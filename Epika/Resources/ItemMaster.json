@@ -1,0 +1,8189 @@
+{
+  "items": [
+    {
+      "id": "coin_old",
+      "name": "古いコイン",
+      "description": "どこかの国で使われていた古い通貨",
+      "category": "other",
+      "basePrice": 10,
+      "sellValue": 5,
+      "statBonuses": {
+        "luck": 2,
+        "agility": 1
+      },
+      "equipable": true,
+      "allowedRaces": [
+        "human",
+        "elf"
+      ],
+      "allowedJobs": [
+        "merchant"
+      ],
+      "allowedGenders": [
+        "male",
+        "female"
+      ],
+      "bypassRaceRestriction": [
+        "undeadMan"
+      ],
+      "combatBonuses": {
+        "magicalDefense": 1
+      },
+      "grantedSkills": [
+        "skill.lucky_charm"
+      ]
+    },
+    {
+      "id": "goblin_ear",
+      "name": "ゴブリンの耳",
+      "description": "ゴブリンから取れた耳。合成素材として使われる",
+      "category": "for_synthesis",
+      "basePrice": 20,
+      "sellValue": 10
+    },
+    {
+      "id": "orc_fang",
+      "name": "オークの牙",
+      "description": "オークの鋭い牙。武器の材料になる",
+      "category": "for_synthesis",
+      "basePrice": 30,
+      "sellValue": 15
+    },
+    {
+      "id": "bone_fragment",
+      "name": "骨の欠片",
+      "description": "アンデッドの骨片。呪術の材料",
+      "category": "for_synthesis",
+      "basePrice": 15,
+      "sellValue": 7
+    },
+    {
+      "id": "curse_powder",
+      "name": "呪いの粉",
+      "description": "触れると不吉な気配がする粉",
+      "category": "for_synthesis",
+      "basePrice": 50,
+      "sellValue": 25
+    },
+    {
+      "id": "slime_jelly",
+      "name": "スライムゼリー",
+      "description": "スライムの体液。錬金術の基本材料",
+      "category": "for_synthesis",
+      "basePrice": 25,
+      "sellValue": 12
+    },
+    {
+      "id": "crystal_core",
+      "name": "クリスタルコア",
+      "description": "魔力を帯びた結晶の核",
+      "category": "gem",
+      "basePrice": 500,
+      "sellValue": 250
+    },
+    {
+      "id": "magic_crystal",
+      "name": "魔法水晶",
+      "description": "純粋な魔力が結晶化したもの",
+      "category": "gem",
+      "basePrice": 1000,
+      "sellValue": 500
+    },
+    {
+      "id": "wolf_fur",
+      "name": "狼の毛皮",
+      "description": "上質な狼の毛皮。防具の材料になる",
+      "category": "for_synthesis",
+      "basePrice": 40,
+      "sellValue": 20
+    },
+    {
+      "id": "sharp_fang",
+      "name": "鋭い牙",
+      "description": "獣の鋭い牙。武器に加工できる",
+      "category": "for_synthesis",
+      "basePrice": 35,
+      "sellValue": 17
+    },
+    {
+      "id": "shadow_essence",
+      "name": "影の精髄",
+      "description": "影の魔物から取れる希少な素材",
+      "category": "for_synthesis",
+      "basePrice": 300,
+      "sellValue": 150
+    },
+    {
+      "id": "dragon_scale",
+      "name": "竜の鱗",
+      "description": "竜の硬い鱗。最高級の防具材料",
+      "category": "for_synthesis",
+      "basePrice": 800,
+      "sellValue": 400
+    },
+    {
+      "id": "dragon_heart",
+      "name": "竜の心臓",
+      "description": "竜の力が宿る心臓",
+      "category": "for_synthesis",
+      "basePrice": 5000,
+      "sellValue": 2500
+    },
+    {
+      "id": "ancient_treasure",
+      "name": "古代の秘宝",
+      "description": "古代文明の遺産",
+      "category": "other",
+      "basePrice": 10000,
+      "sellValue": 5000
+    },
+    {
+      "id": "christmas_coin",
+      "name": "クリスマスコイン",
+      "description": "聖夜の特別な通貨",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "santa_hat",
+      "name": "サンタの帽子",
+      "description": "サンタクロースの帽子の切れ端",
+      "category": "for_synthesis",
+      "basePrice": 200,
+      "sellValue": 100
+    },
+    {
+      "id": "holiday_blessing",
+      "name": "ホリデーの祝福",
+      "description": "聖夜の祝福が込められた宝石",
+      "category": "gem",
+      "basePrice": 1500,
+      "sellValue": 750
+    },
+    {
+      "id": "nature_fragment",
+      "name": "自然の欠片",
+      "description": "自然の力が宿る結晶片",
+      "category": "for_synthesis",
+      "basePrice": 45,
+      "sellValue": 22
+    },
+    {
+      "id": "healing_herb",
+      "name": "癒しの薬草",
+      "description": "回復薬の原料となる薬草",
+      "category": "for_synthesis",
+      "basePrice": 30,
+      "sellValue": 15
+    },
+    {
+      "id": "stone_fragment",
+      "name": "石の欠片",
+      "description": "魔力を帯びた石の欠片",
+      "category": "for_synthesis",
+      "basePrice": 20,
+      "sellValue": 10
+    },
+    {
+      "id": "ore",
+      "name": "鉱石",
+      "description": "武器や防具の材料となる鉱石",
+      "category": "for_synthesis",
+      "basePrice": 50,
+      "sellValue": 25
+    },
+    {
+      "id": "ancient_sap",
+      "name": "古代の樹液",
+      "description": "古代樹から採取される貴重な樹液",
+      "category": "for_synthesis",
+      "basePrice": 150,
+      "sellValue": 75
+    },
+    {
+      "id": "guardian_seed",
+      "name": "番人の種",
+      "description": "森の番人が落とす神秘的な種",
+      "category": "for_synthesis",
+      "basePrice": 200,
+      "sellValue": 100
+    },
+    {
+      "id": "elf_hat",
+      "name": "エルフの帽子",
+      "description": "エルフが身に着けていた帽子の一部",
+      "category": "for_synthesis",
+      "basePrice": 80,
+      "sellValue": 40
+    },
+    {
+      "id": "reindeer_horn",
+      "name": "トナカイの角",
+      "description": "トナカイの立派な角",
+      "category": "for_synthesis",
+      "basePrice": 120,
+      "sellValue": 60
+    },
+    {
+      "id": "golem_fragment",
+      "name": "魔造素材・石片",
+      "description": "ゴーレムの体の一部。魔造生物の素材",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "golem_core",
+      "name": "魔造素材・核",
+      "description": "魔造生物の動力源となる核",
+      "category": "magic_material",
+      "basePrice": 1000,
+      "sellValue": 500
+    },
+    {
+      "id": "ruby",
+      "name": "ルビー",
+      "description": "炎のように赤い宝石",
+      "category": "gem",
+      "basePrice": 800,
+      "sellValue": 400
+    },
+    {
+      "id": "sapphire",
+      "name": "サファイア",
+      "description": "海のように青い宝石",
+      "category": "gem",
+      "basePrice": 800,
+      "sellValue": 400
+    },
+    {
+      "id": "emerald",
+      "name": "エメラルド",
+      "description": "森のように緑の宝石",
+      "category": "gem",
+      "basePrice": 800,
+      "sellValue": 400
+    },
+    {
+      "id": "diamond",
+      "name": "ダイヤモンド",
+      "description": "最も硬い輝く宝石",
+      "category": "gem",
+      "basePrice": 2000,
+      "sellValue": 1000
+    },
+    {
+      "id": "dummy_thin_sword_01",
+      "name": "ダミーの細剣1",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_02",
+      "name": "ダミーの細剣2",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_03",
+      "name": "ダミーの細剣3",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_04",
+      "name": "ダミーの細剣4",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_05",
+      "name": "ダミーの細剣5",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_06",
+      "name": "ダミーの細剣6",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_07",
+      "name": "ダミーの細剣7",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_08",
+      "name": "ダミーの細剣8",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_09",
+      "name": "ダミーの細剣9",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_10",
+      "name": "ダミーの細剣10",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_11",
+      "name": "ダミーの細剣11",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_12",
+      "name": "ダミーの細剣12",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_13",
+      "name": "ダミーの細剣13",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_14",
+      "name": "ダミーの細剣14",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_15",
+      "name": "ダミーの細剣15",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_16",
+      "name": "ダミーの細剣16",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_17",
+      "name": "ダミーの細剣17",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_18",
+      "name": "ダミーの細剣18",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_19",
+      "name": "ダミーの細剣19",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_20",
+      "name": "ダミーの細剣20",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_21",
+      "name": "ダミーの細剣21",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_22",
+      "name": "ダミーの細剣22",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_23",
+      "name": "ダミーの細剣23",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_24",
+      "name": "ダミーの細剣24",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_25",
+      "name": "ダミーの細剣25",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_26",
+      "name": "ダミーの細剣26",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_27",
+      "name": "ダミーの細剣27",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_28",
+      "name": "ダミーの細剣28",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_29",
+      "name": "ダミーの細剣29",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_30",
+      "name": "ダミーの細剣30",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_31",
+      "name": "ダミーの細剣31",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_32",
+      "name": "ダミーの細剣32",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_33",
+      "name": "ダミーの細剣33",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_34",
+      "name": "ダミーの細剣34",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_35",
+      "name": "ダミーの細剣35",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_36",
+      "name": "ダミーの細剣36",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_37",
+      "name": "ダミーの細剣37",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_38",
+      "name": "ダミーの細剣38",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_39",
+      "name": "ダミーの細剣39",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_40",
+      "name": "ダミーの細剣40",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_41",
+      "name": "ダミーの細剣41",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_42",
+      "name": "ダミーの細剣42",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_43",
+      "name": "ダミーの細剣43",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_44",
+      "name": "ダミーの細剣44",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_45",
+      "name": "ダミーの細剣45",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_46",
+      "name": "ダミーの細剣46",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_47",
+      "name": "ダミーの細剣47",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_48",
+      "name": "ダミーの細剣48",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_49",
+      "name": "ダミーの細剣49",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_50",
+      "name": "ダミーの細剣50",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_51",
+      "name": "ダミーの細剣51",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_52",
+      "name": "ダミーの細剣52",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_53",
+      "name": "ダミーの細剣53",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_54",
+      "name": "ダミーの細剣54",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_55",
+      "name": "ダミーの細剣55",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_56",
+      "name": "ダミーの細剣56",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_57",
+      "name": "ダミーの細剣57",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_58",
+      "name": "ダミーの細剣58",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_59",
+      "name": "ダミーの細剣59",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_thin_sword_60",
+      "name": "ダミーの細剣60",
+      "description": "テスト用の細剣アイテムです",
+      "category": "thin_sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_01",
+      "name": "ダミーの剣1",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_02",
+      "name": "ダミーの剣2",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_03",
+      "name": "ダミーの剣3",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_04",
+      "name": "ダミーの剣4",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_05",
+      "name": "ダミーの剣5",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_06",
+      "name": "ダミーの剣6",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_07",
+      "name": "ダミーの剣7",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_08",
+      "name": "ダミーの剣8",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_09",
+      "name": "ダミーの剣9",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_10",
+      "name": "ダミーの剣10",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_11",
+      "name": "ダミーの剣11",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_12",
+      "name": "ダミーの剣12",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_13",
+      "name": "ダミーの剣13",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_14",
+      "name": "ダミーの剣14",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_15",
+      "name": "ダミーの剣15",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_16",
+      "name": "ダミーの剣16",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_17",
+      "name": "ダミーの剣17",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_18",
+      "name": "ダミーの剣18",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_19",
+      "name": "ダミーの剣19",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_20",
+      "name": "ダミーの剣20",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_21",
+      "name": "ダミーの剣21",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_22",
+      "name": "ダミーの剣22",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_23",
+      "name": "ダミーの剣23",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_24",
+      "name": "ダミーの剣24",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_25",
+      "name": "ダミーの剣25",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_26",
+      "name": "ダミーの剣26",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_27",
+      "name": "ダミーの剣27",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_28",
+      "name": "ダミーの剣28",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_29",
+      "name": "ダミーの剣29",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_30",
+      "name": "ダミーの剣30",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_31",
+      "name": "ダミーの剣31",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_32",
+      "name": "ダミーの剣32",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_33",
+      "name": "ダミーの剣33",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_34",
+      "name": "ダミーの剣34",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_35",
+      "name": "ダミーの剣35",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_36",
+      "name": "ダミーの剣36",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_37",
+      "name": "ダミーの剣37",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_38",
+      "name": "ダミーの剣38",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_39",
+      "name": "ダミーの剣39",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_40",
+      "name": "ダミーの剣40",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_41",
+      "name": "ダミーの剣41",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_42",
+      "name": "ダミーの剣42",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_43",
+      "name": "ダミーの剣43",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_44",
+      "name": "ダミーの剣44",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_45",
+      "name": "ダミーの剣45",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_46",
+      "name": "ダミーの剣46",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_47",
+      "name": "ダミーの剣47",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_48",
+      "name": "ダミーの剣48",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_49",
+      "name": "ダミーの剣49",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_50",
+      "name": "ダミーの剣50",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_51",
+      "name": "ダミーの剣51",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_52",
+      "name": "ダミーの剣52",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_53",
+      "name": "ダミーの剣53",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_54",
+      "name": "ダミーの剣54",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_55",
+      "name": "ダミーの剣55",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_56",
+      "name": "ダミーの剣56",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_57",
+      "name": "ダミーの剣57",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_58",
+      "name": "ダミーの剣58",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_59",
+      "name": "ダミーの剣59",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_sword_60",
+      "name": "ダミーの剣60",
+      "description": "テスト用の剣アイテムです",
+      "category": "sword",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_01",
+      "name": "ダミーの刀1",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_02",
+      "name": "ダミーの刀2",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_03",
+      "name": "ダミーの刀3",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_04",
+      "name": "ダミーの刀4",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_05",
+      "name": "ダミーの刀5",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_06",
+      "name": "ダミーの刀6",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_07",
+      "name": "ダミーの刀7",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_08",
+      "name": "ダミーの刀8",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_09",
+      "name": "ダミーの刀9",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_10",
+      "name": "ダミーの刀10",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_11",
+      "name": "ダミーの刀11",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_12",
+      "name": "ダミーの刀12",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_13",
+      "name": "ダミーの刀13",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_14",
+      "name": "ダミーの刀14",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_15",
+      "name": "ダミーの刀15",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_16",
+      "name": "ダミーの刀16",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_17",
+      "name": "ダミーの刀17",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_18",
+      "name": "ダミーの刀18",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_19",
+      "name": "ダミーの刀19",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_20",
+      "name": "ダミーの刀20",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_21",
+      "name": "ダミーの刀21",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_22",
+      "name": "ダミーの刀22",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_23",
+      "name": "ダミーの刀23",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_24",
+      "name": "ダミーの刀24",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_25",
+      "name": "ダミーの刀25",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_26",
+      "name": "ダミーの刀26",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_27",
+      "name": "ダミーの刀27",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_28",
+      "name": "ダミーの刀28",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_29",
+      "name": "ダミーの刀29",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_30",
+      "name": "ダミーの刀30",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_31",
+      "name": "ダミーの刀31",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_32",
+      "name": "ダミーの刀32",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_33",
+      "name": "ダミーの刀33",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_34",
+      "name": "ダミーの刀34",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_35",
+      "name": "ダミーの刀35",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_36",
+      "name": "ダミーの刀36",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_37",
+      "name": "ダミーの刀37",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_38",
+      "name": "ダミーの刀38",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_39",
+      "name": "ダミーの刀39",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_40",
+      "name": "ダミーの刀40",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_41",
+      "name": "ダミーの刀41",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_42",
+      "name": "ダミーの刀42",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_43",
+      "name": "ダミーの刀43",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_44",
+      "name": "ダミーの刀44",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_45",
+      "name": "ダミーの刀45",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_46",
+      "name": "ダミーの刀46",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_47",
+      "name": "ダミーの刀47",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_48",
+      "name": "ダミーの刀48",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_49",
+      "name": "ダミーの刀49",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_50",
+      "name": "ダミーの刀50",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_51",
+      "name": "ダミーの刀51",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_52",
+      "name": "ダミーの刀52",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_53",
+      "name": "ダミーの刀53",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_54",
+      "name": "ダミーの刀54",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_55",
+      "name": "ダミーの刀55",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_56",
+      "name": "ダミーの刀56",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_57",
+      "name": "ダミーの刀57",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_58",
+      "name": "ダミーの刀58",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_59",
+      "name": "ダミーの刀59",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_katana_60",
+      "name": "ダミーの刀60",
+      "description": "テスト用の刀アイテムです",
+      "category": "katana",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_01",
+      "name": "ダミーの弓1",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_02",
+      "name": "ダミーの弓2",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_03",
+      "name": "ダミーの弓3",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_04",
+      "name": "ダミーの弓4",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_05",
+      "name": "ダミーの弓5",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_06",
+      "name": "ダミーの弓6",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_07",
+      "name": "ダミーの弓7",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_08",
+      "name": "ダミーの弓8",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_09",
+      "name": "ダミーの弓9",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_10",
+      "name": "ダミーの弓10",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_11",
+      "name": "ダミーの弓11",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_12",
+      "name": "ダミーの弓12",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_13",
+      "name": "ダミーの弓13",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_14",
+      "name": "ダミーの弓14",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_15",
+      "name": "ダミーの弓15",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_16",
+      "name": "ダミーの弓16",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_17",
+      "name": "ダミーの弓17",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_18",
+      "name": "ダミーの弓18",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_19",
+      "name": "ダミーの弓19",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_20",
+      "name": "ダミーの弓20",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_21",
+      "name": "ダミーの弓21",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_22",
+      "name": "ダミーの弓22",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_23",
+      "name": "ダミーの弓23",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_24",
+      "name": "ダミーの弓24",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_25",
+      "name": "ダミーの弓25",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_26",
+      "name": "ダミーの弓26",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_27",
+      "name": "ダミーの弓27",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_28",
+      "name": "ダミーの弓28",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_29",
+      "name": "ダミーの弓29",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_30",
+      "name": "ダミーの弓30",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_31",
+      "name": "ダミーの弓31",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_32",
+      "name": "ダミーの弓32",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_33",
+      "name": "ダミーの弓33",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_34",
+      "name": "ダミーの弓34",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_35",
+      "name": "ダミーの弓35",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_36",
+      "name": "ダミーの弓36",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_37",
+      "name": "ダミーの弓37",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_38",
+      "name": "ダミーの弓38",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_39",
+      "name": "ダミーの弓39",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_40",
+      "name": "ダミーの弓40",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_41",
+      "name": "ダミーの弓41",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_42",
+      "name": "ダミーの弓42",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_43",
+      "name": "ダミーの弓43",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_44",
+      "name": "ダミーの弓44",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_45",
+      "name": "ダミーの弓45",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_46",
+      "name": "ダミーの弓46",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_47",
+      "name": "ダミーの弓47",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_48",
+      "name": "ダミーの弓48",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_49",
+      "name": "ダミーの弓49",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_50",
+      "name": "ダミーの弓50",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_51",
+      "name": "ダミーの弓51",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_52",
+      "name": "ダミーの弓52",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_53",
+      "name": "ダミーの弓53",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_54",
+      "name": "ダミーの弓54",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_55",
+      "name": "ダミーの弓55",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_56",
+      "name": "ダミーの弓56",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_57",
+      "name": "ダミーの弓57",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_58",
+      "name": "ダミーの弓58",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_59",
+      "name": "ダミーの弓59",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_bow_60",
+      "name": "ダミーの弓60",
+      "description": "テスト用の弓アイテムです",
+      "category": "bow",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_01",
+      "name": "ダミーの鎧1",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_02",
+      "name": "ダミーの鎧2",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_03",
+      "name": "ダミーの鎧3",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_04",
+      "name": "ダミーの鎧4",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_05",
+      "name": "ダミーの鎧5",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_06",
+      "name": "ダミーの鎧6",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_07",
+      "name": "ダミーの鎧7",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_08",
+      "name": "ダミーの鎧8",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_09",
+      "name": "ダミーの鎧9",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_10",
+      "name": "ダミーの鎧10",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_11",
+      "name": "ダミーの鎧11",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_12",
+      "name": "ダミーの鎧12",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_13",
+      "name": "ダミーの鎧13",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_14",
+      "name": "ダミーの鎧14",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_15",
+      "name": "ダミーの鎧15",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_16",
+      "name": "ダミーの鎧16",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_17",
+      "name": "ダミーの鎧17",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_18",
+      "name": "ダミーの鎧18",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_19",
+      "name": "ダミーの鎧19",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_20",
+      "name": "ダミーの鎧20",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_21",
+      "name": "ダミーの鎧21",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_22",
+      "name": "ダミーの鎧22",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_23",
+      "name": "ダミーの鎧23",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_24",
+      "name": "ダミーの鎧24",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_25",
+      "name": "ダミーの鎧25",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_26",
+      "name": "ダミーの鎧26",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_27",
+      "name": "ダミーの鎧27",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_28",
+      "name": "ダミーの鎧28",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_29",
+      "name": "ダミーの鎧29",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_30",
+      "name": "ダミーの鎧30",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_31",
+      "name": "ダミーの鎧31",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_32",
+      "name": "ダミーの鎧32",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_33",
+      "name": "ダミーの鎧33",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_34",
+      "name": "ダミーの鎧34",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_35",
+      "name": "ダミーの鎧35",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_36",
+      "name": "ダミーの鎧36",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_37",
+      "name": "ダミーの鎧37",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_38",
+      "name": "ダミーの鎧38",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_39",
+      "name": "ダミーの鎧39",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_40",
+      "name": "ダミーの鎧40",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_41",
+      "name": "ダミーの鎧41",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_42",
+      "name": "ダミーの鎧42",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_43",
+      "name": "ダミーの鎧43",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_44",
+      "name": "ダミーの鎧44",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_45",
+      "name": "ダミーの鎧45",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_46",
+      "name": "ダミーの鎧46",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_47",
+      "name": "ダミーの鎧47",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_48",
+      "name": "ダミーの鎧48",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_49",
+      "name": "ダミーの鎧49",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_50",
+      "name": "ダミーの鎧50",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_51",
+      "name": "ダミーの鎧51",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_52",
+      "name": "ダミーの鎧52",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_53",
+      "name": "ダミーの鎧53",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_54",
+      "name": "ダミーの鎧54",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_55",
+      "name": "ダミーの鎧55",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_56",
+      "name": "ダミーの鎧56",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_57",
+      "name": "ダミーの鎧57",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_58",
+      "name": "ダミーの鎧58",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_59",
+      "name": "ダミーの鎧59",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_armor_60",
+      "name": "ダミーの鎧60",
+      "description": "テスト用の鎧アイテムです",
+      "category": "armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_01",
+      "name": "ダミーの重鎧1",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_02",
+      "name": "ダミーの重鎧2",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_03",
+      "name": "ダミーの重鎧3",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_04",
+      "name": "ダミーの重鎧4",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_05",
+      "name": "ダミーの重鎧5",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_06",
+      "name": "ダミーの重鎧6",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_07",
+      "name": "ダミーの重鎧7",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_08",
+      "name": "ダミーの重鎧8",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_09",
+      "name": "ダミーの重鎧9",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_10",
+      "name": "ダミーの重鎧10",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_11",
+      "name": "ダミーの重鎧11",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_12",
+      "name": "ダミーの重鎧12",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_13",
+      "name": "ダミーの重鎧13",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_14",
+      "name": "ダミーの重鎧14",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_15",
+      "name": "ダミーの重鎧15",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_16",
+      "name": "ダミーの重鎧16",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_17",
+      "name": "ダミーの重鎧17",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_18",
+      "name": "ダミーの重鎧18",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_19",
+      "name": "ダミーの重鎧19",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_20",
+      "name": "ダミーの重鎧20",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_21",
+      "name": "ダミーの重鎧21",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_22",
+      "name": "ダミーの重鎧22",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_23",
+      "name": "ダミーの重鎧23",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_24",
+      "name": "ダミーの重鎧24",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_25",
+      "name": "ダミーの重鎧25",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_26",
+      "name": "ダミーの重鎧26",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_27",
+      "name": "ダミーの重鎧27",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_28",
+      "name": "ダミーの重鎧28",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_29",
+      "name": "ダミーの重鎧29",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_30",
+      "name": "ダミーの重鎧30",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_31",
+      "name": "ダミーの重鎧31",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_32",
+      "name": "ダミーの重鎧32",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_33",
+      "name": "ダミーの重鎧33",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_34",
+      "name": "ダミーの重鎧34",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_35",
+      "name": "ダミーの重鎧35",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_36",
+      "name": "ダミーの重鎧36",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_37",
+      "name": "ダミーの重鎧37",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_38",
+      "name": "ダミーの重鎧38",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_39",
+      "name": "ダミーの重鎧39",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_40",
+      "name": "ダミーの重鎧40",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_41",
+      "name": "ダミーの重鎧41",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_42",
+      "name": "ダミーの重鎧42",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_43",
+      "name": "ダミーの重鎧43",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_44",
+      "name": "ダミーの重鎧44",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_45",
+      "name": "ダミーの重鎧45",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_46",
+      "name": "ダミーの重鎧46",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_47",
+      "name": "ダミーの重鎧47",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_48",
+      "name": "ダミーの重鎧48",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_49",
+      "name": "ダミーの重鎧49",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_50",
+      "name": "ダミーの重鎧50",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_51",
+      "name": "ダミーの重鎧51",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_52",
+      "name": "ダミーの重鎧52",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_53",
+      "name": "ダミーの重鎧53",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_54",
+      "name": "ダミーの重鎧54",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_55",
+      "name": "ダミーの重鎧55",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_56",
+      "name": "ダミーの重鎧56",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_57",
+      "name": "ダミーの重鎧57",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_58",
+      "name": "ダミーの重鎧58",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_59",
+      "name": "ダミーの重鎧59",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_heavy_armor_60",
+      "name": "ダミーの重鎧60",
+      "description": "テスト用の重鎧アイテムです",
+      "category": "heavy_armor",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_01",
+      "name": "ダミーの盾1",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_02",
+      "name": "ダミーの盾2",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_03",
+      "name": "ダミーの盾3",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_04",
+      "name": "ダミーの盾4",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_05",
+      "name": "ダミーの盾5",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_06",
+      "name": "ダミーの盾6",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_07",
+      "name": "ダミーの盾7",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_08",
+      "name": "ダミーの盾8",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_09",
+      "name": "ダミーの盾9",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_10",
+      "name": "ダミーの盾10",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_11",
+      "name": "ダミーの盾11",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_12",
+      "name": "ダミーの盾12",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_13",
+      "name": "ダミーの盾13",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_14",
+      "name": "ダミーの盾14",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_15",
+      "name": "ダミーの盾15",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_16",
+      "name": "ダミーの盾16",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_17",
+      "name": "ダミーの盾17",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_18",
+      "name": "ダミーの盾18",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_19",
+      "name": "ダミーの盾19",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_20",
+      "name": "ダミーの盾20",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_21",
+      "name": "ダミーの盾21",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_22",
+      "name": "ダミーの盾22",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_23",
+      "name": "ダミーの盾23",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_24",
+      "name": "ダミーの盾24",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_25",
+      "name": "ダミーの盾25",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_26",
+      "name": "ダミーの盾26",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_27",
+      "name": "ダミーの盾27",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_28",
+      "name": "ダミーの盾28",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_29",
+      "name": "ダミーの盾29",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_30",
+      "name": "ダミーの盾30",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_31",
+      "name": "ダミーの盾31",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_32",
+      "name": "ダミーの盾32",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_33",
+      "name": "ダミーの盾33",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_34",
+      "name": "ダミーの盾34",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_35",
+      "name": "ダミーの盾35",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_36",
+      "name": "ダミーの盾36",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_37",
+      "name": "ダミーの盾37",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_38",
+      "name": "ダミーの盾38",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_39",
+      "name": "ダミーの盾39",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_40",
+      "name": "ダミーの盾40",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_41",
+      "name": "ダミーの盾41",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_42",
+      "name": "ダミーの盾42",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_43",
+      "name": "ダミーの盾43",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_44",
+      "name": "ダミーの盾44",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_45",
+      "name": "ダミーの盾45",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_46",
+      "name": "ダミーの盾46",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_47",
+      "name": "ダミーの盾47",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_48",
+      "name": "ダミーの盾48",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_49",
+      "name": "ダミーの盾49",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_50",
+      "name": "ダミーの盾50",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_51",
+      "name": "ダミーの盾51",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_52",
+      "name": "ダミーの盾52",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_53",
+      "name": "ダミーの盾53",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_54",
+      "name": "ダミーの盾54",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_55",
+      "name": "ダミーの盾55",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_56",
+      "name": "ダミーの盾56",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_57",
+      "name": "ダミーの盾57",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_58",
+      "name": "ダミーの盾58",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_59",
+      "name": "ダミーの盾59",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_shield_60",
+      "name": "ダミーの盾60",
+      "description": "テスト用の盾アイテムです",
+      "category": "shield",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_01",
+      "name": "ダミーの小手1",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_02",
+      "name": "ダミーの小手2",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_03",
+      "name": "ダミーの小手3",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_04",
+      "name": "ダミーの小手4",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_05",
+      "name": "ダミーの小手5",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_06",
+      "name": "ダミーの小手6",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_07",
+      "name": "ダミーの小手7",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_08",
+      "name": "ダミーの小手8",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_09",
+      "name": "ダミーの小手9",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_10",
+      "name": "ダミーの小手10",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_11",
+      "name": "ダミーの小手11",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_12",
+      "name": "ダミーの小手12",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_13",
+      "name": "ダミーの小手13",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_14",
+      "name": "ダミーの小手14",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_15",
+      "name": "ダミーの小手15",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_16",
+      "name": "ダミーの小手16",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_17",
+      "name": "ダミーの小手17",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_18",
+      "name": "ダミーの小手18",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_19",
+      "name": "ダミーの小手19",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_20",
+      "name": "ダミーの小手20",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_21",
+      "name": "ダミーの小手21",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_22",
+      "name": "ダミーの小手22",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_23",
+      "name": "ダミーの小手23",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_24",
+      "name": "ダミーの小手24",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_25",
+      "name": "ダミーの小手25",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_26",
+      "name": "ダミーの小手26",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_27",
+      "name": "ダミーの小手27",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_28",
+      "name": "ダミーの小手28",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_29",
+      "name": "ダミーの小手29",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_30",
+      "name": "ダミーの小手30",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_31",
+      "name": "ダミーの小手31",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_32",
+      "name": "ダミーの小手32",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_33",
+      "name": "ダミーの小手33",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_34",
+      "name": "ダミーの小手34",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_35",
+      "name": "ダミーの小手35",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_36",
+      "name": "ダミーの小手36",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_37",
+      "name": "ダミーの小手37",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_38",
+      "name": "ダミーの小手38",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_39",
+      "name": "ダミーの小手39",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_40",
+      "name": "ダミーの小手40",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_41",
+      "name": "ダミーの小手41",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_42",
+      "name": "ダミーの小手42",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_43",
+      "name": "ダミーの小手43",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_44",
+      "name": "ダミーの小手44",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_45",
+      "name": "ダミーの小手45",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_46",
+      "name": "ダミーの小手46",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_47",
+      "name": "ダミーの小手47",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_48",
+      "name": "ダミーの小手48",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_49",
+      "name": "ダミーの小手49",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_50",
+      "name": "ダミーの小手50",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_51",
+      "name": "ダミーの小手51",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_52",
+      "name": "ダミーの小手52",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_53",
+      "name": "ダミーの小手53",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_54",
+      "name": "ダミーの小手54",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_55",
+      "name": "ダミーの小手55",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_56",
+      "name": "ダミーの小手56",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_57",
+      "name": "ダミーの小手57",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_58",
+      "name": "ダミーの小手58",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_59",
+      "name": "ダミーの小手59",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gauntlet_60",
+      "name": "ダミーの小手60",
+      "description": "テスト用の小手アイテムです",
+      "category": "gauntlet",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_01",
+      "name": "ダミーのワンド1",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_02",
+      "name": "ダミーのワンド2",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_03",
+      "name": "ダミーのワンド3",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_04",
+      "name": "ダミーのワンド4",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_05",
+      "name": "ダミーのワンド5",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_06",
+      "name": "ダミーのワンド6",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_07",
+      "name": "ダミーのワンド7",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_08",
+      "name": "ダミーのワンド8",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_09",
+      "name": "ダミーのワンド9",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_10",
+      "name": "ダミーのワンド10",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_11",
+      "name": "ダミーのワンド11",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_12",
+      "name": "ダミーのワンド12",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_13",
+      "name": "ダミーのワンド13",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_14",
+      "name": "ダミーのワンド14",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_15",
+      "name": "ダミーのワンド15",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_16",
+      "name": "ダミーのワンド16",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_17",
+      "name": "ダミーのワンド17",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_18",
+      "name": "ダミーのワンド18",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_19",
+      "name": "ダミーのワンド19",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_20",
+      "name": "ダミーのワンド20",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_21",
+      "name": "ダミーのワンド21",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_22",
+      "name": "ダミーのワンド22",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_23",
+      "name": "ダミーのワンド23",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_24",
+      "name": "ダミーのワンド24",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_25",
+      "name": "ダミーのワンド25",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_26",
+      "name": "ダミーのワンド26",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_27",
+      "name": "ダミーのワンド27",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_28",
+      "name": "ダミーのワンド28",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_29",
+      "name": "ダミーのワンド29",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_30",
+      "name": "ダミーのワンド30",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_31",
+      "name": "ダミーのワンド31",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_32",
+      "name": "ダミーのワンド32",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_33",
+      "name": "ダミーのワンド33",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_34",
+      "name": "ダミーのワンド34",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_35",
+      "name": "ダミーのワンド35",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_36",
+      "name": "ダミーのワンド36",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_37",
+      "name": "ダミーのワンド37",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_38",
+      "name": "ダミーのワンド38",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_39",
+      "name": "ダミーのワンド39",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_40",
+      "name": "ダミーのワンド40",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_41",
+      "name": "ダミーのワンド41",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_42",
+      "name": "ダミーのワンド42",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_43",
+      "name": "ダミーのワンド43",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_44",
+      "name": "ダミーのワンド44",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_45",
+      "name": "ダミーのワンド45",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_46",
+      "name": "ダミーのワンド46",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_47",
+      "name": "ダミーのワンド47",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_48",
+      "name": "ダミーのワンド48",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_49",
+      "name": "ダミーのワンド49",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_50",
+      "name": "ダミーのワンド50",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_51",
+      "name": "ダミーのワンド51",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_52",
+      "name": "ダミーのワンド52",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_53",
+      "name": "ダミーのワンド53",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_54",
+      "name": "ダミーのワンド54",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_55",
+      "name": "ダミーのワンド55",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_56",
+      "name": "ダミーのワンド56",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_57",
+      "name": "ダミーのワンド57",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_58",
+      "name": "ダミーのワンド58",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_59",
+      "name": "ダミーのワンド59",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_wand_60",
+      "name": "ダミーのワンド60",
+      "description": "テスト用のワンドアイテムです",
+      "category": "wand",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_01",
+      "name": "ダミーのロッド1",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_02",
+      "name": "ダミーのロッド2",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_03",
+      "name": "ダミーのロッド3",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_04",
+      "name": "ダミーのロッド4",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_05",
+      "name": "ダミーのロッド5",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_06",
+      "name": "ダミーのロッド6",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_07",
+      "name": "ダミーのロッド7",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_08",
+      "name": "ダミーのロッド8",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_09",
+      "name": "ダミーのロッド9",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_10",
+      "name": "ダミーのロッド10",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_11",
+      "name": "ダミーのロッド11",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_12",
+      "name": "ダミーのロッド12",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_13",
+      "name": "ダミーのロッド13",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_14",
+      "name": "ダミーのロッド14",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_15",
+      "name": "ダミーのロッド15",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_16",
+      "name": "ダミーのロッド16",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_17",
+      "name": "ダミーのロッド17",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_18",
+      "name": "ダミーのロッド18",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_19",
+      "name": "ダミーのロッド19",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_20",
+      "name": "ダミーのロッド20",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_21",
+      "name": "ダミーのロッド21",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_22",
+      "name": "ダミーのロッド22",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_23",
+      "name": "ダミーのロッド23",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_24",
+      "name": "ダミーのロッド24",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_25",
+      "name": "ダミーのロッド25",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_26",
+      "name": "ダミーのロッド26",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_27",
+      "name": "ダミーのロッド27",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_28",
+      "name": "ダミーのロッド28",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_29",
+      "name": "ダミーのロッド29",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_30",
+      "name": "ダミーのロッド30",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_31",
+      "name": "ダミーのロッド31",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_32",
+      "name": "ダミーのロッド32",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_33",
+      "name": "ダミーのロッド33",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_34",
+      "name": "ダミーのロッド34",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_35",
+      "name": "ダミーのロッド35",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_36",
+      "name": "ダミーのロッド36",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_37",
+      "name": "ダミーのロッド37",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_38",
+      "name": "ダミーのロッド38",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_39",
+      "name": "ダミーのロッド39",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_40",
+      "name": "ダミーのロッド40",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_41",
+      "name": "ダミーのロッド41",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_42",
+      "name": "ダミーのロッド42",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_43",
+      "name": "ダミーのロッド43",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_44",
+      "name": "ダミーのロッド44",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_45",
+      "name": "ダミーのロッド45",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_46",
+      "name": "ダミーのロッド46",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_47",
+      "name": "ダミーのロッド47",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_48",
+      "name": "ダミーのロッド48",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_49",
+      "name": "ダミーのロッド49",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_50",
+      "name": "ダミーのロッド50",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_51",
+      "name": "ダミーのロッド51",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_52",
+      "name": "ダミーのロッド52",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_53",
+      "name": "ダミーのロッド53",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_54",
+      "name": "ダミーのロッド54",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_55",
+      "name": "ダミーのロッド55",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_56",
+      "name": "ダミーのロッド56",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_57",
+      "name": "ダミーのロッド57",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_58",
+      "name": "ダミーのロッド58",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_59",
+      "name": "ダミーのロッド59",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_rod_60",
+      "name": "ダミーのロッド60",
+      "description": "テスト用のロッドアイテムです",
+      "category": "rod",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_01",
+      "name": "ダミーの魔道書1",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_02",
+      "name": "ダミーの魔道書2",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_03",
+      "name": "ダミーの魔道書3",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_04",
+      "name": "ダミーの魔道書4",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_05",
+      "name": "ダミーの魔道書5",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_06",
+      "name": "ダミーの魔道書6",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_07",
+      "name": "ダミーの魔道書7",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_08",
+      "name": "ダミーの魔道書8",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_09",
+      "name": "ダミーの魔道書9",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_10",
+      "name": "ダミーの魔道書10",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_11",
+      "name": "ダミーの魔道書11",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_12",
+      "name": "ダミーの魔道書12",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_13",
+      "name": "ダミーの魔道書13",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_14",
+      "name": "ダミーの魔道書14",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_15",
+      "name": "ダミーの魔道書15",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_16",
+      "name": "ダミーの魔道書16",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_17",
+      "name": "ダミーの魔道書17",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_18",
+      "name": "ダミーの魔道書18",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_19",
+      "name": "ダミーの魔道書19",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_20",
+      "name": "ダミーの魔道書20",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_21",
+      "name": "ダミーの魔道書21",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_22",
+      "name": "ダミーの魔道書22",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_23",
+      "name": "ダミーの魔道書23",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_24",
+      "name": "ダミーの魔道書24",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_25",
+      "name": "ダミーの魔道書25",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_26",
+      "name": "ダミーの魔道書26",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_27",
+      "name": "ダミーの魔道書27",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_28",
+      "name": "ダミーの魔道書28",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_29",
+      "name": "ダミーの魔道書29",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_30",
+      "name": "ダミーの魔道書30",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_31",
+      "name": "ダミーの魔道書31",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_32",
+      "name": "ダミーの魔道書32",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_33",
+      "name": "ダミーの魔道書33",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_34",
+      "name": "ダミーの魔道書34",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_35",
+      "name": "ダミーの魔道書35",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_36",
+      "name": "ダミーの魔道書36",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_37",
+      "name": "ダミーの魔道書37",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_38",
+      "name": "ダミーの魔道書38",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_39",
+      "name": "ダミーの魔道書39",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_40",
+      "name": "ダミーの魔道書40",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_41",
+      "name": "ダミーの魔道書41",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_42",
+      "name": "ダミーの魔道書42",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_43",
+      "name": "ダミーの魔道書43",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_44",
+      "name": "ダミーの魔道書44",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_45",
+      "name": "ダミーの魔道書45",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_46",
+      "name": "ダミーの魔道書46",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_47",
+      "name": "ダミーの魔道書47",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_48",
+      "name": "ダミーの魔道書48",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_49",
+      "name": "ダミーの魔道書49",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_50",
+      "name": "ダミーの魔道書50",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_51",
+      "name": "ダミーの魔道書51",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_52",
+      "name": "ダミーの魔道書52",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_53",
+      "name": "ダミーの魔道書53",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_54",
+      "name": "ダミーの魔道書54",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_55",
+      "name": "ダミーの魔道書55",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_56",
+      "name": "ダミーの魔道書56",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_57",
+      "name": "ダミーの魔道書57",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_58",
+      "name": "ダミーの魔道書58",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_59",
+      "name": "ダミーの魔道書59",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_grimoire_60",
+      "name": "ダミーの魔道書60",
+      "description": "テスト用の魔道書アイテムです",
+      "category": "grimoire",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_01",
+      "name": "ダミーの法衣1",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_02",
+      "name": "ダミーの法衣2",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_03",
+      "name": "ダミーの法衣3",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_04",
+      "name": "ダミーの法衣4",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_05",
+      "name": "ダミーの法衣5",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_06",
+      "name": "ダミーの法衣6",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_07",
+      "name": "ダミーの法衣7",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_08",
+      "name": "ダミーの法衣8",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_09",
+      "name": "ダミーの法衣9",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_10",
+      "name": "ダミーの法衣10",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_11",
+      "name": "ダミーの法衣11",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_12",
+      "name": "ダミーの法衣12",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_13",
+      "name": "ダミーの法衣13",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_14",
+      "name": "ダミーの法衣14",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_15",
+      "name": "ダミーの法衣15",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_16",
+      "name": "ダミーの法衣16",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_17",
+      "name": "ダミーの法衣17",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_18",
+      "name": "ダミーの法衣18",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_19",
+      "name": "ダミーの法衣19",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_20",
+      "name": "ダミーの法衣20",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_21",
+      "name": "ダミーの法衣21",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_22",
+      "name": "ダミーの法衣22",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_23",
+      "name": "ダミーの法衣23",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_24",
+      "name": "ダミーの法衣24",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_25",
+      "name": "ダミーの法衣25",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_26",
+      "name": "ダミーの法衣26",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_27",
+      "name": "ダミーの法衣27",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_28",
+      "name": "ダミーの法衣28",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_29",
+      "name": "ダミーの法衣29",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_30",
+      "name": "ダミーの法衣30",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_31",
+      "name": "ダミーの法衣31",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_32",
+      "name": "ダミーの法衣32",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_33",
+      "name": "ダミーの法衣33",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_34",
+      "name": "ダミーの法衣34",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_35",
+      "name": "ダミーの法衣35",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_36",
+      "name": "ダミーの法衣36",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_37",
+      "name": "ダミーの法衣37",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_38",
+      "name": "ダミーの法衣38",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_39",
+      "name": "ダミーの法衣39",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_40",
+      "name": "ダミーの法衣40",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_41",
+      "name": "ダミーの法衣41",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_42",
+      "name": "ダミーの法衣42",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_43",
+      "name": "ダミーの法衣43",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_44",
+      "name": "ダミーの法衣44",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_45",
+      "name": "ダミーの法衣45",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_46",
+      "name": "ダミーの法衣46",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_47",
+      "name": "ダミーの法衣47",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_48",
+      "name": "ダミーの法衣48",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_49",
+      "name": "ダミーの法衣49",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_50",
+      "name": "ダミーの法衣50",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_51",
+      "name": "ダミーの法衣51",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_52",
+      "name": "ダミーの法衣52",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_53",
+      "name": "ダミーの法衣53",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_54",
+      "name": "ダミーの法衣54",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_55",
+      "name": "ダミーの法衣55",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_56",
+      "name": "ダミーの法衣56",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_57",
+      "name": "ダミーの法衣57",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_58",
+      "name": "ダミーの法衣58",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_59",
+      "name": "ダミーの法衣59",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_robe_60",
+      "name": "ダミーの法衣60",
+      "description": "テスト用の法衣アイテムです",
+      "category": "robe",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_08",
+      "name": "ダミーの宝石8",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_09",
+      "name": "ダミーの宝石9",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_10",
+      "name": "ダミーの宝石10",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_11",
+      "name": "ダミーの宝石11",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_12",
+      "name": "ダミーの宝石12",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_13",
+      "name": "ダミーの宝石13",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_14",
+      "name": "ダミーの宝石14",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_15",
+      "name": "ダミーの宝石15",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_16",
+      "name": "ダミーの宝石16",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_17",
+      "name": "ダミーの宝石17",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_18",
+      "name": "ダミーの宝石18",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_19",
+      "name": "ダミーの宝石19",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_20",
+      "name": "ダミーの宝石20",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_21",
+      "name": "ダミーの宝石21",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_22",
+      "name": "ダミーの宝石22",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_23",
+      "name": "ダミーの宝石23",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_24",
+      "name": "ダミーの宝石24",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_25",
+      "name": "ダミーの宝石25",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_26",
+      "name": "ダミーの宝石26",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_27",
+      "name": "ダミーの宝石27",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_28",
+      "name": "ダミーの宝石28",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_29",
+      "name": "ダミーの宝石29",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_30",
+      "name": "ダミーの宝石30",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_31",
+      "name": "ダミーの宝石31",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_32",
+      "name": "ダミーの宝石32",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_33",
+      "name": "ダミーの宝石33",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_34",
+      "name": "ダミーの宝石34",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_35",
+      "name": "ダミーの宝石35",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_36",
+      "name": "ダミーの宝石36",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_37",
+      "name": "ダミーの宝石37",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_38",
+      "name": "ダミーの宝石38",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_39",
+      "name": "ダミーの宝石39",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_40",
+      "name": "ダミーの宝石40",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_41",
+      "name": "ダミーの宝石41",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_42",
+      "name": "ダミーの宝石42",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_43",
+      "name": "ダミーの宝石43",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_44",
+      "name": "ダミーの宝石44",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_45",
+      "name": "ダミーの宝石45",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_46",
+      "name": "ダミーの宝石46",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_47",
+      "name": "ダミーの宝石47",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_48",
+      "name": "ダミーの宝石48",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_49",
+      "name": "ダミーの宝石49",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_50",
+      "name": "ダミーの宝石50",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_51",
+      "name": "ダミーの宝石51",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_52",
+      "name": "ダミーの宝石52",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_53",
+      "name": "ダミーの宝石53",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_54",
+      "name": "ダミーの宝石54",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_55",
+      "name": "ダミーの宝石55",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_56",
+      "name": "ダミーの宝石56",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_57",
+      "name": "ダミーの宝石57",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_58",
+      "name": "ダミーの宝石58",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_59",
+      "name": "ダミーの宝石59",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_gem_60",
+      "name": "ダミーの宝石60",
+      "description": "テスト用の宝石アイテムです",
+      "category": "gem",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_04",
+      "name": "ダミーのその他4",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_05",
+      "name": "ダミーのその他5",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_06",
+      "name": "ダミーのその他6",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_07",
+      "name": "ダミーのその他7",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_08",
+      "name": "ダミーのその他8",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_09",
+      "name": "ダミーのその他9",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_10",
+      "name": "ダミーのその他10",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_11",
+      "name": "ダミーのその他11",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_12",
+      "name": "ダミーのその他12",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_13",
+      "name": "ダミーのその他13",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_14",
+      "name": "ダミーのその他14",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_15",
+      "name": "ダミーのその他15",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_16",
+      "name": "ダミーのその他16",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_17",
+      "name": "ダミーのその他17",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_18",
+      "name": "ダミーのその他18",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_19",
+      "name": "ダミーのその他19",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_20",
+      "name": "ダミーのその他20",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_21",
+      "name": "ダミーのその他21",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_22",
+      "name": "ダミーのその他22",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_23",
+      "name": "ダミーのその他23",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_24",
+      "name": "ダミーのその他24",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_25",
+      "name": "ダミーのその他25",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_26",
+      "name": "ダミーのその他26",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_27",
+      "name": "ダミーのその他27",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_28",
+      "name": "ダミーのその他28",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_29",
+      "name": "ダミーのその他29",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_30",
+      "name": "ダミーのその他30",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_31",
+      "name": "ダミーのその他31",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_32",
+      "name": "ダミーのその他32",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_33",
+      "name": "ダミーのその他33",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_34",
+      "name": "ダミーのその他34",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_35",
+      "name": "ダミーのその他35",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_36",
+      "name": "ダミーのその他36",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_37",
+      "name": "ダミーのその他37",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_38",
+      "name": "ダミーのその他38",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_39",
+      "name": "ダミーのその他39",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_40",
+      "name": "ダミーのその他40",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_41",
+      "name": "ダミーのその他41",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_42",
+      "name": "ダミーのその他42",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_43",
+      "name": "ダミーのその他43",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_44",
+      "name": "ダミーのその他44",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_45",
+      "name": "ダミーのその他45",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_46",
+      "name": "ダミーのその他46",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_47",
+      "name": "ダミーのその他47",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_48",
+      "name": "ダミーのその他48",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_49",
+      "name": "ダミーのその他49",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_50",
+      "name": "ダミーのその他50",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_51",
+      "name": "ダミーのその他51",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_52",
+      "name": "ダミーのその他52",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_53",
+      "name": "ダミーのその他53",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_54",
+      "name": "ダミーのその他54",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_55",
+      "name": "ダミーのその他55",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_56",
+      "name": "ダミーのその他56",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_57",
+      "name": "ダミーのその他57",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_58",
+      "name": "ダミーのその他58",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_59",
+      "name": "ダミーのその他59",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_other_60",
+      "name": "ダミーのその他60",
+      "description": "テスト用のその他アイテムです",
+      "category": "other",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_01",
+      "name": "ダミーの種族専用1",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_02",
+      "name": "ダミーの種族専用2",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_03",
+      "name": "ダミーの種族専用3",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_04",
+      "name": "ダミーの種族専用4",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_05",
+      "name": "ダミーの種族専用5",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_06",
+      "name": "ダミーの種族専用6",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_07",
+      "name": "ダミーの種族専用7",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_08",
+      "name": "ダミーの種族専用8",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_09",
+      "name": "ダミーの種族専用9",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_10",
+      "name": "ダミーの種族専用10",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_11",
+      "name": "ダミーの種族専用11",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_12",
+      "name": "ダミーの種族専用12",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_13",
+      "name": "ダミーの種族専用13",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_14",
+      "name": "ダミーの種族専用14",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_15",
+      "name": "ダミーの種族専用15",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_16",
+      "name": "ダミーの種族専用16",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_17",
+      "name": "ダミーの種族専用17",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_18",
+      "name": "ダミーの種族専用18",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_19",
+      "name": "ダミーの種族専用19",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_20",
+      "name": "ダミーの種族専用20",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_21",
+      "name": "ダミーの種族専用21",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_22",
+      "name": "ダミーの種族専用22",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_23",
+      "name": "ダミーの種族専用23",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_24",
+      "name": "ダミーの種族専用24",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_25",
+      "name": "ダミーの種族専用25",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_26",
+      "name": "ダミーの種族専用26",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_27",
+      "name": "ダミーの種族専用27",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_28",
+      "name": "ダミーの種族専用28",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_29",
+      "name": "ダミーの種族専用29",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_30",
+      "name": "ダミーの種族専用30",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_31",
+      "name": "ダミーの種族専用31",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_32",
+      "name": "ダミーの種族専用32",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_33",
+      "name": "ダミーの種族専用33",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_34",
+      "name": "ダミーの種族専用34",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_35",
+      "name": "ダミーの種族専用35",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_36",
+      "name": "ダミーの種族専用36",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_37",
+      "name": "ダミーの種族専用37",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_38",
+      "name": "ダミーの種族専用38",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_39",
+      "name": "ダミーの種族専用39",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_40",
+      "name": "ダミーの種族専用40",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_41",
+      "name": "ダミーの種族専用41",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_42",
+      "name": "ダミーの種族専用42",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_43",
+      "name": "ダミーの種族専用43",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_44",
+      "name": "ダミーの種族専用44",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_45",
+      "name": "ダミーの種族専用45",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_46",
+      "name": "ダミーの種族専用46",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_47",
+      "name": "ダミーの種族専用47",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_48",
+      "name": "ダミーの種族専用48",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_49",
+      "name": "ダミーの種族専用49",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_50",
+      "name": "ダミーの種族専用50",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_51",
+      "name": "ダミーの種族専用51",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_52",
+      "name": "ダミーの種族専用52",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_53",
+      "name": "ダミーの種族専用53",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_54",
+      "name": "ダミーの種族専用54",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_55",
+      "name": "ダミーの種族専用55",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_56",
+      "name": "ダミーの種族専用56",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_57",
+      "name": "ダミーの種族専用57",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_58",
+      "name": "ダミーの種族専用58",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_59",
+      "name": "ダミーの種族専用59",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_race_specific_60",
+      "name": "ダミーの種族専用60",
+      "description": "テスト用の種族専用アイテムです",
+      "category": "race_specific",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_20",
+      "name": "ダミーの合成用20",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_21",
+      "name": "ダミーの合成用21",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_22",
+      "name": "ダミーの合成用22",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_23",
+      "name": "ダミーの合成用23",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_24",
+      "name": "ダミーの合成用24",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_25",
+      "name": "ダミーの合成用25",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_26",
+      "name": "ダミーの合成用26",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_27",
+      "name": "ダミーの合成用27",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_28",
+      "name": "ダミーの合成用28",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_29",
+      "name": "ダミーの合成用29",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_30",
+      "name": "ダミーの合成用30",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_31",
+      "name": "ダミーの合成用31",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_32",
+      "name": "ダミーの合成用32",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_33",
+      "name": "ダミーの合成用33",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_34",
+      "name": "ダミーの合成用34",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_35",
+      "name": "ダミーの合成用35",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_36",
+      "name": "ダミーの合成用36",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_37",
+      "name": "ダミーの合成用37",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_38",
+      "name": "ダミーの合成用38",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_39",
+      "name": "ダミーの合成用39",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_40",
+      "name": "ダミーの合成用40",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_41",
+      "name": "ダミーの合成用41",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_42",
+      "name": "ダミーの合成用42",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_43",
+      "name": "ダミーの合成用43",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_44",
+      "name": "ダミーの合成用44",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_45",
+      "name": "ダミーの合成用45",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_46",
+      "name": "ダミーの合成用46",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_47",
+      "name": "ダミーの合成用47",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_48",
+      "name": "ダミーの合成用48",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_49",
+      "name": "ダミーの合成用49",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_50",
+      "name": "ダミーの合成用50",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_51",
+      "name": "ダミーの合成用51",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_52",
+      "name": "ダミーの合成用52",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_53",
+      "name": "ダミーの合成用53",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_54",
+      "name": "ダミーの合成用54",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_55",
+      "name": "ダミーの合成用55",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_56",
+      "name": "ダミーの合成用56",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_57",
+      "name": "ダミーの合成用57",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_58",
+      "name": "ダミーの合成用58",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_59",
+      "name": "ダミーの合成用59",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_for_synthesis_60",
+      "name": "ダミーの合成用60",
+      "description": "テスト用の合成用アイテムです",
+      "category": "for_synthesis",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_03",
+      "name": "ダミーの魔造素材3",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_04",
+      "name": "ダミーの魔造素材4",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_05",
+      "name": "ダミーの魔造素材5",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_06",
+      "name": "ダミーの魔造素材6",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_07",
+      "name": "ダミーの魔造素材7",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_08",
+      "name": "ダミーの魔造素材8",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_09",
+      "name": "ダミーの魔造素材9",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_10",
+      "name": "ダミーの魔造素材10",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_11",
+      "name": "ダミーの魔造素材11",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_12",
+      "name": "ダミーの魔造素材12",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_13",
+      "name": "ダミーの魔造素材13",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_14",
+      "name": "ダミーの魔造素材14",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_15",
+      "name": "ダミーの魔造素材15",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_16",
+      "name": "ダミーの魔造素材16",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_17",
+      "name": "ダミーの魔造素材17",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_18",
+      "name": "ダミーの魔造素材18",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_19",
+      "name": "ダミーの魔造素材19",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_20",
+      "name": "ダミーの魔造素材20",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_21",
+      "name": "ダミーの魔造素材21",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_22",
+      "name": "ダミーの魔造素材22",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_23",
+      "name": "ダミーの魔造素材23",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_24",
+      "name": "ダミーの魔造素材24",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_25",
+      "name": "ダミーの魔造素材25",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_26",
+      "name": "ダミーの魔造素材26",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_27",
+      "name": "ダミーの魔造素材27",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_28",
+      "name": "ダミーの魔造素材28",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_29",
+      "name": "ダミーの魔造素材29",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_30",
+      "name": "ダミーの魔造素材30",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_31",
+      "name": "ダミーの魔造素材31",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_32",
+      "name": "ダミーの魔造素材32",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_33",
+      "name": "ダミーの魔造素材33",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_34",
+      "name": "ダミーの魔造素材34",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_35",
+      "name": "ダミーの魔造素材35",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_36",
+      "name": "ダミーの魔造素材36",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_37",
+      "name": "ダミーの魔造素材37",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_38",
+      "name": "ダミーの魔造素材38",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_39",
+      "name": "ダミーの魔造素材39",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_40",
+      "name": "ダミーの魔造素材40",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_41",
+      "name": "ダミーの魔造素材41",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_42",
+      "name": "ダミーの魔造素材42",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_43",
+      "name": "ダミーの魔造素材43",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_44",
+      "name": "ダミーの魔造素材44",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_45",
+      "name": "ダミーの魔造素材45",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_46",
+      "name": "ダミーの魔造素材46",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_47",
+      "name": "ダミーの魔造素材47",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_48",
+      "name": "ダミーの魔造素材48",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_49",
+      "name": "ダミーの魔造素材49",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_50",
+      "name": "ダミーの魔造素材50",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_51",
+      "name": "ダミーの魔造素材51",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_52",
+      "name": "ダミーの魔造素材52",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_53",
+      "name": "ダミーの魔造素材53",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_54",
+      "name": "ダミーの魔造素材54",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_55",
+      "name": "ダミーの魔造素材55",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_56",
+      "name": "ダミーの魔造素材56",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_57",
+      "name": "ダミーの魔造素材57",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_58",
+      "name": "ダミーの魔造素材58",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_59",
+      "name": "ダミーの魔造素材59",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    },
+    {
+      "id": "dummy_magic_material_60",
+      "name": "ダミーの魔造素材60",
+      "description": "テスト用の魔造素材アイテムです",
+      "category": "magic_material",
+      "basePrice": 100,
+      "sellValue": 50
+    }
+  ]
+}

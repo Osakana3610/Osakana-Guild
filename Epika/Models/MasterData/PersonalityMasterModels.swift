@@ -1,0 +1,52 @@
+import Foundation
+
+struct PersonalityPrimaryDefinition: Identifiable, Sendable {
+    struct Effect: Sendable, Hashable {
+        let orderIndex: Int
+        let effectType: String
+        let value: Double?
+        let payloadJSON: String
+    }
+
+    let id: String
+    let name: String
+    let kind: String
+    let description: String
+    let effects: [Effect]
+}
+
+struct PersonalitySecondaryDefinition: Identifiable, Sendable {
+    struct StatBonus: Sendable, Hashable {
+        let stat: String
+        let value: Int
+    }
+
+    let id: String
+    let name: String
+    let positiveSkillId: String
+    let negativeSkillId: String
+    let statBonuses: [StatBonus]
+}
+
+struct PersonalitySkillDefinition: Identifiable, Sendable {
+    struct EventEffect: Sendable, Hashable {
+        let orderIndex: Int
+        let effectId: String
+    }
+
+    let id: String
+    let name: String
+    let kind: String
+    let description: String
+    let eventEffects: [EventEffect]
+}
+
+struct PersonalityCancellation: Sendable, Hashable {
+    let positiveSkillId: String
+    let negativeSkillId: String
+}
+
+struct PersonalityBattleEffect: Identifiable, Sendable {
+    let id: String
+    let payloadJSON: String
+}

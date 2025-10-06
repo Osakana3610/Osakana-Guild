@@ -1,0 +1,140 @@
+{
+  "normalTitles": [
+    {
+      "id": "worst",
+      "name": "最低な",
+      "statMultiplier": 0.25,
+      "negativeMultiplier": 4.0,
+      "rank": 0,
+      "dropProbability": 28.754,
+      "allowWithTitleTreasure": false,
+      "superRareRates": {
+        "normal": 10,
+        "good": 20,
+        "rare": 80,
+        "gem": 160
+      },
+      "priceMultiplier": 0.25
+    },
+    {
+      "id": "stinky",
+      "name": "臭い",
+      "statMultiplier": 0.5,
+      "negativeMultiplier": 2.0,
+      "rank": 1,
+      "dropProbability": 38.2294,
+      "allowWithTitleTreasure": true,
+      "superRareRates": {
+        "normal": 30,
+        "good": 60,
+        "rare": 240,
+        "gem": 480
+      },
+      "priceMultiplier": 0.5
+    },
+    {
+      "id": "normal",
+      "name": "",
+      "statMultiplier": 1.0,
+      "negativeMultiplier": 1.0,
+      "rank": 2,
+      "priceMultiplier": 1.0
+    },
+    {
+      "id": "masterwork",
+      "name": "名工の",
+      "statMultiplier": 1.3195,
+      "negativeMultiplier": 0.7579,
+      "rank": 3,
+      "dropProbability": 28.7541,
+      "allowWithTitleTreasure": true,
+      "superRareRates": {
+        "normal": 50,
+        "good": 100,
+        "rare": 400,
+        "gem": 800
+      },
+      "priceMultiplier": 2.0
+    },
+    {
+      "id": "demonic",
+      "name": "魔性の",
+      "statMultiplier": 1.7411,
+      "negativeMultiplier": 0.5743,
+      "rank": 4,
+      "dropProbability": 3.2,
+      "allowWithTitleTreasure": true,
+      "superRareRates": {
+        "normal": 512,
+        "good": 1024,
+        "rare": 4096,
+        "gem": 8192
+      },
+      "priceMultiplier": 4.0
+    },
+    {
+      "id": "possessed",
+      "name": "宿った",
+      "statMultiplier": 2.2974,
+      "negativeMultiplier": 0.4353,
+      "rank": 5,
+      "dropProbability": 0.8,
+      "allowWithTitleTreasure": true,
+      "superRareRates": {
+        "normal": 2560,
+        "good": 5120,
+        "rare": 20480,
+        "gem": 40960
+      },
+      "priceMultiplier": 8.0
+    },
+    {
+      "id": "legendary",
+      "name": "伝説の",
+      "statMultiplier": 3.0314,
+      "negativeMultiplier": 0.3299,
+      "rank": 6,
+      "dropProbability": 0.2,
+      "allowWithTitleTreasure": true,
+      "superRareRates": {
+        "normal": 5120,
+        "good": 10240,
+        "rare": 40960,
+        "gem": 81920
+      },
+      "priceMultiplier": 16.0
+    },
+    {
+      "id": "terrifying",
+      "name": "恐ろしい",
+      "statMultiplier": 4.0,
+      "negativeMultiplier": 0.25,
+      "rank": 7,
+      "dropProbability": 0.05,
+      "allowWithTitleTreasure": true,
+      "superRareRates": {
+        "normal": 12800,
+        "good": 25600,
+        "rare": 102400,
+        "gem": 204800
+      },
+      "priceMultiplier": 32.0
+    },
+    {
+      "id": "broken",
+      "name": "壊れた",
+      "statMultiplier": 5.278,
+      "negativeMultiplier": 0.1895,
+      "rank": 8,
+      "dropProbability": 0.0125,
+      "allowWithTitleTreasure": true,
+      "superRareRates": {
+        "normal": 25600,
+        "good": 51200,
+        "rare": 204800,
+        "gem": 409600
+      },
+      "priceMultiplier": 128.0
+    }
+  ]
+}

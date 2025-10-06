@@ -1,0 +1,45 @@
+# macOS
+.DS_Store
+
+# Xcode build artifacts
+DerivedData/
+build/
+build/XCBuildData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcarchive
+
+# App artifacts
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# Temp files
+tmp/
+Temp/
+*.orig
+
+# Coverage
+*.xccovreport
+*.xccovarchive
+
+# Agents
+AGENTS.md
+
+# Project docs
+Documents/
+
+# Local agent workspace
+.serena/
+
+# Local scripts
+Scripts/
+
+# Local git hooks (untracked)
+.githooks/
+.derived_*
+xcodebuild-*.log
+periphery*.json
+xcodebuild*.log

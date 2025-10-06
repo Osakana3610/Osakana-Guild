@@ -1,0 +1,108 @@
+import Foundation
+
+/// 旧ランタイムで使用していたドロップカテゴリを非決定論向けに再定義。
+enum DropItemCategory: String, Sendable {
+    case normal
+    case good
+    case rare
+    case gem
+}
+
+/// パーティのドロップ系補正値を集計したもの。
+struct PartyDropBonuses: Sendable {
+    let rareDropMultiplier: Double
+    let titleGrantRateMultiplier: Double
+    let averageLuck: Double
+    let fortune: Int
+
+    static let neutral = PartyDropBonuses(rareDropMultiplier: 1.0,
+                                          titleGrantRateMultiplier: 1.0,
+                                          averageLuck: 0.0,
+                                          fortune: 0)
+}
+
+/// ドロップ判定時に参照する周辺情報。
+struct DropContext: Sendable {
+    let enemy: EnemyDefinition
+    let partyBonuses: PartyDropBonuses
+    let isRabiTicketActive: Bool
+    let hasTitleTreasure: Bool
+    let dungeonId: String?
+    let floorNumber: Int?
+
+    init(enemy: EnemyDefinition,
+         partyBonuses: PartyDropBonuses,
+         isRabiTicketActive: Bool = false,
+         hasTitleTreasure: Bool = false,
+         dungeonId: String? = nil,
+         floorNumber: Int? = nil) {
+        self.enemy = enemy
+        self.partyBonuses = partyBonuses
+        self.isRabiTicketActive = isRabiTicketActive
+        self.hasTitleTreasure = hasTitleTreasure
+        self.dungeonId = dungeonId
+        self.floorNumber = floorNumber
+    }
+}
+
+/// 1回のドロップ判定結果。
+struct DropRollResult: Sendable {
+    let willDrop: Bool
+    let luckRoll: Double
+    let baseThreshold: Double
+    let finalThreshold: Double
+}
+
+/// 日次で共有する超レアドロップ状態。
+struct SuperRareDailyState: Sendable {
+    var jstDayIdentifier: String
+    var hasTriggered: Bool
+}
+
+/// 1バトル内の超レア判定に利用するセッション情報。
+struct SuperRareSessionState {
+    var normalItemTriggered: Bool = false
+}
+
+struct DropOutcome: Sendable {
+    let results: [ItemDropResult]
+    let superRareState: SuperRareDailyState
+}
+
+extension RuntimePartyState {
+    /// パーティメンバーのステータスからドロップ倍率を集計する。
+    func makeDropBonuses() throws -> PartyDropBonuses {
+        guard !members.isEmpty else { return .neutral }
+
+        var luckSum = 0
+        var spiritSum = 0
+        for member in members {
+            let attributes = member.character.progress.attributes
+            luckSum += attributes.luck
+            spiritSum += attributes.spirit
+        }
+
+        let count = Double(members.count)
+        let averageLuck = Double(luckSum) / count
+
+        // 旧仕様準拠: (Luck + Spirit) 合計でレア倍率を底上げ
+        let rareMultiplier = 1.0 + (Double(luckSum + spiritSum) * 0.0005)
+        // 旧仕様準拠: 平均Luckに比例して称号付与率を上げる
+        let titleMultiplier = 1.0 + (averageLuck * 0.002)
+        let fortune = Int(averageLuck.rounded())
+
+        var aggregation = SkillRuntimeEffects.RewardComponents.neutral
+        for member in members where !member.isReserve {
+            let components = try SkillRuntimeEffectCompiler.rewardComponents(from: member.character.learnedSkills)
+            aggregation.merge(components)
+        }
+
+        let dropScale = aggregation.itemDropScale()
+        let titleScale = aggregation.titleScale()
+
+        return PartyDropBonuses(rareDropMultiplier: rareMultiplier * dropScale,
+                                titleGrantRateMultiplier: titleMultiplier * titleScale,
+                                averageLuck: averageLuck,
+                                fortune: fortune)
+    }
+}

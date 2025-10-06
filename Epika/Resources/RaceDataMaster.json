@@ -1,0 +1,277 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-07-20",
+  "description": "種族データマスターデータ",
+  "raceData": {
+    "human_male": {
+      "name": "人間（男）",
+      "gender": "male",
+      "category": "human",
+      "baseStats": {
+        "strength": 8,
+        "wisdom": 6,
+        "spirit": 8,
+        "vitality": 7,
+        "agility": 7,
+        "luck": 7
+      },
+      "description": "基本性能が最も低い種族。雇用費用が安く成長も早いのが特徴。",
+      "maxLevel": 200
+    },
+    "human_female": {
+      "name": "人間（女）",
+      "gender": "female",
+      "category": "human",
+      "baseStats": {
+        "strength": 6,
+        "wisdom": 8,
+        "spirit": 8,
+        "vitality": 7,
+        "agility": 8,
+        "luck": 6
+      },
+      "description": "基本性能が最も低い種族。雇用費用が安く成長も早いのが特徴。",
+      "maxLevel": 200
+    },
+    "pygmyChum": {
+      "name": "ピグミーチャム",
+      "gender": "male",
+      "category": "humanoid",
+      "baseStats": {
+        "strength": 7,
+        "wisdom": 10,
+        "spirit": 6,
+        "vitality": 6,
+        "agility": 11,
+        "luck": 15
+      },
+      "description": "敏捷性が高く、危機を察知する本能を持つ。手先が器用で道具の扱いがうまい。",
+      "maxLevel": 140
+    },
+    "gnome": {
+      "name": "ノーム",
+      "gender": "male",
+      "category": "humanoid",
+      "baseStats": {
+        "strength": 7,
+        "wisdom": 11,
+        "spirit": 12,
+        "vitality": 9,
+        "agility": 5,
+        "luck": 9
+      },
+      "description": "信仰心の高い種族。精神が高く、僧侶職に向いている。",
+      "maxLevel": 140
+    },
+    "dwarf": {
+      "name": "ドワーフ",
+      "gender": "male",
+      "category": "humanoid",
+      "baseStats": {
+        "strength": 12,
+        "wisdom": 7,
+        "spirit": 8,
+        "vitality": 11,
+        "agility": 6,
+        "luck": 9
+      },
+      "description": "山岳や岩場を好み、手先が器用で工芸品などを作り出す。",
+      "maxLevel": 140
+    },
+    "darkElf": {
+      "name": "ダークエルフ",
+      "gender": "male",
+      "category": "elf",
+      "baseStats": {
+        "strength": 8,
+        "wisdom": 12,
+        "spirit": 5,
+        "vitality": 9,
+        "agility": 10,
+        "luck": 7
+      },
+      "description": "森の闇に身を潜め、魔法と暗殺術に長けた種族。",
+      "maxLevel": 150
+    },
+    "vampire": {
+      "name": "吸血鬼",
+      "gender": "male",
+      "category": "undead",
+      "baseStats": {
+        "strength": 12,
+        "wisdom": 10,
+        "spirit": 7,
+        "vitality": 11,
+        "agility": 8,
+        "luck": 10
+      },
+      "description": "夜間に力を発揮する貴族的な種族。ドレイン能力を持つ。",
+      "maxLevel": 135
+    },
+    "elf": {
+      "name": "エルフ",
+      "gender": "female",
+      "category": "elf",
+      "baseStats": {
+        "strength": 6,
+        "wisdom": 11,
+        "spirit": 13,
+        "vitality": 6,
+        "agility": 11,
+        "luck": 12
+      },
+      "description": "森に住む美しい種族。自然と共に生き、治癒能力に長けている。",
+      "maxLevel": 150
+    },
+    "psychic": {
+      "name": "サイキック",
+      "gender": "female",
+      "category": "psychic",
+      "baseStats": {
+        "strength": 5,
+        "wisdom": 14,
+        "spirit": 11,
+        "vitality": 6,
+        "agility": 7,
+        "luck": 8
+      },
+      "description": "強力な精神力を持つ超能力者。魔法攻撃に特化している。",
+      "maxLevel": 140
+    },
+    "workingCat": {
+      "name": "ワーキャット",
+      "gender": "female",
+      "category": "beast",
+      "baseStats": {
+        "strength": 10,
+        "wisdom": 6,
+        "spirit": 6,
+        "vitality": 9,
+        "agility": 10,
+        "luck": 11
+      },
+      "description": "猫のような敏捷性と運を持つ種族。弱点を突く攻撃が得意。",
+      "maxLevel": 135
+    },
+    "dragonewt": {
+      "name": "ドラゴニュート",
+      "gender": "female",
+      "category": "dragon",
+      "baseStats": {
+        "strength": 11,
+        "wisdom": 7,
+        "spirit": 6,
+        "vitality": 11,
+        "agility": 7,
+        "luck": 10
+      },
+      "description": "竜の血を引く種族。ブレス攻撃と高い攻撃力を持つ。",
+      "maxLevel": 135
+    },
+    "amazon": {
+      "name": "アマゾネス",
+      "gender": "female",
+      "category": "human",
+      "baseStats": {
+        "strength": 12,
+        "wisdom": 8,
+        "spirit": 7,
+        "vitality": 10,
+        "agility": 9,
+        "luck": 8
+      },
+      "description": "戦いに生きる女戦士の種族。高い攻撃力と体力を持つ。",
+      "maxLevel": 135
+    },
+    "magicConstruct": {
+      "name": "魔造生物",
+      "gender": "genderless",
+      "category": "construct",
+      "baseStats": {
+        "strength": 6,
+        "wisdom": 5,
+        "spirit": 5,
+        "vitality": 5,
+        "agility": 5,
+        "luck": 4
+      },
+      "description": "素材でカスタマイズ可能な人工的な生命体。基本能力は低いが成長の可能性を秘める。",
+      "maxLevel": 99
+    },
+    "undeadMan": {
+      "name": "アンデッドマン",
+      "gender": "genderless",
+      "category": "undead",
+      "baseStats": {
+        "strength": 8,
+        "wisdom": 8,
+        "spirit": 9,
+        "vitality": 15,
+        "agility": 8,
+        "luck": 8
+      },
+      "description": "不死の特性を持つ種族。体力が非常に高く、死への耐性がある。",
+      "maxLevel": 140
+    },
+    "giant": {
+      "name": "巨人",
+      "gender": "genderless",
+      "category": "giant",
+      "baseStats": {
+        "strength": 13,
+        "wisdom": 5,
+        "spirit": 9,
+        "vitality": 14,
+        "agility": 6,
+        "luck": 6
+      },
+      "description": "巨大な体躯を持つ種族。圧倒的な力と体力でパーティを守る。",
+      "maxLevel": 130
+    },
+    "tengu": {
+      "name": "天狗",
+      "gender": "genderless",
+      "category": "mythical",
+      "baseStats": {
+        "strength": 8,
+        "wisdom": 11,
+        "spirit": 8,
+        "vitality": 7,
+        "agility": 12,
+        "luck": 8
+      },
+      "description": "空を舞う神秘的な種族。高い敏捷性と魔法能力を併せ持つ。",
+      "maxLevel": 130
+    },
+    "demon": {
+      "name": "鬼",
+      "gender": "genderless",
+      "category": "demon",
+      "baseStats": {
+        "strength": 15,
+        "wisdom": 6,
+        "spirit": 9,
+        "vitality": 9,
+        "agility": 8,
+        "luck": 8
+      },
+      "description": "凶暴で力強い種族。最高クラスの攻撃力を誇る。",
+      "maxLevel": 130
+    },
+    "cyborg": {
+      "name": "サイボーグ",
+      "gender": "genderless",
+      "category": "machine",
+      "baseStats": {
+        "strength": 8,
+        "wisdom": 7,
+        "spirit": 6,
+        "vitality": 8,
+        "agility": 14,
+        "luck": 10
+      },
+      "description": "機械と生体の融合体。最高クラスの敏捷性を持つ。",
+      "maxLevel": 130
+    }
+  }
+}

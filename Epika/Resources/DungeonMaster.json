@@ -1,0 +1,973 @@
+{
+  "dungeons": [
+    {
+      "id": "online_babel",
+      "name": "オンラインバベル",
+      "chapter": 0,
+      "stage": 0,
+      "description": "オンラインバベル用の仮想ダンジョン（サーバ取得の敵と戦闘）",
+      "recommendedLevel": 1,
+      "unlockConditions": [],
+      "rewards": [],
+      "storyText": "",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 0,
+      "baseGold": 0,
+      "explorationTime": 1,
+      "eventsPerFloor": 5,
+      "titleRank": 0,
+      "floorEnemyMapping": [],
+      "floorCount": 1
+    },
+    {
+      "id": "forest_entrance",
+      "name": "森の入り口",
+      "chapter": 1,
+      "stage": 1,
+      "description": "ギルドの近くにある平和な森。冒険者の第一歩に最適な場所です。",
+      "recommendedLevel": 3,
+      "unlockConditions": [
+        "storyRead:story_001"
+      ],
+      "rewards": [
+        "copper_coin",
+        "slime_jelly"
+      ],
+      "storyText": "新人冒険者が最初に挑む森。ここで基本的な戦闘を学ぶ。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 50,
+      "baseGold": 25,
+      "explorationTime": 1,
+      "eventsPerFloor": 5,
+      "titleRank": 0,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "crystal_slime",
+              "weight": 40,
+              "minLevel": 1,
+              "maxLevel": 3
+            },
+            {
+              "enemyId": "goblin_warrior",
+              "weight": 60,
+              "minLevel": 2,
+              "maxLevel": 4
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "goblin_warrior",
+              "weight": 50,
+              "minLevel": 3,
+              "maxLevel": 5
+            },
+            {
+              "enemyId": "shadow_wolf",
+              "weight": 50,
+              "minLevel": 5,
+              "maxLevel": 5
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            3,
+            3
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "shadow_wolf",
+              "weight": 40,
+              "minLevel": 4,
+              "maxLevel": 6
+            },
+            {
+              "enemyId": "forest_spirit",
+              "weight": 30,
+              "minLevel": 5,
+              "maxLevel": 7
+            }
+          ]
+        }
+      ],
+      "floorCount": 3
+    },
+    {
+      "id": "ancient_cave",
+      "name": "古い洞窟",
+      "chapter": 1,
+      "stage": 2,
+      "description": "森の奥にある古い洞窟。何かが潜んでいるような気配がします。",
+      "recommendedLevel": 5,
+      "unlockConditions": [
+        "dungeonClear:forest_entrance"
+      ],
+      "rewards": [
+        "bone_fragment",
+        "rusty_dagger"
+      ],
+      "storyText": "洞窟の奥には古代の秘密が眠っている。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 75,
+      "baseGold": 40,
+      "explorationTime": 30,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "skeleton_mage",
+              "weight": 50,
+              "minLevel": 4,
+              "maxLevel": 6
+            },
+            {
+              "enemyId": "orc_berserker",
+              "weight": 50,
+              "minLevel": 5,
+              "maxLevel": 7
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            3
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "skeleton_mage",
+              "weight": 40,
+              "minLevel": 6,
+              "maxLevel": 8
+            },
+            {
+              "enemyId": "orc_berserker",
+              "weight": 40,
+              "minLevel": 7,
+              "maxLevel": 9
+            },
+            {
+              "enemyId": "cave_guardian",
+              "weight": 20,
+              "minLevel": 8,
+              "maxLevel": 10
+            }
+          ]
+        }
+      ],
+      "floorCount": 3
+    },
+    {
+      "id": "forgotten_ruins",
+      "name": "忘れられた遺跡",
+      "chapter": 1,
+      "stage": 3,
+      "description": "遺跡の中は薄暗く、古代の魔法が漂っています。",
+      "recommendedLevel": 8,
+      "unlockConditions": [
+        "dungeonClear:ancient_cave"
+      ],
+      "rewards": [
+        "cursed_powder",
+        "necromancer_staff"
+      ],
+      "storyText": "失われた文明の遺跡。古代魔法の痕跡が残る。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 100,
+      "baseGold": 60,
+      "explorationTime": 45,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "dark_mage",
+              "weight": 50,
+              "minLevel": 7,
+              "maxLevel": 9
+            },
+            {
+              "enemyId": "skeleton_mage",
+              "weight": 50,
+              "minLevel": 8,
+              "maxLevel": 10
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "dark_mage",
+              "weight": 40,
+              "minLevel": 9,
+              "maxLevel": 11
+            },
+            {
+              "enemyId": "wraith",
+              "weight": 30,
+              "minLevel": 10,
+              "maxLevel": 12
+            },
+            {
+              "enemyId": "necromancer",
+              "weight": 30,
+              "minLevel": 10,
+              "maxLevel": 12
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            3,
+            3
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "wraith",
+              "weight": 40,
+              "minLevel": 11,
+              "maxLevel": 13
+            },
+            {
+              "enemyId": "necromancer",
+              "weight": 40,
+              "minLevel": 12,
+              "maxLevel": 14
+            },
+            {
+              "enemyId": "ancient_guardian",
+              "weight": 20,
+              "minLevel": 13,
+              "maxLevel": 15
+            }
+          ]
+        }
+      ],
+      "floorCount": 3
+    },
+    {
+      "id": "forest_guardian",
+      "name": "森の番人",
+      "chapter": 1,
+      "stage": 4,
+      "description": "森の奥深くに住む古い番人。彼を倒せば第2章への道が開かれるでしょう。",
+      "recommendedLevel": 12,
+      "unlockConditions": [
+        "dungeonClear:forgotten_ruins"
+      ],
+      "rewards": [
+        "shadow_essence",
+        "wolf_pelt",
+        "sharp_fang"
+      ],
+      "storyText": "第1章最終ボス。森を守る古い魂との戦い。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 150,
+      "baseGold": 100,
+      "explorationTime": 90,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "forest_guardian",
+              "weight": 100,
+              "minLevel": 15,
+              "maxLevel": 15
+            }
+          ]
+        }
+      ],
+      "floorCount": 1
+    },
+    {
+      "id": "mountain_path",
+      "name": "山麓の道",
+      "chapter": 2,
+      "stage": 1,
+      "description": "山へと続く道。険しい道のりが始まります。",
+      "recommendedLevel": 15,
+      "unlockConditions": [
+        "dungeonClear:forest_guardian"
+      ],
+      "rewards": [
+        "silver_coin",
+        "orc_tusk"
+      ],
+      "storyText": "第2章の始まり。より強い敵が待ち受ける。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 200,
+      "baseGold": 125,
+      "explorationTime": 45,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "orc_berserker",
+              "weight": 50,
+              "minLevel": 14,
+              "maxLevel": 16
+            },
+            {
+              "enemyId": "mountain_golem",
+              "weight": 50,
+              "minLevel": 15,
+              "maxLevel": 17
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "mountain_golem",
+              "weight": 40,
+              "minLevel": 16,
+              "maxLevel": 18
+            },
+            {
+              "enemyId": "rock_elemental",
+              "weight": 30,
+              "minLevel": 17,
+              "maxLevel": 19
+            },
+            {
+              "enemyId": "orc_shaman",
+              "weight": 30,
+              "minLevel": 16,
+              "maxLevel": 18
+            }
+          ]
+        }
+      ],
+      "floorCount": 2
+    },
+    {
+      "id": "ruined_village",
+      "name": "廃墟の村",
+      "chapter": 2,
+      "stage": 2,
+      "description": "かつて栄えた村の廃墟。不気味な静寂が支配しています。",
+      "recommendedLevel": 18,
+      "unlockConditions": [
+        "dungeonClear:mountain_path"
+      ],
+      "rewards": [
+        "iron_axe",
+        "berserker_armor"
+      ],
+      "storyText": "かつて繁栄した村の遺跡。住民の魂が彷徨う。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 250,
+      "baseGold": 150,
+      "explorationTime": 45,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "zombie",
+              "weight": 50,
+              "minLevel": 17,
+              "maxLevel": 19
+            },
+            {
+              "enemyId": "ghost",
+              "weight": 50,
+              "minLevel": 18,
+              "maxLevel": 20
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "ghost",
+              "weight": 40,
+              "minLevel": 19,
+              "maxLevel": 21
+            },
+            {
+              "enemyId": "wraith",
+              "weight": 30,
+              "minLevel": 20,
+              "maxLevel": 22
+            },
+            {
+              "enemyId": "cursed_villager",
+              "weight": 30,
+              "minLevel": 19,
+              "maxLevel": 21
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            3,
+            3
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "wraith",
+              "weight": 40,
+              "minLevel": 21,
+              "maxLevel": 23
+            },
+            {
+              "enemyId": "cursed_villager",
+              "weight": 40,
+              "minLevel": 22,
+              "maxLevel": 24
+            },
+            {
+              "enemyId": "village_chief_specter",
+              "weight": 20,
+              "minLevel": 23,
+              "maxLevel": 25
+            }
+          ]
+        }
+      ],
+      "floorCount": 3
+    },
+    {
+      "id": "ancient_bridge",
+      "name": "古い橋",
+      "chapter": 2,
+      "stage": 3,
+      "description": "谷に架かる古い橋。この先に待つものは...",
+      "recommendedLevel": 22,
+      "unlockConditions": [
+        "dungeonClear:ruined_village"
+      ],
+      "rewards": [
+        "crystal_core",
+        "magic_crystal"
+      ],
+      "storyText": "谷を渡る古い橋。強風と魔物が行く手を阻む。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 300,
+      "baseGold": 200,
+      "explorationTime": 60,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "harpy",
+              "weight": 50,
+              "minLevel": 21,
+              "maxLevel": 23
+            },
+            {
+              "enemyId": "wind_elemental",
+              "weight": 50,
+              "minLevel": 22,
+              "maxLevel": 24
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "wind_elemental",
+              "weight": 40,
+              "minLevel": 23,
+              "maxLevel": 25
+            },
+            {
+              "enemyId": "bridge_guardian",
+              "weight": 30,
+              "minLevel": 24,
+              "maxLevel": 26
+            },
+            {
+              "enemyId": "storm_crow",
+              "weight": 30,
+              "minLevel": 23,
+              "maxLevel": 25
+            }
+          ]
+        }
+      ],
+      "floorCount": 2
+    },
+    {
+      "id": "mountain_beast",
+      "name": "山の魔獣",
+      "chapter": 2,
+      "stage": 4,
+      "description": "山の主である魔獣。強大な力を持つ相手です。",
+      "recommendedLevel": 25,
+      "unlockConditions": [
+        "dungeonClear:ancient_bridge"
+      ],
+      "rewards": [
+        "dragon_scale",
+        "ancient_treasure"
+      ],
+      "storyText": "第2章最終ボス。山を支配する古代の魔獣。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 400,
+      "baseGold": 300,
+      "explorationTime": 90,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "mountain_beast",
+              "weight": 100,
+              "minLevel": 28,
+              "maxLevel": 28
+            }
+          ]
+        }
+      ],
+      "floorCount": 1
+    },
+    {
+      "id": "dark_forest",
+      "name": "暗黒の森",
+      "chapter": 3,
+      "stage": 1,
+      "description": "闇に包まれた邪悪な森。強力な魔物が徘徊している。",
+      "recommendedLevel": 30,
+      "unlockConditions": [
+        "dungeonClear:mountain_beast"
+      ],
+      "rewards": [
+        "dark_essence",
+        "shadow_fragment"
+      ],
+      "storyText": "第3章の始まり。闇の力が満ちた危険な森。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 500,
+      "baseGold": 400,
+      "explorationTime": 60,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "dark_elf",
+              "weight": 50,
+              "minLevel": 29,
+              "maxLevel": 31
+            },
+            {
+              "enemyId": "shadow_beast",
+              "weight": 50,
+              "minLevel": 30,
+              "maxLevel": 32
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "shadow_beast",
+              "weight": 40,
+              "minLevel": 31,
+              "maxLevel": 33
+            },
+            {
+              "enemyId": "nightmare",
+              "weight": 30,
+              "minLevel": 32,
+              "maxLevel": 34
+            },
+            {
+              "enemyId": "dark_treant",
+              "weight": 30,
+              "minLevel": 31,
+              "maxLevel": 33
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            3,
+            3
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "nightmare",
+              "weight": 40,
+              "minLevel": 33,
+              "maxLevel": 35
+            },
+            {
+              "enemyId": "dark_treant",
+              "weight": 40,
+              "minLevel": 34,
+              "maxLevel": 36
+            },
+            {
+              "enemyId": "shadow_lord",
+              "weight": 20,
+              "minLevel": 35,
+              "maxLevel": 37
+            }
+          ]
+        }
+      ],
+      "floorCount": 3
+    },
+    {
+      "id": "magic_lake",
+      "name": "魔法の湖",
+      "chapter": 3,
+      "stage": 2,
+      "description": "神秘的な力を持つ湖。水面から魔力が立ち上る。",
+      "recommendedLevel": 35,
+      "unlockConditions": [
+        "dungeonClear:dark_forest"
+      ],
+      "rewards": [
+        "water_crystal",
+        "mermaid_scale"
+      ],
+      "storyText": "魔法の力で満たされた湖。水の精霊が住む。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 600,
+      "baseGold": 500,
+      "explorationTime": 60,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "water_elemental",
+              "weight": 50,
+              "minLevel": 34,
+              "maxLevel": 36
+            },
+            {
+              "enemyId": "mermaid_warrior",
+              "weight": 50,
+              "minLevel": 35,
+              "maxLevel": 37
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "mermaid_warrior",
+              "weight": 40,
+              "minLevel": 36,
+              "maxLevel": 38
+            },
+            {
+              "enemyId": "sea_serpent",
+              "weight": 30,
+              "minLevel": 37,
+              "maxLevel": 39
+            },
+            {
+              "enemyId": "water_spirit",
+              "weight": 30,
+              "minLevel": 36,
+              "maxLevel": 38
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            3,
+            3
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "sea_serpent",
+              "weight": 40,
+              "minLevel": 38,
+              "maxLevel": 40
+            },
+            {
+              "enemyId": "water_spirit",
+              "weight": 40,
+              "minLevel": 39,
+              "maxLevel": 41
+            },
+            {
+              "enemyId": "lake_guardian",
+              "weight": 20,
+              "minLevel": 40,
+              "maxLevel": 42
+            }
+          ]
+        }
+      ],
+      "floorCount": 3
+    },
+    {
+      "id": "lost_city",
+      "name": "失われた都市",
+      "chapter": 3,
+      "stage": 3,
+      "description": "古代文明の都市遺跡。強力な魔法の痕跡が残る。",
+      "recommendedLevel": 40,
+      "unlockConditions": [
+        "dungeonClear:magic_lake"
+      ],
+      "rewards": [
+        "ancient_relic",
+        "forbidden_tome"
+      ],
+      "storyText": "失われた古代都市。文明の頂点を極めた遺跡。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 800,
+      "baseGold": 700,
+      "explorationTime": 75,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "ancient_soldier",
+              "weight": 50,
+              "minLevel": 39,
+              "maxLevel": 41
+            },
+            {
+              "enemyId": "stone_golem",
+              "weight": 50,
+              "minLevel": 40,
+              "maxLevel": 42
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "stone_golem",
+              "weight": 40,
+              "minLevel": 41,
+              "maxLevel": 43
+            },
+            {
+              "enemyId": "ancient_mage",
+              "weight": 30,
+              "minLevel": 42,
+              "maxLevel": 44
+            },
+            {
+              "enemyId": "city_guardian",
+              "weight": 30,
+              "minLevel": 41,
+              "maxLevel": 43
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            3,
+            3
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "ancient_mage",
+              "weight": 40,
+              "minLevel": 43,
+              "maxLevel": 45
+            },
+            {
+              "enemyId": "city_guardian",
+              "weight": 40,
+              "minLevel": 44,
+              "maxLevel": 46
+            },
+            {
+              "enemyId": "ancient_king",
+              "weight": 20,
+              "minLevel": 45,
+              "maxLevel": 47
+            }
+          ]
+        }
+      ],
+      "floorCount": 3
+    },
+    {
+      "id": "ancient_dragon_lair",
+      "name": "古代ドラゴンの住処",
+      "chapter": 3,
+      "stage": 4,
+      "description": "最強の古代ドラゴンが眠る秘密の洞窟。",
+      "recommendedLevel": 50,
+      "unlockConditions": [
+        "dungeonClear:lost_city"
+      ],
+      "rewards": [
+        "dragon_heart",
+        "dragon_scale",
+        "sword_excalibur"
+      ],
+      "storyText": "第3章最終ボス。伝説の古代ドラゴンとの決戦。",
+      "isLimitedTime": false,
+      "eventId": null,
+      "baseExperience": 1000,
+      "baseGold": 1000,
+      "explorationTime": 120,
+      "eventsPerFloor": 5,
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "drake",
+              "weight": 50,
+              "minLevel": 48,
+              "maxLevel": 50
+            },
+            {
+              "enemyId": "dragon_cultist",
+              "weight": 50,
+              "minLevel": 47,
+              "maxLevel": 49
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "drake",
+              "weight": 40,
+              "minLevel": 49,
+              "maxLevel": 51
+            },
+            {
+              "enemyId": "elder_drake",
+              "weight": 30,
+              "minLevel": 50,
+              "maxLevel": 52
+            },
+            {
+              "enemyId": "dragon_priest",
+              "weight": 30,
+              "minLevel": 49,
+              "maxLevel": 51
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            3,
+            3
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": "ancient_dragon",
+              "weight": 100,
+              "minLevel": 55,
+              "maxLevel": 55
+            }
+          ]
+        }
+      ],
+      "floorCount": 3
+    }
+  ]
+}

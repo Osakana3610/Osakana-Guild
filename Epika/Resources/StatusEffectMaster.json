@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0.0",
+  "statusEffects": [
+    {
+      "id": "status.sleep",
+      "name": "眠り",
+      "description": "深い眠りに落ち、解除されるまで一切行動できない状態です。",
+      "category": "debuff",
+      "durationTurns": 2,
+      "tickDamagePercent": 0,
+      "actionLocked": true,
+      "statModifiers": {},
+      "tags": ["sleep"],
+      "applyMessage": "眠りに落ちた。",
+      "expireMessage": "眠りから目覚めた。"
+    },
+    {
+      "id": "status.confusion",
+      "name": "混乱",
+      "description": "混乱して正しい行動が取れなくなる状態です。味方を攻撃することもあります。",
+      "category": "debuff",
+      "durationTurns": 3,
+      "tickDamagePercent": 0,
+      "actionLocked": false,
+      "statModifiers": {},
+      "tags": ["confusion"],
+      "applyMessage": "混乱してしまった！",
+      "expireMessage": "混乱が収まった。"
+    }
+  ]
+}

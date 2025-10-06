@@ -1,0 +1,47 @@
+import Foundation
+
+enum ProgressError: Error {
+    case invalidInput(description: String)
+    case characterNotFound
+    case partyNotFound
+    case playerNotFound
+    case explorationNotFound
+    case shopNotFound
+    case shopStockNotFound
+    case insufficientFunds(required: Int, available: Int)
+    case insufficientStock(required: Int, available: Int)
+    case itemDefinitionUnavailable(ids: [String])
+    case storyLocked(nodeId: String)
+    case dungeonLocked(id: String)
+}
+
+extension ProgressError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .invalidInput(let description):
+            return description
+        case .characterNotFound:
+            return "キャラクターが見つかりません。"
+        case .partyNotFound:
+            return "パーティが見つかりません。"
+        case .playerNotFound:
+            return "プレイヤーデータが見つかりません。"
+        case .explorationNotFound:
+            return "探索記録が見つかりません。"
+        case .shopNotFound:
+            return "ショップが見つかりません。"
+        case .shopStockNotFound:
+            return "ショップ在庫が見つかりません。"
+        case .insufficientFunds(let required, let available):
+            return "所持金が不足しています (必要: \(required)G / 所持: \(available)G)。"
+        case .insufficientStock(let required, let available):
+            return "在庫が不足しています (必要: \(required) / 在庫: \(available))。"
+        case .itemDefinitionUnavailable(let ids):
+            return "マスタに存在しないアイテムIDがあります: \(ids.joined(separator: ", "))."
+        case .storyLocked:
+            return "まだ解放されていないストーリーです。"
+        case .dungeonLocked:
+            return "まだ解放されていない迷宮です。"
+        }
+    }
+}

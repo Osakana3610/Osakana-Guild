@@ -1,0 +1,596 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-07-20",
+  "description": "個性データマスターデータ（画像データ準拠の個性1 + 仕様書準拠の個性2）",
+  "personality1": [
+    {
+      "id": "elite",
+      "name": "エリート",
+      "type": "special",
+      "description": "選ばれし者の個性"
+    },
+    {
+      "id": "blessed_by_angel",
+      "name": "天使に祝福されし者",
+      "type": "special",
+      "description": "天使の加護を受けた個性"
+    },
+    {
+      "id": "raised_by_dragon",
+      "name": "竜に育てられし者",
+      "type": "special",
+      "description": "竜によって育てられた個性"
+    },
+    {
+      "id": "orphan",
+      "name": "捨て子",
+      "type": "special",
+      "description": "逆境に負けない個性"
+    },
+    {
+      "id": "demon_child",
+      "name": "魔人の申し子",
+      "type": "special",
+      "description": "魔力に満ちた個性"
+    },
+    {
+      "id": "martial_arts_master",
+      "name": "古武術習得",
+      "type": "special",
+      "description": "古の武術を身に着けた個性"
+    },
+    {
+      "id": "hermit_knowledge",
+      "name": "隠遁者の知識",
+      "type": "special",
+      "description": "世を捨てた者の知恵"
+    },
+    {
+      "id": "familiar_owner",
+      "name": "使い魔所有",
+      "type": "special",
+      "description": "使い魔の助けを得る個性"
+    },
+    {
+      "id": "knight_lineage",
+      "name": "騎士の家系",
+      "type": "equipment",
+      "description": "騎士の血筋を引く個性"
+    },
+    {
+      "id": "mercenary_experience",
+      "name": "傭兵経験",
+      "type": "equipment",
+      "description": "傭兵として生きてきた個性"
+    },
+    {
+      "id": "samurai_family",
+      "name": "武家の出",
+      "type": "equipment",
+      "description": "武家の出身である個性"
+    },
+    {
+      "id": "hawks_eye",
+      "name": "鷹の目",
+      "type": "equipment",
+      "description": "鋭い観察眼を持つ個性"
+    },
+    {
+      "id": "sage_lineage",
+      "name": "賢聖の家系",
+      "type": "magic",
+      "description": "賢者の血筋を引く個性"
+    },
+    {
+      "id": "magic_knowledge",
+      "name": "魔法の知識",
+      "type": "magic",
+      "description": "魔法全般の知識を持つ個性"
+    },
+    {
+      "id": "fire_knowledge",
+      "name": "火炎の知識",
+      "type": "magic",
+      "description": "火炎魔法の知識を持つ個性"
+    },
+    {
+      "id": "ice_knowledge",
+      "name": "冷気の知識",
+      "type": "magic",
+      "description": "冷気魔法の知識を持つ個性"
+    },
+    {
+      "id": "lightning_knowledge",
+      "name": "稲妻の知識",
+      "type": "magic",
+      "description": "雷魔法の知識を持つ個性"
+    },
+    {
+      "id": "lost_knowledge",
+      "name": "失われた知識",
+      "type": "magic",
+      "description": "失われた古代魔法の知識"
+    }
+  ],
+  "personality2": [
+    {
+      "id": "tactician",
+      "name": "戦術家",
+      "statBonuses": {
+        "strength": 2,
+        "wisdom": 2
+      },
+      "positiveSkill": "cautious",
+      "negativeSkill": "liar"
+    },
+    {
+      "id": "chivalrous",
+      "name": "騎士道",
+      "statBonuses": {
+        "strength": 2,
+        "spirit": 2
+      },
+      "positiveSkill": "honest",
+      "negativeSkill": "temptation_weak"
+    },
+    {
+      "id": "warrior",
+      "name": "武人",
+      "statBonuses": {
+        "strength": 2,
+        "vitality": 2
+      },
+      "positiveSkill": "sliding_feet",
+      "negativeSkill": "weapon_interested"
+    },
+    {
+      "id": "fighter",
+      "name": "格闘家",
+      "statBonuses": {
+        "strength": 2,
+        "agility": 2
+      },
+      "positiveSkill": "strong",
+      "negativeSkill": "belligerent"
+    },
+    {
+      "id": "victor",
+      "name": "勝利者",
+      "statBonuses": {
+        "strength": 2,
+        "luck": 2
+      },
+      "positiveSkill": "gambling_dislike",
+      "negativeSkill": "obvious_blind"
+    },
+    {
+      "id": "religious",
+      "name": "宗教家",
+      "statBonuses": {
+        "wisdom": 2,
+        "spirit": 2
+      },
+      "positiveSkill": "nature_love",
+      "negativeSkill": "machine_weak"
+    },
+    {
+      "id": "scholar",
+      "name": "学者",
+      "statBonuses": {
+        "wisdom": 2,
+        "vitality": 2
+      },
+      "positiveSkill": "knowledgeable",
+      "negativeSkill": "weak"
+    },
+    {
+      "id": "magician",
+      "name": "手品師",
+      "statBonuses": {
+        "wisdom": 2,
+        "agility": 2
+      },
+      "positiveSkill": "machine_knowledge",
+      "negativeSkill": "nature_uninterested"
+    },
+    {
+      "id": "gambler",
+      "name": "博打打ち",
+      "statBonuses": {
+        "wisdom": 2,
+        "luck": 2
+      },
+      "positiveSkill": "light_eater",
+      "negativeSkill": "gambling_lover"
+    },
+    {
+      "id": "physical",
+      "name": "肉体派",
+      "statBonuses": {
+        "spirit": 2,
+        "vitality": 2
+      },
+      "positiveSkill": "weapon_indifferent",
+      "negativeSkill": "knowledge_poor"
+    },
+    {
+      "id": "missionary",
+      "name": "宣教師",
+      "statBonuses": {
+        "spirit": 2,
+        "agility": 2
+      },
+      "positiveSkill": "philanthropist",
+      "negativeSkill": "loud_footsteps"
+    },
+    {
+      "id": "thinker",
+      "name": "思想家",
+      "statBonuses": {
+        "spirit": 2,
+        "luck": 2
+      },
+      "positiveSkill": "magic_expert",
+      "negativeSkill": "negotiation_weak"
+    },
+    {
+      "id": "athletic",
+      "name": "健脚",
+      "statBonuses": {
+        "vitality": 2,
+        "agility": 2
+      },
+      "positiveSkill": "stealth",
+      "negativeSkill": "magic_unknown"
+    },
+    {
+      "id": "leader",
+      "name": "頭領",
+      "statBonuses": {
+        "vitality": 2,
+        "luck": 2
+      },
+      "positiveSkill": "negotiation_expert",
+      "negativeSkill": "big_appetite"
+    },
+    {
+      "id": "popular",
+      "name": "人気者",
+      "statBonuses": {
+        "agility": 2,
+        "luck": 2
+      },
+      "positiveSkill": "attractive",
+      "negativeSkill": "curious"
+    }
+  ],
+  "personalitySkills": {
+    "cautious": {
+      "name": "慎重",
+      "type": "positive",
+      "description": "探索中の泉(オアシス)で水を飲まない",
+      "eventEffects": [
+        "oasis_safe"
+      ]
+    },
+    "liar": {
+      "name": "嘘つき",
+      "type": "negative",
+      "description": "探索中の泉(女神)で嘘をつく",
+      "eventEffects": [
+        "goddess_fountain_lie"
+      ]
+    },
+    "honest": {
+      "name": "正直者",
+      "type": "positive",
+      "description": "探索中の泉(女神)で正直に答える",
+      "eventEffects": [
+        "goddess_fountain_honest"
+      ]
+    },
+    "temptation_weak": {
+      "name": "誘惑に弱い",
+      "type": "negative",
+      "description": "探索中のサキュバスに魅了される",
+      "eventEffects": [
+        "succubus_charmed"
+      ]
+    },
+    "sliding_feet": {
+      "name": "すり足",
+      "type": "positive",
+      "description": "探索中の落とし穴に堕ちない",
+      "eventEffects": [
+        "pitfall_safe"
+      ]
+    },
+    "weapon_interested": {
+      "name": "武具に興味がある",
+      "type": "negative",
+      "description": "探索中の鍛冶師で承諾する",
+      "eventEffects": [
+        "blacksmith_accept"
+      ]
+    },
+    "strong": {
+      "name": "力持ち",
+      "type": "positive",
+      "description": "探索中の錆びた宝箱を開けられる",
+      "eventEffects": [
+        "rusty_chest_open"
+      ]
+    },
+    "belligerent": {
+      "name": "好戦的",
+      "type": "negative",
+      "description": "探索中の友好的なモンスターに好戦的に対応する",
+      "eventEffects": [
+        "friendly_monster_attack"
+      ]
+    },
+    "gambling_dislike": {
+      "name": "賭け事は嫌い",
+      "type": "positive",
+      "description": "探索中の詐欺師の賭けに乗らない",
+      "eventEffects": [
+        "gambler_refuse"
+      ]
+    },
+    "obvious_blind": {
+      "name": "灯台下暗し",
+      "type": "negative",
+      "description": "探索中の落とし穴に堕ちる",
+      "eventEffects": [
+        "pitfall_fall"
+      ]
+    },
+    "nature_love": {
+      "name": "自然が好き",
+      "type": "positive",
+      "description": "探索中の花を踏まない",
+      "eventEffects": [
+        "flower_protect"
+      ]
+    },
+    "machine_weak": {
+      "name": "機械は苦手",
+      "type": "negative",
+      "description": "探索中の機械仕掛けの箱を開けるのに失敗する",
+      "eventEffects": [
+        "mechanical_box_fail"
+      ]
+    },
+    "knowledgeable": {
+      "name": "博識",
+      "type": "positive",
+      "description": "探索中のスフィンクスの問題に正解する",
+      "eventEffects": [
+        "sphinx_correct"
+      ]
+    },
+    "weak": {
+      "name": "非力",
+      "type": "negative",
+      "description": "探索中の錆びた宝箱を開けるのに失敗する",
+      "eventEffects": [
+        "rusty_chest_fail"
+      ]
+    },
+    "machine_knowledge": {
+      "name": "機械の知識がある",
+      "type": "positive",
+      "description": "探索中の機械仕掛けの箱を開けられる",
+      "eventEffects": [
+        "mechanical_box_open"
+      ]
+    },
+    "nature_uninterested": {
+      "name": "自然に興味がない",
+      "type": "negative",
+      "description": "探索中の花を踏む",
+      "eventEffects": [
+        "flower_step"
+      ]
+    },
+    "light_eater": {
+      "name": "食が細い",
+      "type": "positive",
+      "description": "探索中のキノコを食べない",
+      "eventEffects": [
+        "mushroom_avoid"
+      ]
+    },
+    "gambling_lover": {
+      "name": "ギャンブル好き",
+      "type": "negative",
+      "description": "探索中の詐欺師の賭けに乗る",
+      "eventEffects": [
+        "gambler_accept"
+      ]
+    },
+    "weapon_indifferent": {
+      "name": "武具に無関心",
+      "type": "positive",
+      "description": "探索中の鍛冶師を断る",
+      "eventEffects": [
+        "blacksmith_refuse"
+      ]
+    },
+    "knowledge_poor": {
+      "name": "知識が乏しい",
+      "type": "negative",
+      "description": "探索中のスフィンクスの問題を間違える",
+      "eventEffects": [
+        "sphinx_wrong"
+      ]
+    },
+    "philanthropist": {
+      "name": "博愛主義",
+      "type": "positive",
+      "description": "探索中の友好的なモンスターに友好的に対応する",
+      "eventEffects": [
+        "friendly_monster_peaceful"
+      ]
+    },
+    "loud_footsteps": {
+      "name": "足音が大きい",
+      "type": "negative",
+      "description": "探索中の敵の大群に見つかる",
+      "eventEffects": [
+        "enemy_horde_detected"
+      ]
+    },
+    "magic_expert": {
+      "name": "魔術に詳しい",
+      "type": "positive",
+      "description": "探索中の魔術式トラップを解除できる",
+      "eventEffects": [
+        "magic_trap_disarm"
+      ]
+    },
+    "negotiation_weak": {
+      "name": "交渉は苦手",
+      "type": "negative",
+      "description": "探索中の行商人との交渉に失敗して値段が2倍になる",
+      "eventEffects": [
+        "merchant_fail"
+      ]
+    },
+    "stealth": {
+      "name": "忍び足",
+      "type": "positive",
+      "description": "探索中の敵の大群に見つからない",
+      "eventEffects": [
+        "enemy_horde_avoid"
+      ]
+    },
+    "magic_unknown": {
+      "name": "魔術を知らない",
+      "type": "negative",
+      "description": "探索中の魔術式トラップを解除できない",
+      "eventEffects": [
+        "magic_trap_fail"
+      ]
+    },
+    "negotiation_expert": {
+      "name": "交渉上手",
+      "type": "positive",
+      "description": "探索中の行商人との交渉に成功して半額になる",
+      "eventEffects": [
+        "merchant_success"
+      ]
+    },
+    "big_appetite": {
+      "name": "食欲旺盛",
+      "type": "negative",
+      "description": "探索中のキノコを食べる",
+      "eventEffects": [
+        "mushroom_eat"
+      ]
+    },
+    "attractive": {
+      "name": "容姿端麗",
+      "type": "positive",
+      "description": "探索中のサキュバスに魅了されない",
+      "eventEffects": [
+        "succubus_resist"
+      ]
+    },
+    "curious": {
+      "name": "好奇心が強い",
+      "type": "negative",
+      "description": "探索中の泉(オアシス)で水を飲む",
+      "eventEffects": [
+        "oasis_drink"
+      ]
+    }
+  },
+  "personalityCancellations": [
+    [
+      "cautious",
+      "curious"
+    ],
+    [
+      "honest",
+      "liar"
+    ],
+    [
+      "temptation_weak",
+      "attractive"
+    ],
+    [
+      "sliding_feet",
+      "obvious_blind"
+    ],
+    [
+      "weapon_interested",
+      "weapon_indifferent"
+    ],
+    [
+      "strong",
+      "weak"
+    ],
+    [
+      "gambling_dislike",
+      "gambling_lover"
+    ],
+    [
+      "belligerent",
+      "philanthropist"
+    ],
+    [
+      "loud_footsteps",
+      "stealth"
+    ],
+    [
+      "knowledgeable",
+      "knowledge_poor"
+    ],
+    [
+      "machine_knowledge",
+      "machine_weak"
+    ],
+    [
+      "nature_love",
+      "nature_uninterested"
+    ],
+    [
+      "light_eater",
+      "big_appetite"
+    ],
+    [
+      "negotiation_expert",
+      "negotiation_weak"
+    ],
+    [
+      "magic_expert",
+      "magic_unknown"
+    ]
+  ],
+  "battlePersonalityEffects": {
+    "note": "※戦闘時に影響する個性効果（数値は仮設定）",
+    "confusionResistanceEffects": {
+      "attractive": {
+        "personalityName": "容姿端麗",
+        "skillId": "attractive",
+        "battleEffect": {
+          "type": "confusionResistance",
+          "value": -15,
+          "description": "混乱状態になる確率が15%減少",
+          "note": "※仮設定値"
+        }
+      },
+      "temptation_weak": {
+        "personalityName": "誘惑に弱い",
+        "skillId": "temptation_weak",
+        "battleEffect": {
+          "type": "confusionVulnerability",
+          "value": 15,
+          "description": "混乱状態になる確率が15%増加",
+          "note": "※仮設定値"
+        }
+      }
+    }
+  }
+}

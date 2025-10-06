@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-07-14",
+  "recipes": [
+    {
+      "parentItemId": "sword_basic",
+      "childItemId": "magic_stone",
+      "resultItemId": "magic_sword"
+    },
+    {
+      "parentItemId": "sword_basic",
+      "childItemId": "steel_ingot",
+      "resultItemId": "steel_sword"
+    },
+    {
+      "parentItemId": "shield_basic",
+      "childItemId": "magic_stone",
+      "resultItemId": "magic_shield"
+    },
+    {
+      "parentItemId": "armor_basic",
+      "childItemId": "dragon_scale",
+      "resultItemId": "dragon_mail"
+    },
+    {
+      "parentItemId": "staff_basic",
+      "childItemId": "sage_stone",
+      "resultItemId": "sage_staff"
+    },
+    {
+      "parentItemId": "magic_sword",
+      "childItemId": "dark_crystal",
+      "resultItemId": "chaos_sword"
+    },
+    {
+      "parentItemId": "armor_basic",
+      "childItemId": "holy_crystal",
+      "resultItemId": "holy_armor"
+    },
+    {
+      "parentItemId": "bow_basic",
+      "childItemId": "elemental_gem",
+      "resultItemId": "elemental_bow"
+    }
+  ]
+}

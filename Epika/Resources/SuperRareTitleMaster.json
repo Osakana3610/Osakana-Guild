@@ -1,0 +1,105 @@
+{
+  "superRareTitles": [
+    {
+      "id": "godlike",
+      "name": "神級の",
+      "skills": [
+        "skill.divine_light",
+        "skill.godly_strike"
+      ]
+    },
+    {
+      "id": "celestial",
+      "name": "天界の",
+      "skills": [
+        "skill.angelic_guard"
+      ]
+    },
+    {
+      "id": "demonic_lord",
+      "name": "魔王の",
+      "skills": [
+        "skill.demonic_rage",
+        "skill.hell_fire"
+      ]
+    },
+    {
+      "id": "ancient",
+      "name": "太古の",
+      "skills": [
+        "skill.ancient_wisdom"
+      ]
+    },
+    {
+      "id": "void",
+      "name": "虚無の",
+      "skills": [
+        "skill.void_blast",
+        "skill.shadow_warp"
+      ]
+    },
+    {
+      "id": "eternal",
+      "name": "永遠の",
+      "skills": [
+        "skill.time_loop",
+        "skill.eternal_guard"
+      ]
+    },
+    {
+      "id": "world_breaker",
+      "name": "世界を砕く",
+      "skills": [
+        "skill.world_break"
+      ]
+    },
+    {
+      "id": "omnipotent",
+      "name": "全能の",
+      "skills": [
+        "skill.omniscience",
+        "skill.omnipotence"
+      ]
+    },
+    {
+      "id": "unprecedented",
+      "name": "空前絶後の",
+      "skills": []
+    },
+    {
+      "id": "ultra_raging",
+      "name": "超絶怒涛の",
+      "skills": []
+    },
+    {
+      "id": "flame_emperor",
+      "name": "炎帝の",
+      "skills": []
+    },
+    {
+      "id": "ice_sovereign",
+      "name": "氷皇の",
+      "skills": []
+    },
+    {
+      "id": "storm_king",
+      "name": "嵐王の",
+      "skills": []
+    },
+    {
+      "id": "despair_incarnate",
+      "name": "絶望に満ちた",
+      "skills": []
+    },
+    {
+      "id": "hope_bringer",
+      "name": "希望をもたらす",
+      "skills": []
+    },
+    {
+      "id": "reality_shaper",
+      "name": "現実を編む",
+      "skills": []
+    }
+  ]
+}

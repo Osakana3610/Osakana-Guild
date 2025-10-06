@@ -1,0 +1,329 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "lastUpdated": "2025-07-20",
+    "description": "迷宮内で発生するイベントの定義。各イベントは種類別のペイロードを持つ。",
+    "notes": [
+      "数値は仮設定。実際のバランス調整はランタイムで行う。",
+      "回避率・発生確率は百分率で表記する。",
+      "personalityCondition は今後の個性システム再設計時に拡張予定。"
+    ]
+  },
+  "events": [
+    {
+      "id": "trap.pitfall",
+      "type": "trap",
+      "name": "落とし穴",
+      "description": "隠された落とし穴。落下ダメージを受ける。",
+      "weights": {
+        "default": 1.0
+      },
+      "floorRange": [1, 999],
+      "dungeonTags": ["any"],
+      "trap": {
+        "damage": {
+          "type": "physical",
+          "percentOfMaxHP": 5
+        },
+        "statusEffect": null,
+        "statusChance": 0,
+        "avoidanceRate": 30,
+        "log": "落とし穴に引っかかった。"
+      }
+    },
+    {
+      "id": "trap.poisonNeedle",
+      "type": "trap",
+      "name": "毒針の罠",
+      "description": "毒針が飛び出す罠。毒状態になることがある。",
+      "weights": {
+        "default": 1.0
+      },
+      "floorRange": [1, 999],
+      "dungeonTags": ["any"],
+      "trap": {
+        "damage": {
+          "type": "physical",
+          "percentOfMaxHP": 3
+        },
+        "statusEffect": "status.poison",
+        "statusChance": 50,
+        "avoidanceRate": 40,
+        "log": "毒針の罠に引っかかってしまった。"
+      }
+    },
+    {
+      "id": "trap.explosion",
+      "type": "trap",
+      "name": "爆発の罠",
+      "description": "魔力で炸裂する爆発の罠。",
+      "weights": {
+        "default": 0.8,
+        "tag:magic_tower": 1.2
+      },
+      "floorRange": [5, 999],
+      "dungeonTags": ["any", "magic_tower"],
+      "trap": {
+        "damage": {
+          "type": "magical",
+          "percentOfMaxHP": 8
+        },
+        "statusEffect": null,
+        "statusChance": 0,
+        "avoidanceRate": 20,
+        "log": "爆発の罠を踏み、激しい爆風を浴びた。"
+      }
+    },
+    {
+      "id": "trap.paralysis",
+      "type": "trap",
+      "name": "麻痺の罠",
+      "description": "電撃を放つ罠。麻痺状態になることがある。",
+      "weights": {
+        "default": 1.0
+      },
+      "floorRange": [3, 999],
+      "dungeonTags": ["any"],
+      "trap": {
+        "damage": {
+          "type": "magical",
+          "percentOfMaxHP": 4
+        },
+        "statusEffect": "status.paralysis",
+        "statusChance": 60,
+        "avoidanceRate": 35,
+        "log": "麻痺の罠の電撃を受け、体がしびれてしまった。"
+      }
+    },
+    {
+      "id": "trap.sleepGas",
+      "type": "trap",
+      "name": "睡眠ガスの罠",
+      "description": "催眠ガスを噴出する罠。眠り状態になることがある。",
+      "weights": {
+        "default": 0.9
+      },
+      "floorRange": [6, 999],
+      "dungeonTags": ["any"],
+      "trap": {
+        "damage": {
+          "type": "none",
+          "percentOfMaxHP": 0
+        },
+        "statusEffect": "status.sleep",
+        "statusChance": 70,
+        "avoidanceRate": 25,
+        "log": "睡眠ガスが噴き出し、強烈な眠気に襲われた。"
+      }
+    },
+    {
+      "id": "trap.arrow",
+      "type": "trap",
+      "name": "矢の罠",
+      "description": "壁から矢が飛び出す古典的な罠。",
+      "weights": {
+        "default": 1.2,
+        "tag:ancient_ruins": 1.5
+      },
+      "floorRange": [1, 999],
+      "dungeonTags": ["any", "ancient_ruins"],
+      "trap": {
+        "damage": {
+          "type": "physical",
+          "percentOfMaxHP": 6
+        },
+        "statusEffect": null,
+        "statusChance": 0,
+        "avoidanceRate": 45,
+        "log": "矢の罠を受け、鋭い痛みが走った。"
+      }
+    },
+    {
+      "id": "narrative.oasisFountain",
+      "type": "narrative",
+      "name": "神秘の泉",
+      "description": "乾いた迷宮に現れる神秘的な泉。",
+      "weights": {
+        "default": 0.6,
+        "tag:desert": 1.4
+      },
+      "floorRange": [1, 999],
+      "dungeonTags": ["any", "desert"],
+      "narrative": {
+        "options": [
+          {
+            "id": "drink",
+            "personalityCondition": "trait.curiosity_high",
+            "effects": [
+              { "kind": "hpDeltaPercent", "value": -3 },
+              { "kind": "applyStatus", "statusId": "status.random_minor" }
+            ],
+            "log": "泉の水を飲んだ結果、体調に異変を感じた。"
+          },
+          {
+            "id": "ignore",
+            "personalityCondition": "trait.cautious",
+            "effects": [
+              { "kind": "none" }
+            ],
+            "log": "怪しい泉を警戒し、安全に通過した。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "narrative.goddessFountain",
+      "type": "narrative",
+      "name": "女神の泉",
+      "description": "女神が現れる神聖な泉。",
+      "weights": {
+        "default": 0.2
+      },
+      "floorRange": [10, 999],
+      "dungeonTags": ["any"],
+      "narrative": {
+        "options": [
+          {
+            "id": "honest",
+            "personalityCondition": "trait.honest",
+            "effects": [
+              { "kind": "hpDeltaPercent", "value": 8 },
+              { "kind": "applyStatus", "statusId": "status.goddessBlessing" }
+            ],
+            "log": "正直に答えたことで女神の祝福を受けた。"
+          },
+          {
+            "id": "lie",
+            "personalityCondition": "trait.deceitful",
+            "effects": [
+              { "kind": "hpDeltaPercent", "value": -5 },
+              { "kind": "applyStatus", "statusId": "status.curse" }
+            ],
+            "log": "嘘をついたため女神の怒りを買い、呪いを受けた。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "narrative.succubusEncounter",
+      "type": "narrative",
+      "name": "サキュバスの誘惑",
+      "description": "誘惑を仕掛けてくる魔性の存在。",
+      "weights": {
+        "default": 0.4
+      },
+      "floorRange": [15, 999],
+      "dungeonTags": ["any"],
+      "narrative": {
+        "options": [
+          {
+            "id": "resist",
+            "personalityCondition": "trait.willpower_high",
+            "effects": [
+              { "kind": "none" }
+            ],
+            "log": "誘惑に打ち勝ち、安全に通り抜けた。"
+          },
+          {
+            "id": "fall",
+            "personalityCondition": "trait.temptation_weak",
+            "effects": [
+              { "kind": "hpDeltaPercent", "value": -2 },
+              { "kind": "applyStatus", "statusId": "status.confusionVulnerable" }
+            ],
+            "log": "誘惑に負け、一時的に混乱しやすくなった。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "merchant.wanderingMerchant",
+      "type": "merchant",
+      "name": "行商人との遭遇",
+      "description": "商品を抱えた行商人との取引。",
+      "weights": {
+        "default": 0.5
+      },
+      "floorRange": [5, 999],
+      "dungeonTags": ["any"],
+      "merchant": {
+        "basePriceModifier": 100,
+        "options": [
+          {
+            "id": "negotiate_success",
+            "personalityCondition": "trait.negotiation_master",
+            "priceModifier": 50,
+            "log": "交渉に成功し、商品を半額で購入できた。"
+          },
+          {
+            "id": "negotiate_fail",
+            "personalityCondition": "trait.negotiation_poor",
+            "priceModifier": 200,
+            "log": "交渉に失敗してしまい、通常の2倍の価格で購入する羽目になった。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "battle.enemyHorde",
+      "type": "battle",
+      "name": "敵の大群",
+      "description": "大量の敵に遭遇する危険な状況。",
+      "weights": {
+        "default": 0.7
+      },
+      "floorRange": [10, 999],
+      "dungeonTags": ["any"],
+      "battle": {
+        "encounterType": "elite_wave",
+        "partyModifiers": [
+          {
+            "kind": "status",
+            "statusId": "status.battleExhaustion",
+            "applyAfterBattle": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "resource.mysticMushroom",
+      "type": "resource",
+      "name": "謎のキノコ",
+      "description": "正体不明のキノコを見つけた。",
+      "weights": {
+        "default": 0.5,
+        "tag:forest": 1.3
+      },
+      "floorRange": [2, 999],
+      "dungeonTags": ["any", "forest"],
+      "resource": {
+        "yield": [
+          {
+            "itemId": "item.mysticMushroom",
+            "quantity": 1,
+            "chance": 80
+          }
+        ],
+        "options": [
+          {
+            "id": "harvest_safely",
+            "personalityCondition": "trait.cautious",
+            "effects": [
+              { "kind": "gainItem", "itemId": "item.mysticMushroom", "quantity": 1 }
+            ],
+            "log": "慎重にキノコを採取し、安全に持ち帰った。"
+          },
+          {
+            "id": "eat_on_spot",
+            "personalityCondition": "trait.big_appetite",
+            "effects": [
+              { "kind": "hpDeltaPercent", "value": -4 },
+              { "kind": "applyStatus", "statusId": "status.random_minor" }
+            ],
+            "log": "その場で食べたところ、強烈な毒にあたってしまった。"
+          }
+        ]
+      }
+    }
+  ]
+}

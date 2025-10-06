@@ -1,0 +1,326 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-07-19",
+  "jobs": [
+    {
+      "id": "warrior",
+      "name": "戦士",
+      "category": "frontline",
+      "growthTendency": "HP高、防御高",
+      "combatCoefficients": {
+        "maxHP": 1.78,
+        "physicalAttack": 1.03,
+        "hitRate": 1.0,
+        "attackCount": 0.89,
+        "criticalRate": 0.83,
+        "physicalDefense": 1.41,
+        "evasionRate": 0.5,
+        "magicalAttack": 0.64,
+        "magicalHealing": 0.79,
+        "magicalDefense": 1.15,
+        "trapRemoval": 0.81
+      },
+      "skills": []
+    },
+    {
+      "id": "swordsman",
+      "name": "剣士",
+      "category": "frontline",
+      "growthTendency": "攻撃高、命中高",
+      "combatCoefficients": {
+        "maxHP": 1.26,
+        "physicalAttack": 1.19,
+        "hitRate": 1.51,
+        "attackCount": 1.15,
+        "criticalRate": 0.77,
+        "physicalDefense": 1.21,
+        "evasionRate": 1.07,
+        "magicalAttack": 0.66,
+        "magicalHealing": 0.71,
+        "magicalDefense": 0.57,
+        "trapRemoval": 0.81
+      },
+      "skills": []
+    },
+    {
+      "id": "thief",
+      "name": "盗賊",
+      "category": "midline",
+      "growthTendency": "敏捷高、運高",
+      "combatCoefficients": {
+        "maxHP": 0.67,
+        "physicalAttack": 0.83,
+        "hitRate": 1.31,
+        "attackCount": 1.22,
+        "criticalRate": 1.51,
+        "physicalDefense": 0.6,
+        "evasionRate": 1.54,
+        "magicalAttack": 0.68,
+        "magicalHealing": 0.75,
+        "magicalDefense": 0.59,
+        "trapRemoval": 1.94
+      },
+      "skills": []
+    },
+    {
+      "id": "assassin",
+      "name": "暗殺者",
+      "category": "midline",
+      "growthTendency": "会心特化",
+      "combatCoefficients": {
+        "maxHP": 0.73,
+        "physicalAttack": 0.97,
+        "hitRate": 0.97,
+        "attackCount": 0.91,
+        "criticalRate": 1.01,
+        "physicalDefense": 0.59,
+        "evasionRate": 1.25,
+        "magicalAttack": 0.61,
+        "magicalHealing": 0.76,
+        "magicalDefense": 0.38,
+        "trapRemoval": 1.57
+      },
+      "skills": []
+    },
+    {
+      "id": "jester",
+      "name": "道化師",
+      "category": "backline",
+      "growthTendency": "ランダム効果",
+      "combatCoefficients": {
+        "maxHP": 0.82,
+        "physicalAttack": 0.8,
+        "hitRate": 0.8,
+        "attackCount": 0.83,
+        "criticalRate": 0.51,
+        "physicalDefense": 0.82,
+        "evasionRate": 0.82,
+        "magicalAttack": 0.76,
+        "magicalHealing": 0.82,
+        "magicalDefense": 0.82,
+        "trapRemoval": 1.02
+      },
+      "skills": []
+    },
+    {
+      "id": "priest",
+      "name": "僧侶",
+      "category": "backline",
+      "growthTendency": "精神高、魔法回復量高",
+      "combatCoefficients": {
+        "maxHP": 0.43,
+        "physicalAttack": 0.72,
+        "hitRate": 0.38,
+        "attackCount": 0.93,
+        "criticalRate": 0.82,
+        "physicalDefense": 0.83,
+        "evasionRate": 0.51,
+        "magicalAttack": 1.01,
+        "magicalHealing": 1.99,
+        "magicalDefense": 1.63,
+        "trapRemoval": 0.82
+      },
+      "skills": []
+    },
+    {
+      "id": "mage",
+      "name": "魔法使い",
+      "category": "backline",
+      "growthTendency": "知恵特化",
+      "combatCoefficients": {
+        "maxHP": 0.33,
+        "physicalAttack": 0.33,
+        "hitRate": 0.68,
+        "attackCount": 0.68,
+        "criticalRate": 0.79,
+        "physicalDefense": 0.14,
+        "evasionRate": 1.07,
+        "magicalAttack": 1.78,
+        "magicalHealing": 0.8,
+        "magicalDefense": 1.08,
+        "trapRemoval": 0.81
+      },
+      "skills": []
+    },
+    {
+      "id": "hunter",
+      "name": "狩人",
+      "category": "midline",
+      "growthTendency": "命中高、敏捷高",
+      "combatCoefficients": {
+        "maxHP": 1.03,
+        "physicalAttack": 1.02,
+        "hitRate": 0.67,
+        "attackCount": 1.59,
+        "criticalRate": 1.6,
+        "physicalDefense": 0.81,
+        "evasionRate": 1.08,
+        "magicalAttack": 0.92,
+        "magicalHealing": 0.69,
+        "magicalDefense": 0.57,
+        "trapRemoval": 1.06
+      },
+      "skills": []
+    },
+    {
+      "id": "monk",
+      "name": "修道者",
+      "category": "frontline",
+      "growthTendency": "精神高、体力高",
+      "combatCoefficients": {
+        "maxHP": 0.89,
+        "physicalAttack": 0.85,
+        "hitRate": 0.7,
+        "attackCount": 0.86,
+        "criticalRate": 0.8,
+        "physicalDefense": 1.06,
+        "evasionRate": 1.04,
+        "magicalAttack": 1.12,
+        "magicalHealing": 1.02,
+        "magicalDefense": 1.13,
+        "trapRemoval": 0.84
+      },
+      "skills": []
+    },
+    {
+      "id": "samurai",
+      "name": "侍",
+      "category": "frontline",
+      "growthTendency": "攻撃高、会心高",
+      "combatCoefficients": {
+        "maxHP": 1.01,
+        "physicalAttack": 2.09,
+        "hitRate": 0.95,
+        "attackCount": 0.15,
+        "criticalRate": 0.82,
+        "physicalDefense": 0.79,
+        "evasionRate": 0.74,
+        "magicalAttack": 0.76,
+        "magicalHealing": 0.78,
+        "magicalDefense": 0.55,
+        "trapRemoval": 0.77
+      },
+      "skills": []
+    },
+    {
+      "id": "sword_master",
+      "name": "剣聖",
+      "category": "frontline",
+      "growthTendency": "バランス成長",
+      "combatCoefficients": {
+        "maxHP": 1.21,
+        "physicalAttack": 0.96,
+        "hitRate": 1.68,
+        "attackCount": 1.17,
+        "criticalRate": 0.82,
+        "physicalDefense": 1.25,
+        "evasionRate": 1.31,
+        "magicalAttack": 0.74,
+        "magicalHealing": 0.73,
+        "magicalDefense": 0.59,
+        "trapRemoval": 0.8
+      },
+      "skills": []
+    },
+    {
+      "id": "mystic_swordsman",
+      "name": "秘法剣士",
+      "category": "midline",
+      "growthTendency": "攻撃・魔法両立",
+      "combatCoefficients": {
+        "maxHP": 1.23,
+        "physicalAttack": 1.03,
+        "hitRate": 1.14,
+        "attackCount": 0.87,
+        "criticalRate": 0.83,
+        "physicalDefense": 1.29,
+        "evasionRate": 1.06,
+        "magicalAttack": 1.36,
+        "magicalHealing": 1.28,
+        "magicalDefense": 1.16,
+        "trapRemoval": 0.81
+      },
+      "skills": []
+    },
+    {
+      "id": "sage",
+      "name": "賢者",
+      "category": "backline",
+      "growthTendency": "知恵高、全魔法",
+      "combatCoefficients": {
+        "maxHP": 0.9,
+        "physicalAttack": 0.83,
+        "hitRate": 0.9,
+        "attackCount": 0.92,
+        "criticalRate": 0.78,
+        "physicalDefense": 1.02,
+        "evasionRate": 0.81,
+        "magicalAttack": 1.62,
+        "magicalHealing": 1.46,
+        "magicalDefense": 1.74,
+        "trapRemoval": 1.49
+      },
+      "skills": []
+    },
+    {
+      "id": "ninja",
+      "name": "忍者",
+      "category": "midline",
+      "growthTendency": "バランス成長",
+      "combatCoefficients": {
+        "maxHP": 0.78,
+        "physicalAttack": 1.04,
+        "hitRate": 1.37,
+        "attackCount": 1.16,
+        "criticalRate": 1.87,
+        "physicalDefense": 1.01,
+        "evasionRate": 1.89,
+        "magicalAttack": 0.98,
+        "magicalHealing": 0.7,
+        "magicalDefense": 1.11,
+        "trapRemoval": 1.42
+      },
+      "skills": []
+    },
+    {
+      "id": "lord",
+      "name": "君主",
+      "category": "frontline",
+      "growthTendency": "HP高、全体強化",
+      "combatCoefficients": {
+        "maxHP": 1.43,
+        "physicalAttack": 1.08,
+        "hitRate": 1.0,
+        "attackCount": 0.74,
+        "criticalRate": 0.82,
+        "physicalDefense": 1.69,
+        "evasionRate": 0.51,
+        "magicalAttack": 0.5,
+        "magicalHealing": 1.2,
+        "magicalDefense": 1.13,
+        "trapRemoval": 0.82
+      },
+      "skills": []
+    },
+    {
+      "id": "royal_line",
+      "name": "ロイヤルライン",
+      "category": "frontline",
+      "growthTendency": "王族専用スキル",
+      "combatCoefficients": {
+        "maxHP": 0.94,
+        "physicalAttack": 0.85,
+        "hitRate": 0.7,
+        "attackCount": 1.69,
+        "criticalRate": 0.8,
+        "physicalDefense": 1.0,
+        "evasionRate": 1.01,
+        "magicalAttack": 1.19,
+        "magicalHealing": 0.97,
+        "magicalDefense": 1.11,
+        "trapRemoval": 0.8
+      },
+      "skills": []
+    }
+  ]
+}

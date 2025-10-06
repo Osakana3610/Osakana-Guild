@@ -1,0 +1,607 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 90;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		07A1994969F446429DA66E64 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CF83C67A78994703BBDDB6F8 /* AppIntents.framework */; };
+		B004091A2E3023B700D5C0E4 /* NTPClient in Frameworks */ = {isa = PBXBuildFile; productRef = B00409192E3023B700D5C0E4 /* NTPClient */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B0E9F1EA2E254D660010C564 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B0E9F1CD2E254D650010C564 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B0E9F1D42E254D650010C564;
+			remoteInfo = Epika;
+		};
+		B0E9F1F42E254D660010C564 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B0E9F1CD2E254D650010C564 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B0E9F1D42E254D650010C564;
+			remoteInfo = Epika;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		B0E9F1D52E254D650010C564 /* Epika.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Epika.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0E9F1E92E254D660010C564 /* EpikaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EpikaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0E9F1F32E254D660010C564 /* EpikaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EpikaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF83C67A78994703BBDDB6F8 /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B0E9F1FB2E254D660010C564 /* Exceptions for "Epika" folder in "Epika" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = B0E9F1D42E254D650010C564 /* Epika */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		B0E9F1D72E254D650010C564 /* Epika */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B0E9F1FB2E254D660010C564 /* Exceptions for "Epika" folder in "Epika" target */,
+			);
+			path = Epika;
+			sourceTree = "<group>";
+		};
+		B0E9F1EC2E254D660010C564 /* EpikaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EpikaTests;
+			sourceTree = "<group>";
+		};
+		B0E9F1F62E254D660010C564 /* EpikaUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EpikaUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B0E9F1D22E254D650010C564 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				B004091A2E3023B700D5C0E4 /* NTPClient in Frameworks */,
+				07A1994969F446429DA66E64 /* AppIntents.framework in Frameworks */,
+			);
+		};
+		B0E9F1E62E254D660010C564 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		B0E9F1F02E254D660010C564 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B0E9F1CC2E254D650010C564 = {
+			isa = PBXGroup;
+			children = (
+				CF83C67A78994703BBDDB6F8 /* AppIntents.framework */,
+				B0E9F1D72E254D650010C564 /* Epika */,
+				B0E9F1EC2E254D660010C564 /* EpikaTests */,
+				B0E9F1F62E254D660010C564 /* EpikaUITests */,
+				B0E9F1D62E254D650010C564 /* Products */,
+			);
+			sourceTree = "<group>";
+			wrapsLines = 0;
+		};
+		B0E9F1D62E254D650010C564 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B0E9F1D52E254D650010C564 /* Epika.app */,
+				B0E9F1E92E254D660010C564 /* EpikaTests.xctest */,
+				B0E9F1F32E254D660010C564 /* EpikaUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B0E9F1D42E254D650010C564 /* Epika */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0E9F1FC2E254D660010C564 /* Build configuration list for PBXNativeTarget "Epika" */;
+			buildPhases = (
+				B0E9F1D12E254D650010C564 /* Sources */,
+				B0E9F1D22E254D650010C564 /* Frameworks */,
+				B0E9F1D32E254D650010C564 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				B0E9F1D72E254D650010C564 /* Epika */,
+			);
+			name = Epika;
+			packageProductDependencies = (
+				B00409192E3023B700D5C0E4 /* NTPClient */,
+			);
+			productName = Epika;
+			productReference = B0E9F1D52E254D650010C564 /* Epika.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B0E9F1E82E254D660010C564 /* EpikaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0E9F2012E254D660010C564 /* Build configuration list for PBXNativeTarget "EpikaTests" */;
+			buildPhases = (
+				B0E9F1E52E254D660010C564 /* Sources */,
+				B0E9F1E62E254D660010C564 /* Frameworks */,
+				B0E9F1E72E254D660010C564 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B0E9F1EB2E254D660010C564 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B0E9F1EC2E254D660010C564 /* EpikaTests */,
+			);
+			name = EpikaTests;
+			productName = EpikaTests;
+			productReference = B0E9F1E92E254D660010C564 /* EpikaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B0E9F1F22E254D660010C564 /* EpikaUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0E9F2042E254D660010C564 /* Build configuration list for PBXNativeTarget "EpikaUITests" */;
+			buildPhases = (
+				B0E9F1EF2E254D660010C564 /* Sources */,
+				B0E9F1F02E254D660010C564 /* Frameworks */,
+				B0E9F1F12E254D660010C564 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B0E9F1F52E254D660010C564 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B0E9F1F62E254D660010C564 /* EpikaUITests */,
+			);
+			name = EpikaUITests;
+			productName = EpikaUITests;
+			productReference = B0E9F1F32E254D660010C564 /* EpikaUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B0E9F1CD2E254D650010C564 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1610;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					B0E9F1D42E254D650010C564 = {
+						CreatedOnToolsVersion = 16.1;
+					};
+					B0E9F1E82E254D660010C564 = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = B0E9F1D42E254D650010C564;
+					};
+					B0E9F1F22E254D660010C564 = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = B0E9F1D42E254D650010C564;
+					};
+				};
+			};
+			buildConfigurationList = B0E9F1D02E254D650010C564 /* Build configuration list for PBXProject "Epika" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B0E9F1CC2E254D650010C564;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B00409182E3023B700D5C0E4 /* XCRemoteSwiftPackageReference "swift-ntp" */,
+			);
+			preferredProjectObjectVersion = 90;
+			productRefGroup = B0E9F1D62E254D650010C564 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B0E9F1D42E254D650010C564 /* Epika */,
+				B0E9F1E82E254D660010C564 /* EpikaTests */,
+				B0E9F1F22E254D660010C564 /* EpikaUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B0E9F1D32E254D650010C564 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		B0E9F1E72E254D660010C564 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		B0E9F1F12E254D660010C564 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B0E9F1D12E254D650010C564 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		B0E9F1E52E254D660010C564 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		B0E9F1EF2E254D660010C564 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B0E9F1EB2E254D660010C564 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B0E9F1D42E254D650010C564 /* Epika */;
+			targetProxy = B0E9F1EA2E254D660010C564 /* PBXContainerItemProxy */;
+		};
+		B0E9F1F52E254D660010C564 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B0E9F1D42E254D650010C564 /* Epika */;
+			targetProxy = B0E9F1F42E254D660010C564 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		B0E9F1FD2E254D660010C564 /* Debug configuration for PBXNativeTarget "Epika" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Osakana;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Epika/Epika.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 060;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 77XDTPVZ5W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_APP_INTENTS_METADATA = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Epika/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "おさかなギルド";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.role-playing-games";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.6;
+				PRODUCT_BUNDLE_IDENTIFIER = me.fishnchips.Epika;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_APP_INTENTS_METADATA = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B0E9F1FE2E254D660010C564 /* Release configuration for PBXNativeTarget "Epika" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Osakana;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Epika/Epika.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 060;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 77XDTPVZ5W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_APP_INTENTS_METADATA = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Epika/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "おさかなギルド";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.role-playing-games";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.6;
+				PRODUCT_BUNDLE_IDENTIFIER = me.fishnchips.Epika;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_APP_INTENTS_METADATA = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B0E9F1FF2E254D660010C564 /* Debug configuration for PBXProject "Epika" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 77XDTPVZ5W;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		B0E9F2002E254D660010C564 /* Release configuration for PBXProject "Epika" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 77XDTPVZ5W;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B0E9F2022E254D660010C564 /* Debug configuration for PBXNativeTarget "EpikaTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 77XDTPVZ5W;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.fishnchips.EpikaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Epika.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Epika";
+			};
+			name = Debug;
+		};
+		B0E9F2032E254D660010C564 /* Release configuration for PBXNativeTarget "EpikaTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 77XDTPVZ5W;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.fishnchips.EpikaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Epika.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Epika";
+			};
+			name = Release;
+		};
+		B0E9F2052E254D660010C564 /* Debug configuration for PBXNativeTarget "EpikaUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.fishnchips.EpikaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Epika;
+			};
+			name = Debug;
+		};
+		B0E9F2062E254D660010C564 /* Release configuration for PBXNativeTarget "EpikaUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.fishnchips.EpikaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Epika;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B0E9F1D02E254D650010C564 /* Build configuration list for PBXProject "Epika" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0E9F1FF2E254D660010C564 /* Debug configuration for PBXProject "Epika" */,
+				B0E9F2002E254D660010C564 /* Release configuration for PBXProject "Epika" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		B0E9F1FC2E254D660010C564 /* Build configuration list for PBXNativeTarget "Epika" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0E9F1FD2E254D660010C564 /* Debug configuration for PBXNativeTarget "Epika" */,
+				B0E9F1FE2E254D660010C564 /* Release configuration for PBXNativeTarget "Epika" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		B0E9F2012E254D660010C564 /* Build configuration list for PBXNativeTarget "EpikaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0E9F2022E254D660010C564 /* Debug configuration for PBXNativeTarget "EpikaTests" */,
+				B0E9F2032E254D660010C564 /* Release configuration for PBXNativeTarget "EpikaTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		B0E9F2042E254D660010C564 /* Build configuration list for PBXNativeTarget "EpikaUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0E9F2052E254D660010C564 /* Debug configuration for PBXNativeTarget "EpikaUITests" */,
+				B0E9F2062E254D660010C564 /* Release configuration for PBXNativeTarget "EpikaUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B00409182E3023B700D5C0E4 /* XCRemoteSwiftPackageReference "swift-ntp" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-ntp";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B00409192E3023B700D5C0E4 /* NTPClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B00409182E3023B700D5C0E4 /* XCRemoteSwiftPackageReference "swift-ntp" */;
+			productName = NTPClient;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = B0E9F1CD2E254D650010C564 /* Project object */;
+}
