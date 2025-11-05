@@ -224,103 +224,18 @@ private struct SkillEffectAggregator {
         var cap: Double? = nil
     }
 
-    struct DamageMitigation {
-        var physical: Double = 0.0
-        var magical: Double = 0.0
-        var breath: Double = 0.0
-
-        mutating func add(type: String, value: Double) {
-            switch type {
-            case "physical": physical += value
-            case "magical": magical += value
-            case "breath": breath += value
-            default: break
-            }
-        }
-    }
-
     let talents: TalentModifiers
     let passives: PassiveMultipliers
     let additives: AdditiveBonuses
     let critical: CriticalParameters
-    let mitigation: DamageMitigation
     let martialBonuses: MartialBonuses
 
     init(skills: [SkillDefinition]) {
-        var talents = TalentModifiers()
-        var passives = PassiveMultipliers()
-        var additives = AdditiveBonuses()
-        var critical = CriticalParameters()
-        var mitigation = DamageMitigation()
-        var martial = MartialBonuses()
-
-        for skill in skills {
-            for effect in skill.effects {
-                switch effect.kind {
-                case "baseTalent":
-                    if let stat = CombatStatKey(effect.statType),
-                       let value = SkillEffectAggregator.multiplierValue(from: effect) {
-                        talents.applyTalent(stat: stat, value: value)
-                    }
-                case "baseIncompetence":
-                    if let stat = CombatStatKey(effect.statType),
-                       let value = SkillEffectAggregator.multiplierValue(from: effect) {
-                        talents.applyIncompetence(stat: stat, value: value)
-                    }
-                case "statMultiplier":
-                    if let stat = CombatStatKey(effect.statType),
-                       let value = SkillEffectAggregator.multiplierValue(from: effect) {
-                        passives.multiply(stat: stat, value: value)
-                    }
-                case "attackPowerMultiplier":
-                    if let value = SkillEffectAggregator.multiplierValue(from: effect) {
-                        passives.multiply(stat: .physicalAttack, value: value)
-                    }
-                case "attackPowerModifier":
-                    if let value = SkillEffectAggregator.additiveValue(from: effect) {
-                        additives.add(stat: .physicalAttack, value: value)
-                    }
-                case "magicalPowerModifier":
-                    if let value = SkillEffectAggregator.additiveValue(from: effect) {
-                        additives.add(stat: .magicalAttack, value: value)
-                    }
-                case "martialArts":
-                    if let value = SkillEffectAggregator.additiveValue(from: effect) {
-                        martial.percent += value
-                    }
-                case "martialArtsMultiplier":
-                    if let value = SkillEffectAggregator.multiplierValue(from: effect) {
-                        martial.multiplier *= value
-                    }
-                case "criticalRateBoost", "criticalRateModifier":
-                    if let value = SkillEffectAggregator.additiveValue(from: effect) {
-                        critical.flatBonus += value
-                    }
-                case "criticalRateMax":
-                    if let value = SkillEffectAggregator.additiveValue(from: effect) {
-                        if let current = critical.cap {
-                            critical.cap = min(current, value)
-                        } else {
-                            critical.cap = value
-                        }
-                    }
-                case "damageReduction":
-                    if let type = effect.damageType,
-                       let value = SkillEffectAggregator.percentValue(from: effect) {
-                        mitigation.add(type: type, value: value)
-                    }
-                default:
-                    continue
-                }
-            }
-        }
-
-        self.talents = talents
-        self.passives = passives
-        self.additives = additives
-        self.critical = critical
-        self.mitigation = mitigation
-        self.martialBonuses = martial
+        self.talents = TalentModifiers()
+        self.passives = PassiveMultipliers()
+        self.additives = AdditiveBonuses()
+        self.critical = CriticalParameters()
+        self.martialBonuses = MartialBonuses()
     }
 
     struct MartialBonuses {
@@ -328,23 +243,6 @@ private struct SkillEffectAggregator {
         var multiplier: Double = 1.0
     }
 
-    private static func multiplierValue(from effect: SkillDefinition.Effect) -> Double? {
-        if let value = effect.value { return value }
-        if let percent = effect.valuePercent { return 1.0 + percent / 100.0 }
-        return nil
-    }
-
-    private static func additiveValue(from effect: SkillDefinition.Effect) -> Double? {
-        if let value = effect.value { return value }
-        if let percent = effect.valuePercent { return percent }
-        return nil
-    }
-
-    private static func percentValue(from effect: SkillDefinition.Effect) -> Double? {
-        if let value = effect.value { return value }
-        if let percent = effect.valuePercent { return percent }
-        return nil
-    }
 }
 
 // MARK: - Combat Calculation
