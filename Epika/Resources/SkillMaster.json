@@ -4278,6 +4278,135 @@
         ]
       },
       {
+        "familyId": "statMultiplier.maxHP",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "stat": "maxHP"
+        },
+        "variants": [
+          {
+            "id": "statMultiplier.maxHP.0_1",
+            "label": "[×0.10] 最大HP倍率",
+            "value": {
+              "multiplier": 0.1
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.0_2",
+            "label": "[×0.20] 最大HP倍率",
+            "value": {
+              "multiplier": 0.2
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.0_5",
+            "label": "[×0.50] 最大HP倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.0_666667",
+            "label": "[×0.67] 最大HP倍率",
+            "value": {
+              "multiplier": 0.666667
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_2",
+            "label": "[×1.20] 最大HP倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statMultiplier.physicalAttack",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "stat": "physicalAttack"
+        },
+        "variants": [
+          {
+            "id": "statMultiplier.physicalAttack.0_5",
+            "label": "[×0.50] 攻撃力倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.physicalAttack.2",
+            "label": "[×2.00] 攻撃力倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statMultiplier.hitRate",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "stat": "hitRate"
+        },
+        "variants": [
+          {
+            "id": "statMultiplier.hitRate.0_5",
+            "label": "[×0.50] 命中精度倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.hitRate.1_6",
+            "label": "[×1.60] 命中精度倍率",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "statMultiplier.hitRate.2",
+            "label": "[×2.00] 命中精度倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statMultiplier.magicalAttack",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "stat": "magicalAttack"
+        },
+        "variants": [
+          {
+            "id": "statMultiplier.magicalAttack.0_5",
+            "label": "[×0.50] 魔法攻撃力倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statMultiplier.magicalHealing",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "stat": "magicalHealing"
+        },
+        "variants": [
+          {
+            "id": "statMultiplier.magicalHealing.0_5",
+            "label": "[×0.50] 魔法回復量倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          }
+        ]
+      },
+      {
         "familyId": "attackCount.additive",
         "effectType": "attackCountAdditive",
         "variants": [

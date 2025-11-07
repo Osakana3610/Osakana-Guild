@@ -56,9 +56,11 @@ struct CombatStatCalculator {
                                              critical: skillEffects.critical,
                                              equipment: context.progress.equippedItems,
                                              itemDefinitions: context.state.loadout.items,
-                                             martial: skillEffects.martialBonuses)
+                                             martial: skillEffects.martialBonuses,
+                                             growthMultiplier: skillEffects.growthMultiplier,
+                                             statConversions: skillEffects.statConversions)
 
-        var combat = combatResult.makeCombat()
+        var combat = try combatResult.makeCombat()
         // 結果の切り捨て
         combat = combatResult.applyTwentyOneBonuses(to: combat, attributes: attributes)
         combat = combatResult.clampCombat(combat)
@@ -222,6 +224,9 @@ private struct SkillEffectAggregator {
     struct CriticalParameters {
         var flatBonus: Double = 0.0
         var cap: Double? = nil
+        var capDelta: Double = 0.0
+        var damagePercent: Double = 0.0
+        var damageMultiplier: Double = 1.0
     }
 
     let talents: TalentModifiers
@@ -229,13 +234,17 @@ private struct SkillEffectAggregator {
     let additives: AdditiveBonuses
     let critical: CriticalParameters
     let martialBonuses: MartialBonuses
+    let growthMultiplier: Double
+    let statConversions: [CombatStatKey: [StatConversion]]
 
     init(skills: [SkillDefinition]) {
-        var talents = TalentModifiers()
+        let talents = TalentModifiers()
         var passives = PassiveMultipliers()
         var additives = AdditiveBonuses()
         var critical = CriticalParameters()
         let martial = MartialBonuses()
+        var growthMultiplierProduct: Double = 1.0
+        var conversions: [CombatStatKey: [StatConversion]] = [:]
 
         for skill in skills {
             for effect in skill.effects {
@@ -249,17 +258,63 @@ private struct SkillEffectAggregator {
                     if let value = payload.value["multiplier"] {
                         passives.multiply(stat: .additionalDamage, value: value)
                     }
+                case "statAdditive":
+                    if let statKey = CombatStatKey(payload.parameters?["stat"]),
+                       let additive = payload.value["additive"] {
+                        additives.add(stat: statKey, value: additive)
+                    }
+                case "statMultiplier":
+                    if let statKey = CombatStatKey(payload.parameters?["stat"]),
+                       let multiplier = payload.value["multiplier"] {
+                        passives.multiply(stat: statKey, value: multiplier)
+                    }
+                case "attackCountAdditive":
+                    if let additive = payload.value["additive"] {
+                        additives.add(stat: .attackCount, value: additive)
+                    }
+                case "growthMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        growthMultiplierProduct *= multiplier
+                    }
+                case "attackCountMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        passives.multiply(stat: .attackCount, value: multiplier)
+                    }
+                case "statConversionPercent":
+                    guard let sourceKey = CombatStatKey(payload.parameters?["sourceStat"]),
+                          let targetKey = CombatStatKey(payload.parameters?["targetStat"]),
+                          let percent = payload.value["valuePercent"] else { continue }
+                    let entry = StatConversion(source: sourceKey, ratio: percent / 100.0)
+                    conversions[targetKey, default: []].append(entry)
+                case "statConversionLinear":
+                    guard let sourceKey = CombatStatKey(payload.parameters?["sourceStat"]),
+                          let targetKey = CombatStatKey(payload.parameters?["targetStat"]),
+                          let ratio = payload.value["valuePerUnit"] ?? payload.value["valuePerCount"] else { continue }
+                    let entry = StatConversion(source: sourceKey, ratio: ratio)
+                    conversions[targetKey, default: []].append(entry)
                 case "criticalRateAdditive":
                     if let points = payload.value["points"] {
                         critical.flatBonus += points
                     }
-                case "criticalRateCap":
-                    if let cap = payload.value["cap"] {
+                case "criticalRateCap", "criticalRateMaxAbsolute":
+                    if let cap = payload.value["cap"] ?? payload.value["maxPercent"] {
                         if let current = critical.cap {
                             critical.cap = min(current, cap)
                         } else {
                             critical.cap = cap
                         }
+                    }
+                case "criticalRateMaxDelta":
+                    if let delta = payload.value["deltaPercent"] {
+                        critical.capDelta += delta
+                    }
+                case "criticalDamagePercent":
+                    if let value = payload.value["valuePercent"] {
+                        critical.damagePercent += value
+                    }
+                case "criticalDamageMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        critical.damageMultiplier *= multiplier
                     }
                 default:
                     continue
@@ -272,11 +327,18 @@ private struct SkillEffectAggregator {
         self.additives = additives
         self.critical = critical
         self.martialBonuses = martial
+        self.growthMultiplier = growthMultiplierProduct
+        self.statConversions = conversions
     }
 
     struct MartialBonuses {
         var percent: Double = 0.0
         var multiplier: Double = 1.0
+    }
+
+    struct StatConversion: Sendable {
+        let source: CombatStatKey
+        let ratio: Double
     }
 
 }
@@ -317,6 +379,8 @@ private struct CombatAccumulator {
     private let equipment: [RuntimeCharacterProgress.EquippedItem]
     private let itemDefinitions: [ItemDefinition]
     private let martialBonuses: SkillEffectAggregator.MartialBonuses
+    private let growthMultiplier: Double
+    private let statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
     init(progress: RuntimeCharacterProgress,
@@ -329,7 +393,9 @@ private struct CombatAccumulator {
          critical: SkillEffectAggregator.CriticalParameters,
          equipment: [RuntimeCharacterProgress.EquippedItem],
          itemDefinitions: [ItemDefinition],
-         martial: SkillEffectAggregator.MartialBonuses) {
+         martial: SkillEffectAggregator.MartialBonuses,
+         growthMultiplier: Double,
+         statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]) {
         self.progress = progress
         self.attributes = attributes
         self.race = race
@@ -341,14 +407,17 @@ private struct CombatAccumulator {
         self.equipment = equipment
         self.itemDefinitions = itemDefinitions
         self.martialBonuses = martial
+        self.growthMultiplier = growthMultiplier
+        self.statConversions = statConversions
         self.hasPositivePhysicalAttackEquipment = CombatAccumulator.containsPositivePhysicalAttack(equipment: equipment,
                                                                                                    definitions: itemDefinitions)
     }
 
-    func makeCombat() -> RuntimeCharacterProgress.Combat {
-        let levelFactor = CombatFormulas.levelDependentValue(raceId: progress.raceId,
-                                                             raceCategory: race.category,
-                                                             level: progress.level)
+    func makeCombat() throws -> RuntimeCharacterProgress.Combat {
+        let baseLevelFactor = CombatFormulas.levelDependentValue(raceId: progress.raceId,
+                                                                 raceCategory: race.category,
+                                                                 level: progress.level)
+        let levelFactor = baseLevelFactor * growthMultiplier
         let coefficients = JobCoefficientLookup(definition: job)
         let vitality = Double(attributes.vitality)
         let strength = Double(attributes.strength)
@@ -356,14 +425,14 @@ private struct CombatAccumulator {
         let spirit = Double(attributes.spirit)
         let agility = Double(attributes.agility)
         let luck = Double(attributes.luck)
+        var stats: [CombatStatKey: Double] = [:]
 
-        // 最大HP
         let hpBase = vitality * (1.0 + levelFactor * coefficients.value(for: .maxHP))
         var maxHP = hpBase * talents.multiplier(for: .maxHP) * CombatFormulas.maxHPCoefficient
         maxHP *= passives.multiplier(for: .maxHP)
         maxHP += additives.value(for: .maxHP)
+        stats[.maxHP] = maxHP
 
-        // 物理攻撃
         let attackBase = strength * (1.0 + levelFactor * coefficients.value(for: .physicalAttack))
         var physicalAttack = attackBase * talents.multiplier(for: .physicalAttack) * CombatFormulas.physicalAttackCoefficient
         physicalAttack *= passives.multiplier(for: .physicalAttack)
@@ -375,77 +444,108 @@ private struct CombatAccumulator {
             }
             physicalAttack *= martialBonuses.multiplier
         }
+        stats[.physicalAttack] = physicalAttack
 
-        // 魔法攻撃
         let magicalAttackBase = wisdom * (1.0 + levelFactor * coefficients.value(for: .magicalAttack))
         var magicalAttack = magicalAttackBase * talents.multiplier(for: .magicalAttack) * CombatFormulas.magicalAttackCoefficient
         magicalAttack *= passives.multiplier(for: .magicalAttack)
         magicalAttack += additives.value(for: .magicalAttack)
+        stats[.magicalAttack] = magicalAttack
 
-        // 物理防御
         let physicalDefenseBase = vitality * (1.0 + levelFactor * coefficients.value(for: .physicalDefense))
         var physicalDefense = physicalDefenseBase * talents.multiplier(for: .physicalDefense) * CombatFormulas.physicalDefenseCoefficient
         physicalDefense *= passives.multiplier(for: .physicalDefense)
         physicalDefense += additives.value(for: .physicalDefense)
+        stats[.physicalDefense] = physicalDefense
 
-        // 魔法防御
         let magicalDefenseBase = spirit * (1.0 + levelFactor * coefficients.value(for: .magicalDefense))
         var magicalDefense = magicalDefenseBase * talents.multiplier(for: .magicalDefense) * CombatFormulas.magicalDefenseCoefficient
         magicalDefense *= passives.multiplier(for: .magicalDefense)
         magicalDefense += additives.value(for: .magicalDefense)
+        stats[.magicalDefense] = magicalDefense
 
-        // 命中率
         let hitSource = (strength + agility) / 2.0
         var hitRate = hitSource * (1.0 + levelFactor * coefficients.value(for: .hitRate)) * CombatFormulas.hitRateCoefficient
         hitRate *= talents.multiplier(for: .hitRate)
         hitRate *= passives.multiplier(for: .hitRate)
         hitRate += additives.value(for: .hitRate)
+        stats[.hitRate] = hitRate
 
-        // 回避
         let evasionSource = (agility + luck) / 2.0
         var evasion = evasionSource * (1.0 + levelFactor * coefficients.value(for: .evasionRate)) * CombatFormulas.evasionRateCoefficient
         evasion *= talents.multiplier(for: .evasionRate)
         evasion *= passives.multiplier(for: .evasionRate)
         evasion += additives.value(for: .evasionRate)
+        stats[.evasionRate] = evasion
 
-        // 魔法回復
         let healingBase = spirit * (1.0 + levelFactor * coefficients.value(for: .magicalHealing))
         var magicalHealing = healingBase * talents.multiplier(for: .magicalHealing) * CombatFormulas.magicalHealingCoefficient
         magicalHealing *= passives.multiplier(for: .magicalHealing)
         magicalHealing += additives.value(for: .magicalHealing)
+        stats[.magicalHealing] = magicalHealing
 
-        // 罠解除
         let trapBase = (agility + luck) / 2.0
         var trapRemoval = trapBase * (1.0 + levelFactor * coefficients.value(for: .trapRemoval)) * CombatFormulas.trapRemovalCoefficient
         trapRemoval *= talents.multiplier(for: .trapRemoval)
         trapRemoval *= passives.multiplier(for: .trapRemoval)
         trapRemoval += additives.value(for: .trapRemoval)
+        stats[.trapRemoval] = trapRemoval
 
-        // 追加ダメージ / ブレス
         var additionalDamage = strength * (1.0 + levelFactor * coefficients.value(for: .physicalAttack)) * CombatFormulas.additionalDamageCoefficient
         additionalDamage += additives.value(for: .additionalDamage)
+        stats[.additionalDamage] = additionalDamage
+
         var breathDamage = wisdom * (1.0 + levelFactor * coefficients.value(for: .magicalAttack)) * CombatFormulas.breathDamageCoefficient
         breathDamage += additives.value(for: .breathDamage)
+        stats[.breathDamage] = breathDamage
 
-        // 必殺率
         let critSource = max((agility + luck * 2.0 - 45.0), 0.0)
         var criticalRate = critSource * CombatFormulas.criticalRateCoefficient * coefficients.value(for: .criticalRate)
         criticalRate *= talents.multiplier(for: .criticalRate)
         criticalRate *= passives.multiplier(for: .criticalRate)
         criticalRate += criticalParams.flatBonus
-        if let cap = criticalParams.cap {
-            criticalRate = min(criticalRate, cap)
+        stats[.criticalRate] = criticalRate
+
+        let baseAttackCount = CombatFormulas.finalAttackCount(agility: attributes.agility,
+                                                              level: progress.level,
+                                                              jobCoefficient: coefficients.value(for: .attackCount),
+                                                              hasTalent: talents.hasTalent(for: .attackCount),
+                                                              hasIncompetent: talents.hasIncompetence(for: .attackCount),
+                                                              passiveMultiplier: passives.multiplier(for: .attackCount),
+                                                              additive: additives.value(for: .attackCount))
+        stats[.attackCount] = Double(baseAttackCount)
+
+        let convertedStats = try applyStatConversions(to: stats)
+
+        func resolvedValue(_ key: CombatStatKey) -> Double {
+            convertedStats[key] ?? stats[key] ?? 0.0
         }
+
+        maxHP = resolvedValue(.maxHP)
+        physicalAttack = resolvedValue(.physicalAttack)
+        magicalAttack = resolvedValue(.magicalAttack)
+        physicalDefense = resolvedValue(.physicalDefense)
+        magicalDefense = resolvedValue(.magicalDefense)
+        hitRate = resolvedValue(.hitRate)
+        evasion = resolvedValue(.evasionRate)
+        magicalHealing = resolvedValue(.magicalHealing)
+        trapRemoval = resolvedValue(.trapRemoval)
+        additionalDamage = resolvedValue(.additionalDamage)
+        breathDamage = resolvedValue(.breathDamage)
+        criticalRate = resolvedValue(.criticalRate)
+
+        let baseCriticalCap = criticalParams.cap ?? 100.0
+        let adjustedCriticalCap = max(0.0, baseCriticalCap + criticalParams.capDelta)
+        criticalRate = min(criticalRate, adjustedCriticalCap)
         criticalRate = max(0.0, min(criticalRate, 100.0))
 
-        // 攻撃回数
-        let attackCount = CombatFormulas.finalAttackCount(agility: attributes.agility,
-                                                           level: progress.level,
-                                                           jobCoefficient: coefficients.value(for: .attackCount),
-                                                           hasTalent: talents.hasTalent(for: .attackCount),
-                                                           hasIncompetent: talents.hasIncompetence(for: .attackCount),
-                                                           passiveMultiplier: passives.multiplier(for: .attackCount),
-                                                           additive: additives.value(for: .attackCount))
+        let convertedAttackCountValue = resolvedValue(.attackCount)
+        let attackCount: Int
+        if abs(convertedAttackCountValue - Double(baseAttackCount)) < 0.0001 {
+            attackCount = baseAttackCount
+        } else {
+            attackCount = max(1, Int(convertedAttackCountValue.rounded()))
+        }
 
         var combat = RuntimeCharacterProgress.Combat(maxHP: Int(maxHP.rounded(.towardZero)),
                                                      physicalAttack: Int(physicalAttack.rounded(.towardZero)),
@@ -465,6 +565,75 @@ private struct CombatAccumulator {
         applyEquipmentCombatBonuses(to: &combat)
 
         return combat
+    }
+
+    private func applyStatConversions(to stats: [CombatStatKey: Double]) throws -> [CombatStatKey: Double] {
+        guard !statConversions.isEmpty else { return stats }
+
+        var result = stats
+        let order = try conversionProcessingOrder(initialStats: stats)
+
+        for key in order {
+            guard let conversions = statConversions[key] else { continue }
+            var addition: Double = 0.0
+            for conversion in conversions {
+                guard let sourceValue = result[conversion.source] else {
+                    throw RuntimeError.invalidConfiguration(reason: "Stat conversion の元となる \(conversion.source.rawValue) の値が未確定です")
+                }
+                addition += sourceValue * conversion.ratio
+            }
+            if addition != 0 {
+                result[key, default: 0.0] += addition
+            }
+        }
+
+        return result
+    }
+
+    private func conversionProcessingOrder(initialStats: [CombatStatKey: Double]) throws -> [CombatStatKey] {
+        var nodes = Set(initialStats.keys)
+        var incoming: [CombatStatKey: Int] = [:]
+        var adjacency: [CombatStatKey: Set<CombatStatKey>] = [:]
+
+        for (target, conversions) in statConversions {
+            nodes.insert(target)
+            for conversion in conversions {
+                nodes.insert(conversion.source)
+                adjacency[conversion.source, default: []].insert(target)
+                incoming[target, default: 0] += 1
+                if incoming[conversion.source] == nil {
+                    incoming[conversion.source] = 0
+                }
+            }
+        }
+
+        for node in nodes where incoming[node] == nil {
+            incoming[node] = 0
+        }
+
+        var queue = nodes.filter { incoming[$0] == 0 }.sorted { $0.rawValue < $1.rawValue }
+        var ordered: [CombatStatKey] = []
+
+        while !queue.isEmpty {
+            let node = queue.removeFirst()
+            ordered.append(node)
+            guard let dependents = adjacency[node] else { continue }
+            for dependent in dependents.sorted(by: { $0.rawValue < $1.rawValue }) {
+                guard let currentCount = incoming[dependent] else { continue }
+                let nextCount = currentCount - 1
+                incoming[dependent] = nextCount
+                if nextCount == 0 {
+                    queue.append(dependent)
+                }
+            }
+            queue.sort { $0.rawValue < $1.rawValue }
+        }
+
+        if ordered.count != nodes.count {
+            throw RuntimeError.invalidConfiguration(reason: "Stat conversion に循環依存があります")
+        }
+
+        return ordered
     }
 
     func applyTwentyOneBonuses(to combat: RuntimeCharacterProgress.Combat,
