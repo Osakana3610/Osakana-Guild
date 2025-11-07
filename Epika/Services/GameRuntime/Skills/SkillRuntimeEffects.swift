@@ -144,7 +144,11 @@ enum SkillRuntimeEffectCompiler {
                 switch payload.effectType {
                 case "explorationTimeMultiplier":
                     if let multiplier = payload.value["multiplier"] {
-                        modifiers.timeMultiplier *= multiplier
+                        let dungeonId = payload.parameters?["dungeonId"]
+                        let dungeonName = payload.parameters?["dungeonName"]
+                        modifiers.addEntry(multiplier: multiplier,
+                                           dungeonId: dungeonId,
+                                           dungeonName: dungeonName)
                     }
                 default:
                     continue
@@ -225,13 +229,40 @@ struct SkillRuntimeEffects {
     }
 
     struct ExplorationModifiers: Sendable, Hashable {
-        var timeMultiplier: Double = 1.0
-
-        mutating func merge(_ other: ExplorationModifiers) {
-            timeMultiplier *= other.timeMultiplier
+        struct Entry: Sendable, Hashable {
+            let multiplier: Double
+            let dungeonId: String?
+            let dungeonName: String?
         }
 
-        static let neutral = ExplorationModifiers()
+        private(set) var entries: [Entry] = []
+
+        mutating func addEntry(multiplier: Double,
+                               dungeonId: String?,
+                               dungeonName: String?) {
+            guard multiplier != 1.0 else { return }
+            entries.append(Entry(multiplier: multiplier,
+                                 dungeonId: dungeonId,
+                                 dungeonName: dungeonName))
+        }
+
+        mutating func merge(_ other: ExplorationModifiers) {
+            entries.append(contentsOf: other.entries)
+        }
+
+        func multiplier(forDungeonId dungeonId: String, dungeonName: String) -> Double {
+            entries.reduce(1.0) { result, entry in
+                if let scopedId = entry.dungeonId, scopedId != dungeonId {
+                    return result
+                }
+                if let scopedName = entry.dungeonName, scopedName != dungeonName {
+                    return result
+                }
+                return result * entry.multiplier
+            }
+        }
+
+        static let neutral = ExplorationModifiers(entries: [])
     }
 }
 

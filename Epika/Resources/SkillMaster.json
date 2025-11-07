@@ -1957,6 +1957,22 @@
         ]
       },
       {
+        "familyId": "explorationTimeMultiplier.babel",
+        "effectType": "explorationTimeMultiplier",
+        "parameters": {
+          "dungeonName": "バベルの塔"
+        },
+        "variants": [
+          {
+            "id": "explorationTimeMultiplier.babel.0_75",
+            "label": "[×0.75] バベル探索時間短縮",
+            "value": {
+              "multiplier": 0.75
+            }
+          }
+        ]
+      },
+      {
         "familyId": "rewardExperience.percent",
         "effectType": "rewardExperiencePercent",
         "variants": [
