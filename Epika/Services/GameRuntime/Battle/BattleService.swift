@@ -102,6 +102,8 @@ enum BattleService {
                                    jobName: fallbackDefinition.job,
                                    avatarIdentifier: nil,
                                    isMartialEligible: false,
+                                   raceId: fallbackDefinition.race,
+                                   raceCategory: raceDictionary[fallbackDefinition.race]?.category ?? fallbackDefinition.race,
                                    snapshot: snapshot,
                                    currentHP: snapshot.maxHP,
                                    actionRates: BattleActionRates(attack: fallbackDefinition.actionRates.attack,

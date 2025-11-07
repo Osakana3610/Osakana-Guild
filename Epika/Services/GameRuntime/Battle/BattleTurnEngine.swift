@@ -885,27 +885,36 @@ struct BattleTurnEngine {
                 continue
             }
 
-            let damage = computePhysicalDamage(attacker: attackerCopy,
+            let result = computePhysicalDamage(attacker: attackerCopy,
                                                defender: defenderCopy,
                                                hitIndex: hitIndex,
                                                random: &random)
-            let applied = applyDamage(amount: damage, to: &defenderCopy)
+            let applied = applyDamage(amount: result.damage, to: &defenderCopy)
 
             attackerCopy.attackHistory.registerHit()
             totalDamage += applied
             successfulHits += 1
 
+            var metadata: [String: String] = [
+                "damage": "\(applied)",
+                "targetHP": "\(defenderCopy.currentHP)",
+                "category": ActionCategory.physicalAttack.logIdentifier,
+                "hitIndex": "\(hitIndex)"
+            ]
+            let message: String
+            if result.critical {
+                metadata["critical"] = "true"
+                message = "\(attackerCopy.displayName)の必殺！ \(defenderCopy.displayName)に\(applied)ダメージ！"
+            } else {
+                message = "\(attackerCopy.displayName)の攻撃！ \(defenderCopy.displayName)に\(applied)ダメージ！"
+            }
+
             logs.append(.init(turn: turn,
-                              message: "\(attackerCopy.displayName)の攻撃！ \(defenderCopy.displayName)に\(applied)ダメージ！",
+                              message: message,
                               type: .damage,
                               actorId: attackerCopy.identifier,
                               targetId: defenderCopy.identifier,
-                              metadata: [
-                                  "damage": "\(applied)",
-                                  "targetHP": "\(defenderCopy.currentHP)",
-                                  "category": ActionCategory.physicalAttack.logIdentifier,
-                                  "hitIndex": "\(hitIndex)"
-                              ]))
+                              metadata: metadata))
 
             if !defenderCopy.isAlive {
                 appendDefeatLog(for: defenderCopy, turn: turn, logs: &logs)
@@ -997,18 +1006,20 @@ struct BattleTurnEngine {
     private static func computePhysicalDamage(attacker: BattleActor,
                                               defender: BattleActor,
                                               hitIndex: Int,
-                                              random: inout GameRandomSource) -> Int {
+                                              random: inout GameRandomSource) -> (damage: Int, critical: Bool) {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &random)
         let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &random)
 
         let attackPower = Double(attacker.snapshot.physicalAttack) * attackRoll
         let defensePower = Double(defender.snapshot.physicalDefense) * defenseRoll
-        let baseDifference = max(1.0, attackPower - defensePower)
+        let isCritical = shouldTriggerCritical(attacker: attacker, defender: defender, random: &random)
+        let effectiveDefensePower = isCritical ? defensePower * criticalDefenseRetainedFactor : defensePower
+        let baseDifference = max(1.0, attackPower - effectiveDefensePower)
         let additionalDamage = Double(attacker.snapshot.additionalDamage)
 
         let damageMultiplier = damageModifier(for: hitIndex)
         let rowMultiplier = rowDamageModifier(for: attacker, damageType: .physical)
-        let dealtMultiplier = damageDealtModifier(for: attacker, damageType: .physical)
+        let dealtMultiplier = damageDealtModifier(for: attacker, against: defender, damageType: .physical)
         let takenMultiplier = damageTakenModifier(for: defender, damageType: .physical)
 
         var coreDamage = baseDifference
@@ -1021,11 +1032,17 @@ struct BattleTurnEngine {
 
         var totalDamage = (coreDamage + bonusDamage) * rowMultiplier * dealtMultiplier * takenMultiplier
 
+        if isCritical {
+            totalDamage *= criticalDamageBonus(for: attacker)
+            totalDamage *= defender.skillEffects.criticalDamageTakenMultiplier
+        }
+
         if defender.guardActive {
             totalDamage *= 0.5
         }
 
-        return max(1, Int(totalDamage.rounded()))
+        let finalDamage = max(1, Int(totalDamage.rounded()))
+        return (finalDamage, isCritical)
     }
 
     private static func computeMagicalDamage(attacker: BattleActor,
@@ -1038,7 +1055,7 @@ struct BattleTurnEngine {
         let defensePower = Double(defender.snapshot.magicalDefense) * defenseRoll * 0.5
         var damage = max(1.0, attackPower - defensePower)
 
-        damage *= damageDealtModifier(for: attacker, damageType: .magical)
+        damage *= damageDealtModifier(for: attacker, against: defender, damageType: .magical)
         damage *= damageTakenModifier(for: defender, damageType: .magical)
 
         if defender.guardActive {
@@ -1054,7 +1071,7 @@ struct BattleTurnEngine {
         let variance = BattleRandomSystem.speedMultiplier(luck: attacker.luck, random: &random)
         var damage = Double(attacker.snapshot.breathDamage) * variance
 
-        damage *= damageDealtModifier(for: attacker, damageType: .breath)
+        damage *= damageDealtModifier(for: attacker, against: defender, damageType: .breath)
         damage *= damageTakenModifier(for: defender, damageType: .breath)
 
         if defender.guardActive {
@@ -1115,10 +1132,14 @@ struct BattleTurnEngine {
         }
     }
 
-    private static func damageDealtModifier(for attacker: BattleActor, damageType: BattleDamageType) -> Double {
+    private static func damageDealtModifier(for attacker: BattleActor,
+                                            against defender: BattleActor,
+                                            damageType: BattleDamageType) -> Double {
         let key = modifierKey(for: damageType, suffix: "DamageDealtMultiplier")
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
-        return buffMultiplier * attacker.skillEffects.damageDealt.value(for: damageType)
+        let category = normalizedTargetCategory(for: defender)
+        let categoryMultiplier = attacker.skillEffects.damageDealtAgainst.value(for: category)
+        return buffMultiplier * attacker.skillEffects.damageDealt.value(for: damageType) * categoryMultiplier
     }
 
     private static func damageTakenModifier(for defender: BattleActor, damageType: BattleDamageType) -> Double {
@@ -1157,6 +1178,80 @@ struct BattleTurnEngine {
         let buffMultiplier = aggregateModifier(from: target.timedBuffs, key: "healingReceivedMultiplier")
         return buffMultiplier * target.skillEffects.healingReceived
     }
+
+    private static func shouldTriggerCritical(attacker: BattleActor,
+                                              defender: BattleActor,
+                                              random: inout GameRandomSource) -> Bool {
+        let chance = max(0, min(100, attacker.snapshot.criticalRate))
+        guard chance > 0 else { return false }
+        return BattleRandomSystem.percentChance(chance, random: &random)
+    }
+
+    private static func criticalDamageBonus(for attacker: BattleActor) -> Double {
+        let percentBonus = max(0.0, 1.0 + attacker.skillEffects.criticalDamagePercent / 100.0)
+        let multiplierBonus = max(0.0, attacker.skillEffects.criticalDamageMultiplier)
+        return percentBonus * multiplierBonus
+    }
+
+    private static func normalizedTargetCategory(for actor: BattleActor) -> String? {
+        let candidates = [actor.raceCategory, actor.raceId].compactMap { $0?.lowercased() }
+        for candidate in candidates {
+            if let mapped = mapTargetCategory(from: candidate) {
+                return mapped
+            }
+            let components = candidate.split { !$0.isLetter }
+            for component in components {
+                if let mapped = mapTargetCategory(from: String(component)) {
+                    return mapped
+                }
+            }
+        }
+        return nil
+    }
+
+    private static func mapTargetCategory(from token: String) -> String? {
+        let normalized = token.lowercased()
+        if humanoidKeywords.contains(where: { normalized.contains($0) }) {
+            return "humanoid"
+        }
+        if undeadKeywords.contains(where: { normalized.contains($0) }) {
+            return "undead"
+        }
+        if dragonKeywords.contains(where: { normalized.contains($0) }) {
+            return "dragon"
+        }
+        if divineKeywords.contains(where: { normalized.contains($0) }) {
+            return "divine"
+        }
+        if monsterKeywords.contains(where: { normalized.contains($0) }) {
+            return "monster"
+        }
+        return nil
+    }
+
+    private static let humanoidKeywords: [String] = [
+        "human", "humanoid", "elf", "darkelf", "dwarf", "amazon", "pygmy", "gnome",
+        "orc", "orcish", "goblin", "goblinoid", "tengu", "cyborg", "machine", "psychic",
+        "giant", "workingcat"
+    ]
+
+    private static let monsterKeywords: [String] = [
+        "beast", "demon", "monster", "golem", "treant", "ooze", "slime", "construct"
+    ]
+
+    private static let undeadKeywords: [String] = [
+        "undead", "vampire", "skeleton", "zombie", "ghost", "lich", "ghoul"
+    ]
+
+    private static let dragonKeywords: [String] = [
+        "dragon", "dragonewt", "wyrm"
+    ]
+
+    private static let divineKeywords: [String] = [
+        "divine", "angel", "deity", "god", "spirit", "mythical"
+    ]
+
+    private static let criticalDefenseRetainedFactor: Double = 0.5
 
     private static func clampProbability(_ value: Double) -> Double {
         return min(0.98, max(0.05, value))

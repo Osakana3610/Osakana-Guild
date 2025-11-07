@@ -32,6 +32,8 @@ struct BattleContextBuilder {
                 jobName: state.job?.name ?? state.progress.jobId,
                 avatarIdentifier: state.progress.avatarIdentifier,
                 isMartialEligible: martialEligible,
+                raceId: state.progress.raceId,
+                raceCategory: state.race?.category,
                 snapshot: snapshot,
                 currentHP: state.progress.hitPoints.current,
                 actionRates: BattleContextBuilder.defaultPlayerActionRates(for: state),

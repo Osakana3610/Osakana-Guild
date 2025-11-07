@@ -146,8 +146,38 @@ struct BattleActor: Sendable {
             }
         }
 
+        struct TargetMultipliers: Sendable, Hashable {
+            private var storage: [String: Double]
+
+            init(storage: [String: Double] = [:]) {
+                self.storage = storage
+            }
+
+            func value(for rawCategory: String?) -> Double {
+                guard let raw = rawCategory else { return 1.0 }
+                return storage[raw, default: 1.0]
+            }
+
+            static func == (lhs: TargetMultipliers, rhs: TargetMultipliers) -> Bool {
+                lhs.storage == rhs.storage
+            }
+
+            func hash(into hasher: inout Hasher) {
+                for key in storage.keys.sorted() {
+                    hasher.combine(key)
+                    hasher.combine(storage[key])
+                }
+            }
+
+            static let neutral = TargetMultipliers()
+        }
+
         var damageTaken: DamageMultipliers
         var damageDealt: DamageMultipliers
+        var damageDealtAgainst: TargetMultipliers
+        var criticalDamagePercent: Double
+        var criticalDamageMultiplier: Double
+        var criticalDamageTakenMultiplier: Double
         var healingGiven: Double
         var healingReceived: Double
     }
@@ -167,6 +197,8 @@ struct BattleActor: Sendable {
     let jobName: String?
     let avatarIdentifier: String?
     let isMartialEligible: Bool
+    let raceId: String?
+    let raceCategory: String?
 
         var snapshot: RuntimeCharacterProgress.Combat
         var currentHP: Int
@@ -193,6 +225,8 @@ struct BattleActor: Sendable {
          jobName: String? = nil,
          avatarIdentifier: String? = nil,
          isMartialEligible: Bool,
+         raceId: String? = nil,
+         raceCategory: String? = nil,
          snapshot: RuntimeCharacterProgress.Combat,
          currentHP: Int,
          actionRates: BattleActionRates,
@@ -217,6 +251,8 @@ struct BattleActor: Sendable {
         self.jobName = jobName
         self.avatarIdentifier = avatarIdentifier
         self.isMartialEligible = isMartialEligible
+        self.raceId = raceId
+        self.raceCategory = raceCategory
         self.snapshot = snapshot
         self.currentHP = max(0, min(snapshot.maxHP, currentHP))
         self.actionRates = actionRates

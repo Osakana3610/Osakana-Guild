@@ -1928,28 +1928,28 @@
         "variants": [
           {
             "id": "explorationTimeMultiplier.general.0_5",
-            "label": "[×0.50] 探索時間短縮",
+            "label": "[×1/2] 探索時間短縮",
             "value": {
               "multiplier": 0.5
             }
           },
           {
             "id": "explorationTimeMultiplier.general.0_666667",
-            "label": "[×0.67] 探索時間短縮",
+            "label": "[×2/3] 探索時間短縮",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
             "id": "explorationTimeMultiplier.general.0_75",
-            "label": "[×0.75] 探索時間短縮",
+            "label": "[×3/4] 探索時間短縮",
             "value": {
               "multiplier": 0.75
             }
           },
           {
             "id": "explorationTimeMultiplier.general.0_8",
-            "label": "[×0.80] 探索時間短縮",
+            "label": "[×4/5] 探索時間短縮",
             "value": {
               "multiplier": 0.8
             }
@@ -1965,7 +1965,7 @@
         "variants": [
           {
             "id": "explorationTimeMultiplier.babel.0_75",
-            "label": "[×0.75] バベル探索時間短縮",
+            "label": "[×3/4] バベル探索時間短縮",
             "value": {
               "multiplier": 0.75
             }
@@ -2054,42 +2054,42 @@
         "variants": [
           {
             "id": "rewardExperience.multiplier.0_1",
-            "label": "[×0.10] 獲得経験値倍率",
+            "label": "[×1/10] 獲得経験値倍率",
             "value": {
               "multiplier": 0.1
             }
           },
           {
             "id": "rewardExperience.multiplier.0_25",
-            "label": "[×0.25] 獲得経験値倍率",
+            "label": "[×1/4] 獲得経験値倍率",
             "value": {
               "multiplier": 0.25
             }
           },
           {
             "id": "rewardExperience.multiplier.0_333333",
-            "label": "[×0.33] 獲得経験値倍率",
+            "label": "[×1/3] 獲得経験値倍率",
             "value": {
-              "multiplier": 0.333333
+              "multiplier": 0.3333333333333333
             }
           },
           {
             "id": "rewardExperience.multiplier.0_5",
-            "label": "[×0.50] 獲得経験値倍率",
+            "label": "[×1/2] 獲得経験値倍率",
             "value": {
               "multiplier": 0.5
             }
           },
           {
             "id": "rewardExperience.multiplier.0_666667",
-            "label": "[×0.67] 獲得経験値倍率",
+            "label": "[×2/3] 獲得経験値倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
             "id": "rewardExperience.multiplier.0_75",
-            "label": "[×0.75] 獲得経験値倍率",
+            "label": "[×3/4] 獲得経験値倍率",
             "value": {
               "multiplier": 0.75
             }
@@ -2248,30 +2248,30 @@
         "variants": [
           {
             "id": "rewardGold.multiplier.0_25",
-            "label": "[×0.25] 取得GP倍率",
+            "label": "[×1/4] 取得GP倍率",
             "value": {
               "multiplier": 0.25
             }
           },
           {
             "id": "rewardGold.multiplier.0_333333",
-            "label": "[×0.33] 取得GP倍率",
+            "label": "[×1/3] 取得GP倍率",
             "value": {
-              "multiplier": 0.333333
+              "multiplier": 0.3333333333333333
             }
           },
           {
             "id": "rewardGold.multiplier.0_5",
-            "label": "[×0.50] 取得GP倍率",
+            "label": "[×1/2] 取得GP倍率",
             "value": {
               "multiplier": 0.5
             }
           },
           {
             "id": "rewardGold.multiplier.0_666667",
-            "label": "[×0.67] 取得GP倍率",
+            "label": "[×2/3] 取得GP倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
@@ -2386,9 +2386,9 @@
         "variants": [
           {
             "id": "rewardTitle.multiplier.0_666667",
-            "label": "[×0.67] 称号付与倍率",
+            "label": "[×2/3] 称号付与倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
@@ -2545,14 +2545,14 @@
         "variants": [
           {
             "id": "rewardItem.multiplier.0_666667",
-            "label": "[×0.67] アイテム獲得倍率",
+            "label": "[×2/3] アイテム獲得倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
             "id": "rewardItem.multiplier.0_8",
-            "label": "[×0.80] アイテム獲得倍率",
+            "label": "[×4/5] アイテム獲得倍率",
             "value": {
               "multiplier": 0.8
             }
@@ -2742,56 +2742,56 @@
           },
           {
             "id": "damageTakenMultiplier.physical.0_25",
-            "label": "[×0.25] 物理被ダメ倍率",
+            "label": "[×1/4] 物理被ダメ倍率",
             "value": {
               "multiplier": 0.25
             }
           },
           {
             "id": "damageTakenMultiplier.physical.0_333333",
-            "label": "[×0.333333] 物理被ダメ倍率",
+            "label": "[×1/3] 物理被ダメ倍率",
             "value": {
-              "multiplier": 0.333333
+              "multiplier": 0.3333333333333333
             }
           },
           {
             "id": "damageTakenMultiplier.physical.0_4",
-            "label": "[×0.4] 物理被ダメ倍率",
+            "label": "[×2/5] 物理被ダメ倍率",
             "value": {
               "multiplier": 0.4
             }
           },
           {
             "id": "damageTakenMultiplier.physical.0_5",
-            "label": "[×0.5] 物理被ダメ倍率",
+            "label": "[×1/2] 物理被ダメ倍率",
             "value": {
               "multiplier": 0.5
             }
           },
           {
             "id": "damageTakenMultiplier.physical.0_6",
-            "label": "[×0.6] 物理被ダメ倍率",
+            "label": "[×3/5] 物理被ダメ倍率",
             "value": {
               "multiplier": 0.6
             }
           },
           {
             "id": "damageTakenMultiplier.physical.0_666667",
-            "label": "[×0.666667] 物理被ダメ倍率",
+            "label": "[×2/3] 物理被ダメ倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
             "id": "damageTakenMultiplier.physical.0_75",
-            "label": "[×0.75] 物理被ダメ倍率",
+            "label": "[×3/4] 物理被ダメ倍率",
             "value": {
               "multiplier": 0.75
             }
           },
           {
             "id": "damageTakenMultiplier.physical.0_8",
-            "label": "[×0.8] 物理被ダメ倍率",
+            "label": "[×4/5] 物理被ダメ倍率",
             "value": {
               "multiplier": 0.8
             }
@@ -2825,56 +2825,56 @@
           },
           {
             "id": "criticalDamageTakenMultiplier.general.0_1",
-            "label": "[×0.1] 被必殺ダメ倍率",
+            "label": "[×1/10] 被必殺ダメ倍率",
             "value": {
               "multiplier": 0.1
             }
           },
           {
             "id": "criticalDamageTakenMultiplier.general.0_25",
-            "label": "[×0.25] 被必殺ダメ倍率",
+            "label": "[×1/4] 被必殺ダメ倍率",
             "value": {
               "multiplier": 0.25
             }
           },
           {
             "id": "criticalDamageTakenMultiplier.general.0_333333",
-            "label": "[×0.333333] 被必殺ダメ倍率",
+            "label": "[×1/3] 被必殺ダメ倍率",
             "value": {
-              "multiplier": 0.333333
+              "multiplier": 0.3333333333333333
             }
           },
           {
             "id": "criticalDamageTakenMultiplier.general.0_5",
-            "label": "[×0.5] 被必殺ダメ倍率",
+            "label": "[×1/2] 被必殺ダメ倍率",
             "value": {
               "multiplier": 0.5
             }
           },
           {
             "id": "criticalDamageTakenMultiplier.general.0_6",
-            "label": "[×0.6] 被必殺ダメ倍率",
+            "label": "[×3/5] 被必殺ダメ倍率",
             "value": {
               "multiplier": 0.6
             }
           },
           {
             "id": "criticalDamageTakenMultiplier.general.0_666667",
-            "label": "[×0.666667] 被必殺ダメ倍率",
+            "label": "[×2/3] 被必殺ダメ倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
             "id": "criticalDamageTakenMultiplier.general.0_75",
-            "label": "[×0.75] 被必殺ダメ倍率",
+            "label": "[×3/4] 被必殺ダメ倍率",
             "value": {
               "multiplier": 0.75
             }
           },
           {
             "id": "criticalDamageTakenMultiplier.general.0_8",
-            "label": "[×0.8] 被必殺ダメ倍率",
+            "label": "[×4/5] 被必殺ダメ倍率",
             "value": {
               "multiplier": 0.8
             }
@@ -2901,42 +2901,42 @@
           },
           {
             "id": "penetrationDamageTakenMultiplier.general.0_1",
-            "label": "[×0.1] 貫通被ダメ倍率",
+            "label": "[×1/10] 貫通被ダメ倍率",
             "value": {
               "multiplier": 0.1
             }
           },
           {
             "id": "penetrationDamageTakenMultiplier.general.0_5",
-            "label": "[×0.5] 貫通被ダメ倍率",
+            "label": "[×1/2] 貫通被ダメ倍率",
             "value": {
               "multiplier": 0.5
             }
           },
           {
             "id": "penetrationDamageTakenMultiplier.general.0_6",
-            "label": "[×0.6] 貫通被ダメ倍率",
+            "label": "[×3/5] 貫通被ダメ倍率",
             "value": {
               "multiplier": 0.6
             }
           },
           {
             "id": "penetrationDamageTakenMultiplier.general.0_666667",
-            "label": "[×0.666667] 貫通被ダメ倍率",
+            "label": "[×2/3] 貫通被ダメ倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
             "id": "penetrationDamageTakenMultiplier.general.0_75",
-            "label": "[×0.75] 貫通被ダメ倍率",
+            "label": "[×3/4] 貫通被ダメ倍率",
             "value": {
               "multiplier": 0.75
             }
           },
           {
             "id": "penetrationDamageTakenMultiplier.general.0_8",
-            "label": "[×0.8] 貫通被ダメ倍率",
+            "label": "[×4/5] 貫通被ダメ倍率",
             "value": {
               "multiplier": 0.8
             }
@@ -2970,28 +2970,28 @@
           },
           {
             "id": "counterAttackEvasionMultiplier.general.0_1",
-            "label": "[×0.1] 反撃回避倍率",
+            "label": "[×1/10] 反撃回避倍率",
             "value": {
               "multiplier": 0.1
             }
           },
           {
             "id": "counterAttackEvasionMultiplier.general.0_2",
-            "label": "[×0.2] 反撃回避倍率",
+            "label": "[×1/5] 反撃回避倍率",
             "value": {
               "multiplier": 0.2
             }
           },
           {
             "id": "counterAttackEvasionMultiplier.general.0_333333",
-            "label": "[×0.333333] 反撃回避倍率",
+            "label": "[×1/3] 反撃回避倍率",
             "value": {
-              "multiplier": 0.333333
+              "multiplier": 0.3333333333333333
             }
           },
           {
             "id": "counterAttackEvasionMultiplier.general.0_5",
-            "label": "[×0.5] 反撃回避倍率",
+            "label": "[×1/2] 反撃回避倍率",
             "value": {
               "multiplier": 0.5
             }
@@ -3100,42 +3100,42 @@
         "variants": [
           {
             "id": "damageTakenMultiplier.magical.0_333333",
-            "label": "[×0.333333] 魔法被ダメ倍率",
+            "label": "[×1/3] 魔法被ダメ倍率",
             "value": {
-              "multiplier": 0.333333
+              "multiplier": 0.3333333333333333
             }
           },
           {
             "id": "damageTakenMultiplier.magical.0_5",
-            "label": "[×0.5] 魔法被ダメ倍率",
+            "label": "[×1/2] 魔法被ダメ倍率",
             "value": {
               "multiplier": 0.5
             }
           },
           {
             "id": "damageTakenMultiplier.magical.0_6",
-            "label": "[×0.6] 魔法被ダメ倍率",
+            "label": "[×3/5] 魔法被ダメ倍率",
             "value": {
               "multiplier": 0.6
             }
           },
           {
             "id": "damageTakenMultiplier.magical.0_666667",
-            "label": "[×0.666667] 魔法被ダメ倍率",
+            "label": "[×2/3] 魔法被ダメ倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
             "id": "damageTakenMultiplier.magical.0_75",
-            "label": "[×0.75] 魔法被ダメ倍率",
+            "label": "[×3/4] 魔法被ダメ倍率",
             "value": {
               "multiplier": 0.75
             }
           },
           {
             "id": "damageTakenMultiplier.magical.0_8",
-            "label": "[×0.8] 魔法被ダメ倍率",
+            "label": "[×4/5] 魔法被ダメ倍率",
             "value": {
               "multiplier": 0.8
             }
@@ -3251,35 +3251,35 @@
         "variants": [
           {
             "id": "damageTakenMultiplier.breath.0_5",
-            "label": "[×0.5] ブレス被ダメ倍率",
+            "label": "[×1/2] ブレス被ダメ倍率",
             "value": {
               "multiplier": 0.5
             }
           },
           {
             "id": "damageTakenMultiplier.breath.0_6",
-            "label": "[×0.6] ブレス被ダメ倍率",
+            "label": "[×3/5] ブレス被ダメ倍率",
             "value": {
               "multiplier": 0.6
             }
           },
           {
             "id": "damageTakenMultiplier.breath.0_666667",
-            "label": "[×0.666667] ブレス被ダメ倍率",
+            "label": "[×2/3] ブレス被ダメ倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
             "id": "damageTakenMultiplier.breath.0_75",
-            "label": "[×0.75] ブレス被ダメ倍率",
+            "label": "[×3/4] ブレス被ダメ倍率",
             "value": {
               "multiplier": 0.75
             }
           },
           {
             "id": "damageTakenMultiplier.breath.0_8",
-            "label": "[×0.8] ブレス被ダメ倍率",
+            "label": "[×4/5] ブレス被ダメ倍率",
             "value": {
               "multiplier": 0.8
             }
@@ -3309,14 +3309,14 @@
           },
           {
             "id": "statusResistanceMultiplier.sleep.0_333333",
-            "label": "[×0.333333] 眠り耐性倍率",
+            "label": "[×1/3] 眠り耐性倍率",
             "value": {
-              "multiplier": 0.333333
+              "multiplier": 0.3333333333333333
             }
           },
           {
             "id": "statusResistanceMultiplier.sleep.0_5",
-            "label": "[×0.5] 眠り耐性倍率",
+            "label": "[×1/2] 眠り耐性倍率",
             "value": {
               "multiplier": 0.5
             }
@@ -3346,14 +3346,14 @@
           },
           {
             "id": "statusResistanceMultiplier.petrify.0_333333",
-            "label": "[×0.333333] 石化耐性倍率",
+            "label": "[×1/3] 石化耐性倍率",
             "value": {
-              "multiplier": 0.333333
+              "multiplier": 0.3333333333333333
             }
           },
           {
             "id": "statusResistanceMultiplier.petrify.0_5",
-            "label": "[×0.5] 石化耐性倍率",
+            "label": "[×1/2] 石化耐性倍率",
             "value": {
               "multiplier": 0.5
             }
@@ -3390,7 +3390,7 @@
           },
           {
             "id": "statusResistanceMultiplier.confusion.0_5",
-            "label": "[×0.5] 混乱耐性倍率",
+            "label": "[×1/2] 混乱耐性倍率",
             "value": {
               "multiplier": 0.5
             }
@@ -4286,30 +4286,30 @@
         "variants": [
           {
             "id": "statMultiplier.maxHP.0_1",
-            "label": "[×0.10] 最大HP倍率",
+            "label": "[×1/10] 最大HP倍率",
             "value": {
               "multiplier": 0.1
             }
           },
           {
             "id": "statMultiplier.maxHP.0_2",
-            "label": "[×0.20] 最大HP倍率",
+            "label": "[×1/5] 最大HP倍率",
             "value": {
               "multiplier": 0.2
             }
           },
           {
             "id": "statMultiplier.maxHP.0_5",
-            "label": "[×0.50] 最大HP倍率",
+            "label": "[×1/2] 最大HP倍率",
             "value": {
               "multiplier": 0.5
             }
           },
           {
             "id": "statMultiplier.maxHP.0_666667",
-            "label": "[×0.67] 最大HP倍率",
+            "label": "[×2/3] 最大HP倍率",
             "value": {
-              "multiplier": 0.666667
+              "multiplier": 0.6666666666666666
             }
           },
           {
@@ -4330,7 +4330,7 @@
         "variants": [
           {
             "id": "statMultiplier.physicalAttack.0_5",
-            "label": "[×0.50] 攻撃力倍率",
+            "label": "[×1/2] 攻撃力倍率",
             "value": {
               "multiplier": 0.5
             }
@@ -4353,7 +4353,7 @@
         "variants": [
           {
             "id": "statMultiplier.hitRate.0_5",
-            "label": "[×0.50] 命中精度倍率",
+            "label": "[×1/2] 命中精度倍率",
             "value": {
               "multiplier": 0.5
             }
@@ -4383,7 +4383,7 @@
         "variants": [
           {
             "id": "statMultiplier.magicalAttack.0_5",
-            "label": "[×0.50] 魔法攻撃力倍率",
+            "label": "[×1/2] 魔法攻撃力倍率",
             "value": {
               "multiplier": 0.5
             }
@@ -4399,7 +4399,7 @@
         "variants": [
           {
             "id": "statMultiplier.magicalHealing.0_5",
-            "label": "[×0.50] 魔法回復量倍率",
+            "label": "[×1/2] 魔法回復量倍率",
             "value": {
               "multiplier": 0.5
             }
@@ -4495,7 +4495,7 @@
         "variants": [
           {
             "id": "attackCount.multiplier.0_5",
-            "label": "[×0.5] 攻撃回数倍率",
+            "label": "[×1/2] 攻撃回数倍率",
             "value": {
               "multiplier": 0.5
             }

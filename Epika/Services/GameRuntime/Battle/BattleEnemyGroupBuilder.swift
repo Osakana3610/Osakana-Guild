@@ -54,6 +54,7 @@ struct BattleEnemyGroupBuilder {
                                                           cache: &skillCache,
                                                           skillDefinitions: skillDefinitions)
                 let identifier = "\(group.definition.id)_\(slotIndex)"
+                let raceCategory = raceDefinitions[group.definition.race]?.category ?? group.definition.race
                 let actor = BattleActor(identifier: identifier,
                                         displayName: group.definition.name,
                                         kind: .enemy,
@@ -69,6 +70,8 @@ struct BattleEnemyGroupBuilder {
                                         jobName: group.definition.job,
                                         avatarIdentifier: nil,
                                         isMartialEligible: false,
+                                        raceId: group.definition.race,
+                                        raceCategory: raceCategory,
                                         snapshot: snapshot,
                                         currentHP: snapshot.maxHP,
                                         actionRates: BattleActionRates(attack: group.definition.actionRates.attack,
@@ -116,6 +119,7 @@ struct BattleEnemyGroupBuilder {
                                                       cache: &cache,
                                                       skillDefinitions: skillDefinitions)
             let identifier = index == 0 ? definition.id : "\(definition.id)_\(index)"
+            let raceCategory = raceDefinitions[definition.race]?.category ?? definition.race
             let actor = BattleActor(identifier: identifier,
                                     displayName: definition.name,
                                     kind: .enemy,
@@ -131,6 +135,8 @@ struct BattleEnemyGroupBuilder {
                                     jobName: definition.job,
                                     avatarIdentifier: nil,
                                     isMartialEligible: false,
+                                    raceId: definition.race,
+                                    raceCategory: raceCategory,
                                     snapshot: snapshot,
                                     currentHP: snapshot.maxHP,
                                     actionRates: BattleActionRates(attack: definition.actionRates.attack,
