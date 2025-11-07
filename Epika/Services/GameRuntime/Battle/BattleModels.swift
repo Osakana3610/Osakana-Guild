@@ -172,6 +172,29 @@ struct BattleActor: Sendable {
             static let neutral = TargetMultipliers()
         }
 
+        struct Reaction: Sendable, Hashable {
+            enum Trigger: String, Sendable {
+                case allyDefeated
+                case selfEvadePhysical
+            }
+
+            enum Target: String, Sendable {
+                case attacker
+                case killer
+            }
+
+            let identifier: String
+            let displayName: String
+            let trigger: Trigger
+            let target: Target
+            let damageType: BattleDamageType
+            let baseChancePercent: Double
+            let attackCountMultiplier: Double
+            let criticalRateMultiplier: Double
+            let accuracyMultiplier: Double
+            let requiresMartial: Bool
+        }
+
         var damageTaken: DamageMultipliers
         var damageDealt: DamageMultipliers
         var damageDealtAgainst: TargetMultipliers
@@ -180,6 +203,8 @@ struct BattleActor: Sendable {
         var criticalDamageTakenMultiplier: Double
         var healingGiven: Double
         var healingReceived: Double
+        var reactions: [Reaction]
+        var counterAttackEvasionMultiplier: Double
     }
 
     let identifier: String

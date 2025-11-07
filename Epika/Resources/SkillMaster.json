@@ -5084,7 +5084,53 @@
     ]
   },
   "reaction": {
-    "families": []
+    "families": [
+      {
+        "familyId": "reaction.counter.allyDefeated",
+        "effectType": "reaction",
+        "parameters": {
+          "action": "counterAttack",
+          "trigger": "allyDefeated",
+          "target": "killer",
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": "reaction.counter.allyDefeated.standard",
+            "label": "[反撃] 仲間撃破時反撃",
+            "value": {
+              "baseChancePercent": 100,
+              "attackCountMultiplier": 0.3,
+              "criticalRateMultiplier": 0.5,
+              "accuracyMultiplier": 1.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "reaction.counter.martialEvade",
+        "effectType": "reaction",
+        "parameters": {
+          "action": "counterAttack",
+          "trigger": "selfEvadePhysical",
+          "target": "attacker",
+          "damageType": "physical",
+          "requiresMartial": "true"
+        },
+        "variants": [
+          {
+            "id": "reaction.counter.martialEvade.standard",
+            "label": "[反撃] 格闘回避時反撃",
+            "value": {
+              "baseChancePercent": 100,
+              "attackCountMultiplier": 0.3,
+              "criticalRateMultiplier": 0.5,
+              "accuracyMultiplier": 1.0
+            }
+          }
+        ]
+      }
+    ]
   },
   "resurrection": {
     "families": []

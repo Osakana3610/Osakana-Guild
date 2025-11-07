@@ -164,15 +164,22 @@ struct BattleTurnEngine {
                               metadata: metadata)
     }
 
-    private enum ActorReference {
+    fileprivate enum ActorReference {
         case player(Int)
         case enemy(Int)
     }
 
-    private enum ActorSide {
+    fileprivate enum ActorSide {
         case player
         case enemy
     }
+
+    fileprivate enum ReactionEvent {
+        case allyDefeated(side: ActorSide, fallenIndex: Int, killer: ActorReference?)
+        case selfEvadePhysical(side: ActorSide, actorIndex: Int, attacker: ActorReference)
+    }
+
+    private static let maxReactionDepth = 4
 
     private static func actor(for side: ActorSide,
                                index: Int,
@@ -510,28 +517,43 @@ struct BattleTurnEngine {
                                          hitCountOverride: nil,
                                          accuracyMultiplier: accuracyMultiplier)
 
-        attacker = attackResult.attacker
-        defender = attackResult.defender
+        let outcome = applyAttackOutcome(attackerSide: attackerSide,
+                                         attackerIndex: attackerIndex,
+                                         defenderSide: target.0,
+                                         defenderIndex: target.1,
+                                         attacker: attackResult.attacker,
+                                         defender: attackResult.defender,
+                                         attackResult: attackResult,
+                                         turn: turn,
+                                         logs: &logs,
+                                         players: &players,
+                                         enemies: &enemies,
+                                         random: &random,
+                                         reactionDepth: 0)
+
+        guard var updatedAttacker = outcome.attacker else { return }
+        guard var updatedDefender = outcome.defender else { return }
+        attacker = updatedAttacker
+        defender = updatedDefender
 
         if isMartial,
            attackResult.successfulHits > 0,
            defender.isAlive,
            let descriptor = martialFollowUpDescriptor(for: attacker) {
-            executeFollowUpSequence(attacker: &attacker,
-                                    defender: &defender,
+            executeFollowUpSequence(attackerSide: attackerSide,
+                                    attackerIndex: attackerIndex,
+                                    defenderSide: target.0,
+                                    defenderIndex: target.1,
+                                    players: &players,
+                                    enemies: &enemies,
+                                    attacker: &updatedAttacker,
+                                    defender: &updatedDefender,
                                     descriptor: descriptor,
                                     turn: turn,
                                     logs: &logs,
                                     random: &random)
-        }
-
-        if attackerSide == target.0 && attackerIndex == target.1 {
-            var merged = defender
-            merged.attackHistory = attacker.attackHistory
-            assign(merged, to: attackerSide, index: attackerIndex, players: &players, enemies: &enemies)
-        } else {
-            assign(attacker, to: attackerSide, index: attackerIndex, players: &players, enemies: &enemies)
-            assign(defender, to: target.0, index: target.1, players: &players, enemies: &enemies)
+            attacker = updatedAttacker
+            defender = updatedDefender
         }
     }
 
@@ -833,6 +855,67 @@ struct BattleTurnEngine {
         var defender: BattleActor
         var totalDamage: Int
         var successfulHits: Int
+        var defenderWasDefeated: Bool
+        var defenderEvadedAttack: Bool
+    }
+
+    private struct AttackOutcome {
+        var attacker: BattleActor?
+        var defender: BattleActor?
+    }
+
+    private static func applyAttackOutcome(attackerSide: ActorSide,
+                                           attackerIndex: Int,
+                                           defenderSide: ActorSide,
+                                           defenderIndex: Int,
+                                           attacker: BattleActor,
+                                           defender: BattleActor,
+                                           attackResult: AttackResult,
+                                           turn: Int,
+                                           logs: inout [BattleLogEntry],
+                                           players: inout [BattleActor],
+                                           enemies: inout [BattleActor],
+                                           random: inout GameRandomSource,
+                                           reactionDepth: Int) -> AttackOutcome {
+        assign(attacker, to: attackerSide, index: attackerIndex, players: &players, enemies: &enemies)
+        assign(defender, to: defenderSide, index: defenderIndex, players: &players, enemies: &enemies)
+
+        var currentAttacker = actor(for: attackerSide, index: attackerIndex, players: players, enemies: enemies)
+        var currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
+
+        if attackResult.defenderWasDefeated {
+            let killerRef = reference(for: attackerSide, index: attackerIndex)
+            dispatchReactions(for: .allyDefeated(side: defenderSide,
+                                                 fallenIndex: defenderIndex,
+                                                 killer: killerRef),
+                              depth: reactionDepth,
+                              turn: turn,
+                              players: &players,
+                              enemies: &enemies,
+                              logs: &logs,
+                              random: &random)
+            currentAttacker = actor(for: attackerSide, index: attackerIndex, players: players, enemies: enemies)
+            currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
+        }
+
+        if attackResult.defenderEvadedAttack,
+           let defenderActor = currentDefender,
+           defenderActor.isAlive {
+            let attackerRef = reference(for: attackerSide, index: attackerIndex)
+            dispatchReactions(for: .selfEvadePhysical(side: defenderSide,
+                                                      actorIndex: defenderIndex,
+                                                      attacker: attackerRef),
+                              depth: reactionDepth,
+                              turn: turn,
+                              players: &players,
+                              enemies: &enemies,
+                              logs: &logs,
+                              random: &random)
+            currentAttacker = actor(for: attackerSide, index: attackerIndex, players: players, enemies: enemies)
+            currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
+        }
+
+        return AttackOutcome(attacker: currentAttacker, defender: currentDefender)
     }
 
     private struct FollowUpDescriptor {
@@ -857,12 +940,16 @@ struct BattleTurnEngine {
             return AttackResult(attacker: attackerCopy,
                                 defender: defenderCopy,
                                 totalDamage: 0,
-                                successfulHits: 0)
+                                successfulHits: 0,
+                                defenderWasDefeated: false,
+                                defenderEvadedAttack: false)
         }
 
         let hitCount = max(1, hitCountOverride ?? attackerCopy.snapshot.attackCount)
         var totalDamage = 0
         var successfulHits = 0
+        var defenderEvaded = false
+        var defenderDefeated = false
 
         for hitIndex in 1...hitCount {
             guard attackerCopy.isAlive && defenderCopy.isAlive else { break }
@@ -873,6 +960,7 @@ struct BattleTurnEngine {
                                              accuracyMultiplier: accuracyMultiplier,
                                              random: &random)
             if !BattleRandomSystem.probability(hitChance, random: &random) {
+                defenderEvaded = true
                 logs.append(.init(turn: turn,
                                   message: "\(defenderCopy.displayName)は\(attackerCopy.displayName)の攻撃をかわした！",
                                   type: .miss,
@@ -918,6 +1006,7 @@ struct BattleTurnEngine {
 
             if !defenderCopy.isAlive {
                 appendDefeatLog(for: defenderCopy, turn: turn, logs: &logs)
+                defenderDefeated = true
                 break
             }
         }
@@ -925,10 +1014,18 @@ struct BattleTurnEngine {
         return AttackResult(attacker: attackerCopy,
                              defender: defenderCopy,
                              totalDamage: totalDamage,
-                             successfulHits: successfulHits)
+                             successfulHits: successfulHits,
+                             defenderWasDefeated: defenderDefeated,
+                             defenderEvadedAttack: defenderEvaded)
     }
 
-    private static func executeFollowUpSequence(attacker: inout BattleActor,
+    private static func executeFollowUpSequence(attackerSide: ActorSide,
+                                                attackerIndex: Int,
+                                                defenderSide: ActorSide,
+                                                defenderIndex: Int,
+                                                players: inout [BattleActor],
+                                                enemies: inout [BattleActor],
+                                                attacker: inout BattleActor,
                                                 defender: inout BattleActor,
                                                 descriptor: FollowUpDescriptor,
                                                 turn: Int,
@@ -944,18 +1041,35 @@ struct BattleTurnEngine {
                               targetId: defender.identifier,
                               metadata: ["category": descriptor.logCategory]))
 
-            let followUp = performAttack(attacker: attacker,
-                                         defender: defender,
-                                         turn: turn,
-                                         logs: &logs,
-                                         random: &random,
-                                         hitCountOverride: descriptor.hitCount,
-                                         accuracyMultiplier: descriptor.accuracyMultiplier)
+            let followUpResult = performAttack(attacker: attacker,
+                                               defender: defender,
+                                               turn: turn,
+                                               logs: &logs,
+                                               random: &random,
+                                               hitCountOverride: descriptor.hitCount,
+                                               accuracyMultiplier: descriptor.accuracyMultiplier)
 
-            attacker = followUp.attacker
-            defender = followUp.defender
+            let outcome = applyAttackOutcome(attackerSide: attackerSide,
+                                             attackerIndex: attackerIndex,
+                                             defenderSide: defenderSide,
+                                             defenderIndex: defenderIndex,
+                                             attacker: followUpResult.attacker,
+                                             defender: followUpResult.defender,
+                                             attackResult: followUpResult,
+                                             turn: turn,
+                                             logs: &logs,
+                                             players: &players,
+                                             enemies: &enemies,
+                                             random: &random,
+                                             reactionDepth: 0)
 
-            guard defender.isAlive, followUp.successfulHits > 0 else { break }
+            guard let updatedAttacker = outcome.attacker,
+                  let updatedDefender = outcome.defender else { break }
+
+            attacker = updatedAttacker
+            defender = updatedDefender
+
+            guard defender.isAlive, followUpResult.successfulHits > 0 else { break }
         }
     }
 
@@ -1309,6 +1423,186 @@ struct BattleTurnEngine {
                           metadata: metadata))
     }
 
+    private static func dispatchReactions(for event: ReactionEvent,
+                                          depth: Int,
+                                          turn: Int,
+                                          players: inout [BattleActor],
+                                          enemies: inout [BattleActor],
+                                          logs: inout [BattleLogEntry],
+                                          random: inout GameRandomSource) {
+        guard depth < maxReactionDepth else { return }
+        switch event {
+        case .allyDefeated(let side, _, _):
+            for index in actorIndices(for: side, players: players, enemies: enemies) {
+                attemptReactions(on: side,
+                                 actorIndex: index,
+                                 event: event,
+                                 depth: depth,
+                                 turn: turn,
+                                 players: &players,
+                                 enemies: &enemies,
+                                 logs: &logs,
+                                 random: &random)
+            }
+        case .selfEvadePhysical(let side, let actorIndex, _):
+            attemptReactions(on: side,
+                             actorIndex: actorIndex,
+                             event: event,
+                             depth: depth,
+                             turn: turn,
+                             players: &players,
+                             enemies: &enemies,
+                             logs: &logs,
+                             random: &random)
+        }
+    }
+
+    private static func attemptReactions(on side: ActorSide,
+                                         actorIndex: Int,
+                                         event: ReactionEvent,
+                                         depth: Int,
+                                         turn: Int,
+                                         players: inout [BattleActor],
+                                         enemies: inout [BattleActor],
+                                         logs: inout [BattleLogEntry],
+                                         random: inout GameRandomSource) {
+        guard let performer = actor(for: side, index: actorIndex, players: players, enemies: enemies),
+              performer.isAlive else { return }
+        let candidates = performer.skillEffects.reactions.filter { $0.trigger.matches(event: event) }
+        guard !candidates.isEmpty else { return }
+
+        for reaction in candidates {
+            guard let currentPerformer = actor(for: side, index: actorIndex, players: players, enemies: enemies),
+                  currentPerformer.isAlive else { break }
+            if reaction.requiresMartial && !shouldUseMartialAttack(attacker: currentPerformer) {
+                continue
+            }
+            guard reaction.damageType == .physical else { continue }
+
+            var targetReference = reaction.preferredTarget(for: event).flatMap(referenceToSideIndex)
+            if targetReference == nil {
+                targetReference = selectOffensiveTarget(attackerSide: side,
+                                                        players: players,
+                                                        enemies: enemies,
+                                                        allowFriendlyTargets: false,
+                                                        random: &random)
+            }
+            guard var resolvedTarget = targetReference else { continue }
+            var needsFallback = false
+            if let currentTarget = actor(for: resolvedTarget.0, index: resolvedTarget.1, players: players, enemies: enemies) {
+                if !currentTarget.isAlive {
+                    needsFallback = true
+                }
+            } else {
+                needsFallback = true
+            }
+            if needsFallback {
+                guard let fallback = selectOffensiveTarget(attackerSide: side,
+                                                           players: players,
+                                                           enemies: enemies,
+                                                           allowFriendlyTargets: false,
+                                                           random: &random) else {
+                    continue
+                }
+                resolvedTarget = fallback
+            }
+
+            guard let targetActor = actor(for: resolvedTarget.0, index: resolvedTarget.1, players: players, enemies: enemies),
+                  targetActor.isAlive else { continue }
+
+            var chance = max(0.0, reaction.baseChancePercent)
+            chance *= targetActor.skillEffects.counterAttackEvasionMultiplier
+            let cappedChance = max(0, min(100, Int(floor(chance))))
+            guard cappedChance > 0 else { continue }
+            guard BattleRandomSystem.percentChance(cappedChance, random: &random) else { continue }
+
+            logs.append(.init(turn: turn,
+                              message: "\(currentPerformer.displayName)の\(reaction.displayName)",
+                              type: .action,
+                              actorId: currentPerformer.identifier,
+                              targetId: targetActor.identifier,
+                              metadata: [
+                                  "category": "reaction",
+                                  "reactionId": reaction.identifier
+                              ]))
+
+            executeReactionAttack(from: side,
+                                  actorIndex: actorIndex,
+                                  target: resolvedTarget,
+                                  reaction: reaction,
+                                  depth: depth + 1,
+                                  turn: turn,
+                                  players: &players,
+                                  enemies: &enemies,
+                                  logs: &logs,
+                                  random: &random)
+        }
+    }
+
+    private static func executeReactionAttack(from side: ActorSide,
+                                              actorIndex: Int,
+                                              target: (ActorSide, Int),
+                                              reaction: BattleActor.SkillEffects.Reaction,
+                                              depth: Int,
+                                              turn: Int,
+                                              players: inout [BattleActor],
+                                              enemies: inout [BattleActor],
+                                              logs: inout [BattleLogEntry],
+                                              random: inout GameRandomSource) {
+        guard let attacker = actor(for: side, index: actorIndex, players: players, enemies: enemies),
+              attacker.isAlive else { return }
+        guard actor(for: target.0, index: target.1, players: players, enemies: enemies) != nil else { return }
+
+        let baseHits = max(1, attacker.snapshot.attackCount)
+        let scaledHits = max(1, Int(round(Double(baseHits) * reaction.attackCountMultiplier)))
+        var modifiedAttacker = attacker
+        let scaledCritical = Int((Double(modifiedAttacker.snapshot.criticalRate) * reaction.criticalRateMultiplier).rounded(.down))
+        modifiedAttacker.snapshot.criticalRate = max(0, min(100, scaledCritical))
+
+        let attackResult = performAttack(attacker: modifiedAttacker,
+                                         defender: actor(for: target.0, index: target.1, players: players, enemies: enemies)!,
+                                         turn: turn,
+                                         logs: &logs,
+                                         random: &random,
+                                         hitCountOverride: scaledHits,
+                                         accuracyMultiplier: reaction.accuracyMultiplier)
+
+        _ = applyAttackOutcome(attackerSide: side,
+                               attackerIndex: actorIndex,
+                               defenderSide: target.0,
+                               defenderIndex: target.1,
+                               attacker: attackResult.attacker,
+                               defender: attackResult.defender,
+                               attackResult: attackResult,
+                               turn: turn,
+                               logs: &logs,
+                               players: &players,
+                               enemies: &enemies,
+                               random: &random,
+                               reactionDepth: depth)
+    }
+
+    private static func actorIndices(for side: ActorSide,
+                                     players: [BattleActor],
+                                     enemies: [BattleActor]) -> [Int] {
+        switch side {
+        case .player:
+            return Array(players.indices)
+        case .enemy:
+            return Array(enemies.indices)
+        }
+    }
+
+    private static func reference(for side: ActorSide, index: Int) -> ActorReference {
+        switch side {
+        case .player:
+            return .player(index)
+        case .enemy:
+            return .enemy(index)
+        }
+    }
+
+
     private static func isActionLocked(effect: AppliedStatusEffect) -> Bool {
         statusDefinition(for: effect)?.actionLocked ?? false
     }
@@ -1416,5 +1710,31 @@ struct BattleTurnEngine {
             retained.append(buff)
         }
         actor.timedBuffs = retained
+    }
+}
+
+private extension BattleActor.SkillEffects.Reaction.Trigger {
+    func matches(event: BattleTurnEngine.ReactionEvent) -> Bool {
+        switch (self, event) {
+        case (.allyDefeated, .allyDefeated):
+            return true
+        case (.selfEvadePhysical, .selfEvadePhysical):
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+private extension BattleActor.SkillEffects.Reaction {
+    func preferredTarget(for event: BattleTurnEngine.ReactionEvent) -> BattleTurnEngine.ActorReference? {
+        switch (target, event) {
+        case (.killer, .allyDefeated(_, _, let killer)):
+            return killer
+        case (.attacker, .allyDefeated(_, _, let killer)):
+            return killer
+        case (_, .selfEvadePhysical(_, _, let attacker)):
+            return attacker
+        }
     }
 }

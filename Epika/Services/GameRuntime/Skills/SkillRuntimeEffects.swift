@@ -12,6 +12,8 @@ enum SkillRuntimeEffectCompiler {
         var criticalDamagePercent: Double = 0.0
         var criticalDamageMultiplier: Double = 1.0
         var criticalDamageTakenMultiplier: Double = 1.0
+        var reactions: [BattleActor.SkillEffects.Reaction] = []
+        var counterAttackEvasionMultiplier: Double = 1.0
 
         for skill in skills {
             for effect in skill.effects {
@@ -49,6 +51,16 @@ enum SkillRuntimeEffectCompiler {
                     if let multiplier = payload.value["multiplier"] {
                         criticalDamageTakenMultiplier *= multiplier
                     }
+                case "counterAttackEvasionMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        counterAttackEvasionMultiplier *= multiplier
+                    }
+                case "reaction":
+                    if let reaction = BattleActor.SkillEffects.Reaction.make(from: payload,
+                                                                             skillName: skill.name,
+                                                                             skillId: skill.id) {
+                        reactions.append(reaction)
+                    }
                 default:
                     continue
                 }
@@ -81,7 +93,9 @@ enum SkillRuntimeEffectCompiler {
                                         criticalDamageMultiplier: criticalDamageMultiplier,
                                         criticalDamageTakenMultiplier: criticalDamageTakenMultiplier,
                                         healingGiven: 1.0,
-                                        healingReceived: 1.0)
+                                        healingReceived: 1.0,
+                                        reactions: reactions,
+                                        counterAttackEvasionMultiplier: counterAttackEvasionMultiplier)
     }
 
     static func rewardComponents(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.RewardComponents {
@@ -182,6 +196,51 @@ enum SkillRuntimeEffectCompiler {
     }()
 }
 
+private extension BattleActor.SkillEffects.Reaction {
+    static func make(from payload: SkillEffectPayload,
+                     skillName: String,
+                     skillId: String) -> BattleActor.SkillEffects.Reaction? {
+        guard payload.effectType == "reaction" else { return nil }
+        guard let triggerRaw = payload.parameters?["trigger"],
+              let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: triggerRaw) else { return nil }
+        guard (payload.parameters?["action"] ?? "") == "counterAttack" else { return nil }
+        let target = BattleActor.SkillEffects.Reaction.Target(rawValue: payload.parameters?["target"] ?? "") ?? .attacker
+        let requiresMartial = (payload.parameters?["requiresMartial"]?.lowercased() == "true")
+        let damageIdentifier = payload.parameters?["damageType"] ?? "physical"
+        let damageType = BattleDamageType(identifier: damageIdentifier) ?? .physical
+        let baseChance = payload.value["baseChancePercent"] ?? 100.0
+        let attackCountMultiplier = payload.value["attackCountMultiplier"] ?? 0.3
+        let criticalRateMultiplier = payload.value["criticalRateMultiplier"] ?? 0.5
+        let accuracyMultiplier = payload.value["accuracyMultiplier"] ?? 1.0
+
+        return BattleActor.SkillEffects.Reaction(identifier: skillId,
+                                                 displayName: skillName,
+                                                 trigger: trigger,
+                                                 target: target,
+                                                 damageType: damageType,
+                                                 baseChancePercent: baseChance,
+                                                 attackCountMultiplier: attackCountMultiplier,
+                                                 criticalRateMultiplier: criticalRateMultiplier,
+                                                 accuracyMultiplier: accuracyMultiplier,
+                                                 requiresMartial: requiresMartial)
+    }
+}
+
+private extension BattleDamageType {
+    init?(identifier: String) {
+        switch identifier {
+        case "physical":
+            self = .physical
+        case "magical":
+            self = .magical
+        case "breath":
+            self = .breath
+        default:
+            return nil
+        }
+    }
+}
+
 struct SkillRuntimeEffects {
     struct RewardComponents: Sendable, Hashable {
         var experienceMultiplierProduct: Double = 1.0
@@ -280,7 +339,9 @@ extension BattleActor.SkillEffects {
                                                   criticalDamageMultiplier: 1.0,
                                                   criticalDamageTakenMultiplier: 1.0,
                                                   healingGiven: 1.0,
-                                                  healingReceived: 1.0)
+                                                  healingReceived: 1.0,
+                                                  reactions: [],
+                                                  counterAttackEvasionMultiplier: 1.0)
 }
 
 private struct SkillEffectPayload: Decodable {
