@@ -231,11 +231,47 @@ private struct SkillEffectAggregator {
     let martialBonuses: MartialBonuses
 
     init(skills: [SkillDefinition]) {
-        self.talents = TalentModifiers()
-        self.passives = PassiveMultipliers()
-        self.additives = AdditiveBonuses()
-        self.critical = CriticalParameters()
-        self.martialBonuses = MartialBonuses()
+        var talents = TalentModifiers()
+        var passives = PassiveMultipliers()
+        var additives = AdditiveBonuses()
+        var critical = CriticalParameters()
+        let martial = MartialBonuses()
+
+        for skill in skills {
+            for effect in skill.effects {
+                guard let payload = SkillEffectAggregator.payload(from: effect) else { continue }
+                switch payload.effectType {
+                case "additionalDamageAdditive":
+                    if let value = payload.value["additive"] {
+                        additives.add(stat: .additionalDamage, value: value)
+                    }
+                case "additionalDamageMultiplier":
+                    if let value = payload.value["multiplier"] {
+                        passives.multiply(stat: .additionalDamage, value: value)
+                    }
+                case "criticalRateAdditive":
+                    if let points = payload.value["points"] {
+                        critical.flatBonus += points
+                    }
+                case "criticalRateCap":
+                    if let cap = payload.value["cap"] {
+                        if let current = critical.cap {
+                            critical.cap = min(current, cap)
+                        } else {
+                            critical.cap = cap
+                        }
+                    }
+                default:
+                    continue
+                }
+            }
+        }
+
+        self.talents = talents
+        self.passives = passives
+        self.additives = additives
+        self.critical = critical
+        self.martialBonuses = martial
     }
 
     struct MartialBonuses {
@@ -243,6 +279,28 @@ private struct SkillEffectAggregator {
         var multiplier: Double = 1.0
     }
 
+}
+
+private extension SkillEffectAggregator {
+    struct Payload: Decodable {
+        let effectType: String
+        let parameters: [String: String]?
+        let value: [String: Double]
+    }
+
+    static func payload(from effect: SkillDefinition.Effect) -> Payload? {
+        guard !effect.payloadJSON.isEmpty,
+              let data = effect.payloadJSON.data(using: .utf8) else {
+            return nil
+        }
+        return try? decoder.decode(Payload.self, from: data)
+    }
+
+    private static let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }()
 }
 
 // MARK: - Combat Calculation
