@@ -212,6 +212,7 @@ private extension BattleActor.SkillEffects.Reaction {
         let attackCountMultiplier = payload.value["attackCountMultiplier"] ?? 0.3
         let criticalRateMultiplier = payload.value["criticalRateMultiplier"] ?? 0.5
         let accuracyMultiplier = payload.value["accuracyMultiplier"] ?? 1.0
+        let requiresAllyBehind = (payload.parameters?["requiresAllyBehind"]?.lowercased() == "true")
 
         return BattleActor.SkillEffects.Reaction(identifier: skillId,
                                                  displayName: skillName,
@@ -222,7 +223,8 @@ private extension BattleActor.SkillEffects.Reaction {
                                                  attackCountMultiplier: attackCountMultiplier,
                                                  criticalRateMultiplier: criticalRateMultiplier,
                                                  accuracyMultiplier: accuracyMultiplier,
-                                                 requiresMartial: requiresMartial)
+                                                 requiresMartial: requiresMartial,
+                                                 requiresAllyBehind: requiresAllyBehind)
     }
 }
 

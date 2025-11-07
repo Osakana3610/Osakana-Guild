@@ -176,6 +176,9 @@ struct BattleActor: Sendable {
             enum Trigger: String, Sendable {
                 case allyDefeated
                 case selfEvadePhysical
+                case selfDamagedPhysical
+                case selfDamagedMagical
+                case allyDamagedPhysical
             }
 
             enum Target: String, Sendable {
@@ -193,6 +196,7 @@ struct BattleActor: Sendable {
             let criticalRateMultiplier: Double
             let accuracyMultiplier: Double
             let requiresMartial: Bool
+            let requiresAllyBehind: Bool
         }
 
         var damageTaken: DamageMultipliers

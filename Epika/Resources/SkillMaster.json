@@ -5108,25 +5108,123 @@
         ]
       },
       {
-        "familyId": "reaction.counter.martialEvade",
+        "familyId": "reaction.counter.selfDamagedPhysical",
         "effectType": "reaction",
         "parameters": {
           "action": "counterAttack",
-          "trigger": "selfEvadePhysical",
+          "trigger": "selfDamagedPhysical",
           "target": "attacker",
-          "damageType": "physical",
-          "requiresMartial": "true"
+          "damageType": "physical"
         },
         "variants": [
           {
-            "id": "reaction.counter.martialEvade.standard",
-            "label": "[反撃] 格闘回避時反撃",
+            "id": "reaction.counter.selfDamagedPhysical.standard",
+            "label": "[反撃] 被弾時反撃",
             "value": {
               "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
               "criticalRateMultiplier": 0.5,
               "accuracyMultiplier": 1.0
             }
+          },
+          {
+            "id": "reaction.counter.selfDamagedPhysical.master",
+            "label": "[反撃] 被弾時反撃（上級）",
+            "value": {
+              "baseChancePercent": 100,
+              "attackCountMultiplier": 0.4,
+              "criticalRateMultiplier": 0.7,
+              "accuracyMultiplier": 1.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "reaction.counter.selfDamagedMagical",
+        "effectType": "reaction",
+        "parameters": {
+          "action": "counterAttack",
+          "trigger": "selfDamagedMagical",
+          "target": "attacker",
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": "reaction.counter.selfDamagedMagical.standard",
+            "label": "[反撃] 魔法被弾時反撃",
+            "value": {
+              "baseChancePercent": 100,
+              "attackCountMultiplier": 0.3,
+              "criticalRateMultiplier": 0.5,
+              "accuracyMultiplier": 1.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "reaction.counter.allyDamagedPhysical",
+        "effectType": "reaction",
+        "parameters": {
+          "action": "counterAttack",
+          "trigger": "allyDamagedPhysical",
+          "target": "attacker",
+          "damageType": "physical",
+          "requiresAllyBehind": "true"
+        },
+        "variants": [
+          {
+            "id": "reaction.counter.allyDamagedPhysical.rearguard",
+            "label": "[反撃] 後列護衛反撃",
+            "value": {
+              "baseChancePercent": 100,
+              "attackCountMultiplier": 0.3,
+              "criticalRateMultiplier": 0.5,
+              "accuracyMultiplier": 1.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "reaction.counter.selfEvadePhysical",
+        "effectType": "reaction",
+        "parameters": {
+          "action": "counterAttack",
+          "trigger": "selfEvadePhysical",
+          "target": "attacker",
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": "reaction.counter.selfEvadePhysical.standard",
+            "label": "[反撃] 回避時反撃",
+            "value": {
+              "baseChancePercent": 100,
+              "attackCountMultiplier": 0.3,
+              "criticalRateMultiplier": 0.5,
+              "accuracyMultiplier": 1.0
+            }
+          },
+          {
+            "id": "reaction.counter.selfEvadePhysical.martial",
+            "label": "[反撃] 格闘回避時反撃",
+            "effects": [
+              {
+                "effectType": "reaction",
+                "parameters": {
+                  "action": "counterAttack",
+                  "trigger": "selfEvadePhysical",
+                  "target": "attacker",
+                  "damageType": "physical",
+                  "requiresMartial": "true"
+                },
+                "value": {
+                  "baseChancePercent": 100,
+                  "attackCountMultiplier": 0.3,
+                  "criticalRateMultiplier": 0.5,
+                  "accuracyMultiplier": 1.0
+                }
+              }
+            ]
           }
         ]
       }

@@ -177,6 +177,9 @@ struct BattleTurnEngine {
     fileprivate enum ReactionEvent {
         case allyDefeated(side: ActorSide, fallenIndex: Int, killer: ActorReference?)
         case selfEvadePhysical(side: ActorSide, actorIndex: Int, attacker: ActorReference)
+        case selfDamagedPhysical(side: ActorSide, actorIndex: Int, attacker: ActorReference)
+        case selfDamagedMagical(side: ActorSide, actorIndex: Int, attacker: ActorReference)
+        case allyDamagedPhysical(side: ActorSide, defenderIndex: Int, attacker: ActorReference)
     }
 
     private static let maxReactionDepth = 4
@@ -663,18 +666,27 @@ struct BattleTurnEngine {
                               "category": ActionCategory.arcaneMagic.logIdentifier
                           ]))
 
-        if !target.isAlive {
-            appendDefeatLog(for: target, turn: turn, logs: &logs)
-        }
+        let attackResult = AttackResult(attacker: caster,
+                                        defender: target,
+                                        totalDamage: applied,
+                                        successfulHits: applied > 0 ? 1 : 0,
+                                        defenderWasDefeated: !target.isAlive,
+                                        defenderEvadedAttack: false,
+                                        damageKind: .magical)
 
-        if side == targetRef.0 && attackerIndex == targetRef.1 {
-            var merged = target
-            merged.actionResources = caster.actionResources
-            assign(merged, to: side, index: attackerIndex, players: &players, enemies: &enemies)
-        } else {
-            assign(caster, to: side, index: attackerIndex, players: &players, enemies: &enemies)
-            assign(target, to: targetRef.0, index: targetRef.1, players: &players, enemies: &enemies)
-        }
+        _ = applyAttackOutcome(attackerSide: side,
+                               attackerIndex: attackerIndex,
+                               defenderSide: targetRef.0,
+                               defenderIndex: targetRef.1,
+                               attacker: attackResult.attacker,
+                               defender: attackResult.defender,
+                               attackResult: attackResult,
+                               turn: turn,
+                               logs: &logs,
+                               players: &players,
+                               enemies: &enemies,
+                               random: &random,
+                               reactionDepth: 0)
 
         return true
     }
@@ -721,18 +733,27 @@ struct BattleTurnEngine {
                               "category": ActionCategory.breath.logIdentifier
                           ]))
 
-        if !target.isAlive {
-            appendDefeatLog(for: target, turn: turn, logs: &logs)
-        }
+        let attackResult = AttackResult(attacker: attacker,
+                                        defender: target,
+                                        totalDamage: applied,
+                                        successfulHits: applied > 0 ? 1 : 0,
+                                        defenderWasDefeated: !target.isAlive,
+                                        defenderEvadedAttack: false,
+                                        damageKind: .breath)
 
-        if side == targetRef.0 && attackerIndex == targetRef.1 {
-            var merged = target
-            merged.actionResources = attacker.actionResources
-            assign(merged, to: side, index: attackerIndex, players: &players, enemies: &enemies)
-        } else {
-            assign(attacker, to: side, index: attackerIndex, players: &players, enemies: &enemies)
-            assign(target, to: targetRef.0, index: targetRef.1, players: &players, enemies: &enemies)
-        }
+        _ = applyAttackOutcome(attackerSide: side,
+                               attackerIndex: attackerIndex,
+                               defenderSide: targetRef.0,
+                               defenderIndex: targetRef.1,
+                               attacker: attackResult.attacker,
+                               defender: attackResult.defender,
+                               attackResult: attackResult,
+                               turn: turn,
+                               logs: &logs,
+                               players: &players,
+                               enemies: &enemies,
+                               random: &random,
+                               reactionDepth: 0)
 
         return true
     }
@@ -857,6 +878,7 @@ struct BattleTurnEngine {
         var successfulHits: Int
         var defenderWasDefeated: Bool
         var defenderEvadedAttack: Bool
+        var damageKind: BattleDamageType
     }
 
     private struct AttackOutcome {
@@ -915,6 +937,62 @@ struct BattleTurnEngine {
             currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
         }
 
+        if attackResult.successfulHits > 0 && !attackResult.defenderWasDefeated {
+            let attackerRef = reference(for: attackerSide, index: attackerIndex)
+            switch attackResult.damageKind {
+            case .physical:
+                dispatchReactions(for: .selfDamagedPhysical(side: defenderSide,
+                                                            actorIndex: defenderIndex,
+                                                            attacker: attackerRef),
+                                  depth: reactionDepth,
+                                  turn: turn,
+                                  players: &players,
+                                  enemies: &enemies,
+                                  logs: &logs,
+                                  random: &random)
+                dispatchReactions(for: .allyDamagedPhysical(side: defenderSide,
+                                                            defenderIndex: defenderIndex,
+                                                            attacker: attackerRef),
+                                  depth: reactionDepth,
+                                  turn: turn,
+                                  players: &players,
+                                  enemies: &enemies,
+                                  logs: &logs,
+                                  random: &random)
+            case .magical:
+                dispatchReactions(for: .selfDamagedMagical(side: defenderSide,
+                                                           actorIndex: defenderIndex,
+                                                           attacker: attackerRef),
+                                  depth: reactionDepth,
+                                  turn: turn,
+                                  players: &players,
+                                  enemies: &enemies,
+                                  logs: &logs,
+                                  random: &random)
+            case .breath:
+                dispatchReactions(for: .selfDamagedPhysical(side: defenderSide,
+                                                            actorIndex: defenderIndex,
+                                                            attacker: attackerRef),
+                                  depth: reactionDepth,
+                                  turn: turn,
+                                  players: &players,
+                                  enemies: &enemies,
+                                  logs: &logs,
+                                  random: &random)
+                dispatchReactions(for: .allyDamagedPhysical(side: defenderSide,
+                                                            defenderIndex: defenderIndex,
+                                                            attacker: attackerRef),
+                                  depth: reactionDepth,
+                                  turn: turn,
+                                  players: &players,
+                                  enemies: &enemies,
+                                  logs: &logs,
+                                  random: &random)
+            }
+            currentAttacker = actor(for: attackerSide, index: attackerIndex, players: players, enemies: enemies)
+            currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
+        }
+
         return AttackOutcome(attacker: currentAttacker, defender: currentDefender)
     }
 
@@ -942,7 +1020,8 @@ struct BattleTurnEngine {
                                 totalDamage: 0,
                                 successfulHits: 0,
                                 defenderWasDefeated: false,
-                                defenderEvadedAttack: false)
+                                defenderEvadedAttack: false,
+                                damageKind: .physical)
         }
 
         let hitCount = max(1, hitCountOverride ?? attackerCopy.snapshot.attackCount)
@@ -1016,7 +1095,8 @@ struct BattleTurnEngine {
                              totalDamage: totalDamage,
                              successfulHits: successfulHits,
                              defenderWasDefeated: defenderDefeated,
-                             defenderEvadedAttack: defenderEvaded)
+                             defenderEvadedAttack: defenderEvaded,
+                             damageKind: .physical)
     }
 
     private static func executeFollowUpSequence(attackerSide: ActorSide,
@@ -1440,11 +1520,13 @@ struct BattleTurnEngine {
                                  depth: depth,
                                  turn: turn,
                                  players: &players,
-                                 enemies: &enemies,
-                                 logs: &logs,
-                                 random: &random)
+                                  enemies: &enemies,
+                                  logs: &logs,
+                                  random: &random)
             }
-        case .selfEvadePhysical(let side, let actorIndex, _):
+        case .selfDamagedPhysical(let side, let actorIndex, _),
+                .selfDamagedMagical(let side, let actorIndex, _),
+                .selfEvadePhysical(let side, let actorIndex, _):
             attemptReactions(on: side,
                              actorIndex: actorIndex,
                              event: event,
@@ -1454,6 +1536,18 @@ struct BattleTurnEngine {
                              enemies: &enemies,
                              logs: &logs,
                              random: &random)
+        case .allyDamagedPhysical(let side, _, _):
+            for index in actorIndices(for: side, players: players, enemies: enemies) {
+                attemptReactions(on: side,
+                                 actorIndex: index,
+                                 event: event,
+                                 depth: depth,
+                                 turn: turn,
+                                 players: &players,
+                                 enemies: &enemies,
+                                 logs: &logs,
+                                 random: &random)
+            }
         }
     }
 
@@ -1477,7 +1571,20 @@ struct BattleTurnEngine {
             if reaction.requiresMartial && !shouldUseMartialAttack(attacker: currentPerformer) {
                 continue
             }
-            guard reaction.damageType == .physical else { continue }
+
+            if case .allyDamagedPhysical(_, let defenderIndex, _) = event,
+               defenderIndex == actorIndex {
+                continue
+            }
+
+            if reaction.requiresAllyBehind {
+                guard case .allyDamagedPhysical(let eventSide, let defenderIndex, _) = event,
+                      eventSide == side,
+                      let attackedActor = actor(for: side, index: defenderIndex, players: players, enemies: enemies),
+                      currentPerformer.formationSlot.row < attackedActor.formationSlot.row else {
+                    continue
+                }
+            }
 
             var targetReference = reaction.preferredTarget(for: event).flatMap(referenceToSideIndex)
             if targetReference == nil {
@@ -1551,7 +1658,7 @@ struct BattleTurnEngine {
                                               random: inout GameRandomSource) {
         guard let attacker = actor(for: side, index: actorIndex, players: players, enemies: enemies),
               attacker.isAlive else { return }
-        guard actor(for: target.0, index: target.1, players: players, enemies: enemies) != nil else { return }
+        guard let initialTarget = actor(for: target.0, index: target.1, players: players, enemies: enemies) else { return }
 
         let baseHits = max(1, attacker.snapshot.attackCount)
         let scaledHits = max(1, Int(round(Double(baseHits) * reaction.attackCountMultiplier)))
@@ -1559,13 +1666,80 @@ struct BattleTurnEngine {
         let scaledCritical = Int((Double(modifiedAttacker.snapshot.criticalRate) * reaction.criticalRateMultiplier).rounded(.down))
         modifiedAttacker.snapshot.criticalRate = max(0, min(100, scaledCritical))
 
-        let attackResult = performAttack(attacker: modifiedAttacker,
-                                         defender: actor(for: target.0, index: target.1, players: players, enemies: enemies)!,
+        let attackResult: AttackResult
+        switch reaction.damageType {
+        case .physical:
+            attackResult = performAttack(attacker: modifiedAttacker,
+                                         defender: initialTarget,
                                          turn: turn,
                                          logs: &logs,
                                          random: &random,
                                          hitCountOverride: scaledHits,
                                          accuracyMultiplier: reaction.accuracyMultiplier)
+        case .magical:
+            let attackerCopy = modifiedAttacker
+            var targetCopy = initialTarget
+            var totalDamage = 0
+            var defeated = false
+            let iterations = max(1, scaledHits)
+            for _ in 0..<iterations {
+                guard attackerCopy.isAlive, targetCopy.isAlive else { break }
+                let damage = computeMagicalDamage(attacker: attackerCopy,
+                                                  defender: targetCopy,
+                                                  random: &random)
+                let applied = applyDamage(amount: damage, to: &targetCopy)
+                totalDamage += applied
+                if applied > 0 {
+                    logs.append(.init(turn: turn,
+                                      message: "\(attackerCopy.displayName)の\(reaction.displayName)！ \(targetCopy.displayName)に\(applied)ダメージ！",
+                                      type: .damage,
+                                      actorId: attackerCopy.identifier,
+                                      targetId: targetCopy.identifier,
+                                      metadata: [
+                                          "damage": "\(applied)",
+                                          "targetHP": "\(targetCopy.currentHP)",
+                                          "category": ActionCategory.arcaneMagic.logIdentifier
+                                      ]))
+                }
+                if !targetCopy.isAlive {
+                    defeated = true
+                    break
+                }
+            }
+            attackResult = AttackResult(attacker: attackerCopy,
+                                        defender: targetCopy,
+                                        totalDamage: totalDamage,
+                                        successfulHits: totalDamage > 0 ? 1 : 0,
+                                        defenderWasDefeated: defeated,
+                                        defenderEvadedAttack: false,
+                                        damageKind: .magical)
+        case .breath:
+            let attackerCopy = modifiedAttacker
+            var targetCopy = initialTarget
+            let damage = computeBreathDamage(attacker: attackerCopy,
+                                             defender: targetCopy,
+                                             random: &random)
+            let applied = applyDamage(amount: damage, to: &targetCopy)
+            if applied > 0 {
+                logs.append(.init(turn: turn,
+                                  message: "\(attackerCopy.displayName)の\(reaction.displayName)！ \(targetCopy.displayName)に\(applied)ダメージ！",
+                                  type: .damage,
+                                  actorId: attackerCopy.identifier,
+                                  targetId: targetCopy.identifier,
+                                  metadata: [
+                                      "damage": "\(applied)",
+                                      "targetHP": "\(targetCopy.currentHP)",
+                                      "category": ActionCategory.breath.logIdentifier
+                                  ]))
+            }
+            attackResult = AttackResult(attacker: attackerCopy,
+                                        defender: targetCopy,
+                                        totalDamage: applied,
+                                        successfulHits: applied > 0 ? 1 : 0,
+                                        defenderWasDefeated: !targetCopy.isAlive,
+                                        defenderEvadedAttack: false,
+                                        damageKind: .breath)
+        }
 
         _ = applyAttackOutcome(attackerSide: side,
                                attackerIndex: actorIndex,
@@ -1720,6 +1894,12 @@ private extension BattleActor.SkillEffects.Reaction.Trigger {
             return true
         case (.selfEvadePhysical, .selfEvadePhysical):
             return true
+        case (.selfDamagedPhysical, .selfDamagedPhysical):
+            return true
+        case (.selfDamagedMagical, .selfDamagedMagical):
+            return true
+        case (.allyDamagedPhysical, .allyDamagedPhysical):
+            return true
         default:
             return false
         }
@@ -1734,6 +1914,44 @@ private extension BattleActor.SkillEffects.Reaction {
         case (.attacker, .allyDefeated(_, _, let killer)):
             return killer
         case (_, .selfEvadePhysical(_, _, let attacker)):
+            return attacker
+        case (_, .selfDamagedPhysical(_, _, let attacker)):
+            return attacker
+        case (_, .selfDamagedMagical(_, _, let attacker)):
+            return attacker
+        case (_, .allyDamagedPhysical(_, _, let attacker)):
+            return attacker
+        }
+    }
+}
+
+private extension BattleTurnEngine.ReactionEvent {
+    var defenderIndex: Int? {
+        switch self {
+        case .allyDefeated(_, let fallenIndex, _):
+            return fallenIndex
+        case .selfEvadePhysical(_, let actorIndex, _):
+            return actorIndex
+        case .selfDamagedPhysical(_, let actorIndex, _):
+            return actorIndex
+        case .selfDamagedMagical(_, let actorIndex, _):
+            return actorIndex
+        case .allyDamagedPhysical(_, let defenderIndex, _):
+            return defenderIndex
+        }
+    }
+
+    var attackerReference: BattleTurnEngine.ActorReference? {
+        switch self {
+        case .allyDefeated(_, _, let killer):
+            return killer
+        case .selfEvadePhysical(_, _, let attacker):
+            return attacker
+        case .selfDamagedPhysical(_, _, let attacker):
+            return attacker
+        case .selfDamagedMagical(_, _, let attacker):
+            return attacker
+        case .allyDamagedPhysical(_, _, let attacker):
             return attacker
         }
     }
