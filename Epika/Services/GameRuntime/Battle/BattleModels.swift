@@ -252,6 +252,7 @@ struct BattleActor: Sendable {
     var guardActive: Bool
     var attackHistory: BattleAttackHistory
     var skillEffects: SkillEffects
+    var spellbook: SkillRuntimeEffects.Spellbook
 
     init(identifier: String,
          displayName: String,
@@ -278,7 +279,8 @@ struct BattleActor: Sendable {
          timedBuffs: [TimedBuff] = [],
          guardActive: Bool = false,
          attackHistory: BattleAttackHistory = BattleAttackHistory(),
-         skillEffects: SkillEffects = .neutral) {
+         skillEffects: SkillEffects = .neutral,
+         spellbook: SkillRuntimeEffects.Spellbook = .empty) {
         self.identifier = identifier
         self.displayName = displayName
         self.kind = kind
@@ -305,6 +307,7 @@ struct BattleActor: Sendable {
         self.guardActive = guardActive
         self.attackHistory = attackHistory
         self.skillEffects = skillEffects
+        self.spellbook = spellbook
     }
 
     var isAlive: Bool { currentHP > 0 }

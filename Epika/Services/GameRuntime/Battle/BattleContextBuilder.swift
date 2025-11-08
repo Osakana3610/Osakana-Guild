@@ -38,7 +38,8 @@ struct BattleContextBuilder {
                 currentHP: state.progress.hitPoints.current,
                 actionRates: BattleContextBuilder.defaultPlayerActionRates(for: state),
                 actionResources: resources,
-                skillEffects: skillEffects
+                skillEffects: skillEffects,
+                spellbook: state.spellbook
             )
             actors.append(actor)
         }

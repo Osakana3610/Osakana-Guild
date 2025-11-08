@@ -99,6 +99,7 @@ struct RuntimeCharacterState: Sendable {
     let personalitySecondary: PersonalitySecondaryDefinition?
     let learnedSkills: [SkillDefinition]
     let loadout: Loadout
+    let spellbook: SkillRuntimeEffects.Spellbook
 
     var combatSnapshot: RuntimeCharacterProgress.Combat { progress.combat }
     var isMartialEligible: Bool {
@@ -128,6 +129,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     let masteredSkills: [SkillDefinition]
     let statusEffects: [StatusEffectDefinition]
     let martialEligible: Bool
+    let spellbook: SkillRuntimeEffects.Spellbook
 
     var id: UUID { progress.id }
     var name: String { progress.displayName }

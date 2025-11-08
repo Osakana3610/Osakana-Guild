@@ -177,6 +177,44 @@ enum SkillRuntimeEffectCompiler {
         return modifiers
     }
 
+    static func spellbook(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.Spellbook {
+        guard !skills.isEmpty else { return SkillRuntimeEffects.emptySpellbook }
+        var learnedSpellIds: Set<String> = []
+        var forgottenSpellIds: Set<String> = []
+        var tierUnlocks: [String: Int] = [:]
+
+        for skill in skills {
+            for effect in skill.effects {
+                guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
+                switch payload.effectType {
+                case "spellAccess":
+                    guard let spellId = payload.parameters?["spellId"] else { continue }
+                    let action = (payload.parameters?["action"] ?? "learn").lowercased()
+                    if action == "forget" {
+                        forgottenSpellIds.insert(spellId)
+                    } else {
+                        learnedSpellIds.insert(spellId)
+                    }
+                case "spellTierUnlock":
+                    guard let school = payload.parameters?["school"],
+                          let tierValue = payload.value["tier"] else { continue }
+                    let tier = max(0, Int(tierValue.rounded(.towardZero)))
+                    guard tier > 0 else { continue }
+                    let current = tierUnlocks[school] ?? 0
+                    if tier > current {
+                        tierUnlocks[school] = tier
+                    }
+                default:
+                    continue
+                }
+            }
+        }
+
+        return SkillRuntimeEffects.Spellbook(learnedSpellIds: learnedSpellIds,
+                                             forgottenSpellIds: forgottenSpellIds,
+                                             tierUnlocks: tierUnlocks)
+    }
+
     private static func decodePayload(from effect: SkillDefinition.Effect, skillId: String) throws -> SkillEffectPayload? {
         guard !effect.payloadJSON.isEmpty,
               let data = effect.payloadJSON.data(using: .utf8) else {
@@ -264,6 +302,18 @@ private extension BattleActor.SkillEffects.RowProfile {
 }
 
 struct SkillRuntimeEffects {
+    struct Spellbook: Sendable, Hashable {
+        var learnedSpellIds: Set<String>
+        var forgottenSpellIds: Set<String>
+        var tierUnlocks: [String: Int]
+
+        static let empty = Spellbook(learnedSpellIds: [],
+                                     forgottenSpellIds: [],
+                                     tierUnlocks: [:])
+    }
+
+    static let emptySpellbook = Spellbook.empty
+
     struct RewardComponents: Sendable, Hashable {
         var experienceMultiplierProduct: Double = 1.0
         var experienceBonusSum: Double = 0.0

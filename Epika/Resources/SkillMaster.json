@@ -5210,6 +5210,522 @@
             }
           }
         ]
+      },
+      {
+        "familyId": "spellTierUnlock.arcane",
+        "effectType": "spellTierUnlock",
+        "parameters": {
+          "school": "arcane"
+        },
+        "variants": [
+          {
+            "id": "spellTierUnlock.arcane.tier1",
+            "label": "[解放] 魔導術Lv1",
+            "value": {
+              "tier": 1
+            }
+          },
+          {
+            "id": "spellTierUnlock.arcane.tier2",
+            "label": "[解放] 魔導術Lv2",
+            "value": {
+              "tier": 2
+            }
+          },
+          {
+            "id": "spellTierUnlock.arcane.tier3",
+            "label": "[解放] 魔導術Lv3",
+            "value": {
+              "tier": 3
+            }
+          },
+          {
+            "id": "spellTierUnlock.arcane.tier4",
+            "label": "[解放] 魔導術Lv4",
+            "value": {
+              "tier": 4
+            }
+          },
+          {
+            "id": "spellTierUnlock.arcane.tier5",
+            "label": "[解放] 魔導術Lv5",
+            "value": {
+              "tier": 5
+            }
+          },
+          {
+            "id": "spellTierUnlock.arcane.tier6",
+            "label": "[解放] 魔導術Lv6",
+            "value": {
+              "tier": 6
+            }
+          },
+          {
+            "id": "spellTierUnlock.arcane.tier7",
+            "label": "[解放] 魔導術Lv7",
+            "value": {
+              "tier": 7
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellTierUnlock.cleric",
+        "effectType": "spellTierUnlock",
+        "parameters": {
+          "school": "cleric"
+        },
+        "variants": [
+          {
+            "id": "spellTierUnlock.cleric.tier1",
+            "label": "[解放] 祈祷術Lv1",
+            "value": {
+              "tier": 1
+            }
+          },
+          {
+            "id": "spellTierUnlock.cleric.tier2",
+            "label": "[解放] 祈祷術Lv2",
+            "value": {
+              "tier": 2
+            }
+          },
+          {
+            "id": "spellTierUnlock.cleric.tier3",
+            "label": "[解放] 祈祷術Lv3",
+            "value": {
+              "tier": 3
+            }
+          },
+          {
+            "id": "spellTierUnlock.cleric.tier4",
+            "label": "[解放] 祈祷術Lv4",
+            "value": {
+              "tier": 4
+            }
+          },
+          {
+            "id": "spellTierUnlock.cleric.tier5",
+            "label": "[解放] 祈祷術Lv5",
+            "value": {
+              "tier": 5
+            }
+          },
+          {
+            "id": "spellTierUnlock.cleric.tier6",
+            "label": "[解放] 祈祷術Lv6",
+            "value": {
+              "tier": 6
+            }
+          },
+          {
+            "id": "spellTierUnlock.cleric.tier7",
+            "label": "[解放] 祈祷術Lv7",
+            "value": {
+              "tier": 7
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellAccess.arcane.learn",
+        "effectType": "spellAccess",
+        "parameters": {
+          "action": "learn"
+        },
+        "variants": [
+          {
+            "id": "spellAccess.arcane.learn.tier1",
+            "label": "[習得] 魔導術Lv1",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.magic_arrow"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.learn.tier2",
+            "label": "[習得] 魔導術Lv2",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.sleep_cloud"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.learn.tier3",
+            "label": "[習得] 魔導術Lv3",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.fireball"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.learn.tier4",
+            "label": "[習得] 魔導術Lv4",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.blizzard"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.learn.tier5",
+            "label": "[習得] 魔導術Lv5",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.attack_up"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.learn.tier6",
+            "label": "[習得] 魔導術Lv6",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.thunder_bolt"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.learn.tier7",
+            "label": "[習得] 魔導術Lv7",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.nuclear"
+                },
+                "value": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "spellAccess.arcane.forget",
+        "effectType": "spellAccess",
+        "parameters": {
+          "action": "forget"
+        },
+        "variants": [
+          {
+            "id": "spellAccess.arcane.forget.tier1",
+            "label": "[忘却] 魔導術Lv1",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.magic_arrow"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.forget.tier2",
+            "label": "[忘却] 魔導術Lv2",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.sleep_cloud"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.forget.tier3",
+            "label": "[忘却] 魔導術Lv3",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.fireball"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.forget.tier4",
+            "label": "[忘却] 魔導術Lv4",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.blizzard"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.forget.tier5",
+            "label": "[忘却] 魔導術Lv5",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.attack_up"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.forget.tier6",
+            "label": "[忘却] 魔導術Lv6",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.thunder_bolt"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.arcane.forget.tier7",
+            "label": "[忘却] 魔導術Lv7",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.arcane.nuclear"
+                },
+                "value": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "spellAccess.cleric.learn",
+        "effectType": "spellAccess",
+        "parameters": {
+          "action": "learn"
+        },
+        "variants": [
+          {
+            "id": "spellAccess.cleric.learn.tier1",
+            "label": "[習得] 祈祷術Lv1",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.heal"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.learn.tier2",
+            "label": "[習得] 祈祷術Lv2",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.shield_barrier"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.learn.tier3",
+            "label": "[習得] 祈祷術Lv3",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.cure"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.learn.tier4",
+            "label": "[習得] 祈祷術Lv4",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.heal_plus"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.learn.tier5",
+            "label": "[習得] 祈祷術Lv5",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.magic_barrier"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.learn.tier6",
+            "label": "[習得] 祈祷術Lv6",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.full_heal"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.learn.tier7",
+            "label": "[習得] 祈祷術Lv7",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.party_heal"
+                },
+                "value": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "spellAccess.cleric.forget",
+        "effectType": "spellAccess",
+        "parameters": {
+          "action": "forget"
+        },
+        "variants": [
+          {
+            "id": "spellAccess.cleric.forget.tier1",
+            "label": "[忘却] 祈祷術Lv1",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.heal"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.forget.tier2",
+            "label": "[忘却] 祈祷術Lv2",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.shield_barrier"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.forget.tier3",
+            "label": "[忘却] 祈祷術Lv3",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.cure"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.forget.tier4",
+            "label": "[忘却] 祈祷術Lv4",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.heal_plus"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.forget.tier5",
+            "label": "[忘却] 祈祷術Lv5",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.magic_barrier"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.forget.tier6",
+            "label": "[忘却] 祈祷術Lv6",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.full_heal"
+                },
+                "value": {}
+              }
+            ]
+          },
+          {
+            "id": "spellAccess.cleric.forget.tier7",
+            "label": "[忘却] 祈祷術Lv7",
+            "effects": [
+              {
+                "effectType": "spellAccess",
+                "parameters": {
+                  "spellId": "spell.cleric.party_heal"
+                },
+                "value": {}
+              }
+            ]
+          }
+        ]
       }
     ]
   },

@@ -57,7 +57,8 @@ struct CombatSnapshotBuilder {
                                           personalityPrimary: nil,
                                           personalitySecondary: nil,
                                           learnedSkills: [],
-                                          loadout: .init(items: [], titles: [], superRareTitles: []))
+                                          loadout: .init(items: [], titles: [], superRareTitles: []),
+                                          spellbook: .empty)
 
         do {
             let context = CombatStatCalculator.Context(progress: progress, state: state)

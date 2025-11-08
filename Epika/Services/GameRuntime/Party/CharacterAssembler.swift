@@ -19,6 +19,8 @@ enum CharacterAssembler {
             secondary = try await repository.personalitySecondary(withId: secondaryId)
         }
 
+        let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
+
         return RuntimeCharacterState(
             progress: progress,
             race: try await raceDef,
@@ -26,7 +28,8 @@ enum CharacterAssembler {
             personalityPrimary: primary,
             personalitySecondary: secondary,
             learnedSkills: learnedSkills,
-            loadout: loadout
+            loadout: loadout,
+            spellbook: spellbook
         )
     }
 
@@ -39,7 +42,8 @@ enum CharacterAssembler {
             jobData: state.job,
             masteredSkills: state.learnedSkills,
             statusEffects: [],
-            martialEligible: state.isMartialEligible
+            martialEligible: state.isMartialEligible,
+            spellbook: state.spellbook
         )
     }
 
