@@ -948,6 +948,136 @@
         ]
       },
       {
+        "familyId": "rowProfile.melee",
+        "effectType": "rowProfile",
+        "variants": [
+          {
+            "id": "rowProfile.melee.base",
+            "label": "[隊列] 近距離攻撃",
+            "value": {},
+            "parameters": {
+              "profile": "melee"
+            }
+          },
+          {
+            "id": "rowProfile.melee.apt",
+            "label": "[隊列] 近距離攻撃適正",
+            "value": {},
+            "parameters": {
+              "profile": "melee",
+              "nearApt": "true"
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "rowProfile.ranged",
+        "effectType": "rowProfile",
+        "variants": [
+          {
+            "id": "rowProfile.ranged.base",
+            "label": "[隊列] 遠距離攻撃",
+            "value": {},
+            "parameters": {
+              "profile": "ranged"
+            }
+          },
+          {
+            "id": "rowProfile.ranged.apt",
+            "label": "[隊列] 遠距離攻撃適正",
+            "value": {},
+            "parameters": {
+              "profile": "ranged",
+              "farApt": "true"
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "rowProfile.mixed",
+        "effectType": "rowProfile",
+        "variants": [
+          {
+            "id": "rowProfile.mixed.base",
+            "label": "[隊列] 遠近混合",
+            "value": {},
+            "parameters": {
+              "profile": "mixed"
+            }
+          },
+          {
+            "id": "rowProfile.mixed.nearApt",
+            "label": "[隊列] 遠近混合・近距離適正",
+            "value": {},
+            "parameters": {
+              "profile": "mixed",
+              "nearApt": "true"
+            }
+          },
+          {
+            "id": "rowProfile.mixed.farApt",
+            "label": "[隊列] 遠近混合・遠距離適正",
+            "value": {},
+            "parameters": {
+              "profile": "mixed",
+              "farApt": "true"
+            }
+          },
+          {
+            "id": "rowProfile.mixed.dualApt",
+            "label": "[隊列] 遠近混合・両適正",
+            "value": {},
+            "parameters": {
+              "profile": "mixed",
+              "nearApt": "true",
+              "farApt": "true"
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "rowProfile.balanced",
+        "effectType": "rowProfile",
+        "variants": [
+          {
+            "id": "rowProfile.balanced.base",
+            "label": "[隊列] 遠近両用",
+            "value": {},
+            "parameters": {
+              "profile": "balanced"
+            }
+          },
+          {
+            "id": "rowProfile.balanced.nearApt",
+            "label": "[隊列] 遠近両用・近距離適正",
+            "value": {},
+            "parameters": {
+              "profile": "balanced",
+              "nearApt": "true"
+            }
+          },
+          {
+            "id": "rowProfile.balanced.farApt",
+            "label": "[隊列] 遠近両用・遠距離適正",
+            "value": {},
+            "parameters": {
+              "profile": "balanced",
+              "farApt": "true"
+            }
+          },
+          {
+            "id": "rowProfile.balanced.dualApt",
+            "label": "[隊列] 遠近両用・両適正",
+            "value": {},
+            "parameters": {
+              "profile": "balanced",
+              "nearApt": "true",
+              "farApt": "true"
+            }
+          }
+        ]
+      },
+      {
         "familyId": "additionalDamage.additive",
         "effectType": "additionalDamageAdditive",
         "variants": [

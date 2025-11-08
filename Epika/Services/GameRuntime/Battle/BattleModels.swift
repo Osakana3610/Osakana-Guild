@@ -199,6 +199,19 @@ struct BattleActor: Sendable {
             let requiresAllyBehind: Bool
         }
 
+        struct RowProfile: Sendable, Hashable {
+            enum Base: String, Sendable {
+                case melee
+                case ranged
+                case mixed
+                case balanced
+            }
+
+            var base: Base = .melee
+            var hasMeleeApt: Bool = false
+            var hasRangedApt: Bool = false
+        }
+
         var damageTaken: DamageMultipliers
         var damageDealt: DamageMultipliers
         var damageDealtAgainst: TargetMultipliers
@@ -209,6 +222,7 @@ struct BattleActor: Sendable {
         var healingReceived: Double
         var reactions: [Reaction]
         var counterAttackEvasionMultiplier: Double
+        var rowProfile: RowProfile
     }
 
     let identifier: String

@@ -14,6 +14,7 @@ enum SkillRuntimeEffectCompiler {
         var criticalDamageTakenMultiplier: Double = 1.0
         var reactions: [BattleActor.SkillEffects.Reaction] = []
         var counterAttackEvasionMultiplier: Double = 1.0
+        var rowProfile = BattleActor.SkillEffects.RowProfile()
 
         for skill in skills {
             for effect in skill.effects {
@@ -61,6 +62,8 @@ enum SkillRuntimeEffectCompiler {
                                                                              skillId: skill.id) {
                         reactions.append(reaction)
                     }
+                case "rowProfile":
+                    rowProfile.applyParameters(payload.parameters)
                 default:
                     continue
                 }
@@ -95,7 +98,8 @@ enum SkillRuntimeEffectCompiler {
                                         healingGiven: 1.0,
                                         healingReceived: 1.0,
                                         reactions: reactions,
-                                        counterAttackEvasionMultiplier: counterAttackEvasionMultiplier)
+                                        counterAttackEvasionMultiplier: counterAttackEvasionMultiplier,
+                                        rowProfile: rowProfile)
     }
 
     static func rewardComponents(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.RewardComponents {
@@ -243,6 +247,22 @@ private extension BattleDamageType {
     }
 }
 
+private extension BattleActor.SkillEffects.RowProfile {
+    mutating func applyParameters(_ parameters: [String: String]?) {
+        guard let parameters else { return }
+        if let baseRaw = parameters["profile"],
+           let parsedBase = Base(rawValue: baseRaw) {
+            base = parsedBase
+        }
+        if let near = parameters["nearApt"], near.lowercased() == "true" {
+            hasMeleeApt = true
+        }
+        if let far = parameters["farApt"], far.lowercased() == "true" {
+            hasRangedApt = true
+        }
+    }
+}
+
 struct SkillRuntimeEffects {
     struct RewardComponents: Sendable, Hashable {
         var experienceMultiplierProduct: Double = 1.0
@@ -343,7 +363,8 @@ extension BattleActor.SkillEffects {
                                                   healingGiven: 1.0,
                                                   healingReceived: 1.0,
                                                   reactions: [],
-                                                  counterAttackEvasionMultiplier: 1.0)
+                                                  counterAttackEvasionMultiplier: 1.0,
+                                                  rowProfile: .init())
 }
 
 private struct SkillEffectPayload: Decodable {

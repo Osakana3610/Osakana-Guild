@@ -1316,13 +1316,42 @@ struct BattleTurnEngine {
 
     private static func rowDamageModifier(for attacker: BattleActor, damageType: BattleDamageType) -> Double {
         guard damageType == .physical else { return 1.0 }
-        switch attacker.rowIndex {
-        case 0:
-            return 1.0
-        case 1:
-            return 0.85
-        default:
-            return 0.72
+        let row = max(0, min(5, attacker.rowIndex))
+        let profile = attacker.skillEffects.rowProfile
+        switch profile.base {
+        case .melee:
+            if profile.hasMeleeApt {
+                return meleeAptRow[row]
+            } else {
+                return meleeBaseRow[row]
+            }
+        case .ranged:
+            let index = 5 - row
+            if profile.hasRangedApt {
+                return rangedAptRow[index]
+            } else {
+                return rangedBaseRow[index]
+            }
+        case .mixed:
+            if profile.hasMeleeApt && profile.hasRangedApt {
+                return mixedDualAptRow[row]
+            } else if profile.hasMeleeApt {
+                return mixedMeleeAptRow[row]
+            } else if profile.hasRangedApt {
+                return mixedRangedAptRow[row]
+            } else {
+                return mixedBaseRow[row]
+            }
+        case .balanced:
+            if profile.hasMeleeApt && profile.hasRangedApt {
+                return balancedDualAptRow[row]
+            } else if profile.hasMeleeApt {
+                return balancedMeleeAptRow[row]
+            } else if profile.hasRangedApt {
+                return balancedRangedAptRow[row]
+            } else {
+                return balancedBaseRow[row]
+            }
         }
     }
 
@@ -1446,6 +1475,19 @@ struct BattleTurnEngine {
     ]
 
     private static let criticalDefenseRetainedFactor: Double = 0.5
+
+    private static let meleeBaseRow: [Double] = [1.0, 0.85, 0.72, 0.61, 0.52, 0.44]
+    private static let meleeAptRow: [Double] = [1.28, 1.03, 0.84, 0.68, 0.55, 0.44]
+    private static let rangedBaseRow: [Double] = meleeBaseRow
+    private static let rangedAptRow: [Double] = meleeAptRow
+    private static let mixedBaseRow: [Double] = Array(repeating: 0.44, count: 6)
+    private static let mixedMeleeAptRow: [Double] = [0.57, 0.54, 0.51, 0.49, 0.47, 0.44]
+    private static let mixedRangedAptRow: [Double] = mixedMeleeAptRow.reversed()
+    private static let mixedDualAptRow: [Double] = Array(repeating: 0.57, count: 6)
+    private static let balancedBaseRow: [Double] = Array(repeating: 0.80, count: 6)
+    private static let balancedMeleeAptRow: [Double] = [1.02, 0.97, 0.93, 0.88, 0.84, 0.80]
+    private static let balancedRangedAptRow: [Double] = balancedMeleeAptRow.reversed()
+    private static let balancedDualAptRow: [Double] = Array(repeating: 1.02, count: 6)
 
     private static func clampProbability(_ value: Double) -> Double {
         return min(0.98, max(0.05, value))
