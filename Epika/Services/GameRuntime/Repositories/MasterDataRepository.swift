@@ -8,6 +8,8 @@ actor MasterDataRepository {
     private var itemsById: [String: ItemDefinition]?
     private var skillsCache: [SkillDefinition]?
     private var skillsById: [String: SkillDefinition]?
+    private var spellsCache: [SpellDefinition]?
+    private var spellsById: [String: SpellDefinition]?
     private var enemiesCache: [EnemyDefinition]?
     private var enemiesById: [String: EnemyDefinition]?
     private var statusEffectsCache: [StatusEffectDefinition]?
@@ -92,6 +94,38 @@ actor MasterDataRepository {
         for id in ids {
             guard let definition = skillsById[id] else {
                 throw RuntimeError.masterDataNotFound(entity: "skill", identifier: id)
+            }
+            definitions.append(definition)
+        }
+        return definitions
+    }
+
+    func allSpells() async throws -> [SpellDefinition] {
+        if let spellsCache { return spellsCache }
+        try await ensureInitialized()
+        let spells = try await manager.fetchAllSpells()
+        self.spellsCache = spells
+        self.spellsById = Dictionary(uniqueKeysWithValues: spells.map { ($0.id, $0) })
+        return spells
+    }
+
+    func spell(withId id: String) async throws -> SpellDefinition? {
+        if let spellsById, let definition = spellsById[id] { return definition }
+        _ = try await allSpells()
+        return spellsById?[id]
+    }
+
+    func spells(withIds ids: [String]) async throws -> [SpellDefinition] {
+        guard !ids.isEmpty else { return [] }
+        _ = try await allSpells()
+        guard let spellsById else {
+            throw RuntimeError.invalidConfiguration(reason: "Spell cache is unavailable")
+        }
+        var definitions: [SpellDefinition] = []
+        definitions.reserveCapacity(ids.count)
+        for id in ids {
+            guard let definition = spellsById[id] else {
+                throw RuntimeError.masterDataNotFound(entity: "spell", identifier: id)
             }
             definitions.append(definition)
         }

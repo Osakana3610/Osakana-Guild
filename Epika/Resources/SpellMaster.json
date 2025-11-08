@@ -1,0 +1,175 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-08",
+  "spells": [
+    {
+      "id": "spell.arcane.magic_arrow",
+      "name": "マジックアロー",
+      "school": "arcane",
+      "tier": 1,
+      "category": "damage",
+      "targeting": "randomEnemies",
+      "maxTargetsBase": 3,
+      "hitsPerCast": 3,
+      "basePowerMultiplier": 1.0,
+      "description": "3本の魔法の矢で任意の敵へダメージを与える。単体相手には複数命中することもある。"
+    },
+    {
+      "id": "spell.arcane.sleep_cloud",
+      "name": "スリープクラウド",
+      "school": "arcane",
+      "tier": 2,
+      "category": "status",
+      "targeting": "randomEnemies",
+      "maxTargetsBase": 12,
+      "extraTargetsPerLevels": 0.16666666666666666,
+      "statusId": "status.sleep",
+      "description": "広範囲に眠りの雲を発生させ、多数の敵を眠らせる。ダメージは発生しない。"
+    },
+    {
+      "id": "spell.arcane.fireball",
+      "name": "ファイヤーボール",
+      "school": "arcane",
+      "tier": 3,
+      "category": "damage",
+      "targeting": "randomEnemiesDistinct",
+      "maxTargetsBase": 6,
+      "extraTargetsPerLevels": 0.08333333333333333,
+      "basePowerMultiplier": 1.1,
+      "description": "炎の爆発で複数の敵へダメージ。魔法攻撃力の影響が大きい。"
+    },
+    {
+      "id": "spell.arcane.blizzard",
+      "name": "ブリザード",
+      "school": "arcane",
+      "tier": 4,
+      "category": "damage",
+      "targeting": "randomEnemiesDistinct",
+      "maxTargetsBase": 8,
+      "extraTargetsPerLevels": 0.125,
+      "basePowerMultiplier": 1.0,
+      "description": "吹雪で多数の敵を攻撃する。Lv上昇による威力増加が大きい。"
+    },
+    {
+      "id": "spell.arcane.attack_up",
+      "name": "アタックアップ",
+      "school": "arcane",
+      "tier": 5,
+      "category": "buff",
+      "targeting": "partyAllies",
+      "buffs": [
+        {
+          "type": "physicalDamageDealt",
+          "multiplier": 1.6
+        }
+      ],
+      "description": "味方の物理与ダメージを1.6倍にする戦術バフ。戦闘中永続。"
+    },
+    {
+      "id": "spell.arcane.thunder_bolt",
+      "name": "サンダーボルト",
+      "school": "arcane",
+      "tier": 6,
+      "category": "damage",
+      "targeting": "singleEnemy",
+      "basePowerMultiplier": 1.6,
+      "description": "単体へ強烈な雷撃を放ち大ダメージを与える。"
+    },
+    {
+      "id": "spell.arcane.nuclear",
+      "name": "ニュークリア",
+      "school": "arcane",
+      "tier": 7,
+      "category": "damage",
+      "targeting": "randomEnemiesDistinct",
+      "maxTargetsBase": 15,
+      "extraTargetsPerLevels": 0.25,
+      "basePowerMultiplier": 1.2,
+      "description": "核爆発で多数の敵を攻撃し、魔法防御の影響を半減させる。"
+    },
+    {
+      "id": "spell.cleric.heal",
+      "name": "ヒール",
+      "school": "cleric",
+      "tier": 1,
+      "category": "healing",
+      "targeting": "singleAlly",
+      "healMultiplier": 1.0,
+      "description": "味方1人のHPを回復する基本魔法。"
+    },
+    {
+      "id": "spell.cleric.shield_barrier",
+      "name": "シールドバリア",
+      "school": "cleric",
+      "tier": 2,
+      "category": "buff",
+      "targeting": "partyAllies",
+      "buffs": [
+        {
+          "type": "physicalDamageTaken",
+          "multiplier": 0.5
+        },
+        {
+          "type": "breathDamageTaken",
+          "multiplier": 0.5
+        }
+      ],
+      "description": "味方が受ける攻撃・ブレスダメージを半減するバリアを展開。"
+    },
+    {
+      "id": "spell.cleric.cure",
+      "name": "キュア",
+      "school": "cleric",
+      "tier": 3,
+      "category": "cleanse",
+      "targeting": "partyAllies",
+      "description": "味方全員の状態異常を治療する。"
+    },
+    {
+      "id": "spell.cleric.heal_plus",
+      "name": "ヒールプラス",
+      "school": "cleric",
+      "tier": 4,
+      "category": "healing",
+      "targeting": "singleAlly",
+      "healMultiplier": 1.6,
+      "description": "味方1人のHPを大きく回復させる。"
+    },
+    {
+      "id": "spell.cleric.magic_barrier",
+      "name": "マジックバリア",
+      "school": "cleric",
+      "tier": 5,
+      "category": "buff",
+      "targeting": "partyAllies",
+      "buffs": [
+        {
+          "type": "magicalDamageTaken",
+          "multiplier": 0.5
+        }
+      ],
+      "description": "味方が受ける魔法ダメージを半減する結界を張る。"
+    },
+    {
+      "id": "spell.cleric.full_heal",
+      "name": "フルヒール",
+      "school": "cleric",
+      "tier": 6,
+      "category": "healing",
+      "targeting": "singleAlly",
+      "healMultiplier": 2.5,
+      "castCondition": "targetHalfHP",
+      "description": "HPが半分以下の味方を完全回復させる。"
+    },
+    {
+      "id": "spell.cleric.party_heal",
+      "name": "パーティヒール",
+      "school": "cleric",
+      "tier": 7,
+      "category": "healing",
+      "targeting": "partyAllies",
+      "healMultiplier": 0.7,
+      "description": "味方全員のHPを回復させる。"
+    }
+  ]
+}

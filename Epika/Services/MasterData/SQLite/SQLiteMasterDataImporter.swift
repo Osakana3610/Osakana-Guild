@@ -34,6 +34,7 @@ struct MasterDataResourceLocator {
 enum MasterDataFile: String, CaseIterable {
     case items = "ItemMaster"
     case skills = "SkillMaster"
+    case spells = "SpellMaster"
     case jobs = "JobMaster"
     case races = "RaceDataMaster"
     case titles = "TitleMaster"
@@ -57,6 +58,7 @@ extension SQLiteMasterDataManager {
 #endif
         try await importAndRecord(.items, locator: locator, importer: importItemMaster)
         try await importAndRecord(.skills, locator: locator, importer: importSkillMaster)
+        try await importAndRecord(.spells, locator: locator, importer: importSpellMaster)
         try await importAndRecord(.jobs, locator: locator, importer: importJobMaster)
         try await importAndRecord(.races, locator: locator, importer: importRaceMaster)
         try await importAndRecord(.titles, locator: locator, importer: importTitleMaster)
