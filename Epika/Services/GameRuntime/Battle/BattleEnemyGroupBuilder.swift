@@ -79,7 +79,10 @@ struct BattleEnemyGroupBuilder {
                                                                        arcaneMagic: group.definition.actionRates.arcaneMagic,
                                                                        breath: group.definition.actionRates.breath),
                                         actionResources: resources,
-                                        skillEffects: skillEffects)
+                                        barrierCharges: skillEffects.barrierCharges,
+                                        skillEffects: skillEffects,
+                                        spellbook: .empty,
+                                        spells: .empty)
                 actors.append(actor)
                 encountered.append(EncounteredEnemy(definition: group.definition, level: levelOverride))
                 slotIndex += 1
@@ -136,16 +139,19 @@ struct BattleEnemyGroupBuilder {
                                     avatarIdentifier: nil,
                                     isMartialEligible: false,
                                     raceId: definition.race,
-                                    raceCategory: raceCategory,
-                                    snapshot: snapshot,
-                                    currentHP: snapshot.maxHP,
-                                    actionRates: BattleActionRates(attack: definition.actionRates.attack,
-                                                                   clericMagic: definition.actionRates.clericMagic,
-                                                                   arcaneMagic: definition.actionRates.arcaneMagic,
-                                                                   breath: definition.actionRates.breath),
-                                    actionResources: resources,
-                                    skillEffects: skillEffects)
-            actors.append(actor)
+                                        raceCategory: raceCategory,
+                                        snapshot: snapshot,
+                                        currentHP: snapshot.maxHP,
+                                        actionRates: BattleActionRates(attack: definition.actionRates.attack,
+                                                                       clericMagic: definition.actionRates.clericMagic,
+                                                                       arcaneMagic: definition.actionRates.arcaneMagic,
+                                                                       breath: definition.actionRates.breath),
+                                        actionResources: resources,
+                                        barrierCharges: skillEffects.barrierCharges,
+                                        skillEffects: skillEffects,
+                                        spellbook: .empty,
+                                        spells: .empty)
+                actors.append(actor)
         }
         return actors
     }

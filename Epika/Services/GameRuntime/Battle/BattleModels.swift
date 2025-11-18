@@ -172,6 +172,13 @@ struct BattleActor: Sendable {
             static let neutral = TargetMultipliers()
         }
 
+        struct SpellPower: Sendable, Hashable {
+            var percent: Double
+            var multiplier: Double
+
+            static let neutral = SpellPower(percent: 0.0, multiplier: 1.0)
+        }
+
         struct Reaction: Sendable, Hashable {
             enum Trigger: String, Sendable {
                 case allyDefeated
@@ -212,17 +219,53 @@ struct BattleActor: Sendable {
             var hasRangedApt: Bool = false
         }
 
+        struct StatusResistance: Sendable, Hashable {
+            var multiplier: Double
+            var additivePercent: Double
+
+            static let neutral = StatusResistance(multiplier: 1.0, additivePercent: 0.0)
+        }
+
+        struct TimedBuffTrigger: Sendable, Hashable {
+            enum Scope: String, Sendable {
+                case party
+            }
+
+            let id: String
+            let displayName: String
+            let triggerTurn: Int
+            let modifiers: [String: Double]
+            let scope: Scope
+            let category: String
+        }
+
         var damageTaken: DamageMultipliers
         var damageDealt: DamageMultipliers
         var damageDealtAgainst: TargetMultipliers
+        var spellPower: SpellPower
+        var spellSpecificMultipliers: [String: Double]
         var criticalDamagePercent: Double
         var criticalDamageMultiplier: Double
         var criticalDamageTakenMultiplier: Double
+        var penetrationDamageTakenMultiplier: Double
+        var martialBonusPercent: Double
+        var martialBonusMultiplier: Double
+        var actionOrderMultiplier: Double
         var healingGiven: Double
         var healingReceived: Double
+        var endOfTurnHealingPercent: Double
         var reactions: [Reaction]
         var counterAttackEvasionMultiplier: Double
         var rowProfile: RowProfile
+        var statusResistances: [String: StatusResistance]
+        var timedBuffTriggers: [TimedBuffTrigger]
+        var barrierCharges: [String: Int]
+        var guardBarrierCharges: [String: Int]
+        var degradationPercent: Double
+        var degradationRepairMinPercent: Double
+        var degradationRepairMaxPercent: Double
+        var degradationRepairBonusPercent: Double
+        var autoDegradationRepair: Bool
     }
 
     let identifier: String
@@ -248,11 +291,15 @@ struct BattleActor: Sendable {
         var actionRates: BattleActionRates
     var actionResources: BattleActionResource
     var statusEffects: [AppliedStatusEffect]
-    var timedBuffs: [TimedBuff]
-    var guardActive: Bool
-    var attackHistory: BattleAttackHistory
-    var skillEffects: SkillEffects
-    var spellbook: SkillRuntimeEffects.Spellbook
+        var timedBuffs: [TimedBuff]
+        var guardActive: Bool
+        var barrierCharges: [String: Int]
+        var guardBarrierCharges: [String: Int]
+        var attackHistory: BattleAttackHistory
+        var skillEffects: SkillEffects
+        var spellbook: SkillRuntimeEffects.Spellbook
+        var spells: SkillRuntimeEffects.SpellLoadout
+        var degradationPercent: Double
 
     init(identifier: String,
          displayName: String,
@@ -278,9 +325,13 @@ struct BattleActor: Sendable {
          statusEffects: [AppliedStatusEffect] = [],
          timedBuffs: [TimedBuff] = [],
          guardActive: Bool = false,
+         barrierCharges: [String: Int] = [:],
+         guardBarrierCharges: [String: Int] = [:],
          attackHistory: BattleAttackHistory = BattleAttackHistory(),
          skillEffects: SkillEffects = .neutral,
-         spellbook: SkillRuntimeEffects.Spellbook = .empty) {
+         spellbook: SkillRuntimeEffects.Spellbook = .empty,
+         spells: SkillRuntimeEffects.SpellLoadout = .empty,
+         degradationPercent: Double = 0.0) {
         self.identifier = identifier
         self.displayName = displayName
         self.kind = kind
@@ -305,9 +356,13 @@ struct BattleActor: Sendable {
         self.statusEffects = statusEffects
         self.timedBuffs = timedBuffs
         self.guardActive = guardActive
+        self.barrierCharges = barrierCharges
+        self.guardBarrierCharges = guardBarrierCharges
         self.attackHistory = attackHistory
         self.skillEffects = skillEffects
         self.spellbook = spellbook
+        self.spells = spells
+        self.degradationPercent = degradationPercent
     }
 
     var isAlive: Bool { currentHP > 0 }

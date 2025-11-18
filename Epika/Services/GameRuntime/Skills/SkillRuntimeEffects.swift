@@ -9,12 +9,31 @@ enum SkillRuntimeEffectCompiler {
         var takenPercentByType: [String: Double] = ["physical": 0.0, "magical": 0.0, "breath": 0.0]
         var takenMultiplierByType: [String: Double] = ["physical": 1.0, "magical": 1.0, "breath": 1.0]
         var targetMultipliers: [String: Double] = [:]
+        var spellPowerPercent: Double = 0.0
+        var spellPowerMultiplier: Double = 1.0
+        var spellSpecificMultipliers: [String: Double] = [:]
         var criticalDamagePercent: Double = 0.0
         var criticalDamageMultiplier: Double = 1.0
         var criticalDamageTakenMultiplier: Double = 1.0
+        var penetrationDamageTakenMultiplier: Double = 1.0
+        var martialBonusPercent: Double = 0.0
+        var martialBonusMultiplier: Double = 1.0
+        var actionOrderMultiplier: Double = 1.0
+        let healingGiven: Double = 1.0
+        let healingReceived: Double = 1.0
+        var endOfTurnHealingPercent: Double = 0.0
         var reactions: [BattleActor.SkillEffects.Reaction] = []
         var counterAttackEvasionMultiplier: Double = 1.0
         var rowProfile = BattleActor.SkillEffects.RowProfile()
+        var statusResistances: [String: BattleActor.SkillEffects.StatusResistance] = [:]
+        var timedBuffTriggers: [BattleActor.SkillEffects.TimedBuffTrigger] = []
+        var barrierCharges: [String: Int] = [:]
+        var guardBarrierCharges: [String: Int] = [:]
+        let degradationPercent: Double = 0.0
+        var degradationRepairMinPercent: Double = 0.0
+        var degradationRepairMaxPercent: Double = 0.0
+        var degradationRepairBonusPercent: Double = 0.0
+        var autoDegradationRepair: Bool = false
 
         for skill in skills {
             for effect in skill.effects {
@@ -40,6 +59,18 @@ enum SkillRuntimeEffectCompiler {
                     guard let category = payload.parameters?["targetCategory"],
                           let multiplier = payload.value["multiplier"] else { continue }
                     targetMultipliers[category, default: 1.0] *= multiplier
+                case "spellPowerPercent":
+                    if let value = payload.value["valuePercent"] {
+                        spellPowerPercent += value
+                    }
+                case "spellPowerMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        spellPowerMultiplier *= multiplier
+                    }
+                case "spellSpecificMultiplier":
+                    guard let spellId = payload.parameters?["spellId"],
+                          let multiplier = payload.value["multiplier"] else { continue }
+                    spellSpecificMultipliers[spellId, default: 1.0] *= multiplier
                 case "criticalDamagePercent":
                     if let value = payload.value["valuePercent"] {
                         criticalDamagePercent += value
@@ -51,6 +82,26 @@ enum SkillRuntimeEffectCompiler {
                 case "criticalDamageTakenMultiplier":
                     if let multiplier = payload.value["multiplier"] {
                         criticalDamageTakenMultiplier *= multiplier
+                    }
+                case "penetrationDamageTakenMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        penetrationDamageTakenMultiplier *= multiplier
+                    }
+                case "martialBonusPercent":
+                    if let value = payload.value["valuePercent"] {
+                        let requiresUnarmed = payload.parameters?["requiresUnarmed"]?.lowercased() == "true"
+                        martialBonusPercent += value
+                        if requiresUnarmed {
+                            // flag for downstream if needed
+                        }
+                    }
+                case "martialBonusMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        martialBonusMultiplier *= multiplier
+                    }
+                case "actionOrderMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        actionOrderMultiplier *= multiplier
                     }
                 case "counterAttackEvasionMultiplier":
                     if let multiplier = payload.value["multiplier"] {
@@ -64,6 +115,76 @@ enum SkillRuntimeEffectCompiler {
                     }
                 case "rowProfile":
                     rowProfile.applyParameters(payload.parameters)
+                case "statusResistanceMultiplier":
+                    guard let statusId = payload.parameters?["status"],
+                          let multiplier = payload.value["multiplier"] else { continue }
+                    var entry = statusResistances[statusId] ?? .neutral
+                    entry.multiplier *= multiplier
+                    statusResistances[statusId] = entry
+                case "statusResistancePercent":
+                    guard let statusId = payload.parameters?["status"],
+                          let value = payload.value["valuePercent"] else { continue }
+                    var entry = statusResistances[statusId] ?? .neutral
+                    entry.additivePercent += value
+                    statusResistances[statusId] = entry
+                case "endOfTurnHealing":
+                    if let value = payload.value["valuePercent"] {
+                        endOfTurnHealingPercent = max(endOfTurnHealingPercent, value)
+                    }
+                case "barrier":
+                    guard let damageType = payload.parameters?["damageType"],
+                          let charges = payload.value["charges"] else { continue }
+                    let intCharges = max(0, Int(charges.rounded(.towardZero)))
+                    guard intCharges > 0 else { continue }
+                    let current = barrierCharges[damageType] ?? 0
+                    barrierCharges[damageType] = max(current, intCharges)
+                case "barrierOnGuard":
+                    guard let damageType = payload.parameters?["damageType"],
+                          let charges = payload.value["charges"] else { continue }
+                    let intCharges = max(0, Int(charges.rounded(.towardZero)))
+                    guard intCharges > 0 else { continue }
+                    let current = guardBarrierCharges[damageType] ?? 0
+                    guardBarrierCharges[damageType] = max(current, intCharges)
+                case "degradationRepair":
+                    let minP = payload.value["minPercent"] ?? 0.0
+                    let maxP = payload.value["maxPercent"] ?? 0.0
+                    degradationRepairMinPercent = max(degradationRepairMinPercent, minP)
+                    degradationRepairMaxPercent = max(degradationRepairMaxPercent, maxP)
+                case "degradationRepairBoost":
+                    if let bonus = payload.value["valuePercent"] {
+                        degradationRepairBonusPercent += bonus
+                    }
+                case "autoDegradationRepair":
+                    autoDegradationRepair = true
+                case "timedMagicPowerAmplify":
+                    guard let turn = payload.value["triggerTurn"],
+                          let multiplier = payload.value["multiplier"] else { continue }
+                    timedBuffTriggers.append(.init(id: payload.familyId,
+                                                  displayName: skill.name,
+                                                  triggerTurn: Int(turn.rounded(.towardZero)),
+                                                  modifiers: ["magicalDamageDealtMultiplier": multiplier],
+                                                  scope: .party,
+                                                  category: "magic"))
+                case "timedBreathPowerAmplify":
+                    guard let turn = payload.value["triggerTurn"],
+                          let multiplier = payload.value["multiplier"] else { continue }
+                    timedBuffTriggers.append(.init(id: payload.familyId,
+                                                  displayName: skill.name,
+                                                  triggerTurn: Int(turn.rounded(.towardZero)),
+                                                  modifiers: ["breathDamageDealtMultiplier": multiplier],
+                                                  scope: .party,
+                                                  category: "breath"))
+                case "tacticSpellAmplify":
+                    guard let spellId = payload.parameters?["spellId"],
+                          let multiplier = payload.value["multiplier"],
+                          let triggerTurn = payload.value["triggerTurn"] else { continue }
+                    let key = "spellSpecific:" + spellId
+                    timedBuffTriggers.append(.init(id: payload.familyId,
+                                                  displayName: skill.name,
+                                                  triggerTurn: Int(triggerTurn.rounded(.towardZero)),
+                                                  modifiers: [key: multiplier],
+                                                  scope: .party,
+                                                  category: "spell"))
                 default:
                     continue
                 }
@@ -89,17 +210,35 @@ enum SkillRuntimeEffectCompiler {
                                                                magical: totalTakenMultiplier(for: "magical"),
                                                                breath: totalTakenMultiplier(for: "breath"))
         let categoryMultipliers = BattleActor.SkillEffects.TargetMultipliers(storage: targetMultipliers)
+        let spellPower = BattleActor.SkillEffects.SpellPower(percent: spellPowerPercent,
+                                                             multiplier: spellPowerMultiplier)
         return BattleActor.SkillEffects(damageTaken: taken,
                                         damageDealt: dealt,
                                         damageDealtAgainst: categoryMultipliers,
+                                        spellPower: spellPower,
+                                        spellSpecificMultipliers: spellSpecificMultipliers,
                                         criticalDamagePercent: criticalDamagePercent,
                                         criticalDamageMultiplier: criticalDamageMultiplier,
                                         criticalDamageTakenMultiplier: criticalDamageTakenMultiplier,
-                                        healingGiven: 1.0,
-                                        healingReceived: 1.0,
+                                        penetrationDamageTakenMultiplier: penetrationDamageTakenMultiplier,
+                                        martialBonusPercent: martialBonusPercent,
+                                        martialBonusMultiplier: martialBonusMultiplier,
+                                        actionOrderMultiplier: actionOrderMultiplier,
+                                        healingGiven: healingGiven,
+                                        healingReceived: healingReceived,
+                                        endOfTurnHealingPercent: endOfTurnHealingPercent,
                                         reactions: reactions,
                                         counterAttackEvasionMultiplier: counterAttackEvasionMultiplier,
-                                        rowProfile: rowProfile)
+                                        rowProfile: rowProfile,
+                                        statusResistances: statusResistances,
+                                        timedBuffTriggers: timedBuffTriggers,
+                                        barrierCharges: barrierCharges,
+                                        guardBarrierCharges: guardBarrierCharges,
+                                        degradationPercent: degradationPercent,
+                                        degradationRepairMinPercent: degradationRepairMinPercent,
+                                        degradationRepairMaxPercent: degradationRepairMaxPercent,
+                                        degradationRepairBonusPercent: degradationRepairBonusPercent,
+                                        autoDegradationRepair: autoDegradationRepair)
     }
 
     static func rewardComponents(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.RewardComponents {
@@ -215,6 +354,56 @@ enum SkillRuntimeEffectCompiler {
                                              tierUnlocks: tierUnlocks)
     }
 
+    static func spellLoadout(from spellbook: SkillRuntimeEffects.Spellbook,
+                             definitions: [SpellDefinition]) -> SkillRuntimeEffects.SpellLoadout {
+        guard !definitions.isEmpty else { return SkillRuntimeEffects.emptySpellLoadout }
+
+        var unlocks: [SpellDefinition.School: Int] = [:]
+        for (raw, tier) in spellbook.tierUnlocks {
+            guard let school = SpellDefinition.School(rawValue: raw) else { continue }
+            let clampedTier = max(0, tier)
+            if let current = unlocks[school] {
+                unlocks[school] = max(current, clampedTier)
+            } else {
+                unlocks[school] = clampedTier
+            }
+        }
+
+        var allowedIds: Set<String> = []
+        for definition in definitions {
+            guard !spellbook.forgottenSpellIds.contains(definition.id) else { continue }
+            if let unlockedTier = unlocks[definition.school],
+               definition.tier <= unlockedTier {
+                allowedIds.insert(definition.id)
+            }
+        }
+
+        allowedIds.formUnion(spellbook.learnedSpellIds)
+        allowedIds.subtract(spellbook.forgottenSpellIds)
+
+        guard !allowedIds.isEmpty else { return SkillRuntimeEffects.emptySpellLoadout }
+
+        let filtered = definitions
+            .filter { allowedIds.contains($0.id) }
+            .sorted {
+                if $0.tier != $1.tier { return $0.tier < $1.tier }
+                return $0.id < $1.id
+            }
+
+        var arcane: [SpellDefinition] = []
+        var cleric: [SpellDefinition] = []
+        for definition in filtered {
+            switch definition.school {
+            case .arcane:
+                arcane.append(definition)
+            case .cleric:
+                cleric.append(definition)
+            }
+        }
+
+        return SkillRuntimeEffects.SpellLoadout(arcane: arcane, cleric: cleric)
+    }
+
     private static func decodePayload(from effect: SkillDefinition.Effect, skillId: String) throws -> SkillEffectPayload? {
         guard !effect.payloadJSON.isEmpty,
               let data = effect.payloadJSON.data(using: .utf8) else {
@@ -312,7 +501,15 @@ struct SkillRuntimeEffects {
                                      tierUnlocks: [:])
     }
 
+    struct SpellLoadout: Sendable, Hashable {
+        var arcane: [SpellDefinition]
+        var cleric: [SpellDefinition]
+
+        static let empty = SpellLoadout(arcane: [], cleric: [])
+    }
+
     static let emptySpellbook = Spellbook.empty
+    static let emptySpellLoadout = SpellLoadout.empty
 
     struct RewardComponents: Sendable, Hashable {
         var experienceMultiplierProduct: Double = 1.0
@@ -407,14 +604,30 @@ extension BattleActor.SkillEffects {
     static let neutral = BattleActor.SkillEffects(damageTaken: .neutral,
                                                   damageDealt: .neutral,
                                                   damageDealtAgainst: .neutral,
+                                                  spellPower: .neutral,
+                                                  spellSpecificMultipliers: [:],
                                                   criticalDamagePercent: 0.0,
                                                   criticalDamageMultiplier: 1.0,
                                                   criticalDamageTakenMultiplier: 1.0,
+                                                  penetrationDamageTakenMultiplier: 1.0,
+                                                  martialBonusPercent: 0.0,
+                                                  martialBonusMultiplier: 1.0,
+                                                  actionOrderMultiplier: 1.0,
                                                   healingGiven: 1.0,
                                                   healingReceived: 1.0,
+                                                  endOfTurnHealingPercent: 0.0,
                                                   reactions: [],
                                                   counterAttackEvasionMultiplier: 1.0,
-                                                  rowProfile: .init())
+                                                  rowProfile: .init(),
+                                                  statusResistances: [:],
+                                                  timedBuffTriggers: [],
+                                                  barrierCharges: [:],
+                                                  guardBarrierCharges: [:],
+                                                  degradationPercent: 0.0,
+                                                  degradationRepairMinPercent: 0.0,
+                                                  degradationRepairMaxPercent: 0.0,
+                                                  degradationRepairBonusPercent: 0.0,
+                                                  autoDegradationRepair: false)
 }
 
 private struct SkillEffectPayload: Decodable {

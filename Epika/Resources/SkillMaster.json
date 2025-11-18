@@ -463,6 +463,20 @@
         },
         "variants": [
           {
+            "id": "damageDealtMultiplier.physical.0_8",
+            "label": "[0.8倍] 物理攻撃威力倍率",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "damageDealtMultiplier.physical.0_9",
+            "label": "[0.9倍] 物理攻撃威力倍率",
+            "value": {
+              "multiplier": 0.9
+            }
+          },
+          {
             "id": "damageDealtMultiplier.physical.1_1",
             "label": "[1.1倍] 物理攻撃威力倍率",
             "value": {
@@ -586,10 +600,24 @@
         },
         "variants": [
           {
+            "id": "damageDealtMultiplier.breath.0_6667",
+            "label": "[2/3倍] ブレス威力倍率",
+            "value": {
+              "multiplier": 0.6666666667
+            }
+          },
+          {
             "id": "damageDealtMultiplier.breath.1_1",
             "label": "[1.1倍] ブレス威力倍率",
             "value": {
               "multiplier": 1.1
+            }
+          },
+          {
+            "id": "damageDealtMultiplier.breath.1_2",
+            "label": "[1.2倍] ブレス威力倍率",
+            "value": {
+              "multiplier": 1.2
             }
           },
           {
@@ -1309,6 +1337,763 @@
             "label": "[2.20倍] 追加ダメージ倍率",
             "value": {
               "multiplier": 2.2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellPowerPercent.general",
+        "effectType": "spellPowerPercent",
+        "variants": [
+          {
+            "id": "spellPowerPercent.general.-80",
+            "label": "[-80%] 魔法威力補正",
+            "value": {
+              "valuePercent": -80
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.-30",
+            "label": "[-30%] 魔法威力補正",
+            "value": {
+              "valuePercent": -30
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.-20",
+            "label": "[-20%] 魔法威力補正",
+            "value": {
+              "valuePercent": -20
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.5",
+            "label": "[+5%] 魔法威力補正",
+            "value": {
+              "valuePercent": 5
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.6",
+            "label": "[+6%] 魔法威力補正",
+            "value": {
+              "valuePercent": 6
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.7",
+            "label": "[+7%] 魔法威力補正",
+            "value": {
+              "valuePercent": 7
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.8",
+            "label": "[+8%] 魔法威力補正",
+            "value": {
+              "valuePercent": 8
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.9",
+            "label": "[+9%] 魔法威力補正",
+            "value": {
+              "valuePercent": 9
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.10",
+            "label": "[+10%] 魔法威力補正",
+            "value": {
+              "valuePercent": 10
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.11",
+            "label": "[+11%] 魔法威力補正",
+            "value": {
+              "valuePercent": 11
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.12",
+            "label": "[+12%] 魔法威力補正",
+            "value": {
+              "valuePercent": 12
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.13",
+            "label": "[+13%] 魔法威力補正",
+            "value": {
+              "valuePercent": 13
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.14",
+            "label": "[+14%] 魔法威力補正",
+            "value": {
+              "valuePercent": 14
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.15",
+            "label": "[+15%] 魔法威力補正",
+            "value": {
+              "valuePercent": 15
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.16",
+            "label": "[+16%] 魔法威力補正",
+            "value": {
+              "valuePercent": 16
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.17",
+            "label": "[+17%] 魔法威力補正",
+            "value": {
+              "valuePercent": 17
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.18",
+            "label": "[+18%] 魔法威力補正",
+            "value": {
+              "valuePercent": 18
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.19",
+            "label": "[+19%] 魔法威力補正",
+            "value": {
+              "valuePercent": 19
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.20",
+            "label": "[+20%] 魔法威力補正",
+            "value": {
+              "valuePercent": 20
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.21",
+            "label": "[+21%] 魔法威力補正",
+            "value": {
+              "valuePercent": 21
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.22",
+            "label": "[+22%] 魔法威力補正",
+            "value": {
+              "valuePercent": 22
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.23",
+            "label": "[+23%] 魔法威力補正",
+            "value": {
+              "valuePercent": 23
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.25",
+            "label": "[+25%] 魔法威力補正",
+            "value": {
+              "valuePercent": 25
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.30",
+            "label": "[+30%] 魔法威力補正",
+            "value": {
+              "valuePercent": 30
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.40",
+            "label": "[+40%] 魔法威力補正",
+            "value": {
+              "valuePercent": 40
+            }
+          },
+          {
+            "id": "spellPowerPercent.general.50",
+            "label": "[+50%] 魔法威力補正",
+            "value": {
+              "valuePercent": 50
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellPowerMultiplier.general",
+        "effectType": "spellPowerMultiplier",
+        "variants": [
+          {
+            "id": "spellPowerMultiplier.general.0_8",
+            "label": "[×0.80] 魔法威力倍率",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.1_1",
+            "label": "[×1.10] 魔法威力倍率",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.1_2",
+            "label": "[×1.20] 魔法威力倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.1_3",
+            "label": "[×1.30] 魔法威力倍率",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.1_4",
+            "label": "[×1.40] 魔法威力倍率",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.1_5",
+            "label": "[×1.50] 魔法威力倍率",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.1_6",
+            "label": "[×1.60] 魔法威力倍率",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.1_7",
+            "label": "[×1.70] 魔法威力倍率",
+            "value": {
+              "multiplier": 1.7
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.2",
+            "label": "[×2.00] 魔法威力倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.2_4",
+            "label": "[×2.40] 魔法威力倍率",
+            "value": {
+              "multiplier": 2.4
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.3",
+            "label": "[×3.00] 魔法威力倍率",
+            "value": {
+              "multiplier": 3.0
+            }
+          },
+          {
+            "id": "spellPowerMultiplier.general.5",
+            "label": "[×5.00] 魔法威力倍率",
+            "value": {
+              "multiplier": 5.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "tacticMagicPowerAmplify",
+        "effectType": "timedMagicPowerAmplify",
+        "variants": [
+          {
+            "id": "tacticMagicPowerAmplify.T5",
+            "label": "[T5] 魔法威力増幅",
+            "value": {
+              "triggerTurn": 5,
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "tacticMagicPowerAmplify.T10",
+            "label": "[T10] 魔法威力増幅",
+            "value": {
+              "triggerTurn": 10,
+              "multiplier": 2.0
+            }
+          },
+          {
+            "id": "tacticMagicPowerAmplify.T15",
+            "label": "[T15] 魔法威力増幅",
+            "value": {
+              "triggerTurn": 15,
+              "multiplier": 3.0
+            }
+          },
+          {
+            "id": "tacticMagicPowerAmplify.T20",
+            "label": "[T20] 魔法威力増幅",
+            "value": {
+              "triggerTurn": 20,
+              "multiplier": 5.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "tacticBreathPowerAmplify",
+        "effectType": "timedBreathPowerAmplify",
+        "variants": [
+          {
+            "id": "tacticBreathPowerAmplify.L1",
+            "label": "[Lv1/T1] ブレス増幅",
+            "value": {
+              "triggerTurn": 1,
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "tacticBreathPowerAmplify.L2",
+            "label": "[Lv2/T2] ブレス増幅",
+            "value": {
+              "triggerTurn": 2,
+              "multiplier": 2.0
+            }
+          },
+          {
+            "id": "tacticBreathPowerAmplify.L3",
+            "label": "[Lv3/T3] ブレス増幅",
+            "value": {
+              "triggerTurn": 3,
+              "multiplier": 2.8
+            }
+          },
+          {
+            "id": "tacticBreathPowerAmplify.L5",
+            "label": "[Lv5/T5] ブレス増幅",
+            "value": {
+              "triggerTurn": 5,
+              "multiplier": 3.0
+            }
+          },
+          {
+            "id": "tacticBreathPowerAmplify.L10",
+            "label": "[Lv10/T10] ブレス増幅",
+            "value": {
+              "triggerTurn": 10,
+              "multiplier": 5.0
+            }
+          },
+          {
+            "id": "tacticBreathPowerAmplify.L20",
+            "label": "[Lv20/T20] ブレス増幅",
+            "value": {
+              "triggerTurn": 20,
+              "multiplier": 10.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellSpecificMultiplier.spell.arcane.magic_arrow",
+        "effectType": "spellSpecificMultiplier",
+        "parameters": {
+          "spellId": "spell.arcane.magic_arrow"
+        },
+        "variants": [
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_1",
+            "label": "[×1.10] マジックアロー威力",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_2",
+            "label": "[×1.20] マジックアロー威力",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_3",
+            "label": "[×1.30] マジックアロー威力",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_4",
+            "label": "[×1.40] マジックアロー威力",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_6",
+            "label": "[×1.60] マジックアロー威力",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.2",
+            "label": "[×2.00] マジックアロー威力",
+            "value": {
+              "multiplier": 2.0
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.2_5",
+            "label": "[×2.50] マジックアロー威力",
+            "value": {
+              "multiplier": 2.5
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.3",
+            "label": "[×3.00] マジックアロー威力",
+            "value": {
+              "multiplier": 3.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellSpecificMultiplier.spell.arcane.fireball",
+        "effectType": "spellSpecificMultiplier",
+        "parameters": {
+          "spellId": "spell.arcane.fireball"
+        },
+        "variants": [
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_1",
+            "label": "[×1.10] ファイヤーボール威力",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_2",
+            "label": "[×1.20] ファイヤーボール威力",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_25",
+            "label": "[×1.25] ファイヤーボール威力",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_3",
+            "label": "[×1.30] ファイヤーボール威力",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_4",
+            "label": "[×1.40] ファイヤーボール威力",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_6",
+            "label": "[×1.60] ファイヤーボール威力",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.fireball.2",
+            "label": "[×2.00] ファイヤーボール威力",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellSpecificMultiplier.spell.arcane.blizzard",
+        "effectType": "spellSpecificMultiplier",
+        "parameters": {
+          "spellId": "spell.arcane.blizzard"
+        },
+        "variants": [
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_1",
+            "label": "[×1.10] ブリザード威力",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_2",
+            "label": "[×1.20] ブリザード威力",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_3",
+            "label": "[×1.30] ブリザード威力",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_4",
+            "label": "[×1.40] ブリザード威力",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_6",
+            "label": "[×1.60] ブリザード威力",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.blizzard.2",
+            "label": "[×2.00] ブリザード威力",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellSpecificMultiplier.spell.arcane.thunder_bolt",
+        "effectType": "spellSpecificMultiplier",
+        "parameters": {
+          "spellId": "spell.arcane.thunder_bolt"
+        },
+        "variants": [
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_1",
+            "label": "[×1.10] サンダーボルト威力",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_2",
+            "label": "[×1.20] サンダーボルト威力",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_3",
+            "label": "[×1.30] サンダーボルト威力",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_4",
+            "label": "[×1.40] サンダーボルト威力",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_6",
+            "label": "[×1.60] サンダーボルト威力",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.2",
+            "label": "[×2.00] サンダーボルト威力",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellSpecificMultiplier.spell.arcane.nuclear",
+        "effectType": "spellSpecificMultiplier",
+        "parameters": {
+          "spellId": "spell.arcane.nuclear"
+        },
+        "variants": [
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_05",
+            "label": "[×1.05] ニュークリア威力",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_1",
+            "label": "[×1.10] ニュークリア威力",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_15",
+            "label": "[×1.15] ニュークリア威力",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_2",
+            "label": "[×1.20] ニュークリア威力",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_25",
+            "label": "[×1.25] ニュークリア威力",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_3",
+            "label": "[×1.30] ニュークリア威力",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_35",
+            "label": "[×1.35] ニュークリア威力",
+            "value": {
+              "multiplier": 1.35
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_4",
+            "label": "[×1.40] ニュークリア威力",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_5",
+            "label": "[×1.50] ニュークリア威力",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_55",
+            "label": "[×1.55] ニュークリア威力",
+            "value": {
+              "multiplier": 1.55
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_6",
+            "label": "[×1.60] ニュークリア威力",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.arcane.nuclear.2",
+            "label": "[×2.00] ニュークリア威力",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellSpecificMultiplier.spell.cleric.heal",
+        "effectType": "spellSpecificMultiplier",
+        "parameters": {
+          "spellId": "spell.cleric.heal"
+        },
+        "variants": [
+          {
+            "id": "spellSpecificMultiplier.spell.cleric.heal.1_2",
+            "label": "[×1.20] ヒール威力",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.cleric.heal.1_4",
+            "label": "[×1.40] ヒール威力",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.cleric.heal.1_5",
+            "label": "[×1.50] ヒール威力",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellSpecificMultiplier.spell.cleric.heal_plus",
+        "effectType": "spellSpecificMultiplier",
+        "parameters": {
+          "spellId": "spell.cleric.heal_plus"
+        },
+        "variants": [
+          {
+            "id": "spellSpecificMultiplier.spell.cleric.heal_plus.1_4",
+            "label": "[×1.40] ヒールプラス威力",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "spellSpecificMultiplier.spell.cleric.heal_plus.1_5",
+            "label": "[×1.50] ヒールプラス威力",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellSpecificMultiplier.spell.cleric.party_heal",
+        "effectType": "spellSpecificMultiplier",
+        "parameters": {
+          "spellId": "spell.cleric.party_heal"
+        },
+        "variants": [
+          {
+            "id": "spellSpecificMultiplier.spell.cleric.party_heal.1_4",
+            "label": "[×1.40] パーティヒール威力",
+            "value": {
+              "multiplier": 1.4
             }
           }
         ]
@@ -2758,11 +3543,263 @@
             }
           }
         ]
+      },
+      {
+        "familyId": "tacticSpellAmplify.magic_arrow",
+        "effectType": "tacticSpellAmplify",
+        "parameters": {
+          "spellId": "spell.arcane.magic_arrow"
+        },
+        "variants": [
+          {
+            "id": "tacticSpellAmplify.magic_arrow.Lv1",
+            "label": "[Lv1] 魔矢増幅",
+            "value": {
+              "multiplier": 1.3,
+              "triggerTurn": 1
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.magic_arrow.Lv2",
+            "label": "[Lv2] 魔矢増幅",
+            "value": {
+              "multiplier": 2.0,
+              "triggerTurn": 2
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.magic_arrow.Lv3",
+            "label": "[Lv3] 魔矢増幅",
+            "value": {
+              "multiplier": 2.8,
+              "triggerTurn": 3
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "tacticSpellAmplify.fireball",
+        "effectType": "tacticSpellAmplify",
+        "parameters": {
+          "spellId": "spell.arcane.fireball"
+        },
+        "variants": [
+          {
+            "id": "tacticSpellAmplify.fireball.Lv1",
+            "label": "[Lv1] 炎撃増幅",
+            "value": {
+              "multiplier": 1.3,
+              "triggerTurn": 1
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.fireball.Lv2",
+            "label": "[Lv2] 炎撃増幅",
+            "value": {
+              "multiplier": 2.0,
+              "triggerTurn": 2
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.fireball.Lv3",
+            "label": "[Lv3] 炎撃増幅",
+            "value": {
+              "multiplier": 2.8,
+              "triggerTurn": 3
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "tacticSpellAmplify.blizzard",
+        "effectType": "tacticSpellAmplify",
+        "parameters": {
+          "spellId": "spell.arcane.blizzard"
+        },
+        "variants": [
+          {
+            "id": "tacticSpellAmplify.blizzard.Lv1",
+            "label": "[Lv1] 冷撃増幅",
+            "value": {
+              "multiplier": 1.3,
+              "triggerTurn": 1
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.blizzard.Lv2",
+            "label": "[Lv2] 冷撃増幅",
+            "value": {
+              "multiplier": 2.0,
+              "triggerTurn": 2
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.blizzard.Lv3",
+            "label": "[Lv3] 冷撃増幅",
+            "value": {
+              "multiplier": 2.8,
+              "triggerTurn": 3
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "tacticSpellAmplify.thunder_bolt",
+        "effectType": "tacticSpellAmplify",
+        "parameters": {
+          "spellId": "spell.arcane.thunder_bolt"
+        },
+        "variants": [
+          {
+            "id": "tacticSpellAmplify.thunder_bolt.Lv1",
+            "label": "[Lv1] 雷撃増幅",
+            "value": {
+              "multiplier": 1.3,
+              "triggerTurn": 1
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.thunder_bolt.Lv2",
+            "label": "[Lv2] 雷撃増幅",
+            "value": {
+              "multiplier": 2.0,
+              "triggerTurn": 2
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.thunder_bolt.Lv3",
+            "label": "[Lv3] 雷撃増幅",
+            "value": {
+              "multiplier": 2.8,
+              "triggerTurn": 3
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "tacticSpellAmplify.nuclear",
+        "effectType": "tacticSpellAmplify",
+        "parameters": {
+          "spellId": "spell.arcane.nuclear"
+        },
+        "variants": [
+          {
+            "id": "tacticSpellAmplify.nuclear.Lv1",
+            "label": "[Lv1] 核撃増幅",
+            "value": {
+              "multiplier": 1.3,
+              "triggerTurn": 1
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.nuclear.Lv2",
+            "label": "[Lv2] 核撃増幅",
+            "value": {
+              "multiplier": 2.0,
+              "triggerTurn": 2
+            }
+          },
+          {
+            "id": "tacticSpellAmplify.nuclear.Lv3",
+            "label": "[Lv3] 核撃増幅",
+            "value": {
+              "multiplier": 2.8,
+              "triggerTurn": 3
+            }
+          }
+        ]
       }
     ]
   },
   "defense": {
-    "families": [
+      "families": [
+      {
+        "familyId": "tacticBarrier.physical",
+        "effectType": "barrier",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          { "id": "tacticBarrier.physical.Lv1", "label": "[Lv1] 物理結界", "value": { "charges": 1 } },
+          { "id": "tacticBarrier.physical.Lv2", "label": "[Lv2] 物理結界", "value": { "charges": 2 } },
+          { "id": "tacticBarrier.physical.Lv3", "label": "[Lv3] 物理結界", "value": { "charges": 3 } },
+          { "id": "tacticBarrier.physical.Lv5", "label": "[Lv5] 物理結界", "value": { "charges": 5 } },
+          { "id": "tacticBarrier.physical.field", "label": "[フィールド] 物理結界", "value": { "charges": 10 } }
+        ]
+      },
+      {
+        "familyId": "tacticBarrier.magical",
+        "effectType": "barrier",
+        "parameters": {
+          "damageType": "magical"
+        },
+        "variants": [
+          { "id": "tacticBarrier.magical.Lv1", "label": "[Lv1] 魔法結界", "value": { "charges": 1 } },
+          { "id": "tacticBarrier.magical.Lv2", "label": "[Lv2] 魔法結界", "value": { "charges": 2 } },
+          { "id": "tacticBarrier.magical.Lv3", "label": "[Lv3] 魔法結界", "value": { "charges": 3 } },
+          { "id": "tacticBarrier.magical.Lv5", "label": "[Lv5] 魔法結界", "value": { "charges": 5 } },
+          { "id": "tacticBarrier.magical.field", "label": "[フィールド] 魔法結界", "value": { "charges": 10 } }
+        ]
+      },
+      {
+        "familyId": "tacticBarrier.breath",
+        "effectType": "barrier",
+        "parameters": {
+          "damageType": "breath"
+        },
+        "variants": [
+          { "id": "tacticBarrier.breath.Lv1", "label": "[Lv1] ブレス結界", "value": { "charges": 1 } },
+          { "id": "tacticBarrier.breath.Lv2", "label": "[Lv2] ブレス結界", "value": { "charges": 2 } },
+          { "id": "tacticBarrier.breath.Lv3", "label": "[Lv3] ブレス結界", "value": { "charges": 3 } },
+          { "id": "tacticBarrier.breath.Lv5", "label": "[Lv5] ブレス結界", "value": { "charges": 5 } },
+          { "id": "tacticBarrier.breath.field", "label": "[フィールド] ブレス結界", "value": { "charges": 10 } }
+        ]
+      },
+      {
+        "familyId": "tacticBarrierGuard.physical",
+        "effectType": "barrierOnGuard",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          { "id": "tacticBarrierGuard.physical.1", "label": "[防御] 物理結界1回", "value": { "charges": 1 } },
+          { "id": "tacticBarrierGuard.physical.2", "label": "[防御] 物理結界2回", "value": { "charges": 2 } }
+        ]
+      },
+      {
+        "familyId": "tacticBarrierGuard.magical",
+        "effectType": "barrierOnGuard",
+        "parameters": {
+          "damageType": "magical"
+        },
+        "variants": [
+          { "id": "tacticBarrierGuard.magical.1", "label": "[防御] 魔法結界1回", "value": { "charges": 1 } },
+          { "id": "tacticBarrierGuard.magical.2", "label": "[防御] 魔法結界2回", "value": { "charges": 2 } }
+        ]
+      },
+      {
+        "familyId": "tacticBarrierGuard.breath",
+        "effectType": "barrierOnGuard",
+        "parameters": {
+          "damageType": "breath"
+        },
+        "variants": [
+          { "id": "tacticBarrierGuard.breath.1", "label": "[防御] ブレス結界1回", "value": { "charges": 1 } },
+          { "id": "tacticBarrierGuard.breath.2", "label": "[防御] ブレス結界2回", "value": { "charges": 2 } }
+        ]
+      },
+      {
+        "familyId": "endOfTurnHealing.party",
+        "effectType": "endOfTurnHealing",
+        "variants": [
+          { "id": "endOfTurnHealing.party.100", "label": "[100%] 全体回復", "value": { "valuePercent": 100 } },
+          { "id": "endOfTurnHealing.party.Lv1", "label": "[Lv1/3%] 全体回復", "value": { "valuePercent": 3 } },
+          { "id": "endOfTurnHealing.party.Lv2", "label": "[Lv2/6%] 全体回復", "value": { "valuePercent": 6 } },
+          { "id": "endOfTurnHealing.party.Lv3", "label": "[Lv3/9%] 全体回復", "value": { "valuePercent": 9 } },
+          { "id": "endOfTurnHealing.party.Lv4", "label": "[Lv4/12%] 全体回復", "value": { "valuePercent": 12 } },
+          { "id": "endOfTurnHealing.party.Lv5", "label": "[Lv5/15%] 全体回復", "value": { "valuePercent": 15 } }
+        ]
+      },
       {
         "familyId": "damageTakenPercent.physical",
         "effectType": "damageTakenPercent",
@@ -3505,13 +4542,6 @@
         },
         "variants": [
           {
-            "id": "statusResistanceMultiplier.confusion.minus25",
-            "label": "[×-25] 混乱耐性倍率",
-            "value": {
-              "multiplier": -25.0
-            }
-          },
-          {
             "id": "statusResistanceMultiplier.confusion.0",
             "label": "[×0] 混乱耐性倍率",
             "value": {
@@ -3526,10 +4556,10 @@
             }
           },
           {
-            "id": "statusResistanceMultiplier.confusion.25",
-            "label": "[×25] 混乱耐性倍率",
+            "id": "statusResistanceMultiplier.confusion.2",
+            "label": "[×2] 混乱耐性倍率",
             "value": {
-              "multiplier": 25.0
+              "multiplier": 2.0
             }
           }
         ]
@@ -3567,6 +4597,122 @@
             "label": "[+25%] 混乱耐性%補正",
             "value": {
               "valuePercent": 25
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statusResistanceMultiplier.instantDeath",
+        "effectType": "statusResistanceMultiplier",
+        "parameters": {
+          "status": "instantDeath"
+        },
+        "variants": [
+          {
+            "id": "statusResistanceMultiplier.instantDeath.0",
+            "label": "[×0] 即死耐性倍率",
+            "value": {
+              "multiplier": 0.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "degradationRepair.general",
+        "effectType": "degradationRepair",
+        "variants": [
+          {
+            "id": "degradationRepair.general.Lv1",
+            "label": "[Lv1] 劣化修復機能",
+            "value": {
+              "minPercent": 1,
+              "maxPercent": 3
+            }
+          },
+          {
+            "id": "degradationRepair.general.Lv2",
+            "label": "[Lv2] 劣化修復機能",
+            "value": {
+              "minPercent": 2,
+              "maxPercent": 6
+            }
+          },
+          {
+            "id": "degradationRepair.general.Lv3",
+            "label": "[Lv3] 劣化修復機能",
+            "value": {
+              "minPercent": 3,
+              "maxPercent": 9
+            }
+          },
+          {
+            "id": "degradationRepair.general.Lv4",
+            "label": "[Lv4] 劣化修復機能",
+            "value": {
+              "minPercent": 4,
+              "maxPercent": 12
+            }
+          },
+          {
+            "id": "degradationRepair.general.Lv5",
+            "label": "[Lv5] 劣化修復機能",
+            "value": {
+              "minPercent": 5,
+              "maxPercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "degradationRepairBoost.general",
+        "effectType": "degradationRepairBoost",
+        "variants": [
+          {
+            "id": "degradationRepairBoost.general.1",
+            "label": "[+1%] 修復機能強化",
+            "value": {
+              "valuePercent": 1
+            }
+          },
+          {
+            "id": "degradationRepairBoost.general.2",
+            "label": "[+2%] 修復機能強化",
+            "value": {
+              "valuePercent": 2
+            }
+          },
+          {
+            "id": "degradationRepairBoost.general.3",
+            "label": "[+3%] 修復機能強化",
+            "value": {
+              "valuePercent": 3
+            }
+          },
+          {
+            "id": "degradationRepairBoost.general.4",
+            "label": "[+4%] 修復機能強化",
+            "value": {
+              "valuePercent": 4
+            }
+          },
+          {
+            "id": "degradationRepairBoost.general.5",
+            "label": "[+5%] 修復機能強化",
+            "value": {
+              "valuePercent": 5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "autoDegradationRepair.general",
+        "effectType": "autoDegradationRepair",
+        "variants": [
+          {
+            "id": "autoDegradationRepair.general.enable",
+            "label": "[戦術] 自動劣化修復",
+            "value": {
+              "enabled": 1
             }
           }
         ]
@@ -3750,6 +4896,20 @@
             }
           },
           {
+            "id": "statAdditive.physicalAttack.130",
+            "label": "[+130] physicalAttack加算",
+            "value": {
+              "additive": 130
+            }
+          },
+          {
+            "id": "statAdditive.physicalAttack.140",
+            "label": "[+140] physicalAttack加算",
+            "value": {
+              "additive": 140
+            }
+          },
+          {
             "id": "statAdditive.physicalAttack.150",
             "label": "[+150] 攻撃力加算",
             "value": {
@@ -3761,6 +4921,34 @@
             "label": "[+160] 攻撃力加算",
             "value": {
               "additive": 160
+            }
+          },
+          {
+            "id": "statAdditive.physicalAttack.170",
+            "label": "[+170] physicalAttack加算",
+            "value": {
+              "additive": 170
+            }
+          },
+          {
+            "id": "statAdditive.physicalAttack.180",
+            "label": "[+180] physicalAttack加算",
+            "value": {
+              "additive": 180
+            }
+          },
+          {
+            "id": "statAdditive.physicalAttack.190",
+            "label": "[+190] physicalAttack加算",
+            "value": {
+              "additive": 190
+            }
+          },
+          {
+            "id": "statAdditive.physicalAttack.200",
+            "label": "[+200] physicalAttack加算",
+            "value": {
+              "additive": 200
             }
           }
         ]
@@ -3908,6 +5096,13 @@
         },
         "variants": [
           {
+            "id": "statAdditive.physicalDefense.10",
+            "label": "[+10] physicalDefense加算",
+            "value": {
+              "additive": 10
+            }
+          },
+          {
             "id": "statAdditive.physicalDefense.20",
             "label": "[+20] 防御力加算",
             "value": {
@@ -4032,6 +5227,13 @@
             "value": {
               "additive": 190
             }
+          },
+          {
+            "id": "statAdditive.physicalDefense.200",
+            "label": "[+200] physicalDefense加算",
+            "value": {
+              "additive": 200
+            }
           }
         ]
       },
@@ -4155,6 +5357,13 @@
             }
           },
           {
+            "id": "statAdditive.evasionRate.170",
+            "label": "[+170] evasionRate加算",
+            "value": {
+              "additive": 170
+            }
+          },
+          {
             "id": "statAdditive.evasionRate.180",
             "label": "[+180] 回避能力加算",
             "value": {
@@ -4167,6 +5376,13 @@
             "value": {
               "additive": 190
             }
+          },
+          {
+            "id": "statAdditive.evasionRate.200",
+            "label": "[+200] evasionRate加算",
+            "value": {
+              "additive": 200
+            }
           }
         ]
       },
@@ -4177,6 +5393,13 @@
           "stat": "magicalAttack"
         },
         "variants": [
+          {
+            "id": "statAdditive.magicalAttack.10",
+            "label": "[+10] magicalAttack加算",
+            "value": {
+              "additive": 10
+            }
+          },
           {
             "id": "statAdditive.magicalAttack.20",
             "label": "[+20] 魔法攻撃力加算",
@@ -4281,6 +5504,34 @@
             "value": {
               "additive": 160
             }
+          },
+          {
+            "id": "statAdditive.magicalAttack.170",
+            "label": "[+170] magicalAttack加算",
+            "value": {
+              "additive": 170
+            }
+          },
+          {
+            "id": "statAdditive.magicalAttack.180",
+            "label": "[+180] magicalAttack加算",
+            "value": {
+              "additive": 180
+            }
+          },
+          {
+            "id": "statAdditive.magicalAttack.190",
+            "label": "[+190] magicalAttack加算",
+            "value": {
+              "additive": 190
+            }
+          },
+          {
+            "id": "statAdditive.magicalAttack.200",
+            "label": "[+200] magicalAttack加算",
+            "value": {
+              "additive": 200
+            }
           }
         ]
       },
@@ -4292,10 +5543,59 @@
         },
         "variants": [
           {
+            "id": "statAdditive.magicalHealing.10",
+            "label": "[+10] magicalHealing加算",
+            "value": {
+              "additive": 10
+            }
+          },
+          {
+            "id": "statAdditive.magicalHealing.20",
+            "label": "[+20] magicalHealing加算",
+            "value": {
+              "additive": 20
+            }
+          },
+          {
+            "id": "statAdditive.magicalHealing.30",
+            "label": "[+30] magicalHealing加算",
+            "value": {
+              "additive": 30
+            }
+          },
+          {
+            "id": "statAdditive.magicalHealing.40",
+            "label": "[+40] magicalHealing加算",
+            "value": {
+              "additive": 40
+            }
+          },
+          {
+            "id": "statAdditive.magicalHealing.50",
+            "label": "[+50] magicalHealing加算",
+            "value": {
+              "additive": 50
+            }
+          },
+          {
+            "id": "statAdditive.magicalHealing.60",
+            "label": "[+60] magicalHealing加算",
+            "value": {
+              "additive": 60
+            }
+          },
+          {
             "id": "statAdditive.magicalHealing.70",
             "label": "[+70] 魔法回復量加算",
             "value": {
               "additive": 70
+            }
+          },
+          {
+            "id": "statAdditive.magicalHealing.80",
+            "label": "[+80] magicalHealing加算",
+            "value": {
+              "additive": 80
             }
           },
           {
@@ -4327,6 +5627,13 @@
             }
           },
           {
+            "id": "statAdditive.magicalHealing.130",
+            "label": "[+130] magicalHealing加算",
+            "value": {
+              "additive": 130
+            }
+          },
+          {
             "id": "statAdditive.magicalHealing.140",
             "label": "[+140] 魔法回復量加算",
             "value": {
@@ -4348,10 +5655,31 @@
             }
           },
           {
+            "id": "statAdditive.magicalHealing.170",
+            "label": "[+170] magicalHealing加算",
+            "value": {
+              "additive": 170
+            }
+          },
+          {
             "id": "statAdditive.magicalHealing.180",
             "label": "[+180] 魔法回復量加算",
             "value": {
               "additive": 180
+            }
+          },
+          {
+            "id": "statAdditive.magicalHealing.190",
+            "label": "[+190] magicalHealing加算",
+            "value": {
+              "additive": 190
+            }
+          },
+          {
+            "id": "statAdditive.magicalHealing.200",
+            "label": "[+200] magicalHealing加算",
+            "value": {
+              "additive": 200
             }
           }
         ]
@@ -4363,6 +5691,69 @@
           "stat": "magicalDefense"
         },
         "variants": [
+          {
+            "id": "statAdditive.magicalDefense.10",
+            "label": "[+10] magicalDefense加算",
+            "value": {
+              "additive": 10
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.20",
+            "label": "[+20] magicalDefense加算",
+            "value": {
+              "additive": 20
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.30",
+            "label": "[+30] magicalDefense加算",
+            "value": {
+              "additive": 30
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.40",
+            "label": "[+40] magicalDefense加算",
+            "value": {
+              "additive": 40
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.50",
+            "label": "[+50] magicalDefense加算",
+            "value": {
+              "additive": 50
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.60",
+            "label": "[+60] magicalDefense加算",
+            "value": {
+              "additive": 60
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.70",
+            "label": "[+70] magicalDefense加算",
+            "value": {
+              "additive": 70
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.80",
+            "label": "[+80] magicalDefense加算",
+            "value": {
+              "additive": 80
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.90",
+            "label": "[+90] magicalDefense加算",
+            "value": {
+              "additive": 90
+            }
+          },
           {
             "id": "statAdditive.magicalDefense.100",
             "label": "[+100] 魔法防御力加算",
@@ -4404,6 +5795,41 @@
             "value": {
               "additive": 150
             }
+          },
+          {
+            "id": "statAdditive.magicalDefense.160",
+            "label": "[+160] magicalDefense加算",
+            "value": {
+              "additive": 160
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.170",
+            "label": "[+170] magicalDefense加算",
+            "value": {
+              "additive": 170
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.180",
+            "label": "[+180] magicalDefense加算",
+            "value": {
+              "additive": 180
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.190",
+            "label": "[+190] magicalDefense加算",
+            "value": {
+              "additive": 190
+            }
+          },
+          {
+            "id": "statAdditive.magicalDefense.200",
+            "label": "[+200] magicalDefense加算",
+            "value": {
+              "additive": 200
+            }
           }
         ]
       },
@@ -4440,6 +5866,118 @@
             "label": "[×2/3] 最大HP倍率",
             "value": {
               "multiplier": 0.6666666666666666
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_01",
+            "label": "[×1.01] 最大HP倍率",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_02",
+            "label": "[×1.02] 最大HP倍率",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_03",
+            "label": "[×1.03] 最大HP倍率",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_04",
+            "label": "[×1.04] 最大HP倍率",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_05",
+            "label": "[×1.05] 最大HP倍率",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_06",
+            "label": "[×1.06] 最大HP倍率",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_07",
+            "label": "[×1.07] 最大HP倍率",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_08",
+            "label": "[×1.08] 最大HP倍率",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_09",
+            "label": "[×1.09] 最大HP倍率",
+            "value": {
+              "multiplier": 1.09
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_1",
+            "label": "[×1.10] 最大HP倍率",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_11",
+            "label": "[×1.11] 最大HP倍率",
+            "value": {
+              "multiplier": 1.11
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_12",
+            "label": "[×1.12] 最大HP倍率",
+            "value": {
+              "multiplier": 1.12
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_13",
+            "label": "[×1.13] 最大HP倍率",
+            "value": {
+              "multiplier": 1.13
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_14",
+            "label": "[×1.14] 最大HP倍率",
+            "value": {
+              "multiplier": 1.14
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_15",
+            "label": "[×1.15] 最大HP倍率",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "statMultiplier.maxHP.1_18",
+            "label": "[×1.18] 最大HP倍率",
+            "value": {
+              "multiplier": 1.18
             }
           },
           {
@@ -4674,13 +6212,6 @@
             "value": {
               "valuePercent": 20.0
             }
-          },
-          {
-            "id": "statConversionPercent.physicalAttack.maxHP.33_333333",
-            "label": "[+33.333333%] 攻撃力→最大HP変換",
-            "value": {
-              "valuePercent": 33.333333
-            }
           }
         ]
       },
@@ -4774,30 +6305,6 @@
             "label": "[+20%] 防御力→最大HP変換",
             "value": {
               "valuePercent": 20.0
-            }
-          },
-          {
-            "id": "statConversionPercent.physicalDefense.maxHP.100",
-            "label": "[+100%] 防御力→最大HP変換",
-            "value": {
-              "valuePercent": 100.0
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "statConversionPercent.evasionRate.maxHP",
-        "effectType": "statConversionPercent",
-        "parameters": {
-          "sourceStat": "evasionRate",
-          "targetStat": "maxHP"
-        },
-        "variants": [
-          {
-            "id": "statConversionPercent.evasionRate.maxHP.100",
-            "label": "[+100%] 回避能力→最大HP変換",
-            "value": {
-              "valuePercent": 100.0
             }
           }
         ]
@@ -5726,6 +7233,177 @@
             ]
           }
         ]
+      },
+      {
+        "familyId": "actionOrderMultiplier.general",
+        "effectType": "actionOrderMultiplier",
+        "variants": [
+          {
+            "id": "actionOrderMultiplier.general.0_5",
+            "label": "[×0.5] 行動順倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "actionOrderMultiplier.general.0_66",
+            "label": "[×0.66] 行動順倍率",
+            "value": {
+              "multiplier": 0.66
+            }
+          },
+          {
+            "id": "actionOrderMultiplier.general.0_8",
+            "label": "[×0.8] 行動順倍率",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "actionOrderMultiplier.general.1_2",
+            "label": "[×1.2] 行動順倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "actionOrderMultiplier.general.1_5",
+            "label": "[×1.5] 行動順倍率",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "actionOrderMultiplier.general.2_0",
+            "label": "[×2.0] 行動順倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "martialBonusPercent.unarmed",
+        "effectType": "martialBonusPercent",
+        "parameters": {
+          "requiresUnarmed": "true"
+        },
+        "variants": [
+          {
+            "id": "martialBonusPercent.unarmed.10",
+            "label": "[+10%] 格闘威力補正",
+            "value": {
+              "valuePercent": 10.0
+            }
+          },
+          {
+            "id": "martialBonusPercent.unarmed.20",
+            "label": "[+20%] 格闘威力補正",
+            "value": {
+              "valuePercent": 20.0
+            }
+          },
+          {
+            "id": "martialBonusPercent.unarmed.30",
+            "label": "[+30%] 格闘威力補正",
+            "value": {
+              "valuePercent": 30.0
+            }
+          },
+          {
+            "id": "martialBonusPercent.unarmed.40",
+            "label": "[+40%] 格闘威力補正",
+            "value": {
+              "valuePercent": 40.0
+            }
+          },
+          {
+            "id": "martialBonusPercent.unarmed.50",
+            "label": "[+50%] 格闘威力補正",
+            "value": {
+              "valuePercent": 50.0
+            }
+          },
+          {
+            "id": "martialBonusPercent.unarmed.60",
+            "label": "[+60%] 格闘威力補正",
+            "value": {
+              "valuePercent": 60.0
+            }
+          },
+          {
+            "id": "martialBonusPercent.unarmed.70",
+            "label": "[+70%] 格闘威力補正",
+            "value": {
+              "valuePercent": 70.0
+            }
+          },
+          {
+            "id": "martialBonusPercent.unarmed.80",
+            "label": "[+80%] 格闘威力補正",
+            "value": {
+              "valuePercent": 80.0
+            }
+          },
+          {
+            "id": "martialBonusPercent.unarmed.90",
+            "label": "[+90%] 格闘威力補正",
+            "value": {
+              "valuePercent": 90.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "martialBonusMultiplier.unarmed",
+        "effectType": "martialBonusMultiplier",
+        "parameters": {
+          "requiresUnarmed": "true"
+        },
+        "variants": [
+          {
+            "id": "martialBonusMultiplier.unarmed.1_1",
+            "label": "[×1.1] 格闘威力倍率",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "martialBonusMultiplier.unarmed.1_2",
+            "label": "[×1.2] 格闘威力倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "martialBonusMultiplier.unarmed.1_3",
+            "label": "[×1.3] 格闘威力倍率",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "martialBonusMultiplier.unarmed.1_4",
+            "label": "[×1.4] 格闘威力倍率",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "martialBonusMultiplier.unarmed.1_6",
+            "label": "[×1.6] 格闘威力倍率",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "martialBonusMultiplier.unarmed.2_0",
+            "label": "[×2.0] 格闘威力倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
       }
     ]
   },
@@ -5878,5 +7556,166 @@
   },
   "resurrection": {
     "families": []
+  },
+  "combat": {
+    "families": [
+      {
+        "familyId": "statusResistanceMultiplier.sleep",
+        "effectType": "statusResistanceMultiplier",
+        "parameters": {
+          "status": "sleep"
+        },
+        "variants": [
+          {
+            "id": "statusResistanceMultiplier.sleep.0",
+            "label": "[×0] 眠り耐性倍率",
+            "value": {
+              "multiplier": 0.0
+            }
+          },
+          {
+            "id": "statusResistanceMultiplier.sleep.0_333333",
+            "label": "[×1/3] 眠り耐性倍率",
+            "value": {
+              "multiplier": 0.3333333333333333
+            }
+          },
+          {
+            "id": "statusResistanceMultiplier.sleep.0_5",
+            "label": "[×1/2] 眠り耐性倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statusResistanceMultiplier.sleep.2",
+            "label": "[×2] 眠り耐性倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statusResistanceMultiplier.petrify",
+        "effectType": "statusResistanceMultiplier",
+        "parameters": {
+          "status": "petrify"
+        },
+        "variants": [
+          {
+            "id": "statusResistanceMultiplier.petrify.0",
+            "label": "[×0] 石化耐性倍率",
+            "value": {
+              "multiplier": 0.0
+            }
+          },
+          {
+            "id": "statusResistanceMultiplier.petrify.0_333333",
+            "label": "[×1/3] 石化耐性倍率",
+            "value": {
+              "multiplier": 0.3333333333333333
+            }
+          },
+          {
+            "id": "statusResistanceMultiplier.petrify.0_5",
+            "label": "[×1/2] 石化耐性倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statusResistanceMultiplier.petrify.2",
+            "label": "[×2] 石化耐性倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statusResistanceMultiplier.confusion",
+        "effectType": "statusResistanceMultiplier",
+        "parameters": {
+          "status": "confusion"
+        },
+        "variants": [
+          {
+            "id": "statusResistanceMultiplier.confusion.0",
+            "label": "[×0] 混乱耐性倍率",
+            "value": {
+              "multiplier": 0.0
+            }
+          },
+          {
+            "id": "statusResistanceMultiplier.confusion.0_5",
+            "label": "[×1/2] 混乱耐性倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statusResistanceMultiplier.confusion.2",
+            "label": "[×2] 混乱耐性倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statusResistancePercent.confusion",
+        "effectType": "statusResistancePercent",
+        "parameters": {
+          "status": "confusion"
+        },
+        "variants": [
+          {
+            "id": "statusResistancePercent.confusion.minus25",
+            "label": "[-25%] 混乱耐性%補正",
+            "value": {
+              "valuePercent": -25
+            }
+          },
+          {
+            "id": "statusResistancePercent.confusion.minus15",
+            "label": "[-15%] 混乱耐性%補正",
+            "value": {
+              "valuePercent": -15
+            }
+          },
+          {
+            "id": "statusResistancePercent.confusion.15",
+            "label": "[+15%] 混乱耐性%補正",
+            "value": {
+              "valuePercent": 15
+            }
+          },
+          {
+            "id": "statusResistancePercent.confusion.25",
+            "label": "[+25%] 混乱耐性%補正",
+            "value": {
+              "valuePercent": 25
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statusResistanceMultiplier.instantDeath",
+        "effectType": "statusResistanceMultiplier",
+        "parameters": {
+          "status": "instantDeath"
+        },
+        "variants": [
+          {
+            "id": "statusResistanceMultiplier.instantDeath.0",
+            "label": "[×0] 即死耐性倍率",
+            "value": {
+              "multiplier": 0.0
+            }
+          }
+        ]
+      }
+    ]
   }
 }

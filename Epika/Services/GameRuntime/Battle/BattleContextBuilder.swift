@@ -36,10 +36,12 @@ struct BattleContextBuilder {
                 raceCategory: state.race?.category,
                 snapshot: snapshot,
                 currentHP: state.progress.hitPoints.current,
-                actionRates: BattleContextBuilder.defaultPlayerActionRates(for: state),
+                actionRates: BattleContextBuilder.playerActionRates(for: state),
                 actionResources: resources,
+                barrierCharges: skillEffects.barrierCharges,
                 skillEffects: skillEffects,
-                spellbook: state.spellbook
+                spellbook: state.spellbook,
+                spells: state.spellLoadout
             )
             actors.append(actor)
         }
@@ -52,9 +54,13 @@ struct BattleContextBuilder {
         return BattleFormationSlot.allCases[index]
     }
 
-    private static func defaultPlayerActionRates(for character: RuntimeCharacterState) -> BattleActionRates {
-        let baseBreath = character.combatSnapshot.breathDamage > 0 ? 50 : 0
-        return BattleActionRates(attack: 100, clericMagic: 75, arcaneMagic: 75, breath: baseBreath)
+    private static func playerActionRates(for character: RuntimeCharacterState) -> BattleActionRates {
+        let preferences = character.progress.actionPreferences
+        let breath = character.combatSnapshot.breathDamage > 0 ? preferences.breath : 0
+        return BattleActionRates(attack: preferences.attack,
+                                 clericMagic: preferences.clericMagic,
+                                 arcaneMagic: preferences.arcaneMagic,
+                                 breath: breath)
     }
 
 }
