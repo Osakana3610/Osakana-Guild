@@ -23,6 +23,7 @@ struct CharacterDetailContent: View {
     let character: RuntimeCharacter
     let onRename: ((String) async throws -> Void)?
     let onAvatarChange: ((String) async throws -> Void)?
+    let onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)?
 
     @State private var nameText: String
     @State private var renameError: String?
@@ -31,14 +32,27 @@ struct CharacterDetailContent: View {
     @State private var isAvatarSheetPresented = false
     @State private var avatarChangeError: String?
     @State private var isChangingAvatar = false
+    @State private var actionPreferenceAttack: Double
+    @State private var actionPreferenceCleric: Double
+    @State private var actionPreferenceArcane: Double
+    @State private var actionPreferenceBreath: Double
+    @State private var actionPreferenceError: String?
+    @State private var isUpdatingActionPreferences = false
 
     init(character: RuntimeCharacter,
          onRename: ((String) async throws -> Void)? = nil,
-         onAvatarChange: ((String) async throws -> Void)? = nil) {
+         onAvatarChange: ((String) async throws -> Void)? = nil,
+         onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)? = nil) {
         self.character = character
         self.onRename = onRename
         self.onAvatarChange = onAvatarChange
+        self.onActionPreferencesChange = onActionPreferencesChange
         _nameText = State(initialValue: character.name)
+        let preferences = character.progress.actionPreferences
+        _actionPreferenceAttack = State(initialValue: Double(preferences.attack))
+        _actionPreferenceCleric = State(initialValue: Double(preferences.clericMagic))
+        _actionPreferenceArcane = State(initialValue: Double(preferences.arcaneMagic))
+        _actionPreferenceBreath = State(initialValue: Double(preferences.breath))
     }
 
     var body: some View {
@@ -49,6 +63,7 @@ struct CharacterDetailContent: View {
                 levelSection
                 baseStatSection
                 combatStatSection
+                actionPreferenceSection
                 skillSection
             }
             .padding()
@@ -65,6 +80,14 @@ struct CharacterDetailContent: View {
                                           defaultIdentifier: defaultAvatarIdentifier) { identifier in
                 applyAvatarChange(identifier)
             }
+        }
+        .onChange(of: character.progress.actionPreferences) { _, newValue in
+            actionPreferenceAttack = Double(newValue.attack)
+            actionPreferenceCleric = Double(newValue.clericMagic)
+            actionPreferenceArcane = Double(newValue.arcaneMagic)
+            actionPreferenceBreath = Double(newValue.breath)
+            actionPreferenceError = nil
+            isUpdatingActionPreferences = false
         }
     }
 
@@ -201,6 +224,75 @@ struct CharacterDetailContent: View {
         }
     }
 
+    private var actionPreferenceSection: some View {
+        GroupBox("行動優先度") {
+            if onActionPreferencesChange != nil {
+                actionPreferenceEditor
+            } else {
+                actionPreferenceSummary
+            }
+        }
+    }
+
+    private var actionPreferenceEditor: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("行動抽選は「ブレス > 僧侶魔法 > 魔法使い魔法 > 物理攻撃」の順に行われます。各スライダーはカテゴリの重みを0〜100%で指定します。")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            actionSliderRow(label: "ブレス",
+                            description: "ブレス行動の抽選重み。ブレスダメージを持たない場合は調整できません。",
+                            value: breathSliderBinding,
+                            isDisabled: !canEditBreathRate)
+
+            actionSliderRow(label: "僧侶魔法",
+                            description: "回復・支援魔法の抽選重み。",
+                            value: clericSliderBinding)
+
+            actionSliderRow(label: "魔法使い魔法",
+                            description: "攻撃魔法の抽選重み。",
+                            value: arcaneSliderBinding)
+
+            actionSliderRow(label: "物理攻撃",
+                            description: "通常攻撃／格闘攻撃の抽選重み。",
+                            value: attackSliderBinding)
+
+            if let error = actionPreferenceError {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+
+            HStack {
+                Button("設定を保存") {
+                    saveActionPreferences()
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(!actionPreferencesDirty || isUpdatingActionPreferences)
+
+                if isUpdatingActionPreferences {
+                    ProgressView()
+                        .controlSize(.small)
+                        .padding(.leading, 8)
+                }
+                Spacer()
+            }
+        }
+    }
+
+    private var actionPreferenceSummary: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            let prefs = character.progress.actionPreferences
+            Text("行動抽選の重みを表示します。")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            LabeledContent("ブレス", value: "\(prefs.breath)%")
+            LabeledContent("僧侶魔法", value: "\(prefs.clericMagic)%")
+            LabeledContent("魔法使い魔法", value: "\(prefs.arcaneMagic)%")
+            LabeledContent("物理攻撃", value: "\(prefs.attack)%")
+        }
+    }
+
     private var skillSection: some View {
         GroupBox("習得スキル") {
             let skills = character.masteredSkills
@@ -309,6 +401,95 @@ private extension CharacterDetailContent {
                                                                        genderRawValue: character.gender)
     }
 
+    private var originalActionPreferences: CharacterSnapshot.ActionPreferences {
+        let prefs = character.progress.actionPreferences
+        return CharacterSnapshot.ActionPreferences(attack: prefs.attack,
+                                                   clericMagic: prefs.clericMagic,
+                                                   arcaneMagic: prefs.arcaneMagic,
+                                                   breath: prefs.breath)
+    }
+
+    private var editedActionPreferences: CharacterSnapshot.ActionPreferences {
+        func clamp(_ value: Double) -> Int {
+            let rounded = Int(value.rounded())
+            return max(0, min(100, rounded))
+        }
+        return CharacterSnapshot.ActionPreferences(attack: clamp(actionPreferenceAttack),
+                                                   clericMagic: clamp(actionPreferenceCleric),
+                                                   arcaneMagic: clamp(actionPreferenceArcane),
+                                                   breath: clamp(actionPreferenceBreath))
+    }
+
+    private var actionPreferencesDirty: Bool {
+        editedActionPreferences != originalActionPreferences
+    }
+
+    private var canEditBreathRate: Bool {
+        character.combatStats.breathDamage > 0
+    }
+
+    private var attackSliderBinding: Binding<Double> {
+        Binding(
+            get: { actionPreferenceAttack },
+            set: { newValue in
+                actionPreferenceAttack = newValue
+                actionPreferenceError = nil
+            }
+        )
+    }
+
+    private var clericSliderBinding: Binding<Double> {
+        Binding(
+            get: { actionPreferenceCleric },
+            set: { newValue in
+                actionPreferenceCleric = newValue
+                actionPreferenceError = nil
+            }
+        )
+    }
+
+    private var arcaneSliderBinding: Binding<Double> {
+        Binding(
+            get: { actionPreferenceArcane },
+            set: { newValue in
+                actionPreferenceArcane = newValue
+                actionPreferenceError = nil
+            }
+        )
+    }
+
+    private var breathSliderBinding: Binding<Double> {
+        Binding(
+            get: { actionPreferenceBreath },
+            set: { newValue in
+                actionPreferenceBreath = newValue
+                actionPreferenceError = nil
+            }
+        )
+    }
+
+    private func actionSliderRow(label: String,
+                                 description: String,
+                                 value: Binding<Double>,
+                                 isDisabled: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(label)
+                    .font(.subheadline)
+                Spacer()
+                Text("\(Int(value.wrappedValue.rounded()))%")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Slider(value: value, in: 0...100, step: 1)
+                .tint(.accentColor)
+                .disabled(isDisabled || isUpdatingActionPreferences)
+            Text(description)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+    }
+
     private func triggerRename() {
         guard let onRename else { return }
         let trimmed = nameText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -357,6 +538,29 @@ private extension CharacterDetailContent {
                     isChangingAvatar = false
                     avatarChangeError = error.localizedDescription
                 }
+            }
+        }
+    }
+
+    private func saveActionPreferences() {
+        guard let onActionPreferencesChange else { return }
+        guard actionPreferencesDirty else {
+            actionPreferenceError = nil
+            return
+        }
+        actionPreferenceError = nil
+        isUpdatingActionPreferences = true
+        let newPreferences = editedActionPreferences
+        Task {
+            do {
+                try await onActionPreferencesChange(newPreferences)
+            } catch {
+                await MainActor.run {
+                    actionPreferenceError = error.localizedDescription
+                }
+            }
+            await MainActor.run {
+                isUpdatingActionPreferences = false
             }
         }
     }

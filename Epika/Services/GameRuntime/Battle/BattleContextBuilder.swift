@@ -13,8 +13,16 @@ struct BattleContextBuilder {
             guard let slot = BattleContextBuilder.slot(for: index) else { continue }
             let snapshot = member.character.combatSnapshot
             let state = member.character
-            let resources = BattleActionResource.makeDefault(for: snapshot)
+            var resources = BattleActionResource.makeDefault(for: snapshot,
+                                                            spellLoadout: state.spellLoadout)
             let skillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: state.learnedSkills)
+            applySpellChargeModifiers(skillEffects: skillEffects,
+                                      loadout: state.spellLoadout,
+                                      resources: &resources)
+            if skillEffects.breathExtraCharges > 0 {
+                let current = resources.charges(for: .breath)
+                resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
+            }
             let martialEligible = state.isMartialEligible
             let actor = BattleActor(
                 identifier: member.id.uuidString,
@@ -41,7 +49,8 @@ struct BattleContextBuilder {
                 barrierCharges: skillEffects.barrierCharges,
                 skillEffects: skillEffects,
                 spellbook: state.spellbook,
-                spells: state.spellLoadout
+                spells: state.spellLoadout,
+                baseSkillIds: Set(state.learnedSkills.map { $0.id })
             )
             actors.append(actor)
         }
@@ -63,4 +72,28 @@ struct BattleContextBuilder {
                                  breath: breath)
     }
 
+}
+
+private extension BattleContextBuilder {
+    static func applySpellChargeModifiers(skillEffects: BattleActor.SkillEffects,
+                                          loadout: SkillRuntimeEffects.SpellLoadout,
+                                          resources: inout BattleActionResource) {
+        let spells = loadout.arcane + loadout.cleric
+        guard !spells.isEmpty else { return }
+        for spell in spells {
+            guard let modifier = skillEffects.spellChargeModifier(for: spell.id), !modifier.isEmpty else { continue }
+            let baseState = resources.spellChargeState(for: spell.id)
+                ?? BattleActionResource.SpellChargeState(current: 1, max: 1)
+            let baseInitial = baseState.current
+            let baseMax = baseState.max
+            let newMax = max(modifier.maxOverride ?? baseMax, 0)
+            var newInitial = max(0, modifier.initialOverride ?? baseInitial)
+            if modifier.initialBonus != 0 {
+                newInitial += modifier.initialBonus
+            }
+            resources.setSpellCharges(for: spell.id,
+                                      current: newInitial,
+                                      max: newMax)
+        }
+    }
 }

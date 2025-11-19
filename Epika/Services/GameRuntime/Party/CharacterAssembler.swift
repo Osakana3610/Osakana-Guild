@@ -5,31 +5,45 @@ enum CharacterAssembler {
                               from progress: RuntimeCharacterProgress) async throws -> RuntimeCharacterState {
         async let raceDef = repository.race(withId: progress.raceId)
         async let jobDef = repository.job(withId: progress.jobId)
+        async let spellDefinitions = repository.allSpells()
 
         let learnedSkillIds = progress.learnedSkills.map { $0.skillId }
         let learnedSkills = try await repository.skills(withIds: learnedSkillIds)
 
-        let loadout = try await assembleLoadout(repository: repository, from: progress.equippedItems)
+        var revivedProgress = progress
+        if revivedProgress.hitPoints.current <= 0 {
+            let effects = try SkillRuntimeEffectCompiler.actorEffects(from: learnedSkills)
+            if effects.resurrectionPassiveBetweenFloors {
+                revivedProgress.hitPoints = .init(current: max(1, revivedProgress.hitPoints.maximum),
+                                                  maximum: revivedProgress.hitPoints.maximum)
+            }
+        }
+
+        let loadout = try await assembleLoadout(repository: repository, from: revivedProgress.equippedItems)
         var primary: PersonalityPrimaryDefinition? = nil
-        if let primaryId = progress.personality.primaryId {
+        if let primaryId = revivedProgress.personality.primaryId {
             primary = try await repository.personalityPrimary(withId: primaryId)
         }
         var secondary: PersonalitySecondaryDefinition? = nil
-        if let secondaryId = progress.personality.secondaryId {
+        if let secondaryId = revivedProgress.personality.secondaryId {
             secondary = try await repository.personalitySecondary(withId: secondaryId)
         }
 
         let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
+        let spells = try await spellDefinitions
+        let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(from: spellbook,
+                                                                   definitions: spells)
 
         return RuntimeCharacterState(
-            progress: progress,
+            progress: revivedProgress,
             race: try await raceDef,
             job: try await jobDef,
             personalityPrimary: primary,
             personalitySecondary: secondary,
             learnedSkills: learnedSkills,
             loadout: loadout,
-            spellbook: spellbook
+            spellbook: spellbook,
+            spellLoadout: spellLoadout
         )
     }
 
@@ -43,7 +57,8 @@ enum CharacterAssembler {
             masteredSkills: state.learnedSkills,
             statusEffects: [],
             martialEligible: state.isMartialEligible,
-            spellbook: state.spellbook
+            spellbook: state.spellbook,
+            spellLoadout: state.spellLoadout
         )
     }
 

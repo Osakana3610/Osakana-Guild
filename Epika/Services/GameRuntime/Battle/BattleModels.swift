@@ -47,10 +47,18 @@ enum BattleFormationSlot: Int, Sendable, CaseIterable {
 }
 
 struct BattleActionResource: Sendable, Hashable {
-    private var storage: [String: Int]
+    struct SpellChargeState: Sendable, Hashable {
+        var current: Int
+        var max: Int
+    }
 
-    init(initialValues: [String: Int] = [:]) {
+    private var storage: [String: Int]
+    private var spellCharges: [String: SpellChargeState]
+
+    init(initialValues: [String: Int] = [:],
+         spellCharges: [String: SpellChargeState] = [:]) {
         self.storage = initialValues
+        self.spellCharges = spellCharges
     }
 
     enum Key: String {
@@ -59,37 +67,94 @@ struct BattleActionResource: Sendable, Hashable {
         case breath
     }
 
-    func value(for key: String) -> Int {
-        storage[key, default: 0]
-    }
-
     func charges(for key: Key) -> Int {
-        value(for: key.rawValue)
+        storage[key.rawValue, default: 0]
     }
 
-    mutating func consume(_ key: String, amount: Int = 1) -> Bool {
-        let current = storage[key, default: 0]
-        guard current >= amount else { return false }
-        storage[key] = current - amount
-        return true
+    mutating func setCharges(for key: Key, value: Int) {
+        storage[key.rawValue] = value
     }
 
     mutating func consume(_ key: Key, amount: Int = 1) -> Bool {
-        consume(key.rawValue, amount: amount)
+        guard amount > 0 else { return true }
+        let current = storage[key.rawValue, default: 0]
+        guard current >= amount else { return false }
+        storage[key.rawValue] = current - amount
+        return true
     }
 
-    static func makeDefault(for snapshot: RuntimeCharacterProgress.Combat) -> BattleActionResource {
+    mutating func addCharges(for key: Key, amount: Int, cap: Int) {
+        guard amount > 0 else { return }
+        let current = charges(for: key)
+        let updated = min(cap, current + amount)
+        storage[key.rawValue] = updated
+    }
+
+    func charges(forSpellId spellId: String) -> Int {
+        spellCharges[spellId]?.current ?? 0
+    }
+
+    func maxCharges(forSpellId spellId: String) -> Int? {
+        spellCharges[spellId]?.max
+    }
+
+    mutating func setSpellCharges(for spellId: String, current: Int, max maxValue: Int) {
+        let normalizedMax = Swift.max(0, maxValue)
+        let normalizedCurrent = Swift.max(0, current)
+        spellCharges[spellId] = SpellChargeState(current: normalizedCurrent, max: normalizedMax)
+    }
+
+    mutating func initializeSpellCharges(from loadout: SkillRuntimeEffects.SpellLoadout,
+                                         defaultCharges: Int = 1) {
+        let sanitized = max(0, defaultCharges)
+        for spell in loadout.arcane {
+            setSpellCharges(for: spell.id, current: sanitized, max: sanitized)
+        }
+        for spell in loadout.cleric {
+            setSpellCharges(for: spell.id, current: sanitized, max: sanitized)
+        }
+    }
+
+    mutating func consume(spellId: String, amount: Int = 1) -> Bool {
+        guard amount > 0, var state = spellCharges[spellId], state.current >= amount else {
+            return false
+        }
+        state.current -= amount
+        spellCharges[spellId] = state
+        return true
+    }
+
+    mutating func addCharges(forSpellId spellId: String, amount: Int, cap: Int?) -> Bool {
+        guard amount > 0, var state = spellCharges[spellId] else { return false }
+        let limit = max(cap ?? state.max, 0)
+        let updated = limit > 0 ? min(limit, state.current + amount) : state.current
+        guard updated > state.current else { return false }
+        state.current = updated
+        spellCharges[spellId] = state
+        return true
+    }
+
+    func hasAvailableCharges(for spellId: String) -> Bool {
+        charges(forSpellId: spellId) > 0
+    }
+
+    func hasAvailableSpell(in spells: [SpellDefinition]) -> Bool {
+        spells.contains { hasAvailableCharges(for: $0.id) }
+    }
+
+    func spellChargeState(for spellId: String) -> SpellChargeState? {
+        spellCharges[spellId]
+    }
+
+    static func makeDefault(for snapshot: RuntimeCharacterProgress.Combat,
+                            spellLoadout: SkillRuntimeEffects.SpellLoadout = .empty) -> BattleActionResource {
         var values: [String: Int] = [:]
-        if snapshot.magicalHealing > 0 {
-            values[Key.clericMagic.rawValue] = 1
-        }
-        if snapshot.magicalAttack > 0 {
-            values[Key.arcaneMagic.rawValue] = 1
-        }
         if snapshot.breathDamage > 0 {
             values[Key.breath.rawValue] = 1
         }
-        return BattleActionResource(initialValues: values)
+        var resource = BattleActionResource(initialValues: values)
+        resource.initializeSpellCharges(from: spellLoadout)
+        return resource
     }
 }
 
@@ -239,6 +304,128 @@ struct BattleActor: Sendable {
             let category: String
         }
 
+        struct StatusInflict: Sendable, Hashable {
+            let statusId: String
+            let baseChancePercent: Double
+        }
+
+        struct RescueCapability: Sendable, Hashable {
+            let usesClericMagic: Bool
+            let minLevel: Int
+        }
+
+        struct RescueModifiers: Sendable, Hashable {
+            var ignoreActionCost: Bool = false
+
+            static let neutral = RescueModifiers(ignoreActionCost: false)
+        }
+
+        struct ResurrectionActive: Sendable, Hashable {
+            enum HPScale: String, Sendable {
+                case magicalHealing
+                case maxHP5Percent
+            }
+
+            let chancePercent: Int
+            let hpScale: HPScale
+            let maxTriggers: Int?
+        }
+
+        struct ForcedResurrection: Sendable, Hashable {
+            let maxTriggers: Int?
+        }
+
+        struct VitalizeResurrection: Sendable, Hashable {
+            let removePenalties: Bool
+            let rememberSkills: Bool
+            let removeSkillIds: [String]
+            let grantSkillIds: [String]
+        }
+
+        struct SpecialAttack: Sendable, Hashable {
+            enum Kind: String, Sendable {
+                case magicSword
+                case piercingTriple
+                case fourGods
+                case moonlight
+                case godslayer
+            }
+
+            let kind: Kind
+            let chancePercent: Int
+
+            init?(kindIdentifier: String, chancePercent: Int) {
+                guard let parsed = Kind(rawValue: kindIdentifier) else { return nil }
+                self.init(kind: parsed, chancePercent: chancePercent)
+            }
+
+            init(kind: Kind, chancePercent: Int) {
+                self.kind = kind
+                self.chancePercent = max(0, min(100, chancePercent))
+            }
+        }
+
+        struct SpellChargeRegen: Sendable, Hashable {
+            let every: Int
+            let amount: Int
+            let cap: Int
+            let maxTriggers: Int?
+        }
+
+        struct SpellChargeModifier: Sendable, Hashable {
+            var initialOverride: Int?
+            var initialBonus: Int
+            var maxOverride: Int?
+            var regen: SpellChargeRegen?
+            var gainOnPhysicalHit: Int?
+
+            init(initialOverride: Int? = nil,
+                 initialBonus: Int = 0,
+                 maxOverride: Int? = nil,
+                 regen: SpellChargeRegen? = nil,
+                 gainOnPhysicalHit: Int? = nil) {
+                self.initialOverride = initialOverride
+                self.initialBonus = initialBonus
+                self.maxOverride = maxOverride
+                self.regen = regen
+                self.gainOnPhysicalHit = gainOnPhysicalHit
+            }
+
+            var isEmpty: Bool {
+                initialOverride == nil && initialBonus == 0 && maxOverride == nil && regen == nil && (gainOnPhysicalHit ?? 0) == 0
+            }
+
+            mutating func merge(_ other: SpellChargeModifier) {
+                if let value = other.initialOverride {
+                    if let current = initialOverride {
+                        initialOverride = max(current, value)
+                    } else {
+                        initialOverride = value
+                    }
+                }
+
+                if other.initialBonus != 0 {
+                    initialBonus += other.initialBonus
+                }
+
+                if let value = other.maxOverride {
+                    if let current = maxOverride {
+                        maxOverride = max(current, value)
+                    } else {
+                        maxOverride = value
+                    }
+                }
+
+                if let value = other.gainOnPhysicalHit, value > 0 {
+                    gainOnPhysicalHit = (gainOnPhysicalHit ?? 0) + value
+                }
+
+                if let regen = other.regen {
+                    self.regen = regen
+                }
+            }
+        }
+
         var damageTaken: DamageMultipliers
         var damageDealt: DamageMultipliers
         var damageDealtAgainst: TargetMultipliers
@@ -251,22 +438,109 @@ struct BattleActor: Sendable {
         var martialBonusPercent: Double
         var martialBonusMultiplier: Double
         var actionOrderMultiplier: Double
+        var actionOrderShuffle: Bool
         var healingGiven: Double
         var healingReceived: Double
         var endOfTurnHealingPercent: Double
+        var endOfTurnSelfHPPercent: Double
         var reactions: [Reaction]
         var counterAttackEvasionMultiplier: Double
         var rowProfile: RowProfile
         var statusResistances: [String: StatusResistance]
         var timedBuffTriggers: [TimedBuffTrigger]
+        var statusInflictions: [StatusInflict]
+        var berserkChancePercent: Double?
+        var breathExtraCharges: Int
         var barrierCharges: [String: Int]
         var guardBarrierCharges: [String: Int]
+        var parryEnabled: Bool
+        var shieldBlockEnabled: Bool
+        var parryBonusPercent: Double
+        var shieldBlockBonusPercent: Double
+        var dodgeCapMax: Double?
+        var minHitScale: Double?
+        var spellChargeModifiers: [String: SpellChargeModifier]
+        var defaultSpellChargeModifier: SpellChargeModifier?
+        var absorptionPercent: Double
+        var absorptionCapPercent: Double
+        var partyHostileAll: Bool
+        var vampiricImpulse: Bool
+        var vampiricSuppression: Bool
+        var antiHealingEnabled: Bool
         var degradationPercent: Double
         var degradationRepairMinPercent: Double
         var degradationRepairMaxPercent: Double
         var degradationRepairBonusPercent: Double
         var autoDegradationRepair: Bool
-    }
+        var partyHostileTargets: Set<String>
+        var partyProtectedTargets: Set<String>
+        var specialAttacks: [SpecialAttack]
+        var rescueCapabilities: [RescueCapability]
+        var rescueModifiers: RescueModifiers
+        var resurrectionActives: [ResurrectionActive]
+        var forcedResurrection: ForcedResurrection?
+        var vitalizeResurrection: VitalizeResurrection?
+        var necromancerInterval: Int?
+        var resurrectionPassiveBetweenFloors: Bool
+
+        static let neutral = SkillEffects(
+            damageTaken: .init(physical: 1.0, magical: 1.0, breath: 1.0),
+            damageDealt: .init(physical: 1.0, magical: 1.0, breath: 1.0),
+            damageDealtAgainst: .neutral,
+            spellPower: .neutral,
+            spellSpecificMultipliers: [:],
+            criticalDamagePercent: 0.0,
+            criticalDamageMultiplier: 1.0,
+            criticalDamageTakenMultiplier: 1.0,
+            penetrationDamageTakenMultiplier: 1.0,
+            martialBonusPercent: 0.0,
+            martialBonusMultiplier: 1.0,
+            actionOrderMultiplier: 1.0,
+            actionOrderShuffle: false,
+            healingGiven: 1.0,
+            healingReceived: 1.0,
+            endOfTurnHealingPercent: 0.0,
+            endOfTurnSelfHPPercent: 0.0,
+            reactions: [],
+            counterAttackEvasionMultiplier: 1.0,
+            rowProfile: .init(),
+            statusResistances: [:],
+            timedBuffTriggers: [],
+            statusInflictions: [],
+            berserkChancePercent: nil,
+            breathExtraCharges: 0,
+            barrierCharges: [:],
+            guardBarrierCharges: [:],
+            parryEnabled: false,
+            shieldBlockEnabled: false,
+            parryBonusPercent: 0.0,
+            shieldBlockBonusPercent: 0.0,
+            dodgeCapMax: nil,
+            minHitScale: nil,
+            spellChargeModifiers: [:],
+            defaultSpellChargeModifier: nil,
+            absorptionPercent: 0.0,
+            absorptionCapPercent: 0.0,
+            partyHostileAll: false,
+            vampiricImpulse: false,
+            vampiricSuppression: false,
+            antiHealingEnabled: false,
+            degradationPercent: 0.0,
+            degradationRepairMinPercent: 0.0,
+            degradationRepairMaxPercent: 0.0,
+            degradationRepairBonusPercent: 0.0,
+            autoDegradationRepair: false,
+            partyHostileTargets: [],
+            partyProtectedTargets: [],
+            specialAttacks: [],
+            rescueCapabilities: [],
+            rescueModifiers: .neutral,
+            resurrectionActives: [],
+            forcedResurrection: nil,
+            vitalizeResurrection: nil,
+            necromancerInterval: nil,
+            resurrectionPassiveBetweenFloors: false)
+        }
 
     let identifier: String
     let displayName: String
@@ -286,20 +560,38 @@ struct BattleActor: Sendable {
     let raceId: String?
     let raceCategory: String?
 
-        var snapshot: RuntimeCharacterProgress.Combat
-        var currentHP: Int
-        var actionRates: BattleActionRates
+    var snapshot: RuntimeCharacterProgress.Combat
+    var currentHP: Int
+    var actionRates: BattleActionRates
     var actionResources: BattleActionResource
     var statusEffects: [AppliedStatusEffect]
-        var timedBuffs: [TimedBuff]
-        var guardActive: Bool
-        var barrierCharges: [String: Int]
-        var guardBarrierCharges: [String: Int]
-        var attackHistory: BattleAttackHistory
-        var skillEffects: SkillEffects
-        var spellbook: SkillRuntimeEffects.Spellbook
-        var spells: SkillRuntimeEffects.SpellLoadout
-        var degradationPercent: Double
+    var timedBuffs: [TimedBuff]
+    var guardActive: Bool
+    var barrierCharges: [String: Int]
+    var guardBarrierCharges: [String: Int]
+    var parryEnabled: Bool
+    var shieldBlockEnabled: Bool
+    var partyHostileAll: Bool
+    var vampiricImpulse: Bool
+    var vampiricSuppression: Bool
+    var antiHealingEnabled: Bool
+    var attackHistory: BattleAttackHistory
+    var skillEffects: SkillEffects
+    var spellbook: SkillRuntimeEffects.Spellbook
+    var spells: SkillRuntimeEffects.SpellLoadout
+    var degradationPercent: Double
+    var partyHostileTargets: Set<String>
+        var partyProtectedTargets: Set<String>
+        var spellChargeRegenUsage: [String: Int]
+        var rescueActionCapacity: Int
+        var rescueActionsUsed: Int
+        var resurrectionTriggersUsed: Int
+        var forcedResurrectionTriggersUsed: Int
+        var necromancerLastTriggerTurn: Int?
+        var vitalizeActive: Bool
+        var baseSkillIds: Set<String>
+        var suppressedSkillIds: Set<String>
+        var grantedSkillIds: Set<String>
 
     init(identifier: String,
          displayName: String,
@@ -327,11 +619,29 @@ struct BattleActor: Sendable {
          guardActive: Bool = false,
          barrierCharges: [String: Int] = [:],
          guardBarrierCharges: [String: Int] = [:],
+         parryEnabled: Bool = false,
+         shieldBlockEnabled: Bool = false,
+         partyHostileAll: Bool = false,
+         vampiricImpulse: Bool = false,
+         vampiricSuppression: Bool = false,
+         antiHealingEnabled: Bool = false,
          attackHistory: BattleAttackHistory = BattleAttackHistory(),
          skillEffects: SkillEffects = .neutral,
          spellbook: SkillRuntimeEffects.Spellbook = .empty,
          spells: SkillRuntimeEffects.SpellLoadout = .empty,
-         degradationPercent: Double = 0.0) {
+         degradationPercent: Double = 0.0,
+         partyHostileTargets: Set<String> = [],
+         partyProtectedTargets: Set<String> = [],
+         spellChargeRegenUsage: [String: Int] = [:],
+         rescueActionCapacity: Int = 1,
+         rescueActionsUsed: Int = 0,
+         resurrectionTriggersUsed: Int = 0,
+         forcedResurrectionTriggersUsed: Int = 0,
+         necromancerLastTriggerTurn: Int? = nil,
+         vitalizeActive: Bool = false,
+         baseSkillIds: Set<String> = [],
+         suppressedSkillIds: Set<String> = [],
+         grantedSkillIds: Set<String> = []) {
         self.identifier = identifier
         self.displayName = displayName
         self.kind = kind
@@ -358,13 +668,41 @@ struct BattleActor: Sendable {
         self.guardActive = guardActive
         self.barrierCharges = barrierCharges
         self.guardBarrierCharges = guardBarrierCharges
+        self.parryEnabled = parryEnabled
+        self.shieldBlockEnabled = shieldBlockEnabled
+        self.partyHostileAll = partyHostileAll
+        self.vampiricImpulse = vampiricImpulse
+        self.vampiricSuppression = vampiricSuppression
+        self.antiHealingEnabled = antiHealingEnabled
         self.attackHistory = attackHistory
         self.skillEffects = skillEffects
         self.spellbook = spellbook
         self.spells = spells
         self.degradationPercent = degradationPercent
+        self.partyHostileTargets = partyHostileTargets
+        self.partyProtectedTargets = partyProtectedTargets
+        self.spellChargeRegenUsage = spellChargeRegenUsage
+        self.rescueActionCapacity = max(0, rescueActionCapacity)
+        self.rescueActionsUsed = max(0, rescueActionsUsed)
+        self.resurrectionTriggersUsed = max(0, resurrectionTriggersUsed)
+        self.forcedResurrectionTriggersUsed = max(0, forcedResurrectionTriggersUsed)
+        self.necromancerLastTriggerTurn = necromancerLastTriggerTurn
+        self.vitalizeActive = vitalizeActive
+        self.baseSkillIds = baseSkillIds
+        self.suppressedSkillIds = suppressedSkillIds
+        self.grantedSkillIds = grantedSkillIds
     }
 
     var isAlive: Bool { currentHP > 0 }
     var rowIndex: Int { formationSlot.row }
+}
+
+extension BattleActor.SkillEffects {
+    func spellChargeModifier(for spellId: String) -> SpellChargeModifier? {
+        var modifier = defaultSpellChargeModifier ?? SpellChargeModifier()
+        if let specific = spellChargeModifiers[spellId] {
+            modifier.merge(specific)
+        }
+        return modifier.isEmpty ? nil : modifier
+    }
 }

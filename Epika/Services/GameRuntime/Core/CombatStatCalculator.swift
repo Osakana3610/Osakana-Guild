@@ -58,7 +58,8 @@ struct CombatStatCalculator {
                                              itemDefinitions: context.state.loadout.items,
                                              martial: skillEffects.martialBonuses,
                                              growthMultiplier: skillEffects.growthMultiplier,
-                                             statConversions: skillEffects.statConversions)
+                                             statConversions: skillEffects.statConversions,
+                                             forcedToOne: skillEffects.forcedToOne)
 
         var combat = try combatResult.makeCombat()
         // 結果の切り捨て
@@ -229,22 +230,24 @@ private struct SkillEffectAggregator {
         var damageMultiplier: Double = 1.0
     }
 
-    let talents: TalentModifiers
+    var talents: TalentModifiers
     let passives: PassiveMultipliers
     let additives: AdditiveBonuses
     let critical: CriticalParameters
     let martialBonuses: MartialBonuses
     let growthMultiplier: Double
     let statConversions: [CombatStatKey: [StatConversion]]
+    let forcedToOne: Set<CombatStatKey>
 
     init(skills: [SkillDefinition]) {
-        let talents = TalentModifiers()
+        var talents = TalentModifiers()
         var passives = PassiveMultipliers()
         var additives = AdditiveBonuses()
         var critical = CriticalParameters()
-        let martial = MartialBonuses()
+        var martial = MartialBonuses()
         var growthMultiplierProduct: Double = 1.0
         var conversions: [CombatStatKey: [StatConversion]] = [:]
+        var forcedToOne: Set<CombatStatKey> = []
 
         for skill in skills {
             for effect in skill.effects {
@@ -296,7 +299,15 @@ private struct SkillEffectAggregator {
                     if let points = payload.value["points"] {
                         critical.flatBonus += points
                     }
-                case "criticalRateCap", "criticalRateMaxAbsolute":
+                case "criticalRateCap":
+                    if let cap = payload.value["cap"] ?? payload.value["maxPercent"] {
+                        if let current = critical.cap {
+                            critical.cap = min(current, cap)
+                        } else {
+                            critical.cap = cap
+                        }
+                    }
+                case "criticalRateMaxAbsolute":
                     if let cap = payload.value["cap"] ?? payload.value["maxPercent"] {
                         if let current = critical.cap {
                             critical.cap = min(current, cap)
@@ -316,6 +327,28 @@ private struct SkillEffectAggregator {
                     if let multiplier = payload.value["multiplier"] {
                         critical.damageMultiplier *= multiplier
                     }
+                case "martialBonusPercent":
+                    if let value = payload.value["valuePercent"] {
+                        martial.percent += value
+                    }
+                case "martialBonusMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        martial.multiplier *= multiplier
+                    }
+                case "talentStat":
+                    if let statKey = CombatStatKey(payload.parameters?["stat"]) {
+                        let multiplier = payload.value["multiplier"] ?? 1.5
+                        talents.applyTalent(stat: statKey, value: multiplier)
+                    }
+                case "incompetenceStat":
+                    if let statKey = CombatStatKey(payload.parameters?["stat"]) {
+                        let multiplier = payload.value["multiplier"] ?? 0.5
+                        talents.applyIncompetence(stat: statKey, value: multiplier)
+                    }
+                case "statFixedToOne":
+                    if let statKey = CombatStatKey(payload.parameters?["stat"]) {
+                        forcedToOne.insert(statKey)
+                    }
                 default:
                     continue
                 }
@@ -329,6 +362,7 @@ private struct SkillEffectAggregator {
         self.martialBonuses = martial
         self.growthMultiplier = growthMultiplierProduct
         self.statConversions = conversions
+        self.forcedToOne = forcedToOne
     }
 
     struct MartialBonuses {
@@ -381,6 +415,7 @@ private struct CombatAccumulator {
     private let martialBonuses: SkillEffectAggregator.MartialBonuses
     private let growthMultiplier: Double
     private let statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]
+    private let forcedToOne: Set<CombatStatKey>
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
     init(progress: RuntimeCharacterProgress,
@@ -395,7 +430,8 @@ private struct CombatAccumulator {
          itemDefinitions: [ItemDefinition],
          martial: SkillEffectAggregator.MartialBonuses,
          growthMultiplier: Double,
-         statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]) {
+         statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]],
+         forcedToOne: Set<CombatStatKey>) {
         self.progress = progress
         self.attributes = attributes
         self.race = race
@@ -409,6 +445,7 @@ private struct CombatAccumulator {
         self.martialBonuses = martial
         self.growthMultiplier = growthMultiplier
         self.statConversions = statConversions
+        self.forcedToOne = forcedToOne
         self.hasPositivePhysicalAttackEquipment = CombatAccumulator.containsPositivePhysicalAttack(equipment: equipment,
                                                                                                    definitions: itemDefinitions)
     }
@@ -464,8 +501,8 @@ private struct CombatAccumulator {
         magicalDefense += additives.value(for: .magicalDefense)
         stats[.magicalDefense] = magicalDefense
 
-        let hitSource = (strength + agility) / 2.0
-        var hitRate = hitSource * (1.0 + levelFactor * coefficients.value(for: .hitRate)) * CombatFormulas.hitRateCoefficient
+        let hitSource = (strength + agility) / 2.0 * (1.0 + levelFactor * coefficients.value(for: .hitRate))
+        var hitRate = (hitSource + CombatFormulas.hitRateBaseBonus) * CombatFormulas.hitRateCoefficient
         hitRate *= talents.multiplier(for: .hitRate)
         hitRate *= passives.multiplier(for: .hitRate)
         hitRate += additives.value(for: .hitRate)
@@ -491,7 +528,14 @@ private struct CombatAccumulator {
         trapRemoval += additives.value(for: .trapRemoval)
         stats[.trapRemoval] = trapRemoval
 
-        var additionalDamage = strength * (1.0 + levelFactor * coefficients.value(for: .physicalAttack)) * CombatFormulas.additionalDamageCoefficient
+        let additionalDependency = CombatFormulas.strengthDependency(value: attributes.strength)
+        let additionalGrowth = CombatFormulas.additionalDamageGrowth(level: progress.level,
+                                                                     jobCoefficient: coefficients.value(for: .physicalAttack),
+                                                                     growthMultiplier: growthMultiplier)
+        var additionalDamage = additionalDependency * (1.0 + additionalGrowth)
+        additionalDamage *= talents.multiplier(for: .additionalDamage)
+        additionalDamage *= passives.multiplier(for: .additionalDamage)
+        additionalDamage *= CombatFormulas.additionalDamageScale
         additionalDamage += additives.value(for: .additionalDamage)
         stats[.additionalDamage] = additionalDamage
 
@@ -507,10 +551,9 @@ private struct CombatAccumulator {
         stats[.criticalRate] = criticalRate
 
         let baseAttackCount = CombatFormulas.finalAttackCount(agility: attributes.agility,
-                                                              level: progress.level,
+                                                              levelFactor: levelFactor,
                                                               jobCoefficient: coefficients.value(for: .attackCount),
-                                                              hasTalent: talents.hasTalent(for: .attackCount),
-                                                              hasIncompetent: talents.hasIncompetence(for: .attackCount),
+                                                              talentMultiplier: talents.multiplier(for: .attackCount),
                                                               passiveMultiplier: passives.multiplier(for: .attackCount),
                                                               additive: additives.value(for: .attackCount))
         stats[.attackCount] = Double(baseAttackCount)
@@ -539,6 +582,25 @@ private struct CombatAccumulator {
         criticalRate = min(criticalRate, adjustedCriticalCap)
         criticalRate = max(0.0, min(criticalRate, 100.0))
 
+        for key in forcedToOne {
+            switch key {
+            case .maxHP: maxHP = 1
+            case .physicalAttack: physicalAttack = 1
+            case .magicalAttack: magicalAttack = 1
+            case .physicalDefense: physicalDefense = 1
+            case .magicalDefense: magicalDefense = 1
+            case .hitRate: hitRate = 1
+            case .evasionRate: evasion = 1
+            case .attackCount: // handled after rounding
+                break
+            case .additionalDamage: additionalDamage = 1
+            case .criticalRate: criticalRate = 1
+            case .breathDamage: breathDamage = 1
+            case .magicalHealing: magicalHealing = 1
+            case .trapRemoval: trapRemoval = 1
+            }
+        }
+
         let convertedAttackCountValue = resolvedValue(.attackCount)
         let attackCount: Int
         if abs(convertedAttackCountValue - Double(baseAttackCount)) < 0.0001 {
@@ -546,6 +608,7 @@ private struct CombatAccumulator {
         } else {
             attackCount = max(1, Int(convertedAttackCountValue.rounded()))
         }
+        let finalAttackCount = forcedToOne.contains(.attackCount) ? 1 : attackCount
 
         var combat = RuntimeCharacterProgress.Combat(maxHP: Int(maxHP.rounded(.towardZero)),
                                                      physicalAttack: Int(physicalAttack.rounded(.towardZero)),
@@ -555,7 +618,7 @@ private struct CombatAccumulator {
                                                      hitRate: Int(hitRate.rounded(.towardZero)),
                                                      evasionRate: Int(evasion.rounded(.towardZero)),
                                                      criticalRate: Int(criticalRate.rounded(.towardZero)),
-                                                     attackCount: attackCount,
+                                                     attackCount: finalAttackCount,
                                                      magicalHealing: Int(magicalHealing.rounded(.towardZero)),
                                                      trapRemoval: Int(trapRemoval.rounded(.towardZero)),
                                                      additionalDamage: Int(additionalDamage.rounded(.towardZero)),
@@ -789,20 +852,54 @@ enum CombatFormulas {
     static let physicalDefenseCoefficient: Double = 1.0
     static let magicalDefenseCoefficient: Double = 1.0
     static let hitRateCoefficient: Double = 2.0
+    static let hitRateBaseBonus: Double = 50.0
     static let evasionRateCoefficient: Double = 1.0
     static let criticalRateCoefficient: Double = 0.16
     static let magicalHealingCoefficient: Double = 2.0
     static let trapRemovalCoefficient: Double = 0.5
-    static let additionalDamageCoefficient: Double = 1.0
+    static let additionalDamageScale: Double = 0.32
+    static let additionalDamageLevelCoefficient: Double = 0.125
+    static let attackCountCoefficient: Double = 0.025
+    static let attackCountLevelCoefficient: Double = 0.025
     static let breathDamageCoefficient: Double = 1.0
 
     static func levelDependentValue(raceId: String,
                                     raceCategory: String,
                                     level: Int) -> Double {
-        if raceCategory == "human" || raceId.contains("human") {
-            return 7.0 * log(1.0 + Double(level))
-        } else {
-            return 17.0 * log10(1.0 + Double(level))
+        let lv = Double(level)
+        let isHuman = raceCategory == "human" || raceId.contains("human")
+
+        switch level {
+        case ...30:
+            return lv * 0.1
+        case 31...60:
+            return lv * 0.15 - 1.5
+        case 61...80:
+            return lv * 0.225 - 6.0
+        case 81...100:
+            if isHuman {
+                return lv * 0.225 - 6.0
+            } else {
+                return lv * 0.45 - 24.0
+            }
+        case 101...150:
+            if isHuman {
+                return lv * 0.1125 + 5.25
+            } else {
+                return lv * 0.45 - 24.0
+            }
+        case 151...180:
+            if isHuman {
+                return lv * 0.16875 - 3.1875
+            } else {
+                return lv * 0.45 - 24.0
+            }
+        default:
+            if isHuman {
+                return lv * 0.253125 - 18.375
+            } else {
+                return lv * 0.45 - 24.0
+            }
         }
     }
 
@@ -816,6 +913,54 @@ enum CombatFormulas {
         return pow(0.96, Double(value - 20))
     }
 
+    static func strengthDependency(value: Int) -> Double {
+        let v = Double(value)
+        let dependency: Double
+        switch value {
+        case ..<10:
+            dependency = 0.04
+        case 10...20:
+            dependency = 0.004 * v
+        case 20...25:
+            dependency = 0.008 * (v - 10.0)
+        case 25...30:
+            dependency = 0.024 * (v - 20.0)
+        case 30...33:
+            dependency = 0.040 * (v - 24.0)
+        case 33...35:
+            dependency = 0.060 * (v - 27.0)
+        default:
+            dependency = 0.060 * (v - 27.0)
+        }
+        return dependency * 125.0
+    }
+
+    static func agilityDependency(value: Int) -> Double {
+        let v = Double(value)
+        let dependency: Double
+        switch value {
+        case ..<10:
+            dependency = 0.04
+        case 10...15:
+            dependency = 0.008 * (v - 5.0)
+        case 15...25:
+            dependency = 0.012 * (v - 8.3333333333)
+        case 25...30:
+            dependency = 0.016 * (v - 12.5)
+        case 30...35:
+            dependency = 0.024 * (v - 18.3333333333)
+        default:
+            dependency = 0.024 * (v - 18.3333333333)
+        }
+        return dependency * 125.0
+    }
+
+    static func additionalDamageGrowth(level: Int,
+                                       jobCoefficient: Double,
+                                       growthMultiplier: Double) -> Double {
+        return (Double(level) / 5.0) * additionalDamageLevelCoefficient * jobCoefficient * growthMultiplier
+    }
+
     static func evasionLimit(value: Int) -> Double {
         guard value >= 21 else { return 95.0 }
         let failure = 5.0 * pow(0.88, Double(value - 20))
@@ -823,30 +968,19 @@ enum CombatFormulas {
     }
 
     static func finalAttackCount(agility: Int,
-                                 level: Int,
+                                 levelFactor: Double,
                                  jobCoefficient: Double,
-                                 hasTalent: Bool,
-                                 hasIncompetent: Bool,
+                                 talentMultiplier: Double,
                                  passiveMultiplier: Double,
                                  additive: Double) -> Int {
-        let base = baseAttackCount(agility: max(agility, 20))
-        let levelBonus: Double
-        if level <= 10 {
-            levelBonus = Double(level) * 0.10
-        } else if level <= 30 {
-            levelBonus = 1.0 + Double(level - 10) * 0.05
-        } else {
-            levelBonus = 2.0 + Double(level - 30) * 0.02
-        }
-        var count = (base + levelBonus) * 0.025
-        if hasTalent && hasIncompetent {
-            count *= 5.0 / 6.0
-        } else if hasTalent {
-            count *= 5.0 / 4.0
-        } else if hasIncompetent {
-            count *= 2.0 / 3.0
-        }
-        count *= jobCoefficient
+        var base = Double(max(agility, 0))
+        base *= 1.0 + levelFactor * jobCoefficient * attackCountLevelCoefficient
+        base *= talentMultiplier
+        base *= 0.5
+
+        let primary = (base + 0.1).rounded()
+        let secondary = (base - 0.3).rounded()
+        var count = max(1.0, primary + secondary) * 2.0 * attackCountCoefficient
         count *= passiveMultiplier
         count += additive
 
@@ -855,30 +989,5 @@ enum CombatFormulas {
         } else {
             return max(1, Int(count.rounded()))
         }
-    }
-
-    private static func baseAttackCount(agility: Int) -> Double {
-        let table: [Int: Double] = [
-            20: 20.84, 21: 21.74, 22: 22.72, 23: 23.78, 24: 24.92,
-            25: 26.15, 26: 27.47, 27: 28.88, 28: 30.39, 29: 31.99,
-            30: 33.69, 31: 35.49, 32: 37.40, 33: 39.42, 34: 41.55,
-            35: 43.80
-        ]
-        if agility <= 35, let value = table[agility] {
-            return value
-        }
-        if agility <= 35 {
-            let keys = table.keys.sorted()
-            guard let lowerKey = keys.last(where: { $0 <= agility }),
-                  let upperKey = keys.first(where: { $0 >= agility }),
-                  lowerKey != upperKey,
-                  let lower = table[lowerKey],
-                  let upper = table[upperKey] else {
-                return table[20] ?? 20.84
-            }
-            let ratio = (Double(agility - lowerKey) / Double(upperKey - lowerKey))
-            return lower + (upper - lower) * ratio
-        }
-        return 43.80 + Double(agility - 35) * 0.60
     }
 }

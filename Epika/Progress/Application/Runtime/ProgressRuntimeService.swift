@@ -138,6 +138,10 @@ private extension ProgressRuntimeService {
             achievements: .init(totalBattles: snapshot.achievements.totalBattles,
                                 totalVictories: snapshot.achievements.totalVictories,
                                 defeatCount: snapshot.achievements.defeatCount),
+            actionPreferences: .init(attack: snapshot.actionPreferences.attack,
+                                     clericMagic: snapshot.actionPreferences.clericMagic,
+                                     arcaneMagic: snapshot.actionPreferences.arcaneMagic,
+                                     breath: snapshot.actionPreferences.breath),
             createdAt: snapshot.createdAt,
             updatedAt: snapshot.updatedAt)
     }

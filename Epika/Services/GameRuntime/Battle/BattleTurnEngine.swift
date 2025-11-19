@@ -10,14 +10,20 @@ struct BattleTurnEngine {
     }
 
     private static var statusDefinitions: [String: StatusEffectDefinition] = [:]
+    private static var skillDefinitions: [String: SkillDefinition] = [:]
     private static let martialAccuracyMultiplier: Double = 1.6
 
     static func runBattle(players: inout [BattleActor],
                           enemies: inout [BattleActor],
                           statusEffects: [String: StatusEffectDefinition],
+                          skillDefinitions: [String: SkillDefinition],
                           random: inout GameRandomSource) -> Result {
         statusDefinitions = statusEffects
-        defer { statusDefinitions = [:] }
+        Self.skillDefinitions = skillDefinitions
+        defer {
+            statusDefinitions = [:]
+            Self.skillDefinitions = [:]
+        }
 
         var logs: [BattleLogEntry] = []
         logs.append(.init(turn: 0, message: "戦闘開始！", type: .system))
@@ -60,6 +66,9 @@ struct BattleTurnEngine {
             logs.append(.init(turn: turn,
                               message: "--- \(turn)ターン目 ---",
                               type: .system))
+
+            resetRescueUsage(for: &players)
+            resetRescueUsage(for: &enemies)
 
             applyTimedBuffTriggers(turn: turn, actors: &players, logs: &logs)
             applyTimedBuffTriggers(turn: turn, actors: &enemies, logs: &logs)
@@ -109,7 +118,7 @@ struct BattleTurnEngine {
                 }
             }
 
-            endOfTurn(players: &players, enemies: &enemies, turn: turn, logs: &logs)
+            endOfTurn(players: &players, enemies: &enemies, turn: turn, logs: &logs, random: &random)
         }
 
         logs.append(.init(turn: turn,
@@ -267,12 +276,24 @@ struct BattleTurnEngine {
     private static func actionOrder(players: [BattleActor], enemies: [BattleActor], random: inout GameRandomSource) -> [ActorReference] {
         var entries: [(ActorReference, Int, Double)] = []
         for (idx, actor) in players.enumerated() where actor.isAlive {
-            let speed = Double(actor.agility) * max(0.0, actor.skillEffects.actionOrderMultiplier)
-            entries.append((.player(idx), Int(speed.rounded(.towardZero)), random.nextDouble(in: 0.0...1.0)))
+            let speed: Int
+            if actor.skillEffects.actionOrderShuffle {
+                speed = random.nextInt(in: 0...10_000)
+            } else {
+                let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.actionOrderMultiplier)
+                speed = Int(scaled.rounded(.towardZero))
+            }
+            entries.append((.player(idx), speed, random.nextDouble(in: 0.0...1.0)))
         }
         for (idx, actor) in enemies.enumerated() where actor.isAlive {
-            let speed = Double(actor.agility) * max(0.0, actor.skillEffects.actionOrderMultiplier)
-            entries.append((.enemy(idx), Int(speed.rounded(.towardZero)), random.nextDouble(in: 0.0...1.0)))
+            let speed: Int
+            if actor.skillEffects.actionOrderShuffle {
+                speed = random.nextInt(in: 0...10_000)
+            } else {
+                let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.actionOrderMultiplier)
+                speed = Int(scaled.rounded(.towardZero))
+            }
+            entries.append((.enemy(idx), speed, random.nextDouble(in: 0.0...1.0)))
         }
         return entries.sorted { lhs, rhs in
             if lhs.1 != rhs.1 { return lhs.1 > rhs.1 }
@@ -300,6 +321,23 @@ struct BattleTurnEngine {
         if isActionLocked(actor: actor) {
             appendStatusLockLog(for: actor, turn: turn, logs: &logs)
             return
+        }
+
+        _ = shouldTriggerBerserk(for: &actor, turn: turn, logs: &logs, random: &random)
+
+        // 吸血衝動があれば行動前に判定
+        if hasVampiricImpulse(actor: actor) {
+            let didImpulse = handleVampiricImpulse(attackerSide: side,
+                                                   attackerIndex: actorIndex,
+                                                   attacker: actor,
+                                                   players: &players,
+                                                   enemies: &enemies,
+                                                   turn: turn,
+                                                   logs: &logs,
+                                                   random: &random)
+            if didImpulse {
+                return
+            }
         }
 
         let category = selectAction(for: side,
@@ -463,15 +501,183 @@ struct BattleTurnEngine {
     }
 
     private static func canPerformCleric(actor: BattleActor, allies: [BattleActor]) -> Bool {
-        actor.isAlive && actor.snapshot.magicalHealing > 0 && actor.actionResources.charges(for: .clericMagic) > 0 && selectHealingTargetIndex(in: allies) != nil
+        guard actor.isAlive,
+              actor.snapshot.magicalHealing > 0,
+              actor.actionResources.hasAvailableSpell(in: actor.spells.cleric) else { return false }
+        return selectHealingTargetIndex(in: allies) != nil
     }
 
     private static func canPerformArcane(actor: BattleActor, opponents: [BattleActor]) -> Bool {
-        actor.isAlive && actor.snapshot.magicalAttack > 0 && actor.actionResources.charges(for: .arcaneMagic) > 0 && opponents.contains(where: { $0.isAlive })
+        actor.isAlive &&
+        actor.snapshot.magicalAttack > 0 &&
+        actor.actionResources.hasAvailableSpell(in: actor.spells.arcane) &&
+        opponents.contains(where: { $0.isAlive })
     }
 
     private static func canPerformPhysical(actor: BattleActor, opponents: [BattleActor]) -> Bool {
         actor.isAlive && opponents.contains(where: { $0.isAlive })
+    }
+
+    private static func handleVampiricImpulse(attackerSide: ActorSide,
+                                              attackerIndex: Int,
+                                              attacker: BattleActor,
+                                              players: inout [BattleActor],
+                                              enemies: inout [BattleActor],
+                                              turn: Int,
+                                              logs: inout [BattleLogEntry],
+                                              random: inout GameRandomSource) -> Bool {
+        guard attacker.skillEffects.vampiricImpulse, !attacker.skillEffects.vampiricSuppression else { return false }
+        guard attacker.currentHP * 2 <= attacker.snapshot.maxHP else { return false }
+
+        // 精神20で約10%発動、精神10で約30%、精神30で0%を想定した線形式
+        let rawChance = 50.0 - Double(attacker.spirit) * 2.0
+        let chancePercent = max(0, min(100, Int(rawChance.rounded(.down))))
+        guard chancePercent > 0 else { return false }
+        guard BattleRandomSystem.percentChance(chancePercent, random: &random) else { return false }
+
+        let allies: [BattleActor]
+        switch attackerSide {
+        case .player: allies = players
+        case .enemy: allies = enemies
+        }
+
+        let candidateIndices = allies.enumerated().compactMap { index, actor in
+            (index != attackerIndex && actor.isAlive) ? index : nil
+        }
+        guard !candidateIndices.isEmpty else { return false }
+
+        let pick = random.nextInt(in: 0...(candidateIndices.count - 1))
+        let targetIndex = candidateIndices[pick]
+        let targetRef: (ActorSide, Int) = attackerSide == .player ? (.player, targetIndex) : (.enemy, targetIndex)
+        guard let targetActor = actor(for: targetRef.0, index: targetRef.1, players: players, enemies: enemies) else { return false }
+
+        logs.append(.init(turn: turn,
+                          message: "\(attacker.displayName)は吸血衝動に駆られて仲間を襲った！",
+                          type: .action,
+                          actorId: attacker.identifier,
+                          targetId: targetActor.identifier,
+                          metadata: ["category": "vampiricImpulse"]))
+
+        let attackResult = performAttack(attacker: attacker,
+                                         defender: targetActor,
+                                         turn: turn,
+                                         logs: &logs,
+                                         random: &random,
+                                         hitCountOverride: nil,
+                                         accuracyMultiplier: 1.0)
+
+        let outcome = applyAttackOutcome(attackerSide: attackerSide,
+                                         attackerIndex: attackerIndex,
+                                         defenderSide: targetRef.0,
+                                         defenderIndex: targetRef.1,
+                                         attacker: attackResult.attacker,
+                                         defender: attackResult.defender,
+                                         attackResult: attackResult,
+                                         turn: turn,
+                                         logs: &logs,
+                                         players: &players,
+                                         enemies: &enemies,
+                                         random: &random,
+                                         reactionDepth: 0)
+
+        guard var updatedAttacker = outcome.attacker,
+              let updatedDefender = outcome.defender else { return true }
+
+        applySpellChargeGainOnPhysicalHit(for: &updatedAttacker,
+                                          damageDealt: attackResult.totalDamage)
+        if attackResult.totalDamage > 0 && updatedAttacker.isAlive {
+            let missing = updatedAttacker.snapshot.maxHP - updatedAttacker.currentHP
+            if missing > 0 {
+                let healed = min(missing, attackResult.totalDamage)
+                updatedAttacker.currentHP += healed
+                logs.append(.init(turn: turn,
+                                  message: "\(updatedAttacker.displayName)は吸血で\(healed)回復した！",
+                                  type: .heal,
+                                  actorId: updatedAttacker.identifier,
+                                  metadata: [
+                                      "heal": "\(healed)",
+                                      "category": "vampiricImpulse"
+                                  ]))
+            }
+        }
+
+        assign(updatedAttacker, to: attackerSide, index: attackerIndex, players: &players, enemies: &enemies)
+        assign(updatedDefender, to: targetRef.0, index: targetRef.1, players: &players, enemies: &enemies)
+        return true
+    }
+
+    private static func selectSpecialAttack(for attacker: BattleActor,
+                                            random: inout GameRandomSource) -> BattleActor.SkillEffects.SpecialAttack? {
+        let specials = attacker.skillEffects.specialAttacks
+        guard !specials.isEmpty else { return nil }
+        for descriptor in specials {
+            guard descriptor.chancePercent > 0 else { continue }
+            if BattleRandomSystem.percentChance(descriptor.chancePercent, random: &random) {
+                return descriptor
+            }
+        }
+        return nil
+    }
+
+    private static func performSpecialAttack(_ descriptor: BattleActor.SkillEffects.SpecialAttack,
+                                             attacker: BattleActor,
+                                             defender: BattleActor,
+                                             turn: Int,
+                                             logs: inout [BattleLogEntry],
+                                             random: inout GameRandomSource) -> AttackResult {
+        var overrides = PhysicalAttackOverrides()
+        var hitCountOverride: Int? = nil
+        let message: String
+        var specialAccuracyMultiplier: Double = 1.0
+
+        switch descriptor.kind {
+        case .magicSword:
+            let combined = attacker.snapshot.physicalAttack + attacker.snapshot.magicalAttack
+            overrides = PhysicalAttackOverrides(physicalAttackOverride: combined,
+                                                maxAttackMultiplier: 3.0)
+            message = "\(attacker.displayName)は魔剣術を発動した！"
+        case .piercingTriple:
+            overrides = PhysicalAttackOverrides(ignoreDefense: true)
+            hitCountOverride = 3
+            message = "\(attacker.displayName)は貫通三連撃を繰り出した！"
+        case .fourGods:
+            let combined = attacker.snapshot.physicalAttack + attacker.snapshot.hitRate
+            overrides = PhysicalAttackOverrides(physicalAttackOverride: combined,
+                                                forceHit: true)
+            hitCountOverride = 4
+            message = "\(attacker.displayName)は四神の剣を振るった！"
+        case .moonlight:
+            let doubled = attacker.snapshot.physicalAttack * 2
+            overrides = PhysicalAttackOverrides(physicalAttackOverride: doubled,
+                                                criticalRateMultiplier: 2.0)
+            hitCountOverride = max(1, attacker.snapshot.attackCount * 2)
+            specialAccuracyMultiplier = 2.0
+            message = "\(attacker.displayName)は月光剣を放った！"
+        case .godslayer:
+            let scaled = attacker.snapshot.physicalAttack * max(1, attacker.snapshot.attackCount)
+            overrides = PhysicalAttackOverrides(physicalAttackOverride: scaled,
+                                                doubleDamageAgainstDivine: true)
+            hitCountOverride = 1
+            message = "\(attacker.displayName)は神殺しの矢を放った！"
+        }
+
+        logs.append(.init(turn: turn,
+                          message: message,
+                          type: .action,
+                          actorId: attacker.identifier,
+                          metadata: [
+                              "category": "specialAttack",
+                              "specialAttackId": descriptor.kind.rawValue
+                          ]))
+
+        return performAttack(attacker: attacker,
+                             defender: defender,
+                             turn: turn,
+                             logs: &logs,
+                             random: &random,
+                             hitCountOverride: hitCountOverride,
+                             accuracyMultiplier: specialAccuracyMultiplier,
+                             overrides: overrides)
     }
 
     private static func executePhysicalAttack(for side: ActorSide,
@@ -485,12 +691,19 @@ struct BattleTurnEngine {
             return false
         }
 
+        if let inflicted = attemptStatusInflictIfNeeded(attacker: attacker, logs: &logs, turn: turn, random: &random) {
+            store(actor: inflicted, side: side, index: attackerIndex, players: &players, enemies: &enemies)
+        }
+
         let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker)
+            || attacker.skillEffects.partyHostileAll
+            || !attacker.skillEffects.partyHostileTargets.isEmpty
         guard let target = selectOffensiveTarget(attackerSide: side,
                                                  players: players,
                                                  enemies: enemies,
                                                  allowFriendlyTargets: allowFriendlyTargets,
-                                                 random: &random) else { return false }
+                                                 random: &random,
+                                                 attacker: attacker) else { return false }
 
         resolvePhysicalAction(attackerSide: side,
                               attackerIndex: attackerIndex,
@@ -514,8 +727,62 @@ struct BattleTurnEngine {
         guard var attacker = actor(for: attackerSide, index: attackerIndex, players: players, enemies: enemies) else { return }
         guard var defender = actor(for: target.0, index: target.1, players: players, enemies: enemies) else { return }
 
+        let useAntiHealing = attacker.skillEffects.antiHealingEnabled && attacker.snapshot.magicalHealing > 0
         let isMartial = shouldUseMartialAttack(attacker: attacker)
         let accuracyMultiplier = isMartial ? martialAccuracyMultiplier : 1.0
+
+        if useAntiHealing {
+            let attackResult = performAntiHealingAttack(attacker: attacker,
+                                                        defender: defender,
+                                                        turn: turn,
+                                                        logs: &logs,
+                                                        random: &random)
+            let outcome = applyAttackOutcome(attackerSide: attackerSide,
+                                             attackerIndex: attackerIndex,
+                                             defenderSide: target.0,
+                                             defenderIndex: target.1,
+                                             attacker: attackResult.attacker,
+                                             defender: attackResult.defender,
+                                             attackResult: attackResult,
+                                             turn: turn,
+                                             logs: &logs,
+                                             players: &players,
+                                             enemies: &enemies,
+                                             random: &random,
+                                             reactionDepth: 0)
+            guard let updatedAttacker = outcome.attacker,
+                  let updatedDefender = outcome.defender else { return }
+            attacker = updatedAttacker
+            defender = updatedDefender
+            return
+        }
+
+        if let special = selectSpecialAttack(for: attacker, random: &random) {
+            let attackResult = performSpecialAttack(special,
+                                                    attacker: attacker,
+                                                    defender: defender,
+                                                    turn: turn,
+                                                    logs: &logs,
+                                                    random: &random)
+            let outcome = applyAttackOutcome(attackerSide: attackerSide,
+                                             attackerIndex: attackerIndex,
+                                             defenderSide: target.0,
+                                             defenderIndex: target.1,
+                                             attacker: attackResult.attacker,
+                                             defender: attackResult.defender,
+                                             attackResult: attackResult,
+                                             turn: turn,
+                                             logs: &logs,
+                                             players: &players,
+                                             enemies: &enemies,
+                                             random: &random,
+                                             reactionDepth: 0)
+            guard let updatedAttacker = outcome.attacker,
+                  let updatedDefender = outcome.defender else { return }
+            attacker = updatedAttacker
+            defender = updatedDefender
+            return
+        }
 
         let attackResult = performAttack(attacker: attacker,
                                          defender: defender,
@@ -536,8 +803,8 @@ struct BattleTurnEngine {
                                          logs: &logs,
                                          players: &players,
                                          enemies: &enemies,
-                                         random: &random,
-                                         reactionDepth: 0)
+                              random: &random,
+                              reactionDepth: 0)
 
         guard var updatedAttacker = outcome.attacker else { return }
         guard var updatedDefender = outcome.defender else { return }
@@ -597,12 +864,13 @@ struct BattleTurnEngine {
         var caster = group[casterIndex]
         guard caster.isAlive, caster.snapshot.magicalHealing > 0 else { return false }
         guard let targetIndex = selectHealingTargetIndex(in: group) else { return false }
-        guard caster.actionResources.consume(.clericMagic) else { return false }
-        let selectedSpell = selectClericHealingSpell(for: caster)
-        let remaining = caster.actionResources.charges(for: .clericMagic)
+        guard let selectedSpell = selectClericHealingSpell(for: caster) else { return false }
+        guard caster.actionResources.consume(spellId: selectedSpell.id) else { return false }
+        let remaining = caster.actionResources.charges(forSpellId: selectedSpell.id)
         appendActionLog(for: caster,
                         category: .clericMagic,
                         remainingUses: remaining,
+                        spellId: selectedSpell.id,
                         turn: turn,
                         logs: &logs)
         group[casterIndex] = caster
@@ -611,22 +879,20 @@ struct BattleTurnEngine {
         let healAmount = computeHealingAmount(caster: caster,
                                               target: target,
                                               random: &random,
-                                              spellId: selectedSpell?.id)
+                                              spellId: selectedSpell.id)
         let missing = target.snapshot.maxHP - target.currentHP
         guard missing > 0 else { return true }
         let applied = min(healAmount, missing)
         target.currentHP += applied
         group[targetIndex] = target
-        let spellName = selectedSpell?.name ?? "回復"
+        let spellName = selectedSpell.name
 
         var metadata: [String: String] = [
             "heal": "\(applied)",
             "targetHP": "\(target.currentHP)",
             "category": ActionCategory.clericMagic.logIdentifier
         ]
-        if let spellId = selectedSpell?.id {
-            metadata["spellId"] = spellId
-        }
+        metadata["spellId"] = selectedSpell.id
         logs.append(.init(turn: turn,
                           message: "\(caster.displayName)の\(spellName)！ \(target.displayName)のHPが\(applied)回復した！",
                           type: .heal,
@@ -645,22 +911,24 @@ struct BattleTurnEngine {
                                            random: inout GameRandomSource) -> Bool {
         guard var caster = actor(for: side, index: attackerIndex, players: players, enemies: enemies) else { return false }
         guard caster.isAlive, caster.snapshot.magicalAttack > 0 else { return false }
-        guard caster.actionResources.consume(.arcaneMagic) else { return false }
-        let selectedSpell = selectArcaneSpell(for: caster)
-        let remaining = caster.actionResources.charges(for: .arcaneMagic)
+        guard let selectedSpell = selectArcaneSpell(for: caster) else { return false }
+        guard caster.actionResources.consume(spellId: selectedSpell.id) else { return false }
+        let remaining = caster.actionResources.charges(forSpellId: selectedSpell.id)
         appendActionLog(for: caster,
                         category: .arcaneMagic,
                         remainingUses: remaining,
+                        spellId: selectedSpell.id,
                         turn: turn,
                         logs: &logs)
 
         let allowFriendlyTargets = hasStatus(tag: "confusion", in: caster)
+            || caster.skillEffects.partyHostileAll
+            || !caster.skillEffects.partyHostileTargets.isEmpty
 
-        if let spell = selectedSpell,
-           spell.category == .status,
-           let statusId = spell.statusId {
-            let maxTargets = statusTargetCount(for: caster, spell: spell)
-            let distinct = (spell.targeting == .randomEnemiesDistinct)
+        if selectedSpell.category == .status,
+           let statusId = selectedSpell.statusId {
+            let maxTargets = statusTargetCount(for: caster, spell: selectedSpell)
+            let distinct = (selectedSpell.targeting == .randomEnemiesDistinct)
             let targets = selectStatusTargets(attackerSide: side,
                                               players: players,
                                               enemies: enemies,
@@ -670,14 +938,14 @@ struct BattleTurnEngine {
                                               distinct: distinct)
 
             logs.append(.init(turn: turn,
-                              message: "\(caster.displayName)の\(spell.name)！",
+                              message: "\(caster.displayName)の\(selectedSpell.name)！",
                               type: .status,
                               actorId: caster.identifier,
-                              metadata: ["category": ActionCategory.arcaneMagic.logIdentifier, "spellId": spell.id]))
+                              metadata: ["category": ActionCategory.arcaneMagic.logIdentifier, "spellId": selectedSpell.id]))
 
             for reference in targets {
                 guard var target = actor(for: reference.0, index: reference.1, players: players, enemies: enemies) else { continue }
-                let baseChance = baseStatusChancePercent(spell: spell, caster: caster, target: target)
+                let baseChance = baseStatusChancePercent(spell: selectedSpell, caster: caster, target: target)
                 _ = attemptApplyStatus(statusId: statusId,
                                        baseChancePercent: baseChance,
                                        durationTurns: nil,
@@ -697,28 +965,35 @@ struct BattleTurnEngine {
                                                     players: players,
                                                     enemies: enemies,
                                                     allowFriendlyTargets: allowFriendlyTargets,
-                                                    random: &random) else { return false }
+                                                    random: &random,
+                                                    attacker: caster) else { return false }
 
         guard var target = actor(for: targetRef.0, index: targetRef.1, players: players, enemies: enemies) else { return false }
+
+        if let inflicted = attemptStatusInflictIfNeeded(attacker: caster, logs: &logs, turn: turn, random: &random) {
+            assign(inflicted, to: side, index: attackerIndex, players: &players, enemies: &enemies)
+        }
 
         let damage = computeMagicalDamage(attacker: caster,
                                           defender: &target,
                                           random: &random,
-                                          spellId: selectedSpell?.id)
+                                          spellId: selectedSpell.id)
+        applyMagicDegradation(to: &target, spellId: selectedSpell.id, caster: caster)
         let applied = applyDamage(amount: damage, to: &target)
-        if let spellId = selectedSpell?.id {
-            applyMagicDegradation(to: &target, spellId: spellId, caster: caster)
-        }
-        let spellName = selectedSpell?.name ?? "魔法"
+        attemptInflictStatuses(from: caster, to: &target, turn: turn, logs: &logs, random: &random)
+        applyAbsorptionIfNeeded(for: &caster,
+                                damageDealt: applied,
+                                damageType: .magical,
+                                turn: turn,
+                                logs: &logs)
+        let spellName = selectedSpell.name
 
         var metadata: [String: String] = [
             "damage": "\(applied)",
             "targetHP": "\(target.currentHP)",
             "category": ActionCategory.arcaneMagic.logIdentifier
         ]
-        if let spellId = selectedSpell?.id {
-            metadata["spellId"] = spellId
-        }
+        metadata["spellId"] = selectedSpell.id
 
         logs.append(.init(turn: turn,
                           message: "\(caster.displayName)の\(spellName)！ \(target.displayName)に\(applied)ダメージ！",
@@ -770,11 +1045,14 @@ struct BattleTurnEngine {
                         logs: &logs)
 
         let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker)
+            || attacker.skillEffects.partyHostileAll
+            || !attacker.skillEffects.partyHostileTargets.isEmpty
         guard let targetRef = selectOffensiveTarget(attackerSide: side,
                                                     players: players,
                                                     enemies: enemies,
                                                     allowFriendlyTargets: allowFriendlyTargets,
-                                                    random: &random) else { return false }
+                                                    random: &random,
+                                                    attacker: attacker) else { return false }
 
         guard var target = actor(for: targetRef.0, index: targetRef.1, players: players, enemies: enemies) else { return false }
 
@@ -782,6 +1060,12 @@ struct BattleTurnEngine {
                                          defender: &target,
                                          random: &random)
         let applied = applyDamage(amount: damage, to: &target)
+        applyAbsorptionIfNeeded(for: &attacker,
+                                damageDealt: applied,
+                                damageType: .physical,
+                                turn: turn,
+                                logs: &logs)
+        attemptInflictStatuses(from: attacker, to: &target, turn: turn, logs: &logs, random: &random)
 
         logs.append(.init(turn: turn,
                           message: "\(attacker.displayName)のブレス！ \(target.displayName)に\(applied)ダメージ！",
@@ -858,11 +1142,15 @@ struct BattleTurnEngine {
     private static func appendActionLog(for actor: BattleActor,
                                         category: ActionCategory,
                                         remainingUses: Int?,
+                                        spellId: String? = nil,
                                         turn: Int,
                                         logs: inout [BattleLogEntry]) {
         var metadata = ["category": category.logIdentifier]
         if let remainingUses {
             metadata["remainingUses"] = "\(remainingUses)"
+        }
+        if let spellId {
+            metadata["spellId"] = spellId
         }
         logs.append(.init(turn: turn,
                           message: category.actionMessage(for: actor.displayName),
@@ -875,7 +1163,8 @@ struct BattleTurnEngine {
                                               players: [BattleActor],
                                               enemies: [BattleActor],
                                               allowFriendlyTargets: Bool,
-                                              random: inout GameRandomSource) -> (ActorSide, Int)? {
+                                              random: inout GameRandomSource,
+                                              attacker: BattleActor?) -> (ActorSide, Int)? {
         var opponentRefs: [ActorReference] = []
         var allyRefs: [ActorReference] = []
 
@@ -892,10 +1181,13 @@ struct BattleTurnEngine {
             guard allowFriendlyTargets, !allyRefs.isEmpty else { return nil }
         }
 
+        if allowFriendlyTargets, let attacker {
+            let filtered = filterAlliedTargets(for: attacker, allies: allyRefs, players: players, enemies: enemies)
+            allyRefs = filtered
+        }
+
         var pool: [ActorReference] = []
         if allowFriendlyTargets {
-            // 重み付け: 敵を優先しつつ味方にも逸れる可能性を持たせる
-            pool.append(contentsOf: opponentRefs)
             pool.append(contentsOf: opponentRefs)
             pool.append(contentsOf: allyRefs)
         } else {
@@ -905,6 +1197,37 @@ struct BattleTurnEngine {
         guard !pool.isEmpty else { return nil }
         let pick = random.nextInt(in: 0...(pool.count - 1))
         return referenceToSideIndex(pool[pick])
+    }
+
+    private static func filterAlliedTargets(for attacker: BattleActor,
+                                            allies: [ActorReference],
+                                            players: [BattleActor],
+                                            enemies: [BattleActor]) -> [ActorReference] {
+        let protected = attacker.skillEffects.partyProtectedTargets
+        let hostileTargets = attacker.skillEffects.partyHostileTargets
+        var filtered: [ActorReference] = []
+        for reference in allies {
+            let (side, index) = referenceToSideIndex(reference)
+            guard let ally = actor(for: side, index: index, players: players, enemies: enemies) else { continue }
+            if protected.contains(where: { matchTargetId($0, to: ally) }) {
+                continue
+            }
+            if !hostileTargets.isEmpty && !hostileTargets.contains(where: { matchTargetId($0, to: ally) }) {
+                continue
+            }
+            filtered.append(reference)
+        }
+        return filtered
+    }
+
+    private static func matchTargetId(_ targetId: String, to actor: BattleActor) -> Bool {
+        let lower = targetId.lowercased()
+        if lower == actor.identifier.lowercased() { return true }
+        if let raceId = actor.raceId, lower == raceId.lowercased() { return true }
+        if let raceCategory = actor.raceCategory, lower == raceCategory.lowercased() { return true }
+        if let jobName = actor.jobName, lower == jobName.lowercased() { return true }
+        if lower == actor.displayName.lowercased() { return true }
+        return false
     }
 
     private static func referenceToSideIndex(_ reference: ActorReference) -> (ActorSide, Int) {
@@ -929,6 +1252,137 @@ struct BattleTurnEngine {
         return bestIndex
     }
 
+    private static func resetRescueUsage(for actors: inout [BattleActor]) {
+        for index in actors.indices {
+            actors[index].rescueActionsUsed = 0
+        }
+    }
+
+    @discardableResult
+    private static func attemptRescue(of fallenIndex: Int,
+                                      side: ActorSide,
+                                      turn: Int,
+                                      logs: inout [BattleLogEntry],
+                                      players: inout [BattleActor],
+                                      enemies: inout [BattleActor],
+                                      random: inout GameRandomSource) -> Bool {
+        guard let fallen = actor(for: side, index: fallenIndex, players: players, enemies: enemies) else {
+            return false
+        }
+        guard !fallen.isAlive else { return true }
+
+        let allies = side == .player ? players : enemies
+        let candidateIndices = allies.enumerated()
+            .filter { $0.element.isAlive && !$0.element.skillEffects.rescueCapabilities.isEmpty }
+            .sorted { lhs, rhs in
+                let leftRow = lhs.element.formationSlot.rawValue
+                let rightRow = rhs.element.formationSlot.rawValue
+                if leftRow == rightRow {
+                    return lhs.offset < rhs.offset
+                }
+                return leftRow < rightRow
+            }
+            .map { $0.offset }
+
+        for candidateIndex in candidateIndices {
+            guard var rescuer = actor(for: side, index: candidateIndex, players: players, enemies: enemies) else { continue }
+            guard canAttemptRescue(rescuer, turn: turn) else { continue }
+
+            let capabilities = availableRescueCapabilities(for: rescuer)
+            guard let capability = capabilities.max(by: { $0.minLevel < $1.minLevel }) ?? capabilities.first else { continue }
+
+            let successChance = rescueChance(for: rescuer)
+            guard successChance > 0 else { continue }
+            guard BattleRandomSystem.percentChance(successChance, random: &random) else { continue }
+
+            guard var revivedTarget = actor(for: side, index: fallenIndex, players: players, enemies: enemies), !revivedTarget.isAlive else {
+                return true
+            }
+
+            var appliedHeal = revivedTarget.snapshot.maxHP
+            if capability.usesClericMagic {
+                guard let spell = selectClericHealingSpell(for: rescuer) else { continue }
+                guard rescuer.actionResources.consume(spellId: spell.id) else { continue }
+                let healAmount = computeHealingAmount(caster: rescuer,
+                                                      target: revivedTarget,
+                                                      random: &random,
+                                                      spellId: spell.id)
+                appliedHeal = max(1, healAmount)
+                logs.append(.init(turn: turn,
+                                  message: "\(rescuer.displayName)は\(spell.name)で\(revivedTarget.displayName)を救出した！",
+                                  type: .heal,
+                                  actorId: rescuer.identifier,
+                                  targetId: revivedTarget.identifier,
+                                  metadata: [
+                                      "category": "rescue",
+                                      "spellId": spell.id,
+                                      "heal": "\(min(appliedHeal, revivedTarget.snapshot.maxHP))"
+                                  ]))
+            } else {
+                logs.append(.init(turn: turn,
+                                  message: "\(rescuer.displayName)は\(revivedTarget.displayName)を救出した！",
+                                  type: .heal,
+                                  actorId: rescuer.identifier,
+                                  targetId: revivedTarget.identifier,
+                                  metadata: [
+                                      "category": "rescue",
+                                      "heal": "\(min(appliedHeal, revivedTarget.snapshot.maxHP))"
+                                  ]))
+            }
+
+            if !rescuer.skillEffects.rescueModifiers.ignoreActionCost {
+                rescuer.rescueActionsUsed += 1
+            }
+
+            revivedTarget.currentHP = min(revivedTarget.snapshot.maxHP, appliedHeal)
+            revivedTarget.statusEffects = []
+            revivedTarget.guardActive = false
+
+            assign(rescuer, to: side, index: candidateIndex, players: &players, enemies: &enemies)
+            assign(revivedTarget, to: side, index: fallenIndex, players: &players, enemies: &enemies)
+            return true
+        }
+
+        return false
+    }
+
+    private static func attemptInstantResurrectionIfNeeded(of fallenIndex: Int,
+                                                           side: ActorSide,
+                                                           turn: Int,
+                                                           logs: inout [BattleLogEntry],
+                                                           players: inout [BattleActor],
+                                                           enemies: inout [BattleActor],
+                                                           random: inout GameRandomSource) -> Bool {
+        guard var target = actor(for: side, index: fallenIndex, players: players, enemies: enemies), !target.isAlive else {
+            return false
+        }
+
+        applyEndOfTurnResurrectionIfNeeded(for: &target, turn: turn, logs: &logs, random: &random)
+        guard target.isAlive else { return false }
+
+        assign(target, to: side, index: fallenIndex, players: &players, enemies: &enemies)
+        return true
+    }
+
+    private static func availableRescueCapabilities(for actor: BattleActor) -> [BattleActor.SkillEffects.RescueCapability] {
+        let level = actor.level ?? 0
+        return actor.skillEffects.rescueCapabilities.filter { level >= $0.minLevel }
+    }
+
+    private static func rescueChance(for actor: BattleActor) -> Int {
+        return max(0, min(100, actor.actionRates.clericMagic))
+    }
+
+    private static func canAttemptRescue(_ actor: BattleActor, turn: Int) -> Bool {
+        guard actor.isAlive else { return false }
+        guard actor.rescueActionCapacity > 0 else { return false }
+        if actor.rescueActionsUsed >= actor.rescueActionCapacity,
+           !actor.skillEffects.rescueModifiers.ignoreActionCost {
+            return false
+        }
+        return true
+    }
+
     private static func appendDefeatLog(for target: BattleActor, turn: Int, logs: inout [BattleLogEntry]) {
         logs.append(.init(turn: turn,
                           message: "\(target.displayName)は倒れた…",
@@ -944,6 +1398,7 @@ struct BattleTurnEngine {
         var defenderWasDefeated: Bool
         var defenderEvadedAttack: Bool
         var damageKind: BattleDamageType
+        var isAntiHealing: Bool = false
     }
 
     private struct AttackOutcome {
@@ -970,20 +1425,38 @@ struct BattleTurnEngine {
         var currentAttacker = actor(for: attackerSide, index: attackerIndex, players: players, enemies: enemies)
         var currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
 
-        if attackResult.defenderWasDefeated {
-            let killerRef = reference(for: attackerSide, index: attackerIndex)
-            dispatchReactions(for: .allyDefeated(side: defenderSide,
-                                                 fallenIndex: defenderIndex,
-                                                 killer: killerRef),
-                              depth: reactionDepth,
-                              turn: turn,
-                              players: &players,
-                              enemies: &enemies,
-                              logs: &logs,
-                              random: &random)
-            currentAttacker = actor(for: attackerSide, index: attackerIndex, players: players, enemies: enemies)
-            currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
-        }
+            if attackResult.defenderWasDefeated {
+                let killerRef = reference(for: attackerSide, index: attackerIndex)
+                dispatchReactions(for: .allyDefeated(side: defenderSide,
+                                                     fallenIndex: defenderIndex,
+                                                     killer: killerRef),
+                                  depth: reactionDepth,
+                                  turn: turn,
+                                  players: &players,
+                                  enemies: &enemies,
+                                  logs: &logs,
+                                  random: &random)
+                currentAttacker = actor(for: attackerSide, index: attackerIndex, players: players, enemies: enemies)
+                currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
+
+                if attemptInstantResurrectionIfNeeded(of: defenderIndex,
+                                                      side: defenderSide,
+                                                      turn: turn,
+                                                      logs: &logs,
+                                                      players: &players,
+                                                      enemies: &enemies,
+                                                      random: &random) {
+                    currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
+                } else if attemptRescue(of: defenderIndex,
+                                        side: defenderSide,
+                                        turn: turn,
+                                        logs: &logs,
+                                        players: &players,
+                                        enemies: &enemies,
+                                        random: &random) {
+                    currentDefender = actor(for: defenderSide, index: defenderIndex, players: players, enemies: enemies)
+                }
+            }
 
         if attackResult.defenderEvadedAttack,
            let defenderActor = currentDefender,
@@ -1019,11 +1492,11 @@ struct BattleTurnEngine {
                                                             defenderIndex: defenderIndex,
                                                             attacker: attackerRef),
                                   depth: reactionDepth,
-                                  turn: turn,
-                                  players: &players,
-                                  enemies: &enemies,
-                                  logs: &logs,
-                                  random: &random)
+                                 turn: turn,
+                                 players: &players,
+                                 enemies: &enemies,
+                                 logs: &logs,
+                                 random: &random)
             case .magical:
                 dispatchReactions(for: .selfDamagedMagical(side: defenderSide,
                                                            actorIndex: defenderIndex,
@@ -1034,6 +1507,26 @@ struct BattleTurnEngine {
                                   enemies: &enemies,
                                   logs: &logs,
                                   random: &random)
+                if attackResult.isAntiHealing {
+                    dispatchReactions(for: .selfDamagedPhysical(side: defenderSide,
+                                                                actorIndex: defenderIndex,
+                                                                attacker: attackerRef),
+                                      depth: reactionDepth,
+                                      turn: turn,
+                                      players: &players,
+                                      enemies: &enemies,
+                                      logs: &logs,
+                                      random: &random)
+                    dispatchReactions(for: .allyDamagedPhysical(side: defenderSide,
+                                                                defenderIndex: defenderIndex,
+                                                                attacker: attackerRef),
+                                      depth: reactionDepth,
+                                      turn: turn,
+                                      players: &players,
+                                      enemies: &enemies,
+                                      logs: &logs,
+                                      random: &random)
+                }
             case .breath:
                 dispatchReactions(for: .selfDamagedPhysical(side: defenderSide,
                                                             actorIndex: defenderIndex,
@@ -1069,15 +1562,63 @@ struct BattleTurnEngine {
         let accuracyMultiplier: Double
     }
 
+    private struct PhysicalAttackOverrides {
+        var physicalAttackOverride: Int?
+        var maxAttackMultiplier: Double?
+        var ignoreDefense: Bool
+        var forceHit: Bool
+        var criticalRateMultiplier: Double?
+        var doubleDamageAgainstDivine: Bool
+
+        init(physicalAttackOverride: Int? = nil,
+             maxAttackMultiplier: Double? = nil,
+             ignoreDefense: Bool = false,
+             forceHit: Bool = false,
+             criticalRateMultiplier: Double? = nil,
+             doubleDamageAgainstDivine: Bool = false) {
+            self.physicalAttackOverride = physicalAttackOverride
+            self.maxAttackMultiplier = maxAttackMultiplier
+            self.ignoreDefense = ignoreDefense
+            self.forceHit = forceHit
+            self.criticalRateMultiplier = criticalRateMultiplier
+            self.doubleDamageAgainstDivine = doubleDamageAgainstDivine
+        }
+    }
+
     private static func performAttack(attacker: BattleActor,
                                       defender: BattleActor,
                                       turn: Int,
                                       logs: inout [BattleLogEntry],
                                       random: inout GameRandomSource,
                                       hitCountOverride: Int?,
-                                      accuracyMultiplier: Double) -> AttackResult {
+                                      accuracyMultiplier: Double,
+                                      overrides: PhysicalAttackOverrides? = nil) -> AttackResult {
         var attackerCopy = attacker
         var defenderCopy = defender
+
+        if let overrides {
+            if let overrideAttack = overrides.physicalAttackOverride {
+                var snapshot = attackerCopy.snapshot
+                var adjusted = overrideAttack
+                if let maxMultiplier = overrides.maxAttackMultiplier {
+                    let cap = Int((Double(attacker.snapshot.physicalAttack) * maxMultiplier).rounded(.down))
+                    adjusted = min(adjusted, cap)
+                }
+                snapshot.physicalAttack = max(0, adjusted)
+                attackerCopy.snapshot = snapshot
+            }
+            if overrides.ignoreDefense {
+                var snapshot = defenderCopy.snapshot
+                snapshot.physicalDefense = 0
+                defenderCopy.snapshot = snapshot
+            }
+            if let multiplier = overrides.criticalRateMultiplier {
+                var snapshot = attackerCopy.snapshot
+                let scaled = Double(snapshot.criticalRate) * multiplier
+                snapshot.criticalRate = max(0, min(100, Int(scaled.rounded())))
+                attackerCopy.snapshot = snapshot
+            }
+        }
 
         guard attackerCopy.isAlive && defenderCopy.isAlive else {
             return AttackResult(attacker: attackerCopy,
@@ -1098,12 +1639,34 @@ struct BattleTurnEngine {
         for hitIndex in 1...hitCount {
             guard attackerCopy.isAlive && defenderCopy.isAlive else { break }
 
-            let hitChance = computeHitChance(attacker: attackerCopy,
-                                             defender: defenderCopy,
-                                             hitIndex: hitIndex,
-                                             accuracyMultiplier: accuracyMultiplier,
-                                             random: &random)
-            if !BattleRandomSystem.probability(hitChance, random: &random) {
+            if hitIndex == 1 {
+                if shouldTriggerShieldBlock(defender: &defenderCopy, attacker: attackerCopy, turn: turn, logs: &logs, random: &random) {
+                    return AttackResult(attacker: attackerCopy,
+                                        defender: defenderCopy,
+                                        totalDamage: totalDamage,
+                                        successfulHits: successfulHits,
+                                        defenderWasDefeated: defenderDefeated,
+                                        defenderEvadedAttack: true,
+                                        damageKind: .physical)
+                }
+                if shouldTriggerParry(defender: &defenderCopy, attacker: attackerCopy, turn: turn, logs: &logs, random: &random) {
+                    return AttackResult(attacker: attackerCopy,
+                                        defender: defenderCopy,
+                                        totalDamage: totalDamage,
+                                        successfulHits: successfulHits,
+                                        defenderWasDefeated: defenderDefeated,
+                                        defenderEvadedAttack: true,
+                                        damageKind: .physical)
+                }
+            }
+
+            let forceHit = overrides?.forceHit ?? false
+            let hitChance = forceHit ? 1.0 : computeHitChance(attacker: attackerCopy,
+                                                             defender: defenderCopy,
+                                                             hitIndex: hitIndex,
+                                                             accuracyMultiplier: accuracyMultiplier,
+                                                             random: &random)
+            if !forceHit && !BattleRandomSystem.probability(hitChance, random: &random) {
                 defenderEvaded = true
                 logs.append(.init(turn: turn,
                                   message: "\(defenderCopy.displayName)は\(attackerCopy.displayName)の攻撃をかわした！",
@@ -1121,8 +1684,21 @@ struct BattleTurnEngine {
                                                defender: &defenderCopy,
                                                hitIndex: hitIndex,
                                                random: &random)
-            let applied = applyDamage(amount: result.damage, to: &defenderCopy)
+            var pendingDamage = result.damage
+            if overrides?.doubleDamageAgainstDivine == true,
+               normalizedTargetCategory(for: defenderCopy) == "divine" {
+                pendingDamage = min(Int.max, pendingDamage * 2)
+            }
+            let applied = applyDamage(amount: pendingDamage, to: &defenderCopy)
             applyPhysicalDegradation(to: &defenderCopy)
+            applySpellChargeGainOnPhysicalHit(for: &attackerCopy,
+                                              damageDealt: applied)
+            applyAbsorptionIfNeeded(for: &attackerCopy,
+                                    damageDealt: applied,
+                                    damageType: .physical,
+                                    turn: turn,
+                                    logs: &logs)
+            attemptInflictStatuses(from: attackerCopy, to: &defenderCopy, turn: turn, logs: &logs, random: &random)
 
             attackerCopy.attackHistory.registerHit()
             totalDamage += applied
@@ -1163,6 +1739,91 @@ struct BattleTurnEngine {
                              defenderWasDefeated: defenderDefeated,
                              defenderEvadedAttack: defenderEvaded,
                              damageKind: .physical)
+    }
+
+    private static func performAntiHealingAttack(attacker: BattleActor,
+                                                 defender: BattleActor,
+                                                 turn: Int,
+                                                 logs: inout [BattleLogEntry],
+                                                 random: inout GameRandomSource) -> AttackResult {
+        let attackerCopy = attacker
+        var defenderCopy = defender
+
+        guard attackerCopy.isAlive && defenderCopy.isAlive else {
+            return AttackResult(attacker: attackerCopy,
+                                defender: defenderCopy,
+                                totalDamage: 0,
+                                successfulHits: 0,
+                                defenderWasDefeated: false,
+                                defenderEvadedAttack: false,
+                                damageKind: .magical,
+                                isAntiHealing: true)
+        }
+
+        let hitChance = computeHitChance(attacker: attackerCopy,
+                                         defender: defenderCopy,
+                                         hitIndex: 1,
+                                         accuracyMultiplier: 1.0,
+                                         random: &random)
+        if !BattleRandomSystem.probability(hitChance, random: &random) {
+            logs.append(.init(turn: turn,
+                              message: "\(defenderCopy.displayName)は\(attackerCopy.displayName)のアンチ・ヒーリングを回避した！",
+                              type: .miss,
+                              actorId: defenderCopy.identifier,
+                              targetId: attackerCopy.identifier,
+                              metadata: [
+                                  "category": "antiHealing",
+                                  "hitIndex": "1"
+                              ]))
+            return AttackResult(attacker: attackerCopy,
+                                defender: defenderCopy,
+                                totalDamage: 0,
+                                successfulHits: 0,
+                                defenderWasDefeated: false,
+                                defenderEvadedAttack: true,
+                                damageKind: .magical,
+                                isAntiHealing: true)
+        }
+
+        let result = computeAntiHealingDamage(attacker: attackerCopy,
+                                              defender: &defenderCopy,
+                                              random: &random)
+        let applied = applyDamage(amount: result.damage, to: &defenderCopy)
+
+        var message: String
+        var metadata: [String: String] = [
+            "damage": "\(applied)",
+            "targetHP": "\(defenderCopy.currentHP)",
+            "category": "antiHealing",
+            "hitIndex": "1"
+        ]
+
+        if result.critical {
+            metadata["critical"] = "true"
+            message = "\(attackerCopy.displayName)の必殺アンチ・ヒーリング！ \(defenderCopy.displayName)に\(applied)ダメージ！"
+        } else {
+            message = "\(attackerCopy.displayName)のアンチ・ヒーリング！ \(defenderCopy.displayName)に\(applied)ダメージ！"
+        }
+
+        logs.append(.init(turn: turn,
+                          message: message,
+                          type: .damage,
+                          actorId: attackerCopy.identifier,
+                          targetId: defenderCopy.identifier,
+                          metadata: metadata))
+
+        if !defenderCopy.isAlive {
+            appendDefeatLog(for: defenderCopy, turn: turn, logs: &logs)
+        }
+
+        return AttackResult(attacker: attackerCopy,
+                             defender: defenderCopy,
+                             totalDamage: applied,
+                             successfulHits: applied > 0 ? 1 : 0,
+                             defenderWasDefeated: !defenderCopy.isAlive,
+                             defenderEvadedAttack: false,
+                             damageKind: .magical,
+                             isAntiHealing: true)
     }
 
     private static func executeFollowUpSequence(attackerSide: ActorSide,
@@ -1233,7 +1894,7 @@ struct BattleTurnEngine {
         let luckModifier = Double(attacker.luck - defender.luck) * 0.002
         let accuracyModifier = hitAccuracyModifier(for: hitIndex)
         let rawChance = (baseRatio * randomFactor + luckModifier) * accuracyModifier * accuracyMultiplier
-        return clampProbability(rawChance)
+        return clampProbability(rawChance, defender: defender)
     }
 
     private static func shouldUseMartialAttack(attacker: BattleActor) -> Bool {
@@ -1333,6 +1994,35 @@ struct BattleTurnEngine {
         return max(1, Int(adjusted.rounded()))
     }
 
+    private static func computeAntiHealingDamage(attacker: BattleActor,
+                                                 defender: inout BattleActor,
+                                                 random: inout GameRandomSource) -> (damage: Int, critical: Bool) {
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &random)
+        let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &random)
+        let attackPower = Double(attacker.snapshot.magicalHealing) * attackRoll
+        let defensePower = degradedMagicalDefense(for: defender) * defenseRoll * 0.5
+        let isCritical = shouldTriggerCritical(attacker: attacker, defender: defender, random: &random)
+        let effectiveDefense = isCritical ? defensePower * criticalDefenseRetainedFactor : defensePower
+        var damage = max(1.0, attackPower - effectiveDefense)
+
+        damage *= antiHealingDamageDealtModifier(for: attacker)
+        damage *= damageTakenModifier(for: defender, damageType: .magical)
+
+        if isCritical {
+            damage *= criticalDamageBonus(for: attacker)
+            damage *= defender.skillEffects.criticalDamageTakenMultiplier
+        }
+
+        let barrierMultiplier = applyBarrierIfAvailable(for: .magical, defender: &defender)
+        damage *= barrierMultiplier
+
+        if barrierMultiplier == 1.0, defender.guardActive {
+            damage *= 0.5
+        }
+
+        return (max(1, Int(damage.rounded())), isCritical)
+    }
+
     private static func computeBreathDamage(attacker: BattleActor,
                                             defender: inout BattleActor,
                                             random: inout GameRandomSource) -> Int {
@@ -1383,15 +2073,24 @@ struct BattleTurnEngine {
     }
 
     private static func selectArcaneSpell(for actor: BattleActor) -> SpellDefinition? {
-        guard !actor.spells.arcane.isEmpty else { return nil }
-        return highestTierSpell(in: actor.spells.arcane) { spell in
+        let available = actor.spells.arcane.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
+        guard !available.isEmpty else { return nil }
+        return highestTierSpell(in: available) { spell in
             spell.category == .damage || spell.category == .status
         }
     }
 
+    private static func attemptStatusInflictIfNeeded(attacker: BattleActor,
+                                                     logs: inout [BattleLogEntry],
+                                                     turn: Int,
+                                                     random: inout GameRandomSource) -> BattleActor? {
+        return attacker
+    }
+
     private static func selectClericHealingSpell(for actor: BattleActor) -> SpellDefinition? {
-        guard !actor.spells.cleric.isEmpty else { return nil }
-        return highestTierSpell(in: actor.spells.cleric) { $0.category == .healing }
+        let available = actor.spells.cleric.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
+        guard !available.isEmpty else { return nil }
+        return highestTierSpell(in: available) { $0.category == .healing }
     }
 
     private static func statusTargetCount(for caster: BattleActor, spell: SpellDefinition) -> Int {
@@ -1561,6 +2260,12 @@ struct BattleTurnEngine {
         return buffMultiplier * attacker.skillEffects.damageDealt.value(for: damageType) * categoryMultiplier
     }
 
+    private static func antiHealingDamageDealtModifier(for attacker: BattleActor) -> Double {
+        let key = modifierKey(for: .magical, suffix: "DamageDealtMultiplier")
+        let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
+        return buffMultiplier * attacker.skillEffects.damageDealt.value(for: .magical)
+    }
+
     private static func damageTakenModifier(for defender: BattleActor, damageType: BattleDamageType) -> Double {
         let key = modifierKey(for: damageType, suffix: "DamageTakenMultiplier")
         let buffMultiplier = aggregateModifier(from: defender.timedBuffs, key: key)
@@ -1629,6 +2334,85 @@ struct BattleTurnEngine {
             increment = max(0.0, (100.0 - d) * 0.001)
         }
         defender.degradationPercent = min(100.0, d + increment)
+    }
+
+    private static func shouldTriggerParry(defender: inout BattleActor,
+                                           attacker: BattleActor,
+                                           turn: Int,
+                                           logs: inout [BattleLogEntry],
+                                           random: inout GameRandomSource) -> Bool {
+        guard defender.skillEffects.parryEnabled else { return false }
+        let defenderBonus = Double(defender.snapshot.additionalDamage) * 0.25
+        let attackerPenalty = Double(attacker.snapshot.additionalDamage) * 0.5
+        let base = 10.0 + defenderBonus - attackerPenalty + defender.skillEffects.parryBonusPercent
+        let chance = max(0, min(100, Int(base.rounded())))
+        guard BattleRandomSystem.percentChance(chance, random: &random) else { return false }
+        logs.append(.init(turn: turn,
+                          message: "\(defender.displayName)のパリィ！連続攻撃を防いだ！",
+                          type: .status,
+                          actorId: defender.identifier,
+                          targetId: attacker.identifier,
+                          metadata: ["category": "parry", "chance": "\(chance)"]))
+        return true
+    }
+
+    private static func shouldTriggerShieldBlock(defender: inout BattleActor,
+                                                 attacker: BattleActor,
+                                                 turn: Int,
+                                                 logs: inout [BattleLogEntry],
+                                                 random: inout GameRandomSource) -> Bool {
+        guard defender.skillEffects.shieldBlockEnabled else { return false }
+        let base = 30.0 - Double(attacker.snapshot.additionalDamage) / 2.0 + defender.skillEffects.shieldBlockBonusPercent
+        let chance = max(0, min(100, Int(base.rounded())))
+        guard BattleRandomSystem.percentChance(chance, random: &random) else { return false }
+        logs.append(.init(turn: turn,
+                          message: "\(defender.displayName)は大盾で攻撃を防いだ！",
+                          type: .status,
+                          actorId: defender.identifier,
+                          targetId: attacker.identifier,
+                          metadata: ["category": "shieldBlock", "chance": "\(chance)"]))
+        return true
+    }
+
+    private static func applyAbsorptionIfNeeded(for attacker: inout BattleActor,
+                                                damageDealt: Int,
+                                                damageType: BattleDamageType,
+                                                turn: Int,
+                                                logs: inout [BattleLogEntry]) {
+        guard damageDealt > 0 else { return }
+        guard damageType == .physical else { return }
+        let percent = attacker.skillEffects.absorptionPercent
+        guard percent > 0 else { return }
+        let capPercent = attacker.skillEffects.absorptionCapPercent
+        let rawHeal = Int((Double(damageDealt) * percent / 100.0).rounded())
+        let cap = Int((Double(attacker.snapshot.maxHP) * capPercent / 100.0).rounded())
+        let healAmount = max(0, min(rawHeal, cap > 0 ? cap : rawHeal))
+        guard healAmount > 0 else { return }
+        let missing = attacker.snapshot.maxHP - attacker.currentHP
+        let applied = min(healAmount, missing)
+        guard applied > 0 else { return }
+        attacker.currentHP += applied
+        logs.append(.init(turn: turn,
+                          message: "\(attacker.displayName)は吸収能力でHPが\(applied)回復した！",
+                          type: .heal,
+                          actorId: attacker.identifier,
+                          metadata: ["category": "absorption", "heal": "\(applied)"]))
+    }
+
+    private static func applySpellChargeGainOnPhysicalHit(for attacker: inout BattleActor,
+                                                          damageDealt: Int) {
+        guard damageDealt > 0 else { return }
+        let spells = attacker.spells.arcane + attacker.spells.cleric
+        guard !spells.isEmpty else { return }
+        for spell in spells {
+            guard let modifier = attacker.skillEffects.spellChargeModifier(for: spell.id),
+                  let gain = modifier.gainOnPhysicalHit,
+                  gain > 0 else { continue }
+            let cap = modifier.maxOverride ?? attacker.actionResources.maxCharges(forSpellId: spell.id)
+            _ = attacker.actionResources.addCharges(forSpellId: spell.id,
+                                                    amount: gain,
+                                                    cap: cap)
+        }
     }
 
     private static func applyMagicDegradation(to defender: inout BattleActor,
@@ -1766,8 +2550,36 @@ struct BattleTurnEngine {
     private static let balancedRangedAptRow: [Double] = balancedMeleeAptRow.reversed()
     private static let balancedDualAptRow: [Double] = Array(repeating: 1.02, count: 6)
 
-    private static func clampProbability(_ value: Double) -> Double {
-        return min(0.98, max(0.05, value))
+    private static func clampProbability(_ value: Double, defender: BattleActor? = nil) -> Double {
+        // 下限（命中の最低値）と上限（命中の最高値）を算出
+        let baseMinHit = 0.05
+        var minHit = baseMinHit
+
+        if let defender {
+            // 回避スキルによる命中下限低下（97%回避=0.6倍など）
+            if let minScale = defender.skillEffects.minHitScale {
+                minHit *= minScale
+            }
+            // 敏捷が20を超えると1上昇ごとに0.88倍（命中下限が下がる＝回避上限が上がる）
+        if defender.agility > 20 {
+            let delta = defender.agility - 20
+            minHit *= pow(0.88, Double(delta))
+        }
+        }
+
+        // 命中下限を 0〜1 に制限
+        minHit = max(0.0, min(1.0, minHit))
+
+        // 命中上限の計算: (1 - 下限回避率) を基本とし、システム上限95%を適用
+        var maxHit = min(1.0 - minHit, 0.95)
+
+        // 回避上限スキル(例:97%回避)がある場合、命中上限を 1 - cap に引き下げる
+        if let capPercent = defender?.skillEffects.dodgeCapMax {
+            let hitUpper = max(0.0, 1.0 - capPercent / 100.0)
+            maxHit = min(maxHit, hitUpper)
+        }
+
+        return min(maxHit, max(minHit, value))
     }
 
     private static func statusDefinition(for effect: AppliedStatusEffect) -> StatusEffectDefinition? {
@@ -1857,11 +2669,36 @@ struct BattleTurnEngine {
         }
     }
 
+    private static func hasVampiricImpulse(actor: BattleActor) -> Bool {
+        actor.skillEffects.vampiricImpulse && !actor.skillEffects.vampiricSuppression
+    }
+
     private static func isActionLocked(actor: BattleActor) -> Bool {
         actor.statusEffects.contains { effect in
             guard let definition = statusDefinition(for: effect) else { return false }
             return definition.actionLocked ?? false
         }
+    }
+
+    private static func shouldTriggerBerserk(for actor: inout BattleActor,
+                                             turn: Int,
+                                             logs: inout [BattleLogEntry],
+                                             random: inout GameRandomSource) -> Bool {
+        guard let chance = actor.skillEffects.berserkChancePercent,
+              chance > 0 else { return false }
+        let capped = max(0, min(100, Int(chance.rounded(.towardZero))))
+        guard BattleRandomSystem.percentChance(capped, random: &random) else { return false }
+        let alreadyConfused = hasStatus(tag: "confusion", in: actor)
+        if !alreadyConfused {
+            let applied = AppliedStatusEffect(id: "status.confusion", remainingTurns: 3, source: actor.identifier, stackValue: 0.0)
+            actor.statusEffects.append(applied)
+            logs.append(.init(turn: turn,
+                              message: "\(actor.displayName)は暴走して混乱した！",
+                              type: .status,
+                              actorId: actor.identifier,
+                              metadata: ["statusId": "status.confusion"]))
+        }
+        return true
     }
 
     private static func appendStatusLockLog(for actor: BattleActor,
@@ -1987,7 +2824,8 @@ struct BattleTurnEngine {
                                                         players: players,
                                                         enemies: enemies,
                                                         allowFriendlyTargets: false,
-                                                        random: &random)
+                                                        random: &random,
+                                                        attacker: currentPerformer)
             }
             guard var resolvedTarget = targetReference else { continue }
             var needsFallback = false
@@ -2003,7 +2841,8 @@ struct BattleTurnEngine {
                                                            players: players,
                                                            enemies: enemies,
                                                            allowFriendlyTargets: false,
-                                                           random: &random) else {
+                                                           random: &random,
+                                                           attacker: currentPerformer) else {
                     continue
                 }
                 resolvedTarget = fallback
@@ -2072,18 +2911,23 @@ struct BattleTurnEngine {
                                          hitCountOverride: scaledHits,
                                          accuracyMultiplier: reaction.accuracyMultiplier)
         case .magical:
-            let attackerCopy = modifiedAttacker
+            var attackerCopy = modifiedAttacker
             var targetCopy = initialTarget
             var totalDamage = 0
             var defeated = false
-                let iterations = max(1, scaledHits)
-                for _ in 0..<iterations {
-                    guard attackerCopy.isAlive, targetCopy.isAlive else { break }
-                    let damage = computeMagicalDamage(attacker: attackerCopy,
-                                                      defender: &targetCopy,
-                                                      random: &random,
-                                                      spellId: nil)
+            let iterations = max(1, scaledHits)
+            for _ in 0..<iterations {
+                guard attackerCopy.isAlive, targetCopy.isAlive else { break }
+                let damage = computeMagicalDamage(attacker: attackerCopy,
+                                                  defender: &targetCopy,
+                                                  random: &random,
+                                                  spellId: nil)
                 let applied = applyDamage(amount: damage, to: &targetCopy)
+                applyAbsorptionIfNeeded(for: &attackerCopy,
+                                        damageDealt: applied,
+                                        damageType: .magical,
+                                        turn: turn,
+                                        logs: &logs)
                 totalDamage += applied
                 if applied > 0 {
                     logs.append(.init(turn: turn,
@@ -2262,25 +3106,30 @@ struct BattleTurnEngine {
     private static func endOfTurn(players: inout [BattleActor],
                                   enemies: inout [BattleActor],
                                   turn: Int,
-                                  logs: inout [BattleLogEntry]) {
+                                  logs: inout [BattleLogEntry],
+                                  random: inout GameRandomSource) {
         for index in players.indices {
             var actor = players[index]
-            processEndOfTurn(for: &actor, turn: turn, logs: &logs)
+            processEndOfTurn(for: &actor, turn: turn, logs: &logs, random: &random)
             players[index] = actor
         }
         for index in enemies.indices {
             var actor = enemies[index]
-            processEndOfTurn(for: &actor, turn: turn, logs: &logs)
+            processEndOfTurn(for: &actor, turn: turn, logs: &logs, random: &random)
             enemies[index] = actor
         }
 
         applyEndOfTurnPartyHealing(for: &players, turn: turn, logs: &logs)
+        applyNecromancerIfNeeded(for: &players, turn: turn, logs: &logs, random: &random)
+
         applyEndOfTurnPartyHealing(for: &enemies, turn: turn, logs: &logs)
+        applyNecromancerIfNeeded(for: &enemies, turn: turn, logs: &logs, random: &random)
     }
 
     private static func processEndOfTurn(for actor: inout BattleActor,
                                          turn: Int,
-                                         logs: inout [BattleLogEntry]) {
+                                         logs: inout [BattleLogEntry],
+                                         random: inout GameRandomSource) {
         let wasAlive = actor.isAlive
         actor.guardActive = false
         actor.guardBarrierCharges = [:]
@@ -2289,7 +3138,10 @@ struct BattleTurnEngine {
         if actor.skillEffects.autoDegradationRepair {
             applyDegradationRepairIfAvailable(to: &actor)
         }
+        applySpellChargeRegenIfNeeded(for: &actor, turn: turn)
         updateTimedBuffs(for: &actor, turn: turn, logs: &logs)
+        applyEndOfTurnSelfHPDeltaIfNeeded(for: &actor, turn: turn, logs: &logs)
+        applyEndOfTurnResurrectionIfNeeded(for: &actor, turn: turn, logs: &logs, random: &random)
         if wasAlive && !actor.isAlive {
             appendDefeatLog(for: actor, turn: turn, logs: &logs)
         }
@@ -2339,6 +3191,178 @@ struct BattleTurnEngine {
         }
     }
 
+    private static func applyEndOfTurnSelfHPDeltaIfNeeded(for actor: inout BattleActor,
+                                                          turn: Int,
+                                                          logs: inout [BattleLogEntry]) {
+        guard actor.isAlive else { return }
+        let percent = actor.skillEffects.endOfTurnSelfHPPercent
+        guard percent != 0 else { return }
+        let magnitude = abs(percent) / 100.0
+        guard magnitude > 0 else { return }
+        let rawAmount = Double(actor.snapshot.maxHP) * magnitude
+        let amount = max(1, Int(rawAmount.rounded()))
+        if percent > 0 {
+            let missing = actor.snapshot.maxHP - actor.currentHP
+            guard missing > 0 else { return }
+            let applied = min(amount, missing)
+            actor.currentHP += applied
+            logs.append(.init(turn: turn,
+                              message: "\(actor.displayName)は自身の効果で\(applied)回復した",
+                              type: .heal,
+                              actorId: actor.identifier,
+                              metadata: [
+                                  "heal": "\(applied)",
+                                  "category": "endOfTurnSelfHPDelta"
+                              ]))
+        } else {
+            let applied = applyDamage(amount: amount, to: &actor)
+            logs.append(.init(turn: turn,
+                              message: "\(actor.displayName)は自身の効果で\(applied)ダメージを受けた",
+                              type: .damage,
+                              actorId: actor.identifier,
+                              metadata: [
+                                  "damage": "\(applied)",
+                                  "category": "endOfTurnSelfHPDelta"
+                              ]))
+        }
+    }
+
+    private static func applyEndOfTurnResurrectionIfNeeded(for actor: inout BattleActor,
+                                                           turn: Int,
+                                                           logs: inout [BattleLogEntry],
+                                                           random: inout GameRandomSource,
+                                                           allowVitalize: Bool = true) {
+        guard !actor.isAlive else { return }
+
+        guard let best = actor.skillEffects.resurrectionActives.max(by: { lhs, rhs in
+            if lhs.chancePercent == rhs.chancePercent {
+                return (lhs.maxTriggers ?? .max) < (rhs.maxTriggers ?? .max)
+            }
+            return lhs.chancePercent < rhs.chancePercent
+        }) else { return }
+
+        if let maxTriggers = best.maxTriggers,
+           actor.resurrectionTriggersUsed >= maxTriggers {
+            return
+        }
+
+        var forcedTriggered = false
+        if let forced = actor.skillEffects.forcedResurrection {
+            let limit = forced.maxTriggers ?? 1
+            if actor.forcedResurrectionTriggersUsed < limit {
+                actor.forcedResurrectionTriggersUsed += 1
+                forcedTriggered = true
+            }
+        }
+
+        if !forcedTriggered {
+            let chance = max(0, min(100, best.chancePercent))
+            guard BattleRandomSystem.percentChance(chance, random: &random) else { return }
+        }
+
+        let healAmount: Int
+        switch best.hpScale {
+        case .magicalHealing:
+            let base = max(actor.snapshot.magicalHealing, Int(Double(actor.snapshot.maxHP) * 0.05))
+            healAmount = max(1, base)
+        case .maxHP5Percent:
+            let raw = Double(actor.snapshot.maxHP) * 0.05
+            healAmount = max(1, Int(raw.rounded()))
+        }
+
+        actor.currentHP = min(actor.snapshot.maxHP, healAmount)
+        actor.statusEffects = []
+        actor.guardActive = false
+        actor.resurrectionTriggersUsed += 1
+
+        if allowVitalize,
+           let vitalize = actor.skillEffects.vitalizeResurrection,
+           !actor.vitalizeActive {
+            actor.vitalizeActive = true
+            if vitalize.removePenalties {
+                actor.suppressedSkillIds.formUnion(vitalize.removeSkillIds)
+            }
+            if vitalize.rememberSkills {
+                actor.grantedSkillIds.formUnion(vitalize.grantSkillIds)
+            }
+            rebuildSkillsAfterResurrection(for: &actor)
+        }
+
+        logs.append(.init(turn: turn,
+                          message: "\(actor.displayName)は即時蘇生した！",
+                          type: .heal,
+                          actorId: actor.identifier,
+                          metadata: [
+                              "category": "instantResurrection",
+                              "heal": "\(actor.currentHP)"
+                          ]))
+    }
+
+    private static func rebuildSkillsAfterResurrection(for actor: inout BattleActor) {
+        var skillIds = actor.baseSkillIds
+        if !actor.suppressedSkillIds.isEmpty {
+            skillIds.subtract(actor.suppressedSkillIds)
+        }
+        if !actor.grantedSkillIds.isEmpty {
+            skillIds.formUnion(actor.grantedSkillIds)
+        }
+        guard !skillIds.isEmpty else { return }
+
+        let definitions: [SkillDefinition] = skillIds.map { skillId in
+            guard let definition = skillDefinitions[skillId] else {
+                fatalError("Skill definition not found for id: \(skillId)")
+            }
+            return definition
+        }
+
+        do {
+            let effects = try SkillRuntimeEffectCompiler.actorEffects(from: definitions)
+            actor.skillEffects = effects
+
+            for (key, value) in effects.barrierCharges {
+                let current = actor.barrierCharges[key] ?? 0
+                if value > current {
+                    actor.barrierCharges[key] = value
+                }
+            }
+            for (key, value) in effects.guardBarrierCharges {
+                let current = actor.guardBarrierCharges[key] ?? 0
+                if value > current {
+                    actor.guardBarrierCharges[key] = value
+                }
+            }
+        } catch {
+            fatalError("Failed to rebuild skill effects after resurrection: \(error)")
+        }
+    }
+
+    private static func applySpellChargeRegenIfNeeded(for actor: inout BattleActor, turn: Int) {
+        let spells = actor.spells.arcane + actor.spells.cleric
+        guard !spells.isEmpty else { return }
+        var usage = actor.spellChargeRegenUsage
+        var touched = false
+        for spell in spells {
+            guard let modifier = actor.skillEffects.spellChargeModifier(for: spell.id),
+                  let regen = modifier.regen,
+                  regen.every > 0 else { continue }
+            if let maxTriggers = regen.maxTriggers,
+               let used = usage[spell.id],
+               used >= maxTriggers {
+                continue
+            }
+            guard turn % regen.every == 0 else { continue }
+            if actor.actionResources.addCharges(forSpellId: spell.id,
+                                                amount: regen.amount,
+                                                cap: regen.cap) {
+                usage[spell.id] = (usage[spell.id] ?? 0) + 1
+                touched = true
+            }
+        }
+        if touched {
+            actor.spellChargeRegenUsage = usage
+        }
+    }
+
     private static func applyStatusTicks(for actor: inout BattleActor,
                                          turn: Int,
                                          logs: inout [BattleLogEntry]) {
@@ -2380,6 +3404,77 @@ struct BattleTurnEngine {
             updated.append(effect)
         }
         actor.statusEffects = updated
+    }
+
+    private static func applyNecromancerIfNeeded(for actors: inout [BattleActor],
+                                                 turn: Int,
+                                                 logs: inout [BattleLogEntry],
+                                                 random: inout GameRandomSource) {
+        guard turn >= 2 else { return }
+        guard actors.contains(where: { $0.skillEffects.necromancerInterval != nil }) else { return }
+
+        for index in actors.indices {
+            guard let interval = actors[index].skillEffects.necromancerInterval else { continue }
+            if let last = actors[index].necromancerLastTriggerTurn,
+               turn <= last { continue }
+            let offset = turn - 2
+            guard offset >= 0, offset % interval == 0 else { continue }
+            actors[index].necromancerLastTriggerTurn = turn
+
+            if let reviveIndex = actors.indices.first(where: { !actors[$0].isAlive && !actors[$0].skillEffects.resurrectionActives.isEmpty }) {
+                var target = actors[reviveIndex]
+                target.resurrectionTriggersUsed = 0
+                applyEndOfTurnResurrectionIfNeeded(for: &target,
+                                                 turn: turn,
+                                                 logs: &logs,
+                                                 random: &random,
+                                                 allowVitalize: false)
+                actors[reviveIndex] = target
+                logs.append(.init(turn: turn,
+                                  message: "\(actors[index].displayName)のネクロマンサーで\(target.displayName)が蘇生した！",
+                                  type: .heal,
+                                  actorId: actors[index].identifier,
+                                  targetId: target.identifier,
+                                  metadata: ["category": "necromancer"]))
+            }
+        }
+    }
+
+    private static func attemptInflictStatuses(from attacker: BattleActor,
+                                               to defender: inout BattleActor,
+                                               turn: Int,
+                                               logs: inout [BattleLogEntry],
+                                               random: inout GameRandomSource) {
+        guard !attacker.skillEffects.statusInflictions.isEmpty else { return }
+        for inflict in attacker.skillEffects.statusInflictions {
+            let baseChance = statusInflictBaseChance(for: inflict,
+                                                     attacker: attacker,
+                                                     defender: defender)
+            guard baseChance > 0 else { continue }
+            _ = attemptApplyStatus(statusId: inflict.statusId,
+                                   baseChancePercent: baseChance,
+                                   durationTurns: nil,
+                                   sourceId: attacker.identifier,
+                                   to: &defender,
+                                   turn: turn,
+                                   logs: &logs,
+                                   random: &random)
+        }
+    }
+
+    private static func statusInflictBaseChance(for inflict: BattleActor.SkillEffects.StatusInflict,
+                                                attacker: BattleActor,
+                                                defender: BattleActor) -> Double {
+        guard inflict.baseChancePercent > 0 else { return 0.0 }
+        switch inflict.statusId {
+        case "status.confusion":
+            let span: Double = 34.0
+            let spiritDelta = Double(attacker.spirit - defender.spirit)
+            let normalized = max(0.0, min(1.0, (spiritDelta + span) / (span * 2.0)))
+            return inflict.baseChancePercent * normalized
+        default:
+            return inflict.baseChancePercent
+        }
     }
 
     private static func appendStatusExpireLog(for actor: BattleActor,

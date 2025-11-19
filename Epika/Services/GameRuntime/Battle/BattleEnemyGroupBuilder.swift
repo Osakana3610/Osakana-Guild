@@ -49,10 +49,15 @@ struct BattleEnemyGroupBuilder {
                                                                        levelOverride: levelOverride,
                                                                        jobDefinitions: jobDefinitions,
                                                                        raceDefinitions: raceDefinitions)
-                let resources = BattleActionResource.makeDefault(for: snapshot)
+                var resources = BattleActionResource.makeDefault(for: snapshot,
+                                                                spellLoadout: .empty)
                 let skillEffects = try cachedSkillEffects(for: group.definition,
                                                           cache: &skillCache,
                                                           skillDefinitions: skillDefinitions)
+                if skillEffects.breathExtraCharges > 0 {
+                    let current = resources.charges(for: .breath)
+                    resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
+                }
                 let identifier = "\(group.definition.id)_\(slotIndex)"
                 let raceCategory = raceDefinitions[group.definition.race]?.category ?? group.definition.race
                 let actor = BattleActor(identifier: identifier,
@@ -82,7 +87,8 @@ struct BattleEnemyGroupBuilder {
                                         barrierCharges: skillEffects.barrierCharges,
                                         skillEffects: skillEffects,
                                         spellbook: .empty,
-                                        spells: .empty)
+                                        spells: .empty,
+                                        baseSkillIds: Set(group.definition.skills.map { $0.skillId }) )
                 actors.append(actor)
                 encountered.append(EncounteredEnemy(definition: group.definition, level: levelOverride))
                 slotIndex += 1
@@ -117,10 +123,15 @@ struct BattleEnemyGroupBuilder {
                                                                    levelOverride: level,
                                                                    jobDefinitions: jobDefinitions,
                                                                    raceDefinitions: raceDefinitions)
-            let resources = BattleActionResource.makeDefault(for: snapshot)
+            var resources = BattleActionResource.makeDefault(for: snapshot,
+                                                            spellLoadout: .empty)
             let skillEffects = try cachedSkillEffects(for: definition,
                                                       cache: &cache,
                                                       skillDefinitions: skillDefinitions)
+            if skillEffects.breathExtraCharges > 0 {
+                let current = resources.charges(for: .breath)
+                resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
+            }
             let identifier = index == 0 ? definition.id : "\(definition.id)_\(index)"
             let raceCategory = raceDefinitions[definition.race]?.category ?? definition.race
             let actor = BattleActor(identifier: identifier,
@@ -146,12 +157,13 @@ struct BattleEnemyGroupBuilder {
                                                                        clericMagic: definition.actionRates.clericMagic,
                                                                        arcaneMagic: definition.actionRates.arcaneMagic,
                                                                        breath: definition.actionRates.breath),
-                                        actionResources: resources,
-                                        barrierCharges: skillEffects.barrierCharges,
-                                        skillEffects: skillEffects,
-                                        spellbook: .empty,
-                                        spells: .empty)
-                actors.append(actor)
+                                    actionResources: resources,
+                                    barrierCharges: skillEffects.barrierCharges,
+                                    skillEffects: skillEffects,
+                                    spellbook: .empty,
+                                    spells: .empty,
+                                    baseSkillIds: Set(definition.skills.map { $0.skillId }) )
+            actors.append(actor)
         }
         return actors
     }

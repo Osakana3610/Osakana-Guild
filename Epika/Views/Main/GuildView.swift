@@ -268,6 +268,9 @@ private struct LazyRuntimeCharacterDetailView: View {
                                       },
                                       onAvatarChange: { identifier in
                                           try await changeAvatar(to: identifier)
+                                      },
+                                      onActionPreferencesChange: { preferences in
+                                          try await updateActionPreferences(to: preferences)
                                       })
                     .navigationTitle(runtimeCharacter.name)
                     .navigationBarTitleDisplayMode(.inline)
@@ -333,6 +336,18 @@ private struct LazyRuntimeCharacterDetailView: View {
         }
         let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
             snapshot.avatarIdentifier = identifier
+        }
+        runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
+    }
+
+    @MainActor
+    private func updateActionPreferences(to newPreferences: CharacterSnapshot.ActionPreferences) async throws {
+        let normalized = CharacterSnapshot.ActionPreferences.normalized(attack: newPreferences.attack,
+                                                                        clericMagic: newPreferences.clericMagic,
+                                                                        arcaneMagic: newPreferences.arcaneMagic,
+                                                                        breath: newPreferences.breath)
+        let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
+            snapshot.actionPreferences = normalized
         }
         runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
     }

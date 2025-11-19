@@ -26,6 +26,9 @@ enum BattleService {
                               encounterEnemyId: String?,
                               encounterLevel: Int?,
                               random: inout GameRandomSource) async throws -> Resolution {
+        let skillDefinitions = try await repository.allSkills()
+        let skillDictionary = Dictionary(uniqueKeysWithValues: skillDefinitions.map { ($0.id, $0) })
+
         let players = try BattleContextBuilder.makePlayerActors(from: party)
         guard !players.isEmpty else {
             guard let enemyDefinition = try await repository.enemy(withId: encounterEnemyId ?? "") else {
@@ -51,8 +54,6 @@ enum BattleService {
         let jobDictionary = Dictionary(uniqueKeysWithValues: jobDefinitions.map { ($0.id, $0) })
         let raceDefinitions = try await repository.allRaces()
         let raceDictionary = Dictionary(uniqueKeysWithValues: raceDefinitions.map { ($0.id, $0) })
-        let skillDefinitions = try await repository.allSkills()
-        let skillDictionary = Dictionary(uniqueKeysWithValues: skillDefinitions.map { ($0.id, $0) })
 
         var localRandom = random
         let enemyResult = try BattleEnemyGroupBuilder.makeEnemies(baseEnemyId: encounterEnemyId,
@@ -111,7 +112,10 @@ enum BattleService {
                                                                   arcaneMagic: fallbackDefinition.actionRates.arcaneMagic,
                                                                   breath: fallbackDefinition.actionRates.breath),
                                    actionResources: resources,
-                                   skillEffects: fallbackSkillEffects)]
+                                   skillEffects: fallbackSkillEffects,
+                                   spellbook: .empty,
+                                   spells: .empty,
+                                   baseSkillIds: Set(fallbackDefinition.skills.map { $0.skillId }) )]
             encounteredEnemies = [BattleEnemyGroupBuilder.EncounteredEnemy(definition: fallbackDefinition,
                                                                           level: encounterLevel ?? 1)]
             random = localRandom
@@ -128,10 +132,14 @@ enum BattleService {
         let battleResult = BattleTurnEngine.runBattle(players: &mutablePlayers,
                                                       enemies: &mutableEnemies,
                                                       statusEffects: statusDefinitions,
+                                                      skillDefinitions: skillDictionary,
                                                       random: &mutableRandom)
         random = mutableRandom
 
-        let survivingPartyIds = battleResult.players
+        let revivedPlayers = applyBetweenFloorsResurrection(to: battleResult.players)
+        let revivedEnemies = applyBetweenFloorsResurrection(to: battleResult.enemies)
+
+        let survivingPartyIds = revivedPlayers
             .filter { $0.isAlive }
             .compactMap { $0.partyMemberId }
 
@@ -144,8 +152,25 @@ enum BattleService {
                           enemy: enemyDefinition,
                           enemies: encounteredEnemies.map { $0.definition },
                           encounteredEnemies: encounteredEnemies,
-                          playerActors: battleResult.players,
-                          enemyActors: battleResult.enemies)
+                          playerActors: revivedPlayers,
+                          enemyActors: revivedEnemies)
+    }
+}
+
+private extension BattleService {
+    static func applyBetweenFloorsResurrection(to actors: [BattleActor]) -> [BattleActor] {
+        actors.map { actor in
+            guard !actor.isAlive,
+                  actor.skillEffects.resurrectionPassiveBetweenFloors else {
+                return actor
+            }
+
+            var revived = actor
+            revived.currentHP = max(1, actor.currentHP)
+            revived.statusEffects = []
+            revived.guardActive = false
+            return revived
+        }
     }
 }
 

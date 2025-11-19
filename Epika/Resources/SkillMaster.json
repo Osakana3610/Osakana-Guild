@@ -3708,11 +3708,170 @@
             }
           }
         ]
+      },
+      {
+        "familyId": "spellCharges.triple",
+        "effectType": "spellCharges",
+        "variants": [
+          {
+            "id": "spellCharges.triple.magic_arrow",
+            "label": "[3回] マジックアロー",
+            "parameters": { "spellId": "spell.arcane.magic_arrow" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          },
+          {
+            "id": "spellCharges.triple.fireball",
+            "label": "[3回] ファイヤーボール",
+            "parameters": { "spellId": "spell.arcane.fireball" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          },
+          {
+            "id": "spellCharges.triple.blizzard",
+            "label": "[3回] ブリザード",
+            "parameters": { "spellId": "spell.arcane.blizzard" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          },
+          {
+            "id": "spellCharges.triple.thunder_bolt",
+            "label": "[3回] サンダーボルト",
+            "parameters": { "spellId": "spell.arcane.thunder_bolt" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          },
+          {
+            "id": "spellCharges.triple.nuclear",
+            "label": "[3回] ニュークリア",
+            "parameters": { "spellId": "spell.arcane.nuclear" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          },
+          {
+            "id": "spellCharges.triple.heal",
+            "label": "[3回] ヒール",
+            "parameters": { "spellId": "spell.cleric.heal" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          },
+          {
+            "id": "spellCharges.triple.heal_plus",
+            "label": "[3回] ヒールプラス",
+            "parameters": { "spellId": "spell.cleric.heal_plus" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          },
+          {
+            "id": "spellCharges.triple.cure",
+            "label": "[3回] キュア",
+            "parameters": { "spellId": "spell.cleric.cure" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          },
+          {
+            "id": "spellCharges.triple.full_heal",
+            "label": "[3回] フルヒール",
+            "parameters": { "spellId": "spell.cleric.full_heal" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          },
+          {
+            "id": "spellCharges.triple.party_heal",
+            "label": "[3回] パーティヒール",
+            "parameters": { "spellId": "spell.cleric.party_heal" },
+            "value": {
+              "maxCharges": 3,
+              "initialCharges": 3,
+              "regenEveryTurns": 10,
+              "regenAmount": 1,
+              "regenCap": 4,
+              "maxTriggers": 1,
+              "gainOnPhysicalHit": 1
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "spellCharges.tacticExtra",
+        "effectType": "spellCharges",
+        "variants": [
+          {
+            "id": "spellCharges.tacticExtra.enable",
+            "label": "[戦術] チャージ増加",
+            "value": {
+              "initialBonus": 1
+            }
+          }
+        ]
       }
     ]
   },
   "defense": {
-      "families": [
+    "families": [
       {
         "familyId": "tacticBarrier.physical",
         "effectType": "barrier",
@@ -3720,11 +3879,41 @@
           "damageType": "physical"
         },
         "variants": [
-          { "id": "tacticBarrier.physical.Lv1", "label": "[Lv1] 物理結界", "value": { "charges": 1 } },
-          { "id": "tacticBarrier.physical.Lv2", "label": "[Lv2] 物理結界", "value": { "charges": 2 } },
-          { "id": "tacticBarrier.physical.Lv3", "label": "[Lv3] 物理結界", "value": { "charges": 3 } },
-          { "id": "tacticBarrier.physical.Lv5", "label": "[Lv5] 物理結界", "value": { "charges": 5 } },
-          { "id": "tacticBarrier.physical.field", "label": "[フィールド] 物理結界", "value": { "charges": 10 } }
+          {
+            "id": "tacticBarrier.physical.Lv1",
+            "label": "[Lv1] 物理結界",
+            "value": {
+              "charges": 1
+            }
+          },
+          {
+            "id": "tacticBarrier.physical.Lv2",
+            "label": "[Lv2] 物理結界",
+            "value": {
+              "charges": 2
+            }
+          },
+          {
+            "id": "tacticBarrier.physical.Lv3",
+            "label": "[Lv3] 物理結界",
+            "value": {
+              "charges": 3
+            }
+          },
+          {
+            "id": "tacticBarrier.physical.Lv5",
+            "label": "[Lv5] 物理結界",
+            "value": {
+              "charges": 5
+            }
+          },
+          {
+            "id": "tacticBarrier.physical.field",
+            "label": "[フィールド] 物理結界",
+            "value": {
+              "charges": 10
+            }
+          }
         ]
       },
       {
@@ -3734,11 +3923,41 @@
           "damageType": "magical"
         },
         "variants": [
-          { "id": "tacticBarrier.magical.Lv1", "label": "[Lv1] 魔法結界", "value": { "charges": 1 } },
-          { "id": "tacticBarrier.magical.Lv2", "label": "[Lv2] 魔法結界", "value": { "charges": 2 } },
-          { "id": "tacticBarrier.magical.Lv3", "label": "[Lv3] 魔法結界", "value": { "charges": 3 } },
-          { "id": "tacticBarrier.magical.Lv5", "label": "[Lv5] 魔法結界", "value": { "charges": 5 } },
-          { "id": "tacticBarrier.magical.field", "label": "[フィールド] 魔法結界", "value": { "charges": 10 } }
+          {
+            "id": "tacticBarrier.magical.Lv1",
+            "label": "[Lv1] 魔法結界",
+            "value": {
+              "charges": 1
+            }
+          },
+          {
+            "id": "tacticBarrier.magical.Lv2",
+            "label": "[Lv2] 魔法結界",
+            "value": {
+              "charges": 2
+            }
+          },
+          {
+            "id": "tacticBarrier.magical.Lv3",
+            "label": "[Lv3] 魔法結界",
+            "value": {
+              "charges": 3
+            }
+          },
+          {
+            "id": "tacticBarrier.magical.Lv5",
+            "label": "[Lv5] 魔法結界",
+            "value": {
+              "charges": 5
+            }
+          },
+          {
+            "id": "tacticBarrier.magical.field",
+            "label": "[フィールド] 魔法結界",
+            "value": {
+              "charges": 10
+            }
+          }
         ]
       },
       {
@@ -3748,11 +3967,41 @@
           "damageType": "breath"
         },
         "variants": [
-          { "id": "tacticBarrier.breath.Lv1", "label": "[Lv1] ブレス結界", "value": { "charges": 1 } },
-          { "id": "tacticBarrier.breath.Lv2", "label": "[Lv2] ブレス結界", "value": { "charges": 2 } },
-          { "id": "tacticBarrier.breath.Lv3", "label": "[Lv3] ブレス結界", "value": { "charges": 3 } },
-          { "id": "tacticBarrier.breath.Lv5", "label": "[Lv5] ブレス結界", "value": { "charges": 5 } },
-          { "id": "tacticBarrier.breath.field", "label": "[フィールド] ブレス結界", "value": { "charges": 10 } }
+          {
+            "id": "tacticBarrier.breath.Lv1",
+            "label": "[Lv1] ブレス結界",
+            "value": {
+              "charges": 1
+            }
+          },
+          {
+            "id": "tacticBarrier.breath.Lv2",
+            "label": "[Lv2] ブレス結界",
+            "value": {
+              "charges": 2
+            }
+          },
+          {
+            "id": "tacticBarrier.breath.Lv3",
+            "label": "[Lv3] ブレス結界",
+            "value": {
+              "charges": 3
+            }
+          },
+          {
+            "id": "tacticBarrier.breath.Lv5",
+            "label": "[Lv5] ブレス結界",
+            "value": {
+              "charges": 5
+            }
+          },
+          {
+            "id": "tacticBarrier.breath.field",
+            "label": "[フィールド] ブレス結界",
+            "value": {
+              "charges": 10
+            }
+          }
         ]
       },
       {
@@ -3762,8 +4011,20 @@
           "damageType": "physical"
         },
         "variants": [
-          { "id": "tacticBarrierGuard.physical.1", "label": "[防御] 物理結界1回", "value": { "charges": 1 } },
-          { "id": "tacticBarrierGuard.physical.2", "label": "[防御] 物理結界2回", "value": { "charges": 2 } }
+          {
+            "id": "tacticBarrierGuard.physical.1",
+            "label": "[防御] 物理結界1回",
+            "value": {
+              "charges": 1
+            }
+          },
+          {
+            "id": "tacticBarrierGuard.physical.2",
+            "label": "[防御] 物理結界2回",
+            "value": {
+              "charges": 2
+            }
+          }
         ]
       },
       {
@@ -3773,8 +4034,20 @@
           "damageType": "magical"
         },
         "variants": [
-          { "id": "tacticBarrierGuard.magical.1", "label": "[防御] 魔法結界1回", "value": { "charges": 1 } },
-          { "id": "tacticBarrierGuard.magical.2", "label": "[防御] 魔法結界2回", "value": { "charges": 2 } }
+          {
+            "id": "tacticBarrierGuard.magical.1",
+            "label": "[防御] 魔法結界1回",
+            "value": {
+              "charges": 1
+            }
+          },
+          {
+            "id": "tacticBarrierGuard.magical.2",
+            "label": "[防御] 魔法結界2回",
+            "value": {
+              "charges": 2
+            }
+          }
         ]
       },
       {
@@ -3784,20 +4057,267 @@
           "damageType": "breath"
         },
         "variants": [
-          { "id": "tacticBarrierGuard.breath.1", "label": "[防御] ブレス結界1回", "value": { "charges": 1 } },
-          { "id": "tacticBarrierGuard.breath.2", "label": "[防御] ブレス結界2回", "value": { "charges": 2 } }
+          {
+            "id": "tacticBarrierGuard.breath.1",
+            "label": "[防御] ブレス結界1回",
+            "value": {
+              "charges": 1
+            }
+          },
+          {
+            "id": "tacticBarrierGuard.breath.2",
+            "label": "[防御] ブレス結界2回",
+            "value": {
+              "charges": 2
+            }
+          }
         ]
       },
       {
         "familyId": "endOfTurnHealing.party",
         "effectType": "endOfTurnHealing",
         "variants": [
-          { "id": "endOfTurnHealing.party.100", "label": "[100%] 全体回復", "value": { "valuePercent": 100 } },
-          { "id": "endOfTurnHealing.party.Lv1", "label": "[Lv1/3%] 全体回復", "value": { "valuePercent": 3 } },
-          { "id": "endOfTurnHealing.party.Lv2", "label": "[Lv2/6%] 全体回復", "value": { "valuePercent": 6 } },
-          { "id": "endOfTurnHealing.party.Lv3", "label": "[Lv3/9%] 全体回復", "value": { "valuePercent": 9 } },
-          { "id": "endOfTurnHealing.party.Lv4", "label": "[Lv4/12%] 全体回復", "value": { "valuePercent": 12 } },
-          { "id": "endOfTurnHealing.party.Lv5", "label": "[Lv5/15%] 全体回復", "value": { "valuePercent": 15 } }
+          {
+            "id": "endOfTurnHealing.party.100",
+            "label": "[100%] 全体回復",
+            "value": {
+              "valuePercent": 100
+            }
+          },
+          {
+            "id": "endOfTurnHealing.party.Lv1",
+            "label": "[Lv1/3%] 全体回復",
+            "value": {
+              "valuePercent": 3
+            }
+          },
+          {
+            "id": "endOfTurnHealing.party.Lv2",
+            "label": "[Lv2/6%] 全体回復",
+            "value": {
+              "valuePercent": 6
+            }
+          },
+          {
+            "id": "endOfTurnHealing.party.Lv3",
+            "label": "[Lv3/9%] 全体回復",
+            "value": {
+              "valuePercent": 9
+            }
+          },
+          {
+            "id": "endOfTurnHealing.party.Lv4",
+            "label": "[Lv4/12%] 全体回復",
+            "value": {
+              "valuePercent": 12
+            }
+          },
+          {
+            "id": "endOfTurnHealing.party.Lv5",
+            "label": "[Lv5/15%] 全体回復",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "endOfTurnSelfHP.heal",
+        "effectType": "endOfTurnSelfHPPercent",
+        "variants": [
+          { "id": "endOfTurnSelfHP.heal.Lv1", "label": "[+5%] 回復能力Lv1", "value": { "valuePercent": 5 } },
+          { "id": "endOfTurnSelfHP.heal.Lv2", "label": "[+10%] 回復能力Lv2", "value": { "valuePercent": 10 } },
+          { "id": "endOfTurnSelfHP.heal.Lv3", "label": "[+15%] 回復能力Lv3", "value": { "valuePercent": 15 } },
+          { "id": "endOfTurnSelfHP.heal.Lv4", "label": "[+20%] 回復能力Lv4", "value": { "valuePercent": 20 } },
+          { "id": "endOfTurnSelfHP.heal.Lv5", "label": "[+25%] 回復能力Lv5", "value": { "valuePercent": 25 } },
+          { "id": "endOfTurnSelfHP.heal.Lv6", "label": "[+30%] 回復能力Lv6", "value": { "valuePercent": 30 } },
+          { "id": "endOfTurnSelfHP.heal.Lv7", "label": "[+35%] 回復能力Lv7", "value": { "valuePercent": 35 } },
+          { "id": "endOfTurnSelfHP.heal.Lv8", "label": "[+40%] 回復能力Lv8", "value": { "valuePercent": 40 } },
+          { "id": "endOfTurnSelfHP.heal.Lv9", "label": "[+45%] 回復能力Lv9", "value": { "valuePercent": 45 } },
+          { "id": "endOfTurnSelfHP.heal.Lv10", "label": "[+50%] 回復能力Lv10", "value": { "valuePercent": 50 } }
+        ]
+      },
+      {
+        "familyId": "endOfTurnSelfHP.damage",
+        "effectType": "endOfTurnSelfHPPercent",
+        "variants": [
+          { "id": "endOfTurnSelfHP.damage.Lv1", "label": "[-5%] HPダメージLv1", "value": { "valuePercent": -5 } },
+          { "id": "endOfTurnSelfHP.damage.Lv2", "label": "[-10%] HPダメージLv2", "value": { "valuePercent": -10 } },
+          { "id": "endOfTurnSelfHP.damage.Lv3", "label": "[-15%] HPダメージLv3", "value": { "valuePercent": -15 } },
+          { "id": "endOfTurnSelfHP.damage.Lv4", "label": "[-20%] HPダメージLv4", "value": { "valuePercent": -20 } },
+          { "id": "endOfTurnSelfHP.damage.Lv5", "label": "[-25%] HPダメージLv5", "value": { "valuePercent": -25 } },
+          { "id": "endOfTurnSelfHP.damage.Lv6", "label": "[-30%] HPダメージLv6", "value": { "valuePercent": -30 } },
+          { "id": "endOfTurnSelfHP.damage.Lv7", "label": "[-35%] HPダメージLv7", "value": { "valuePercent": -35 } },
+          { "id": "endOfTurnSelfHP.damage.Lv8", "label": "[-40%] HPダメージLv8", "value": { "valuePercent": -40 } },
+          { "id": "endOfTurnSelfHP.damage.Lv9", "label": "[-45%] HPダメージLv9", "value": { "valuePercent": -45 } },
+          { "id": "endOfTurnSelfHP.damage.Lv10", "label": "[-50%] HPダメージLv10", "value": { "valuePercent": -50 } }
+        ]
+      },
+      {
+        "familyId": "partyAttack.flags",
+        "effectType": "partyAttackFlag",
+        "variants": [
+          { "id": "partyAttack.flags.hostileAll", "label": "[敵対] 全てを攻撃", "value": { "hostileAll": 1 } },
+          { "id": "partyAttack.flags.vampiricImpulse", "label": "[吸血] 吸血衝動", "value": { "vampiricImpulse": 1 } },
+          { "id": "partyAttack.flags.vampiricSuppression", "label": "[吸血] 吸血抑制", "value": { "vampiricSuppression": 1 } }
+        ]
+      },
+      {
+        "familyId": "partyAttack.targets",
+        "effectType": "partyAttackTarget",
+        "variants": [
+          { "id": "partyAttack.targets.vampire", "label": "[敵対] 対吸血鬼", "parameters": { "targetId": "vampire" }, "value": { "hostile": 1 } },
+          { "id": "partyAttack.targets.human", "label": "[敵対] 対人間", "parameters": { "targetId": "human" }, "value": { "hostile": 1 } },
+          { "id": "partyAttack.targets.specialA", "label": "[敵対] 特定対象A", "parameters": { "targetId": "special_a" }, "value": { "hostile": 1 } },
+          { "id": "partyAttack.targets.specialB", "label": "[敵対] 特定対象B", "parameters": { "targetId": "special_b" }, "value": { "hostile": 1 } },
+          { "id": "partyAttack.targets.protect.specialC", "label": "[保護] 特定対象C保護", "parameters": { "targetId": "special_c" }, "value": { "protect": 1 } }
+        ]
+      },
+      {
+        "familyId": "talent.stat",
+        "effectType": "talentStat",
+        "variants": [
+          { "id": "talent.stat.maxHP", "label": "[才能] HP", "parameters": { "stat": "maxHP" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.physicalAttack", "label": "[才能] 攻撃", "parameters": { "stat": "physicalAttack" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.magicalAttack", "label": "[才能] 魔法攻撃", "parameters": { "stat": "magicalAttack" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.physicalDefense", "label": "[才能] 防御", "parameters": { "stat": "physicalDefense" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.magicalDefense", "label": "[才能] 魔法防御", "parameters": { "stat": "magicalDefense" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.hitRate", "label": "[才能] 命中", "parameters": { "stat": "hitRate" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.evasionRate", "label": "[才能] 回避", "parameters": { "stat": "evasionRate" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.criticalRate", "label": "[才能] 必殺", "parameters": { "stat": "criticalRate" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.attackCount", "label": "[才能] 攻撃回数", "parameters": { "stat": "attackCount" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.magicalHealing", "label": "[才能] 回復力", "parameters": { "stat": "magicalHealing" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.additionalDamage", "label": "[才能] 追加ダメージ", "parameters": { "stat": "additionalDamage" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.breathDamage", "label": "[才能] ブレス", "parameters": { "stat": "breathDamage" }, "value": { "multiplier": 1.5 } },
+          { "id": "talent.stat.trapRemoval", "label": "[才能] 罠解除", "parameters": { "stat": "trapRemoval" }, "value": { "multiplier": 1.5 } }
+        ]
+      },
+      {
+        "familyId": "incompetence.stat",
+        "effectType": "incompetenceStat",
+        "variants": [
+          { "id": "incompetence.stat.maxHP", "label": "[無能] HP", "parameters": { "stat": "maxHP" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.physicalAttack", "label": "[無能] 攻撃", "parameters": { "stat": "physicalAttack" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.magicalAttack", "label": "[無能] 魔法攻撃", "parameters": { "stat": "magicalAttack" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.physicalDefense", "label": "[無能] 防御", "parameters": { "stat": "physicalDefense" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.magicalDefense", "label": "[無能] 魔法防御", "parameters": { "stat": "magicalDefense" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.hitRate", "label": "[無能] 命中", "parameters": { "stat": "hitRate" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.evasionRate", "label": "[無能] 回避", "parameters": { "stat": "evasionRate" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.criticalRate", "label": "[無能] 必殺", "parameters": { "stat": "criticalRate" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.attackCount", "label": "[無能] 攻撃回数", "parameters": { "stat": "attackCount" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.magicalHealing", "label": "[無能] 回復力", "parameters": { "stat": "magicalHealing" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.additionalDamage", "label": "[無能] 追加ダメージ", "parameters": { "stat": "additionalDamage" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.breathDamage", "label": "[無能] ブレス", "parameters": { "stat": "breathDamage" }, "value": { "multiplier": 0.5 } },
+          { "id": "incompetence.stat.trapRemoval", "label": "[無能] 罠解除", "parameters": { "stat": "trapRemoval" }, "value": { "multiplier": 0.5 } }
+        ]
+      },
+      {
+        "familyId": "absent.stat",
+        "effectType": "statFixedToOne",
+        "variants": [
+          { "id": "absent.stat.maxHP", "label": "皆無: HP", "parameters": { "stat": "maxHP" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.physicalAttack", "label": "皆無: 攻撃", "parameters": { "stat": "physicalAttack" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.magicalAttack", "label": "皆無: 魔法攻撃", "parameters": { "stat": "magicalAttack" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.physicalDefense", "label": "皆無: 防御", "parameters": { "stat": "physicalDefense" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.magicalDefense", "label": "皆無: 魔法防御", "parameters": { "stat": "magicalDefense" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.hitRate", "label": "皆無: 命中", "parameters": { "stat": "hitRate" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.evasionRate", "label": "皆無: 回避", "parameters": { "stat": "evasionRate" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.criticalRate", "label": "皆無: 必殺", "parameters": { "stat": "criticalRate" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.attackCount", "label": "皆無: 攻撃回数", "parameters": { "stat": "attackCount" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.magicalHealing", "label": "皆無: 回復力", "parameters": { "stat": "magicalHealing" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.additionalDamage", "label": "皆無: 追加ダメージ", "parameters": { "stat": "additionalDamage" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.breathDamage", "label": "皆無: ブレス", "parameters": { "stat": "breathDamage" }, "value": { "valuePercent": 0 } },
+          { "id": "absent.stat.trapRemoval", "label": "皆無: 罠解除", "parameters": { "stat": "trapRemoval" }, "value": { "valuePercent": 0 } }
+        ]
+      },
+      {
+        "familyId": "actionOrder.shuffle",
+        "effectType": "actionOrderShuffle",
+        "variants": [
+          { "id": "actionOrder.shuffle.random", "label": "[行動順] シャッフル", "value": { "enabled": 1 } }
+        ]
+      },
+      {
+        "familyId": "breath.variant",
+        "effectType": "breathVariant",
+        "variants": [
+          { "id": "breath.variant.fire", "label": "[戦術] ファイヤーブレス", "parameters": { "variant": "fire" }, "value": { "extraCharges": 1 } },
+          { "id": "breath.variant.cold", "label": "[戦術] コールドブレス", "parameters": { "variant": "cold" }, "value": { "extraCharges": 1 } },
+          { "id": "breath.variant.thunder", "label": "[戦術] サンダーブレス", "parameters": { "variant": "thunder" }, "value": { "extraCharges": 1 } }
+        ]
+      },
+      {
+        "familyId": "breath.power",
+        "effectType": "damageDealtMultiplier",
+        "parameters": { "damageType": "breath" },
+        "variants": [
+          { "id": "breath.power.up.small", "label": "[ブレス強化] 小", "value": { "multiplier": 1.2 } },
+          { "id": "breath.power.up.large", "label": "[ブレス強化] 大", "value": { "multiplier": 1.5 } },
+          { "id": "breath.power.down", "label": "[ブレス弱化]", "value": { "multiplier": 0.7 } },
+          { "id": "breath.power.amp", "label": "[ブレス増幅]", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "status.inflict.confusion",
+        "effectType": "statusInflict",
+        "parameters": { "statusId": "status.confusion" },
+        "variants": [
+          { "id": "status.inflict.confusion.low", "label": "[混乱付与] 小", "value": { "baseChancePercent": 10 } },
+          { "id": "status.inflict.confusion.mid", "label": "[混乱付与] 中", "value": { "baseChancePercent": 20 } },
+          { "id": "status.inflict.confusion.high", "label": "[混乱付与] 大", "value": { "baseChancePercent": 30 } }
+        ]
+      },
+      {
+        "familyId": "berserk.trigger",
+        "effectType": "berserk",
+        "variants": [
+          { "id": "berserk.trigger.5", "label": "[暴走] 5%", "value": { "chancePercent": 5 } },
+          { "id": "berserk.trigger.10", "label": "[暴走] 10%", "value": { "chancePercent": 10 } },
+          { "id": "berserk.trigger.15", "label": "[暴走] 15%", "value": { "chancePercent": 15 } },
+          { "id": "berserk.trigger.20", "label": "[暴走] 20%", "value": { "chancePercent": 20 } },
+          { "id": "berserk.trigger.25", "label": "[暴走] 25%", "value": { "chancePercent": 25 } }
+        ]
+      },
+      {
+        "familyId": "antiHealing.general",
+        "effectType": "antiHealing",
+        "variants": [
+          { "id": "antiHealing.general.enable", "label": "[戦術] アンチ・ヒーリング", "value": { "enabled": 1 } }
+        ]
+      },
+      {
+        "familyId": "specialAttack.magicSword",
+        "effectType": "specialAttack",
+        "variants": [
+          { "id": "specialAttack.magicSword.enable", "label": "[戦術] 魔剣術", "parameters": { "specialAttackId": "magicSword" }, "value": { "chancePercent": 50 } }
+        ]
+      },
+      {
+        "familyId": "specialAttack.piercingTriple",
+        "effectType": "specialAttack",
+        "variants": [
+          { "id": "specialAttack.piercingTriple.enable", "label": "[戦術] 貫通三連撃", "parameters": { "specialAttackId": "piercingTriple" }, "value": { "chancePercent": 50 } }
+        ]
+      },
+      {
+        "familyId": "specialAttack.fourGods",
+        "effectType": "specialAttack",
+        "variants": [
+          { "id": "specialAttack.fourGods.enable", "label": "[戦術] 四神の剣", "parameters": { "specialAttackId": "fourGods" }, "value": { "chancePercent": 50 } }
+        ]
+      },
+      {
+        "familyId": "specialAttack.moonlight",
+        "effectType": "specialAttack",
+        "variants": [
+          { "id": "specialAttack.moonlight.enable", "label": "[戦術] 月光剣", "parameters": { "specialAttackId": "moonlight" }, "value": { "chancePercent": 50 } }
+        ]
+      },
+      {
+        "familyId": "specialAttack.godslayer",
+        "effectType": "specialAttack",
+        "variants": [
+          { "id": "specialAttack.godslayer.enable", "label": "[戦術] 神殺しの矢", "parameters": { "specialAttackId": "godslayer" }, "value": { "chancePercent": 50 } }
         ]
       },
       {
@@ -4713,6 +5233,136 @@
             "label": "[戦術] 自動劣化修復",
             "value": {
               "enabled": 1
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "parry.general",
+        "effectType": "parry",
+        "variants": [
+          {
+            "id": "parry.general.base",
+            "label": "[戦術] パリィ",
+            "value": {
+              "enabled": 1
+            }
+          },
+          {
+            "id": "parry.general.boost15",
+            "label": "[+15%] パリィ成功率上昇",
+            "value": {
+              "bonusPercent": 15
+            }
+          },
+          {
+            "id": "parry.general.boost30",
+            "label": "[+30%] パリィ成功率上昇",
+            "value": {
+              "bonusPercent": 30
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "shieldBlock.general",
+        "effectType": "shieldBlock",
+        "variants": [
+          {
+            "id": "shieldBlock.general.base",
+            "label": "[戦術] 大盾",
+            "value": {
+              "enabled": 1
+            }
+          },
+          {
+            "id": "shieldBlock.general.boost15",
+            "label": "[+15%] 大盾成功率上昇",
+            "value": {
+              "bonusPercent": 15
+            }
+          },
+          {
+            "id": "shieldBlock.general.boost30",
+            "label": "[+30%] 大盾成功率上昇",
+            "value": {
+              "bonusPercent": 30
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "dodgeCap.general",
+        "effectType": "dodgeCap",
+        "variants": [
+          {
+            "id": "dodgeCap.general.enable",
+            "label": "[97%] 回避スキル",
+            "value": {
+              "maxDodge": 97,
+              "minHitScale": 0.6
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "absorption.general",
+        "effectType": "absorption",
+        "variants": [
+          {
+            "id": "absorption.general.Lv1",
+            "label": "[Lv1] 吸収能力",
+            "value": {
+              "percent": 8,
+              "capPercent": 28
+            }
+          },
+          {
+            "id": "absorption.general.Lv2",
+            "label": "[Lv2] 吸収能力",
+            "value": {
+              "percent": 12,
+              "capPercent": 32
+            }
+          },
+          {
+            "id": "absorption.general.Lv3",
+            "label": "[Lv3] 吸収能力",
+            "value": {
+              "percent": 16,
+              "capPercent": 36
+            }
+          },
+          {
+            "id": "absorption.general.Lv4",
+            "label": "[Lv4] 吸収能力",
+            "value": {
+              "percent": 20,
+              "capPercent": 40
+            }
+          },
+          {
+            "id": "absorption.general.Lv5",
+            "label": "[Lv5] 吸収能力",
+            "value": {
+              "percent": 24,
+              "capPercent": 44
+            }
+          },
+          {
+            "id": "absorption.general.Lv6",
+            "label": "[Lv6] 吸収能力",
+            "value": {
+              "percent": 32,
+              "capPercent": 50
+            }
+          },
+          {
+            "id": "absorption.general.Lv7",
+            "label": "[Lv7] 吸収能力",
+            "value": {
+              "percent": 40,
+              "capPercent": 50
             }
           }
         ]
@@ -7555,7 +8205,58 @@
     ]
   },
   "resurrection": {
-    "families": []
+    "families": [
+      {
+        "familyId": "resurrection.undeath",
+        "effectType": "resurrectionPassive",
+        "variants": [
+          { "id": "resurrection.undeath.passive", "label": "[不死] アンデッド蘇生", "value": { "type": "betweenFloors" } }
+        ]
+      },
+      {
+        "familyId": "resurrection.forced",
+        "effectType": "resurrectionBuff",
+        "variants": [
+          { "id": "resurrection.forced.once", "label": "[戦術] 強制蘇生", "value": { "guaranteed": 1, "maxTriggers": 1 } }
+        ]
+      },
+      {
+        "familyId": "resurrection.active",
+        "effectType": "resurrectionActive",
+        "variants": [
+          { "id": "resurrection.active.revive50", "label": "[不死Lv50] 即時蘇生", "value": { "chancePercent": 50, "hpScale": "magicalHealing" } },
+          { "id": "resurrection.active.revive100", "label": "[不死Lv50] 即時蘇生100%", "value": { "chancePercent": 100, "hpScale": "magicalHealing" } }
+        ]
+      },
+      {
+        "familyId": "resurrection.vitalized",
+        "effectType": "resurrectionVitalize",
+        "variants": [
+          { "id": "resurrection.vitalize.once", "label": "[戦術] 活性蘇生", "value": { "removePenalties": 1, "rememberSkills": 1, "removeSkillIds": [], "grantSkillIds": [] } }
+        ]
+      },
+      {
+        "familyId": "resurrection.necromancer",
+        "effectType": "resurrectionSummon",
+        "variants": [
+          { "id": "resurrection.necromancer.every3", "label": "[戦術] ネクロマンサー", "value": { "everyTurns": 3, "targetStatus": "resurrection.active" } }
+        ]
+      },
+      {
+        "familyId": "resurrection.instant",
+        "effectType": "resurrectionActive",
+        "variants": [
+          { "id": "resurrection.instant.once", "label": "[戦術] 瞬間蘇生", "value": { "chancePercent": 100, "instant": 1, "maxTriggers": 1 } }
+        ]
+      },
+      {
+        "familyId": "resurrection.save",
+        "effectType": "resurrectionSave",
+        "variants": [
+          { "id": "resurrection.save.cleric", "label": "[救出] 僧侶系", "value": { "usesClericMagic": 1, "minLevel": 1 } }
+        ]
+      }
+    ]
   },
   "combat": {
     "families": [

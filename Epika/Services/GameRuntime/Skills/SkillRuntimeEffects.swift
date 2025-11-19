@@ -19,14 +19,35 @@ enum SkillRuntimeEffectCompiler {
         var martialBonusPercent: Double = 0.0
         var martialBonusMultiplier: Double = 1.0
         var actionOrderMultiplier: Double = 1.0
+        var actionOrderShuffle: Bool = false
         let healingGiven: Double = 1.0
         let healingReceived: Double = 1.0
         var endOfTurnHealingPercent: Double = 0.0
+        var endOfTurnSelfHPPercent: Double = 0.0
         var reactions: [BattleActor.SkillEffects.Reaction] = []
         var counterAttackEvasionMultiplier: Double = 1.0
         var rowProfile = BattleActor.SkillEffects.RowProfile()
         var statusResistances: [String: BattleActor.SkillEffects.StatusResistance] = [:]
         var timedBuffTriggers: [BattleActor.SkillEffects.TimedBuffTrigger] = []
+        var statusInflictions: [BattleActor.SkillEffects.StatusInflict] = []
+        var berserkChancePercent: Double?
+        var breathExtraCharges: Int = 0
+        var parryEnabled: Bool = false
+        var shieldBlockEnabled: Bool = false
+        var parryBonusPercent: Double = 0.0
+        var shieldBlockBonusPercent: Double = 0.0
+        var dodgeCapMax: Double? = nil
+        var minHitScale: Double? = nil
+        var defaultSpellChargeModifier: BattleActor.SkillEffects.SpellChargeModifier? = nil
+        var spellChargeModifiers: [String: BattleActor.SkillEffects.SpellChargeModifier] = [:]
+        var absorptionPercent: Double = 0.0
+        var absorptionCapPercent: Double = 0.0
+        var partyHostileAll: Bool = false
+        var vampiricImpulse: Bool = false
+        var vampiricSuppression: Bool = false
+        var antiHealingEnabled: Bool = false
+        var partyHostileTargets: Set<String> = []
+        var partyProtectedTargets: Set<String> = []
         var barrierCharges: [String: Int] = [:]
         var guardBarrierCharges: [String: Int] = [:]
         let degradationPercent: Double = 0.0
@@ -34,6 +55,14 @@ enum SkillRuntimeEffectCompiler {
         var degradationRepairMaxPercent: Double = 0.0
         var degradationRepairBonusPercent: Double = 0.0
         var autoDegradationRepair: Bool = false
+        var rescueCapabilities: [BattleActor.SkillEffects.RescueCapability] = []
+        var rescueModifiers = BattleActor.SkillEffects.RescueModifiers.neutral
+        var specialAttacks: [BattleActor.SkillEffects.SpecialAttack] = []
+        var resurrectionActives: [BattleActor.SkillEffects.ResurrectionActive] = []
+        var forcedResurrection: BattleActor.SkillEffects.ForcedResurrection?
+        var vitalizeResurrection: BattleActor.SkillEffects.VitalizeResurrection?
+        var necromancerInterval: Int?
+        var resurrectionPassiveBetweenFloors: Bool = false
 
         for skill in skills {
             for effect in skill.effects {
@@ -103,6 +132,8 @@ enum SkillRuntimeEffectCompiler {
                     if let multiplier = payload.value["multiplier"] {
                         actionOrderMultiplier *= multiplier
                     }
+                case "actionOrderShuffle":
+                    actionOrderShuffle = true
                 case "counterAttackEvasionMultiplier":
                     if let multiplier = payload.value["multiplier"] {
                         counterAttackEvasionMultiplier *= multiplier
@@ -127,10 +158,49 @@ enum SkillRuntimeEffectCompiler {
                     var entry = statusResistances[statusId] ?? .neutral
                     entry.additivePercent += value
                     statusResistances[statusId] = entry
+                case "statusInflict":
+                    guard let statusId = payload.parameters?["statusId"],
+                          let base = payload.value["baseChancePercent"] else { continue }
+                    statusInflictions.append(.init(statusId: statusId, baseChancePercent: base))
+                case "breathVariant":
+                    let extra = payload.value["extraCharges"].map { Int($0.rounded(.towardZero)) } ?? 0
+                    breathExtraCharges += max(0, extra)
+                case "berserk":
+                    if let chance = payload.value["chancePercent"] {
+                        if let current = berserkChancePercent {
+                            berserkChancePercent = max(current, chance)
+                        } else {
+                            berserkChancePercent = chance
+                        }
+                    }
                 case "endOfTurnHealing":
                     if let value = payload.value["valuePercent"] {
                         endOfTurnHealingPercent = max(endOfTurnHealingPercent, value)
                     }
+                case "endOfTurnSelfHPPercent":
+                    if let value = payload.value["valuePercent"] {
+                        endOfTurnSelfHPPercent += value
+                    }
+                case "partyAttackFlag":
+                    if payload.value["hostileAll"] != nil {
+                        partyHostileAll = true
+                    }
+                    if payload.value["vampiricImpulse"] != nil {
+                        vampiricImpulse = true
+                    }
+                    if payload.value["vampiricSuppression"] != nil {
+                        vampiricSuppression = true
+                    }
+                case "partyAttackTarget":
+                    guard let targetId = payload.parameters?["targetId"] else { continue }
+                    if payload.value["hostile"] != nil {
+                        partyHostileTargets.insert(targetId)
+                    }
+                    if payload.value["protect"] != nil {
+                        partyProtectedTargets.insert(targetId)
+                    }
+                case "antiHealing":
+                    antiHealingEnabled = true
                 case "barrier":
                     guard let damageType = payload.parameters?["damageType"],
                           let charges = payload.value["charges"] else { continue }
@@ -145,6 +215,89 @@ enum SkillRuntimeEffectCompiler {
                     guard intCharges > 0 else { continue }
                     let current = guardBarrierCharges[damageType] ?? 0
                     guardBarrierCharges[damageType] = max(current, intCharges)
+                case "parry":
+                    parryEnabled = true
+                    if let bonus = payload.value["bonusPercent"] {
+                        parryBonusPercent = max(parryBonusPercent, bonus)
+                    } else {
+                        parryBonusPercent = max(parryBonusPercent, 0.0)
+                    }
+                case "shieldBlock":
+                    shieldBlockEnabled = true
+                    if let bonus = payload.value["bonusPercent"] {
+                        shieldBlockBonusPercent = max(shieldBlockBonusPercent, bonus)
+                    } else {
+                        shieldBlockBonusPercent = max(shieldBlockBonusPercent, 0.0)
+                    }
+                case "dodgeCap":
+                    if let maxCap = payload.value["maxDodge"] {
+                        dodgeCapMax = max(dodgeCapMax ?? 0.0, maxCap)
+                    }
+                    if let scale = payload.value["minHitScale"] {
+                        minHitScale = minHitScale.map { min($0, scale) } ?? scale
+                    }
+                case "spellCharges":
+                    let targetSpellId = payload.parameters?["spellId"]
+                    var modifier = targetSpellId.flatMap { spellChargeModifiers[$0] }
+                        ?? defaultSpellChargeModifier
+                        ?? BattleActor.SkillEffects.SpellChargeModifier()
+
+                    if let maxCharges = payload.value["maxCharges"] {
+                        let value = Int(maxCharges.rounded(.towardZero))
+                        if value > 0 {
+                            if let current = modifier.maxOverride {
+                                modifier.maxOverride = max(current, value)
+                            } else {
+                                modifier.maxOverride = value
+                            }
+                        }
+                    }
+                    if let initial = payload.value["initialCharges"] {
+                        let value = Int(initial.rounded(.towardZero))
+                        if value > 0 {
+                            if let current = modifier.initialOverride {
+                                modifier.initialOverride = max(current, value)
+                            } else {
+                                modifier.initialOverride = value
+                            }
+                        }
+                    }
+                    if let bonus = payload.value["initialBonus"] {
+                        let value = Int(bonus.rounded(.towardZero))
+                        if value != 0 {
+                            modifier.initialBonus += value
+                        }
+                    }
+                    if let every = payload.value["regenEveryTurns"],
+                       let amount = payload.value["regenAmount"],
+                       let cap = payload.value["regenCap"] {
+                        let regen = BattleActor.SkillEffects.SpellChargeRegen(every: Int(every),
+                                                                              amount: Int(amount),
+                                                                              cap: Int(cap),
+                                                                              maxTriggers: payload.value["maxTriggers"].map { Int($0) })
+                        modifier.regen = regen
+                    }
+                    if let gain = payload.value["gainOnPhysicalHit"], gain > 0 {
+                        let value = Int(gain.rounded(.towardZero))
+                        if value > 0 {
+                            modifier.gainOnPhysicalHit = (modifier.gainOnPhysicalHit ?? 0) + value
+                        }
+                    }
+
+                    if modifier.isEmpty { break }
+
+                    if let spellId = targetSpellId {
+                        spellChargeModifiers[spellId] = modifier
+                    } else {
+                        defaultSpellChargeModifier = modifier
+                    }
+                case "absorption":
+                    if let percent = payload.value["percent"] {
+                        absorptionPercent = max(absorptionPercent, percent)
+                    }
+                    if let cap = payload.value["capPercent"] {
+                        absorptionCapPercent = max(absorptionCapPercent, cap)
+                    }
                 case "degradationRepair":
                     let minP = payload.value["minPercent"] ?? 0.0
                     let maxP = payload.value["maxPercent"] ?? 0.0
@@ -156,6 +309,51 @@ enum SkillRuntimeEffectCompiler {
                     }
                 case "autoDegradationRepair":
                     autoDegradationRepair = true
+                case "specialAttack":
+                    guard let identifier = payload.parameters?["specialAttackId"] else { continue }
+                    let chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 50
+                    if let descriptor = BattleActor.SkillEffects.SpecialAttack(kindIdentifier: identifier,
+                                                                              chancePercent: chance) {
+                        specialAttacks.append(descriptor)
+                    }
+                case "resurrectionSave":
+                    let usesCleric = payload.value["usesClericMagic"].map { $0 > 0 } ?? false
+                    let minLevel = payload.value["minLevel"].map { Int($0.rounded(.towardZero)) } ?? 0
+                    rescueCapabilities.append(.init(usesClericMagic: usesCleric,
+                                                    minLevel: max(0, minLevel)))
+                case "resurrectionActive":
+                    if let instant = payload.value["instant"], instant > 0 {
+                        rescueModifiers.ignoreActionCost = true
+                    }
+                    let chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 0
+                    let hpScaleRaw = payload.stringValues["hpScale"] ?? payload.value["hpScale"].map { _ in "magicalHealing" }
+                    let hpScale = BattleActor.SkillEffects.ResurrectionActive.HPScale(rawValue: hpScaleRaw ?? "magicalHealing") ?? .magicalHealing
+                    let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
+                    resurrectionActives.append(.init(chancePercent: max(0, chance),
+                                                     hpScale: hpScale,
+                                                     maxTriggers: maxTriggers))
+                case "resurrectionBuff":
+                    if let guaranteed = payload.value["guaranteed"], guaranteed > 0 {
+                        let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
+                        forcedResurrection = .init(maxTriggers: maxTriggers)
+                    }
+                case "resurrectionVitalize":
+                    let removePenalties = payload.value["removePenalties"].map { $0 > 0 } ?? false
+                    let rememberSkills = payload.value["rememberSkills"].map { $0 > 0 } ?? false
+                    let removeSkillIds = payload.stringArrayValues["removeSkillIds"] ?? []
+                    let grantSkillIds = payload.stringArrayValues["grantSkillIds"] ?? []
+                    vitalizeResurrection = .init(removePenalties: removePenalties,
+                                                 rememberSkills: rememberSkills,
+                                                 removeSkillIds: removeSkillIds,
+                                                 grantSkillIds: grantSkillIds)
+                case "resurrectionSummon":
+                    if let every = payload.value["everyTurns"], every > 0 {
+                        necromancerInterval = Int(every.rounded(.towardZero))
+                    }
+                case "resurrectionPassive":
+                    if payload.stringValues["type"] == "betweenFloors" {
+                        resurrectionPassiveBetweenFloors = true
+                    }
                 case "timedMagicPowerAmplify":
                     guard let turn = payload.value["triggerTurn"],
                           let multiplier = payload.value["multiplier"] else { continue }
@@ -224,21 +422,50 @@ enum SkillRuntimeEffectCompiler {
                                         martialBonusPercent: martialBonusPercent,
                                         martialBonusMultiplier: martialBonusMultiplier,
                                         actionOrderMultiplier: actionOrderMultiplier,
+                                        actionOrderShuffle: actionOrderShuffle,
                                         healingGiven: healingGiven,
                                         healingReceived: healingReceived,
                                         endOfTurnHealingPercent: endOfTurnHealingPercent,
+                                        endOfTurnSelfHPPercent: endOfTurnSelfHPPercent,
                                         reactions: reactions,
                                         counterAttackEvasionMultiplier: counterAttackEvasionMultiplier,
                                         rowProfile: rowProfile,
                                         statusResistances: statusResistances,
                                         timedBuffTriggers: timedBuffTriggers,
+                                        statusInflictions: statusInflictions,
+                                        berserkChancePercent: berserkChancePercent,
+                                        breathExtraCharges: breathExtraCharges,
                                         barrierCharges: barrierCharges,
                                         guardBarrierCharges: guardBarrierCharges,
+                                        parryEnabled: parryEnabled,
+                                        shieldBlockEnabled: shieldBlockEnabled,
+                                        parryBonusPercent: parryBonusPercent,
+                                        shieldBlockBonusPercent: shieldBlockBonusPercent,
+                                        dodgeCapMax: dodgeCapMax,
+                                        minHitScale: minHitScale,
+                                        spellChargeModifiers: spellChargeModifiers,
+                                        defaultSpellChargeModifier: defaultSpellChargeModifier,
+                                        absorptionPercent: absorptionPercent,
+                                        absorptionCapPercent: absorptionCapPercent,
+                                        partyHostileAll: partyHostileAll,
+                                        vampiricImpulse: vampiricImpulse,
+                                        vampiricSuppression: vampiricSuppression,
+                                        antiHealingEnabled: antiHealingEnabled,
                                         degradationPercent: degradationPercent,
                                         degradationRepairMinPercent: degradationRepairMinPercent,
                                         degradationRepairMaxPercent: degradationRepairMaxPercent,
                                         degradationRepairBonusPercent: degradationRepairBonusPercent,
-                                        autoDegradationRepair: autoDegradationRepair)
+                                        autoDegradationRepair: autoDegradationRepair,
+                                        partyHostileTargets: partyHostileTargets,
+                                        partyProtectedTargets: partyProtectedTargets,
+                                        specialAttacks: specialAttacks,
+                                        rescueCapabilities: rescueCapabilities,
+                                        rescueModifiers: rescueModifiers,
+                                        resurrectionActives: resurrectionActives,
+                                        forcedResurrection: forcedResurrection,
+                                        vitalizeResurrection: vitalizeResurrection,
+                                        necromancerInterval: necromancerInterval,
+                                        resurrectionPassiveBetweenFloors: resurrectionPassiveBetweenFloors)
     }
 
     static func rewardComponents(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.RewardComponents {
@@ -600,39 +827,75 @@ private extension BattleActor.SkillEffects.DamageMultipliers {
                                                                     breath: 1.0)
 }
 
-extension BattleActor.SkillEffects {
-    static let neutral = BattleActor.SkillEffects(damageTaken: .neutral,
-                                                  damageDealt: .neutral,
-                                                  damageDealtAgainst: .neutral,
-                                                  spellPower: .neutral,
-                                                  spellSpecificMultipliers: [:],
-                                                  criticalDamagePercent: 0.0,
-                                                  criticalDamageMultiplier: 1.0,
-                                                  criticalDamageTakenMultiplier: 1.0,
-                                                  penetrationDamageTakenMultiplier: 1.0,
-                                                  martialBonusPercent: 0.0,
-                                                  martialBonusMultiplier: 1.0,
-                                                  actionOrderMultiplier: 1.0,
-                                                  healingGiven: 1.0,
-                                                  healingReceived: 1.0,
-                                                  endOfTurnHealingPercent: 0.0,
-                                                  reactions: [],
-                                                  counterAttackEvasionMultiplier: 1.0,
-                                                  rowProfile: .init(),
-                                                  statusResistances: [:],
-                                                  timedBuffTriggers: [],
-                                                  barrierCharges: [:],
-                                                  guardBarrierCharges: [:],
-                                                  degradationPercent: 0.0,
-                                                  degradationRepairMinPercent: 0.0,
-                                                  degradationRepairMaxPercent: 0.0,
-                                                  degradationRepairBonusPercent: 0.0,
-                                                  autoDegradationRepair: false)
-}
-
 private struct SkillEffectPayload: Decodable {
     let familyId: String
     let effectType: String
     var parameters: [String: String]?
-    let value: [String: Double]
+    var value: [String: Double]
+    var stringValues: [String: String]
+    var stringArrayValues: [String: [String]]
+
+    private enum CodingKeys: String, CodingKey {
+        case familyId
+        case effectType
+        case parameters
+        case value
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        familyId = try container.decode(String.self, forKey: .familyId)
+        effectType = try container.decode(String.self, forKey: .effectType)
+        parameters = try container.decodeIfPresent([String: String].self, forKey: .parameters)
+
+        let rawValue = try container.decodeIfPresent([String: FlexibleValue].self, forKey: .value) ?? [:]
+        var doubles: [String: Double] = [:]
+        var strings: [String: String] = [:]
+        var stringArrays: [String: [String]] = [:]
+        for (key, entry) in rawValue {
+            if let double = entry.doubleValue {
+                doubles[key] = double
+            }
+            if let string = entry.stringValue {
+                strings[key] = string
+            }
+            if let array = entry.stringArrayValue {
+                stringArrays[key] = array
+            }
+        }
+        value = doubles
+        stringValues = strings
+        stringArrayValues = stringArrays
+    }
+}
+
+private struct FlexibleValue: Decodable {
+    let doubleValue: Double?
+    let stringValue: String?
+    let stringArrayValue: [String]?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let double = try? container.decode(Double.self) {
+            doubleValue = double
+            stringValue = nil
+            stringArrayValue = nil
+            return
+        }
+        if let array = try? container.decode([String].self) {
+            doubleValue = nil
+            stringValue = nil
+            stringArrayValue = array
+            return
+        }
+        if let string = try? container.decode(String.self) {
+            doubleValue = nil
+            stringValue = string
+            stringArrayValue = nil
+            return
+        }
+        doubleValue = nil
+        stringValue = nil
+        stringArrayValue = nil
+    }
 }

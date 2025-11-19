@@ -45,6 +45,10 @@ struct CombatSnapshotBuilder {
                                                 jobHistory: [],
                                                 explorationTags: Set<String>(),
                                                 achievements: .init(totalBattles: 0, totalVictories: 0, defeatCount: 0),
+                                                actionPreferences: .init(attack: 100,
+                                                                         clericMagic: 0,
+                                                                         arcaneMagic: 0,
+                                                                         breath: 50),
                                                 createdAt: Date(),
                                                 updatedAt: Date())
 
@@ -58,7 +62,8 @@ struct CombatSnapshotBuilder {
                                           personalitySecondary: nil,
                                           learnedSkills: [],
                                           loadout: .init(items: [], titles: [], superRareTitles: []),
-                                          spellbook: .empty)
+                                          spellbook: .empty,
+                                          spellLoadout: .empty)
 
         do {
             let context = CombatStatCalculator.Context(progress: progress, state: state)
