@@ -3213,7 +3213,15 @@ struct BattleTurnEngine {
         let magnitude = abs(percent) / 100.0
         guard magnitude > 0 else { return }
         let rawAmount = Double(actor.snapshot.maxHP) * magnitude
-        let amount = max(1, Int(rawAmount.rounded()))
+        let amount: Int
+        if percent > 0 {
+            let healed = rawAmount
+                * healingDealtModifier(for: actor)
+                * healingReceivedModifier(for: actor)
+            amount = max(1, Int(healed.rounded()))
+        } else {
+            amount = max(1, Int(rawAmount.rounded()))
+        }
         if percent > 0 {
             let missing = actor.snapshot.maxHP - actor.currentHP
             guard missing > 0 else { return }
