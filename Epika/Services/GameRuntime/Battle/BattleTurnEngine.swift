@@ -2384,7 +2384,11 @@ struct BattleTurnEngine {
         let percent = attacker.skillEffects.absorptionPercent
         guard percent > 0 else { return }
         let capPercent = attacker.skillEffects.absorptionCapPercent
-        let rawHeal = Int((Double(damageDealt) * percent / 100.0).rounded())
+        let baseHeal = Double(damageDealt) * percent / 100.0
+        let scaledHeal = baseHeal
+            * healingDealtModifier(for: attacker)
+            * healingReceivedModifier(for: attacker)
+        let rawHeal = Int(scaledHeal.rounded())
         let cap = Int((Double(attacker.snapshot.maxHP) * capPercent / 100.0).rounded())
         let healAmount = max(0, min(rawHeal, cap > 0 ? cap : rawHeal))
         guard healAmount > 0 else { return }
@@ -2409,9 +2413,18 @@ struct BattleTurnEngine {
                   let gain = modifier.gainOnPhysicalHit,
                   gain > 0 else { continue }
             let cap = modifier.maxOverride ?? attacker.actionResources.maxCharges(forSpellId: spell.id)
-            _ = attacker.actionResources.addCharges(forSpellId: spell.id,
-                                                    amount: gain,
-                                                    cap: cap)
+            if let cap {
+                let current = attacker.actionResources.charges(forSpellId: spell.id)
+                let missing = max(0, cap - current)
+                guard missing > 0 else { continue }
+                _ = attacker.actionResources.addCharges(forSpellId: spell.id,
+                                                        amount: missing,
+                                                        cap: cap)
+            } else {
+                _ = attacker.actionResources.addCharges(forSpellId: spell.id,
+                                                        amount: gain,
+                                                        cap: nil)
+            }
         }
     }
 

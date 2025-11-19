@@ -180,7 +180,10 @@ private struct SkillEffectAggregator {
         }
 
         func multiplier(for stat: CombatStatKey) -> Double {
-            multipliers[stat, default: 1.0]
+            if talentFlags.contains(stat) && incompetenceFlags.contains(stat) {
+                return 1.0
+            }
+            return multipliers[stat, default: 1.0]
         }
 
         func hasTalent(for stat: CombatStatKey) -> Bool {
