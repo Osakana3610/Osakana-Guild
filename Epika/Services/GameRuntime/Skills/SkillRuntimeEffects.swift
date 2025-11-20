@@ -12,12 +12,16 @@ enum SkillRuntimeEffectCompiler {
         var spellPowerPercent: Double = 0.0
         var spellPowerMultiplier: Double = 1.0
         var spellSpecificMultipliers: [String: Double] = [:]
+        var spellSpecificTakenMultipliers: [String: Double] = [:]
         var criticalDamagePercent: Double = 0.0
         var criticalDamageMultiplier: Double = 1.0
         var criticalDamageTakenMultiplier: Double = 1.0
         var penetrationDamageTakenMultiplier: Double = 1.0
         var martialBonusPercent: Double = 0.0
         var martialBonusMultiplier: Double = 1.0
+        var procChanceMultiplier: Double = 1.0
+        var extraActions: [BattleActor.SkillEffects.ExtraAction] = []
+        var nextTurnExtraActions: Int = 0
         var actionOrderMultiplier: Double = 1.0
         var actionOrderShuffle: Bool = false
         let healingGiven: Double = 1.0
@@ -63,6 +67,11 @@ enum SkillRuntimeEffectCompiler {
         var vitalizeResurrection: BattleActor.SkillEffects.VitalizeResurrection?
         var necromancerInterval: Int?
         var resurrectionPassiveBetweenFloors: Bool = false
+        var magicRunaway: BattleActor.SkillEffects.Runaway?
+        var damageRunaway: BattleActor.SkillEffects.Runaway?
+        var sacrificeInterval: Int?
+        var retreatTurn: Int?
+        var retreatChancePercent: Double?
 
         for skill in skills {
             for effect in skill.effects {
@@ -100,6 +109,10 @@ enum SkillRuntimeEffectCompiler {
                     guard let spellId = payload.parameters?["spellId"],
                           let multiplier = payload.value["multiplier"] else { continue }
                     spellSpecificMultipliers[spellId, default: 1.0] *= multiplier
+                case "spellSpecificTakenMultiplier":
+                    guard let spellId = payload.parameters?["spellId"],
+                          let multiplier = payload.value["multiplier"] else { continue }
+                    spellSpecificTakenMultipliers[spellId, default: 1.0] *= multiplier
                 case "criticalDamagePercent":
                     if let value = payload.value["valuePercent"] {
                         criticalDamagePercent += value
@@ -127,6 +140,22 @@ enum SkillRuntimeEffectCompiler {
                 case "martialBonusMultiplier":
                     if let multiplier = payload.value["multiplier"] {
                         martialBonusMultiplier *= multiplier
+                    }
+                case "procMultiplier":
+                    if let multiplier = payload.value["multiplier"] {
+                        procChanceMultiplier *= multiplier
+                    }
+                case "extraAction":
+                    let chance = payload.value["chancePercent"] ?? payload.value["valuePercent"] ?? 0.0
+                    let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
+                    let clampedCount = max(0, count)
+                    if chance > 0, clampedCount > 0 {
+                        extraActions.append(.init(chancePercent: chance, count: clampedCount))
+                    }
+                case "reactionNextTurn":
+                    let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
+                    if count > 0 {
+                        nextTurnExtraActions &+= count
                     }
                 case "actionOrderMultiplier":
                     if let multiplier = payload.value["multiplier"] {
@@ -354,6 +383,29 @@ enum SkillRuntimeEffectCompiler {
                     if payload.stringValues["type"] == "betweenFloors" {
                         resurrectionPassiveBetweenFloors = true
                     }
+                case "runawayMagic":
+                    if let threshold = payload.value["thresholdPercent"],
+                       let chance = payload.value["chancePercent"] {
+                        magicRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
+                    }
+                case "runawayDamage":
+                    if let threshold = payload.value["thresholdPercent"],
+                       let chance = payload.value["chancePercent"] {
+                        damageRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
+                    }
+                case "sacrificeRite":
+                    if let every = payload.value["everyTurns"] {
+                        let interval = max(1, Int(every.rounded(.towardZero)))
+                        sacrificeInterval = sacrificeInterval.map { min($0, interval) } ?? interval
+                    }
+                case "retreatAtTurn":
+                    if let turnValue = payload.value["turn"] {
+                        let normalized = max(1, Int(turnValue.rounded(.towardZero)))
+                        retreatTurn = retreatTurn.map { min($0, normalized) } ?? normalized
+                    }
+                    if let chance = payload.value["chancePercent"] {
+                        retreatChancePercent = max(retreatChancePercent ?? 0.0, chance)
+                    }
                 case "timedMagicPowerAmplify":
                     guard let turn = payload.value["triggerTurn"],
                           let multiplier = payload.value["multiplier"] else { continue }
@@ -415,12 +467,16 @@ enum SkillRuntimeEffectCompiler {
                                         damageDealtAgainst: categoryMultipliers,
                                         spellPower: spellPower,
                                         spellSpecificMultipliers: spellSpecificMultipliers,
+                                        spellSpecificTakenMultipliers: spellSpecificTakenMultipliers,
                                         criticalDamagePercent: criticalDamagePercent,
                                         criticalDamageMultiplier: criticalDamageMultiplier,
                                         criticalDamageTakenMultiplier: criticalDamageTakenMultiplier,
                                         penetrationDamageTakenMultiplier: penetrationDamageTakenMultiplier,
                                         martialBonusPercent: martialBonusPercent,
                                         martialBonusMultiplier: martialBonusMultiplier,
+                                        procChanceMultiplier: procChanceMultiplier,
+                                        extraActions: extraActions,
+                                        nextTurnExtraActions: nextTurnExtraActions,
                                         actionOrderMultiplier: actionOrderMultiplier,
                                         actionOrderShuffle: actionOrderShuffle,
                                         healingGiven: healingGiven,
@@ -465,7 +521,41 @@ enum SkillRuntimeEffectCompiler {
                                         forcedResurrection: forcedResurrection,
                                         vitalizeResurrection: vitalizeResurrection,
                                         necromancerInterval: necromancerInterval,
-                                        resurrectionPassiveBetweenFloors: resurrectionPassiveBetweenFloors)
+                                        resurrectionPassiveBetweenFloors: resurrectionPassiveBetweenFloors,
+                                        magicRunaway: magicRunaway,
+                                        damageRunaway: damageRunaway,
+                                        sacrificeInterval: sacrificeInterval,
+                                        retreatTurn: retreatTurn,
+                                        retreatChancePercent: retreatChancePercent)
+    }
+
+    static func equipmentSlots(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.EquipmentSlots {
+        guard !skills.isEmpty else { return .neutral }
+
+        var result = SkillRuntimeEffects.EquipmentSlots.neutral
+
+        for skill in skills {
+            for effect in skill.effects {
+                guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
+                switch payload.effectType {
+                case "equipmentSlotAdditive":
+                    let raw = payload.value["add"] ?? payload.value["value"] ?? payload.value["slots"]
+                    if let value = raw {
+                        let intValue = Int(value.rounded(.towardZero))
+                        result.additive &+= max(0, intValue)
+                    }
+                case "equipmentSlotMultiplier":
+                    let raw = payload.value["multiplier"] ?? payload.value["value"]
+                    if let multiplier = raw {
+                        result.multiplier *= multiplier
+                    }
+                default:
+                    continue
+                }
+            }
+        }
+
+        return result
     }
 
     static func rewardComponents(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.RewardComponents {
@@ -737,6 +827,13 @@ struct SkillRuntimeEffects {
 
     static let emptySpellbook = Spellbook.empty
     static let emptySpellLoadout = SpellLoadout.empty
+
+    struct EquipmentSlots: Sendable, Hashable {
+        var additive: Int
+        var multiplier: Double
+
+        static let neutral = EquipmentSlots(additive: 0, multiplier: 1.0)
+    }
 
     struct RewardComponents: Sendable, Hashable {
         var experienceMultiplierProduct: Double = 1.0

@@ -431,12 +431,20 @@ struct BattleActor: Sendable {
         var damageDealtAgainst: TargetMultipliers
         var spellPower: SpellPower
         var spellSpecificMultipliers: [String: Double]
+        var spellSpecificTakenMultipliers: [String: Double]
         var criticalDamagePercent: Double
         var criticalDamageMultiplier: Double
         var criticalDamageTakenMultiplier: Double
         var penetrationDamageTakenMultiplier: Double
         var martialBonusPercent: Double
         var martialBonusMultiplier: Double
+        var procChanceMultiplier: Double
+        struct ExtraAction: Sendable, Hashable {
+            let chancePercent: Double
+            let count: Int
+        }
+        var extraActions: [ExtraAction]
+        var nextTurnExtraActions: Int
         var actionOrderMultiplier: Double
         var actionOrderShuffle: Bool
         var healingGiven: Double
@@ -482,6 +490,15 @@ struct BattleActor: Sendable {
         var vitalizeResurrection: VitalizeResurrection?
         var necromancerInterval: Int?
         var resurrectionPassiveBetweenFloors: Bool
+        struct Runaway: Sendable, Hashable {
+            let thresholdPercent: Double
+            let chancePercent: Double
+        }
+        var magicRunaway: Runaway?
+        var damageRunaway: Runaway?
+        var sacrificeInterval: Int?
+        var retreatTurn: Int?
+        var retreatChancePercent: Double?
 
         static let neutral = SkillEffects(
             damageTaken: .init(physical: 1.0, magical: 1.0, breath: 1.0),
@@ -489,12 +506,16 @@ struct BattleActor: Sendable {
             damageDealtAgainst: .neutral,
             spellPower: .neutral,
             spellSpecificMultipliers: [:],
+            spellSpecificTakenMultipliers: [:],
             criticalDamagePercent: 0.0,
             criticalDamageMultiplier: 1.0,
             criticalDamageTakenMultiplier: 1.0,
             penetrationDamageTakenMultiplier: 1.0,
             martialBonusPercent: 0.0,
             martialBonusMultiplier: 1.0,
+            procChanceMultiplier: 1.0,
+            extraActions: [],
+            nextTurnExtraActions: 0,
             actionOrderMultiplier: 1.0,
             actionOrderShuffle: false,
             healingGiven: 1.0,
@@ -539,7 +560,12 @@ struct BattleActor: Sendable {
             forcedResurrection: nil,
             vitalizeResurrection: nil,
             necromancerInterval: nil,
-            resurrectionPassiveBetweenFloors: false)
+            resurrectionPassiveBetweenFloors: false,
+            magicRunaway: nil,
+            damageRunaway: nil,
+            sacrificeInterval: nil,
+            retreatTurn: nil,
+            retreatChancePercent: nil)
         }
 
     let identifier: String
@@ -592,6 +618,7 @@ struct BattleActor: Sendable {
         var baseSkillIds: Set<String>
         var suppressedSkillIds: Set<String>
         var grantedSkillIds: Set<String>
+        var extraActionsNextTurn: Int
 
     init(identifier: String,
          displayName: String,
@@ -641,7 +668,8 @@ struct BattleActor: Sendable {
          vitalizeActive: Bool = false,
          baseSkillIds: Set<String> = [],
          suppressedSkillIds: Set<String> = [],
-         grantedSkillIds: Set<String> = []) {
+         grantedSkillIds: Set<String> = [],
+         extraActionsNextTurn: Int = 0) {
         self.identifier = identifier
         self.displayName = displayName
         self.kind = kind
@@ -691,6 +719,7 @@ struct BattleActor: Sendable {
         self.baseSkillIds = baseSkillIds
         self.suppressedSkillIds = suppressedSkillIds
         self.grantedSkillIds = grantedSkillIds
+        self.extraActionsNextTurn = extraActionsNextTurn
     }
 
     var isAlive: Bool { currentHP > 0 }
