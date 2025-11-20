@@ -70,6 +70,15 @@ struct BattleTurnEngine {
             resetRescueUsage(for: &players)
             resetRescueUsage(for: &enemies)
 
+            applyRetreatIfNeeded(turn: turn, actors: &players, side: .player, logs: &logs, random: &random)
+            applyRetreatIfNeeded(turn: turn, actors: &enemies, side: .enemy, logs: &logs, random: &random)
+
+            let sacrificeTargets = computeSacrificeTargets(turn: turn,
+                                                           players: &players,
+                                                           enemies: &enemies,
+                                                           logs: &logs,
+                                                           random: &random)
+
             applyTimedBuffTriggers(turn: turn, actors: &players, logs: &logs)
             applyTimedBuffTriggers(turn: turn, actors: &enemies, logs: &logs)
 
@@ -77,9 +86,11 @@ struct BattleTurnEngine {
             // 今ターンに消費する追加行動（次ターン予約分）はここでリセット
             for index in players.indices {
                 players[index].extraActionsNextTurn = 0
+                players[index].isSacrificeTarget = sacrificeTargets.playerTarget == index
             }
             for index in enemies.indices {
                 enemies[index].extraActionsNextTurn = 0
+                enemies[index].isSacrificeTarget = sacrificeTargets.enemyTarget == index
             }
             for reference in order {
                 switch reference {
@@ -91,7 +102,9 @@ struct BattleTurnEngine {
                                   enemies: &enemies,
                                   turn: turn,
                                   logs: &logs,
-                                  random: &random)
+                                  random: &random,
+                                  forcedTargets: (playerTarget: sacrificeTargets.playerTarget,
+                                                  enemyTarget: sacrificeTargets.enemyTarget))
                 case .enemy(let index):
                     guard enemies.indices.contains(index), enemies[index].isAlive else { continue }
                     performAction(for: .enemy,
@@ -100,7 +113,9 @@ struct BattleTurnEngine {
                                   enemies: &enemies,
                                   turn: turn,
                                   logs: &logs,
-                                  random: &random)
+                                  random: &random,
+                                  forcedTargets: (playerTarget: sacrificeTargets.playerTarget,
+                                                  enemyTarget: sacrificeTargets.enemyTarget))
                 }
 
                 if enemies.allSatisfy({ !$0.isAlive }) {
@@ -202,6 +217,10 @@ struct BattleTurnEngine {
     }
 
     private static let maxReactionDepth = 4
+    private struct SacrificeTargets {
+        let playerTarget: Int?
+        let enemyTarget: Int?
+    }
 
     private static func actor(for side: ActorSide,
                                index: Int,
@@ -321,6 +340,7 @@ struct BattleTurnEngine {
                                       turn: Int,
                                       logs: inout [BattleLogEntry],
                                       random: inout GameRandomSource,
+                                      forcedTargets: (playerTarget: Int?, enemyTarget: Int?),
                                       depth: Int = 0) {
         guard depth < 5 else { return }
         var performer: BattleActor
@@ -375,7 +395,8 @@ struct BattleTurnEngine {
                                       enemies: &enemies,
                                       turn: turn,
                                       logs: &logs,
-                                      random: &random) {
+                                      random: &random,
+                                      forcedTargets: forcedTargets) {
                 activateGuard(for: side,
                               actorIndex: actorIndex,
                               players: &players,
@@ -390,7 +411,8 @@ struct BattleTurnEngine {
                                    enemies: &enemies,
                                    turn: turn,
                                    logs: &logs,
-                                   random: &random) {
+                                   random: &random,
+                                   forcedTargets: forcedTargets) {
                 activateGuard(for: side,
                               actorIndex: actorIndex,
                               players: &players,
@@ -405,7 +427,8 @@ struct BattleTurnEngine {
                                    enemies: &enemies,
                                    turn: turn,
                                    logs: &logs,
-                                   random: &random) {
+                                   random: &random,
+                                   forcedTargets: forcedTargets) {
                 activateGuard(for: side,
                               actorIndex: actorIndex,
                               players: &players,
@@ -420,7 +443,8 @@ struct BattleTurnEngine {
                               enemies: &enemies,
                               turn: turn,
                               logs: &logs,
-                              random: &random) {
+                              random: &random,
+                              forcedTargets: forcedTargets) {
                 activateGuard(for: side,
                               actorIndex: actorIndex,
                               players: &players,
@@ -445,6 +469,7 @@ struct BattleTurnEngine {
                                   turn: turn,
                                   logs: &logs,
                                   random: &random,
+                                  forcedTargets: forcedTargets,
                                   depth: depth + 1)
                 }
             }
@@ -722,7 +747,8 @@ struct BattleTurnEngine {
                                               enemies: inout [BattleActor],
                                               turn: Int,
                                               logs: inout [BattleLogEntry],
-                                              random: inout GameRandomSource) -> Bool {
+                                              random: inout GameRandomSource,
+                                              forcedTargets: (playerTarget: Int?, enemyTarget: Int?)) -> Bool {
         guard let attacker = actor(for: side, index: attackerIndex, players: players, enemies: enemies), attacker.isAlive else {
             return false
         }
@@ -739,7 +765,8 @@ struct BattleTurnEngine {
                                                  enemies: enemies,
                                                  allowFriendlyTargets: allowFriendlyTargets,
                                                  random: &random,
-                                                 attacker: attacker) else { return false }
+                                                 attacker: attacker,
+                                                 forcedTargets: forcedTargets) else { return false }
 
         resolvePhysicalAction(attackerSide: side,
                               attackerIndex: attackerIndex,
@@ -874,7 +901,8 @@ struct BattleTurnEngine {
                                            enemies: inout [BattleActor],
                                            turn: Int,
                                            logs: inout [BattleLogEntry],
-                                           random: inout GameRandomSource) -> Bool {
+                                           random: inout GameRandomSource,
+                                           forcedTargets: (playerTarget: Int?, enemyTarget: Int?)) -> Bool {
         switch side {
         case .player:
             return performClericMagic(on: &players,
@@ -944,7 +972,8 @@ struct BattleTurnEngine {
                                            enemies: inout [BattleActor],
                                            turn: Int,
                                            logs: inout [BattleLogEntry],
-                                           random: inout GameRandomSource) -> Bool {
+                                           random: inout GameRandomSource,
+                                           forcedTargets: (playerTarget: Int?, enemyTarget: Int?)) -> Bool {
         guard var caster = actor(for: side, index: attackerIndex, players: players, enemies: enemies) else { return false }
         guard caster.isAlive, caster.snapshot.magicalAttack > 0 else { return false }
         guard let selectedSpell = selectArcaneSpell(for: caster) else { return false }
@@ -1003,7 +1032,8 @@ struct BattleTurnEngine {
                                                     enemies: enemies,
                                                     allowFriendlyTargets: allowFriendlyTargets,
                                                     random: &random,
-                                                    attacker: caster) else { return false }
+                                                    attacker: caster,
+                                                    forcedTargets: forcedTargets) else { return false }
 
         guard var target = actor(for: targetRef.0, index: targetRef.1, players: players, enemies: enemies) else { return false }
 
@@ -1070,7 +1100,8 @@ struct BattleTurnEngine {
                                       enemies: inout [BattleActor],
                                       turn: Int,
                                       logs: inout [BattleLogEntry],
-                                      random: inout GameRandomSource) -> Bool {
+                                      random: inout GameRandomSource,
+                                      forcedTargets: (playerTarget: Int?, enemyTarget: Int?)) -> Bool {
         guard var attacker = actor(for: side, index: attackerIndex, players: players, enemies: enemies) else { return false }
         guard attacker.isAlive, attacker.snapshot.breathDamage > 0 else { return false }
         guard attacker.actionResources.consume(.breath) else { return false }
@@ -1089,7 +1120,8 @@ struct BattleTurnEngine {
                                                     enemies: enemies,
                                                     allowFriendlyTargets: allowFriendlyTargets,
                                                     random: &random,
-                                                    attacker: attacker) else { return false }
+                                                    attacker: attacker,
+                                                    forcedTargets: forcedTargets) else { return false }
 
         guard var target = actor(for: targetRef.0, index: targetRef.1, players: players, enemies: enemies) else { return false }
 
@@ -1201,7 +1233,8 @@ struct BattleTurnEngine {
                                               enemies: [BattleActor],
                                               allowFriendlyTargets: Bool,
                                               random: inout GameRandomSource,
-                                              attacker: BattleActor?) -> (ActorSide, Int)? {
+                                              attacker: BattleActor?,
+                                              forcedTargets: (playerTarget: Int?, enemyTarget: Int?)) -> (ActorSide, Int)? {
         var opponentRefs: [ActorReference] = []
         var allyRefs: [ActorReference] = []
 
@@ -1212,6 +1245,24 @@ struct BattleTurnEngine {
         case .enemy:
             opponentRefs = players.enumerated().compactMap { $0.element.isAlive ? .player($0.offset) : nil }
             allyRefs = enemies.enumerated().compactMap { $0.element.isAlive ? .enemy($0.offset) : nil }
+        }
+
+        // 生贄ターゲットが指定されていれば優先
+        if !allowFriendlyTargets {
+            switch attackerSide {
+            case .player:
+                if let forced = forcedTargets.enemyTarget,
+                   enemies.indices.contains(forced),
+                   enemies[forced].isAlive {
+                    return (.enemy, forced)
+                }
+            case .enemy:
+                if let forced = forcedTargets.playerTarget,
+                   players.indices.contains(forced),
+                   players[forced].isAlive {
+                    return (.player, forced)
+                }
+            }
         }
 
         if opponentRefs.isEmpty {
@@ -1293,6 +1344,100 @@ struct BattleTurnEngine {
         for index in actors.indices {
             actors[index].rescueActionsUsed = 0
         }
+    }
+
+    private static func applyRetreatIfNeeded(turn: Int,
+                                             actors: inout [BattleActor],
+                                             side: ActorSide,
+                                             logs: inout [BattleLogEntry],
+                                             random: inout GameRandomSource) {
+        for index in actors.indices where actors[index].isAlive {
+            var actor = actors[index]
+            if let forcedTurn = actor.skillEffects.retreatTurn,
+               turn >= forcedTurn {
+                let probability = max(0.0, min(1.0, (actor.skillEffects.retreatChancePercent ?? 100.0) / 100.0))
+                if random.nextBool(probability: probability) {
+                    actor.currentHP = 0
+                    actors[index] = actor
+                    logs.append(.init(turn: turn,
+                                      message: "\(actor.displayName)は戦線離脱した",
+                                      type: .status,
+                                      actorId: actor.identifier,
+                                      metadata: ["category": "retreat", "side": "\(side)"]))
+                }
+                continue
+            }
+            if let chance = actor.skillEffects.retreatChancePercent,
+               actor.skillEffects.retreatTurn == nil {
+                let probability = max(0.0, min(1.0, chance / 100.0))
+                if random.nextBool(probability: probability) {
+                    actor.currentHP = 0
+                    actors[index] = actor
+                    logs.append(.init(turn: turn,
+                                      message: "\(actor.displayName)は戦線離脱した",
+                                      type: .status,
+                                      actorId: actor.identifier,
+                                      metadata: ["category": "retreat", "side": "\(side)"]))
+                }
+            }
+        }
+    }
+
+    private static func computeSacrificeTargets(turn: Int,
+                                                players: inout [BattleActor],
+                                                enemies: inout [BattleActor],
+                                                logs: inout [BattleLogEntry],
+                                                random: inout GameRandomSource) -> SacrificeTargets {
+        func pickTarget(from group: [BattleActor],
+                        sacrifices: [Int],
+                        opponents: [BattleActor]) -> Int? {
+            for index in sacrifices {
+                let actor = group[index]
+                guard actor.isAlive,
+                      let interval = actor.skillEffects.sacrificeInterval,
+                      interval > 0,
+                      turn % interval == 0 else { continue }
+                let candidates = group.enumerated()
+                    .filter { $0.element.isAlive }
+                    .filter { $0.offset != index }
+                    .filter { ($0.element.level ?? 0) < (actor.level ?? 0) }
+                guard !candidates.isEmpty else { continue }
+                let upper = candidates.count - 1
+                guard upper >= 0 else { return nil }
+                let choice = candidates[random.nextInt(in: 0...upper)].offset
+                return choice
+            }
+            return nil
+        }
+
+        let playerSacrificeIndices = players.enumerated().filter { $0.element.skillEffects.sacrificeInterval != nil }.map { $0.offset }
+        let enemySacrificeIndices = enemies.enumerated().filter { $0.element.skillEffects.sacrificeInterval != nil }.map { $0.offset }
+
+        let playerTarget = pickTarget(from: players,
+                                     sacrifices: playerSacrificeIndices,
+                                     opponents: enemies)
+        if let target = playerTarget {
+            let targetName = players[target].displayName
+            logs.append(.init(turn: turn,
+                              message: "生贄の儀：\(targetName)が生贄に選ばれた",
+                              type: .status,
+                              actorId: players[target].identifier,
+                              metadata: ["category": "sacrifice", "side": "player"]))
+        }
+
+        let enemyTarget = pickTarget(from: enemies,
+                                     sacrifices: enemySacrificeIndices,
+                                     opponents: players)
+        if let target = enemyTarget {
+            let targetName = enemies[target].displayName
+            logs.append(.init(turn: turn,
+                              message: "生贄の儀：\(targetName)が生贄に選ばれた",
+                              type: .status,
+                              actorId: enemies[target].identifier,
+                              metadata: ["category": "sacrifice", "side": "enemy"]))
+        }
+
+        return SacrificeTargets(playerTarget: playerTarget, enemyTarget: enemyTarget)
     }
 
     @discardableResult
@@ -2954,7 +3099,8 @@ struct BattleTurnEngine {
                                                         enemies: enemies,
                                                         allowFriendlyTargets: false,
                                                         random: &random,
-                                                        attacker: currentPerformer)
+                                                        attacker: currentPerformer,
+                                                        forcedTargets: (nil, nil))
             }
             guard var resolvedTarget = targetReference else { continue }
             var needsFallback = false
@@ -2971,7 +3117,8 @@ struct BattleTurnEngine {
                                                            enemies: enemies,
                                                            allowFriendlyTargets: false,
                                                            random: &random,
-                                                           attacker: currentPerformer) else {
+                                                           attacker: currentPerformer,
+                                                           forcedTargets: (nil, nil)) else {
                     continue
                 }
                 resolvedTarget = fallback

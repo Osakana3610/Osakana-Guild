@@ -619,6 +619,7 @@ struct BattleActor: Sendable {
         var suppressedSkillIds: Set<String>
         var grantedSkillIds: Set<String>
         var extraActionsNextTurn: Int
+        var isSacrificeTarget: Bool
 
     init(identifier: String,
          displayName: String,
@@ -669,7 +670,8 @@ struct BattleActor: Sendable {
          baseSkillIds: Set<String> = [],
          suppressedSkillIds: Set<String> = [],
          grantedSkillIds: Set<String> = [],
-         extraActionsNextTurn: Int = 0) {
+         extraActionsNextTurn: Int = 0,
+         isSacrificeTarget: Bool = false) {
         self.identifier = identifier
         self.displayName = displayName
         self.kind = kind
@@ -720,6 +722,7 @@ struct BattleActor: Sendable {
         self.suppressedSkillIds = suppressedSkillIds
         self.grantedSkillIds = grantedSkillIds
         self.extraActionsNextTurn = extraActionsNextTurn
+        self.isSacrificeTarget = isSacrificeTarget
     }
 
     var isAlive: Bool { currentHP > 0 }
