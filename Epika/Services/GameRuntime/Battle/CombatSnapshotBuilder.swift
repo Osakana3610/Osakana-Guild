@@ -46,8 +46,8 @@ struct CombatSnapshotBuilder {
                                                 explorationTags: Set<String>(),
                                                 achievements: .init(totalBattles: 0, totalVictories: 0, defeatCount: 0),
                                                 actionPreferences: .init(attack: 100,
-                                                                         clericMagic: 0,
-                                                                         arcaneMagic: 0,
+                                                                         priestMagic: 0,
+                                                                         mageMagic: 0,
                                                                          breath: 50),
                                                 createdAt: Date(),
                                                 updatedAt: Date())

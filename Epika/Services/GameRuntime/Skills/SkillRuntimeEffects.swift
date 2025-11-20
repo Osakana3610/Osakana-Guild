@@ -52,6 +52,7 @@ enum SkillRuntimeEffectCompiler {
         var antiHealingEnabled: Bool = false
         var partyHostileTargets: Set<String> = []
         var partyProtectedTargets: Set<String> = []
+        var equipmentStatMultipliers: [String: Double] = [:]
         var barrierCharges: [String: Int] = [:]
         var guardBarrierCharges: [String: Int] = [:]
         let degradationPercent: Double = 0.0
@@ -258,6 +259,10 @@ enum SkillRuntimeEffectCompiler {
                     } else {
                         shieldBlockBonusPercent = max(shieldBlockBonusPercent, 0.0)
                     }
+                case "equipmentStatMultiplier":
+                    guard let category = payload.parameters?["equipmentCategory"],
+                          let multiplier = payload.value["multiplier"] else { continue }
+                    equipmentStatMultipliers[category, default: 1.0] *= multiplier
                 case "dodgeCap":
                     if let maxCap = payload.value["maxDodge"] {
                         dodgeCapMax = max(dodgeCapMax ?? 0.0, maxCap)
@@ -346,9 +351,9 @@ enum SkillRuntimeEffectCompiler {
                         specialAttacks.append(descriptor)
                     }
                 case "resurrectionSave":
-                    let usesCleric = payload.value["usesClericMagic"].map { $0 > 0 } ?? false
+                    let usesPriest = payload.value["usesPriestMagic"].map { $0 > 0 } ?? false
                     let minLevel = payload.value["minLevel"].map { Int($0.rounded(.towardZero)) } ?? 0
-                    rescueCapabilities.append(.init(usesClericMagic: usesCleric,
+                    rescueCapabilities.append(.init(usesPriestMagic: usesPriest,
                                                     minLevel: max(0, minLevel)))
                 case "resurrectionActive":
                     if let instant = payload.value["instant"], instant > 0 {
@@ -507,6 +512,7 @@ enum SkillRuntimeEffectCompiler {
                                         vampiricImpulse: vampiricImpulse,
                                         vampiricSuppression: vampiricSuppression,
                                         antiHealingEnabled: antiHealingEnabled,
+                                        equipmentStatMultipliers: equipmentStatMultipliers,
                                         degradationPercent: degradationPercent,
                                         degradationRepairMinPercent: degradationRepairMinPercent,
                                         degradationRepairMaxPercent: degradationRepairMaxPercent,
@@ -707,18 +713,18 @@ enum SkillRuntimeEffectCompiler {
                 return $0.id < $1.id
             }
 
-        var arcane: [SpellDefinition] = []
-        var cleric: [SpellDefinition] = []
+        var mage: [SpellDefinition] = []
+        var priest: [SpellDefinition] = []
         for definition in filtered {
             switch definition.school {
-            case .arcane:
-                arcane.append(definition)
-            case .cleric:
-                cleric.append(definition)
+            case .mage:
+                mage.append(definition)
+            case .priest:
+                priest.append(definition)
             }
         }
 
-        return SkillRuntimeEffects.SpellLoadout(arcane: arcane, cleric: cleric)
+        return SkillRuntimeEffects.SpellLoadout(mage: mage, priest: priest)
     }
 
     private static func decodePayload(from effect: SkillDefinition.Effect, skillId: String) throws -> SkillEffectPayload? {
@@ -819,10 +825,10 @@ struct SkillRuntimeEffects {
     }
 
     struct SpellLoadout: Sendable, Hashable {
-        var arcane: [SpellDefinition]
-        var cleric: [SpellDefinition]
+        var mage: [SpellDefinition]
+        var priest: [SpellDefinition]
 
-        static let empty = SpellLoadout(arcane: [], cleric: [])
+        static let empty = SpellLoadout(mage: [], priest: [])
     }
 
     static let emptySpellbook = Spellbook.empty

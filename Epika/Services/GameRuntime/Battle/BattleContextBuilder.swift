@@ -67,8 +67,8 @@ struct BattleContextBuilder {
         let preferences = character.progress.actionPreferences
         let breath = character.combatSnapshot.breathDamage > 0 ? preferences.breath : 0
         return BattleActionRates(attack: preferences.attack,
-                                 clericMagic: preferences.clericMagic,
-                                 arcaneMagic: preferences.arcaneMagic,
+                                 priestMagic: preferences.priestMagic,
+                                 mageMagic: preferences.mageMagic,
                                  breath: breath)
     }
 
@@ -78,7 +78,7 @@ private extension BattleContextBuilder {
     static func applySpellChargeModifiers(skillEffects: BattleActor.SkillEffects,
                                           loadout: SkillRuntimeEffects.SpellLoadout,
                                           resources: inout BattleActionResource) {
-        let spells = loadout.arcane + loadout.cleric
+        let spells = loadout.mage + loadout.priest
         guard !spells.isEmpty else { return }
         for spell in spells {
             guard let modifier = skillEffects.spellChargeModifier(for: spell.id), !modifier.isEmpty else { continue }

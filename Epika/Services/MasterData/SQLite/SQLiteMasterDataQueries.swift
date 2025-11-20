@@ -214,7 +214,7 @@ extension SQLiteMasterDataManager {
             var resistances: [EnemyDefinition.Resistance] = []
             var skills: [EnemyDefinition.Skill] = []
             var drops: [EnemyDefinition.Drop] = []
-            var actionRates: EnemyDefinition.ActionRates = .init(attack: 100, clericMagic: 0, arcaneMagic: 0, breath: 0)
+            var actionRates: EnemyDefinition.ActionRates = .init(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
             var groupSizeRange: ClosedRange<Int> = 1...1
         }
 

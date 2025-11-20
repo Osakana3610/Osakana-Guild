@@ -343,8 +343,8 @@ private struct LazyRuntimeCharacterDetailView: View {
     @MainActor
     private func updateActionPreferences(to newPreferences: CharacterSnapshot.ActionPreferences) async throws {
         let normalized = CharacterSnapshot.ActionPreferences.normalized(attack: newPreferences.attack,
-                                                                        clericMagic: newPreferences.clericMagic,
-                                                                        arcaneMagic: newPreferences.arcaneMagic,
+                                                                        priestMagic: newPreferences.priestMagic,
+                                                                        mageMagic: newPreferences.mageMagic,
                                                                         breath: newPreferences.breath)
         let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
             snapshot.actionPreferences = normalized

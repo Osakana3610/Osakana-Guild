@@ -255,16 +255,16 @@ struct BattleTurnEngine {
     private enum ActionCategory {
         case physicalAttack
         case defend
-        case clericMagic
-        case arcaneMagic
+        case priestMagic
+        case mageMagic
         case breath
 
         var logIdentifier: String {
             switch self {
             case .physicalAttack: return "physical"
             case .defend: return "guard"
-            case .clericMagic: return "clericMagic"
-            case .arcaneMagic: return "arcaneMagic"
+            case .priestMagic: return "priestMagic"
+            case .mageMagic: return "mageMagic"
             case .breath: return "breath"
             }
         }
@@ -275,9 +275,9 @@ struct BattleTurnEngine {
                 return "\(actorName)の攻撃"
             case .defend:
                 return "\(actorName)は身を守っている"
-            case .clericMagic:
+            case .priestMagic:
                 return "\(actorName)は僧侶魔法を唱えた"
-            case .arcaneMagic:
+            case .mageMagic:
                 return "\(actorName)は魔法を放った"
             case .breath:
                 return "\(actorName)はブレスを放った"
@@ -404,8 +404,8 @@ struct BattleTurnEngine {
                               turn: turn,
                               logs: &logs)
             }
-        case .clericMagic:
-            if !executeClericMagic(for: side,
+        case .priestMagic:
+            if !executePriestMagic(for: side,
                                    casterIndex: actorIndex,
                                    players: &players,
                                    enemies: &enemies,
@@ -420,8 +420,8 @@ struct BattleTurnEngine {
                               turn: turn,
                               logs: &logs)
             }
-        case .arcaneMagic:
-            if !executeArcaneMagic(for: side,
+        case .mageMagic:
+            if !executeMageMagic(for: side,
                                    attackerIndex: actorIndex,
                                    players: &players,
                                    enemies: &enemies,
@@ -541,11 +541,11 @@ struct BattleTurnEngine {
         if rates.breath > 0 && canPerformBreath(actor: actor, opponents: opponents) {
             candidates.append(ActionCandidate(category: .breath, weight: rates.breath))
         }
-        if rates.clericMagic > 0 && canPerformCleric(actor: actor, allies: allies) {
-            candidates.append(ActionCandidate(category: .clericMagic, weight: rates.clericMagic))
+        if rates.priestMagic > 0 && canPerformPriest(actor: actor, allies: allies) {
+            candidates.append(ActionCandidate(category: .priestMagic, weight: rates.priestMagic))
         }
-        if rates.arcaneMagic > 0 && canPerformArcane(actor: actor, opponents: opponents) {
-            candidates.append(ActionCandidate(category: .arcaneMagic, weight: rates.arcaneMagic))
+        if rates.mageMagic > 0 && canPerformMage(actor: actor, opponents: opponents) {
+            candidates.append(ActionCandidate(category: .mageMagic, weight: rates.mageMagic))
         }
         if rates.attack > 0 && canPerformPhysical(actor: actor, opponents: opponents) {
             candidates.append(ActionCandidate(category: .physicalAttack, weight: rates.attack))
@@ -561,17 +561,17 @@ struct BattleTurnEngine {
         actor.isAlive && actor.snapshot.breathDamage > 0 && actor.actionResources.charges(for: .breath) > 0 && opponents.contains(where: { $0.isAlive })
     }
 
-    private static func canPerformCleric(actor: BattleActor, allies: [BattleActor]) -> Bool {
+    private static func canPerformPriest(actor: BattleActor, allies: [BattleActor]) -> Bool {
         guard actor.isAlive,
               actor.snapshot.magicalHealing > 0,
-              actor.actionResources.hasAvailableSpell(in: actor.spells.cleric) else { return false }
+              actor.actionResources.hasAvailableSpell(in: actor.spells.priest) else { return false }
         return selectHealingTargetIndex(in: allies) != nil
     }
 
-    private static func canPerformArcane(actor: BattleActor, opponents: [BattleActor]) -> Bool {
+    private static func canPerformMage(actor: BattleActor, opponents: [BattleActor]) -> Bool {
         actor.isAlive &&
         actor.snapshot.magicalAttack > 0 &&
-        actor.actionResources.hasAvailableSpell(in: actor.spells.arcane) &&
+        actor.actionResources.hasAvailableSpell(in: actor.spells.mage) &&
         opponents.contains(where: { $0.isAlive })
     }
 
@@ -692,34 +692,34 @@ struct BattleTurnEngine {
         var specialAccuracyMultiplier: Double = 1.0
 
         switch descriptor.kind {
-        case .magicSword:
+        case .specialA:
             let combined = attacker.snapshot.physicalAttack + attacker.snapshot.magicalAttack
             overrides = PhysicalAttackOverrides(physicalAttackOverride: combined,
                                                 maxAttackMultiplier: 3.0)
-            message = "\(attacker.displayName)は魔剣術を発動した！"
-        case .piercingTriple:
+            message = "\(attacker.displayName)は特殊攻撃Aを発動した！"
+        case .specialB:
             overrides = PhysicalAttackOverrides(ignoreDefense: true)
             hitCountOverride = 3
-            message = "\(attacker.displayName)は貫通三連撃を繰り出した！"
-        case .fourGods:
+            message = "\(attacker.displayName)は特殊攻撃Bを繰り出した！"
+        case .specialC:
             let combined = attacker.snapshot.physicalAttack + attacker.snapshot.hitRate
             overrides = PhysicalAttackOverrides(physicalAttackOverride: combined,
                                                 forceHit: true)
             hitCountOverride = 4
-            message = "\(attacker.displayName)は四神の剣を振るった！"
-        case .moonlight:
+            message = "\(attacker.displayName)は特殊攻撃Cを放った！"
+        case .specialD:
             let doubled = attacker.snapshot.physicalAttack * 2
             overrides = PhysicalAttackOverrides(physicalAttackOverride: doubled,
                                                 criticalRateMultiplier: 2.0)
             hitCountOverride = max(1, attacker.snapshot.attackCount * 2)
             specialAccuracyMultiplier = 2.0
-            message = "\(attacker.displayName)は月光剣を放った！"
-        case .godslayer:
+            message = "\(attacker.displayName)は特殊攻撃Dを放った！"
+        case .specialE:
             let scaled = attacker.snapshot.physicalAttack * max(1, attacker.snapshot.attackCount)
             overrides = PhysicalAttackOverrides(physicalAttackOverride: scaled,
                                                 doubleDamageAgainstDivine: true)
             hitCountOverride = 1
-            message = "\(attacker.displayName)は神殺しの矢を放った！"
+            message = "\(attacker.displayName)は特殊攻撃Eを放った！"
         }
 
         logs.append(.init(turn: turn,
@@ -895,7 +895,7 @@ struct BattleTurnEngine {
         }
     }
 
-    private static func executeClericMagic(for side: ActorSide,
+    private static func executePriestMagic(for side: ActorSide,
                                            casterIndex: Int,
                                            players: inout [BattleActor],
                                            enemies: inout [BattleActor],
@@ -905,13 +905,13 @@ struct BattleTurnEngine {
                                            forcedTargets: (playerTarget: Int?, enemyTarget: Int?)) -> Bool {
         switch side {
         case .player:
-            return performClericMagic(on: &players,
+            return performPriestMagic(on: &players,
                                       casterIndex: casterIndex,
                                       turn: turn,
                                       logs: &logs,
                                       random: &random)
         case .enemy:
-            return performClericMagic(on: &enemies,
+            return performPriestMagic(on: &enemies,
                                       casterIndex: casterIndex,
                                       turn: turn,
                                       logs: &logs,
@@ -919,7 +919,7 @@ struct BattleTurnEngine {
         }
     }
 
-    private static func performClericMagic(on group: inout [BattleActor],
+    private static func performPriestMagic(on group: inout [BattleActor],
                                            casterIndex: Int,
                                            turn: Int,
                                            logs: inout [BattleLogEntry],
@@ -928,11 +928,11 @@ struct BattleTurnEngine {
         var caster = group[casterIndex]
         guard caster.isAlive, caster.snapshot.magicalHealing > 0 else { return false }
         guard let targetIndex = selectHealingTargetIndex(in: group) else { return false }
-        guard let selectedSpell = selectClericHealingSpell(for: caster) else { return false }
+        guard let selectedSpell = selectPriestHealingSpell(for: caster) else { return false }
         guard caster.actionResources.consume(spellId: selectedSpell.id) else { return false }
         let remaining = caster.actionResources.charges(forSpellId: selectedSpell.id)
         appendActionLog(for: caster,
-                        category: .clericMagic,
+                        category: .priestMagic,
                         remainingUses: remaining,
                         spellId: selectedSpell.id,
                         turn: turn,
@@ -954,7 +954,7 @@ struct BattleTurnEngine {
         var metadata: [String: String] = [
             "heal": "\(applied)",
             "targetHP": "\(target.currentHP)",
-            "category": ActionCategory.clericMagic.logIdentifier
+            "category": ActionCategory.priestMagic.logIdentifier
         ]
         metadata["spellId"] = selectedSpell.id
         logs.append(.init(turn: turn,
@@ -966,7 +966,7 @@ struct BattleTurnEngine {
         return true
     }
 
-    private static func executeArcaneMagic(for side: ActorSide,
+    private static func executeMageMagic(for side: ActorSide,
                                            attackerIndex: Int,
                                            players: inout [BattleActor],
                                            enemies: inout [BattleActor],
@@ -976,11 +976,11 @@ struct BattleTurnEngine {
                                            forcedTargets: (playerTarget: Int?, enemyTarget: Int?)) -> Bool {
         guard var caster = actor(for: side, index: attackerIndex, players: players, enemies: enemies) else { return false }
         guard caster.isAlive, caster.snapshot.magicalAttack > 0 else { return false }
-        guard let selectedSpell = selectArcaneSpell(for: caster) else { return false }
+        guard let selectedSpell = selectMageSpell(for: caster) else { return false }
         guard caster.actionResources.consume(spellId: selectedSpell.id) else { return false }
         let remaining = caster.actionResources.charges(forSpellId: selectedSpell.id)
         appendActionLog(for: caster,
-                        category: .arcaneMagic,
+                        category: .mageMagic,
                         remainingUses: remaining,
                         spellId: selectedSpell.id,
                         turn: turn,
@@ -1006,7 +1006,7 @@ struct BattleTurnEngine {
                               message: "\(caster.displayName)の\(selectedSpell.name)！",
                               type: .status,
                               actorId: caster.identifier,
-                              metadata: ["category": ActionCategory.arcaneMagic.logIdentifier, "spellId": selectedSpell.id]))
+                              metadata: ["category": ActionCategory.mageMagic.logIdentifier, "spellId": selectedSpell.id]))
 
             for reference in targets {
                 guard var target = actor(for: reference.0, index: reference.1, players: players, enemies: enemies) else { continue }
@@ -1058,7 +1058,7 @@ struct BattleTurnEngine {
         var metadata: [String: String] = [
             "damage": "\(applied)",
             "targetHP": "\(target.currentHP)",
-            "category": ActionCategory.arcaneMagic.logIdentifier
+            "category": ActionCategory.mageMagic.logIdentifier
         ]
         metadata["spellId"] = selectedSpell.id
 
@@ -1247,7 +1247,7 @@ struct BattleTurnEngine {
             allyRefs = enemies.enumerated().compactMap { $0.element.isAlive ? .enemy($0.offset) : nil }
         }
 
-        // 生贄ターゲットが指定されていれば優先
+        // 儀式ターゲットが指定されていれば優先
         if !allowFriendlyTargets {
             switch attackerSide {
             case .player:
@@ -1419,7 +1419,7 @@ struct BattleTurnEngine {
         if let target = playerTarget {
             let targetName = players[target].displayName
             logs.append(.init(turn: turn,
-                              message: "生贄の儀：\(targetName)が生贄に選ばれた",
+                              message: "古の儀：\(targetName)が供儀対象になった",
                               type: .status,
                               actorId: players[target].identifier,
                               metadata: ["category": "sacrifice", "side": "player"]))
@@ -1431,7 +1431,7 @@ struct BattleTurnEngine {
         if let target = enemyTarget {
             let targetName = enemies[target].displayName
             logs.append(.init(turn: turn,
-                              message: "生贄の儀：\(targetName)が生贄に選ばれた",
+                              message: "古の儀：\(targetName)が供儀対象になった",
                               type: .status,
                               actorId: enemies[target].identifier,
                               metadata: ["category": "sacrifice", "side": "enemy"]))
@@ -1482,8 +1482,8 @@ struct BattleTurnEngine {
             }
 
             var appliedHeal = revivedTarget.snapshot.maxHP
-            if capability.usesClericMagic {
-                guard let spell = selectClericHealingSpell(for: rescuer) else { continue }
+            if capability.usesPriestMagic {
+                guard let spell = selectPriestHealingSpell(for: rescuer) else { continue }
                 guard rescuer.actionResources.consume(spellId: spell.id) else { continue }
                 let healAmount = computeHealingAmount(caster: rescuer,
                                                       target: revivedTarget,
@@ -1552,7 +1552,7 @@ struct BattleTurnEngine {
     }
 
     private static func rescueChance(for actor: BattleActor) -> Int {
-        return max(0, min(100, actor.actionRates.clericMagic))
+        return max(0, min(100, actor.actionRates.priestMagic))
     }
 
     private static func canAttemptRescue(_ actor: BattleActor, turn: Int) -> Bool {
@@ -2265,8 +2265,8 @@ struct BattleTurnEngine {
         return pow(0.9, Double(adjustedIndex))
     }
 
-    private static func selectArcaneSpell(for actor: BattleActor) -> SpellDefinition? {
-        let available = actor.spells.arcane.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
+    private static func selectMageSpell(for actor: BattleActor) -> SpellDefinition? {
+        let available = actor.spells.mage.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
         guard !available.isEmpty else { return nil }
         return highestTierSpell(in: available) { spell in
             spell.category == .damage || spell.category == .status
@@ -2280,8 +2280,8 @@ struct BattleTurnEngine {
         return attacker
     }
 
-    private static func selectClericHealingSpell(for actor: BattleActor) -> SpellDefinition? {
-        let available = actor.spells.cleric.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
+    private static func selectPriestHealingSpell(for actor: BattleActor) -> SpellDefinition? {
+        let available = actor.spells.priest.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
         guard !available.isEmpty else { return nil }
         return highestTierSpell(in: available) { $0.category == .healing }
     }
@@ -2547,7 +2547,7 @@ struct BattleTurnEngine {
         let chance = max(0, min(100, Int((base * defender.skillEffects.procChanceMultiplier).rounded())))
         guard BattleRandomSystem.percentChance(chance, random: &random) else { return false }
         logs.append(.init(turn: turn,
-                          message: "\(defender.displayName)のパリィ！連続攻撃を防いだ！",
+                          message: "\(defender.displayName)の受け流し！連続攻撃を防いだ！",
                           type: .status,
                           actorId: defender.identifier,
                           targetId: attacker.identifier,
@@ -2605,7 +2605,7 @@ struct BattleTurnEngine {
     private static func applySpellChargeGainOnPhysicalHit(for attacker: inout BattleActor,
                                                           damageDealt: Int) {
         guard damageDealt > 0 else { return }
-        let spells = attacker.spells.arcane + attacker.spells.cleric
+        let spells = attacker.spells.mage + attacker.spells.priest
         guard !spells.isEmpty else { return }
         for spell in spells {
             guard let modifier = attacker.skillEffects.spellChargeModifier(for: spell.id),
@@ -2688,7 +2688,7 @@ struct BattleTurnEngine {
                                               spellId: String,
                                               caster: BattleActor) {
         let master = (caster.jobName?.contains("マスター") == true) || (caster.jobName?.lowercased().contains("master") == true)
-        let isMagicArrow = spellId == "spell.arcane.magic_arrow"
+        let isMagicArrow = spellId == "spell.mage.magic_arrow"
         let coefficient: Double = {
             if isMagicArrow {
                 return master ? 5.0 : 3.0
@@ -3214,7 +3214,7 @@ struct BattleTurnEngine {
                                       metadata: [
                                           "damage": "\(applied)",
                                           "targetHP": "\(targetCopy.currentHP)",
-                                          "category": ActionCategory.arcaneMagic.logIdentifier
+                                          "category": ActionCategory.mageMagic.logIdentifier
                                       ]))
                 }
                 if !targetCopy.isAlive {
@@ -3621,7 +3621,7 @@ struct BattleTurnEngine {
     }
 
     private static func applySpellChargeRegenIfNeeded(for actor: inout BattleActor, turn: Int) {
-        let spells = actor.spells.arcane + actor.spells.cleric
+        let spells = actor.spells.mage + actor.spells.priest
         guard !spells.isEmpty else { return }
         var usage = actor.spellChargeRegenUsage
         var touched = false

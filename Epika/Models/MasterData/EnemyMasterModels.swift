@@ -3,8 +3,8 @@ import Foundation
 struct EnemyDefinition: Identifiable, Sendable {
     struct ActionRates: Sendable, Hashable {
         let attack: Int
-        let clericMagic: Int
-        let arcaneMagic: Int
+        let priestMagic: Int
+        let mageMagic: Int
         let breath: Int
     }
 

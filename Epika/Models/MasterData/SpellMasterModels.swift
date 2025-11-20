@@ -2,8 +2,8 @@ import Foundation
 
 struct SpellDefinition: Identifiable, Sendable, Hashable {
     enum School: String, Sendable, Hashable {
-        case arcane
-        case cleric
+        case mage
+        case priest
     }
 
     enum Category: String, Sendable, Hashable {

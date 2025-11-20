@@ -26,6 +26,8 @@ struct CombatStatCalculator {
             throw CalculationError.missingJobDefinition(context.progress.jobId)
         }
 
+        let skillEffects = SkillEffectAggregator(skills: context.state.learnedSkills)
+
         var base = BaseStatAccumulator()
         base.apply(raceBase: race)
         base.applyLevelBonus(level: context.progress.level)
@@ -33,7 +35,8 @@ struct CombatStatCalculator {
             base.apply(personality: secondary)
         }
         try base.apply(equipment: context.progress.equippedItems,
-                       definitions: context.state.loadout.items)
+                       definitions: context.state.loadout.items,
+                       equipmentMultipliers: skillEffects.equipmentMultipliers)
 
         var attributes = base.makeAttributes()
 
@@ -44,8 +47,6 @@ struct CombatStatCalculator {
         attributes.vitality = max(0, attributes.vitality)
         attributes.agility = max(0, attributes.agility)
         attributes.luck = max(0, attributes.luck)
-
-        let skillEffects = SkillEffectAggregator(skills: context.state.learnedSkills)
         let combatResult = CombatAccumulator(progress: context.progress,
                                              attributes: attributes,
                                              race: race,
@@ -59,7 +60,8 @@ struct CombatStatCalculator {
                                              martial: skillEffects.martialBonuses,
                                              growthMultiplier: skillEffects.growthMultiplier,
                                              statConversions: skillEffects.statConversions,
-                                             forcedToOne: skillEffects.forcedToOne)
+                                             forcedToOne: skillEffects.forcedToOne,
+                                             equipmentMultipliers: skillEffects.equipmentMultipliers)
 
         var combat = try combatResult.makeCombat()
         // 結果の切り捨て
@@ -109,14 +111,19 @@ private struct BaseStatAccumulator {
     }
 
     mutating func apply(equipment: [RuntimeCharacterProgress.EquippedItem],
-                        definitions: [ItemDefinition]) throws {
+                        definitions: [ItemDefinition],
+                        equipmentMultipliers: [String: Double]) throws {
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else {
                 throw CombatStatCalculator.CalculationError.missingItemDefinition(item.itemId)
             }
+            let categoryMultiplier = equipmentMultipliers[definition.category]
+                ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
+                ?? 1.0
             for bonus in definition.statBonuses {
-                assign(bonus.stat, delta: bonus.value * item.quantity)
+                let scaled = Double(bonus.value) * categoryMultiplier
+                assign(bonus.stat, delta: Int(scaled.rounded(.towardZero)) * item.quantity)
             }
         }
     }
@@ -241,6 +248,7 @@ private struct SkillEffectAggregator {
     let growthMultiplier: Double
     let statConversions: [CombatStatKey: [StatConversion]]
     let forcedToOne: Set<CombatStatKey>
+    let equipmentMultipliers: [String: Double]
 
     init(skills: [SkillDefinition]) {
         var talents = TalentModifiers()
@@ -251,6 +259,7 @@ private struct SkillEffectAggregator {
         var growthMultiplierProduct: Double = 1.0
         var conversions: [CombatStatKey: [StatConversion]] = [:]
         var forcedToOne: Set<CombatStatKey> = []
+        var equipmentMultipliers: [String: Double] = [:]
 
         for skill in skills {
             for effect in skill.effects {
@@ -285,6 +294,11 @@ private struct SkillEffectAggregator {
                 case "attackCountMultiplier":
                     if let multiplier = payload.value["multiplier"] {
                         passives.multiply(stat: .attackCount, value: multiplier)
+                    }
+                case "equipmentStatMultiplier":
+                    if let category = payload.parameters?["equipmentCategory"],
+                       let multiplier = payload.value["multiplier"] {
+                        equipmentMultipliers[category, default: 1.0] *= multiplier
                     }
                 case "statConversionPercent":
                     guard let sourceKey = CombatStatKey(payload.parameters?["sourceStat"]),
@@ -366,6 +380,7 @@ private struct SkillEffectAggregator {
         self.growthMultiplier = growthMultiplierProduct
         self.statConversions = conversions
         self.forcedToOne = forcedToOne
+        self.equipmentMultipliers = equipmentMultipliers
     }
 
     struct MartialBonuses {
@@ -419,6 +434,7 @@ private struct CombatAccumulator {
     private let growthMultiplier: Double
     private let statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]
     private let forcedToOne: Set<CombatStatKey>
+    private let equipmentMultipliers: [String: Double]
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
     init(progress: RuntimeCharacterProgress,
@@ -434,7 +450,8 @@ private struct CombatAccumulator {
          martial: SkillEffectAggregator.MartialBonuses,
          growthMultiplier: Double,
          statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]],
-         forcedToOne: Set<CombatStatKey>) {
+         forcedToOne: Set<CombatStatKey>,
+         equipmentMultipliers: [String: Double]) {
         self.progress = progress
         self.attributes = attributes
         self.race = race
@@ -449,6 +466,7 @@ private struct CombatAccumulator {
         self.growthMultiplier = growthMultiplier
         self.statConversions = statConversions
         self.forcedToOne = forcedToOne
+        self.equipmentMultipliers = equipmentMultipliers
         self.hasPositivePhysicalAttackEquipment = CombatAccumulator.containsPositivePhysicalAttack(equipment: equipment,
                                                                                                    definitions: itemDefinitions)
     }
@@ -747,9 +765,13 @@ private struct CombatAccumulator {
         let definitionsById = Dictionary(uniqueKeysWithValues: itemDefinitions.map { ($0.id, $0) })
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
+            let categoryMultiplier = equipmentMultipliers[definition.category]
+                ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
+                ?? 1.0
             for bonus in definition.combatBonuses {
                 guard let stat = CombatStatKey(bonus.stat) else { continue }
-                apply(bonus: bonus.value * item.quantity, to: stat, combat: &combat)
+                let scaled = Double(bonus.value) * categoryMultiplier
+                apply(bonus: Int(scaled.rounded(.towardZero)) * item.quantity, to: stat, combat: &combat)
             }
         }
     }

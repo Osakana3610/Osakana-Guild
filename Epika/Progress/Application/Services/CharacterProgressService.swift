@@ -366,8 +366,8 @@ private extension CharacterProgressService {
             max(0, min(100, value))
         }
         let actionPreferences = CharacterSnapshot.ActionPreferences(attack: clamp(record.actionRateAttack),
-                                                                     clericMagic: clamp(record.actionRateClericMagic),
-                                                                     arcaneMagic: clamp(record.actionRateArcaneMagic),
+                                                                     priestMagic: clamp(record.actionRatePriestMagic),
+                                                                     mageMagic: clamp(record.actionRateMageMagic),
                                                                      breath: clamp(record.actionRateBreath))
 
         var avatarIdentifier = record.avatarIdentifier
@@ -476,8 +476,8 @@ private extension CharacterProgressService {
         record.attackCount = snapshot.combat.attackCount
         record.isMartialEligible = snapshot.combat.isMartialEligible
         record.actionRateAttack = snapshot.actionPreferences.attack
-        record.actionRateClericMagic = snapshot.actionPreferences.clericMagic
-        record.actionRateArcaneMagic = snapshot.actionPreferences.arcaneMagic
+        record.actionRatePriestMagic = snapshot.actionPreferences.priestMagic
+        record.actionRateMageMagic = snapshot.actionPreferences.mageMagic
         record.actionRateBreath = snapshot.actionPreferences.breath
         record.primaryPersonalityId = snapshot.personality.primaryId
         record.secondaryPersonalityId = snapshot.personality.secondaryId

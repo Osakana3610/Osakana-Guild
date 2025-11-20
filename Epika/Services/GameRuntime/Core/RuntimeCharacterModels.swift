@@ -66,8 +66,8 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
 
     struct ActionPreferences: Sendable, Hashable {
         var attack: Int
-        var clericMagic: Int
-        var arcaneMagic: Int
+        var priestMagic: Int
+        var mageMagic: Int
         var breath: Int
     }
 

@@ -8,14 +8,14 @@ enum BattleDamageType: Sendable {
 
 struct BattleActionRates: Sendable, Hashable {
     var attack: Int
-    var clericMagic: Int
-    var arcaneMagic: Int
+    var priestMagic: Int
+    var mageMagic: Int
     var breath: Int
 
-    init(attack: Int, clericMagic: Int, arcaneMagic: Int, breath: Int) {
+    init(attack: Int, priestMagic: Int, mageMagic: Int, breath: Int) {
         self.attack = BattleActionRates.clamp(attack)
-        self.clericMagic = BattleActionRates.clamp(clericMagic)
-        self.arcaneMagic = BattleActionRates.clamp(arcaneMagic)
+        self.priestMagic = BattleActionRates.clamp(priestMagic)
+        self.mageMagic = BattleActionRates.clamp(mageMagic)
         self.breath = BattleActionRates.clamp(breath)
     }
 
@@ -62,8 +62,8 @@ struct BattleActionResource: Sendable, Hashable {
     }
 
     enum Key: String {
-        case clericMagic
-        case arcaneMagic
+        case priestMagic
+        case mageMagic
         case breath
     }
 
@@ -107,10 +107,10 @@ struct BattleActionResource: Sendable, Hashable {
     mutating func initializeSpellCharges(from loadout: SkillRuntimeEffects.SpellLoadout,
                                          defaultCharges: Int = 1) {
         let sanitized = max(0, defaultCharges)
-        for spell in loadout.arcane {
+        for spell in loadout.mage {
             setSpellCharges(for: spell.id, current: sanitized, max: sanitized)
         }
-        for spell in loadout.cleric {
+        for spell in loadout.priest {
             setSpellCharges(for: spell.id, current: sanitized, max: sanitized)
         }
     }
@@ -310,7 +310,7 @@ struct BattleActor: Sendable {
         }
 
         struct RescueCapability: Sendable, Hashable {
-            let usesClericMagic: Bool
+            let usesPriestMagic: Bool
             let minLevel: Int
         }
 
@@ -344,11 +344,11 @@ struct BattleActor: Sendable {
 
         struct SpecialAttack: Sendable, Hashable {
             enum Kind: String, Sendable {
-                case magicSword
-                case piercingTriple
-                case fourGods
-                case moonlight
-                case godslayer
+                case specialA
+                case specialB
+                case specialC
+                case specialD
+                case specialE
             }
 
             let kind: Kind
@@ -475,6 +475,7 @@ struct BattleActor: Sendable {
         var vampiricImpulse: Bool
         var vampiricSuppression: Bool
         var antiHealingEnabled: Bool
+        var equipmentStatMultipliers: [String: Double]
         var degradationPercent: Double
         var degradationRepairMinPercent: Double
         var degradationRepairMaxPercent: Double
@@ -546,6 +547,7 @@ struct BattleActor: Sendable {
             vampiricImpulse: false,
             vampiricSuppression: false,
             antiHealingEnabled: false,
+            equipmentStatMultipliers: [:],
             degradationPercent: 0.0,
             degradationRepairMinPercent: 0.0,
             degradationRepairMaxPercent: 0.0,

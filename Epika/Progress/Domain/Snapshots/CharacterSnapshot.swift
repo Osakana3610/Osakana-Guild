@@ -66,8 +66,8 @@ struct CharacterSnapshot: Sendable, Hashable {
 
     struct ActionPreferences: Sendable, Hashable {
         var attack: Int
-        var clericMagic: Int
-        var arcaneMagic: Int
+        var priestMagic: Int
+        var mageMagic: Int
         var breath: Int
 
         static func clamped(_ value: Int) -> Int {
@@ -75,12 +75,12 @@ struct CharacterSnapshot: Sendable, Hashable {
         }
 
         static func normalized(attack: Int,
-                               clericMagic: Int,
-                               arcaneMagic: Int,
+                               priestMagic: Int,
+                               mageMagic: Int,
                                breath: Int) -> ActionPreferences {
             ActionPreferences(attack: clamped(attack),
-                              clericMagic: clamped(clericMagic),
-                              arcaneMagic: clamped(arcaneMagic),
+                              priestMagic: clamped(priestMagic),
+                              mageMagic: clamped(mageMagic),
                               breath: clamped(breath))
         }
     }

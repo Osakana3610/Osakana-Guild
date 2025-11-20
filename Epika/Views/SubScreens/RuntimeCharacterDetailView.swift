@@ -33,8 +33,8 @@ struct CharacterDetailContent: View {
     @State private var avatarChangeError: String?
     @State private var isChangingAvatar = false
     @State private var actionPreferenceAttack: Double
-    @State private var actionPreferenceCleric: Double
-    @State private var actionPreferenceArcane: Double
+    @State private var actionPreferencePriest: Double
+    @State private var actionPreferenceMage: Double
     @State private var actionPreferenceBreath: Double
     @State private var actionPreferenceError: String?
     @State private var isUpdatingActionPreferences = false
@@ -50,8 +50,8 @@ struct CharacterDetailContent: View {
         _nameText = State(initialValue: character.name)
         let preferences = character.progress.actionPreferences
         _actionPreferenceAttack = State(initialValue: Double(preferences.attack))
-        _actionPreferenceCleric = State(initialValue: Double(preferences.clericMagic))
-        _actionPreferenceArcane = State(initialValue: Double(preferences.arcaneMagic))
+        _actionPreferencePriest = State(initialValue: Double(preferences.priestMagic))
+        _actionPreferenceMage = State(initialValue: Double(preferences.mageMagic))
         _actionPreferenceBreath = State(initialValue: Double(preferences.breath))
     }
 
@@ -83,8 +83,8 @@ struct CharacterDetailContent: View {
         }
         .onChange(of: character.progress.actionPreferences) { _, newValue in
             actionPreferenceAttack = Double(newValue.attack)
-            actionPreferenceCleric = Double(newValue.clericMagic)
-            actionPreferenceArcane = Double(newValue.arcaneMagic)
+            actionPreferencePriest = Double(newValue.priestMagic)
+            actionPreferenceMage = Double(newValue.mageMagic)
             actionPreferenceBreath = Double(newValue.breath)
             actionPreferenceError = nil
             isUpdatingActionPreferences = false
@@ -247,11 +247,11 @@ struct CharacterDetailContent: View {
 
             actionSliderRow(label: "僧侶魔法",
                             description: "回復・支援魔法の抽選重み。",
-                            value: clericSliderBinding)
+                            value: priestSliderBinding)
 
             actionSliderRow(label: "魔法使い魔法",
                             description: "攻撃魔法の抽選重み。",
-                            value: arcaneSliderBinding)
+                            value: mageSliderBinding)
 
             actionSliderRow(label: "物理攻撃",
                             description: "通常攻撃／格闘攻撃の抽選重み。",
@@ -287,8 +287,8 @@ struct CharacterDetailContent: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             LabeledContent("ブレス", value: "\(prefs.breath)%")
-            LabeledContent("僧侶魔法", value: "\(prefs.clericMagic)%")
-            LabeledContent("魔法使い魔法", value: "\(prefs.arcaneMagic)%")
+            LabeledContent("僧侶魔法", value: "\(prefs.priestMagic)%")
+            LabeledContent("魔法使い魔法", value: "\(prefs.mageMagic)%")
             LabeledContent("物理攻撃", value: "\(prefs.attack)%")
         }
     }
@@ -404,8 +404,8 @@ private extension CharacterDetailContent {
     private var originalActionPreferences: CharacterSnapshot.ActionPreferences {
         let prefs = character.progress.actionPreferences
         return CharacterSnapshot.ActionPreferences(attack: prefs.attack,
-                                                   clericMagic: prefs.clericMagic,
-                                                   arcaneMagic: prefs.arcaneMagic,
+                                                   priestMagic: prefs.priestMagic,
+                                                   mageMagic: prefs.mageMagic,
                                                    breath: prefs.breath)
     }
 
@@ -415,8 +415,8 @@ private extension CharacterDetailContent {
             return max(0, min(100, rounded))
         }
         return CharacterSnapshot.ActionPreferences(attack: clamp(actionPreferenceAttack),
-                                                   clericMagic: clamp(actionPreferenceCleric),
-                                                   arcaneMagic: clamp(actionPreferenceArcane),
+                                                   priestMagic: clamp(actionPreferencePriest),
+                                                   mageMagic: clamp(actionPreferenceMage),
                                                    breath: clamp(actionPreferenceBreath))
     }
 
@@ -438,21 +438,21 @@ private extension CharacterDetailContent {
         )
     }
 
-    private var clericSliderBinding: Binding<Double> {
+    private var priestSliderBinding: Binding<Double> {
         Binding(
-            get: { actionPreferenceCleric },
+            get: { actionPreferencePriest },
             set: { newValue in
-                actionPreferenceCleric = newValue
+                actionPreferencePriest = newValue
                 actionPreferenceError = nil
             }
         )
     }
 
-    private var arcaneSliderBinding: Binding<Double> {
+    private var mageSliderBinding: Binding<Double> {
         Binding(
-            get: { actionPreferenceArcane },
+            get: { actionPreferenceMage },
             set: { newValue in
-                actionPreferenceArcane = newValue
+                actionPreferenceMage = newValue
                 actionPreferenceError = nil
             }
         )

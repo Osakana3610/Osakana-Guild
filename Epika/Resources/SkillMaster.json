@@ -1625,7 +1625,7 @@
         "variants": [
           {
             "id": "tacticMagicPowerAmplify.T5",
-            "label": "[T5] 魔法威力増幅",
+            "label": "[T5] 魔法威力強化",
             "value": {
               "triggerTurn": 5,
               "multiplier": 1.6
@@ -1633,7 +1633,7 @@
           },
           {
             "id": "tacticMagicPowerAmplify.T10",
-            "label": "[T10] 魔法威力増幅",
+            "label": "[T10] 魔法威力強化",
             "value": {
               "triggerTurn": 10,
               "multiplier": 2.0
@@ -1641,7 +1641,7 @@
           },
           {
             "id": "tacticMagicPowerAmplify.T15",
-            "label": "[T15] 魔法威力増幅",
+            "label": "[T15] 魔法威力強化",
             "value": {
               "triggerTurn": 15,
               "multiplier": 3.0
@@ -1649,7 +1649,7 @@
           },
           {
             "id": "tacticMagicPowerAmplify.T20",
-            "label": "[T20] 魔法威力増幅",
+            "label": "[T20] 魔法威力強化",
             "value": {
               "triggerTurn": 20,
               "multiplier": 5.0
@@ -1663,7 +1663,7 @@
         "variants": [
           {
             "id": "tacticBreathPowerAmplify.L1",
-            "label": "[Lv1/T1] ブレス増幅",
+            "label": "[Lv1/T1] ブレス強化",
             "value": {
               "triggerTurn": 1,
               "multiplier": 1.3
@@ -1671,7 +1671,7 @@
           },
           {
             "id": "tacticBreathPowerAmplify.L2",
-            "label": "[Lv2/T2] ブレス増幅",
+            "label": "[Lv2/T2] ブレス強化",
             "value": {
               "triggerTurn": 2,
               "multiplier": 2.0
@@ -1679,7 +1679,7 @@
           },
           {
             "id": "tacticBreathPowerAmplify.L3",
-            "label": "[Lv3/T3] ブレス増幅",
+            "label": "[Lv3/T3] ブレス強化",
             "value": {
               "triggerTurn": 3,
               "multiplier": 2.8
@@ -1687,7 +1687,7 @@
           },
           {
             "id": "tacticBreathPowerAmplify.L5",
-            "label": "[Lv5/T5] ブレス増幅",
+            "label": "[Lv5/T5] ブレス強化",
             "value": {
               "triggerTurn": 5,
               "multiplier": 3.0
@@ -1695,7 +1695,7 @@
           },
           {
             "id": "tacticBreathPowerAmplify.L10",
-            "label": "[Lv10/T10] ブレス増幅",
+            "label": "[Lv10/T10] ブレス強化",
             "value": {
               "triggerTurn": 10,
               "multiplier": 5.0
@@ -1703,7 +1703,7 @@
           },
           {
             "id": "tacticBreathPowerAmplify.L20",
-            "label": "[Lv20/T20] ブレス増幅",
+            "label": "[Lv20/T20] ブレス強化",
             "value": {
               "triggerTurn": 20,
               "multiplier": 10.0
@@ -1712,63 +1712,63 @@
         ]
       },
       {
-        "familyId": "spellSpecificMultiplier.spell.arcane.magic_arrow",
+        "familyId": "spellSpecificMultiplier.spell.mage.magic_arrow",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.arcane.magic_arrow"
+          "spellId": "spell.mage.magic_arrow"
         },
         "variants": [
           {
-            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_1",
+            "id": "spellSpecificMultiplier.spell.mage.magic_arrow.1_1",
             "label": "[×1.10] マジックアロー威力",
             "value": {
               "multiplier": 1.1
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_2",
+            "id": "spellSpecificMultiplier.spell.mage.magic_arrow.1_2",
             "label": "[×1.20] マジックアロー威力",
             "value": {
               "multiplier": 1.2
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_3",
+            "id": "spellSpecificMultiplier.spell.mage.magic_arrow.1_3",
             "label": "[×1.30] マジックアロー威力",
             "value": {
               "multiplier": 1.3
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_4",
+            "id": "spellSpecificMultiplier.spell.mage.magic_arrow.1_4",
             "label": "[×1.40] マジックアロー威力",
             "value": {
               "multiplier": 1.4
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.1_6",
+            "id": "spellSpecificMultiplier.spell.mage.magic_arrow.1_6",
             "label": "[×1.60] マジックアロー威力",
             "value": {
               "multiplier": 1.6
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.2",
+            "id": "spellSpecificMultiplier.spell.mage.magic_arrow.2",
             "label": "[×2.00] マジックアロー威力",
             "value": {
               "multiplier": 2.0
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.2_5",
+            "id": "spellSpecificMultiplier.spell.mage.magic_arrow.2_5",
             "label": "[×2.50] マジックアロー威力",
             "value": {
               "multiplier": 2.5
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.magic_arrow.3",
+            "id": "spellSpecificMultiplier.spell.mage.magic_arrow.3",
             "label": "[×3.00] マジックアロー威力",
             "value": {
               "multiplier": 3.0
@@ -1777,56 +1777,56 @@
         ]
       },
       {
-        "familyId": "spellSpecificMultiplier.spell.arcane.fireball",
+        "familyId": "spellSpecificMultiplier.spell.mage.fireball",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.arcane.fireball"
+          "spellId": "spell.mage.fireball"
         },
         "variants": [
           {
-            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_1",
+            "id": "spellSpecificMultiplier.spell.mage.fireball.1_1",
             "label": "[×1.10] ファイヤーボール威力",
             "value": {
               "multiplier": 1.1
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_2",
+            "id": "spellSpecificMultiplier.spell.mage.fireball.1_2",
             "label": "[×1.20] ファイヤーボール威力",
             "value": {
               "multiplier": 1.2
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_25",
+            "id": "spellSpecificMultiplier.spell.mage.fireball.1_25",
             "label": "[×1.25] ファイヤーボール威力",
             "value": {
               "multiplier": 1.25
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_3",
+            "id": "spellSpecificMultiplier.spell.mage.fireball.1_3",
             "label": "[×1.30] ファイヤーボール威力",
             "value": {
               "multiplier": 1.3
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_4",
+            "id": "spellSpecificMultiplier.spell.mage.fireball.1_4",
             "label": "[×1.40] ファイヤーボール威力",
             "value": {
               "multiplier": 1.4
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.fireball.1_6",
+            "id": "spellSpecificMultiplier.spell.mage.fireball.1_6",
             "label": "[×1.60] ファイヤーボール威力",
             "value": {
               "multiplier": 1.6
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.fireball.2",
+            "id": "spellSpecificMultiplier.spell.mage.fireball.2",
             "label": "[×2.00] ファイヤーボール威力",
             "value": {
               "multiplier": 2.0
@@ -1835,49 +1835,49 @@
         ]
       },
       {
-        "familyId": "spellSpecificMultiplier.spell.arcane.blizzard",
+        "familyId": "spellSpecificMultiplier.spell.mage.blizzard",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.arcane.blizzard"
+          "spellId": "spell.mage.blizzard"
         },
         "variants": [
           {
-            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_1",
+            "id": "spellSpecificMultiplier.spell.mage.blizzard.1_1",
             "label": "[×1.10] ブリザード威力",
             "value": {
               "multiplier": 1.1
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_2",
+            "id": "spellSpecificMultiplier.spell.mage.blizzard.1_2",
             "label": "[×1.20] ブリザード威力",
             "value": {
               "multiplier": 1.2
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_3",
+            "id": "spellSpecificMultiplier.spell.mage.blizzard.1_3",
             "label": "[×1.30] ブリザード威力",
             "value": {
               "multiplier": 1.3
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_4",
+            "id": "spellSpecificMultiplier.spell.mage.blizzard.1_4",
             "label": "[×1.40] ブリザード威力",
             "value": {
               "multiplier": 1.4
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.blizzard.1_6",
+            "id": "spellSpecificMultiplier.spell.mage.blizzard.1_6",
             "label": "[×1.60] ブリザード威力",
             "value": {
               "multiplier": 1.6
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.blizzard.2",
+            "id": "spellSpecificMultiplier.spell.mage.blizzard.2",
             "label": "[×2.00] ブリザード威力",
             "value": {
               "multiplier": 2.0
@@ -1886,49 +1886,49 @@
         ]
       },
       {
-        "familyId": "spellSpecificMultiplier.spell.arcane.thunder_bolt",
+        "familyId": "spellSpecificMultiplier.spell.mage.thunder_bolt",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.arcane.thunder_bolt"
+          "spellId": "spell.mage.thunder_bolt"
         },
         "variants": [
           {
-            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_1",
+            "id": "spellSpecificMultiplier.spell.mage.thunder_bolt.1_1",
             "label": "[×1.10] サンダーボルト威力",
             "value": {
               "multiplier": 1.1
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_2",
+            "id": "spellSpecificMultiplier.spell.mage.thunder_bolt.1_2",
             "label": "[×1.20] サンダーボルト威力",
             "value": {
               "multiplier": 1.2
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_3",
+            "id": "spellSpecificMultiplier.spell.mage.thunder_bolt.1_3",
             "label": "[×1.30] サンダーボルト威力",
             "value": {
               "multiplier": 1.3
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_4",
+            "id": "spellSpecificMultiplier.spell.mage.thunder_bolt.1_4",
             "label": "[×1.40] サンダーボルト威力",
             "value": {
               "multiplier": 1.4
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.1_6",
+            "id": "spellSpecificMultiplier.spell.mage.thunder_bolt.1_6",
             "label": "[×1.60] サンダーボルト威力",
             "value": {
               "multiplier": 1.6
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.thunder_bolt.2",
+            "id": "spellSpecificMultiplier.spell.mage.thunder_bolt.2",
             "label": "[×2.00] サンダーボルト威力",
             "value": {
               "multiplier": 2.0
@@ -1937,91 +1937,91 @@
         ]
       },
       {
-        "familyId": "spellSpecificMultiplier.spell.arcane.nuclear",
+        "familyId": "spellSpecificMultiplier.spell.mage.nuclear",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.arcane.nuclear"
+          "spellId": "spell.mage.nuclear"
         },
         "variants": [
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_05",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_05",
             "label": "[×1.05] ニュークリア威力",
             "value": {
               "multiplier": 1.05
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_1",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_1",
             "label": "[×1.10] ニュークリア威力",
             "value": {
               "multiplier": 1.1
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_15",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_15",
             "label": "[×1.15] ニュークリア威力",
             "value": {
               "multiplier": 1.15
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_2",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_2",
             "label": "[×1.20] ニュークリア威力",
             "value": {
               "multiplier": 1.2
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_25",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_25",
             "label": "[×1.25] ニュークリア威力",
             "value": {
               "multiplier": 1.25
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_3",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_3",
             "label": "[×1.30] ニュークリア威力",
             "value": {
               "multiplier": 1.3
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_35",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_35",
             "label": "[×1.35] ニュークリア威力",
             "value": {
               "multiplier": 1.35
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_4",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_4",
             "label": "[×1.40] ニュークリア威力",
             "value": {
               "multiplier": 1.4
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_5",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_5",
             "label": "[×1.50] ニュークリア威力",
             "value": {
               "multiplier": 1.5
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_55",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_55",
             "label": "[×1.55] ニュークリア威力",
             "value": {
               "multiplier": 1.55
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.1_6",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.1_6",
             "label": "[×1.60] ニュークリア威力",
             "value": {
               "multiplier": 1.6
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.arcane.nuclear.2",
+            "id": "spellSpecificMultiplier.spell.mage.nuclear.2",
             "label": "[×2.00] ニュークリア威力",
             "value": {
               "multiplier": 2.0
@@ -2030,28 +2030,28 @@
         ]
       },
       {
-        "familyId": "spellSpecificMultiplier.spell.cleric.heal",
+        "familyId": "spellSpecificMultiplier.spell.priest.heal",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.cleric.heal"
+          "spellId": "spell.priest.heal"
         },
         "variants": [
           {
-            "id": "spellSpecificMultiplier.spell.cleric.heal.1_2",
+            "id": "spellSpecificMultiplier.spell.priest.heal.1_2",
             "label": "[×1.20] ヒール威力",
             "value": {
               "multiplier": 1.2
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.cleric.heal.1_4",
+            "id": "spellSpecificMultiplier.spell.priest.heal.1_4",
             "label": "[×1.40] ヒール威力",
             "value": {
               "multiplier": 1.4
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.cleric.heal.1_5",
+            "id": "spellSpecificMultiplier.spell.priest.heal.1_5",
             "label": "[×1.50] ヒール威力",
             "value": {
               "multiplier": 1.5
@@ -2060,21 +2060,21 @@
         ]
       },
       {
-        "familyId": "spellSpecificMultiplier.spell.cleric.heal_plus",
+        "familyId": "spellSpecificMultiplier.spell.priest.heal_plus",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.cleric.heal_plus"
+          "spellId": "spell.priest.heal_plus"
         },
         "variants": [
           {
-            "id": "spellSpecificMultiplier.spell.cleric.heal_plus.1_4",
+            "id": "spellSpecificMultiplier.spell.priest.heal_plus.1_4",
             "label": "[×1.40] ヒールプラス威力",
             "value": {
               "multiplier": 1.4
             }
           },
           {
-            "id": "spellSpecificMultiplier.spell.cleric.heal_plus.1_5",
+            "id": "spellSpecificMultiplier.spell.priest.heal_plus.1_5",
             "label": "[×1.50] ヒールプラス威力",
             "value": {
               "multiplier": 1.5
@@ -2083,14 +2083,14 @@
         ]
       },
       {
-        "familyId": "spellSpecificMultiplier.spell.cleric.party_heal",
+        "familyId": "spellSpecificMultiplier.spell.priest.party_heal",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.cleric.party_heal"
+          "spellId": "spell.priest.party_heal"
         },
         "variants": [
           {
-            "id": "spellSpecificMultiplier.spell.cleric.party_heal.1_4",
+            "id": "spellSpecificMultiplier.spell.priest.party_heal.1_4",
             "label": "[×1.40] パーティヒール威力",
             "value": {
               "multiplier": 1.4
@@ -3548,12 +3548,12 @@
         "familyId": "tacticSpellAmplify.magic_arrow",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.arcane.magic_arrow"
+          "spellId": "spell.mage.magic_arrow"
         },
         "variants": [
           {
             "id": "tacticSpellAmplify.magic_arrow.Lv1",
-            "label": "[Lv1] 魔矢増幅",
+            "label": "[Lv1] マジックアロー強化",
             "value": {
               "multiplier": 1.3,
               "triggerTurn": 1
@@ -3561,7 +3561,7 @@
           },
           {
             "id": "tacticSpellAmplify.magic_arrow.Lv2",
-            "label": "[Lv2] 魔矢増幅",
+            "label": "[Lv2] マジックアロー強化",
             "value": {
               "multiplier": 2.0,
               "triggerTurn": 2
@@ -3569,7 +3569,7 @@
           },
           {
             "id": "tacticSpellAmplify.magic_arrow.Lv3",
-            "label": "[Lv3] 魔矢増幅",
+            "label": "[Lv3] マジックアロー強化",
             "value": {
               "multiplier": 2.8,
               "triggerTurn": 3
@@ -3581,12 +3581,12 @@
         "familyId": "tacticSpellAmplify.fireball",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.arcane.fireball"
+          "spellId": "spell.mage.fireball"
         },
         "variants": [
           {
             "id": "tacticSpellAmplify.fireball.Lv1",
-            "label": "[Lv1] 炎撃増幅",
+            "label": "[Lv1] ファイヤーボール強化",
             "value": {
               "multiplier": 1.3,
               "triggerTurn": 1
@@ -3594,7 +3594,7 @@
           },
           {
             "id": "tacticSpellAmplify.fireball.Lv2",
-            "label": "[Lv2] 炎撃増幅",
+            "label": "[Lv2] ファイヤーボール強化",
             "value": {
               "multiplier": 2.0,
               "triggerTurn": 2
@@ -3602,7 +3602,7 @@
           },
           {
             "id": "tacticSpellAmplify.fireball.Lv3",
-            "label": "[Lv3] 炎撃増幅",
+            "label": "[Lv3] ファイヤーボール強化",
             "value": {
               "multiplier": 2.8,
               "triggerTurn": 3
@@ -3614,12 +3614,12 @@
         "familyId": "tacticSpellAmplify.blizzard",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.arcane.blizzard"
+          "spellId": "spell.mage.blizzard"
         },
         "variants": [
           {
             "id": "tacticSpellAmplify.blizzard.Lv1",
-            "label": "[Lv1] 冷撃増幅",
+            "label": "[Lv1] ブリザード強化",
             "value": {
               "multiplier": 1.3,
               "triggerTurn": 1
@@ -3627,7 +3627,7 @@
           },
           {
             "id": "tacticSpellAmplify.blizzard.Lv2",
-            "label": "[Lv2] 冷撃増幅",
+            "label": "[Lv2] ブリザード強化",
             "value": {
               "multiplier": 2.0,
               "triggerTurn": 2
@@ -3635,7 +3635,7 @@
           },
           {
             "id": "tacticSpellAmplify.blizzard.Lv3",
-            "label": "[Lv3] 冷撃増幅",
+            "label": "[Lv3] ブリザード強化",
             "value": {
               "multiplier": 2.8,
               "triggerTurn": 3
@@ -3647,12 +3647,12 @@
         "familyId": "tacticSpellAmplify.thunder_bolt",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.arcane.thunder_bolt"
+          "spellId": "spell.mage.thunder_bolt"
         },
         "variants": [
           {
             "id": "tacticSpellAmplify.thunder_bolt.Lv1",
-            "label": "[Lv1] 雷撃増幅",
+            "label": "[Lv1] サンダーボルト強化",
             "value": {
               "multiplier": 1.3,
               "triggerTurn": 1
@@ -3660,7 +3660,7 @@
           },
           {
             "id": "tacticSpellAmplify.thunder_bolt.Lv2",
-            "label": "[Lv2] 雷撃増幅",
+            "label": "[Lv2] サンダーボルト強化",
             "value": {
               "multiplier": 2.0,
               "triggerTurn": 2
@@ -3668,7 +3668,7 @@
           },
           {
             "id": "tacticSpellAmplify.thunder_bolt.Lv3",
-            "label": "[Lv3] 雷撃増幅",
+            "label": "[Lv3] サンダーボルト強化",
             "value": {
               "multiplier": 2.8,
               "triggerTurn": 3
@@ -3680,12 +3680,12 @@
         "familyId": "tacticSpellAmplify.nuclear",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.arcane.nuclear"
+          "spellId": "spell.mage.nuclear"
         },
         "variants": [
           {
             "id": "tacticSpellAmplify.nuclear.Lv1",
-            "label": "[Lv1] 核撃増幅",
+            "label": "[Lv1] ニュークリア強化",
             "value": {
               "multiplier": 1.3,
               "triggerTurn": 1
@@ -3693,7 +3693,7 @@
           },
           {
             "id": "tacticSpellAmplify.nuclear.Lv2",
-            "label": "[Lv2] 核撃増幅",
+            "label": "[Lv2] ニュークリア強化",
             "value": {
               "multiplier": 2.0,
               "triggerTurn": 2
@@ -3701,7 +3701,7 @@
           },
           {
             "id": "tacticSpellAmplify.nuclear.Lv3",
-            "label": "[Lv3] 核撃増幅",
+            "label": "[Lv3] ニュークリア強化",
             "value": {
               "multiplier": 2.8,
               "triggerTurn": 3
@@ -3716,7 +3716,7 @@
           {
             "id": "spellCharges.triple.magic_arrow",
             "label": "[3回] マジックアロー",
-            "parameters": { "spellId": "spell.arcane.magic_arrow" },
+            "parameters": { "spellId": "spell.mage.magic_arrow" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3730,7 +3730,7 @@
           {
             "id": "spellCharges.triple.fireball",
             "label": "[3回] ファイヤーボール",
-            "parameters": { "spellId": "spell.arcane.fireball" },
+            "parameters": { "spellId": "spell.mage.fireball" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3744,7 +3744,7 @@
           {
             "id": "spellCharges.triple.blizzard",
             "label": "[3回] ブリザード",
-            "parameters": { "spellId": "spell.arcane.blizzard" },
+            "parameters": { "spellId": "spell.mage.blizzard" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3758,7 +3758,7 @@
           {
             "id": "spellCharges.triple.thunder_bolt",
             "label": "[3回] サンダーボルト",
-            "parameters": { "spellId": "spell.arcane.thunder_bolt" },
+            "parameters": { "spellId": "spell.mage.thunder_bolt" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3772,7 +3772,7 @@
           {
             "id": "spellCharges.triple.nuclear",
             "label": "[3回] ニュークリア",
-            "parameters": { "spellId": "spell.arcane.nuclear" },
+            "parameters": { "spellId": "spell.mage.nuclear" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3786,7 +3786,7 @@
           {
             "id": "spellCharges.triple.heal",
             "label": "[3回] ヒール",
-            "parameters": { "spellId": "spell.cleric.heal" },
+            "parameters": { "spellId": "spell.priest.heal" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3800,7 +3800,7 @@
           {
             "id": "spellCharges.triple.heal_plus",
             "label": "[3回] ヒールプラス",
-            "parameters": { "spellId": "spell.cleric.heal_plus" },
+            "parameters": { "spellId": "spell.priest.heal_plus" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3814,7 +3814,7 @@
           {
             "id": "spellCharges.triple.cure",
             "label": "[3回] キュア",
-            "parameters": { "spellId": "spell.cleric.cure" },
+            "parameters": { "spellId": "spell.priest.cure" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3828,7 +3828,7 @@
           {
             "id": "spellCharges.triple.full_heal",
             "label": "[3回] フルヒール",
-            "parameters": { "spellId": "spell.cleric.full_heal" },
+            "parameters": { "spellId": "spell.priest.full_heal" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3842,7 +3842,7 @@
           {
             "id": "spellCharges.triple.party_heal",
             "label": "[3回] パーティヒール",
-            "parameters": { "spellId": "spell.cleric.party_heal" },
+            "parameters": { "spellId": "spell.priest.party_heal" },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -4238,6 +4238,179 @@
         ]
       },
       {
+        "familyId": "equipmentSlots.additive",
+        "effectType": "equipmentSlotAdditive",
+        "variants": [
+          { "id": "equipmentSlots.additive.minus2", "label": "[-2] 装備枠", "value": { "add": -2 } },
+          { "id": "equipmentSlots.additive.1", "label": "[+1] 装備枠", "value": { "add": 1 } },
+          { "id": "equipmentSlots.additive.2", "label": "[+2] 装備枠", "value": { "add": 2 } },
+          { "id": "equipmentSlots.additive.3", "label": "[+3] 装備枠", "value": { "add": 3 } },
+          { "id": "equipmentSlots.additive.4", "label": "[+4] 装備枠", "value": { "add": 4 } },
+          { "id": "equipmentSlots.additive.5", "label": "[+5] 装備枠", "value": { "add": 5 } }
+        ]
+      },
+      {
+        "familyId": "equipmentSlots.multiplier",
+        "effectType": "equipmentSlotMultiplier",
+        "variants": [
+          { "id": "equipmentSlots.multiplier.half", "label": "[半減] 装備枠", "value": { "multiplier": 0.5 } },
+          { "id": "equipmentSlots.multiplier.double", "label": "[2倍] 装備枠", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.thin_sword",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "thin_sword" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.thin_sword.1_5", "label": "[1.5倍] 細剣装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.thin_sword.2_0", "label": "[2倍] 細剣装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.sword",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "sword" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.sword.1_5", "label": "[1.5倍] 剣装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.sword.2_0", "label": "[2倍] 剣装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.katana",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "katana" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.katana.1_5", "label": "[1.5倍] 刀装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.katana.2_0", "label": "[2倍] 刀装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.bow",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "bow" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.bow.1_5", "label": "[1.5倍] 弓装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.bow.2_0", "label": "[2倍] 弓装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.armor",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "armor" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.armor.1_5", "label": "[1.5倍] 鎧装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.armor.2_0", "label": "[2倍] 鎧装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.heavy_armor",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "heavy_armor" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.heavy_armor.1_5", "label": "[1.5倍] 重鎧装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.heavy_armor.2_0", "label": "[2倍] 重鎧装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.shield",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "shield" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.shield.1_5", "label": "[1.5倍] 盾装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.shield.2_0", "label": "[2倍] 盾装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.gauntlet",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "gauntlet" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.gauntlet.1_5", "label": "[1.5倍] 小手装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.gauntlet.2_0", "label": "[2倍] 小手装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.wand",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "wand" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.wand.1_5", "label": "[1.5倍] ワンド装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.wand.2_0", "label": "[2倍] ワンド装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.rod",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "rod" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.rod.1_5", "label": "[1.5倍] ロッド装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.rod.2_0", "label": "[2倍] ロッド装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.grimoire",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "grimoire" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.grimoire.1_5", "label": "[1.5倍] 魔道書装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.grimoire.2_0", "label": "[2倍] 魔道書装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.robe",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "robe" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.robe.1_5", "label": "[1.5倍] 法衣装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.robe.2_0", "label": "[2倍] 法衣装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.gem",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "gem" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.gem.1_5", "label": "[1.5倍] 宝石装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.gem.2_0", "label": "[2倍] 宝石装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.other",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "other" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.other.1_5", "label": "[1.5倍] その他装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.other.2_0", "label": "[2倍] その他装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.race_specific",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "race_specific" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.race_specific.1_5", "label": "[1.5倍] 種族専用装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.race_specific.2_0", "label": "[2倍] 種族専用装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.for_synthesis",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "for_synthesis" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.for_synthesis.1_5", "label": "[1.5倍] 合成素材装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.for_synthesis.2_0", "label": "[2倍] 合成素材装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
+        "familyId": "equipmentStatMultiplier.magic_material",
+        "effectType": "equipmentStatMultiplier",
+        "parameters": { "equipmentCategory": "magic_material" },
+        "variants": [
+          { "id": "equipmentStatMultiplier.magic_material.1_5", "label": "[1.5倍] 魔造素材装備性能", "value": { "multiplier": 1.5 } },
+          { "id": "equipmentStatMultiplier.magic_material.2_0", "label": "[2倍] 魔造素材装備性能", "value": { "multiplier": 2.0 } }
+        ]
+      },
+      {
         "familyId": "breath.variant",
         "effectType": "breathVariant",
         "variants": [
@@ -4254,7 +4427,7 @@
           { "id": "breath.power.up.small", "label": "[ブレス強化] 小", "value": { "multiplier": 1.2 } },
           { "id": "breath.power.up.large", "label": "[ブレス強化] 大", "value": { "multiplier": 1.5 } },
           { "id": "breath.power.down", "label": "[ブレス弱化]", "value": { "multiplier": 0.7 } },
-          { "id": "breath.power.amp", "label": "[ブレス増幅]", "value": { "multiplier": 2.0 } }
+          { "id": "breath.power.amp", "label": "[ブレス強化]", "value": { "multiplier": 2.0 } }
         ]
       },
       {
@@ -4290,45 +4463,85 @@
         "familyId": "antiHealing.general",
         "effectType": "antiHealing",
         "variants": [
-          { "id": "antiHealing.general.enable", "label": "[戦術] アンチ・ヒーリング", "value": { "enabled": 1 } }
+          { "id": "antiHealing.general.enable", "label": "[戦術] リバース・ヒール", "value": { "enabled": 1 } }
         ]
       },
       {
-        "familyId": "specialAttack.magicSword",
+        "familyId": "specialAttack.specialA",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.magicSword.enable", "label": "[戦術] 魔剣術", "parameters": { "specialAttackId": "magicSword" }, "value": { "chancePercent": 50 } }
+          { "id": "specialAttack.specialA.enable", "label": "[戦術] 特殊攻撃A", "parameters": { "specialAttackId": "specialA" }, "value": { "chancePercent": 50 } }
         ]
       },
       {
-        "familyId": "specialAttack.piercingTriple",
+        "familyId": "specialAttack.specialB",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.piercingTriple.enable", "label": "[戦術] 貫通三連撃", "parameters": { "specialAttackId": "piercingTriple" }, "value": { "chancePercent": 50 } }
+          { "id": "specialAttack.specialB.enable", "label": "[戦術] 特殊攻撃B", "parameters": { "specialAttackId": "specialB" }, "value": { "chancePercent": 50 } }
         ]
       },
       {
-        "familyId": "specialAttack.fourGods",
+        "familyId": "specialAttack.specialC",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.fourGods.enable", "label": "[戦術] 四神の剣", "parameters": { "specialAttackId": "fourGods" }, "value": { "chancePercent": 50 } }
+          { "id": "specialAttack.specialC.enable", "label": "[戦術] 特殊攻撃C", "parameters": { "specialAttackId": "specialC" }, "value": { "chancePercent": 50 } }
         ]
       },
       {
-        "familyId": "specialAttack.moonlight",
+        "familyId": "specialAttack.specialD",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.moonlight.enable", "label": "[戦術] 月光剣", "parameters": { "specialAttackId": "moonlight" }, "value": { "chancePercent": 50 } }
+          { "id": "specialAttack.specialD.enable", "label": "[戦術] 特殊攻撃D", "parameters": { "specialAttackId": "specialD" }, "value": { "chancePercent": 50 } }
         ]
       },
       {
         "familyId": "spellSpecificTakenMultiplier.fireball",
         "effectType": "spellSpecificTakenMultiplier",
-        "parameters": { "spellId": "spell.arcane.fireball" },
+        "parameters": { "spellId": "spell.mage.fireball" },
         "variants": [
           { "id": "spellSpecificTakenMultiplier.fireball.half", "label": "[耐性] ファイアーボール", "value": { "multiplier": 0.5 } },
           { "id": "spellSpecificTakenMultiplier.fireball.quarter", "label": "[無効] ファイアーボール", "value": { "multiplier": 0.0 } },
           { "id": "spellSpecificTakenMultiplier.fireball.weak", "label": "[弱点] ファイアーボール", "value": { "multiplier": 1.5 } }
+        ]
+      },
+      {
+        "familyId": "spellSpecificTakenMultiplier.magic_arrow",
+        "effectType": "spellSpecificTakenMultiplier",
+        "parameters": { "spellId": "spell.mage.magic_arrow" },
+        "variants": [
+          { "id": "spellSpecificTakenMultiplier.magic_arrow.half", "label": "[耐性] マジックアロー", "value": { "multiplier": 0.5 } },
+          { "id": "spellSpecificTakenMultiplier.magic_arrow.quarter", "label": "[無効] マジックアロー", "value": { "multiplier": 0.0 } },
+          { "id": "spellSpecificTakenMultiplier.magic_arrow.weak", "label": "[弱点] マジックアロー", "value": { "multiplier": 1.5 } }
+        ]
+      },
+      {
+        "familyId": "spellSpecificTakenMultiplier.blizzard",
+        "effectType": "spellSpecificTakenMultiplier",
+        "parameters": { "spellId": "spell.mage.blizzard" },
+        "variants": [
+          { "id": "spellSpecificTakenMultiplier.blizzard.half", "label": "[耐性] ブリザード", "value": { "multiplier": 0.5 } },
+          { "id": "spellSpecificTakenMultiplier.blizzard.quarter", "label": "[無効] ブリザード", "value": { "multiplier": 0.0 } },
+          { "id": "spellSpecificTakenMultiplier.blizzard.weak", "label": "[弱点] ブリザード", "value": { "multiplier": 1.5 } }
+        ]
+      },
+      {
+        "familyId": "spellSpecificTakenMultiplier.thunder_bolt",
+        "effectType": "spellSpecificTakenMultiplier",
+        "parameters": { "spellId": "spell.mage.thunder_bolt" },
+        "variants": [
+          { "id": "spellSpecificTakenMultiplier.thunder_bolt.half", "label": "[耐性] サンダーボルト", "value": { "multiplier": 0.5 } },
+          { "id": "spellSpecificTakenMultiplier.thunder_bolt.quarter", "label": "[無効] サンダーボルト", "value": { "multiplier": 0.0 } },
+          { "id": "spellSpecificTakenMultiplier.thunder_bolt.weak", "label": "[弱点] サンダーボルト", "value": { "multiplier": 1.5 } }
+        ]
+      },
+      {
+        "familyId": "spellSpecificTakenMultiplier.nuclear",
+        "effectType": "spellSpecificTakenMultiplier",
+        "parameters": { "spellId": "spell.mage.nuclear" },
+        "variants": [
+          { "id": "spellSpecificTakenMultiplier.nuclear.half", "label": "[耐性] ニュークリア", "value": { "multiplier": 0.5 } },
+          { "id": "spellSpecificTakenMultiplier.nuclear.quarter", "label": "[無効] ニュークリア", "value": { "multiplier": 0.0 } },
+          { "id": "spellSpecificTakenMultiplier.nuclear.weak", "label": "[弱点] ニュークリア", "value": { "multiplier": 1.5 } }
         ]
       },
       {
@@ -4368,8 +4581,8 @@
         "familyId": "sacrificeRite.general",
         "effectType": "sacrificeRite",
         "variants": [
-          { "id": "sacrificeRite.general.every2", "label": "[戦術] 生贄の儀(2T毎)", "value": { "everyTurns": 2 } },
-          { "id": "sacrificeRite.general.every3", "label": "[戦術] 生贄の儀(3T毎)", "value": { "everyTurns": 3 } }
+          { "id": "sacrificeRite.general.every2", "label": "[戦術] 古の儀(2T毎)", "value": { "everyTurns": 2 } },
+          { "id": "sacrificeRite.general.every3", "label": "[戦術] 古の儀(3T毎)", "value": { "everyTurns": 3 } }
         ]
       },
       {
@@ -4380,12 +4593,12 @@
           { "id": "retreatAtTurn.general.turn15", "label": "[戦線離脱] 15ターン", "value": { "turn": 15, "chancePercent": 100 } },
           { "id": "retreatAtTurn.general.instant50", "label": "[即時離脱] 50%", "value": { "chancePercent": 50 } }
         ]
-      }
+      },
       {
-        "familyId": "specialAttack.godslayer",
+        "familyId": "specialAttack.specialE",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.godslayer.enable", "label": "[戦術] 神殺しの矢", "parameters": { "specialAttackId": "godslayer" }, "value": { "chancePercent": 50 } }
+          { "id": "specialAttack.specialE.enable", "label": "[戦術] 特殊攻撃E", "parameters": { "specialAttackId": "specialE" }, "value": { "chancePercent": 50 } }
         ]
       },
       {
@@ -5311,21 +5524,21 @@
         "variants": [
           {
             "id": "parry.general.base",
-            "label": "[戦術] パリィ",
+            "label": "[戦術] 受け流し",
             "value": {
               "enabled": 1
             }
           },
           {
             "id": "parry.general.boost15",
-            "label": "[+15%] パリィ成功率上昇",
+            "label": "[+15%] 受け流し成功率上昇",
             "value": {
               "bonusPercent": 15
             }
           },
           {
             "id": "parry.general.boost30",
-            "label": "[+30%] パリィ成功率上昇",
+            "label": "[+30%] 受け流し成功率上昇",
             "value": {
               "bonusPercent": 30
             }
@@ -5338,21 +5551,21 @@
         "variants": [
           {
             "id": "shieldBlock.general.base",
-            "label": "[戦術] 大盾",
+            "label": "[戦術] 盾防御",
             "value": {
               "enabled": 1
             }
           },
           {
             "id": "shieldBlock.general.boost15",
-            "label": "[+15%] 大盾成功率上昇",
+            "label": "[+15%] 盾防御成功率上昇",
             "value": {
               "bonusPercent": 15
             }
           },
           {
             "id": "shieldBlock.general.boost30",
-            "label": "[+30%] 大盾成功率上昇",
+            "label": "[+30%] 盾防御成功率上昇",
             "value": {
               "bonusPercent": 30
             }
@@ -5615,14 +5828,14 @@
           },
           {
             "id": "statAdditive.physicalAttack.130",
-            "label": "[+130] physicalAttack加算",
+            "label": "[+130] 物理攻撃力加算",
             "value": {
               "additive": 130
             }
           },
           {
             "id": "statAdditive.physicalAttack.140",
-            "label": "[+140] physicalAttack加算",
+            "label": "[+140] 物理攻撃力加算",
             "value": {
               "additive": 140
             }
@@ -5643,28 +5856,28 @@
           },
           {
             "id": "statAdditive.physicalAttack.170",
-            "label": "[+170] physicalAttack加算",
+            "label": "[+170] 物理攻撃力加算",
             "value": {
               "additive": 170
             }
           },
           {
             "id": "statAdditive.physicalAttack.180",
-            "label": "[+180] physicalAttack加算",
+            "label": "[+180] 物理攻撃力加算",
             "value": {
               "additive": 180
             }
           },
           {
             "id": "statAdditive.physicalAttack.190",
-            "label": "[+190] physicalAttack加算",
+            "label": "[+190] 物理攻撃力加算",
             "value": {
               "additive": 190
             }
           },
           {
             "id": "statAdditive.physicalAttack.200",
-            "label": "[+200] physicalAttack加算",
+            "label": "[+200] 物理攻撃力加算",
             "value": {
               "additive": 200
             }
@@ -5815,7 +6028,7 @@
         "variants": [
           {
             "id": "statAdditive.physicalDefense.10",
-            "label": "[+10] physicalDefense加算",
+            "label": "[+10] 物理防御力加算",
             "value": {
               "additive": 10
             }
@@ -5948,7 +6161,7 @@
           },
           {
             "id": "statAdditive.physicalDefense.200",
-            "label": "[+200] physicalDefense加算",
+            "label": "[+200] 物理防御力加算",
             "value": {
               "additive": 200
             }
@@ -6076,7 +6289,7 @@
           },
           {
             "id": "statAdditive.evasionRate.170",
-            "label": "[+170] evasionRate加算",
+            "label": "[+170] 回避能力加算",
             "value": {
               "additive": 170
             }
@@ -6097,7 +6310,7 @@
           },
           {
             "id": "statAdditive.evasionRate.200",
-            "label": "[+200] evasionRate加算",
+            "label": "[+200] 回避能力加算",
             "value": {
               "additive": 200
             }
@@ -6113,7 +6326,7 @@
         "variants": [
           {
             "id": "statAdditive.magicalAttack.10",
-            "label": "[+10] magicalAttack加算",
+            "label": "[+10] 魔法攻撃力加算",
             "value": {
               "additive": 10
             }
@@ -6225,28 +6438,28 @@
           },
           {
             "id": "statAdditive.magicalAttack.170",
-            "label": "[+170] magicalAttack加算",
+            "label": "[+170] 魔法攻撃力加算",
             "value": {
               "additive": 170
             }
           },
           {
             "id": "statAdditive.magicalAttack.180",
-            "label": "[+180] magicalAttack加算",
+            "label": "[+180] 魔法攻撃力加算",
             "value": {
               "additive": 180
             }
           },
           {
             "id": "statAdditive.magicalAttack.190",
-            "label": "[+190] magicalAttack加算",
+            "label": "[+190] 魔法攻撃力加算",
             "value": {
               "additive": 190
             }
           },
           {
             "id": "statAdditive.magicalAttack.200",
-            "label": "[+200] magicalAttack加算",
+            "label": "[+200] 魔法攻撃力加算",
             "value": {
               "additive": 200
             }
@@ -6262,42 +6475,42 @@
         "variants": [
           {
             "id": "statAdditive.magicalHealing.10",
-            "label": "[+10] magicalHealing加算",
+            "label": "[+10] 魔法回復量加算",
             "value": {
               "additive": 10
             }
           },
           {
             "id": "statAdditive.magicalHealing.20",
-            "label": "[+20] magicalHealing加算",
+            "label": "[+20] 魔法回復量加算",
             "value": {
               "additive": 20
             }
           },
           {
             "id": "statAdditive.magicalHealing.30",
-            "label": "[+30] magicalHealing加算",
+            "label": "[+30] 魔法回復量加算",
             "value": {
               "additive": 30
             }
           },
           {
             "id": "statAdditive.magicalHealing.40",
-            "label": "[+40] magicalHealing加算",
+            "label": "[+40] 魔法回復量加算",
             "value": {
               "additive": 40
             }
           },
           {
             "id": "statAdditive.magicalHealing.50",
-            "label": "[+50] magicalHealing加算",
+            "label": "[+50] 魔法回復量加算",
             "value": {
               "additive": 50
             }
           },
           {
             "id": "statAdditive.magicalHealing.60",
-            "label": "[+60] magicalHealing加算",
+            "label": "[+60] 魔法回復量加算",
             "value": {
               "additive": 60
             }
@@ -6311,7 +6524,7 @@
           },
           {
             "id": "statAdditive.magicalHealing.80",
-            "label": "[+80] magicalHealing加算",
+            "label": "[+80] 魔法回復量加算",
             "value": {
               "additive": 80
             }
@@ -6346,7 +6559,7 @@
           },
           {
             "id": "statAdditive.magicalHealing.130",
-            "label": "[+130] magicalHealing加算",
+            "label": "[+130] 魔法回復量加算",
             "value": {
               "additive": 130
             }
@@ -6374,7 +6587,7 @@
           },
           {
             "id": "statAdditive.magicalHealing.170",
-            "label": "[+170] magicalHealing加算",
+            "label": "[+170] 魔法回復量加算",
             "value": {
               "additive": 170
             }
@@ -6388,14 +6601,14 @@
           },
           {
             "id": "statAdditive.magicalHealing.190",
-            "label": "[+190] magicalHealing加算",
+            "label": "[+190] 魔法回復量加算",
             "value": {
               "additive": 190
             }
           },
           {
             "id": "statAdditive.magicalHealing.200",
-            "label": "[+200] magicalHealing加算",
+            "label": "[+200] 魔法回復量加算",
             "value": {
               "additive": 200
             }
@@ -6411,63 +6624,63 @@
         "variants": [
           {
             "id": "statAdditive.magicalDefense.10",
-            "label": "[+10] magicalDefense加算",
+            "label": "[+10] 魔法防御力加算",
             "value": {
               "additive": 10
             }
           },
           {
             "id": "statAdditive.magicalDefense.20",
-            "label": "[+20] magicalDefense加算",
+            "label": "[+20] 魔法防御力加算",
             "value": {
               "additive": 20
             }
           },
           {
             "id": "statAdditive.magicalDefense.30",
-            "label": "[+30] magicalDefense加算",
+            "label": "[+30] 魔法防御力加算",
             "value": {
               "additive": 30
             }
           },
           {
             "id": "statAdditive.magicalDefense.40",
-            "label": "[+40] magicalDefense加算",
+            "label": "[+40] 魔法防御力加算",
             "value": {
               "additive": 40
             }
           },
           {
             "id": "statAdditive.magicalDefense.50",
-            "label": "[+50] magicalDefense加算",
+            "label": "[+50] 魔法防御力加算",
             "value": {
               "additive": 50
             }
           },
           {
             "id": "statAdditive.magicalDefense.60",
-            "label": "[+60] magicalDefense加算",
+            "label": "[+60] 魔法防御力加算",
             "value": {
               "additive": 60
             }
           },
           {
             "id": "statAdditive.magicalDefense.70",
-            "label": "[+70] magicalDefense加算",
+            "label": "[+70] 魔法防御力加算",
             "value": {
               "additive": 70
             }
           },
           {
             "id": "statAdditive.magicalDefense.80",
-            "label": "[+80] magicalDefense加算",
+            "label": "[+80] 魔法防御力加算",
             "value": {
               "additive": 80
             }
           },
           {
             "id": "statAdditive.magicalDefense.90",
-            "label": "[+90] magicalDefense加算",
+            "label": "[+90] 魔法防御力加算",
             "value": {
               "additive": 90
             }
@@ -6516,35 +6729,35 @@
           },
           {
             "id": "statAdditive.magicalDefense.160",
-            "label": "[+160] magicalDefense加算",
+            "label": "[+160] 魔法防御力加算",
             "value": {
               "additive": 160
             }
           },
           {
             "id": "statAdditive.magicalDefense.170",
-            "label": "[+170] magicalDefense加算",
+            "label": "[+170] 魔法防御力加算",
             "value": {
               "additive": 170
             }
           },
           {
             "id": "statAdditive.magicalDefense.180",
-            "label": "[+180] magicalDefense加算",
+            "label": "[+180] 魔法防御力加算",
             "value": {
               "additive": 180
             }
           },
           {
             "id": "statAdditive.magicalDefense.190",
-            "label": "[+190] magicalDefense加算",
+            "label": "[+190] 魔法防御力加算",
             "value": {
               "additive": 190
             }
           },
           {
             "id": "statAdditive.magicalDefense.200",
-            "label": "[+200] magicalDefense加算",
+            "label": "[+200] 魔法防御力加算",
             "value": {
               "additive": 200
             }
@@ -7437,57 +7650,57 @@
         ]
       },
       {
-        "familyId": "spellTierUnlock.arcane",
+        "familyId": "spellTierUnlock.mage",
         "effectType": "spellTierUnlock",
         "parameters": {
-          "school": "arcane"
+          "school": "mage"
         },
         "variants": [
           {
-            "id": "spellTierUnlock.arcane.tier1",
-            "label": "[解放] 魔導術Lv1",
+            "id": "spellTierUnlock.mage.tier1",
+            "label": "[解放] 魔法使い魔法Lv1",
             "value": {
               "tier": 1
             }
           },
           {
-            "id": "spellTierUnlock.arcane.tier2",
-            "label": "[解放] 魔導術Lv2",
+            "id": "spellTierUnlock.mage.tier2",
+            "label": "[解放] 魔法使い魔法Lv2",
             "value": {
               "tier": 2
             }
           },
           {
-            "id": "spellTierUnlock.arcane.tier3",
-            "label": "[解放] 魔導術Lv3",
+            "id": "spellTierUnlock.mage.tier3",
+            "label": "[解放] 魔法使い魔法Lv3",
             "value": {
               "tier": 3
             }
           },
           {
-            "id": "spellTierUnlock.arcane.tier4",
-            "label": "[解放] 魔導術Lv4",
+            "id": "spellTierUnlock.mage.tier4",
+            "label": "[解放] 魔法使い魔法Lv4",
             "value": {
               "tier": 4
             }
           },
           {
-            "id": "spellTierUnlock.arcane.tier5",
-            "label": "[解放] 魔導術Lv5",
+            "id": "spellTierUnlock.mage.tier5",
+            "label": "[解放] 魔法使い魔法Lv5",
             "value": {
               "tier": 5
             }
           },
           {
-            "id": "spellTierUnlock.arcane.tier6",
-            "label": "[解放] 魔導術Lv6",
+            "id": "spellTierUnlock.mage.tier6",
+            "label": "[解放] 魔法使い魔法Lv6",
             "value": {
               "tier": 6
             }
           },
           {
-            "id": "spellTierUnlock.arcane.tier7",
-            "label": "[解放] 魔導術Lv7",
+            "id": "spellTierUnlock.mage.tier7",
+            "label": "[解放] 魔法使い魔法Lv7",
             "value": {
               "tier": 7
             }
@@ -7495,57 +7708,57 @@
         ]
       },
       {
-        "familyId": "spellTierUnlock.cleric",
+        "familyId": "spellTierUnlock.priest",
         "effectType": "spellTierUnlock",
         "parameters": {
-          "school": "cleric"
+          "school": "priest"
         },
         "variants": [
           {
-            "id": "spellTierUnlock.cleric.tier1",
-            "label": "[解放] 祈祷術Lv1",
+            "id": "spellTierUnlock.priest.tier1",
+            "label": "[解放] 僧侶魔法Lv1",
             "value": {
               "tier": 1
             }
           },
           {
-            "id": "spellTierUnlock.cleric.tier2",
-            "label": "[解放] 祈祷術Lv2",
+            "id": "spellTierUnlock.priest.tier2",
+            "label": "[解放] 僧侶魔法Lv2",
             "value": {
               "tier": 2
             }
           },
           {
-            "id": "spellTierUnlock.cleric.tier3",
-            "label": "[解放] 祈祷術Lv3",
+            "id": "spellTierUnlock.priest.tier3",
+            "label": "[解放] 僧侶魔法Lv3",
             "value": {
               "tier": 3
             }
           },
           {
-            "id": "spellTierUnlock.cleric.tier4",
-            "label": "[解放] 祈祷術Lv4",
+            "id": "spellTierUnlock.priest.tier4",
+            "label": "[解放] 僧侶魔法Lv4",
             "value": {
               "tier": 4
             }
           },
           {
-            "id": "spellTierUnlock.cleric.tier5",
-            "label": "[解放] 祈祷術Lv5",
+            "id": "spellTierUnlock.priest.tier5",
+            "label": "[解放] 僧侶魔法Lv5",
             "value": {
               "tier": 5
             }
           },
           {
-            "id": "spellTierUnlock.cleric.tier6",
-            "label": "[解放] 祈祷術Lv6",
+            "id": "spellTierUnlock.priest.tier6",
+            "label": "[解放] 僧侶魔法Lv6",
             "value": {
               "tier": 6
             }
           },
           {
-            "id": "spellTierUnlock.cleric.tier7",
-            "label": "[解放] 祈祷術Lv7",
+            "id": "spellTierUnlock.priest.tier7",
+            "label": "[解放] 僧侶魔法Lv7",
             "value": {
               "tier": 7
             }
@@ -7553,98 +7766,98 @@
         ]
       },
       {
-        "familyId": "spellAccess.arcane.learn",
+        "familyId": "spellAccess.mage.learn",
         "effectType": "spellAccess",
         "parameters": {
           "action": "learn"
         },
         "variants": [
           {
-            "id": "spellAccess.arcane.learn.tier1",
-            "label": "[習得] 魔導術Lv1",
+            "id": "spellAccess.mage.learn.tier1",
+            "label": "[習得] 魔法使い魔法Lv1",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.magic_arrow"
+                  "spellId": "spell.mage.magic_arrow"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.learn.tier2",
-            "label": "[習得] 魔導術Lv2",
+            "id": "spellAccess.mage.learn.tier2",
+            "label": "[習得] 魔法使い魔法Lv2",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.sleep_cloud"
+                  "spellId": "spell.mage.sleep_cloud"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.learn.tier3",
-            "label": "[習得] 魔導術Lv3",
+            "id": "spellAccess.mage.learn.tier3",
+            "label": "[習得] 魔法使い魔法Lv3",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.fireball"
+                  "spellId": "spell.mage.fireball"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.learn.tier4",
-            "label": "[習得] 魔導術Lv4",
+            "id": "spellAccess.mage.learn.tier4",
+            "label": "[習得] 魔法使い魔法Lv4",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.blizzard"
+                  "spellId": "spell.mage.blizzard"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.learn.tier5",
-            "label": "[習得] 魔導術Lv5",
+            "id": "spellAccess.mage.learn.tier5",
+            "label": "[習得] 魔法使い魔法Lv5",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.attack_up"
+                  "spellId": "spell.mage.attack_up"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.learn.tier6",
-            "label": "[習得] 魔導術Lv6",
+            "id": "spellAccess.mage.learn.tier6",
+            "label": "[習得] 魔法使い魔法Lv6",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.thunder_bolt"
+                  "spellId": "spell.mage.thunder_bolt"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.learn.tier7",
-            "label": "[習得] 魔導術Lv7",
+            "id": "spellAccess.mage.learn.tier7",
+            "label": "[習得] 魔法使い魔法Lv7",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.nuclear"
+                  "spellId": "spell.mage.nuclear"
                 },
                 "value": {}
               }
@@ -7653,98 +7866,98 @@
         ]
       },
       {
-        "familyId": "spellAccess.arcane.forget",
+        "familyId": "spellAccess.mage.forget",
         "effectType": "spellAccess",
         "parameters": {
           "action": "forget"
         },
         "variants": [
           {
-            "id": "spellAccess.arcane.forget.tier1",
-            "label": "[忘却] 魔導術Lv1",
+            "id": "spellAccess.mage.forget.tier1",
+            "label": "[忘却] 魔法使い魔法Lv1",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.magic_arrow"
+                  "spellId": "spell.mage.magic_arrow"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.forget.tier2",
-            "label": "[忘却] 魔導術Lv2",
+            "id": "spellAccess.mage.forget.tier2",
+            "label": "[忘却] 魔法使い魔法Lv2",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.sleep_cloud"
+                  "spellId": "spell.mage.sleep_cloud"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.forget.tier3",
-            "label": "[忘却] 魔導術Lv3",
+            "id": "spellAccess.mage.forget.tier3",
+            "label": "[忘却] 魔法使い魔法Lv3",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.fireball"
+                  "spellId": "spell.mage.fireball"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.forget.tier4",
-            "label": "[忘却] 魔導術Lv4",
+            "id": "spellAccess.mage.forget.tier4",
+            "label": "[忘却] 魔法使い魔法Lv4",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.blizzard"
+                  "spellId": "spell.mage.blizzard"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.forget.tier5",
-            "label": "[忘却] 魔導術Lv5",
+            "id": "spellAccess.mage.forget.tier5",
+            "label": "[忘却] 魔法使い魔法Lv5",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.attack_up"
+                  "spellId": "spell.mage.attack_up"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.forget.tier6",
-            "label": "[忘却] 魔導術Lv6",
+            "id": "spellAccess.mage.forget.tier6",
+            "label": "[忘却] 魔法使い魔法Lv6",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.thunder_bolt"
+                  "spellId": "spell.mage.thunder_bolt"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.arcane.forget.tier7",
-            "label": "[忘却] 魔導術Lv7",
+            "id": "spellAccess.mage.forget.tier7",
+            "label": "[忘却] 魔法使い魔法Lv7",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.arcane.nuclear"
+                  "spellId": "spell.mage.nuclear"
                 },
                 "value": {}
               }
@@ -7753,98 +7966,98 @@
         ]
       },
       {
-        "familyId": "spellAccess.cleric.learn",
+        "familyId": "spellAccess.priest.learn",
         "effectType": "spellAccess",
         "parameters": {
           "action": "learn"
         },
         "variants": [
           {
-            "id": "spellAccess.cleric.learn.tier1",
-            "label": "[習得] 祈祷術Lv1",
+            "id": "spellAccess.priest.learn.tier1",
+            "label": "[習得] 僧侶魔法Lv1",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.heal"
+                  "spellId": "spell.priest.heal"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.learn.tier2",
-            "label": "[習得] 祈祷術Lv2",
+            "id": "spellAccess.priest.learn.tier2",
+            "label": "[習得] 僧侶魔法Lv2",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.shield_barrier"
+                  "spellId": "spell.priest.shield_barrier"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.learn.tier3",
-            "label": "[習得] 祈祷術Lv3",
+            "id": "spellAccess.priest.learn.tier3",
+            "label": "[習得] 僧侶魔法Lv3",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.cure"
+                  "spellId": "spell.priest.cure"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.learn.tier4",
-            "label": "[習得] 祈祷術Lv4",
+            "id": "spellAccess.priest.learn.tier4",
+            "label": "[習得] 僧侶魔法Lv4",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.heal_plus"
+                  "spellId": "spell.priest.heal_plus"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.learn.tier5",
-            "label": "[習得] 祈祷術Lv5",
+            "id": "spellAccess.priest.learn.tier5",
+            "label": "[習得] 僧侶魔法Lv5",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.magic_barrier"
+                  "spellId": "spell.priest.magic_barrier"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.learn.tier6",
-            "label": "[習得] 祈祷術Lv6",
+            "id": "spellAccess.priest.learn.tier6",
+            "label": "[習得] 僧侶魔法Lv6",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.full_heal"
+                  "spellId": "spell.priest.full_heal"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.learn.tier7",
-            "label": "[習得] 祈祷術Lv7",
+            "id": "spellAccess.priest.learn.tier7",
+            "label": "[習得] 僧侶魔法Lv7",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.party_heal"
+                  "spellId": "spell.priest.party_heal"
                 },
                 "value": {}
               }
@@ -7853,98 +8066,98 @@
         ]
       },
       {
-        "familyId": "spellAccess.cleric.forget",
+        "familyId": "spellAccess.priest.forget",
         "effectType": "spellAccess",
         "parameters": {
           "action": "forget"
         },
         "variants": [
           {
-            "id": "spellAccess.cleric.forget.tier1",
-            "label": "[忘却] 祈祷術Lv1",
+            "id": "spellAccess.priest.forget.tier1",
+            "label": "[忘却] 僧侶魔法Lv1",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.heal"
+                  "spellId": "spell.priest.heal"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.forget.tier2",
-            "label": "[忘却] 祈祷術Lv2",
+            "id": "spellAccess.priest.forget.tier2",
+            "label": "[忘却] 僧侶魔法Lv2",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.shield_barrier"
+                  "spellId": "spell.priest.shield_barrier"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.forget.tier3",
-            "label": "[忘却] 祈祷術Lv3",
+            "id": "spellAccess.priest.forget.tier3",
+            "label": "[忘却] 僧侶魔法Lv3",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.cure"
+                  "spellId": "spell.priest.cure"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.forget.tier4",
-            "label": "[忘却] 祈祷術Lv4",
+            "id": "spellAccess.priest.forget.tier4",
+            "label": "[忘却] 僧侶魔法Lv4",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.heal_plus"
+                  "spellId": "spell.priest.heal_plus"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.forget.tier5",
-            "label": "[忘却] 祈祷術Lv5",
+            "id": "spellAccess.priest.forget.tier5",
+            "label": "[忘却] 僧侶魔法Lv5",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.magic_barrier"
+                  "spellId": "spell.priest.magic_barrier"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.forget.tier6",
-            "label": "[忘却] 祈祷術Lv6",
+            "id": "spellAccess.priest.forget.tier6",
+            "label": "[忘却] 僧侶魔法Lv6",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.full_heal"
+                  "spellId": "spell.priest.full_heal"
                 },
                 "value": {}
               }
             ]
           },
           {
-            "id": "spellAccess.cleric.forget.tier7",
-            "label": "[忘却] 祈祷術Lv7",
+            "id": "spellAccess.priest.forget.tier7",
+            "label": "[忘却] 僧侶魔法Lv7",
             "effects": [
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.cleric.party_heal"
+                  "spellId": "spell.priest.party_heal"
                 },
                 "value": {}
               }
@@ -8321,7 +8534,7 @@
         "familyId": "resurrection.save",
         "effectType": "resurrectionSave",
         "variants": [
-          { "id": "resurrection.save.cleric", "label": "[救出] 僧侶系", "value": { "usesClericMagic": 1, "minLevel": 1 } }
+          { "id": "resurrection.save.priest", "label": "[救出] 僧侶系", "value": { "usesPriestMagic": 1, "minLevel": 1 } }
         ]
       }
     ]
