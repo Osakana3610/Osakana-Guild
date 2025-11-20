@@ -4279,6 +4279,14 @@
         ]
       },
       {
+        "familyId": "procMultiplier.general",
+        "effectType": "procMultiplier",
+        "variants": [
+          { "id": "procMultiplier.general.1p2", "label": "[+20%] 発動率強化", "value": { "multiplier": 1.2 } },
+          { "id": "procMultiplier.general.1p5", "label": "[+50%] 発動率強化", "value": { "multiplier": 1.5 } }
+        ]
+      },
+      {
         "familyId": "antiHealing.general",
         "effectType": "antiHealing",
         "variants": [
@@ -4313,6 +4321,66 @@
           { "id": "specialAttack.moonlight.enable", "label": "[戦術] 月光剣", "parameters": { "specialAttackId": "moonlight" }, "value": { "chancePercent": 50 } }
         ]
       },
+      {
+        "familyId": "spellSpecificTakenMultiplier.fireball",
+        "effectType": "spellSpecificTakenMultiplier",
+        "parameters": { "spellId": "spell.arcane.fireball" },
+        "variants": [
+          { "id": "spellSpecificTakenMultiplier.fireball.half", "label": "[耐性] ファイアーボール", "value": { "multiplier": 0.5 } },
+          { "id": "spellSpecificTakenMultiplier.fireball.quarter", "label": "[無効] ファイアーボール", "value": { "multiplier": 0.0 } },
+          { "id": "spellSpecificTakenMultiplier.fireball.weak", "label": "[弱点] ファイアーボール", "value": { "multiplier": 1.5 } }
+        ]
+      },
+      {
+        "familyId": "runaway.magic",
+        "effectType": "runawayMagic",
+        "variants": [
+          { "id": "runaway.magic.20", "label": "[魔力暴走] 20%", "value": { "thresholdPercent": 20, "chancePercent": 20 } },
+          { "id": "runaway.magic.30", "label": "[魔力暴走] 30%", "value": { "thresholdPercent": 30, "chancePercent": 25 } }
+        ]
+      },
+      {
+        "familyId": "runaway.damage",
+        "effectType": "runawayDamage",
+        "variants": [
+          { "id": "runaway.damage.20", "label": "[ダメージ暴走] 20%", "value": { "thresholdPercent": 20, "chancePercent": 20 } },
+          { "id": "runaway.damage.30", "label": "[ダメージ暴走] 30%", "value": { "thresholdPercent": 30, "chancePercent": 25 } }
+        ]
+      },
+      {
+        "familyId": "extraAction.general",
+        "effectType": "extraAction",
+        "variants": [
+          { "id": "extraAction.general.once10", "label": "[追加行動] 10%", "value": { "chancePercent": 10, "count": 1 } },
+          { "id": "extraAction.general.once30", "label": "[追加行動] 30%", "value": { "chancePercent": 30, "count": 1 } },
+          { "id": "extraAction.general.twice20", "label": "[追加行動] 20%×2", "value": { "chancePercent": 20, "count": 2 } }
+        ]
+      },
+      {
+        "familyId": "reactionNextTurn.general",
+        "effectType": "reactionNextTurn",
+        "variants": [
+          { "id": "reactionNextTurn.general.plus1", "label": "[再行動] 次ターン+1", "value": { "count": 1 } },
+          { "id": "reactionNextTurn.general.plus2", "label": "[再行動] 次ターン+2", "value": { "count": 2 } }
+        ]
+      },
+      {
+        "familyId": "sacrificeRite.general",
+        "effectType": "sacrificeRite",
+        "variants": [
+          { "id": "sacrificeRite.general.every2", "label": "[戦術] 生贄の儀(2T毎)", "value": { "everyTurns": 2 } },
+          { "id": "sacrificeRite.general.every3", "label": "[戦術] 生贄の儀(3T毎)", "value": { "everyTurns": 3 } }
+        ]
+      },
+      {
+        "familyId": "retreatAtTurn.general",
+        "effectType": "retreatAtTurn",
+        "variants": [
+          { "id": "retreatAtTurn.general.turn10", "label": "[戦線離脱] 10ターン", "value": { "turn": 10, "chancePercent": 100 } },
+          { "id": "retreatAtTurn.general.turn15", "label": "[戦線離脱] 15ターン", "value": { "turn": 15, "chancePercent": 100 } },
+          { "id": "retreatAtTurn.general.instant50", "label": "[即時離脱] 50%", "value": { "chancePercent": 50 } }
+        ]
+      }
       {
         "familyId": "specialAttack.godslayer",
         "effectType": "specialAttack",
