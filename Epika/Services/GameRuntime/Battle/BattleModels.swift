@@ -167,6 +167,7 @@ struct AppliedStatusEffect: Sendable, Hashable {
 
 struct TimedBuff: Sendable, Hashable {
     let id: String
+    let baseDuration: Int
     var remainingTurns: Int
     let statModifiers: [String: Double]
 }

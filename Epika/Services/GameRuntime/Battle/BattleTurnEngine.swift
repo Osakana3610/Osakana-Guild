@@ -3347,7 +3347,8 @@ struct BattleTurnEngine {
                 let otherMods = trigger.modifiers.filter { !$0.key.hasPrefix("spellSpecific:") }
                 if !otherMods.isEmpty {
                     let buff = TimedBuff(id: trigger.id,
-                                         remainingTurns: 99,
+                                         baseDuration: max(1, trigger.triggerTurn),
+                                         remainingTurns: max(1, trigger.triggerTurn),
                                          statModifiers: otherMods)
                     upsert(buff: buff, into: &actor.timedBuffs)
                 }
@@ -3365,10 +3366,16 @@ struct BattleTurnEngine {
         var replaced = false
         for index in buffs.indices {
             if buffs[index].id == buff.id {
-                let current = buffs[index].statModifiers.values.max() ?? 1.0
-                let incoming = buff.statModifiers.values.max() ?? 1.0
-                if incoming > current {
+                let currentLevel = buffs[index].baseDuration
+                let incomingLevel = buff.baseDuration
+                // より高いレベルを優先。レベル同等なら残りターンを最大化して更新
+                if incomingLevel > currentLevel {
                     buffs[index] = buff
+                } else if incomingLevel == currentLevel {
+                    let remaining = max(buffs[index].remainingTurns, buff.remainingTurns)
+                    var merged = buff
+                    merged.remainingTurns = remaining
+                    buffs[index] = merged
                 }
                 replaced = true
                 break
