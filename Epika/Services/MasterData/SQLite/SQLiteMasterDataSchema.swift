@@ -109,6 +109,34 @@ extension SQLiteMasterDataManager {
                 FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
             );
             """,
+            """
+            CREATE TABLE IF NOT EXISTS spells (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                school TEXT NOT NULL,
+                tier INTEGER NOT NULL,
+                category TEXT NOT NULL,
+                targeting TEXT NOT NULL,
+                max_targets_base INTEGER,
+                extra_targets_per_levels REAL,
+                hits_per_cast INTEGER,
+                base_power_multiplier REAL,
+                status_id TEXT,
+                heal_multiplier REAL,
+                cast_condition TEXT,
+                description TEXT NOT NULL
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS spell_buffs (
+                spell_id TEXT NOT NULL,
+                order_index INTEGER NOT NULL,
+                type TEXT NOT NULL,
+                multiplier REAL NOT NULL,
+                PRIMARY KEY (spell_id, order_index),
+                FOREIGN KEY (spell_id) REFERENCES spells(id) ON DELETE CASCADE
+            );
+            """,
             // Jobs
             """
             CREATE TABLE IF NOT EXISTS jobs (

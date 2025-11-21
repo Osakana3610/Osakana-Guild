@@ -149,7 +149,9 @@ actor GameRuntimeService {
                                                                        targetFloorNumber: targetFloorNumber,
                                                                        superRareState: superRareState,
                                                                        scheduler: scheduler)
-        let interval = TimeInterval(max(0, preparation.dungeon.explorationTime))
+        let timeScale = try await explorationTimeMultiplier(for: party, dungeon: preparation.dungeon)
+        let scaledInterval = max(0.0, Double(preparation.dungeon.explorationTime) * timeScale)
+        let interval = TimeInterval(scaledInterval)
         return ExplorationRunPreparationData(preparation: preparation,
                                              state: state,
                                              explorationInterval: interval)
@@ -207,6 +209,20 @@ actor GameRuntimeService {
 
     private func makeEventScheduler() async -> ExplorationEventScheduler {
         await MainActor.run { ExplorationEventScheduler() }
+    }
+
+    private func explorationTimeMultiplier(for party: RuntimePartyState,
+                                           dungeon: DungeonDefinition) async throws -> Double {
+        let skillSets = party.members.map { $0.character.learnedSkills }
+        return try await MainActor.run {
+            var combined = SkillRuntimeEffects.ExplorationModifiers.neutral
+            for skills in skillSets {
+                let modifiers = try SkillRuntimeEffectCompiler.explorationModifiers(from: skills)
+                combined.merge(modifiers)
+            }
+            let value = combined.multiplier(forDungeonId: dungeon.id, dungeonName: dungeon.name)
+            return max(0.0, value)
+        }
     }
 }
 

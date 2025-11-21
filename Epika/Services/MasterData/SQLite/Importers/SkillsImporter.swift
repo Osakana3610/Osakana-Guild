@@ -1,6 +1,7 @@
 import Foundation
 import SQLite3
 
+
 private struct SkillEntry: Sendable {
     struct Effect: Sendable {
         let index: Int
@@ -21,91 +22,149 @@ private struct SkillEntry: Sendable {
     let effects: [Effect]
 }
 
+private struct VariantEffectPayload: Sendable {
+    let familyId: String
+    let effectType: String
+    let parameters: [String: String]?
+    let numericValues: [String: Double]
+    let stringValues: [String: String]
+    let stringArrayValues: [String: [String]]
+}
+
 extension SQLiteMasterDataManager {
     func importSkillMaster(_ data: Data) async throws -> Int {
-        func toDouble(_ value: Any?) -> Double? {
-            if let doubleValue = value as? Double { return doubleValue }
-            if let intValue = value as? Int { return Double(intValue) }
-            if let stringValue = value as? String { return Double(stringValue) }
-            if let number = value as? NSNumber { return number.doubleValue }
+        let root = try await MainActor.run { () -> SkillMasterRoot in
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            return try decoder.decode(SkillMasterRoot.self, from: data)
+        }
+
+        var entries: [SkillEntry] = []
+        let categories: [(String, SkillCategory?)] = [
+            ("attack", root.attack),
+            ("defense", root.defense),
+            ("status", root.status),
+            ("reaction", root.reaction),
+            ("resurrection", root.resurrection)
+        ]
+
+        let mergeParameters: ([String: String]?, [String: String]?) -> [String: String]? = { defaultParameters, overrides in
+            if let defaultParameters = defaultParameters, let overrides = overrides {
+                return defaultParameters.merging(overrides) { _, new in new }
+            }
+            if let defaultParameters = defaultParameters {
+                return defaultParameters
+            }
+            if let overrides = overrides {
+                return overrides
+            }
             return nil
         }
 
-        func encodeJSONObject(_ value: Any, context: String) throws -> String {
-            if JSONSerialization.isValidJSONObject(value) {
-                let data = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys])
-                guard let json = String(data: data, encoding: .utf8) else {
-                    throw SQLiteMasterDataError.executionFailed(context)
+        for (categoryKey, category) in categories {
+            guard let families = category?.families else { continue }
+            for family in families {
+                for variant in family.variants {
+                    let effectPayloads: [VariantEffectPayload]
+                    if let customEffects = variant.effects, !customEffects.isEmpty {
+                        effectPayloads = try customEffects.map { custom in
+                            let effectType = custom.effectType ?? family.effectType
+                            guard !effectType.isEmpty else {
+                                throw SQLiteMasterDataError.executionFailed("Skill \(variant.id) の effectType が指定されていません")
+                            }
+                            let parameters = mergeParameters(mergeParameters(family.parameters, variant.parameters), custom.parameters)
+                            return VariantEffectPayload(familyId: family.familyId,
+                                                        effectType: effectType,
+                                                        parameters: parameters,
+                                                        numericValues: custom.payload.numericValues,
+                                                        stringValues: custom.payload.stringValues,
+                                                        stringArrayValues: custom.payload.stringArrayValues)
+                        }
+                    } else {
+                        guard !family.effectType.isEmpty else {
+                            throw SQLiteMasterDataError.executionFailed("Skill \(variant.id) の effectType が空です")
+                        }
+                        let mergedParameters = mergeParameters(family.parameters, variant.parameters)
+                        let payload = variant.payload
+                        let hasPayload = !payload.numericValues.isEmpty
+                            || !payload.stringValues.isEmpty
+                            || !payload.stringArrayValues.isEmpty
+                            || !(mergedParameters?.isEmpty ?? true)
+                        guard hasPayload else {
+                            throw SQLiteMasterDataError.executionFailed("Skill \(variant.id) の value が不足しています")
+                        }
+                        effectPayloads = [VariantEffectPayload(familyId: family.familyId,
+                                                               effectType: family.effectType,
+                                                               parameters: mergedParameters,
+                                                               numericValues: payload.numericValues,
+                                                               stringValues: payload.stringValues,
+                                                               stringArrayValues: payload.stringArrayValues)]
+                    }
+
+                    let acquisitionJSON = try encodeJSONObject([:],
+                                                                context: "Skill \(variant.id) の acquisitionConditions をエンコードできません")
+
+                    let label = variant.label ?? variant.id
+                    var effects: [SkillEntry.Effect] = []
+                    effects.reserveCapacity(effectPayloads.count)
+
+                    for (index, payload) in effectPayloads.enumerated() {
+                        var payloadDictionary: [String: Any] = [
+                            "familyId": payload.familyId,
+                            "effectType": payload.effectType,
+                            "value": payload.numericValues
+                        ]
+                        if let parameters = payload.parameters {
+                            payloadDictionary["parameters"] = parameters
+                        }
+                        if !payload.stringValues.isEmpty {
+                            payloadDictionary["stringValues"] = payload.stringValues
+                        }
+                        if !payload.stringArrayValues.isEmpty {
+                            payloadDictionary["stringArrayValues"] = payload.stringArrayValues
+                        }
+                        let payloadJSON = try encodeJSONObject(payloadDictionary,
+                                                                context: "Skill \(variant.id) の payload をエンコードできません")
+
+                        let effectValue = payload.numericValues["multiplier"]
+                            ?? payload.numericValues["additive"]
+                            ?? payload.numericValues["points"]
+                            ?? payload.numericValues["cap"]
+                            ?? payload.numericValues["deltaPercent"]
+                            ?? payload.numericValues["maxPercent"]
+                            ?? payload.numericValues["valuePerUnit"]
+                            ?? payload.numericValues["valuePerCount"]
+                        let valuePercent = payload.numericValues["valuePercent"]
+
+                        let statType = payload.parameters?["stat"] ?? payload.parameters?["targetStat"]
+                        let damageType = payload.parameters?["damageType"]
+
+                        let effect = SkillEntry.Effect(index: index,
+                                                       kind: payload.effectType,
+                                                       value: effectValue,
+                                                       valuePercent: valuePercent,
+                                                       statType: statType,
+                                                       damageType: damageType,
+                                                       payloadJSON: payloadJSON)
+                        effects.append(effect)
+                    }
+
+                    let entry = SkillEntry(id: variant.id,
+                                           name: label,
+                                           description: label,
+                                           type: "passive",
+                                           category: categoryKey,
+                                           acquisitionJSON: acquisitionJSON,
+                                           effects: effects)
+                    entries.append(entry)
                 }
-                return json
             }
-            if let string = value as? String {
-                let data = try JSONEncoder().encode(string)
-                guard let json = String(data: data, encoding: .utf8) else {
-                    throw SQLiteMasterDataError.executionFailed(context)
-                }
-                return json
-            }
-            if let number = value as? NSNumber {
-                return number.stringValue
-            }
-            if value is NSNull {
-                return "null"
-            }
-            throw SQLiteMasterDataError.executionFailed(context)
         }
 
-        guard let rawSkills = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw SQLiteMasterDataError.executionFailed("SkillMaster.json は辞書形式である必要があります")
-        }
-
-        let entries = try rawSkills.sorted(by: { $0.key < $1.key }).map { identifier, value -> SkillEntry in
-            guard let body = value as? [String: Any] else {
-                throw SQLiteMasterDataError.executionFailed("Skill \(identifier) の形式が不正です")
-            }
-
-            guard let name = body["name"] as? String,
-                  let description = body["description"] as? String,
-                  let type = body["type"] as? String,
-                  let category = body["category"] as? String else {
-                throw SQLiteMasterDataError.executionFailed("Skill \(identifier) に必須フィールドが不足しています")
-            }
-
-            let acquisitionConditions = body["acquisitionConditions"] as? [String: Any] ?? [:]
-            let acquisitionJSON = try encodeJSONObject(acquisitionConditions,
-                                                        context: "Skill \(identifier) の acquisitionConditions をエンコードできません")
-
-            let effectsArray = body["effects"] as? [[String: Any]] ?? []
-            let effects = try effectsArray.enumerated().map { index, effect -> SkillEntry.Effect in
-                guard let kind = effect["type"] as? String else {
-                    throw SQLiteMasterDataError.executionFailed("Skill \(identifier) の effect \(index) に type が存在しません")
-                }
-                let value = toDouble(effect["value"])
-                let valuePercent = toDouble(effect["valuePercent"])
-                let statType = effect["statType"] as? String
-                let damageType = effect["damageType"] as? String
-                let payloadJSON = try encodeJSONObject(effect,
-                                                        context: "Skill \(identifier) の effect をJSON文字列化できません")
-                return SkillEntry.Effect(index: index,
-                                         kind: kind,
-                                         value: value,
-                                         valuePercent: valuePercent,
-                                         statType: statType,
-                                         damageType: damageType,
-                                         payloadJSON: payloadJSON)
-            }
-
-            let skillId = (body["id"] as? String) ?? identifier
-            return SkillEntry(id: skillId,
-                              name: name,
-                              description: description,
-                              type: type,
-                              category: category,
-                              acquisitionJSON: acquisitionJSON,
-                              effects: effects)
-        }
+        entries.sort { $0.id < $1.id }
 
         try withTransaction {
+            try execute("DELETE FROM skill_effects;")
             try execute("DELETE FROM skills;")
 
             let insertSkillSQL = """
@@ -151,4 +210,92 @@ extension SQLiteMasterDataManager {
 
         return entries.count
     }
+
+    private func encodeJSONObject(_ value: Any, context: String) throws -> String {
+        if JSONSerialization.isValidJSONObject(value) {
+            let data = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys])
+            guard let json = String(data: data, encoding: .utf8) else {
+                throw SQLiteMasterDataError.executionFailed(context)
+            }
+            return json
+        }
+        if let string = value as? String {
+            let data = try JSONEncoder().encode(string)
+            guard let json = String(data: data, encoding: .utf8) else {
+                throw SQLiteMasterDataError.executionFailed(context)
+            }
+            return json
+        }
+        if let number = value as? NSNumber {
+            return number.stringValue
+        }
+        if value is NSNull {
+            return "null"
+        }
+        throw SQLiteMasterDataError.executionFailed(context)
+    }
+}
+
+struct SkillMasterRoot: Decodable, Sendable {
+    let attack: SkillCategory?
+    let defense: SkillCategory?
+    let status: SkillCategory?
+    let reaction: SkillCategory?
+    let resurrection: SkillCategory?
+}
+
+struct SkillCategory: Decodable, Sendable {
+    let families: [SkillFamily]
+}
+
+struct SkillFamily: Decodable, Sendable {
+    let familyId: String
+    let effectType: String
+    let parameters: [String: String]?
+    let variants: [SkillVariant]
+}
+
+struct SkillVariant: Decodable, Sendable {
+    struct CustomEffect: Decodable, Sendable {
+        let effectType: String?
+        let parameters: [String: String]?
+        let payload: SkillEffectPayloadValues
+
+        private enum CodingKeys: String, CodingKey {
+            case effectType
+            case parameters
+            case value
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            effectType = try container.decodeIfPresent(String.self, forKey: .effectType)
+            parameters = try container.decodeIfPresent([String: String].self, forKey: .parameters)
+            payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
+        }
+    }
+
+    let id: String
+    let label: String?
+    let parameters: [String: String]?
+    let payload: SkillEffectPayloadValues
+    let effects: [CustomEffect]?
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case label
+        case parameters
+        case value
+        case effects
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        label = try container.decodeIfPresent(String.self, forKey: .label)
+        parameters = try container.decodeIfPresent([String: String].self, forKey: .parameters)
+        payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
+        effects = try container.decodeIfPresent([CustomEffect].self, forKey: .effects)
+    }
+
 }

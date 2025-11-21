@@ -66,6 +66,18 @@ actor MasterDataRuntimeService {
         return try await repository.enemy(withId: id)
     }
 
+    // MARK: - Spells
+
+    func getAllSpells() async throws -> [SpellDefinition] {
+        try await ensureInitialized()
+        return try await repository.allSpells()
+    }
+
+    func getSpellDefinition(id: String) async throws -> SpellDefinition? {
+        try await ensureInitialized()
+        return try await repository.spell(withId: id)
+    }
+
     // MARK: - Races
 
     func getAllRaces() async throws -> [RaceDefinition] {

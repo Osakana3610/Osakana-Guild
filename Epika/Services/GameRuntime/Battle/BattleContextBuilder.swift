@@ -13,8 +13,16 @@ struct BattleContextBuilder {
             guard let slot = BattleContextBuilder.slot(for: index) else { continue }
             let snapshot = member.character.combatSnapshot
             let state = member.character
-            let resources = BattleActionResource.makeDefault(for: snapshot)
+            var resources = BattleActionResource.makeDefault(for: snapshot,
+                                                            spellLoadout: state.spellLoadout)
             let skillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: state.learnedSkills)
+            applySpellChargeModifiers(skillEffects: skillEffects,
+                                      loadout: state.spellLoadout,
+                                      resources: &resources)
+            if skillEffects.breathExtraCharges > 0 {
+                let current = resources.charges(for: .breath)
+                resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
+            }
             let martialEligible = state.isMartialEligible
             let actor = BattleActor(
                 identifier: member.id.uuidString,
@@ -32,11 +40,17 @@ struct BattleContextBuilder {
                 jobName: state.job?.name ?? state.progress.jobId,
                 avatarIdentifier: state.progress.avatarIdentifier,
                 isMartialEligible: martialEligible,
+                raceId: state.progress.raceId,
+                raceCategory: state.race?.category,
                 snapshot: snapshot,
                 currentHP: state.progress.hitPoints.current,
-                actionRates: BattleContextBuilder.defaultPlayerActionRates(for: state),
+                actionRates: BattleContextBuilder.playerActionRates(for: state),
                 actionResources: resources,
-                skillEffects: skillEffects
+                barrierCharges: skillEffects.barrierCharges,
+                skillEffects: skillEffects,
+                spellbook: state.spellbook,
+                spells: state.spellLoadout,
+                baseSkillIds: Set(state.learnedSkills.map { $0.id })
             )
             actors.append(actor)
         }
@@ -49,9 +63,37 @@ struct BattleContextBuilder {
         return BattleFormationSlot.allCases[index]
     }
 
-    private static func defaultPlayerActionRates(for character: RuntimeCharacterState) -> BattleActionRates {
-        let baseBreath = character.combatSnapshot.breathDamage > 0 ? 50 : 0
-        return BattleActionRates(attack: 100, clericMagic: 75, arcaneMagic: 75, breath: baseBreath)
+    private static func playerActionRates(for character: RuntimeCharacterState) -> BattleActionRates {
+        let preferences = character.progress.actionPreferences
+        let breath = character.combatSnapshot.breathDamage > 0 ? preferences.breath : 0
+        return BattleActionRates(attack: preferences.attack,
+                                 priestMagic: preferences.priestMagic,
+                                 mageMagic: preferences.mageMagic,
+                                 breath: breath)
     }
 
+}
+
+private extension BattleContextBuilder {
+    static func applySpellChargeModifiers(skillEffects: BattleActor.SkillEffects,
+                                          loadout: SkillRuntimeEffects.SpellLoadout,
+                                          resources: inout BattleActionResource) {
+        let spells = loadout.mage + loadout.priest
+        guard !spells.isEmpty else { return }
+        for spell in spells {
+            guard let modifier = skillEffects.spellChargeModifier(for: spell.id), !modifier.isEmpty else { continue }
+            let baseState = resources.spellChargeState(for: spell.id)
+                ?? BattleActionResource.SpellChargeState(current: 1, max: 1)
+            let baseInitial = baseState.current
+            let baseMax = baseState.max
+            let newMax = max(modifier.maxOverride ?? baseMax, 0)
+            var newInitial = max(0, modifier.initialOverride ?? baseInitial)
+            if modifier.initialBonus != 0 {
+                newInitial += modifier.initialBonus
+            }
+            resources.setSpellCharges(for: spell.id,
+                                      current: newInitial,
+                                      max: newMax)
+        }
+    }
 }

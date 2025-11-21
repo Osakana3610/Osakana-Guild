@@ -64,6 +64,13 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
         var defeatCount: Int
     }
 
+    struct ActionPreferences: Sendable, Hashable {
+        var attack: Int
+        var priestMagic: Int
+        var mageMagic: Int
+        var breath: Int
+    }
+
     var id: UUID
     var displayName: String
     var raceId: String
@@ -81,6 +88,7 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
     var jobHistory: [CharacterSnapshot.JobHistoryEntry]
     var explorationTags: Set<String>
     var achievements: AchievementCounters
+    var actionPreferences: ActionPreferences
     var createdAt: Date
     var updatedAt: Date
 }
@@ -99,6 +107,8 @@ struct RuntimeCharacterState: Sendable {
     let personalitySecondary: PersonalitySecondaryDefinition?
     let learnedSkills: [SkillDefinition]
     let loadout: Loadout
+    let spellbook: SkillRuntimeEffects.Spellbook
+    let spellLoadout: SkillRuntimeEffects.SpellLoadout
 
     var combatSnapshot: RuntimeCharacterProgress.Combat { progress.combat }
     var isMartialEligible: Bool {
@@ -128,6 +138,8 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     let masteredSkills: [SkillDefinition]
     let statusEffects: [StatusEffectDefinition]
     let martialEligible: Bool
+    let spellbook: SkillRuntimeEffects.Spellbook
+    let spellLoadout: SkillRuntimeEffects.SpellLoadout
 
     var id: UUID { progress.id }
     var name: String { progress.displayName }

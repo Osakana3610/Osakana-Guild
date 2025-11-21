@@ -5,28 +5,53 @@ enum CharacterAssembler {
                               from progress: RuntimeCharacterProgress) async throws -> RuntimeCharacterState {
         async let raceDef = repository.race(withId: progress.raceId)
         async let jobDef = repository.job(withId: progress.jobId)
+        async let spellDefinitions = repository.allSpells()
 
         let learnedSkillIds = progress.learnedSkills.map { $0.skillId }
         let learnedSkills = try await repository.skills(withIds: learnedSkillIds)
 
-        let loadout = try await assembleLoadout(repository: repository, from: progress.equippedItems)
+        let slotModifiers = try SkillRuntimeEffectCompiler.equipmentSlots(from: learnedSkills)
+        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: progress.level,
+                                                            modifiers: slotModifiers)
+        let usedSlots = EquipmentSlotCalculator.usedSlots(for: progress.equippedItems)
+        if usedSlots > allowedSlots {
+            throw RuntimeError.invalidConfiguration(reason: "装備枠を超過しています（装備数: \(usedSlots) / 上限: \(allowedSlots)）")
+        }
+
+        var revivedProgress = progress
+        if revivedProgress.hitPoints.current <= 0 {
+            let effects = try SkillRuntimeEffectCompiler.actorEffects(from: learnedSkills)
+            if effects.resurrectionPassiveBetweenFloors {
+                revivedProgress.hitPoints = .init(current: max(1, revivedProgress.hitPoints.maximum),
+                                                  maximum: revivedProgress.hitPoints.maximum)
+            }
+        }
+
+        let loadout = try await assembleLoadout(repository: repository, from: revivedProgress.equippedItems)
         var primary: PersonalityPrimaryDefinition? = nil
-        if let primaryId = progress.personality.primaryId {
+        if let primaryId = revivedProgress.personality.primaryId {
             primary = try await repository.personalityPrimary(withId: primaryId)
         }
         var secondary: PersonalitySecondaryDefinition? = nil
-        if let secondaryId = progress.personality.secondaryId {
+        if let secondaryId = revivedProgress.personality.secondaryId {
             secondary = try await repository.personalitySecondary(withId: secondaryId)
         }
 
+        let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
+        let spells = try await spellDefinitions
+        let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(from: spellbook,
+                                                                   definitions: spells)
+
         return RuntimeCharacterState(
-            progress: progress,
+            progress: revivedProgress,
             race: try await raceDef,
             job: try await jobDef,
             personalityPrimary: primary,
             personalitySecondary: secondary,
             learnedSkills: learnedSkills,
-            loadout: loadout
+            loadout: loadout,
+            spellbook: spellbook,
+            spellLoadout: spellLoadout
         )
     }
 
@@ -39,7 +64,9 @@ enum CharacterAssembler {
             jobData: state.job,
             masteredSkills: state.learnedSkills,
             statusEffects: [],
-            martialEligible: state.isMartialEligible
+            martialEligible: state.isMartialEligible,
+            spellbook: state.spellbook,
+            spellLoadout: state.spellLoadout
         )
     }
 
@@ -68,5 +95,31 @@ enum CharacterAssembler {
             titles: titles,
             superRareTitles: superRareTitles
         )
+    }
+}
+
+private enum EquipmentSlotCalculator {
+    static func capacity(forLevel level: Int,
+                         modifiers: SkillRuntimeEffects.EquipmentSlots) -> Int {
+        let base = baseCapacity(forLevel: level)
+        let scaled = Double(base) * max(0.0, modifiers.multiplier)
+        let adjusted = Int(scaled.rounded()) + modifiers.additive
+        return max(1, adjusted)
+    }
+
+    static func usedSlots(for items: [RuntimeCharacterProgress.EquippedItem]) -> Int {
+        items.reduce(0) { partial, item in
+            let quantity = max(0, item.quantity)
+            return partial &+ quantity
+        }
+    }
+
+    private static func baseCapacity(forLevel rawLevel: Int) -> Int {
+        let level = max(1, rawLevel)
+        if level <= 18 {
+            let value = 0.34 * Double(level * level) + 0.55 * Double(level)
+            return max(1, Int(value.rounded()))
+        }
+        return max(1, 118 + (level - 18) * 16)
     }
 }

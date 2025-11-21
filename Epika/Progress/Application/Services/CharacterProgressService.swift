@@ -362,6 +362,13 @@ private extension CharacterProgressService {
                                                updatedAt: history.updatedAt)
         }
         let explorationTags = Set(tags.map(\.value))
+        func clamp(_ value: Int) -> Int {
+            max(0, min(100, value))
+        }
+        let actionPreferences = CharacterSnapshot.ActionPreferences(attack: clamp(record.actionRateAttack),
+                                                                     priestMagic: clamp(record.actionRatePriestMagic),
+                                                                     mageMagic: clamp(record.actionRateMageMagic),
+                                                                     breath: clamp(record.actionRateBreath))
 
         var avatarIdentifier = record.avatarIdentifier
         if avatarIdentifier.isEmpty {
@@ -388,6 +395,7 @@ private extension CharacterProgressService {
                                          jobHistory: jobHistory,
                                          explorationTags: explorationTags,
                                          achievements: achievements,
+                                         actionPreferences: actionPreferences,
                                          createdAt: record.createdAt,
                                          updatedAt: record.updatedAt)
 
@@ -467,6 +475,10 @@ private extension CharacterProgressService {
         record.criticalRate = snapshot.combat.criticalRate
         record.attackCount = snapshot.combat.attackCount
         record.isMartialEligible = snapshot.combat.isMartialEligible
+        record.actionRateAttack = snapshot.actionPreferences.attack
+        record.actionRatePriestMagic = snapshot.actionPreferences.priestMagic
+        record.actionRateMageMagic = snapshot.actionPreferences.mageMagic
+        record.actionRateBreath = snapshot.actionPreferences.breath
         record.primaryPersonalityId = snapshot.personality.primaryId
         record.secondaryPersonalityId = snapshot.personality.secondaryId
         record.totalBattles = snapshot.achievements.totalBattles

@@ -64,6 +64,27 @@ struct CharacterSnapshot: Sendable, Hashable {
         var defeatCount: Int
     }
 
+    struct ActionPreferences: Sendable, Hashable {
+        var attack: Int
+        var priestMagic: Int
+        var mageMagic: Int
+        var breath: Int
+
+        static func clamped(_ value: Int) -> Int {
+            max(0, min(100, value))
+        }
+
+        static func normalized(attack: Int,
+                               priestMagic: Int,
+                               mageMagic: Int,
+                               breath: Int) -> ActionPreferences {
+            ActionPreferences(attack: clamped(attack),
+                              priestMagic: clamped(priestMagic),
+                              mageMagic: clamped(mageMagic),
+                              breath: clamped(breath))
+        }
+    }
+
     struct JobHistoryEntry: Sendable, Hashable {
         var id: UUID
         var jobId: String
@@ -90,6 +111,7 @@ struct CharacterSnapshot: Sendable, Hashable {
     var jobHistory: [JobHistoryEntry]
     var explorationTags: Set<String>
     var achievements: AchievementCounters
+    var actionPreferences: ActionPreferences
     var createdAt: Date
     var updatedAt: Date
 }

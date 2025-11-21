@@ -39,6 +39,10 @@ final class CharacterRecord {
     var breathDamage: Int = 0
     var isMartialEligible: Bool = false
     var needsCombatRecalculation: Bool = true
+    var actionRateAttack: Int = 100
+    var actionRatePriestMagic: Int = 75
+    var actionRateMageMagic: Int = 75
+    var actionRateBreath: Int = 50
     var primaryPersonalityId: String?
     var secondaryPersonalityId: String?
     var totalBattles: Int = 0
@@ -75,6 +79,10 @@ final class CharacterRecord {
          trapRemoval: Int,
          additionalDamage: Int,
          breathDamage: Int,
+         actionRateAttack: Int = 100,
+         actionRatePriestMagic: Int = 75,
+         actionRateMageMagic: Int = 75,
+         actionRateBreath: Int = 50,
          isMartialEligible: Bool = false,
          needsCombatRecalculation: Bool = true,
          primaryPersonalityId: String?,
@@ -112,6 +120,10 @@ final class CharacterRecord {
         self.trapRemoval = trapRemoval
         self.additionalDamage = additionalDamage
         self.breathDamage = breathDamage
+        self.actionRateAttack = actionRateAttack
+        self.actionRatePriestMagic = actionRatePriestMagic
+        self.actionRateMageMagic = actionRateMageMagic
+        self.actionRateBreath = actionRateBreath
         self.isMartialEligible = isMartialEligible
         self.needsCombatRecalculation = needsCombatRecalculation
         self.primaryPersonalityId = primaryPersonalityId
