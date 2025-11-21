@@ -77,97 +77,79 @@ enum SkillRuntimeEffectCompiler {
         for skill in skills {
             for effect in skill.effects {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
+                try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case "damageDealtPercent":
-                    guard let damageType = payload.parameters?["damageType"],
-                          let value = payload.value["valuePercent"] else { continue }
+                    let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                     dealtPercentByType[damageType, default: 0.0] += value
                 case "damageDealtMultiplier":
-                    guard let damageType = payload.parameters?["damageType"],
-                          let multiplier = payload.value["multiplier"] else { continue }
+                    let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     dealtMultiplierByType[damageType, default: 1.0] *= multiplier
                 case "damageTakenPercent":
-                    guard let damageType = payload.parameters?["damageType"],
-                          let value = payload.value["valuePercent"] else { continue }
+                    let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                     takenPercentByType[damageType, default: 0.0] += value
                 case "damageTakenMultiplier":
-                    guard let damageType = payload.parameters?["damageType"],
-                          let multiplier = payload.value["multiplier"] else { continue }
+                    let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     takenMultiplierByType[damageType, default: 1.0] *= multiplier
                 case "damageDealtMultiplierAgainst":
-                    guard let category = payload.parameters?["targetCategory"],
-                          let multiplier = payload.value["multiplier"] else { continue }
+                    let category = try payload.requireParam("targetCategory", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     targetMultipliers[category, default: 1.0] *= multiplier
                 case "spellPowerPercent":
-                    if let value = payload.value["valuePercent"] {
-                        spellPowerPercent += value
-                    }
+                    spellPowerPercent += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                 case "spellPowerMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        spellPowerMultiplier *= multiplier
-                    }
+                    spellPowerMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "spellSpecificMultiplier":
-                    guard let spellId = payload.parameters?["spellId"],
-                          let multiplier = payload.value["multiplier"] else { continue }
+                    let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     spellSpecificMultipliers[spellId, default: 1.0] *= multiplier
                 case "spellSpecificTakenMultiplier":
-                    guard let spellId = payload.parameters?["spellId"],
-                          let multiplier = payload.value["multiplier"] else { continue }
+                    let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     spellSpecificTakenMultipliers[spellId, default: 1.0] *= multiplier
                 case "criticalDamagePercent":
-                    if let value = payload.value["valuePercent"] {
-                        criticalDamagePercent += value
-                    }
+                    criticalDamagePercent += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                 case "criticalDamageMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        criticalDamageMultiplier *= multiplier
-                    }
+                    criticalDamageMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "criticalDamageTakenMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        criticalDamageTakenMultiplier *= multiplier
-                    }
+                    criticalDamageTakenMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "penetrationDamageTakenMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        penetrationDamageTakenMultiplier *= multiplier
-                    }
+                    penetrationDamageTakenMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "martialBonusPercent":
-                    if let value = payload.value["valuePercent"] {
-                        let requiresUnarmed = payload.parameters?["requiresUnarmed"]?.lowercased() == "true"
-                        martialBonusPercent += value
-                        if requiresUnarmed {
-                            // flag for downstream if needed
-                        }
+                    let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
+                    let requiresUnarmed = payload.parameters?["requiresUnarmed"]?.lowercased() == "true"
+                    martialBonusPercent += value
+                    if requiresUnarmed {
+                        // flag for downstream if needed
                     }
                 case "martialBonusMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        martialBonusMultiplier *= multiplier
-                    }
+                    martialBonusMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "procMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        procChanceMultiplier *= multiplier
-                    }
+                    procChanceMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "extraAction":
                     let chance = payload.value["chancePercent"] ?? payload.value["valuePercent"] ?? 0.0
                     let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
                     let clampedCount = max(0, count)
-                    if chance > 0, clampedCount > 0 {
-                        extraActions.append(.init(chancePercent: chance, count: clampedCount))
+                    guard chance > 0, clampedCount > 0 else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) extraAction が無効です")
                     }
+                    extraActions.append(.init(chancePercent: chance, count: clampedCount))
                 case "reactionNextTurn":
                     let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
-                    if count > 0 {
-                        nextTurnExtraActions &+= count
+                    guard count > 0 else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) reactionNextTurn のcountが不正です")
                     }
+                    nextTurnExtraActions &+= count
                 case "actionOrderMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        actionOrderMultiplier *= multiplier
-                    }
+                    actionOrderMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "actionOrderShuffle":
                     actionOrderShuffle = true
                 case "counterAttackEvasionMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        counterAttackEvasionMultiplier *= multiplier
-                    }
+                    counterAttackEvasionMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "reaction":
                     if let reaction = BattleActor.SkillEffects.Reaction.make(from: payload,
                                                                              skillName: skill.name,
@@ -177,72 +159,73 @@ enum SkillRuntimeEffectCompiler {
                 case "rowProfile":
                     rowProfile.applyParameters(payload.parameters)
                 case "statusResistanceMultiplier":
-                    guard let statusId = payload.parameters?["status"],
-                          let multiplier = payload.value["multiplier"] else { continue }
+                    let statusId = try payload.requireParam("status", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     var entry = statusResistances[statusId] ?? .neutral
                     entry.multiplier *= multiplier
                     statusResistances[statusId] = entry
                 case "statusResistancePercent":
-                    guard let statusId = payload.parameters?["status"],
-                          let value = payload.value["valuePercent"] else { continue }
+                    let statusId = try payload.requireParam("status", skillId: skill.id, effectIndex: effect.index)
+                    let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                     var entry = statusResistances[statusId] ?? .neutral
                     entry.additivePercent += value
                     statusResistances[statusId] = entry
                 case "statusInflict":
-                    guard let statusId = payload.parameters?["statusId"],
-                          let base = payload.value["baseChancePercent"] else { continue }
+                    let statusId = try payload.requireParam("statusId", skillId: skill.id, effectIndex: effect.index)
+                    let base = try payload.requireValue("baseChancePercent", skillId: skill.id, effectIndex: effect.index)
                     statusInflictions.append(.init(statusId: statusId, baseChancePercent: base))
                 case "breathVariant":
                     let extra = payload.value["extraCharges"].map { Int($0.rounded(.towardZero)) } ?? 0
                     breathExtraCharges += max(0, extra)
                 case "berserk":
-                    if let chance = payload.value["chancePercent"] {
-                        if let current = berserkChancePercent {
-                            berserkChancePercent = max(current, chance)
-                        } else {
-                            berserkChancePercent = chance
-                        }
+                    let chance = try payload.requireValue("chancePercent", skillId: skill.id, effectIndex: effect.index)
+                    if let current = berserkChancePercent {
+                        berserkChancePercent = max(current, chance)
+                    } else {
+                        berserkChancePercent = chance
                     }
                 case "endOfTurnHealing":
-                    if let value = payload.value["valuePercent"] {
-                        endOfTurnHealingPercent = max(endOfTurnHealingPercent, value)
-                    }
+                    let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
+                    endOfTurnHealingPercent = max(endOfTurnHealingPercent, value)
                 case "endOfTurnSelfHPPercent":
-                    if let value = payload.value["valuePercent"] {
-                        endOfTurnSelfHPPercent += value
-                    }
+                    endOfTurnSelfHPPercent += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                 case "partyAttackFlag":
-                    if payload.value["hostileAll"] != nil {
-                        partyHostileAll = true
+                    let hasHostileAll = payload.value["hostileAll"] != nil
+                    let hasVampiricImpulse = payload.value["vampiricImpulse"] != nil
+                    let hasVampiricSuppression = payload.value["vampiricSuppression"] != nil
+                    guard hasHostileAll || hasVampiricImpulse || hasVampiricSuppression else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) partyAttackFlag に有効なフラグがありません")
                     }
-                    if payload.value["vampiricImpulse"] != nil {
-                        vampiricImpulse = true
-                    }
-                    if payload.value["vampiricSuppression"] != nil {
-                        vampiricSuppression = true
-                    }
+                    partyHostileAll = hasHostileAll
+                    vampiricImpulse = hasVampiricImpulse
+                    vampiricSuppression = hasVampiricSuppression
                 case "partyAttackTarget":
-                    guard let targetId = payload.parameters?["targetId"] else { continue }
-                    if payload.value["hostile"] != nil {
-                        partyHostileTargets.insert(targetId)
+                    let targetId = try payload.requireParam("targetId", skillId: skill.id, effectIndex: effect.index)
+                    let hostile = payload.value["hostile"] != nil
+                    let protect = payload.value["protect"] != nil
+                    guard hostile || protect else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) partyAttackTarget にhostile/protect指定がありません")
                     }
-                    if payload.value["protect"] != nil {
-                        partyProtectedTargets.insert(targetId)
-                    }
+                    if hostile { partyHostileTargets.insert(targetId) }
+                    if protect { partyProtectedTargets.insert(targetId) }
                 case "antiHealing":
                     antiHealingEnabled = true
                 case "barrier":
-                    guard let damageType = payload.parameters?["damageType"],
-                          let charges = payload.value["charges"] else { continue }
+                    let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    let charges = try payload.requireValue("charges", skillId: skill.id, effectIndex: effect.index)
                     let intCharges = max(0, Int(charges.rounded(.towardZero)))
-                    guard intCharges > 0 else { continue }
+                    guard intCharges > 0 else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) barrier のchargesが不正です")
+                    }
                     let current = barrierCharges[damageType] ?? 0
                     barrierCharges[damageType] = max(current, intCharges)
                 case "barrierOnGuard":
-                    guard let damageType = payload.parameters?["damageType"],
-                          let charges = payload.value["charges"] else { continue }
+                    let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    let charges = try payload.requireValue("charges", skillId: skill.id, effectIndex: effect.index)
                     let intCharges = max(0, Int(charges.rounded(.towardZero)))
-                    guard intCharges > 0 else { continue }
+                    guard intCharges > 0 else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) barrierOnGuard のchargesが不正です")
+                    }
                     let current = guardBarrierCharges[damageType] ?? 0
                     guardBarrierCharges[damageType] = max(current, intCharges)
                 case "parry":
@@ -260,8 +243,8 @@ enum SkillRuntimeEffectCompiler {
                         shieldBlockBonusPercent = max(shieldBlockBonusPercent, 0.0)
                     }
                 case "equipmentStatMultiplier":
-                    guard let category = payload.parameters?["equipmentCategory"],
-                          let multiplier = payload.value["multiplier"] else { continue }
+                    let category = try payload.requireParam("equipmentCategory", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     equipmentStatMultipliers[category, default: 1.0] *= multiplier
                 case "dodgeCap":
                     if let maxCap = payload.value["maxDodge"] {
@@ -332,19 +315,20 @@ enum SkillRuntimeEffectCompiler {
                     if let cap = payload.value["capPercent"] {
                         absorptionCapPercent = max(absorptionCapPercent, cap)
                     }
+                    if absorptionPercent == 0.0, absorptionCapPercent == 0.0 {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) absorption が空です")
+                    }
                 case "degradationRepair":
                     let minP = payload.value["minPercent"] ?? 0.0
                     let maxP = payload.value["maxPercent"] ?? 0.0
                     degradationRepairMinPercent = max(degradationRepairMinPercent, minP)
                     degradationRepairMaxPercent = max(degradationRepairMaxPercent, maxP)
                 case "degradationRepairBoost":
-                    if let bonus = payload.value["valuePercent"] {
-                        degradationRepairBonusPercent += bonus
-                    }
+                    degradationRepairBonusPercent += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                 case "autoDegradationRepair":
                     autoDegradationRepair = true
                 case "specialAttack":
-                    guard let identifier = payload.parameters?["specialAttackId"] else { continue }
+                    let identifier = try payload.requireParam("specialAttackId", skillId: skill.id, effectIndex: effect.index)
                     let chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 50
                     if let descriptor = BattleActor.SkillEffects.SpecialAttack(kindIdentifier: identifier,
                                                                               chancePercent: chance) {
@@ -359,7 +343,7 @@ enum SkillRuntimeEffectCompiler {
                     if let instant = payload.value["instant"], instant > 0 {
                         rescueModifiers.ignoreActionCost = true
                     }
-                    let chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 0
+                    let chance = Int((try payload.requireValue("chancePercent", skillId: skill.id, effectIndex: effect.index)).rounded(.towardZero))
                     let hpScaleRaw = payload.stringValues["hpScale"] ?? payload.value["hpScale"].map { _ in "magicalHealing" }
                     let hpScale = BattleActor.SkillEffects.ResurrectionActive.HPScale(rawValue: hpScaleRaw ?? "magicalHealing") ?? .magicalHealing
                     let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
@@ -367,10 +351,12 @@ enum SkillRuntimeEffectCompiler {
                                                      hpScale: hpScale,
                                                      maxTriggers: maxTriggers))
                 case "resurrectionBuff":
-                    if let guaranteed = payload.value["guaranteed"], guaranteed > 0 {
-                        let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
-                        forcedResurrection = .init(maxTriggers: maxTriggers)
+                    let guaranteed = try payload.requireValue("guaranteed", skillId: skill.id, effectIndex: effect.index)
+                    guard guaranteed > 0 else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) resurrectionBuff guaranteed が不正です")
                     }
+                    let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
+                    forcedResurrection = .init(maxTriggers: maxTriggers)
                 case "resurrectionVitalize":
                     let removePenalties = payload.value["removePenalties"].map { $0 > 0 } ?? false
                     let rememberSkills = payload.value["rememberSkills"].map { $0 > 0 } ?? false
@@ -381,60 +367,68 @@ enum SkillRuntimeEffectCompiler {
                                                  removeSkillIds: removeSkillIds,
                                                  grantSkillIds: grantSkillIds)
                 case "resurrectionSummon":
-                    if let every = payload.value["everyTurns"], every > 0 {
-                        necromancerInterval = Int(every.rounded(.towardZero))
+                    let every = try payload.requireValue("everyTurns", skillId: skill.id, effectIndex: effect.index)
+                    guard every > 0 else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) resurrectionSummon everyTurns が不正です")
                     }
+                    necromancerInterval = Int(every.rounded(.towardZero))
                 case "resurrectionPassive":
-                    if payload.stringValues["type"] == "betweenFloors" {
-                        resurrectionPassiveBetweenFloors = true
+                    guard let type = payload.stringValues["type"], type == "betweenFloors" else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) resurrectionPassive のtypeが不正です")
                     }
+                    resurrectionPassiveBetweenFloors = true
                 case "runawayMagic":
-                    if let threshold = payload.value["thresholdPercent"],
-                       let chance = payload.value["chancePercent"] {
-                        magicRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
-                    }
+                    let threshold = try payload.requireValue("thresholdPercent", skillId: skill.id, effectIndex: effect.index)
+                    let chance = try payload.requireValue("chancePercent", skillId: skill.id, effectIndex: effect.index)
+                    magicRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
                 case "runawayDamage":
-                    if let threshold = payload.value["thresholdPercent"],
-                       let chance = payload.value["chancePercent"] {
-                        damageRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
-                    }
+                    let threshold = try payload.requireValue("thresholdPercent", skillId: skill.id, effectIndex: effect.index)
+                    let chance = try payload.requireValue("chancePercent", skillId: skill.id, effectIndex: effect.index)
+                    damageRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
                 case "sacrificeRite":
-                    if let every = payload.value["everyTurns"] {
-                        let interval = max(1, Int(every.rounded(.towardZero)))
-                        sacrificeInterval = sacrificeInterval.map { min($0, interval) } ?? interval
-                    }
+                    let every = try payload.requireValue("everyTurns", skillId: skill.id, effectIndex: effect.index)
+                    let interval = max(1, Int(every.rounded(.towardZero)))
+                    sacrificeInterval = sacrificeInterval.map { min($0, interval) } ?? interval
                 case "retreatAtTurn":
-                    if let turnValue = payload.value["turn"] {
+                    let turnValue = payload.value["turn"]
+                    let chance = payload.value["chancePercent"]
+                    guard turnValue != nil || chance != nil else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) retreatAtTurn にturn/chanceがありません")
+                    }
+                    if let turnValue {
                         let normalized = max(1, Int(turnValue.rounded(.towardZero)))
                         retreatTurn = retreatTurn.map { min($0, normalized) } ?? normalized
                     }
-                    if let chance = payload.value["chancePercent"] {
+                    if let chance {
                         retreatChancePercent = max(retreatChancePercent ?? 0.0, chance)
                     }
                 case "timedMagicPowerAmplify":
-                    guard let turn = payload.value["triggerTurn"],
-                          let multiplier = payload.value["multiplier"] else { continue }
-                    timedBuffTriggers.append(.init(id: payload.familyId,
+                    let turn = try payload.requireValue("triggerTurn", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                    let triggerId = payload.familyId ?? payload.effectType
+                    timedBuffTriggers.append(.init(id: triggerId,
                                                   displayName: skill.name,
                                                   triggerTurn: Int(turn.rounded(.towardZero)),
                                                   modifiers: ["magicalDamageDealtMultiplier": multiplier],
                                                   scope: .party,
                                                   category: "magic"))
                 case "timedBreathPowerAmplify":
-                    guard let turn = payload.value["triggerTurn"],
-                          let multiplier = payload.value["multiplier"] else { continue }
-                    timedBuffTriggers.append(.init(id: payload.familyId,
+                    let turn = try payload.requireValue("triggerTurn", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                    let triggerId = payload.familyId ?? payload.effectType
+                    timedBuffTriggers.append(.init(id: triggerId,
                                                   displayName: skill.name,
                                                   triggerTurn: Int(turn.rounded(.towardZero)),
                                                   modifiers: ["breathDamageDealtMultiplier": multiplier],
                                                   scope: .party,
                                                   category: "breath"))
                 case "tacticSpellAmplify":
-                    guard let spellId = payload.parameters?["spellId"],
-                          let multiplier = payload.value["multiplier"],
-                          let triggerTurn = payload.value["triggerTurn"] else { continue }
+                    let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                    let triggerTurn = try payload.requireValue("triggerTurn", skillId: skill.id, effectIndex: effect.index)
                     let key = "spellSpecific:" + spellId
-                    timedBuffTriggers.append(.init(id: payload.familyId,
+                    let triggerId = payload.familyId ?? payload.effectType
+                    timedBuffTriggers.append(.init(id: triggerId,
                                                   displayName: skill.name,
                                                   triggerTurn: Int(triggerTurn.rounded(.towardZero)),
                                                   modifiers: [key: multiplier],
@@ -543,6 +537,7 @@ enum SkillRuntimeEffectCompiler {
         for skill in skills {
             for effect in skill.effects {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
+                try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case "equipmentSlotAdditive":
                     let raw = payload.value["add"] ?? payload.value["value"] ?? payload.value["slots"]
@@ -572,39 +567,24 @@ enum SkillRuntimeEffectCompiler {
         for skill in skills {
             for effect in skill.effects {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
+                try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case "rewardExperiencePercent":
-                    if let value = payload.value["valuePercent"] {
-                        components.experienceBonusSum += value / 100.0
-                    }
+                    components.experienceBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
                 case "rewardExperienceMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        components.experienceMultiplierProduct *= multiplier
-                    }
+                    components.experienceMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "rewardGoldPercent":
-                    if let value = payload.value["valuePercent"] {
-                        components.goldBonusSum += value / 100.0
-                    }
+                    components.goldBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
                 case "rewardGoldMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        components.goldMultiplierProduct *= multiplier
-                    }
+                    components.goldMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "rewardItemPercent":
-                    if let value = payload.value["valuePercent"] {
-                        components.itemDropBonusSum += value / 100.0
-                    }
+                    components.itemDropBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
                 case "rewardItemMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        components.itemDropMultiplierProduct *= multiplier
-                    }
+                    components.itemDropMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case "rewardTitlePercent":
-                    if let value = payload.value["valuePercent"] {
-                        components.titleBonusSum += value / 100.0
-                    }
+                    components.titleBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
                 case "rewardTitleMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        components.titleMultiplierProduct *= multiplier
-                    }
+                    components.titleMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 default:
                     continue
                 }
@@ -621,15 +601,15 @@ enum SkillRuntimeEffectCompiler {
         for skill in skills {
             for effect in skill.effects {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
+                try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case "explorationTimeMultiplier":
-                    if let multiplier = payload.value["multiplier"] {
-                        let dungeonId = payload.parameters?["dungeonId"]
-                        let dungeonName = payload.parameters?["dungeonName"]
-                        modifiers.addEntry(multiplier: multiplier,
-                                           dungeonId: dungeonId,
-                                           dungeonName: dungeonName)
-                    }
+                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                    let dungeonId = payload.parameters?["dungeonId"]
+                    let dungeonName = payload.parameters?["dungeonName"]
+                    modifiers.addEntry(multiplier: multiplier,
+                                       dungeonId: dungeonId,
+                                       dungeonName: dungeonName)
                 default:
                     continue
                 }
@@ -648,9 +628,10 @@ enum SkillRuntimeEffectCompiler {
         for skill in skills {
             for effect in skill.effects {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
+                try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case "spellAccess":
-                    guard let spellId = payload.parameters?["spellId"] else { continue }
+                    let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
                     let action = (payload.parameters?["action"] ?? "learn").lowercased()
                     if action == "forget" {
                         forgottenSpellIds.insert(spellId)
@@ -658,8 +639,8 @@ enum SkillRuntimeEffectCompiler {
                         learnedSpellIds.insert(spellId)
                     }
                 case "spellTierUnlock":
-                    guard let school = payload.parameters?["school"],
-                          let tierValue = payload.value["tier"] else { continue }
+                    let school = try payload.requireParam("school", skillId: skill.id, effectIndex: effect.index)
+                    let tierValue = try payload.requireValue("tier", skillId: skill.id, effectIndex: effect.index)
                     let tier = max(0, Int(tierValue.rounded(.towardZero)))
                     guard tier > 0 else { continue }
                     let current = tierUnlocks[school] ?? 0
@@ -727,31 +708,151 @@ enum SkillRuntimeEffectCompiler {
         return SkillRuntimeEffects.SpellLoadout(mage: mage, priest: priest)
     }
 
-    private static func decodePayload(from effect: SkillDefinition.Effect, skillId: String) throws -> SkillEffectPayload? {
-        guard !effect.payloadJSON.isEmpty,
-              let data = effect.payloadJSON.data(using: .utf8) else {
-            return nil
-        }
+    private static func decodePayload(from effect: SkillDefinition.Effect, skillId: String) throws -> DecodedSkillEffectPayload? {
         do {
-            var payload = try decoder.decode(SkillEffectPayload.self, from: data)
-            if payload.parameters == nil {
-                payload.parameters = [:]
-            }
-            return payload
+            return try SkillEffectPayloadDecoder.decode(effect: effect, fallbackEffectType: effect.kind)
         } catch {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId) の payload を解析できません: \(error)")
         }
     }
 
-    private static let decoder: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return decoder
-    }()
+    private static func validatePayload(_ payload: DecodedSkillEffectPayload,
+                                        skillId: String,
+                                        effectIndex: Int) throws {
+        if let requirements = requiredFields[payload.effectType] {
+            for key in requirements.params {
+                guard let value = payload.parameters?[key], !value.isEmpty else {
+                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType) の必須パラメータ \(key) が不足しています")
+                }
+            }
+            for key in requirements.values {
+                guard payload.value[key] != nil else {
+                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType) の必須値 \(key) が不足しています")
+                }
+            }
+        }
+
+        switch payload.effectType {
+        case "extraAction":
+            let chance = payload.value["chancePercent"] ?? payload.value["valuePercent"]
+            guard chance != nil else {
+                throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) extraAction にchanceがありません")
+            }
+        case "partyAttackFlag":
+            let hasFlag = payload.value["hostileAll"] != nil
+                || payload.value["vampiricImpulse"] != nil
+                || payload.value["vampiricSuppression"] != nil
+            guard hasFlag else {
+                throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) partyAttackFlag が空です")
+            }
+        case "partyAttackTarget":
+            let hasTargetFlag = payload.value["hostile"] != nil || payload.value["protect"] != nil
+            guard hasTargetFlag else {
+                throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) partyAttackTarget の種別指定がありません")
+            }
+        case "spellCharges":
+            let hasField = payload.value["maxCharges"] != nil
+                || payload.value["initialCharges"] != nil
+                || payload.value["initialBonus"] != nil
+                || payload.value["regenEveryTurns"] != nil
+                || payload.value["regenAmount"] != nil
+                || payload.value["regenCap"] != nil
+                || payload.value["gainOnPhysicalHit"] != nil
+            guard hasField else {
+                throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) spellCharges に有効な指定がありません")
+            }
+        case "absorption":
+            let hasValue = payload.value["percent"] != nil || payload.value["capPercent"] != nil
+            guard hasValue else {
+                throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) absorption が空です")
+            }
+        case "retreatAtTurn":
+            let hasField = payload.value["turn"] != nil || payload.value["chancePercent"] != nil
+            guard hasField else {
+                throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) retreatAtTurn にturn/chanceがありません")
+            }
+        default:
+            break
+        }
+    }
 }
 
+private struct SkillEffectValidationRequirement {
+    let params: [String]
+    let values: [String]
+}
+
+private let requiredFields: [String: SkillEffectValidationRequirement] = [
+    "absorption": .init(params: [], values: []),
+    "actionOrderMultiplier": .init(params: [], values: ["multiplier"]),
+    "actionOrderShuffle": .init(params: [], values: []),
+    "additionalDamageAdditive": .init(params: [], values: ["additive"]),
+    "additionalDamageMultiplier": .init(params: [], values: ["multiplier"]),
+    "antiHealing": .init(params: [], values: []),
+    "barrier": .init(params: ["damageType"], values: ["charges"]),
+    "barrierOnGuard": .init(params: ["damageType"], values: ["charges"]),
+    "berserk": .init(params: [], values: ["chancePercent"]),
+    "breathVariant": .init(params: [], values: ["extraCharges"]),
+    "counterAttackEvasionMultiplier": .init(params: [], values: ["multiplier"]),
+    "criticalDamageMultiplier": .init(params: [], values: ["multiplier"]),
+    "criticalDamagePercent": .init(params: [], values: ["valuePercent"]),
+    "criticalDamageTakenMultiplier": .init(params: [], values: ["multiplier"]),
+    "damageDealtMultiplier": .init(params: ["damageType"], values: ["multiplier"]),
+    "damageDealtMultiplierAgainst": .init(params: ["targetCategory"], values: ["multiplier"]),
+    "damageDealtPercent": .init(params: ["damageType"], values: ["valuePercent"]),
+    "damageTakenMultiplier": .init(params: ["damageType"], values: ["multiplier"]),
+    "damageTakenPercent": .init(params: ["damageType"], values: ["valuePercent"]),
+    "degradationRepair": .init(params: [], values: []),
+    "degradationRepairBoost": .init(params: [], values: ["valuePercent"]),
+    "endOfTurnHealing": .init(params: [], values: ["valuePercent"]),
+    "endOfTurnSelfHPPercent": .init(params: [], values: ["valuePercent"]),
+    "equipmentSlotAdditive": .init(params: [], values: []),
+    "equipmentSlotMultiplier": .init(params: [], values: []),
+    "equipmentStatMultiplier": .init(params: ["equipmentCategory"], values: ["multiplier"]),
+    "explorationTimeMultiplier": .init(params: [], values: ["multiplier"]),
+    "martialBonusMultiplier": .init(params: [], values: ["multiplier"]),
+    "martialBonusPercent": .init(params: [], values: ["valuePercent"]),
+    "minHitScale": .init(params: [], values: ["minHitScale"]),
+    "partyAttackFlag": .init(params: [], values: []),
+    "partyAttackTarget": .init(params: ["targetId"], values: []),
+    "penetrationDamageTakenMultiplier": .init(params: [], values: ["multiplier"]),
+    "procMultiplier": .init(params: [], values: ["multiplier"]),
+    "reaction": .init(params: ["trigger", "action"], values: []),
+    "reactionNextTurn": .init(params: [], values: ["count"]),
+    "resurrectionActive": .init(params: [], values: ["chancePercent"]),
+    "resurrectionBuff": .init(params: [], values: ["guaranteed"]),
+    "resurrectionPassive": .init(params: [], values: []),
+    "resurrectionSummon": .init(params: [], values: ["everyTurns"]),
+    "rewardExperienceMultiplier": .init(params: [], values: ["multiplier"]),
+    "rewardExperiencePercent": .init(params: [], values: ["valuePercent"]),
+    "rewardGoldMultiplier": .init(params: [], values: ["multiplier"]),
+    "rewardGoldPercent": .init(params: [], values: ["valuePercent"]),
+    "rewardItemMultiplier": .init(params: [], values: ["multiplier"]),
+    "rewardItemPercent": .init(params: [], values: ["valuePercent"]),
+    "rewardTitleMultiplier": .init(params: [], values: ["multiplier"]),
+    "rewardTitlePercent": .init(params: [], values: ["valuePercent"]),
+    "rowProfile": .init(params: ["profile"], values: []),
+    "runawayDamage": .init(params: [], values: ["thresholdPercent", "chancePercent"]),
+    "runawayMagic": .init(params: [], values: ["thresholdPercent", "chancePercent"]),
+    "sacrificeRite": .init(params: [], values: ["everyTurns"]),
+    "specialAttack": .init(params: ["specialAttackId"], values: []),
+    "spellAccess": .init(params: ["spellId"], values: []),
+    "spellPowerMultiplier": .init(params: [], values: ["multiplier"]),
+    "spellPowerPercent": .init(params: [], values: ["valuePercent"]),
+    "spellSpecificMultiplier": .init(params: ["spellId"], values: ["multiplier"]),
+    "spellSpecificTakenMultiplier": .init(params: ["spellId"], values: ["multiplier"]),
+    "spellTierUnlock": .init(params: ["school"], values: ["tier"]),
+    "statusInflict": .init(params: ["statusId"], values: ["baseChancePercent"]),
+    "statusResistanceMultiplier": .init(params: ["status"], values: ["multiplier"]),
+    "statusResistancePercent": .init(params: ["status"], values: ["valuePercent"]),
+    "tacticSpellAmplify": .init(params: ["spellId"], values: ["multiplier", "triggerTurn"]),
+    "timedBreathPowerAmplify": .init(params: [], values: ["triggerTurn", "multiplier"]),
+    "timedBuffTrigger": .init(params: [], values: ["triggerTurn"]),
+    "timedMagicPowerAmplify": .init(params: [], values: ["triggerTurn", "multiplier"])
+]
+
 private extension BattleActor.SkillEffects.Reaction {
-    static func make(from payload: SkillEffectPayload,
+    static func make(from payload: DecodedSkillEffectPayload,
                      skillName: String,
                      skillId: String) -> BattleActor.SkillEffects.Reaction? {
         guard payload.effectType == "reaction" else { return nil }
@@ -810,6 +911,71 @@ private extension BattleActor.SkillEffects.RowProfile {
         if let far = parameters["farApt"], far.lowercased() == "true" {
             hasRangedApt = true
         }
+    }
+}
+
+struct DecodedSkillEffectPayload: Sendable, Hashable {
+    let familyId: String?
+    let effectType: String
+    let parameters: [String: String]?
+    let value: [String: Double]
+    let stringValues: [String: String]
+    let stringArrayValues: [String: [String]]
+
+    func requireParam(_ key: String, skillId: String, effectIndex: Int) throws -> String {
+        guard let value = parameters?[key], !value.isEmpty else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType) の必須パラメータ \(key) がありません")
+        }
+        return value
+    }
+
+    func requireValue(_ key: String, skillId: String, effectIndex: Int) throws -> Double {
+        guard let value = self.value[key] else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType) の必須値 \(key) がありません")
+        }
+        return value
+    }
+}
+
+enum SkillEffectPayloadDecoder {
+    static func decode(effect: SkillDefinition.Effect, fallbackEffectType: String) throws -> DecodedSkillEffectPayload? {
+        guard !effect.payloadJSON.isEmpty,
+              let data = effect.payloadJSON.data(using: .utf8) else {
+            return nil
+        }
+        let raw = try decoder.decode(RawPayload.self, from: data)
+        let resolvedEffectType = (raw.effectType ?? raw.type ?? fallbackEffectType).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !resolvedEffectType.isEmpty else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(fallbackEffectType) の effectType が不正です")
+        }
+
+        let values = SkillEffectPayloadValues.from(rawValues: raw.value,
+                                                   stringValues: raw.stringValues,
+                                                   stringArrayValues: raw.stringArrayValues)
+        return DecodedSkillEffectPayload(
+            familyId: raw.familyId,
+            effectType: resolvedEffectType,
+            parameters: raw.parameters,
+            value: values.numericValues,
+            stringValues: values.stringValues,
+            stringArrayValues: values.stringArrayValues
+        )
+    }
+
+    private static let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }()
+
+    private struct RawPayload: Decodable {
+        let familyId: String?
+        let effectType: String?
+        let type: String?
+        let parameters: [String: String]?
+        let value: [String: SkillEffectFlexibleValue]?
+        let stringValues: [String: String]?
+        let stringArrayValues: [String: [String]]?
     }
 }
 
@@ -928,77 +1094,4 @@ private extension BattleActor.SkillEffects.DamageMultipliers {
     static let neutral = BattleActor.SkillEffects.DamageMultipliers(physical: 1.0,
                                                                     magical: 1.0,
                                                                     breath: 1.0)
-}
-
-private struct SkillEffectPayload: Decodable {
-    let familyId: String
-    let effectType: String
-    var parameters: [String: String]?
-    var value: [String: Double]
-    var stringValues: [String: String]
-    var stringArrayValues: [String: [String]]
-
-    private enum CodingKeys: String, CodingKey {
-        case familyId
-        case effectType
-        case parameters
-        case value
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        familyId = try container.decode(String.self, forKey: .familyId)
-        effectType = try container.decode(String.self, forKey: .effectType)
-        parameters = try container.decodeIfPresent([String: String].self, forKey: .parameters)
-
-        let rawValue = try container.decodeIfPresent([String: FlexibleValue].self, forKey: .value) ?? [:]
-        var doubles: [String: Double] = [:]
-        var strings: [String: String] = [:]
-        var stringArrays: [String: [String]] = [:]
-        for (key, entry) in rawValue {
-            if let double = entry.doubleValue {
-                doubles[key] = double
-            }
-            if let string = entry.stringValue {
-                strings[key] = string
-            }
-            if let array = entry.stringArrayValue {
-                stringArrays[key] = array
-            }
-        }
-        value = doubles
-        stringValues = strings
-        stringArrayValues = stringArrays
-    }
-}
-
-private struct FlexibleValue: Decodable {
-    let doubleValue: Double?
-    let stringValue: String?
-    let stringArrayValue: [String]?
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if let double = try? container.decode(Double.self) {
-            doubleValue = double
-            stringValue = nil
-            stringArrayValue = nil
-            return
-        }
-        if let array = try? container.decode([String].self) {
-            doubleValue = nil
-            stringValue = nil
-            stringArrayValue = array
-            return
-        }
-        if let string = try? container.decode(String.self) {
-            doubleValue = nil
-            stringValue = string
-            stringArrayValue = nil
-            return
-        }
-        doubleValue = nil
-        stringValue = nil
-        stringArrayValue = nil
-    }
 }

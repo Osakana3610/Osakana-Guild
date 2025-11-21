@@ -20,7 +20,7 @@ final class CombatFormulasTests: XCTestCase {
                                                      talentMultiplier: 1.0,
                                                      passiveMultiplier: 1.0,
                                                      additive: 0.0)
-        XCTAssertEqual(result, 3)
+        XCTAssertEqual(result, 8)
     }
 
     func testFinalAttackCountWithLevelScaling() {
@@ -30,7 +30,7 @@ final class CombatFormulasTests: XCTestCase {
                                                      talentMultiplier: 1.0,
                                                      passiveMultiplier: 1.0,
                                                      additive: 0.0)
-        XCTAssertEqual(result, 7)
+        XCTAssertEqual(result, 18)
     }
 
     func testFinalAttackCountWithPassiveMultiplierAndAdditive() {

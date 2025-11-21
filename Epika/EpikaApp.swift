@@ -10,6 +10,7 @@ import SwiftData
 
 @main
 struct EpikaApp: App {
+    private let isRunningTests: Bool = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     @State private var sharedModelContainer: ModelContainer?
     @State private var progressService: ProgressService?
     @State private var initializationError: String?
@@ -21,19 +22,23 @@ struct EpikaApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if let error = initializationError {
-                    StartupErrorView(message: error)
-                } else if let container = sharedModelContainer, let progressService {
-                    ContentView(progressService: progressService)
-                        .modelContainer(container)
-                        .task { await initializeSystems() }
-                } else {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if isRunningTests {
+                Text("Running Tests")
+            } else {
+                Group {
+                    if let error = initializationError {
+                        StartupErrorView(message: error)
+                    } else if let container = sharedModelContainer, let progressService {
+                        ContentView(progressService: progressService)
+                            .modelContainer(container)
+                            .task { await initializeSystems() }
+                    } else {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                 }
+                .task { await bootIfNeeded() }
             }
-            .task { await bootIfNeeded() }
         }
     }
 
@@ -41,6 +46,7 @@ struct EpikaApp: App {
 
     @MainActor
     private func bootIfNeeded() async {
+        guard !isRunningTests else { return }
         guard !didBoot else { return }
         didBoot = true
         do {

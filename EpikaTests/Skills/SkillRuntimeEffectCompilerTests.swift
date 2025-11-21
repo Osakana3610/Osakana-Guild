@@ -29,7 +29,13 @@ final class SkillRuntimeEffectCompilerTests: XCTestCase {
         let definitions = try SkillMasterTestLoader.loadDefinitions(ids: tacticIds)
         XCTAssertEqual(definitions.count, tacticIds.count)
 
-        let effects = try SkillRuntimeEffectCompiler.actorEffects(from: definitions)
+        let effects: BattleActor.SkillEffects
+        do {
+            effects = try SkillRuntimeEffectCompiler.actorEffects(from: definitions)
+        } catch {
+            XCTFail("戦術スキルのコンパイルに失敗: \(error)")
+            return
+        }
 
         let specialKinds = Set(effects.specialAttacks.map(\.kind))
         XCTAssertEqual(specialKinds, [.specialA, .specialB, .specialC, .specialD, .specialE])

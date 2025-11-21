@@ -26,7 +26,9 @@ private struct VariantEffectPayload: Sendable {
     let familyId: String
     let effectType: String
     let parameters: [String: String]?
-    let value: [String: Double]
+    let numericValues: [String: Double]
+    let stringValues: [String: String]
+    let stringArrayValues: [String: [String]]
 }
 
 extension SQLiteMasterDataManager {
@@ -70,24 +72,33 @@ extension SQLiteMasterDataManager {
                             guard !effectType.isEmpty else {
                                 throw SQLiteMasterDataError.executionFailed("Skill \(variant.id) の effectType が指定されていません")
                             }
-                            let parameters = mergeParameters(family.parameters, custom.parameters)
-                            let values = custom.value.mapValues { $0.doubleValue }
+                            let parameters = mergeParameters(mergeParameters(family.parameters, variant.parameters), custom.parameters)
                             return VariantEffectPayload(familyId: family.familyId,
                                                         effectType: effectType,
                                                         parameters: parameters,
-                                                        value: values)
+                                                        numericValues: custom.payload.numericValues,
+                                                        stringValues: custom.payload.stringValues,
+                                                        stringArrayValues: custom.payload.stringArrayValues)
                         }
                     } else {
                         guard !family.effectType.isEmpty else {
                             throw SQLiteMasterDataError.executionFailed("Skill \(variant.id) の effectType が空です")
                         }
-                        guard let value = variant.value else {
+                        let mergedParameters = mergeParameters(family.parameters, variant.parameters)
+                        let payload = variant.payload
+                        let hasPayload = !payload.numericValues.isEmpty
+                            || !payload.stringValues.isEmpty
+                            || !payload.stringArrayValues.isEmpty
+                            || !(mergedParameters?.isEmpty ?? true)
+                        guard hasPayload else {
                             throw SQLiteMasterDataError.executionFailed("Skill \(variant.id) の value が不足しています")
                         }
                         effectPayloads = [VariantEffectPayload(familyId: family.familyId,
                                                                effectType: family.effectType,
-                                                               parameters: family.parameters,
-                                                               value: value)]
+                                                               parameters: mergedParameters,
+                                                               numericValues: payload.numericValues,
+                                                               stringValues: payload.stringValues,
+                                                               stringArrayValues: payload.stringArrayValues)]
                     }
 
                     let acquisitionJSON = try encodeJSONObject([:],
@@ -101,23 +112,29 @@ extension SQLiteMasterDataManager {
                         var payloadDictionary: [String: Any] = [
                             "familyId": payload.familyId,
                             "effectType": payload.effectType,
-                            "value": payload.value
+                            "value": payload.numericValues
                         ]
                         if let parameters = payload.parameters {
                             payloadDictionary["parameters"] = parameters
                         }
+                        if !payload.stringValues.isEmpty {
+                            payloadDictionary["stringValues"] = payload.stringValues
+                        }
+                        if !payload.stringArrayValues.isEmpty {
+                            payloadDictionary["stringArrayValues"] = payload.stringArrayValues
+                        }
                         let payloadJSON = try encodeJSONObject(payloadDictionary,
                                                                 context: "Skill \(variant.id) の payload をエンコードできません")
 
-                        let effectValue = payload.value["multiplier"]
-                            ?? payload.value["additive"]
-                            ?? payload.value["points"]
-                            ?? payload.value["cap"]
-                            ?? payload.value["deltaPercent"]
-                            ?? payload.value["maxPercent"]
-                            ?? payload.value["valuePerUnit"]
-                            ?? payload.value["valuePerCount"]
-                        let valuePercent = payload.value["valuePercent"]
+                        let effectValue = payload.numericValues["multiplier"]
+                            ?? payload.numericValues["additive"]
+                            ?? payload.numericValues["points"]
+                            ?? payload.numericValues["cap"]
+                            ?? payload.numericValues["deltaPercent"]
+                            ?? payload.numericValues["maxPercent"]
+                            ?? payload.numericValues["valuePerUnit"]
+                            ?? payload.numericValues["valuePerCount"]
+                        let valuePercent = payload.numericValues["valuePercent"]
 
                         let statType = payload.parameters?["stat"] ?? payload.parameters?["targetStat"]
                         let damageType = payload.parameters?["damageType"]
@@ -242,17 +259,32 @@ struct SkillVariant: Decodable, Sendable {
     struct CustomEffect: Decodable, Sendable {
         let effectType: String?
         let parameters: [String: String]?
-        let value: [String: NumericValue]
+        let payload: SkillEffectPayloadValues
+
+        private enum CodingKeys: String, CodingKey {
+            case effectType
+            case parameters
+            case value
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            effectType = try container.decodeIfPresent(String.self, forKey: .effectType)
+            parameters = try container.decodeIfPresent([String: String].self, forKey: .parameters)
+            payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
+        }
     }
 
     let id: String
     let label: String?
-    let value: [String: Double]?
+    let parameters: [String: String]?
+    let payload: SkillEffectPayloadValues
     let effects: [CustomEffect]?
 
     private enum CodingKeys: String, CodingKey {
         case id
         case label
+        case parameters
         case value
         case effects
     }
@@ -261,27 +293,9 @@ struct SkillVariant: Decodable, Sendable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
         label = try container.decodeIfPresent(String.self, forKey: .label)
-        if let rawValues = try container.decodeIfPresent([String: NumericValue].self, forKey: .value) {
-            value = rawValues.mapValues { $0.doubleValue }
-        } else {
-            value = nil
-        }
+        parameters = try container.decodeIfPresent([String: String].self, forKey: .parameters)
+        payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
         effects = try container.decodeIfPresent([CustomEffect].self, forKey: .effects)
     }
 
-}
-
-struct NumericValue: Decodable, Sendable {
-    let doubleValue: Double
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if let double = try? container.decode(Double.self) {
-            doubleValue = double
-        } else if let int = try? container.decode(Int.self) {
-            doubleValue = Double(int)
-        } else {
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "数値に変換できません")
-        }
-    }
 }
