@@ -79,58 +79,58 @@ enum SkillRuntimeEffectCompiler {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
-                case "damageDealtPercent":
+                case .damageDealtPercent:
                     let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
                     let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                     dealtPercentByType[damageType, default: 0.0] += value
-                case "damageDealtMultiplier":
+                case .damageDealtMultiplier:
                     let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     dealtMultiplierByType[damageType, default: 1.0] *= multiplier
-                case "damageTakenPercent":
+                case .damageTakenPercent:
                     let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
                     let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                     takenPercentByType[damageType, default: 0.0] += value
-                case "damageTakenMultiplier":
+                case .damageTakenMultiplier:
                     let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     takenMultiplierByType[damageType, default: 1.0] *= multiplier
-                case "damageDealtMultiplierAgainst":
+                case .damageDealtMultiplierAgainst:
                     let category = try payload.requireParam("targetCategory", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     targetMultipliers[category, default: 1.0] *= multiplier
-                case "spellPowerPercent":
+                case .spellPowerPercent:
                     spellPowerPercent += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
-                case "spellPowerMultiplier":
+                case .spellPowerMultiplier:
                     spellPowerMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "spellSpecificMultiplier":
+                case .spellSpecificMultiplier:
                     let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     spellSpecificMultipliers[spellId, default: 1.0] *= multiplier
-                case "spellSpecificTakenMultiplier":
+                case .spellSpecificTakenMultiplier:
                     let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     spellSpecificTakenMultipliers[spellId, default: 1.0] *= multiplier
-                case "criticalDamagePercent":
+                case .criticalDamagePercent:
                     criticalDamagePercent += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
-                case "criticalDamageMultiplier":
+                case .criticalDamageMultiplier:
                     criticalDamageMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "criticalDamageTakenMultiplier":
+                case .criticalDamageTakenMultiplier:
                     criticalDamageTakenMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "penetrationDamageTakenMultiplier":
+                case .penetrationDamageTakenMultiplier:
                     penetrationDamageTakenMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "martialBonusPercent":
+                case .martialBonusPercent:
                     let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                     let requiresUnarmed = payload.parameters?["requiresUnarmed"]?.lowercased() == "true"
                     martialBonusPercent += value
                     if requiresUnarmed {
                         // flag for downstream if needed
                     }
-                case "martialBonusMultiplier":
+                case .martialBonusMultiplier:
                     martialBonusMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "procMultiplier":
+                case .procMultiplier:
                     procChanceMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "extraAction":
+                case .extraAction:
                     let chance = payload.value["chancePercent"] ?? payload.value["valuePercent"] ?? 0.0
                     let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
                     let clampedCount = max(0, count)
@@ -138,58 +138,58 @@ enum SkillRuntimeEffectCompiler {
                         throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) extraAction が無効です")
                     }
                     extraActions.append(.init(chancePercent: chance, count: clampedCount))
-                case "reactionNextTurn":
+                case .reactionNextTurn:
                     let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
                     guard count > 0 else {
                         throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) reactionNextTurn のcountが不正です")
                     }
                     nextTurnExtraActions &+= count
-                case "actionOrderMultiplier":
+                case .actionOrderMultiplier:
                     actionOrderMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "actionOrderShuffle":
+                case .actionOrderShuffle:
                     actionOrderShuffle = true
-                case "counterAttackEvasionMultiplier":
+                case .counterAttackEvasionMultiplier:
                     counterAttackEvasionMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "reaction":
+                case .reaction:
                     if let reaction = BattleActor.SkillEffects.Reaction.make(from: payload,
                                                                              skillName: skill.name,
                                                                              skillId: skill.id) {
                         reactions.append(reaction)
                     }
-                case "rowProfile":
+                case .rowProfile:
                     rowProfile.applyParameters(payload.parameters)
-                case "statusResistanceMultiplier":
+                case .statusResistanceMultiplier:
                     let statusId = try payload.requireParam("status", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     var entry = statusResistances[statusId] ?? .neutral
                     entry.multiplier *= multiplier
                     statusResistances[statusId] = entry
-                case "statusResistancePercent":
+                case .statusResistancePercent:
                     let statusId = try payload.requireParam("status", skillId: skill.id, effectIndex: effect.index)
                     let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                     var entry = statusResistances[statusId] ?? .neutral
                     entry.additivePercent += value
                     statusResistances[statusId] = entry
-                case "statusInflict":
+                case .statusInflict:
                     let statusId = try payload.requireParam("statusId", skillId: skill.id, effectIndex: effect.index)
                     let base = try payload.requireValue("baseChancePercent", skillId: skill.id, effectIndex: effect.index)
                     statusInflictions.append(.init(statusId: statusId, baseChancePercent: base))
-                case "breathVariant":
+                case .breathVariant:
                     let extra = payload.value["extraCharges"].map { Int($0.rounded(.towardZero)) } ?? 0
                     breathExtraCharges += max(0, extra)
-                case "berserk":
+                case .berserk:
                     let chance = try payload.requireValue("chancePercent", skillId: skill.id, effectIndex: effect.index)
                     if let current = berserkChancePercent {
                         berserkChancePercent = max(current, chance)
                     } else {
                         berserkChancePercent = chance
                     }
-                case "endOfTurnHealing":
+                case .endOfTurnHealing:
                     let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                     endOfTurnHealingPercent = max(endOfTurnHealingPercent, value)
-                case "endOfTurnSelfHPPercent":
+                case .endOfTurnSelfHPPercent:
                     endOfTurnSelfHPPercent += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
-                case "partyAttackFlag":
+                case .partyAttackFlag:
                     let hasHostileAll = payload.value["hostileAll"] != nil
                     let hasVampiricImpulse = payload.value["vampiricImpulse"] != nil
                     let hasVampiricSuppression = payload.value["vampiricSuppression"] != nil
@@ -199,7 +199,7 @@ enum SkillRuntimeEffectCompiler {
                     partyHostileAll = hasHostileAll
                     vampiricImpulse = hasVampiricImpulse
                     vampiricSuppression = hasVampiricSuppression
-                case "partyAttackTarget":
+                case .partyAttackTarget:
                     let targetId = try payload.requireParam("targetId", skillId: skill.id, effectIndex: effect.index)
                     let hostile = payload.value["hostile"] != nil
                     let protect = payload.value["protect"] != nil
@@ -208,9 +208,9 @@ enum SkillRuntimeEffectCompiler {
                     }
                     if hostile { partyHostileTargets.insert(targetId) }
                     if protect { partyProtectedTargets.insert(targetId) }
-                case "antiHealing":
+                case .antiHealing:
                     antiHealingEnabled = true
-                case "barrier":
+                case .barrier:
                     let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
                     let charges = try payload.requireValue("charges", skillId: skill.id, effectIndex: effect.index)
                     let intCharges = max(0, Int(charges.rounded(.towardZero)))
@@ -219,7 +219,7 @@ enum SkillRuntimeEffectCompiler {
                     }
                     let current = barrierCharges[damageType] ?? 0
                     barrierCharges[damageType] = max(current, intCharges)
-                case "barrierOnGuard":
+                case .barrierOnGuard:
                     let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
                     let charges = try payload.requireValue("charges", skillId: skill.id, effectIndex: effect.index)
                     let intCharges = max(0, Int(charges.rounded(.towardZero)))
@@ -228,32 +228,32 @@ enum SkillRuntimeEffectCompiler {
                     }
                     let current = guardBarrierCharges[damageType] ?? 0
                     guardBarrierCharges[damageType] = max(current, intCharges)
-                case "parry":
+                case .parry:
                     parryEnabled = true
                     if let bonus = payload.value["bonusPercent"] {
                         parryBonusPercent = max(parryBonusPercent, bonus)
                     } else {
                         parryBonusPercent = max(parryBonusPercent, 0.0)
                     }
-                case "shieldBlock":
+                case .shieldBlock:
                     shieldBlockEnabled = true
                     if let bonus = payload.value["bonusPercent"] {
                         shieldBlockBonusPercent = max(shieldBlockBonusPercent, bonus)
                     } else {
                         shieldBlockBonusPercent = max(shieldBlockBonusPercent, 0.0)
                     }
-                case "equipmentStatMultiplier":
+                case .equipmentStatMultiplier:
                     let category = try payload.requireParam("equipmentCategory", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     equipmentStatMultipliers[category, default: 1.0] *= multiplier
-                case "dodgeCap":
+                case .dodgeCap:
                     if let maxCap = payload.value["maxDodge"] {
                         dodgeCapMax = max(dodgeCapMax ?? 0.0, maxCap)
                     }
                     if let scale = payload.value["minHitScale"] {
                         minHitScale = minHitScale.map { min($0, scale) } ?? scale
                     }
-                case "spellCharges":
+                case .spellCharges:
                     let targetSpellId = payload.parameters?["spellId"]
                     var modifier = targetSpellId.flatMap { spellChargeModifiers[$0] }
                         ?? defaultSpellChargeModifier
@@ -308,7 +308,7 @@ enum SkillRuntimeEffectCompiler {
                     } else {
                         defaultSpellChargeModifier = modifier
                     }
-                case "absorption":
+                case .absorption:
                     if let percent = payload.value["percent"] {
                         absorptionPercent = max(absorptionPercent, percent)
                     }
@@ -318,28 +318,28 @@ enum SkillRuntimeEffectCompiler {
                     if absorptionPercent == 0.0, absorptionCapPercent == 0.0 {
                         throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) absorption が空です")
                     }
-                case "degradationRepair":
+                case .degradationRepair:
                     let minP = payload.value["minPercent"] ?? 0.0
                     let maxP = payload.value["maxPercent"] ?? 0.0
                     degradationRepairMinPercent = max(degradationRepairMinPercent, minP)
                     degradationRepairMaxPercent = max(degradationRepairMaxPercent, maxP)
-                case "degradationRepairBoost":
+                case .degradationRepairBoost:
                     degradationRepairBonusPercent += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
-                case "autoDegradationRepair":
+                case .autoDegradationRepair:
                     autoDegradationRepair = true
-                case "specialAttack":
+                case .specialAttack:
                     let identifier = try payload.requireParam("specialAttackId", skillId: skill.id, effectIndex: effect.index)
                     let chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 50
                     if let descriptor = BattleActor.SkillEffects.SpecialAttack(kindIdentifier: identifier,
                                                                               chancePercent: chance) {
                         specialAttacks.append(descriptor)
                     }
-                case "resurrectionSave":
+                case .resurrectionSave:
                     let usesPriest = payload.value["usesPriestMagic"].map { $0 > 0 } ?? false
                     let minLevel = payload.value["minLevel"].map { Int($0.rounded(.towardZero)) } ?? 0
                     rescueCapabilities.append(.init(usesPriestMagic: usesPriest,
                                                     minLevel: max(0, minLevel)))
-                case "resurrectionActive":
+                case .resurrectionActive:
                     if let instant = payload.value["instant"], instant > 0 {
                         rescueModifiers.ignoreActionCost = true
                     }
@@ -350,14 +350,14 @@ enum SkillRuntimeEffectCompiler {
                     resurrectionActives.append(.init(chancePercent: max(0, chance),
                                                      hpScale: hpScale,
                                                      maxTriggers: maxTriggers))
-                case "resurrectionBuff":
+                case .resurrectionBuff:
                     let guaranteed = try payload.requireValue("guaranteed", skillId: skill.id, effectIndex: effect.index)
                     guard guaranteed > 0 else {
                         throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) resurrectionBuff guaranteed が不正です")
                     }
                     let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
                     forcedResurrection = .init(maxTriggers: maxTriggers)
-                case "resurrectionVitalize":
+                case .resurrectionVitalize:
                     let removePenalties = payload.value["removePenalties"].map { $0 > 0 } ?? false
                     let rememberSkills = payload.value["rememberSkills"].map { $0 > 0 } ?? false
                     let removeSkillIds = payload.stringArrayValues["removeSkillIds"] ?? []
@@ -366,30 +366,30 @@ enum SkillRuntimeEffectCompiler {
                                                  rememberSkills: rememberSkills,
                                                  removeSkillIds: removeSkillIds,
                                                  grantSkillIds: grantSkillIds)
-                case "resurrectionSummon":
+                case .resurrectionSummon:
                     let every = try payload.requireValue("everyTurns", skillId: skill.id, effectIndex: effect.index)
                     guard every > 0 else {
                         throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) resurrectionSummon everyTurns が不正です")
                     }
                     necromancerInterval = Int(every.rounded(.towardZero))
-                case "resurrectionPassive":
+                case .resurrectionPassive:
                     guard let type = payload.stringValues["type"], type == "betweenFloors" else {
                         throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) resurrectionPassive のtypeが不正です")
                     }
                     resurrectionPassiveBetweenFloors = true
-                case "runawayMagic":
+                case .runawayMagic:
                     let threshold = try payload.requireValue("thresholdPercent", skillId: skill.id, effectIndex: effect.index)
                     let chance = try payload.requireValue("chancePercent", skillId: skill.id, effectIndex: effect.index)
                     magicRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
-                case "runawayDamage":
+                case .runawayDamage:
                     let threshold = try payload.requireValue("thresholdPercent", skillId: skill.id, effectIndex: effect.index)
                     let chance = try payload.requireValue("chancePercent", skillId: skill.id, effectIndex: effect.index)
                     damageRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
-                case "sacrificeRite":
+                case .sacrificeRite:
                     let every = try payload.requireValue("everyTurns", skillId: skill.id, effectIndex: effect.index)
                     let interval = max(1, Int(every.rounded(.towardZero)))
                     sacrificeInterval = sacrificeInterval.map { min($0, interval) } ?? interval
-                case "retreatAtTurn":
+                case .retreatAtTurn:
                     let turnValue = payload.value["turn"]
                     let chance = payload.value["chancePercent"]
                     guard turnValue != nil || chance != nil else {
@@ -402,42 +402,72 @@ enum SkillRuntimeEffectCompiler {
                     if let chance {
                         retreatChancePercent = max(retreatChancePercent ?? 0.0, chance)
                     }
-                case "timedMagicPowerAmplify":
+                case .timedMagicPowerAmplify:
                     let turn = try payload.requireValue("triggerTurn", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                    let triggerId = payload.familyId ?? payload.effectType
+                    let triggerId = payload.familyId ?? payload.effectType.rawValue
                     timedBuffTriggers.append(.init(id: triggerId,
                                                   displayName: skill.name,
                                                   triggerTurn: Int(turn.rounded(.towardZero)),
                                                   modifiers: ["magicalDamageDealtMultiplier": multiplier],
                                                   scope: .party,
                                                   category: "magic"))
-                case "timedBreathPowerAmplify":
+                case .timedBreathPowerAmplify:
                     let turn = try payload.requireValue("triggerTurn", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                    let triggerId = payload.familyId ?? payload.effectType
+                    let triggerId = payload.familyId ?? payload.effectType.rawValue
                     timedBuffTriggers.append(.init(id: triggerId,
                                                   displayName: skill.name,
                                                   triggerTurn: Int(turn.rounded(.towardZero)),
                                                   modifiers: ["breathDamageDealtMultiplier": multiplier],
                                                   scope: .party,
                                                   category: "breath"))
-                case "tacticSpellAmplify":
+                case .tacticSpellAmplify:
                     let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     let triggerTurn = try payload.requireValue("triggerTurn", skillId: skill.id, effectIndex: effect.index)
                     let key = "spellSpecific:" + spellId
-                    let triggerId = payload.familyId ?? payload.effectType
+                    let triggerId = payload.familyId ?? payload.effectType.rawValue
                     timedBuffTriggers.append(.init(id: triggerId,
                                                   displayName: skill.name,
                                                   triggerTurn: Int(triggerTurn.rounded(.towardZero)),
                                                   modifiers: [key: multiplier],
                                                   scope: .party,
                                                   category: "spell"))
-                default:
+                case .additionalDamageAdditive,
+                     .additionalDamageMultiplier,
+                     .attackCountAdditive,
+                     .attackCountMultiplier,
+                     .criticalRateAdditive,
+                     .criticalRateCap,
+                     .criticalRateMaxAbsolute,
+                     .criticalRateMaxDelta,
+                     .equipmentSlotAdditive,
+                     .equipmentSlotMultiplier,
+                     .explorationTimeMultiplier,
+                     .growthMultiplier,
+                     .incompetenceStat,
+                     .minHitScale,
+                     .rewardExperienceMultiplier,
+                     .rewardExperiencePercent,
+                     .rewardGoldMultiplier,
+                     .rewardGoldPercent,
+                     .rewardItemMultiplier,
+                     .rewardItemPercent,
+                     .rewardTitleMultiplier,
+                     .rewardTitlePercent,
+                     .spellAccess,
+                     .spellTierUnlock,
+                     .statAdditive,
+                     .statConversionLinear,
+                     .statConversionPercent,
+                     .statFixedToOne,
+                     .statMultiplier,
+                     .talentStat,
+                     .timedBuffTrigger:
                     continue
-                }
             }
+        }
         }
 
         func totalMultiplier(for damageType: String) -> Double {
@@ -539,21 +569,107 @@ enum SkillRuntimeEffectCompiler {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
-                case "equipmentSlotAdditive":
+                case .equipmentSlotAdditive:
                     let raw = payload.value["add"] ?? payload.value["value"] ?? payload.value["slots"]
                     if let value = raw {
                         let intValue = Int(value.rounded(.towardZero))
                         result.additive &+= max(0, intValue)
                     }
-                case "equipmentSlotMultiplier":
+                case .equipmentSlotMultiplier:
                     let raw = payload.value["multiplier"] ?? payload.value["value"]
                     if let multiplier = raw {
                         result.multiplier *= multiplier
                     }
-                default:
+                case .absorption,
+                     .actionOrderMultiplier,
+                     .actionOrderShuffle,
+                     .attackCountAdditive,
+                     .attackCountMultiplier,
+                     .additionalDamageAdditive,
+                     .additionalDamageMultiplier,
+                     .antiHealing,
+                     .autoDegradationRepair,
+                     .barrier,
+                     .barrierOnGuard,
+                     .berserk,
+                     .breathVariant,
+                     .counterAttackEvasionMultiplier,
+                     .criticalDamageMultiplier,
+                     .criticalDamagePercent,
+                     .criticalDamageTakenMultiplier,
+                     .criticalRateAdditive,
+                     .criticalRateCap,
+                     .criticalRateMaxAbsolute,
+                     .criticalRateMaxDelta,
+                     .damageDealtMultiplier,
+                     .damageDealtMultiplierAgainst,
+                     .damageDealtPercent,
+                     .damageTakenMultiplier,
+                     .damageTakenPercent,
+                     .degradationRepair,
+                     .degradationRepairBoost,
+                     .growthMultiplier,
+                     .dodgeCap,
+                     .endOfTurnHealing,
+                     .endOfTurnSelfHPPercent,
+                     .equipmentStatMultiplier,
+                     .explorationTimeMultiplier,
+                     .extraAction,
+                     .martialBonusMultiplier,
+                     .martialBonusPercent,
+                     .minHitScale,
+                     .partyAttackFlag,
+                     .partyAttackTarget,
+                     .parry,
+                     .penetrationDamageTakenMultiplier,
+                     .procMultiplier,
+                     .reaction,
+                     .reactionNextTurn,
+                     .resurrectionActive,
+                     .resurrectionBuff,
+                     .resurrectionPassive,
+                     .resurrectionSave,
+                     .resurrectionSummon,
+                     .resurrectionVitalize,
+                     .retreatAtTurn,
+                     .rewardExperienceMultiplier,
+                     .rewardExperiencePercent,
+                     .rewardGoldMultiplier,
+                     .rewardGoldPercent,
+                     .rewardItemMultiplier,
+                     .rewardItemPercent,
+                     .rewardTitleMultiplier,
+                     .rewardTitlePercent,
+                     .rowProfile,
+                     .statAdditive,
+                     .statConversionLinear,
+                     .statConversionPercent,
+                     .statFixedToOne,
+                     .statMultiplier,
+                     .runawayDamage,
+                     .runawayMagic,
+                     .sacrificeRite,
+                     .talentStat,
+                     .incompetenceStat,
+                     .shieldBlock,
+                     .specialAttack,
+                     .spellAccess,
+                     .spellCharges,
+                     .spellPowerMultiplier,
+                     .spellPowerPercent,
+                     .spellSpecificMultiplier,
+                     .spellSpecificTakenMultiplier,
+                     .spellTierUnlock,
+                     .statusInflict,
+                     .statusResistanceMultiplier,
+                     .statusResistancePercent,
+                     .tacticSpellAmplify,
+                     .timedBreathPowerAmplify,
+                     .timedBuffTrigger,
+                     .timedMagicPowerAmplify:
                     continue
-                }
             }
+        }
         }
 
         return result
@@ -569,26 +685,106 @@ enum SkillRuntimeEffectCompiler {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
-                case "rewardExperiencePercent":
+                case .rewardExperiencePercent:
                     components.experienceBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
-                case "rewardExperienceMultiplier":
+                case .rewardExperienceMultiplier:
                     components.experienceMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "rewardGoldPercent":
+                case .rewardGoldPercent:
                     components.goldBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
-                case "rewardGoldMultiplier":
+                case .rewardGoldMultiplier:
                     components.goldMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "rewardItemPercent":
+                case .rewardItemPercent:
                     components.itemDropBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
-                case "rewardItemMultiplier":
+                case .rewardItemMultiplier:
                     components.itemDropMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                case "rewardTitlePercent":
+                case .rewardTitlePercent:
                     components.titleBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
-                case "rewardTitleMultiplier":
+                case .rewardTitleMultiplier:
                     components.titleMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                default:
+                case .absorption,
+                     .actionOrderMultiplier,
+                     .actionOrderShuffle,
+                     .attackCountAdditive,
+                     .attackCountMultiplier,
+                     .additionalDamageAdditive,
+                     .additionalDamageMultiplier,
+                     .antiHealing,
+                     .autoDegradationRepair,
+                     .barrier,
+                     .barrierOnGuard,
+                     .berserk,
+                     .breathVariant,
+                     .counterAttackEvasionMultiplier,
+                     .criticalDamageMultiplier,
+                     .criticalDamagePercent,
+                     .criticalDamageTakenMultiplier,
+                     .criticalRateAdditive,
+                     .criticalRateCap,
+                     .criticalRateMaxAbsolute,
+                     .criticalRateMaxDelta,
+                     .damageDealtMultiplier,
+                     .damageDealtMultiplierAgainst,
+                     .damageDealtPercent,
+                     .damageTakenMultiplier,
+                     .damageTakenPercent,
+                     .degradationRepair,
+                     .degradationRepairBoost,
+                     .growthMultiplier,
+                     .dodgeCap,
+                     .endOfTurnHealing,
+                     .endOfTurnSelfHPPercent,
+                     .equipmentSlotAdditive,
+                     .equipmentSlotMultiplier,
+                     .equipmentStatMultiplier,
+                     .explorationTimeMultiplier,
+                     .extraAction,
+                     .martialBonusMultiplier,
+                     .martialBonusPercent,
+                     .minHitScale,
+                     .partyAttackFlag,
+                     .partyAttackTarget,
+                     .parry,
+                     .penetrationDamageTakenMultiplier,
+                     .procMultiplier,
+                     .reaction,
+                     .reactionNextTurn,
+                     .resurrectionActive,
+                     .resurrectionBuff,
+                     .resurrectionPassive,
+                     .resurrectionSave,
+                     .resurrectionSummon,
+                     .resurrectionVitalize,
+                     .retreatAtTurn,
+                     .rowProfile,
+                     .statAdditive,
+                     .statConversionLinear,
+                     .statConversionPercent,
+                     .statFixedToOne,
+                     .statMultiplier,
+                     .runawayDamage,
+                     .runawayMagic,
+                     .sacrificeRite,
+                     .talentStat,
+                     .incompetenceStat,
+                     .shieldBlock,
+                     .specialAttack,
+                     .spellAccess,
+                     .spellCharges,
+                     .spellPowerMultiplier,
+                     .spellPowerPercent,
+                     .spellSpecificMultiplier,
+                     .spellSpecificTakenMultiplier,
+                     .spellTierUnlock,
+                     .statusInflict,
+                     .statusResistanceMultiplier,
+                     .statusResistancePercent,
+                     .tacticSpellAmplify,
+                     .timedBreathPowerAmplify,
+                     .timedBuffTrigger,
+                     .timedMagicPowerAmplify:
                     continue
-                }
             }
+        }
         }
 
         return components
@@ -603,17 +799,104 @@ enum SkillRuntimeEffectCompiler {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
-                case "explorationTimeMultiplier":
+                case .explorationTimeMultiplier:
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     let dungeonId = payload.parameters?["dungeonId"]
                     let dungeonName = payload.parameters?["dungeonName"]
                     modifiers.addEntry(multiplier: multiplier,
                                        dungeonId: dungeonId,
                                        dungeonName: dungeonName)
-                default:
+                case .absorption,
+                     .actionOrderMultiplier,
+                     .actionOrderShuffle,
+                     .attackCountAdditive,
+                     .attackCountMultiplier,
+                     .additionalDamageAdditive,
+                     .additionalDamageMultiplier,
+                     .antiHealing,
+                     .autoDegradationRepair,
+                     .barrier,
+                     .barrierOnGuard,
+                     .berserk,
+                     .breathVariant,
+                     .counterAttackEvasionMultiplier,
+                     .criticalDamageMultiplier,
+                     .criticalDamagePercent,
+                     .criticalDamageTakenMultiplier,
+                     .criticalRateAdditive,
+                     .criticalRateCap,
+                     .criticalRateMaxAbsolute,
+                     .criticalRateMaxDelta,
+                     .damageDealtMultiplier,
+                     .damageDealtMultiplierAgainst,
+                     .damageDealtPercent,
+                     .damageTakenMultiplier,
+                     .damageTakenPercent,
+                     .degradationRepair,
+                     .degradationRepairBoost,
+                     .growthMultiplier,
+                     .dodgeCap,
+                     .endOfTurnHealing,
+                     .endOfTurnSelfHPPercent,
+                     .equipmentSlotAdditive,
+                     .equipmentSlotMultiplier,
+                     .equipmentStatMultiplier,
+                     .extraAction,
+                     .martialBonusMultiplier,
+                     .martialBonusPercent,
+                     .minHitScale,
+                     .partyAttackFlag,
+                     .partyAttackTarget,
+                     .parry,
+                     .penetrationDamageTakenMultiplier,
+                     .procMultiplier,
+                     .reaction,
+                     .reactionNextTurn,
+                     .resurrectionActive,
+                     .resurrectionBuff,
+                     .resurrectionPassive,
+                     .resurrectionSave,
+                     .resurrectionSummon,
+                     .resurrectionVitalize,
+                     .retreatAtTurn,
+                     .rewardExperienceMultiplier,
+                     .rewardExperiencePercent,
+                     .rewardGoldMultiplier,
+                     .rewardGoldPercent,
+                     .rewardItemMultiplier,
+                     .rewardItemPercent,
+                     .rewardTitleMultiplier,
+                     .rewardTitlePercent,
+                     .rowProfile,
+                     .statAdditive,
+                     .statConversionLinear,
+                     .statConversionPercent,
+                     .statFixedToOne,
+                     .statMultiplier,
+                     .runawayDamage,
+                     .runawayMagic,
+                     .sacrificeRite,
+                     .talentStat,
+                     .incompetenceStat,
+                     .shieldBlock,
+                     .specialAttack,
+                     .spellAccess,
+                     .spellCharges,
+                     .spellPowerMultiplier,
+                     .spellPowerPercent,
+                     .spellSpecificMultiplier,
+                     .spellSpecificTakenMultiplier,
+                     .spellTierUnlock,
+                     .statusInflict,
+                     .statusResistanceMultiplier,
+                     .statusResistancePercent,
+                     .tacticSpellAmplify,
+                     .timedBreathPowerAmplify,
+                     .timedBuffTrigger,
+                     .timedMagicPowerAmplify:
                     continue
-                }
             }
+        }
         }
 
         return modifiers
@@ -630,7 +913,7 @@ enum SkillRuntimeEffectCompiler {
                 guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
-                case "spellAccess":
+                case .spellAccess:
                     let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
                     let action = (payload.parameters?["action"] ?? "learn").lowercased()
                     if action == "forget" {
@@ -638,7 +921,7 @@ enum SkillRuntimeEffectCompiler {
                     } else {
                         learnedSpellIds.insert(spellId)
                     }
-                case "spellTierUnlock":
+                case .spellTierUnlock:
                     let school = try payload.requireParam("school", skillId: skill.id, effectIndex: effect.index)
                     let tierValue = try payload.requireValue("tier", skillId: skill.id, effectIndex: effect.index)
                     let tier = max(0, Int(tierValue.rounded(.towardZero)))
@@ -647,10 +930,96 @@ enum SkillRuntimeEffectCompiler {
                     if tier > current {
                         tierUnlocks[school] = tier
                     }
-                default:
+                case .absorption,
+                     .actionOrderMultiplier,
+                     .actionOrderShuffle,
+                     .attackCountAdditive,
+                     .attackCountMultiplier,
+                     .additionalDamageAdditive,
+                     .additionalDamageMultiplier,
+                     .antiHealing,
+                     .autoDegradationRepair,
+                     .barrier,
+                     .barrierOnGuard,
+                     .berserk,
+                     .breathVariant,
+                     .counterAttackEvasionMultiplier,
+                     .criticalDamageMultiplier,
+                     .criticalDamagePercent,
+                     .criticalDamageTakenMultiplier,
+                     .criticalRateAdditive,
+                     .criticalRateCap,
+                     .criticalRateMaxAbsolute,
+                     .criticalRateMaxDelta,
+                     .damageDealtMultiplier,
+                     .damageDealtMultiplierAgainst,
+                     .damageDealtPercent,
+                     .damageTakenMultiplier,
+                     .damageTakenPercent,
+                     .degradationRepair,
+                     .degradationRepairBoost,
+                     .growthMultiplier,
+                     .dodgeCap,
+                     .endOfTurnHealing,
+                     .endOfTurnSelfHPPercent,
+                     .equipmentSlotAdditive,
+                     .equipmentSlotMultiplier,
+                     .equipmentStatMultiplier,
+                     .explorationTimeMultiplier,
+                     .extraAction,
+                     .martialBonusMultiplier,
+                     .martialBonusPercent,
+                     .minHitScale,
+                     .partyAttackFlag,
+                     .partyAttackTarget,
+                     .parry,
+                     .penetrationDamageTakenMultiplier,
+                     .procMultiplier,
+                     .reaction,
+                     .reactionNextTurn,
+                     .resurrectionActive,
+                     .resurrectionBuff,
+                     .resurrectionPassive,
+                     .resurrectionSave,
+                     .resurrectionSummon,
+                     .resurrectionVitalize,
+                     .retreatAtTurn,
+                     .rewardExperienceMultiplier,
+                     .rewardExperiencePercent,
+                     .rewardGoldMultiplier,
+                     .rewardGoldPercent,
+                     .rewardItemMultiplier,
+                     .rewardItemPercent,
+                     .rewardTitleMultiplier,
+                     .rewardTitlePercent,
+                     .rowProfile,
+                     .statAdditive,
+                     .statConversionLinear,
+                     .statConversionPercent,
+                     .statFixedToOne,
+                     .statMultiplier,
+                     .runawayDamage,
+                     .runawayMagic,
+                     .sacrificeRite,
+                     .talentStat,
+                     .incompetenceStat,
+                     .shieldBlock,
+                     .specialAttack,
+                     .spellCharges,
+                     .spellPowerMultiplier,
+                     .spellPowerPercent,
+                     .spellSpecificMultiplier,
+                     .spellSpecificTakenMultiplier,
+                     .statusInflict,
+                     .statusResistanceMultiplier,
+                     .statusResistancePercent,
+                     .tacticSpellAmplify,
+                     .timedBreathPowerAmplify,
+                     .timedBuffTrigger,
+                     .timedMagicPowerAmplify:
                     continue
-                }
             }
+        }
         }
 
         return SkillRuntimeEffects.Spellbook(learnedSpellIds: learnedSpellIds,
@@ -722,35 +1091,35 @@ enum SkillRuntimeEffectCompiler {
         if let requirements = requiredFields[payload.effectType] {
             for key in requirements.params {
                 guard let value = payload.parameters?[key], !value.isEmpty else {
-                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType) の必須パラメータ \(key) が不足しています")
+                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType.rawValue) の必須パラメータ \(key) が不足しています")
                 }
             }
             for key in requirements.values {
                 guard payload.value[key] != nil else {
-                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType) の必須値 \(key) が不足しています")
+                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType.rawValue) の必須値 \(key) が不足しています")
                 }
             }
         }
 
         switch payload.effectType {
-        case "extraAction":
+        case .extraAction:
             let chance = payload.value["chancePercent"] ?? payload.value["valuePercent"]
             guard chance != nil else {
                 throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) extraAction にchanceがありません")
             }
-        case "partyAttackFlag":
+        case .partyAttackFlag:
             let hasFlag = payload.value["hostileAll"] != nil
                 || payload.value["vampiricImpulse"] != nil
                 || payload.value["vampiricSuppression"] != nil
             guard hasFlag else {
                 throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) partyAttackFlag が空です")
             }
-        case "partyAttackTarget":
+        case .partyAttackTarget:
             let hasTargetFlag = payload.value["hostile"] != nil || payload.value["protect"] != nil
             guard hasTargetFlag else {
                 throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) partyAttackTarget の種別指定がありません")
             }
-        case "spellCharges":
+        case .spellCharges:
             let hasField = payload.value["maxCharges"] != nil
                 || payload.value["initialCharges"] != nil
                 || payload.value["initialBonus"] != nil
@@ -761,12 +1130,12 @@ enum SkillRuntimeEffectCompiler {
             guard hasField else {
                 throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) spellCharges に有効な指定がありません")
             }
-        case "absorption":
+        case .absorption:
             let hasValue = payload.value["percent"] != nil || payload.value["capPercent"] != nil
             guard hasValue else {
                 throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) absorption が空です")
             }
-        case "retreatAtTurn":
+        case .retreatAtTurn:
             let hasField = payload.value["turn"] != nil || payload.value["chancePercent"] != nil
             guard hasField else {
                 throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) retreatAtTurn にturn/chanceがありません")
@@ -782,80 +1151,172 @@ private struct SkillEffectValidationRequirement {
     let values: [String]
 }
 
-private let requiredFields: [String: SkillEffectValidationRequirement] = [
-    "absorption": .init(params: [], values: []),
-    "actionOrderMultiplier": .init(params: [], values: ["multiplier"]),
-    "actionOrderShuffle": .init(params: [], values: []),
-    "additionalDamageAdditive": .init(params: [], values: ["additive"]),
-    "additionalDamageMultiplier": .init(params: [], values: ["multiplier"]),
-    "antiHealing": .init(params: [], values: []),
-    "barrier": .init(params: ["damageType"], values: ["charges"]),
-    "barrierOnGuard": .init(params: ["damageType"], values: ["charges"]),
-    "berserk": .init(params: [], values: ["chancePercent"]),
-    "breathVariant": .init(params: [], values: ["extraCharges"]),
-    "counterAttackEvasionMultiplier": .init(params: [], values: ["multiplier"]),
-    "criticalDamageMultiplier": .init(params: [], values: ["multiplier"]),
-    "criticalDamagePercent": .init(params: [], values: ["valuePercent"]),
-    "criticalDamageTakenMultiplier": .init(params: [], values: ["multiplier"]),
-    "damageDealtMultiplier": .init(params: ["damageType"], values: ["multiplier"]),
-    "damageDealtMultiplierAgainst": .init(params: ["targetCategory"], values: ["multiplier"]),
-    "damageDealtPercent": .init(params: ["damageType"], values: ["valuePercent"]),
-    "damageTakenMultiplier": .init(params: ["damageType"], values: ["multiplier"]),
-    "damageTakenPercent": .init(params: ["damageType"], values: ["valuePercent"]),
-    "degradationRepair": .init(params: [], values: []),
-    "degradationRepairBoost": .init(params: [], values: ["valuePercent"]),
-    "endOfTurnHealing": .init(params: [], values: ["valuePercent"]),
-    "endOfTurnSelfHPPercent": .init(params: [], values: ["valuePercent"]),
-    "equipmentSlotAdditive": .init(params: [], values: []),
-    "equipmentSlotMultiplier": .init(params: [], values: []),
-    "equipmentStatMultiplier": .init(params: ["equipmentCategory"], values: ["multiplier"]),
-    "explorationTimeMultiplier": .init(params: [], values: ["multiplier"]),
-    "martialBonusMultiplier": .init(params: [], values: ["multiplier"]),
-    "martialBonusPercent": .init(params: [], values: ["valuePercent"]),
-    "minHitScale": .init(params: [], values: ["minHitScale"]),
-    "partyAttackFlag": .init(params: [], values: []),
-    "partyAttackTarget": .init(params: ["targetId"], values: []),
-    "penetrationDamageTakenMultiplier": .init(params: [], values: ["multiplier"]),
-    "procMultiplier": .init(params: [], values: ["multiplier"]),
-    "reaction": .init(params: ["trigger", "action"], values: []),
-    "reactionNextTurn": .init(params: [], values: ["count"]),
-    "resurrectionActive": .init(params: [], values: ["chancePercent"]),
-    "resurrectionBuff": .init(params: [], values: ["guaranteed"]),
-    "resurrectionPassive": .init(params: [], values: []),
-    "resurrectionSummon": .init(params: [], values: ["everyTurns"]),
-    "rewardExperienceMultiplier": .init(params: [], values: ["multiplier"]),
-    "rewardExperiencePercent": .init(params: [], values: ["valuePercent"]),
-    "rewardGoldMultiplier": .init(params: [], values: ["multiplier"]),
-    "rewardGoldPercent": .init(params: [], values: ["valuePercent"]),
-    "rewardItemMultiplier": .init(params: [], values: ["multiplier"]),
-    "rewardItemPercent": .init(params: [], values: ["valuePercent"]),
-    "rewardTitleMultiplier": .init(params: [], values: ["multiplier"]),
-    "rewardTitlePercent": .init(params: [], values: ["valuePercent"]),
-    "rowProfile": .init(params: ["profile"], values: []),
-    "runawayDamage": .init(params: [], values: ["thresholdPercent", "chancePercent"]),
-    "runawayMagic": .init(params: [], values: ["thresholdPercent", "chancePercent"]),
-    "sacrificeRite": .init(params: [], values: ["everyTurns"]),
-    "specialAttack": .init(params: ["specialAttackId"], values: []),
-    "spellAccess": .init(params: ["spellId"], values: []),
-    "spellPowerMultiplier": .init(params: [], values: ["multiplier"]),
-    "spellPowerPercent": .init(params: [], values: ["valuePercent"]),
-    "spellSpecificMultiplier": .init(params: ["spellId"], values: ["multiplier"]),
-    "spellSpecificTakenMultiplier": .init(params: ["spellId"], values: ["multiplier"]),
-    "spellTierUnlock": .init(params: ["school"], values: ["tier"]),
-    "statusInflict": .init(params: ["statusId"], values: ["baseChancePercent"]),
-    "statusResistanceMultiplier": .init(params: ["status"], values: ["multiplier"]),
-    "statusResistancePercent": .init(params: ["status"], values: ["valuePercent"]),
-    "tacticSpellAmplify": .init(params: ["spellId"], values: ["multiplier", "triggerTurn"]),
-    "timedBreathPowerAmplify": .init(params: [], values: ["triggerTurn", "multiplier"]),
-    "timedBuffTrigger": .init(params: [], values: ["triggerTurn"]),
-    "timedMagicPowerAmplify": .init(params: [], values: ["triggerTurn", "multiplier"])
+enum SkillEffectType: String, CaseIterable, Sendable, Hashable {
+    case absorption
+    case actionOrderMultiplier
+    case actionOrderShuffle
+    case attackCountAdditive
+    case attackCountMultiplier
+    case additionalDamageAdditive
+    case additionalDamageMultiplier
+    case antiHealing
+    case autoDegradationRepair
+    case barrier
+    case barrierOnGuard
+    case berserk
+    case breathVariant
+    case counterAttackEvasionMultiplier
+    case criticalDamageMultiplier
+    case criticalDamagePercent
+    case criticalDamageTakenMultiplier
+    case criticalRateAdditive
+    case criticalRateCap
+    case criticalRateMaxAbsolute
+    case criticalRateMaxDelta
+    case damageDealtMultiplier
+    case damageDealtMultiplierAgainst
+    case damageDealtPercent
+    case damageTakenMultiplier
+    case damageTakenPercent
+    case degradationRepair
+    case degradationRepairBoost
+    case growthMultiplier
+    case dodgeCap
+    case endOfTurnHealing
+    case endOfTurnSelfHPPercent
+    case equipmentSlotAdditive
+    case equipmentSlotMultiplier
+    case equipmentStatMultiplier
+    case explorationTimeMultiplier
+    case extraAction
+    case martialBonusMultiplier
+    case martialBonusPercent
+    case minHitScale
+    case partyAttackFlag
+    case partyAttackTarget
+    case parry
+    case penetrationDamageTakenMultiplier
+    case procMultiplier
+    case reaction
+    case reactionNextTurn
+    case resurrectionActive
+    case resurrectionBuff
+    case resurrectionPassive
+    case resurrectionSave
+    case resurrectionSummon
+    case resurrectionVitalize
+    case retreatAtTurn
+    case rewardExperienceMultiplier
+    case rewardExperiencePercent
+    case rewardGoldMultiplier
+    case rewardGoldPercent
+    case rewardItemMultiplier
+    case rewardItemPercent
+    case rewardTitleMultiplier
+    case rewardTitlePercent
+    case rowProfile
+    case statAdditive
+    case statConversionLinear
+    case statConversionPercent
+    case statFixedToOne
+    case statMultiplier
+    case runawayDamage
+    case runawayMagic
+    case sacrificeRite
+    case talentStat
+    case incompetenceStat
+    case shieldBlock
+    case specialAttack
+    case spellAccess
+    case spellCharges
+    case spellPowerMultiplier
+    case spellPowerPercent
+    case spellSpecificMultiplier
+    case spellSpecificTakenMultiplier
+    case spellTierUnlock
+    case statusInflict
+    case statusResistanceMultiplier
+    case statusResistancePercent
+    case tacticSpellAmplify
+    case timedBreathPowerAmplify
+    case timedBuffTrigger
+    case timedMagicPowerAmplify
+}
+
+private let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
+    .absorption: .init(params: [], values: []),
+    .actionOrderMultiplier: .init(params: [], values: ["multiplier"]),
+    .actionOrderShuffle: .init(params: [], values: []),
+    .additionalDamageAdditive: .init(params: [], values: ["additive"]),
+    .additionalDamageMultiplier: .init(params: [], values: ["multiplier"]),
+    .antiHealing: .init(params: [], values: []),
+    .barrier: .init(params: ["damageType"], values: ["charges"]),
+    .barrierOnGuard: .init(params: ["damageType"], values: ["charges"]),
+    .berserk: .init(params: [], values: ["chancePercent"]),
+    .breathVariant: .init(params: [], values: ["extraCharges"]),
+    .counterAttackEvasionMultiplier: .init(params: [], values: ["multiplier"]),
+    .criticalDamageMultiplier: .init(params: [], values: ["multiplier"]),
+    .criticalDamagePercent: .init(params: [], values: ["valuePercent"]),
+    .criticalDamageTakenMultiplier: .init(params: [], values: ["multiplier"]),
+    .damageDealtMultiplier: .init(params: ["damageType"], values: ["multiplier"]),
+    .damageDealtMultiplierAgainst: .init(params: ["targetCategory"], values: ["multiplier"]),
+    .damageDealtPercent: .init(params: ["damageType"], values: ["valuePercent"]),
+    .damageTakenMultiplier: .init(params: ["damageType"], values: ["multiplier"]),
+    .damageTakenPercent: .init(params: ["damageType"], values: ["valuePercent"]),
+    .degradationRepair: .init(params: [], values: []),
+    .degradationRepairBoost: .init(params: [], values: ["valuePercent"]),
+    .endOfTurnHealing: .init(params: [], values: ["valuePercent"]),
+    .endOfTurnSelfHPPercent: .init(params: [], values: ["valuePercent"]),
+    .equipmentSlotAdditive: .init(params: [], values: []),
+    .equipmentSlotMultiplier: .init(params: [], values: []),
+    .equipmentStatMultiplier: .init(params: ["equipmentCategory"], values: ["multiplier"]),
+    .explorationTimeMultiplier: .init(params: [], values: ["multiplier"]),
+    .martialBonusMultiplier: .init(params: [], values: ["multiplier"]),
+    .martialBonusPercent: .init(params: [], values: ["valuePercent"]),
+    .minHitScale: .init(params: [], values: ["minHitScale"]),
+    .partyAttackFlag: .init(params: [], values: []),
+    .partyAttackTarget: .init(params: ["targetId"], values: []),
+    .penetrationDamageTakenMultiplier: .init(params: [], values: ["multiplier"]),
+    .procMultiplier: .init(params: [], values: ["multiplier"]),
+    .reaction: .init(params: ["trigger", "action"], values: []),
+    .reactionNextTurn: .init(params: [], values: ["count"]),
+    .resurrectionActive: .init(params: [], values: ["chancePercent"]),
+    .resurrectionBuff: .init(params: [], values: ["guaranteed"]),
+    .resurrectionPassive: .init(params: [], values: []),
+    .resurrectionSummon: .init(params: [], values: ["everyTurns"]),
+    .rewardExperienceMultiplier: .init(params: [], values: ["multiplier"]),
+    .rewardExperiencePercent: .init(params: [], values: ["valuePercent"]),
+    .rewardGoldMultiplier: .init(params: [], values: ["multiplier"]),
+    .rewardGoldPercent: .init(params: [], values: ["valuePercent"]),
+    .rewardItemMultiplier: .init(params: [], values: ["multiplier"]),
+    .rewardItemPercent: .init(params: [], values: ["valuePercent"]),
+    .rewardTitleMultiplier: .init(params: [], values: ["multiplier"]),
+    .rewardTitlePercent: .init(params: [], values: ["valuePercent"]),
+    .rowProfile: .init(params: ["profile"], values: []),
+    .runawayDamage: .init(params: [], values: ["thresholdPercent", "chancePercent"]),
+    .runawayMagic: .init(params: [], values: ["thresholdPercent", "chancePercent"]),
+    .sacrificeRite: .init(params: [], values: ["everyTurns"]),
+    .specialAttack: .init(params: ["specialAttackId"], values: []),
+    .spellAccess: .init(params: ["spellId"], values: []),
+    .spellPowerMultiplier: .init(params: [], values: ["multiplier"]),
+    .spellPowerPercent: .init(params: [], values: ["valuePercent"]),
+    .spellSpecificMultiplier: .init(params: ["spellId"], values: ["multiplier"]),
+    .spellSpecificTakenMultiplier: .init(params: ["spellId"], values: ["multiplier"]),
+    .spellTierUnlock: .init(params: ["school"], values: ["tier"]),
+    .statusInflict: .init(params: ["statusId"], values: ["baseChancePercent"]),
+    .statusResistanceMultiplier: .init(params: ["status"], values: ["multiplier"]),
+    .statusResistancePercent: .init(params: ["status"], values: ["valuePercent"]),
+    .tacticSpellAmplify: .init(params: ["spellId"], values: ["multiplier", "triggerTurn"]),
+    .timedBreathPowerAmplify: .init(params: [], values: ["triggerTurn", "multiplier"]),
+    .timedBuffTrigger: .init(params: [], values: ["triggerTurn"]),
+    .timedMagicPowerAmplify: .init(params: [], values: ["triggerTurn", "multiplier"])
 ]
 
 private extension BattleActor.SkillEffects.Reaction {
     static func make(from payload: DecodedSkillEffectPayload,
                      skillName: String,
                      skillId: String) -> BattleActor.SkillEffects.Reaction? {
-        guard payload.effectType == "reaction" else { return nil }
+        guard payload.effectType == .reaction else { return nil }
         guard let triggerRaw = payload.parameters?["trigger"],
               let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: triggerRaw) else { return nil }
         guard (payload.parameters?["action"] ?? "") == "counterAttack" else { return nil }
@@ -916,7 +1377,7 @@ private extension BattleActor.SkillEffects.RowProfile {
 
 struct DecodedSkillEffectPayload: Sendable, Hashable {
     let familyId: String?
-    let effectType: String
+    let effectType: SkillEffectType
     let parameters: [String: String]?
     let value: [String: Double]
     let stringValues: [String: String]
@@ -924,14 +1385,14 @@ struct DecodedSkillEffectPayload: Sendable, Hashable {
 
     func requireParam(_ key: String, skillId: String, effectIndex: Int) throws -> String {
         guard let value = parameters?[key], !value.isEmpty else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType) の必須パラメータ \(key) がありません")
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.rawValue) の必須パラメータ \(key) がありません")
         }
         return value
     }
 
     func requireValue(_ key: String, skillId: String, effectIndex: Int) throws -> Double {
         guard let value = self.value[key] else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType) の必須値 \(key) がありません")
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.rawValue) の必須値 \(key) がありません")
         }
         return value
     }
@@ -948,13 +1409,16 @@ enum SkillEffectPayloadDecoder {
         guard !resolvedEffectType.isEmpty else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(fallbackEffectType) の effectType が不正です")
         }
+        guard let effectType = SkillEffectType(rawValue: resolvedEffectType) else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(fallbackEffectType) の effectType \(resolvedEffectType) は未対応です")
+        }
 
         let values = SkillEffectPayloadValues.from(rawValues: raw.value,
                                                    stringValues: raw.stringValues,
                                                    stringArrayValues: raw.stringArrayValues)
         return DecodedSkillEffectPayload(
             familyId: raw.familyId,
-            effectType: resolvedEffectType,
+            effectType: effectType,
             parameters: raw.parameters,
             value: values.numericValues,
             stringValues: values.stringValues,

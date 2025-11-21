@@ -271,58 +271,58 @@ private struct SkillEffectAggregator {
                     throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): \(error)")
                 }
                 switch payload.effectType {
-                case "additionalDamageAdditive":
+                case .additionalDamageAdditive:
                     if let value = payload.value["additive"] {
                         additives.add(stat: .additionalDamage, value: value)
                     }
-                case "additionalDamageMultiplier":
+                case .additionalDamageMultiplier:
                     if let value = payload.value["multiplier"] {
                         passives.multiply(stat: .additionalDamage, value: value)
                     }
-                case "statAdditive":
+                case .statAdditive:
                     if let statKey = CombatStatKey(payload.parameters?["stat"]),
                        let additive = payload.value["additive"] {
                         additives.add(stat: statKey, value: additive)
                     }
-                case "statMultiplier":
+                case .statMultiplier:
                     if let statKey = CombatStatKey(payload.parameters?["stat"]),
                        let multiplier = payload.value["multiplier"] {
                         passives.multiply(stat: statKey, value: multiplier)
                     }
-                case "attackCountAdditive":
+                case .attackCountAdditive:
                     if let additive = payload.value["additive"] {
                         additives.add(stat: .attackCount, value: additive)
                     }
-                case "growthMultiplier":
+                case .growthMultiplier:
                     if let multiplier = payload.value["multiplier"] {
                         growthMultiplierProduct *= multiplier
                     }
-                case "attackCountMultiplier":
+                case .attackCountMultiplier:
                     if let multiplier = payload.value["multiplier"] {
                         passives.multiply(stat: .attackCount, value: multiplier)
                     }
-                case "equipmentStatMultiplier":
+                case .equipmentStatMultiplier:
                     if let category = payload.parameters?["equipmentCategory"],
                        let multiplier = payload.value["multiplier"] {
                         equipmentMultipliers[category, default: 1.0] *= multiplier
                     }
-                case "statConversionPercent":
+                case .statConversionPercent:
                     guard let sourceKey = CombatStatKey(payload.parameters?["sourceStat"]),
                           let targetKey = CombatStatKey(payload.parameters?["targetStat"]),
                           let percent = payload.value["valuePercent"] else { continue }
                     let entry = StatConversion(source: sourceKey, ratio: percent / 100.0)
                     conversions[targetKey, default: []].append(entry)
-                case "statConversionLinear":
+                case .statConversionLinear:
                     guard let sourceKey = CombatStatKey(payload.parameters?["sourceStat"]),
                           let targetKey = CombatStatKey(payload.parameters?["targetStat"]),
                           let ratio = payload.value["valuePerUnit"] ?? payload.value["valuePerCount"] else { continue }
                     let entry = StatConversion(source: sourceKey, ratio: ratio)
                     conversions[targetKey, default: []].append(entry)
-                case "criticalRateAdditive":
+                case .criticalRateAdditive:
                     if let points = payload.value["points"] {
                         critical.flatBonus += points
                     }
-                case "criticalRateCap":
+                case .criticalRateCap:
                     if let cap = payload.value["cap"] ?? payload.value["maxPercent"] {
                         if let current = critical.cap {
                             critical.cap = min(current, cap)
@@ -330,7 +330,7 @@ private struct SkillEffectAggregator {
                             critical.cap = cap
                         }
                     }
-                case "criticalRateMaxAbsolute":
+                case .criticalRateMaxAbsolute:
                     if let cap = payload.value["cap"] ?? payload.value["maxPercent"] {
                         if let current = critical.cap {
                             critical.cap = min(current, cap)
@@ -338,37 +338,37 @@ private struct SkillEffectAggregator {
                             critical.cap = cap
                         }
                     }
-                case "criticalRateMaxDelta":
+                case .criticalRateMaxDelta:
                     if let delta = payload.value["deltaPercent"] {
                         critical.capDelta += delta
                     }
-                case "criticalDamagePercent":
+                case .criticalDamagePercent:
                     if let value = payload.value["valuePercent"] {
                         critical.damagePercent += value
                     }
-                case "criticalDamageMultiplier":
+                case .criticalDamageMultiplier:
                     if let multiplier = payload.value["multiplier"] {
                         critical.damageMultiplier *= multiplier
                     }
-                case "martialBonusPercent":
+                case .martialBonusPercent:
                     if let value = payload.value["valuePercent"] {
                         martial.percent += value
                     }
-                case "martialBonusMultiplier":
+                case .martialBonusMultiplier:
                     if let multiplier = payload.value["multiplier"] {
                         martial.multiplier *= multiplier
                     }
-                case "talentStat":
+                case .talentStat:
                     if let statKey = CombatStatKey(payload.parameters?["stat"]) {
                         let multiplier = payload.value["multiplier"] ?? 1.5
                         talents.applyTalent(stat: statKey, value: multiplier)
                     }
-                case "incompetenceStat":
+                case .incompetenceStat:
                     if let statKey = CombatStatKey(payload.parameters?["stat"]) {
                         let multiplier = payload.value["multiplier"] ?? 0.5
                         talents.applyIncompetence(stat: statKey, value: multiplier)
                     }
-                case "statFixedToOne":
+                case .statFixedToOne:
                     if let statKey = CombatStatKey(payload.parameters?["stat"]) {
                         forcedToOne.insert(statKey)
                     }
@@ -412,7 +412,7 @@ private extension SkillEffectAggregator {
     }
 
     struct Payload {
-        let effectType: String
+        let effectType: SkillEffectType
         let parameters: [String: String]?
         let value: [String: Double]
     }
