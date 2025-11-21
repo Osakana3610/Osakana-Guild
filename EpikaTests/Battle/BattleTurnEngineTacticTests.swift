@@ -173,6 +173,89 @@ final class BattleTurnEngineTacticTests: XCTestCase {
         XCTAssertLessThan(survivingEnemy?.currentHP ?? 0, 220)
     }
 
+    func testReactionAndExtraActionStackInSixVersusSix() {
+        // 6vs6 でも反撃と追加行動が併存し、最低限の発火回数を維持することを確認。
+        func chainedEffects() -> BattleActor.SkillEffects {
+            var effects = BattleActor.SkillEffects.neutral
+            effects.reactions = [
+                .init(identifier: "counter.six",
+                      displayName: "六人反撃",
+                      trigger: .selfDamagedPhysical,
+                      target: .attacker,
+                      damageType: .physical,
+                      baseChancePercent: 100,
+                      attackCountMultiplier: 1.0,
+                      criticalRateMultiplier: 1.0,
+                      accuracyMultiplier: 1.0,
+                      requiresMartial: false,
+                      requiresAllyBehind: false)
+            ]
+            effects.extraActions = [.init(chancePercent: 100, count: 1)]
+            return effects
+        }
+
+        let playerFront = BattleTestFactory.actor(
+            id: "player.front",
+            kind: .player,
+            combat: BattleTestFactory.combat(maxHP: 240, physicalAttack: 40, physicalDefense: 14, hitRate: 120),
+            skillEffects: chainedEffects()
+        )
+        let playerSecond = BattleTestFactory.actor(
+            id: "player.second",
+            kind: .player,
+            combat: BattleTestFactory.combat(maxHP: 230, physicalAttack: 38, physicalDefense: 13, hitRate: 115),
+            skillEffects: chainedEffects()
+        )
+        let playerOthers: [BattleActor] = (3...6).map { idx in
+            BattleTestFactory.actor(
+                id: "player.\(idx)",
+                kind: .player,
+                combat: BattleTestFactory.combat(maxHP: 200, physicalAttack: 25, physicalDefense: 10, hitRate: 100)
+            )
+        }
+        var players = [playerFront, playerSecond] + playerOthers
+
+        let enemyFront = BattleTestFactory.actor(
+            id: "enemy.front",
+            kind: .enemy,
+            combat: BattleTestFactory.combat(maxHP: 260, physicalAttack: 42, physicalDefense: 12, hitRate: 120)
+        )
+        let enemySecond = BattleTestFactory.actor(
+            id: "enemy.second",
+            kind: .enemy,
+            combat: BattleTestFactory.combat(maxHP: 250, physicalAttack: 40, physicalDefense: 12, hitRate: 115)
+        )
+        let enemyOthers: [BattleActor] = (3...6).map { idx in
+            BattleTestFactory.actor(
+                id: "enemy.\(idx)",
+                kind: .enemy,
+                combat: BattleTestFactory.combat(maxHP: 210, physicalAttack: 28, physicalDefense: 10, hitRate: 100)
+            )
+        }
+        var enemies = [enemyFront, enemySecond] + enemyOthers
+
+        var random = GameRandomSource(seed: 314159)
+        let result = BattleTurnEngine.runBattle(players: &players,
+                                                enemies: &enemies,
+                                                statusEffects: [:],
+                                                skillDefinitions: [:],
+                                                random: &random)
+
+        // 反撃が発火しているか
+        for actorId in ["player.front", "player.second"] {
+            XCTAssertTrue(
+                result.log.contains { $0.metadata["category"] == "reaction" && $0.actorId == actorId },
+                "reaction should fire for \(actorId)"
+            )
+        }
+
+        // 本行動＋反撃＋追加行動の最低3回以上の物理攻撃が記録されているか
+        for actorId in ["player.front", "player.second"] {
+            let hits = result.log.filter { $0.metadata["category"] == "physical" && $0.actorId == actorId }
+            XCTAssertGreaterThanOrEqual(hits.count, 3, "physical hits should include base+reaction+extra for \(actorId)")
+        }
+    }
+
     func testSacrificeSelectsTargetOnInterval() {
         var sacrificeEffects = BattleActor.SkillEffects.neutral
         sacrificeEffects.sacrificeInterval = 2
