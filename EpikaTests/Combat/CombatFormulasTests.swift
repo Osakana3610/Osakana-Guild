@@ -13,36 +13,33 @@ final class CombatFormulasTests: XCTestCase {
         XCTAssertEqual(CombatFormulas.statBonusMultiplier(value: 25), expected, accuracy: 1e-9)
     }
 
-    func testFinalAttackCountBaseline() {
+    func testFinalAttackCountWithoutLevelBonus() {
         let result = CombatFormulas.finalAttackCount(agility: 60,
-                                                     level: 50,
+                                                     levelFactor: 0.0,
                                                      jobCoefficient: 1.0,
-                                                     hasTalent: false,
-                                                     hasIncompetent: false,
+                                                     talentMultiplier: 1.0,
                                                      passiveMultiplier: 1.0,
                                                      additive: 0.0)
-        XCTAssertEqual(result, 2)
+        XCTAssertEqual(result, 3)
     }
 
-    func testFinalAttackCountTalentAndIncompetence() {
+    func testFinalAttackCountWithLevelScaling() {
         let result = CombatFormulas.finalAttackCount(agility: 60,
-                                                     level: 50,
+                                                     levelFactor: 50.0,
                                                      jobCoefficient: 1.0,
-                                                     hasTalent: true,
-                                                     hasIncompetent: true,
+                                                     talentMultiplier: 1.0,
                                                      passiveMultiplier: 1.0,
                                                      additive: 0.0)
-        XCTAssertEqual(result, 1)
+        XCTAssertEqual(result, 7)
     }
 
     func testFinalAttackCountWithPassiveMultiplierAndAdditive() {
         let result = CombatFormulas.finalAttackCount(agility: 30,
-                                                     level: 15,
+                                                     levelFactor: 15.0,
                                                      jobCoefficient: 1.2,
-                                                     hasTalent: false,
-                                                     hasIncompetent: false,
+                                                     talentMultiplier: 1.0,
                                                      passiveMultiplier: 1.1,
                                                      additive: 0.25)
-        XCTAssertEqual(result, 1)
+        XCTAssertEqual(result, 3)
     }
 }
