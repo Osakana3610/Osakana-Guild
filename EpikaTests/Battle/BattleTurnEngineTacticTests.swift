@@ -121,6 +121,58 @@ final class BattleTurnEngineTacticTests: XCTestCase {
         XCTAssertTrue(result.log.contains { $0.metadata["category"] == "shieldBlock" })
     }
 
+    func testReactionAndExtraActionStackWithoutConflict() {
+        var playerEffects = BattleActor.SkillEffects.neutral
+        playerEffects.reactions = [
+            .init(identifier: "counter.chain",
+                  displayName: "連係反撃",
+                  trigger: .selfDamagedPhysical,
+                  target: .attacker,
+                  damageType: .physical,
+                  baseChancePercent: 100,
+                  attackCountMultiplier: 1.0,
+                  criticalRateMultiplier: 1.0,
+                  accuracyMultiplier: 1.0,
+                  requiresMartial: false,
+                  requiresAllyBehind: false)
+        ]
+        playerEffects.extraActions = [.init(chancePercent: 100, count: 1)]
+
+        var players = [
+            BattleTestFactory.actor(
+                id: "player.chain",
+                kind: .player,
+                combat: BattleTestFactory.combat(maxHP: 220, physicalAttack: 35, physicalDefense: 12, hitRate: 120),
+                skillEffects: playerEffects
+            )
+        ]
+        var enemies = [
+            BattleTestFactory.actor(
+                id: "enemy.chain",
+                kind: .enemy,
+                combat: BattleTestFactory.combat(maxHP: 260, physicalAttack: 48, physicalDefense: 8, hitRate: 120)
+            )
+        ]
+        // 相手から物理攻撃を受けて反撃→本行動→追加行動の順で物理攻撃が積み上がることを確認。
+
+        var random = GameRandomSource(seed: 21)
+        let result = BattleTurnEngine.runBattle(players: &players,
+                                                enemies: &enemies,
+                                                statusEffects: [:],
+                                                skillDefinitions: [:],
+                                                random: &random)
+
+        XCTAssertTrue(result.log.contains { $0.metadata["category"] == "reaction" && $0.actorId == "player.chain" })
+
+        let playerPhysicalHits = result.log.filter { $0.metadata["category"] == "physical" && $0.actorId == "player.chain" }
+        // 反撃（1）＋本行動（1）＋追加行動（1）以上が実行されていることを確認
+        XCTAssertGreaterThanOrEqual(playerPhysicalHits.count, 3)
+
+        let survivingEnemy = result.enemies.first(where: { $0.identifier == "enemy.chain" })
+        XCTAssertNotNil(survivingEnemy)
+        XCTAssertLessThan(survivingEnemy?.currentHP ?? 0, 220)
+    }
+
     func testSacrificeSelectsTargetOnInterval() {
         var sacrificeEffects = BattleActor.SkillEffects.neutral
         sacrificeEffects.sacrificeInterval = 2
