@@ -7,7 +7,21 @@ enum CharacterAssembler {
         async let jobDef = repository.job(withId: progress.jobId)
         async let spellDefinitions = repository.allSpells()
 
-        let learnedSkillIds = progress.learnedSkills.map { $0.skillId }
+        // 装備付与スキルを合成し、先勝ちで重複除去
+        let itemIds = Set(progress.equippedItems.map { $0.itemId })
+        let equippedItemDefinitions = try await repository.items(withIds: Array(itemIds))
+        let equipmentSkills: [RuntimeCharacterProgress.LearnedSkill] = equippedItemDefinitions.flatMap { definition in
+            definition.grantedSkills.sorted { $0.orderIndex < $1.orderIndex }.map { granted in
+                RuntimeCharacterProgress.LearnedSkill(id: UUID(),
+                                                      skillId: granted.skillId,
+                                                      level: 1,
+                                                      isEquipped: true,
+                                                      createdAt: Date(),
+                                                      updatedAt: Date())
+            }
+        }
+        let mergedLearnedSkills = deduplicatedSkills(progress.learnedSkills + equipmentSkills)
+        let learnedSkillIds = mergedLearnedSkills.map { $0.skillId }
         let learnedSkills = try await repository.skills(withIds: learnedSkillIds)
 
         let slotModifiers = try SkillRuntimeEffectCompiler.equipmentSlots(from: learnedSkills)
@@ -122,4 +136,18 @@ private enum EquipmentSlotCalculator {
         }
         return max(1, 118 + (level - 18) * 16)
     }
+}
+
+// MARK: - Helpers
+
+private func deduplicatedSkills(_ skills: [RuntimeCharacterProgress.LearnedSkill]) -> [RuntimeCharacterProgress.LearnedSkill] {
+    var seen: Set<String> = []
+    var result: [RuntimeCharacterProgress.LearnedSkill] = []
+    result.reserveCapacity(skills.count)
+    for entry in skills {
+        if seen.insert(entry.skillId).inserted {
+            result.append(entry)
+        }
+    }
+    return result
 }
