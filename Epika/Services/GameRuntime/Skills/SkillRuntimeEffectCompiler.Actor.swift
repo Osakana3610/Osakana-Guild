@@ -21,6 +21,8 @@ extension SkillRuntimeEffectCompiler {
         var martialBonusPercent: Double = 0.0
         var martialBonusMultiplier: Double = 1.0
         var procChanceMultiplier: Double = 1.0
+        var procRateMultipliers: [String: Double] = [:]
+        var procRateAdditives: [String: Double] = [:]
         var extraActions: [BattleActor.SkillEffects.ExtraAction] = []
         var nextTurnExtraActions: Int = 0
         var actionOrderMultiplier: Double = 1.0
@@ -127,6 +129,19 @@ extension SkillRuntimeEffectCompiler {
                     martialBonusMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case .procMultiplier:
                     procChanceMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                case .procRate:
+                    let target = try payload.requireParam("target", skillId: skill.id, effectIndex: effect.index)
+                    let stacking = try payload.requireParam("stacking", skillId: skill.id, effectIndex: effect.index)
+                    switch stacking {
+                    case "multiply":
+                        let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                        procRateMultipliers[target, default: 1.0] *= multiplier
+                    case "add":
+                        let addPercent = try payload.requireValue("addPercent", skillId: skill.id, effectIndex: effect.index)
+                        procRateAdditives[target, default: 0.0] += addPercent
+                    default:
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) procRate の stacking が不正です: \(stacking)")
+                    }
                 case .extraAction:
                     let chance = payload.value["chancePercent"] ?? payload.value["valuePercent"] ?? 0.0
                     let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
@@ -501,6 +516,7 @@ extension SkillRuntimeEffectCompiler {
                                         martialBonusPercent: martialBonusPercent,
                                         martialBonusMultiplier: martialBonusMultiplier,
                                         procChanceMultiplier: procChanceMultiplier,
+                                        procRateModifier: .init(multipliers: procRateMultipliers, additives: procRateAdditives),
                                         extraActions: extraActions,
                                         nextTurnExtraActions: nextTurnExtraActions,
                                         actionOrderMultiplier: actionOrderMultiplier,

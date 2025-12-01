@@ -73,6 +73,7 @@ extension SkillRuntimeEffectCompiler {
                      .parry,
                      .penetrationDamageTakenMultiplier,
                      .procMultiplier,
+                     .procRate,
                      .reaction,
                      .reactionNextTurn,
                      .resurrectionActive,

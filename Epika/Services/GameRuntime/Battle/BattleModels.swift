@@ -440,6 +440,19 @@ struct BattleActor: Sendable {
         var martialBonusPercent: Double
         var martialBonusMultiplier: Double
         var procChanceMultiplier: Double
+        struct ProcRateModifier: Sendable, Hashable {
+            var multipliers: [String: Double]
+            var additives: [String: Double]
+
+            static let neutral = ProcRateModifier(multipliers: [:], additives: [:])
+
+            func adjustedChance(base: Double, target: String) -> Double {
+                let added = additives[target, default: 0.0]
+                let multiplied = multipliers[target, default: 1.0]
+                return (base + added) * multiplied
+            }
+        }
+        var procRateModifier: ProcRateModifier
         struct ExtraAction: Sendable, Hashable {
             let chancePercent: Double
             let count: Int
@@ -516,6 +529,7 @@ struct BattleActor: Sendable {
             martialBonusPercent: 0.0,
             martialBonusMultiplier: 1.0,
             procChanceMultiplier: 1.0,
+            procRateModifier: .neutral,
             extraActions: [],
             nextTurnExtraActions: 0,
             actionOrderMultiplier: 1.0,

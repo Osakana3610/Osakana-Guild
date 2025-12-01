@@ -112,6 +112,7 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .partyAttackTarget: .init(params: ["targetId"], values: []),
     .penetrationDamageTakenMultiplier: .init(params: [], values: ["multiplier"]),
     .procMultiplier: .init(params: [], values: ["multiplier"]),
+    .procRate: .init(params: ["target", "stacking"], values: []),
     .reaction: .init(params: ["trigger", "action"], values: []),
     .reactionNextTurn: .init(params: [], values: ["count"]),
     .resurrectionActive: .init(params: [], values: ["chancePercent"]),

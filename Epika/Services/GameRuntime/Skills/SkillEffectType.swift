@@ -46,6 +46,7 @@ enum SkillEffectType: String, CaseIterable, Sendable, Hashable {
     case parry
     case penetrationDamageTakenMultiplier
     case procMultiplier
+    case procRate
     case reaction
     case reactionNextTurn
     case resurrectionActive

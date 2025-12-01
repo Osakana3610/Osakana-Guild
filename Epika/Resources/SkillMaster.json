@@ -3716,7 +3716,9 @@
           {
             "id": "spellCharges.triple.magic_arrow",
             "label": "[3回] マジックアロー",
-            "parameters": { "spellId": "spell.mage.magic_arrow" },
+            "parameters": {
+              "spellId": "spell.mage.magic_arrow"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3730,7 +3732,9 @@
           {
             "id": "spellCharges.triple.fireball",
             "label": "[3回] ファイヤーボール",
-            "parameters": { "spellId": "spell.mage.fireball" },
+            "parameters": {
+              "spellId": "spell.mage.fireball"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3744,7 +3748,9 @@
           {
             "id": "spellCharges.triple.blizzard",
             "label": "[3回] ブリザード",
-            "parameters": { "spellId": "spell.mage.blizzard" },
+            "parameters": {
+              "spellId": "spell.mage.blizzard"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3758,7 +3764,9 @@
           {
             "id": "spellCharges.triple.thunder_bolt",
             "label": "[3回] サンダーボルト",
-            "parameters": { "spellId": "spell.mage.thunder_bolt" },
+            "parameters": {
+              "spellId": "spell.mage.thunder_bolt"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3772,7 +3780,9 @@
           {
             "id": "spellCharges.triple.nuclear",
             "label": "[3回] ニュークリア",
-            "parameters": { "spellId": "spell.mage.nuclear" },
+            "parameters": {
+              "spellId": "spell.mage.nuclear"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3786,7 +3796,9 @@
           {
             "id": "spellCharges.triple.heal",
             "label": "[3回] ヒール",
-            "parameters": { "spellId": "spell.priest.heal" },
+            "parameters": {
+              "spellId": "spell.priest.heal"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3800,7 +3812,9 @@
           {
             "id": "spellCharges.triple.heal_plus",
             "label": "[3回] ヒールプラス",
-            "parameters": { "spellId": "spell.priest.heal_plus" },
+            "parameters": {
+              "spellId": "spell.priest.heal_plus"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3814,7 +3828,9 @@
           {
             "id": "spellCharges.triple.cure",
             "label": "[3回] キュア",
-            "parameters": { "spellId": "spell.priest.cure" },
+            "parameters": {
+              "spellId": "spell.priest.cure"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3828,7 +3844,9 @@
           {
             "id": "spellCharges.triple.full_heal",
             "label": "[3回] フルヒール",
-            "parameters": { "spellId": "spell.priest.full_heal" },
+            "parameters": {
+              "spellId": "spell.priest.full_heal"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -3842,7 +3860,9 @@
           {
             "id": "spellCharges.triple.party_heal",
             "label": "[3回] パーティヒール",
-            "parameters": { "spellId": "spell.priest.party_heal" },
+            "parameters": {
+              "spellId": "spell.priest.party_heal"
+            },
             "value": {
               "maxCharges": 3,
               "initialCharges": 3,
@@ -4125,480 +4145,3688 @@
         "familyId": "endOfTurnSelfHP.heal",
         "effectType": "endOfTurnSelfHPPercent",
         "variants": [
-          { "id": "endOfTurnSelfHP.heal.Lv1", "label": "[+5%] 回復能力Lv1", "value": { "valuePercent": 5 } },
-          { "id": "endOfTurnSelfHP.heal.Lv2", "label": "[+10%] 回復能力Lv2", "value": { "valuePercent": 10 } },
-          { "id": "endOfTurnSelfHP.heal.Lv3", "label": "[+15%] 回復能力Lv3", "value": { "valuePercent": 15 } },
-          { "id": "endOfTurnSelfHP.heal.Lv4", "label": "[+20%] 回復能力Lv4", "value": { "valuePercent": 20 } },
-          { "id": "endOfTurnSelfHP.heal.Lv5", "label": "[+25%] 回復能力Lv5", "value": { "valuePercent": 25 } },
-          { "id": "endOfTurnSelfHP.heal.Lv6", "label": "[+30%] 回復能力Lv6", "value": { "valuePercent": 30 } },
-          { "id": "endOfTurnSelfHP.heal.Lv7", "label": "[+35%] 回復能力Lv7", "value": { "valuePercent": 35 } },
-          { "id": "endOfTurnSelfHP.heal.Lv8", "label": "[+40%] 回復能力Lv8", "value": { "valuePercent": 40 } },
-          { "id": "endOfTurnSelfHP.heal.Lv9", "label": "[+45%] 回復能力Lv9", "value": { "valuePercent": 45 } },
-          { "id": "endOfTurnSelfHP.heal.Lv10", "label": "[+50%] 回復能力Lv10", "value": { "valuePercent": 50 } }
+          {
+            "id": "endOfTurnSelfHP.heal.Lv1",
+            "label": "[+5%] 回復能力Lv1",
+            "value": {
+              "valuePercent": 5
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.heal.Lv2",
+            "label": "[+10%] 回復能力Lv2",
+            "value": {
+              "valuePercent": 10
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.heal.Lv3",
+            "label": "[+15%] 回復能力Lv3",
+            "value": {
+              "valuePercent": 15
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.heal.Lv4",
+            "label": "[+20%] 回復能力Lv4",
+            "value": {
+              "valuePercent": 20
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.heal.Lv5",
+            "label": "[+25%] 回復能力Lv5",
+            "value": {
+              "valuePercent": 25
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.heal.Lv6",
+            "label": "[+30%] 回復能力Lv6",
+            "value": {
+              "valuePercent": 30
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.heal.Lv7",
+            "label": "[+35%] 回復能力Lv7",
+            "value": {
+              "valuePercent": 35
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.heal.Lv8",
+            "label": "[+40%] 回復能力Lv8",
+            "value": {
+              "valuePercent": 40
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.heal.Lv9",
+            "label": "[+45%] 回復能力Lv9",
+            "value": {
+              "valuePercent": 45
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.heal.Lv10",
+            "label": "[+50%] 回復能力Lv10",
+            "value": {
+              "valuePercent": 50
+            }
+          }
         ]
       },
       {
         "familyId": "endOfTurnSelfHP.damage",
         "effectType": "endOfTurnSelfHPPercent",
         "variants": [
-          { "id": "endOfTurnSelfHP.damage.Lv1", "label": "[-5%] HPダメージLv1", "value": { "valuePercent": -5 } },
-          { "id": "endOfTurnSelfHP.damage.Lv2", "label": "[-10%] HPダメージLv2", "value": { "valuePercent": -10 } },
-          { "id": "endOfTurnSelfHP.damage.Lv3", "label": "[-15%] HPダメージLv3", "value": { "valuePercent": -15 } },
-          { "id": "endOfTurnSelfHP.damage.Lv4", "label": "[-20%] HPダメージLv4", "value": { "valuePercent": -20 } },
-          { "id": "endOfTurnSelfHP.damage.Lv5", "label": "[-25%] HPダメージLv5", "value": { "valuePercent": -25 } },
-          { "id": "endOfTurnSelfHP.damage.Lv6", "label": "[-30%] HPダメージLv6", "value": { "valuePercent": -30 } },
-          { "id": "endOfTurnSelfHP.damage.Lv7", "label": "[-35%] HPダメージLv7", "value": { "valuePercent": -35 } },
-          { "id": "endOfTurnSelfHP.damage.Lv8", "label": "[-40%] HPダメージLv8", "value": { "valuePercent": -40 } },
-          { "id": "endOfTurnSelfHP.damage.Lv9", "label": "[-45%] HPダメージLv9", "value": { "valuePercent": -45 } },
-          { "id": "endOfTurnSelfHP.damage.Lv10", "label": "[-50%] HPダメージLv10", "value": { "valuePercent": -50 } }
+          {
+            "id": "endOfTurnSelfHP.damage.Lv1",
+            "label": "[-5%] HPダメージLv1",
+            "value": {
+              "valuePercent": -5
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.damage.Lv2",
+            "label": "[-10%] HPダメージLv2",
+            "value": {
+              "valuePercent": -10
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.damage.Lv3",
+            "label": "[-15%] HPダメージLv3",
+            "value": {
+              "valuePercent": -15
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.damage.Lv4",
+            "label": "[-20%] HPダメージLv4",
+            "value": {
+              "valuePercent": -20
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.damage.Lv5",
+            "label": "[-25%] HPダメージLv5",
+            "value": {
+              "valuePercent": -25
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.damage.Lv6",
+            "label": "[-30%] HPダメージLv6",
+            "value": {
+              "valuePercent": -30
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.damage.Lv7",
+            "label": "[-35%] HPダメージLv7",
+            "value": {
+              "valuePercent": -35
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.damage.Lv8",
+            "label": "[-40%] HPダメージLv8",
+            "value": {
+              "valuePercent": -40
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.damage.Lv9",
+            "label": "[-45%] HPダメージLv9",
+            "value": {
+              "valuePercent": -45
+            }
+          },
+          {
+            "id": "endOfTurnSelfHP.damage.Lv10",
+            "label": "[-50%] HPダメージLv10",
+            "value": {
+              "valuePercent": -50
+            }
+          }
         ]
       },
       {
         "familyId": "partyAttack.flags",
         "effectType": "partyAttackFlag",
         "variants": [
-          { "id": "partyAttack.flags.hostileAll", "label": "[敵対] 全てを攻撃", "value": { "hostileAll": 1 } },
-          { "id": "partyAttack.flags.vampiricImpulse", "label": "[吸血] 吸血衝動", "value": { "vampiricImpulse": 1 } },
-          { "id": "partyAttack.flags.vampiricSuppression", "label": "[吸血] 吸血抑制", "value": { "vampiricSuppression": 1 } }
+          {
+            "id": "partyAttack.flags.hostileAll",
+            "label": "[敵対] 全てを攻撃",
+            "value": {
+              "hostileAll": 1
+            }
+          },
+          {
+            "id": "partyAttack.flags.vampiricImpulse",
+            "label": "[吸血] 吸血衝動",
+            "value": {
+              "vampiricImpulse": 1
+            }
+          },
+          {
+            "id": "partyAttack.flags.vampiricSuppression",
+            "label": "[吸血] 吸血抑制",
+            "value": {
+              "vampiricSuppression": 1
+            }
+          }
         ]
       },
       {
         "familyId": "partyAttack.targets",
         "effectType": "partyAttackTarget",
         "variants": [
-          { "id": "partyAttack.targets.vampire", "label": "[敵対] 対吸血鬼", "parameters": { "targetId": "vampire" }, "value": { "hostile": 1 } },
-          { "id": "partyAttack.targets.human", "label": "[敵対] 対人間", "parameters": { "targetId": "human" }, "value": { "hostile": 1 } },
-          { "id": "partyAttack.targets.specialA", "label": "[敵対] 特定対象A", "parameters": { "targetId": "special_a" }, "value": { "hostile": 1 } },
-          { "id": "partyAttack.targets.specialB", "label": "[敵対] 特定対象B", "parameters": { "targetId": "special_b" }, "value": { "hostile": 1 } },
-          { "id": "partyAttack.targets.protect.specialC", "label": "[保護] 特定対象C保護", "parameters": { "targetId": "special_c" }, "value": { "protect": 1 } }
+          {
+            "id": "partyAttack.targets.vampire",
+            "label": "[敵対] 対吸血鬼",
+            "parameters": {
+              "targetId": "vampire"
+            },
+            "value": {
+              "hostile": 1
+            }
+          },
+          {
+            "id": "partyAttack.targets.human",
+            "label": "[敵対] 対人間",
+            "parameters": {
+              "targetId": "human"
+            },
+            "value": {
+              "hostile": 1
+            }
+          },
+          {
+            "id": "partyAttack.targets.specialA",
+            "label": "[敵対] 特定対象A",
+            "parameters": {
+              "targetId": "special_a"
+            },
+            "value": {
+              "hostile": 1
+            }
+          },
+          {
+            "id": "partyAttack.targets.specialB",
+            "label": "[敵対] 特定対象B",
+            "parameters": {
+              "targetId": "special_b"
+            },
+            "value": {
+              "hostile": 1
+            }
+          },
+          {
+            "id": "partyAttack.targets.protect.specialC",
+            "label": "[保護] 特定対象C保護",
+            "parameters": {
+              "targetId": "special_c"
+            },
+            "value": {
+              "protect": 1
+            }
+          }
         ]
       },
       {
         "familyId": "talent.stat",
         "effectType": "talentStat",
         "variants": [
-          { "id": "talent.stat.maxHP", "label": "[才能] HP", "parameters": { "stat": "maxHP" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.physicalAttack", "label": "[才能] 攻撃", "parameters": { "stat": "physicalAttack" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.magicalAttack", "label": "[才能] 魔法攻撃", "parameters": { "stat": "magicalAttack" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.physicalDefense", "label": "[才能] 防御", "parameters": { "stat": "physicalDefense" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.magicalDefense", "label": "[才能] 魔法防御", "parameters": { "stat": "magicalDefense" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.hitRate", "label": "[才能] 命中", "parameters": { "stat": "hitRate" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.evasionRate", "label": "[才能] 回避", "parameters": { "stat": "evasionRate" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.criticalRate", "label": "[才能] 必殺", "parameters": { "stat": "criticalRate" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.attackCount", "label": "[才能] 攻撃回数", "parameters": { "stat": "attackCount" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.magicalHealing", "label": "[才能] 回復力", "parameters": { "stat": "magicalHealing" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.additionalDamage", "label": "[才能] 追加ダメージ", "parameters": { "stat": "additionalDamage" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.breathDamage", "label": "[才能] ブレス", "parameters": { "stat": "breathDamage" }, "value": { "multiplier": 1.5 } },
-          { "id": "talent.stat.trapRemoval", "label": "[才能] 罠解除", "parameters": { "stat": "trapRemoval" }, "value": { "multiplier": 1.5 } }
+          {
+            "id": "talent.stat.maxHP",
+            "label": "[才能] HP",
+            "parameters": {
+              "stat": "maxHP"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.physicalAttack",
+            "label": "[才能] 攻撃",
+            "parameters": {
+              "stat": "physicalAttack"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.magicalAttack",
+            "label": "[才能] 魔法攻撃",
+            "parameters": {
+              "stat": "magicalAttack"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.physicalDefense",
+            "label": "[才能] 防御",
+            "parameters": {
+              "stat": "physicalDefense"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.magicalDefense",
+            "label": "[才能] 魔法防御",
+            "parameters": {
+              "stat": "magicalDefense"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.hitRate",
+            "label": "[才能] 命中",
+            "parameters": {
+              "stat": "hitRate"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.evasionRate",
+            "label": "[才能] 回避",
+            "parameters": {
+              "stat": "evasionRate"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.criticalRate",
+            "label": "[才能] 必殺",
+            "parameters": {
+              "stat": "criticalRate"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.attackCount",
+            "label": "[才能] 攻撃回数",
+            "parameters": {
+              "stat": "attackCount"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.magicalHealing",
+            "label": "[才能] 回復力",
+            "parameters": {
+              "stat": "magicalHealing"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.additionalDamage",
+            "label": "[才能] 追加ダメージ",
+            "parameters": {
+              "stat": "additionalDamage"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.breathDamage",
+            "label": "[才能] ブレス",
+            "parameters": {
+              "stat": "breathDamage"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "talent.stat.trapRemoval",
+            "label": "[才能] 罠解除",
+            "parameters": {
+              "stat": "trapRemoval"
+            },
+            "value": {
+              "multiplier": 1.5
+            }
+          }
         ]
       },
       {
         "familyId": "incompetence.stat",
         "effectType": "incompetenceStat",
         "variants": [
-          { "id": "incompetence.stat.maxHP", "label": "[無能] HP", "parameters": { "stat": "maxHP" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.physicalAttack", "label": "[無能] 攻撃", "parameters": { "stat": "physicalAttack" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.magicalAttack", "label": "[無能] 魔法攻撃", "parameters": { "stat": "magicalAttack" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.physicalDefense", "label": "[無能] 防御", "parameters": { "stat": "physicalDefense" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.magicalDefense", "label": "[無能] 魔法防御", "parameters": { "stat": "magicalDefense" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.hitRate", "label": "[無能] 命中", "parameters": { "stat": "hitRate" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.evasionRate", "label": "[無能] 回避", "parameters": { "stat": "evasionRate" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.criticalRate", "label": "[無能] 必殺", "parameters": { "stat": "criticalRate" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.attackCount", "label": "[無能] 攻撃回数", "parameters": { "stat": "attackCount" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.magicalHealing", "label": "[無能] 回復力", "parameters": { "stat": "magicalHealing" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.additionalDamage", "label": "[無能] 追加ダメージ", "parameters": { "stat": "additionalDamage" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.breathDamage", "label": "[無能] ブレス", "parameters": { "stat": "breathDamage" }, "value": { "multiplier": 0.5 } },
-          { "id": "incompetence.stat.trapRemoval", "label": "[無能] 罠解除", "parameters": { "stat": "trapRemoval" }, "value": { "multiplier": 0.5 } }
+          {
+            "id": "incompetence.stat.maxHP",
+            "label": "[無能] HP",
+            "parameters": {
+              "stat": "maxHP"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.physicalAttack",
+            "label": "[無能] 攻撃",
+            "parameters": {
+              "stat": "physicalAttack"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.magicalAttack",
+            "label": "[無能] 魔法攻撃",
+            "parameters": {
+              "stat": "magicalAttack"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.physicalDefense",
+            "label": "[無能] 防御",
+            "parameters": {
+              "stat": "physicalDefense"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.magicalDefense",
+            "label": "[無能] 魔法防御",
+            "parameters": {
+              "stat": "magicalDefense"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.hitRate",
+            "label": "[無能] 命中",
+            "parameters": {
+              "stat": "hitRate"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.evasionRate",
+            "label": "[無能] 回避",
+            "parameters": {
+              "stat": "evasionRate"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.criticalRate",
+            "label": "[無能] 必殺",
+            "parameters": {
+              "stat": "criticalRate"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.attackCount",
+            "label": "[無能] 攻撃回数",
+            "parameters": {
+              "stat": "attackCount"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.magicalHealing",
+            "label": "[無能] 回復力",
+            "parameters": {
+              "stat": "magicalHealing"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.additionalDamage",
+            "label": "[無能] 追加ダメージ",
+            "parameters": {
+              "stat": "additionalDamage"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.breathDamage",
+            "label": "[無能] ブレス",
+            "parameters": {
+              "stat": "breathDamage"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "incompetence.stat.trapRemoval",
+            "label": "[無能] 罠解除",
+            "parameters": {
+              "stat": "trapRemoval"
+            },
+            "value": {
+              "multiplier": 0.5
+            }
+          }
         ]
       },
       {
         "familyId": "absent.stat",
         "effectType": "statFixedToOne",
         "variants": [
-          { "id": "absent.stat.maxHP", "label": "皆無: HP", "parameters": { "stat": "maxHP" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.physicalAttack", "label": "皆無: 攻撃", "parameters": { "stat": "physicalAttack" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.magicalAttack", "label": "皆無: 魔法攻撃", "parameters": { "stat": "magicalAttack" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.physicalDefense", "label": "皆無: 防御", "parameters": { "stat": "physicalDefense" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.magicalDefense", "label": "皆無: 魔法防御", "parameters": { "stat": "magicalDefense" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.hitRate", "label": "皆無: 命中", "parameters": { "stat": "hitRate" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.evasionRate", "label": "皆無: 回避", "parameters": { "stat": "evasionRate" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.criticalRate", "label": "皆無: 必殺", "parameters": { "stat": "criticalRate" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.attackCount", "label": "皆無: 攻撃回数", "parameters": { "stat": "attackCount" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.magicalHealing", "label": "皆無: 回復力", "parameters": { "stat": "magicalHealing" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.additionalDamage", "label": "皆無: 追加ダメージ", "parameters": { "stat": "additionalDamage" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.breathDamage", "label": "皆無: ブレス", "parameters": { "stat": "breathDamage" }, "value": { "valuePercent": 0 } },
-          { "id": "absent.stat.trapRemoval", "label": "皆無: 罠解除", "parameters": { "stat": "trapRemoval" }, "value": { "valuePercent": 0 } }
+          {
+            "id": "absent.stat.maxHP",
+            "label": "皆無: HP",
+            "parameters": {
+              "stat": "maxHP"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.physicalAttack",
+            "label": "皆無: 攻撃",
+            "parameters": {
+              "stat": "physicalAttack"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.magicalAttack",
+            "label": "皆無: 魔法攻撃",
+            "parameters": {
+              "stat": "magicalAttack"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.physicalDefense",
+            "label": "皆無: 防御",
+            "parameters": {
+              "stat": "physicalDefense"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.magicalDefense",
+            "label": "皆無: 魔法防御",
+            "parameters": {
+              "stat": "magicalDefense"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.hitRate",
+            "label": "皆無: 命中",
+            "parameters": {
+              "stat": "hitRate"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.evasionRate",
+            "label": "皆無: 回避",
+            "parameters": {
+              "stat": "evasionRate"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.criticalRate",
+            "label": "皆無: 必殺",
+            "parameters": {
+              "stat": "criticalRate"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.attackCount",
+            "label": "皆無: 攻撃回数",
+            "parameters": {
+              "stat": "attackCount"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.magicalHealing",
+            "label": "皆無: 回復力",
+            "parameters": {
+              "stat": "magicalHealing"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.additionalDamage",
+            "label": "皆無: 追加ダメージ",
+            "parameters": {
+              "stat": "additionalDamage"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.breathDamage",
+            "label": "皆無: ブレス",
+            "parameters": {
+              "stat": "breathDamage"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          },
+          {
+            "id": "absent.stat.trapRemoval",
+            "label": "皆無: 罠解除",
+            "parameters": {
+              "stat": "trapRemoval"
+            },
+            "value": {
+              "valuePercent": 0
+            }
+          }
         ]
       },
       {
         "familyId": "actionOrder.shuffle",
         "effectType": "actionOrderShuffle",
         "variants": [
-          { "id": "actionOrder.shuffle.random", "label": "[行動順] シャッフル", "value": { "enabled": 1 } }
+          {
+            "id": "actionOrder.shuffle.random",
+            "label": "[行動順] シャッフル",
+            "value": {
+              "enabled": 1
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentSlots.additive",
         "effectType": "equipmentSlotAdditive",
         "variants": [
-          { "id": "equipmentSlots.additive.minus2", "label": "[-2] 装備枠", "value": { "add": -2 } },
-          { "id": "equipmentSlots.additive.1", "label": "[+1] 装備枠", "value": { "add": 1 } },
-          { "id": "equipmentSlots.additive.2", "label": "[+2] 装備枠", "value": { "add": 2 } },
-          { "id": "equipmentSlots.additive.3", "label": "[+3] 装備枠", "value": { "add": 3 } },
-          { "id": "equipmentSlots.additive.4", "label": "[+4] 装備枠", "value": { "add": 4 } },
-          { "id": "equipmentSlots.additive.5", "label": "[+5] 装備枠", "value": { "add": 5 } }
+          {
+            "id": "equipmentSlots.additive.minus2",
+            "label": "[-2] 装備枠",
+            "value": {
+              "add": -2
+            }
+          },
+          {
+            "id": "equipmentSlots.additive.1",
+            "label": "[+1] 装備枠",
+            "value": {
+              "add": 1
+            }
+          },
+          {
+            "id": "equipmentSlots.additive.2",
+            "label": "[+2] 装備枠",
+            "value": {
+              "add": 2
+            }
+          },
+          {
+            "id": "equipmentSlots.additive.3",
+            "label": "[+3] 装備枠",
+            "value": {
+              "add": 3
+            }
+          },
+          {
+            "id": "equipmentSlots.additive.4",
+            "label": "[+4] 装備枠",
+            "value": {
+              "add": 4
+            }
+          },
+          {
+            "id": "equipmentSlots.additive.5",
+            "label": "[+5] 装備枠",
+            "value": {
+              "add": 5
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentSlots.multiplier",
         "effectType": "equipmentSlotMultiplier",
         "variants": [
-          { "id": "equipmentSlots.multiplier.half", "label": "[半減] 装備枠", "value": { "multiplier": 0.5 } },
-          { "id": "equipmentSlots.multiplier.double", "label": "[2倍] 装備枠", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentSlots.multiplier.half",
+            "label": "[半減] 装備枠",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentSlots.multiplier.double",
+            "label": "[2倍] 装備枠",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.thin_sword",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "thin_sword" },
+        "parameters": {
+          "equipmentCategory": "thin_sword"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.thin_sword.1_5", "label": "[1.5倍] 細剣装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.thin_sword.2_0", "label": "[2倍] 細剣装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.thin_sword.0_5",
+            "label": "[0.5倍] 細剣装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.0_8",
+            "label": "[0.8倍] 細剣装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_01",
+            "label": "[1.01倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_02",
+            "label": "[1.02倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_03",
+            "label": "[1.03倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_04",
+            "label": "[1.04倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_05",
+            "label": "[1.05倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_06",
+            "label": "[1.06倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_07",
+            "label": "[1.07倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_08",
+            "label": "[1.08倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_1",
+            "label": "[1.1倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_15",
+            "label": "[1.15倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_2",
+            "label": "[1.2倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_25",
+            "label": "[1.25倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_3",
+            "label": "[1.3倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_4",
+            "label": "[1.4倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_5",
+            "label": "[1.5倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.1_8",
+            "label": "[1.8倍] 細剣装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.thin_sword.2_0",
+            "label": "[2倍] 細剣装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.sword",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "sword" },
+        "parameters": {
+          "equipmentCategory": "sword"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.sword.1_5", "label": "[1.5倍] 剣装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.sword.2_0", "label": "[2倍] 剣装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.sword.0_5",
+            "label": "[0.5倍] 剣装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.0_8",
+            "label": "[0.8倍] 剣装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_01",
+            "label": "[1.01倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_02",
+            "label": "[1.02倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_03",
+            "label": "[1.03倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_04",
+            "label": "[1.04倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_05",
+            "label": "[1.05倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_06",
+            "label": "[1.06倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_07",
+            "label": "[1.07倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_08",
+            "label": "[1.08倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_1",
+            "label": "[1.1倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_15",
+            "label": "[1.15倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_2",
+            "label": "[1.2倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_25",
+            "label": "[1.25倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_3",
+            "label": "[1.3倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_4",
+            "label": "[1.4倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_5",
+            "label": "[1.5倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.1_8",
+            "label": "[1.8倍] 剣装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.sword.2_0",
+            "label": "[2倍] 剣装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.katana",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "katana" },
+        "parameters": {
+          "equipmentCategory": "katana"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.katana.1_5", "label": "[1.5倍] 刀装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.katana.2_0", "label": "[2倍] 刀装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.katana.0_5",
+            "label": "[0.5倍] 刀装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.0_8",
+            "label": "[0.8倍] 刀装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_01",
+            "label": "[1.01倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_02",
+            "label": "[1.02倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_03",
+            "label": "[1.03倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_04",
+            "label": "[1.04倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_05",
+            "label": "[1.05倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_06",
+            "label": "[1.06倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_07",
+            "label": "[1.07倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_08",
+            "label": "[1.08倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_1",
+            "label": "[1.1倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_15",
+            "label": "[1.15倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_2",
+            "label": "[1.2倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_25",
+            "label": "[1.25倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_3",
+            "label": "[1.3倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_4",
+            "label": "[1.4倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_5",
+            "label": "[1.5倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.1_8",
+            "label": "[1.8倍] 刀装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.katana.2_0",
+            "label": "[2倍] 刀装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.bow",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "bow" },
+        "parameters": {
+          "equipmentCategory": "bow"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.bow.1_5", "label": "[1.5倍] 弓装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.bow.2_0", "label": "[2倍] 弓装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.bow.0_5",
+            "label": "[0.5倍] 弓装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.0_8",
+            "label": "[0.8倍] 弓装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_01",
+            "label": "[1.01倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_02",
+            "label": "[1.02倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_03",
+            "label": "[1.03倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_04",
+            "label": "[1.04倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_05",
+            "label": "[1.05倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_06",
+            "label": "[1.06倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_07",
+            "label": "[1.07倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_08",
+            "label": "[1.08倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_1",
+            "label": "[1.1倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_15",
+            "label": "[1.15倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_2",
+            "label": "[1.2倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_25",
+            "label": "[1.25倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_3",
+            "label": "[1.3倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_4",
+            "label": "[1.4倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_5",
+            "label": "[1.5倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.1_8",
+            "label": "[1.8倍] 弓装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.bow.2_0",
+            "label": "[2倍] 弓装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.armor",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "armor" },
+        "parameters": {
+          "equipmentCategory": "armor"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.armor.1_5", "label": "[1.5倍] 鎧装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.armor.2_0", "label": "[2倍] 鎧装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.armor.0_5",
+            "label": "[0.5倍] 鎧装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.0_8",
+            "label": "[0.8倍] 鎧装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_01",
+            "label": "[1.01倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_02",
+            "label": "[1.02倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_03",
+            "label": "[1.03倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_04",
+            "label": "[1.04倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_05",
+            "label": "[1.05倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_06",
+            "label": "[1.06倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_07",
+            "label": "[1.07倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_08",
+            "label": "[1.08倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_1",
+            "label": "[1.1倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_15",
+            "label": "[1.15倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_2",
+            "label": "[1.2倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_25",
+            "label": "[1.25倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_3",
+            "label": "[1.3倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_4",
+            "label": "[1.4倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_5",
+            "label": "[1.5倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.1_8",
+            "label": "[1.8倍] 鎧装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.armor.2_0",
+            "label": "[2倍] 鎧装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.heavy_armor",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "heavy_armor" },
+        "parameters": {
+          "equipmentCategory": "heavy_armor"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.heavy_armor.1_5", "label": "[1.5倍] 重鎧装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.heavy_armor.2_0", "label": "[2倍] 重鎧装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.0_5",
+            "label": "[0.5倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.0_8",
+            "label": "[0.8倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_01",
+            "label": "[1.01倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_02",
+            "label": "[1.02倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_03",
+            "label": "[1.03倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_04",
+            "label": "[1.04倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_05",
+            "label": "[1.05倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_06",
+            "label": "[1.06倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_07",
+            "label": "[1.07倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_08",
+            "label": "[1.08倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_1",
+            "label": "[1.1倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_15",
+            "label": "[1.15倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_2",
+            "label": "[1.2倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_25",
+            "label": "[1.25倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_3",
+            "label": "[1.3倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_4",
+            "label": "[1.4倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_5",
+            "label": "[1.5倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.1_8",
+            "label": "[1.8倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.heavy_armor.2_0",
+            "label": "[2倍] 重鎧装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.shield",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "shield" },
+        "parameters": {
+          "equipmentCategory": "shield"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.shield.1_5", "label": "[1.5倍] 盾装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.shield.2_0", "label": "[2倍] 盾装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.shield.0_5",
+            "label": "[0.5倍] 盾装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.0_8",
+            "label": "[0.8倍] 盾装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_01",
+            "label": "[1.01倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_02",
+            "label": "[1.02倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_03",
+            "label": "[1.03倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_04",
+            "label": "[1.04倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_05",
+            "label": "[1.05倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_06",
+            "label": "[1.06倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_07",
+            "label": "[1.07倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_08",
+            "label": "[1.08倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_1",
+            "label": "[1.1倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_15",
+            "label": "[1.15倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_2",
+            "label": "[1.2倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_25",
+            "label": "[1.25倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_3",
+            "label": "[1.3倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_4",
+            "label": "[1.4倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_5",
+            "label": "[1.5倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.1_8",
+            "label": "[1.8倍] 盾装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.shield.2_0",
+            "label": "[2倍] 盾装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.gauntlet",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "gauntlet" },
+        "parameters": {
+          "equipmentCategory": "gauntlet"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.gauntlet.1_5", "label": "[1.5倍] 小手装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.gauntlet.2_0", "label": "[2倍] 小手装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.gauntlet.0_5",
+            "label": "[0.5倍] 小手装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.0_8",
+            "label": "[0.8倍] 小手装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_01",
+            "label": "[1.01倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_02",
+            "label": "[1.02倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_03",
+            "label": "[1.03倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_04",
+            "label": "[1.04倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_05",
+            "label": "[1.05倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_06",
+            "label": "[1.06倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_07",
+            "label": "[1.07倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_08",
+            "label": "[1.08倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_1",
+            "label": "[1.1倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_15",
+            "label": "[1.15倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_2",
+            "label": "[1.2倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_25",
+            "label": "[1.25倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_3",
+            "label": "[1.3倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_4",
+            "label": "[1.4倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_5",
+            "label": "[1.5倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.1_8",
+            "label": "[1.8倍] 小手装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gauntlet.2_0",
+            "label": "[2倍] 小手装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.wand",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "wand" },
+        "parameters": {
+          "equipmentCategory": "wand"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.wand.1_5", "label": "[1.5倍] ワンド装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.wand.2_0", "label": "[2倍] ワンド装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.wand.0_5",
+            "label": "[0.5倍] ワンド装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.0_8",
+            "label": "[0.8倍] ワンド装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_01",
+            "label": "[1.01倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_02",
+            "label": "[1.02倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_03",
+            "label": "[1.03倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_04",
+            "label": "[1.04倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_05",
+            "label": "[1.05倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_06",
+            "label": "[1.06倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_07",
+            "label": "[1.07倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_08",
+            "label": "[1.08倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_1",
+            "label": "[1.1倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_15",
+            "label": "[1.15倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_2",
+            "label": "[1.2倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_25",
+            "label": "[1.25倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_3",
+            "label": "[1.3倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_4",
+            "label": "[1.4倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_5",
+            "label": "[1.5倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.1_8",
+            "label": "[1.8倍] ワンド装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.wand.2_0",
+            "label": "[2倍] ワンド装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.rod",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "rod" },
+        "parameters": {
+          "equipmentCategory": "rod"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.rod.1_5", "label": "[1.5倍] ロッド装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.rod.2_0", "label": "[2倍] ロッド装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.rod.0_5",
+            "label": "[0.5倍] ロッド装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.0_8",
+            "label": "[0.8倍] ロッド装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_01",
+            "label": "[1.01倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_02",
+            "label": "[1.02倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_03",
+            "label": "[1.03倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_04",
+            "label": "[1.04倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_05",
+            "label": "[1.05倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_06",
+            "label": "[1.06倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_07",
+            "label": "[1.07倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_08",
+            "label": "[1.08倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_1",
+            "label": "[1.1倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_15",
+            "label": "[1.15倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_2",
+            "label": "[1.2倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_25",
+            "label": "[1.25倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_3",
+            "label": "[1.3倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_4",
+            "label": "[1.4倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_5",
+            "label": "[1.5倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.1_8",
+            "label": "[1.8倍] ロッド装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.rod.2_0",
+            "label": "[2倍] ロッド装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.grimoire",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "grimoire" },
+        "parameters": {
+          "equipmentCategory": "grimoire"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.grimoire.1_5", "label": "[1.5倍] 魔道書装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.grimoire.2_0", "label": "[2倍] 魔道書装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.grimoire.0_5",
+            "label": "[0.5倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.0_8",
+            "label": "[0.8倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_01",
+            "label": "[1.01倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_02",
+            "label": "[1.02倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_03",
+            "label": "[1.03倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_04",
+            "label": "[1.04倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_05",
+            "label": "[1.05倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_06",
+            "label": "[1.06倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_07",
+            "label": "[1.07倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_08",
+            "label": "[1.08倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_1",
+            "label": "[1.1倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_15",
+            "label": "[1.15倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_2",
+            "label": "[1.2倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_25",
+            "label": "[1.25倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_3",
+            "label": "[1.3倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_4",
+            "label": "[1.4倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_5",
+            "label": "[1.5倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.1_8",
+            "label": "[1.8倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.grimoire.2_0",
+            "label": "[2倍] 魔道書装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.robe",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "robe" },
+        "parameters": {
+          "equipmentCategory": "robe"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.robe.1_5", "label": "[1.5倍] 法衣装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.robe.2_0", "label": "[2倍] 法衣装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.robe.0_5",
+            "label": "[0.5倍] 法衣装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.0_8",
+            "label": "[0.8倍] 法衣装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_01",
+            "label": "[1.01倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_02",
+            "label": "[1.02倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_03",
+            "label": "[1.03倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_04",
+            "label": "[1.04倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_05",
+            "label": "[1.05倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_06",
+            "label": "[1.06倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_07",
+            "label": "[1.07倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_08",
+            "label": "[1.08倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_1",
+            "label": "[1.1倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_15",
+            "label": "[1.15倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_2",
+            "label": "[1.2倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_25",
+            "label": "[1.25倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_3",
+            "label": "[1.3倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_4",
+            "label": "[1.4倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_5",
+            "label": "[1.5倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.1_8",
+            "label": "[1.8倍] 法衣装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.robe.2_0",
+            "label": "[2倍] 法衣装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.gem",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "gem" },
+        "parameters": {
+          "equipmentCategory": "gem"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.gem.1_5", "label": "[1.5倍] 宝石装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.gem.2_0", "label": "[2倍] 宝石装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.gem.0_5",
+            "label": "[0.5倍] 宝石装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.0_8",
+            "label": "[0.8倍] 宝石装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_01",
+            "label": "[1.01倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_02",
+            "label": "[1.02倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_03",
+            "label": "[1.03倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_04",
+            "label": "[1.04倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_05",
+            "label": "[1.05倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_06",
+            "label": "[1.06倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_07",
+            "label": "[1.07倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_08",
+            "label": "[1.08倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_1",
+            "label": "[1.1倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_15",
+            "label": "[1.15倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_2",
+            "label": "[1.2倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_25",
+            "label": "[1.25倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_3",
+            "label": "[1.3倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_4",
+            "label": "[1.4倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_5",
+            "label": "[1.5倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.1_8",
+            "label": "[1.8倍] 宝石装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.gem.2_0",
+            "label": "[2倍] 宝石装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.other",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "other" },
+        "parameters": {
+          "equipmentCategory": "other"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.other.1_5", "label": "[1.5倍] その他装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.other.2_0", "label": "[2倍] その他装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.other.0_5",
+            "label": "[0.5倍] その他装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.0_8",
+            "label": "[0.8倍] その他装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_01",
+            "label": "[1.01倍] その他装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_02",
+            "label": "[1.02倍] その他装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_03",
+            "label": "[1.03倍] その他装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_04",
+            "label": "[1.04倍] その他装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_05",
+            "label": "[1.05倍] その他装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_06",
+            "label": "[1.06倍] その他装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_07",
+            "label": "[1.07倍] その他装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_08",
+            "label": "[1.08倍] その他装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_1",
+            "label": "[1.1倍] その他装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_15",
+            "label": "[1.15倍] その他装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_2",
+            "label": "[1.2倍] その他装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_25",
+            "label": "[1.25倍] その他装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_3",
+            "label": "[1.3倍] その他装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_4",
+            "label": "[1.4倍] その他装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_5",
+            "label": "[1.5倍] その他装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.1_8",
+            "label": "[1.8倍] その他装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.other.2_0",
+            "label": "[2倍] その他装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.race_specific",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "race_specific" },
+        "parameters": {
+          "equipmentCategory": "race_specific"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.race_specific.1_5", "label": "[1.5倍] 種族専用装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.race_specific.2_0", "label": "[2倍] 種族専用装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.race_specific.0_5",
+            "label": "[0.5倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.0_8",
+            "label": "[0.8倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_01",
+            "label": "[1.01倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_02",
+            "label": "[1.02倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_03",
+            "label": "[1.03倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_04",
+            "label": "[1.04倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_05",
+            "label": "[1.05倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_06",
+            "label": "[1.06倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_07",
+            "label": "[1.07倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_08",
+            "label": "[1.08倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_1",
+            "label": "[1.1倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_15",
+            "label": "[1.15倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_2",
+            "label": "[1.2倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_25",
+            "label": "[1.25倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_3",
+            "label": "[1.3倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_4",
+            "label": "[1.4倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_5",
+            "label": "[1.5倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.1_8",
+            "label": "[1.8倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.race_specific.2_0",
+            "label": "[2倍] 種族専用装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.for_synthesis",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "for_synthesis" },
+        "parameters": {
+          "equipmentCategory": "for_synthesis"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.for_synthesis.1_5", "label": "[1.5倍] 合成素材装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.for_synthesis.2_0", "label": "[2倍] 合成素材装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.0_5",
+            "label": "[0.5倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.0_8",
+            "label": "[0.8倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_01",
+            "label": "[1.01倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_02",
+            "label": "[1.02倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_03",
+            "label": "[1.03倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_04",
+            "label": "[1.04倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_05",
+            "label": "[1.05倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_06",
+            "label": "[1.06倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_07",
+            "label": "[1.07倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_08",
+            "label": "[1.08倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_1",
+            "label": "[1.1倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_15",
+            "label": "[1.15倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_2",
+            "label": "[1.2倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_25",
+            "label": "[1.25倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_3",
+            "label": "[1.3倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_4",
+            "label": "[1.4倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_5",
+            "label": "[1.5倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.1_8",
+            "label": "[1.8倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.for_synthesis.2_0",
+            "label": "[2倍] 合成素材装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "equipmentStatMultiplier.magic_material",
         "effectType": "equipmentStatMultiplier",
-        "parameters": { "equipmentCategory": "magic_material" },
+        "parameters": {
+          "equipmentCategory": "magic_material"
+        },
         "variants": [
-          { "id": "equipmentStatMultiplier.magic_material.1_5", "label": "[1.5倍] 魔造素材装備性能", "value": { "multiplier": 1.5 } },
-          { "id": "equipmentStatMultiplier.magic_material.2_0", "label": "[2倍] 魔造素材装備性能", "value": { "multiplier": 2.0 } }
+          {
+            "id": "equipmentStatMultiplier.magic_material.0_5",
+            "label": "[0.5倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.0_8",
+            "label": "[0.8倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 0.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_01",
+            "label": "[1.01倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.01
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_02",
+            "label": "[1.02倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.02
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_03",
+            "label": "[1.03倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.03
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_04",
+            "label": "[1.04倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.04
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_05",
+            "label": "[1.05倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.05
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_06",
+            "label": "[1.06倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.06
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_07",
+            "label": "[1.07倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.07
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_08",
+            "label": "[1.08倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.08
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_1",
+            "label": "[1.1倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.1
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_15",
+            "label": "[1.15倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.15
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_2",
+            "label": "[1.2倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_25",
+            "label": "[1.25倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.25
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_3",
+            "label": "[1.3倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.3
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_4",
+            "label": "[1.4倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.4
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_5",
+            "label": "[1.5倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.1_8",
+            "label": "[1.8倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 1.8
+            }
+          },
+          {
+            "id": "equipmentStatMultiplier.magic_material.2_0",
+            "label": "[2倍] 魔造素材装備性能",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "breath.variant",
         "effectType": "breathVariant",
         "variants": [
-          { "id": "breath.variant.fire", "label": "[戦術] ファイヤーブレス", "parameters": { "variant": "fire" }, "value": { "extraCharges": 1 } },
-          { "id": "breath.variant.cold", "label": "[戦術] コールドブレス", "parameters": { "variant": "cold" }, "value": { "extraCharges": 1 } },
-          { "id": "breath.variant.thunder", "label": "[戦術] サンダーブレス", "parameters": { "variant": "thunder" }, "value": { "extraCharges": 1 } }
+          {
+            "id": "breath.variant.fire",
+            "label": "[戦術] ファイヤーブレス",
+            "parameters": {
+              "variant": "fire"
+            },
+            "value": {
+              "extraCharges": 1
+            }
+          },
+          {
+            "id": "breath.variant.cold",
+            "label": "[戦術] コールドブレス",
+            "parameters": {
+              "variant": "cold"
+            },
+            "value": {
+              "extraCharges": 1
+            }
+          },
+          {
+            "id": "breath.variant.thunder",
+            "label": "[戦術] サンダーブレス",
+            "parameters": {
+              "variant": "thunder"
+            },
+            "value": {
+              "extraCharges": 1
+            }
+          }
         ]
       },
       {
         "familyId": "breath.power",
         "effectType": "damageDealtMultiplier",
-        "parameters": { "damageType": "breath" },
+        "parameters": {
+          "damageType": "breath"
+        },
         "variants": [
-          { "id": "breath.power.up.small", "label": "[ブレス強化] 小", "value": { "multiplier": 1.2 } },
-          { "id": "breath.power.up.large", "label": "[ブレス強化] 大", "value": { "multiplier": 1.5 } },
-          { "id": "breath.power.down", "label": "[ブレス弱化]", "value": { "multiplier": 0.7 } },
-          { "id": "breath.power.amp", "label": "[ブレス強化]", "value": { "multiplier": 2.0 } }
+          {
+            "id": "breath.power.up.small",
+            "label": "[ブレス強化] 小",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "breath.power.up.large",
+            "label": "[ブレス強化] 大",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "breath.power.down",
+            "label": "[ブレス弱化]",
+            "value": {
+              "multiplier": 0.7
+            }
+          },
+          {
+            "id": "breath.power.amp",
+            "label": "[ブレス強化]",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
         ]
       },
       {
         "familyId": "status.inflict.confusion",
         "effectType": "statusInflict",
-        "parameters": { "statusId": "status.confusion" },
+        "parameters": {
+          "statusId": "status.confusion"
+        },
         "variants": [
-          { "id": "status.inflict.confusion.low", "label": "[混乱付与] 小", "value": { "baseChancePercent": 10 } },
-          { "id": "status.inflict.confusion.mid", "label": "[混乱付与] 中", "value": { "baseChancePercent": 20 } },
-          { "id": "status.inflict.confusion.high", "label": "[混乱付与] 大", "value": { "baseChancePercent": 30 } }
+          {
+            "id": "status.inflict.confusion.low",
+            "label": "[混乱付与] 小",
+            "value": {
+              "baseChancePercent": 10
+            }
+          },
+          {
+            "id": "status.inflict.confusion.mid",
+            "label": "[混乱付与] 中",
+            "value": {
+              "baseChancePercent": 20
+            }
+          },
+          {
+            "id": "status.inflict.confusion.high",
+            "label": "[混乱付与] 大",
+            "value": {
+              "baseChancePercent": 30
+            }
+          }
         ]
       },
       {
         "familyId": "berserk.trigger",
         "effectType": "berserk",
         "variants": [
-          { "id": "berserk.trigger.5", "label": "[暴走] 5%", "value": { "chancePercent": 5 } },
-          { "id": "berserk.trigger.10", "label": "[暴走] 10%", "value": { "chancePercent": 10 } },
-          { "id": "berserk.trigger.15", "label": "[暴走] 15%", "value": { "chancePercent": 15 } },
-          { "id": "berserk.trigger.20", "label": "[暴走] 20%", "value": { "chancePercent": 20 } },
-          { "id": "berserk.trigger.25", "label": "[暴走] 25%", "value": { "chancePercent": 25 } }
+          {
+            "id": "berserk.trigger.5",
+            "label": "[暴走] 5%",
+            "value": {
+              "chancePercent": 5
+            }
+          },
+          {
+            "id": "berserk.trigger.10",
+            "label": "[暴走] 10%",
+            "value": {
+              "chancePercent": 10
+            }
+          },
+          {
+            "id": "berserk.trigger.15",
+            "label": "[暴走] 15%",
+            "value": {
+              "chancePercent": 15
+            }
+          },
+          {
+            "id": "berserk.trigger.20",
+            "label": "[暴走] 20%",
+            "value": {
+              "chancePercent": 20
+            }
+          },
+          {
+            "id": "berserk.trigger.25",
+            "label": "[暴走] 25%",
+            "value": {
+              "chancePercent": 25
+            }
+          }
         ]
       },
       {
         "familyId": "procMultiplier.general",
         "effectType": "procMultiplier",
         "variants": [
-          { "id": "procMultiplier.general.1p2", "label": "[+20%] 発動率強化", "value": { "multiplier": 1.2 } },
-          { "id": "procMultiplier.general.1p5", "label": "[+50%] 発動率強化", "value": { "multiplier": 1.5 } }
+          {
+            "id": "procMultiplier.general.1p2",
+            "label": "[+20%] 発動率強化",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "procMultiplier.general.1p5",
+            "label": "[+50%] 発動率強化",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
         ]
       },
       {
         "familyId": "antiHealing.general",
         "effectType": "antiHealing",
         "variants": [
-          { "id": "antiHealing.general.enable", "label": "[戦術] リバース・ヒール", "value": { "enabled": 1 } }
+          {
+            "id": "antiHealing.general.enable",
+            "label": "[戦術] リバース・ヒール",
+            "value": {
+              "enabled": 1
+            }
+          }
         ]
       },
       {
         "familyId": "specialAttack.specialA",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.specialA.enable", "label": "[戦術] 特殊攻撃A", "parameters": { "specialAttackId": "specialA" }, "value": { "chancePercent": 50 } }
+          {
+            "id": "specialAttack.specialA.enable",
+            "label": "[戦術] 特殊攻撃A",
+            "parameters": {
+              "specialAttackId": "specialA"
+            },
+            "value": {
+              "chancePercent": 50
+            }
+          }
         ]
       },
       {
         "familyId": "specialAttack.specialB",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.specialB.enable", "label": "[戦術] 特殊攻撃B", "parameters": { "specialAttackId": "specialB" }, "value": { "chancePercent": 50 } }
+          {
+            "id": "specialAttack.specialB.enable",
+            "label": "[戦術] 特殊攻撃B",
+            "parameters": {
+              "specialAttackId": "specialB"
+            },
+            "value": {
+              "chancePercent": 50
+            }
+          }
         ]
       },
       {
         "familyId": "specialAttack.specialC",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.specialC.enable", "label": "[戦術] 特殊攻撃C", "parameters": { "specialAttackId": "specialC" }, "value": { "chancePercent": 50 } }
+          {
+            "id": "specialAttack.specialC.enable",
+            "label": "[戦術] 特殊攻撃C",
+            "parameters": {
+              "specialAttackId": "specialC"
+            },
+            "value": {
+              "chancePercent": 50
+            }
+          }
         ]
       },
       {
         "familyId": "specialAttack.specialD",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.specialD.enable", "label": "[戦術] 特殊攻撃D", "parameters": { "specialAttackId": "specialD" }, "value": { "chancePercent": 50 } }
+          {
+            "id": "specialAttack.specialD.enable",
+            "label": "[戦術] 特殊攻撃D",
+            "parameters": {
+              "specialAttackId": "specialD"
+            },
+            "value": {
+              "chancePercent": 50
+            }
+          }
         ]
       },
       {
         "familyId": "spellSpecificTakenMultiplier.fireball",
         "effectType": "spellSpecificTakenMultiplier",
-        "parameters": { "spellId": "spell.mage.fireball" },
+        "parameters": {
+          "spellId": "spell.mage.fireball"
+        },
         "variants": [
-          { "id": "spellSpecificTakenMultiplier.fireball.half", "label": "[耐性] ファイアーボール", "value": { "multiplier": 0.5 } },
-          { "id": "spellSpecificTakenMultiplier.fireball.quarter", "label": "[無効] ファイアーボール", "value": { "multiplier": 0.0 } },
-          { "id": "spellSpecificTakenMultiplier.fireball.weak", "label": "[弱点] ファイアーボール", "value": { "multiplier": 1.5 } }
+          {
+            "id": "spellSpecificTakenMultiplier.fireball.half",
+            "label": "[耐性] ファイアーボール",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.fireball.quarter",
+            "label": "[無効] ファイアーボール",
+            "value": {
+              "multiplier": 0.0
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.fireball.weak",
+            "label": "[弱点] ファイアーボール",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
         ]
       },
       {
         "familyId": "spellSpecificTakenMultiplier.magic_arrow",
         "effectType": "spellSpecificTakenMultiplier",
-        "parameters": { "spellId": "spell.mage.magic_arrow" },
+        "parameters": {
+          "spellId": "spell.mage.magic_arrow"
+        },
         "variants": [
-          { "id": "spellSpecificTakenMultiplier.magic_arrow.half", "label": "[耐性] マジックアロー", "value": { "multiplier": 0.5 } },
-          { "id": "spellSpecificTakenMultiplier.magic_arrow.quarter", "label": "[無効] マジックアロー", "value": { "multiplier": 0.0 } },
-          { "id": "spellSpecificTakenMultiplier.magic_arrow.weak", "label": "[弱点] マジックアロー", "value": { "multiplier": 1.5 } }
+          {
+            "id": "spellSpecificTakenMultiplier.magic_arrow.half",
+            "label": "[耐性] マジックアロー",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.magic_arrow.quarter",
+            "label": "[無効] マジックアロー",
+            "value": {
+              "multiplier": 0.0
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.magic_arrow.weak",
+            "label": "[弱点] マジックアロー",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
         ]
       },
       {
         "familyId": "spellSpecificTakenMultiplier.blizzard",
         "effectType": "spellSpecificTakenMultiplier",
-        "parameters": { "spellId": "spell.mage.blizzard" },
+        "parameters": {
+          "spellId": "spell.mage.blizzard"
+        },
         "variants": [
-          { "id": "spellSpecificTakenMultiplier.blizzard.half", "label": "[耐性] ブリザード", "value": { "multiplier": 0.5 } },
-          { "id": "spellSpecificTakenMultiplier.blizzard.quarter", "label": "[無効] ブリザード", "value": { "multiplier": 0.0 } },
-          { "id": "spellSpecificTakenMultiplier.blizzard.weak", "label": "[弱点] ブリザード", "value": { "multiplier": 1.5 } }
+          {
+            "id": "spellSpecificTakenMultiplier.blizzard.half",
+            "label": "[耐性] ブリザード",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.blizzard.quarter",
+            "label": "[無効] ブリザード",
+            "value": {
+              "multiplier": 0.0
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.blizzard.weak",
+            "label": "[弱点] ブリザード",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
         ]
       },
       {
         "familyId": "spellSpecificTakenMultiplier.thunder_bolt",
         "effectType": "spellSpecificTakenMultiplier",
-        "parameters": { "spellId": "spell.mage.thunder_bolt" },
+        "parameters": {
+          "spellId": "spell.mage.thunder_bolt"
+        },
         "variants": [
-          { "id": "spellSpecificTakenMultiplier.thunder_bolt.half", "label": "[耐性] サンダーボルト", "value": { "multiplier": 0.5 } },
-          { "id": "spellSpecificTakenMultiplier.thunder_bolt.quarter", "label": "[無効] サンダーボルト", "value": { "multiplier": 0.0 } },
-          { "id": "spellSpecificTakenMultiplier.thunder_bolt.weak", "label": "[弱点] サンダーボルト", "value": { "multiplier": 1.5 } }
+          {
+            "id": "spellSpecificTakenMultiplier.thunder_bolt.half",
+            "label": "[耐性] サンダーボルト",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.thunder_bolt.quarter",
+            "label": "[無効] サンダーボルト",
+            "value": {
+              "multiplier": 0.0
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.thunder_bolt.weak",
+            "label": "[弱点] サンダーボルト",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
         ]
       },
       {
         "familyId": "spellSpecificTakenMultiplier.nuclear",
         "effectType": "spellSpecificTakenMultiplier",
-        "parameters": { "spellId": "spell.mage.nuclear" },
+        "parameters": {
+          "spellId": "spell.mage.nuclear"
+        },
         "variants": [
-          { "id": "spellSpecificTakenMultiplier.nuclear.half", "label": "[耐性] ニュークリア", "value": { "multiplier": 0.5 } },
-          { "id": "spellSpecificTakenMultiplier.nuclear.quarter", "label": "[無効] ニュークリア", "value": { "multiplier": 0.0 } },
-          { "id": "spellSpecificTakenMultiplier.nuclear.weak", "label": "[弱点] ニュークリア", "value": { "multiplier": 1.5 } }
+          {
+            "id": "spellSpecificTakenMultiplier.nuclear.half",
+            "label": "[耐性] ニュークリア",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.nuclear.quarter",
+            "label": "[無効] ニュークリア",
+            "value": {
+              "multiplier": 0.0
+            }
+          },
+          {
+            "id": "spellSpecificTakenMultiplier.nuclear.weak",
+            "label": "[弱点] ニュークリア",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
         ]
       },
       {
         "familyId": "runaway.magic",
         "effectType": "runawayMagic",
         "variants": [
-          { "id": "runaway.magic.20", "label": "[魔力暴走] 20%", "value": { "thresholdPercent": 20, "chancePercent": 20 } },
-          { "id": "runaway.magic.30", "label": "[魔力暴走] 30%", "value": { "thresholdPercent": 30, "chancePercent": 25 } }
+          {
+            "id": "runaway.magic.20",
+            "label": "[魔力暴走] 20%",
+            "value": {
+              "thresholdPercent": 20,
+              "chancePercent": 20
+            }
+          },
+          {
+            "id": "runaway.magic.30",
+            "label": "[魔力暴走] 30%",
+            "value": {
+              "thresholdPercent": 30,
+              "chancePercent": 25
+            }
+          }
         ]
       },
       {
         "familyId": "runaway.damage",
         "effectType": "runawayDamage",
         "variants": [
-          { "id": "runaway.damage.20", "label": "[ダメージ暴走] 20%", "value": { "thresholdPercent": 20, "chancePercent": 20 } },
-          { "id": "runaway.damage.30", "label": "[ダメージ暴走] 30%", "value": { "thresholdPercent": 30, "chancePercent": 25 } }
+          {
+            "id": "runaway.damage.20",
+            "label": "[ダメージ暴走] 20%",
+            "value": {
+              "thresholdPercent": 20,
+              "chancePercent": 20
+            }
+          },
+          {
+            "id": "runaway.damage.30",
+            "label": "[ダメージ暴走] 30%",
+            "value": {
+              "thresholdPercent": 30,
+              "chancePercent": 25
+            }
+          }
         ]
       },
       {
         "familyId": "extraAction.general",
         "effectType": "extraAction",
         "variants": [
-          { "id": "extraAction.general.once10", "label": "[追加行動] 10%", "value": { "chancePercent": 10, "count": 1 } },
-          { "id": "extraAction.general.once30", "label": "[追加行動] 30%", "value": { "chancePercent": 30, "count": 1 } },
-          { "id": "extraAction.general.twice20", "label": "[追加行動] 20%×2", "value": { "chancePercent": 20, "count": 2 } }
+          {
+            "id": "extraAction.general.once10",
+            "label": "[追加行動] 10%",
+            "value": {
+              "chancePercent": 10,
+              "count": 1
+            }
+          },
+          {
+            "id": "extraAction.general.once30",
+            "label": "[追加行動] 30%",
+            "value": {
+              "chancePercent": 30,
+              "count": 1
+            }
+          },
+          {
+            "id": "extraAction.general.twice20",
+            "label": "[追加行動] 20%×2",
+            "value": {
+              "chancePercent": 20,
+              "count": 2
+            }
+          }
         ]
       },
       {
         "familyId": "reactionNextTurn.general",
         "effectType": "reactionNextTurn",
         "variants": [
-          { "id": "reactionNextTurn.general.plus1", "label": "[再行動] 次ターン+1", "value": { "count": 1 } },
-          { "id": "reactionNextTurn.general.plus2", "label": "[再行動] 次ターン+2", "value": { "count": 2 } }
+          {
+            "id": "reactionNextTurn.general.plus1",
+            "label": "[再行動] 次ターン+1",
+            "value": {
+              "count": 1
+            }
+          },
+          {
+            "id": "reactionNextTurn.general.plus2",
+            "label": "[再行動] 次ターン+2",
+            "value": {
+              "count": 2
+            }
+          }
         ]
       },
       {
         "familyId": "sacrificeRite.general",
         "effectType": "sacrificeRite",
         "variants": [
-          { "id": "sacrificeRite.general.every2", "label": "[戦術] 古の儀(2T毎)", "value": { "everyTurns": 2 } },
-          { "id": "sacrificeRite.general.every3", "label": "[戦術] 古の儀(3T毎)", "value": { "everyTurns": 3 } }
+          {
+            "id": "sacrificeRite.general.every2",
+            "label": "[戦術] 古の儀(2T毎)",
+            "value": {
+              "everyTurns": 2
+            }
+          },
+          {
+            "id": "sacrificeRite.general.every3",
+            "label": "[戦術] 古の儀(3T毎)",
+            "value": {
+              "everyTurns": 3
+            }
+          }
         ]
       },
       {
         "familyId": "retreatAtTurn.general",
         "effectType": "retreatAtTurn",
         "variants": [
-          { "id": "retreatAtTurn.general.turn10", "label": "[戦線離脱] 10ターン", "value": { "turn": 10, "chancePercent": 100 } },
-          { "id": "retreatAtTurn.general.turn15", "label": "[戦線離脱] 15ターン", "value": { "turn": 15, "chancePercent": 100 } },
-          { "id": "retreatAtTurn.general.instant50", "label": "[即時離脱] 50%", "value": { "chancePercent": 50 } }
+          {
+            "id": "retreatAtTurn.general.turn10",
+            "label": "[戦線離脱] 10ターン",
+            "value": {
+              "turn": 10,
+              "chancePercent": 100
+            }
+          },
+          {
+            "id": "retreatAtTurn.general.turn15",
+            "label": "[戦線離脱] 15ターン",
+            "value": {
+              "turn": 15,
+              "chancePercent": 100
+            }
+          },
+          {
+            "id": "retreatAtTurn.general.instant50",
+            "label": "[即時離脱] 50%",
+            "value": {
+              "chancePercent": 50
+            }
+          }
         ]
       },
       {
         "familyId": "specialAttack.specialE",
         "effectType": "specialAttack",
         "variants": [
-          { "id": "specialAttack.specialE.enable", "label": "[戦術] 特殊攻撃E", "parameters": { "specialAttackId": "specialE" }, "value": { "chancePercent": 50 } }
+          {
+            "id": "specialAttack.specialE.enable",
+            "label": "[戦術] 特殊攻撃E",
+            "parameters": {
+              "specialAttackId": "specialE"
+            },
+            "value": {
+              "chancePercent": 50
+            }
+          }
         ]
       },
       {
@@ -4748,6 +7976,13 @@
             "label": "[×2/3] 物理被ダメ倍率",
             "value": {
               "multiplier": 0.6666666666666666
+            }
+          },
+          {
+            "id": "damageTakenMultiplier.physical.0_7",
+            "label": "[×7/10] 物理被ダメ倍率",
+            "value": {
+              "multiplier": 0.7
             }
           },
           {
@@ -5067,10 +8302,31 @@
         },
         "variants": [
           {
+            "id": "damageTakenMultiplier.magical.0",
+            "label": "[×無効] 魔法被ダメ倍率",
+            "value": {
+              "multiplier": 0
+            }
+          },
+          {
+            "id": "damageTakenMultiplier.magical.0_25",
+            "label": "[×1/4] 魔法被ダメ倍率",
+            "value": {
+              "multiplier": 0.25
+            }
+          },
+          {
             "id": "damageTakenMultiplier.magical.0_333333",
             "label": "[×1/3] 魔法被ダメ倍率",
             "value": {
               "multiplier": 0.3333333333333333
+            }
+          },
+          {
+            "id": "damageTakenMultiplier.magical.0_4",
+            "label": "[×2/5] 魔法被ダメ倍率",
+            "value": {
+              "multiplier": 0.4
             }
           },
           {
@@ -5095,6 +8351,13 @@
             }
           },
           {
+            "id": "damageTakenMultiplier.magical.0_7",
+            "label": "[×7/10] 魔法被ダメ倍率",
+            "value": {
+              "multiplier": 0.7
+            }
+          },
+          {
             "id": "damageTakenMultiplier.magical.0_75",
             "label": "[×3/4] 魔法被ダメ倍率",
             "value": {
@@ -5113,6 +8376,13 @@
             "label": "[×2] 魔法被ダメ倍率",
             "value": {
               "multiplier": 2.0
+            }
+          },
+          {
+            "id": "damageTakenMultiplier.magical.5_0",
+            "label": "[×弱点5倍] 魔法被ダメ倍率",
+            "value": {
+              "multiplier": 5.0
             }
           }
         ]
@@ -5218,6 +8488,34 @@
         },
         "variants": [
           {
+            "id": "damageTakenMultiplier.breath.0",
+            "label": "[×無効] ブレス被ダメ倍率",
+            "value": {
+              "multiplier": 0
+            }
+          },
+          {
+            "id": "damageTakenMultiplier.breath.0_25",
+            "label": "[×1/4] ブレス被ダメ倍率",
+            "value": {
+              "multiplier": 0.25
+            }
+          },
+          {
+            "id": "damageTakenMultiplier.breath.0_33",
+            "label": "[×1/3] ブレス被ダメ倍率",
+            "value": {
+              "multiplier": 0.3333333333
+            }
+          },
+          {
+            "id": "damageTakenMultiplier.breath.0_4",
+            "label": "[×2/5] ブレス被ダメ倍率",
+            "value": {
+              "multiplier": 0.4
+            }
+          },
+          {
             "id": "damageTakenMultiplier.breath.0_5",
             "label": "[×1/2] ブレス被ダメ倍率",
             "value": {
@@ -5239,6 +8537,13 @@
             }
           },
           {
+            "id": "damageTakenMultiplier.breath.0_7",
+            "label": "[×7/10] ブレス被ダメ倍率",
+            "value": {
+              "multiplier": 0.7
+            }
+          },
+          {
             "id": "damageTakenMultiplier.breath.0_75",
             "label": "[×3/4] ブレス被ダメ倍率",
             "value": {
@@ -5257,6 +8562,13 @@
             "label": "[×2] ブレス被ダメ倍率",
             "value": {
               "multiplier": 2.0
+            }
+          },
+          {
+            "id": "damageTakenMultiplier.breath.5_0",
+            "label": "[×弱点5倍] ブレス被ダメ倍率",
+            "value": {
+              "multiplier": 5.0
             }
           }
         ]
@@ -5644,6 +8956,258 @@
             "value": {
               "percent": 40,
               "capPercent": 50
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.counter",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "counter",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.counter.x1_5",
+            "label": "[x1.5] 殺意・達人",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "procRate.multiplier.counter.x2_0",
+            "label": "[x2.0] 反撃適正",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.pursuit",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "pursuit",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.pursuit.x1_5",
+            "label": "[x1.5] 追撃適正",
+            "value": {
+              "multiplier": 1.5
+            }
+          },
+          {
+            "id": "procRate.multiplier.pursuit.x2_0",
+            "label": "[x2.0] 追撃・追撃適正",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.reattack",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "reattack",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.reattack.x1_5",
+            "label": "[x1.5] 再攻撃適正",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.magicCounter",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "magicCounter",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.magicCounter.x2_0",
+            "label": "[x2.0] 魔法反撃",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.breathCounter",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "breathCounter",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.breathCounter.x2_0",
+            "label": "[x2.0] ブレス反撃",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.magicSupport",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "magicSupport",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.magicSupport.x1_5",
+            "label": "[x1.5] 魔法支援",
+            "value": {
+              "multiplier": 1.5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.crisisEvasion",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "crisisEvasion",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.crisisEvasion.x2_0",
+            "label": "[x2.0] 危機回避",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.instantResurrection",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "instantResurrection",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.instantResurrection.x2_0",
+            "label": "[x2.0] 即時蘇生",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.bravery",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "bravery",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.bravery.x2_0",
+            "label": "[x2.0] 勇猛果敢",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.reflectionRecovery",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "reflectionRecovery",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.reflectionRecovery.x1_6",
+            "label": "[x1.6] 反射回復",
+            "value": {
+              "multiplier": 1.6
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.multiplier.manaDecomposition",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "manaDecomposition",
+          "stacking": "multiply"
+        },
+        "variants": [
+          {
+            "id": "procRate.multiplier.manaDecomposition.x2_0",
+            "label": "[x2.0] 魔力分解",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.additive.counter",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "counter",
+          "stacking": "add"
+        },
+        "variants": [
+          {
+            "id": "procRate.additive.counter.p8",
+            "label": "[+8%] 殺意",
+            "value": {
+              "addPercent": 8.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.additive.fightingSpirit",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "fightingSpirit",
+          "stacking": "add"
+        },
+        "variants": [
+          {
+            "id": "procRate.additive.fightingSpirit.p10",
+            "label": "[+10%] 闘争心",
+            "value": {
+              "addPercent": 10.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "procRate.additive.criticalCombo",
+        "effectType": "procRate",
+        "parameters": {
+          "target": "criticalCombo",
+          "stacking": "add"
+        },
+        "variants": [
+          {
+            "id": "procRate.additive.criticalCombo.p10",
+            "label": "[+10%] 必殺連撃",
+            "value": {
+              "addPercent": 10.0
             }
           }
         ]
@@ -6928,10 +10492,45 @@
         },
         "variants": [
           {
+            "id": "statMultiplier.physicalAttack.0_1",
+            "label": "[×1/10] 攻撃力倍率",
+            "value": {
+              "multiplier": 0.1
+            }
+          },
+          {
+            "id": "statMultiplier.physicalAttack.0_2",
+            "label": "[×1/5] 攻撃力倍率",
+            "value": {
+              "multiplier": 0.2
+            }
+          },
+          {
             "id": "statMultiplier.physicalAttack.0_5",
             "label": "[×1/2] 攻撃力倍率",
             "value": {
               "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.physicalAttack.0_67",
+            "label": "[×2/3] 攻撃力倍率",
+            "value": {
+              "multiplier": 0.6666666667
+            }
+          },
+          {
+            "id": "statMultiplier.physicalAttack.1_2",
+            "label": "[×1.2] 攻撃力倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "statMultiplier.physicalAttack.1_6",
+            "label": "[×1.6] 攻撃力倍率",
+            "value": {
+              "multiplier": 1.6
             }
           },
           {
@@ -6951,10 +10550,38 @@
         },
         "variants": [
           {
+            "id": "statMultiplier.hitRate.0_1",
+            "label": "[×1/10] 命中精度倍率",
+            "value": {
+              "multiplier": 0.1
+            }
+          },
+          {
+            "id": "statMultiplier.hitRate.0_2",
+            "label": "[×1/5] 命中精度倍率",
+            "value": {
+              "multiplier": 0.2
+            }
+          },
+          {
             "id": "statMultiplier.hitRate.0_5",
             "label": "[×1/2] 命中精度倍率",
             "value": {
               "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.hitRate.0_67",
+            "label": "[×2/3] 命中精度倍率",
+            "value": {
+              "multiplier": 0.6666666667
+            }
+          },
+          {
+            "id": "statMultiplier.hitRate.1_2",
+            "label": "[×1.2] 命中精度倍率",
+            "value": {
+              "multiplier": 1.2
             }
           },
           {
@@ -6981,10 +10608,52 @@
         },
         "variants": [
           {
+            "id": "statMultiplier.magicalAttack.0_1",
+            "label": "[×1/10] 魔法攻撃力倍率",
+            "value": {
+              "multiplier": 0.1
+            }
+          },
+          {
+            "id": "statMultiplier.magicalAttack.0_2",
+            "label": "[×1/5] 魔法攻撃力倍率",
+            "value": {
+              "multiplier": 0.2
+            }
+          },
+          {
             "id": "statMultiplier.magicalAttack.0_5",
             "label": "[×1/2] 魔法攻撃力倍率",
             "value": {
               "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.magicalAttack.0_67",
+            "label": "[×2/3] 魔法攻撃力倍率",
+            "value": {
+              "multiplier": 0.6666666667
+            }
+          },
+          {
+            "id": "statMultiplier.magicalAttack.1_2",
+            "label": "[×1.2] 魔法攻撃力倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "statMultiplier.magicalAttack.1_6",
+            "label": "[×1.6] 魔法攻撃力倍率",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "statMultiplier.magicalAttack.2_0",
+            "label": "[×2.0] 魔法攻撃力倍率",
+            "value": {
+              "multiplier": 2.0
             }
           }
         ]
@@ -6997,10 +10666,52 @@
         },
         "variants": [
           {
+            "id": "statMultiplier.magicalHealing.0_1",
+            "label": "[×1/10] 魔法回復量倍率",
+            "value": {
+              "multiplier": 0.1
+            }
+          },
+          {
+            "id": "statMultiplier.magicalHealing.0_2",
+            "label": "[×1/5] 魔法回復量倍率",
+            "value": {
+              "multiplier": 0.2
+            }
+          },
+          {
             "id": "statMultiplier.magicalHealing.0_5",
             "label": "[×1/2] 魔法回復量倍率",
             "value": {
               "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.magicalHealing.0_67",
+            "label": "[×2/3] 魔法回復量倍率",
+            "value": {
+              "multiplier": 0.6666666667
+            }
+          },
+          {
+            "id": "statMultiplier.magicalHealing.1_2",
+            "label": "[×1.2] 魔法回復量倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "statMultiplier.magicalHealing.1_6",
+            "label": "[×1.6] 魔法回復量倍率",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "statMultiplier.magicalHealing.2_0",
+            "label": "[×2.0] 魔法回復量倍率",
+            "value": {
+              "multiplier": 2.0
             }
           }
         ]
@@ -8335,6 +12046,238 @@
             }
           }
         ]
+      },
+      {
+        "familyId": "statMultiplier.physicalDefense",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "statType": "physicalDefense"
+        },
+        "variants": [
+          {
+            "id": "statMultiplier.physicalDefense.0_1",
+            "label": "[×1/10] 防御力倍率",
+            "value": {
+              "multiplier": 0.1
+            }
+          },
+          {
+            "id": "statMultiplier.physicalDefense.0_2",
+            "label": "[×1/5] 防御力倍率",
+            "value": {
+              "multiplier": 0.2
+            }
+          },
+          {
+            "id": "statMultiplier.physicalDefense.0_5",
+            "label": "[×1/2] 防御力倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.physicalDefense.0_67",
+            "label": "[×2/3] 防御力倍率",
+            "value": {
+              "multiplier": 0.6666666667
+            }
+          },
+          {
+            "id": "statMultiplier.physicalDefense.1_2",
+            "label": "[×1.2] 防御力倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "statMultiplier.physicalDefense.1_6",
+            "label": "[×1.6] 防御力倍率",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "statMultiplier.physicalDefense.2_0",
+            "label": "[×2.0] 防御力倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statMultiplier.evasionRate",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "statType": "evasionRate"
+        },
+        "variants": [
+          {
+            "id": "statMultiplier.evasionRate.0_1",
+            "label": "[×1/10] 回避能力倍率",
+            "value": {
+              "multiplier": 0.1
+            }
+          },
+          {
+            "id": "statMultiplier.evasionRate.0_2",
+            "label": "[×1/5] 回避能力倍率",
+            "value": {
+              "multiplier": 0.2
+            }
+          },
+          {
+            "id": "statMultiplier.evasionRate.0_5",
+            "label": "[×1/2] 回避能力倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.evasionRate.0_67",
+            "label": "[×2/3] 回避能力倍率",
+            "value": {
+              "multiplier": 0.6666666667
+            }
+          },
+          {
+            "id": "statMultiplier.evasionRate.1_2",
+            "label": "[×1.2] 回避能力倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "statMultiplier.evasionRate.1_6",
+            "label": "[×1.6] 回避能力倍率",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "statMultiplier.evasionRate.2_0",
+            "label": "[×2.0] 回避能力倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statMultiplier.magicalDefense",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "statType": "magicalDefense"
+        },
+        "variants": [
+          {
+            "id": "statMultiplier.magicalDefense.0_1",
+            "label": "[×1/10] 魔法防御力倍率",
+            "value": {
+              "multiplier": 0.1
+            }
+          },
+          {
+            "id": "statMultiplier.magicalDefense.0_2",
+            "label": "[×1/5] 魔法防御力倍率",
+            "value": {
+              "multiplier": 0.2
+            }
+          },
+          {
+            "id": "statMultiplier.magicalDefense.0_5",
+            "label": "[×1/2] 魔法防御力倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.magicalDefense.0_67",
+            "label": "[×2/3] 魔法防御力倍率",
+            "value": {
+              "multiplier": 0.6666666667
+            }
+          },
+          {
+            "id": "statMultiplier.magicalDefense.1_2",
+            "label": "[×1.2] 魔法防御力倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "statMultiplier.magicalDefense.1_6",
+            "label": "[×1.6] 魔法防御力倍率",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "statMultiplier.magicalDefense.2_0",
+            "label": "[×2.0] 魔法防御力倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "statMultiplier.trapDisarm",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "statType": "trapDisarm"
+        },
+        "variants": [
+          {
+            "id": "statMultiplier.trapDisarm.0_1",
+            "label": "[×1/10] 罠解除能力倍率",
+            "value": {
+              "multiplier": 0.1
+            }
+          },
+          {
+            "id": "statMultiplier.trapDisarm.0_2",
+            "label": "[×1/5] 罠解除能力倍率",
+            "value": {
+              "multiplier": 0.2
+            }
+          },
+          {
+            "id": "statMultiplier.trapDisarm.0_5",
+            "label": "[×1/2] 罠解除能力倍率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "statMultiplier.trapDisarm.0_67",
+            "label": "[×2/3] 罠解除能力倍率",
+            "value": {
+              "multiplier": 0.6666666667
+            }
+          },
+          {
+            "id": "statMultiplier.trapDisarm.1_2",
+            "label": "[×1.2] 罠解除能力倍率",
+            "value": {
+              "multiplier": 1.2
+            }
+          },
+          {
+            "id": "statMultiplier.trapDisarm.1_6",
+            "label": "[×1.6] 罠解除能力倍率",
+            "value": {
+              "multiplier": 1.6
+            }
+          },
+          {
+            "id": "statMultiplier.trapDisarm.2_0",
+            "label": "[×2.0] 罠解除能力倍率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
       }
     ]
   },
@@ -8491,50 +12434,108 @@
         "familyId": "resurrection.undeath",
         "effectType": "resurrectionPassive",
         "variants": [
-          { "id": "resurrection.undeath.passive", "label": "[不死] アンデッド蘇生", "value": { "type": "betweenFloors" } }
+          {
+            "id": "resurrection.undeath.passive",
+            "label": "[不死] アンデッド蘇生",
+            "value": {
+              "type": "betweenFloors"
+            }
+          }
         ]
       },
       {
         "familyId": "resurrection.forced",
         "effectType": "resurrectionBuff",
         "variants": [
-          { "id": "resurrection.forced.once", "label": "[戦術] 強制蘇生", "value": { "guaranteed": 1, "maxTriggers": 1 } }
+          {
+            "id": "resurrection.forced.once",
+            "label": "[戦術] 強制蘇生",
+            "value": {
+              "guaranteed": 1,
+              "maxTriggers": 1
+            }
+          }
         ]
       },
       {
         "familyId": "resurrection.active",
         "effectType": "resurrectionActive",
         "variants": [
-          { "id": "resurrection.active.revive50", "label": "[不死Lv50] 即時蘇生", "value": { "chancePercent": 50, "hpScale": "magicalHealing" } },
-          { "id": "resurrection.active.revive100", "label": "[不死Lv50] 即時蘇生100%", "value": { "chancePercent": 100, "hpScale": "magicalHealing" } }
+          {
+            "id": "resurrection.active.revive50",
+            "label": "[不死Lv50] 即時蘇生",
+            "value": {
+              "chancePercent": 50,
+              "hpScale": "magicalHealing"
+            }
+          },
+          {
+            "id": "resurrection.active.revive100",
+            "label": "[不死Lv50] 即時蘇生100%",
+            "value": {
+              "chancePercent": 100,
+              "hpScale": "magicalHealing"
+            }
+          }
         ]
       },
       {
         "familyId": "resurrection.vitalized",
         "effectType": "resurrectionVitalize",
         "variants": [
-          { "id": "resurrection.vitalize.once", "label": "[戦術] 活性蘇生", "value": { "removePenalties": 1, "rememberSkills": 1, "removeSkillIds": [], "grantSkillIds": [] } }
+          {
+            "id": "resurrection.vitalize.once",
+            "label": "[戦術] 活性蘇生",
+            "value": {
+              "removePenalties": 1,
+              "rememberSkills": 1,
+              "removeSkillIds": [],
+              "grantSkillIds": []
+            }
+          }
         ]
       },
       {
         "familyId": "resurrection.necromancer",
         "effectType": "resurrectionSummon",
         "variants": [
-          { "id": "resurrection.necromancer.every3", "label": "[戦術] ネクロマンサー", "value": { "everyTurns": 3, "targetStatus": "resurrection.active" } }
+          {
+            "id": "resurrection.necromancer.every3",
+            "label": "[戦術] ネクロマンサー",
+            "value": {
+              "everyTurns": 3,
+              "targetStatus": "resurrection.active"
+            }
+          }
         ]
       },
       {
         "familyId": "resurrection.instant",
         "effectType": "resurrectionActive",
         "variants": [
-          { "id": "resurrection.instant.once", "label": "[戦術] 瞬間蘇生", "value": { "chancePercent": 100, "instant": 1, "maxTriggers": 1 } }
+          {
+            "id": "resurrection.instant.once",
+            "label": "[戦術] 瞬間蘇生",
+            "value": {
+              "chancePercent": 100,
+              "instant": 1,
+              "maxTriggers": 1
+            }
+          }
         ]
       },
       {
         "familyId": "resurrection.save",
         "effectType": "resurrectionSave",
         "variants": [
-          { "id": "resurrection.save.priest", "label": "[救出] 僧侶系", "value": { "usesPriestMagic": 1, "minLevel": 1 } }
+          {
+            "id": "resurrection.save.priest",
+            "label": "[救出] 僧侶系",
+            "value": {
+              "usesPriestMagic": 1,
+              "minLevel": 1
+            }
+          }
         ]
       }
     ]
