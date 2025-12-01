@@ -1,0 +1,274 @@
+import Foundation
+
+// MARK: - Magic (Priest & Mage)
+extension BattleTurnEngine {
+    @discardableResult
+    static func executePriestMagic(for side: ActorSide,
+                                   casterIndex: Int,
+                                   context: inout BattleContext,
+                                   forcedTargets: BattleContext.SacrificeTargets) -> Bool {
+        guard var caster = context.actor(for: side, index: casterIndex), caster.isAlive else { return false }
+        guard let spell = selectPriestHealingSpell(for: caster) else { return false }
+
+        let allies: [BattleActor] = side == .player ? context.players : context.enemies
+        guard let targetIndex = selectHealingTargetIndex(in: allies) else { return false }
+        guard caster.actionResources.consume(spellId: spell.id) else { return false }
+
+        let remaining = caster.actionResources.charges(forSpellId: spell.id)
+        context.updateActor(caster, side: side, index: casterIndex)
+        appendActionLog(for: caster, category: .priestMagic, remainingUses: remaining, spellId: spell.id, context: &context)
+
+        performPriestMagic(casterSide: side,
+                           casterIndex: casterIndex,
+                           targetIndex: targetIndex,
+                           spell: spell,
+                           context: &context)
+        return true
+    }
+
+    static func performPriestMagic(casterSide: ActorSide,
+                                   casterIndex: Int,
+                                   targetIndex: Int,
+                                   spell: SpellDefinition,
+                                   context: inout BattleContext) {
+        guard let caster = context.actor(for: casterSide, index: casterIndex) else { return }
+        guard var target = context.actor(for: casterSide, index: targetIndex) else { return }
+
+        let healAmount = computeHealingAmount(caster: caster, target: target, spellId: spell.id, context: &context)
+        let missing = target.snapshot.maxHP - target.currentHP
+        let applied = min(healAmount, missing)
+        target.currentHP += applied
+        context.updateActor(target, side: casterSide, index: targetIndex)
+
+        context.appendLog(message: "\(caster.displayName)の\(spell.name)！ \(target.displayName)のHPが\(applied)回復した！",
+                          type: .heal,
+                          actorId: caster.identifier,
+                          targetId: target.identifier,
+                          metadata: [
+                              "heal": "\(applied)",
+                              "targetHP": "\(target.currentHP)",
+                              "category": ActionCategory.priestMagic.logIdentifier,
+                              "spellId": spell.id
+                          ])
+    }
+
+    @discardableResult
+    static func executeMageMagic(for side: ActorSide,
+                                 attackerIndex: Int,
+                                 context: inout BattleContext,
+                                 forcedTargets: BattleContext.SacrificeTargets) -> Bool {
+        guard var attacker = context.actor(for: side, index: attackerIndex), attacker.isAlive else { return false }
+        guard let spell = selectMageSpell(for: attacker) else { return false }
+        guard attacker.actionResources.consume(spellId: spell.id) else { return false }
+
+        let remaining = attacker.actionResources.charges(forSpellId: spell.id)
+        context.updateActor(attacker, side: side, index: attackerIndex)
+
+        appendActionLog(for: attacker, category: .mageMagic, remainingUses: remaining, spellId: spell.id, context: &context)
+
+        let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker, context: context)
+        let targetCount = statusTargetCount(for: attacker, spell: spell)
+        let targets = selectStatusTargets(attackerSide: side,
+                                          context: &context,
+                                          allowFriendlyTargets: allowFriendlyTargets,
+                                          maxTargets: targetCount,
+                                          distinct: true)
+
+        for targetRef in targets {
+            guard let refreshedAttacker = context.actor(for: side, index: attackerIndex),
+                  refreshedAttacker.isAlive else { break }
+            guard var target = context.actor(for: targetRef.0, index: targetRef.1),
+                  target.isAlive else { continue }
+
+            let damage = computeMagicalDamage(attacker: refreshedAttacker,
+                                              defender: &target,
+                                              spellId: spell.id,
+                                              context: &context)
+            let applied = applyDamage(amount: damage, to: &target)
+            applyMagicDegradation(to: &target, spellId: spell.id, caster: refreshedAttacker)
+
+            context.updateActor(target, side: targetRef.0, index: targetRef.1)
+
+            context.appendLog(message: "\(refreshedAttacker.displayName)の\(spell.name)！ \(target.displayName)に\(applied)ダメージ！",
+                              type: .damage,
+                              actorId: refreshedAttacker.identifier,
+                              targetId: target.identifier,
+                              metadata: [
+                                  "damage": "\(applied)",
+                                  "targetHP": "\(target.currentHP)",
+                                  "category": ActionCategory.mageMagic.logIdentifier,
+                                  "spellId": spell.id
+                              ])
+
+            if !target.isAlive {
+                appendDefeatLog(for: target, context: &context)
+                let killerRef = BattleContext.reference(for: side, index: attackerIndex)
+                dispatchReactions(for: .allyDefeated(side: targetRef.0,
+                                                     fallenIndex: targetRef.1,
+                                                     killer: killerRef),
+                                  depth: 0,
+                                  context: &context)
+                if let _ = context.actor(for: targetRef.0, index: targetRef.1) {
+                    _ = attemptInstantResurrectionIfNeeded(of: targetRef.1,
+                                                          side: targetRef.0,
+                                                          context: &context)
+                        || attemptRescue(of: targetRef.1,
+                                        side: targetRef.0,
+                                        context: &context)
+                }
+            } else {
+                let attackerRef = BattleContext.reference(for: side, index: attackerIndex)
+                dispatchReactions(for: .selfDamagedMagical(side: targetRef.0,
+                                                           actorIndex: targetRef.1,
+                                                           attacker: attackerRef),
+                                  depth: 0,
+                                  context: &context)
+            }
+
+            // 呪文にステータスIDが設定されている場合は付与を試みる
+            if let statusId = spell.statusId {
+                guard var freshTarget = context.actor(for: targetRef.0, index: targetRef.1),
+                      freshTarget.isAlive else { continue }
+                let baseChance = baseStatusChancePercent(spell: spell, caster: refreshedAttacker, target: freshTarget)
+                _ = attemptApplyStatus(statusId: statusId,
+                                       baseChancePercent: baseChance,
+                                       durationTurns: nil,
+                                       sourceId: refreshedAttacker.identifier,
+                                       to: &freshTarget,
+                                       context: &context,
+                                       sourceProcMultiplier: refreshedAttacker.skillEffects.procChanceMultiplier)
+                context.updateActor(freshTarget, side: targetRef.0, index: targetRef.1)
+            }
+        }
+
+        return true
+    }
+
+    @discardableResult
+    static func executeBreath(for side: ActorSide,
+                              attackerIndex: Int,
+                              context: inout BattleContext,
+                              forcedTargets: BattleContext.SacrificeTargets) -> Bool {
+        guard var attacker = context.actor(for: side, index: attackerIndex), attacker.isAlive else { return false }
+        guard attacker.actionResources.consume(.breath) else { return false }
+
+        let remaining = attacker.actionResources.charges(for: .breath)
+        context.updateActor(attacker, side: side, index: attackerIndex)
+
+        appendActionLog(for: attacker, category: .breath, remainingUses: remaining, context: &context)
+
+        let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker, context: context)
+        let targets = selectStatusTargets(attackerSide: side,
+                                          context: &context,
+                                          allowFriendlyTargets: allowFriendlyTargets,
+                                          maxTargets: 6,
+                                          distinct: true)
+
+        for targetRef in targets {
+            guard let refreshedAttacker = context.actor(for: side, index: attackerIndex),
+                  refreshedAttacker.isAlive else { break }
+            guard var target = context.actor(for: targetRef.0, index: targetRef.1),
+                  target.isAlive else { continue }
+
+            let damage = computeBreathDamage(attacker: refreshedAttacker, defender: &target, context: &context)
+            let applied = applyDamage(amount: damage, to: &target)
+
+            context.updateActor(target, side: targetRef.0, index: targetRef.1)
+
+            context.appendLog(message: "\(refreshedAttacker.displayName)のブレス！ \(target.displayName)に\(applied)ダメージ！",
+                              type: .damage,
+                              actorId: refreshedAttacker.identifier,
+                              targetId: target.identifier,
+                              metadata: [
+                                  "damage": "\(applied)",
+                                  "targetHP": "\(target.currentHP)",
+                                  "category": ActionCategory.breath.logIdentifier
+                              ])
+
+            if !target.isAlive {
+                appendDefeatLog(for: target, context: &context)
+                let killerRef = BattleContext.reference(for: side, index: attackerIndex)
+                dispatchReactions(for: .allyDefeated(side: targetRef.0,
+                                                     fallenIndex: targetRef.1,
+                                                     killer: killerRef),
+                                  depth: 0,
+                                  context: &context)
+                if let _ = context.actor(for: targetRef.0, index: targetRef.1) {
+                    _ = attemptInstantResurrectionIfNeeded(of: targetRef.1,
+                                                          side: targetRef.0,
+                                                          context: &context)
+                        || attemptRescue(of: targetRef.1,
+                                        side: targetRef.0,
+                                        context: &context)
+                }
+            } else {
+                let attackerRef = BattleContext.reference(for: side, index: attackerIndex)
+                dispatchReactions(for: .selfDamagedPhysical(side: targetRef.0,
+                                                            actorIndex: targetRef.1,
+                                                            attacker: attackerRef),
+                                  depth: 0,
+                                  context: &context)
+            }
+        }
+
+        return true
+    }
+
+    static func selectMageSpell(for actor: BattleActor) -> SpellDefinition? {
+        let available = actor.spells.mage.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
+        guard !available.isEmpty else { return nil }
+        return highestTierSpell(in: available) { spell in
+            spell.category == .damage || spell.category == .status
+        }
+    }
+
+    static func selectPriestHealingSpell(for actor: BattleActor) -> SpellDefinition? {
+        let available = actor.spells.priest.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
+        guard !available.isEmpty else { return nil }
+        return highestTierSpell(in: available) { $0.category == .healing }
+    }
+
+    static func highestTierSpell(in spells: [SpellDefinition],
+                                 matching predicate: ((SpellDefinition) -> Bool)? = nil) -> SpellDefinition? {
+        let filtered: [SpellDefinition]
+        if let predicate {
+            filtered = spells.filter(predicate)
+        } else {
+            filtered = spells
+        }
+        guard !filtered.isEmpty else { return nil }
+        return filtered.max { lhs, rhs in
+            if lhs.tier != rhs.tier { return lhs.tier < rhs.tier }
+            return lhs.id < rhs.id
+        }
+    }
+
+    static func statusTargetCount(for caster: BattleActor, spell: SpellDefinition) -> Int {
+        let base = spell.maxTargetsBase ?? 1
+        guard base > 0 else { return 1 }
+        let extraPerLevel = spell.extraTargetsPerLevels ?? 0.0
+        let level = Double(caster.level ?? 0)
+        let total = Double(base) + level * extraPerLevel
+        return max(1, Int(total.rounded(.down)))
+    }
+
+    static func baseStatusChancePercent(spell: SpellDefinition, caster: BattleActor, target: BattleActor) -> Double {
+        let magicAttack = max(0, caster.snapshot.magicalAttack)
+        let magicDefense = max(1, target.snapshot.magicalDefense)
+        let ratio = Double(magicAttack) / Double(magicDefense)
+        let base = min(95.0, 50.0 * ratio)
+        let luckPenalty = max(0, target.luck - 10)
+        let luckScalePercent = max(0.0, 100.0 - Double(luckPenalty * 2))
+        return max(0.0, base * (luckScalePercent / 100.0))
+    }
+
+    static func spellPowerModifier(for attacker: BattleActor, spellId: String? = nil) -> Double {
+        let percentScale = max(0.0, 1.0 + attacker.skillEffects.spellPower.percent / 100.0)
+        var modifier = percentScale * attacker.skillEffects.spellPower.multiplier
+        if let spellId,
+           let specific = attacker.skillEffects.spellSpecificMultipliers[spellId] {
+            modifier *= specific
+        }
+        return modifier
+    }
+}
