@@ -12278,6 +12278,236 @@
             }
           }
         ]
+      },
+      {
+        "familyId": "itemStatMultiplier.maxHP",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "maxHP"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.maxHP.0_5",
+            "label": "[1/2] アイテム最大HP",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.maxHP.2_0",
+            "label": "[2倍] アイテム最大HP",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "itemStatMultiplier.physicalAttack",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "physicalAttack"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.physicalAttack.0_5",
+            "label": "[1/2] アイテム攻撃力",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.physicalAttack.2_0",
+            "label": "[2倍] アイテム攻撃力",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "itemStatMultiplier.hitRate",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "hitRate"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.hitRate.0_5",
+            "label": "[1/2] アイテム命中精度",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.hitRate.2_0",
+            "label": "[2倍] アイテム命中精度",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "itemStatMultiplier.criticalRate",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "criticalRate"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.criticalRate.0_5",
+            "label": "[1/2] アイテム必殺率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.criticalRate.2_0",
+            "label": "[2倍] アイテム必殺率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "itemStatMultiplier.physicalDefense",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "physicalDefense"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.physicalDefense.0_5",
+            "label": "[1/2] アイテム防御力",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.physicalDefense.2_0",
+            "label": "[2倍] アイテム防御力",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "itemStatMultiplier.evasionRate",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "evasionRate"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.evasionRate.0_5",
+            "label": "[1/2] アイテム回避率",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.evasionRate.2_0",
+            "label": "[2倍] アイテム回避率",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "itemStatMultiplier.magicalAttack",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "magicalAttack"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.magicalAttack.0_5",
+            "label": "[1/2] アイテム魔法攻撃力",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.magicalAttack.2_0",
+            "label": "[2倍] アイテム魔法攻撃力",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "itemStatMultiplier.magicalHealing",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "magicalHealing"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.magicalHealing.0_5",
+            "label": "[1/2] アイテム魔法回復量",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.magicalHealing.2_0",
+            "label": "[2倍] アイテム魔法回復量",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "itemStatMultiplier.magicalDefense",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "magicalDefense"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.magicalDefense.0_5",
+            "label": "[1/2] アイテム魔法防御力",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.magicalDefense.2_0",
+            "label": "[2倍] アイテム魔法防御力",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "itemStatMultiplier.trapRemoval",
+        "effectType": "itemStatMultiplier",
+        "parameters": {
+          "statType": "trapRemoval"
+        },
+        "variants": [
+          {
+            "id": "itemStatMultiplier.trapRemoval.0_5",
+            "label": "[1/2] アイテム罠解除",
+            "value": {
+              "multiplier": 0.5
+            }
+          },
+          {
+            "id": "itemStatMultiplier.trapRemoval.2_0",
+            "label": "[2倍] アイテム罠解除",
+            "value": {
+              "multiplier": 2.0
+            }
+          }
+        ]
       }
     ]
   },

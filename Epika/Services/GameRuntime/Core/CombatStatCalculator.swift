@@ -62,7 +62,8 @@ struct CombatStatCalculator {
                                              growthMultiplier: skillEffects.growthMultiplier,
                                              statConversions: skillEffects.statConversions,
                                              forcedToOne: skillEffects.forcedToOne,
-                                             equipmentMultipliers: skillEffects.equipmentMultipliers)
+                                             equipmentMultipliers: skillEffects.equipmentMultipliers,
+                                             itemStatMultipliers: skillEffects.itemStatMultipliers)
 
         var combat = try combatResult.makeCombat()
         // 結果の切り捨て
@@ -250,6 +251,7 @@ private struct SkillEffectAggregator {
     let statConversions: [CombatStatKey: [StatConversion]]
     let forcedToOne: Set<CombatStatKey>
     let equipmentMultipliers: [String: Double]
+    let itemStatMultipliers: [String: Double]
 
     init(skills: [SkillDefinition]) throws {
         var talents = TalentModifiers()
@@ -261,6 +263,7 @@ private struct SkillEffectAggregator {
         var conversions: [CombatStatKey: [StatConversion]] = [:]
         var forcedToOne: Set<CombatStatKey> = []
         var equipmentMultipliers: [String: Double] = [:]
+        var itemStatMultipliers: [String: Double] = [:]
 
         for skill in skills {
             for effect in skill.effects {
@@ -305,6 +308,11 @@ private struct SkillEffectAggregator {
                     if let category = payload.parameters?["equipmentCategory"],
                        let multiplier = payload.value["multiplier"] {
                         equipmentMultipliers[category, default: 1.0] *= multiplier
+                    }
+                case .itemStatMultiplier:
+                    if let statType = payload.parameters?["statType"],
+                       let multiplier = payload.value["multiplier"] {
+                        itemStatMultipliers[statType, default: 1.0] *= multiplier
                     }
                 case .statConversionPercent:
                     guard let sourceKey = CombatStatKey(payload.parameters?["sourceStat"]),
@@ -387,6 +395,7 @@ private struct SkillEffectAggregator {
         self.statConversions = conversions
         self.forcedToOne = forcedToOne
         self.equipmentMultipliers = equipmentMultipliers
+        self.itemStatMultipliers = itemStatMultipliers
     }
 
     struct MartialBonuses {
@@ -436,6 +445,7 @@ private struct CombatAccumulator {
     private let statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]
     private let forcedToOne: Set<CombatStatKey>
     private let equipmentMultipliers: [String: Double]
+    private let itemStatMultipliers: [String: Double]
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
     init(progress: RuntimeCharacterProgress,
@@ -452,7 +462,8 @@ private struct CombatAccumulator {
          growthMultiplier: Double,
          statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]],
          forcedToOne: Set<CombatStatKey>,
-         equipmentMultipliers: [String: Double]) {
+         equipmentMultipliers: [String: Double],
+         itemStatMultipliers: [String: Double]) {
         self.progress = progress
         self.attributes = attributes
         self.race = race
@@ -468,6 +479,7 @@ private struct CombatAccumulator {
         self.statConversions = statConversions
         self.forcedToOne = forcedToOne
         self.equipmentMultipliers = equipmentMultipliers
+        self.itemStatMultipliers = itemStatMultipliers
         self.hasPositivePhysicalAttackEquipment = CombatAccumulator.containsPositivePhysicalAttack(equipment: equipment,
                                                                                                    definitions: itemDefinitions)
     }
@@ -771,7 +783,8 @@ private struct CombatAccumulator {
                 ?? 1.0
             for bonus in definition.combatBonuses {
                 guard let stat = CombatStatKey(bonus.stat) else { continue }
-                let scaled = Double(bonus.value) * categoryMultiplier
+                let statMultiplier = itemStatMultipliers[bonus.stat] ?? itemStatMultipliers[stat.rawValue] ?? 1.0
+                let scaled = Double(bonus.value) * categoryMultiplier * statMultiplier
                 apply(bonus: Int(scaled.rounded(.towardZero)) * item.quantity, to: stat, combat: &combat)
             }
         }

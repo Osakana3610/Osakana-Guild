@@ -104,6 +104,7 @@ extension SkillRuntimeEffectCompiler {
                      .sacrificeRite,
                      .talentStat,
                      .incompetenceStat,
+                     .itemStatMultiplier,
                      .shieldBlock,
                      .specialAttack,
                      .spellCharges,

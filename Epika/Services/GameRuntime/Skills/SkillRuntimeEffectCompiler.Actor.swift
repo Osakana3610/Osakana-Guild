@@ -459,6 +459,7 @@ extension SkillRuntimeEffectCompiler {
                      .explorationTimeMultiplier,
                      .growthMultiplier,
                      .incompetenceStat,
+                     .itemStatMultiplier,
                      .minHitScale,
                      .rewardExperienceMultiplier,
                      .rewardExperiencePercent,

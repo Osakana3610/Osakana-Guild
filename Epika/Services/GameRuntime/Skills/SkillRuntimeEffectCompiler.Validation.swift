@@ -104,6 +104,7 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .equipmentSlotAdditive: .init(params: [], values: []),
     .equipmentSlotMultiplier: .init(params: [], values: []),
     .equipmentStatMultiplier: .init(params: ["equipmentCategory"], values: ["multiplier"]),
+    .itemStatMultiplier: .init(params: ["statType"], values: ["multiplier"]),
     .explorationTimeMultiplier: .init(params: [], values: ["multiplier"]),
     .martialBonusMultiplier: .init(params: [], values: ["multiplier"]),
     .martialBonusPercent: .init(params: [], values: ["valuePercent"]),

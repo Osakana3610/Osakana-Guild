@@ -75,6 +75,7 @@ enum SkillEffectType: String, CaseIterable, Sendable, Hashable {
     case sacrificeRite
     case talentStat
     case incompetenceStat
+    case itemStatMultiplier
     case shieldBlock
     case specialAttack
     case spellAccess
