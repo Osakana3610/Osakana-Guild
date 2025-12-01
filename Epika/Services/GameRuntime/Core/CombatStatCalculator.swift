@@ -251,7 +251,7 @@ private struct SkillEffectAggregator {
     let statConversions: [CombatStatKey: [StatConversion]]
     let forcedToOne: Set<CombatStatKey>
     let equipmentMultipliers: [String: Double]
-    let itemStatMultipliers: [String: Double]
+    let itemStatMultipliers: [CombatStatKey: Double]
 
     init(skills: [SkillDefinition]) throws {
         var talents = TalentModifiers()
@@ -263,7 +263,7 @@ private struct SkillEffectAggregator {
         var conversions: [CombatStatKey: [StatConversion]] = [:]
         var forcedToOne: Set<CombatStatKey> = []
         var equipmentMultipliers: [String: Double] = [:]
-        var itemStatMultipliers: [String: Double] = [:]
+        var itemStatMultipliers: [CombatStatKey: Double] = [:]
 
         for skill in skills {
             for effect in skill.effects {
@@ -310,10 +310,16 @@ private struct SkillEffectAggregator {
                         equipmentMultipliers[category, default: 1.0] *= multiplier
                     }
                 case .itemStatMultiplier:
-                    if let statType = payload.parameters?["statType"],
-                       let multiplier = payload.value["multiplier"] {
-                        itemStatMultipliers[statType, default: 1.0] *= multiplier
+                    guard let statTypeRaw = payload.parameters?["statType"] else {
+                        throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): missing statType")
                     }
+                    guard let statKey = CombatStatKey(statTypeRaw) else {
+                        throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): invalid statType '\(statTypeRaw)'")
+                    }
+                    guard let multiplier = payload.value["multiplier"] else {
+                        throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): missing multiplier")
+                    }
+                    itemStatMultipliers[statKey, default: 1.0] *= multiplier
                 case .statConversionPercent:
                     guard let sourceKey = CombatStatKey(payload.parameters?["sourceStat"]),
                           let targetKey = CombatStatKey(payload.parameters?["targetStat"]),
@@ -445,7 +451,7 @@ private struct CombatAccumulator {
     private let statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]
     private let forcedToOne: Set<CombatStatKey>
     private let equipmentMultipliers: [String: Double]
-    private let itemStatMultipliers: [String: Double]
+    private let itemStatMultipliers: [CombatStatKey: Double]
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
     init(progress: RuntimeCharacterProgress,
@@ -463,7 +469,7 @@ private struct CombatAccumulator {
          statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]],
          forcedToOne: Set<CombatStatKey>,
          equipmentMultipliers: [String: Double],
-         itemStatMultipliers: [String: Double]) {
+         itemStatMultipliers: [CombatStatKey: Double]) {
         self.progress = progress
         self.attributes = attributes
         self.race = race
@@ -783,7 +789,7 @@ private struct CombatAccumulator {
                 ?? 1.0
             for bonus in definition.combatBonuses {
                 guard let stat = CombatStatKey(bonus.stat) else { continue }
-                let statMultiplier = itemStatMultipliers[bonus.stat] ?? itemStatMultipliers[stat.rawValue] ?? 1.0
+                let statMultiplier = itemStatMultipliers[stat] ?? 1.0
                 let scaled = Double(bonus.value) * categoryMultiplier * statMultiplier
                 apply(bonus: Int(scaled.rounded(.towardZero)) * item.quantity, to: stat, combat: &combat)
             }
