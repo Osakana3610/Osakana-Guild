@@ -45,7 +45,7 @@ struct RuntimePartyDetailView: View {
                     }
 
                 NavigationLink {
-                    PartySkillsPlaceholderView(characters: membersOfCurrentParty)
+                    PartySkillsListView(characters: membersOfCurrentParty)
                 } label: {
                     Text("パーティーのスキルを見る")
                         .foregroundColor(.primary)
@@ -69,7 +69,7 @@ struct RuntimePartyDetailView: View {
                 }
 
                 NavigationLink {
-                    PartyEquipmentPlaceholderView(characters: membersOfCurrentParty)
+                    PartyEquipmentListView(characters: membersOfCurrentParty)
                 } label: {
                     Text("装備アイテムの一覧")
                         .foregroundColor(.primary)
@@ -316,7 +316,7 @@ struct RuntimePartyDetailView: View {
 
 }
 
-private struct PartySkillsPlaceholderView: View {
+private struct PartySkillsListView: View {
     let characters: [RuntimeCharacter]
 
     var body: some View {
@@ -344,7 +344,7 @@ private struct PartySkillsPlaceholderView: View {
     }
 }
 
-private struct PartyEquipmentPlaceholderView: View {
+private struct PartyEquipmentListView: View {
     let characters: [RuntimeCharacter]
 
     var body: some View {
