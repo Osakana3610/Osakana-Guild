@@ -182,8 +182,11 @@ extension ProgressService {
             let enhancement = ItemSnapshot.Enhancement(normalTitleId: drop.normalTitleId,
                                                        superRareTitleId: drop.superRareTitleId,
                                                        socketKey: nil)
-            let compositeKey = enhancement.compositeKey(for: drop.item.id)
-            if autoTradeKeys.contains(compositeKey) {
+            // 自動売却キーはソケットを除外した3要素形式
+            let autoTradeKey = [drop.superRareTitleId ?? "",
+                                drop.normalTitleId ?? "",
+                                drop.item.id].joined(separator: "|")
+            if autoTradeKeys.contains(autoTradeKey) {
                 _ = try await autoTrade.executeAutoSell(itemId: drop.item.id,
                                                         quantity: drop.quantity,
                                                         enhancement: enhancement)

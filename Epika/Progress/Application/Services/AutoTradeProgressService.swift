@@ -49,7 +49,7 @@ actor AutoTradeProgressService {
     func removeRule(compositeKey: String) async throws {
         let context = makeContext()
         guard let record = try fetchRecord(compositeKey: compositeKey, context: context) else {
-            return
+            throw ProgressError.invalidInput(description: "指定された自動売却ルールが見つかりません: \(compositeKey)")
         }
         context.delete(record)
         try context.save()
@@ -60,7 +60,7 @@ actor AutoTradeProgressService {
         var descriptor = FetchDescriptor<AutoTradeRuleRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
-            return
+            throw ProgressError.invalidInput(description: "指定された自動売却ルールが見つかりません: \(id.uuidString)")
         }
         context.delete(record)
         try context.save()

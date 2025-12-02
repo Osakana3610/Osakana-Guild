@@ -72,9 +72,17 @@ struct LightweightItemData: Sendable {
         "\(progressId.uuidString)-\(masterDataId)"
     }
 
-    /// 自動売却ルール用のキー（称号・ソケットを含む）
+    /// 自動売却ルール用のキー（称号のみ、ソケットは除外）
     var autoTradeKey: String {
-        enhancement.compositeKey(for: masterDataId)
+        let parts = [enhancement.superRareTitleId ?? "",
+                     enhancement.normalTitleId ?? "",
+                     masterDataId]
+        return parts.joined(separator: "|")
+    }
+
+    /// 宝石が装着されているか
+    var hasSocket: Bool {
+        enhancement.socketKey != nil
     }
 
     /// 称号を含むフルネーム（自動売却ルール表示用）

@@ -143,10 +143,12 @@ struct ItemSaleView: View {
                 }
             }
 
-            Button {
-                Task { await addToAutoTrade(item) }
-            } label: {
-                Label("自動売却に追加", systemImage: "arrow.triangle.2.circlepath")
+            if !item.hasSocket {
+                Button {
+                    Task { await addToAutoTrade(item) }
+                } label: {
+                    Label("自動売却に追加", systemImage: "arrow.triangle.2.circlepath")
+                }
             }
         }
     }
