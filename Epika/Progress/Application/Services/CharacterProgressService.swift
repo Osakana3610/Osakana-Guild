@@ -210,6 +210,189 @@ actor CharacterProgressService {
         try context.save()
         notifyCharacterProgressDidChange()
     }
+
+    // MARK: - Equipment Management
+
+    /// キャラクターにアイテムを装備
+    func equipItem(characterId: UUID, inventoryItemId: UUID, quantity: Int = 1) async throws -> CharacterSnapshot {
+        guard quantity > 0 else {
+            throw ProgressError.invalidInput(description: "装備数量は1以上である必要があります")
+        }
+
+        let context = makeContext()
+
+        // キャラクターの取得
+        var characterDescriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+        characterDescriptor.fetchLimit = 1
+        guard let characterRecord = try context.fetch(characterDescriptor).first else {
+            throw ProgressError.invalidInput(description: "キャラクターが見つかりません")
+        }
+
+        // インベントリアイテムの取得
+        var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.id == inventoryItemId })
+        inventoryDescriptor.fetchLimit = 1
+        guard let inventoryRecord = try context.fetch(inventoryDescriptor).first else {
+            throw ProgressError.invalidInput(description: "アイテムが見つかりません")
+        }
+
+        guard inventoryRecord.quantity >= quantity else {
+            throw ProgressError.invalidInput(description: "アイテム数量が不足しています")
+        }
+
+        // 現在の装備数をチェック
+        let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
+        let currentEquipment = try context.fetch(equipmentDescriptor)
+        let currentCount = currentEquipment.reduce(0) { $0 + $1.quantity }
+
+        if currentCount + quantity > EquipmentProgressService.maxEquippedItems {
+            throw ProgressError.invalidInput(description: "装備数が上限(\(EquipmentProgressService.maxEquippedItems)個)を超えます")
+        }
+
+        let now = Date()
+
+        // 同じアイテム（同じmasterDataId、同じ強化状態）が既に装備されているかチェック
+        let existingEquipment = currentEquipment.first { record in
+            record.itemId == inventoryRecord.masterDataId &&
+            record.normalTitleId == inventoryRecord.normalTitleId &&
+            record.superRareTitleId == inventoryRecord.superRareTitleId &&
+            record.socketKey == inventoryRecord.socketKey
+        }
+
+        if let existing = existingEquipment {
+            // 既存の装備にスタック
+            existing.quantity += quantity
+            existing.updatedAt = now
+        } else {
+            // 新規装備レコード作成
+            let equipmentRecord = CharacterEquipmentRecord(
+                characterId: characterId,
+                itemId: inventoryRecord.masterDataId,
+                quantity: quantity,
+                normalTitleId: inventoryRecord.normalTitleId,
+                superRareTitleId: inventoryRecord.superRareTitleId,
+                socketKey: inventoryRecord.socketKey,
+                createdAt: now,
+                updatedAt: now
+            )
+            context.insert(equipmentRecord)
+        }
+
+        // インベントリから減算
+        inventoryRecord.quantity -= quantity
+        if inventoryRecord.quantity <= 0 {
+            context.delete(inventoryRecord)
+        }
+
+        characterRecord.updatedAt = now
+        try context.save()
+
+        notifyCharacterProgressDidChange()
+        return try await makeSnapshot(characterRecord, context: context)
+    }
+
+    /// キャラクターからアイテムを解除
+    func unequipItem(characterId: UUID, equipmentRecordId: UUID, quantity: Int = 1) async throws -> CharacterSnapshot {
+        guard quantity > 0 else {
+            throw ProgressError.invalidInput(description: "解除数量は1以上である必要があります")
+        }
+
+        let context = makeContext()
+
+        // キャラクターの取得
+        var characterDescriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+        characterDescriptor.fetchLimit = 1
+        guard let characterRecord = try context.fetch(characterDescriptor).first else {
+            throw ProgressError.invalidInput(description: "キャラクターが見つかりません")
+        }
+
+        // 装備レコードの取得
+        var equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.id == equipmentRecordId && $0.characterId == characterId })
+        equipmentDescriptor.fetchLimit = 1
+        guard let equipmentRecord = try context.fetch(equipmentDescriptor).first else {
+            throw ProgressError.invalidInput(description: "装備が見つかりません")
+        }
+
+        guard equipmentRecord.quantity >= quantity else {
+            throw ProgressError.invalidInput(description: "解除数量が装備数を超えています")
+        }
+
+        let now = Date()
+
+        // インベントリに戻す（同じ強化状態のアイテムを探す）
+        let enhancement = ItemSnapshot.Enhancement(
+            normalTitleId: equipmentRecord.normalTitleId,
+            superRareTitleId: equipmentRecord.superRareTitleId,
+            socketKey: equipmentRecord.socketKey
+        )
+        let compositeKey = makeCompositeKey(itemId: equipmentRecord.itemId, enhancement: enhancement)
+        let storage = ItemStorage.playerItem
+
+        var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.compositeKey == compositeKey && $0.storageRawValue == storage.rawValue
+        })
+        inventoryDescriptor.fetchLimit = 1
+
+        if let existingInventory = try context.fetch(inventoryDescriptor).first {
+            // 既存スタックに追加
+            existingInventory.quantity = min(existingInventory.quantity + quantity, 99)
+        } else {
+            // 新規インベントリレコード作成
+            let inventoryRecord = InventoryItemRecord(
+                compositeKey: compositeKey,
+                masterDataId: equipmentRecord.itemId,
+                quantity: quantity,
+                storage: storage,
+                normalTitleId: equipmentRecord.normalTitleId,
+                superRareTitleId: equipmentRecord.superRareTitleId,
+                socketKey: equipmentRecord.socketKey,
+                acquiredAt: now
+            )
+            context.insert(inventoryRecord)
+        }
+
+        // 装備から減算
+        equipmentRecord.quantity -= quantity
+        if equipmentRecord.quantity <= 0 {
+            context.delete(equipmentRecord)
+        } else {
+            equipmentRecord.updatedAt = now
+        }
+
+        characterRecord.updatedAt = now
+        try context.save()
+
+        notifyCharacterProgressDidChange()
+        return try await makeSnapshot(characterRecord, context: context)
+    }
+
+    /// キャラクターの装備一覧を取得
+    func equippedItems(characterId: UUID) async throws -> [CharacterSnapshot.EquippedItem] {
+        let context = makeContext()
+        let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
+        let records = try context.fetch(descriptor)
+        return records.map { record in
+            CharacterSnapshot.EquippedItem(
+                id: record.id,
+                itemId: record.itemId,
+                quantity: record.quantity,
+                normalTitleId: record.normalTitleId,
+                superRareTitleId: record.superRareTitleId,
+                socketKey: record.socketKey,
+                createdAt: record.createdAt,
+                updatedAt: record.updatedAt
+            )
+        }
+    }
+
+    private func makeCompositeKey(itemId: String, enhancement: ItemSnapshot.Enhancement) -> String {
+        let parts = [
+            enhancement.superRareTitleId ?? "",
+            enhancement.normalTitleId ?? "",
+            itemId,
+            enhancement.socketKey ?? ""
+        ]
+        return parts.joined(separator: "|")
+    }
 }
 
 private extension CharacterProgressService {

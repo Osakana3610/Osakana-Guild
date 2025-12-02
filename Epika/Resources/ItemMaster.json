@@ -8184,6 +8184,310 @@
       "category": "magic_material",
       "basePrice": 100,
       "sellValue": 50
+    },
+    {
+      "id": "core_atlas",
+      "name": "アトラスの核",
+      "description": "魔造生物アトラスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_adamantite",
+      "name": "アダマンタイトの核",
+      "description": "魔造生物アダマンタイトを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_sea_foam",
+      "name": "シーフォームの核",
+      "description": "魔造生物シーフォームを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_diabolos",
+      "name": "ディアボロスの核",
+      "description": "魔造生物ディアボロスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_boreas",
+      "name": "ボレアスの核",
+      "description": "魔造生物ボレアスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_ghost_edge",
+      "name": "ゴーストエッジの核",
+      "description": "魔造生物ゴーストエッジを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_tauros",
+      "name": "タウロスの核",
+      "description": "魔造生物タウロスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_lilim",
+      "name": "リリムの核",
+      "description": "魔造生物リリムを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_silver_horn",
+      "name": "シルバーホーンの核",
+      "description": "魔造生物シルバーホーンを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_sludge",
+      "name": "スラッジの核",
+      "description": "魔造生物スラッジを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_yeti",
+      "name": "イエティの核",
+      "description": "魔造生物イエティを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_lucky_cat",
+      "name": "ラッキーキャットの核",
+      "description": "魔造生物ラッキーキャットを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_ignis",
+      "name": "イグニスの核",
+      "description": "魔造生物イグニスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_doom_knight",
+      "name": "ドゥームナイトの核",
+      "description": "魔造生物ドゥームナイトを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_mind_hound",
+      "name": "マインドハウンドの核",
+      "description": "魔造生物マインドハウンドを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_keraunos",
+      "name": "ケラウノスの核",
+      "description": "魔造生物ケラウノスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_arch_lich",
+      "name": "アークリッチの核",
+      "description": "魔造生物アークリッチを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_marionette",
+      "name": "マリオネットの核",
+      "description": "魔造生物マリオネットを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_monolith",
+      "name": "モノリスの核",
+      "description": "魔造生物モノリスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_gigantes",
+      "name": "ギガンテスの核",
+      "description": "魔造生物ギガンテスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_antroid",
+      "name": "アントロイドの核",
+      "description": "魔造生物アントロイドを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_deidara",
+      "name": "デイダラの核",
+      "description": "魔造生物デイダラを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_hakutaku",
+      "name": "ハクタクの核",
+      "description": "魔造生物ハクタクを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_royal_drake",
+      "name": "ロイヤルドレイクの核",
+      "description": "魔造生物ロイヤルドレイクを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_wing_mare",
+      "name": "ウィングメアの核",
+      "description": "魔造生物ウィングメアを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_shub_niggurath",
+      "name": "シュブニグラトの核",
+      "description": "魔造生物シュブニグラトを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_dominion",
+      "name": "ドミニオンの核",
+      "description": "魔造生物ドミニオンを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_phantom_drake",
+      "name": "ファントムドレイクの核",
+      "description": "魔造生物ファントムドレイクを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_suzaku",
+      "name": "朱雀の核",
+      "description": "魔造生物朱雀を生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_fenrir",
+      "name": "フェンリルの核",
+      "description": "魔造生物フェンリルを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_seraphim",
+      "name": "セラフィムの核",
+      "description": "魔造生物セラフィムを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_leo_nemea",
+      "name": "レオネメアの核",
+      "description": "魔造生物レオネメアを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_earth_born",
+      "name": "アースボーンの核",
+      "description": "魔造生物アースボーンを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_silvas",
+      "name": "シルヴァスの核",
+      "description": "魔造生物シルヴァスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_goldia",
+      "name": "ゴルディアの核",
+      "description": "魔造生物ゴルディアを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_persephone",
+      "name": "ペルセポネの核",
+      "description": "魔造生物ペルセポネを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_azrael",
+      "name": "アズラエルの核",
+      "description": "魔造生物アズラエルを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
+    },
+    {
+      "id": "core_apocalypse",
+      "name": "アポカリプスの核",
+      "description": "魔造生物アポカリプスを生成するための核",
+      "category": "mazo_material",
+      "basePrice": 0,
+      "sellValue": 0
     }
   ]
 }

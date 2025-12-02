@@ -1,0 +1,576 @@
+{
+  "version": "1.0.0",
+  "description": "魔造生物マスターデータ",
+  "mazoCreatures": {
+    "atlas": {
+      "name": "アトラス",
+      "sourceItemId": "core_atlas",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "adamantite": {
+      "name": "アダマンタイト",
+      "sourceItemId": "core_adamantite",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "sea_foam": {
+      "name": "シーフォーム",
+      "sourceItemId": "core_sea_foam",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "diabolos": {
+      "name": "ディアボロス",
+      "sourceItemId": "core_diabolos",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "boreas": {
+      "name": "ボレアス",
+      "sourceItemId": "core_boreas",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "ghost_edge": {
+      "name": "ゴーストエッジ",
+      "sourceItemId": "core_ghost_edge",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "tauros": {
+      "name": "タウロス",
+      "sourceItemId": "core_tauros",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "lilim": {
+      "name": "リリム",
+      "sourceItemId": "core_lilim",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "silver_horn": {
+      "name": "シルバーホーン",
+      "sourceItemId": "core_silver_horn",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "sludge": {
+      "name": "スラッジ",
+      "sourceItemId": "core_sludge",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "yeti": {
+      "name": "イエティ",
+      "sourceItemId": "core_yeti",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "lucky_cat": {
+      "name": "ラッキーキャット",
+      "sourceItemId": "core_lucky_cat",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "ignis": {
+      "name": "イグニス",
+      "sourceItemId": "core_ignis",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "doom_knight": {
+      "name": "ドゥームナイト",
+      "sourceItemId": "core_doom_knight",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "mind_hound": {
+      "name": "マインドハウンド",
+      "sourceItemId": "core_mind_hound",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "keraunos": {
+      "name": "ケラウノス",
+      "sourceItemId": "core_keraunos",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "arch_lich": {
+      "name": "アークリッチ",
+      "sourceItemId": "core_arch_lich",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "marionette": {
+      "name": "マリオネット",
+      "sourceItemId": "core_marionette",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "monolith": {
+      "name": "モノリス",
+      "sourceItemId": "core_monolith",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "gigantes": {
+      "name": "ギガンテス",
+      "sourceItemId": "core_gigantes",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "antroid": {
+      "name": "アントロイド",
+      "sourceItemId": "core_antroid",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "deidara": {
+      "name": "デイダラ",
+      "sourceItemId": "core_deidara",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "hakutaku": {
+      "name": "ハクタク",
+      "sourceItemId": "core_hakutaku",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "royal_drake": {
+      "name": "ロイヤルドレイク",
+      "sourceItemId": "core_royal_drake",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "wing_mare": {
+      "name": "ウィングメア",
+      "sourceItemId": "core_wing_mare",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "shub_niggurath": {
+      "name": "シュブニグラト",
+      "sourceItemId": "core_shub_niggurath",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "dominion": {
+      "name": "ドミニオン",
+      "sourceItemId": "core_dominion",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "phantom_drake": {
+      "name": "ファントムドレイク",
+      "sourceItemId": "core_phantom_drake",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "suzaku": {
+      "name": "朱雀",
+      "sourceItemId": "core_suzaku",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "fenrir": {
+      "name": "フェンリル",
+      "sourceItemId": "core_fenrir",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "seraphim": {
+      "name": "セラフィム",
+      "sourceItemId": "core_seraphim",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "leo_nemea": {
+      "name": "レオネメア",
+      "sourceItemId": "core_leo_nemea",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "earth_born": {
+      "name": "アースボーン",
+      "sourceItemId": "core_earth_born",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "silvas": {
+      "name": "シルヴァス",
+      "sourceItemId": "core_silvas",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "goldia": {
+      "name": "ゴルディア",
+      "sourceItemId": "core_goldia",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "persephone": {
+      "name": "ペルセポネ",
+      "sourceItemId": "core_persephone",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "azrael": {
+      "name": "アズラエル",
+      "sourceItemId": "core_azrael",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    },
+    "apocalypse": {
+      "name": "アポカリプス",
+      "sourceItemId": "core_apocalypse",
+      "baseStatModifiers": {
+        "strength": 0,
+        "wisdom": 0,
+        "spirit": 0,
+        "vitality": 0,
+        "agility": 0,
+        "luck": 0
+      },
+      "skillIds": [],
+      "isGolem": false,
+      "description": ""
+    }
+  }
+}
