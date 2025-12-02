@@ -7,9 +7,9 @@ struct ShopSnapshot: Sendable, Hashable {
         var itemId: String
         var remaining: Int?
         var restockAt: Date?
+        var isPlayerSold: Bool
         var createdAt: Date
         var updatedAt: Date
-
     }
 
     let persistentIdentifier: PersistentIdentifier

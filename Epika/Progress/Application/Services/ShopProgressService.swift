@@ -8,6 +8,7 @@ actor ShopProgressService {
         let definition: ItemDefinition
         let price: Int
         let stockQuantity: Int?
+        let isPlayerSold: Bool
         let metadata: ProgressMetadata
 
         static func == (lhs: ShopItem, rhs: ShopItem) -> Bool { lhs.id == rhs.id }
@@ -57,7 +58,117 @@ actor ShopProgressService {
                             definition: definition,
                             price: definition.basePrice,
                             stockQuantity: stock.remaining,
+                            isPlayerSold: stock.isPlayerSold,
                             metadata: .init(createdAt: stock.createdAt, updatedAt: stock.updatedAt))
+        }
+    }
+
+    /// 在庫上限（表示上限99、内部上限110）
+    static let stockDisplayLimit = 99
+    static let stockInternalLimit = 110
+
+    /// プレイヤーがアイテムを売却した際にショップ在庫に追加する
+    /// - Parameters:
+    ///   - itemId: アイテムID（超レア・称号なしの素のID）
+    ///   - quantity: 数量
+    /// - Returns: 売却額（ゴールド）実際に追加された数量に基づく
+    @discardableResult
+    func addPlayerSoldItem(itemId: String, quantity: Int) async throws -> Int {
+        guard quantity > 0 else {
+            throw ProgressError.invalidInput(description: "数量は1以上である必要があります")
+        }
+
+        let definitions = try await environment.masterDataService.getItemMasterData(ids: [itemId])
+        guard let definition = definitions.first else {
+            throw ProgressError.itemDefinitionUnavailable(ids: [itemId])
+        }
+
+        let context = makeContext()
+        let now = Date()
+        let shopRecord = try ensureShopRecord(shopId: defaultShopIdentifier, timestamp: now, context: context)
+
+        // 既存の在庫を検索（プレイヤー売却品のみ）
+        let shopRecordId = shopRecord.id
+        let descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate {
+            $0.shopRecordId == shopRecordId && $0.itemId == itemId && $0.isPlayerSold == true
+        })
+        let existingStock = try context.fetch(descriptor).first
+
+        var actuallyAdded = quantity
+        if let stock = existingStock {
+            // 既存の在庫に加算（内部上限まで）
+            let previousRemaining = stock.remaining
+            stock.remaining = min(stock.remaining + quantity, Self.stockInternalLimit)
+            actuallyAdded = stock.remaining - previousRemaining
+            stock.updatedAt = now
+        } else {
+            // 新規在庫を作成
+            actuallyAdded = min(quantity, Self.stockInternalLimit)
+            let stock = ShopStockRecord(shopRecordId: shopRecordId,
+                                        itemId: itemId,
+                                        remaining: actuallyAdded,
+                                        restockAt: nil,
+                                        isPlayerSold: true,
+                                        createdAt: now,
+                                        updatedAt: now)
+            context.insert(stock)
+        }
+
+        shopRecord.updatedAt = now
+        try saveIfNeeded(context)
+
+        // 実際に追加された数量に基づいてゴールドを計算
+        return definition.sellValue * actuallyAdded
+    }
+
+    /// 在庫整理：指定アイテムの在庫を目標数量まで減らし、減少分に応じたキャット・チケットを返す
+    /// - Parameters:
+    ///   - stockId: 在庫ID
+    ///   - targetQuantity: 目標数量（デフォルト5、0以上）
+    /// - Returns: 獲得キャット・チケット数
+    func cleanupStock(stockId: UUID, targetQuantity: Int = 5) async throws -> Int {
+        guard targetQuantity >= 0 else {
+            throw ProgressError.invalidInput(description: "目標数量は0以上である必要があります")
+        }
+
+        let context = makeContext()
+        let stock = try fetchStockRecord(id: stockId, context: context)
+
+        guard stock.isPlayerSold else {
+            throw ProgressError.invalidInput(description: "マスターデータ由来の在庫は整理できません")
+        }
+        guard stock.remaining > targetQuantity else {
+            return 0
+        }
+
+        let definitions = try await environment.masterDataService.getItemMasterData(ids: [stock.itemId])
+        guard let definition = definitions.first else {
+            throw ProgressError.itemDefinitionUnavailable(ids: [stock.itemId])
+        }
+
+        // ShopRecordも取得して更新
+        let shopRecordId = stock.shopRecordId
+        let shopDescriptor = FetchDescriptor<ShopRecord>(predicate: #Predicate { $0.id == shopRecordId })
+        let shopRecord = try context.fetch(shopDescriptor).first
+
+        let now = Date()
+        let reducedQuantity = stock.remaining - targetQuantity
+        stock.remaining = targetQuantity
+        stock.updatedAt = now
+        shopRecord?.updatedAt = now
+        try saveIfNeeded(context)
+
+        // キャット・チケット計算：売値に応じた量（仮: 売値 / 100 * 減少数）
+        let ticketsPerItem = max(1, definition.sellValue / 100)
+        return ticketsPerItem * reducedQuantity
+    }
+
+    /// 在庫整理対象のアイテム一覧を取得（表示上限超過のプレイヤー売却品）
+    func loadCleanupCandidates() async throws -> [ShopItem] {
+        let items = try await loadItems()
+        return items.filter { item in
+            guard let quantity = item.stockQuantity else { return false }
+            return quantity > Self.stockDisplayLimit && item.isPlayerSold
         }
     }
 
@@ -170,10 +281,10 @@ private extension ShopProgressService {
         }
 
         if !existing.isEmpty {
-            for leftover in existing.values {
+            for leftover in existing.values where !leftover.isPlayerSold {
                 context.delete(leftover)
+                changed = true
             }
-            changed = true
         }
         return changed
     }
@@ -208,6 +319,7 @@ private extension ShopProgressService {
                                itemId: stock.itemId,
                                remaining: stock.remaining >= 0 ? stock.remaining : nil,
                                restockAt: stock.restockAt,
+                               isPlayerSold: stock.isPlayerSold,
                                createdAt: stock.createdAt,
                                updatedAt: stock.updatedAt)
         }

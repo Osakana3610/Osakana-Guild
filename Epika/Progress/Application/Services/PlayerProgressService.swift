@@ -41,6 +41,15 @@ actor PlayerProgressService {
             wallet.gold -= amount
         }
     }
+
+    func addCatTickets(_ amount: Int) async throws -> PlayerSnapshot {
+        guard amount >= 0 else {
+            throw ProgressError.invalidInput(description: "追加キャット・チケットは0以上である必要があります")
+        }
+        return try await mutateWallet { wallet in
+            wallet.catTickets &+= amount
+        }
+    }
 }
 
 private extension PlayerProgressService {

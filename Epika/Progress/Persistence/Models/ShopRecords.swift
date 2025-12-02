@@ -29,6 +29,8 @@ final class ShopStockRecord {
     var itemId: String = ""
     var remaining: Int = 0
     var restockAt: Date?
+    /// プレイヤーが売却したアイテムかどうか（マスターデータ同期で削除されない）
+    var isPlayerSold: Bool = false
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
 
@@ -37,6 +39,7 @@ final class ShopStockRecord {
          itemId: String,
          remaining: Int,
          restockAt: Date?,
+         isPlayerSold: Bool = false,
          createdAt: Date,
          updatedAt: Date) {
         self.id = id
@@ -44,6 +47,7 @@ final class ShopStockRecord {
         self.itemId = itemId
         self.remaining = remaining
         self.restockAt = restockAt
+        self.isPlayerSold = isPlayerSold
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

@@ -184,7 +184,7 @@ struct ItemSaleView: View {
         guard !selectedDisplayItems.isEmpty else { return }
         do {
             let ids = selectedDisplayItems.map { $0.progressId }
-            _ = try await progressService.inventory.sellItems(itemIds: ids)
+            _ = try await progressService.sellItemsToShop(itemIds: ids)
             UniversalItemDisplayService.shared.clearSortCache()
             selectedItemIds.removeAll()
             selectedDisplayItems.removeAll()
@@ -217,8 +217,7 @@ struct ItemSaleView: View {
     @MainActor
     private func sellItem(_ item: LightweightItemData, quantity: Int) async {
         do {
-            try await progressService.inventory.decrementItem(id: item.progressId, quantity: quantity)
-            _ = try await progressService.player.addGold(item.sellValue * quantity)
+            _ = try await progressService.sellItemToShop(itemId: item.progressId, quantity: quantity)
             UniversalItemDisplayService.shared.clearSortCache()
             selectedItemIds.remove(item.progressId)
             selectedDisplayItems.removeAll { $0.progressId == item.progressId }
@@ -235,7 +234,7 @@ struct ItemSaleView: View {
         do {
             _ = try await progressService.autoTrade.addRule(compositeKey: item.autoTradeKey,
                                                              displayName: item.fullDisplayName)
-            _ = try await progressService.inventory.sellItems(itemIds: [item.progressId])
+            _ = try await progressService.sellItemsToShop(itemIds: [item.progressId])
             UniversalItemDisplayService.shared.clearSortCache()
             selectedItemIds.remove(item.progressId)
             selectedDisplayItems.removeAll { $0.progressId == item.progressId }

@@ -79,22 +79,6 @@ actor AutoTradeProgressService {
         return Set(records.map { $0.compositeKey })
     }
 
-    /// 自動売却を実行し、アイテムをゴールドに変換する
-    func executeAutoSell(itemId: String,
-                         quantity: Int,
-                         enhancement: ItemSnapshot.Enhancement) async throws -> Int {
-        guard quantity > 0 else { return 0 }
-        let definitions = try await environment.masterDataService.getItemMasterData(ids: [itemId])
-        guard let definition = definitions.first else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [itemId])
-        }
-        let totalGold = definition.sellValue * quantity
-        if totalGold > 0 {
-            _ = try await playerService.addGold(totalGold)
-        }
-        return totalGold
-    }
-
     // MARK: - Private Helpers
 
     private func makeContext() -> ModelContext {
