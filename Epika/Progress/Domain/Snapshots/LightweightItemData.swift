@@ -71,6 +71,27 @@ struct LightweightItemData: Sendable {
     var compositeKey: String {
         "\(progressId.uuidString)-\(masterDataId)"
     }
+
+    /// 自動売却ルール用のキー（称号・ソケットを含む）
+    var autoTradeKey: String {
+        enhancement.compositeKey(for: masterDataId)
+    }
+
+    /// 称号を含むフルネーム（自動売却ルール表示用）
+    var fullDisplayName: String {
+        var parts: [String] = []
+        if let superRare = superRareTitleName {
+            parts.append(superRare)
+        }
+        if let normal = normalTitleName {
+            parts.append(normal)
+        }
+        parts.append(name)
+        if let gem = gemName {
+            parts.append("(\(gem))")
+        }
+        return parts.joined(separator: " ")
+    }
 }
 
 extension LightweightItemData: Equatable {

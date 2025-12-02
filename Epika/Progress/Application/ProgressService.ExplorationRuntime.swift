@@ -177,14 +177,22 @@ extension ProgressService {
     }
 
     func applyDropRewards(_ drops: [ItemDropResult]) async throws {
+        let autoTradeKeys = try await autoTrade.registeredCompositeKeys()
         for drop in drops where drop.quantity > 0 {
             let enhancement = ItemSnapshot.Enhancement(normalTitleId: drop.normalTitleId,
                                                        superRareTitleId: drop.superRareTitleId,
                                                        socketKey: nil)
-            _ = try await inventory.addItem(itemId: drop.item.id,
-                                            quantity: drop.quantity,
-                                            storage: .playerItem,
-                                            enhancements: enhancement)
+            let compositeKey = enhancement.compositeKey(for: drop.item.id)
+            if autoTradeKeys.contains(compositeKey) {
+                _ = try await autoTrade.executeAutoSell(itemId: drop.item.id,
+                                                        quantity: drop.quantity,
+                                                        enhancement: enhancement)
+            } else {
+                _ = try await inventory.addItem(itemId: drop.item.id,
+                                                quantity: drop.quantity,
+                                                storage: .playerItem,
+                                                enhancements: enhancement)
+            }
         }
     }
 

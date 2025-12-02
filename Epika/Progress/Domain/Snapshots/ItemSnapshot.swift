@@ -12,6 +12,14 @@ struct ItemSnapshot: Sendable {
             lhs.superRareTitleId == rhs.superRareTitleId &&
             lhs.socketKey == rhs.socketKey
         }
+
+        func compositeKey(for itemId: String) -> String {
+            let parts = [superRareTitleId ?? "",
+                         normalTitleId ?? "",
+                         itemId,
+                         socketKey ?? ""]
+            return parts.joined(separator: "|")
+        }
     }
 
     let persistentIdentifier: PersistentIdentifier

@@ -17,6 +17,7 @@ final class ProgressService: ObservableObject {
     let titleInheritance: TitleInheritanceProgressService
     let artifactExchange: ArtifactExchangeProgressService
     let itemSynthesis: ItemSynthesisProgressService
+    let autoTrade: AutoTradeProgressService
     let runtime: ProgressRuntimeService
     let dropNotifications: ItemDropNotificationService
     let universalItemDisplay: UniversalItemDisplayService
@@ -81,6 +82,9 @@ final class ProgressService: ObservableObject {
         self.artifactExchange = ArtifactExchangeProgressService(inventoryService: self.inventory)
         self.itemSynthesis = ItemSynthesisProgressService(inventoryService: self.inventory,
                                                           playerService: self.player)
+        self.autoTrade = AutoTradeProgressService(container: container,
+                                                   playerService: self.player,
+                                                   environment: environment)
         self.universalItemDisplay = .shared
     }
 }

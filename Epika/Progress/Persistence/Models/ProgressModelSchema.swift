@@ -25,7 +25,8 @@ enum ProgressModelSchema {
             ExplorationEventDropRecord.self,
             ExplorationBattleLogRecord.self,
             ShopRecord.self,
-            ShopStockRecord.self
+            ShopStockRecord.self,
+            AutoTradeRuleRecord.self
         ]
     }
 }

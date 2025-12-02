@@ -127,6 +127,28 @@ struct ItemSaleView: View {
         .frame(height: AppConstants.UI.listRowHeight)
         .contentShape(Rectangle())
         .onTapGesture { toggleSelection(item) }
+        .contextMenu {
+            Button {
+                Task { await sellItem(item, quantity: 1) }
+            } label: {
+                Label("1個売る", systemImage: "1.circle")
+            }
+            .disabled(item.quantity < 1)
+
+            if item.quantity >= 10 {
+                Button {
+                    Task { await sellItem(item, quantity: 10) }
+                } label: {
+                    Label("10個売る", systemImage: "10.circle")
+                }
+            }
+
+            Button {
+                Task { await addToAutoTrade(item) }
+            } label: {
+                Label("自動売却に追加", systemImage: "arrow.triangle.2.circlepath")
+            }
+        }
     }
 
     @MainActor
@@ -188,5 +210,38 @@ struct ItemSaleView: View {
             partial += item.sellValue * item.quantity
         }
         selectedTotalSellPrice = total
+    }
+
+    @MainActor
+    private func sellItem(_ item: LightweightItemData, quantity: Int) async {
+        do {
+            try await progressService.inventory.decrementItem(id: item.progressId, quantity: quantity)
+            _ = try await progressService.player.addGold(item.sellValue * quantity)
+            UniversalItemDisplayService.shared.clearSortCache()
+            selectedItemIds.remove(item.progressId)
+            selectedDisplayItems.removeAll { $0.progressId == item.progressId }
+            recalcSelectedTotalSellPrice()
+            await loadSaleData()
+        } catch {
+            showError = true
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    @MainActor
+    private func addToAutoTrade(_ item: LightweightItemData) async {
+        do {
+            _ = try await progressService.autoTrade.addRule(compositeKey: item.autoTradeKey,
+                                                             displayName: item.fullDisplayName)
+            _ = try await progressService.inventory.sellItems(itemIds: [item.progressId])
+            UniversalItemDisplayService.shared.clearSortCache()
+            selectedItemIds.remove(item.progressId)
+            selectedDisplayItems.removeAll { $0.progressId == item.progressId }
+            recalcSelectedTotalSellPrice()
+            await loadSaleData()
+        } catch {
+            showError = true
+            errorMessage = error.localizedDescription
+        }
     }
 }
