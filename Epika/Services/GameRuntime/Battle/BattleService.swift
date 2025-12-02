@@ -21,8 +21,8 @@ enum BattleService {
 
     static func resolveBattle(repository: MasterDataRepository,
                               party: RuntimePartyState,
-                              dungeon: DungeonDefinition?,
-                              floor: DungeonFloorDefinition?,
+                              dungeon: DungeonDefinition,
+                              floor: DungeonFloorDefinition,
                               encounterEnemyId: String?,
                               encounterLevel: Int?,
                               random: inout GameRandomSource) async throws -> Resolution {
@@ -58,8 +58,8 @@ enum BattleService {
         var localRandom = random
         let enemyResult = try BattleEnemyGroupBuilder.makeEnemies(baseEnemyId: encounterEnemyId,
                                                                  baseEnemyLevel: encounterLevel,
-                                                                 dungeon: dungeon ?? BattleServicePlaceholder.dungeon,
-                                                                 floor: floor ?? BattleServicePlaceholder.floor,
+                                                                 dungeon: dungeon,
+                                                                 floor: floor,
                                                                  enemyDefinitions: enemyDictionary,
                                                                  skillDefinitions: skillDictionary,
                                                                  jobDefinitions: jobDictionary,
@@ -174,26 +174,3 @@ private extension BattleService {
     }
 }
 
-private enum BattleServicePlaceholder {
-    static let dungeon = DungeonDefinition(id: "fallback",
-                                           name: "",
-                                           chapter: 0,
-                                           stage: 0,
-                                           description: "",
-                                           recommendedLevel: 1,
-                                           explorationTime: 0,
-                                           eventsPerFloor: 0,
-                                           floorCount: 1,
-                                           storyText: nil,
-                                           unlockConditions: [],
-                                           encounterWeights: [],
-                                           enemyGroupConfig: nil)
-
-    static let floor = DungeonFloorDefinition(id: "fallback",
-                                              dungeonId: nil,
-                                              name: "",
-                                              floorNumber: 1,
-                                              encounterTableId: "",
-                                              description: "",
-                                              specialEvents: [])
-}

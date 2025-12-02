@@ -94,7 +94,7 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
 }
 
 struct RuntimeCharacterState: Sendable {
-    struct Loadout: Sendable {
+    struct Loadout: Sendable, Hashable {
         var items: [ItemDefinition]
         var titles: [TitleDefinition]
         var superRareTitles: [SuperRareTitleDefinition]
@@ -140,6 +140,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     let martialEligible: Bool
     let spellbook: SkillRuntimeEffects.Spellbook
     let spellLoadout: SkillRuntimeEffects.SpellLoadout
+    let loadout: RuntimeCharacterState.Loadout
 
     var id: UUID { progress.id }
     var name: String { progress.displayName }

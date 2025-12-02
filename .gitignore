@@ -28,6 +28,7 @@ Temp/
 # Agents
 AGENTS.md
 .agent/
+agent_docs/
 
 # Project docs
 Documents/

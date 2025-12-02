@@ -358,11 +358,17 @@ private struct PartyEquipmentPlaceholderView: View {
                         if equipment.isEmpty {
                             Text("装備なし").foregroundColor(.secondary)
                         } else {
+                            let itemsById = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.id, $0) })
+                            let titlesById = Dictionary(uniqueKeysWithValues: character.loadout.titles.map { ($0.id, $0) })
+                            let superRareTitlesById = Dictionary(uniqueKeysWithValues: character.loadout.superRareTitles.map { ($0.id, $0) })
                             ForEach(equipment, id: \.id) { entry in
-                                if let title = entry.normalTitleId ?? entry.superRareTitleId {
-                                    Text("\(entry.itemId) x\(entry.quantity) (称号: \(title))")
+                                let itemName = itemsById[entry.itemId]?.name ?? entry.itemId
+                                let titleName = entry.normalTitleId.flatMap { titlesById[$0]?.name }
+                                    ?? entry.superRareTitleId.flatMap { superRareTitlesById[$0]?.name }
+                                if let titleName {
+                                    Text("\(itemName) x\(entry.quantity) (\(titleName))")
                                 } else {
-                                    Text("\(entry.itemId) x\(entry.quantity)")
+                                    Text("\(itemName) x\(entry.quantity)")
                                 }
                             }
                         }

@@ -80,7 +80,8 @@ enum CharacterAssembler {
             statusEffects: [],
             martialEligible: state.isMartialEligible,
             spellbook: state.spellbook,
-            spellLoadout: state.spellLoadout
+            spellLoadout: state.spellLoadout,
+            loadout: state.loadout
         )
     }
 

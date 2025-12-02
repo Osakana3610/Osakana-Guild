@@ -1,18 +1,18 @@
 import Foundation
 
 /// SQLite `items` および関連テーブルを表すアイテム定義
-struct ItemDefinition: Identifiable, Sendable {
-    struct StatBonus: Sendable {
+struct ItemDefinition: Identifiable, Sendable, Hashable {
+    struct StatBonus: Sendable, Hashable {
         let stat: String
         let value: Int
     }
 
-    struct CombatBonus: Sendable {
+    struct CombatBonus: Sendable, Hashable {
         let stat: String
         let value: Int
     }
 
-    struct GrantedSkill: Sendable {
+    struct GrantedSkill: Sendable, Hashable {
         let orderIndex: Int
         let skillId: String
     }

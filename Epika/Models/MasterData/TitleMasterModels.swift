@@ -1,6 +1,6 @@
 import Foundation
 
-struct TitleDefinition: Identifiable, Sendable {
+struct TitleDefinition: Identifiable, Sendable, Hashable {
     let id: String
     let name: String
     let description: String?
@@ -16,7 +16,7 @@ struct TitleDefinition: Identifiable, Sendable {
     let superRareRates: TitleSuperRareRates?
 }
 
-struct SuperRareTitleDefinition: Identifiable, Sendable {
+struct SuperRareTitleDefinition: Identifiable, Sendable, Hashable {
     struct Skill: Sendable, Hashable {
         let orderIndex: Int
         let skillId: String
@@ -27,7 +27,7 @@ struct SuperRareTitleDefinition: Identifiable, Sendable {
     let skills: [Skill]
 }
 
-struct TitleSuperRareRates: Sendable {
+struct TitleSuperRareRates: Sendable, Hashable {
     let normal: Double
     let good: Double
     let rare: Double
