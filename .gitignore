@@ -45,3 +45,4 @@ Scripts/
 xcodebuild-*.log
 periphery*.json
 xcodebuild*.log
+CLAUDE.md

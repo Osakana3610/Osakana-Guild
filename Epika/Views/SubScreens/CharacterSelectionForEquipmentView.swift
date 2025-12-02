@@ -354,9 +354,10 @@ struct EquipmentEditorView: View {
 
     private func showStatPreview(for definition: ItemDefinition, isEquipping: Bool) {
         // 同一ベースIDの重複ペナルティを考慮した差分計算
-        let delta = calculateStatDelta(
+        let delta = EquipmentProgressService.calculateStatDelta(
             adding: isEquipping ? definition : nil,
-            removing: isEquipping ? nil : definition
+            removing: isEquipping ? nil : definition,
+            currentEquippedItems: currentCharacter.progress.equippedItems
         )
 
         statDeltas = delta.map { (StatLabelResolver.label(for: $0.key), $0.value) }
@@ -365,58 +366,5 @@ struct EquipmentEditorView: View {
 
     private func clearStatPreview() {
         statDeltas = []
-    }
-
-    /// 装備中のアイテムからベースID別のカウントを取得
-    private func countItemsByBaseId() -> [String: Int] {
-        var counts: [String: Int] = [:]
-        for item in currentCharacter.progress.equippedItems {
-            counts[item.itemId, default: 0] += item.quantity
-        }
-        return counts
-    }
-
-    /// 装備変更時のステータス差分を計算
-    private func calculateStatDelta(
-        adding itemDefinition: ItemDefinition?,
-        removing existingItemDefinition: ItemDefinition?
-    ) -> [String: Int] {
-        var delta: [String: Int] = [:]
-
-        // 現在の重複カウント
-        let currentCounts = countItemsByBaseId()
-
-        // 追加するアイテムの効果を計算
-        if let addItem = itemDefinition {
-            let newCount = (currentCounts[addItem.id] ?? 0) + 1
-            let multiplier = EquipmentProgressService.duplicatePenaltyMultiplier(for: newCount)
-
-            for bonus in addItem.statBonuses {
-                let adjustedValue = Int(Double(bonus.value) * multiplier)
-                delta[bonus.stat, default: 0] += adjustedValue
-            }
-            for bonus in addItem.combatBonuses {
-                let adjustedValue = Int(Double(bonus.value) * multiplier)
-                delta[bonus.stat, default: 0] += adjustedValue
-            }
-        }
-
-        // 削除するアイテムの効果を計算（逆符号）
-        if let removeItem = existingItemDefinition {
-            let currentCount = currentCounts[removeItem.id] ?? 1
-            let multiplier = EquipmentProgressService.duplicatePenaltyMultiplier(for: currentCount)
-
-            for bonus in removeItem.statBonuses {
-                let adjustedValue = Int(Double(bonus.value) * multiplier)
-                delta[bonus.stat, default: 0] -= adjustedValue
-            }
-            for bonus in removeItem.combatBonuses {
-                let adjustedValue = Int(Double(bonus.value) * multiplier)
-                delta[bonus.stat, default: 0] -= adjustedValue
-            }
-        }
-
-        // 0の差分は除外
-        return delta.filter { $0.value != 0 }
     }
 }
