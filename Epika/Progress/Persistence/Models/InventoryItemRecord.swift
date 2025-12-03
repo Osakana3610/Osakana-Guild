@@ -3,6 +3,8 @@ import SwiftData
 
 @Model
 final class InventoryItemRecord {
+    #Index<InventoryItemRecord>([\.storageRawValue, \.sortOrder])
+
     var id: UUID = UUID()
     var compositeKey: String = ""
     var masterDataId: String = ""
