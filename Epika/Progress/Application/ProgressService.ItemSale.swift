@@ -2,9 +2,66 @@ import Foundation
 
 // MARK: - Item Sale with Shop Stock
 extension ProgressService {
+    /// 在庫整理結果
+    struct CleanupResult: Sendable {
+        let tickets: Int         // 獲得キャット・チケット
+        let autoSellGold: Int    // 自動売却で獲得したゴールド
+    }
+
+    /// 在庫整理を実行し、インベントリ内の自動売却対象も売却する
+    /// - Parameter stockId: 整理対象の在庫ID
+    /// - Returns: 獲得したチケットとゴールド
+    /// - Note: 自動売却で再度overflow時はインベントリに残る（無限ループ防止）
+    func cleanupStockAndAutoSell(stockId: UUID) async throws -> CleanupResult {
+        // 1. 在庫整理でキャット・チケット獲得
+        let tickets = try await shop.cleanupStock(stockId: stockId)
+        if tickets > 0 {
+            _ = try await player.addCatTickets(tickets)
+        }
+
+        // 2. インベントリ内の自動売却対象を売却
+        let autoSellGold = try await sellAutoTradeItemsFromInventory()
+
+        return CleanupResult(tickets: tickets, autoSellGold: autoSellGold)
+    }
+
+    /// インベントリ内の自動売却登録アイテムを売却する
+    /// - Returns: 獲得ゴールド
+    /// - Note: overflow分はインベントリに残る（再帰しない）
+    @discardableResult
+    private func sellAutoTradeItemsFromInventory() async throws -> Int {
+        let autoTradeKeys = try await autoTrade.registeredCompositeKeys()
+        guard !autoTradeKeys.isEmpty else { return 0 }
+
+        let items = try await inventory.allItems(storage: .playerItem)
+        guard !items.isEmpty else { return 0 }
+
+        var totalGold = 0
+        for item in items {
+            // composite keyを構築（superRareTitleId|normalTitleId|itemId）
+            let key = [item.enhancements.superRareTitleId ?? "",
+                       item.enhancements.normalTitleId ?? "",
+                       item.itemId].joined(separator: "|")
+            guard autoTradeKeys.contains(key) else { continue }
+
+            // 売却（overflow分はインベントリに残る）
+            let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: item.quantity)
+            totalGold += result.gold
+            if result.added > 0 {
+                try await inventory.decrementItem(id: item.id, quantity: result.added)
+            }
+        }
+
+        if totalGold > 0 {
+            _ = try await player.addGold(totalGold)
+        }
+        return totalGold
+    }
+
     /// アイテムを売却してゴールドを取得し、ショップ在庫に追加する
     /// - Parameter itemIds: 売却するアイテムのID配列
     /// - Returns: 更新後のプレイヤー情報
+    /// - Note: 商店在庫上限超過分はインベントリに残る
     @discardableResult
     func sellItemsToShop(itemIds: [UUID]) async throws -> PlayerSnapshot {
         guard !itemIds.isEmpty else {
@@ -20,15 +77,20 @@ extension ProgressService {
 
         // 各アイテムを売却してショップ在庫に追加
         var totalGold = 0
+        var decrementList: [(id: UUID, quantity: Int)] = []
         for item in targetItems {
             // ショップ在庫に追加（素のitemIdのみ、称号なし）
-            let gold = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: item.quantity)
-            totalGold += gold
+            let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: item.quantity)
+            totalGold += result.gold
+            // 実際に追加された分のみ減算対象（overflow分はインベントリに残る）
+            if result.added > 0 {
+                decrementList.append((id: item.id, quantity: result.added))
+            }
         }
 
-        // インベントリからアイテムを削除（全数量を減算することで削除）
-        for item in targetItems {
-            try await inventory.decrementItem(id: item.id, quantity: item.quantity)
+        // インベントリからアイテムを削除（実際に売却された分のみ）
+        for entry in decrementList {
+            try await inventory.decrementItem(id: entry.id, quantity: entry.quantity)
         }
 
         // ゴールドを加算
@@ -43,6 +105,7 @@ extension ProgressService {
     ///   - itemId: 売却するアイテムのID
     ///   - quantity: 売却数量
     /// - Returns: 更新後のプレイヤー情報
+    /// - Note: 商店在庫上限超過分はインベントリに残る
     @discardableResult
     func sellItemToShop(itemId: UUID, quantity: Int) async throws -> PlayerSnapshot {
         guard quantity > 0 else {
@@ -59,14 +122,16 @@ extension ProgressService {
         }
 
         // ショップ在庫に追加（素のitemIdのみ、称号なし）
-        let gold = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: quantity)
+        let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: quantity)
 
-        // インベントリから減算
-        try await inventory.decrementItem(id: itemId, quantity: quantity)
+        // インベントリから減算（実際に売却された分のみ、overflow分はインベントリに残る）
+        if result.added > 0 {
+            try await inventory.decrementItem(id: itemId, quantity: result.added)
+        }
 
         // ゴールドを加算
-        if gold > 0 {
-            return try await player.addGold(gold)
+        if result.gold > 0 {
+            return try await player.addGold(result.gold)
         }
         return try await player.currentPlayer()
     }

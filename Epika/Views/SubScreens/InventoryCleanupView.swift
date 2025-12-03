@@ -110,10 +110,11 @@ struct InventoryCleanupView: View {
     @MainActor
     private func cleanupItem(_ item: ShopProgressService.ShopItem) async {
         do {
-            let tickets = try await progressService.shop.cleanupStock(stockId: item.id)
-            if tickets > 0 {
-                player = try await progressService.player.addCatTickets(tickets)
-            }
+            let result = try await progressService.cleanupStockAndAutoSell(stockId: item.id)
+            // キャット・チケットはcleanupStockAndAutoSell内で加算済み
+            // 自動売却でゴールドも獲得
+            _ = result // 結果をログ表示等で使う場合はここで
+            player = try await progressService.player.currentPlayer()
             candidates = try await progressService.shop.loadCleanupCandidates()
         } catch {
             showError = true

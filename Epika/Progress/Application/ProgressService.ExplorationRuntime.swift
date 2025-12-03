@@ -188,9 +188,16 @@ extension ProgressService {
                                 drop.item.id].joined(separator: "|")
             if autoTradeKeys.contains(autoTradeKey) {
                 // 自動売却：ショップ在庫に追加してゴールド取得
-                let gold = try await shop.addPlayerSoldItem(itemId: drop.item.id, quantity: drop.quantity)
-                if gold > 0 {
-                    _ = try await player.addGold(gold)
+                let result = try await shop.addPlayerSoldItem(itemId: drop.item.id, quantity: drop.quantity)
+                if result.gold > 0 {
+                    _ = try await player.addGold(result.gold)
+                }
+                // 上限超過分はインベントリに一時保管
+                if result.overflow > 0 {
+                    _ = try await inventory.addItem(itemId: drop.item.id,
+                                                    quantity: result.overflow,
+                                                    storage: .playerItem,
+                                                    enhancements: enhancement)
                 }
             } else {
                 _ = try await inventory.addItem(itemId: drop.item.id,

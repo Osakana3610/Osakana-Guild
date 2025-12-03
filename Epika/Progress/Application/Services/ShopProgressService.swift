@@ -18,6 +18,13 @@ actor ShopProgressService {
         }
     }
 
+    /// 売却結果
+    struct SoldResult: Sendable {
+        let added: Int      // 実際に追加された数量
+        let gold: Int       // 獲得ゴールド
+        let overflow: Int   // 上限超過で追加できなかった数量
+    }
+
     private let container: ModelContainer
     private let environment: ProgressEnvironment
     private let inventoryService: InventoryProgressService
@@ -71,9 +78,9 @@ actor ShopProgressService {
     /// - Parameters:
     ///   - itemId: アイテムID（超レア・称号なしの素のID）
     ///   - quantity: 数量
-    /// - Returns: 売却額（ゴールド）実際に追加された数量に基づく
+    /// - Returns: 売却結果（追加数量、ゴールド、上限超過数量）
     @discardableResult
-    func addPlayerSoldItem(itemId: String, quantity: Int) async throws -> Int {
+    func addPlayerSoldItem(itemId: String, quantity: Int) async throws -> SoldResult {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "数量は1以上である必要があります")
         }
@@ -117,8 +124,9 @@ actor ShopProgressService {
         shopRecord.updatedAt = now
         try saveIfNeeded(context)
 
-        // 実際に追加された数量に基づいてゴールドを計算
-        return definition.sellValue * actuallyAdded
+        let overflow = quantity - actuallyAdded
+        let gold = definition.sellValue * actuallyAdded
+        return SoldResult(added: actuallyAdded, gold: gold, overflow: overflow)
     }
 
     /// 在庫整理：指定アイテムの在庫を目標数量まで減らし、減少分に応じたキャット・チケットを返す
@@ -170,6 +178,12 @@ actor ShopProgressService {
             guard let quantity = item.stockQuantity else { return false }
             return quantity > Self.stockDisplayLimit && item.isPlayerSold
         }
+    }
+
+    /// 在庫整理が必要なアイテムがあるかチェック（バッジ表示用）
+    func hasCleanupCandidates() async throws -> Bool {
+        let candidates = try await loadCleanupCandidates()
+        return !candidates.isEmpty
     }
 
     @discardableResult
