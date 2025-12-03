@@ -16,9 +16,10 @@ final class ProgressRuntimeService {
         return try await runtimeService.runtimeCharacter(from: progress)
     }
 
-    func recalculateCombatSnapshot(for snapshot: CharacterSnapshot) async throws -> CombatStatCalculator.Result {
+    func recalculateCombatSnapshot(for snapshot: CharacterSnapshot,
+                                    pandoraBoxItemIds: Set<UUID> = []) async throws -> CombatStatCalculator.Result {
         let progress = makeRuntimeCharacterProgress(from: snapshot)
-        return try await runtimeService.recalculateCombatStats(for: progress)
+        return try await runtimeService.recalculateCombatStats(for: progress, pandoraBoxItemIds: pandoraBoxItemIds)
     }
 
     func raceMaxLevel(for raceId: String) async throws -> Int {

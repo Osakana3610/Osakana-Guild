@@ -583,7 +583,8 @@ private extension CharacterProgressService {
                                          updatedAt: record.updatedAt)
 
         if record.needsCombatRecalculation {
-            let result = try await runtime.recalculateCombatSnapshot(for: snapshot)
+            let pandoraItemIds = try fetchPandoraBoxItemIds(context: context)
+            let result = try await runtime.recalculateCombatSnapshot(for: snapshot, pandoraBoxItemIds: pandoraItemIds)
             let updatedAttributes = CharacterSnapshot.CoreAttributes(strength: result.attributes.strength,
                                                                       wisdom: result.attributes.wisdom,
                                                                       spirit: result.attributes.spirit,
@@ -799,5 +800,14 @@ private extension CharacterProgressService {
         var descriptor = FetchDescriptor<PartyMemberRecord>(predicate: #Predicate { $0.partyId == partyId })
         descriptor.sortBy = [SortDescriptor(\PartyMemberRecord.order, order: .forward)]
         return try context.fetch(descriptor)
+    }
+
+    func fetchPandoraBoxItemIds(context: ModelContext) throws -> Set<UUID> {
+        var descriptor = FetchDescriptor<PlayerProfileRecord>()
+        descriptor.fetchLimit = 1
+        guard let profile = try context.fetch(descriptor).first else {
+            throw ProgressError.playerNotFound
+        }
+        return Set(profile.pandoraBoxItemIds)
     }
 }
