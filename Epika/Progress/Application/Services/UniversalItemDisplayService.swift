@@ -6,25 +6,40 @@ final class UniversalItemDisplayService {
     static let shared = UniversalItemDisplayService()
 
     private var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
-    private var itemOrderLookup: IdIndexLookup?
-    private var normalTitleOrderLookup: IdIndexLookup?
-    private var superRareTitleOrderLookup: IdIndexLookup?
     private var cacheVersion: Int = 0
 
     private init() {}
 
     func stagedGroupAndSortLightweightByCategory(for items: [ItemSnapshot]) async throws {
+        #if DEBUG
+        let totalStart = CFAbsoluteTimeGetCurrent()
+        var checkpoints: [(String, Double)] = []
+        func checkpoint(_ name: String) {
+            checkpoints.append((name, CFAbsoluteTimeGetCurrent()))
+        }
+        checkpoint("start")
+        #endif
+
         let masterIds = Set(items.map { $0.itemId })
         guard !masterIds.isEmpty else {
             categorizedItems.removeAll()
             return
         }
+
+        #if DEBUG
+        checkpoint("masterIds collected")
+        #endif
+
         let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(masterIds))
         let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         let missing = masterIds.filter { definitionMap[$0] == nil }
         if !missing.isEmpty {
             throw ProgressError.itemDefinitionUnavailable(ids: missing.sorted())
         }
+
+        #if DEBUG
+        checkpoint("definitions fetched")
+        #endif
 
         var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
         var normalTitleIds: Set<String> = []
@@ -58,32 +73,25 @@ final class UniversalItemDisplayService {
             }
         }
 
-        let itemOrderLookup = try await ensureOrderIndices(for: definitionMap)
-        try await ensureTitleOrderCache()
+        #if DEBUG
+        checkpoint("grouped and ids collected")
+        #endif
 
-        for key in grouped.keys {
-            grouped[key]?.sort { lhs, rhs in
-                guard let lhsIndex = itemOrderLookup.index(of: lhs.masterDataId),
-                      let rhsIndex = itemOrderLookup.index(of: rhs.masterDataId) else {
-                    return lhs.masterDataId < rhs.masterDataId
-                }
-                if lhsIndex != rhsIndex { return lhsIndex < rhsIndex }
-
-                let lhsBucket = enhancementBucket(for: lhs)
-                let rhsBucket = enhancementBucket(for: rhs)
-                if lhsBucket != rhsBucket { return lhsBucket < rhsBucket }
-
-                if let bucketComparison = compareWithinBucket(lhs: lhs, rhs: rhs, bucket: lhsBucket) {
-                    return bucketComparison
-                }
-                return lhs.progressId.uuidString < rhs.progressId.uuidString
-            }
-        }
+        // ソートは不要：データは InventoryProgressService から sortOrder 順で取得済み
 
         let titleNames = try await resolveTitleNames(normalIds: normalTitleIds,
                                                      superRareIds: superRareTitleIds)
+
+        #if DEBUG
+        checkpoint("title names resolved")
+        #endif
+
         let gemDisplayNames = try await resolveGemNames(socketKeys: socketKeys,
                                                         itemDefinitions: definitionMap)
+
+        #if DEBUG
+        checkpoint("gem names resolved")
+        #endif
 
         for key in grouped.keys {
             grouped[key] = grouped[key]?.map { item in
@@ -101,6 +109,19 @@ final class UniversalItemDisplayService {
             }
         }
 
+        #if DEBUG
+        checkpoint("names applied")
+        let totalTime = CFAbsoluteTimeGetCurrent() - totalStart
+        var log = "[Perf:DisplayService] items=\(items.count) uniqueMasterIds=\(masterIds.count) normalTitles=\(normalTitleIds.count) superRareTitles=\(superRareTitleIds.count) gems=\(socketKeys.count)\n"
+        log += "  Breakdown:"
+        for i in 1..<checkpoints.count {
+            let delta = checkpoints[i].1 - checkpoints[i-1].1
+            log += " \(checkpoints[i].0)=\(String(format: "%.3f", delta))s"
+        }
+        log += " total=\(String(format: "%.3f", totalTime))s"
+        print(log)
+        #endif
+
         categorizedItems = grouped
         cacheVersion &+= 1
     }
@@ -114,14 +135,6 @@ final class UniversalItemDisplayService {
     func clearSortCache() {
         categorizedItems.removeAll()
         cacheVersion &+= 1
-    }
-
-    func optimizeMemoryUsage() {
-        if categorizedItems.isEmpty {
-            itemOrderLookup = nil
-            normalTitleOrderLookup = nil
-            superRareTitleOrderLookup = nil
-        }
     }
 
     func makeStyledDisplayText(for item: LightweightItemData) -> Text {
@@ -192,133 +205,6 @@ final class UniversalItemDisplayService {
 
 @MainActor
 private extension UniversalItemDisplayService {
-    private func compareWithinBucket(lhs: LightweightItemData,
-                                     rhs: LightweightItemData,
-                                     bucket: Int) -> Bool? {
-        switch bucket {
-        case 0, 1:
-            let lhsTitleIndex = orderIndex(forNormalTitle: lhs.enhancement.normalTitleId)
-            let rhsTitleIndex = orderIndex(forNormalTitle: rhs.enhancement.normalTitleId)
-            if lhsTitleIndex != rhsTitleIndex { return lhsTitleIndex < rhsTitleIndex }
-
-            if bucket == 1 {
-                let lhsGemIndex = orderIndex(forGem: lhs.enhancement.socketKey)
-                let rhsGemIndex = orderIndex(forGem: rhs.enhancement.socketKey)
-                if lhsGemIndex != rhsGemIndex { return lhsGemIndex < rhsGemIndex }
-            }
-        case 2, 3:
-            let lhsTitleIndex = orderIndex(forSuperRareTitle: lhs.enhancement.superRareTitleId)
-            let rhsTitleIndex = orderIndex(forSuperRareTitle: rhs.enhancement.superRareTitleId)
-            if lhsTitleIndex != rhsTitleIndex { return lhsTitleIndex < rhsTitleIndex }
-
-            let lhsNormalIndex = orderIndex(forNormalTitle: lhs.enhancement.normalTitleId)
-            let rhsNormalIndex = orderIndex(forNormalTitle: rhs.enhancement.normalTitleId)
-            if lhsNormalIndex != rhsNormalIndex { return lhsNormalIndex < rhsNormalIndex }
-
-            if bucket == 3 {
-                let lhsGemIndex = orderIndex(forGem: lhs.enhancement.socketKey)
-                let rhsGemIndex = orderIndex(forGem: rhs.enhancement.socketKey)
-                if lhsGemIndex != rhsGemIndex { return lhsGemIndex < rhsGemIndex }
-            }
-        case 4:
-            break
-        default:
-            break
-        }
-        return nil
-    }
-
-    private struct IdIndexLookup {
-        private struct Entry {
-            let id: String
-            let index: Int
-        }
-
-        private let entries: [Entry]
-
-        init(order: [String]) {
-            entries = order.enumerated().map { Entry(id: $0.element, index: $0.offset) }
-                .sorted { $0.id < $1.id }
-        }
-
-        func index(of id: String) -> Int? {
-            guard !entries.isEmpty else { return nil }
-            var low = 0
-            var high = entries.count - 1
-            while low <= high {
-                let mid = low + (high - low) / 2
-                let entry = entries[mid]
-                if entry.id == id { return entry.index }
-                if entry.id < id {
-                    low = mid + 1
-                } else {
-                    high = mid - 1
-                }
-            }
-            return nil
-        }
-    }
-
-    private func ensureOrderIndices(for definitions: [String: ItemDefinition]) async throws -> IdIndexLookup {
-        if itemOrderLookup == nil {
-            let allItems = try await MasterDataRuntimeService.shared.getAllItems()
-            itemOrderLookup = IdIndexLookup(order: allItems.map { $0.id })
-        }
-        guard let lookup = itemOrderLookup else {
-            throw ProgressError.invalidInput(description: "アイテム順序の初期化に失敗しました")
-        }
-        let missing = definitions.keys.filter { lookup.index(of: $0) == nil }
-        if !missing.isEmpty {
-            throw ProgressError.itemDefinitionUnavailable(ids: missing.sorted())
-        }
-        return lookup
-    }
-
-    private func ensureTitleOrderCache() async throws {
-        if normalTitleOrderLookup == nil {
-            let titles = try await MasterDataRuntimeService.shared.getAllTitles()
-            normalTitleOrderLookup = IdIndexLookup(order: titles.map { $0.id })
-        }
-        if superRareTitleOrderLookup == nil {
-            let superRare = try await MasterDataRuntimeService.shared.getAllSuperRareTitles()
-            superRareTitleOrderLookup = IdIndexLookup(order: superRare.map { $0.id })
-        }
-    }
-
-    private func orderIndex(forNormalTitle id: String?) -> Int {
-        guard let id else { return Int.max }
-        return normalTitleOrderLookup?.index(of: id) ?? Int.max
-    }
-
-    private func orderIndex(forSuperRareTitle id: String?) -> Int {
-        guard let id else { return Int.max }
-        return superRareTitleOrderLookup?.index(of: id) ?? Int.max
-    }
-
-    private func orderIndex(forGem key: String?) -> Int {
-        guard let key else { return Int.max }
-        return itemOrderLookup?.index(of: key) ?? Int.max
-    }
-
-    private func enhancementBucket(for item: LightweightItemData) -> Int {
-        let hasNormal = item.enhancement.normalTitleId != nil
-        let hasSuperRare = item.enhancement.superRareTitleId != nil
-        let hasGem = item.enhancement.socketKey != nil
-
-        switch (hasSuperRare, hasNormal, hasGem) {
-        case (false, true, false):
-            return 0 // 通常称号のみ
-        case (false, true, true):
-            return 1 // 通常称号 + 宝石
-        case (true, _, false):
-            return 2 // 超レアのみ（通常称号は無視）
-        case (true, _, true):
-            return 3 // 超レア + 宝石
-        default:
-            return 4 // その他は後ろ
-        }
-    }
-
     private func resolveTitleNames(normalIds: Set<String>,
                                    superRareIds: Set<String>) async throws -> (normal: [String: String], superRare: [String: String]) {
         guard !(normalIds.isEmpty && superRareIds.isEmpty) else {

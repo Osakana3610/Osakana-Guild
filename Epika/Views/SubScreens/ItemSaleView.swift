@@ -164,15 +164,34 @@ struct ItemSaleView: View {
         if isLoading { return }
         isLoading = true
         defer { isLoading = false }
+
+        #if DEBUG
+        let totalStart = CFAbsoluteTimeGetCurrent()
+        #endif
+
         do {
             player = try await progressService.player.loadCurrentPlayer()
+
+            #if DEBUG
+            let inventoryStart = CFAbsoluteTimeGetCurrent()
+            #endif
+
             let items = try await progressService.inventory.allItems(storage: .playerItem)
+
+            #if DEBUG
+            let displayStart = CFAbsoluteTimeGetCurrent()
+            #endif
+
             let service = UniversalItemDisplayService.shared
             try await service.stagedGroupAndSortLightweightByCategory(for: items)
             cacheVersion = service.getCacheVersion()
-            service.optimizeMemoryUsage()
             showError = false
             didLoadOnce = true
+
+            #if DEBUG
+            let totalEnd = CFAbsoluteTimeGetCurrent()
+            print("[Perf:ItemSaleView] inventory=\(String(format: "%.3f", displayStart - inventoryStart))s display=\(String(format: "%.3f", totalEnd - displayStart))s total=\(String(format: "%.3f", totalEnd - totalStart))s")
+            #endif
         } catch {
             showError = true
             errorMessage = error.localizedDescription

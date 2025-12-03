@@ -32,6 +32,7 @@ private struct SuperRareTitleMasterFile: Decodable {
     struct Title: Decodable {
         let id: String
         let name: String
+        let order: Int
         let skills: [String]
     }
 
@@ -107,7 +108,7 @@ extension SQLiteMasterDataManager {
             try execute("DELETE FROM super_rare_title_skills;")
             try execute("DELETE FROM super_rare_titles;")
 
-            let insertTitleSQL = "INSERT INTO super_rare_titles (id, name) VALUES (?, ?);"
+            let insertTitleSQL = "INSERT INTO super_rare_titles (id, name, sort_order) VALUES (?, ?, ?);"
             let insertSkillSQL = "INSERT INTO super_rare_title_skills (title_id, order_index, skill_id) VALUES (?, ?, ?);"
 
             let titleStatement = try prepare(insertTitleSQL)
@@ -120,6 +121,7 @@ extension SQLiteMasterDataManager {
             for title in file.superRareTitles {
                 bindText(titleStatement, index: 1, value: title.id)
                 bindText(titleStatement, index: 2, value: title.name)
+                bindInt(titleStatement, index: 3, value: title.order)
                 try step(titleStatement)
                 reset(titleStatement)
 

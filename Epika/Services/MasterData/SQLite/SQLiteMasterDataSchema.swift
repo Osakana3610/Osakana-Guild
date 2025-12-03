@@ -284,7 +284,8 @@ extension SQLiteMasterDataManager {
             """
             CREATE TABLE IF NOT EXISTS super_rare_titles (
                 id TEXT PRIMARY KEY,
-                name TEXT NOT NULL
+                name TEXT NOT NULL,
+                sort_order INTEGER NOT NULL
             );
             """,
             """

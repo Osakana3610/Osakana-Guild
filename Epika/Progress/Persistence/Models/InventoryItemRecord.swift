@@ -14,6 +14,7 @@ final class InventoryItemRecord {
     var socketNormalTitleId: String?
     var socketKey: String?
     var acquiredAt: Date = Date()
+    var sortOrder: Int = 0
 
     var storage: ItemStorage {
         get { ItemStorage(rawValue: storageRawValue) ?? .unknown }
@@ -29,6 +30,7 @@ final class InventoryItemRecord {
          socketSuperRareTitleId: String?,
          socketNormalTitleId: String?,
          socketKey: String?,
+         sortOrder: Int,
          acquiredAt: Date = Date()) {
         self.compositeKey = compositeKey
         self.masterDataId = masterDataId
@@ -39,6 +41,7 @@ final class InventoryItemRecord {
         self.socketSuperRareTitleId = socketSuperRareTitleId
         self.socketNormalTitleId = socketNormalTitleId
         self.socketKey = socketKey
+        self.sortOrder = sortOrder
         self.acquiredAt = acquiredAt
     }
 }

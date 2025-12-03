@@ -19,12 +19,14 @@ actor CharacterProgressService {
 
     private let container: ModelContainer
     private let runtime: ProgressRuntimeService
+    private let sortOrderCalculator: ItemSortOrderCalculator
     private var raceLevelCache: [String: Int] = [:]
     private var raceMaxExperienceCache: [String: Int] = [:]
 
     init(container: ModelContainer, runtime: ProgressRuntimeService) {
         self.container = container
         self.runtime = runtime
+        self.sortOrderCalculator = ItemSortOrderCalculator()
     }
 
     private func notifyCharacterProgressDidChange() {
@@ -342,6 +344,14 @@ actor CharacterProgressService {
             // 既存スタックに追加
             existingInventory.quantity = min(existingInventory.quantity + quantity, 99)
         } else {
+            // sortOrderを計算
+            let sortOrder = try await sortOrderCalculator.calculateSortOrder(
+                itemId: equipmentRecord.itemId,
+                superRareTitleId: equipmentRecord.superRareTitleId,
+                normalTitleId: equipmentRecord.normalTitleId,
+                socketKey: equipmentRecord.socketKey
+            )
+
             // 新規インベントリレコード作成
             let inventoryRecord = InventoryItemRecord(
                 compositeKey: compositeKey,
@@ -353,6 +363,7 @@ actor CharacterProgressService {
                 socketSuperRareTitleId: equipmentRecord.socketSuperRareTitleId,
                 socketNormalTitleId: equipmentRecord.socketNormalTitleId,
                 socketKey: equipmentRecord.socketKey,
+                sortOrder: sortOrder,
                 acquiredAt: now
             )
             context.insert(inventoryRecord)

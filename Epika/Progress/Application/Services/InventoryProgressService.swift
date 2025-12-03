@@ -5,6 +5,7 @@ actor InventoryProgressService {
     private let container: ModelContainer
     private let playerService: PlayerProgressService
     private let environment: ProgressEnvironment
+    private let sortOrderCalculator: ItemSortOrderCalculator
     private let maxStackSize = 99
 
     struct BatchSeed: Sendable {
@@ -33,15 +34,39 @@ actor InventoryProgressService {
         self.container = container
         self.playerService = playerService
         self.environment = environment
+        self.sortOrderCalculator = ItemSortOrderCalculator()
     }
 
     // MARK: - Public API
 
     func allItems(storage: ItemStorage) async throws -> [ItemSnapshot] {
+        #if DEBUG
+        let startTime = CFAbsoluteTimeGetCurrent()
+        #endif
+
         let context = makeContext()
         let descriptor = fetchDescriptor(for: storage)
+
+        #if DEBUG
+        let fetchStart = CFAbsoluteTimeGetCurrent()
+        #endif
+
         let records = try context.fetch(descriptor)
-        return records.map(makeSnapshot(_:))
+
+        #if DEBUG
+        let fetchEnd = CFAbsoluteTimeGetCurrent()
+        let mapStart = CFAbsoluteTimeGetCurrent()
+        #endif
+
+        let snapshots = records.map(makeSnapshot(_:))
+
+        #if DEBUG
+        let mapEnd = CFAbsoluteTimeGetCurrent()
+        let totalTime = mapEnd - startTime
+        print("[Perf:Inventory] allItems count=\(records.count) fetch=\(String(format: "%.3f", fetchEnd - fetchStart))s map=\(String(format: "%.3f", mapEnd - mapStart))s total=\(String(format: "%.3f", totalTime))s")
+        #endif
+
+        return snapshots
     }
 
     func allEquipment(storage: ItemStorage) async throws -> [RuntimeEquipment] {
@@ -89,12 +114,20 @@ actor InventoryProgressService {
             throw ProgressError.invalidInput(description: "追加数量は1以上である必要があります")
         }
 
+        let sortOrder = try await sortOrderCalculator.calculateSortOrder(
+            itemId: itemId,
+            superRareTitleId: enhancements.superRareTitleId,
+            normalTitleId: enhancements.normalTitleId,
+            socketKey: enhancements.socketKey
+        )
+
         let context = makeContext()
         let key = compositeKey(for: itemId, enhancements: enhancements)
         let record = try fetchOrCreateRecord(with: key,
                                              itemId: itemId,
                                              storage: storage,
                                              enhancements: enhancements,
+                                             sortOrder: sortOrder,
                                              context: context,
                                              acquiredAt: Date())
         _ = applyIncrement(to: record, amount: quantity)
@@ -115,6 +148,9 @@ actor InventoryProgressService {
                 throw ProgressError.invalidInput(description: "アイテムの保管場所が不正です")
             }
         }
+
+        // sortOrder計算用のキャッシュを事前に初期化
+        try await sortOrderCalculator.ensureInitialized()
 
         var index = 0
         var chunkNumber = 0
@@ -140,6 +176,12 @@ actor InventoryProgressService {
                     if let record = recordMap[entry.key.compositeKey] {
                         _ = applyIncrement(to: record, amount: entry.totalQuantity)
                     } else {
+                        let sortOrder = try await sortOrderCalculator.calculateSortOrder(
+                            itemId: entry.seed.itemId,
+                            superRareTitleId: entry.seed.enhancements.superRareTitleId,
+                            normalTitleId: entry.seed.enhancements.normalTitleId,
+                            socketKey: entry.seed.enhancements.socketKey
+                        )
                         let newRecord = InventoryItemRecord(compositeKey: entry.key.compositeKey,
                                                             masterDataId: entry.seed.itemId,
                                                             quantity: 0,
@@ -149,6 +191,7 @@ actor InventoryProgressService {
                                                             socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
                                                             socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
                                                             socketKey: entry.seed.enhancements.socketKey,
+                                                            sortOrder: sortOrder,
                                                             acquiredAt: entry.seed.acquiredAt)
                         _ = applyIncrement(to: newRecord, amount: entry.totalQuantity)
                         context.insert(newRecord)
@@ -329,8 +372,8 @@ actor InventoryProgressService {
 
     private func fetchDescriptor(for storage: ItemStorage) -> FetchDescriptor<InventoryItemRecord> {
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.storageRawValue == storage.rawValue })
-        descriptor.sortBy = [SortDescriptor(\InventoryItemRecord.acquiredAt, order: .forward),
-                             SortDescriptor(\InventoryItemRecord.compositeKey, order: .forward)]
+        descriptor.sortBy = [SortDescriptor(\InventoryItemRecord.sortOrder, order: .forward),
+                             SortDescriptor(\InventoryItemRecord.acquiredAt, order: .forward)]
         return descriptor
     }
 
@@ -353,6 +396,7 @@ actor InventoryProgressService {
                                      itemId: String,
                                      storage: ItemStorage,
                                      enhancements: ItemSnapshot.Enhancement,
+                                     sortOrder: Int,
                                      context: ModelContext,
                                      acquiredAt: Date) throws -> InventoryItemRecord {
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.compositeKey == compositeKey && $0.storageRawValue == storage.rawValue })
@@ -360,6 +404,10 @@ actor InventoryProgressService {
         if let existing = try context.fetch(descriptor).first {
             if existing.storage != storage {
                 existing.storage = storage
+            }
+            // 既存レコードのsortOrderが0の場合は更新
+            if existing.sortOrder == 0 && sortOrder != 0 {
+                existing.sortOrder = sortOrder
             }
             return existing
         }
@@ -372,6 +420,7 @@ actor InventoryProgressService {
                                          socketSuperRareTitleId: enhancements.socketSuperRareTitleId,
                                          socketNormalTitleId: enhancements.socketNormalTitleId,
                                          socketKey: enhancements.socketKey,
+                                         sortOrder: sortOrder,
                                          acquiredAt: acquiredAt)
         updateCompositeKey(for: record)
         context.insert(record)
