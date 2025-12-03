@@ -228,8 +228,10 @@ struct DebugMenuView: View {
                     guard remainingForItem > 0 else { return true }
                     if createdCount + pendingSeeds.count >= targetCount { return true }
                     pendingSeeds.append(ItemSeed(itemId: item.id,
-                                                 enhancement: .init(normalTitleId: normal,
-                                                                    superRareTitleId: superRare,
+                                                 enhancement: .init(superRareTitleId: superRare,
+                                                                    normalTitleId: normal,
+                                                                    socketSuperRareTitleId: nil,
+                                                                    socketNormalTitleId: nil,
                                                                     socketKey: gem)))
                     remainingForItem -= 1
                     if pendingSeeds.count >= batchSize || createdCount + pendingSeeds.count >= targetCount {

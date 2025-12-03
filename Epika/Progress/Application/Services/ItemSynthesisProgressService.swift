@@ -59,7 +59,8 @@ actor ItemSynthesisProgressService {
             record.masterDataId = synthesisContext.recipe.resultItemId
             record.normalTitleId = nil
             record.superRareTitleId = nil
-            record.socketKey = nil
+            // ソケット情報（socketKey, socketSuperRareTitleId, socketNormalTitleId）は維持
+            // ユーザーが「残る側」として選んだ親アイテムのソケットは引き継がれる
             record.acquiredAt = Date()
         }
 

@@ -128,8 +128,10 @@ private extension ProgressRuntimeService {
                 RuntimeCharacterProgress.EquippedItem(id: $0.id,
                                                       itemId: $0.itemId,
                                                       quantity: $0.quantity,
-                                                      normalTitleId: $0.normalTitleId,
                                                       superRareTitleId: $0.superRareTitleId,
+                                                      normalTitleId: $0.normalTitleId,
+                                                      socketSuperRareTitleId: $0.socketSuperRareTitleId,
+                                                      socketNormalTitleId: $0.socketNormalTitleId,
                                                       socketKey: $0.socketKey,
                                                       createdAt: $0.createdAt,
                                                       updatedAt: $0.updatedAt)

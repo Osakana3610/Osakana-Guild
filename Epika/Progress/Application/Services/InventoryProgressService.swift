@@ -80,9 +80,11 @@ actor InventoryProgressService {
     func addItem(itemId: String,
                  quantity: Int,
                  storage: ItemStorage,
-                 enhancements: ItemSnapshot.Enhancement = .init(normalTitleId: nil,
-                                                                  superRareTitleId: nil,
-                                                                  socketKey: nil)) async throws -> ItemSnapshot {
+                 enhancements: ItemSnapshot.Enhancement = .init(superRareTitleId: nil,
+                                                                normalTitleId: nil,
+                                                                socketSuperRareTitleId: nil,
+                                                                socketNormalTitleId: nil,
+                                                                socketKey: nil)) async throws -> ItemSnapshot {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "追加数量は1以上である必要があります")
         }
@@ -142,8 +144,10 @@ actor InventoryProgressService {
                                                             masterDataId: entry.seed.itemId,
                                                             quantity: 0,
                                                             storage: storage,
-                                                            normalTitleId: entry.seed.enhancements.normalTitleId,
                                                             superRareTitleId: entry.seed.enhancements.superRareTitleId,
+                                                            normalTitleId: entry.seed.enhancements.normalTitleId,
+                                                            socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
+                                                            socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
                                                             socketKey: entry.seed.enhancements.socketKey,
                                                             acquiredAt: entry.seed.acquiredAt)
                         _ = applyIncrement(to: newRecord, amount: entry.totalQuantity)
@@ -279,8 +283,10 @@ actor InventoryProgressService {
             throw ProgressError.invalidInput(description: "提供アイテムは所持品から選択してください")
         }
 
-        targetRecord.normalTitleId = newEnhancement.normalTitleId
         targetRecord.superRareTitleId = newEnhancement.superRareTitleId
+        targetRecord.normalTitleId = newEnhancement.normalTitleId
+        targetRecord.socketSuperRareTitleId = newEnhancement.socketSuperRareTitleId
+        targetRecord.socketNormalTitleId = newEnhancement.socketNormalTitleId
         targetRecord.socketKey = newEnhancement.socketKey
         targetRecord.acquiredAt = Date()
         updateCompositeKey(for: targetRecord)
@@ -335,8 +341,10 @@ actor InventoryProgressService {
                      itemId: record.masterDataId,
                      quantity: record.quantity,
                      storage: record.storage,
-                     enhancements: .init(normalTitleId: record.normalTitleId,
-                                         superRareTitleId: record.superRareTitleId,
+                     enhancements: .init(superRareTitleId: record.superRareTitleId,
+                                         normalTitleId: record.normalTitleId,
+                                         socketSuperRareTitleId: record.socketSuperRareTitleId,
+                                         socketNormalTitleId: record.socketNormalTitleId,
                                          socketKey: record.socketKey),
                      acquiredAt: record.acquiredAt)
     }
@@ -359,8 +367,10 @@ actor InventoryProgressService {
                                          masterDataId: itemId,
                                          quantity: 0,
                                          storage: storage,
-                                         normalTitleId: enhancements.normalTitleId,
                                          superRareTitleId: enhancements.superRareTitleId,
+                                         normalTitleId: enhancements.normalTitleId,
+                                         socketSuperRareTitleId: enhancements.socketSuperRareTitleId,
+                                         socketNormalTitleId: enhancements.socketNormalTitleId,
                                          socketKey: enhancements.socketKey,
                                          acquiredAt: acquiredAt)
         updateCompositeKey(for: record)
@@ -372,13 +382,17 @@ actor InventoryProgressService {
         let parts = [enhancements.superRareTitleId ?? "",
                      enhancements.normalTitleId ?? "",
                      itemId,
+                     enhancements.socketSuperRareTitleId ?? "",
+                     enhancements.socketNormalTitleId ?? "",
                      enhancements.socketKey ?? ""]
         return parts.joined(separator: "|")
     }
 
     private func updateCompositeKey(for record: InventoryItemRecord) {
-        let enhancements = ItemSnapshot.Enhancement(normalTitleId: record.normalTitleId,
-                                                    superRareTitleId: record.superRareTitleId,
+        let enhancements = ItemSnapshot.Enhancement(superRareTitleId: record.superRareTitleId,
+                                                    normalTitleId: record.normalTitleId,
+                                                    socketSuperRareTitleId: record.socketSuperRareTitleId,
+                                                    socketNormalTitleId: record.socketNormalTitleId,
                                                     socketKey: record.socketKey)
         record.compositeKey = compositeKey(for: record.masterDataId, enhancements: enhancements)
     }

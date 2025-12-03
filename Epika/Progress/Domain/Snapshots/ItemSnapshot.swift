@@ -3,13 +3,17 @@ import SwiftData
 
 struct ItemSnapshot: Sendable {
     struct Enhancement: Sendable, Equatable {
-        var normalTitleId: String?
         var superRareTitleId: String?
+        var normalTitleId: String?
+        var socketSuperRareTitleId: String?
+        var socketNormalTitleId: String?
         var socketKey: String?
 
         nonisolated static func == (lhs: Enhancement, rhs: Enhancement) -> Bool {
-            lhs.normalTitleId == rhs.normalTitleId &&
             lhs.superRareTitleId == rhs.superRareTitleId &&
+            lhs.normalTitleId == rhs.normalTitleId &&
+            lhs.socketSuperRareTitleId == rhs.socketSuperRareTitleId &&
+            lhs.socketNormalTitleId == rhs.socketNormalTitleId &&
             lhs.socketKey == rhs.socketKey
         }
 
@@ -51,8 +55,10 @@ extension ItemSnapshot: Hashable {
         hasher.combine(itemId)
         hasher.combine(quantity)
         hasher.combine(storage)
-        hasher.combine(enhancements.normalTitleId)
         hasher.combine(enhancements.superRareTitleId)
+        hasher.combine(enhancements.normalTitleId)
+        hasher.combine(enhancements.socketSuperRareTitleId)
+        hasher.combine(enhancements.socketNormalTitleId)
         hasher.combine(enhancements.socketKey)
         hasher.combine(acquiredAt)
     }

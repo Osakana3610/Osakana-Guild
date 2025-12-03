@@ -140,6 +140,14 @@ private struct BaseStatAccumulator {
                 let scaled = Double(bonus.value) * categoryMultiplier * pandoraMultiplier
                 assign(bonus.stat, delta: Int(scaled.rounded(.towardZero)) * item.quantity)
             }
+            // ソケット宝石の基礎ステータス（係数1.0）
+            if let socketKey = item.socketKey,
+               let gemDefinition = definitionsById[socketKey] {
+                for bonus in gemDefinition.statBonuses {
+                    // 宝石ステータスは装備数量に依存しない（1個の宝石が1個の装備に装着）
+                    assign(bonus.stat, delta: bonus.value)
+                }
+            }
         }
     }
 
@@ -809,6 +817,16 @@ private struct CombatAccumulator {
                 let statMultiplier = itemStatMultipliers[stat] ?? 1.0
                 let scaled = Double(bonus.value) * categoryMultiplier * statMultiplier * pandoraMultiplier
                 apply(bonus: Int(scaled.rounded(.towardZero)) * item.quantity, to: stat, combat: &combat)
+            }
+            // ソケット宝石の戦闘ステータス（係数: 通常0.5、魔法防御0.25）
+            if let socketKey = item.socketKey,
+               let gemDefinition = definitionsById[socketKey] {
+                for bonus in gemDefinition.combatBonuses {
+                    guard let stat = CombatStatKey(bonus.stat) else { continue }
+                    let gemCoefficient: Double = (stat == .magicalDefense) ? 0.25 : 0.5
+                    let scaled = Double(bonus.value) * gemCoefficient
+                    apply(bonus: Int(scaled.rounded(.towardZero)), to: stat, combat: &combat)
+                }
             }
         }
     }

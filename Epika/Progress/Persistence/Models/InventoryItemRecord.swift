@@ -8,8 +8,10 @@ final class InventoryItemRecord {
     var masterDataId: String = ""
     var quantity: Int = 0
     var storageRawValue: String = ItemStorage.playerItem.rawValue
-    var normalTitleId: String?
     var superRareTitleId: String?
+    var normalTitleId: String?
+    var socketSuperRareTitleId: String?
+    var socketNormalTitleId: String?
     var socketKey: String?
     var acquiredAt: Date = Date()
 
@@ -22,16 +24,20 @@ final class InventoryItemRecord {
          masterDataId: String,
          quantity: Int,
          storage: ItemStorage,
-         normalTitleId: String?,
          superRareTitleId: String?,
+         normalTitleId: String?,
+         socketSuperRareTitleId: String?,
+         socketNormalTitleId: String?,
          socketKey: String?,
          acquiredAt: Date = Date()) {
         self.compositeKey = compositeKey
         self.masterDataId = masterDataId
         self.quantity = quantity
         self.storageRawValue = storage.rawValue
-        self.normalTitleId = normalTitleId
         self.superRareTitleId = superRareTitleId
+        self.normalTitleId = normalTitleId
+        self.socketSuperRareTitleId = socketSuperRareTitleId
+        self.socketNormalTitleId = socketNormalTitleId
         self.socketKey = socketKey
         self.acquiredAt = acquiredAt
     }

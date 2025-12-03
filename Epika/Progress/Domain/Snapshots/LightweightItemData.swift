@@ -80,8 +80,8 @@ struct LightweightItemData: Sendable {
         return parts.joined(separator: "|")
     }
 
-    /// 宝石が装着されているか
-    var hasSocket: Bool {
+    /// 宝石改造が施されているか
+    var hasGemModification: Bool {
         enhancement.socketKey != nil
     }
 

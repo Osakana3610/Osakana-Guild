@@ -143,7 +143,7 @@ struct ItemSaleView: View {
                 }
             }
 
-            if !item.hasSocket {
+            if !item.hasGemModification {
                 Button {
                     Task { await addToAutoTrade(item) }
                 } label: {

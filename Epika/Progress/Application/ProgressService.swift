@@ -22,6 +22,8 @@ final class ProgressService: ObservableObject {
     let dropNotifications: ItemDropNotificationService
     let universalItemDisplay: UniversalItemDisplayService
     let cloudKitCleanup: ProgressCloudKitCleanupService
+    let gemModification: GemModificationProgressService
+    let masterData: MasterDataRuntimeService
 
     let maniaDifficultyRank = 2
 
@@ -86,6 +88,9 @@ final class ProgressService: ObservableObject {
                                                    playerService: self.player,
                                                    environment: environment)
         self.universalItemDisplay = .shared
+        self.masterData = .shared
+        self.gemModification = GemModificationProgressService(container: container,
+                                                               masterDataService: .shared)
     }
 }
 

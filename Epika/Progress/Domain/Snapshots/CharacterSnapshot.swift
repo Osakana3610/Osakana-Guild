@@ -51,8 +51,10 @@ struct CharacterSnapshot: Sendable, Hashable {
         var id: UUID
         var itemId: String
         var quantity: Int
-        var normalTitleId: String?
         var superRareTitleId: String?
+        var normalTitleId: String?
+        var socketSuperRareTitleId: String?
+        var socketNormalTitleId: String?
         var socketKey: String?
         var createdAt: Date
         var updatedAt: Date
