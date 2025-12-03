@@ -1,6 +1,17 @@
 import Foundation
 import SwiftUI
 
+enum DisplayServiceError: Error, LocalizedError {
+    case itemNotFoundInCache(id: UUID)
+
+    var errorDescription: String? {
+        switch self {
+        case .itemNotFoundInCache(let id):
+            return "アイテムがキャッシュに見つかりません: \(id)"
+        }
+    }
+}
+
 @MainActor
 final class UniversalItemDisplayService {
     static let shared = UniversalItemDisplayService()
@@ -135,6 +146,37 @@ final class UniversalItemDisplayService {
     func clearSortCache() {
         categorizedItems.removeAll()
         cacheVersion &+= 1
+    }
+
+    /// キャッシュからアイテムを削除する（完全売却時）
+    func removeItems(ids: Set<UUID>) {
+        guard !ids.isEmpty else { return }
+        for key in categorizedItems.keys {
+            categorizedItems[key]?.removeAll { ids.contains($0.progressId) }
+        }
+        cacheVersion &+= 1
+    }
+
+    /// キャッシュ内のアイテム数量を減らす（部分売却時）
+    /// 数量が0以下になった場合は削除する
+    /// - Returns: 更新後の数量（削除された場合は0）
+    /// - Throws: キャッシュに該当IDが存在しない場合
+    func decrementQuantity(id: UUID, by amount: Int) throws -> Int {
+        for key in categorizedItems.keys {
+            if let index = categorizedItems[key]?.firstIndex(where: { $0.progressId == id }) {
+                let newQuantity = categorizedItems[key]![index].quantity - amount
+                if newQuantity <= 0 {
+                    categorizedItems[key]?.remove(at: index)
+                    cacheVersion &+= 1
+                    return 0
+                } else {
+                    categorizedItems[key]![index].quantity = newQuantity
+                    cacheVersion &+= 1
+                    return newQuantity
+                }
+            }
+        }
+        throw DisplayServiceError.itemNotFoundInCache(id: id)
     }
 
     func makeStyledDisplayText(for item: LightweightItemData) -> Text {

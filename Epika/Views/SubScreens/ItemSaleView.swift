@@ -204,11 +204,12 @@ struct ItemSaleView: View {
         do {
             let ids = selectedDisplayItems.map { $0.progressId }
             _ = try await progressService.sellItemsToShop(itemIds: ids)
-            UniversalItemDisplayService.shared.clearSortCache()
+            let service = UniversalItemDisplayService.shared
+            service.removeItems(ids: Set(ids))
+            cacheVersion = service.getCacheVersion()
             selectedItemIds.removeAll()
             selectedDisplayItems.removeAll()
             selectedTotalSellPrice = 0
-            await loadSaleData()
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -237,11 +238,21 @@ struct ItemSaleView: View {
     private func sellItem(_ item: LightweightItemData, quantity: Int) async {
         do {
             _ = try await progressService.sellItemToShop(itemId: item.progressId, quantity: quantity)
-            UniversalItemDisplayService.shared.clearSortCache()
-            selectedItemIds.remove(item.progressId)
-            selectedDisplayItems.removeAll { $0.progressId == item.progressId }
+            let service = UniversalItemDisplayService.shared
+            let newQuantity = try service.decrementQuantity(id: item.progressId, by: quantity)
+            cacheVersion = service.getCacheVersion()
+
+            if newQuantity <= 0 {
+                // 数量が0になった場合は選択から削除
+                selectedItemIds.remove(item.progressId)
+                selectedDisplayItems.removeAll { $0.progressId == item.progressId }
+            } else {
+                // 選択中アイテムの数量も更新
+                if let index = selectedDisplayItems.firstIndex(where: { $0.progressId == item.progressId }) {
+                    selectedDisplayItems[index].quantity = newQuantity
+                }
+            }
             recalcSelectedTotalSellPrice()
-            await loadSaleData()
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -254,11 +265,12 @@ struct ItemSaleView: View {
             _ = try await progressService.autoTrade.addRule(compositeKey: item.autoTradeKey,
                                                              displayName: item.fullDisplayName)
             _ = try await progressService.sellItemsToShop(itemIds: [item.progressId])
-            UniversalItemDisplayService.shared.clearSortCache()
+            let service = UniversalItemDisplayService.shared
+            service.removeItems(ids: [item.progressId])
+            cacheVersion = service.getCacheVersion()
             selectedItemIds.remove(item.progressId)
             selectedDisplayItems.removeAll { $0.progressId == item.progressId }
             recalcSelectedTotalSellPrice()
-            await loadSaleData()
         } catch {
             showError = true
             errorMessage = error.localizedDescription
