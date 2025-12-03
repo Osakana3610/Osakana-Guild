@@ -179,8 +179,10 @@ extension ProgressService {
     func applyDropRewards(_ drops: [ItemDropResult]) async throws {
         let autoTradeKeys = try await autoTrade.registeredCompositeKeys()
         for drop in drops where drop.quantity > 0 {
-            let enhancement = ItemSnapshot.Enhancement(normalTitleId: drop.normalTitleId,
-                                                       superRareTitleId: drop.superRareTitleId,
+            let enhancement = ItemSnapshot.Enhancement(superRareTitleId: drop.superRareTitleId,
+                                                       normalTitleId: drop.normalTitleId,
+                                                       socketSuperRareTitleId: nil,
+                                                       socketNormalTitleId: nil,
                                                        socketKey: nil)
             // 自動売却キーはソケットを除外した3要素形式
             let autoTradeKey = [drop.superRareTitleId ?? "",

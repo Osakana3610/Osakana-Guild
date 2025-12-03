@@ -190,8 +190,10 @@ final class CharacterEquipmentRecord {
     var characterId: UUID = UUID()
     var itemId: String = ""
     var quantity: Int = 0
-    var normalTitleId: String?
     var superRareTitleId: String?
+    var normalTitleId: String?
+    var socketSuperRareTitleId: String?
+    var socketNormalTitleId: String?
     var socketKey: String?
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
@@ -200,8 +202,10 @@ final class CharacterEquipmentRecord {
          characterId: UUID,
          itemId: String,
          quantity: Int,
-         normalTitleId: String?,
          superRareTitleId: String?,
+         normalTitleId: String?,
+         socketSuperRareTitleId: String?,
+         socketNormalTitleId: String?,
          socketKey: String?,
          createdAt: Date,
          updatedAt: Date) {
@@ -209,8 +213,10 @@ final class CharacterEquipmentRecord {
         self.characterId = characterId
         self.itemId = itemId
         self.quantity = quantity
-        self.normalTitleId = normalTitleId
         self.superRareTitleId = superRareTitleId
+        self.normalTitleId = normalTitleId
+        self.socketSuperRareTitleId = socketSuperRareTitleId
+        self.socketNormalTitleId = socketNormalTitleId
         self.socketKey = socketKey
         self.createdAt = createdAt
         self.updatedAt = updatedAt

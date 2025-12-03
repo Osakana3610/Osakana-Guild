@@ -53,8 +53,10 @@ actor EquipmentProgressService {
                 baseValue: definition.basePrice,
                 sellValue: definition.sellValue,
                 enhancement: .init(
-                    normalTitleId: record.normalTitleId,
                     superRareTitleId: record.superRareTitleId,
+                    normalTitleId: record.normalTitleId,
+                    socketSuperRareTitleId: record.socketSuperRareTitleId,
+                    socketNormalTitleId: record.socketNormalTitleId,
                     socketKey: record.socketKey
                 ),
                 rarity: definition.rarity,

@@ -253,8 +253,10 @@ actor CharacterProgressService {
         // 同じアイテム（同じmasterDataId、同じ強化状態）が既に装備されているかチェック
         let existingEquipment = currentEquipment.first { record in
             record.itemId == inventoryRecord.masterDataId &&
-            record.normalTitleId == inventoryRecord.normalTitleId &&
             record.superRareTitleId == inventoryRecord.superRareTitleId &&
+            record.normalTitleId == inventoryRecord.normalTitleId &&
+            record.socketSuperRareTitleId == inventoryRecord.socketSuperRareTitleId &&
+            record.socketNormalTitleId == inventoryRecord.socketNormalTitleId &&
             record.socketKey == inventoryRecord.socketKey
         }
 
@@ -268,8 +270,10 @@ actor CharacterProgressService {
                 characterId: characterId,
                 itemId: inventoryRecord.masterDataId,
                 quantity: quantity,
-                normalTitleId: inventoryRecord.normalTitleId,
                 superRareTitleId: inventoryRecord.superRareTitleId,
+                normalTitleId: inventoryRecord.normalTitleId,
+                socketSuperRareTitleId: inventoryRecord.socketSuperRareTitleId,
+                socketNormalTitleId: inventoryRecord.socketNormalTitleId,
                 socketKey: inventoryRecord.socketKey,
                 createdAt: now,
                 updatedAt: now
@@ -320,8 +324,10 @@ actor CharacterProgressService {
 
         // インベントリに戻す（同じ強化状態のアイテムを探す）
         let enhancement = ItemSnapshot.Enhancement(
-            normalTitleId: equipmentRecord.normalTitleId,
             superRareTitleId: equipmentRecord.superRareTitleId,
+            normalTitleId: equipmentRecord.normalTitleId,
+            socketSuperRareTitleId: equipmentRecord.socketSuperRareTitleId,
+            socketNormalTitleId: equipmentRecord.socketNormalTitleId,
             socketKey: equipmentRecord.socketKey
         )
         let compositeKey = makeCompositeKey(itemId: equipmentRecord.itemId, enhancement: enhancement)
@@ -342,8 +348,10 @@ actor CharacterProgressService {
                 masterDataId: equipmentRecord.itemId,
                 quantity: quantity,
                 storage: storage,
-                normalTitleId: equipmentRecord.normalTitleId,
                 superRareTitleId: equipmentRecord.superRareTitleId,
+                normalTitleId: equipmentRecord.normalTitleId,
+                socketSuperRareTitleId: equipmentRecord.socketSuperRareTitleId,
+                socketNormalTitleId: equipmentRecord.socketNormalTitleId,
                 socketKey: equipmentRecord.socketKey,
                 acquiredAt: now
             )
@@ -375,8 +383,10 @@ actor CharacterProgressService {
                 id: record.id,
                 itemId: record.itemId,
                 quantity: record.quantity,
-                normalTitleId: record.normalTitleId,
                 superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
                 socketKey: record.socketKey,
                 createdAt: record.createdAt,
                 updatedAt: record.updatedAt
@@ -389,6 +399,8 @@ actor CharacterProgressService {
             enhancement.superRareTitleId ?? "",
             enhancement.normalTitleId ?? "",
             itemId,
+            enhancement.socketSuperRareTitleId ?? "",
+            enhancement.socketNormalTitleId ?? "",
             enhancement.socketKey ?? ""
         ]
         return parts.joined(separator: "|")
@@ -528,8 +540,10 @@ private extension CharacterProgressService {
             CharacterSnapshot.EquippedItem(id: item.id,
                                             itemId: item.itemId,
                                             quantity: item.quantity,
-                                            normalTitleId: item.normalTitleId,
                                             superRareTitleId: item.superRareTitleId,
+                                            normalTitleId: item.normalTitleId,
+                                            socketSuperRareTitleId: item.socketSuperRareTitleId,
+                                            socketNormalTitleId: item.socketNormalTitleId,
                                             socketKey: item.socketKey,
                                             createdAt: item.createdAt,
                                             updatedAt: item.updatedAt)
@@ -729,8 +743,10 @@ private extension CharacterProgressService {
                                                    characterId: characterId,
                                                    itemId: item.itemId,
                                                    quantity: item.quantity,
-                                                   normalTitleId: item.normalTitleId,
                                                    superRareTitleId: item.superRareTitleId,
+                                                   normalTitleId: item.normalTitleId,
+                                                   socketSuperRareTitleId: item.socketSuperRareTitleId,
+                                                   socketNormalTitleId: item.socketNormalTitleId,
                                                    socketKey: item.socketKey,
                                                    createdAt: item.createdAt,
                                                    updatedAt: item.updatedAt)

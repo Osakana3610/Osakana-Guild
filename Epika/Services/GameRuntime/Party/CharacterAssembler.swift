@@ -91,15 +91,28 @@ enum CharacterAssembler {
         let normalTitleIds = Set(equippedItems.compactMap { $0.normalTitleId })
         let superRareTitleIds = Set(equippedItems.compactMap { $0.superRareTitleId })
 
-        let items = try await repository.items(withIds: Array(itemIds))
+        // ソケット宝石のアイテムIDと称号IDも収集
+        let socketItemIds = Set(equippedItems.compactMap { $0.socketKey })
+        let socketNormalTitleIds = Set(equippedItems.compactMap { $0.socketNormalTitleId })
+        let socketSuperRareTitleIds = Set(equippedItems.compactMap { $0.socketSuperRareTitleId })
+
+        // 装備と宝石のアイテム定義を取得
+        let allItemIds = itemIds.union(socketItemIds)
+        let items = try await repository.items(withIds: Array(allItemIds))
+
+        // 通常称号を取得（装備とソケット宝石の両方）
+        let allNormalTitleIds = normalTitleIds.union(socketNormalTitleIds)
         var titles: [TitleDefinition] = []
-        for id in normalTitleIds {
+        for id in allNormalTitleIds {
             if let definition = try await repository.title(withId: id) {
                 titles.append(definition)
             }
         }
+
+        // 超レア称号を取得（装備とソケット宝石の両方）
+        let allSuperRareTitleIds = superRareTitleIds.union(socketSuperRareTitleIds)
         var superRareTitles: [SuperRareTitleDefinition] = []
-        for id in superRareTitleIds {
+        for id in allSuperRareTitleIds {
             if let definition = try await repository.superRareTitle(withId: id) {
                 superRareTitles.append(definition)
             }

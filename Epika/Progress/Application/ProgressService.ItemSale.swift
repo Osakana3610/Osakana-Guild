@@ -62,6 +62,7 @@ extension ProgressService {
     /// - Parameter itemIds: 売却するアイテムのID配列
     /// - Returns: 更新後のプレイヤー情報
     /// - Note: 商店在庫上限超過分はインベントリに残る
+    /// - Note: ソケット宝石が装着されている場合、宝石を分離してインベントリに戻す
     @discardableResult
     func sellItemsToShop(itemIds: [UUID]) async throws -> PlayerSnapshot {
         guard !itemIds.isEmpty else {
@@ -85,6 +86,8 @@ extension ProgressService {
             // 実際に追加された分のみ減算対象（overflow分はインベントリに残る）
             if result.added > 0 {
                 decrementList.append((id: item.id, quantity: result.added))
+                // ソケット宝石が装着されている場合、売却数量分の宝石を分離してインベントリに戻す
+                try await separateGemFromItem(item, quantity: result.added)
             }
         }
 
@@ -106,6 +109,7 @@ extension ProgressService {
     ///   - quantity: 売却数量
     /// - Returns: 更新後のプレイヤー情報
     /// - Note: 商店在庫上限超過分はインベントリに残る
+    /// - Note: ソケット宝石が装着されている場合、宝石を分離してインベントリに戻す
     @discardableResult
     func sellItemToShop(itemId: UUID, quantity: Int) async throws -> PlayerSnapshot {
         guard quantity > 0 else {
@@ -127,6 +131,8 @@ extension ProgressService {
         // インベントリから減算（実際に売却された分のみ、overflow分はインベントリに残る）
         if result.added > 0 {
             try await inventory.decrementItem(id: itemId, quantity: result.added)
+            // ソケット宝石が装着されている場合、売却数量分の宝石を分離してインベントリに戻す
+            try await separateGemFromItem(item, quantity: result.added)
         }
 
         // ゴールドを加算
@@ -134,5 +140,32 @@ extension ProgressService {
             return try await player.addGold(result.gold)
         }
         return try await player.currentPlayer()
+    }
+
+    // MARK: - Private Helpers
+
+    /// アイテムからソケット宝石を分離してインベントリに戻す
+    /// - Parameters:
+    ///   - item: 宝石が装着されたアイテム
+    ///   - quantity: 分離する宝石の数量（売却された装備の数量）
+    /// - Note: 宝石の称号情報（socketSuperRareTitleId, socketNormalTitleId）も引き継ぐ
+    private func separateGemFromItem(_ item: ItemSnapshot, quantity: Int) async throws {
+        guard let socketKey = item.enhancements.socketKey else { return }
+        guard quantity > 0 else { return }
+
+        // 宝石をインベントリに追加（宝石の称号情報を引き継ぐ）
+        let gemEnhancement = ItemSnapshot.Enhancement(
+            superRareTitleId: item.enhancements.socketSuperRareTitleId,
+            normalTitleId: item.enhancements.socketNormalTitleId,
+            socketSuperRareTitleId: nil,
+            socketNormalTitleId: nil,
+            socketKey: nil
+        )
+        _ = try await inventory.addItem(
+            itemId: socketKey,
+            quantity: quantity,
+            storage: .playerItem,
+            enhancements: gemEnhancement
+        )
     }
 }
