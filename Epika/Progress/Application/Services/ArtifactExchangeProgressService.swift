@@ -69,10 +69,13 @@ actor ArtifactExchangeProgressService {
             guard record.masterDataId == rule.requiredItemId else {
                 throw ProgressError.invalidInput(description: "提供アイテムが交換条件と一致しません")
             }
+            // 提供アイテムは報酬アイテムに完全置換（称号・ソケット全てリセット）
             record.masterDataId = rewardDefinition.id
             record.normalTitleId = nil
             record.superRareTitleId = nil
             record.socketKey = nil
+            record.socketSuperRareTitleId = nil
+            record.socketNormalTitleId = nil
             record.acquiredAt = Date()
         }
 

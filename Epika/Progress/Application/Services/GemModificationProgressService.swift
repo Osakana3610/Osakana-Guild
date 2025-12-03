@@ -80,9 +80,9 @@ actor GemModificationProgressService {
             throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
         }
 
-        // 対象アイテムに既にソケットが装着されていないか確認
+        // 対象アイテムに既に宝石改造が施されていないか確認
         guard targetRecord.socketKey == nil else {
-            throw ProgressError.invalidInput(description: "このアイテムには既に宝石が装着されています")
+            throw ProgressError.invalidInput(description: "このアイテムには既に宝石改造が施されています")
         }
 
         // 宝石のカテゴリ確認
@@ -98,10 +98,10 @@ actor GemModificationProgressService {
             throw ProgressError.invalidInput(description: "対象アイテムの定義が見つかりません")
         }
         if targetDefinition.category.lowercased().contains("gem") {
-            throw ProgressError.invalidInput(description: "宝石に宝石を装着することはできません")
+            throw ProgressError.invalidInput(description: "宝石に宝石改造を施すことはできません")
         }
         if Self.nonSocketableCategories.contains(targetDefinition.category) {
-            throw ProgressError.invalidInput(description: "このカテゴリのアイテムには宝石を装着できません")
+            throw ProgressError.invalidInput(description: "このカテゴリのアイテムには宝石改造を施すことができません")
         }
 
         // 宝石の称号情報を対象アイテムに転送

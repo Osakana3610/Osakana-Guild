@@ -10,6 +10,8 @@ struct ArtifactExchangeView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var isLoading = false
+    @State private var showGemWarning = false
+    @State private var pendingExchange: (option: ArtifactExchangeProgressService.ArtifactOption, artifact: RuntimeEquipment)?
 
     private var exchangeService: ArtifactExchangeProgressService { progressService.artifactExchange }
 
@@ -34,9 +36,22 @@ struct ArtifactExchangeView: View {
                     selectedItem: $selectedPlayerArtifact
                 ) {
                     if let option = selectedOption, let artifact = selectedPlayerArtifact {
-                        Task { await performExchange(option: option, artifact: artifact) }
+                        Task { await tryPerformExchange(option: option, artifact: artifact) }
                     }
                 }
+            }
+            .alert("宝石改造が施されています", isPresented: $showGemWarning) {
+                Button("キャンセル", role: .cancel) {
+                    pendingExchange = nil
+                }
+                Button("交換する", role: .destructive) {
+                    if let exchange = pendingExchange {
+                        Task { await performExchange(option: exchange.option, artifact: exchange.artifact) }
+                    }
+                    pendingExchange = nil
+                }
+            } message: {
+                Text("この神器には宝石改造が施されています。交換すると宝石は失われます。")
             }
         }
     }
@@ -111,9 +126,21 @@ struct ArtifactExchangeView: View {
         selectedOption = option
         selectedPlayerArtifact = nil
         if playerArtifacts.count == 1, let artifact = playerArtifacts.first {
-            Task { await performExchange(option: option, artifact: artifact) }
+            Task { await tryPerformExchange(option: option, artifact: artifact) }
         } else {
             showArtifactPicker = true
+        }
+    }
+
+    @MainActor
+    private func tryPerformExchange(option: ArtifactExchangeProgressService.ArtifactOption, artifact: RuntimeEquipment) async {
+        showArtifactPicker = false
+        // 宝石改造が施されている場合は警告を表示
+        if artifact.enhancement.socketKey != nil {
+            pendingExchange = (option, artifact)
+            showGemWarning = true
+        } else {
+            await performExchange(option: option, artifact: artifact)
         }
     }
 

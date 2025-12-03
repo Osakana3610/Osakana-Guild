@@ -54,8 +54,8 @@ struct GemModificationView: View {
                     }
                 )
             }
-            .alert("宝石を装着", isPresented: $showConfirmation) {
-                Button("装着", role: .destructive) {
+            .alert("宝石改造", isPresented: $showConfirmation) {
+                Button("改造する", role: .destructive) {
                     Task {
                         await attachGem()
                     }
@@ -68,9 +68,9 @@ struct GemModificationView: View {
                    let target = targetItem,
                    let gemDef = gemDefinitions[gem.itemId],
                    let targetDef = gemDefinitions[target.itemId] {
-                    Text("\(gemDef.name)を\(targetDef.name)に装着しますか？\n（宝石は消費されます）")
+                    Text("\(targetDef.name)に\(gemDef.name)で宝石改造を施しますか？\n（宝石は消費されます）")
                 } else {
-                    Text("宝石を装着しますか？")
+                    Text("宝石改造を施しますか？")
                 }
             }
         }
@@ -80,10 +80,10 @@ struct GemModificationView: View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("宝石を装備アイテムに装着できます。")
+                    Text("装備アイテムに宝石改造を施すことができます。")
                         .font(.callout)
                         .foregroundStyle(.secondary)
-                    Text("装着した宝石のステータスが装備に追加されます。")
+                    Text("宝石改造を施した装備には宝石のステータスが追加されます。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
