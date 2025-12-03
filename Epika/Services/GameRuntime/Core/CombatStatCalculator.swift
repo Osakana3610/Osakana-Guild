@@ -7,9 +7,18 @@ struct CombatStatCalculator {
         var combat: RuntimeCharacterProgress.Combat
     }
 
-    struct Context {
+    struct Context: Sendable {
         let progress: RuntimeCharacterProgress
         let state: RuntimeCharacterState
+        let pandoraBoxItemIds: Set<UUID>
+
+        nonisolated init(progress: RuntimeCharacterProgress,
+                         state: RuntimeCharacterState,
+                         pandoraBoxItemIds: Set<UUID> = []) {
+            self.progress = progress
+            self.state = state
+            self.pandoraBoxItemIds = pandoraBoxItemIds
+        }
     }
 
     enum CalculationError: Error {
@@ -37,7 +46,8 @@ struct CombatStatCalculator {
         }
         try base.apply(equipment: context.progress.equippedItems,
                        definitions: context.state.loadout.items,
-                       equipmentMultipliers: skillEffects.equipmentMultipliers)
+                       equipmentMultipliers: skillEffects.equipmentMultipliers,
+                       pandoraBoxItemIds: context.pandoraBoxItemIds)
 
         var attributes = base.makeAttributes()
 
@@ -63,7 +73,8 @@ struct CombatStatCalculator {
                                              statConversions: skillEffects.statConversions,
                                              forcedToOne: skillEffects.forcedToOne,
                                              equipmentMultipliers: skillEffects.equipmentMultipliers,
-                                             itemStatMultipliers: skillEffects.itemStatMultipliers)
+                                             itemStatMultipliers: skillEffects.itemStatMultipliers,
+                                             pandoraBoxItemIds: context.pandoraBoxItemIds)
 
         var combat = try combatResult.makeCombat()
         // 結果の切り捨て
@@ -114,7 +125,8 @@ private struct BaseStatAccumulator {
 
     mutating func apply(equipment: [RuntimeCharacterProgress.EquippedItem],
                         definitions: [ItemDefinition],
-                        equipmentMultipliers: [String: Double]) throws {
+                        equipmentMultipliers: [String: Double],
+                        pandoraBoxItemIds: Set<UUID>) throws {
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else {
@@ -123,8 +135,9 @@ private struct BaseStatAccumulator {
             let categoryMultiplier = equipmentMultipliers[definition.category]
                 ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
                 ?? 1.0
+            let pandoraMultiplier = pandoraBoxItemIds.contains(item.id) ? 1.5 : 1.0
             for bonus in definition.statBonuses {
-                let scaled = Double(bonus.value) * categoryMultiplier
+                let scaled = Double(bonus.value) * categoryMultiplier * pandoraMultiplier
                 assign(bonus.stat, delta: Int(scaled.rounded(.towardZero)) * item.quantity)
             }
         }
@@ -452,6 +465,7 @@ private struct CombatAccumulator {
     private let forcedToOne: Set<CombatStatKey>
     private let equipmentMultipliers: [String: Double]
     private let itemStatMultipliers: [CombatStatKey: Double]
+    private let pandoraBoxItemIds: Set<UUID>
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
     init(progress: RuntimeCharacterProgress,
@@ -469,7 +483,8 @@ private struct CombatAccumulator {
          statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]],
          forcedToOne: Set<CombatStatKey>,
          equipmentMultipliers: [String: Double],
-         itemStatMultipliers: [CombatStatKey: Double]) {
+         itemStatMultipliers: [CombatStatKey: Double],
+         pandoraBoxItemIds: Set<UUID>) {
         self.progress = progress
         self.attributes = attributes
         self.race = race
@@ -486,6 +501,7 @@ private struct CombatAccumulator {
         self.forcedToOne = forcedToOne
         self.equipmentMultipliers = equipmentMultipliers
         self.itemStatMultipliers = itemStatMultipliers
+        self.pandoraBoxItemIds = pandoraBoxItemIds
         self.hasPositivePhysicalAttackEquipment = CombatAccumulator.containsPositivePhysicalAttack(equipment: equipment,
                                                                                                    definitions: itemDefinitions)
     }
@@ -787,10 +803,11 @@ private struct CombatAccumulator {
             let categoryMultiplier = equipmentMultipliers[definition.category]
                 ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
                 ?? 1.0
+            let pandoraMultiplier = pandoraBoxItemIds.contains(item.id) ? 1.5 : 1.0
             for bonus in definition.combatBonuses {
                 guard let stat = CombatStatKey(bonus.stat) else { continue }
                 let statMultiplier = itemStatMultipliers[stat] ?? 1.0
-                let scaled = Double(bonus.value) * categoryMultiplier * statMultiplier
+                let scaled = Double(bonus.value) * categoryMultiplier * statMultiplier * pandoraMultiplier
                 apply(bonus: Int(scaled.rounded(.towardZero)) * item.quantity, to: stat, combat: &combat)
             }
         }

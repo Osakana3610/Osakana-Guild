@@ -7,6 +7,7 @@ struct PlayerSnapshot: Sendable, Hashable {
     var gold: Int
     var catTickets: Int
     var partySlots: Int
+    var pandoraBoxItemIds: [UUID]
     var createdAt: Date
     var updatedAt: Date
 }
