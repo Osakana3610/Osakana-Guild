@@ -53,11 +53,11 @@ actor MasterDataRuntimeService {
             itemIndexToId[item.index] = item.id
         }
 
-        // 通常称号のインデックスマップ（rankをindexとして使用）
+        // 通常称号のインデックスマップ（rank + 1 をindexとして使用、0は無称号用に予約）
         let titles = try await repository.allTitles()
         for title in titles {
             if let rank = title.rank {
-                let index = Int8(rank)
+                let index = Int8(rank + 1)
                 titleIdToIndex[title.id] = index
                 titleIndexToId[index] = title.id
             }

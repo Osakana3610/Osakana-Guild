@@ -5,7 +5,7 @@ import SwiftData
 final class InventoryItemRecord {
     // アイテム本体
     var superRareTitleIndex: Int16 = 0      // 超レア称号（0=なし、1〜=あり）
-    var normalTitleIndex: Int8 = 0          // 通常称号（0〜8）
+    var normalTitleIndex: Int8 = 0          // 通常称号（0=なし、1〜9=あり）
     var masterDataIndex: Int16 = 0          // アイテム（1〜1000）
 
     // ソケット（宝石改造）
