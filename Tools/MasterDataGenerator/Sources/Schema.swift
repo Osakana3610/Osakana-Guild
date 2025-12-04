@@ -1,6 +1,8 @@
 import Foundation
 
-extension SQLiteMasterDataManager {
+// MARK: - Schema Creation
+
+extension Generator {
     func createSchema() throws {
         let statements = [
             """

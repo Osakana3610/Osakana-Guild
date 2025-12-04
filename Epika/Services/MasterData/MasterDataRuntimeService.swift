@@ -18,11 +18,9 @@ actor MasterDataRuntimeService {
 
     // MARK: - Initialization
 
-    func initializeSQLite(databaseURL: URL? = nil,
-                          resourceLocator: MasterDataResourceLocator? = nil) async throws {
+    func initializeSQLite(databaseURL: URL? = nil) async throws {
         guard !isInitialized else { return }
-        let locator = try await resolveLocator(resourceLocator)
-        try await manager.initialize(databaseURL: databaseURL, resourceLocator: locator)
+        try await manager.initialize(databaseURL: databaseURL)
         isInitialized = true
     }
 
@@ -30,11 +28,6 @@ actor MasterDataRuntimeService {
         if !isInitialized {
             try await initializeSQLite()
         }
-    }
-
-    private func resolveLocator(_ locator: MasterDataResourceLocator?) async throws -> MasterDataResourceLocator {
-        if let locator { return locator }
-        return await MainActor.run { MasterDataResourceLocator.makeDefault() }
     }
 
     // MARK: - Item Master Data

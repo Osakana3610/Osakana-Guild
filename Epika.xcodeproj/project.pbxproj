@@ -116,6 +116,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B0E9F1FC2E254D660010C564 /* Build configuration list for PBXNativeTarget "Epika" */;
 			buildPhases = (
+				B0MASTER0D2E254D650010C564 /* Generate MasterData SQLite */,
 				B0E9F1D12E254D650010C564 /* Sources */,
 				B0E9F1D22E254D650010C564 /* Frameworks */,
 				B0E9F1D32E254D650010C564 /* Resources */,
@@ -239,6 +240,58 @@
 			);
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B0MASTER0D2E254D650010C564 /* Generate MasterData SQLite */ = {
+			isa = PBXShellScriptBuildPhase;
+			inputPaths = (
+				"$(SRCROOT)/MasterData/ItemMaster.json",
+				"$(SRCROOT)/MasterData/SkillMaster.json",
+				"$(SRCROOT)/MasterData/SpellMaster.json",
+				"$(SRCROOT)/MasterData/JobMaster.json",
+				"$(SRCROOT)/MasterData/RaceDataMaster.json",
+				"$(SRCROOT)/MasterData/TitleMaster.json",
+				"$(SRCROOT)/MasterData/SuperRareTitleMaster.json",
+				"$(SRCROOT)/MasterData/StatusEffectMaster.json",
+				"$(SRCROOT)/MasterData/EnemyMaster.json",
+				"$(SRCROOT)/MasterData/DungeonMaster.json",
+				"$(SRCROOT)/MasterData/ShopMaster.json",
+				"$(SRCROOT)/MasterData/SynthesisRecipeMaster.json",
+				"$(SRCROOT)/MasterData/StoryMaster.json",
+				"$(SRCROOT)/MasterData/PersonalityMaster.json",
+				"$(SRCROOT)/MasterData/ExplorationEventMaster.json",
+			);
+			name = "Generate MasterData SQLite";
+			outputPaths = (
+				"$(SRCROOT)/Epika/Generated/master_data.db",
+			);
+			shellPath = /bin/bash;
+			shellScript = (
+				"set -e",
+				"",
+				"GENERATOR=\"${SRCROOT}/Tools/MasterDataGenerator/.build/release/MasterDataGenerator\"",
+				"INPUT_DIR=\"${SRCROOT}/MasterData\"",
+				"OUTPUT_FILE=\"${SRCROOT}/Epika/Generated/master_data.db\"",
+				"",
+				"echo \"[MasterDataGenerator] Starting...\"",
+				"",
+				"# Build generator if needed",
+				"if [ ! -f \"$GENERATOR\" ]; then",
+				"    echo \"[MasterDataGenerator] Building generator...\"",
+				"    swift build -c release --package-path \"${SRCROOT}/Tools/MasterDataGenerator\"",
+				"fi",
+				"",
+				"# Generate SQLite",
+				"echo \"[MasterDataGenerator] Generating master_data.db...\"",
+				"\"$GENERATOR\" --input \"$INPUT_DIR\" --output \"$OUTPUT_FILE\"",
+				"",
+				"echo \"[MasterDataGenerator] Done.\"",
+				"",
+				"",
+				"",
+			);
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B0E9F1D12E254D650010C564 /* Sources */ = {
@@ -390,7 +443,7 @@
 				DEVELOPMENT_TEAM = 77XDTPVZ5W;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -458,7 +511,7 @@
 				DEVELOPMENT_TEAM = 77XDTPVZ5W;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
