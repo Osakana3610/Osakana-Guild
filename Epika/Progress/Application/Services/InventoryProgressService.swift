@@ -104,16 +104,32 @@ actor InventoryProgressService {
             )
         }
         .sorted { lhs, rhs in
-            // 超レア称号 → 通常称号 → アイテム → ソケット の順でソート
-            if lhs.enhancement.superRareTitleIndex != rhs.enhancement.superRareTitleIndex {
-                return lhs.enhancement.superRareTitleIndex < rhs.enhancement.superRareTitleIndex
-            }
-            if lhs.enhancement.normalTitleIndex != rhs.enhancement.normalTitleIndex {
-                return lhs.enhancement.normalTitleIndex < rhs.enhancement.normalTitleIndex
-            }
+            // ソート順: アイテムごとに 通常称号のみ → 通常称号+ソケット → 超レア → 超レア+ソケット
+            // 1. アイテム (ベースアイテムでグループ化)
             if lhs.masterDataIndex != rhs.masterDataIndex {
                 return lhs.masterDataIndex < rhs.masterDataIndex
             }
+            // 2. 超レアの有無 (なしが先)
+            let lhsHasSuperRare = lhs.enhancement.superRareTitleIndex > 0
+            let rhsHasSuperRare = rhs.enhancement.superRareTitleIndex > 0
+            if lhsHasSuperRare != rhsHasSuperRare {
+                return !lhsHasSuperRare
+            }
+            // 3. ソケットの有無 (なしが先)
+            let lhsHasSocket = lhs.enhancement.socketMasterDataIndex > 0
+            let rhsHasSocket = rhs.enhancement.socketMasterDataIndex > 0
+            if lhsHasSocket != rhsHasSocket {
+                return !lhsHasSocket
+            }
+            // 4. 通常称号
+            if lhs.enhancement.normalTitleIndex != rhs.enhancement.normalTitleIndex {
+                return lhs.enhancement.normalTitleIndex < rhs.enhancement.normalTitleIndex
+            }
+            // 5. 超レア称号の詳細
+            if lhs.enhancement.superRareTitleIndex != rhs.enhancement.superRareTitleIndex {
+                return lhs.enhancement.superRareTitleIndex < rhs.enhancement.superRareTitleIndex
+            }
+            // 6. ソケットの詳細
             return lhs.enhancement.socketMasterDataIndex < rhs.enhancement.socketMasterDataIndex
         }
     }

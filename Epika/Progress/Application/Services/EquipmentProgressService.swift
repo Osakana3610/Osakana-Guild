@@ -71,6 +71,29 @@ actor EquipmentProgressService {
                 combatBonuses: definition.combatBonuses
             )
         }
+        .sorted { lhs, rhs in
+            // ソート順: アイテムごとに 通常称号のみ → 通常称号+ソケット → 超レア → 超レア+ソケット
+            if lhs.masterDataIndex != rhs.masterDataIndex {
+                return lhs.masterDataIndex < rhs.masterDataIndex
+            }
+            let lhsHasSuperRare = lhs.enhancement.superRareTitleIndex > 0
+            let rhsHasSuperRare = rhs.enhancement.superRareTitleIndex > 0
+            if lhsHasSuperRare != rhsHasSuperRare {
+                return !lhsHasSuperRare
+            }
+            let lhsHasSocket = lhs.enhancement.socketMasterDataIndex > 0
+            let rhsHasSocket = rhs.enhancement.socketMasterDataIndex > 0
+            if lhsHasSocket != rhsHasSocket {
+                return !lhsHasSocket
+            }
+            if lhs.enhancement.normalTitleIndex != rhs.enhancement.normalTitleIndex {
+                return lhs.enhancement.normalTitleIndex < rhs.enhancement.normalTitleIndex
+            }
+            if lhs.enhancement.superRareTitleIndex != rhs.enhancement.superRareTitleIndex {
+                return lhs.enhancement.superRareTitleIndex < rhs.enhancement.superRareTitleIndex
+            }
+            return lhs.enhancement.socketMasterDataIndex < rhs.enhancement.socketMasterDataIndex
+        }
     }
 
     // MARK: - 装備バリデーション
