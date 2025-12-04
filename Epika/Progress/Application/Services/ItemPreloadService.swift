@@ -209,9 +209,8 @@ final class ItemPreloadService {
             )
             grouped[data.category, default: []].append(data)
 
-            if snapshot.enhancements.normalTitleIndex != 0 {
-                normalTitleIndices.insert(snapshot.enhancements.normalTitleIndex)
-            }
+            // 通常称号は必ず存在する（rank 0〜8）
+            normalTitleIndices.insert(snapshot.enhancements.normalTitleIndex)
             if snapshot.enhancements.superRareTitleIndex != 0 {
                 superRareTitleIndices.insert(snapshot.enhancements.superRareTitleIndex)
             }
@@ -233,9 +232,8 @@ final class ItemPreloadService {
         for key in grouped.keys {
             grouped[key] = grouped[key]?.map { item in
                 var updated = item
-                if item.enhancement.normalTitleIndex != 0 {
-                    updated.normalTitleName = titleNames.normal[item.enhancement.normalTitleIndex]
-                }
+                // 通常称号は必ず存在する（rank 0〜8、無称号も rank=2 の称号）
+                updated.normalTitleName = titleNames.normal[item.enhancement.normalTitleIndex]
                 if item.enhancement.superRareTitleIndex != 0 {
                     updated.superRareTitleName = titleNames.superRare[item.enhancement.superRareTitleIndex]
                 }

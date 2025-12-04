@@ -82,6 +82,7 @@ private extension TitleInheritanceProgressService {
     }
 
     nonisolated func titleDisplayName(for enhancement: RuntimeEquipment.Enhancement) async throws -> String {
+        // 超レア称号があればその名前を返す
         if enhancement.superRareTitleIndex != 0 {
             if let id = await masterDataService.getSuperRareTitleId(for: enhancement.superRareTitleIndex),
                let definition = try await masterDataService.getSuperRareTitle(id: id) {
@@ -90,14 +91,12 @@ private extension TitleInheritanceProgressService {
                 throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.superRareTitleIndex)])
             }
         }
-        if enhancement.normalTitleIndex != 0 {
-            if let id = await masterDataService.getTitleId(for: enhancement.normalTitleIndex),
-               let definition = try await masterDataService.getTitleMasterData(id: id) {
-                return definition.name
-            } else {
-                throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.normalTitleIndex)])
-            }
+        // 通常称号は必ず存在する（rank 0〜8、無称号も rank=2 の称号で name=""）
+        if let id = await masterDataService.getTitleId(for: enhancement.normalTitleIndex),
+           let definition = try await masterDataService.getTitleMasterData(id: id) {
+            return definition.name
+        } else {
+            throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.normalTitleIndex)])
         }
-        return "なし"
     }
 }
