@@ -217,7 +217,7 @@ struct DebugMenuView: View {
 
             try await ensureStorageCapacity()
 
-            let batchSize = 10_000
+            let batchSize = 50_000
             var pendingSeeds: [ItemSeed] = []
             pendingSeeds.reserveCapacity(batchSize)
             var createdCount = 0
@@ -407,7 +407,8 @@ struct DebugMenuView: View {
                                                storage: .playerItem,
                                                enhancements: seed.enhancement)
         }
-        try await inventoryService.addItems(batchSeeds, chunkSize: chunkSize)
+        // デバッグ用高速INSERT（既存チェックなし）
+        try await inventoryService.addItemsUnchecked(batchSeeds, chunkSize: chunkSize)
     }
 
     private func updateProgress(current: Int, total: Int, message: String) async {

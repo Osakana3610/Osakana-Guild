@@ -223,6 +223,38 @@ actor InventoryProgressService {
         }
     }
 
+    #if DEBUG
+    /// デバッグ用: 既存チェックなしで高速INSERT（新規生成専用）
+    func addItemsUnchecked(_ seeds: [BatchSeed], chunkSize: Int = 50_000) async throws {
+        guard !seeds.isEmpty else { return }
+        var index = 0
+        var chunkNumber = 0
+        while index < seeds.count {
+            try Task.checkCancellation()
+            let end = min(index + chunkSize, seeds.count)
+            chunkNumber += 1
+            let context = makeContext()
+            for i in index..<end {
+                let seed = seeds[i]
+                let record = InventoryItemRecord(
+                    superRareTitleIndex: seed.enhancements.superRareTitleIndex,
+                    normalTitleIndex: seed.enhancements.normalTitleIndex,
+                    masterDataIndex: seed.masterDataIndex,
+                    socketSuperRareTitleIndex: seed.enhancements.socketSuperRareTitleIndex,
+                    socketNormalTitleIndex: seed.enhancements.socketNormalTitleIndex,
+                    socketMasterDataIndex: seed.enhancements.socketMasterDataIndex,
+                    quantity: seed.quantity,
+                    storage: seed.storage
+                )
+                context.insert(record)
+            }
+            try context.save()
+            print("[Inventory] unchecked insert chunk #\(chunkNumber) size=\(end - index)")
+            index = end
+        }
+    }
+    #endif
+
     private struct SeedKey: Hashable {
         let stackKey: String
         let storageRaw: String
