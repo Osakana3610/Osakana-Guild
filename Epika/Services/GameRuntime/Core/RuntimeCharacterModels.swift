@@ -48,19 +48,16 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
     }
 
     struct EquippedItem: Sendable, Hashable {
-        var id: UUID
         // アイテム本体
         var superRareTitleIndex: Int16
-        var normalTitleIndex: Int8
+        var normalTitleIndex: UInt8
         var masterDataIndex: Int16
         // ソケット（宝石改造）
         var socketSuperRareTitleIndex: Int16
-        var socketNormalTitleIndex: Int8
+        var socketNormalTitleIndex: UInt8
         var socketMasterDataIndex: Int16
-        // その他
+        // 数量
         var quantity: Int
-        var createdAt: Date
-        var updatedAt: Date
 
         /// スタック識別キー
         var stackKey: String {
@@ -81,7 +78,7 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
         var breath: Int
     }
 
-    var id: UUID
+    var id: Int32
     var displayName: String
     var raceId: String
     var gender: String
@@ -152,7 +149,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     let spellLoadout: SkillRuntimeEffects.SpellLoadout
     let loadout: RuntimeCharacterState.Loadout
 
-    var id: UUID { progress.id }
+    var id: Int32 { progress.id }
     var name: String { progress.displayName }
     var level: Int { progress.level }
     var experience: Int { progress.experience }

@@ -13,6 +13,7 @@ struct JobDefinition: Identifiable, Sendable, Hashable {
     }
 
     let id: String
+    let index: Int
     let name: String
     let category: String
     let growthTendency: String?

@@ -4,6 +4,7 @@
   "jobs": [
     {
       "id": "warrior",
+      "index": 1,
       "name": "戦士",
       "category": "frontline",
       "growthTendency": "HP高、防御高",
@@ -24,6 +25,7 @@
     },
     {
       "id": "swordsman",
+      "index": 2,
       "name": "剣士",
       "category": "frontline",
       "growthTendency": "攻撃高、命中高",
@@ -44,6 +46,7 @@
     },
     {
       "id": "thief",
+      "index": 3,
       "name": "盗賊",
       "category": "midline",
       "growthTendency": "敏捷高、運高",
@@ -64,6 +67,7 @@
     },
     {
       "id": "assassin",
+      "index": 4,
       "name": "暗殺者",
       "category": "midline",
       "growthTendency": "会心特化",
@@ -84,6 +88,7 @@
     },
     {
       "id": "jester",
+      "index": 5,
       "name": "道化師",
       "category": "backline",
       "growthTendency": "ランダム効果",
@@ -104,6 +109,7 @@
     },
     {
       "id": "priest",
+      "index": 6,
       "name": "僧侶",
       "category": "backline",
       "growthTendency": "精神高、魔法回復量高",
@@ -124,6 +130,7 @@
     },
     {
       "id": "mage",
+      "index": 7,
       "name": "魔法使い",
       "category": "backline",
       "growthTendency": "知恵特化",
@@ -144,6 +151,7 @@
     },
     {
       "id": "hunter",
+      "index": 8,
       "name": "狩人",
       "category": "midline",
       "growthTendency": "命中高、敏捷高",
@@ -164,6 +172,7 @@
     },
     {
       "id": "monk",
+      "index": 9,
       "name": "修道者",
       "category": "frontline",
       "growthTendency": "精神高、体力高",
@@ -184,6 +193,7 @@
     },
     {
       "id": "samurai",
+      "index": 10,
       "name": "侍",
       "category": "frontline",
       "growthTendency": "攻撃高、会心高",
@@ -204,6 +214,7 @@
     },
     {
       "id": "sword_master",
+      "index": 11,
       "name": "剣聖",
       "category": "frontline",
       "growthTendency": "バランス成長",
@@ -224,6 +235,7 @@
     },
     {
       "id": "mystic_swordsman",
+      "index": 12,
       "name": "秘法剣士",
       "category": "midline",
       "growthTendency": "攻撃・魔法両立",
@@ -244,6 +256,7 @@
     },
     {
       "id": "sage",
+      "index": 13,
       "name": "賢者",
       "category": "backline",
       "growthTendency": "知恵高、全魔法",
@@ -264,6 +277,7 @@
     },
     {
       "id": "ninja",
+      "index": 14,
       "name": "忍者",
       "category": "midline",
       "growthTendency": "バランス成長",
@@ -284,6 +298,7 @@
     },
     {
       "id": "lord",
+      "index": 15,
       "name": "君主",
       "category": "frontline",
       "growthTendency": "HP高、全体強化",
@@ -304,6 +319,7 @@
     },
     {
       "id": "royal_line",
+      "index": 16,
       "name": "ロイヤルライン",
       "category": "frontline",
       "growthTendency": "王族専用スキル",

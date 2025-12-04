@@ -537,10 +537,10 @@ actor InventoryProgressService {
 
     private func fetchOrCreateRecord(
         superRareTitleIndex: Int16,
-        normalTitleIndex: Int8,
+        normalTitleIndex: UInt8,
         masterDataIndex: Int16,
         socketSuperRareTitleIndex: Int16,
-        socketNormalTitleIndex: Int8,
+        socketNormalTitleIndex: UInt8,
         socketMasterDataIndex: Int16,
         storage: ItemStorage,
         context: ModelContext
@@ -585,10 +585,10 @@ actor InventoryProgressService {
 
     private func makeStackKey(
         superRareTitleIndex: Int16,
-        normalTitleIndex: Int8,
+        normalTitleIndex: UInt8,
         masterDataIndex: Int16,
         socketSuperRareTitleIndex: Int16,
-        socketNormalTitleIndex: Int8,
+        socketNormalTitleIndex: UInt8,
         socketMasterDataIndex: Int16
     ) -> String {
         "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"

@@ -125,16 +125,13 @@ private extension ProgressRuntimeService {
                                                       updatedAt: $0.updatedAt)
             },
             equippedItems: snapshot.equippedItems.map {
-                RuntimeCharacterProgress.EquippedItem(id: $0.id,
-                                                      superRareTitleIndex: $0.superRareTitleIndex,
+                RuntimeCharacterProgress.EquippedItem(superRareTitleIndex: $0.superRareTitleIndex,
                                                       normalTitleIndex: $0.normalTitleIndex,
                                                       masterDataIndex: $0.masterDataIndex,
                                                       socketSuperRareTitleIndex: $0.socketSuperRareTitleIndex,
                                                       socketNormalTitleIndex: $0.socketNormalTitleIndex,
                                                       socketMasterDataIndex: $0.socketMasterDataIndex,
-                                                      quantity: $0.quantity,
-                                                      createdAt: $0.createdAt,
-                                                      updatedAt: $0.updatedAt)
+                                                      quantity: $0.quantity)
             },
             jobHistory: snapshot.jobHistory,
             explorationTags: snapshot.explorationTags,

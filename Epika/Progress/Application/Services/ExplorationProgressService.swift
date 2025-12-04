@@ -64,7 +64,7 @@ final class ExplorationProgressService {
                                              createdAt: startedAt,
                                              updatedAt: startedAt)
         context.insert(runRecord)
-        insertMembers(for: runRecord, party: party, context: context, timestamp: startedAt)
+        // パーティメンバー情報はPartyMemberRecordで管理されるため、ここでの挿入は不要
         try saveIfNeeded(context)
     }
 
@@ -93,15 +93,7 @@ final class ExplorationProgressService {
                                                  createdAt: occurredAt,
                                                  updatedAt: occurredAt)
         context.insert(eventRecord)
-
-        if !event.experienceByMember.isEmpty {
-            for (characterId, value) in event.experienceByMember {
-                let record = ExplorationEventExperienceRecord(eventId: eventRecord.id,
-                                                              characterId: characterId,
-                                                              experience: value)
-                context.insert(record)
-            }
-        }
+        // キャラクター別経験値はBattleLogArchiveのpayloadに含まれるため、別途記録不要
 
         if !event.drops.isEmpty {
             for drop in event.drops {
@@ -180,26 +172,13 @@ private extension ExplorationProgressService {
         return context
     }
 
-    func insertMembers(for run: ExplorationRunRecord,
-                       party: PartySnapshot,
-                       context: ModelContext,
-                       timestamp: Date) {
-        for member in party.members.sorted(by: { $0.order < $1.order }) {
-            let record = ExplorationRunMemberRecord(runId: run.id,
-                                                    characterId: member.characterId,
-                                                    order: member.order,
-                                                    isReserve: member.isReserve,
-                                                    createdAt: timestamp,
-                                                    updatedAt: timestamp)
-            context.insert(record)
-        }
-    }
-
     func makeSnapshot(for run: ExplorationRunRecord,
                       context: ModelContext) async throws -> ExplorationSnapshot {
         let runId = run.id
-        let memberDescriptor = FetchDescriptor<ExplorationRunMemberRecord>(predicate: #Predicate { $0.runId == runId },
-                                                                           sortBy: [SortDescriptor(\.order)])
+        // パーティメンバー情報はPartyMemberRecordから取得
+        let partyId = run.partyId
+        let memberDescriptor = FetchDescriptor<PartyMemberRecord>(predicate: #Predicate { $0.partyId == partyId },
+                                                                  sortBy: [SortDescriptor(\.order)])
         let members = try context.fetch(memberDescriptor)
 
         let eventDescriptor = FetchDescriptor<ExplorationEventRecord>(predicate: #Predicate { $0.runId == runId },
@@ -207,15 +186,11 @@ private extension ExplorationProgressService {
         let events = try context.fetch(eventDescriptor)
 
         var dropsByEvent: [UUID: [ExplorationEventDropRecord]] = [:]
-        var expByEvent: [UUID: [ExplorationEventExperienceRecord]] = [:]
 
         for event in events {
             let eventId = event.id
             let dropDescriptor = FetchDescriptor<ExplorationEventDropRecord>(predicate: #Predicate { $0.eventId == eventId })
             dropsByEvent[event.id] = try context.fetch(dropDescriptor)
-
-            let expDescriptor = FetchDescriptor<ExplorationEventExperienceRecord>(predicate: #Predicate { $0.eventId == eventId })
-            expByEvent[event.id] = try context.fetch(expDescriptor)
         }
 
         let battleDescriptor = FetchDescriptor<ExplorationBattleLogRecord>(predicate: #Predicate { $0.runId == runId })
@@ -301,13 +276,7 @@ private extension ExplorationProgressService {
                     contextEntries["effects"] = names.joined(separator: ", ")
                 }
             }
-
-            if let experiences = expByEvent[event.id], !experiences.isEmpty {
-                let total = experiences.reduce(0) { $0 + $1.experience }
-                if total > 0 {
-                    contextEntries["exp"] = "\(total)"
-                }
-            }
+            // 経験値はイベント自体のexperienceGainedに含まれている（上で設定済み）
 
             let combatSummary: ExplorationSnapshot.EncounterLog.CombatSummary?
             if let battle = battlesByEvent[event.id] {

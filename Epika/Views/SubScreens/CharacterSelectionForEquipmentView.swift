@@ -353,7 +353,7 @@ struct EquipmentEditorView: View {
 
         let snapshot = try await characterService.unequipItem(
             characterId: currentCharacter.id,
-            equipmentRecordId: item.id
+            equipmentStackKey: item.stackKey
         )
         let runtime = try await characterService.runtimeCharacter(from: snapshot)
         currentCharacter = runtime

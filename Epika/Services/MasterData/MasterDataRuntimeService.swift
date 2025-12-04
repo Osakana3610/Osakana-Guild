@@ -16,13 +16,29 @@ actor MasterDataRuntimeService {
     private var itemIdToIndex: [String: Int16] = [:]
     private var itemIndexToId: [Int16: String] = [:]
 
-    /// 通常称号: String ID → Int8 Index (rank: 0〜8)
-    private var titleIdToIndex: [String: Int8] = [:]
-    private var titleIndexToId: [Int8: String] = [:]
+    /// 通常称号: String ID → UInt8 Index (rank: 0〜8)
+    private var titleIdToIndex: [String: UInt8] = [:]
+    private var titleIndexToId: [UInt8: String] = [:]
 
     /// 超レア称号: String ID → Int16 Index (order: 1〜100)
     private var superRareTitleIdToIndex: [String: Int16] = [:]
     private var superRareTitleIndexToId: [Int16: String] = [:]
+
+    /// 種族: String ID → UInt8 Index (1〜18)
+    private var raceIdToIndex: [String: UInt8] = [:]
+    private var raceIndexToId: [UInt8: String] = [:]
+
+    /// 職業: String ID → UInt8 Index (1〜16)
+    private var jobIdToIndex: [String: UInt8] = [:]
+    private var jobIndexToId: [UInt8: String] = [:]
+
+    /// 主性格: String ID → UInt8 Index (1〜18, 0=なし)
+    private var primaryPersonalityIdToIndex: [String: UInt8] = [:]
+    private var primaryPersonalityIndexToId: [UInt8: String] = [:]
+
+    /// 副性格: String ID → UInt8 Index (1〜15, 0=なし)
+    private var secondaryPersonalityIdToIndex: [String: UInt8] = [:]
+    private var secondaryPersonalityIndexToId: [UInt8: String] = [:]
 
     init(repository: MasterDataRepository,
          manager: SQLiteMasterDataManager) {
@@ -57,7 +73,7 @@ actor MasterDataRuntimeService {
         let titles = try await repository.allTitles()
         for title in titles {
             if let rank = title.rank {
-                let index = Int8(rank)
+                let index = UInt8(rank)
                 titleIdToIndex[title.id] = index
                 titleIndexToId[index] = title.id
             }
@@ -69,6 +85,36 @@ actor MasterDataRuntimeService {
             let index = Int16(title.order)
             superRareTitleIdToIndex[title.id] = index
             superRareTitleIndexToId[index] = title.id
+        }
+
+        // 種族のインデックスマップ
+        let races = try await repository.allRaces()
+        for race in races {
+            let index = UInt8(race.index)
+            raceIdToIndex[race.id] = index
+            raceIndexToId[index] = race.id
+        }
+
+        // 職業のインデックスマップ
+        let jobs = try await repository.allJobs()
+        for job in jobs {
+            let index = UInt8(job.index)
+            jobIdToIndex[job.id] = index
+            jobIndexToId[index] = job.id
+        }
+
+        // 性格のインデックスマップ
+        let primaryPersonalities = try await repository.allPersonalityPrimary()
+        for personality in primaryPersonalities {
+            let index = UInt8(personality.index)
+            primaryPersonalityIdToIndex[personality.id] = index
+            primaryPersonalityIndexToId[index] = personality.id
+        }
+        let secondaryPersonalities = try await repository.allPersonalitySecondary()
+        for personality in secondaryPersonalities {
+            let index = UInt8(personality.index)
+            secondaryPersonalityIdToIndex[personality.id] = index
+            secondaryPersonalityIndexToId[index] = personality.id
         }
     }
 
@@ -82,11 +128,11 @@ actor MasterDataRuntimeService {
         itemIndexToId[index]
     }
 
-    func getTitleIndex(for id: String) -> Int8? {
+    func getTitleIndex(for id: String) -> UInt8? {
         titleIdToIndex[id]
     }
 
-    func getTitleId(for index: Int8) -> String? {
+    func getTitleId(for index: UInt8) -> String? {
         titleIndexToId[index]
     }
 
@@ -96,6 +142,38 @@ actor MasterDataRuntimeService {
 
     func getSuperRareTitleId(for index: Int16) -> String? {
         superRareTitleIndexToId[index]
+    }
+
+    func getRaceIndex(for id: String) -> UInt8? {
+        raceIdToIndex[id]
+    }
+
+    func getRaceId(for index: UInt8) -> String? {
+        raceIndexToId[index]
+    }
+
+    func getJobIndex(for id: String) -> UInt8? {
+        jobIdToIndex[id]
+    }
+
+    func getJobId(for index: UInt8) -> String? {
+        jobIndexToId[index]
+    }
+
+    func getPrimaryPersonalityIndex(for id: String) -> UInt8? {
+        primaryPersonalityIdToIndex[id]
+    }
+
+    func getPrimaryPersonalityId(for index: UInt8) -> String? {
+        primaryPersonalityIndexToId[index]
+    }
+
+    func getSecondaryPersonalityIndex(for id: String) -> UInt8? {
+        secondaryPersonalityIdToIndex[id]
+    }
+
+    func getSecondaryPersonalityId(for index: UInt8) -> String? {
+        secondaryPersonalityIndexToId[index]
     }
 
     // MARK: - Item Master Data

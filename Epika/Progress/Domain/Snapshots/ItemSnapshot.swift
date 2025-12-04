@@ -5,15 +5,15 @@ struct ItemSnapshot: Sendable {
     /// Int Indexベースの強化情報
     struct Enhancement: Sendable, Equatable, Hashable {
         var superRareTitleIndex: Int16
-        var normalTitleIndex: Int8
+        var normalTitleIndex: UInt8
         var socketSuperRareTitleIndex: Int16
-        var socketNormalTitleIndex: Int8
+        var socketNormalTitleIndex: UInt8
         var socketMasterDataIndex: Int16
 
         nonisolated init(superRareTitleIndex: Int16 = 0,
-                         normalTitleIndex: Int8 = 0,
+                         normalTitleIndex: UInt8 = 0,
                          socketSuperRareTitleIndex: Int16 = 0,
-                         socketNormalTitleIndex: Int8 = 0,
+                         socketNormalTitleIndex: UInt8 = 0,
                          socketMasterDataIndex: Int16 = 0) {
             self.superRareTitleIndex = superRareTitleIndex
             self.normalTitleIndex = normalTitleIndex

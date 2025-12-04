@@ -597,6 +597,7 @@ extension Generator {
 private struct JobMasterFile: Decodable {
     struct Job: Decodable {
         let id: String
+        let index: Int
         let name: String
         let category: String
         let growthTendency: String?
@@ -616,8 +617,8 @@ extension Generator {
             try execute("DELETE FROM jobs;")
 
             let insertJobSQL = """
-                INSERT INTO jobs (id, name, category, growth_tendency)
-                VALUES (?, ?, ?, ?);
+                INSERT INTO jobs (id, job_index, name, category, growth_tendency)
+                VALUES (?, ?, ?, ?, ?);
             """
             let insertCoefficientSQL = "INSERT INTO job_combat_coefficients (job_id, stat, value) VALUES (?, ?, ?);"
             let insertSkillSQL = "INSERT INTO job_skills (job_id, order_index, skill_id) VALUES (?, ?, ?);"
@@ -633,9 +634,10 @@ extension Generator {
 
             for job in file.jobs {
                 bindText(jobStatement, index: 1, value: job.id)
-                bindText(jobStatement, index: 2, value: job.name)
-                bindText(jobStatement, index: 3, value: job.category)
-                bindText(jobStatement, index: 4, value: job.growthTendency)
+                bindInt(jobStatement, index: 2, value: job.index)
+                bindText(jobStatement, index: 3, value: job.name)
+                bindText(jobStatement, index: 4, value: job.category)
+                bindText(jobStatement, index: 5, value: job.growthTendency)
                 try step(jobStatement)
                 reset(jobStatement)
 
@@ -676,6 +678,7 @@ private extension CodingUserInfoKey {
 
 private struct RaceDataMasterFile: Decodable {
     struct Race: Decodable {
+        let index: Int
         let name: String
         let gender: String
         let category: String
@@ -809,8 +812,8 @@ extension Generator {
             try execute("DELETE FROM races;")
 
             let insertRaceSQL = """
-                INSERT INTO races (id, name, gender, category, description)
-                VALUES (?, ?, ?, ?, ?);
+                INSERT INTO races (id, race_index, name, gender, category, description)
+                VALUES (?, ?, ?, ?, ?, ?);
             """
             let insertStatSQL = "INSERT INTO race_base_stats (race_id, stat, value) VALUES (?, ?, ?);"
             let insertCategorySQL = "INSERT INTO race_category_caps (category, max_level) VALUES (?, ?);"
@@ -832,10 +835,11 @@ extension Generator {
 
             for (raceId, race) in file.raceEntries {
                 bindText(raceStatement, index: 1, value: raceId)
-                bindText(raceStatement, index: 2, value: race.name)
-                bindText(raceStatement, index: 3, value: race.gender)
-                bindText(raceStatement, index: 4, value: race.category)
-                bindText(raceStatement, index: 5, value: race.description)
+                bindInt(raceStatement, index: 2, value: race.index)
+                bindText(raceStatement, index: 3, value: race.name)
+                bindText(raceStatement, index: 4, value: race.gender)
+                bindText(raceStatement, index: 5, value: race.category)
+                bindText(raceStatement, index: 6, value: race.description)
                 try step(raceStatement)
                 reset(raceStatement)
 
@@ -1594,6 +1598,7 @@ private struct PersonalityPrimaryEntry {
     }
 
     let id: String
+    let index: Int
     let name: String
     let kind: String
     let description: String
@@ -1602,6 +1607,7 @@ private struct PersonalityPrimaryEntry {
 
 private struct PersonalitySecondaryEntry {
     let id: String
+    let index: Int
     let name: String
     let positiveSkillId: String
     let negativeSkillId: String
@@ -1669,6 +1675,7 @@ extension Generator {
 
         let primaries = try primaryList.map { dictionary -> PersonalityPrimaryEntry in
             guard let id = dictionary["id"] as? String,
+                  let personalityIndex = toInt(dictionary["index"]),
                   let name = dictionary["name"] as? String,
                   let kind = dictionary["type"] as? String,
                   let description = dictionary["description"] as? String else {
@@ -1685,11 +1692,12 @@ extension Generator {
                 return PersonalityPrimaryEntry.Effect(index: index, type: type, value: value, payloadJSON: payload)
             }
 
-            return PersonalityPrimaryEntry(id: id, name: name, kind: kind, description: description, effects: effects)
+            return PersonalityPrimaryEntry(id: id, index: personalityIndex, name: name, kind: kind, description: description, effects: effects)
         }
 
         let secondaries = try secondaryList.map { dictionary -> PersonalitySecondaryEntry in
             guard let id = dictionary["id"] as? String,
+                  let personalityIndex = toInt(dictionary["index"]),
                   let name = dictionary["name"] as? String,
                   let positive = dictionary["positiveSkill"] as? String,
                   let negative = dictionary["negativeSkill"] as? String else {
@@ -1705,7 +1713,7 @@ extension Generator {
                 statBonuses[stat] = intValue
             }
 
-            return PersonalitySecondaryEntry(id: id, name: name, positiveSkillId: positive, negativeSkillId: negative, statBonuses: statBonuses)
+            return PersonalitySecondaryEntry(id: id, index: personalityIndex, name: name, positiveSkillId: positive, negativeSkillId: negative, statBonuses: statBonuses)
         }
 
         let skills = try skillsDict.map { key, value -> PersonalitySkillEntry in
@@ -1733,12 +1741,12 @@ extension Generator {
             try execute("DELETE FROM personality_primary_effects;")
             try execute("DELETE FROM personality_primary;")
 
-            let insertPrimarySQL = "INSERT INTO personality_primary (id, name, kind, description) VALUES (?, ?, ?, ?);"
+            let insertPrimarySQL = "INSERT INTO personality_primary (id, personality_index, name, kind, description) VALUES (?, ?, ?, ?, ?);"
             let insertPrimaryEffectSQL = """
                 INSERT INTO personality_primary_effects (personality_id, order_index, effect_type, value, payload_json)
                 VALUES (?, ?, ?, ?, ?);
             """
-            let insertSecondarySQL = "INSERT INTO personality_secondary (id, name, positive_skill_id, negative_skill_id) VALUES (?, ?, ?, ?);"
+            let insertSecondarySQL = "INSERT INTO personality_secondary (id, personality_index, name, positive_skill_id, negative_skill_id) VALUES (?, ?, ?, ?, ?);"
             let insertSecondaryStatSQL = "INSERT INTO personality_secondary_stat_bonuses (personality_id, stat, value) VALUES (?, ?, ?);"
             let insertSkillSQL = "INSERT INTO personality_skills (id, name, kind, description) VALUES (?, ?, ?, ?);"
             let insertSkillEventSQL = "INSERT INTO personality_skill_event_effects (skill_id, order_index, effect_id) VALUES (?, ?, ?);"
@@ -1766,9 +1774,10 @@ extension Generator {
 
             for entry in primaries {
                 bindText(primaryStatement, index: 1, value: entry.id)
-                bindText(primaryStatement, index: 2, value: entry.name)
-                bindText(primaryStatement, index: 3, value: entry.kind)
-                bindText(primaryStatement, index: 4, value: entry.description)
+                bindInt(primaryStatement, index: 2, value: entry.index)
+                bindText(primaryStatement, index: 3, value: entry.name)
+                bindText(primaryStatement, index: 4, value: entry.kind)
+                bindText(primaryStatement, index: 5, value: entry.description)
                 try step(primaryStatement)
                 reset(primaryStatement)
 
@@ -1785,9 +1794,10 @@ extension Generator {
 
             for entry in secondaries {
                 bindText(secondaryStatement, index: 1, value: entry.id)
-                bindText(secondaryStatement, index: 2, value: entry.name)
-                bindText(secondaryStatement, index: 3, value: entry.positiveSkillId)
-                bindText(secondaryStatement, index: 4, value: entry.negativeSkillId)
+                bindInt(secondaryStatement, index: 2, value: entry.index)
+                bindText(secondaryStatement, index: 3, value: entry.name)
+                bindText(secondaryStatement, index: 4, value: entry.positiveSkillId)
+                bindText(secondaryStatement, index: 5, value: entry.negativeSkillId)
                 try step(secondaryStatement)
                 reset(secondaryStatement)
 

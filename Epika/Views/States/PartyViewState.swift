@@ -46,7 +46,7 @@ final class PartyViewState {
         try await loadAllParties()
     }
 
-    func updatePartyMembers(party: RuntimeParty, memberIds: [UUID]) async throws {
+    func updatePartyMembers(party: RuntimeParty, memberIds: [Int32]) async throws {
         _ = try await partyService.updatePartyMembers(persistentIdentifier: party.persistentIdentifier, memberIds: memberIds)
         try await refresh()
     }

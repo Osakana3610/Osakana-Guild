@@ -48,19 +48,16 @@ struct CharacterSnapshot: Sendable, Hashable {
     }
 
     struct EquippedItem: Sendable, Hashable {
-        var id: UUID
         // アイテム本体
         var superRareTitleIndex: Int16
-        var normalTitleIndex: Int8
+        var normalTitleIndex: UInt8
         var masterDataIndex: Int16
         // ソケット（宝石改造）
         var socketSuperRareTitleIndex: Int16
-        var socketNormalTitleIndex: Int8
+        var socketNormalTitleIndex: UInt8
         var socketMasterDataIndex: Int16
-        // その他
+        // 数量（グループ化後）
         var quantity: Int
-        var createdAt: Date
-        var updatedAt: Date
 
         /// スタック識別キー
         var stackKey: String {
@@ -104,7 +101,7 @@ struct CharacterSnapshot: Sendable, Hashable {
     }
 
     let persistentIdentifier: PersistentIdentifier
-    let id: UUID
+    let id: Int32
     var displayName: String
     var raceId: String
     var gender: String

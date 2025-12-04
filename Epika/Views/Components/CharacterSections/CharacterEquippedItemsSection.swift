@@ -29,7 +29,7 @@ struct CharacterEquippedItemsSection: View {
                     .foregroundColor(.secondary)
             } else {
                 VStack(alignment: .leading, spacing: 4) {
-                    ForEach(equippedItems, id: \.id) { item in
+                    ForEach(equippedItems, id: \.stackKey) { item in
                         equippedItemRow(item)
                     }
                 }

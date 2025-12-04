@@ -187,7 +187,7 @@ final class ItemPreloadService {
         let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
 
         var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
-        var normalTitleIndices: Set<Int8> = []
+        var normalTitleIndices: Set<UInt8> = []
         var superRareTitleIndices: Set<Int16> = []
         var socketIndices: Set<Int16> = []
 
@@ -271,15 +271,15 @@ final class ItemPreloadService {
     }
 
     private func resolveTitleNames(
-        normalIndices: Set<Int8>,
+        normalIndices: Set<UInt8>,
         superRareIndices: Set<Int16>,
         masterDataService: MasterDataRuntimeService
-    ) async throws -> (normal: [Int8: String], superRare: [Int16: String]) {
+    ) async throws -> (normal: [UInt8: String], superRare: [Int16: String]) {
         guard !(normalIndices.isEmpty && superRareIndices.isEmpty) else {
             return ([:], [:])
         }
 
-        var normal: [Int8: String] = [:]
+        var normal: [UInt8: String] = [:]
         for index in normalIndices {
             if let id = await masterDataService.getTitleId(for: index),
                let definition = try await masterDataService.getTitleMasterData(id: id) {

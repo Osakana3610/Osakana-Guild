@@ -173,13 +173,13 @@ struct DebugMenuView: View {
             // Int Index形式で称号データを取得（MasterDataRuntimeServiceで変換）
             let runtimeService = MasterDataRuntimeService.shared
             let normalTitles = try await masterDataService.getAllTitles()
-            var normalTitleIndices: [Int8] = []
+            var normalTitleIndices: [UInt8] = []
             for title in normalTitles {
                 if let index = await runtimeService.getTitleIndex(for: title.id) {
                     normalTitleIndices.append(index)
                 }
             }
-            let normalOptions: [Int8] = normalTitleIndices.isEmpty ? [0] : normalTitleIndices
+            let normalOptions: [UInt8] = normalTitleIndices.isEmpty ? [0] : normalTitleIndices
 
             let superRareTitleIndices: [Int16]
             if selectedCreationType == .basicOnly {
@@ -238,7 +238,7 @@ struct DebugMenuView: View {
                 var remainingForItem = itemQuotas[index]
                 guard remainingForItem > 0 else { continue }
 
-                func appendSeed(normalIndex: Int8, superRareIndex: Int16 = 0, gemIndex: Int16 = 0) async throws -> Bool {
+                func appendSeed(normalIndex: UInt8, superRareIndex: Int16 = 0, gemIndex: Int16 = 0) async throws -> Bool {
                     guard remainingForItem > 0 else { return true }
                     if createdCount + pendingSeeds.count >= targetCount { return true }
                     pendingSeeds.append(ItemSeed(masterDataIndex: item.index,

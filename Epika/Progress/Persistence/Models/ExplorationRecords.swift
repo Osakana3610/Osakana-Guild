@@ -86,33 +86,6 @@ final class ExplorationRunRecord {
 }
 
 @Model
-final class ExplorationRunMemberRecord {
-    var id: UUID = Foundation.UUID()
-    var runId: UUID = Foundation.UUID()
-    var characterId: UUID = Foundation.UUID()
-    var order: Int = 0
-    var isReserve: Bool = false
-    var createdAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-    var updatedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-
-    init(id: UUID = UUID(),
-         runId: UUID,
-         characterId: UUID,
-         order: Int,
-         isReserve: Bool,
-         createdAt: Date,
-         updatedAt: Date) {
-        self.id = id
-        self.runId = runId
-        self.characterId = characterId
-        self.order = order
-        self.isReserve = isReserve
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-    }
-}
-
-@Model
 final class ExplorationEventRecord {
     var id: UUID = Foundation.UUID()
     var runId: UUID = Foundation.UUID()
@@ -155,24 +128,6 @@ final class ExplorationEventRecord {
         self.battleLogId = battleLogId
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-    }
-}
-
-@Model
-final class ExplorationEventExperienceRecord {
-    var id: UUID = Foundation.UUID()
-    var eventId: UUID = Foundation.UUID()
-    var characterId: UUID = Foundation.UUID()
-    var experience: Int = 0
-
-    init(id: UUID = UUID(),
-         eventId: UUID,
-         characterId: UUID,
-         experience: Int) {
-        self.id = id
-        self.eventId = eventId
-        self.characterId = characterId
-        self.experience = experience
     }
 }
 

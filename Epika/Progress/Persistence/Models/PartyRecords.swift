@@ -38,7 +38,7 @@ final class PartyRecord {
 final class PartyMemberRecord {
     var id: UUID = UUID()
     var partyId: UUID = UUID()
-    var characterId: UUID = UUID()
+    var characterId: Int32 = 0
     var order: Int = 0
     var isReserve: Bool = false
     var createdAt: Date = Date()
@@ -46,7 +46,7 @@ final class PartyMemberRecord {
 
     init(id: UUID = UUID(),
          partyId: UUID,
-         characterId: UUID,
+         characterId: Int32,
          order: Int,
          isReserve: Bool,
          createdAt: Date,

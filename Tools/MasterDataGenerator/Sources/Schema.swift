@@ -143,6 +143,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS jobs (
                 id TEXT PRIMARY KEY,
+                job_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 category TEXT NOT NULL,
                 growth_tendency TEXT
@@ -170,6 +171,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS races (
                 id TEXT PRIMARY KEY,
+                race_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 gender TEXT NOT NULL,
                 category TEXT NOT NULL,
@@ -533,6 +535,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS personality_primary (
                 id TEXT PRIMARY KEY,
+                personality_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 kind TEXT NOT NULL,
                 description TEXT NOT NULL
@@ -552,6 +555,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS personality_secondary (
                 id TEXT PRIMARY KEY,
+                personality_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 positive_skill_id TEXT NOT NULL,
                 negative_skill_id TEXT NOT NULL

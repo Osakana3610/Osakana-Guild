@@ -6,7 +6,7 @@ struct RuntimeParty: Identifiable, Sendable, Hashable {
     let progressId: UUID
     let persistentIdentifier: PersistentIdentifier
     var name: String
-    var memberIds: [UUID]
+    var memberIds: [Int32]
     var formationId: String?
     var lastSelectedDungeonId: String?
     var lastSelectedDifficulty: Int

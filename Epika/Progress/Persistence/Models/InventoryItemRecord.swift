@@ -5,12 +5,12 @@ import SwiftData
 final class InventoryItemRecord {
     // アイテム本体
     var superRareTitleIndex: Int16 = 0      // 超レア称号（0=なし、1〜=あり）
-    var normalTitleIndex: Int8 = 0          // 通常称号rank（0=最低な〜2=無称号〜8=壊れた）
+    var normalTitleIndex: UInt8 = 0          // 通常称号rank（0=最低な〜2=無称号〜8=壊れた）
     var masterDataIndex: Int16 = 0          // アイテム（1〜1000）
 
     // ソケット（宝石改造）
     var socketSuperRareTitleIndex: Int16 = 0 // 宝石の超レア称号
-    var socketNormalTitleIndex: Int8 = 0     // 宝石の通常称号
+    var socketNormalTitleIndex: UInt8 = 0     // 宝石の通常称号
     var socketMasterDataIndex: Int16 = 0     // 宝石（0=なし、1〜=あり）
 
     // その他
@@ -38,10 +38,10 @@ final class InventoryItemRecord {
     }
 
     init(superRareTitleIndex: Int16,
-         normalTitleIndex: Int8,
+         normalTitleIndex: UInt8,
          masterDataIndex: Int16,
          socketSuperRareTitleIndex: Int16 = 0,
-         socketNormalTitleIndex: Int8 = 0,
+         socketNormalTitleIndex: UInt8 = 0,
          socketMasterDataIndex: Int16 = 0,
          quantity: Int,
          storage: ItemStorage) {

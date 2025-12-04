@@ -11,17 +11,19 @@ extension SQLiteMasterDataManager {
         battleEffects: [PersonalityBattleEffect]
     ) {
         var primary: [String: PersonalityPrimaryDefinition] = [:]
-        let primarySQL = "SELECT id, name, kind, description FROM personality_primary;"
+        let primarySQL = "SELECT id, personality_index, name, kind, description FROM personality_primary ORDER BY personality_index;"
         let primaryStatement = try prepare(primarySQL)
         defer { sqlite3_finalize(primaryStatement) }
         while sqlite3_step(primaryStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(primaryStatement, 0),
-                  let nameC = sqlite3_column_text(primaryStatement, 1),
-                  let kindC = sqlite3_column_text(primaryStatement, 2),
-                  let descriptionC = sqlite3_column_text(primaryStatement, 3) else { continue }
+                  let nameC = sqlite3_column_text(primaryStatement, 2),
+                  let kindC = sqlite3_column_text(primaryStatement, 3),
+                  let descriptionC = sqlite3_column_text(primaryStatement, 4) else { continue }
             let id = String(cString: idC)
+            let index = Int(sqlite3_column_int(primaryStatement, 1))
             primary[id] = PersonalityPrimaryDefinition(
                 id: id,
+                index: index,
                 name: String(cString: nameC),
                 kind: String(cString: kindC),
                 description: String(cString: descriptionC),
@@ -44,6 +46,7 @@ extension SQLiteMasterDataManager {
                                  payloadJSON: String(cString: payloadC)))
             primary[definition.id] = PersonalityPrimaryDefinition(
                 id: definition.id,
+                index: definition.index,
                 name: definition.name,
                 kind: definition.kind,
                 description: definition.description,
@@ -52,17 +55,19 @@ extension SQLiteMasterDataManager {
         }
 
         var secondary: [String: PersonalitySecondaryDefinition] = [:]
-        let secondarySQL = "SELECT id, name, positive_skill_id, negative_skill_id FROM personality_secondary;"
+        let secondarySQL = "SELECT id, personality_index, name, positive_skill_id, negative_skill_id FROM personality_secondary ORDER BY personality_index;"
         let secondaryStatement = try prepare(secondarySQL)
         defer { sqlite3_finalize(secondaryStatement) }
         while sqlite3_step(secondaryStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(secondaryStatement, 0),
-                  let nameC = sqlite3_column_text(secondaryStatement, 1),
-                  let positiveC = sqlite3_column_text(secondaryStatement, 2),
-                  let negativeC = sqlite3_column_text(secondaryStatement, 3) else { continue }
+                  let nameC = sqlite3_column_text(secondaryStatement, 2),
+                  let positiveC = sqlite3_column_text(secondaryStatement, 3),
+                  let negativeC = sqlite3_column_text(secondaryStatement, 4) else { continue }
             let id = String(cString: idC)
+            let index = Int(sqlite3_column_int(secondaryStatement, 1))
             secondary[id] = PersonalitySecondaryDefinition(
                 id: id,
+                index: index,
                 name: String(cString: nameC),
                 positiveSkillId: String(cString: positiveC),
                 negativeSkillId: String(cString: negativeC),
@@ -81,6 +86,7 @@ extension SQLiteMasterDataManager {
             bonuses.append(.init(stat: String(cString: statC), value: Int(sqlite3_column_int(secondaryStatStatement, 2))))
             secondary[definition.id] = PersonalitySecondaryDefinition(
                 id: definition.id,
+                index: definition.index,
                 name: definition.name,
                 positiveSkillId: definition.positiveSkillId,
                 negativeSkillId: definition.negativeSkillId,
@@ -146,8 +152,8 @@ extension SQLiteMasterDataManager {
         }
 
         return (
-            primary.values.sorted { $0.name < $1.name },
-            secondary.values.sorted { $0.name < $1.name },
+            primary.values.sorted { $0.index < $1.index },
+            secondary.values.sorted { $0.index < $1.index },
             skills.values.sorted { $0.name < $1.name },
             cancellations,
             battleEffects

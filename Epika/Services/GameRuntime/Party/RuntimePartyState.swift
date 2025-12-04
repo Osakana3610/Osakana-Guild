@@ -3,7 +3,7 @@ import Foundation
 struct RuntimePartyProgress: Sendable, Hashable {
     struct Member: Sendable, Hashable {
         let id: UUID
-        let characterId: UUID
+        let characterId: Int32
         let order: Int
         let isReserve: Bool
         let createdAt: Date
@@ -22,7 +22,7 @@ struct RuntimePartyProgress: Sendable, Hashable {
 struct RuntimePartyState: Sendable {
     struct Member: Identifiable, Sendable {
         let id: UUID
-        let characterId: UUID
+        let characterId: Int32
         let order: Int
         let isReserve: Bool
         let character: RuntimeCharacterState

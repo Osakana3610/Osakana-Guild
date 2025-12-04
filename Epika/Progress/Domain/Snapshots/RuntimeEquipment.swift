@@ -74,9 +74,9 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
     /// Int Indexベースの強化情報
     struct Enhancement: Sendable, Hashable {
         var superRareTitleIndex: Int16
-        var normalTitleIndex: Int8
+        var normalTitleIndex: UInt8
         var socketSuperRareTitleIndex: Int16
-        var socketNormalTitleIndex: Int8
+        var socketNormalTitleIndex: UInt8
         var socketMasterDataIndex: Int16
     }
 }

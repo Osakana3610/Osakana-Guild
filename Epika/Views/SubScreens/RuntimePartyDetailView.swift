@@ -359,7 +359,7 @@ private struct PartyEquipmentListView: View {
                             Text("装備なし").foregroundColor(.secondary)
                         } else {
                             let itemsByIndex = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.index, $0) })
-                            ForEach(equipment, id: \.id) { entry in
+                            ForEach(equipment, id: \.stackKey) { entry in
                                 let itemName = itemsByIndex[entry.masterDataIndex]?.name ?? "不明なアイテム"
                                 if entry.superRareTitleIndex > 0 || entry.normalTitleIndex > 0 {
                                     Text("\(itemName) x\(entry.quantity) (称号付き)")

@@ -4,7 +4,7 @@ import SwiftData
 struct PartySnapshot: Sendable, Hashable {
     struct Member: Sendable, Hashable {
         var id: UUID
-        var characterId: UUID
+        var characterId: Int32
         var order: Int
         var isReserve: Bool
         var createdAt: Date

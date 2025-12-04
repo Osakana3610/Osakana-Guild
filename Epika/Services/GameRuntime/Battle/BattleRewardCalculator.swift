@@ -1,7 +1,7 @@
 import Foundation
 
 struct BattleRewards: Sendable {
-    let experienceByMember: [UUID: Int]
+    let experienceByMember: [Int32: Int]
     let totalExperience: Int
     let gold: Int
 }
@@ -21,7 +21,7 @@ enum BattleRewardCalculator {
         let survivorLevels = party.members
             .filter { survivors.contains($0.id) }
             .map { max(1, $0.character.progress.level) }
-        var experiencePerMember: [UUID: Int] = [:]
+        var experiencePerMember: [Int32: Int] = [:]
         var totalExperience = 0
 
         var rewardComponentsByMember: [UUID: SkillRuntimeEffects.RewardComponents] = [:]

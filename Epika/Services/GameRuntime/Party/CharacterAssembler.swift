@@ -96,8 +96,8 @@ enum CharacterAssembler {
         let items = try await runtimeService.getItemMasterData(byIndices: Array(itemIndices.filter { $0 > 0 }))
 
         // 通常称号インデックスを収集（装備とソケット宝石）
-        var normalTitleIndices = Set(equippedItems.map { Int8($0.normalTitleIndex) })
-        let socketNormalTitleIndices = Set(equippedItems.map { Int8($0.socketNormalTitleIndex) })
+        var normalTitleIndices = Set(equippedItems.map { $0.normalTitleIndex })
+        let socketNormalTitleIndices = Set(equippedItems.map { $0.socketNormalTitleIndex })
         normalTitleIndices.formUnion(socketNormalTitleIndices)
         var titles: [TitleDefinition] = []
         for index in normalTitleIndices where index > 0 {

@@ -88,7 +88,7 @@ actor PartyProgressService {
         return Self.snapshot(from: party, members: members)
     }
 
-    func updatePartyMembers(persistentIdentifier: PersistentIdentifier, memberIds: [UUID]) async throws -> PartySnapshot {
+    func updatePartyMembers(persistentIdentifier: PersistentIdentifier, memberIds: [Int32]) async throws -> PartySnapshot {
         let context = makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         let partyId = party.id
@@ -151,7 +151,7 @@ actor PartyProgressService {
         return Self.snapshot(from: party, members: members)
     }
 
-    func characterIdsInOtherParties(excluding identifier: PersistentIdentifier?) async throws -> Set<UUID> {
+    func characterIdsInOtherParties(excluding identifier: PersistentIdentifier?) async throws -> Set<Int32> {
         let context = makeContext()
         var descriptor = FetchDescriptor<PartyMemberRecord>()
         if let identifier {
