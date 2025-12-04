@@ -117,7 +117,7 @@ struct EquipmentEditorView: View {
 
     @EnvironmentObject private var progressService: ProgressService
     @State private var currentCharacter: RuntimeCharacter
-    @State private var availableItems: [RuntimeEquipment] = []
+    @State private var availableItems: [LightweightItemData] = []
     @State private var itemDefinitions: [String: ItemDefinition] = [:]
     @State private var isLoading = true
     @State private var loadError: String?
@@ -126,6 +126,7 @@ struct EquipmentEditorView: View {
 
     private var characterService: CharacterProgressService { progressService.character }
     private var inventoryService: InventoryProgressService { progressService.inventory }
+    private var displayService: UniversalItemDisplayService { UniversalItemDisplayService.shared }
 
     init(character: RuntimeCharacter) {
         self.character = character
@@ -196,7 +197,7 @@ struct EquipmentEditorView: View {
                     .foregroundStyle(.secondary)
             } else {
                 VStack(alignment: .leading, spacing: 4) {
-                    ForEach(availableItems) { item in
+                    ForEach(availableItems, id: \.progressId) { item in
                         equipmentCandidateRow(item)
                     }
                 }
@@ -205,20 +206,15 @@ struct EquipmentEditorView: View {
     }
 
     @ViewBuilder
-    private func equipmentCandidateRow(_ item: RuntimeEquipment) -> some View {
+    private func equipmentCandidateRow(_ item: LightweightItemData) -> some View {
         let definition = itemDefinitions[item.masterDataId]
         let validation = validateEquipment(definition: definition)
 
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.displayName)
-                    .font(.subheadline)
-                if item.quantity > 1 {
-                    Text("x\(item.quantity)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
+                .font(.body)
+                .foregroundStyle(.primary)
+                .lineLimit(1)
 
             Spacer()
 
@@ -235,7 +231,7 @@ struct EquipmentEditorView: View {
                     .foregroundStyle(.gray)
             }
         }
-        .padding(.vertical, 2)
+        .frame(height: AppConstants.UI.listRowHeight)
         .contentShape(Rectangle())
         .onTapGesture {
             if let def = definition {
@@ -249,21 +245,21 @@ struct EquipmentEditorView: View {
         loadError = nil
 
         do {
-            // 装備可能なアイテムを取得
-            let allEquipment = try await inventoryService.allEquipment(storage: .playerItem)
-            // 除外カテゴリをフィルタ
-            availableItems = allEquipment.filter { equipment in
-                !EquipmentProgressService.excludedCategories.contains(equipment.category.rawValue)
-            }
+            // アイテムを取得してキャッシュに登録
+            let items = try await inventoryService.allItems(storage: .playerItem)
+            try await displayService.stagedGroupAndSortLightweightByCategory(for: items)
 
-            // アイテム定義を取得
+            // 装備可能カテゴリのみ取得（宝石・合成素材・魔法素材を除く）
+            let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .magicMaterial, .gem])
+            availableItems = displayService.getCachedItemsFlat(categories: equipCategories)
+
+            // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
             let allItemIds = Set(availableItems.map { $0.masterDataId })
                 .union(Set(currentCharacter.progress.equippedItems.map { $0.itemId }))
             if !allItemIds.isEmpty {
                 let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(allItemIds))
                 itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
             }
-
         } catch {
             loadError = error.localizedDescription
         }
@@ -320,13 +316,13 @@ struct EquipmentEditorView: View {
     }
 
     @MainActor
-    private func performEquip(_ item: RuntimeEquipment) async {
+    private func performEquip(_ item: LightweightItemData) async {
         equipError = nil
 
         do {
             let snapshot = try await characterService.equipItem(
                 characterId: currentCharacter.id,
-                inventoryItemId: item.id
+                inventoryItemId: item.progressId
             )
             let runtime = try await characterService.runtimeCharacter(from: snapshot)
             currentCharacter = runtime

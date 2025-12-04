@@ -141,6 +141,13 @@ final class UniversalItemDisplayService {
         categorizedItems
     }
 
+    /// 指定カテゴリのアイテムをフラット配列で取得（カテゴリ順序を保証）
+    func getCachedItemsFlat(categories: Set<ItemSaleCategory>) -> [LightweightItemData] {
+        ItemSaleCategory.allCases
+            .filter { categories.contains($0) }
+            .flatMap { categorizedItems[$0] ?? [] }
+    }
+
     func getCacheVersion() -> Int { cacheVersion }
 
     func clearSortCache() {
@@ -179,7 +186,7 @@ final class UniversalItemDisplayService {
         throw DisplayServiceError.itemNotFoundInCache(id: id)
     }
 
-    func makeStyledDisplayText(for item: LightweightItemData) -> Text {
+    func makeStyledDisplayText(for item: LightweightItemData, includeSellValue: Bool = true) -> Text {
         let isSuperRare = item.enhancement.superRareTitleId != nil
 
         var segments: [Text] = []
@@ -199,10 +206,16 @@ final class UniversalItemDisplayService {
             content = content + segment
         }
 
-        let priceSegment = Text("\(item.sellValue)GP")
         let quantitySegment = Text("x\(item.quantity)")
 
-        var display = priceSegment + Text("  ") + quantitySegment + Text("  ") + content
+        var display: Text
+        if includeSellValue {
+            let priceSegment = Text("\(item.sellValue)GP")
+            display = priceSegment + Text("  ") + quantitySegment + Text("  ") + content
+        } else {
+            display = quantitySegment + Text("  ") + content
+        }
+
         if isSuperRare {
             display = display.bold()
         }

@@ -3,14 +3,15 @@ import SwiftUI
 struct PandoraBoxView: View {
     @EnvironmentObject private var progressService: ProgressService
 
-    @State private var pandoraItems: [RuntimeEquipment] = []
-    @State private var availableItems: [RuntimeEquipment] = []
+    @State private var pandoraItems: [LightweightItemData] = []
+    @State private var availableItems: [LightweightItemData] = []
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var showingItemPicker = false
 
     private var inventoryService: InventoryProgressService { progressService.inventory }
     private var playerService: PlayerProgressService { progressService.player }
+    private var displayService: UniversalItemDisplayService { UniversalItemDisplayService.shared }
 
     private let maxPandoraSlots = 5
 
@@ -40,8 +41,9 @@ struct PandoraBoxView: View {
             .sheet(isPresented: $showingItemPicker) {
                 ItemPickerSheet(
                     availableItems: availableItems.filter { item in
-                        !pandoraItems.contains { $0.id == item.id }
+                        !pandoraItems.contains { $0.progressId == item.progressId }
                     },
+                    displayService: displayService,
                     onSelect: { item in
                         Task {
                             await addToPandoraBox(item: item)
@@ -72,8 +74,8 @@ struct PandoraBoxView: View {
                         .foregroundStyle(.secondary)
                         .font(.callout)
                 } else {
-                    ForEach(pandoraItems) { item in
-                        PandoraItemRow(item: item)
+                    ForEach(pandoraItems, id: \.progressId) { item in
+                        PandoraItemRow(item: item, displayService: displayService)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     Task {
@@ -110,10 +112,17 @@ struct PandoraBoxView: View {
             let player = try await playerService.currentPlayer()
             let pandoraIds = Set(player.pandoraBoxItemIds)
 
-            let allEquipment = try await inventoryService.allEquipment(storage: .playerItem)
-            availableItems = allEquipment
+            // アイテムを取得してキャッシュに登録
+            let items = try await inventoryService.allItems(storage: .playerItem)
+            try await displayService.stagedGroupAndSortLightweightByCategory(for: items)
 
-            pandoraItems = allEquipment.filter { pandoraIds.contains($0.id) }
+            // 装備可能カテゴリのみ取得（追加候補用）
+            let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .magicMaterial, .gem])
+            availableItems = displayService.getCachedItemsFlat(categories: equipCategories)
+
+            // 登録済みアイテムは全カテゴリから取得（既存の非装備アイテムも表示して削除可能にする）
+            let allItems = displayService.getCachedItemsFlat(categories: Set(ItemSaleCategory.allCases))
+            pandoraItems = allItems.filter { pandoraIds.contains($0.progressId) }
         } catch {
             loadError = error.localizedDescription
         }
@@ -122,9 +131,9 @@ struct PandoraBoxView: View {
     }
 
     @MainActor
-    private func addToPandoraBox(item: RuntimeEquipment) async {
+    private func addToPandoraBox(item: LightweightItemData) async {
         do {
-            _ = try await playerService.addToPandoraBox(itemId: item.id)
+            _ = try await playerService.addToPandoraBox(itemId: item.progressId)
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -132,9 +141,9 @@ struct PandoraBoxView: View {
     }
 
     @MainActor
-    private func removeFromPandoraBox(item: RuntimeEquipment) async {
+    private func removeFromPandoraBox(item: LightweightItemData) async {
         do {
-            _ = try await playerService.removeFromPandoraBox(itemId: item.id)
+            _ = try await playerService.removeFromPandoraBox(itemId: item.progressId)
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -143,27 +152,15 @@ struct PandoraBoxView: View {
 }
 
 private struct PandoraItemRow: View {
-    let item: RuntimeEquipment
+    let item: LightweightItemData
+    let displayService: UniversalItemDisplayService
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: item.category.iconName)
-                .font(.title2)
-                .foregroundStyle(.purple)
-                .frame(width: 32, height: 32)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.displayName)
-                    .font(.headline)
-                if let enhancement = enhancementText {
-                    Text(enhancement)
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                }
-                Text("x\(item.quantity)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+        HStack {
+            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
+                .font(.body)
+                .foregroundStyle(.primary)
+                .lineLimit(1)
 
             Spacer()
 
@@ -176,28 +173,16 @@ private struct PandoraItemRow: View {
                 .background(.purple)
                 .clipShape(Capsule())
         }
-        .padding(.vertical, 4)
-    }
-
-    private var enhancementText: String? {
-        var parts: [String] = []
-        if item.enhancement.superRareTitleId != nil {
-            parts.append("SR称号付")
-        }
-        if item.enhancement.normalTitleId != nil {
-            parts.append("称号付")
-        }
-        if item.enhancement.socketKey != nil {
-            parts.append("ソケット付")
-        }
-        return parts.isEmpty ? nil : parts.joined(separator: " / ")
+        .frame(height: AppConstants.UI.listRowHeight)
+        .contentShape(Rectangle())
     }
 }
 
 private struct ItemPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
-    let availableItems: [RuntimeEquipment]
-    let onSelect: (RuntimeEquipment) -> Void
+    let availableItems: [LightweightItemData]
+    let displayService: UniversalItemDisplayService
+    let onSelect: (LightweightItemData) -> Void
 
     var body: some View {
         NavigationStack {
@@ -209,12 +194,12 @@ private struct ItemPickerSheet: View {
                         Text("所持品にアイテムがないか、すべて登録済みです")
                     }
                 } else {
-                    ForEach(availableItems) { item in
+                    ForEach(availableItems, id: \.progressId) { item in
                         Button {
                             onSelect(item)
                             dismiss()
                         } label: {
-                            ItemPickerRow(item: item)
+                            ItemPickerRow(item: item, displayService: displayService)
                         }
                         .tint(.primary)
                     }
@@ -235,27 +220,15 @@ private struct ItemPickerSheet: View {
 }
 
 private struct ItemPickerRow: View {
-    let item: RuntimeEquipment
+    let item: LightweightItemData
+    let displayService: UniversalItemDisplayService
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: item.category.iconName)
-                .font(.title2)
-                .foregroundStyle(.secondary)
-                .frame(width: 32, height: 32)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.displayName)
-                    .font(.headline)
-                if hasEnhancements {
-                    Text(enhancementSummary)
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                }
-                Text("x\(item.quantity)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+        HStack {
+            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
+                .font(.body)
+                .foregroundStyle(.primary)
+                .lineLimit(1)
 
             Spacer()
 
@@ -263,26 +236,7 @@ private struct ItemPickerRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 4)
-    }
-
-    private var hasEnhancements: Bool {
-        item.enhancement.normalTitleId != nil ||
-        item.enhancement.superRareTitleId != nil ||
-        item.enhancement.socketKey != nil
-    }
-
-    private var enhancementSummary: String {
-        var parts: [String] = []
-        if item.enhancement.superRareTitleId != nil {
-            parts.append("SR称号付")
-        }
-        if item.enhancement.normalTitleId != nil {
-            parts.append("称号付")
-        }
-        if item.enhancement.socketKey != nil {
-            parts.append("ソケット付")
-        }
-        return parts.joined(separator: " / ")
+        .frame(height: AppConstants.UI.listRowHeight)
+        .contentShape(Rectangle())
     }
 }
