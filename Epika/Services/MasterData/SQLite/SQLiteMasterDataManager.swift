@@ -176,9 +176,9 @@ actor SQLiteMasterDataManager {
 
     private func resolveDatabaseURL(_ url: URL?) throws -> URL {
         if let url { return url }
-        let directories = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
+        let directories = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         guard let base = directories.first else {
-            throw SQLiteMasterDataError.cannotLocateCachesDirectory
+            throw SQLiteMasterDataError.cannotLocateDocumentsDirectory
         }
         return base.appendingPathComponent(databaseFileName)
     }
@@ -247,5 +247,5 @@ enum SQLiteMasterDataError: Error {
     case executionFailed(String)
     case statementPrepareFailed(String)
     case resourceNotFound(String)
-    case cannotLocateCachesDirectory
+    case cannotLocateDocumentsDirectory
 }
