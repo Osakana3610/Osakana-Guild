@@ -126,7 +126,7 @@ struct EquipmentEditorView: View {
 
     private var characterService: CharacterProgressService { progressService.character }
     private var inventoryService: InventoryProgressService { progressService.inventory }
-    private var displayService: UniversalItemDisplayService { UniversalItemDisplayService.shared }
+    private var displayService: ItemPreloadService { ItemPreloadService.shared }
 
     init(character: RuntimeCharacter) {
         self.character = character
@@ -245,13 +245,15 @@ struct EquipmentEditorView: View {
         loadError = nil
 
         do {
-            // アイテムを取得してキャッシュに登録
-            let items = try await inventoryService.allItems(storage: .playerItem)
-            try await displayService.stagedGroupAndSortLightweightByCategory(for: items)
+            // プリロードが完了していなければ待機
+            if !displayService.loaded {
+                displayService.startPreload(inventoryService: inventoryService)
+                try await displayService.waitForPreload()
+            }
 
             // 装備可能カテゴリのみ取得（合成素材・魔造素材を除く）
             let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .mazoMaterial])
-            availableItems = displayService.getCachedItemsFlat(categories: equipCategories)
+            availableItems = displayService.getItems(categories: equipCategories)
 
             // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
             let allItemIndices = Set(availableItems.map { $0.masterDataIndex })

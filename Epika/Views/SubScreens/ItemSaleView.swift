@@ -16,7 +16,7 @@ struct ItemSaleView: View {
     private var totalSellPriceText: String { "\(selectedTotalSellPrice)GP" }
     private var hasSelection: Bool { !selectedDisplayItems.isEmpty }
     private var categorizedDisplayItems: [ItemSaleCategory: [LightweightItemData]] {
-        UniversalItemDisplayService.shared.getCachedCategorizedLightweightItems()
+        ItemPreloadService.shared.getCategorizedItems()
     }
 
     var body: some View {
@@ -117,7 +117,7 @@ struct ItemSaleView: View {
                 .foregroundColor(.primary)
                 .onTapGesture { toggleSelection(item) }
 
-            UniversalItemDisplayService.shared.makeStyledDisplayText(for: item)
+            ItemPreloadService.shared.makeStyledDisplayText(for: item)
                 .font(.body)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
@@ -172,25 +172,19 @@ struct ItemSaleView: View {
         do {
             player = try await progressService.player.loadCurrentPlayer()
 
-            #if DEBUG
-            let inventoryStart = CFAbsoluteTimeGetCurrent()
-            #endif
-
-            let items = try await progressService.inventory.allItems(storage: .playerItem)
-
-            #if DEBUG
-            let displayStart = CFAbsoluteTimeGetCurrent()
-            #endif
-
-            let service = UniversalItemDisplayService.shared
-            try await service.stagedGroupAndSortLightweightByCategory(for: items)
-            cacheVersion = service.getCacheVersion()
+            // プリロードが完了していなければ待機
+            let service = ItemPreloadService.shared
+            if !service.loaded {
+                service.startPreload(inventoryService: progressService.inventory)
+                try await service.waitForPreload()
+            }
+            cacheVersion = service.version
             showError = false
             didLoadOnce = true
 
             #if DEBUG
             let totalEnd = CFAbsoluteTimeGetCurrent()
-            print("[Perf:ItemSaleView] inventory=\(String(format: "%.3f", displayStart - inventoryStart))s display=\(String(format: "%.3f", totalEnd - displayStart))s total=\(String(format: "%.3f", totalEnd - totalStart))s")
+            print("[Perf:ItemSaleView] total=\(String(format: "%.3f", totalEnd - totalStart))s preloaded=\(service.loaded)")
             #endif
         } catch {
             showError = true
@@ -204,9 +198,9 @@ struct ItemSaleView: View {
         do {
             let stackKeys = selectedDisplayItems.map { $0.stackKey }
             _ = try await progressService.sellItemsToShop(stackKeys: stackKeys)
-            let service = UniversalItemDisplayService.shared
+            let service = ItemPreloadService.shared
             service.removeItems(stackKeys: Set(stackKeys))
-            cacheVersion = service.getCacheVersion()
+            cacheVersion = service.version
             selectedStackKeys.removeAll()
             selectedDisplayItems.removeAll()
             selectedTotalSellPrice = 0
@@ -238,9 +232,9 @@ struct ItemSaleView: View {
     private func sellItem(_ item: LightweightItemData, quantity: Int) async {
         do {
             _ = try await progressService.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
-            let service = UniversalItemDisplayService.shared
+            let service = ItemPreloadService.shared
             let newQuantity = try service.decrementQuantity(stackKey: item.stackKey, by: quantity)
-            cacheVersion = service.getCacheVersion()
+            cacheVersion = service.version
 
             if newQuantity <= 0 {
                 // 数量が0になった場合は選択から削除
@@ -265,9 +259,9 @@ struct ItemSaleView: View {
             _ = try await progressService.autoTrade.addRule(autoTradeKey: item.autoTradeKey,
                                                              displayName: item.fullDisplayName)
             _ = try await progressService.sellItemsToShop(stackKeys: [item.stackKey])
-            let service = UniversalItemDisplayService.shared
+            let service = ItemPreloadService.shared
             service.removeItems(stackKeys: [item.stackKey])
-            cacheVersion = service.getCacheVersion()
+            cacheVersion = service.version
             selectedStackKeys.remove(item.stackKey)
             selectedDisplayItems.removeAll { $0.stackKey == item.stackKey }
             recalcSelectedTotalSellPrice()

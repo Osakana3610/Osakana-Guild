@@ -11,7 +11,7 @@ struct PandoraBoxView: View {
 
     private var inventoryService: InventoryProgressService { progressService.inventory }
     private var playerService: PlayerProgressService { progressService.player }
-    private var displayService: UniversalItemDisplayService { UniversalItemDisplayService.shared }
+    private var displayService: ItemPreloadService { ItemPreloadService.shared }
 
     private let maxPandoraSlots = 5
 
@@ -112,16 +112,18 @@ struct PandoraBoxView: View {
             let player = try await playerService.currentPlayer()
             let pandoraStackKeys = Set(player.pandoraBoxStackKeys)
 
-            // アイテムを取得してキャッシュに登録
-            let items = try await inventoryService.allItems(storage: .playerItem)
-            try await displayService.stagedGroupAndSortLightweightByCategory(for: items)
+            // プリロードが完了していなければ待機
+            if !displayService.loaded {
+                displayService.startPreload(inventoryService: inventoryService)
+                try await displayService.waitForPreload()
+            }
 
             // 装備可能カテゴリのみ取得（追加候補用）
             let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .mazoMaterial])
-            availableItems = displayService.getCachedItemsFlat(categories: equipCategories)
+            availableItems = displayService.getItems(categories: equipCategories)
 
             // 登録済みアイテムは全カテゴリから取得（既存の非装備アイテムも表示して削除可能にする）
-            let allItems = displayService.getCachedItemsFlat(categories: Set(ItemSaleCategory.allCases))
+            let allItems = displayService.getItems(categories: Set(ItemSaleCategory.allCases))
             pandoraItems = allItems.filter { pandoraStackKeys.contains($0.stackKey) }
         } catch {
             loadError = error.localizedDescription
@@ -153,7 +155,7 @@ struct PandoraBoxView: View {
 
 private struct PandoraItemRow: View {
     let item: LightweightItemData
-    let displayService: UniversalItemDisplayService
+    let displayService: ItemPreloadService
 
     var body: some View {
         HStack {
@@ -181,7 +183,7 @@ private struct PandoraItemRow: View {
 private struct ItemPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
     let availableItems: [LightweightItemData]
-    let displayService: UniversalItemDisplayService
+    let displayService: ItemPreloadService
     let onSelect: (LightweightItemData) -> Void
 
     var body: some View {
@@ -221,7 +223,7 @@ private struct ItemPickerSheet: View {
 
 private struct ItemPickerRow: View {
     let item: LightweightItemData
-    let displayService: UniversalItemDisplayService
+    let displayService: ItemPreloadService
 
     var body: some View {
         HStack {

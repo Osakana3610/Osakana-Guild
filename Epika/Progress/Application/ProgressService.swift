@@ -20,7 +20,7 @@ final class ProgressService: ObservableObject {
     let autoTrade: AutoTradeProgressService
     let runtime: ProgressRuntimeService
     let dropNotifications: ItemDropNotificationService
-    let universalItemDisplay: UniversalItemDisplayService
+    let itemPreload: ItemPreloadService
     let cloudKitCleanup: ProgressCloudKitCleanupService
     let gemModification: GemModificationProgressService
     let masterData: MasterDataRuntimeService
@@ -87,7 +87,7 @@ final class ProgressService: ObservableObject {
         self.autoTrade = AutoTradeProgressService(container: container,
                                                    playerService: self.player,
                                                    environment: environment)
-        self.universalItemDisplay = .shared
+        self.itemPreload = .shared
         self.masterData = .shared
         self.gemModification = GemModificationProgressService(container: container,
                                                                masterDataService: .shared)

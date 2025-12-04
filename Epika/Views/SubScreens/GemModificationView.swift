@@ -15,7 +15,7 @@ struct GemModificationView: View {
 
     private var gemService: GemModificationProgressService { progressService.gemModification }
     private var inventoryService: InventoryProgressService { progressService.inventory }
-    private var displayService: UniversalItemDisplayService { UniversalItemDisplayService.shared }
+    private var displayService: ItemPreloadService { ItemPreloadService.shared }
 
     var body: some View {
         NavigationStack {
@@ -122,15 +122,17 @@ struct GemModificationView: View {
         loadError = nil
 
         do {
-            // アイテムを取得してキャッシュに登録
-            let items = try await inventoryService.allItems(storage: .playerItem)
-            try await displayService.stagedGroupAndSortLightweightByCategory(for: items)
+            // プリロードが完了していなければ待機
+            if !displayService.loaded {
+                displayService.startPreload(inventoryService: inventoryService)
+                try await displayService.waitForPreload()
+            }
 
             // 全アイテムを保持（selectGemでソケット可能アイテムをフィルタするため）
-            allItems = displayService.getCachedItemsFlat(categories: Set(ItemSaleCategory.allCases))
+            allItems = displayService.getItems(categories: Set(ItemSaleCategory.allCases))
 
             // 宝石カテゴリのみ取得
-            gems = displayService.getCachedItemsFlat(categories: [.gem])
+            gems = displayService.getItems(categories: [.gem])
         } catch {
             loadError = error.localizedDescription
         }
@@ -176,7 +178,7 @@ struct GemModificationView: View {
 
 private struct GemRow: View {
     let item: LightweightItemData
-    let displayService: UniversalItemDisplayService
+    let displayService: ItemPreloadService
 
     var body: some View {
         HStack {
@@ -201,7 +203,7 @@ private struct SocketableItemsSheet: View {
     let gem: LightweightItemData
     let socketableItems: [LightweightItemData]
     let isLoading: Bool
-    let displayService: UniversalItemDisplayService
+    let displayService: ItemPreloadService
     let onSelect: (LightweightItemData) -> Void
     let onDismiss: () -> Void
 
@@ -263,7 +265,7 @@ private struct SocketableItemsSheet: View {
 
 private struct SocketableItemRow: View {
     let item: LightweightItemData
-    let displayService: UniversalItemDisplayService
+    let displayService: ItemPreloadService
 
     var body: some View {
         HStack {
