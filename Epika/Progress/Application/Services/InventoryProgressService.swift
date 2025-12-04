@@ -169,12 +169,15 @@ actor InventoryProgressService {
 
             for (storage, entries) in aggregated {
                 try Task.checkCancellation()
-                let stackKeys = entries.map { $0.key.stackKey }
-                var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-                    stackKeys.contains($0.stackKey) && $0.storageRawValue == storage.rawValue
+                let stackKeySet = Set(entries.map { $0.key.stackKey })
+                // Fetch all records for this storage, then filter in memory
+                // (SwiftData #Predicate cannot use computed properties like stackKey)
+                let storageRaw = storage.rawValue
+                let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                    $0.storageRawValue == storageRaw
                 })
-                descriptor.fetchLimit = stackKeys.count
-                let existingRecords = try context.fetch(descriptor)
+                let allRecords = try context.fetch(descriptor)
+                let existingRecords = allRecords.filter { stackKeySet.contains($0.stackKey) }
                 let recordMap = Dictionary(uniqueKeysWithValues: existingRecords.map { ($0.stackKey, $0) })
 
                 for entry in entries {
@@ -253,8 +256,12 @@ actor InventoryProgressService {
         }
 
         let context = makeContext()
-        let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { stackKeys.contains($0.stackKey) })
-        let records = try context.fetch(descriptor)
+        // Fetch all records, then filter in memory by stackKey
+        // (SwiftData #Predicate cannot use computed properties like stackKey)
+        let stackKeySet = Set(stackKeys)
+        let descriptor = FetchDescriptor<InventoryItemRecord>()
+        let allRecords = try context.fetch(descriptor)
+        let records = allRecords.filter { stackKeySet.contains($0.stackKey) }
         guard !records.isEmpty else {
             return try await playerService.currentPlayer()
         }
@@ -283,8 +290,24 @@ actor InventoryProgressService {
 
     func updateItem(stackKey: String,
                     mutate: (InventoryItemRecord) throws -> Void) async throws -> ItemSnapshot {
+        guard let c = StackKeyComponents(stackKey: stackKey) else {
+            throw ProgressError.invalidInput(description: "不正なstackKeyです")
+        }
         let context = makeContext()
-        var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.stackKey == stackKey })
+        let superRare = c.superRareTitleIndex
+        let normal = c.normalTitleIndex
+        let master = c.masterDataIndex
+        let socketSuperRare = c.socketSuperRareTitleIndex
+        let socketNormal = c.socketNormalTitleIndex
+        let socketMaster = c.socketMasterDataIndex
+        var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.superRareTitleIndex == superRare &&
+            $0.normalTitleIndex == normal &&
+            $0.masterDataIndex == master &&
+            $0.socketSuperRareTitleIndex == socketSuperRare &&
+            $0.socketNormalTitleIndex == socketNormal &&
+            $0.socketMasterDataIndex == socketMaster
+        })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
             throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
@@ -296,8 +319,24 @@ actor InventoryProgressService {
 
     func decrementItem(stackKey: String, quantity: Int) async throws {
         guard quantity > 0 else { return }
+        guard let c = StackKeyComponents(stackKey: stackKey) else {
+            throw ProgressError.invalidInput(description: "不正なstackKeyです")
+        }
         let context = makeContext()
-        var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.stackKey == stackKey })
+        let superRare = c.superRareTitleIndex
+        let normal = c.normalTitleIndex
+        let master = c.masterDataIndex
+        let socketSuperRare = c.socketSuperRareTitleIndex
+        let socketNormal = c.socketNormalTitleIndex
+        let socketMaster = c.socketMasterDataIndex
+        var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.superRareTitleIndex == superRare &&
+            $0.normalTitleIndex == normal &&
+            $0.masterDataIndex == master &&
+            $0.socketSuperRareTitleIndex == socketSuperRare &&
+            $0.socketNormalTitleIndex == socketNormal &&
+            $0.socketMasterDataIndex == socketMaster
+        })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
             throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
@@ -315,14 +354,49 @@ actor InventoryProgressService {
     func inheritItem(targetStackKey: String,
                      sourceStackKey: String,
                      newEnhancement: ItemSnapshot.Enhancement) async throws -> RuntimeEquipment {
+        guard let tc = StackKeyComponents(stackKey: targetStackKey) else {
+            throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
+        }
+        guard let sc = StackKeyComponents(stackKey: sourceStackKey) else {
+            throw ProgressError.invalidInput(description: "不正な提供stackKeyです")
+        }
         let context = makeContext()
 
-        var targetFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.stackKey == targetStackKey })
+        // target fetch with individual field comparison
+        let tSuperRare = tc.superRareTitleIndex
+        let tNormal = tc.normalTitleIndex
+        let tMaster = tc.masterDataIndex
+        let tSocketSuperRare = tc.socketSuperRareTitleIndex
+        let tSocketNormal = tc.socketNormalTitleIndex
+        let tSocketMaster = tc.socketMasterDataIndex
+        var targetFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.superRareTitleIndex == tSuperRare &&
+            $0.normalTitleIndex == tNormal &&
+            $0.masterDataIndex == tMaster &&
+            $0.socketSuperRareTitleIndex == tSocketSuperRare &&
+            $0.socketNormalTitleIndex == tSocketNormal &&
+            $0.socketMasterDataIndex == tSocketMaster
+        })
         targetFetch.fetchLimit = 1
         guard let targetRecord = try context.fetch(targetFetch).first else {
             throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
         }
-        var sourceFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.stackKey == sourceStackKey })
+
+        // source fetch with individual field comparison
+        let sSuperRare = sc.superRareTitleIndex
+        let sNormal = sc.normalTitleIndex
+        let sMaster = sc.masterDataIndex
+        let sSocketSuperRare = sc.socketSuperRareTitleIndex
+        let sSocketNormal = sc.socketNormalTitleIndex
+        let sSocketMaster = sc.socketMasterDataIndex
+        var sourceFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.superRareTitleIndex == sSuperRare &&
+            $0.normalTitleIndex == sNormal &&
+            $0.masterDataIndex == sMaster &&
+            $0.socketSuperRareTitleIndex == sSocketSuperRare &&
+            $0.socketNormalTitleIndex == sSocketNormal &&
+            $0.socketMasterDataIndex == sSocketMaster
+        })
         sourceFetch.fetchLimit = 1
         guard let sourceRecord = try context.fetch(sourceFetch).first else {
             throw ProgressError.invalidInput(description: "提供アイテムが見つかりません")
@@ -423,16 +497,22 @@ actor InventoryProgressService {
         storage: ItemStorage,
         context: ModelContext
     ) throws -> InventoryItemRecord {
-        let stackKey = makeStackKey(
-            superRareTitleIndex: superRareTitleIndex,
-            normalTitleIndex: normalTitleIndex,
-            masterDataIndex: masterDataIndex,
-            socketSuperRareTitleIndex: socketSuperRareTitleIndex,
-            socketNormalTitleIndex: socketNormalTitleIndex,
-            socketMasterDataIndex: socketMasterDataIndex
-        )
+        // Capture values for #Predicate
+        let superRare = superRareTitleIndex
+        let normal = normalTitleIndex
+        let master = masterDataIndex
+        let socketSuperRare = socketSuperRareTitleIndex
+        let socketNormal = socketNormalTitleIndex
+        let socketMaster = socketMasterDataIndex
+        let storageRaw = storage.rawValue
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.stackKey == stackKey && $0.storageRawValue == storage.rawValue
+            $0.superRareTitleIndex == superRare &&
+            $0.normalTitleIndex == normal &&
+            $0.masterDataIndex == master &&
+            $0.socketSuperRareTitleIndex == socketSuperRare &&
+            $0.socketNormalTitleIndex == socketNormal &&
+            $0.socketMasterDataIndex == socketMaster &&
+            $0.storageRawValue == storageRaw
         })
         descriptor.fetchLimit = 1
         if let existing = try context.fetch(descriptor).first {

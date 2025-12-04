@@ -72,17 +72,49 @@ actor GemModificationProgressService {
 
     /// 宝石を装備アイテムに装着
     func attachGem(gemItemStackKey: String, targetItemStackKey: String) async throws {
+        guard let gc = StackKeyComponents(stackKey: gemItemStackKey) else {
+            throw ProgressError.invalidInput(description: "不正な宝石stackKeyです")
+        }
+        guard let tc = StackKeyComponents(stackKey: targetItemStackKey) else {
+            throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
+        }
         let context = makeContext()
 
         // 宝石レコードの取得
-        var gemDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.stackKey == gemItemStackKey })
+        let gSuperRare = gc.superRareTitleIndex
+        let gNormal = gc.normalTitleIndex
+        let gMaster = gc.masterDataIndex
+        let gSocketSuperRare = gc.socketSuperRareTitleIndex
+        let gSocketNormal = gc.socketNormalTitleIndex
+        let gSocketMaster = gc.socketMasterDataIndex
+        var gemDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.superRareTitleIndex == gSuperRare &&
+            $0.normalTitleIndex == gNormal &&
+            $0.masterDataIndex == gMaster &&
+            $0.socketSuperRareTitleIndex == gSocketSuperRare &&
+            $0.socketNormalTitleIndex == gSocketNormal &&
+            $0.socketMasterDataIndex == gSocketMaster
+        })
         gemDescriptor.fetchLimit = 1
         guard let gemRecord = try context.fetch(gemDescriptor).first else {
             throw ProgressError.invalidInput(description: "宝石が見つかりません")
         }
 
         // 対象アイテムレコードの取得
-        var targetDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.stackKey == targetItemStackKey })
+        let tSuperRare = tc.superRareTitleIndex
+        let tNormal = tc.normalTitleIndex
+        let tMaster = tc.masterDataIndex
+        let tSocketSuperRare = tc.socketSuperRareTitleIndex
+        let tSocketNormal = tc.socketNormalTitleIndex
+        let tSocketMaster = tc.socketMasterDataIndex
+        var targetDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.superRareTitleIndex == tSuperRare &&
+            $0.normalTitleIndex == tNormal &&
+            $0.masterDataIndex == tMaster &&
+            $0.socketSuperRareTitleIndex == tSocketSuperRare &&
+            $0.socketNormalTitleIndex == tSocketNormal &&
+            $0.socketMasterDataIndex == tSocketMaster
+        })
         targetDescriptor.fetchLimit = 1
         guard let targetRecord = try context.fetch(targetDescriptor).first else {
             throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
