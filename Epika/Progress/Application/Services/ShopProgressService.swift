@@ -215,7 +215,7 @@ actor ShopProgressService {
         shopRecord.updatedAt = Date()
         try saveIfNeeded(context)
 
-        _ = try await inventoryService.addItem(itemId: target.definition.id,
+        _ = try await inventoryService.addItem(masterDataIndex: target.definition.index,
                                                quantity: quantity,
                                                storage: .playerItem)
         return playerSnapshot

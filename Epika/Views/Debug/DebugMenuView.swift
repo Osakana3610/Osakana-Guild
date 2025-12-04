@@ -19,7 +19,7 @@ enum ItemCreationType: String, CaseIterable {
 }
 
 private struct ItemSeed {
-    let itemId: String
+    let masterDataIndex: Int16
     let enhancement: ItemSnapshot.Enhancement
 }
 
@@ -170,15 +170,29 @@ struct DebugMenuView: View {
                 return lhs.name < rhs.name
             }
 
-            let normalTitles = try await masterDataService.getAllTitles().map { $0.id }
-            let effectiveNormalTitles = normalTitles.isEmpty ? ["normal"] : normalTitles
-            let normalOptions: [String?] = effectiveNormalTitles.map { Optional($0) }
+            // Int Index形式で称号データを取得（MasterDataRuntimeServiceで変換）
+            let runtimeService = MasterDataRuntimeService.shared
+            let normalTitles = try await masterDataService.getAllTitles()
+            var normalTitleIndices: [Int8] = []
+            for title in normalTitles {
+                if let index = await runtimeService.getTitleIndex(for: title.id) {
+                    normalTitleIndices.append(index)
+                }
+            }
+            let normalOptions: [Int8] = normalTitleIndices.isEmpty ? [0] : normalTitleIndices
 
-            let superRareTitles: [String]
+            let superRareTitleIndices: [Int16]
             if selectedCreationType == .basicOnly {
-                superRareTitles = []
+                superRareTitleIndices = []
             } else {
-                superRareTitles = try await masterDataService.getAllSuperRareTitles().map { $0.id }
+                let superRareTitles = try await masterDataService.getAllSuperRareTitles()
+                var indices: [Int16] = []
+                for title in superRareTitles {
+                    if let index = await runtimeService.getSuperRareTitleIndex(for: title.id) {
+                        indices.append(index)
+                    }
+                }
+                superRareTitleIndices = indices
             }
 
             let gemItems: [ItemDefinition]
@@ -190,12 +204,12 @@ struct DebugMenuView: View {
 
             let estimatedTotal = estimateTotalCount(itemCount: allItems.count,
                                                     normalCount: normalOptions.count,
-                                                    superRareCount: superRareTitles.count,
+                                                    superRareCount: superRareTitleIndices.count,
                                                     gemCount: gemItems.count)
             let targetLimit = max(1, maxItemLimit)
             let targetCount = estimatedTotal > 0 ? min(targetLimit, estimatedTotal) : targetLimit
 
-        debugLog("[DebugMenu] itemCount=\(allItems.count), normalOptions=\(normalOptions.count), superRare=\(superRareTitles.count), gems=\(gemItems.count), estimate=\(estimatedTotal), limit=\(targetLimit), target=\(targetCount)")
+        debugLog("[DebugMenu] itemCount=\(allItems.count), normalOptions=\(normalOptions.count), superRare=\(superRareTitleIndices.count), gems=\(gemItems.count), estimate=\(estimatedTotal), limit=\(targetLimit), target=\(targetCount)")
 
             await MainActor.run {
                 statusMessage = "アイテム作成開始 - \(selectedCreationType.rawValue)\n予定種類: \(targetCount) (設定上限 \(targetLimit))"
@@ -224,15 +238,15 @@ struct DebugMenuView: View {
                 var remainingForItem = itemQuotas[index]
                 guard remainingForItem > 0 else { continue }
 
-                func appendSeed(normal: String?, superRare: String? = nil, gem: String? = nil) async throws -> Bool {
+                func appendSeed(normalIndex: Int8, superRareIndex: Int16 = 0, gemIndex: Int16 = 0) async throws -> Bool {
                     guard remainingForItem > 0 else { return true }
                     if createdCount + pendingSeeds.count >= targetCount { return true }
-                    pendingSeeds.append(ItemSeed(itemId: item.id,
-                                                 enhancement: .init(superRareTitleId: superRare,
-                                                                    normalTitleId: normal,
-                                                                    socketSuperRareTitleId: nil,
-                                                                    socketNormalTitleId: nil,
-                                                                    socketKey: gem)))
+                    pendingSeeds.append(ItemSeed(masterDataIndex: item.index,
+                                                 enhancement: .init(superRareTitleIndex: superRareIndex,
+                                                                    normalTitleIndex: normalIndex,
+                                                                    socketSuperRareTitleIndex: 0,
+                                                                    socketNormalTitleIndex: 0,
+                                                                    socketMasterDataIndex: gemIndex)))
                     remainingForItem -= 1
                     if pendingSeeds.count >= batchSize || createdCount + pendingSeeds.count >= targetCount {
                         try await flushSeeds(&pendingSeeds,
@@ -243,16 +257,16 @@ struct DebugMenuView: View {
                     return remainingForItem == 0 || createdCount >= targetCount
                 }
 
-                for normal in normalOptions {
-                    if try await appendSeed(normal: normal) { break }
+                for normalIndex in normalOptions {
+                    if try await appendSeed(normalIndex: normalIndex) { break }
                 }
                 if createdCount >= targetCount { break }
                 if remainingForItem <= 0 { continue }
 
                 if selectedCreationType != .basicOnly {
-                    superLoop: for superRare in superRareTitles {
-                        for normal in normalOptions {
-                            if try await appendSeed(normal: normal, superRare: superRare) {
+                    superLoop: for superRareIndex in superRareTitleIndices {
+                        for normalIndex in normalOptions {
+                            if try await appendSeed(normalIndex: normalIndex, superRareIndex: superRareIndex) {
                                 break superLoop
                             }
                         }
@@ -264,18 +278,18 @@ struct DebugMenuView: View {
 
                 if selectedCreationType == .withGemModification {
                     gemLoop: for gem in gemItems {
-                        for normal in normalOptions {
-                            if try await appendSeed(normal: normal, gem: gem.id) {
+                        for normalIndex in normalOptions {
+                            if try await appendSeed(normalIndex: normalIndex, gemIndex: gem.index) {
                                 break gemLoop
                             }
                         }
                         if createdCount >= targetCount || remainingForItem <= 0 { break }
                         if selectedCreationType != .basicOnly {
-                            for superRare in superRareTitles {
-                                for normal in normalOptions {
-                                    if try await appendSeed(normal: normal,
-                                                            superRare: superRare,
-                                                            gem: gem.id) {
+                            for superRareIndex in superRareTitleIndices {
+                                for normalIndex in normalOptions {
+                                    if try await appendSeed(normalIndex: normalIndex,
+                                                            superRareIndex: superRareIndex,
+                                                            gemIndex: gem.index) {
                                         break gemLoop
                                     }
                                 }
@@ -388,7 +402,7 @@ struct DebugMenuView: View {
     private func saveBatch(_ seeds: [ItemSeed], chunkSize: Int) async throws {
         guard !seeds.isEmpty else { return }
         let batchSeeds = seeds.map { seed in
-            InventoryProgressService.BatchSeed(itemId: seed.itemId,
+            InventoryProgressService.BatchSeed(masterDataIndex: seed.masterDataIndex,
                                                quantity: 99,
                                                storage: .playerItem,
                                                enhancements: seed.enhancement)

@@ -38,17 +38,19 @@ extension ProgressService {
 
         var totalGold = 0
         for item in items {
-            // composite keyを構築（superRareTitleId|normalTitleId|itemId）
-            let key = [item.enhancements.superRareTitleId ?? "",
-                       item.enhancements.normalTitleId ?? "",
-                       item.itemId].joined(separator: "|")
+            // autoTradeKeyを使用（superRareTitleIndex|normalTitleIndex|masterDataIndex）
+            let key = item.autoTradeKey
             guard autoTradeKeys.contains(key) else { continue }
 
+            // マスターデータIDを取得して売却
+            let itemId = await masterData.getItemId(for: item.masterDataIndex)
+            guard let itemId else { continue }
+
             // 売却（overflow分はインベントリに残る）
-            let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: item.quantity)
+            let result = try await shop.addPlayerSoldItem(itemId: itemId, quantity: item.quantity)
             totalGold += result.gold
             if result.added > 0 {
-                try await inventory.decrementItem(id: item.id, quantity: result.added)
+                try await inventory.decrementItem(stackKey: item.stackKey, quantity: result.added)
             }
         }
 
@@ -59,33 +61,38 @@ extension ProgressService {
     }
 
     /// アイテムを売却してゴールドを取得し、ショップ在庫に追加する
-    /// - Parameter itemIds: 売却するアイテムのID配列
+    /// - Parameter stackKeys: 売却するアイテムのstackKey配列
     /// - Returns: 更新後のプレイヤー情報
     /// - Note: 商店在庫上限超過分はインベントリに残る
     /// - Note: ソケット宝石が装着されている場合、宝石を分離してインベントリに戻す
     @discardableResult
-    func sellItemsToShop(itemIds: [UUID]) async throws -> PlayerSnapshot {
-        guard !itemIds.isEmpty else {
+    func sellItemsToShop(stackKeys: [String]) async throws -> PlayerSnapshot {
+        guard !stackKeys.isEmpty else {
             return try await player.currentPlayer()
         }
 
         // アイテム情報を取得
         let items = try await inventory.allItems(storage: .playerItem)
-        let targetItems = items.filter { itemIds.contains($0.id) }
+        let stackKeySet = Set(stackKeys)
+        let targetItems = items.filter { stackKeySet.contains($0.stackKey) }
         guard !targetItems.isEmpty else {
             return try await player.currentPlayer()
         }
 
         // 各アイテムを売却してショップ在庫に追加
         var totalGold = 0
-        var decrementList: [(id: UUID, quantity: Int)] = []
+        var decrementList: [(stackKey: String, quantity: Int)] = []
         for item in targetItems {
+            // マスターデータIDを取得して売却
+            let itemId = await masterData.getItemId(for: item.masterDataIndex)
+            guard let itemId else { continue }
+
             // ショップ在庫に追加（素のitemIdのみ、称号なし）
-            let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: item.quantity)
+            let result = try await shop.addPlayerSoldItem(itemId: itemId, quantity: item.quantity)
             totalGold += result.gold
             // 実際に追加された分のみ減算対象（overflow分はインベントリに残る）
             if result.added > 0 {
-                decrementList.append((id: item.id, quantity: result.added))
+                decrementList.append((stackKey: item.stackKey, quantity: result.added))
                 // ソケット宝石が装着されている場合、売却数量分の宝石を分離してインベントリに戻す
                 try await separateGemFromItem(item, quantity: result.added)
             }
@@ -93,7 +100,7 @@ extension ProgressService {
 
         // インベントリからアイテムを削除（実際に売却された分のみ）
         for entry in decrementList {
-            try await inventory.decrementItem(id: entry.id, quantity: entry.quantity)
+            try await inventory.decrementItem(stackKey: entry.stackKey, quantity: entry.quantity)
         }
 
         // ゴールドを加算
@@ -105,32 +112,38 @@ extension ProgressService {
 
     /// 単一アイテムを指定数量売却してショップ在庫に追加する
     /// - Parameters:
-    ///   - itemId: 売却するアイテムのID
+    ///   - stackKey: 売却するアイテムのstackKey
     ///   - quantity: 売却数量
     /// - Returns: 更新後のプレイヤー情報
     /// - Note: 商店在庫上限超過分はインベントリに残る
     /// - Note: ソケット宝石が装着されている場合、宝石を分離してインベントリに戻す
     @discardableResult
-    func sellItemToShop(itemId: UUID, quantity: Int) async throws -> PlayerSnapshot {
+    func sellItemToShop(stackKey: String, quantity: Int) async throws -> PlayerSnapshot {
         guard quantity > 0 else {
             return try await player.currentPlayer()
         }
 
         // アイテム情報を取得
         let items = try await inventory.allItems(storage: .playerItem)
-        guard let item = items.first(where: { $0.id == itemId }) else {
+        guard let item = items.first(where: { $0.stackKey == stackKey }) else {
             throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
         }
         guard item.quantity >= quantity else {
             throw ProgressError.invalidInput(description: "数量が不足しています")
         }
 
+        // マスターデータIDを取得して売却
+        let itemId = await masterData.getItemId(for: item.masterDataIndex)
+        guard let itemId else {
+            throw ProgressError.invalidInput(description: "アイテム定義が見つかりません")
+        }
+
         // ショップ在庫に追加（素のitemIdのみ、称号なし）
-        let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: quantity)
+        let result = try await shop.addPlayerSoldItem(itemId: itemId, quantity: quantity)
 
         // インベントリから減算（実際に売却された分のみ、overflow分はインベントリに残る）
         if result.added > 0 {
-            try await inventory.decrementItem(id: itemId, quantity: result.added)
+            try await inventory.decrementItem(stackKey: stackKey, quantity: result.added)
             // ソケット宝石が装着されている場合、売却数量分の宝石を分離してインベントリに戻す
             try await separateGemFromItem(item, quantity: result.added)
         }
@@ -148,21 +161,21 @@ extension ProgressService {
     /// - Parameters:
     ///   - item: 宝石が装着されたアイテム
     ///   - quantity: 分離する宝石の数量（売却された装備の数量）
-    /// - Note: 宝石の称号情報（socketSuperRareTitleId, socketNormalTitleId）も引き継ぐ
+    /// - Note: 宝石の称号情報（socketSuperRareTitleIndex, socketNormalTitleIndex）も引き継ぐ
     private func separateGemFromItem(_ item: ItemSnapshot, quantity: Int) async throws {
-        guard let socketKey = item.enhancements.socketKey else { return }
+        guard item.enhancements.hasSocket else { return }
         guard quantity > 0 else { return }
 
         // 宝石をインベントリに追加（宝石の称号情報を引き継ぐ）
         let gemEnhancement = ItemSnapshot.Enhancement(
-            superRareTitleId: item.enhancements.socketSuperRareTitleId,
-            normalTitleId: item.enhancements.socketNormalTitleId,
-            socketSuperRareTitleId: nil,
-            socketNormalTitleId: nil,
-            socketKey: nil
+            superRareTitleIndex: item.enhancements.socketSuperRareTitleIndex,
+            normalTitleIndex: item.enhancements.socketNormalTitleIndex,
+            socketSuperRareTitleIndex: 0,
+            socketNormalTitleIndex: 0,
+            socketMasterDataIndex: 0
         )
         _ = try await inventory.addItem(
-            itemId: socketKey,
+            masterDataIndex: item.enhancements.socketMasterDataIndex,
             quantity: quantity,
             storage: .playerItem,
             enhancements: gemEnhancement

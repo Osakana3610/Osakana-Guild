@@ -8,8 +8,8 @@ enum CharacterAssembler {
         async let spellDefinitions = repository.allSpells()
 
         // 装備付与スキルを合成し、先勝ちで重複除去
-        let itemIds = Set(progress.equippedItems.map { $0.itemId })
-        let equippedItemDefinitions = try await repository.items(withIds: Array(itemIds))
+        let masterDataIndices = Set(progress.equippedItems.map { $0.masterDataIndex }).filter { $0 > 0 }
+        let equippedItemDefinitions = try await MasterDataRuntimeService.shared.getItemMasterData(byIndices: Array(masterDataIndices))
         let equipmentSkills: [RuntimeCharacterProgress.LearnedSkill] = equippedItemDefinitions.flatMap { definition in
             definition.grantedSkills.sorted { $0.orderIndex < $1.orderIndex }.map { granted in
                 RuntimeCharacterProgress.LearnedSkill(id: UUID(),
@@ -87,33 +87,34 @@ enum CharacterAssembler {
 
     private static func assembleLoadout(repository: MasterDataRepository,
                                         from equippedItems: [RuntimeCharacterProgress.EquippedItem]) async throws -> RuntimeCharacterState.Loadout {
-        let itemIds = Set(equippedItems.map { $0.itemId })
-        let normalTitleIds = Set(equippedItems.compactMap { $0.normalTitleId })
-        let superRareTitleIds = Set(equippedItems.compactMap { $0.superRareTitleId })
+        let runtimeService = MasterDataRuntimeService.shared
 
-        // ソケット宝石のアイテムIDと称号IDも収集
-        let socketItemIds = Set(equippedItems.compactMap { $0.socketKey })
-        let socketNormalTitleIds = Set(equippedItems.compactMap { $0.socketNormalTitleId })
-        let socketSuperRareTitleIds = Set(equippedItems.compactMap { $0.socketSuperRareTitleId })
+        // アイテムインデックスを収集（装備とソケット宝石）
+        var itemIndices = Set(equippedItems.map { $0.masterDataIndex })
+        let socketItemIndices = Set(equippedItems.map { $0.socketMasterDataIndex }).filter { $0 > 0 }
+        itemIndices.formUnion(socketItemIndices)
+        let items = try await runtimeService.getItemMasterData(byIndices: Array(itemIndices.filter { $0 > 0 }))
 
-        // 装備と宝石のアイテム定義を取得
-        let allItemIds = itemIds.union(socketItemIds)
-        let items = try await repository.items(withIds: Array(allItemIds))
-
-        // 通常称号を取得（装備とソケット宝石の両方）
-        let allNormalTitleIds = normalTitleIds.union(socketNormalTitleIds)
+        // 通常称号インデックスを収集（装備とソケット宝石）
+        var normalTitleIndices = Set(equippedItems.map { Int8($0.normalTitleIndex) })
+        let socketNormalTitleIndices = Set(equippedItems.map { Int8($0.socketNormalTitleIndex) })
+        normalTitleIndices.formUnion(socketNormalTitleIndices)
         var titles: [TitleDefinition] = []
-        for id in allNormalTitleIds {
-            if let definition = try await repository.title(withId: id) {
+        for index in normalTitleIndices where index > 0 {
+            if let titleId = await runtimeService.getTitleId(for: index),
+               let definition = try await repository.title(withId: titleId) {
                 titles.append(definition)
             }
         }
 
-        // 超レア称号を取得（装備とソケット宝石の両方）
-        let allSuperRareTitleIds = superRareTitleIds.union(socketSuperRareTitleIds)
+        // 超レア称号インデックスを収集（装備とソケット宝石）
+        var superRareTitleIndices = Set(equippedItems.map { $0.superRareTitleIndex })
+        let socketSuperRareTitleIndices = Set(equippedItems.map { $0.socketSuperRareTitleIndex })
+        superRareTitleIndices.formUnion(socketSuperRareTitleIndices)
         var superRareTitles: [SuperRareTitleDefinition] = []
-        for id in allSuperRareTitleIds {
-            if let definition = try await repository.superRareTitle(withId: id) {
+        for index in superRareTitleIndices where index > 0 {
+            if let titleId = await runtimeService.getSuperRareTitleId(for: index),
+               let definition = try await repository.superRareTitle(withId: titleId) {
                 superRareTitles.append(definition)
             }
         }

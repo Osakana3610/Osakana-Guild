@@ -3,47 +3,55 @@ import SwiftData
 
 @Model
 final class InventoryItemRecord {
-    #Index<InventoryItemRecord>([\.storageRawValue, \.sortOrder])
+    // アイテム本体
+    var superRareTitleIndex: Int16 = 0      // 超レア称号（0=なし、1〜=あり）
+    var normalTitleIndex: Int8 = 0          // 通常称号（0〜8）
+    var masterDataIndex: Int16 = 0          // アイテム（1〜1000）
 
-    var id: UUID = UUID()
-    var compositeKey: String = ""
-    var masterDataId: String = ""
+    // ソケット（宝石改造）
+    var socketSuperRareTitleIndex: Int16 = 0 // 宝石の超レア称号
+    var socketNormalTitleIndex: Int8 = 0     // 宝石の通常称号
+    var socketMasterDataIndex: Int16 = 0     // 宝石（0=なし、1〜=あり）
+
+    // その他
     var quantity: Int = 0
     var storageRawValue: String = ItemStorage.playerItem.rawValue
-    var superRareTitleId: String?
-    var normalTitleId: String?
-    var socketSuperRareTitleId: String?
-    var socketNormalTitleId: String?
-    var socketKey: String?
-    var acquiredAt: Date = Date()
-    var sortOrder: Int = 0
 
     var storage: ItemStorage {
         get { ItemStorage(rawValue: storageRawValue) ?? .unknown }
         set { storageRawValue = newValue.rawValue }
     }
 
-    init(compositeKey: String,
-         masterDataId: String,
+    /// スタック識別キー（6つのindexの組み合わせ）
+    var stackKey: String {
+        "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"
+    }
+
+    /// 自動売却ルール用キー（ソケット情報を除く）
+    var autoTradeKey: String {
+        "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)"
+    }
+
+    /// 宝石改造が施されているか
+    var hasSocket: Bool {
+        socketMasterDataIndex != 0
+    }
+
+    init(superRareTitleIndex: Int16,
+         normalTitleIndex: Int8,
+         masterDataIndex: Int16,
+         socketSuperRareTitleIndex: Int16 = 0,
+         socketNormalTitleIndex: Int8 = 0,
+         socketMasterDataIndex: Int16 = 0,
          quantity: Int,
-         storage: ItemStorage,
-         superRareTitleId: String?,
-         normalTitleId: String?,
-         socketSuperRareTitleId: String?,
-         socketNormalTitleId: String?,
-         socketKey: String?,
-         sortOrder: Int,
-         acquiredAt: Date = Date()) {
-        self.compositeKey = compositeKey
-        self.masterDataId = masterDataId
+         storage: ItemStorage) {
+        self.superRareTitleIndex = superRareTitleIndex
+        self.normalTitleIndex = normalTitleIndex
+        self.masterDataIndex = masterDataIndex
+        self.socketSuperRareTitleIndex = socketSuperRareTitleIndex
+        self.socketNormalTitleIndex = socketNormalTitleIndex
+        self.socketMasterDataIndex = socketMasterDataIndex
         self.quantity = quantity
         self.storageRawValue = storage.rawValue
-        self.superRareTitleId = superRareTitleId
-        self.normalTitleId = normalTitleId
-        self.socketSuperRareTitleId = socketSuperRareTitleId
-        self.socketNormalTitleId = socketNormalTitleId
-        self.socketKey = socketKey
-        self.sortOrder = sortOrder
-        self.acquiredAt = acquiredAt
     }
 }

@@ -352,21 +352,17 @@ private struct PartyEquipmentListView: View {
             if characters.isEmpty {
                 Text("メンバーがいません").foregroundColor(.secondary)
             } else {
-                ForEach(characters) { character in
+                ForEach(characters, id: \.id) { character in
                     Section(character.name) {
                         let equipment = character.progress.equippedItems
                         if equipment.isEmpty {
                             Text("装備なし").foregroundColor(.secondary)
                         } else {
-                            let itemsById = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.id, $0) })
-                            let titlesById = Dictionary(uniqueKeysWithValues: character.loadout.titles.map { ($0.id, $0) })
-                            let superRareTitlesById = Dictionary(uniqueKeysWithValues: character.loadout.superRareTitles.map { ($0.id, $0) })
+                            let itemsByIndex = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.index, $0) })
                             ForEach(equipment, id: \.id) { entry in
-                                let itemName = itemsById[entry.itemId]?.name ?? entry.itemId
-                                let titleName = entry.normalTitleId.flatMap { titlesById[$0]?.name }
-                                    ?? entry.superRareTitleId.flatMap { superRareTitlesById[$0]?.name }
-                                if let titleName {
-                                    Text("\(itemName) x\(entry.quantity) (\(titleName))")
+                                let itemName = itemsByIndex[entry.masterDataIndex]?.name ?? "不明なアイテム"
+                                if entry.superRareTitleIndex > 0 || entry.normalTitleIndex > 0 {
+                                    Text("\(itemName) x\(entry.quantity) (称号付き)")
                                 } else {
                                     Text("\(itemName) x\(entry.quantity)")
                                 }

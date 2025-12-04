@@ -53,44 +53,44 @@ actor PlayerProgressService {
 
     // MARK: - Pandora Box
 
-    func pandoraBoxItemIds() async throws -> [UUID] {
+    func pandoraBoxStackKeys() async throws -> [String] {
         let context = makeContext()
         let profile = try fetchProfile(context: context)
-        return profile.pandoraBoxItemIds
+        return profile.pandoraBoxStackKeys
     }
 
-    func setPandoraBoxItemIds(_ itemIds: [UUID]) async throws -> PlayerSnapshot {
-        guard itemIds.count <= 5 else {
+    func setPandoraBoxStackKeys(_ stackKeys: [String]) async throws -> PlayerSnapshot {
+        guard stackKeys.count <= 5 else {
             throw ProgressError.invalidInput(description: "パンドラボックスには最大5個までのアイテムを登録できます")
         }
-        let uniqueIds = Array(Set(itemIds))
+        let uniqueKeys = Array(Set(stackKeys))
         let context = makeContext()
         let profile = try fetchProfile(context: context)
-        profile.pandoraBoxItemIds = uniqueIds
+        profile.pandoraBoxStackKeys = uniqueKeys
         profile.updatedAt = Date()
         try saveIfNeeded(context)
         return Self.snapshot(from: profile)
     }
 
-    func addToPandoraBox(itemId: UUID) async throws -> PlayerSnapshot {
+    func addToPandoraBox(stackKey: String) async throws -> PlayerSnapshot {
         let context = makeContext()
         let profile = try fetchProfile(context: context)
-        guard !profile.pandoraBoxItemIds.contains(itemId) else {
+        guard !profile.pandoraBoxStackKeys.contains(stackKey) else {
             return Self.snapshot(from: profile)
         }
-        guard profile.pandoraBoxItemIds.count < 5 else {
+        guard profile.pandoraBoxStackKeys.count < 5 else {
             throw ProgressError.invalidInput(description: "パンドラボックスは既に満杯です")
         }
-        profile.pandoraBoxItemIds.append(itemId)
+        profile.pandoraBoxStackKeys.append(stackKey)
         profile.updatedAt = Date()
         try saveIfNeeded(context)
         return Self.snapshot(from: profile)
     }
 
-    func removeFromPandoraBox(itemId: UUID) async throws -> PlayerSnapshot {
+    func removeFromPandoraBox(stackKey: String) async throws -> PlayerSnapshot {
         let context = makeContext()
         let profile = try fetchProfile(context: context)
-        profile.pandoraBoxItemIds.removeAll { $0 == itemId }
+        profile.pandoraBoxStackKeys.removeAll { $0 == stackKey }
         profile.updatedAt = Date()
         try saveIfNeeded(context)
         return Self.snapshot(from: profile)
@@ -154,7 +154,7 @@ private extension PlayerProgressService {
                        gold: record.gold,
                        catTickets: record.catTickets,
                        partySlots: record.partySlots,
-                       pandoraBoxItemIds: record.pandoraBoxItemIds,
+                       pandoraBoxStackKeys: record.pandoraBoxStackKeys,
                        createdAt: record.createdAt,
                        updatedAt: record.updatedAt)
     }

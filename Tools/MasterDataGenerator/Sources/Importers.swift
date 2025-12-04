@@ -6,6 +6,7 @@ import SQLite3
 private struct ItemMasterFile: Decodable {
     struct Item: Decodable {
         let id: String
+        let index: Int
         let name: String
         let description: String
         let category: String
@@ -33,8 +34,8 @@ extension Generator {
             try execute("DELETE FROM items;")
 
             let insertItemSQL = """
-                INSERT INTO items (id, name, description, category, base_price, sell_value, rarity)
-                VALUES (?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO items (id, item_index, name, description, category, base_price, sell_value, rarity)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
             """
             let insertStatSQL = "INSERT INTO item_stat_bonuses (item_id, stat, value) VALUES (?, ?, ?);"
             let insertCombatSQL = "INSERT INTO item_combat_bonuses (item_id, stat, value) VALUES (?, ?, ?);"
@@ -65,12 +66,13 @@ extension Generator {
 
             for item in file.items {
                 bindText(itemStatement, index: 1, value: item.id)
-                bindText(itemStatement, index: 2, value: item.name)
-                bindText(itemStatement, index: 3, value: item.description)
-                bindText(itemStatement, index: 4, value: item.category)
-                bindInt(itemStatement, index: 5, value: item.basePrice)
-                bindInt(itemStatement, index: 6, value: item.sellValue)
-                bindText(itemStatement, index: 7, value: item.rarity)
+                bindInt(itemStatement, index: 2, value: item.index)
+                bindText(itemStatement, index: 3, value: item.name)
+                bindText(itemStatement, index: 4, value: item.description)
+                bindText(itemStatement, index: 5, value: item.category)
+                bindInt(itemStatement, index: 6, value: item.basePrice)
+                bindInt(itemStatement, index: 7, value: item.sellValue)
+                bindText(itemStatement, index: 8, value: item.rarity)
                 try step(itemStatement)
                 reset(itemStatement)
 

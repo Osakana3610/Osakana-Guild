@@ -216,7 +216,7 @@ actor CharacterProgressService {
     // MARK: - Equipment Management
 
     /// キャラクターにアイテムを装備
-    func equipItem(characterId: UUID, inventoryItemId: UUID, quantity: Int = 1) async throws -> CharacterSnapshot {
+    func equipItem(characterId: UUID, inventoryItemStackKey: String, quantity: Int = 1) async throws -> CharacterSnapshot {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "装備数量は1以上である必要があります")
         }
@@ -230,10 +230,12 @@ actor CharacterProgressService {
             throw ProgressError.invalidInput(description: "キャラクターが見つかりません")
         }
 
-        // インベントリアイテムの取得
-        var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.id == inventoryItemId })
-        inventoryDescriptor.fetchLimit = 1
-        guard let inventoryRecord = try context.fetch(inventoryDescriptor).first else {
+        // インベントリアイテムの取得（stackKeyでマッチング）
+        let storage = ItemStorage.playerItem
+        let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageRawValue == storage.rawValue
+        }))
+        guard let inventoryRecord = allInventory.first(where: { $0.stackKey == inventoryItemStackKey }) else {
             throw ProgressError.invalidInput(description: "アイテムが見つかりません")
         }
 
@@ -252,14 +254,9 @@ actor CharacterProgressService {
 
         let now = Date()
 
-        // 同じアイテム（同じmasterDataId、同じ強化状態）が既に装備されているかチェック
+        // 同じアイテム（同じstackKey）が既に装備されているかチェック
         let existingEquipment = currentEquipment.first { record in
-            record.itemId == inventoryRecord.masterDataId &&
-            record.superRareTitleId == inventoryRecord.superRareTitleId &&
-            record.normalTitleId == inventoryRecord.normalTitleId &&
-            record.socketSuperRareTitleId == inventoryRecord.socketSuperRareTitleId &&
-            record.socketNormalTitleId == inventoryRecord.socketNormalTitleId &&
-            record.socketKey == inventoryRecord.socketKey
+            record.stackKey == inventoryRecord.stackKey
         }
 
         if let existing = existingEquipment {
@@ -270,13 +267,13 @@ actor CharacterProgressService {
             // 新規装備レコード作成
             let equipmentRecord = CharacterEquipmentRecord(
                 characterId: characterId,
-                itemId: inventoryRecord.masterDataId,
+                superRareTitleIndex: inventoryRecord.superRareTitleIndex,
+                normalTitleIndex: inventoryRecord.normalTitleIndex,
+                masterDataIndex: inventoryRecord.masterDataIndex,
+                socketSuperRareTitleIndex: inventoryRecord.socketSuperRareTitleIndex,
+                socketNormalTitleIndex: inventoryRecord.socketNormalTitleIndex,
+                socketMasterDataIndex: inventoryRecord.socketMasterDataIndex,
                 quantity: quantity,
-                superRareTitleId: inventoryRecord.superRareTitleId,
-                normalTitleId: inventoryRecord.normalTitleId,
-                socketSuperRareTitleId: inventoryRecord.socketSuperRareTitleId,
-                socketNormalTitleId: inventoryRecord.socketNormalTitleId,
-                socketKey: inventoryRecord.socketKey,
                 createdAt: now,
                 updatedAt: now
             )
@@ -323,48 +320,28 @@ actor CharacterProgressService {
         }
 
         let now = Date()
-
-        // インベントリに戻す（同じ強化状態のアイテムを探す）
-        let enhancement = ItemSnapshot.Enhancement(
-            superRareTitleId: equipmentRecord.superRareTitleId,
-            normalTitleId: equipmentRecord.normalTitleId,
-            socketSuperRareTitleId: equipmentRecord.socketSuperRareTitleId,
-            socketNormalTitleId: equipmentRecord.socketNormalTitleId,
-            socketKey: equipmentRecord.socketKey
-        )
-        let compositeKey = makeCompositeKey(itemId: equipmentRecord.itemId, enhancement: enhancement)
         let storage = ItemStorage.playerItem
 
-        var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.compositeKey == compositeKey && $0.storageRawValue == storage.rawValue
-        })
-        inventoryDescriptor.fetchLimit = 1
+        // インベントリに戻す（同じstackKeyのアイテムを探す）
+        let equipmentStackKey = equipmentRecord.stackKey
+        let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageRawValue == storage.rawValue
+        }))
 
-        if let existingInventory = try context.fetch(inventoryDescriptor).first {
+        if let existingInventory = allInventory.first(where: { $0.stackKey == equipmentStackKey }) {
             // 既存スタックに追加
             existingInventory.quantity = min(existingInventory.quantity + quantity, 99)
         } else {
-            // sortOrderを計算
-            let sortOrder = try await sortOrderCalculator.calculateSortOrder(
-                itemId: equipmentRecord.itemId,
-                superRareTitleId: equipmentRecord.superRareTitleId,
-                normalTitleId: equipmentRecord.normalTitleId,
-                socketKey: equipmentRecord.socketKey
-            )
-
             // 新規インベントリレコード作成
             let inventoryRecord = InventoryItemRecord(
-                compositeKey: compositeKey,
-                masterDataId: equipmentRecord.itemId,
+                superRareTitleIndex: equipmentRecord.superRareTitleIndex,
+                normalTitleIndex: equipmentRecord.normalTitleIndex,
+                masterDataIndex: equipmentRecord.masterDataIndex,
+                socketSuperRareTitleIndex: equipmentRecord.socketSuperRareTitleIndex,
+                socketNormalTitleIndex: equipmentRecord.socketNormalTitleIndex,
+                socketMasterDataIndex: equipmentRecord.socketMasterDataIndex,
                 quantity: quantity,
-                storage: storage,
-                superRareTitleId: equipmentRecord.superRareTitleId,
-                normalTitleId: equipmentRecord.normalTitleId,
-                socketSuperRareTitleId: equipmentRecord.socketSuperRareTitleId,
-                socketNormalTitleId: equipmentRecord.socketNormalTitleId,
-                socketKey: equipmentRecord.socketKey,
-                sortOrder: sortOrder,
-                acquiredAt: now
+                storage: storage
             )
             context.insert(inventoryRecord)
         }
@@ -392,29 +369,17 @@ actor CharacterProgressService {
         return records.map { record in
             CharacterSnapshot.EquippedItem(
                 id: record.id,
-                itemId: record.itemId,
+                superRareTitleIndex: record.superRareTitleIndex,
+                normalTitleIndex: record.normalTitleIndex,
+                masterDataIndex: record.masterDataIndex,
+                socketSuperRareTitleIndex: record.socketSuperRareTitleIndex,
+                socketNormalTitleIndex: record.socketNormalTitleIndex,
+                socketMasterDataIndex: record.socketMasterDataIndex,
                 quantity: record.quantity,
-                superRareTitleId: record.superRareTitleId,
-                normalTitleId: record.normalTitleId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketKey: record.socketKey,
                 createdAt: record.createdAt,
                 updatedAt: record.updatedAt
             )
         }
-    }
-
-    private func makeCompositeKey(itemId: String, enhancement: ItemSnapshot.Enhancement) -> String {
-        let parts = [
-            enhancement.superRareTitleId ?? "",
-            enhancement.normalTitleId ?? "",
-            itemId,
-            enhancement.socketSuperRareTitleId ?? "",
-            enhancement.socketNormalTitleId ?? "",
-            enhancement.socketKey ?? ""
-        ]
-        return parts.joined(separator: "|")
     }
 }
 
@@ -549,13 +514,13 @@ private extension CharacterProgressService {
         }
         let equippedItems = equipment.map { item in
             CharacterSnapshot.EquippedItem(id: item.id,
-                                            itemId: item.itemId,
+                                            superRareTitleIndex: item.superRareTitleIndex,
+                                            normalTitleIndex: item.normalTitleIndex,
+                                            masterDataIndex: item.masterDataIndex,
+                                            socketSuperRareTitleIndex: item.socketSuperRareTitleIndex,
+                                            socketNormalTitleIndex: item.socketNormalTitleIndex,
+                                            socketMasterDataIndex: item.socketMasterDataIndex,
                                             quantity: item.quantity,
-                                            superRareTitleId: item.superRareTitleId,
-                                            normalTitleId: item.normalTitleId,
-                                            socketSuperRareTitleId: item.socketSuperRareTitleId,
-                                            socketNormalTitleId: item.socketNormalTitleId,
-                                            socketKey: item.socketKey,
                                             createdAt: item.createdAt,
                                             updatedAt: item.updatedAt)
         }
@@ -608,8 +573,8 @@ private extension CharacterProgressService {
                                          updatedAt: record.updatedAt)
 
         if record.needsCombatRecalculation {
-            let pandoraItemIds = try fetchPandoraBoxItemIds(context: context)
-            let result = try await runtime.recalculateCombatSnapshot(for: snapshot, pandoraBoxItemIds: pandoraItemIds)
+            let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
+            let result = try await runtime.recalculateCombatSnapshot(for: snapshot, pandoraBoxStackKeys: pandoraStackKeys)
             let updatedAttributes = CharacterSnapshot.CoreAttributes(strength: result.attributes.strength,
                                                                       wisdom: result.attributes.wisdom,
                                                                       spirit: result.attributes.spirit,
@@ -752,13 +717,13 @@ private extension CharacterProgressService {
         for item in snapshot.equippedItems {
             let record = CharacterEquipmentRecord(id: item.id,
                                                    characterId: characterId,
-                                                   itemId: item.itemId,
+                                                   superRareTitleIndex: item.superRareTitleIndex,
+                                                   normalTitleIndex: item.normalTitleIndex,
+                                                   masterDataIndex: item.masterDataIndex,
+                                                   socketSuperRareTitleIndex: item.socketSuperRareTitleIndex,
+                                                   socketNormalTitleIndex: item.socketNormalTitleIndex,
+                                                   socketMasterDataIndex: item.socketMasterDataIndex,
                                                    quantity: item.quantity,
-                                                   superRareTitleId: item.superRareTitleId,
-                                                   normalTitleId: item.normalTitleId,
-                                                   socketSuperRareTitleId: item.socketSuperRareTitleId,
-                                                   socketNormalTitleId: item.socketNormalTitleId,
-                                                   socketKey: item.socketKey,
                                                    createdAt: item.createdAt,
                                                    updatedAt: item.updatedAt)
             context.insert(record)
@@ -829,12 +794,12 @@ private extension CharacterProgressService {
         return try context.fetch(descriptor)
     }
 
-    func fetchPandoraBoxItemIds(context: ModelContext) throws -> Set<UUID> {
+    func fetchPandoraBoxStackKeys(context: ModelContext) throws -> Set<String> {
         var descriptor = FetchDescriptor<PlayerProfileRecord>()
         descriptor.fetchLimit = 1
         guard let profile = try context.fetch(descriptor).first else {
             throw ProgressError.playerNotFound
         }
-        return Set(profile.pandoraBoxItemIds)
+        return Set(profile.pandoraBoxStackKeys)
     }
 }

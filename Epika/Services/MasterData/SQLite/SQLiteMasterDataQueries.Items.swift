@@ -6,6 +6,7 @@ extension SQLiteMasterDataManager {
     func fetchAllItems() throws -> [ItemDefinition] {
         struct Builder {
             var id: String
+            var index: Int16
             var name: String
             var description: String
             var category: String
@@ -24,23 +25,25 @@ extension SQLiteMasterDataManager {
         var builders: [String: Builder] = [:]
         var orderedIds: [String] = []
 
-        let itemSQL = "SELECT id, name, description, category, base_price, sell_value, rarity FROM items;"
+        let itemSQL = "SELECT id, item_index, name, description, category, base_price, sell_value, rarity FROM items;"
         let itemStatement = try prepare(itemSQL)
         defer { sqlite3_finalize(itemStatement) }
         while sqlite3_step(itemStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(itemStatement, 0),
-                  let nameC = sqlite3_column_text(itemStatement, 1),
-                  let descC = sqlite3_column_text(itemStatement, 2),
-                  let categoryC = sqlite3_column_text(itemStatement, 3) else { continue }
+                  let nameC = sqlite3_column_text(itemStatement, 2),
+                  let descC = sqlite3_column_text(itemStatement, 3),
+                  let categoryC = sqlite3_column_text(itemStatement, 4) else { continue }
             let id = String(cString: idC)
+            let index = Int16(sqlite3_column_int(itemStatement, 1))
             let name = String(cString: nameC)
             let description = String(cString: descC)
             let category = String(cString: categoryC)
-            let basePrice = Int(sqlite3_column_int(itemStatement, 4))
-            let sellValue = Int(sqlite3_column_int(itemStatement, 5))
-            let rarityValue = sqlite3_column_text(itemStatement, 6).flatMap { String(cString: $0) }
+            let basePrice = Int(sqlite3_column_int(itemStatement, 5))
+            let sellValue = Int(sqlite3_column_int(itemStatement, 6))
+            let rarityValue = sqlite3_column_text(itemStatement, 7).flatMap { String(cString: $0) }
             builders[id] = Builder(
                 id: id,
+                index: index,
                 name: name,
                 description: description,
                 category: category,
@@ -111,6 +114,7 @@ extension SQLiteMasterDataManager {
         return orderedIds.compactMap { builders[$0] }.map { builder in
             ItemDefinition(
                 id: builder.id,
+                index: builder.index,
                 name: builder.name,
                 description: builder.description,
                 category: builder.category,

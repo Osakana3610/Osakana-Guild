@@ -18,6 +18,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS items (
                 id TEXT PRIMARY KEY,
+                item_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,
                 category TEXT NOT NULL,

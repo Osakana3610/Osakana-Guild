@@ -18,6 +18,7 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
     }
 
     let id: String
+    let index: Int16
     let name: String
     let description: String
     let category: String

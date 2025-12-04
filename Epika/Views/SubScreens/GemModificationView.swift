@@ -99,7 +99,7 @@ struct GemModificationView: View {
                         .foregroundStyle(.secondary)
                         .font(.callout)
                 } else {
-                    ForEach(gems, id: \.progressId) { gem in
+                    ForEach(gems, id: \.stackKey) { gem in
                         Button {
                             Task {
                                 await selectGem(gem)
@@ -145,12 +145,12 @@ struct GemModificationView: View {
         socketableItems = []
 
         do {
-            // ソケット可能アイテムのIDを取得
-            let socketableSnapshots = try await gemService.getSocketableItems(for: gem.progressId)
-            let socketableIds = Set(socketableSnapshots.map { $0.id })
+            // ソケット可能アイテムのstackKeyを取得
+            let socketableSnapshots = try await gemService.getSocketableItems(for: gem.stackKey)
+            let socketableStackKeys = Set(socketableSnapshots.map { $0.stackKey })
 
             // キャッシュからフィルタリング
-            socketableItems = allItems.filter { socketableIds.contains($0.progressId) }
+            socketableItems = allItems.filter { socketableStackKeys.contains($0.stackKey) }
         } catch {
             loadError = error.localizedDescription
             selectedGem = nil
@@ -164,7 +164,7 @@ struct GemModificationView: View {
         guard let gem = selectedGem, let target = targetItem else { return }
 
         do {
-            try await gemService.attachGem(gemItemId: gem.progressId, targetItemId: target.progressId)
+            try await gemService.attachGem(gemItemStackKey: gem.stackKey, targetItemStackKey: target.stackKey)
             selectedGem = nil
             targetItem = nil
             await loadData()
@@ -173,8 +173,6 @@ struct GemModificationView: View {
         }
     }
 }
-
-extension ItemSnapshot: Identifiable { }
 
 private struct GemRow: View {
     let item: LightweightItemData
@@ -234,7 +232,7 @@ private struct SocketableItemsSheet: View {
                         }
 
                         Section("装着先を選択") {
-                            ForEach(socketableItems, id: \.progressId) { item in
+                            ForEach(socketableItems, id: \.stackKey) { item in
                                 Button {
                                     onSelect(item)
                                     dismiss()

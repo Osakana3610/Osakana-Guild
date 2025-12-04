@@ -33,70 +33,82 @@ actor ItemSynthesisProgressService {
         return equipments.filter { $0.id != parent.id && childIds.contains($0.masterDataId) }
     }
 
-    func preview(parentId: UUID, childId: UUID) async throws -> SynthesisPreview {
-        let context = try await resolveContext(parentId: parentId, childId: childId)
+    func preview(parentStackKey: String, childStackKey: String) async throws -> SynthesisPreview {
+        let context = try await resolveContext(parentStackKey: parentStackKey, childStackKey: childStackKey)
         let cost = calculateCost()
         return SynthesisPreview(resultDefinition: context.resultDefinition, cost: cost)
     }
 
-    func synthesize(parentId: UUID, childId: UUID) async throws -> RuntimeEquipment {
-        let synthesisContext = try await resolveContext(parentId: parentId, childId: childId)
+    func synthesize(parentStackKey: String, childStackKey: String) async throws -> RuntimeEquipment {
+        let synthesisContext = try await resolveContext(parentStackKey: parentStackKey, childStackKey: childStackKey)
         let cost = calculateCost()
 
         if cost > 0 {
             _ = try await playerService.spendGold(cost)
         }
 
-        try await inventoryService.decrementItem(id: childId, quantity: 1)
+        try await inventoryService.decrementItem(stackKey: childStackKey, quantity: 1)
 
-        let snapshot = try await inventoryService.updateItem(id: parentId) { record in
+        // 結果アイテムのマスターデータインデックスを取得
+        guard let resultIndex = await masterDataService.getItemIndex(for: synthesisContext.recipe.resultItemId) else {
+            throw ProgressError.itemDefinitionUnavailable(ids: [synthesisContext.recipe.resultItemId])
+        }
+
+        let snapshot = try await inventoryService.updateItem(stackKey: parentStackKey) { record in
             guard record.storage == .playerItem else {
                 throw ProgressError.invalidInput(description: "親アイテムは所持品から選択してください")
             }
-            guard record.masterDataId == synthesisContext.recipe.parentItemId else {
-                throw ProgressError.invalidInput(description: "親アイテムがレシピと一致しません")
-            }
-            record.masterDataId = synthesisContext.recipe.resultItemId
-            record.normalTitleId = nil
-            record.superRareTitleId = nil
-            // ソケット情報（socketKey, socketSuperRareTitleId, socketNormalTitleId）は維持
-            // ユーザーが「残る側」として選んだ親アイテムのソケットは引き継がれる
-            record.acquiredAt = Date()
+            // マスターデータインデックスを更新
+            record.masterDataIndex = resultIndex
+            // 称号情報をリセット
+            record.normalTitleIndex = 0
+            record.superRareTitleIndex = 0
+            // ソケット情報は維持
         }
 
-        return RuntimeEquipment(id: snapshot.id,
-                                masterDataId: synthesisContext.resultDefinition.id,
-                                displayName: synthesisContext.resultDefinition.name,
-                                description: synthesisContext.resultDefinition.description,
-                                quantity: snapshot.quantity,
-                                category: RuntimeEquipment.Category(from: synthesisContext.resultDefinition.category),
-                                baseValue: synthesisContext.resultDefinition.basePrice,
-                                sellValue: synthesisContext.resultDefinition.sellValue,
-                                enhancement: snapshot.enhancements,
-                                rarity: synthesisContext.resultDefinition.rarity,
-                                statBonuses: synthesisContext.resultDefinition.statBonuses,
-                                combatBonuses: synthesisContext.resultDefinition.combatBonuses,
-                                acquiredAt: snapshot.acquiredAt)
+        return RuntimeEquipment(
+            id: snapshot.stackKey,
+            masterDataIndex: snapshot.masterDataIndex,
+            masterDataId: synthesisContext.resultDefinition.id,
+            displayName: synthesisContext.resultDefinition.name,
+            description: synthesisContext.resultDefinition.description,
+            quantity: snapshot.quantity,
+            category: RuntimeEquipment.Category(from: synthesisContext.resultDefinition.category),
+            baseValue: synthesisContext.resultDefinition.basePrice,
+            sellValue: synthesisContext.resultDefinition.sellValue,
+            enhancement: .init(
+                superRareTitleIndex: snapshot.enhancements.superRareTitleIndex,
+                normalTitleIndex: snapshot.enhancements.normalTitleIndex,
+                socketSuperRareTitleIndex: snapshot.enhancements.socketSuperRareTitleIndex,
+                socketNormalTitleIndex: snapshot.enhancements.socketNormalTitleIndex,
+                socketMasterDataIndex: snapshot.enhancements.socketMasterDataIndex
+            ),
+            rarity: synthesisContext.resultDefinition.rarity,
+            statBonuses: synthesisContext.resultDefinition.statBonuses,
+            combatBonuses: synthesisContext.resultDefinition.combatBonuses
+        )
     }
 
     private func loadRecipes() async throws -> [SynthesisRecipeDefinition] {
         try await masterDataService.getAllSynthesisRecipes()
     }
 
-    private func resolveContext(parentId: UUID,
-                                childId: UUID) async throws -> (parent: RuntimeEquipment,
-                                                                 child: RuntimeEquipment,
-                                                                 recipe: SynthesisRecipeDefinition,
-                                                                 resultDefinition: ItemDefinition) {
-        guard parentId != childId else {
+    private func resolveContext(
+        parentStackKey: String,
+        childStackKey: String
+    ) async throws -> (parent: RuntimeEquipment,
+                       child: RuntimeEquipment,
+                       recipe: SynthesisRecipeDefinition,
+                       resultDefinition: ItemDefinition) {
+        guard parentStackKey != childStackKey else {
             throw ProgressError.invalidInput(description: "同じアイテム同士は合成できません")
         }
 
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        guard let parent = equipments.first(where: { $0.id == parentId }) else {
+        guard let parent = equipments.first(where: { $0.id == parentStackKey }) else {
             throw ProgressError.invalidInput(description: "親アイテムが見つかりません")
         }
-        guard let child = equipments.first(where: { $0.id == childId }) else {
+        guard let child = equipments.first(where: { $0.id == childStackKey }) else {
             throw ProgressError.invalidInput(description: "子アイテムが見つかりません")
         }
 

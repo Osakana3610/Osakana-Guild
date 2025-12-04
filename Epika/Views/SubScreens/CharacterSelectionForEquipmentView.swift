@@ -118,7 +118,7 @@ struct EquipmentEditorView: View {
     @EnvironmentObject private var progressService: ProgressService
     @State private var currentCharacter: RuntimeCharacter
     @State private var availableItems: [LightweightItemData] = []
-    @State private var itemDefinitions: [String: ItemDefinition] = [:]
+    @State private var itemDefinitions: [Int16: ItemDefinition] = [:]
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var equipError: String?
@@ -197,7 +197,7 @@ struct EquipmentEditorView: View {
                     .foregroundStyle(.secondary)
             } else {
                 VStack(alignment: .leading, spacing: 4) {
-                    ForEach(availableItems, id: \.progressId) { item in
+                    ForEach(availableItems, id: \.stackKey) { item in
                         equipmentCandidateRow(item)
                     }
                 }
@@ -207,7 +207,7 @@ struct EquipmentEditorView: View {
 
     @ViewBuilder
     private func equipmentCandidateRow(_ item: LightweightItemData) -> some View {
-        let definition = itemDefinitions[item.masterDataId]
+        let definition = itemDefinitions[item.masterDataIndex]
         let validation = validateEquipment(definition: definition)
 
         HStack {
@@ -254,11 +254,11 @@ struct EquipmentEditorView: View {
             availableItems = displayService.getCachedItemsFlat(categories: equipCategories)
 
             // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
-            let allItemIds = Set(availableItems.map { $0.masterDataId })
-                .union(Set(currentCharacter.progress.equippedItems.map { $0.itemId }))
-            if !allItemIds.isEmpty {
-                let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(allItemIds))
-                itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+            let allItemIndices = Set(availableItems.map { $0.masterDataIndex })
+                .union(Set(currentCharacter.progress.equippedItems.map { $0.masterDataIndex }))
+            if !allItemIndices.isEmpty {
+                let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(byIndices: Array(allItemIndices))
+                itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
             }
         } catch {
             loadError = error.localizedDescription
@@ -317,7 +317,7 @@ struct EquipmentEditorView: View {
         do {
             let snapshot = try await characterService.equipItem(
                 characterId: currentCharacter.id,
-                inventoryItemId: item.progressId
+                inventoryItemStackKey: item.stackKey
             )
             let runtime = try await characterService.runtimeCharacter(from: snapshot)
             currentCharacter = runtime

@@ -2,65 +2,68 @@ import Foundation
 import SwiftData
 
 struct ItemSnapshot: Sendable {
-    struct Enhancement: Sendable, Equatable {
-        var superRareTitleId: String?
-        var normalTitleId: String?
-        var socketSuperRareTitleId: String?
-        var socketNormalTitleId: String?
-        var socketKey: String?
+    /// Int Indexベースの強化情報
+    struct Enhancement: Sendable, Equatable, Hashable {
+        var superRareTitleIndex: Int16
+        var normalTitleIndex: Int8
+        var socketSuperRareTitleIndex: Int16
+        var socketNormalTitleIndex: Int8
+        var socketMasterDataIndex: Int16
 
-        nonisolated static func == (lhs: Enhancement, rhs: Enhancement) -> Bool {
-            lhs.superRareTitleId == rhs.superRareTitleId &&
-            lhs.normalTitleId == rhs.normalTitleId &&
-            lhs.socketSuperRareTitleId == rhs.socketSuperRareTitleId &&
-            lhs.socketNormalTitleId == rhs.socketNormalTitleId &&
-            lhs.socketKey == rhs.socketKey
+        nonisolated init(superRareTitleIndex: Int16 = 0,
+                         normalTitleIndex: Int8 = 0,
+                         socketSuperRareTitleIndex: Int16 = 0,
+                         socketNormalTitleIndex: Int8 = 0,
+                         socketMasterDataIndex: Int16 = 0) {
+            self.superRareTitleIndex = superRareTitleIndex
+            self.normalTitleIndex = normalTitleIndex
+            self.socketSuperRareTitleIndex = socketSuperRareTitleIndex
+            self.socketNormalTitleIndex = socketNormalTitleIndex
+            self.socketMasterDataIndex = socketMasterDataIndex
         }
 
-        func compositeKey(for itemId: String) -> String {
-            let parts = [superRareTitleId ?? "",
-                         normalTitleId ?? "",
-                         itemId,
-                         socketKey ?? ""]
-            return parts.joined(separator: "|")
+        /// 宝石改造が施されているか
+        var hasSocket: Bool {
+            socketMasterDataIndex != 0
         }
     }
 
     let persistentIdentifier: PersistentIdentifier
-    var id: UUID
-    var compositeKey: String
-    var itemId: String
+
+    /// スタック識別キー（6つのindexの組み合わせ）
+    var stackKey: String
+    var masterDataIndex: Int16
     var quantity: Int
     var storage: ItemStorage
     var enhancements: Enhancement
-    var acquiredAt: Date
+
+    /// 自動売却ルール用キー（ソケット情報を除く3要素）
+    var autoTradeKey: String {
+        "\(enhancements.superRareTitleIndex)|\(enhancements.normalTitleIndex)|\(masterDataIndex)"
+    }
+}
+
+extension ItemSnapshot: Identifiable {
+    var id: String { stackKey }
 }
 
 extension ItemSnapshot: Equatable {
-    nonisolated static func == (lhs: ItemSnapshot, rhs: ItemSnapshot) -> Bool {
-        lhs.id == rhs.id &&
-        lhs.compositeKey == rhs.compositeKey &&
-        lhs.itemId == rhs.itemId &&
+    static func == (lhs: ItemSnapshot, rhs: ItemSnapshot) -> Bool {
+        lhs.stackKey == rhs.stackKey &&
+        lhs.masterDataIndex == rhs.masterDataIndex &&
         lhs.quantity == rhs.quantity &&
         lhs.storage == rhs.storage &&
-        lhs.enhancements == rhs.enhancements &&
-        lhs.acquiredAt == rhs.acquiredAt
+        lhs.enhancements == rhs.enhancements
     }
 }
 
 extension ItemSnapshot: Hashable {
-    nonisolated func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(compositeKey)
-        hasher.combine(itemId)
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(stackKey)
+        hasher.combine(masterDataIndex)
         hasher.combine(quantity)
         hasher.combine(storage)
-        hasher.combine(enhancements.superRareTitleId)
-        hasher.combine(enhancements.normalTitleId)
-        hasher.combine(enhancements.socketSuperRareTitleId)
-        hasher.combine(enhancements.socketNormalTitleId)
-        hasher.combine(enhancements.socketKey)
-        hasher.combine(acquiredAt)
+        hasher.combine(enhancements)
     }
 }
 

@@ -41,7 +41,7 @@ struct PandoraBoxView: View {
             .sheet(isPresented: $showingItemPicker) {
                 ItemPickerSheet(
                     availableItems: availableItems.filter { item in
-                        !pandoraItems.contains { $0.progressId == item.progressId }
+                        !pandoraItems.contains { $0.stackKey == item.stackKey }
                     },
                     displayService: displayService,
                     onSelect: { item in
@@ -74,7 +74,7 @@ struct PandoraBoxView: View {
                         .foregroundStyle(.secondary)
                         .font(.callout)
                 } else {
-                    ForEach(pandoraItems, id: \.progressId) { item in
+                    ForEach(pandoraItems, id: \.stackKey) { item in
                         PandoraItemRow(item: item, displayService: displayService)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
@@ -110,7 +110,7 @@ struct PandoraBoxView: View {
 
         do {
             let player = try await playerService.currentPlayer()
-            let pandoraIds = Set(player.pandoraBoxItemIds)
+            let pandoraStackKeys = Set(player.pandoraBoxStackKeys)
 
             // アイテムを取得してキャッシュに登録
             let items = try await inventoryService.allItems(storage: .playerItem)
@@ -122,7 +122,7 @@ struct PandoraBoxView: View {
 
             // 登録済みアイテムは全カテゴリから取得（既存の非装備アイテムも表示して削除可能にする）
             let allItems = displayService.getCachedItemsFlat(categories: Set(ItemSaleCategory.allCases))
-            pandoraItems = allItems.filter { pandoraIds.contains($0.progressId) }
+            pandoraItems = allItems.filter { pandoraStackKeys.contains($0.stackKey) }
         } catch {
             loadError = error.localizedDescription
         }
@@ -133,7 +133,7 @@ struct PandoraBoxView: View {
     @MainActor
     private func addToPandoraBox(item: LightweightItemData) async {
         do {
-            _ = try await playerService.addToPandoraBox(itemId: item.progressId)
+            _ = try await playerService.addToPandoraBox(stackKey: item.stackKey)
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -143,7 +143,7 @@ struct PandoraBoxView: View {
     @MainActor
     private func removeFromPandoraBox(item: LightweightItemData) async {
         do {
-            _ = try await playerService.removeFromPandoraBox(itemId: item.progressId)
+            _ = try await playerService.removeFromPandoraBox(stackKey: item.stackKey)
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -194,7 +194,7 @@ private struct ItemPickerSheet: View {
                         Text("所持品にアイテムがないか、すべて登録済みです")
                     }
                 } else {
-                    ForEach(availableItems, id: \.progressId) { item in
+                    ForEach(availableItems, id: \.stackKey) { item in
                         Button {
                             onSelect(item)
                             dismiss()

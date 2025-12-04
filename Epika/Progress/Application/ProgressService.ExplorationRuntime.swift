@@ -179,15 +179,25 @@ extension ProgressService {
     func applyDropRewards(_ drops: [ItemDropResult]) async throws {
         let autoTradeKeys = try await autoTrade.registeredCompositeKeys()
         for drop in drops where drop.quantity > 0 {
-            let enhancement = ItemSnapshot.Enhancement(superRareTitleId: drop.superRareTitleId,
-                                                       normalTitleId: drop.normalTitleId,
-                                                       socketSuperRareTitleId: nil,
-                                                       socketNormalTitleId: nil,
-                                                       socketKey: nil)
-            // 自動売却キーはソケットを除外した3要素形式
-            let autoTradeKey = [drop.superRareTitleId ?? "",
-                                drop.normalTitleId ?? "",
-                                drop.item.id].joined(separator: "|")
+            // String IDをInt Indexに変換
+            let superRareTitleIndex: Int16 = await {
+                guard let id = drop.superRareTitleId else { return 0 }
+                return await masterData.getSuperRareTitleIndex(for: id) ?? 0
+            }()
+            let normalTitleIndex: Int8 = await {
+                guard let id = drop.normalTitleId else { return 0 }
+                return await masterData.getTitleIndex(for: id) ?? 0
+            }()
+
+            let enhancement = ItemSnapshot.Enhancement(
+                superRareTitleIndex: superRareTitleIndex,
+                normalTitleIndex: normalTitleIndex,
+                socketSuperRareTitleIndex: 0,
+                socketNormalTitleIndex: 0,
+                socketMasterDataIndex: 0
+            )
+            // 自動売却キーはソケットを除外した3要素形式（Int Index）
+            let autoTradeKey = "\(superRareTitleIndex)|\(normalTitleIndex)|\(drop.item.index)"
             if autoTradeKeys.contains(autoTradeKey) {
                 // 自動売却：ショップ在庫に追加してゴールド取得
                 let result = try await shop.addPlayerSoldItem(itemId: drop.item.id, quantity: drop.quantity)
@@ -196,13 +206,13 @@ extension ProgressService {
                 }
                 // 上限超過分はインベントリに一時保管
                 if result.overflow > 0 {
-                    _ = try await inventory.addItem(itemId: drop.item.id,
+                    _ = try await inventory.addItem(masterDataIndex: drop.item.index,
                                                     quantity: result.overflow,
                                                     storage: .playerItem,
                                                     enhancements: enhancement)
                 }
             } else {
-                _ = try await inventory.addItem(itemId: drop.item.id,
+                _ = try await inventory.addItem(masterDataIndex: drop.item.index,
                                                 quantity: drop.quantity,
                                                 storage: .playerItem,
                                                 enhancements: enhancement)

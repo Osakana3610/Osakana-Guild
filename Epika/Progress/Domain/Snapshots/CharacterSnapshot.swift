@@ -49,15 +49,23 @@ struct CharacterSnapshot: Sendable, Hashable {
 
     struct EquippedItem: Sendable, Hashable {
         var id: UUID
-        var itemId: String
+        // アイテム本体
+        var superRareTitleIndex: Int16
+        var normalTitleIndex: Int8
+        var masterDataIndex: Int16
+        // ソケット（宝石改造）
+        var socketSuperRareTitleIndex: Int16
+        var socketNormalTitleIndex: Int8
+        var socketMasterDataIndex: Int16
+        // その他
         var quantity: Int
-        var superRareTitleId: String?
-        var normalTitleId: String?
-        var socketSuperRareTitleId: String?
-        var socketNormalTitleId: String?
-        var socketKey: String?
         var createdAt: Date
         var updatedAt: Date
+
+        /// スタック識別キー
+        var stackKey: String {
+            "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"
+        }
     }
 
     struct AchievementCounters: Sendable, Hashable {

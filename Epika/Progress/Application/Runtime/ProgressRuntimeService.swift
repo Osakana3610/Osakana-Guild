@@ -17,9 +17,9 @@ final class ProgressRuntimeService {
     }
 
     func recalculateCombatSnapshot(for snapshot: CharacterSnapshot,
-                                    pandoraBoxItemIds: Set<UUID> = []) async throws -> CombatStatCalculator.Result {
+                                    pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
         let progress = makeRuntimeCharacterProgress(from: snapshot)
-        return try await runtimeService.recalculateCombatStats(for: progress, pandoraBoxItemIds: pandoraBoxItemIds)
+        return try await runtimeService.recalculateCombatStats(for: progress, pandoraBoxStackKeys: pandoraBoxStackKeys)
     }
 
     func raceMaxLevel(for raceId: String) async throws -> Int {
@@ -126,13 +126,13 @@ private extension ProgressRuntimeService {
             },
             equippedItems: snapshot.equippedItems.map {
                 RuntimeCharacterProgress.EquippedItem(id: $0.id,
-                                                      itemId: $0.itemId,
+                                                      superRareTitleIndex: $0.superRareTitleIndex,
+                                                      normalTitleIndex: $0.normalTitleIndex,
+                                                      masterDataIndex: $0.masterDataIndex,
+                                                      socketSuperRareTitleIndex: $0.socketSuperRareTitleIndex,
+                                                      socketNormalTitleIndex: $0.socketNormalTitleIndex,
+                                                      socketMasterDataIndex: $0.socketMasterDataIndex,
                                                       quantity: $0.quantity,
-                                                      superRareTitleId: $0.superRareTitleId,
-                                                      normalTitleId: $0.normalTitleId,
-                                                      socketSuperRareTitleId: $0.socketSuperRareTitleId,
-                                                      socketNormalTitleId: $0.socketNormalTitleId,
-                                                      socketKey: $0.socketKey,
                                                       createdAt: $0.createdAt,
                                                       updatedAt: $0.updatedAt)
             },

@@ -188,36 +188,44 @@ final class CharacterSkillRecord {
 final class CharacterEquipmentRecord {
     var id: UUID = UUID()
     var characterId: UUID = UUID()
-    var itemId: String = ""
+    // アイテム本体
+    var superRareTitleIndex: Int16 = 0
+    var normalTitleIndex: Int8 = 0
+    var masterDataIndex: Int16 = 0
+    // ソケット（宝石改造）
+    var socketSuperRareTitleIndex: Int16 = 0
+    var socketNormalTitleIndex: Int8 = 0
+    var socketMasterDataIndex: Int16 = 0
+    // その他
     var quantity: Int = 0
-    var superRareTitleId: String?
-    var normalTitleId: String?
-    var socketSuperRareTitleId: String?
-    var socketNormalTitleId: String?
-    var socketKey: String?
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
 
+    /// スタック識別キー（インベントリと同じ形式）
+    var stackKey: String {
+        "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"
+    }
+
     init(id: UUID = UUID(),
          characterId: UUID,
-         itemId: String,
+         superRareTitleIndex: Int16,
+         normalTitleIndex: Int8,
+         masterDataIndex: Int16,
+         socketSuperRareTitleIndex: Int16,
+         socketNormalTitleIndex: Int8,
+         socketMasterDataIndex: Int16,
          quantity: Int,
-         superRareTitleId: String?,
-         normalTitleId: String?,
-         socketSuperRareTitleId: String?,
-         socketNormalTitleId: String?,
-         socketKey: String?,
          createdAt: Date,
          updatedAt: Date) {
         self.id = id
         self.characterId = characterId
-        self.itemId = itemId
+        self.superRareTitleIndex = superRareTitleIndex
+        self.normalTitleIndex = normalTitleIndex
+        self.masterDataIndex = masterDataIndex
+        self.socketSuperRareTitleIndex = socketSuperRareTitleIndex
+        self.socketNormalTitleIndex = socketNormalTitleIndex
+        self.socketMasterDataIndex = socketMasterDataIndex
         self.quantity = quantity
-        self.superRareTitleId = superRareTitleId
-        self.normalTitleId = normalTitleId
-        self.socketSuperRareTitleId = socketSuperRareTitleId
-        self.socketNormalTitleId = socketNormalTitleId
-        self.socketKey = socketKey
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
