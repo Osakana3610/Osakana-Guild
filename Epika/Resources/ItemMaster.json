@@ -229,7 +229,7 @@
       "id": "golem_fragment",
       "name": "魔造素材・石片",
       "description": "ゴーレムの体の一部。魔造生物の素材",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
@@ -237,7 +237,7 @@
       "id": "golem_core",
       "name": "魔造素材・核",
       "description": "魔造生物の動力源となる核",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 1000,
       "sellValue": 500
     },
@@ -7722,466 +7722,466 @@
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_03",
+      "id": "dummy_mazo_material_03",
       "name": "ダミーの魔造素材3",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_04",
+      "id": "dummy_mazo_material_04",
       "name": "ダミーの魔造素材4",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_05",
+      "id": "dummy_mazo_material_05",
       "name": "ダミーの魔造素材5",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_06",
+      "id": "dummy_mazo_material_06",
       "name": "ダミーの魔造素材6",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_07",
+      "id": "dummy_mazo_material_07",
       "name": "ダミーの魔造素材7",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_08",
+      "id": "dummy_mazo_material_08",
       "name": "ダミーの魔造素材8",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_09",
+      "id": "dummy_mazo_material_09",
       "name": "ダミーの魔造素材9",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_10",
+      "id": "dummy_mazo_material_10",
       "name": "ダミーの魔造素材10",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_11",
+      "id": "dummy_mazo_material_11",
       "name": "ダミーの魔造素材11",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_12",
+      "id": "dummy_mazo_material_12",
       "name": "ダミーの魔造素材12",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_13",
+      "id": "dummy_mazo_material_13",
       "name": "ダミーの魔造素材13",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_14",
+      "id": "dummy_mazo_material_14",
       "name": "ダミーの魔造素材14",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_15",
+      "id": "dummy_mazo_material_15",
       "name": "ダミーの魔造素材15",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_16",
+      "id": "dummy_mazo_material_16",
       "name": "ダミーの魔造素材16",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_17",
+      "id": "dummy_mazo_material_17",
       "name": "ダミーの魔造素材17",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_18",
+      "id": "dummy_mazo_material_18",
       "name": "ダミーの魔造素材18",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_19",
+      "id": "dummy_mazo_material_19",
       "name": "ダミーの魔造素材19",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_20",
+      "id": "dummy_mazo_material_20",
       "name": "ダミーの魔造素材20",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_21",
+      "id": "dummy_mazo_material_21",
       "name": "ダミーの魔造素材21",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_22",
+      "id": "dummy_mazo_material_22",
       "name": "ダミーの魔造素材22",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_23",
+      "id": "dummy_mazo_material_23",
       "name": "ダミーの魔造素材23",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_24",
+      "id": "dummy_mazo_material_24",
       "name": "ダミーの魔造素材24",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_25",
+      "id": "dummy_mazo_material_25",
       "name": "ダミーの魔造素材25",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_26",
+      "id": "dummy_mazo_material_26",
       "name": "ダミーの魔造素材26",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_27",
+      "id": "dummy_mazo_material_27",
       "name": "ダミーの魔造素材27",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_28",
+      "id": "dummy_mazo_material_28",
       "name": "ダミーの魔造素材28",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_29",
+      "id": "dummy_mazo_material_29",
       "name": "ダミーの魔造素材29",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_30",
+      "id": "dummy_mazo_material_30",
       "name": "ダミーの魔造素材30",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_31",
+      "id": "dummy_mazo_material_31",
       "name": "ダミーの魔造素材31",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_32",
+      "id": "dummy_mazo_material_32",
       "name": "ダミーの魔造素材32",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_33",
+      "id": "dummy_mazo_material_33",
       "name": "ダミーの魔造素材33",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_34",
+      "id": "dummy_mazo_material_34",
       "name": "ダミーの魔造素材34",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_35",
+      "id": "dummy_mazo_material_35",
       "name": "ダミーの魔造素材35",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_36",
+      "id": "dummy_mazo_material_36",
       "name": "ダミーの魔造素材36",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_37",
+      "id": "dummy_mazo_material_37",
       "name": "ダミーの魔造素材37",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_38",
+      "id": "dummy_mazo_material_38",
       "name": "ダミーの魔造素材38",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_39",
+      "id": "dummy_mazo_material_39",
       "name": "ダミーの魔造素材39",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_40",
+      "id": "dummy_mazo_material_40",
       "name": "ダミーの魔造素材40",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_41",
+      "id": "dummy_mazo_material_41",
       "name": "ダミーの魔造素材41",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_42",
+      "id": "dummy_mazo_material_42",
       "name": "ダミーの魔造素材42",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_43",
+      "id": "dummy_mazo_material_43",
       "name": "ダミーの魔造素材43",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_44",
+      "id": "dummy_mazo_material_44",
       "name": "ダミーの魔造素材44",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_45",
+      "id": "dummy_mazo_material_45",
       "name": "ダミーの魔造素材45",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_46",
+      "id": "dummy_mazo_material_46",
       "name": "ダミーの魔造素材46",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_47",
+      "id": "dummy_mazo_material_47",
       "name": "ダミーの魔造素材47",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_48",
+      "id": "dummy_mazo_material_48",
       "name": "ダミーの魔造素材48",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_49",
+      "id": "dummy_mazo_material_49",
       "name": "ダミーの魔造素材49",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_50",
+      "id": "dummy_mazo_material_50",
       "name": "ダミーの魔造素材50",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_51",
+      "id": "dummy_mazo_material_51",
       "name": "ダミーの魔造素材51",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_52",
+      "id": "dummy_mazo_material_52",
       "name": "ダミーの魔造素材52",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_53",
+      "id": "dummy_mazo_material_53",
       "name": "ダミーの魔造素材53",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_54",
+      "id": "dummy_mazo_material_54",
       "name": "ダミーの魔造素材54",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_55",
+      "id": "dummy_mazo_material_55",
       "name": "ダミーの魔造素材55",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_56",
+      "id": "dummy_mazo_material_56",
       "name": "ダミーの魔造素材56",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_57",
+      "id": "dummy_mazo_material_57",
       "name": "ダミーの魔造素材57",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_58",
+      "id": "dummy_mazo_material_58",
       "name": "ダミーの魔造素材58",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_59",
+      "id": "dummy_mazo_material_59",
       "name": "ダミーの魔造素材59",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },
     {
-      "id": "dummy_magic_material_60",
+      "id": "dummy_mazo_material_60",
       "name": "ダミーの魔造素材60",
       "description": "テスト用の魔造素材アイテムです",
-      "category": "magic_material",
+      "category": "mazo_material",
       "basePrice": 100,
       "sellValue": 50
     },

@@ -17,13 +17,13 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
     case other = "other"
     case raceSpecific = "race_specific"
     case forSynthesis = "for_synthesis"
-    case magicMaterial = "magic_material"
+    case mazoMaterial = "mazo_material"
 
     static let ordered: [ItemSaleCategory] = [
         .thinSword, .sword, .katana, .bow,
         .armor, .heavyArmor, .shield, .gauntlet,
         .wand, .rod, .grimoire, .robe, .gem,
-        .other, .raceSpecific, .forSynthesis, .magicMaterial
+        .other, .raceSpecific, .forSynthesis, .mazoMaterial
     ]
 
     var displayName: String {
@@ -44,7 +44,7 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
         case .other: return "その他"
         case .raceSpecific: return "種族専用"
         case .forSynthesis: return "合成用"
-        case .magicMaterial: return "魔造素材"
+        case .mazoMaterial: return "魔造素材"
         }
     }
 

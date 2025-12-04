@@ -10,7 +10,7 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
         case grimoire = "grimoire"
         case heavyArmor = "heavy_armor"
         case katana = "katana"
-        case magicMaterial = "magic_material"
+        case mazoMaterial = "mazo_material"
         case other = "other"
         case raceSpecific = "race_specific"
         case robe = "robe"
@@ -30,7 +30,7 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
                 return "shield"
             case .bow:
                 return "bow.and.arrow"
-            case .forSynthesis, .magicMaterial:
+            case .forSynthesis, .mazoMaterial:
                 return "hammer"
             case .gauntlet:
                 return "hand.raised"

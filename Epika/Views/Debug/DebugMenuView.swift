@@ -152,7 +152,7 @@ struct DebugMenuView: View {
                 "armor": 9,
                 "heavy_armor": 10,
                 "robe": 11,
-                "magic_material": 12,
+                "mazo_material": 12,
                 "gem": 13,
                 "for_synthesis": 14,
                 "race_specific": 15,

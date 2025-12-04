@@ -117,7 +117,7 @@ struct PandoraBoxView: View {
             try await displayService.stagedGroupAndSortLightweightByCategory(for: items)
 
             // 装備可能カテゴリのみ取得（追加候補用）
-            let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .magicMaterial, .gem])
+            let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .mazoMaterial])
             availableItems = displayService.getCachedItemsFlat(categories: equipCategories)
 
             // 登録済みアイテムは全カテゴリから取得（既存の非装備アイテムも表示して削除可能にする）

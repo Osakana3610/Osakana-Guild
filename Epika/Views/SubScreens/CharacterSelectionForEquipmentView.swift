@@ -249,8 +249,8 @@ struct EquipmentEditorView: View {
             let items = try await inventoryService.allItems(storage: .playerItem)
             try await displayService.stagedGroupAndSortLightweightByCategory(for: items)
 
-            // 装備可能カテゴリのみ取得（宝石・合成素材・魔法素材を除く）
-            let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .magicMaterial, .gem])
+            // 装備可能カテゴリのみ取得（合成素材・魔造素材を除く）
+            let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .mazoMaterial])
             availableItems = displayService.getCachedItemsFlat(categories: equipCategories)
 
             // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
