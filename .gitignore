@@ -21,6 +21,9 @@ tmp/
 Temp/
 *.orig
 
+# Generated SQLite databases
+MasterData.sqlite
+
 # Coverage
 *.xccovreport
 *.xccovarchive
