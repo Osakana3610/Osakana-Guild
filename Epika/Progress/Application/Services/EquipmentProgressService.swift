@@ -98,14 +98,6 @@ actor EquipmentProgressService {
             )
         }
 
-        // equipableフラグチェック（明示的にfalseの場合のみ除外）
-        if let equipable = itemDefinition.equipable, !equipable {
-            return EquipmentValidationResult(
-                canEquip: false,
-                reason: "このアイテムは装備できません"
-            )
-        }
-
         // 種族制限チェック（bypassRaceRestrictionsで回避可能）
         if !itemDefinition.allowedRaces.isEmpty {
             let canBypass = itemDefinition.bypassRaceRestrictions.contains(characterRaceId)

@@ -21,7 +21,6 @@ extension SQLiteMasterDataManager {
                 category TEXT NOT NULL,
                 base_price INTEGER NOT NULL,
                 sell_value INTEGER NOT NULL,
-                equipable INTEGER,
                 rarity TEXT
             );
             """,

@@ -11,7 +11,6 @@ extension SQLiteMasterDataManager {
             var category: String
             var basePrice: Int
             var sellValue: Int
-            var equipable: Bool?
             var rarity: String?
             var statBonuses: [ItemDefinition.StatBonus] = []
             var combatBonuses: [ItemDefinition.CombatBonus] = []
@@ -25,7 +24,7 @@ extension SQLiteMasterDataManager {
         var builders: [String: Builder] = [:]
         var orderedIds: [String] = []
 
-        let itemSQL = "SELECT id, name, description, category, base_price, sell_value, equipable, rarity FROM items;"
+        let itemSQL = "SELECT id, name, description, category, base_price, sell_value, rarity FROM items;"
         let itemStatement = try prepare(itemSQL)
         defer { sqlite3_finalize(itemStatement) }
         while sqlite3_step(itemStatement) == SQLITE_ROW {
@@ -39,8 +38,7 @@ extension SQLiteMasterDataManager {
             let category = String(cString: categoryC)
             let basePrice = Int(sqlite3_column_int(itemStatement, 4))
             let sellValue = Int(sqlite3_column_int(itemStatement, 5))
-            let equipableValue = sqlite3_column_type(itemStatement, 6) == SQLITE_NULL ? nil : sqlite3_column_int(itemStatement, 6) == 1
-            let rarityValue = sqlite3_column_text(itemStatement, 7).flatMap { String(cString: $0) }
+            let rarityValue = sqlite3_column_text(itemStatement, 6).flatMap { String(cString: $0) }
             builders[id] = Builder(
                 id: id,
                 name: name,
@@ -48,7 +46,6 @@ extension SQLiteMasterDataManager {
                 category: category,
                 basePrice: basePrice,
                 sellValue: sellValue,
-                equipable: equipableValue,
                 rarity: rarityValue
             )
             orderedIds.append(id)
@@ -119,7 +116,6 @@ extension SQLiteMasterDataManager {
                 category: builder.category,
                 basePrice: builder.basePrice,
                 sellValue: builder.sellValue,
-                equipable: builder.equipable,
                 rarity: builder.rarity,
                 statBonuses: builder.statBonuses,
                 combatBonuses: builder.combatBonuses,

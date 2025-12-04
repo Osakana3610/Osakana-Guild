@@ -23,7 +23,6 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
     let category: String
     let basePrice: Int
     let sellValue: Int
-    let equipable: Bool?
     let rarity: String?
     let statBonuses: [StatBonus]
     let combatBonuses: [CombatBonus]

@@ -284,11 +284,6 @@ struct EquipmentEditorView: View {
             return (false, "このアイテムは装備できません")
         }
 
-        // equipableフラグチェック
-        if let equipable = definition.equipable, !equipable {
-            return (false, "このアイテムは装備できません")
-        }
-
         // 種族制限チェック
         if !definition.allowedRaces.isEmpty {
             let canBypass = definition.bypassRaceRestrictions.contains(currentCharacter.progress.raceId)

@@ -10,7 +10,6 @@ private struct ItemMasterFile: Decodable, Sendable {
         let basePrice: Int
         let sellValue: Int
         let statBonuses: [String: Int]?
-        let equipable: Bool?
         let allowedRaces: [String]?
         let allowedJobs: [String]?
         let allowedGenders: [String]?
@@ -35,8 +34,8 @@ extension SQLiteMasterDataManager {
             try execute("DELETE FROM items;")
 
             let insertItemSQL = """
-                INSERT INTO items (id, name, description, category, base_price, sell_value, equipable, rarity)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO items (id, name, description, category, base_price, sell_value, rarity)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
             """
             let insertStatSQL = "INSERT INTO item_stat_bonuses (item_id, stat, value) VALUES (?, ?, ?);"
             let insertCombatSQL = "INSERT INTO item_combat_bonuses (item_id, stat, value) VALUES (?, ?, ?);"
@@ -72,8 +71,7 @@ extension SQLiteMasterDataManager {
                 bindText(itemStatement, index: 4, value: item.category)
                 bindInt(itemStatement, index: 5, value: item.basePrice)
                 bindInt(itemStatement, index: 6, value: item.sellValue)
-                bindBool(itemStatement, index: 7, value: item.equipable)
-                bindText(itemStatement, index: 8, value: item.rarity)
+                bindText(itemStatement, index: 7, value: item.rarity)
                 try step(itemStatement)
                 reset(itemStatement)
 
