@@ -12,11 +12,9 @@ echo "[MasterDataGenerator] Starting..."
 echo "[MasterDataGenerator] SRCROOT: ${SRCROOT}"
 echo "[MasterDataGenerator] DERIVED_FILE_DIR: ${DERIVED_FILE_DIR}"
 
-# ジェネレータが未ビルドならビルド
-if [ ! -f "$GENERATOR" ]; then
-    echo "[MasterDataGenerator] Building generator..."
-    swift build -c release --package-path "${SRCROOT}/Tools/MasterDataGenerator"
-fi
+# 毎回ビルド（差分ビルドなので変更がなければ高速）
+echo "[MasterDataGenerator] Building generator..."
+swift build -c release --package-path "${SRCROOT}/Tools/MasterDataGenerator"
 
 # SQLite生成
 echo "[MasterDataGenerator] Generating master_data.db..."
