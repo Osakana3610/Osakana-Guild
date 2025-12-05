@@ -13,8 +13,9 @@ echo "[MasterDataGenerator] SRCROOT: ${SRCROOT}"
 echo "[MasterDataGenerator] DERIVED_FILE_DIR: ${DERIVED_FILE_DIR}"
 
 # 毎回ビルド（差分ビルドなので変更がなければ高速）
+# Xcodeの環境変数をリセットしてmacOS用にビルド
 echo "[MasterDataGenerator] Building generator..."
-swift build -c release --package-path "${SRCROOT}/Tools/MasterDataGenerator"
+env -i PATH="$PATH" HOME="$HOME" swift build -c release --package-path "${SRCROOT}/Tools/MasterDataGenerator"
 
 # SQLite生成
 echo "[MasterDataGenerator] Generating master_data.db..."

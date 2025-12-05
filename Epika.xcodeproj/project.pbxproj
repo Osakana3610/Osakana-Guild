@@ -266,31 +266,7 @@
 				"$(SRCROOT)/Epika/Generated/master_data.db",
 			);
 			shellPath = /bin/bash;
-			shellScript = (
-				"set -e",
-				"",
-				"GENERATOR=\"${SRCROOT}/Tools/MasterDataGenerator/.build/release/MasterDataGenerator\"",
-				"INPUT_DIR=\"${SRCROOT}/MasterData\"",
-				"OUTPUT_FILE=\"${SRCROOT}/Epika/Generated/master_data.db\"",
-				"",
-				"echo \"[MasterDataGenerator] Starting...\"",
-				"",
-				"# Build generator if needed",
-				"if [ ! -f \"$GENERATOR\" ]; then",
-				"    echo \"[MasterDataGenerator] Building generator...\"",
-				"    swift build -c release --package-path \"${SRCROOT}/Tools/MasterDataGenerator\"",
-				"fi",
-				"",
-				"# Generate SQLite",
-				"echo \"[MasterDataGenerator] Generating master_data.db...\"",
-				"\"$GENERATOR\" --input \"$INPUT_DIR\" --output \"$OUTPUT_FILE\"",
-				"",
-				"echo \"[MasterDataGenerator] Done.\"",
-				"",
-				"",
-				"",
-				"",
-			);
+			shellScript = "\"${SRCROOT}/Tools/MasterDataGenerator/generate_master_data.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
