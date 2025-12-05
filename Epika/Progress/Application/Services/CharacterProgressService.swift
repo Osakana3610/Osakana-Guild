@@ -676,6 +676,6 @@ private extension CharacterProgressService {
         guard let gameState = try context.fetch(descriptor).first else {
             throw ProgressError.playerNotFound
         }
-        return Set(gameState.pandoraBoxItems.map { $0.stackKey })
+        return Set(gameState.pandoraBoxStackKeys)
     }
 }

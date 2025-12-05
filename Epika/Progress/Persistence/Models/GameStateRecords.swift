@@ -36,28 +36,8 @@ struct PandoraBoxItem: Codable, Sendable, Hashable {
     }
 
     /// stackKey文字列に変換
-    nonisolated var stackKey: String {
+    var stackKey: String {
         "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"
-    }
-
-    // MARK: - Equatable (nonisolated)
-    nonisolated static func == (lhs: PandoraBoxItem, rhs: PandoraBoxItem) -> Bool {
-        lhs.superRareTitleIndex == rhs.superRareTitleIndex &&
-        lhs.normalTitleIndex == rhs.normalTitleIndex &&
-        lhs.masterDataIndex == rhs.masterDataIndex &&
-        lhs.socketSuperRareTitleIndex == rhs.socketSuperRareTitleIndex &&
-        lhs.socketNormalTitleIndex == rhs.socketNormalTitleIndex &&
-        lhs.socketMasterDataIndex == rhs.socketMasterDataIndex
-    }
-
-    // MARK: - Hashable (nonisolated)
-    nonisolated func hash(into hasher: inout Hasher) {
-        hasher.combine(superRareTitleIndex)
-        hasher.combine(normalTitleIndex)
-        hasher.combine(masterDataIndex)
-        hasher.combine(socketSuperRareTitleIndex)
-        hasher.combine(socketNormalTitleIndex)
-        hasher.combine(socketMasterDataIndex)
     }
 }
 
@@ -87,8 +67,8 @@ final class GameStateRecord {
     var partySlots: Int = AppConstants.Progress.defaultPartySlotCount
 
     // MARK: - パンドラボックス
-    /// パンドラボックスに登録されたアイテム（最大5件）
-    var pandoraBoxItems: [PandoraBoxItem] = []
+    /// パンドラボックスに登録されたアイテム（最大5件）- stackKey文字列の配列
+    var pandoraBoxStackKeys: [String] = []
 
     init(schemaVersion: UInt8 = 1,
          updatedAt: Date = Date(),
@@ -97,7 +77,7 @@ final class GameStateRecord {
          gold: Int = 0,
          catTickets: Int = 0,
          partySlots: Int = AppConstants.Progress.defaultPartySlotCount,
-         pandoraBoxItems: [PandoraBoxItem] = []) {
+         pandoraBoxStackKeys: [String] = []) {
         self.schemaVersion = schemaVersion
         self.updatedAt = updatedAt
         self.lastDailyProcessedDate = lastDailyProcessedDate
@@ -105,7 +85,7 @@ final class GameStateRecord {
         self.gold = gold
         self.catTickets = catTickets
         self.partySlots = partySlots
-        self.pandoraBoxItems = pandoraBoxItems
+        self.pandoraBoxStackKeys = pandoraBoxStackKeys
     }
 }
 

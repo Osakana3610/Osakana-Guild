@@ -110,7 +110,7 @@ struct PandoraBoxView: View {
 
         do {
             let player = try await gameStateService.currentPlayer()
-            let pandoraStackKeys = Set(player.pandoraBoxItems.map { $0.stackKey })
+            let pandoraStackKeys = Set(player.pandoraBoxStackKeys)
 
             // プリロードが完了していなければ待機
             if !displayService.loaded {
@@ -135,11 +135,7 @@ struct PandoraBoxView: View {
     @MainActor
     private func addToPandoraBox(item: LightweightItemData) async {
         do {
-            guard let pandoraItem = PandoraBoxItem(stackKey: item.stackKey) else {
-                loadError = "アイテムの形式が不正です"
-                return
-            }
-            _ = try await gameStateService.addToPandoraBox(item: pandoraItem)
+            _ = try await gameStateService.addToPandoraBox(stackKey: item.stackKey)
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -149,11 +145,7 @@ struct PandoraBoxView: View {
     @MainActor
     private func removeFromPandoraBox(item: LightweightItemData) async {
         do {
-            guard let pandoraItem = PandoraBoxItem(stackKey: item.stackKey) else {
-                loadError = "アイテムの形式が不正です"
-                return
-            }
-            _ = try await gameStateService.removeFromPandoraBox(item: pandoraItem)
+            _ = try await gameStateService.removeFromPandoraBox(stackKey: item.stackKey)
             await loadData()
         } catch {
             loadError = error.localizedDescription

@@ -6,5 +6,5 @@ struct PlayerSnapshot: Sendable, Hashable {
     var gold: Int
     var catTickets: Int
     var partySlots: Int
-    var pandoraBoxItems: [PandoraBoxItem]
+    var pandoraBoxStackKeys: [String]
 }

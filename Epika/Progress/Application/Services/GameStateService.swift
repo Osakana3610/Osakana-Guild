@@ -129,43 +129,43 @@ actor GameStateService {
 
     // MARK: - Pandora Box
 
-    func pandoraBoxItems() async throws -> [PandoraBoxItem] {
+    func pandoraBoxStackKeys() async throws -> [String] {
         let context = makeContext()
         let record = try fetchGameState(context: context)
-        return record.pandoraBoxItems
+        return record.pandoraBoxStackKeys
     }
 
-    func setPandoraBoxItems(_ items: [PandoraBoxItem]) async throws -> PlayerSnapshot {
-        guard items.count <= 5 else {
+    func setPandoraBoxStackKeys(_ stackKeys: [String]) async throws -> PlayerSnapshot {
+        guard stackKeys.count <= 5 else {
             throw ProgressError.invalidInput(description: "パンドラボックスには最大5個までのアイテムを登録できます")
         }
         let context = makeContext()
         let record = try fetchGameState(context: context)
-        record.pandoraBoxItems = items
+        record.pandoraBoxStackKeys = stackKeys
         record.updatedAt = Date()
         try saveIfNeeded(context)
         return Self.snapshot(from: record)
     }
 
-    func addToPandoraBox(item: PandoraBoxItem) async throws -> PlayerSnapshot {
+    func addToPandoraBox(stackKey: String) async throws -> PlayerSnapshot {
         let context = makeContext()
         let record = try fetchGameState(context: context)
-        guard !record.pandoraBoxItems.contains(item) else {
+        guard !record.pandoraBoxStackKeys.contains(stackKey) else {
             return Self.snapshot(from: record)
         }
-        guard record.pandoraBoxItems.count < 5 else {
+        guard record.pandoraBoxStackKeys.count < 5 else {
             throw ProgressError.invalidInput(description: "パンドラボックスは既に満杯です")
         }
-        record.pandoraBoxItems.append(item)
+        record.pandoraBoxStackKeys.append(stackKey)
         record.updatedAt = Date()
         try saveIfNeeded(context)
         return Self.snapshot(from: record)
     }
 
-    func removeFromPandoraBox(item: PandoraBoxItem) async throws -> PlayerSnapshot {
+    func removeFromPandoraBox(stackKey: String) async throws -> PlayerSnapshot {
         let context = makeContext()
         let record = try fetchGameState(context: context)
-        record.pandoraBoxItems.removeAll { $0 == item }
+        record.pandoraBoxStackKeys.removeAll { $0 == stackKey }
         record.updatedAt = Date()
         try saveIfNeeded(context)
         return Self.snapshot(from: record)
@@ -232,7 +232,7 @@ private extension GameStateService {
             gold: record.gold,
             catTickets: record.catTickets,
             partySlots: record.partySlots,
-            pandoraBoxItems: record.pandoraBoxItems
+            pandoraBoxStackKeys: record.pandoraBoxStackKeys
         )
     }
 }
