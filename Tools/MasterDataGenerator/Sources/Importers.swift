@@ -1085,6 +1085,7 @@ extension Generator {
 
 private struct EnemyMasterFile: Decodable {
     struct Enemy: Decodable {
+        let index: Int
         let id: String
         let baseName: String
         let race: String
@@ -1110,8 +1111,8 @@ extension Generator {
             try execute("DELETE FROM enemies;")
 
             let insertEnemySQL = """
-                INSERT INTO enemies (id, name, race, category, job, base_experience, is_boss)
-                VALUES (?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO enemies (id, enemy_index, name, race, category, job, base_experience, is_boss)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
             """
             let insertStatsSQL = """
                 INSERT INTO enemy_stats (enemy_id, strength, wisdom, spirit, vitality, agility, luck)
@@ -1136,12 +1137,13 @@ extension Generator {
 
             for enemy in file.enemyTemplates {
                 bindText(enemyStatement, index: 1, value: enemy.id)
-                bindText(enemyStatement, index: 2, value: enemy.baseName)
-                bindText(enemyStatement, index: 3, value: enemy.race)
-                bindText(enemyStatement, index: 4, value: enemy.category)
-                bindText(enemyStatement, index: 5, value: enemy.job)
-                bindInt(enemyStatement, index: 6, value: enemy.baseExperience)
-                bindBool(enemyStatement, index: 7, value: enemy.isBoss)
+                bindInt(enemyStatement, index: 2, value: enemy.index)
+                bindText(enemyStatement, index: 3, value: enemy.baseName)
+                bindText(enemyStatement, index: 4, value: enemy.race)
+                bindText(enemyStatement, index: 5, value: enemy.category)
+                bindText(enemyStatement, index: 6, value: enemy.job)
+                bindInt(enemyStatement, index: 7, value: enemy.baseExperience)
+                bindBool(enemyStatement, index: 8, value: enemy.isBoss)
                 try step(enemyStatement)
                 reset(enemyStatement)
 
@@ -1856,6 +1858,7 @@ private struct ExplorationEventEntry {
         let value: Double
     }
 
+    let index: Int
     let id: String
     let type: String
     let name: String
@@ -1915,7 +1918,8 @@ extension Generator {
         }
 
         let entries = try eventsArray.map { event -> ExplorationEventEntry in
-            guard let id = event["id"] as? String,
+            guard let eventIndex = toInt(event["index"]),
+                  let id = event["id"] as? String,
                   let type = event["type"] as? String,
                   let name = event["name"] as? String,
                   let description = event["description"] as? String,
@@ -1947,7 +1951,8 @@ extension Generator {
                 payloadJSON = nil
             }
 
-            return ExplorationEventEntry(id: id,
+            return ExplorationEventEntry(index: eventIndex,
+                                         id: id,
                                          type: type,
                                          name: name,
                                          description: description,
@@ -1965,8 +1970,8 @@ extension Generator {
             try execute("DELETE FROM exploration_events;")
 
             let insertEventSQL = """
-                INSERT INTO exploration_events (id, type, name, description, floor_min, floor_max)
-                VALUES (?, ?, ?, ?, ?, ?);
+                INSERT INTO exploration_events (id, event_index, type, name, description, floor_min, floor_max)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
             """
             let insertTagSQL = "INSERT INTO exploration_event_tags (event_id, order_index, tag) VALUES (?, ?, ?);"
             let insertWeightSQL = "INSERT INTO exploration_event_weights (event_id, context, weight) VALUES (?, ?, ?);"
@@ -1985,11 +1990,12 @@ extension Generator {
 
             for entry in entries {
                 bindText(eventStatement, index: 1, value: entry.id)
-                bindText(eventStatement, index: 2, value: entry.type)
-                bindText(eventStatement, index: 3, value: entry.name)
-                bindText(eventStatement, index: 4, value: entry.description)
-                bindInt(eventStatement, index: 5, value: entry.floorMin)
-                bindInt(eventStatement, index: 6, value: entry.floorMax)
+                bindInt(eventStatement, index: 2, value: entry.index)
+                bindText(eventStatement, index: 3, value: entry.type)
+                bindText(eventStatement, index: 4, value: entry.name)
+                bindText(eventStatement, index: 5, value: entry.description)
+                bindInt(eventStatement, index: 6, value: entry.floorMin)
+                bindInt(eventStatement, index: 7, value: entry.floorMax)
                 try step(eventStatement)
                 reset(eventStatement)
 

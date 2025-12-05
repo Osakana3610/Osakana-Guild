@@ -1,6 +1,7 @@
 {
   "enemyTemplates": [
     {
+      "index": 0,
       "id": "goblin_warrior",
       "baseName": "ゴブリン戦士",
       "race": "goblinoid",
@@ -71,6 +72,7 @@
       "job": null
     },
     {
+      "index": 1,
       "id": "orc_berserker",
       "baseName": "オークの狂戦士",
       "race": "orcish",
@@ -149,6 +151,7 @@
       "job": null
     },
     {
+      "index": 2,
       "id": "skeleton_mage",
       "baseName": "スケルトンメイジ",
       "race": "undead",
@@ -227,6 +230,7 @@
       "job": null
     },
     {
+      "index": 3,
       "id": "crystal_slime",
       "baseName": "クリスタルスライム",
       "race": "ooze",
@@ -304,6 +308,7 @@
       "job": null
     },
     {
+      "index": 4,
       "id": "shadow_wolf",
       "baseName": "シャドウウルフ",
       "race": "beast",
@@ -381,6 +386,7 @@
       "job": null
     },
     {
+      "index": 5,
       "id": "ancient_dragon",
       "baseName": "古代竜アンシエント",
       "race": "dragon",
@@ -468,6 +474,7 @@
       "job": null
     },
     {
+      "index": 6,
       "id": "goblin_captain",
       "baseName": "ゴブリンキャプテン",
       "race": "goblinoid",
@@ -537,6 +544,7 @@
       "job": null
     },
     {
+      "index": 7,
       "id": "forest_spirit",
       "baseName": "森の精霊",
       "race": "spirit",
@@ -607,6 +615,7 @@
       "job": null
     },
     {
+      "index": 8,
       "id": "cave_guardian",
       "baseName": "洞窟の守護者",
       "race": "golem",
@@ -677,6 +686,7 @@
       "job": null
     },
     {
+      "index": 9,
       "id": "forest_guardian",
       "baseName": "森の番人",
       "race": "treant",

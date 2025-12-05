@@ -67,7 +67,7 @@ actor PartyProgressService {
         return Self.snapshot(from: party)
     }
 
-    func updatePartyMembers(persistentIdentifier: PersistentIdentifier, memberIds: [Int32]) async throws -> PartySnapshot {
+    func updatePartyMembers(persistentIdentifier: PersistentIdentifier, memberIds: [UInt8]) async throws -> PartySnapshot {
         let context = makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.memberCharacterIds = memberIds
@@ -106,7 +106,7 @@ actor PartyProgressService {
         return Self.snapshot(from: party)
     }
 
-    func characterIdsInOtherParties(excluding identifier: PersistentIdentifier?) async throws -> Set<Int32> {
+    func characterIdsInOtherParties(excluding identifier: PersistentIdentifier?) async throws -> Set<UInt8> {
         let context = makeContext()
         let descriptor = FetchDescriptor<PartyRecord>()
         let records = try context.fetch(descriptor)
@@ -117,7 +117,7 @@ actor PartyProgressService {
             excludedPartyId = party.id
         }
 
-        var result = Set<Int32>()
+        var result = Set<UInt8>()
         for record in records {
             if record.id != excludedPartyId {
                 result.formUnion(record.memberCharacterIds)

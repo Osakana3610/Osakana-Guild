@@ -11,11 +11,7 @@ extension BattleTurnEngine {
         let base = 10.0 + defenderBonus - attackerPenalty + defender.skillEffects.parryBonusPercent
         let chance = max(0, min(100, Int((base * defender.skillEffects.procChanceMultiplier).rounded())))
         guard BattleRandomSystem.percentChance(chance, random: &context.random) else { return false }
-        context.appendLog(message: "\(defender.displayName)の受け流し！連続攻撃を防いだ！",
-                          type: .status,
-                          actorId: defender.identifier,
-                          targetId: attacker.identifier,
-                          metadata: ["category": "parry", "chance": "\(chance)"])
+        // パリィは performAttack 内でログ済みなので、ここでは追加しない
         return true
     }
 
@@ -26,11 +22,7 @@ extension BattleTurnEngine {
         let base = 30.0 - Double(attacker.snapshot.additionalDamage) / 2.0 + defender.skillEffects.shieldBlockBonusPercent
         let chance = max(0, min(100, Int((base * defender.skillEffects.procChanceMultiplier).rounded())))
         guard BattleRandomSystem.percentChance(chance, random: &context.random) else { return false }
-        context.appendLog(message: "\(defender.displayName)は大盾で攻撃を防いだ！",
-                          type: .status,
-                          actorId: defender.identifier,
-                          targetId: attacker.identifier,
-                          metadata: ["category": "shieldBlock", "chance": "\(chance)"])
+        // シールドブロックは performAttack 内でログ済みなので、ここでは追加しない
         return true
     }
 
@@ -53,10 +45,8 @@ extension BattleTurnEngine {
         let applied = min(healAmount, missing)
         guard applied > 0 else { return }
         attacker.currentHP += applied
-        context.appendLog(message: "\(attacker.displayName)は吸収能力でHPが\(applied)回復した！",
-                          type: .heal,
-                          actorId: attacker.identifier,
-                          metadata: ["category": "absorption", "heal": "\(applied)"])
+        // 吸収回復のログは呼び出し元でperformAttack経由で記録される
+        // actor indexがない状態ではappendActionを呼べないため、ここではログ出力しない
     }
 
     static func applySpellChargeGainOnPhysicalHit(for attacker: inout BattleActor,
@@ -110,11 +100,9 @@ extension BattleTurnEngine {
                 let applied = max(1, Int((baseDamage * modifier).rounded()))
                 _ = applyDamage(amount: applied, to: &target)
                 context.updateActor(target, side: ref.0, index: ref.1)
-                context.appendLog(message: "\(defender.displayName)の暴走！ \(target.displayName)に\(applied)ダメージ",
-                                  type: .damage,
-                                  actorId: defender.identifier,
-                                  targetId: target.identifier,
-                                  metadata: ["category": "runaway", "magic": "\(isMagic)"])
+                let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
+                let targetIdx = context.actorIndex(for: ref.0, arrayIndex: ref.1)
+                context.appendAction(kind: .statusRampage, actor: defenderIdx, target: targetIdx, value: UInt32(applied))
             }
 
             if !hasStatus(tag: "confusion", in: defender, context: context) {
@@ -214,11 +202,9 @@ extension BattleTurnEngine {
             guard cappedChance > 0 else { continue }
             guard BattleRandomSystem.percentChance(cappedChance, random: &context.random) else { continue }
 
-            context.appendLog(message: "\(currentPerformer.displayName)の\(reaction.displayName)",
-                              type: .action,
-                              actorId: currentPerformer.identifier,
-                              targetId: targetActor.identifier,
-                              metadata: ["category": "reaction", "reactionId": reaction.identifier])
+            let performerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
+            let targetIdx = context.actorIndex(for: resolvedTarget.0, arrayIndex: resolvedTarget.1)
+            context.appendAction(kind: .reactionAttack, actor: performerIdx, target: targetIdx)
 
             executeReactionAttack(from: side,
                                   actorIndex: actorIndex,
@@ -244,11 +230,18 @@ extension BattleTurnEngine {
         let scaledCritical = Int((Double(modifiedAttacker.snapshot.criticalRate) * reaction.criticalRateMultiplier).rounded(.down))
         modifiedAttacker.snapshot.criticalRate = max(0, min(100, scaledCritical))
 
+        let attackerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
+        let targetIdx = context.actorIndex(for: target.0, arrayIndex: target.1)
+
         let attackResult: AttackResult
         switch reaction.damageType {
         case .physical:
-            attackResult = performAttack(attacker: modifiedAttacker,
+            attackResult = performAttack(attackerSide: side,
+                                         attackerIndex: actorIndex,
+                                         attacker: modifiedAttacker,
                                          defender: initialTarget,
+                                         defenderSide: target.0,
+                                         defenderIndex: target.1,
                                          context: &context,
                                          hitCountOverride: scaledHits,
                                          accuracyMultiplier: reaction.accuracyMultiplier)
@@ -267,11 +260,7 @@ extension BattleTurnEngine {
                 applyAbsorptionIfNeeded(for: &attackerCopy, damageDealt: applied, damageType: .magical, context: &context)
                 totalDamage += applied
                 if applied > 0 {
-                    context.appendLog(message: "\(attackerCopy.displayName)の\(reaction.displayName)！ \(targetCopy.displayName)に\(applied)ダメージ！",
-                                      type: .damage,
-                                      actorId: attackerCopy.identifier,
-                                      targetId: targetCopy.identifier,
-                                      metadata: ["damage": "\(applied)", "targetHP": "\(targetCopy.currentHP)", "category": ActionCategory.mageMagic.logIdentifier])
+                    context.appendAction(kind: .magicDamage, actor: attackerIdx, target: targetIdx, value: UInt32(applied))
                 }
                 if !targetCopy.isAlive {
                     break
@@ -291,11 +280,7 @@ extension BattleTurnEngine {
             let damage = computeBreathDamage(attacker: attackerCopy, defender: &targetCopy, context: &context)
             let applied = applyDamage(amount: damage, to: &targetCopy)
             if applied > 0 {
-                context.appendLog(message: "\(attackerCopy.displayName)の\(reaction.displayName)！ \(targetCopy.displayName)に\(applied)ダメージ！",
-                                  type: .damage,
-                                  actorId: attackerCopy.identifier,
-                                  targetId: targetCopy.identifier,
-                                  metadata: ["damage": "\(applied)", "targetHP": "\(targetCopy.currentHP)", "category": ActionCategory.breath.logIdentifier])
+                context.appendAction(kind: .breathDamage, actor: attackerIdx, target: targetIdx, value: UInt32(applied))
             }
             attackResult = AttackResult(attacker: attackerCopy,
                                         defender: targetCopy,

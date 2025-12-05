@@ -266,7 +266,10 @@
 				"$(SRCROOT)/Epika/Generated/master_data.db",
 			);
 			shellPath = /bin/bash;
-			shellScript = "\"${SRCROOT}/Tools/MasterDataGenerator/generate_master_data.sh\"\n";
+			shellScript = (
+				"\"${SRCROOT}/Tools/MasterDataGenerator/generate_master_data.sh\"",
+				"",
+			);
 		};
 /* End PBXShellScriptBuildPhase section */
 

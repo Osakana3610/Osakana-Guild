@@ -60,21 +60,7 @@ extension BattleTurnEngine {
                                                             stackValue: 0))
         }
 
-        let message: String
-        if let apply = definition.applyMessage, !apply.isEmpty {
-            message = apply
-        } else {
-            message = "\(target.displayName)は\(definition.name)の状態になった"
-        }
-
-        var metadata: [String: String] = ["statusId": statusId]
-        if let sourceId {
-            metadata["sourceId"] = sourceId
-        }
-        context.appendLog(message: message,
-                          type: .status,
-                          actorId: target.identifier,
-                          metadata: metadata)
+        // ステータス付与のログは呼び出し元で出力する（side/indexの情報がないため）
         return true
     }
 
@@ -111,15 +97,16 @@ extension BattleTurnEngine {
         if !alreadyConfused {
             let applied = AppliedStatusEffect(id: "status.confusion", remainingTurns: 3, source: actor.identifier, stackValue: 0.0)
             actor.statusEffects.append(applied)
-            context.appendLog(message: "\(actor.displayName)は暴走して混乱した！",
-                              type: .status,
-                              actorId: actor.identifier,
-                              metadata: ["statusId": "status.confusion"])
+            // 暴走のログは呼び出し元でperformAction経由で出力する（side/indexの情報がないため）
         }
         return true
     }
 
-    static func applyStatusTicks(for actor: inout BattleActor, context: inout BattleContext) {
+    static func applyStatusTicks(for side: ActorSide,
+                                  index: Int,
+                                  actor: inout BattleActor,
+                                  context: inout BattleContext) {
+        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
         var updated: [AppliedStatusEffect] = []
         for var effect in actor.statusEffects {
             guard let definition = context.statusDefinition(for: effect) else {
@@ -132,10 +119,7 @@ extension BattleTurnEngine {
                 let damage = max(1, Int(rawDamage.rounded()))
                 let applied = applyDamage(amount: damage, to: &actor)
                 if applied > 0 {
-                    context.appendLog(message: "\(actor.displayName)は\(definition.name)で\(applied)ダメージを受けた",
-                                      type: .status,
-                                      actorId: actor.identifier,
-                                      metadata: ["statusId": effect.id, "damage": "\(applied)"])
+                    context.appendAction(kind: .statusTick, actor: actorIdx, value: UInt32(applied))
                 }
             }
 
@@ -144,7 +128,7 @@ extension BattleTurnEngine {
             }
 
             if effect.remainingTurns <= 0 {
-                appendStatusExpireLog(for: actor, definition: definition, context: &context)
+                appendStatusExpireLog(for: actor, side: side, index: index, definition: definition, context: &context)
                 continue
             }
 

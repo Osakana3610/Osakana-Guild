@@ -44,6 +44,14 @@ actor MasterDataRuntimeService {
     private var dungeonIdToIndex: [String: UInt16] = [:]
     private var dungeonIndexToId: [UInt16: String] = [:]
 
+    /// 敵: String ID → UInt16 Index
+    private var enemyIdToIndex: [String: UInt16] = [:]
+    private var enemyIndexToId: [UInt16: String] = [:]
+
+    /// 探索イベント: String ID → UInt16 Index
+    private var explorationEventIdToIndex: [String: UInt16] = [:]
+    private var explorationEventIndexToId: [UInt16: String] = [:]
+
     init(repository: MasterDataRepository,
          manager: SQLiteMasterDataManager) {
         self.repository = repository
@@ -127,6 +135,20 @@ actor MasterDataRuntimeService {
             dungeonIdToIndex[dungeon.id] = dungeon.index
             dungeonIndexToId[dungeon.index] = dungeon.id
         }
+
+        // 敵のインデックスマップ
+        let enemies = try await repository.allEnemies()
+        for enemy in enemies {
+            enemyIdToIndex[enemy.id] = enemy.index
+            enemyIndexToId[enemy.index] = enemy.id
+        }
+
+        // 探索イベントのインデックスマップ
+        let explorationEvents = try await repository.allExplorationEvents()
+        for event in explorationEvents {
+            explorationEventIdToIndex[event.id] = event.index
+            explorationEventIndexToId[event.index] = event.id
+        }
     }
 
     // MARK: - Index Lookup
@@ -195,6 +217,22 @@ actor MasterDataRuntimeService {
         dungeonIndexToId[index]
     }
 
+    func getEnemyIndex(for id: String) -> UInt16? {
+        enemyIdToIndex[id]
+    }
+
+    func getEnemyId(for index: UInt16) -> String? {
+        enemyIndexToId[index]
+    }
+
+    func getExplorationEventIndex(for id: String) -> UInt16? {
+        explorationEventIdToIndex[id]
+    }
+
+    func getExplorationEventId(for index: UInt16) -> String? {
+        explorationEventIndexToId[index]
+    }
+
     // MARK: - Item Master Data
 
     func getAllItems() async throws -> [ItemDefinition] {
@@ -234,6 +272,33 @@ actor MasterDataRuntimeService {
     func getEnemyDefinition(id: String) async throws -> EnemyDefinition? {
         try await ensureInitialized()
         return try await repository.enemy(withId: id)
+    }
+
+    func getEnemyDefinition(byIndex index: UInt16) async throws -> EnemyDefinition? {
+        guard let id = getEnemyId(for: index) else { return nil }
+        return try await getEnemyDefinition(id: id)
+    }
+
+    func getAllEnemies() async throws -> [EnemyDefinition] {
+        try await ensureInitialized()
+        return try await repository.allEnemies()
+    }
+
+    // MARK: - Exploration Events
+
+    func getExplorationEventDefinition(id: String) async throws -> ExplorationEventDefinition? {
+        try await ensureInitialized()
+        return try await repository.explorationEvent(withId: id)
+    }
+
+    func getExplorationEventDefinition(byIndex index: UInt16) async throws -> ExplorationEventDefinition? {
+        guard let id = getExplorationEventId(for: index) else { return nil }
+        return try await getExplorationEventDefinition(id: id)
+    }
+
+    func getAllExplorationEvents() async throws -> [ExplorationEventDefinition] {
+        try await ensureInitialized()
+        return try await repository.allExplorationEvents()
     }
 
     // MARK: - Spells

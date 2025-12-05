@@ -8,6 +8,6 @@ struct PartySnapshot: Sendable, Hashable {
     var lastSelectedDungeonIndex: UInt16       // 0=未選択
     var lastSelectedDifficulty: UInt8
     var targetFloor: UInt8
-    var memberCharacterIds: [Int32]            // 順序=配列index
+    var memberCharacterIds: [UInt8]            // 順序=配列index
     var updatedAt: Date
 }

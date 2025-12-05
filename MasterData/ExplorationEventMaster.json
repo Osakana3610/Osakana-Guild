@@ -11,6 +11,7 @@
   },
   "events": [
     {
+      "index": 0,
       "id": "trap.pitfall",
       "type": "trap",
       "name": "落とし穴",
@@ -32,6 +33,7 @@
       }
     },
     {
+      "index": 1,
       "id": "trap.poisonNeedle",
       "type": "trap",
       "name": "毒針の罠",
@@ -53,6 +55,7 @@
       }
     },
     {
+      "index": 2,
       "id": "trap.explosion",
       "type": "trap",
       "name": "爆発の罠",
@@ -75,6 +78,7 @@
       }
     },
     {
+      "index": 3,
       "id": "trap.paralysis",
       "type": "trap",
       "name": "麻痺の罠",
@@ -96,6 +100,7 @@
       }
     },
     {
+      "index": 4,
       "id": "trap.sleepGas",
       "type": "trap",
       "name": "睡眠ガスの罠",
@@ -117,6 +122,7 @@
       }
     },
     {
+      "index": 5,
       "id": "trap.arrow",
       "type": "trap",
       "name": "矢の罠",
@@ -139,6 +145,7 @@
       }
     },
     {
+      "index": 6,
       "id": "narrative.oasisFountain",
       "type": "narrative",
       "name": "神秘の泉",
@@ -172,6 +179,7 @@
       }
     },
     {
+      "index": 7,
       "id": "narrative.goddessFountain",
       "type": "narrative",
       "name": "女神の泉",
@@ -205,6 +213,7 @@
       }
     },
     {
+      "index": 8,
       "id": "narrative.succubusEncounter",
       "type": "narrative",
       "name": "サキュバスの誘惑",
@@ -237,6 +246,7 @@
       }
     },
     {
+      "index": 9,
       "id": "merchant.wanderingMerchant",
       "type": "merchant",
       "name": "行商人との遭遇",
@@ -265,6 +275,7 @@
       }
     },
     {
+      "index": 10,
       "id": "battle.enemyHorde",
       "type": "battle",
       "name": "敵の大群",
@@ -286,6 +297,7 @@
       }
     },
     {
+      "index": 11,
       "id": "resource.mysticMushroom",
       "type": "resource",
       "name": "謎のキノコ",

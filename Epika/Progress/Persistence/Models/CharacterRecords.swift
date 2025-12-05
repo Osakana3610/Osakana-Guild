@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class CharacterRecord {
-    var id: Int32 = 0                          // 連番（作成順）
+    var id: UInt8 = 0                          // 1〜200（再利用可能）
     var displayName: String = ""
     var raceIndex: UInt8 = 0                   // 種族（18種）
     var jobIndex: UInt8 = 0                    // 職業（16種）
@@ -17,7 +17,7 @@ final class CharacterRecord {
     var actionRateMageMagic: UInt8 = 75
     var actionRateBreath: UInt8 = 50
 
-    init(id: Int32,
+    init(id: UInt8,
          displayName: String,
          raceIndex: UInt8,
          jobIndex: UInt8,
@@ -48,7 +48,7 @@ final class CharacterRecord {
 
 @Model
 final class CharacterEquipmentRecord {
-    var characterId: Int32 = 0                 // UUID → Int32
+    var characterId: UInt8 = 0                 // 1〜200
     var superRareTitleIndex: Int16 = 0
     var normalTitleIndex: UInt8 = 0            // Int8 → UInt8（負値なし）
     var masterDataIndex: Int16 = 0
@@ -61,7 +61,7 @@ final class CharacterEquipmentRecord {
         "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"
     }
 
-    init(characterId: Int32,
+    init(characterId: UInt8,
          superRareTitleIndex: Int16,
          normalTitleIndex: UInt8,
          masterDataIndex: Int16,

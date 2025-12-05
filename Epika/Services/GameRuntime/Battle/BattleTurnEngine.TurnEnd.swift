@@ -5,12 +5,12 @@ extension BattleTurnEngine {
     static func endOfTurn(_ context: inout BattleContext) {
         for index in context.players.indices {
             var actor = context.players[index]
-            processEndOfTurn(for: &actor, context: &context)
+            processEndOfTurn(for: .player, index: index, actor: &actor, context: &context)
             context.players[index] = actor
         }
         for index in context.enemies.indices {
             var actor = context.enemies[index]
-            processEndOfTurn(for: &actor, context: &context)
+            processEndOfTurn(for: .enemy, index: index, actor: &actor, context: &context)
             context.enemies[index] = actor
         }
 
@@ -21,21 +21,24 @@ extension BattleTurnEngine {
         applyNecromancerIfNeeded(for: .enemy, context: &context)
     }
 
-    static func processEndOfTurn(for actor: inout BattleActor, context: inout BattleContext) {
+    static func processEndOfTurn(for side: ActorSide,
+                                 index: Int,
+                                 actor: inout BattleActor,
+                                 context: inout BattleContext) {
         let wasAlive = actor.isAlive
         actor.guardActive = false
         actor.guardBarrierCharges = [:]
         actor.attackHistory.reset()
-        applyStatusTicks(for: &actor, context: &context)
+        applyStatusTicks(for: side, index: index, actor: &actor, context: &context)
         if actor.skillEffects.autoDegradationRepair {
             applyDegradationRepairIfAvailable(to: &actor)
         }
         applySpellChargeRegenIfNeeded(for: &actor, context: context)
-        updateTimedBuffs(for: &actor, context: &context)
-        applyEndOfTurnSelfHPDeltaIfNeeded(for: &actor, context: &context)
-        applyEndOfTurnResurrectionIfNeeded(for: &actor, context: &context, allowVitalize: true)
+        updateTimedBuffs(for: side, index: index, actor: &actor, context: &context)
+        applyEndOfTurnSelfHPDeltaIfNeeded(for: side, index: index, actor: &actor, context: &context)
+        applyEndOfTurnResurrectionIfNeeded(for: side, index: index, actor: &actor, context: &context, allowVitalize: true)
         if wasAlive && !actor.isAlive {
-            appendDefeatLog(for: actor, context: &context)
+            appendDefeatLog(for: actor, side: side, index: index, context: &context)
         }
     }
 
@@ -70,15 +73,16 @@ extension BattleTurnEngine {
             let applied = min(amount, missing)
             target.currentHP += applied
             context.updateActor(target, side: side, index: targetIndex)
-            context.appendLog(message: "\(healer.displayName)の全体回復！ \(target.displayName)のHPが\(applied)回復した！",
-                              type: .heal,
-                              actorId: healer.identifier,
-                              targetId: target.identifier,
-                              metadata: ["heal": "\(applied)", "targetHP": "\(target.currentHP)", "category": "endOfTurnHeal"])
+            let healerIdx = context.actorIndex(for: side, arrayIndex: healerIndex)
+            let targetIdx = context.actorIndex(for: side, arrayIndex: targetIndex)
+            context.appendAction(kind: .healParty, actor: healerIdx, target: targetIdx, value: UInt32(applied))
         }
     }
 
-    static func applyEndOfTurnSelfHPDeltaIfNeeded(for actor: inout BattleActor, context: inout BattleContext) {
+    static func applyEndOfTurnSelfHPDeltaIfNeeded(for side: ActorSide,
+                                                   index: Int,
+                                                   actor: inout BattleActor,
+                                                   context: inout BattleContext) {
         guard actor.isAlive else { return }
         let percent = actor.skillEffects.endOfTurnSelfHPPercent
         guard percent != 0 else { return }
@@ -92,25 +96,22 @@ extension BattleTurnEngine {
         } else {
             amount = max(1, Int(rawAmount.rounded()))
         }
+        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
         if percent > 0 {
             let missing = actor.snapshot.maxHP - actor.currentHP
             guard missing > 0 else { return }
             let applied = min(amount, missing)
             actor.currentHP += applied
-            context.appendLog(message: "\(actor.displayName)は自身の効果で\(applied)回復した",
-                              type: .heal,
-                              actorId: actor.identifier,
-                              metadata: ["heal": "\(applied)", "category": "endOfTurnSelfHPDelta"])
+            context.appendAction(kind: .healSelf, actor: actorIdx, value: UInt32(applied))
         } else {
             let applied = applyDamage(amount: amount, to: &actor)
-            context.appendLog(message: "\(actor.displayName)は自身の効果で\(applied)ダメージを受けた",
-                              type: .damage,
-                              actorId: actor.identifier,
-                              metadata: ["damage": "\(applied)", "category": "endOfTurnSelfHPDelta"])
+            context.appendAction(kind: .damageSelf, actor: actorIdx, value: UInt32(applied))
         }
     }
 
-    static func applyEndOfTurnResurrectionIfNeeded(for actor: inout BattleActor,
+    static func applyEndOfTurnResurrectionIfNeeded(for side: ActorSide,
+                                                   index: Int,
+                                                   actor: inout BattleActor,
                                                    context: inout BattleContext,
                                                    allowVitalize: Bool) {
         guard !actor.isAlive else { return }
@@ -169,10 +170,8 @@ extension BattleTurnEngine {
             rebuildSkillsAfterResurrection(for: &actor, context: context)
         }
 
-        context.appendLog(message: "\(actor.displayName)は即時蘇生した！",
-                          type: .heal,
-                          actorId: actor.identifier,
-                          metadata: ["category": "instantResurrection", "heal": "\(actor.currentHP)"])
+        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+        context.appendAction(kind: .resurrection, actor: actorIdx, value: UInt32(actor.currentHP))
     }
 
     static func rebuildSkillsAfterResurrection(for actor: inout BattleActor, context: BattleContext) {
@@ -254,13 +253,11 @@ extension BattleTurnEngine {
             if let reviveIndex = allActors.indices.first(where: { !allActors[$0].isAlive && !allActors[$0].skillEffects.resurrectionActives.isEmpty }) {
                 var target = side == .player ? context.players[reviveIndex] : context.enemies[reviveIndex]
                 target.resurrectionTriggersUsed = 0
-                applyEndOfTurnResurrectionIfNeeded(for: &target, context: &context, allowVitalize: false)
+                applyEndOfTurnResurrectionIfNeeded(for: side, index: reviveIndex, actor: &target, context: &context, allowVitalize: false)
                 context.updateActor(target, side: side, index: reviveIndex)
-                context.appendLog(message: "\(actor.displayName)のネクロマンサーで\(target.displayName)が蘇生した！",
-                                  type: .heal,
-                                  actorId: actor.identifier,
-                                  targetId: target.identifier,
-                                  metadata: ["category": "necromancer"])
+                let casterIdx = context.actorIndex(for: side, arrayIndex: index)
+                let targetIdx = context.actorIndex(for: side, arrayIndex: reviveIndex)
+                context.appendAction(kind: .necromancer, actor: casterIdx, target: targetIdx, value: UInt32(target.currentHP))
             }
         }
     }
@@ -299,14 +296,6 @@ extension BattleTurnEngine {
         guard !fired.isEmpty else { return }
 
         for trigger in fired {
-            let multiplier = trigger.modifiers.values.first ?? 1.0
-            let categoryDescription: String
-            switch trigger.category {
-            case "magic": categoryDescription = "魔法威力"
-            case "breath": categoryDescription = "ブレス威力"
-            default: categoryDescription = "攻撃威力"
-            }
-
             var refreshedActors: [BattleActor] = side == .player ? context.players : context.enemies
             for index in refreshedActors.indices where refreshedActors[index].isAlive {
                 var actor = refreshedActors[index]
@@ -335,9 +324,8 @@ extension BattleTurnEngine {
                 context.enemies = refreshedActors
             }
 
-            context.appendLog(message: "\(trigger.displayName)が発動し、味方の\(categoryDescription)が×\(String(format: "%.2f", multiplier))",
-                              type: .status,
-                              metadata: ["buffId": trigger.id])
+            // バフ発動は全体効果のため、個別actorログは省略
+            context.appendAction(kind: .buffApply, actor: side == .player ? 0 : 1000, value: UInt32(trigger.triggerTurn))
         }
     }
 
@@ -364,17 +352,18 @@ extension BattleTurnEngine {
         }
     }
 
-    static func updateTimedBuffs(for actor: inout BattleActor, context: inout BattleContext) {
+    static func updateTimedBuffs(for side: ActorSide,
+                                  index: Int,
+                                  actor: inout BattleActor,
+                                  context: inout BattleContext) {
         var retained: [TimedBuff] = []
+        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
         for var buff in actor.timedBuffs {
             if buff.remainingTurns > 0 {
                 buff.remainingTurns -= 1
             }
             if buff.remainingTurns <= 0 {
-                context.appendLog(message: "\(actor.displayName)の効果(\(buff.id))が切れた",
-                                  type: .status,
-                                  actorId: actor.identifier,
-                                  metadata: ["buffId": buff.id])
+                context.appendAction(kind: .buffExpire, actor: actorIdx)
                 continue
             }
             retained.append(buff)
@@ -423,17 +412,6 @@ extension BattleTurnEngine {
                 guard rescuer.actionResources.consume(spellId: spell.id) else { continue }
                 let healAmount = computeHealingAmount(caster: rescuer, target: revivedTarget, spellId: spell.id, context: &context)
                 appliedHeal = max(1, healAmount)
-                context.appendLog(message: "\(rescuer.displayName)は\(spell.name)で\(revivedTarget.displayName)を救出した！",
-                                  type: .heal,
-                                  actorId: rescuer.identifier,
-                                  targetId: revivedTarget.identifier,
-                                  metadata: ["category": "rescue", "spellId": spell.id, "heal": "\(min(appliedHeal, revivedTarget.snapshot.maxHP))"])
-            } else {
-                context.appendLog(message: "\(rescuer.displayName)は\(revivedTarget.displayName)を救出した！",
-                                  type: .heal,
-                                  actorId: rescuer.identifier,
-                                  targetId: revivedTarget.identifier,
-                                  metadata: ["category": "rescue", "heal": "\(min(appliedHeal, revivedTarget.snapshot.maxHP))"])
             }
 
             if !rescuer.skillEffects.rescueModifiers.ignoreActionCost {
@@ -446,6 +424,10 @@ extension BattleTurnEngine {
 
             context.updateActor(rescuer, side: side, index: candidateIndex)
             context.updateActor(revivedTarget, side: side, index: fallenIndex)
+
+            let rescuerIdx = context.actorIndex(for: side, arrayIndex: candidateIndex)
+            let targetIdx = context.actorIndex(for: side, arrayIndex: fallenIndex)
+            context.appendAction(kind: .rescue, actor: rescuerIdx, target: targetIdx, value: UInt32(appliedHeal))
             return true
         }
 
@@ -460,7 +442,7 @@ extension BattleTurnEngine {
             return false
         }
 
-        applyEndOfTurnResurrectionIfNeeded(for: &target, context: &context, allowVitalize: true)
+        applyEndOfTurnResurrectionIfNeeded(for: side, index: fallenIndex, actor: &target, context: &context, allowVitalize: true)
         guard target.isAlive else { return false }
 
         context.updateActor(target, side: side, index: fallenIndex)

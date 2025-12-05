@@ -6,13 +6,13 @@ struct RuntimePartyProgress: Sendable, Hashable {
     var lastSelectedDungeonIndex: UInt16       // 0=未選択
     var lastSelectedDifficulty: UInt8
     var targetFloor: UInt8
-    var memberIds: [Int32]                     // 順序=配列index
+    var memberIds: [UInt8]                     // 順序=配列index
 }
 
 struct RuntimePartyState: Sendable {
     struct Member: Identifiable, Sendable {
-        var id: Int32 { characterId }
-        let characterId: Int32
+        var id: UInt8 { characterId }
+        let characterId: UInt8
         let order: Int
         let character: RuntimeCharacterState
     }
