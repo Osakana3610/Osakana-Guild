@@ -78,7 +78,7 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
         var breath: Int
     }
 
-    var id: Int32
+    var id: UInt8
     var displayName: String
     var raceId: String
     var gender: String
@@ -149,7 +149,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     let spellLoadout: SkillRuntimeEffects.SpellLoadout
     let loadout: RuntimeCharacterState.Loadout
 
-    var id: Int32 { progress.id }
+    var id: UInt8 { progress.id }
     var name: String { progress.displayName }
     var level: Int { progress.level }
     var experience: Int { progress.experience }

@@ -39,7 +39,11 @@ extension BattleTurnEngine {
         let accuracyMultiplier = isMartial ? BattleContext.martialAccuracyMultiplier : 1.0
 
         if useAntiHealing {
-            let attackResult = performAntiHealingAttack(attacker: attacker,
+            let attackResult = performAntiHealingAttack(attackerSide: attackerSide,
+                                                        attackerIndex: attackerIndex,
+                                                        attacker: attacker,
+                                                        defenderSide: target.0,
+                                                        defenderIndex: target.1,
                                                         defender: defender,
                                                         context: &context)
             let outcome = applyAttackOutcome(attackerSide: attackerSide,
@@ -57,7 +61,11 @@ extension BattleTurnEngine {
 
         if let special = selectSpecialAttack(for: attacker, context: &context) {
             let attackResult = performSpecialAttack(special,
+                                                    attackerSide: attackerSide,
+                                                    attackerIndex: attackerIndex,
                                                     attacker: attacker,
+                                                    defenderSide: target.0,
+                                                    defenderIndex: target.1,
                                                     defender: defender,
                                                     context: &context)
             let outcome = applyAttackOutcome(attackerSide: attackerSide,
@@ -73,8 +81,12 @@ extension BattleTurnEngine {
             return
         }
 
-        let attackResult = performAttack(attacker: attacker,
+        let attackResult = performAttack(attackerSide: attackerSide,
+                                         attackerIndex: attackerIndex,
+                                         attacker: attacker,
                                          defender: defender,
+                                         defenderSide: target.0,
+                                         defenderIndex: target.1,
                                          context: &context,
                                          hitCountOverride: nil,
                                          accuracyMultiplier: accuracyMultiplier)
@@ -132,14 +144,16 @@ extension BattleTurnEngine {
         let targetRef: (ActorSide, Int) = (attackerSide, targetIndex)
         guard let targetActor = context.actor(for: targetRef.0, index: targetRef.1) else { return false }
 
-        context.appendLog(message: "\(attacker.displayName)は吸血衝動に駆られて仲間を襲った！",
-                          type: .action,
-                          actorId: attacker.identifier,
-                          targetId: targetActor.identifier,
-                          metadata: ["category": "vampiricImpulse"])
+        let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+        let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetIndex)
+        context.appendAction(kind: .vampireUrge, actor: attackerIdx, target: targetIdx)
 
-        let attackResult = performAttack(attacker: attacker,
+        let attackResult = performAttack(attackerSide: attackerSide,
+                                         attackerIndex: attackerIndex,
+                                         attacker: attacker,
                                          defender: targetActor,
+                                         defenderSide: targetRef.0,
+                                         defenderIndex: targetIndex,
                                          context: &context,
                                          hitCountOverride: nil,
                                          accuracyMultiplier: 1.0)
@@ -163,10 +177,8 @@ extension BattleTurnEngine {
             if missing > 0 {
                 let healed = min(missing, attackResult.totalDamage)
                 updatedAttacker.currentHP += healed
-                context.appendLog(message: "\(updatedAttacker.displayName)は吸血で\(healed)回復した！",
-                                  type: .heal,
-                                  actorId: updatedAttacker.identifier,
-                                  metadata: ["heal": "\(healed)", "category": "vampiricImpulse"])
+                let actorIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+                context.appendAction(kind: .healVampire, actor: actorIdx, value: UInt32(healed))
             }
         }
 
@@ -189,56 +201,59 @@ extension BattleTurnEngine {
     }
 
     static func performSpecialAttack(_ descriptor: BattleActor.SkillEffects.SpecialAttack,
+                                     attackerSide: ActorSide,
+                                     attackerIndex: Int,
                                      attacker: BattleActor,
+                                     defenderSide: ActorSide,
+                                     defenderIndex: Int,
                                      defender: BattleActor,
                                      context: inout BattleContext) -> AttackResult {
         var overrides = PhysicalAttackOverrides()
         var hitCountOverride: Int? = nil
-        let message: String
         var specialAccuracyMultiplier: Double = 1.0
 
         switch descriptor.kind {
         case .specialA:
             let combined = attacker.snapshot.physicalAttack + attacker.snapshot.magicalAttack
             overrides = PhysicalAttackOverrides(physicalAttackOverride: combined, maxAttackMultiplier: 3.0)
-            message = "\(attacker.displayName)は特殊攻撃Aを発動した！"
         case .specialB:
             overrides = PhysicalAttackOverrides(ignoreDefense: true)
             hitCountOverride = 3
-            message = "\(attacker.displayName)は特殊攻撃Bを繰り出した！"
         case .specialC:
             let combined = attacker.snapshot.physicalAttack + attacker.snapshot.hitRate
             overrides = PhysicalAttackOverrides(physicalAttackOverride: combined, forceHit: true)
             hitCountOverride = 4
-            message = "\(attacker.displayName)は特殊攻撃Cを放った！"
         case .specialD:
             let doubled = attacker.snapshot.physicalAttack * 2
             overrides = PhysicalAttackOverrides(physicalAttackOverride: doubled, criticalRateMultiplier: 2.0)
             hitCountOverride = max(1, attacker.snapshot.attackCount * 2)
             specialAccuracyMultiplier = 2.0
-            message = "\(attacker.displayName)は特殊攻撃Dを放った！"
         case .specialE:
             let scaled = attacker.snapshot.physicalAttack * max(1, attacker.snapshot.attackCount)
             overrides = PhysicalAttackOverrides(physicalAttackOverride: scaled, doubleDamageAgainstDivine: true)
             hitCountOverride = 1
-            message = "\(attacker.displayName)は特殊攻撃Eを放った！"
         }
 
-        context.appendLog(message: message,
-                          type: .action,
-                          actorId: attacker.identifier,
-                          metadata: ["category": "specialAttack", "specialAttackId": descriptor.kind.rawValue])
+        // 特殊攻撃のログは呼び出し元でphysicalAttackとして記録される
 
-        return performAttack(attacker: attacker,
+        return performAttack(attackerSide: attackerSide,
+                             attackerIndex: attackerIndex,
+                             attacker: attacker,
                              defender: defender,
+                             defenderSide: defenderSide,
+                             defenderIndex: defenderIndex,
                              context: &context,
                              hitCountOverride: hitCountOverride,
                              accuracyMultiplier: specialAccuracyMultiplier,
                              overrides: overrides)
     }
 
-    static func performAttack(attacker: BattleActor,
+    static func performAttack(attackerSide: ActorSide,
+                              attackerIndex: Int,
+                              attacker: BattleActor,
                               defender: BattleActor,
+                              defenderSide: ActorSide? = nil,
+                              defenderIndex: Int? = nil,
                               context: inout BattleContext,
                               hitCountOverride: Int?,
                               accuracyMultiplier: Double,
@@ -287,6 +302,14 @@ extension BattleTurnEngine {
         var criticalHits = 0
         var defenderEvaded = false
 
+        let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+        let defenderIdx: UInt16
+        if let defSide = defenderSide, let defIndex = defenderIndex {
+            defenderIdx = context.actorIndex(for: defSide, arrayIndex: defIndex)
+        } else {
+            defenderIdx = 0
+        }
+
         for hitIndex in 1...hitCount {
             guard attackerCopy.isAlive && defenderCopy.isAlive else { break }
 
@@ -321,11 +344,7 @@ extension BattleTurnEngine {
                                                               context: &context)
             if !forceHit && !BattleRandomSystem.probability(hitChance, random: &context.random) {
                 defenderEvaded = true
-                context.appendLog(message: "\(defenderCopy.displayName)は\(attackerCopy.displayName)の攻撃をかわした！",
-                                  type: .miss,
-                                  actorId: defenderCopy.identifier,
-                                  targetId: attackerCopy.identifier,
-                                  metadata: ["category": ActionCategory.physicalAttack.logIdentifier, "hitIndex": "\(hitIndex)"])
+                context.appendAction(kind: .physicalEvade, actor: defenderIdx, target: attackerIdx)
                 continue
             }
 
@@ -349,24 +368,12 @@ extension BattleTurnEngine {
             successfulHits += 1
             if result.critical { criticalHits += 1 }
 
-            var metadata: [String: String] = [
-                "damage": "\(applied)",
-                "targetHP": "\(defenderCopy.currentHP)",
-                "category": ActionCategory.physicalAttack.logIdentifier,
-                "hitIndex": "\(hitIndex)"
-            ]
-            let message: String
-            if result.critical {
-                metadata["critical"] = "true"
-                message = "\(attackerCopy.displayName)の必殺！ \(defenderCopy.displayName)に\(applied)ダメージ！"
-            } else {
-                message = "\(attackerCopy.displayName)の攻撃！ \(defenderCopy.displayName)に\(applied)ダメージ！"
-            }
-
-            context.appendLog(message: message, type: .damage, actorId: attackerCopy.identifier, targetId: defenderCopy.identifier, metadata: metadata)
+            context.appendAction(kind: .physicalDamage, actor: attackerIdx, target: defenderIdx, value: UInt32(applied))
 
             if !defenderCopy.isAlive {
-                appendDefeatLog(for: defenderCopy, context: &context)
+                if let defSide = defenderSide, let defIndex = defenderIndex {
+                    appendDefeatLog(for: defenderCopy, side: defSide, index: defIndex, context: &context)
+                }
                 break
             }
         }
@@ -381,7 +388,11 @@ extension BattleTurnEngine {
                             wasBlocked: false)
     }
 
-    static func performAntiHealingAttack(attacker: BattleActor,
+    static func performAntiHealingAttack(attackerSide: ActorSide,
+                                         attackerIndex: Int,
+                                         attacker: BattleActor,
+                                         defenderSide: ActorSide,
+                                         defenderIndex: Int,
                                          defender: BattleActor,
                                          context: inout BattleContext) -> AttackResult {
         let attackerCopy = attacker
@@ -398,17 +409,16 @@ extension BattleTurnEngine {
                                 wasBlocked: false)
         }
 
+        let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+        let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
+
         let hitChance = computeHitChance(attacker: attackerCopy,
                                          defender: defenderCopy,
                                          hitIndex: 1,
                                          accuracyMultiplier: 1.0,
                                          context: &context)
         if !BattleRandomSystem.probability(hitChance, random: &context.random) {
-            context.appendLog(message: "\(defenderCopy.displayName)は\(attackerCopy.displayName)のアンチ・ヒーリングを回避した！",
-                              type: .miss,
-                              actorId: defenderCopy.identifier,
-                              targetId: attackerCopy.identifier,
-                              metadata: ["category": "antiHealing", "hitIndex": "1"])
+            context.appendAction(kind: .physicalEvade, actor: defenderIdx, target: attackerIdx)
             return AttackResult(attacker: attackerCopy,
                                 defender: defenderCopy,
                                 totalDamage: 0,
@@ -422,24 +432,10 @@ extension BattleTurnEngine {
         let result = computeAntiHealingDamage(attacker: attackerCopy, defender: &defenderCopy, context: &context)
         let applied = applyDamage(amount: result.damage, to: &defenderCopy)
 
-        var metadata: [String: String] = [
-            "damage": "\(applied)",
-            "targetHP": "\(defenderCopy.currentHP)",
-            "category": "antiHealing",
-            "hitIndex": "1"
-        ]
-        let message: String
-        if result.critical {
-            metadata["critical"] = "true"
-            message = "\(attackerCopy.displayName)の必殺アンチ・ヒーリング！ \(defenderCopy.displayName)に\(applied)ダメージ！"
-        } else {
-            message = "\(attackerCopy.displayName)のアンチ・ヒーリング！ \(defenderCopy.displayName)に\(applied)ダメージ！"
-        }
-
-        context.appendLog(message: message, type: .damage, actorId: attackerCopy.identifier, targetId: defenderCopy.identifier, metadata: metadata)
+        context.appendAction(kind: .physicalDamage, actor: attackerIdx, target: defenderIdx, value: UInt32(applied))
 
         if !defenderCopy.isAlive {
-            appendDefeatLog(for: defenderCopy, context: &context)
+            appendDefeatLog(for: defenderCopy, side: defenderSide, index: defenderIndex, context: &context)
         }
 
         return AttackResult(attacker: attackerCopy,
@@ -465,14 +461,16 @@ extension BattleTurnEngine {
         guard chancePercent > 0 else { return }
 
         while defender.isAlive && BattleRandomSystem.percentChance(chancePercent, random: &context.random) {
-            context.appendLog(message: "\(attacker.displayName)の格闘戦！",
-                              type: .action,
-                              actorId: attacker.identifier,
-                              targetId: defender.identifier,
-                              metadata: ["category": "martialAttack"])
+            let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+            let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
+            context.appendAction(kind: .martialArts, actor: attackerIdx, target: defenderIdx)
 
-            let followUpResult = performAttack(attacker: attacker,
+            let followUpResult = performAttack(attackerSide: attackerSide,
+                                               attackerIndex: attackerIndex,
+                                               attacker: attacker,
                                                defender: defender,
+                                               defenderSide: defenderSide,
+                                               defenderIndex: defenderIndex,
                                                context: &context,
                                                hitCountOverride: descriptor.hitCount,
                                                accuracyMultiplier: BattleContext.martialAccuracyMultiplier)

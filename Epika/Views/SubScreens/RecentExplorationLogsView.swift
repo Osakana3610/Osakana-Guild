@@ -528,7 +528,7 @@ private struct EncounterDetailView: View {
     @State private var battleLogEntries: [BattleLogEntry] = []
     @State private var isLoadingBattleLog = false
     @State private var battleLogError: String?
-    @State private var actorIdentifierToMemberId: [String: Int32] = [:]
+    @State private var actorIdentifierToMemberId: [String: UInt8] = [:]
     @State private var actorIcons: [String: CharacterIconInfo] = [:]
 
     var body: some View {
@@ -675,7 +675,7 @@ private struct EncounterDetailView: View {
         let name = entry.metadata["name"].flatMap { $0.isEmpty ? nil : $0 } ?? "-"
         let level = entry.metadata["level"].flatMap(Int.init)
         let job = entry.metadata["job"].flatMap { $0.isEmpty ? nil : $0 }
-        let memberId = entry.metadata["partyMemberId"].flatMap(Int32.init)
+        let memberId = entry.metadata["partyMemberId"].flatMap(UInt8.init)
 
         return ParticipantState(id: rawId,
                                 name: name,
@@ -721,7 +721,7 @@ private struct EncounterDetailView: View {
         let maxHP: Int
         let level: Int?
         let jobName: String?
-        let partyMemberId: Int32?
+        let partyMemberId: UInt8?
         let role: Role
         let order: Int
     }
@@ -775,20 +775,23 @@ private struct EncounterDetailView: View {
 
     @MainActor
     private func loadBattleLogIfNeeded() async {
-        guard encounter.combatSummary?.battleLogId != nil else { return }
+        guard encounter.combatSummary?.battleLogData != nil else { return }
         guard battleLogEntries.isEmpty, !isLoadingBattleLog, battleLogError == nil else { return }
 
         isLoadingBattleLog = true
         battleLogError = nil
         do {
             let archive = try fetchBattleLogArchive()
-            battleLogEntries = archive.entries
 
-            var memberMap: [String: Int32] = [:]
+            // 名前マップを構築
+            var allyNames: [UInt8: String] = [:]
+            var enemyNames: [UInt16: String] = [:]
+            var memberMap: [String: UInt8] = [:]
             var iconMap: [String: CharacterIconInfo] = [:]
 
             for participant in archive.playerSnapshots {
                 if let memberId = participant.partyMemberId {
+                    allyNames[memberId] = participant.name
                     memberMap[participant.actorId] = memberId
                 }
                 if let avatar = participant.avatarIdentifier {
@@ -796,6 +799,20 @@ private struct EncounterDetailView: View {
                                                                      displayName: participant.name)
                 }
             }
+
+            for participant in archive.enemySnapshots {
+                // actorIdは "suffix*1000+index" 形式で保存されている
+                if let actorIndex = UInt16(participant.actorId) {
+                    enemyNames[actorIndex] = participant.name
+                }
+            }
+
+            // BattleLogRenderer で変換
+            battleLogEntries = BattleLogRenderer.render(
+                battleLog: archive.battleLog,
+                allyNames: allyNames,
+                enemyNames: enemyNames
+            )
 
             actorIdentifierToMemberId = memberMap
             actorIcons = iconMap
@@ -806,26 +823,22 @@ private struct EncounterDetailView: View {
     }
 
     private func fetchBattleLogArchive() throws -> BattleLogArchive {
-        guard let battleLogId = encounter.combatSummary?.battleLogId else {
+        guard let data = encounter.combatSummary?.battleLogData else {
             throw EncounterDetailError.battleLogNotAvailable
         }
-        var descriptor = FetchDescriptor<ExplorationBattleLogRecord>(predicate: #Predicate { $0.id == battleLogId })
-        descriptor.fetchLimit = 1
-        guard let record = try modelContext.fetch(descriptor).first else {
-            throw EncounterDetailError.battleLogNotAvailable
-        }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(BattleLogArchive.self, from: record.payload)
+        return try JSONDecoder().decode(BattleLogArchive.self, from: data)
     }
 
     enum EncounterDetailError: LocalizedError {
         case battleLogNotAvailable
+        case decodingFailed
 
         var errorDescription: String? {
             switch self {
             case .battleLogNotAvailable:
                 return "戦闘ログを取得できませんでした"
+            case .decodingFailed:
+                return "戦闘ログのデコードに失敗しました"
             }
         }
     }
@@ -835,7 +848,7 @@ private struct EncounterDetailView: View {
         return actorIcons[identifier]
     }
 
-    private func iconInfo(forMember memberId: Int32?) -> CharacterIconInfo? {
+    private func iconInfo(forMember memberId: UInt8?) -> CharacterIconInfo? {
         guard let memberId else { return nil }
         if let identifier = actorIdentifierToMemberId.first(where: { $0.value == memberId })?.key {
             return actorIcons[identifier]

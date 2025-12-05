@@ -5,6 +5,7 @@ import SQLite3
 extension SQLiteMasterDataManager {
     func fetchAllEnemies() throws -> [EnemyDefinition] {
         struct Builder {
+            var index: UInt16
             var id: String
             var name: String
             var race: String
@@ -26,29 +27,30 @@ extension SQLiteMasterDataManager {
         }
 
         var builders: [String: Builder] = [:]
-        let baseSQL = "SELECT e.id, e.name, e.race, e.category, e.job, e.base_experience, e.is_boss, s.strength, s.wisdom, s.spirit, s.vitality, s.agility, s.luck FROM enemies e JOIN enemy_stats s ON e.id = s.enemy_id;"
+        let baseSQL = "SELECT e.id, e.enemy_index, e.name, e.race, e.category, e.job, e.base_experience, e.is_boss, s.strength, s.wisdom, s.spirit, s.vitality, s.agility, s.luck FROM enemies e JOIN enemy_stats s ON e.id = s.enemy_id;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(baseStatement, 0),
-                  let nameC = sqlite3_column_text(baseStatement, 1),
-                  let raceC = sqlite3_column_text(baseStatement, 2),
-                  let categoryC = sqlite3_column_text(baseStatement, 3) else { continue }
+                  let nameC = sqlite3_column_text(baseStatement, 2),
+                  let raceC = sqlite3_column_text(baseStatement, 3),
+                  let categoryC = sqlite3_column_text(baseStatement, 4) else { continue }
             let id = String(cString: idC)
             builders[id] = Builder(
+                index: UInt16(sqlite3_column_int(baseStatement, 1)),
                 id: id,
                 name: String(cString: nameC),
                 race: String(cString: raceC),
                 category: String(cString: categoryC),
-                job: sqlite3_column_text(baseStatement, 4).flatMap { String(cString: $0) },
-                baseExperience: Int(sqlite3_column_int(baseStatement, 5)),
-                isBoss: sqlite3_column_int(baseStatement, 6) == 1,
-                strength: Int(sqlite3_column_int(baseStatement, 7)),
-                wisdom: Int(sqlite3_column_int(baseStatement, 8)),
-                spirit: Int(sqlite3_column_int(baseStatement, 9)),
-                vitality: Int(sqlite3_column_int(baseStatement, 10)),
-                agility: Int(sqlite3_column_int(baseStatement, 11)),
-                luck: Int(sqlite3_column_int(baseStatement, 12))
+                job: sqlite3_column_text(baseStatement, 5).flatMap { String(cString: $0) },
+                baseExperience: Int(sqlite3_column_int(baseStatement, 6)),
+                isBoss: sqlite3_column_int(baseStatement, 7) == 1,
+                strength: Int(sqlite3_column_int(baseStatement, 8)),
+                wisdom: Int(sqlite3_column_int(baseStatement, 9)),
+                spirit: Int(sqlite3_column_int(baseStatement, 10)),
+                vitality: Int(sqlite3_column_int(baseStatement, 11)),
+                agility: Int(sqlite3_column_int(baseStatement, 12)),
+                luck: Int(sqlite3_column_int(baseStatement, 13))
             )
         }
 
@@ -87,6 +89,7 @@ extension SQLiteMasterDataManager {
 
         return builders.values.sorted { $0.name < $1.name }.map { builder in
             EnemyDefinition(
+                index: builder.index,
                 id: builder.id,
                 name: builder.name,
                 race: builder.race,

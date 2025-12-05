@@ -90,7 +90,7 @@ final class ProgressBootstrapper {
 #if DEBUG
         print("[ProgressStore][DEBUG] register transformers")
 #endif
-        StatusEffectIdsTransformer.registerIfNeeded()
+        // StatusEffectIdsTransformer は旧ExplorationEventRecord用で、現在は不要
     }
 
     private func progressStoreURL() throws -> URL {

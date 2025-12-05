@@ -1,7 +1,7 @@
 import Foundation
 
 struct BattleLogEntry: Codable, Sendable, Hashable {
-    enum LogType: String, Codable, Sendable {
+    nonisolated enum LogType: String, Codable, Sendable {
         case system
         case action
         case damage
@@ -21,12 +21,12 @@ struct BattleLogEntry: Codable, Sendable, Hashable {
     let targetId: String?
     let metadata: [String: String]
 
-    init(turn: Int,
-         message: String,
-         type: LogType,
-         actorId: String? = nil,
-         targetId: String? = nil,
-         metadata: [String: String] = [:]) {
+    nonisolated init(turn: Int,
+                     message: String,
+                     type: LogType,
+                     actorId: String? = nil,
+                     targetId: String? = nil,
+                     metadata: [String: String] = [:]) {
         self.turn = turn
         self.message = message
         self.type = type

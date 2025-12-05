@@ -4,9 +4,8 @@ import Foundation
 /// 戦闘ごとにBattleContextを生成し、並行実行時のデータ競合を防ぐ
 struct BattleTurnEngine {
     struct Result {
-        let result: BattleService.BattleResult
-        let turns: Int
-        let log: [BattleLogEntry]
+        let outcome: UInt8
+        let battleLog: BattleLog
         let players: [BattleActor]
         let enemies: [BattleActor]
     }
@@ -44,30 +43,29 @@ struct BattleTurnEngine {
 
     /// メインの戦闘ループ
     private static func executeMainLoop(_ context: inout BattleContext) -> Result {
-        context.appendLog(turn: 0, message: "戦闘開始！", type: .system)
+        // 初期HP記録
+        context.buildInitialHP()
 
-        for enemy in context.enemies {
-            context.appendLog(turn: 0,
-                              message: "\(enemy.displayName)が現れた！",
-                              type: .system,
-                              actorId: enemy.identifier)
+        context.appendAction(kind: .battleStart)
+
+        for (index, _) in context.enemies.enumerated() {
+            let actorIdx = context.actorIndex(for: .enemy, arrayIndex: index)
+            context.appendAction(kind: .enemyAppear, actor: actorIdx)
         }
-
-        appendInitialStateLogs(&context)
 
         while context.turn < BattleContext.maxTurns {
             // 勝敗判定
             if context.isVictory {
-                context.appendLog(message: "勝利！ 敵を倒した！", type: .victory)
-                return context.makeResult(.victory)
+                context.appendAction(kind: .victory)
+                return context.makeResult(BattleLog.outcomeVictory)
             }
             if context.isDefeat {
-                context.appendLog(message: "敗北… パーティは全滅した…", type: .defeat)
-                return context.makeResult(.defeat)
+                context.appendAction(kind: .defeat)
+                return context.makeResult(BattleLog.outcomeDefeat)
             }
 
             context.turn += 1
-            context.appendLog(message: "--- \(context.turn)ターン目 ---", type: .system)
+            context.appendAction(kind: .turnStart)
 
             resetRescueUsage(&context)
             applyRetreatIfNeeded(&context)
@@ -82,20 +80,20 @@ struct BattleTurnEngine {
 
                 // アクション後の勝敗判定
                 if context.isVictory {
-                    context.appendLog(message: "勝利！ 敵を倒した！", type: .victory)
-                    return context.makeResult(.victory)
+                    context.appendAction(kind: .victory)
+                    return context.makeResult(BattleLog.outcomeVictory)
                 }
                 if context.isDefeat {
-                    context.appendLog(message: "敗北… パーティは全滅した…", type: .defeat)
-                    return context.makeResult(.defeat)
+                    context.appendAction(kind: .defeat)
+                    return context.makeResult(BattleLog.outcomeDefeat)
                 }
             }
 
             endOfTurn(&context)
         }
 
-        context.appendLog(message: "戦闘は長期化し、パーティは撤退を決断した", type: .retreat)
-        return context.makeResult(.retreat)
+        context.appendAction(kind: .retreat)
+        return context.makeResult(BattleLog.outcomeRetreat)
     }
 
     /// ターン開始時の準備処理
@@ -131,48 +129,10 @@ struct BattleTurnEngine {
     }
 }
 
-// MARK: - ActionCategory
+// MARK: - ActionCandidate
 extension BattleTurnEngine {
-    enum ActionCategory {
-        case defend
-        case physicalAttack
-        case priestMagic
-        case mageMagic
-        case breath
-
-        var logIdentifier: String {
-            switch self {
-            case .defend: return "defend"
-            case .physicalAttack: return "physical"
-            case .priestMagic: return "priest"
-            case .mageMagic: return "mage"
-            case .breath: return "breath"
-            }
-        }
-
-        var logType: BattleLogEntry.LogType {
-            switch self {
-            case .defend: return .action
-            case .physicalAttack: return .damage
-            case .priestMagic: return .heal
-            case .mageMagic: return .damage
-            case .breath: return .damage
-            }
-        }
-
-        func actionMessage(for displayName: String) -> String {
-            switch self {
-            case .defend: return "\(displayName)は防御態勢を取った"
-            case .physicalAttack: return "\(displayName)の攻撃！"
-            case .priestMagic: return "\(displayName)が回復魔法を唱える"
-            case .mageMagic: return "\(displayName)が攻撃魔法を唱える"
-            case .breath: return "\(displayName)のブレス攻撃！"
-            }
-        }
-    }
-
     struct ActionCandidate {
-        let category: ActionCategory
+        let category: ActionKind
         let weight: Int
     }
 }

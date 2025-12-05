@@ -29,6 +29,7 @@ actor MasterDataRepository {
     private var dungeonsCache: ([DungeonDefinition], [EncounterTableDefinition], [DungeonFloorDefinition])?
     private var dungeonsById: [String: DungeonDefinition]?
     private var explorationEventsCache: [ExplorationEventDefinition]?
+    private var explorationEventsById: [String: ExplorationEventDefinition]?
     private var storiesCache: [StoryNodeDefinition]?
     private var synthesisCache: [SynthesisRecipeDefinition]?
     private var shopsCache: [ShopDefinition]?
@@ -294,7 +295,14 @@ actor MasterDataRepository {
         try await ensureInitialized()
         let events = try await manager.fetchAllExplorationEvents()
         self.explorationEventsCache = events
+        self.explorationEventsById = Dictionary(uniqueKeysWithValues: events.map { ($0.id, $0) })
         return events
+    }
+
+    func explorationEvent(withId id: String) async throws -> ExplorationEventDefinition? {
+        if let explorationEventsById, let definition = explorationEventsById[id] { return definition }
+        _ = try await allExplorationEvents()
+        return explorationEventsById?[id]
     }
 
     func allStories() async throws -> [StoryNodeDefinition] {

@@ -337,6 +337,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS enemies (
                 id TEXT PRIMARY KEY,
+                enemy_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 race TEXT NOT NULL,
                 category TEXT NOT NULL,
@@ -605,6 +606,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS exploration_events (
                 id TEXT PRIMARY KEY,
+                event_index INTEGER NOT NULL,
                 type TEXT NOT NULL,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,

@@ -249,7 +249,7 @@ private struct GuildCharacterRow: View {
 // MARK: - Character Detail Loader
 
 private struct LazyRuntimeCharacterDetailView: View {
-    let characterId: Int32
+    let characterId: UInt8
     let summary: CharacterViewState.CharacterSummary
     let progressService: ProgressService
 
@@ -1161,7 +1161,7 @@ private struct CharacterJobChangeView: View {
 
     @State private var characters: [RuntimeCharacter] = []
     @State private var jobs: [JobDefinition] = []
-    @State private var selectedCharacterId: Int32?
+    @State private var selectedCharacterId: UInt8?
     @State private var selectedJobId: String?
     @State private var isLoading = false
     @State private var isProcessing = false
@@ -1181,9 +1181,9 @@ private struct CharacterJobChangeView: View {
                         ProgressView()
                     } else {
                         Picker("対象", selection: $selectedCharacterId) {
-                            Text("未選択").tag(Int32?.none)
+                            Text("未選択").tag(UInt8?.none)
                             ForEach(characters, id: \.id) { character in
-                                Text("\(character.name) (Lv.\(character.level))").tag(Int32?.some(character.id))
+                                Text("\(character.name) (Lv.\(character.level))").tag(UInt8?.some(character.id))
                             }
                         }
                     }

@@ -9,7 +9,7 @@ actor CharacterProgressService {
     }
 
     struct BattleResultUpdate: Sendable {
-        let characterId: Int32
+        let characterId: UInt8
         let experienceDelta: Int
         let hpDelta: Int32
     }
@@ -40,7 +40,7 @@ actor CharacterProgressService {
         return try await makeSnapshots(records, context: context)
     }
 
-    func character(withId id: Int32) async throws -> CharacterSnapshot? {
+    func character(withId id: UInt8) async throws -> CharacterSnapshot? {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
@@ -50,15 +50,15 @@ actor CharacterProgressService {
         return try await makeSnapshot(record, context: context)
     }
 
-    func characters(withIds ids: [Int32]) async throws -> [CharacterSnapshot] {
+    func characters(withIds ids: [UInt8]) async throws -> [CharacterSnapshot] {
         guard !ids.isEmpty else { return [] }
         let context = makeContext()
         let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { ids.contains($0.id) })
         let records = try context.fetch(descriptor)
         let map = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
         var ordered: [CharacterRecord] = []
-        var missing: [Int32] = []
-        var seen: Set<Int32> = []
+        var missing: [UInt8] = []
+        var seen: Set<UInt8> = []
         for id in ids {
             guard let record = map[id] else {
                 missing.append(id)
@@ -97,11 +97,8 @@ actor CharacterProgressService {
 
         let context = makeContext()
 
-        // ID採番: 最後のレコードのID + 1
-        var lastDescriptor = FetchDescriptor<CharacterRecord>(sortBy: [SortDescriptor(\.id, order: .reverse)])
-        lastDescriptor.fetchLimit = 1
-        let lastRecord = try context.fetch(lastDescriptor).first
-        let newId = (lastRecord?.id ?? 0) + 1
+        // ID採番: 1〜200で最小の未使用IDを割り当てる
+        let newId = try allocateCharacterId(context: context)
 
         // 初期HPは一旦100を設定（最初のmakeSnapshotで再計算される）
         let initialHP: Int32 = 100
@@ -129,7 +126,7 @@ actor CharacterProgressService {
 
     // MARK: - Update
 
-    func updateCharacter(id: Int32,
+    func updateCharacter(id: UInt8,
                          mutate: @Sendable (inout CharacterSnapshot) throws -> Void) async throws -> CharacterSnapshot {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
@@ -195,7 +192,7 @@ actor CharacterProgressService {
         notifyCharacterProgressDidChange()
     }
 
-    func updateHP(characterId: Int32, newHP: Int32) async throws {
+    func updateHP(characterId: UInt8, newHP: Int32) async throws {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
         descriptor.fetchLimit = 1
@@ -209,7 +206,7 @@ actor CharacterProgressService {
 
     // MARK: - Delete
 
-    func deleteCharacter(id: Int32) async throws {
+    func deleteCharacter(id: UInt8) async throws {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
@@ -224,7 +221,7 @@ actor CharacterProgressService {
     // MARK: - Equipment Management
 
     /// キャラクターにアイテムを装備
-    func equipItem(characterId: Int32, inventoryItemStackKey: String, quantity: Int = 1) async throws -> CharacterSnapshot {
+    func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1) async throws -> CharacterSnapshot {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "装備数量は1以上である必要があります")
         }
@@ -286,7 +283,7 @@ actor CharacterProgressService {
     }
 
     /// キャラクターからアイテムを解除（stackKeyで指定、quantity個）
-    func unequipItem(characterId: Int32, equipmentStackKey: String, quantity: Int = 1) async throws -> CharacterSnapshot {
+    func unequipItem(characterId: UInt8, equipmentStackKey: String, quantity: Int = 1) async throws -> CharacterSnapshot {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "解除数量は1以上である必要があります")
         }
@@ -346,7 +343,7 @@ actor CharacterProgressService {
     }
 
     /// キャラクターの装備一覧を取得
-    func equippedItems(characterId: Int32) async throws -> [CharacterSnapshot.EquippedItem] {
+    func equippedItems(characterId: UInt8) async throws -> [CharacterSnapshot.EquippedItem] {
         let context = makeContext()
         let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let records = try context.fetch(descriptor)
@@ -629,14 +626,23 @@ private extension CharacterProgressService {
         // raceIndex, jobIndex, personalityIndexは変更しない（種族・職業変更は別APIで）
     }
 
-    func deleteEquipment(for characterId: Int32, context: ModelContext) throws {
+    func deleteEquipment(for characterId: UInt8, context: ModelContext) throws {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         for record in try context.fetch(equipmentDescriptor) {
             context.delete(record)
         }
     }
 
-    func removeFromParties(characterId: Int32, context: ModelContext) throws {
+    /// 1〜200の範囲で最小の未使用IDを割り当てる
+    func allocateCharacterId(context: ModelContext) throws -> UInt8 {
+        let occupied = Set(try context.fetch(FetchDescriptor<CharacterRecord>()).map(\.id))
+        guard let id = (1...200).lazy.map(UInt8.init).first(where: { !occupied.contains($0) }) else {
+            throw ProgressError.invalidInput(description: "キャラクター数が上限（200体）に達しています")
+        }
+        return id
+    }
+
+    func removeFromParties(characterId: UInt8, context: ModelContext) throws {
         let descriptor = FetchDescriptor<PartyRecord>()
         let parties = try context.fetch(descriptor)
         let now = Date()

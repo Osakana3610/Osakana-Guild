@@ -1,192 +1,88 @@
 import Foundation
 import SwiftData
 
-@objc(StatusEffectIdsTransformer)
-final class StatusEffectIdsTransformer: NSSecureUnarchiveFromDataTransformer {
-    static let name = NSValueTransformerName("StatusEffectIdsTransformer")
-
-    nonisolated override class func transformedValueClass() -> AnyClass { NSArray.self }
-    nonisolated override class func allowsReverseTransformation() -> Bool { true }
-    nonisolated override class var allowedTopLevelClasses: [AnyClass] {
-        [NSArray.self, NSString.self]
-    }
-
-    nonisolated override init() {
-        super.init()
-    }
-
-}
-
-extension StatusEffectIdsTransformer {
-    static func registerIfNeeded() {
-        if ValueTransformer(forName: name) == nil {
-            ValueTransformer.setValueTransformer(StatusEffectIdsTransformer(), forName: name)
-        }
-    }
-}
-
+/// 探索実行レコード
+///
+/// 以前は4つの@Model（ExplorationRunRecord, ExplorationEventRecord,
+/// ExplorationEventDropRecord, ExplorationBattleLogRecord）で構成されていたが、
+/// ストレージ効率化のため1レコードに統合。
+/// イベント情報はEventEntry配列をエンコードしてeventsDataに格納。
 @Model
 final class ExplorationRunRecord {
-    var id: UUID = Foundation.UUID()
+    /// パーティID
     var partyId: UInt8 = 1
-    var dungeonId: String = ""
-    var difficultyRank: Int = 0
-    var startedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-    var endedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-    var expectedReturnAt: Date? = nil
-    var endStateRawValue: String = ""
-    var defeatedFloorNumber: Int?
-    var defeatedEventIndex: Int?
-    var defeatedEnemyId: String?
-    var eventsPerFloor: Int = 0
-    var floorCount: Int = 0
-    var totalExperience: Int = 0
-    var totalGold: Int = 0
-    var statusRawValue: String = ""
-    var createdAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-    var updatedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
 
-    init(id: UUID = UUID(),
-         partyId: UInt8,
-         dungeonId: String,
-         difficultyRank: Int,
-         startedAt: Date,
-         endedAt: Date,
-         endStateRawValue: String,
-         expectedReturnAt: Date?,
-         defeatedFloorNumber: Int?,
-         defeatedEventIndex: Int?,
-         defeatedEnemyId: String?,
-         eventsPerFloor: Int,
-         floorCount: Int,
-         totalExperience: Int,
-         totalGold: Int,
-         statusRawValue: String,
-         createdAt: Date,
-         updatedAt: Date) {
-        self.id = id
+    /// ダンジョンのマスターデータindex
+    var dungeonIndex: UInt16 = 0
+
+    /// 難易度（0〜255）
+    var difficulty: UInt8 = 0
+
+    /// 目標フロア
+    var targetFloor: UInt8 = 0
+
+    /// 探索開始日時（識別子の一部として使用）
+    var startedAt: Date = Date()
+
+    /// 探索終了日時
+    var endedAt: Date = Date()
+
+    /// 探索結果: 0=running, 1=completed, 2=defeated, 3=cancelled
+    var result: UInt8 = 0
+
+    /// 到達フロア
+    var finalFloor: UInt8 = 0
+
+    /// 獲得経験値合計
+    var totalExp: Int32 = 0
+
+    /// 獲得ゴールド合計
+    var totalGold: Int32 = 0
+
+    /// イベント情報（EventEntry配列をJSONエンコード）
+    var eventsData: Data = Data()
+
+    init(partyId: UInt8,
+         dungeonIndex: UInt16,
+         difficulty: UInt8,
+         targetFloor: UInt8,
+         startedAt: Date) {
         self.partyId = partyId
-        self.dungeonId = dungeonId
-        self.difficultyRank = difficultyRank
+        self.dungeonIndex = dungeonIndex
+        self.difficulty = difficulty
+        self.targetFloor = targetFloor
         self.startedAt = startedAt
-        self.endedAt = endedAt
-        self.expectedReturnAt = expectedReturnAt
-        self.endStateRawValue = endStateRawValue
-        self.defeatedFloorNumber = defeatedFloorNumber
-        self.defeatedEventIndex = defeatedEventIndex
-        self.defeatedEnemyId = defeatedEnemyId
-        self.eventsPerFloor = eventsPerFloor
-        self.floorCount = floorCount
-        self.totalExperience = totalExperience
-        self.totalGold = totalGold
-        self.statusRawValue = statusRawValue
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
+    }
+
+    // MARK: - Events Encoding/Decoding
+
+    /// eventsDataをデコードしてEventEntry配列を取得
+    func decodeEvents() throws -> [EventEntry] {
+        guard !eventsData.isEmpty else { return [] }
+        return try JSONDecoder().decode([EventEntry].self, from: eventsData)
+    }
+
+    /// EventEntry配列をエンコードしてeventsDataに保存
+    func encodeEvents(_ events: [EventEntry]) throws {
+        eventsData = try JSONEncoder().encode(events)
+    }
+
+    /// イベントを追加
+    func appendEvent(_ event: EventEntry) throws {
+        var events = try decodeEvents()
+        events.append(event)
+        try encodeEvents(events)
     }
 }
 
-@Model
-final class ExplorationEventRecord {
-    var id: UUID = Foundation.UUID()
-    var runId: UUID = Foundation.UUID()
-    var floorNumber: Int = 0
-    var eventIndex: Int = 0
-    var occurredAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-    var kindRawValue: String = ""
-    var referenceId: String?
-    var experienceGained: Int = 0
-    var goldGained: Int = 0
-    @Attribute(.transformable(by: StatusEffectIdsTransformer.self))
-    var statusEffectIds: [String] = []
-    var battleLogId: UUID?
-    var createdAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-    var updatedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
+// MARK: - Result Helpers
 
-    init(id: UUID = UUID(),
-         runId: UUID,
-         floorNumber: Int,
-         eventIndex: Int,
-         occurredAt: Date,
-         kindRawValue: String,
-         referenceId: String?,
-         experienceGained: Int,
-         goldGained: Int,
-         statusEffectIds: [String],
-         battleLogId: UUID?,
-         createdAt: Date,
-         updatedAt: Date) {
-        self.id = id
-        self.runId = runId
-        self.floorNumber = floorNumber
-        self.eventIndex = eventIndex
-        self.occurredAt = occurredAt
-        self.kindRawValue = kindRawValue
-        self.referenceId = referenceId
-        self.experienceGained = experienceGained
-        self.goldGained = goldGained
-        self.statusEffectIds = statusEffectIds
-        self.battleLogId = battleLogId
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
+extension ExplorationRunRecord {
+    var explorationResult: ExplorationResult {
+        ExplorationResult(rawValue: result) ?? .running
     }
-}
 
-@Model
-final class ExplorationEventDropRecord {
-    var id: UUID = Foundation.UUID()
-    var eventId: UUID = Foundation.UUID()
-    var itemId: String = ""
-    var quantity: Int = 0
-    var trapDifficulty: Int?
-    var sourceEnemyId: String?
-    var normalTitleId: String?
-    var superRareTitleId: String?
-
-    init(id: UUID = UUID(),
-         eventId: UUID,
-         itemId: String,
-         quantity: Int,
-         trapDifficulty: Int?,
-         sourceEnemyId: String?,
-         normalTitleId: String?,
-         superRareTitleId: String?) {
-        self.id = id
-        self.eventId = eventId
-        self.itemId = itemId
-        self.quantity = quantity
-        self.trapDifficulty = trapDifficulty
-        self.sourceEnemyId = sourceEnemyId
-        self.normalTitleId = normalTitleId
-        self.superRareTitleId = superRareTitleId
-    }
-}
-
-@Model
-final class ExplorationBattleLogRecord {
-    var id: UUID = Foundation.UUID()
-    var runId: UUID = Foundation.UUID()
-    var eventId: UUID = Foundation.UUID()
-    var enemyId: String = ""
-    var resultRawValue: String = ""
-    var turns: Int = 0
-    var loggedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-    var payload: Data = Foundation.Data()
-
-    init(id: UUID = UUID(),
-         runId: UUID,
-         eventId: UUID,
-         enemyId: String,
-         resultRawValue: String,
-         turns: Int,
-         loggedAt: Date,
-         payload: Data) {
-        self.id = id
-        self.runId = runId
-        self.eventId = eventId
-        self.enemyId = enemyId
-        self.resultRawValue = resultRawValue
-        self.turns = turns
-        self.loggedAt = loggedAt
-        self.payload = payload
+    var isFinished: Bool {
+        result != ExplorationResult.running.rawValue
     }
 }

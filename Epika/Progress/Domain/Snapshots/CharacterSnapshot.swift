@@ -101,7 +101,7 @@ struct CharacterSnapshot: Sendable, Hashable {
     }
 
     let persistentIdentifier: PersistentIdentifier
-    let id: Int32
+    let id: UInt8
     var displayName: String
     var raceId: String
     var gender: String

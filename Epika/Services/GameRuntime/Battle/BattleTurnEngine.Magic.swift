@@ -14,9 +14,8 @@ extension BattleTurnEngine {
         guard let targetIndex = selectHealingTargetIndex(in: allies) else { return false }
         guard caster.actionResources.consume(spellId: spell.id) else { return false }
 
-        let remaining = caster.actionResources.charges(forSpellId: spell.id)
         context.updateActor(caster, side: side, index: casterIndex)
-        appendActionLog(for: caster, category: .priestMagic, remainingUses: remaining, spellId: spell.id, context: &context)
+        appendActionLog(for: caster, side: side, index: casterIndex, category: .priestMagic, context: &context)
 
         performPriestMagic(casterSide: side,
                            casterIndex: casterIndex,
@@ -40,16 +39,9 @@ extension BattleTurnEngine {
         target.currentHP += applied
         context.updateActor(target, side: casterSide, index: targetIndex)
 
-        context.appendLog(message: "\(caster.displayName)の\(spell.name)！ \(target.displayName)のHPが\(applied)回復した！",
-                          type: .heal,
-                          actorId: caster.identifier,
-                          targetId: target.identifier,
-                          metadata: [
-                              "heal": "\(applied)",
-                              "targetHP": "\(target.currentHP)",
-                              "category": ActionCategory.priestMagic.logIdentifier,
-                              "spellId": spell.id
-                          ])
+        let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
+        let targetIdx = context.actorIndex(for: casterSide, arrayIndex: targetIndex)
+        context.appendAction(kind: .magicHeal, actor: casterIdx, target: targetIdx, value: UInt32(applied))
     }
 
     @discardableResult
@@ -61,10 +53,9 @@ extension BattleTurnEngine {
         guard let spell = selectMageSpell(for: attacker) else { return false }
         guard attacker.actionResources.consume(spellId: spell.id) else { return false }
 
-        let remaining = attacker.actionResources.charges(forSpellId: spell.id)
         context.updateActor(attacker, side: side, index: attackerIndex)
 
-        appendActionLog(for: attacker, category: .mageMagic, remainingUses: remaining, spellId: spell.id, context: &context)
+        appendActionLog(for: attacker, side: side, index: attackerIndex, category: .mageMagic, context: &context)
 
         let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker, context: context)
         let targetCount = statusTargetCount(for: attacker, spell: spell)
@@ -89,19 +80,12 @@ extension BattleTurnEngine {
 
             context.updateActor(target, side: targetRef.0, index: targetRef.1)
 
-            context.appendLog(message: "\(refreshedAttacker.displayName)の\(spell.name)！ \(target.displayName)に\(applied)ダメージ！",
-                              type: .damage,
-                              actorId: refreshedAttacker.identifier,
-                              targetId: target.identifier,
-                              metadata: [
-                                  "damage": "\(applied)",
-                                  "targetHP": "\(target.currentHP)",
-                                  "category": ActionCategory.mageMagic.logIdentifier,
-                                  "spellId": spell.id
-                              ])
+            let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
+            let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
+            context.appendAction(kind: .magicDamage, actor: attackerIdx, target: targetIdx, value: UInt32(applied))
 
             if !target.isAlive {
-                appendDefeatLog(for: target, context: &context)
+                appendDefeatLog(for: target, side: targetRef.0, index: targetRef.1, context: &context)
                 let killerRef = BattleContext.reference(for: side, index: attackerIndex)
                 dispatchReactions(for: .allyDefeated(side: targetRef.0,
                                                      fallenIndex: targetRef.1,
@@ -152,10 +136,9 @@ extension BattleTurnEngine {
         guard var attacker = context.actor(for: side, index: attackerIndex), attacker.isAlive else { return false }
         guard attacker.actionResources.consume(.breath) else { return false }
 
-        let remaining = attacker.actionResources.charges(for: .breath)
         context.updateActor(attacker, side: side, index: attackerIndex)
 
-        appendActionLog(for: attacker, category: .breath, remainingUses: remaining, context: &context)
+        appendActionLog(for: attacker, side: side, index: attackerIndex, category: .breath, context: &context)
 
         let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker, context: context)
         let targets = selectStatusTargets(attackerSide: side,
@@ -175,18 +158,12 @@ extension BattleTurnEngine {
 
             context.updateActor(target, side: targetRef.0, index: targetRef.1)
 
-            context.appendLog(message: "\(refreshedAttacker.displayName)のブレス！ \(target.displayName)に\(applied)ダメージ！",
-                              type: .damage,
-                              actorId: refreshedAttacker.identifier,
-                              targetId: target.identifier,
-                              metadata: [
-                                  "damage": "\(applied)",
-                                  "targetHP": "\(target.currentHP)",
-                                  "category": ActionCategory.breath.logIdentifier
-                              ])
+            let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
+            let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
+            context.appendAction(kind: .breathDamage, actor: attackerIdx, target: targetIdx, value: UInt32(applied))
 
             if !target.isAlive {
-                appendDefeatLog(for: target, context: &context)
+                appendDefeatLog(for: target, side: targetRef.0, index: targetRef.1, context: &context)
                 let killerRef = BattleContext.reference(for: side, index: attackerIndex)
                 dispatchReactions(for: .allyDefeated(side: targetRef.0,
                                                      fallenIndex: targetRef.1,

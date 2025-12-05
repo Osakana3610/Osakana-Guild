@@ -9,9 +9,9 @@ enum BattleService {
 
     struct Resolution: Sendable {
         let result: BattleResult
-        let survivingAllyIds: [Int32]
+        let survivingAllyIds: [UInt8]
         let turns: Int
-        let log: [BattleLogEntry]
+        let battleLog: BattleLog
         let enemy: EnemyDefinition
         let enemies: [EnemyDefinition]
         let encounteredEnemies: [BattleEnemyGroupBuilder.EncounteredEnemy]
@@ -37,7 +37,7 @@ enum BattleService {
             return Resolution(result: .defeat,
                               survivingAllyIds: [],
                               turns: 0,
-                              log: [],
+                              battleLog: .empty,
                               enemy: enemyDefinition,
                               enemies: [enemyDefinition],
                               encounteredEnemies: [BattleEnemyGroupBuilder.EncounteredEnemy(definition: enemyDefinition,
@@ -145,10 +145,18 @@ enum BattleService {
 
         let enemyDefinition = encounteredEnemies.first?.definition ?? enemyDictionary[encounterEnemyId ?? ""] ?? enemyDefinitions.first!
 
-        return Resolution(result: battleResult.result,
+        let result: BattleResult
+        switch battleResult.outcome {
+        case BattleLog.outcomeVictory: result = .victory
+        case BattleLog.outcomeDefeat: result = .defeat
+        case BattleLog.outcomeRetreat: result = .retreat
+        default: result = .defeat
+        }
+
+        return Resolution(result: result,
                           survivingAllyIds: survivingPartyIds,
-                          turns: battleResult.turns,
-                          log: battleResult.log,
+                          turns: Int(battleResult.battleLog.turns),
+                          battleLog: battleResult.battleLog,
                           enemy: enemyDefinition,
                           enemies: encounteredEnemies.map { $0.definition },
                           encounteredEnemies: encounteredEnemies,
