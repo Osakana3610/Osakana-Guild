@@ -1,8 +1,10 @@
 import Foundation
+import SwiftData
 
 // MARK: - Exploration Stream Processing & Rewards
 extension ProgressService {
     func processExplorationStream(session: ExplorationRuntimeSession,
+                                  recordId: PersistentIdentifier,
                                   memberIds: [UInt8],
                                   runtimeMap: [UInt8: RuntimeCharacterState],
                                   runDifficulty: Int,
@@ -20,7 +22,7 @@ extension ProgressService {
                     totalDrops.append(contentsOf: outcome.drops)
                 }
 
-                try await exploration.appendEvent(runId: session.runId,
+                try await exploration.appendEvent(runId: recordId,
                                                    event: outcome.entry,
                                                    battleLog: outcome.battleLog,
                                                    occurredAt: outcome.entry.occurredAt)
@@ -38,7 +40,7 @@ extension ProgressService {
             }
 
             let artifact = try await session.waitForCompletion()
-            try await exploration.finalizeRun(runId: session.runId,
+            try await exploration.finalizeRun(runId: recordId,
                                               endState: artifact.endState,
                                               endedAt: artifact.endedAt,
                                               totalExperience: artifact.totalExperience,
@@ -71,7 +73,7 @@ extension ProgressService {
             let originalError = error
             await session.cancel()
             do {
-                try await exploration.cancelRun(runId: session.runId)
+                try await exploration.cancelRun(runId: recordId)
             } catch is CancellationError {
                 continuation.finish(throwing: originalError)
                 return

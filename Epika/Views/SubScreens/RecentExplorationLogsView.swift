@@ -775,7 +775,7 @@ private struct EncounterDetailView: View {
 
     @MainActor
     private func loadBattleLogIfNeeded() async {
-        guard encounter.combatSummary?.battleLogId != nil else { return }
+        guard encounter.combatSummary?.battleLogData != nil else { return }
         guard battleLogEntries.isEmpty, !isLoadingBattleLog, battleLogError == nil else { return }
 
         isLoadingBattleLog = true
@@ -806,26 +806,22 @@ private struct EncounterDetailView: View {
     }
 
     private func fetchBattleLogArchive() throws -> BattleLogArchive {
-        guard let battleLogId = encounter.combatSummary?.battleLogId else {
+        guard let data = encounter.combatSummary?.battleLogData else {
             throw EncounterDetailError.battleLogNotAvailable
         }
-        var descriptor = FetchDescriptor<ExplorationBattleLogRecord>(predicate: #Predicate { $0.id == battleLogId })
-        descriptor.fetchLimit = 1
-        guard let record = try modelContext.fetch(descriptor).first else {
-            throw EncounterDetailError.battleLogNotAvailable
-        }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(BattleLogArchive.self, from: record.payload)
+        return try JSONDecoder().decode(BattleLogArchive.self, from: data)
     }
 
     enum EncounterDetailError: LocalizedError {
         case battleLogNotAvailable
+        case decodingFailed
 
         var errorDescription: String? {
             switch self {
             case .battleLogNotAvailable:
                 return "戦闘ログを取得できませんでした"
+            case .decodingFailed:
+                return "戦闘ログのデコードに失敗しました"
             }
         }
     }

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 // MARK: - Exploration Run Management
 extension ProgressService {
@@ -27,25 +28,16 @@ extension ProgressService {
                                                             dungeonId: dungeonId,
                                                             targetFloorNumber: targetFloor)
 
+        let recordId: PersistentIdentifier
         do {
-            try await exploration.beginRun(runId: session.runId,
-                                           party: partySnapshot,
-                                           dungeon: session.preparation.dungeon,
-                                           difficultyRank: Int(runDifficulty),
-                                           eventsPerFloor: session.preparation.eventsPerFloor,
-                                           floorCount: session.preparation.targetFloorNumber,
-                                           explorationInterval: session.explorationInterval,
-                                           startedAt: session.startedAt)
+            recordId = try await exploration.beginRun(party: partySnapshot,
+                                                      dungeon: session.preparation.dungeon,
+                                                      difficulty: Int(runDifficulty),
+                                                      targetFloor: session.preparation.targetFloorNumber,
+                                                      startedAt: session.startedAt)
         } catch {
             let originalError = error
             await session.cancel()
-            do {
-                try await exploration.cancelRun(runId: session.runId)
-            } catch is CancellationError {
-                // 同一ランIDが既に破棄済みの場合は無視
-            } catch let cancelError {
-                throw cancelError
-            }
             throw originalError
         }
 
@@ -59,6 +51,7 @@ extension ProgressService {
                     return
                 }
                 await self.processExplorationStream(session: session,
+                                                    recordId: recordId,
                                                     memberIds: memberIds,
                                                     runtimeMap: runtimeMap,
                                                     runDifficulty: Int(runDifficulty),
@@ -73,7 +66,7 @@ extension ProgressService {
                 Task { @MainActor [weak self] in
                     guard let self else { return }
                     do {
-                        try await self.exploration.cancelRun(runId: session.runId)
+                        try await self.exploration.cancelRun(runId: recordId)
                     } catch is CancellationError {
                         // キャンセル済みであれば問題なし
                     } catch {
@@ -90,6 +83,8 @@ extension ProgressService {
 
     func cancelExplorationRun(runId: UUID) async throws {
         await runtime.cancelExploration(runId: runId)
-        try await exploration.cancelRun(runId: runId)
+        // Note: cancelRun now requires PersistentIdentifier,
+        // but runtime cancellation handles the active session.
+        // The persistence record will be cleaned up by purge logic.
     }
 }

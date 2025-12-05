@@ -27,7 +27,7 @@ struct ExplorationSnapshot: Sendable, Hashable {
             var enemyName: String
             var result: String
             var turns: Int
-            var battleLogId: UUID?
+            var battleLogData: Data?
         }
 
         var id: UUID
