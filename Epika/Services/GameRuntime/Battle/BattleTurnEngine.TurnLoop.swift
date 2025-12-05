@@ -55,7 +55,7 @@ extension BattleTurnEngine {
         }
 
         if isActionLocked(actor: performer, context: context) {
-            appendStatusLockLog(for: performer, context: &context)
+            appendStatusLockLog(for: performer, side: side, index: actorIndex, context: &context)
             return
         }
 
@@ -105,6 +105,9 @@ extension BattleTurnEngine {
                               forcedTargets: forcedTargets) {
                 activateGuard(for: side, actorIndex: actorIndex, context: &context)
             }
+        default:
+            // selectAction は行動選択用のケースのみ返すので、ここには到達しない
+            activateGuard(for: side, actorIndex: actorIndex, context: &context)
         }
 
         if let refreshedActor = context.actor(for: side, index: actorIndex),
@@ -127,7 +130,7 @@ extension BattleTurnEngine {
     /// 行動カテゴリを選択
     static func selectAction(for side: ActorSide,
                              actorIndex: Int,
-                             context: inout BattleContext) -> ActionCategory {
+                             context: inout BattleContext) -> ActionKind {
         let actor: BattleActor
         let allies: [BattleActor]
         let opponents: [BattleActor]
@@ -238,7 +241,7 @@ extension BattleTurnEngine {
             actor.guardBarrierCharges = actor.skillEffects.guardBarrierCharges
             applyDegradationRepairIfAvailable(to: &actor)
             context.players[actorIndex] = actor
-            appendActionLog(for: actor, category: .defend, remainingUses: nil, context: &context)
+            appendActionLog(for: actor, side: .player, index: actorIndex, category: .defend, context: &context)
         case .enemy:
             guard context.enemies.indices.contains(actorIndex) else { return }
             var actor = context.enemies[actorIndex]
@@ -247,7 +250,7 @@ extension BattleTurnEngine {
             actor.guardBarrierCharges = actor.skillEffects.guardBarrierCharges
             applyDegradationRepairIfAvailable(to: &actor)
             context.enemies[actorIndex] = actor
-            appendActionLog(for: actor, category: .defend, remainingUses: nil, context: &context)
+            appendActionLog(for: actor, side: .enemy, index: actorIndex, category: .defend, context: &context)
         }
     }
 
@@ -275,10 +278,8 @@ extension BattleTurnEngine {
                 if context.random.nextBool(probability: probability) {
                     actor.currentHP = 0
                     context.updateActor(actor, side: side, index: index)
-                    context.appendLog(message: "\(actor.displayName)は戦線離脱した",
-                                      type: .status,
-                                      actorId: actor.identifier,
-                                      metadata: ["category": "retreat", "side": "\(side)"])
+                    let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+                    context.appendAction(kind: .withdraw, actor: actorIdx)
                 }
                 continue
             }
@@ -288,10 +289,8 @@ extension BattleTurnEngine {
                 if context.random.nextBool(probability: probability) {
                     actor.currentHP = 0
                     context.updateActor(actor, side: side, index: index)
-                    context.appendLog(message: "\(actor.displayName)は戦線離脱した",
-                                      type: .status,
-                                      actorId: actor.identifier,
-                                      metadata: ["category": "retreat", "side": "\(side)"])
+                    let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+                    context.appendAction(kind: .withdraw, actor: actorIdx)
                 }
             }
         }
@@ -329,11 +328,8 @@ extension BattleTurnEngine {
                                       random: &context.random,
                                       turn: context.turn)
         if let target = playerTarget {
-            let targetName = context.players[target].displayName
-            context.appendLog(message: "古の儀：\(targetName)が供儀対象になった",
-                              type: .status,
-                              actorId: context.players[target].identifier,
-                              metadata: ["category": "sacrifice", "side": "player"])
+            let targetIdx = context.actorIndex(for: .player, arrayIndex: target)
+            context.appendAction(kind: .sacrifice, target: targetIdx)
         }
 
         let enemyTarget = pickTarget(from: context.enemies,
@@ -341,11 +337,8 @@ extension BattleTurnEngine {
                                      random: &context.random,
                                      turn: context.turn)
         if let target = enemyTarget {
-            let targetName = context.enemies[target].displayName
-            context.appendLog(message: "古の儀：\(targetName)が供儀対象になった",
-                              type: .status,
-                              actorId: context.enemies[target].identifier,
-                              metadata: ["category": "sacrifice", "side": "enemy"])
+            let targetIdx = context.actorIndex(for: .enemy, arrayIndex: target)
+            context.appendAction(kind: .sacrifice, target: targetIdx)
         }
 
         return BattleContext.SacrificeTargets(playerTarget: playerTarget, enemyTarget: enemyTarget)

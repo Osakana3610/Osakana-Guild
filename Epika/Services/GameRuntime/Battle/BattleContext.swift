@@ -9,7 +9,8 @@ struct BattleContext {
     // MARK: - 戦闘状態（可変）
     var players: [BattleActor]
     var enemies: [BattleActor]
-    var logs: [BattleLogEntry]
+    var actions: [BattleAction]
+    var initialHP: [UInt16: UInt32]
     var turn: Int
     var random: GameRandomSource
 
@@ -28,18 +29,51 @@ struct BattleContext {
         self.statusDefinitions = statusDefinitions
         self.skillDefinitions = skillDefinitions
         self.random = random
-        self.logs = []
+        self.actions = []
+        self.initialHP = [:]
         self.turn = 0
     }
 
+    // MARK: - 初期HP記録
+    mutating func buildInitialHP() {
+        for (index, player) in players.enumerated() {
+            let idx = actorIndex(for: .player, arrayIndex: index)
+            initialHP[idx] = UInt32(player.currentHP)
+        }
+        for (index, enemy) in enemies.enumerated() {
+            let idx = actorIndex(for: .enemy, arrayIndex: index)
+            initialHP[idx] = UInt32(enemy.currentHP)
+        }
+    }
+
+    // MARK: - actorIndex生成
+    func actorIndex(for side: ActorSide, arrayIndex: Int) -> UInt16 {
+        switch side {
+        case .player:
+            return UInt16(players[arrayIndex].partyMemberId ?? 0)
+        case .enemy:
+            let suffix = arrayIndex + 1  // 1=A, 2=B, ...
+            let masterIndex = enemies[arrayIndex].enemyMasterIndex ?? 0
+            return UInt16(suffix) * 1000 + masterIndex
+        }
+    }
+
     // MARK: - 結果生成
-    func makeResult(_ result: BattleService.BattleResult) -> BattleTurnEngine.Result {
+    func makeResult(_ outcome: UInt8) -> BattleTurnEngine.Result {
         BattleTurnEngine.Result(
-            result: result,
-            turns: turn,
-            log: logs,
+            outcome: outcome,
+            battleLog: makeBattleLog(outcome: outcome),
             players: players,
             enemies: enemies
+        )
+    }
+
+    func makeBattleLog(outcome: UInt8) -> BattleLog {
+        BattleLog(
+            initialHP: initialHP,
+            actions: actions,
+            outcome: outcome,
+            turns: UInt8(turn)
         )
     }
 
@@ -65,24 +99,24 @@ struct BattleContext {
         skillDefinitions[skillId]
     }
 
-    // MARK: - ログ追加
-    mutating func appendLog(_ entry: BattleLogEntry) {
-        logs.append(entry)
-    }
-
-    mutating func appendLog(turn: Int? = nil,
-                            message: String,
-                            type: BattleLogEntry.LogType,
-                            actorId: String? = nil,
-                            targetId: String? = nil,
-                            metadata: [String: String] = [:]) {
-        logs.append(BattleLogEntry(
-            turn: turn ?? self.turn,
-            message: message,
-            type: type,
-            actorId: actorId,
-            targetId: targetId,
-            metadata: metadata
+    // MARK: - アクション追加
+    mutating func appendAction(kind: ActionKind,
+                               actor: UInt16 = 0,
+                               target: UInt16? = nil,
+                               value: UInt32? = nil,
+                               skillIndex: UInt16? = nil,
+                               extra: UInt16? = nil) {
+        #if DEBUG
+        assert(turn >= 0 && turn <= 255, "turn out of range: \(turn)")
+        #endif
+        actions.append(BattleAction(
+            turn: UInt8(turn),
+            kind: kind.rawValue,
+            actor: actor,
+            target: target,
+            value: value,
+            skillIndex: skillIndex,
+            extra: extra
         ))
     }
 }

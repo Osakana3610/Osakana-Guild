@@ -602,6 +602,7 @@ struct BattleActor: Sendable {
     let isMartialEligible: Bool
     let raceId: String?
     let raceCategory: String?
+    let enemyMasterIndex: UInt16?  // 敵の場合のみ、EnemyDefinition.index
 
     var snapshot: RuntimeCharacterProgress.Combat
     var currentHP: Int
@@ -655,6 +656,7 @@ struct BattleActor: Sendable {
          isMartialEligible: Bool,
          raceId: String? = nil,
          raceCategory: String? = nil,
+         enemyMasterIndex: UInt16? = nil,
          snapshot: RuntimeCharacterProgress.Combat,
          currentHP: Int,
          actionRates: BattleActionRates,
@@ -706,6 +708,7 @@ struct BattleActor: Sendable {
         self.isMartialEligible = isMartialEligible
         self.raceId = raceId
         self.raceCategory = raceCategory
+        self.enemyMasterIndex = enemyMasterIndex
         self.snapshot = snapshot
         self.currentHP = max(0, min(snapshot.maxHP, currentHP))
         self.actionRates = actionRates

@@ -95,7 +95,7 @@ struct CombatExecutionService {
                                           result: resolution.result,
                                           turns: resolution.turns,
                                           timestamp: Date(),
-                                          entries: resolution.log,
+                                          battleLog: resolution.battleLog,
                                           playerSnapshots: playerSnapshots,
                                           enemySnapshots: enemySnapshots)
 

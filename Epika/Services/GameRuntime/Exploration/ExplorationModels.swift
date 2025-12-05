@@ -40,7 +40,7 @@ struct BattleLogArchive: Codable, Sendable {
     let result: BattleService.BattleResult
     let turns: Int
     let timestamp: Date
-    let entries: [BattleLogEntry]
+    let battleLog: BattleLog
     let playerSnapshots: [BattleParticipantSnapshot]
     let enemySnapshots: [BattleParticipantSnapshot]
 }

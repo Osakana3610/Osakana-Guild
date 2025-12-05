@@ -782,13 +782,16 @@ private struct EncounterDetailView: View {
         battleLogError = nil
         do {
             let archive = try fetchBattleLogArchive()
-            battleLogEntries = archive.entries
 
+            // 名前マップを構築
+            var allyNames: [UInt8: String] = [:]
+            var enemyNames: [UInt16: String] = [:]
             var memberMap: [String: UInt8] = [:]
             var iconMap: [String: CharacterIconInfo] = [:]
 
             for participant in archive.playerSnapshots {
                 if let memberId = participant.partyMemberId {
+                    allyNames[memberId] = participant.name
                     memberMap[participant.actorId] = memberId
                 }
                 if let avatar = participant.avatarIdentifier {
@@ -796,6 +799,20 @@ private struct EncounterDetailView: View {
                                                                      displayName: participant.name)
                 }
             }
+
+            for participant in archive.enemySnapshots {
+                // actorIdは "suffix*1000+index" 形式で保存されている
+                if let actorIndex = UInt16(participant.actorId) {
+                    enemyNames[actorIndex] = participant.name
+                }
+            }
+
+            // BattleLogRenderer で変換
+            battleLogEntries = BattleLogRenderer.render(
+                battleLog: archive.battleLog,
+                allyNames: allyNames,
+                enemyNames: enemyNames
+            )
 
             actorIdentifierToMemberId = memberMap
             actorIcons = iconMap
