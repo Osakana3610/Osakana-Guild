@@ -8,7 +8,7 @@ extension ProgressService {
     }
 
     func resetAllProgress() async throws {
-        try await metadata.resetAllProgress()
-        _ = try await player.loadCurrentPlayer()
+        try await gameState.resetAllProgress()
+        _ = try await gameState.loadCurrentPlayer()
     }
 }

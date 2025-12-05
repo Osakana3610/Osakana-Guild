@@ -28,7 +28,7 @@ extension StatusEffectIdsTransformer {
 @Model
 final class ExplorationRunRecord {
     var id: UUID = Foundation.UUID()
-    var partyId: UUID = Foundation.UUID()
+    var partyId: UInt8 = 1
     var dungeonId: String = ""
     var difficultyRank: Int = 0
     var startedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
@@ -47,7 +47,7 @@ final class ExplorationRunRecord {
     var updatedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
 
     init(id: UUID = UUID(),
-         partyId: UUID,
+         partyId: UInt8,
          dungeonId: String,
          difficultyRank: Int,
          startedAt: Date,
@@ -80,33 +80,6 @@ final class ExplorationRunRecord {
         self.totalExperience = totalExperience
         self.totalGold = totalGold
         self.statusRawValue = statusRawValue
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-    }
-}
-
-@Model
-final class ExplorationRunMemberRecord {
-    var id: UUID = Foundation.UUID()
-    var runId: UUID = Foundation.UUID()
-    var characterId: UUID = Foundation.UUID()
-    var order: Int = 0
-    var isReserve: Bool = false
-    var createdAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-    var updatedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
-
-    init(id: UUID = UUID(),
-         runId: UUID,
-         characterId: UUID,
-         order: Int,
-         isReserve: Bool,
-         createdAt: Date,
-         updatedAt: Date) {
-        self.id = id
-        self.runId = runId
-        self.characterId = characterId
-        self.order = order
-        self.isReserve = isReserve
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -155,24 +128,6 @@ final class ExplorationEventRecord {
         self.battleLogId = battleLogId
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-    }
-}
-
-@Model
-final class ExplorationEventExperienceRecord {
-    var id: UUID = Foundation.UUID()
-    var eventId: UUID = Foundation.UUID()
-    var characterId: UUID = Foundation.UUID()
-    var experience: Int = 0
-
-    init(id: UUID = UUID(),
-         eventId: UUID,
-         characterId: UUID,
-         experience: Int) {
-        self.id = id
-        self.eventId = eventId
-        self.characterId = characterId
-        self.experience = experience
     }
 }
 

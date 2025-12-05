@@ -99,7 +99,7 @@ struct InventoryCleanupView: View {
         defer { isLoading = false }
         do {
             candidates = try await progressService.shop.loadCleanupCandidates()
-            player = try await progressService.player.currentPlayer()
+            player = try await progressService.gameState.currentPlayer()
             showError = false
         } catch {
             showError = true
@@ -114,7 +114,7 @@ struct InventoryCleanupView: View {
             // キャット・チケットはcleanupStockAndAutoSell内で加算済み
             // 自動売却でゴールドも獲得
             _ = result // 結果をログ表示等で使う場合はここで
-            player = try await progressService.player.currentPlayer()
+            player = try await progressService.gameState.currentPlayer()
             candidates = try await progressService.shop.loadCleanupCandidates()
         } catch {
             showError = true

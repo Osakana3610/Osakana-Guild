@@ -31,12 +31,7 @@ final class PartyViewState {
             let partySnapshots = try await partyService.allParties()
             parties = partySnapshots
                 .map { RuntimeParty(snapshot: $0) }
-                .sorted { lhs, rhs in
-                    if lhs.slotIndex != rhs.slotIndex {
-                        return lhs.slotIndex < rhs.slotIndex
-                    }
-                    return lhs.createdAt < rhs.createdAt
-                }
+                .sorted { $0.id < $1.id }
         }
         ongoingLoad = task
         try await task.value
@@ -46,7 +41,7 @@ final class PartyViewState {
         try await loadAllParties()
     }
 
-    func updatePartyMembers(party: RuntimeParty, memberIds: [UUID]) async throws {
+    func updatePartyMembers(party: RuntimeParty, memberIds: [Int32]) async throws {
         _ = try await partyService.updatePartyMembers(persistentIdentifier: party.persistentIdentifier, memberIds: memberIds)
         try await refresh()
     }

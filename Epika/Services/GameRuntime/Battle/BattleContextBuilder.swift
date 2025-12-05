@@ -3,7 +3,7 @@ import Foundation
 struct BattleContextBuilder {
     static func makePlayerActors(from party: RuntimePartyState) throws -> [BattleActor] {
         let members = party.members
-            .filter { !$0.isReserve && $0.character.progress.hitPoints.maximum > 0 }
+            .filter { $0.character.progress.hitPoints.maximum > 0 }
             .sorted { $0.order < $1.order }
 
         var actors: [BattleActor] = []
@@ -20,12 +20,12 @@ struct BattleContextBuilder {
                                       loadout: state.spellLoadout,
                                       resources: &resources)
             if skillEffects.breathExtraCharges > 0 {
-                let current = resources.charges(for: .breath)
-                resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
+                let current = resources.charges(for: BattleActionResource.Key.breath)
+                resources.setCharges(for: BattleActionResource.Key.breath, value: current + skillEffects.breathExtraCharges)
             }
             let martialEligible = state.isMartialEligible
             let actor = BattleActor(
-                identifier: member.id.uuidString,
+                identifier: String(member.characterId),
                 displayName: state.progress.displayName,
                 kind: .player,
                 formationSlot: slot,
@@ -35,7 +35,7 @@ struct BattleContextBuilder {
                 vitality: state.progress.attributes.vitality,
                 agility: state.progress.attributes.agility,
                 luck: state.progress.attributes.luck,
-                partyMemberId: member.id,
+                partyMemberId: member.characterId,
                 level: state.progress.level,
                 jobName: state.job?.name ?? state.progress.jobId,
                 avatarIdentifier: state.progress.avatarIdentifier,

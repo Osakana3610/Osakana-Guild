@@ -15,12 +15,7 @@ struct AdventureView: View {
     @State private var logsContext: RuntimeParty?
 
     private var parties: [RuntimeParty] {
-        partyState.parties.sorted { lhs, rhs in
-            if lhs.slotIndex != rhs.slotIndex {
-                return lhs.slotIndex < rhs.slotIndex
-            }
-            return lhs.createdAt < rhs.createdAt
-        }
+        partyState.parties.sorted { $0.id < $1.id }
     }
 
     private var massDepartureCandidates: [RuntimeParty] {
@@ -75,7 +70,7 @@ struct AdventureView: View {
             .sheet(item: $logsContext) { party in
                 NavigationStack {
                     let runs = adventureState.explorationProgress
-                        .filter { $0.party.partyId == party.progressId }
+                        .filter { $0.party.partyId == party.id }
                     RecentExplorationLogsView(party: party, runs: runs)
                 }
             }
@@ -102,17 +97,17 @@ struct AdventureView: View {
         let members = runtimeMembers(for: party)
         let bonuses = partyBonuses(for: members)
         let runs = adventureState.explorationProgress
-            .filter { $0.party.partyId == party.progressId }
+            .filter { $0.party.partyId == party.id }
 
         Section {
             PartySlotCardView(
                 party: party,
                 members: members,
                 bonuses: bonuses,
-                isExploring: adventureState.isExploring(partyId: party.progressId),
+                isExploring: adventureState.isExploring(partyId: party.id),
                 canStartExploration: canStartExploration(for: party),
                 onPrimaryAction: {
-                    if adventureState.isExploring(partyId: party.progressId) {
+                    if adventureState.isExploring(partyId: party.id) {
                         Task { await adventureState.cancelExploration(for: party) }
                     } else {
                         selectParty(party)
@@ -243,7 +238,8 @@ struct AdventureView: View {
     }
 
     private func selectedDungeon(for party: RuntimeParty) -> RuntimeDungeon? {
-        adventureState.runtimeDungeons.first { $0.id == party.lastSelectedDungeonId }
+        guard party.lastSelectedDungeonIndex > 0 else { return nil }
+        return adventureState.runtimeDungeons.first { $0.definition.index == party.lastSelectedDungeonIndex }
     }
 
     private func canStartExploration(for party: RuntimeParty) -> Bool {
@@ -251,7 +247,7 @@ struct AdventureView: View {
         guard dungeon.isUnlocked else { return false }
         guard party.lastSelectedDifficulty <= dungeon.highestUnlockedDifficulty else { return false }
         guard !runtimeMembers(for: party).isEmpty else { return false }
-        return !adventureState.isExploring(partyId: party.progressId)
+        return !adventureState.isExploring(partyId: party.id)
     }
 
     @MainActor
@@ -305,5 +301,5 @@ struct AdventureView: View {
 private struct PartyDetailContext: Identifiable {
     var party: RuntimeParty
     var selectedDungeon: RuntimeDungeon?
-    var id: UUID { party.id }
+    var id: UInt8 { party.id }
 }

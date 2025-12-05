@@ -8,7 +8,7 @@ final class CharacterViewState {
     @ObservationIgnored private var characterChangeTask: Task<Void, Never>?
 
     struct CharacterSummary: Identifiable, Sendable {
-        let id: UUID
+        let id: Int32
         let name: String
         let level: Int
         let jobName: String

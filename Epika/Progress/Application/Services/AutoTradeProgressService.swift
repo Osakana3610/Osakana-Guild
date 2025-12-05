@@ -10,14 +10,14 @@ actor AutoTradeProgressService {
     }
 
     private let container: ModelContainer
-    private let playerService: PlayerProgressService
+    private let gameStateService: GameStateService
     private let environment: ProgressEnvironment
 
     init(container: ModelContainer,
-         playerService: PlayerProgressService,
+         gameStateService: GameStateService,
          environment: ProgressEnvironment) {
         self.container = container
-        self.playerService = playerService
+        self.gameStateService = gameStateService
         self.environment = environment
     }
 
@@ -31,14 +31,14 @@ actor AutoTradeProgressService {
         return records.map(makeRule(_:))
     }
 
-    func addRule(compositeKey: String, displayName: String) async throws -> Rule {
+    func addRule(autoTradeKey: String, displayName: String) async throws -> Rule {
         let context = makeContext()
-        let existing = try fetchRecord(compositeKey: compositeKey, context: context)
+        let existing = try fetchRecord(compositeKey: autoTradeKey, context: context)
         if let existing {
             return makeRule(existing)
         }
         let now = Date()
-        let record = AutoTradeRuleRecord(compositeKey: compositeKey,
+        let record = AutoTradeRuleRecord(compositeKey: autoTradeKey,
                                           displayName: displayName,
                                           createdAt: now)
         context.insert(record)

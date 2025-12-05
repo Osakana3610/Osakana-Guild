@@ -172,7 +172,7 @@ struct GuildView: View {
         do {
             async let summariesTask: Void = characterState.loadCharacterSummaries()
             async let allCharactersTask: Void = characterState.loadAllCharacters()
-            _ = try await progressService.player.loadCurrentPlayer()
+            _ = try await progressService.gameState.loadCurrentPlayer()
             try await summariesTask
             try await allCharactersTask
             maxCharacterSlots = AppConstants.Progress.defaultCharacterSlotCount
@@ -249,7 +249,7 @@ private struct GuildCharacterRow: View {
 // MARK: - Character Detail Loader
 
 private struct LazyRuntimeCharacterDetailView: View {
-    let characterId: UUID
+    let characterId: Int32
     let summary: CharacterViewState.CharacterSummary
     let progressService: ProgressService
 
@@ -754,7 +754,6 @@ private struct CharacterCreationView: View {
             let request = CharacterProgressService.CharacterCreationRequest(
                 displayName: trimmed,
                 raceId: race.id,
-                gender: race.gender,
                 jobId: job.id
             )
             _ = try await characterService.createCharacter(request)
@@ -1162,7 +1161,7 @@ private struct CharacterJobChangeView: View {
 
     @State private var characters: [RuntimeCharacter] = []
     @State private var jobs: [JobDefinition] = []
-    @State private var selectedCharacterId: UUID?
+    @State private var selectedCharacterId: Int32?
     @State private var selectedJobId: String?
     @State private var isLoading = false
     @State private var isProcessing = false
@@ -1182,9 +1181,9 @@ private struct CharacterJobChangeView: View {
                         ProgressView()
                     } else {
                         Picker("対象", selection: $selectedCharacterId) {
-                            Text("未選択").tag(UUID?.none)
+                            Text("未選択").tag(Int32?.none)
                             ForEach(characters, id: \.id) { character in
-                                Text("\(character.name) (Lv.\(character.level))").tag(UUID?.some(character.id))
+                                Text("\(character.name) (Lv.\(character.level))").tag(Int32?.some(character.id))
                             }
                         }
                     }

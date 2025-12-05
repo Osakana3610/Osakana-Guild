@@ -164,7 +164,7 @@ struct TitleInheritanceView: View {
             return
         }
         do {
-            preview = try await titleService.preview(targetId: target.id, sourceId: source.id)
+            preview = try await titleService.preview(targetStackKey: target.id, sourceStackKey: source.id)
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -176,7 +176,7 @@ struct TitleInheritanceView: View {
         guard let target = selectedTarget, let source = selectedSource else { return }
         do {
             isLoading = true
-            let updated = try await titleService.inherit(targetId: target.id, sourceId: source.id)
+            let updated = try await titleService.inherit(targetStackKey: target.id, sourceStackKey: source.id)
             resultItem = updated
             selectedTarget = updated
             selectedSource = nil

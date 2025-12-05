@@ -5,7 +5,7 @@ import SwiftUI
 @MainActor
 struct CharacterEquippedItemsSection: View {
     let equippedItems: [RuntimeCharacterProgress.EquippedItem]
-    let itemDefinitions: [String: ItemDefinition]
+    let itemDefinitions: [Int16: ItemDefinition]
     let onUnequip: ((RuntimeCharacterProgress.EquippedItem) async throws -> Void)?
 
     @State private var unequipError: String?
@@ -13,7 +13,7 @@ struct CharacterEquippedItemsSection: View {
 
     init(
         equippedItems: [RuntimeCharacterProgress.EquippedItem],
-        itemDefinitions: [String: ItemDefinition],
+        itemDefinitions: [Int16: ItemDefinition],
         onUnequip: ((RuntimeCharacterProgress.EquippedItem) async throws -> Void)? = nil
     ) {
         self.equippedItems = equippedItems
@@ -29,7 +29,7 @@ struct CharacterEquippedItemsSection: View {
                     .foregroundColor(.secondary)
             } else {
                 VStack(alignment: .leading, spacing: 4) {
-                    ForEach(equippedItems, id: \.id) { item in
+                    ForEach(equippedItems, id: \.stackKey) { item in
                         equippedItemRow(item)
                     }
                 }
@@ -49,8 +49,8 @@ struct CharacterEquippedItemsSection: View {
 
     @ViewBuilder
     private func equippedItemRow(_ item: RuntimeCharacterProgress.EquippedItem) -> some View {
-        let definition = itemDefinitions[item.itemId]
-        let name = definition?.name ?? item.itemId
+        let definition = itemDefinitions[item.masterDataIndex]
+        let name = definition?.name ?? "不明なアイテム"
 
         HStack {
             Text("• \(name)")

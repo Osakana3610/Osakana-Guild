@@ -7,7 +7,7 @@ struct ItemSaleView: View {
     @State private var isLoading = false
     @State private var showError = false
     @State private var errorMessage = ""
-    @State private var selectedItemIds: Set<UUID> = []
+    @State private var selectedStackKeys: Set<String> = []
     @State private var selectedDisplayItems: [LightweightItemData] = []
     @State private var selectedTotalSellPrice: Int = 0
     @State private var cacheVersion: Int = 0
@@ -16,7 +16,7 @@ struct ItemSaleView: View {
     private var totalSellPriceText: String { "\(selectedTotalSellPrice)GP" }
     private var hasSelection: Bool { !selectedDisplayItems.isEmpty }
     private var categorizedDisplayItems: [ItemSaleCategory: [LightweightItemData]] {
-        UniversalItemDisplayService.shared.getCachedCategorizedLightweightItems()
+        ItemPreloadService.shared.getCategorizedItems()
     }
 
     var body: some View {
@@ -71,7 +71,7 @@ struct ItemSaleView: View {
             Spacer()
 
             Button("選択解除") {
-                selectedItemIds.removeAll()
+                selectedStackKeys.removeAll()
                 selectedDisplayItems.removeAll()
                 selectedTotalSellPrice = 0
             }
@@ -93,7 +93,7 @@ struct ItemSaleView: View {
             EmptyView()
         } else {
             Section {
-                ForEach(items, id: \.compositeKey) { item in
+                ForEach(items, id: \.stackKey) { item in
                     buildRow(for: item)
                 }
             } header: {
@@ -111,13 +111,13 @@ struct ItemSaleView: View {
     }
 
     private func buildRow(for item: LightweightItemData) -> some View {
-        let isSelected = selectedItemIds.contains(item.progressId)
+        let isSelected = selectedStackKeys.contains(item.stackKey)
         return HStack {
             Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                 .foregroundColor(.primary)
                 .onTapGesture { toggleSelection(item) }
 
-            UniversalItemDisplayService.shared.makeStyledDisplayText(for: item)
+            ItemPreloadService.shared.makeStyledDisplayText(for: item)
                 .font(.body)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
@@ -164,15 +164,28 @@ struct ItemSaleView: View {
         if isLoading { return }
         isLoading = true
         defer { isLoading = false }
+
+        #if DEBUG
+        let totalStart = CFAbsoluteTimeGetCurrent()
+        #endif
+
         do {
-            player = try await progressService.player.loadCurrentPlayer()
-            let items = try await progressService.inventory.allItems(storage: .playerItem)
-            let service = UniversalItemDisplayService.shared
-            try await service.stagedGroupAndSortLightweightByCategory(for: items)
-            cacheVersion = service.getCacheVersion()
-            service.optimizeMemoryUsage()
+            player = try await progressService.gameState.loadCurrentPlayer()
+
+            // プリロードが完了していなければ待機
+            let service = ItemPreloadService.shared
+            if !service.loaded {
+                service.startPreload(inventoryService: progressService.inventory)
+                try await service.waitForPreload()
+            }
+            cacheVersion = service.version
             showError = false
             didLoadOnce = true
+
+            #if DEBUG
+            let totalEnd = CFAbsoluteTimeGetCurrent()
+            print("[Perf:ItemSaleView] total=\(String(format: "%.3f", totalEnd - totalStart))s preloaded=\(service.loaded)")
+            #endif
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -183,13 +196,14 @@ struct ItemSaleView: View {
     private func sellSelectedItems() async {
         guard !selectedDisplayItems.isEmpty else { return }
         do {
-            let ids = selectedDisplayItems.map { $0.progressId }
-            _ = try await progressService.sellItemsToShop(itemIds: ids)
-            UniversalItemDisplayService.shared.clearSortCache()
-            selectedItemIds.removeAll()
+            let stackKeys = selectedDisplayItems.map { $0.stackKey }
+            _ = try await progressService.sellItemsToShop(stackKeys: stackKeys)
+            let service = ItemPreloadService.shared
+            service.removeItems(stackKeys: Set(stackKeys))
+            cacheVersion = service.version
+            selectedStackKeys.removeAll()
             selectedDisplayItems.removeAll()
             selectedTotalSellPrice = 0
-            await loadSaleData()
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -197,11 +211,11 @@ struct ItemSaleView: View {
     }
 
     private func toggleSelection(_ item: LightweightItemData) {
-        if selectedItemIds.contains(item.progressId) {
-            selectedItemIds.remove(item.progressId)
-            selectedDisplayItems.removeAll { $0.progressId == item.progressId }
+        if selectedStackKeys.contains(item.stackKey) {
+            selectedStackKeys.remove(item.stackKey)
+            selectedDisplayItems.removeAll { $0.stackKey == item.stackKey }
         } else {
-            selectedItemIds.insert(item.progressId)
+            selectedStackKeys.insert(item.stackKey)
             selectedDisplayItems.append(item)
         }
         recalcSelectedTotalSellPrice()
@@ -217,12 +231,22 @@ struct ItemSaleView: View {
     @MainActor
     private func sellItem(_ item: LightweightItemData, quantity: Int) async {
         do {
-            _ = try await progressService.sellItemToShop(itemId: item.progressId, quantity: quantity)
-            UniversalItemDisplayService.shared.clearSortCache()
-            selectedItemIds.remove(item.progressId)
-            selectedDisplayItems.removeAll { $0.progressId == item.progressId }
+            _ = try await progressService.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
+            let service = ItemPreloadService.shared
+            let newQuantity = try service.decrementQuantity(stackKey: item.stackKey, by: quantity)
+            cacheVersion = service.version
+
+            if newQuantity <= 0 {
+                // 数量が0になった場合は選択から削除
+                selectedStackKeys.remove(item.stackKey)
+                selectedDisplayItems.removeAll { $0.stackKey == item.stackKey }
+            } else {
+                // 選択中アイテムの数量も更新
+                if let index = selectedDisplayItems.firstIndex(where: { $0.stackKey == item.stackKey }) {
+                    selectedDisplayItems[index].quantity = newQuantity
+                }
+            }
             recalcSelectedTotalSellPrice()
-            await loadSaleData()
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -232,14 +256,15 @@ struct ItemSaleView: View {
     @MainActor
     private func addToAutoTrade(_ item: LightweightItemData) async {
         do {
-            _ = try await progressService.autoTrade.addRule(compositeKey: item.autoTradeKey,
+            _ = try await progressService.autoTrade.addRule(autoTradeKey: item.autoTradeKey,
                                                              displayName: item.fullDisplayName)
-            _ = try await progressService.sellItemsToShop(itemIds: [item.progressId])
-            UniversalItemDisplayService.shared.clearSortCache()
-            selectedItemIds.remove(item.progressId)
-            selectedDisplayItems.removeAll { $0.progressId == item.progressId }
+            _ = try await progressService.sellItemsToShop(stackKeys: [item.stackKey])
+            let service = ItemPreloadService.shared
+            service.removeItems(stackKeys: [item.stackKey])
+            cacheVersion = service.version
+            selectedStackKeys.remove(item.stackKey)
+            selectedDisplayItems.removeAll { $0.stackKey == item.stackKey }
             recalcSelectedTotalSellPrice()
-            await loadSaleData()
         } catch {
             showError = true
             errorMessage = error.localizedDescription

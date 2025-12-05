@@ -6,6 +6,7 @@ extension SQLiteMasterDataManager {
     func fetchAllRaces() throws -> [RaceDefinition] {
         struct Builder {
             var id: String
+            var index: Int
             var name: String
             var gender: String
             var category: String
@@ -16,18 +17,20 @@ extension SQLiteMasterDataManager {
 
         var builders: [String: Builder] = [:]
         var order: [String] = []
-        let baseSQL = "SELECT id, name, gender, category, description FROM races ORDER BY rowid;"
+        let baseSQL = "SELECT id, race_index, name, gender, category, description FROM races ORDER BY race_index;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(baseStatement, 0),
-                  let nameC = sqlite3_column_text(baseStatement, 1),
-                  let genderC = sqlite3_column_text(baseStatement, 2),
-                  let categoryC = sqlite3_column_text(baseStatement, 3),
-                  let descriptionC = sqlite3_column_text(baseStatement, 4) else { continue }
+                  let nameC = sqlite3_column_text(baseStatement, 2),
+                  let genderC = sqlite3_column_text(baseStatement, 3),
+                  let categoryC = sqlite3_column_text(baseStatement, 4),
+                  let descriptionC = sqlite3_column_text(baseStatement, 5) else { continue }
             let id = String(cString: idC)
+            let index = Int(sqlite3_column_int(baseStatement, 1))
             builders[id] = Builder(
                 id: id,
+                index: index,
                 name: String(cString: nameC),
                 gender: String(cString: genderC),
                 category: String(cString: categoryC),
@@ -65,6 +68,7 @@ extension SQLiteMasterDataManager {
         return order.compactMap { builders[$0] }.map { builder in
             RaceDefinition(
                 id: builder.id,
+                index: builder.index,
                 name: builder.name,
                 gender: builder.gender,
                 category: builder.category,

@@ -3,6 +3,7 @@
     {
       "id": "godlike",
       "name": "神級の",
+      "order": 1,
       "skills": [
         "skill.divine_light",
         "skill.godly_strike"
@@ -11,6 +12,7 @@
     {
       "id": "celestial",
       "name": "天界の",
+      "order": 2,
       "skills": [
         "skill.angelic_guard"
       ]
@@ -18,6 +20,7 @@
     {
       "id": "demonic_lord",
       "name": "魔王の",
+      "order": 3,
       "skills": [
         "skill.demonic_rage",
         "skill.hell_fire"
@@ -26,6 +29,7 @@
     {
       "id": "ancient",
       "name": "太古の",
+      "order": 4,
       "skills": [
         "skill.ancient_wisdom"
       ]
@@ -33,6 +37,7 @@
     {
       "id": "void",
       "name": "虚無の",
+      "order": 5,
       "skills": [
         "skill.void_blast",
         "skill.shadow_warp"
@@ -41,6 +46,7 @@
     {
       "id": "eternal",
       "name": "永遠の",
+      "order": 6,
       "skills": [
         "skill.time_loop",
         "skill.eternal_guard"
@@ -49,6 +55,7 @@
     {
       "id": "world_breaker",
       "name": "世界を砕く",
+      "order": 7,
       "skills": [
         "skill.world_break"
       ]
@@ -56,6 +63,7 @@
     {
       "id": "omnipotent",
       "name": "全能の",
+      "order": 8,
       "skills": [
         "skill.omniscience",
         "skill.omnipotence"
@@ -64,41 +72,49 @@
     {
       "id": "unprecedented",
       "name": "空前絶後の",
+      "order": 9,
       "skills": []
     },
     {
       "id": "ultra_raging",
       "name": "超絶怒涛の",
+      "order": 10,
       "skills": []
     },
     {
       "id": "flame_emperor",
       "name": "炎帝の",
+      "order": 11,
       "skills": []
     },
     {
       "id": "ice_sovereign",
       "name": "氷皇の",
+      "order": 12,
       "skills": []
     },
     {
       "id": "storm_king",
       "name": "嵐王の",
+      "order": 13,
       "skills": []
     },
     {
       "id": "despair_incarnate",
       "name": "絶望に満ちた",
+      "order": 14,
       "skills": []
     },
     {
       "id": "hope_bringer",
       "name": "希望をもたらす",
+      "order": 15,
       "skills": []
     },
     {
       "id": "reality_shaper",
       "name": "現実を編む",
+      "order": 16,
       "skills": []
     }
   ]

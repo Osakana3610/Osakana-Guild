@@ -172,11 +172,11 @@ actor GameRuntimeService {
     }
 
     func recalculateCombatStats(for progress: RuntimeCharacterProgress,
-                                   pandoraBoxItemIds: Set<UUID> = []) async throws -> CombatStatCalculator.Result {
+                                   pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
         let state = try await CharacterAssembler.assembleState(repository: repository, from: progress)
         let context = CombatStatCalculator.Context(progress: progress,
                                                     state: state,
-                                                    pandoraBoxItemIds: pandoraBoxItemIds)
+                                                    pandoraBoxStackKeys: pandoraBoxStackKeys)
         return try await MainActor.run {
             try CombatStatCalculator.calculate(for: context)
         }

@@ -3,8 +3,8 @@ import Foundation
 // MARK: - Exploration Stream Processing & Rewards
 extension ProgressService {
     func processExplorationStream(session: ExplorationRuntimeSession,
-                                  memberIds: [UUID],
-                                  runtimeMap: [UUID: RuntimeCharacterState],
+                                  memberIds: [Int32],
+                                  runtimeMap: [Int32: RuntimeCharacterState],
                                   runDifficulty: Int,
                                   dungeonId: String,
                                   continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
@@ -83,8 +83,8 @@ extension ProgressService {
         }
     }
 
-    func handleExplorationEvent(memberIds: [UUID],
-                                runtimeCharactersById: [UUID: RuntimeCharacterState],
+    func handleExplorationEvent(memberIds: [Int32],
+                                runtimeCharactersById: [Int32: RuntimeCharacterState],
                                 outcome: ExplorationEngine.StepOutcome) async throws {
         switch outcome.entry.kind {
         case .nothing:
@@ -105,8 +105,8 @@ extension ProgressService {
         }
     }
 
-    func applyCombatRewards(memberIds: [UUID],
-                            runtimeCharactersById: [UUID: RuntimeCharacterState],
+    func applyCombatRewards(memberIds: [Int32],
+                            runtimeCharactersById: [Int32: RuntimeCharacterState],
                             summary: CombatSummary,
                             drops: [ItemDropResult]) async throws {
         let participants = uniqueOrdered(memberIds)
@@ -115,27 +115,12 @@ extension ProgressService {
         var updates: [CharacterProgressService.BattleResultUpdate] = []
         for characterId in participants {
             guard runtimeCharactersById[characterId] != nil else {
-                throw ProgressError.invalidInput(description: "戦闘参加メンバー \(characterId.uuidString) のランタイムデータを取得できませんでした")
+                throw ProgressError.invalidInput(description: "戦闘参加メンバー \(characterId) のランタイムデータを取得できませんでした")
             }
             let gained = summary.experienceByMember[characterId] ?? 0
-            let victoryDelta: Int
-            let defeatDelta: Int
-            switch summary.result {
-            case .victory:
-                victoryDelta = 1
-                defeatDelta = 0
-            case .defeat:
-                victoryDelta = 0
-                defeatDelta = 1
-            case .retreat:
-                victoryDelta = 0
-                defeatDelta = 0
-            }
             updates.append(.init(characterId: characterId,
                                  experienceDelta: gained,
-                                 totalBattlesDelta: 1,
-                                 victoriesDelta: victoryDelta,
-                                 defeatsDelta: defeatDelta))
+                                 hpDelta: 0))
         }
         try await character.applyBattleResults(updates)
 
@@ -143,7 +128,7 @@ extension ProgressService {
             let multiplier = partyGoldMultiplier(for: runtimeCharactersById.values)
             let reward = Int((Double(summary.goldEarned) * multiplier).rounded(.down))
             if reward > 0 {
-                _ = try await player.addGold(reward)
+                _ = try await gameState.addGold(reward)
             }
         }
 
@@ -152,8 +137,8 @@ extension ProgressService {
         }
     }
 
-    func applyNonBattleRewards(memberIds: [UUID],
-                               runtimeCharactersById: [UUID: RuntimeCharacterState],
+    func applyNonBattleRewards(memberIds: [Int32],
+                               runtimeCharactersById: [Int32: RuntimeCharacterState],
                                totalExperience: Int,
                                goldBase: Int,
                                drops: [ItemDropResult]) async throws {
@@ -163,13 +148,11 @@ extension ProgressService {
                                                  runtimeCharactersById: runtimeCharactersById)
             let updates = share.map { CharacterProgressService.BattleResultUpdate(characterId: $0.key,
                                                                                   experienceDelta: $0.value,
-                                                                                  totalBattlesDelta: 0,
-                                                                                  victoriesDelta: 0,
-                                                                                  defeatsDelta: 0) }
+                                                                                  hpDelta: 0) }
             try await character.applyBattleResults(updates)
         }
         if goldBase > 0 {
-            _ = try await player.addGold(goldBase)
+            _ = try await gameState.addGold(goldBase)
         }
         if !drops.isEmpty {
             try await applyDropRewards(drops)
@@ -179,30 +162,40 @@ extension ProgressService {
     func applyDropRewards(_ drops: [ItemDropResult]) async throws {
         let autoTradeKeys = try await autoTrade.registeredCompositeKeys()
         for drop in drops where drop.quantity > 0 {
-            let enhancement = ItemSnapshot.Enhancement(superRareTitleId: drop.superRareTitleId,
-                                                       normalTitleId: drop.normalTitleId,
-                                                       socketSuperRareTitleId: nil,
-                                                       socketNormalTitleId: nil,
-                                                       socketKey: nil)
-            // 自動売却キーはソケットを除外した3要素形式
-            let autoTradeKey = [drop.superRareTitleId ?? "",
-                                drop.normalTitleId ?? "",
-                                drop.item.id].joined(separator: "|")
+            // String IDをInt Indexに変換
+            let superRareTitleIndex: Int16 = await {
+                guard let id = drop.superRareTitleId else { return 0 }
+                return await masterData.getSuperRareTitleIndex(for: id) ?? 0
+            }()
+            let normalTitleIndex: UInt8 = await {
+                guard let id = drop.normalTitleId else { return 0 }
+                return await masterData.getTitleIndex(for: id) ?? 0
+            }()
+
+            let enhancement = ItemSnapshot.Enhancement(
+                superRareTitleIndex: superRareTitleIndex,
+                normalTitleIndex: normalTitleIndex,
+                socketSuperRareTitleIndex: 0,
+                socketNormalTitleIndex: 0,
+                socketMasterDataIndex: 0
+            )
+            // 自動売却キーはソケットを除外した3要素形式（Int Index）
+            let autoTradeKey = "\(superRareTitleIndex)|\(normalTitleIndex)|\(drop.item.index)"
             if autoTradeKeys.contains(autoTradeKey) {
                 // 自動売却：ショップ在庫に追加してゴールド取得
                 let result = try await shop.addPlayerSoldItem(itemId: drop.item.id, quantity: drop.quantity)
                 if result.gold > 0 {
-                    _ = try await player.addGold(result.gold)
+                    _ = try await gameState.addGold(result.gold)
                 }
                 // 上限超過分はインベントリに一時保管
                 if result.overflow > 0 {
-                    _ = try await inventory.addItem(itemId: drop.item.id,
+                    _ = try await inventory.addItem(masterDataIndex: drop.item.index,
                                                     quantity: result.overflow,
                                                     storage: .playerItem,
                                                     enhancements: enhancement)
                 }
             } else {
-                _ = try await inventory.addItem(itemId: drop.item.id,
+                _ = try await inventory.addItem(masterDataIndex: drop.item.index,
                                                 quantity: drop.quantity,
                                                 storage: .playerItem,
                                                 enhancements: enhancement)
@@ -211,13 +204,13 @@ extension ProgressService {
     }
 
     func distributeFlatExperience(total: Int,
-                                  recipients: [UUID],
-                                  runtimeCharactersById: [UUID: RuntimeCharacterState]) -> [UUID: Int] {
+                                  recipients: [Int32],
+                                  runtimeCharactersById: [Int32: RuntimeCharacterState]) -> [Int32: Int] {
         guard total > 0 else { return [:] }
         let eligible = recipients.filter { runtimeCharactersById[$0] != nil }
         guard !eligible.isEmpty else { return [:] }
         let baseShare = Double(total) / Double(eligible.count)
-        var assignments: [UUID: Int] = [:]
+        var assignments: [Int32: Int] = [:]
         assignments.reserveCapacity(eligible.count)
 
         var accumulatedShare = 0.0
@@ -243,9 +236,9 @@ extension ProgressService {
         return 1.0 + min(luckSum / 1000.0, 2.0)
     }
 
-    func uniqueOrdered(_ ids: [UUID]) -> [UUID] {
-        var seen = Set<UUID>()
-        var ordered: [UUID] = []
+    func uniqueOrdered(_ ids: [Int32]) -> [Int32] {
+        var seen = Set<Int32>()
+        var ordered: [Int32] = []
         for id in ids where !seen.contains(id) {
             seen.insert(id)
             ordered.append(id)

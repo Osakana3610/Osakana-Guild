@@ -6,6 +6,7 @@ extension SQLiteMasterDataManager {
     func fetchAllJobs() throws -> [JobDefinition] {
         struct Builder {
             var id: String
+            var index: Int
             var name: String
             var category: String
             var growthTendency: String?
@@ -15,19 +16,21 @@ extension SQLiteMasterDataManager {
 
         var builders: [String: Builder] = [:]
         var order: [String] = []
-        let baseSQL = "SELECT id, name, category, growth_tendency FROM jobs ORDER BY rowid;"
+        let baseSQL = "SELECT id, job_index, name, category, growth_tendency FROM jobs ORDER BY job_index;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(baseStatement, 0),
-                  let nameC = sqlite3_column_text(baseStatement, 1),
-                  let categoryC = sqlite3_column_text(baseStatement, 2) else { continue }
+                  let nameC = sqlite3_column_text(baseStatement, 2),
+                  let categoryC = sqlite3_column_text(baseStatement, 3) else { continue }
             let id = String(cString: idC)
+            let index = Int(sqlite3_column_int(baseStatement, 1))
             builders[id] = Builder(
                 id: id,
+                index: index,
                 name: String(cString: nameC),
                 category: String(cString: categoryC),
-                growthTendency: sqlite3_column_text(baseStatement, 3).flatMap { String(cString: $0) }
+                growthTendency: sqlite3_column_text(baseStatement, 4).flatMap { String(cString: $0) }
             )
             order.append(id)
         }
@@ -57,6 +60,7 @@ extension SQLiteMasterDataManager {
         return order.compactMap { builders[$0] }.map { builder in
             JobDefinition(
                 id: builder.id,
+                index: builder.index,
                 name: builder.name,
                 category: builder.category,
                 growthTendency: builder.growthTendency,

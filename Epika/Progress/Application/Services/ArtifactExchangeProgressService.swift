@@ -43,7 +43,7 @@ actor ArtifactExchangeProgressService {
         try await inventoryService.allEquipment(storage: .playerItem)
     }
 
-    func exchange(givingItemId: UUID, desiredItemId: String) async throws -> RuntimeEquipment {
+    func exchange(givingItemStackKey: String, desiredItemId: String) async throws -> RuntimeEquipment {
         guard !exchangeRules.isEmpty else {
             throw ProgressError.invalidInput(description: "神器交換レシピが未定義です")
         }
@@ -52,7 +52,7 @@ actor ArtifactExchangeProgressService {
         }
 
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        guard let offering = equipments.first(where: { $0.id == givingItemId }) else {
+        guard let offering = equipments.first(where: { $0.id == givingItemStackKey }) else {
             throw ProgressError.invalidInput(description: "提供する神器が所持品に存在しません")
         }
         guard offering.masterDataId == rule.requiredItemId else {
@@ -61,36 +61,43 @@ actor ArtifactExchangeProgressService {
         guard let rewardDefinition = try await masterDataService.getItemMasterData(id: rule.rewardItemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [rule.rewardItemId])
         }
+        guard let rewardIndex = await masterDataService.getItemIndex(for: rule.rewardItemId) else {
+            throw ProgressError.itemDefinitionUnavailable(ids: [rule.rewardItemId])
+        }
 
-        let snapshot = try await inventoryService.updateItem(id: givingItemId) { record in
+        let snapshot = try await inventoryService.updateItem(stackKey: givingItemStackKey) { record in
             guard record.storage == .playerItem else {
                 throw ProgressError.invalidInput(description: "提供アイテムは所持品から選択してください")
             }
-            guard record.masterDataId == rule.requiredItemId else {
-                throw ProgressError.invalidInput(description: "提供アイテムが交換条件と一致しません")
-            }
             // 提供アイテムは報酬アイテムに完全置換（称号・ソケット全てリセット）
-            record.masterDataId = rewardDefinition.id
-            record.normalTitleId = nil
-            record.superRareTitleId = nil
-            record.socketKey = nil
-            record.socketSuperRareTitleId = nil
-            record.socketNormalTitleId = nil
-            record.acquiredAt = Date()
+            record.masterDataIndex = rewardIndex
+            record.normalTitleIndex = 0
+            record.superRareTitleIndex = 0
+            record.socketMasterDataIndex = 0
+            record.socketSuperRareTitleIndex = 0
+            record.socketNormalTitleIndex = 0
         }
 
-        return RuntimeEquipment(id: snapshot.id,
-                                 masterDataId: rewardDefinition.id,
-                                 displayName: rewardDefinition.name,
-                                 description: rewardDefinition.description,
-                                 quantity: snapshot.quantity,
-                                 category: RuntimeEquipment.Category(from: rewardDefinition.category),
-                                 baseValue: rewardDefinition.basePrice,
-                                 sellValue: rewardDefinition.sellValue,
-                                 enhancement: snapshot.enhancements,
-                                 rarity: rewardDefinition.rarity,
-                                 statBonuses: rewardDefinition.statBonuses,
-                                 combatBonuses: rewardDefinition.combatBonuses,
-                                 acquiredAt: snapshot.acquiredAt)
+        return RuntimeEquipment(
+            id: snapshot.stackKey,
+            masterDataIndex: snapshot.masterDataIndex,
+            masterDataId: rewardDefinition.id,
+            displayName: rewardDefinition.name,
+            description: rewardDefinition.description,
+            quantity: snapshot.quantity,
+            category: RuntimeEquipment.Category(from: rewardDefinition.category),
+            baseValue: rewardDefinition.basePrice,
+            sellValue: rewardDefinition.sellValue,
+            enhancement: .init(
+                superRareTitleIndex: snapshot.enhancements.superRareTitleIndex,
+                normalTitleIndex: snapshot.enhancements.normalTitleIndex,
+                socketSuperRareTitleIndex: snapshot.enhancements.socketSuperRareTitleIndex,
+                socketNormalTitleIndex: snapshot.enhancements.socketNormalTitleIndex,
+                socketMasterDataIndex: snapshot.enhancements.socketMasterDataIndex
+            ),
+            rarity: rewardDefinition.rarity,
+            statBonuses: rewardDefinition.statBonuses,
+            combatBonuses: rewardDefinition.combatBonuses
+        )
     }
 }

@@ -21,6 +21,9 @@ tmp/
 Temp/
 *.orig
 
+# Generated SQLite databases
+MasterData.sqlite
+
 # Coverage
 *.xccovreport
 *.xccovarchive
@@ -46,3 +49,9 @@ xcodebuild-*.log
 periphery*.json
 xcodebuild*.log
 CLAUDE.md
+# MasterData (auto-generated at build time)
+Epika/Generated/master_data.db
+
+# MasterDataGenerator build artifacts
+Tools/MasterDataGenerator/.build/
+Tools/MasterDataGenerator/output/

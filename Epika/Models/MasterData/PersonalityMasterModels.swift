@@ -9,6 +9,7 @@ struct PersonalityPrimaryDefinition: Identifiable, Sendable {
     }
 
     let id: String
+    let index: Int
     let name: String
     let kind: String
     let description: String
@@ -22,6 +23,7 @@ struct PersonalitySecondaryDefinition: Identifiable, Sendable {
     }
 
     let id: String
+    let index: Int
     let name: String
     let positiveSkillId: String
     let negativeSkillId: String

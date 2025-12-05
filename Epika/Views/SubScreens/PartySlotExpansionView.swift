@@ -235,7 +235,7 @@ struct PartySlotExpansionView: View {
         defer { isLoading = false }
         errorMessage = nil
         do {
-            async let playerTask = progressService.player.currentPlayer()
+            async let playerTask = progressService.gameState.currentPlayer()
             async let partyTask = progressService.party.allParties()
             let (player, parties) = try await (playerTask, partyTask)
             playerSnapshot = player
@@ -257,11 +257,11 @@ struct PartySlotExpansionView: View {
         successMessage = nil
         do {
             if cost > 0 {
-                _ = try await progressService.player.spendGold(cost)
+                _ = try await progressService.gameState.spendGold(cost)
             }
             do {
                 let updatedParties = try await progressService.party.ensurePartySlots(atLeast: previousSlots + 1)
-                let updatedPlayer = try await progressService.player.currentPlayer()
+                let updatedPlayer = try await progressService.gameState.currentPlayer()
                 playerSnapshot = updatedPlayer
                 partySnapshots = updatedParties
                 successMessage = "ギルド改造完了！パーティスロットが\(previousSlots)から\(updatedParties.count)に増えました！"
@@ -270,7 +270,7 @@ struct PartySlotExpansionView: View {
             } catch {
                 if cost > 0 {
                     do {
-                        _ = try await progressService.player.addGold(cost)
+                        _ = try await progressService.gameState.addGold(cost)
                     } catch let refundError {
                         throw PartySlotExpansionError.rollbackFailed(original: error, rollback: refundError)
                     }

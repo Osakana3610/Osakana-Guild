@@ -2,33 +2,23 @@ import Foundation
 import SwiftData
 
 struct RuntimeParty: Identifiable, Sendable, Hashable {
-    let id: UUID
-    let progressId: UUID
+    let id: UInt8                              // 1〜8
     let persistentIdentifier: PersistentIdentifier
     var name: String
-    var memberIds: [UUID]
-    var formationId: String?
-    var lastSelectedDungeonId: String?
-    var lastSelectedDifficulty: Int
-    var targetFloor: Int
-    var slotIndex: Int
-    var createdAt: Date
+    var memberIds: [Int32]
+    var lastSelectedDungeonIndex: UInt16       // 0=未選択
+    var lastSelectedDifficulty: UInt8
+    var targetFloor: UInt8
     var updatedAt: Date
 
     init(snapshot: PartySnapshot) {
         self.id = snapshot.id
-        self.progressId = snapshot.id
         self.persistentIdentifier = snapshot.persistentIdentifier
         self.name = snapshot.displayName
-        self.memberIds = snapshot.members
-            .sorted { $0.order < $1.order }
-            .map { $0.characterId }
-        self.formationId = snapshot.formationId
-        self.lastSelectedDungeonId = snapshot.lastSelectedDungeonId
+        self.memberIds = snapshot.memberCharacterIds
+        self.lastSelectedDungeonIndex = snapshot.lastSelectedDungeonIndex
         self.lastSelectedDifficulty = snapshot.lastSelectedDifficulty
         self.targetFloor = snapshot.targetFloor
-        self.slotIndex = snapshot.slotIndex
-        self.createdAt = snapshot.createdAt
         self.updatedAt = snapshot.updatedAt
     }
 }

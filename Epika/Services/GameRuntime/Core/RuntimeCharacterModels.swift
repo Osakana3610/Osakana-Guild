@@ -48,16 +48,21 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
     }
 
     struct EquippedItem: Sendable, Hashable {
-        var id: UUID
-        var itemId: String
+        // アイテム本体
+        var superRareTitleIndex: Int16
+        var normalTitleIndex: UInt8
+        var masterDataIndex: Int16
+        // ソケット（宝石改造）
+        var socketSuperRareTitleIndex: Int16
+        var socketNormalTitleIndex: UInt8
+        var socketMasterDataIndex: Int16
+        // 数量
         var quantity: Int
-        var superRareTitleId: String?
-        var normalTitleId: String?
-        var socketSuperRareTitleId: String?
-        var socketNormalTitleId: String?
-        var socketKey: String?
-        var createdAt: Date
-        var updatedAt: Date
+
+        /// スタック識別キー
+        var stackKey: String {
+            "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"
+        }
     }
 
     struct AchievementCounters: Sendable, Hashable {
@@ -73,7 +78,7 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
         var breath: Int
     }
 
-    var id: UUID
+    var id: Int32
     var displayName: String
     var raceId: String
     var gender: String
@@ -122,9 +127,9 @@ struct RuntimeCharacterState: Sendable {
     private static func hasPositivePhysicalAttackBonus(progress: RuntimeCharacterProgress,
                                                        loadout: Loadout) -> Bool {
         guard !progress.equippedItems.isEmpty else { return false }
-        let definitions = Dictionary(uniqueKeysWithValues: loadout.items.map { ($0.id, $0) })
+        let definitionsByIndex = Dictionary(uniqueKeysWithValues: loadout.items.map { ($0.index, $0) })
         for equipment in progress.equippedItems {
-            guard let definition = definitions[equipment.itemId] else { continue }
+            guard let definition = definitionsByIndex[equipment.masterDataIndex] else { continue }
             for bonus in definition.combatBonuses where bonus.stat == "physicalAttack" {
                 if bonus.value * equipment.quantity > 0 { return true }
             }
@@ -144,7 +149,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     let spellLoadout: SkillRuntimeEffects.SpellLoadout
     let loadout: RuntimeCharacterState.Loadout
 
-    var id: UUID { progress.id }
+    var id: Int32 { progress.id }
     var name: String { progress.displayName }
     var level: Int { progress.level }
     var experience: Int { progress.experience }

@@ -55,7 +55,8 @@ struct DropRollResult: Sendable {
 
 /// 日次で共有する超レアドロップ状態。
 struct SuperRareDailyState: Sendable {
-    var jstDayIdentifier: String
+    /// JST日付 (YYYYMMDD形式のInt)
+    var jstDate: Int
     var hasTriggered: Bool
 }
 
@@ -92,7 +93,7 @@ extension RuntimePartyState {
         let fortune = Int(averageLuck.rounded())
 
         var aggregation = SkillRuntimeEffects.RewardComponents.neutral
-        for member in members where !member.isReserve {
+        for member in members {
             let components = try SkillRuntimeEffectCompiler.rewardComponents(from: member.character.learnedSkills)
             aggregation.merge(components)
         }
