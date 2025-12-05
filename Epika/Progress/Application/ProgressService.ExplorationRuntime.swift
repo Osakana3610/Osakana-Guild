@@ -128,7 +128,7 @@ extension ProgressService {
             let multiplier = partyGoldMultiplier(for: runtimeCharactersById.values)
             let reward = Int((Double(summary.goldEarned) * multiplier).rounded(.down))
             if reward > 0 {
-                _ = try await player.addGold(reward)
+                _ = try await gameState.addGold(reward)
             }
         }
 
@@ -152,7 +152,7 @@ extension ProgressService {
             try await character.applyBattleResults(updates)
         }
         if goldBase > 0 {
-            _ = try await player.addGold(goldBase)
+            _ = try await gameState.addGold(goldBase)
         }
         if !drops.isEmpty {
             try await applyDropRewards(drops)
@@ -185,7 +185,7 @@ extension ProgressService {
                 // 自動売却：ショップ在庫に追加してゴールド取得
                 let result = try await shop.addPlayerSoldItem(itemId: drop.item.id, quantity: drop.quantity)
                 if result.gold > 0 {
-                    _ = try await player.addGold(result.gold)
+                    _ = try await gameState.addGold(result.gold)
                 }
                 // 上限超過分はインベントリに一時保管
                 if result.overflow > 0 {

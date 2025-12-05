@@ -106,11 +106,11 @@ struct BottomGameInfoView: View {
     private func loadPlayerData() {
         Task { @MainActor in
             do {
-                let player = try await progressService.player.currentPlayer()
+                let player = try await progressService.gameState.currentPlayer()
                 apply(player)
             } catch ProgressError.playerNotFound {
                 do {
-                    let player = try await progressService.player.loadCurrentPlayer()
+                    let player = try await progressService.gameState.loadCurrentPlayer()
                     apply(player)
                 } catch {
                     clearPlayer()

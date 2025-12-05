@@ -10,7 +10,7 @@ struct PandoraBoxView: View {
     @State private var showingItemPicker = false
 
     private var inventoryService: InventoryProgressService { progressService.inventory }
-    private var playerService: PlayerProgressService { progressService.player }
+    private var gameStateService: GameStateService { progressService.gameState }
     private var displayService: ItemPreloadService { ItemPreloadService.shared }
 
     private let maxPandoraSlots = 5
@@ -109,8 +109,8 @@ struct PandoraBoxView: View {
         loadError = nil
 
         do {
-            let player = try await playerService.currentPlayer()
-            let pandoraStackKeys = Set(player.pandoraBoxStackKeys)
+            let player = try await gameStateService.currentPlayer()
+            let pandoraStackKeys = Set(player.pandoraBoxItems.map { $0.stackKey })
 
             // プリロードが完了していなければ待機
             if !displayService.loaded {
@@ -135,7 +135,11 @@ struct PandoraBoxView: View {
     @MainActor
     private func addToPandoraBox(item: LightweightItemData) async {
         do {
-            _ = try await playerService.addToPandoraBox(stackKey: item.stackKey)
+            guard let pandoraItem = PandoraBoxItem(stackKey: item.stackKey) else {
+                loadError = "アイテムの形式が不正です"
+                return
+            }
+            _ = try await gameStateService.addToPandoraBox(item: pandoraItem)
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -145,7 +149,11 @@ struct PandoraBoxView: View {
     @MainActor
     private func removeFromPandoraBox(item: LightweightItemData) async {
         do {
-            _ = try await playerService.removeFromPandoraBox(stackKey: item.stackKey)
+            guard let pandoraItem = PandoraBoxItem(stackKey: item.stackKey) else {
+                loadError = "アイテムの形式が不正です"
+                return
+            }
+            _ = try await gameStateService.removeFromPandoraBox(item: pandoraItem)
             await loadData()
         } catch {
             loadError = error.localizedDescription

@@ -40,7 +40,7 @@ struct DebugMenuView: View {
 
     private let masterDataService = MasterDataRuntimeService.shared
     private var inventoryService: InventoryProgressService { progressService.inventory }
-    private var playerService: PlayerProgressService { progressService.player }
+    private var gameStateService: GameStateService { progressService.gameState }
 
     private func debugLog(_ message: @autoclosure () -> String) {
         print(message())
@@ -420,7 +420,7 @@ struct DebugMenuView: View {
     }
 
     private func ensureStorageCapacity() async throws {
-        _ = try await playerService.loadCurrentPlayer()
+        _ = try await gameStateService.loadCurrentPlayer()
     }
 }
 

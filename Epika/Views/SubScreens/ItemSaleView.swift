@@ -170,7 +170,7 @@ struct ItemSaleView: View {
         #endif
 
         do {
-            player = try await progressService.player.loadCurrentPlayer()
+            player = try await progressService.gameState.loadCurrentPlayer()
 
             // プリロードが完了していなければ待機
             let service = ItemPreloadService.shared

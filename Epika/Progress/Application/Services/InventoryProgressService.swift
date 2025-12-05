@@ -3,7 +3,7 @@ import SwiftData
 
 actor InventoryProgressService {
     private let container: ModelContainer
-    private let playerService: PlayerProgressService
+    private let gameStateService: GameStateService
     private let environment: ProgressEnvironment
     private let maxStackSize = 99
 
@@ -25,10 +25,10 @@ actor InventoryProgressService {
     }
 
     init(container: ModelContainer,
-         playerService: PlayerProgressService,
+         gameStateService: GameStateService,
          environment: ProgressEnvironment) {
         self.container = container
-        self.playerService = playerService
+        self.gameStateService = gameStateService
         self.environment = environment
     }
 
@@ -300,7 +300,7 @@ actor InventoryProgressService {
 
     func sellItems(stackKeys: [String]) async throws -> PlayerSnapshot {
         guard !stackKeys.isEmpty else {
-            return try await playerService.currentPlayer()
+            return try await gameStateService.currentPlayer()
         }
 
         let context = makeContext()
@@ -311,7 +311,7 @@ actor InventoryProgressService {
         let allRecords = try context.fetch(descriptor)
         let records = allRecords.filter { stackKeySet.contains($0.stackKey) }
         guard !records.isEmpty else {
-            return try await playerService.currentPlayer()
+            return try await gameStateService.currentPlayer()
         }
         let masterIndices = Array(Set(records.map { $0.masterDataIndex }))
         let definitions = try await environment.masterDataService.getItemMasterData(byIndices: masterIndices)
@@ -330,10 +330,10 @@ actor InventoryProgressService {
         try context.save()
 
         guard totalGain > 0 else {
-            return try await playerService.currentPlayer()
+            return try await gameStateService.currentPlayer()
         }
 
-        return try await playerService.addGold(totalGain)
+        return try await gameStateService.addGold(totalGain)
     }
 
     func updateItem(stackKey: String,

@@ -45,11 +45,11 @@ final class AdventureViewState {
         return progressService.party
     }
 
-    private var playerService: PlayerProgressService {
+    private var gameStateService: GameStateService {
         guard let progressService else {
             fatalError("AdventureViewState is not configured with ProgressService")
         }
-        return progressService.player
+        return progressService.gameState
     }
 
     private var explorationService: ExplorationProgressService {
@@ -131,7 +131,7 @@ final class AdventureViewState {
 
     func loadPlayer() async {
         do {
-            playerProgress = try await playerService.loadCurrentPlayer()
+            playerProgress = try await gameStateService.loadCurrentPlayer()
         } catch {
             present(error: error)
         }
@@ -154,7 +154,7 @@ final class AdventureViewState {
     func ensurePartySlots() async {
         guard let partyState else { return }
         do {
-            let profile = try await playerService.loadCurrentPlayer()
+            let profile = try await gameStateService.loadCurrentPlayer()
             playerProgress = profile
             _ = try await partyService.ensurePartySlots(atLeast: profile.partySlots)
             try await partyState.refresh()

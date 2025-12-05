@@ -4,9 +4,8 @@ import SwiftData
 
 @MainActor
 final class ProgressService: ObservableObject {
-    let metadata: ProgressMetadataService
+    let gameState: GameStateService
     let environment: ProgressEnvironment
-    let player: PlayerProgressService
     let character: CharacterProgressService
     let party: PartyProgressService
     let inventory: InventoryProgressService
@@ -53,7 +52,8 @@ final class ProgressService: ObservableObject {
          environment: ProgressEnvironment = .live,
          cloudKitCleanup: ProgressCloudKitCleanupService = .init()) {
         self.environment = environment
-        self.metadata = ProgressMetadataService(container: container)
+        let gameStateService = GameStateService(container: container)
+        self.gameState = gameStateService
         self.cloudKitCleanup = cloudKitCleanup
         let dropNotifications = ItemDropNotificationService()
         self.dropNotifications = dropNotifications
@@ -65,17 +65,16 @@ final class ProgressService: ObservableObject {
         }
         let runtimeService = GameRuntimeService(dropNotifier: dropNotifier)
         self.runtime = ProgressRuntimeService(runtimeService: runtimeService,
-                                              metadataService: self.metadata)
+                                              gameStateService: gameStateService)
 
-        self.player = PlayerProgressService(container: container)
         self.party = PartyProgressService(container: container)
         self.inventory = InventoryProgressService(container: container,
-                                                  playerService: self.player,
+                                                  gameStateService: gameStateService,
                                                   environment: environment)
         self.shop = ShopProgressService(container: container,
                                         environment: environment,
                                         inventoryService: self.inventory,
-                                        playerService: self.player)
+                                        gameStateService: gameStateService)
         self.character = CharacterProgressService(container: container, runtime: runtime)
         self.exploration = ExplorationProgressService(container: container)
         self.dungeon = DungeonProgressService(container: container)
@@ -83,9 +82,9 @@ final class ProgressService: ObservableObject {
         self.titleInheritance = TitleInheritanceProgressService(inventoryService: self.inventory)
         self.artifactExchange = ArtifactExchangeProgressService(inventoryService: self.inventory)
         self.itemSynthesis = ItemSynthesisProgressService(inventoryService: self.inventory,
-                                                          playerService: self.player)
+                                                          gameStateService: gameStateService)
         self.autoTrade = AutoTradeProgressService(container: container,
-                                                   playerService: self.player,
+                                                   gameStateService: gameStateService,
                                                    environment: environment)
         self.itemPreload = .shared
         self.masterData = .shared

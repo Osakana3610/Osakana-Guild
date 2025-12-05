@@ -3,12 +3,12 @@ import Foundation
 @MainActor
 final class ProgressRuntimeService {
     private let runtimeService: GameRuntimeService
-    private let metadataService: ProgressMetadataService
+    private let gameStateService: GameStateService
 
     init(runtimeService: GameRuntimeService,
-         metadataService: ProgressMetadataService) {
+         gameStateService: GameStateService) {
         self.runtimeService = runtimeService
-        self.metadataService = metadataService
+        self.gameStateService = gameStateService
     }
 
     func runtimeCharacter(from snapshot: CharacterSnapshot) async throws -> RuntimeCharacter {
@@ -42,7 +42,7 @@ final class ProgressRuntimeService {
         let partyState = try await runtimeService.runtimePartyState(party: partyProgress,
                                                                    characters: characterProgresses)
         let runtimeCharacters = partyState.members.map { $0.character }
-        let superRareState = try await metadataService.loadSuperRareDailyState()
+        let superRareState = try await gameStateService.loadSuperRareDailyState()
         let session = try await runtimeService.startExplorationRun(dungeonId: dungeonId,
                                                                    targetFloorNumber: targetFloorNumber,
                                                                    party: partyState,
@@ -51,7 +51,7 @@ final class ProgressRuntimeService {
         let waitClosure: @Sendable () async throws -> ExplorationRunArtifact = { [weak self] in
             let artifact = try await session.waitForCompletion()
             if let self {
-                try await self.metadataService.updateSuperRareDailyState(artifact.updatedSuperRareState)
+                try await self.gameStateService.updateSuperRareDailyState(artifact.updatedSuperRareState)
             }
             return artifact
         }

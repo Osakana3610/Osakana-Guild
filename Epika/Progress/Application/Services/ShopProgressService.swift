@@ -28,18 +28,18 @@ actor ShopProgressService {
     private let container: ModelContainer
     private let environment: ProgressEnvironment
     private let inventoryService: InventoryProgressService
-    private let playerService: PlayerProgressService
+    private let gameStateService: GameStateService
     private let defaultShopIdentifier = "default"
     private let unlimitedSentinel = -1
 
     init(container: ModelContainer,
          environment: ProgressEnvironment,
          inventoryService: InventoryProgressService,
-         playerService: PlayerProgressService) {
+         gameStateService: GameStateService) {
         self.container = container
         self.environment = environment
         self.inventoryService = inventoryService
-        self.playerService = playerService
+        self.gameStateService = gameStateService
     }
 
     func loadItems() async throws -> [ShopItem] {
@@ -200,7 +200,7 @@ actor ShopProgressService {
             throw ProgressError.insufficientStock(required: quantity, available: stockQuantity)
         }
         let totalCost = target.price * quantity
-        let playerSnapshot = try await playerService.spendGold(totalCost)
+        let playerSnapshot = try await gameStateService.spendGold(totalCost)
 
         let context = makeContext()
         let stockRecord = try fetchStockRecord(id: stockId, context: context)

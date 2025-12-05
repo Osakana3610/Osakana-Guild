@@ -10,14 +10,14 @@ actor AutoTradeProgressService {
     }
 
     private let container: ModelContainer
-    private let playerService: PlayerProgressService
+    private let gameStateService: GameStateService
     private let environment: ProgressEnvironment
 
     init(container: ModelContainer,
-         playerService: PlayerProgressService,
+         gameStateService: GameStateService,
          environment: ProgressEnvironment) {
         self.container = container
-        self.playerService = playerService
+        self.gameStateService = gameStateService
         self.environment = environment
     }
 

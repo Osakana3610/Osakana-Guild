@@ -16,7 +16,7 @@ extension ProgressService {
         // 1. 在庫整理でキャット・チケット獲得
         let tickets = try await shop.cleanupStock(stockId: stockId)
         if tickets > 0 {
-            _ = try await player.addCatTickets(tickets)
+            _ = try await gameState.addCatTickets(tickets)
         }
 
         // 2. インベントリ内の自動売却対象を売却
@@ -55,7 +55,7 @@ extension ProgressService {
         }
 
         if totalGold > 0 {
-            _ = try await player.addGold(totalGold)
+            _ = try await gameState.addGold(totalGold)
         }
         return totalGold
     }
@@ -68,7 +68,7 @@ extension ProgressService {
     @discardableResult
     func sellItemsToShop(stackKeys: [String]) async throws -> PlayerSnapshot {
         guard !stackKeys.isEmpty else {
-            return try await player.currentPlayer()
+            return try await gameState.currentPlayer()
         }
 
         // アイテム情報を取得
@@ -76,7 +76,7 @@ extension ProgressService {
         let stackKeySet = Set(stackKeys)
         let targetItems = items.filter { stackKeySet.contains($0.stackKey) }
         guard !targetItems.isEmpty else {
-            return try await player.currentPlayer()
+            return try await gameState.currentPlayer()
         }
 
         // 各アイテムを売却してショップ在庫に追加
@@ -105,9 +105,9 @@ extension ProgressService {
 
         // ゴールドを加算
         if totalGold > 0 {
-            return try await player.addGold(totalGold)
+            return try await gameState.addGold(totalGold)
         }
-        return try await player.currentPlayer()
+        return try await gameState.currentPlayer()
     }
 
     /// 単一アイテムを指定数量売却してショップ在庫に追加する
@@ -120,7 +120,7 @@ extension ProgressService {
     @discardableResult
     func sellItemToShop(stackKey: String, quantity: Int) async throws -> PlayerSnapshot {
         guard quantity > 0 else {
-            return try await player.currentPlayer()
+            return try await gameState.currentPlayer()
         }
 
         // アイテム情報を取得
@@ -150,9 +150,9 @@ extension ProgressService {
 
         // ゴールドを加算
         if result.gold > 0 {
-            return try await player.addGold(result.gold)
+            return try await gameState.addGold(result.gold)
         }
-        return try await player.currentPlayer()
+        return try await gameState.currentPlayer()
     }
 
     // MARK: - Private Helpers

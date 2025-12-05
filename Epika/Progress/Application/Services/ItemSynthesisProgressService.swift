@@ -8,13 +8,13 @@ actor ItemSynthesisProgressService {
     }
 
     private let inventoryService: InventoryProgressService
-    private let playerService: PlayerProgressService
+    private let gameStateService: GameStateService
     private let masterDataService = MasterDataRuntimeService.shared
 
     init(inventoryService: InventoryProgressService,
-         playerService: PlayerProgressService) {
+         gameStateService: GameStateService) {
         self.inventoryService = inventoryService
-        self.playerService = playerService
+        self.gameStateService = gameStateService
     }
 
     func availableParentItems() async throws -> [RuntimeEquipment] {
@@ -44,7 +44,7 @@ actor ItemSynthesisProgressService {
         let cost = calculateCost()
 
         if cost > 0 {
-            _ = try await playerService.spendGold(cost)
+            _ = try await gameStateService.spendGold(cost)
         }
 
         try await inventoryService.decrementItem(stackKey: childStackKey, quantity: 1)

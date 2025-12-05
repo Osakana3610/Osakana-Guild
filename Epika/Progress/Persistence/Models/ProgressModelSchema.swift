@@ -3,8 +3,7 @@ import SwiftData
 enum ProgressModelSchema {
     static var modelTypes: [any PersistentModel.Type] {
         [
-            ProgressMetadataRecord.self,
-            PlayerProfileRecord.self,
+            GameStateRecord.self,
             CharacterRecord.self,
             CharacterEquipmentRecord.self,
             PartyRecord.self,

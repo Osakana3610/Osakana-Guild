@@ -671,11 +671,11 @@ private extension CharacterProgressService {
     }
 
     func fetchPandoraBoxStackKeys(context: ModelContext) throws -> Set<String> {
-        var descriptor = FetchDescriptor<PlayerProfileRecord>()
+        var descriptor = FetchDescriptor<GameStateRecord>()
         descriptor.fetchLimit = 1
-        guard let profile = try context.fetch(descriptor).first else {
+        guard let gameState = try context.fetch(descriptor).first else {
             throw ProgressError.playerNotFound
         }
-        return Set(profile.pandoraBoxStackKeys)
+        return Set(gameState.pandoraBoxItems.map { $0.stackKey })
     }
 }
