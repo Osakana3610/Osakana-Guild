@@ -9,7 +9,7 @@ enum BattleService {
 
     struct Resolution: Sendable {
         let result: BattleResult
-        let survivingAllyIds: [Int32]
+        let survivingAllyIds: [UInt8]
         let turns: Int
         let log: [BattleLogEntry]
         let enemy: EnemyDefinition

@@ -3,8 +3,8 @@ import Foundation
 // MARK: - Exploration Stream Processing & Rewards
 extension ProgressService {
     func processExplorationStream(session: ExplorationRuntimeSession,
-                                  memberIds: [Int32],
-                                  runtimeMap: [Int32: RuntimeCharacterState],
+                                  memberIds: [UInt8],
+                                  runtimeMap: [UInt8: RuntimeCharacterState],
                                   runDifficulty: Int,
                                   dungeonId: String,
                                   continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
@@ -83,8 +83,8 @@ extension ProgressService {
         }
     }
 
-    func handleExplorationEvent(memberIds: [Int32],
-                                runtimeCharactersById: [Int32: RuntimeCharacterState],
+    func handleExplorationEvent(memberIds: [UInt8],
+                                runtimeCharactersById: [UInt8: RuntimeCharacterState],
                                 outcome: ExplorationEngine.StepOutcome) async throws {
         switch outcome.entry.kind {
         case .nothing:
@@ -105,8 +105,8 @@ extension ProgressService {
         }
     }
 
-    func applyCombatRewards(memberIds: [Int32],
-                            runtimeCharactersById: [Int32: RuntimeCharacterState],
+    func applyCombatRewards(memberIds: [UInt8],
+                            runtimeCharactersById: [UInt8: RuntimeCharacterState],
                             summary: CombatSummary,
                             drops: [ItemDropResult]) async throws {
         let participants = uniqueOrdered(memberIds)
@@ -137,8 +137,8 @@ extension ProgressService {
         }
     }
 
-    func applyNonBattleRewards(memberIds: [Int32],
-                               runtimeCharactersById: [Int32: RuntimeCharacterState],
+    func applyNonBattleRewards(memberIds: [UInt8],
+                               runtimeCharactersById: [UInt8: RuntimeCharacterState],
                                totalExperience: Int,
                                goldBase: Int,
                                drops: [ItemDropResult]) async throws {
@@ -204,13 +204,13 @@ extension ProgressService {
     }
 
     func distributeFlatExperience(total: Int,
-                                  recipients: [Int32],
-                                  runtimeCharactersById: [Int32: RuntimeCharacterState]) -> [Int32: Int] {
+                                  recipients: [UInt8],
+                                  runtimeCharactersById: [UInt8: RuntimeCharacterState]) -> [UInt8: Int] {
         guard total > 0 else { return [:] }
         let eligible = recipients.filter { runtimeCharactersById[$0] != nil }
         guard !eligible.isEmpty else { return [:] }
         let baseShare = Double(total) / Double(eligible.count)
-        var assignments: [Int32: Int] = [:]
+        var assignments: [UInt8: Int] = [:]
         assignments.reserveCapacity(eligible.count)
 
         var accumulatedShare = 0.0
@@ -236,9 +236,9 @@ extension ProgressService {
         return 1.0 + min(luckSum / 1000.0, 2.0)
     }
 
-    func uniqueOrdered(_ ids: [Int32]) -> [Int32] {
-        var seen = Set<Int32>()
-        var ordered: [Int32] = []
+    func uniqueOrdered(_ ids: [UInt8]) -> [UInt8] {
+        var seen = Set<UInt8>()
+        var ordered: [UInt8] = []
         for id in ids where !seen.contains(id) {
             seen.insert(id)
             ordered.append(id)

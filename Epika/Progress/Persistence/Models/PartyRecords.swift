@@ -8,7 +8,7 @@ final class PartyRecord {
     var lastSelectedDungeonIndex: UInt16 = 0  // 0=未選択、1〜=ダンジョン
     var lastSelectedDifficulty: UInt8 = 0
     var targetFloor: UInt8 = 1
-    var memberCharacterIds: [Int32] = []      // メンバー（順序=配列index）
+    var memberCharacterIds: [UInt8] = []      // メンバー（順序=配列index）
     var updatedAt: Date = Date()
 
     init(id: UInt8 = 1,
@@ -16,7 +16,7 @@ final class PartyRecord {
          lastSelectedDungeonIndex: UInt16 = 0,
          lastSelectedDifficulty: UInt8 = 0,
          targetFloor: UInt8 = 1,
-         memberCharacterIds: [Int32] = [],
+         memberCharacterIds: [UInt8] = [],
          updatedAt: Date = Date()) {
         self.id = id
         self.displayName = displayName
