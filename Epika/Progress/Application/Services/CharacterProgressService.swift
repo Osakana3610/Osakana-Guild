@@ -637,37 +637,15 @@ private extension CharacterProgressService {
     }
 
     func removeFromParties(characterId: Int32, context: ModelContext) throws {
-        let descriptor = FetchDescriptor<PartyMemberRecord>(predicate: #Predicate { $0.characterId == characterId })
-        let members = try context.fetch(descriptor)
-        guard !members.isEmpty else { return }
+        let descriptor = FetchDescriptor<PartyRecord>()
+        let parties = try context.fetch(descriptor)
         let now = Date()
-        var affectedPartyIds: Set<UUID> = []
-        for member in members {
-            affectedPartyIds.insert(member.partyId)
-            context.delete(member)
-        }
-        for partyId in affectedPartyIds {
-            try resequenceMembers(partyId: partyId, context: context, timestamp: now)
-        }
-    }
-
-    func resequenceMembers(partyId: UUID, context: ModelContext, timestamp: Date) throws {
-        let partyDescriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == partyId })
-        guard let party = try context.fetch(partyDescriptor).first else { return }
-        let members = try fetchPartyMembers(partyId: partyId, context: context)
-        for (index, member) in members.enumerated() {
-            if member.order != index {
-                member.order = index
-                member.updatedAt = timestamp
+        for party in parties {
+            if party.memberCharacterIds.contains(characterId) {
+                party.memberCharacterIds.removeAll { $0 == characterId }
+                party.updatedAt = now
             }
         }
-        party.updatedAt = timestamp
-    }
-
-    func fetchPartyMembers(partyId: UUID, context: ModelContext) throws -> [PartyMemberRecord] {
-        var descriptor = FetchDescriptor<PartyMemberRecord>(predicate: #Predicate { $0.partyId == partyId })
-        descriptor.sortBy = [SortDescriptor(\PartyMemberRecord.order, order: .forward)]
-        return try context.fetch(descriptor)
     }
 
     func fetchPandoraBoxStackKeys(context: ModelContext) throws -> Set<String> {

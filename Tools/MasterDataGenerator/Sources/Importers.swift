@@ -1216,6 +1216,7 @@ private struct DungeonMasterFile: Decodable {
 
     struct Dungeon: Decodable {
         let id: String
+        let index: Int
         let name: String
         let chapter: Int
         let stage: Int
@@ -1254,8 +1255,8 @@ extension Generator {
             try execute("DELETE FROM dungeons;")
 
             let insertDungeonSQL = """
-                INSERT INTO dungeons (id, name, chapter, stage, description, recommended_level, exploration_time, events_per_floor, floor_count, story_text)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO dungeons (id, dungeon_index, name, chapter, stage, description, recommended_level, exploration_time, events_per_floor, floor_count, story_text)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
             let insertUnlockSQL = "INSERT INTO dungeon_unlock_conditions (dungeon_id, order_index, condition) VALUES (?, ?, ?);"
             let insertWeightSQL = "INSERT INTO dungeon_encounter_weights (dungeon_id, order_index, enemy_id, weight) VALUES (?, ?, ?, ?);"
@@ -1326,15 +1327,16 @@ extension Generator {
                 let floorCount = max(1, dungeon.floorCount)
 
                 bindText(dungeonStatement, index: 1, value: dungeon.id)
-                bindText(dungeonStatement, index: 2, value: dungeon.name)
-                bindInt(dungeonStatement, index: 3, value: dungeon.chapter)
-                bindInt(dungeonStatement, index: 4, value: dungeon.stage)
-                bindText(dungeonStatement, index: 5, value: dungeon.description)
-                bindInt(dungeonStatement, index: 6, value: dungeon.recommendedLevel)
-                bindInt(dungeonStatement, index: 7, value: dungeon.explorationTime)
-                bindInt(dungeonStatement, index: 8, value: dungeon.eventsPerFloor)
-                bindInt(dungeonStatement, index: 9, value: floorCount)
-                bindText(dungeonStatement, index: 10, value: dungeon.storyText)
+                bindInt(dungeonStatement, index: 2, value: dungeon.index)
+                bindText(dungeonStatement, index: 3, value: dungeon.name)
+                bindInt(dungeonStatement, index: 4, value: dungeon.chapter)
+                bindInt(dungeonStatement, index: 5, value: dungeon.stage)
+                bindText(dungeonStatement, index: 6, value: dungeon.description)
+                bindInt(dungeonStatement, index: 7, value: dungeon.recommendedLevel)
+                bindInt(dungeonStatement, index: 8, value: dungeon.explorationTime)
+                bindInt(dungeonStatement, index: 9, value: dungeon.eventsPerFloor)
+                bindInt(dungeonStatement, index: 10, value: floorCount)
+                bindText(dungeonStatement, index: 11, value: dungeon.storyText)
                 try step(dungeonStatement)
                 reset(dungeonStatement)
 

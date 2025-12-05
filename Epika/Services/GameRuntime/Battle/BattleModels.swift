@@ -595,7 +595,7 @@ struct BattleActor: Sendable {
     let vitality: Int
     let agility: Int
     let luck: Int
-    let partyMemberId: UUID?
+    let partyMemberId: Int32?
     let level: Int?
     let jobName: String?
     let avatarIdentifier: String?
@@ -648,7 +648,7 @@ struct BattleActor: Sendable {
          vitality: Int,
          agility: Int,
          luck: Int,
-         partyMemberId: UUID? = nil,
+         partyMemberId: Int32? = nil,
          level: Int? = nil,
          jobName: String? = nil,
          avatarIdentifier: String? = nil,

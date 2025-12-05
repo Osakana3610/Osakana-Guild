@@ -25,7 +25,7 @@ struct ExplorationDropReward: Sendable {
 
 struct BattleParticipantSnapshot: Codable, Sendable {
     let actorId: String
-    let partyMemberId: UUID?
+    let partyMemberId: Int32?
     let characterId: Int32?
     let name: String
     let avatarIdentifier: String?

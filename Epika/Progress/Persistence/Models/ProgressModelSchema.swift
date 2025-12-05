@@ -7,7 +7,6 @@ enum ProgressModelSchema {
             CharacterRecord.self,
             CharacterEquipmentRecord.self,
             PartyRecord.self,
-            PartyMemberRecord.self,
             InventoryItemRecord.self,
             StoryRecord.self,
             StoryNodeProgressRecord.self,

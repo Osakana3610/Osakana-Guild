@@ -8,7 +8,7 @@ struct BattleRewards: Sendable {
 
 enum BattleRewardCalculator {
     static func calculateRewards(party: RuntimePartyState,
-                                 survivingMemberIds: [UUID],
+                                 survivingMemberIds: [Int32],
                                  enemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
                                  result: BattleService.BattleResult) throws -> BattleRewards {
         guard result == .victory, !enemies.isEmpty else {
@@ -24,7 +24,7 @@ enum BattleRewardCalculator {
         var experiencePerMember: [Int32: Int] = [:]
         var totalExperience = 0
 
-        var rewardComponentsByMember: [UUID: SkillRuntimeEffects.RewardComponents] = [:]
+        var rewardComponentsByMember: [Int32: SkillRuntimeEffects.RewardComponents] = [:]
         for member in party.members {
             let components = try SkillRuntimeEffectCompiler.rewardComponents(from: member.character.learnedSkills)
             rewardComponentsByMember[member.id] = components
@@ -42,7 +42,7 @@ enum BattleRewardCalculator {
         }
 
         var partyRewardAggregation = SkillRuntimeEffects.RewardComponents.neutral
-        for member in party.members where !member.isReserve {
+        for member in party.members {
             if let components = rewardComponentsByMember[member.id] {
                 partyRewardAggregation.merge(components)
             }
@@ -69,7 +69,7 @@ enum BattleRewardCalculator {
     }
 
     private static func computeExperience(for member: RuntimePartyState.Member,
-                                          survivors: Set<UUID>,
+                                          survivors: Set<Int32>,
                                           aliveCount: Int,
                                           enemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
                                           rewardComponents: SkillRuntimeEffects.RewardComponents) -> Int {

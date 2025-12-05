@@ -93,7 +93,7 @@ extension RuntimePartyState {
         let fortune = Int(averageLuck.rounded())
 
         var aggregation = SkillRuntimeEffects.RewardComponents.neutral
-        for member in members where !member.isReserve {
+        for member in members {
             let components = try SkillRuntimeEffectCompiler.rewardComponents(from: member.character.learnedSkills)
             aggregation.merge(components)
         }

@@ -388,6 +388,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS dungeons (
                 id TEXT PRIMARY KEY,
+                dungeon_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 chapter INTEGER NOT NULL,
                 stage INTEGER NOT NULL,

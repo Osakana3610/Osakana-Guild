@@ -175,11 +175,11 @@ private extension ExplorationProgressService {
     func makeSnapshot(for run: ExplorationRunRecord,
                       context: ModelContext) async throws -> ExplorationSnapshot {
         let runId = run.id
-        // パーティメンバー情報はPartyMemberRecordから取得
+        // パーティメンバー情報はPartyRecordから取得
         let partyId = run.partyId
-        let memberDescriptor = FetchDescriptor<PartyMemberRecord>(predicate: #Predicate { $0.partyId == partyId },
-                                                                  sortBy: [SortDescriptor(\.order)])
-        let members = try context.fetch(memberDescriptor)
+        let partyDescriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == partyId })
+        let partyRecord = try context.fetch(partyDescriptor).first
+        let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
 
         let eventDescriptor = FetchDescriptor<ExplorationEventRecord>(predicate: #Predicate { $0.runId == runId },
                                                                       sortBy: [SortDescriptor(\.floorNumber), SortDescriptor(\.eventIndex)])
@@ -319,7 +319,7 @@ private extension ExplorationProgressService {
         }
 
         let partySummary = ExplorationSnapshot.PartySummary(partyId: run.partyId,
-                                                            memberCharacterIds: members.map { $0.characterId },
+                                                            memberCharacterIds: memberCharacterIds,
                                                             inventorySnapshotId: nil)
 
         let metadata = ProgressMetadata(createdAt: run.createdAt, updatedAt: run.updatedAt)

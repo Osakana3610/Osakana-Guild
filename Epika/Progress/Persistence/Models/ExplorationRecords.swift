@@ -28,7 +28,7 @@ extension StatusEffectIdsTransformer {
 @Model
 final class ExplorationRunRecord {
     var id: UUID = Foundation.UUID()
-    var partyId: UUID = Foundation.UUID()
+    var partyId: UInt8 = 1
     var dungeonId: String = ""
     var difficultyRank: Int = 0
     var startedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
@@ -47,7 +47,7 @@ final class ExplorationRunRecord {
     var updatedAt: Date = Foundation.Date(timeIntervalSince1970: 0)
 
     init(id: UUID = UUID(),
-         partyId: UUID,
+         partyId: UInt8,
          dungeonId: String,
          difficultyRank: Int,
          startedAt: Date,

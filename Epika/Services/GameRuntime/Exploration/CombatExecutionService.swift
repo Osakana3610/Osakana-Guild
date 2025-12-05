@@ -62,7 +62,7 @@ struct CombatExecutionService {
 
         let partyMembersById = Dictionary(uniqueKeysWithValues: party.members.map { ($0.id, $0.character) })
 
-        // survivingAllyIds (UUID) を characterId (Int32) に変換
+        // survivingAllyIds (partyMemberId) から characterId を取得
         let survivingCharacterIds: [Int32] = resolution.survivingAllyIds.compactMap { partyMemberId in
             partyMembersById[partyMemberId]?.progress.id
         }

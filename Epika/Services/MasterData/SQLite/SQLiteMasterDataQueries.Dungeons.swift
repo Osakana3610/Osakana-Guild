@@ -5,25 +5,26 @@ import SQLite3
 extension SQLiteMasterDataManager {
     func fetchAllDungeons() throws -> ([DungeonDefinition], [EncounterTableDefinition], [DungeonFloorDefinition]) {
         var dungeons: [String: DungeonDefinition] = [:]
-        let dungeonSQL = "SELECT id, name, chapter, stage, description, recommended_level, exploration_time, events_per_floor, floor_count, story_text FROM dungeons;"
+        let dungeonSQL = "SELECT id, dungeon_index, name, chapter, stage, description, recommended_level, exploration_time, events_per_floor, floor_count, story_text FROM dungeons;"
         let dungeonStatement = try prepare(dungeonSQL)
         defer { sqlite3_finalize(dungeonStatement) }
         while sqlite3_step(dungeonStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(dungeonStatement, 0),
-                  let nameC = sqlite3_column_text(dungeonStatement, 1),
-                  let descC = sqlite3_column_text(dungeonStatement, 4) else { continue }
+                  let nameC = sqlite3_column_text(dungeonStatement, 2),
+                  let descC = sqlite3_column_text(dungeonStatement, 5) else { continue }
             let id = String(cString: idC)
             dungeons[id] = DungeonDefinition(
                 id: id,
+                index: UInt16(sqlite3_column_int(dungeonStatement, 1)),
                 name: String(cString: nameC),
-                chapter: Int(sqlite3_column_int(dungeonStatement, 2)),
-                stage: Int(sqlite3_column_int(dungeonStatement, 3)),
+                chapter: Int(sqlite3_column_int(dungeonStatement, 3)),
+                stage: Int(sqlite3_column_int(dungeonStatement, 4)),
                 description: String(cString: descC),
-                recommendedLevel: Int(sqlite3_column_int(dungeonStatement, 5)),
-                explorationTime: Int(sqlite3_column_int(dungeonStatement, 6)),
-                eventsPerFloor: Int(sqlite3_column_int(dungeonStatement, 7)),
-                floorCount: Int(sqlite3_column_int(dungeonStatement, 8)),
-                storyText: sqlite3_column_text(dungeonStatement, 9).flatMap { String(cString: $0) },
+                recommendedLevel: Int(sqlite3_column_int(dungeonStatement, 6)),
+                explorationTime: Int(sqlite3_column_int(dungeonStatement, 7)),
+                eventsPerFloor: Int(sqlite3_column_int(dungeonStatement, 8)),
+                floorCount: Int(sqlite3_column_int(dungeonStatement, 9)),
+                storyText: sqlite3_column_text(dungeonStatement, 10).flatMap { String(cString: $0) },
                 unlockConditions: [],
                 encounterWeights: [],
                 enemyGroupConfig: nil
@@ -41,6 +42,7 @@ extension SQLiteMasterDataManager {
             conditions.append(.init(orderIndex: Int(sqlite3_column_int(unlockStatement, 1)), value: String(cString: condC)))
             dungeons[dungeon.id] = DungeonDefinition(
                 id: dungeon.id,
+                index: dungeon.index,
                 name: dungeon.name,
                 chapter: dungeon.chapter,
                 stage: dungeon.stage,
@@ -67,6 +69,7 @@ extension SQLiteMasterDataManager {
             weights.append(.init(orderIndex: Int(sqlite3_column_int(weightStatement, 1)), enemyId: String(cString: enemyC), weight: sqlite3_column_double(weightStatement, 3)))
             dungeons[dungeon.id] = DungeonDefinition(
                 id: dungeon.id,
+                index: dungeon.index,
                 name: dungeon.name,
                 chapter: dungeon.chapter,
                 stage: dungeon.stage,

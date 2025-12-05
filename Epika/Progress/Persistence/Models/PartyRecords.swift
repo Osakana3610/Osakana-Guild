@@ -3,60 +3,27 @@ import SwiftData
 
 @Model
 final class PartyRecord {
-    var id: UUID = UUID()
+    var id: UInt8 = 1                         // 1〜8（識別子 兼 スロット番号）
     var displayName: String = ""
-    var formationId: String?
-    var lastSelectedDungeonId: String?
-    var lastSelectedDifficulty: Int = 0
-    var targetFloor: Int = 0
-    var slotIndex: Int = 0
-    var createdAt: Date = Date()
+    var lastSelectedDungeonIndex: UInt16 = 0  // 0=未選択、1〜=ダンジョン
+    var lastSelectedDifficulty: UInt8 = 0
+    var targetFloor: UInt8 = 1
+    var memberCharacterIds: [Int32] = []      // メンバー（順序=配列index）
     var updatedAt: Date = Date()
 
-    init(id: UUID = UUID(),
-         displayName: String,
-         formationId: String?,
-         lastSelectedDungeonId: String?,
-         lastSelectedDifficulty: Int,
-         targetFloor: Int,
-         slotIndex: Int,
-         createdAt: Date,
-         updatedAt: Date) {
+    init(id: UInt8 = 1,
+         displayName: String = "",
+         lastSelectedDungeonIndex: UInt16 = 0,
+         lastSelectedDifficulty: UInt8 = 0,
+         targetFloor: UInt8 = 1,
+         memberCharacterIds: [Int32] = [],
+         updatedAt: Date = Date()) {
         self.id = id
         self.displayName = displayName
-        self.formationId = formationId
-        self.lastSelectedDungeonId = lastSelectedDungeonId
+        self.lastSelectedDungeonIndex = lastSelectedDungeonIndex
         self.lastSelectedDifficulty = lastSelectedDifficulty
         self.targetFloor = targetFloor
-        self.slotIndex = slotIndex
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-    }
-}
-
-@Model
-final class PartyMemberRecord {
-    var id: UUID = UUID()
-    var partyId: UUID = UUID()
-    var characterId: Int32 = 0
-    var order: Int = 0
-    var isReserve: Bool = false
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
-
-    init(id: UUID = UUID(),
-         partyId: UUID,
-         characterId: Int32,
-         order: Int,
-         isReserve: Bool,
-         createdAt: Date,
-         updatedAt: Date) {
-        self.id = id
-        self.partyId = partyId
-        self.characterId = characterId
-        self.order = order
-        self.isReserve = isReserve
-        self.createdAt = createdAt
+        self.memberCharacterIds = memberCharacterIds
         self.updatedAt = updatedAt
     }
 }

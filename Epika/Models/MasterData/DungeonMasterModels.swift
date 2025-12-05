@@ -30,6 +30,7 @@ struct DungeonDefinition: Identifiable, Sendable, Hashable {
     }
 
     let id: String
+    let index: UInt16
     let name: String
     let chapter: Int
     let stage: Int

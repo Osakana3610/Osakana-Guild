@@ -150,17 +150,9 @@ private extension ProgressRuntimeService {
         RuntimePartyProgress(
             id: snapshot.id,
             displayName: snapshot.displayName,
-            formationId: snapshot.formationId,
-            lastSelectedDungeonId: snapshot.lastSelectedDungeonId,
+            lastSelectedDungeonIndex: snapshot.lastSelectedDungeonIndex,
             lastSelectedDifficulty: snapshot.lastSelectedDifficulty,
             targetFloor: snapshot.targetFloor,
-            members: snapshot.members.map {
-                RuntimePartyProgress.Member(id: $0.id,
-                                             characterId: $0.characterId,
-                                             order: $0.order,
-                                             isReserve: $0.isReserve,
-                                             createdAt: $0.createdAt,
-                                             updatedAt: $0.updatedAt)
-            })
+            memberIds: snapshot.memberCharacterIds)
     }
 }

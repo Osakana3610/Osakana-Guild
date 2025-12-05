@@ -40,6 +40,10 @@ actor MasterDataRuntimeService {
     private var secondaryPersonalityIdToIndex: [String: UInt8] = [:]
     private var secondaryPersonalityIndexToId: [UInt8: String] = [:]
 
+    /// ダンジョン: String ID → UInt16 Index (1〜, 0=未選択)
+    private var dungeonIdToIndex: [String: UInt16] = [:]
+    private var dungeonIndexToId: [UInt16: String] = [:]
+
     init(repository: MasterDataRepository,
          manager: SQLiteMasterDataManager) {
         self.repository = repository
@@ -116,6 +120,13 @@ actor MasterDataRuntimeService {
             secondaryPersonalityIdToIndex[personality.id] = index
             secondaryPersonalityIndexToId[index] = personality.id
         }
+
+        // ダンジョンのインデックスマップ
+        let dungeons = try await repository.allDungeons()
+        for dungeon in dungeons.0 {
+            dungeonIdToIndex[dungeon.id] = dungeon.index
+            dungeonIndexToId[dungeon.index] = dungeon.id
+        }
     }
 
     // MARK: - Index Lookup
@@ -174,6 +185,14 @@ actor MasterDataRuntimeService {
 
     func getSecondaryPersonalityId(for index: UInt8) -> String? {
         secondaryPersonalityIndexToId[index]
+    }
+
+    func getDungeonIndex(for id: String) -> UInt16? {
+        dungeonIdToIndex[id]
+    }
+
+    func getDungeonId(for index: UInt16) -> String? {
+        dungeonIndexToId[index]
     }
 
     // MARK: - Item Master Data

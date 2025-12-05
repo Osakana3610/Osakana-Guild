@@ -1,30 +1,19 @@
 import Foundation
 
 struct RuntimePartyProgress: Sendable, Hashable {
-    struct Member: Sendable, Hashable {
-        let id: UUID
-        let characterId: Int32
-        let order: Int
-        let isReserve: Bool
-        let createdAt: Date
-        let updatedAt: Date
-    }
-
-    var id: UUID
+    var id: UInt8                              // 1〜8
     var displayName: String
-    var formationId: String?
-    var lastSelectedDungeonId: String?
-    var lastSelectedDifficulty: Int
-    var targetFloor: Int
-    var members: [Member]
+    var lastSelectedDungeonIndex: UInt16       // 0=未選択
+    var lastSelectedDifficulty: UInt8
+    var targetFloor: UInt8
+    var memberIds: [Int32]                     // 順序=配列index
 }
 
 struct RuntimePartyState: Sendable {
     struct Member: Identifiable, Sendable {
-        let id: UUID
+        var id: Int32 { characterId }
         let characterId: Int32
         let order: Int
-        let isReserve: Bool
         let character: RuntimeCharacterState
     }
 
@@ -35,16 +24,14 @@ struct RuntimePartyState: Sendable {
         self.party = party
         let characterMap = Dictionary(uniqueKeysWithValues: characters.map { ($0.progress.id, $0) })
         var mappedMembers: [Member] = []
-        for member in party.members {
-            guard let character = characterMap[member.characterId] else {
-                throw RuntimeError.missingProgressData(reason: "Party member \(member.characterId) のキャラクターデータが見つかりません")
+        for (order, characterId) in party.memberIds.enumerated() {
+            guard let character = characterMap[characterId] else {
+                throw RuntimeError.missingProgressData(reason: "Party member \(characterId) のキャラクターデータが見つかりません")
             }
-            mappedMembers.append(Member(id: member.id,
-                                        characterId: member.characterId,
-                                        order: member.order,
-                                        isReserve: member.isReserve,
+            mappedMembers.append(Member(characterId: characterId,
+                                        order: order,
                                         character: character))
         }
-        self.members = mappedMembers.sorted { $0.order < $1.order }
+        self.members = mappedMembers
     }
 }

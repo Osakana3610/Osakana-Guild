@@ -18,7 +18,6 @@ actor GameStateService {
         try deleteAll(CharacterRecord.self, context: context)
         try deleteAll(CharacterEquipmentRecord.self, context: context)
         try deleteAll(PartyRecord.self, context: context)
-        try deleteAll(PartyMemberRecord.self, context: context)
         try deleteAll(StoryRecord.self, context: context)
         try deleteAll(StoryNodeProgressRecord.self, context: context)
         try deleteAll(DungeonRecord.self, context: context)
