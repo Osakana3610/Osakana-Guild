@@ -7,7 +7,7 @@ final class AdventureViewState {
     private var progressService: ProgressService?
     private var activeExplorationHandle: ProgressService.ExplorationRunHandle?
     private var activeExplorationTask: Task<Void, Never>?
-    private var activeExplorationPartyId: UUID?
+    private var activeExplorationPartyId: UInt8?
 
     var selectedPartyIndex: Int = 0
     var isLoading: Bool = false
@@ -45,11 +45,11 @@ final class AdventureViewState {
         return progressService.party
     }
 
-    private var playerService: PlayerProgressService {
+    private var gameStateService: GameStateService {
         guard let progressService else {
             fatalError("AdventureViewState is not configured with ProgressService")
         }
-        return progressService.player
+        return progressService.gameState
     }
 
     private var explorationService: ExplorationProgressService {
@@ -131,7 +131,7 @@ final class AdventureViewState {
 
     func loadPlayer() async {
         do {
-            playerProgress = try await playerService.loadCurrentPlayer()
+            playerProgress = try await gameStateService.loadCurrentPlayer()
         } catch {
             present(error: error)
         }
@@ -154,7 +154,7 @@ final class AdventureViewState {
     func ensurePartySlots() async {
         guard let partyState else { return }
         do {
-            let profile = try await playerService.loadCurrentPlayer()
+            let profile = try await gameStateService.loadCurrentPlayer()
             playerProgress = profile
             _ = try await partyService.ensurePartySlots(atLeast: profile.partySlots)
             try await partyState.refresh()
@@ -171,11 +171,11 @@ final class AdventureViewState {
             throw RuntimeError.missingProgressData(reason: "ProgressService が未設定です")
         }
 
-        let handle = try await progressService.startExplorationRun(for: party.progressId,
+        let handle = try await progressService.startExplorationRun(for: party.id,
                                                                    dungeonId: dungeon.id,
-                                                                   targetFloor: party.targetFloor)
+                                                                   targetFloor: Int(party.targetFloor))
         activeExplorationHandle = handle
-        activeExplorationPartyId = party.progressId
+        activeExplorationPartyId = party.id
         activeExplorationTask = Task { [weak self] in
             guard let self else { return }
             await self.runExplorationStream(handle: handle)
@@ -186,7 +186,7 @@ final class AdventureViewState {
 
     func cancelExploration(for party: RuntimeParty) async {
         if let handle = activeExplorationHandle,
-           activeExplorationPartyId == party.progressId {
+           activeExplorationPartyId == party.id {
             activeExplorationTask?.cancel()
             await handle.cancel()
             activeExplorationHandle = nil
@@ -199,7 +199,7 @@ final class AdventureViewState {
         await cancelPersistedExploration(for: party)
     }
 
-    func isExploring(partyId: UUID) -> Bool {
+    func isExploring(partyId: UInt8) -> Bool {
         if activeExplorationPartyId == partyId { return true }
         return explorationProgress.contains { $0.party.partyId == partyId && $0.status == .running }
     }
@@ -238,7 +238,7 @@ final class AdventureViewState {
 
     private func cancelPersistedExploration(for party: RuntimeParty) async {
         guard let progressService else { return }
-        guard let running = explorationProgress.first(where: { $0.party.partyId == party.progressId && $0.status == .running }) else {
+        guard let running = explorationProgress.first(where: { $0.party.partyId == party.id && $0.status == .running }) else {
             return
         }
         do {

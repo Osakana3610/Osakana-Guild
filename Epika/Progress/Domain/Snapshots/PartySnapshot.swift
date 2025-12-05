@@ -2,25 +2,12 @@ import Foundation
 import SwiftData
 
 struct PartySnapshot: Sendable, Hashable {
-    struct Member: Sendable, Hashable {
-        var id: UUID
-        var characterId: UUID
-        var order: Int
-        var isReserve: Bool
-        var createdAt: Date
-        var updatedAt: Date
-
-    }
-
     let persistentIdentifier: PersistentIdentifier
-    var id: UUID
+    var id: UInt8                              // 1〜8
     var displayName: String
-    var formationId: String?
-    var lastSelectedDungeonId: String?
-    var lastSelectedDifficulty: Int
-    var targetFloor: Int
-    var slotIndex: Int
-    var members: [Member]
-    var createdAt: Date
+    var lastSelectedDungeonIndex: UInt16       // 0=未選択
+    var lastSelectedDifficulty: UInt8
+    var targetFloor: UInt8
+    var memberCharacterIds: [Int32]            // 順序=配列index
     var updatedAt: Date
 }

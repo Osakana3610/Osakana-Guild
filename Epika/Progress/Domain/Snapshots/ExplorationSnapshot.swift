@@ -10,8 +10,8 @@ struct ExplorationSnapshot: Sendable, Hashable {
     }
 
     struct PartySummary: Sendable, Hashable {
-        var partyId: UUID
-        var memberCharacterIds: [UUID]
+        var partyId: UInt8
+        var memberCharacterIds: [Int32]
         var inventorySnapshotId: UUID?
     }
 

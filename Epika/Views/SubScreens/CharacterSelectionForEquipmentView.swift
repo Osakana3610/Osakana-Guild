@@ -117,15 +117,21 @@ struct EquipmentEditorView: View {
 
     @EnvironmentObject private var progressService: ProgressService
     @State private var currentCharacter: RuntimeCharacter
-    @State private var availableItems: [RuntimeEquipment] = []
-    @State private var itemDefinitions: [String: ItemDefinition] = [:]
+    @State private var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
+    @State private var itemDefinitions: [Int16: ItemDefinition] = [:]
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var equipError: String?
     @State private var statDeltas: [(label: String, value: Int)] = []
+    @State private var cacheVersion: Int = 0
 
     private var characterService: CharacterProgressService { progressService.character }
     private var inventoryService: InventoryProgressService { progressService.inventory }
+    private var displayService: ItemPreloadService { ItemPreloadService.shared }
+
+    /// 装備画面で表示するカテゴリ（合成素材・魔造素材を除く）
+    private static let equipCategories: [ItemSaleCategory] = ItemSaleCategory.ordered
+        .filter { $0 != .forSynthesis && $0 != .mazoMaterial }
 
     init(character: RuntimeCharacter) {
         self.character = character
@@ -134,39 +140,50 @@ struct EquipmentEditorView: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    // ヘッダー（読み取り専用）
-                    CharacterHeaderSection(character: currentCharacter)
+            if isLoading {
+                ProgressView("読み込み中...")
+            } else if let error = loadError {
+                ContentUnavailableView {
+                    Label("エラー", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(error)
+                }
+            } else {
+                List {
+                    // キャラクター情報セクション
+                    Section {
+                        CharacterHeaderSection(character: currentCharacter)
+                        CharacterBaseStatsSection(character: currentCharacter)
+                        CharacterCombatStatsSection(character: currentCharacter)
+                    }
 
-                    // 基本ステータス（読み取り専用）
-                    CharacterBaseStatsSection(character: currentCharacter)
+                    // 装備中アイテムセクション
+                    Section("装備中") {
+                        CharacterEquippedItemsSection(
+                            equippedItems: currentCharacter.progress.equippedItems,
+                            itemDefinitions: itemDefinitions,
+                            onUnequip: { item in
+                                try await performUnequip(item)
+                            }
+                        )
+                    }
 
-                    // 戦闘ステータス（読み取り専用）
-                    CharacterCombatStatsSection(character: currentCharacter)
-
-                    // 装備中アイテム（編集可能）
-                    CharacterEquippedItemsSection(
-                        equippedItems: currentCharacter.progress.equippedItems,
-                        itemDefinitions: itemDefinitions,
-                        onUnequip: { item in
-                            try await performUnequip(item)
-                        }
-                    )
-
-                    // 装備候補
-                    equipmentCandidatesSection
+                    // 装備候補セクション（カテゴリ別）
+                    ForEach(Self.equipCategories, id: \.self) { category in
+                        buildCategorySection(for: category)
+                    }
 
                     if let error = equipError {
-                        Text(error)
-                            .font(.caption)
-                            .foregroundStyle(.red)
-                            .padding(.horizontal)
+                        Section {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                        }
                     }
                 }
-                .padding()
+                .id(cacheVersion)
+                .avoidBottomGameInfo()
             }
-            .avoidBottomGameInfo()
 
             // 差分プレビュー（左下）
             EquipmentStatDeltaView(deltas: statDeltas)
@@ -181,44 +198,38 @@ struct EquipmentEditorView: View {
     }
 
     @ViewBuilder
-    private var equipmentCandidatesSection: some View {
-        GroupBox("装備候補") {
-            if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-            } else if let error = loadError {
-                Text(error)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-            } else if availableItems.isEmpty {
-                Text("装備可能なアイテムがありません")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(availableItems) { item in
-                        equipmentCandidateRow(item)
-                    }
+    private func buildCategorySection(for category: ItemSaleCategory) -> some View {
+        let items = categorizedItems[category] ?? []
+        if items.isEmpty {
+            EmptyView()
+        } else {
+            Section {
+                ForEach(items, id: \.stackKey) { item in
+                    equipmentCandidateRow(item)
+                }
+            } header: {
+                HStack {
+                    Text(category.displayName)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    Spacer()
+                    Text("\(items.count)個")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
         }
     }
 
-    @ViewBuilder
-    private func equipmentCandidateRow(_ item: RuntimeEquipment) -> some View {
-        let definition = itemDefinitions[item.masterDataId]
+    private func equipmentCandidateRow(_ item: LightweightItemData) -> some View {
+        let definition = itemDefinitions[item.masterDataIndex]
         let validation = validateEquipment(definition: definition)
 
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.displayName)
-                    .font(.subheadline)
-                if item.quantity > 1 {
-                    Text("x\(item.quantity)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
+        return HStack {
+            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
+                .font(.body)
+                .foregroundStyle(.primary)
+                .lineLimit(1)
 
             Spacer()
 
@@ -235,7 +246,7 @@ struct EquipmentEditorView: View {
                     .foregroundStyle(.gray)
             }
         }
-        .padding(.vertical, 2)
+        .frame(height: AppConstants.UI.listRowHeight)
         .contentShape(Rectangle())
         .onTapGesture {
             if let def = definition {
@@ -249,21 +260,25 @@ struct EquipmentEditorView: View {
         loadError = nil
 
         do {
-            // 装備可能なアイテムを取得
-            let allEquipment = try await inventoryService.allEquipment(storage: .playerItem)
-            // 除外カテゴリをフィルタ
-            availableItems = allEquipment.filter { equipment in
-                !EquipmentProgressService.excludedCategories.contains(equipment.category.rawValue)
+            // プリロードが完了していなければ待機
+            if !displayService.loaded {
+                displayService.startPreload(inventoryService: inventoryService)
+                try await displayService.waitForPreload()
             }
 
-            // アイテム定義を取得
-            let allItemIds = Set(availableItems.map { $0.masterDataId })
-                .union(Set(currentCharacter.progress.equippedItems.map { $0.itemId }))
-            if !allItemIds.isEmpty {
-                let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(allItemIds))
-                itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
-            }
+            // カテゴリ別アイテムを取得（合成素材・魔造素材を除く）
+            let allCategorized = displayService.getCategorizedItems()
+            categorizedItems = allCategorized.filter { Self.equipCategories.contains($0.key) }
+            cacheVersion = displayService.version
 
+            // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
+            let availableIndices = categorizedItems.values.flatMap { $0.map { $0.masterDataIndex } }
+            let allItemIndices = Set(availableIndices)
+                .union(Set(currentCharacter.progress.equippedItems.map { $0.masterDataIndex }))
+            if !allItemIndices.isEmpty {
+                let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(byIndices: Array(allItemIndices))
+                itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
+            }
         } catch {
             loadError = error.localizedDescription
         }
@@ -285,11 +300,6 @@ struct EquipmentEditorView: View {
 
         // 除外カテゴリチェック
         if EquipmentProgressService.excludedCategories.contains(definition.category) {
-            return (false, "このアイテムは装備できません")
-        }
-
-        // equipableフラグチェック
-        if let equipable = definition.equipable, !equipable {
             return (false, "このアイテムは装備できません")
         }
 
@@ -320,13 +330,13 @@ struct EquipmentEditorView: View {
     }
 
     @MainActor
-    private func performEquip(_ item: RuntimeEquipment) async {
+    private func performEquip(_ item: LightweightItemData) async {
         equipError = nil
 
         do {
             let snapshot = try await characterService.equipItem(
                 characterId: currentCharacter.id,
-                inventoryItemId: item.id
+                inventoryItemStackKey: item.stackKey
             )
             let runtime = try await characterService.runtimeCharacter(from: snapshot)
             currentCharacter = runtime
@@ -343,7 +353,7 @@ struct EquipmentEditorView: View {
 
         let snapshot = try await characterService.unequipItem(
             characterId: currentCharacter.id,
-            equipmentRecordId: item.id
+            equipmentStackKey: item.stackKey
         )
         let runtime = try await characterService.runtimeCharacter(from: snapshot)
         currentCharacter = runtime

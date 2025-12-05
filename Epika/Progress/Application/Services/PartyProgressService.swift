@@ -11,10 +11,9 @@ actor PartyProgressService {
     func allParties() async throws -> [PartySnapshot] {
         let context = makeContext()
         var descriptor = FetchDescriptor<PartyRecord>()
-        descriptor.sortBy = [SortDescriptor(\PartyRecord.slotIndex, order: .forward),
-                             SortDescriptor(\PartyRecord.createdAt, order: .forward)]
+        descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
         let records = try context.fetch(descriptor)
-        return try makeSnapshots(for: records, context: context)
+        return records.map(Self.snapshot)
     }
 
     func ensurePartySlots(atLeast desiredCount: Int,
@@ -25,43 +24,23 @@ actor PartyProgressService {
 
         let context = makeContext()
         var descriptor = FetchDescriptor<PartyRecord>()
-        descriptor.sortBy = [SortDescriptor(\PartyRecord.createdAt, order: .forward)]
+        descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
         var records = try context.fetch(descriptor)
         var didMutate = false
         let now = Date()
 
         if records.count < desiredCount {
             for index in records.count..<desiredCount {
-                let slotIndex = index + 1
-                let timestamp = now.addingTimeInterval(TimeInterval(index - records.count))
-                let record = PartyRecord(displayName: nameProvider(index),
-                                         formationId: nil,
-                                         lastSelectedDungeonId: nil,
+                let partyId = UInt8(index + 1)
+                let record = PartyRecord(id: partyId,
+                                         displayName: nameProvider(index),
+                                         lastSelectedDungeonIndex: 0,
                                          lastSelectedDifficulty: 0,
                                          targetFloor: 1,
-                                         slotIndex: slotIndex,
-                                         createdAt: timestamp,
-                                         updatedAt: timestamp)
+                                         memberCharacterIds: [],
+                                         updatedAt: now)
                 context.insert(record)
                 records.append(record)
-                didMutate = true
-            }
-        }
-
-        let sortedRecords = records.sorted { lhs, rhs in
-            switch (lhs.slotIndex, rhs.slotIndex) {
-            case let (l, r) where l != r:
-                return l < r
-            default:
-                return lhs.createdAt < rhs.createdAt
-            }
-        }
-
-        for (index, record) in sortedRecords.enumerated() {
-            let expectedSlot = index + 1
-            if record.slotIndex != expectedSlot {
-                record.slotIndex = expectedSlot
-                record.updatedAt = now
                 didMutate = true
             }
         }
@@ -70,7 +49,8 @@ actor PartyProgressService {
             try context.save()
         }
 
-        return try makeSnapshots(for: sortedRecords, context: context)
+        let sortedRecords = records.sorted { $0.id < $1.id }
+        return sortedRecords.map(Self.snapshot)
     }
 
     func updatePartyName(persistentIdentifier: PersistentIdentifier, name: String) async throws -> PartySnapshot {
@@ -84,61 +64,37 @@ actor PartyProgressService {
         party.displayName = trimmed
         party.updatedAt = Date()
         try context.save()
-        let members = try fetchMembers(for: party.id, context: context)
-        return Self.snapshot(from: party, members: members)
+        return Self.snapshot(from: party)
     }
 
-    func updatePartyMembers(persistentIdentifier: PersistentIdentifier, memberIds: [UUID]) async throws -> PartySnapshot {
+    func updatePartyMembers(persistentIdentifier: PersistentIdentifier, memberIds: [Int32]) async throws -> PartySnapshot {
         let context = makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
-        let partyId = party.id
-        let existingMembers = try fetchMembers(for: partyId, context: context)
-        for member in existingMembers {
-            context.delete(member)
-        }
-
-        let now = Date()
-        for (index, characterId) in memberIds.enumerated() {
-            let member = PartyMemberRecord(partyId: partyId,
-                                           characterId: characterId,
-                                           order: index,
-                                           isReserve: false,
-                                           createdAt: now,
-                                           updatedAt: now)
-            context.insert(member)
-        }
-
-        party.updatedAt = now
-        try context.save()
-        let members = try fetchMembers(for: partyId, context: context)
-        return Self.snapshot(from: party, members: members)
-    }
-
-    func setLastSelectedDungeon(persistentIdentifier: PersistentIdentifier, dungeonId: String?) async throws -> PartySnapshot {
-        let context = makeContext()
-        let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
-        let trimmed = dungeonId?.trimmingCharacters(in: .whitespacesAndNewlines)
-        party.lastSelectedDungeonId = trimmed?.isEmpty == true ? nil : trimmed
+        party.memberCharacterIds = memberIds
         party.updatedAt = Date()
         try context.save()
-        let members = try fetchMembers(for: party.id, context: context)
-        return Self.snapshot(from: party, members: members)
+        return Self.snapshot(from: party)
     }
 
-    func setLastSelectedDifficulty(persistentIdentifier: PersistentIdentifier, difficulty: Int) async throws -> PartySnapshot {
-        guard difficulty >= 0 else {
-            throw ProgressError.invalidInput(description: "難易度は0以上である必要があります")
-        }
+    func setLastSelectedDungeon(persistentIdentifier: PersistentIdentifier, dungeonIndex: UInt16) async throws -> PartySnapshot {
+        let context = makeContext()
+        let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
+        party.lastSelectedDungeonIndex = dungeonIndex
+        party.updatedAt = Date()
+        try context.save()
+        return Self.snapshot(from: party)
+    }
+
+    func setLastSelectedDifficulty(persistentIdentifier: PersistentIdentifier, difficulty: UInt8) async throws -> PartySnapshot {
         let context = makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.lastSelectedDifficulty = difficulty
         party.updatedAt = Date()
         try context.save()
-        let members = try fetchMembers(for: party.id, context: context)
-        return Self.snapshot(from: party, members: members)
+        return Self.snapshot(from: party)
     }
 
-    func setTargetFloor(persistentIdentifier: PersistentIdentifier, floor: Int) async throws -> PartySnapshot {
+    func setTargetFloor(persistentIdentifier: PersistentIdentifier, floor: UInt8) async throws -> PartySnapshot {
         guard floor >= 1 else {
             throw ProgressError.invalidInput(description: "目標階層は1以上である必要があります")
         }
@@ -147,30 +103,36 @@ actor PartyProgressService {
         party.targetFloor = floor
         party.updatedAt = Date()
         try context.save()
-        let members = try fetchMembers(for: party.id, context: context)
-        return Self.snapshot(from: party, members: members)
+        return Self.snapshot(from: party)
     }
 
-    func characterIdsInOtherParties(excluding identifier: PersistentIdentifier?) async throws -> Set<UUID> {
+    func characterIdsInOtherParties(excluding identifier: PersistentIdentifier?) async throws -> Set<Int32> {
         let context = makeContext()
-        var descriptor = FetchDescriptor<PartyMemberRecord>()
+        let descriptor = FetchDescriptor<PartyRecord>()
+        let records = try context.fetch(descriptor)
+
+        var excludedPartyId: UInt8?
         if let identifier {
             let party = try fetchParty(persistentIdentifier: identifier, context: context)
-            let excludedId = party.id
-            descriptor = FetchDescriptor(predicate: #Predicate { $0.partyId != excludedId })
+            excludedPartyId = party.id
         }
-        let members = try context.fetch(descriptor)
-        return Set(members.map(\.characterId))
+
+        var result = Set<Int32>()
+        for record in records {
+            if record.id != excludedPartyId {
+                result.formUnion(record.memberCharacterIds)
+            }
+        }
+        return result
     }
 
-    func partySnapshot(id: UUID) async throws -> PartySnapshot? {
+    func partySnapshot(id: UInt8) async throws -> PartySnapshot? {
         let context = makeContext()
         let descriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == id })
         guard let record = try context.fetch(descriptor).first else {
             return nil
         }
-        let members = try fetchMembers(for: id, context: context)
-        return Self.snapshot(from: record, members: members)
+        return Self.snapshot(from: record)
     }
 
     private static let defaultPartyName: @Sendable (Int) -> String = { index in
@@ -186,16 +148,6 @@ private extension PartyProgressService {
         return context
     }
 
-    func makeSnapshots(for records: [PartyRecord], context: ModelContext) throws -> [PartySnapshot] {
-        var snapshots: [PartySnapshot] = []
-        snapshots.reserveCapacity(records.count)
-        for record in records {
-            let members = try fetchMembers(for: record.id, context: context)
-            snapshots.append(Self.snapshot(from: record, members: members))
-        }
-        return snapshots
-    }
-
     func fetchParty(persistentIdentifier: PersistentIdentifier, context: ModelContext) throws -> PartyRecord {
         guard let record = context.model(for: persistentIdentifier) as? PartyRecord else {
             throw ProgressError.partyNotFound
@@ -203,33 +155,14 @@ private extension PartyProgressService {
         return record
     }
 
-    func fetchMembers(for partyId: UUID, context: ModelContext) throws -> [PartyMemberRecord] {
-        var descriptor = FetchDescriptor<PartyMemberRecord>(predicate: #Predicate { $0.partyId == partyId })
-        descriptor.sortBy = [SortDescriptor(\PartyMemberRecord.order, order: .forward)]
-        return try context.fetch(descriptor)
-    }
-
-    static func snapshot(from record: PartyRecord, members: [PartyMemberRecord]) -> PartySnapshot {
-        let memberSnapshots = members.map(Self.memberSnapshot)
-        return PartySnapshot(persistentIdentifier: record.persistentModelID,
-                             id: record.id,
-                             displayName: record.displayName,
-                             formationId: record.formationId,
-                             lastSelectedDungeonId: record.lastSelectedDungeonId,
-                             lastSelectedDifficulty: record.lastSelectedDifficulty,
-                             targetFloor: record.targetFloor,
-                             slotIndex: record.slotIndex,
-                             members: memberSnapshots,
-                             createdAt: record.createdAt,
-                             updatedAt: record.updatedAt)
-    }
-
-    static func memberSnapshot(from record: PartyMemberRecord) -> PartySnapshot.Member {
-        PartySnapshot.Member(id: record.id,
-                             characterId: record.characterId,
-                             order: record.order,
-                             isReserve: record.isReserve,
-                             createdAt: record.createdAt,
-                             updatedAt: record.updatedAt)
+    static func snapshot(from record: PartyRecord) -> PartySnapshot {
+        PartySnapshot(persistentIdentifier: record.persistentModelID,
+                      id: record.id,
+                      displayName: record.displayName,
+                      lastSelectedDungeonIndex: record.lastSelectedDungeonIndex,
+                      lastSelectedDifficulty: record.lastSelectedDifficulty,
+                      targetFloor: record.targetFloor,
+                      memberCharacterIds: record.memberCharacterIds,
+                      updatedAt: record.updatedAt)
     }
 }

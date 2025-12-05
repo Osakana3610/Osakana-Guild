@@ -29,7 +29,7 @@ extension BattleTurnEngine {
             metadata["job"] = job
         }
         if let partyId = actor.partyMemberId {
-            metadata["partyMemberId"] = partyId.uuidString
+            metadata["partyMemberId"] = String(partyId)
         }
         metadata["identifier"] = actor.identifier
 

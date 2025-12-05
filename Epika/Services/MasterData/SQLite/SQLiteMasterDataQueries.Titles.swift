@@ -73,14 +73,15 @@ extension SQLiteMasterDataManager {
     func fetchAllSuperRareTitles() throws -> [SuperRareTitleDefinition] {
         var titles: [String: SuperRareTitleDefinition] = [:]
         var orderedIds: [String] = []
-        let baseSQL = "SELECT id, name FROM super_rare_titles;"
+        let baseSQL = "SELECT id, name, sort_order FROM super_rare_titles ORDER BY sort_order;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(baseStatement, 0),
                   let nameC = sqlite3_column_text(baseStatement, 1) else { continue }
             let id = String(cString: idC)
-            titles[id] = SuperRareTitleDefinition(id: id, name: String(cString: nameC), skills: [])
+            let order = Int(sqlite3_column_int(baseStatement, 2))
+            titles[id] = SuperRareTitleDefinition(id: id, name: String(cString: nameC), order: order, skills: [])
             orderedIds.append(id)
         }
 
@@ -93,7 +94,7 @@ extension SQLiteMasterDataManager {
                   let skillC = sqlite3_column_text(skillStatement, 2) else { continue }
             var skills = title.skills
             skills.append(.init(orderIndex: Int(sqlite3_column_int(skillStatement, 1)), skillId: String(cString: skillC)))
-            titles[title.id] = SuperRareTitleDefinition(id: title.id, name: title.name, skills: skills.sorted { $0.orderIndex < $1.orderIndex })
+            titles[title.id] = SuperRareTitleDefinition(id: title.id, name: title.name, order: title.order, skills: skills.sorted { $0.orderIndex < $1.orderIndex })
         }
 
         return orderedIds.compactMap { titles[$0] }

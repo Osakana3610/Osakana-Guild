@@ -15,8 +15,7 @@ actor SQLiteMasterDataManager {
 
     private init() {}
 
-    func initialize(databaseURL: URL? = nil,
-                    resourceLocator: MasterDataResourceLocator? = nil) async throws {
+    func initialize(databaseURL: URL? = nil) async throws {
         guard !isInitialized else { return }
 
 #if DEBUG
@@ -26,37 +25,15 @@ actor SQLiteMasterDataManager {
             close()
         }
 
-        let databaseURL = try resolveDatabaseURL(databaseURL)
+        let databaseURL = try resolveBundledDatabaseURL(override: databaseURL)
 #if DEBUG
-        print("[MasterData][DEBUG] resolved database URL: \(databaseURL.path)")
+        print("[MasterData][DEBUG] opening bundled database: \(databaseURL.path)")
 #endif
-        try recreateDatabase(at: databaseURL)
-        try openDatabase(at: databaseURL)
+        try openDatabaseReadOnly(at: databaseURL)
         do {
-            try configureDatabase()
+            try verifySchemaVersion()
 #if DEBUG
-            print("[MasterData][DEBUG] database configured")
-#endif
-            try createSchema()
-#if DEBUG
-            print("[MasterData][DEBUG] schema created")
-#endif
-            try setUserVersion(schemaVersion)
-#if DEBUG
-            print("[MasterData][DEBUG] user_version set to \(schemaVersion)")
-#endif
-            let locator: MasterDataResourceLocator
-            if let resourceLocator {
-                locator = resourceLocator
-            } else {
-                locator = await MainActor.run { MasterDataResourceLocator.makeDefault() }
-            }
-#if DEBUG
-            print("[MasterData][DEBUG] begin resource import")
-#endif
-            try await importAllResources(using: locator)
-#if DEBUG
-            print("[MasterData][DEBUG] resource import completed")
+            print("[MasterData][DEBUG] schema version verified")
 #endif
             isInitialized = true
         } catch {
@@ -174,41 +151,33 @@ actor SQLiteMasterDataManager {
 
     // MARK: - Private
 
-    private func resolveDatabaseURL(_ url: URL?) throws -> URL {
+    private func resolveBundledDatabaseURL(override url: URL?) throws -> URL {
         if let url { return url }
-        let directories = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        guard let base = directories.first else {
-            throw SQLiteMasterDataError.cannotLocateDocumentsDirectory
+        guard let bundledURL = Bundle.main.url(forResource: "master_data", withExtension: "db") else {
+            throw SQLiteMasterDataError.bundledDatabaseNotFound
         }
-        return base.appendingPathComponent(databaseFileName)
+        return bundledURL
     }
 
-    private func recreateDatabase(at url: URL) throws {
-        let directory = url.deletingLastPathComponent()
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        if FileManager.default.fileExists(atPath: url.path) {
-            try FileManager.default.removeItem(at: url)
-        }
-        let walPath = url.path + "-wal"
-        if FileManager.default.fileExists(atPath: walPath) {
-            try FileManager.default.removeItem(atPath: walPath)
-        }
-        let shmPath = url.path + "-shm"
-        if FileManager.default.fileExists(atPath: shmPath) {
-            try FileManager.default.removeItem(atPath: shmPath)
-        }
-    }
-
-    private func openDatabase(at url: URL) throws {
-        if sqlite3_open(url.path, &db) != SQLITE_OK {
+    private func openDatabaseReadOnly(at url: URL) throws {
+        let flags = SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX
+        if sqlite3_open_v2(url.path, &db, flags, nil) != SQLITE_OK {
             throw SQLiteMasterDataError.failedToOpenDatabase(sqliteMessage())
         }
     }
 
-    private func configureDatabase() throws {
-        try execute("PRAGMA journal_mode=WAL;")
-        try execute("PRAGMA synchronous=NORMAL;")
-        try execute("PRAGMA foreign_keys=ON;")
+    private func verifySchemaVersion() throws {
+        let statement = try prepare("PRAGMA user_version;")
+        defer { sqlite3_finalize(statement) }
+
+        guard sqlite3_step(statement) == SQLITE_ROW else {
+            throw SQLiteMasterDataError.executionFailed("Failed to read user_version")
+        }
+
+        let version = sqlite3_column_int(statement, 0)
+        guard version == schemaVersion else {
+            throw SQLiteMasterDataError.schemaVersionMismatch(expected: schemaVersion, actual: version)
+        }
     }
 
     private func finalizeStatements(for handle: OpaquePointer) {
@@ -247,5 +216,6 @@ enum SQLiteMasterDataError: Error {
     case executionFailed(String)
     case statementPrepareFailed(String)
     case resourceNotFound(String)
-    case cannotLocateDocumentsDirectory
+    case bundledDatabaseNotFound
+    case schemaVersionMismatch(expected: Int32, actual: Int32)
 }

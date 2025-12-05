@@ -195,7 +195,7 @@ struct ItemSynthesisView: View {
             return
         }
         do {
-            preview = try await synthesisService.preview(parentId: parent.id, childId: child.id)
+            preview = try await synthesisService.preview(parentStackKey: parent.id, childStackKey: child.id)
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -207,7 +207,7 @@ struct ItemSynthesisView: View {
         guard let parent = selectedParent, let child = selectedChild else { return }
         do {
             isLoading = true
-            let result = try await synthesisService.synthesize(parentId: parent.id, childId: child.id)
+            let result = try await synthesisService.synthesize(parentStackKey: parent.id, childStackKey: child.id)
             synthesisResult = result
             selectedParent = result
             selectedChild = nil

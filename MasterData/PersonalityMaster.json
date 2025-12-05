@@ -5,108 +5,126 @@
   "personality1": [
     {
       "id": "elite",
+      "index": 1,
       "name": "エリート",
       "type": "special",
       "description": "選ばれし者の個性"
     },
     {
       "id": "blessed_by_angel",
+      "index": 2,
       "name": "天使に祝福されし者",
       "type": "special",
       "description": "天使の加護を受けた個性"
     },
     {
       "id": "raised_by_dragon",
+      "index": 3,
       "name": "竜に育てられし者",
       "type": "special",
       "description": "竜によって育てられた個性"
     },
     {
       "id": "orphan",
+      "index": 4,
       "name": "捨て子",
       "type": "special",
       "description": "逆境に負けない個性"
     },
     {
       "id": "demon_child",
+      "index": 5,
       "name": "魔人の申し子",
       "type": "special",
       "description": "魔力に満ちた個性"
     },
     {
       "id": "martial_arts_master",
+      "index": 6,
       "name": "古武術習得",
       "type": "special",
       "description": "古の武術を身に着けた個性"
     },
     {
       "id": "hermit_knowledge",
+      "index": 7,
       "name": "隠遁者の知識",
       "type": "special",
       "description": "世を捨てた者の知恵"
     },
     {
       "id": "familiar_owner",
+      "index": 8,
       "name": "使い魔所有",
       "type": "special",
       "description": "使い魔の助けを得る個性"
     },
     {
       "id": "knight_lineage",
+      "index": 9,
       "name": "騎士の家系",
       "type": "equipment",
       "description": "騎士の血筋を引く個性"
     },
     {
       "id": "mercenary_experience",
+      "index": 10,
       "name": "傭兵経験",
       "type": "equipment",
       "description": "傭兵として生きてきた個性"
     },
     {
       "id": "samurai_family",
+      "index": 11,
       "name": "武家の出",
       "type": "equipment",
       "description": "武家の出身である個性"
     },
     {
       "id": "hawks_eye",
+      "index": 12,
       "name": "鷹の目",
       "type": "equipment",
       "description": "鋭い観察眼を持つ個性"
     },
     {
       "id": "sage_lineage",
+      "index": 13,
       "name": "賢聖の家系",
       "type": "magic",
       "description": "賢者の血筋を引く個性"
     },
     {
       "id": "magic_knowledge",
+      "index": 14,
       "name": "魔法の知識",
       "type": "magic",
       "description": "魔法全般の知識を持つ個性"
     },
     {
       "id": "fire_knowledge",
+      "index": 15,
       "name": "火炎の知識",
       "type": "magic",
       "description": "火炎魔法の知識を持つ個性"
     },
     {
       "id": "ice_knowledge",
+      "index": 16,
       "name": "冷気の知識",
       "type": "magic",
       "description": "冷気魔法の知識を持つ個性"
     },
     {
       "id": "lightning_knowledge",
+      "index": 17,
       "name": "稲妻の知識",
       "type": "magic",
       "description": "雷魔法の知識を持つ個性"
     },
     {
       "id": "lost_knowledge",
+      "index": 18,
       "name": "失われた知識",
       "type": "magic",
       "description": "失われた古代魔法の知識"
@@ -115,6 +133,7 @@
   "personality2": [
     {
       "id": "tactician",
+      "index": 1,
       "name": "戦術家",
       "statBonuses": {
         "strength": 2,
@@ -125,6 +144,7 @@
     },
     {
       "id": "chivalrous",
+      "index": 2,
       "name": "騎士道",
       "statBonuses": {
         "strength": 2,
@@ -135,6 +155,7 @@
     },
     {
       "id": "warrior",
+      "index": 3,
       "name": "武人",
       "statBonuses": {
         "strength": 2,
@@ -145,6 +166,7 @@
     },
     {
       "id": "fighter",
+      "index": 4,
       "name": "格闘家",
       "statBonuses": {
         "strength": 2,
@@ -155,6 +177,7 @@
     },
     {
       "id": "victor",
+      "index": 5,
       "name": "勝利者",
       "statBonuses": {
         "strength": 2,
@@ -165,6 +188,7 @@
     },
     {
       "id": "religious",
+      "index": 6,
       "name": "宗教家",
       "statBonuses": {
         "wisdom": 2,
@@ -175,6 +199,7 @@
     },
     {
       "id": "scholar",
+      "index": 7,
       "name": "学者",
       "statBonuses": {
         "wisdom": 2,
@@ -185,6 +210,7 @@
     },
     {
       "id": "magician",
+      "index": 8,
       "name": "手品師",
       "statBonuses": {
         "wisdom": 2,
@@ -195,6 +221,7 @@
     },
     {
       "id": "gambler",
+      "index": 9,
       "name": "博打打ち",
       "statBonuses": {
         "wisdom": 2,
@@ -205,6 +232,7 @@
     },
     {
       "id": "physical",
+      "index": 10,
       "name": "肉体派",
       "statBonuses": {
         "spirit": 2,
@@ -215,6 +243,7 @@
     },
     {
       "id": "missionary",
+      "index": 11,
       "name": "宣教師",
       "statBonuses": {
         "spirit": 2,
@@ -225,6 +254,7 @@
     },
     {
       "id": "thinker",
+      "index": 12,
       "name": "思想家",
       "statBonuses": {
         "spirit": 2,
@@ -235,6 +265,7 @@
     },
     {
       "id": "athletic",
+      "index": 13,
       "name": "健脚",
       "statBonuses": {
         "vitality": 2,
@@ -245,6 +276,7 @@
     },
     {
       "id": "leader",
+      "index": 14,
       "name": "頭領",
       "statBonuses": {
         "vitality": 2,
@@ -255,6 +287,7 @@
     },
     {
       "id": "popular",
+      "index": 15,
       "name": "人気者",
       "statBonuses": {
         "agility": 2,

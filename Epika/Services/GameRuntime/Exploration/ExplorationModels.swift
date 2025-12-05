@@ -25,8 +25,8 @@ struct ExplorationDropReward: Sendable {
 
 struct BattleParticipantSnapshot: Codable, Sendable {
     let actorId: String
-    let partyMemberId: UUID?
-    let characterId: UUID?
+    let partyMemberId: Int32?
+    let characterId: Int32?
     let name: String
     let avatarIdentifier: String?
     let level: Int?
@@ -48,9 +48,9 @@ struct BattleLogArchive: Codable, Sendable {
 struct CombatSummary: Sendable {
     let enemy: EnemyDefinition
     let result: BattleService.BattleResult
-    let survivingPartyMemberIds: [UUID]
+    let survivingPartyMemberIds: [Int32]
     let turns: Int
-    let experienceByMember: [UUID: Int]
+    let experienceByMember: [Int32: Int]
     let totalExperience: Int
     let goldEarned: Int
     let drops: [ExplorationDropReward]
@@ -76,7 +76,7 @@ struct ExplorationEventLogEntry: Sendable {
     let occurredAt: Date
     let kind: Kind
     let experienceGained: Int
-    let experienceByMember: [UUID: Int]
+    let experienceByMember: [Int32: Int]
     let goldGained: Int
     let drops: [ExplorationDropReward]
     let statusEffectsApplied: [StatusEffectDefinition]
@@ -98,7 +98,7 @@ struct ExplorationRunArtifact: Sendable {
     let totalExperience: Int
     let totalGold: Int
     let totalDrops: [ExplorationDropReward]
-    let experienceByMember: [UUID: Int]
+    let experienceByMember: [Int32: Int]
     let endState: ExplorationEndState
     let updatedSuperRareState: SuperRareDailyState
     let battleLogs: [BattleLogArchive]

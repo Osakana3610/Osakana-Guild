@@ -121,14 +121,12 @@ private struct TaskView: View {
                 }
             }
             .task {
-                let vals = await UniversalItemDisplayService.shared.getCombatDeltaDisplay(for: equipment)
-                await MainActor.run { self.deltas = vals }
+                self.deltas = ItemPreloadService.shared.getCombatDeltaDisplay(for: equipment)
             }
         } else {
             // 初回ロード
             HStack {}.task {
-                let vals = await UniversalItemDisplayService.shared.getCombatDeltaDisplay(for: equipment)
-                await MainActor.run { self.deltas = vals }
+                self.deltas = ItemPreloadService.shared.getCombatDeltaDisplay(for: equipment)
             }
         }
     }

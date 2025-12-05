@@ -4,6 +4,7 @@
   "description": "種族データマスターデータ",
   "raceData": {
     "human_male": {
+      "index": 1,
       "name": "人間（男）",
       "gender": "male",
       "category": "human",
@@ -19,6 +20,7 @@
       "maxLevel": 200
     },
     "human_female": {
+      "index": 2,
       "name": "人間（女）",
       "gender": "female",
       "category": "human",
@@ -34,6 +36,7 @@
       "maxLevel": 200
     },
     "pygmyChum": {
+      "index": 3,
       "name": "ピグミーチャム",
       "gender": "male",
       "category": "humanoid",
@@ -49,6 +52,7 @@
       "maxLevel": 140
     },
     "gnome": {
+      "index": 4,
       "name": "ノーム",
       "gender": "male",
       "category": "humanoid",
@@ -64,6 +68,7 @@
       "maxLevel": 140
     },
     "dwarf": {
+      "index": 5,
       "name": "ドワーフ",
       "gender": "male",
       "category": "humanoid",
@@ -79,6 +84,7 @@
       "maxLevel": 140
     },
     "darkElf": {
+      "index": 6,
       "name": "ダークエルフ",
       "gender": "male",
       "category": "elf",
@@ -94,6 +100,7 @@
       "maxLevel": 150
     },
     "vampire": {
+      "index": 7,
       "name": "吸血鬼",
       "gender": "male",
       "category": "undead",
@@ -109,6 +116,7 @@
       "maxLevel": 135
     },
     "elf": {
+      "index": 8,
       "name": "エルフ",
       "gender": "female",
       "category": "elf",
@@ -124,6 +132,7 @@
       "maxLevel": 150
     },
     "psychic": {
+      "index": 9,
       "name": "サイキック",
       "gender": "female",
       "category": "psychic",
@@ -139,6 +148,7 @@
       "maxLevel": 140
     },
     "workingCat": {
+      "index": 10,
       "name": "ワーキャット",
       "gender": "female",
       "category": "beast",
@@ -154,6 +164,7 @@
       "maxLevel": 135
     },
     "dragonewt": {
+      "index": 11,
       "name": "ドラゴニュート",
       "gender": "female",
       "category": "dragon",
@@ -169,6 +180,7 @@
       "maxLevel": 135
     },
     "amazon": {
+      "index": 12,
       "name": "アマゾネス",
       "gender": "female",
       "category": "human",
@@ -184,6 +196,7 @@
       "maxLevel": 135
     },
     "magicConstruct": {
+      "index": 13,
       "name": "魔造生物",
       "gender": "genderless",
       "category": "construct",
@@ -199,6 +212,7 @@
       "maxLevel": 99
     },
     "undeadMan": {
+      "index": 14,
       "name": "アンデッドマン",
       "gender": "genderless",
       "category": "undead",
@@ -214,6 +228,7 @@
       "maxLevel": 140
     },
     "giant": {
+      "index": 15,
       "name": "巨人",
       "gender": "genderless",
       "category": "giant",
@@ -229,6 +244,7 @@
       "maxLevel": 130
     },
     "tengu": {
+      "index": 16,
       "name": "天狗",
       "gender": "genderless",
       "category": "mythical",
@@ -244,6 +260,7 @@
       "maxLevel": 130
     },
     "demon": {
+      "index": 17,
       "name": "鬼",
       "gender": "genderless",
       "category": "demon",
@@ -259,6 +276,7 @@
       "maxLevel": 130
     },
     "cyborg": {
+      "index": 18,
       "name": "サイボーグ",
       "gender": "genderless",
       "category": "machine",

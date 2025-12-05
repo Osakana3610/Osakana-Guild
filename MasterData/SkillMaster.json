@@ -7138,140 +7138,140 @@
         ]
       },
       {
-        "familyId": "equipmentStatMultiplier.magic_material",
+        "familyId": "equipmentStatMultiplier.mazo_material",
         "effectType": "equipmentStatMultiplier",
         "parameters": {
-          "equipmentCategory": "magic_material"
+          "equipmentCategory": "mazo_material"
         },
         "variants": [
           {
-            "id": "equipmentStatMultiplier.magic_material.0_5",
+            "id": "equipmentStatMultiplier.mazo_material.0_5",
             "label": "[0.5倍] 魔造素材装備性能",
             "value": {
               "multiplier": 0.5
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.0_8",
+            "id": "equipmentStatMultiplier.mazo_material.0_8",
             "label": "[0.8倍] 魔造素材装備性能",
             "value": {
               "multiplier": 0.8
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_01",
+            "id": "equipmentStatMultiplier.mazo_material.1_01",
             "label": "[1.01倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.01
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_02",
+            "id": "equipmentStatMultiplier.mazo_material.1_02",
             "label": "[1.02倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.02
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_03",
+            "id": "equipmentStatMultiplier.mazo_material.1_03",
             "label": "[1.03倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.03
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_04",
+            "id": "equipmentStatMultiplier.mazo_material.1_04",
             "label": "[1.04倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.04
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_05",
+            "id": "equipmentStatMultiplier.mazo_material.1_05",
             "label": "[1.05倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.05
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_06",
+            "id": "equipmentStatMultiplier.mazo_material.1_06",
             "label": "[1.06倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.06
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_07",
+            "id": "equipmentStatMultiplier.mazo_material.1_07",
             "label": "[1.07倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.07
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_08",
+            "id": "equipmentStatMultiplier.mazo_material.1_08",
             "label": "[1.08倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.08
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_1",
+            "id": "equipmentStatMultiplier.mazo_material.1_1",
             "label": "[1.1倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.1
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_15",
+            "id": "equipmentStatMultiplier.mazo_material.1_15",
             "label": "[1.15倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.15
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_2",
+            "id": "equipmentStatMultiplier.mazo_material.1_2",
             "label": "[1.2倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.2
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_25",
+            "id": "equipmentStatMultiplier.mazo_material.1_25",
             "label": "[1.25倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.25
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_3",
+            "id": "equipmentStatMultiplier.mazo_material.1_3",
             "label": "[1.3倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.3
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_4",
+            "id": "equipmentStatMultiplier.mazo_material.1_4",
             "label": "[1.4倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.4
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_5",
+            "id": "equipmentStatMultiplier.mazo_material.1_5",
             "label": "[1.5倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.5
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.1_8",
+            "id": "equipmentStatMultiplier.mazo_material.1_8",
             "label": "[1.8倍] 魔造素材装備性能",
             "value": {
               "multiplier": 1.8
             }
           },
           {
-            "id": "equipmentStatMultiplier.magic_material.2_0",
+            "id": "equipmentStatMultiplier.mazo_material.2_0",
             "label": "[2倍] 魔造素材装備性能",
             "value": {
               "multiplier": 2.0

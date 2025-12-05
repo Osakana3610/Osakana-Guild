@@ -27,10 +27,10 @@ struct RuntimePartyDetailView: View {
                         party: currentParty,
                         members: membersOfCurrentParty,
                         bonuses: partyBonuses(for: membersOfCurrentParty),
-                        isExploring: adventureState.isExploring(partyId: currentParty.progressId),
+                        isExploring: adventureState.isExploring(partyId: currentParty.id),
                         canStartExploration: canStartExploration(for: currentParty),
                         onPrimaryAction: {
-                            handlePrimaryAction(isExploring: adventureState.isExploring(partyId: currentParty.progressId),
+                            handlePrimaryAction(isExploring: adventureState.isExploring(partyId: currentParty.id),
                                                 canDepart: canStartExploration(for: currentParty))
                         }
                     )
@@ -107,7 +107,7 @@ struct RuntimePartyDetailView: View {
                     .buttonStyle(.plain)
 
                     if let dungeon = activeDungeon {
-                        let displayedDifficulty = min(currentParty.lastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
+                        let displayedDifficulty = min(Int(currentParty.lastSelectedDifficulty), dungeon.highestUnlockedDifficulty)
                         DifficultyPickerMenu(dungeon: dungeon,
                                              currentDifficulty: displayedDifficulty,
                                              onSelect: { await updateDifficultySelection($0) },
@@ -115,7 +115,7 @@ struct RuntimePartyDetailView: View {
                         .disabled(dungeon.availableDifficultyRanks.count <= 1)
                     }
 
-                    TargetFloorPickerMenu(currentFloor: currentParty.targetFloor,
+                    TargetFloorPickerMenu(currentFloor: Int(currentParty.targetFloor),
                                           maxFloor: selectedDungeon?.definition.floorCount ?? 1,
                                           onSelect: { await updateTargetFloor($0) },
                                           rowHeight: listRowHeight)
@@ -130,10 +130,10 @@ struct RuntimePartyDetailView: View {
             .sheet(isPresented: $showDungeonPicker) {
                 DungeonPickerView(
                     dungeons: dungeons,
-                    currentSelection: selectedDungeon?.id ?? currentParty.lastSelectedDungeonId,
-                    currentDifficulty: currentParty.lastSelectedDifficulty,
+                    currentSelection: selectedDungeon?.definition.index ?? currentParty.lastSelectedDungeonIndex,
+                    currentDifficulty: Int(currentParty.lastSelectedDifficulty),
                     onSelectDungeon: { dungeon in
-                        await updateDungeonSelection(dungeonId: dungeon.id)
+                        await updateDungeonSelection(dungeonIndex: dungeon.definition.index)
                     },
                     onSelectDifficulty: { dungeon, difficulty in
                         await updateDifficultySelectionFromDungeonPicker(dungeon: dungeon, difficulty: difficulty)
@@ -152,12 +152,12 @@ struct RuntimePartyDetailView: View {
     }
 
     private var activeDungeon: RuntimeDungeon? {
-        selectedDungeon ?? dungeons.first { $0.id == currentParty.lastSelectedDungeonId }
+        selectedDungeon ?? dungeons.first { $0.definition.index == currentParty.lastSelectedDungeonIndex }
     }
 
     private var selectedDungeonName: String {
         if let dungeon = activeDungeon {
-            let desiredRank = currentParty.lastSelectedDifficulty
+            let desiredRank = Int(currentParty.lastSelectedDifficulty)
             let clampedRank = min(desiredRank, dungeon.highestUnlockedDifficulty)
             return formattedDifficultyLabel(for: dungeon, rank: clampedRank)
         }
@@ -217,20 +217,20 @@ struct RuntimePartyDetailView: View {
             try await partyState.refresh()
             if let updated = partyState.parties.first(where: { $0.id == currentParty.id }) {
                 currentParty = updated
-                if let dungeon = dungeons.first(where: { $0.id == updated.lastSelectedDungeonId }) {
+                if let dungeon = dungeons.first(where: { $0.definition.index == updated.lastSelectedDungeonIndex }) {
                     selectedDungeon = dungeon
                 } else {
                     selectedDungeon = nil
                 }
                 if let dungeon = selectedDungeon,
-                   updated.lastSelectedDifficulty > dungeon.highestUnlockedDifficulty {
+                   Int(updated.lastSelectedDifficulty) > dungeon.highestUnlockedDifficulty {
                     do {
                         _ = try await partyService.setLastSelectedDifficulty(persistentIdentifier: updated.persistentIdentifier,
-                                                                              difficulty: dungeon.highestUnlockedDifficulty)
+                                                                              difficulty: UInt8(dungeon.highestUnlockedDifficulty))
                         try await partyState.refresh()
                         if let adjusted = partyState.parties.first(where: { $0.id == updated.id }) {
                             currentParty = adjusted
-                            selectedDungeon = dungeons.first(where: { $0.id == adjusted.lastSelectedDungeonId })
+                            selectedDungeon = dungeons.first(where: { $0.definition.index == adjusted.lastSelectedDungeonIndex })
                         }
                     } catch {
                         errorMessage = error.localizedDescription
@@ -270,16 +270,16 @@ struct RuntimePartyDetailView: View {
     private func canStartExploration(for party: RuntimeParty) -> Bool {
         guard let dungeon = activeDungeon, !dungeon.id.isEmpty else { return false }
         guard dungeon.isUnlocked else { return false }
-        guard party.lastSelectedDifficulty <= dungeon.highestUnlockedDifficulty else { return false }
+        guard Int(party.lastSelectedDifficulty) <= dungeon.highestUnlockedDifficulty else { return false }
         guard !membersOfCurrentParty.isEmpty else { return false }
-        return !adventureState.isExploring(partyId: party.progressId)
+        return !adventureState.isExploring(partyId: party.id)
     }
 
     // MARK: - Mutations
 
-    private func updateDungeonSelection(dungeonId: String) async -> Bool {
+    private func updateDungeonSelection(dungeonIndex: UInt16) async -> Bool {
         do {
-            _ = try await partyService.setLastSelectedDungeon(persistentIdentifier: currentParty.persistentIdentifier, dungeonId: dungeonId)
+            _ = try await partyService.setLastSelectedDungeon(persistentIdentifier: currentParty.persistentIdentifier, dungeonIndex: dungeonIndex)
             await refreshPartySnapshot()
             return true
         } catch {
@@ -290,7 +290,7 @@ struct RuntimePartyDetailView: View {
 
     private func updateTargetFloor(_ floor: Int) async {
         do {
-            _ = try await partyService.setTargetFloor(persistentIdentifier: currentParty.persistentIdentifier, floor: floor)
+            _ = try await partyService.setTargetFloor(persistentIdentifier: currentParty.persistentIdentifier, floor: UInt8(floor))
             await refreshPartySnapshot()
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
@@ -300,7 +300,7 @@ struct RuntimePartyDetailView: View {
     private func updateDifficultySelection(_ difficulty: Int) async -> Bool {
         do {
             _ = try await partyService.setLastSelectedDifficulty(persistentIdentifier: currentParty.persistentIdentifier,
-                                                                 difficulty: difficulty)
+                                                                 difficulty: UInt8(difficulty))
             await refreshPartySnapshot()
             return true
         } catch {
@@ -352,21 +352,17 @@ private struct PartyEquipmentListView: View {
             if characters.isEmpty {
                 Text("メンバーがいません").foregroundColor(.secondary)
             } else {
-                ForEach(characters) { character in
+                ForEach(characters, id: \.id) { character in
                     Section(character.name) {
                         let equipment = character.progress.equippedItems
                         if equipment.isEmpty {
                             Text("装備なし").foregroundColor(.secondary)
                         } else {
-                            let itemsById = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.id, $0) })
-                            let titlesById = Dictionary(uniqueKeysWithValues: character.loadout.titles.map { ($0.id, $0) })
-                            let superRareTitlesById = Dictionary(uniqueKeysWithValues: character.loadout.superRareTitles.map { ($0.id, $0) })
-                            ForEach(equipment, id: \.id) { entry in
-                                let itemName = itemsById[entry.itemId]?.name ?? entry.itemId
-                                let titleName = entry.normalTitleId.flatMap { titlesById[$0]?.name }
-                                    ?? entry.superRareTitleId.flatMap { superRareTitlesById[$0]?.name }
-                                if let titleName {
-                                    Text("\(itemName) x\(entry.quantity) (\(titleName))")
+                            let itemsByIndex = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.index, $0) })
+                            ForEach(equipment, id: \.stackKey) { entry in
+                                let itemName = itemsByIndex[entry.masterDataIndex]?.name ?? "不明なアイテム"
+                                if entry.superRareTitleIndex > 0 || entry.normalTitleIndex > 0 {
+                                    Text("\(itemName) x\(entry.quantity) (称号付き)")
                                 } else {
                                     Text("\(itemName) x\(entry.quantity)")
                                 }
@@ -506,7 +502,7 @@ private func clampMultiplier(_ value: Double, limit: Double) -> Double {
 
 private struct DungeonPickerView: View {
     let dungeons: [RuntimeDungeon]
-    let currentSelection: String?
+    let currentSelection: UInt16
     let currentDifficulty: Int
     let onSelectDungeon: (RuntimeDungeon) async -> Bool
     let onSelectDifficulty: (RuntimeDungeon, Int) async -> Bool
@@ -571,7 +567,7 @@ private struct DungeonPickerView: View {
     }
 
     private func currentDifficulty(for dungeon: RuntimeDungeon) -> Int {
-        if currentSelection == dungeon.id {
+        if currentSelection == dungeon.definition.index {
             return currentDifficulty
         }
         return min(currentDifficulty, dungeon.highestUnlockedDifficulty)

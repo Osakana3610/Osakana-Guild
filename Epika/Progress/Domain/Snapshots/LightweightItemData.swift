@@ -17,13 +17,13 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
     case other = "other"
     case raceSpecific = "race_specific"
     case forSynthesis = "for_synthesis"
-    case magicMaterial = "magic_material"
+    case mazoMaterial = "mazo_material"
 
     static let ordered: [ItemSaleCategory] = [
         .thinSword, .sword, .katana, .bow,
         .armor, .heavyArmor, .shield, .gauntlet,
         .wand, .rod, .grimoire, .robe, .gem,
-        .other, .raceSpecific, .forSynthesis, .magicMaterial
+        .other, .raceSpecific, .forSynthesis, .mazoMaterial
     ]
 
     var displayName: String {
@@ -44,7 +44,7 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
         case .other: return "その他"
         case .raceSpecific: return "種族専用"
         case .forSynthesis: return "合成用"
-        case .magicMaterial: return "魔造素材"
+        case .mazoMaterial: return "魔造素材"
         }
     }
 
@@ -54,8 +54,9 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
 }
 
 struct LightweightItemData: Sendable {
-    var progressId: UUID
-    var masterDataId: String
+    /// スタック識別キー
+    var stackKey: String
+    var masterDataIndex: Int16
     var name: String
     var quantity: Int
     var sellValue: Int
@@ -63,26 +64,18 @@ struct LightweightItemData: Sendable {
     var enhancement: ItemSnapshot.Enhancement
     var storage: ItemStorage
     var rarity: String?
-    var acquiredAt: Date
     var normalTitleName: String?
     var superRareTitleName: String?
     var gemName: String?
 
-    var compositeKey: String {
-        "\(progressId.uuidString)-\(masterDataId)"
-    }
-
     /// 自動売却ルール用のキー（称号のみ、ソケットは除外）
     var autoTradeKey: String {
-        let parts = [enhancement.superRareTitleId ?? "",
-                     enhancement.normalTitleId ?? "",
-                     masterDataId]
-        return parts.joined(separator: "|")
+        "\(enhancement.superRareTitleIndex)|\(enhancement.normalTitleIndex)|\(masterDataIndex)"
     }
 
     /// 宝石改造が施されているか
     var hasGemModification: Bool {
-        enhancement.socketKey != nil
+        enhancement.socketMasterDataIndex != 0
     }
 
     /// 称号を含むフルネーム（自動売却ルール表示用）
@@ -102,10 +95,14 @@ struct LightweightItemData: Sendable {
     }
 }
 
+extension LightweightItemData: Identifiable {
+    var id: String { stackKey }
+}
+
 extension LightweightItemData: Equatable {
     static func == (lhs: LightweightItemData, rhs: LightweightItemData) -> Bool {
-        lhs.progressId == rhs.progressId &&
-        lhs.masterDataId == rhs.masterDataId &&
+        lhs.stackKey == rhs.stackKey &&
+        lhs.masterDataIndex == rhs.masterDataIndex &&
         lhs.name == rhs.name &&
         lhs.quantity == rhs.quantity &&
         lhs.sellValue == rhs.sellValue &&
@@ -113,7 +110,6 @@ extension LightweightItemData: Equatable {
         lhs.enhancement == rhs.enhancement &&
         lhs.storage == rhs.storage &&
         lhs.rarity == rhs.rarity &&
-        lhs.acquiredAt == rhs.acquiredAt &&
         lhs.normalTitleName == rhs.normalTitleName &&
         lhs.superRareTitleName == rhs.superRareTitleName &&
         lhs.gemName == rhs.gemName
@@ -122,18 +118,15 @@ extension LightweightItemData: Equatable {
 
 extension LightweightItemData: Hashable {
     func hash(into hasher: inout Hasher) {
-        hasher.combine(progressId)
-        hasher.combine(masterDataId)
+        hasher.combine(stackKey)
+        hasher.combine(masterDataIndex)
         hasher.combine(name)
         hasher.combine(quantity)
         hasher.combine(sellValue)
         hasher.combine(category)
-        hasher.combine(enhancement.normalTitleId)
-        hasher.combine(enhancement.superRareTitleId)
-        hasher.combine(enhancement.socketKey)
+        hasher.combine(enhancement)
         hasher.combine(storage)
         hasher.combine(rarity)
-        hasher.combine(acquiredAt)
         hasher.combine(normalTitleName)
         hasher.combine(superRareTitleName)
         hasher.combine(gemName)

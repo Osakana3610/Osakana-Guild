@@ -3,12 +3,12 @@ import Foundation
 @MainActor
 final class ProgressRuntimeService {
     private let runtimeService: GameRuntimeService
-    private let metadataService: ProgressMetadataService
+    private let gameStateService: GameStateService
 
     init(runtimeService: GameRuntimeService,
-         metadataService: ProgressMetadataService) {
+         gameStateService: GameStateService) {
         self.runtimeService = runtimeService
-        self.metadataService = metadataService
+        self.gameStateService = gameStateService
     }
 
     func runtimeCharacter(from snapshot: CharacterSnapshot) async throws -> RuntimeCharacter {
@@ -17,9 +17,9 @@ final class ProgressRuntimeService {
     }
 
     func recalculateCombatSnapshot(for snapshot: CharacterSnapshot,
-                                    pandoraBoxItemIds: Set<UUID> = []) async throws -> CombatStatCalculator.Result {
+                                    pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
         let progress = makeRuntimeCharacterProgress(from: snapshot)
-        return try await runtimeService.recalculateCombatStats(for: progress, pandoraBoxItemIds: pandoraBoxItemIds)
+        return try await runtimeService.recalculateCombatStats(for: progress, pandoraBoxStackKeys: pandoraBoxStackKeys)
     }
 
     func raceMaxLevel(for raceId: String) async throws -> Int {
@@ -42,7 +42,7 @@ final class ProgressRuntimeService {
         let partyState = try await runtimeService.runtimePartyState(party: partyProgress,
                                                                    characters: characterProgresses)
         let runtimeCharacters = partyState.members.map { $0.character }
-        let superRareState = try await metadataService.loadSuperRareDailyState()
+        let superRareState = try await gameStateService.loadSuperRareDailyState()
         let session = try await runtimeService.startExplorationRun(dungeonId: dungeonId,
                                                                    targetFloorNumber: targetFloorNumber,
                                                                    party: partyState,
@@ -51,7 +51,7 @@ final class ProgressRuntimeService {
         let waitClosure: @Sendable () async throws -> ExplorationRunArtifact = { [weak self] in
             let artifact = try await session.waitForCompletion()
             if let self {
-                try await self.metadataService.updateSuperRareDailyState(artifact.updatedSuperRareState)
+                try await self.gameStateService.updateSuperRareDailyState(artifact.updatedSuperRareState)
             }
             return artifact
         }
@@ -125,16 +125,13 @@ private extension ProgressRuntimeService {
                                                       updatedAt: $0.updatedAt)
             },
             equippedItems: snapshot.equippedItems.map {
-                RuntimeCharacterProgress.EquippedItem(id: $0.id,
-                                                      itemId: $0.itemId,
-                                                      quantity: $0.quantity,
-                                                      superRareTitleId: $0.superRareTitleId,
-                                                      normalTitleId: $0.normalTitleId,
-                                                      socketSuperRareTitleId: $0.socketSuperRareTitleId,
-                                                      socketNormalTitleId: $0.socketNormalTitleId,
-                                                      socketKey: $0.socketKey,
-                                                      createdAt: $0.createdAt,
-                                                      updatedAt: $0.updatedAt)
+                RuntimeCharacterProgress.EquippedItem(superRareTitleIndex: $0.superRareTitleIndex,
+                                                      normalTitleIndex: $0.normalTitleIndex,
+                                                      masterDataIndex: $0.masterDataIndex,
+                                                      socketSuperRareTitleIndex: $0.socketSuperRareTitleIndex,
+                                                      socketNormalTitleIndex: $0.socketNormalTitleIndex,
+                                                      socketMasterDataIndex: $0.socketMasterDataIndex,
+                                                      quantity: $0.quantity)
             },
             jobHistory: snapshot.jobHistory,
             explorationTags: snapshot.explorationTags,
@@ -153,17 +150,9 @@ private extension ProgressRuntimeService {
         RuntimePartyProgress(
             id: snapshot.id,
             displayName: snapshot.displayName,
-            formationId: snapshot.formationId,
-            lastSelectedDungeonId: snapshot.lastSelectedDungeonId,
+            lastSelectedDungeonIndex: snapshot.lastSelectedDungeonIndex,
             lastSelectedDifficulty: snapshot.lastSelectedDifficulty,
             targetFloor: snapshot.targetFloor,
-            members: snapshot.members.map {
-                RuntimePartyProgress.Member(id: $0.id,
-                                             characterId: $0.characterId,
-                                             order: $0.order,
-                                             isReserve: $0.isReserve,
-                                             createdAt: $0.createdAt,
-                                             updatedAt: $0.updatedAt)
-            })
+            memberIds: snapshot.memberCharacterIds)
     }
 }

@@ -18,12 +18,12 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
     }
 
     let id: String
+    let index: Int16
     let name: String
     let description: String
     let category: String
     let basePrice: Int
     let sellValue: Int
-    let equipable: Bool?
     let rarity: String?
     let statBonuses: [StatBonus]
     let combatBonuses: [CombatBonus]

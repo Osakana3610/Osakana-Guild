@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Exploration Run Management
 extension ProgressService {
-    func startExplorationRun(for partyId: UUID,
+    func startExplorationRun(for partyId: UInt8,
                               dungeonId: String,
                               targetFloor: Int) async throws -> ExplorationRunHandle {
         try await synchronizeStoryAndDungeonUnlocks()
@@ -17,10 +17,10 @@ extension ProgressService {
         let highestDifficulty = max(0, dungeonSnapshot.highestUnlockedDifficulty)
         if partySnapshot.lastSelectedDifficulty > highestDifficulty {
             partySnapshot = try await party.setLastSelectedDifficulty(persistentIdentifier: partySnapshot.persistentIdentifier,
-                                                                      difficulty: highestDifficulty)
+                                                                      difficulty: UInt8(highestDifficulty))
         }
         let runDifficulty = partySnapshot.lastSelectedDifficulty
-        let characterIds = partySnapshot.members.map { $0.characterId }
+        let characterIds = partySnapshot.memberCharacterIds
         let characters = try await character.characters(withIds: characterIds)
         let session = try await runtime.startExplorationRun(party: partySnapshot,
                                                             characters: characters,
@@ -31,7 +31,7 @@ extension ProgressService {
             try await exploration.beginRun(runId: session.runId,
                                            party: partySnapshot,
                                            dungeon: session.preparation.dungeon,
-                                           difficultyRank: runDifficulty,
+                                           difficultyRank: Int(runDifficulty),
                                            eventsPerFloor: session.preparation.eventsPerFloor,
                                            floorCount: session.preparation.targetFloorNumber,
                                            explorationInterval: session.explorationInterval,
@@ -50,7 +50,7 @@ extension ProgressService {
         }
 
         let runtimeMap = Dictionary(uniqueKeysWithValues: session.runtimeCharacters.map { ($0.progress.id, $0) })
-        let memberIds = partySnapshot.members.map { $0.characterId }
+        let memberIds = partySnapshot.memberCharacterIds
 
         let updates = AsyncThrowingStream<ExplorationRunUpdate, Error> { continuation in
             let processingTask = Task { [weak self] in
@@ -61,7 +61,7 @@ extension ProgressService {
                 await self.processExplorationStream(session: session,
                                                     memberIds: memberIds,
                                                     runtimeMap: runtimeMap,
-                                                    runDifficulty: runDifficulty,
+                                                    runDifficulty: Int(runDifficulty),
                                                     dungeonId: dungeonId,
                                                     continuation: continuation)
             }

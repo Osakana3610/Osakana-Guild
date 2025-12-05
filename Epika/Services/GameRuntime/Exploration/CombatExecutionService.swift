@@ -62,6 +62,11 @@ struct CombatExecutionService {
 
         let partyMembersById = Dictionary(uniqueKeysWithValues: party.members.map { ($0.id, $0.character) })
 
+        // survivingAllyIds (partyMemberId) から characterId を取得
+        let survivingCharacterIds: [Int32] = resolution.survivingAllyIds.compactMap { partyMemberId in
+            partyMembersById[partyMemberId]?.progress.id
+        }
+
         let playerSnapshots: [BattleParticipantSnapshot] = resolution.playerActors.map { actor in
             let characterState = actor.partyMemberId.flatMap { partyMembersById[$0] }
             let progress = characterState?.progress
@@ -96,7 +101,7 @@ struct CombatExecutionService {
 
         let summary = CombatSummary(enemy: resolution.enemy,
                                     result: resolution.result,
-                                    survivingPartyMemberIds: resolution.survivingAllyIds,
+                                    survivingPartyMemberIds: survivingCharacterIds,
                                     turns: resolution.turns,
                                     experienceByMember: rewards.experienceByMember,
                                     totalExperience: rewards.totalExperience,

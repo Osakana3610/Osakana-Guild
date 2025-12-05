@@ -1,6 +1,8 @@
 import Foundation
 
-extension SQLiteMasterDataManager {
+// MARK: - Schema Creation
+
+extension Generator {
     func createSchema() throws {
         let statements = [
             """
@@ -16,12 +18,12 @@ extension SQLiteMasterDataManager {
             """
             CREATE TABLE IF NOT EXISTS items (
                 id TEXT PRIMARY KEY,
+                item_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,
                 category TEXT NOT NULL,
                 base_price INTEGER NOT NULL,
                 sell_value INTEGER NOT NULL,
-                equipable INTEGER,
                 rarity TEXT
             );
             """,
@@ -141,6 +143,7 @@ extension SQLiteMasterDataManager {
             """
             CREATE TABLE IF NOT EXISTS jobs (
                 id TEXT PRIMARY KEY,
+                job_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 category TEXT NOT NULL,
                 growth_tendency TEXT
@@ -168,6 +171,7 @@ extension SQLiteMasterDataManager {
             """
             CREATE TABLE IF NOT EXISTS races (
                 id TEXT PRIMARY KEY,
+                race_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 gender TEXT NOT NULL,
                 category TEXT NOT NULL,
@@ -284,7 +288,8 @@ extension SQLiteMasterDataManager {
             """
             CREATE TABLE IF NOT EXISTS super_rare_titles (
                 id TEXT PRIMARY KEY,
-                name TEXT NOT NULL
+                name TEXT NOT NULL,
+                sort_order INTEGER NOT NULL
             );
             """,
             """
@@ -383,6 +388,7 @@ extension SQLiteMasterDataManager {
             """
             CREATE TABLE IF NOT EXISTS dungeons (
                 id TEXT PRIMARY KEY,
+                dungeon_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 chapter INTEGER NOT NULL,
                 stage INTEGER NOT NULL,
@@ -530,6 +536,7 @@ extension SQLiteMasterDataManager {
             """
             CREATE TABLE IF NOT EXISTS personality_primary (
                 id TEXT PRIMARY KEY,
+                personality_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 kind TEXT NOT NULL,
                 description TEXT NOT NULL
@@ -549,6 +556,7 @@ extension SQLiteMasterDataManager {
             """
             CREATE TABLE IF NOT EXISTS personality_secondary (
                 id TEXT PRIMARY KEY,
+                personality_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 positive_skill_id TEXT NOT NULL,
                 negative_skill_id TEXT NOT NULL

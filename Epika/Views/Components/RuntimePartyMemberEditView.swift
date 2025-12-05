@@ -5,10 +5,10 @@ struct RuntimePartyMemberEditView: View {
     let allCharacters: [RuntimeCharacter]
     @Environment(PartyViewState.self) private var partyState
     @EnvironmentObject private var progressService: ProgressService
-    @State private var currentMemberIds: [UUID?] = Array(repeating: nil, count: Self.maxSlots)
+    @State private var currentMemberIds: [Int32?] = Array(repeating: nil, count: Self.maxSlots)
     @State private var selectedSlotIndex: Int? = nil
     @State private var searchText = ""
-    @State private var characterIdsInOtherParties = Set<UUID>()
+    @State private var characterIdsInOtherParties = Set<Int32>()
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var isSaving = false
@@ -26,7 +26,7 @@ struct RuntimePartyMemberEditView: View {
 
     private var partyService: PartyProgressService { progressService.party }
 
-    private func character(for id: UUID?) -> RuntimeCharacter? {
+    private func character(for id: Int32?) -> RuntimeCharacter? {
         guard let id else { return nil }
         return allCharacters.first { $0.id == id }
     }
@@ -191,8 +191,8 @@ struct RuntimePartyMemberEditView: View {
 private extension RuntimePartyMemberEditView {
     static let maxSlots = 6
 
-    static func initialSlots(from members: [UUID]) -> [UUID?] {
-        var slots = Array<UUID?>(repeating: nil, count: maxSlots)
+    static func initialSlots(from members: [Int32]) -> [Int32?] {
+        var slots = Array<Int32?>(repeating: nil, count: maxSlots)
         for (index, id) in members.enumerated() where index < slots.count {
             slots[index] = id
         }

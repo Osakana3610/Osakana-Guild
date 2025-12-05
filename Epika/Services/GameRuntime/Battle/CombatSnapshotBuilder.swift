@@ -28,7 +28,7 @@ struct CombatSnapshotBuilder {
                                                             breathDamage: 0,
                                                             isMartialEligible: false)
 
-        let progress = RuntimeCharacterProgress(id: UUID(),
+        let progress = RuntimeCharacterProgress(id: 0,  // 敵用の一時ID
                                                 displayName: definition.name,
                                                 raceId: definition.race,
                                                 gender: "enemy",
@@ -86,6 +86,7 @@ private extension CombatSnapshotBuilder {
             .init(stat: "luck", value: definition.luck)
         ]
         return RaceDefinition(id: definition.race,
+                              index: 0,
                               name: definition.race.capitalized,
                               gender: "enemy",
                               category: definition.category,
@@ -113,6 +114,7 @@ private extension CombatSnapshotBuilder {
             JobDefinition.CombatCoefficient(stat: $0, value: 0.0)
         }
         return JobDefinition(id: jobId,
+                             index: 0,
                              name: jobId.capitalized,
                              category: "enemy",
                              growthTendency: nil,

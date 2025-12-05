@@ -10,7 +10,7 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
         case grimoire = "grimoire"
         case heavyArmor = "heavy_armor"
         case katana = "katana"
-        case magicMaterial = "magic_material"
+        case mazoMaterial = "mazo_material"
         case other = "other"
         case raceSpecific = "race_specific"
         case robe = "robe"
@@ -30,7 +30,7 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
                 return "shield"
             case .bow:
                 return "bow.and.arrow"
-            case .forSynthesis, .magicMaterial:
+            case .forSynthesis, .mazoMaterial:
                 return "hammer"
             case .gauntlet:
                 return "hand.raised"
@@ -56,7 +56,9 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
         case gem
     }
 
-    let id: UUID
+    /// スタック識別キー（6つのindexの組み合わせ）
+    let id: String
+    let masterDataIndex: Int16
     let masterDataId: String
     let displayName: String
     let description: String?
@@ -64,11 +66,19 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
     let category: Category
     let baseValue: Int
     let sellValue: Int
-    let enhancement: ItemSnapshot.Enhancement
+    let enhancement: Enhancement
     let rarity: String?
     let statBonuses: [ItemDefinition.StatBonus]
     let combatBonuses: [ItemDefinition.CombatBonus]
-    let acquiredAt: Date
+
+    /// Int Indexベースの強化情報
+    struct Enhancement: Sendable, Hashable {
+        var superRareTitleIndex: Int16
+        var normalTitleIndex: UInt8
+        var socketSuperRareTitleIndex: Int16
+        var socketNormalTitleIndex: UInt8
+        var socketMasterDataIndex: Int16
+    }
 }
 
 extension RuntimeEquipment {

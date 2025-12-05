@@ -25,12 +25,19 @@ actor TitleInheritanceProgressService {
         return equipments.filter { $0.id != target.id && $0.category == target.category }
     }
 
-    func preview(targetId: UUID, sourceId: UUID) async throws -> TitleInheritancePreview {
-        let inheritance = try await resolveContext(targetId: targetId, sourceId: sourceId)
+    func preview(targetStackKey: String, sourceStackKey: String) async throws -> TitleInheritancePreview {
+        let inheritance = try await resolveContext(targetStackKey: targetStackKey, sourceStackKey: sourceStackKey)
         let currentTitle = try await titleDisplayName(for: inheritance.target.enhancement)
         let sourceTitle = try await titleDisplayName(for: inheritance.source.enhancement)
-        let resultEnhancement = inheritance.source.enhancement
-        let inheritsSameEnhancement = resultEnhancement == inheritance.target.enhancement
+        let resultEnhancement = ItemSnapshot.Enhancement(
+            superRareTitleIndex: inheritance.source.enhancement.superRareTitleIndex,
+            normalTitleIndex: inheritance.source.enhancement.normalTitleIndex,
+            socketSuperRareTitleIndex: inheritance.target.enhancement.socketSuperRareTitleIndex,
+            socketNormalTitleIndex: inheritance.target.enhancement.socketNormalTitleIndex,
+            socketMasterDataIndex: inheritance.target.enhancement.socketMasterDataIndex
+        )
+        let inheritsSameEnhancement = resultEnhancement.superRareTitleIndex == inheritance.target.enhancement.superRareTitleIndex &&
+            resultEnhancement.normalTitleIndex == inheritance.target.enhancement.normalTitleIndex
         let resultTitle = inheritsSameEnhancement ? currentTitle : sourceTitle
         return TitleInheritancePreview(currentTitleName: currentTitle,
                                        sourceTitleName: sourceTitle,
@@ -38,26 +45,34 @@ actor TitleInheritanceProgressService {
                                        resultEnhancement: resultEnhancement)
     }
 
-    func inherit(targetId: UUID, sourceId: UUID) async throws -> RuntimeEquipment {
-        let inheritance = try await resolveContext(targetId: targetId, sourceId: sourceId)
-        return try await inventoryService.inheritItem(targetId: targetId,
-                                                      sourceId: sourceId,
-                                                      newEnhancement: inheritance.source.enhancement)
+    func inherit(targetStackKey: String, sourceStackKey: String) async throws -> RuntimeEquipment {
+        let inheritance = try await resolveContext(targetStackKey: targetStackKey, sourceStackKey: sourceStackKey)
+        let newEnhancement = ItemSnapshot.Enhancement(
+            superRareTitleIndex: inheritance.source.enhancement.superRareTitleIndex,
+            normalTitleIndex: inheritance.source.enhancement.normalTitleIndex,
+            socketSuperRareTitleIndex: inheritance.target.enhancement.socketSuperRareTitleIndex,
+            socketNormalTitleIndex: inheritance.target.enhancement.socketNormalTitleIndex,
+            socketMasterDataIndex: inheritance.target.enhancement.socketMasterDataIndex
+        )
+        return try await inventoryService.inheritItem(targetStackKey: targetStackKey,
+                                                      sourceStackKey: sourceStackKey,
+                                                      newEnhancement: newEnhancement)
     }
 }
 
 private extension TitleInheritanceProgressService {
-    nonisolated func resolveContext(targetId: UUID,
-                                    sourceId: UUID) async throws -> (target: RuntimeEquipment,
-                                                                     source: RuntimeEquipment) {
-        guard targetId != sourceId else {
+    nonisolated func resolveContext(
+        targetStackKey: String,
+        sourceStackKey: String
+    ) async throws -> (target: RuntimeEquipment, source: RuntimeEquipment) {
+        guard targetStackKey != sourceStackKey else {
             throw ProgressError.invalidInput(description: "同じアイテム間での継承はできません")
         }
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        guard let target = equipments.first(where: { $0.id == targetId }) else {
+        guard let target = equipments.first(where: { $0.id == targetStackKey }) else {
             throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
         }
-        guard let source = equipments.first(where: { $0.id == sourceId }) else {
+        guard let source = equipments.first(where: { $0.id == sourceStackKey }) else {
             throw ProgressError.invalidInput(description: "提供アイテムが見つかりません")
         }
         guard source.category == target.category else {
@@ -66,19 +81,22 @@ private extension TitleInheritanceProgressService {
         return (target, source)
     }
 
-    nonisolated func titleDisplayName(for enhancement: ItemSnapshot.Enhancement) async throws -> String {
-        if let superRareId = enhancement.superRareTitleId,
-           let definition = try await masterDataService.getSuperRareTitle(id: superRareId) {
-            return definition.name
-        } else if let superRareId = enhancement.superRareTitleId {
-            throw ProgressError.itemDefinitionUnavailable(ids: [superRareId])
+    nonisolated func titleDisplayName(for enhancement: RuntimeEquipment.Enhancement) async throws -> String {
+        // 超レア称号があればその名前を返す
+        if enhancement.superRareTitleIndex != 0 {
+            if let id = await masterDataService.getSuperRareTitleId(for: enhancement.superRareTitleIndex),
+               let definition = try await masterDataService.getSuperRareTitle(id: id) {
+                return definition.name
+            } else {
+                throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.superRareTitleIndex)])
+            }
         }
-        if let normalId = enhancement.normalTitleId,
-           let definition = try await masterDataService.getTitleMasterData(id: normalId) {
+        // 通常称号は必ず存在する（rank 0〜8、無称号も rank=2 の称号で name=""）
+        if let id = await masterDataService.getTitleId(for: enhancement.normalTitleIndex),
+           let definition = try await masterDataService.getTitleMasterData(id: id) {
             return definition.name
-        } else if let normalId = enhancement.normalTitleId {
-            throw ProgressError.itemDefinitionUnavailable(ids: [normalId])
+        } else {
+            throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.normalTitleIndex)])
         }
-        return "なし"
     }
 }

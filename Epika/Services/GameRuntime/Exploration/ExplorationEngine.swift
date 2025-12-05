@@ -27,7 +27,7 @@ struct ExplorationEngine {
         let accumulatedExperience: Int
         let accumulatedGold: Int
         let drops: [ExplorationDropReward]
-        let experienceByMember: [UUID: Int]
+        let experienceByMember: [Int32: Int]
     }
 
     static func prepare(provider: ExplorationMasterDataProvider,
@@ -88,7 +88,7 @@ struct ExplorationEngine {
         var battleLog: BattleLogArchive?
         var shouldTerminate = false
         var drops: [ExplorationDropReward] = []
-        var experienceByMember: [UUID: Int] = [:]
+        var experienceByMember: [Int32: Int] = [:]
         var gold = 0
         var totalExperience = 0
 
