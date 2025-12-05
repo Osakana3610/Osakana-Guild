@@ -1,6 +1,8 @@
 import Foundation
 
 struct ExplorationEventDefinition: Identifiable, Sendable {
+    let index: UInt16
+
     struct Tag: Sendable, Hashable {
         let orderIndex: Int
         let value: String

@@ -1,6 +1,8 @@
 import Foundation
 
 struct EnemyDefinition: Identifiable, Sendable {
+    let index: UInt16
+
     struct ActionRates: Sendable, Hashable {
         let attack: Int
         let priestMagic: Int
