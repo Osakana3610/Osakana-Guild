@@ -598,7 +598,7 @@ struct BattleActor: Sendable {
     let partyMemberId: UInt8?
     let level: Int?
     let jobName: String?
-    let avatarIdentifier: String?
+    let avatarIndex: UInt16?
     let isMartialEligible: Bool
     let raceId: String?
     let raceCategory: String?
@@ -652,7 +652,7 @@ struct BattleActor: Sendable {
          partyMemberId: UInt8? = nil,
          level: Int? = nil,
          jobName: String? = nil,
-         avatarIdentifier: String? = nil,
+         avatarIndex: UInt16? = nil,
          isMartialEligible: Bool,
          raceId: String? = nil,
          raceCategory: String? = nil,
@@ -704,7 +704,7 @@ struct BattleActor: Sendable {
         self.partyMemberId = partyMemberId
         self.level = level
         self.jobName = jobName
-        self.avatarIdentifier = avatarIdentifier
+        self.avatarIndex = avatarIndex
         self.isMartialEligible = isMartialEligible
         self.raceId = raceId
         self.raceCategory = raceCategory

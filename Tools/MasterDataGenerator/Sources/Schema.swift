@@ -174,6 +174,7 @@ extension Generator {
                 race_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 gender TEXT NOT NULL,
+                gender_code INTEGER NOT NULL,
                 category TEXT NOT NULL,
                 description TEXT NOT NULL
             );
