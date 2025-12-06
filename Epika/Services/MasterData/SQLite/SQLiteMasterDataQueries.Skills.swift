@@ -5,18 +5,20 @@ import SQLite3
 extension SQLiteMasterDataManager {
     func fetchAllSkills() throws -> [SkillDefinition] {
         var skills: [String: SkillDefinition] = [:]
-        let baseSQL = "SELECT id, name, description, type, category, acquisition_conditions_json FROM skills;"
+        let baseSQL = "SELECT id, skill_index, name, description, type, category, acquisition_conditions_json FROM skills;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(baseStatement, 0),
-                  let nameC = sqlite3_column_text(baseStatement, 1),
-                  let descC = sqlite3_column_text(baseStatement, 2),
-                  let typeC = sqlite3_column_text(baseStatement, 3),
-                  let categoryC = sqlite3_column_text(baseStatement, 4),
-                  let conditionsC = sqlite3_column_text(baseStatement, 5) else { continue }
+                  let nameC = sqlite3_column_text(baseStatement, 2),
+                  let descC = sqlite3_column_text(baseStatement, 3),
+                  let typeC = sqlite3_column_text(baseStatement, 4),
+                  let categoryC = sqlite3_column_text(baseStatement, 5),
+                  let conditionsC = sqlite3_column_text(baseStatement, 6) else { continue }
+            let skillIndex = Int(sqlite3_column_int(baseStatement, 1))
             let skill = SkillDefinition(
                 id: String(cString: idC),
+                skillIndex: skillIndex,
                 name: String(cString: nameC),
                 description: String(cString: descC),
                 type: String(cString: typeC),
@@ -50,6 +52,7 @@ extension SQLiteMasterDataManager {
                                  payloadJSON: String(cString: payloadC)))
             skills[skill.id] = SkillDefinition(
                 id: skill.id,
+                skillIndex: skill.skillIndex,
                 name: skill.name,
                 description: skill.description,
                 type: skill.type,

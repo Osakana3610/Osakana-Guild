@@ -427,8 +427,8 @@ extension Generator {
             try execute("DELETE FROM skills;")
 
             let insertSkillSQL = """
-                INSERT INTO skills (id, name, description, type, category, acquisition_conditions_json)
-                VALUES (?, ?, ?, ?, ?, ?);
+                INSERT INTO skills (id, skill_index, name, description, type, category, acquisition_conditions_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
             """
             let insertEffectSQL = """
                 INSERT INTO skill_effects (skill_id, effect_index, kind, value, value_percent, stat_type, damage_type, payload_json)
@@ -442,13 +442,14 @@ extension Generator {
                 sqlite3_finalize(effectStatement)
             }
 
-            for entry in entries {
+            for (skillIndex, entry) in entries.enumerated() {
                 bindText(skillStatement, index: 1, value: entry.id)
-                bindText(skillStatement, index: 2, value: entry.name)
-                bindText(skillStatement, index: 3, value: entry.description)
-                bindText(skillStatement, index: 4, value: entry.type)
-                bindText(skillStatement, index: 5, value: entry.category)
-                bindText(skillStatement, index: 6, value: entry.acquisitionJSON)
+                bindInt(skillStatement, index: 2, value: skillIndex)
+                bindText(skillStatement, index: 3, value: entry.name)
+                bindText(skillStatement, index: 4, value: entry.description)
+                bindText(skillStatement, index: 5, value: entry.type)
+                bindText(skillStatement, index: 6, value: entry.category)
+                bindText(skillStatement, index: 7, value: entry.acquisitionJSON)
                 try step(skillStatement)
                 reset(skillStatement)
 

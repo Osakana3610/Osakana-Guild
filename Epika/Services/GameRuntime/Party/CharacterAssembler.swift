@@ -10,19 +10,26 @@ enum CharacterAssembler {
         // 装備付与スキルを合成し、先勝ちで重複除去
         let masterDataIndices = Set(progress.equippedItems.map { $0.masterDataIndex }).filter { $0 > 0 }
         let equippedItemDefinitions = try await MasterDataRuntimeService.shared.getItemMasterData(byIndices: Array(masterDataIndices))
+
+        // 装備から付与されるスキルのskillId→skillIndex変換用マップを構築
+        let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkills.map { $0.skillId } }
+        let grantedSkillDefinitions = try await repository.skills(withIds: grantedSkillIds)
+        let skillIdToIndex = Dictionary(uniqueKeysWithValues: grantedSkillDefinitions.map { ($0.id, $0.skillIndex) })
+
         let equipmentSkills: [RuntimeCharacterProgress.LearnedSkill] = equippedItemDefinitions.flatMap { definition in
-            definition.grantedSkills.sorted { $0.orderIndex < $1.orderIndex }.map { granted in
-                RuntimeCharacterProgress.LearnedSkill(id: UUID(),
-                                                      skillId: granted.skillId,
-                                                      level: 1,
-                                                      isEquipped: true,
-                                                      createdAt: Date(),
-                                                      updatedAt: Date())
+            definition.grantedSkills.sorted { $0.orderIndex < $1.orderIndex }.compactMap { granted in
+                guard let skillIndex = skillIdToIndex[granted.skillId] else { return nil }
+                return RuntimeCharacterProgress.LearnedSkill(id: UUID(),
+                                                             skillIndex: skillIndex,
+                                                             level: 1,
+                                                             isEquipped: true,
+                                                             createdAt: Date(),
+                                                             updatedAt: Date())
             }
         }
         let mergedLearnedSkills = deduplicatedSkills(progress.learnedSkills + equipmentSkills)
-        let learnedSkillIds = mergedLearnedSkills.map { $0.skillId }
-        let learnedSkills = try await repository.skills(withIds: learnedSkillIds)
+        let learnedSkillIndices = mergedLearnedSkills.map { $0.skillIndex }
+        let learnedSkills = try await repository.skills(withIndices: learnedSkillIndices)
 
         let slotModifiers = try SkillRuntimeEffectCompiler.equipmentSlots(from: learnedSkills)
         let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: progress.level,
@@ -150,11 +157,11 @@ private enum EquipmentSlotCalculator {
 // MARK: - Helpers
 
 private func deduplicatedSkills(_ skills: [RuntimeCharacterProgress.LearnedSkill]) -> [RuntimeCharacterProgress.LearnedSkill] {
-    var seen: Set<String> = []
+    var seen: Set<Int> = []
     var result: [RuntimeCharacterProgress.LearnedSkill] = []
     result.reserveCapacity(skills.count)
     for entry in skills {
-        if seen.insert(entry.skillId).inserted {
+        if seen.insert(entry.skillIndex).inserted {
             result.append(entry)
         }
     }
