@@ -37,9 +37,8 @@ final class ProgressRuntimeService {
                               characters: [CharacterSnapshot],
                               dungeonId: String,
                               targetFloorNumber: Int) async throws -> ExplorationRuntimeSession {
-        let partyProgress = makeRuntimePartyProgress(from: party)
         let characterProgresses = characters.map(makeRuntimeCharacterProgress(from:))
-        let partyState = try await runtimeService.runtimePartyState(party: partyProgress,
+        let partyState = try await runtimeService.runtimePartyState(party: party,
                                                                    characters: characterProgresses)
         let runtimeCharacters = partyState.members.map { $0.character }
         let superRareState = try await gameStateService.loadSuperRareDailyState()
@@ -82,6 +81,8 @@ struct ExplorationRuntimeSession: Sendable {
 }
 
 private extension ProgressRuntimeService {
+    /// CharacterSnapshotからRuntimeCharacterProgressへ変換する。
+    /// ネスト型は共有値型（CharacterValues）への typealias のため直接代入可能。
     func makeRuntimeCharacterProgress(from snapshot: CharacterSnapshot) -> RuntimeCharacterProgress {
         RuntimeCharacterProgress(
             id: snapshot.id,
@@ -92,67 +93,17 @@ private extension ProgressRuntimeService {
             avatarIdentifier: snapshot.avatarIdentifier,
             level: snapshot.level,
             experience: snapshot.experience,
-            attributes: .init(strength: snapshot.attributes.strength,
-                              wisdom: snapshot.attributes.wisdom,
-                              spirit: snapshot.attributes.spirit,
-                              vitality: snapshot.attributes.vitality,
-                              agility: snapshot.attributes.agility,
-                              luck: snapshot.attributes.luck),
-            hitPoints: .init(current: snapshot.hitPoints.current,
-                              maximum: snapshot.hitPoints.maximum),
-            combat: .init(maxHP: snapshot.combat.maxHP,
-                          physicalAttack: snapshot.combat.physicalAttack,
-                          magicalAttack: snapshot.combat.magicalAttack,
-                          physicalDefense: snapshot.combat.physicalDefense,
-                          magicalDefense: snapshot.combat.magicalDefense,
-                          hitRate: snapshot.combat.hitRate,
-                          evasionRate: snapshot.combat.evasionRate,
-                          criticalRate: snapshot.combat.criticalRate,
-                          attackCount: snapshot.combat.attackCount,
-                          magicalHealing: snapshot.combat.magicalHealing,
-                          trapRemoval: snapshot.combat.trapRemoval,
-                          additionalDamage: snapshot.combat.additionalDamage,
-                          breathDamage: snapshot.combat.breathDamage,
-                          isMartialEligible: snapshot.combat.isMartialEligible),
-            personality: .init(primaryId: snapshot.personality.primaryId,
-                               secondaryId: snapshot.personality.secondaryId),
-            learnedSkills: snapshot.learnedSkills.map {
-                RuntimeCharacterProgress.LearnedSkill(id: $0.id,
-                                                      skillId: $0.skillId,
-                                                      level: $0.level,
-                                                      isEquipped: $0.isEquipped,
-                                                      createdAt: $0.createdAt,
-                                                      updatedAt: $0.updatedAt)
-            },
-            equippedItems: snapshot.equippedItems.map {
-                RuntimeCharacterProgress.EquippedItem(superRareTitleIndex: $0.superRareTitleIndex,
-                                                      normalTitleIndex: $0.normalTitleIndex,
-                                                      masterDataIndex: $0.masterDataIndex,
-                                                      socketSuperRareTitleIndex: $0.socketSuperRareTitleIndex,
-                                                      socketNormalTitleIndex: $0.socketNormalTitleIndex,
-                                                      socketMasterDataIndex: $0.socketMasterDataIndex,
-                                                      quantity: $0.quantity)
-            },
+            attributes: snapshot.attributes,
+            hitPoints: snapshot.hitPoints,
+            combat: snapshot.combat,
+            personality: snapshot.personality,
+            learnedSkills: snapshot.learnedSkills,
+            equippedItems: snapshot.equippedItems,
             jobHistory: snapshot.jobHistory,
             explorationTags: snapshot.explorationTags,
-            achievements: .init(totalBattles: snapshot.achievements.totalBattles,
-                                totalVictories: snapshot.achievements.totalVictories,
-                                defeatCount: snapshot.achievements.defeatCount),
-            actionPreferences: .init(attack: snapshot.actionPreferences.attack,
-                                     priestMagic: snapshot.actionPreferences.priestMagic,
-                                     mageMagic: snapshot.actionPreferences.mageMagic,
-                                     breath: snapshot.actionPreferences.breath),
+            achievements: snapshot.achievements,
+            actionPreferences: snapshot.actionPreferences,
             createdAt: snapshot.createdAt,
             updatedAt: snapshot.updatedAt)
-    }
-
-    func makeRuntimePartyProgress(from snapshot: PartySnapshot) -> RuntimePartyProgress {
-        RuntimePartyProgress(
-            id: snapshot.id,
-            displayName: snapshot.displayName,
-            lastSelectedDungeonIndex: snapshot.lastSelectedDungeonIndex,
-            lastSelectedDifficulty: snapshot.lastSelectedDifficulty,
-            targetFloor: snapshot.targetFloor,
-            memberIds: snapshot.memberCharacterIds)
     }
 }
