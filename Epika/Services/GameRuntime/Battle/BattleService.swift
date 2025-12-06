@@ -101,7 +101,7 @@ enum BattleService {
                                    partyMemberId: nil,
                                    level: fallbackLevel,
                                    jobName: fallbackDefinition.job,
-                                   avatarIdentifier: nil,
+                                   avatarIndex: nil,
                                    isMartialEligible: false,
                                    raceId: fallbackDefinition.race,
                                    raceCategory: raceDictionary[fallbackDefinition.race]?.category ?? fallbackDefinition.race,

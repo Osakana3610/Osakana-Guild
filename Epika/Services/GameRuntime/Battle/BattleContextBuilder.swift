@@ -38,7 +38,7 @@ struct BattleContextBuilder {
                 partyMemberId: member.characterId,
                 level: state.progress.level,
                 jobName: state.job?.name ?? "職業\(state.progress.jobIndex)",
-                avatarIdentifier: String(state.avatarIndex),
+                avatarIndex: state.avatarIndex,
                 isMartialEligible: martialEligible,
                 raceId: state.race?.id,
                 raceCategory: state.race?.category,

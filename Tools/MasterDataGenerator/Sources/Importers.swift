@@ -681,6 +681,7 @@ private struct RaceDataMasterFile: Decodable {
         let index: Int
         let name: String
         let gender: String
+        let genderCode: Int
         let category: String
         let baseStats: [String: Int]
         let description: String
@@ -812,8 +813,8 @@ extension Generator {
             try execute("DELETE FROM races;")
 
             let insertRaceSQL = """
-                INSERT INTO races (id, race_index, name, gender, category, description)
-                VALUES (?, ?, ?, ?, ?, ?);
+                INSERT INTO races (id, race_index, name, gender, gender_code, category, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
             """
             let insertStatSQL = "INSERT INTO race_base_stats (race_id, stat, value) VALUES (?, ?, ?);"
             let insertCategorySQL = "INSERT INTO race_category_caps (category, max_level) VALUES (?, ?);"
@@ -838,8 +839,9 @@ extension Generator {
                 bindInt(raceStatement, index: 2, value: race.index)
                 bindText(raceStatement, index: 3, value: race.name)
                 bindText(raceStatement, index: 4, value: race.gender)
-                bindText(raceStatement, index: 5, value: race.category)
-                bindText(raceStatement, index: 6, value: race.description)
+                bindInt(raceStatement, index: 5, value: race.genderCode)
+                bindText(raceStatement, index: 6, value: race.category)
+                bindText(raceStatement, index: 7, value: race.description)
                 try step(raceStatement)
                 reset(raceStatement)
 
