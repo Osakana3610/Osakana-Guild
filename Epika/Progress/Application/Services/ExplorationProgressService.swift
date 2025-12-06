@@ -317,7 +317,7 @@ private extension ExplorationProgressService {
         return ExplorationSnapshot(
             persistentIdentifier: run.persistentModelID,
             id: UUID(),  // 新構造ではUUIDは識別子として使わない
-            dungeonId: await masterData.getDungeonId(for: run.dungeonIndex) ?? "",
+            dungeonIndex: run.dungeonIndex,
             displayDungeonName: displayDungeonName,
             activeFloorNumber: Int(run.finalFloor),
             party: partySummary,
@@ -357,7 +357,7 @@ private extension ExplorationProgressService {
                         turns = archive.turns
                     }
                     combatSummary = ExplorationSnapshot.EncounterLog.CombatSummary(
-                        enemyId: id,
+                        enemyIndex: enemyIdx,
                         enemyName: enemy.name,
                         result: result,
                         turns: turns,

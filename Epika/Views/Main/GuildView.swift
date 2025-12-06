@@ -518,7 +518,7 @@ private struct CharacterCreationView: View {
 
                         HStack(alignment: .top, spacing: 16) {
                             CharacterImageView(
-                                imageType: .job(id: job.id, gender: race.gender),
+                                avatarIndex: UInt16(race.genderCode) * 100 + UInt16(job.index),
                                 size: 80
                             )
                             VStack(alignment: .leading, spacing: 8) {
@@ -603,7 +603,7 @@ private struct CharacterCreationView: View {
 
     private func raceTile(for race: RaceDefinition) -> some View {
         VStack(spacing: 6) {
-            CharacterImageView(imageType: .race(id: race.id, gender: race.gender), size: 48)
+            CharacterImageView(avatarIndex: UInt16(race.index), size: 48)
             Text(race.name)
                 .font(.caption)
                 .multilineTextAlignment(.center)
@@ -629,7 +629,7 @@ private struct CharacterCreationView: View {
 
     private func jobTile(for job: JobDefinition) -> some View {
         VStack(spacing: 8) {
-            CharacterImageView(imageType: .job(id: job.id, gender: selectedRace?.gender ?? "genderless"), size: 48)
+            CharacterImageView(avatarIndex: UInt16(selectedRace?.genderCode ?? 3) * 100 + UInt16(job.index), size: 48)
             Text(job.name)
                 .font(.caption)
                 .multilineTextAlignment(.center)
@@ -649,14 +649,14 @@ private struct CharacterCreationView: View {
                 Label("この職業を選択", systemImage: "checkmark.circle")
             }
         } preview: {
-            JobDetailPreview(job: job, gender: selectedRace?.gender)
+            JobDetailPreview(job: job, genderCode: selectedRace?.genderCode)
         }
     }
 
     private func selectedRaceSummary(_ race: RaceDefinition) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
-                CharacterImageView(imageType: .race(id: race.id, gender: race.gender), size: 56)
+                CharacterImageView(avatarIndex: UInt16(race.index), size: 56)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(race.name)
                         .font(.headline)
@@ -673,7 +673,7 @@ private struct CharacterCreationView: View {
     private func selectedJobSummary(_ job: JobDefinition) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
-                CharacterImageView(imageType: .job(id: job.id, gender: selectedRace?.gender ?? "genderless"), size: 56)
+                CharacterImageView(avatarIndex: UInt16(selectedRace?.genderCode ?? 3) * 100 + UInt16(job.index), size: 56)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(job.name)
                         .font(.headline)
@@ -835,7 +835,7 @@ private struct RaceDetailPreview: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 12) {
-            CharacterImageView(imageType: .race(id: race.id, gender: race.gender), size: 64)
+            CharacterImageView(avatarIndex: UInt16(race.index), size: 64)
             VStack(alignment: .leading, spacing: 4) {
                 Text(race.name)
                     .font(.headline)
@@ -870,7 +870,7 @@ private struct RaceDetailPreview: View {
 
 private struct JobDetailPreview: View {
     let job: JobDefinition
-    let gender: String?
+    let genderCode: UInt8?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -942,7 +942,7 @@ private struct JobDetailPreview: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 12) {
-            CharacterImageView(imageType: .job(id: job.id, gender: gender ?? "genderless"), size: 64)
+            CharacterImageView(avatarIndex: UInt16(genderCode ?? 3) * 100 + UInt16(job.index), size: 64)
             VStack(alignment: .leading, spacing: 4) {
                 Text(job.name)
                     .font(.headline)
