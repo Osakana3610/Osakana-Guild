@@ -83,9 +83,73 @@ final class Generator {
         try execute("PRAGMA user_version = \(version);")
     }
 
+    // MARK: - Schema Validation
+
+    private func validateSchemas() throws {
+        let validations: [(filename: String, rootKey: String?, expectedKeys: Set<String>)] = [
+            ("RaceDataMaster", "raceData", ["index", "name", "gender", "genderCode", "category", "baseStats", "description", "maxLevel"]),
+            ("JobMaster", "jobs", ["id", "index", "name", "category", "growthTendency", "combatCoefficients", "skills"]),
+            ("EnemyMaster", "enemies", ["index", "name", "race", "category", "job", "stats", "resistances", "skills", "drops", "groupSizeRange", "actionRates", "baseExperience", "isBoss"]),
+            ("ExplorationEventMaster", "events", ["id", "index", "type", "name", "description", "floorRange", "dungeonTags", "weights", "trap"]),
+        ]
+
+        var allMismatches: [(file: String, missing: Set<String>, extra: Set<String>)] = []
+
+        for (filename, rootKey, expectedKeys) in validations {
+            let url = inputDirectory.appendingPathComponent("\(filename).json")
+            let data = try Data(contentsOf: url)
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
+
+            let entries: [[String: Any]]
+            if let rootKey = rootKey, let dict = json[rootKey] as? [String: [String: Any]] {
+                entries = Array(dict.values)
+            } else if let rootKey = rootKey, let array = json[rootKey] as? [[String: Any]] {
+                entries = array
+            } else {
+                continue
+            }
+
+            guard let firstEntry = entries.first else { continue }
+            let jsonKeys = Set(firstEntry.keys)
+
+            let missingInStruct = jsonKeys.subtracting(expectedKeys)
+            let missingInJSON = expectedKeys.subtracting(jsonKeys)
+
+            if !missingInStruct.isEmpty || !missingInJSON.isEmpty {
+                allMismatches.append((file: filename, missing: missingInStruct, extra: missingInJSON))
+            }
+        }
+
+        if !allMismatches.isEmpty {
+            var message = "[MasterDataGenerator] Schema mismatch detected:\n"
+            for mismatch in allMismatches {
+                message += "\n\(mismatch.file).json:\n"
+                if !mismatch.missing.isEmpty {
+                    message += "  JSONにあるがImportersに未定義:\n"
+                    for key in mismatch.missing.sorted() {
+                        message += "    - \(key)\n"
+                    }
+                }
+                if !mismatch.extra.isEmpty {
+                    message += "  Importersに定義があるがJSONにない:\n"
+                    for key in mismatch.extra.sorted() {
+                        message += "    - \(key)\n"
+                    }
+                }
+            }
+            message += "\nImporters.swift と Schema.swift を更新してください。"
+            throw GeneratorError.schemaMismatch(message)
+        }
+
+        print("[MasterDataGenerator] Schema validation passed")
+    }
+
     // MARK: - Import All
 
     private func importAll() throws {
+        // スキーマ検証を先に実行
+        try validateSchemas()
+
         let files: [(String, (Data) throws -> Int)] = [
             ("ItemMaster", importItemMaster),
             ("SkillMaster", importSkillMaster),
@@ -203,6 +267,7 @@ enum GeneratorError: Error, LocalizedError {
     case failedToOpenDatabase(String)
     case executionFailed(String)
     case statementPrepareFailed(String)
+    case schemaMismatch(String)
 
     var errorDescription: String? {
         switch self {
@@ -210,6 +275,7 @@ enum GeneratorError: Error, LocalizedError {
         case .failedToOpenDatabase(let msg): return "Failed to open database: \(msg)"
         case .executionFailed(let msg): return "Execution failed: \(msg)"
         case .statementPrepareFailed(let msg): return "Statement prepare failed: \(msg)"
+        case .schemaMismatch(let msg): return msg
         }
     }
 }
