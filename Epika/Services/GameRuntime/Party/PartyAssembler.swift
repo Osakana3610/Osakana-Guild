@@ -2,7 +2,7 @@ import Foundation
 
 enum PartyAssembler {
     static func assembleState(repository: MasterDataRepository,
-                              party: RuntimePartyProgress,
+                              party: PartySnapshot,
                               characters: [RuntimeCharacterProgress]) async throws -> RuntimePartyState {
         let characterMap = Dictionary(uniqueKeysWithValues: characters.map { ($0.id, $0) })
         var assembled: [RuntimeCharacterState] = []
