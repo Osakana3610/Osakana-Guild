@@ -4,8 +4,8 @@ import SwiftData
 actor CharacterProgressService {
     struct CharacterCreationRequest: Sendable {
         var displayName: String
-        var raceId: String
-        var jobId: String
+        var raceIndex: UInt8
+        var jobIndex: UInt8
     }
 
     struct BattleResultUpdate: Sendable {
@@ -87,14 +87,6 @@ actor CharacterProgressService {
             throw ProgressError.invalidInput(description: "キャラクター名を入力してください")
         }
 
-        let masterData = MasterDataRuntimeService.shared
-        guard let raceIndex = await masterData.getRaceIndex(for: request.raceId) else {
-            throw ProgressError.invalidInput(description: "無効な種族IDです")
-        }
-        guard let jobIndex = await masterData.getJobIndex(for: request.jobId) else {
-            throw ProgressError.invalidInput(description: "無効な職業IDです")
-        }
-
         let context = makeContext()
 
         // ID採番: 1〜200で最小の未使用IDを割り当てる
@@ -106,8 +98,8 @@ actor CharacterProgressService {
         let record = CharacterRecord(
             id: newId,
             displayName: trimmedName,
-            raceIndex: raceIndex,
-            jobIndex: jobIndex,
+            raceIndex: request.raceIndex,
+            jobIndex: request.jobIndex,
             level: 1,
             experience: 0,
             currentHP: initialHP,
@@ -432,22 +424,6 @@ private extension CharacterProgressService {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let equipment = try context.fetch(equipmentDescriptor)
 
-        let masterData = MasterDataRuntimeService.shared
-
-        let primaryPersonalityId: String?
-        if record.primaryPersonalityIndex > 0 {
-            primaryPersonalityId = await masterData.getPrimaryPersonalityId(for: record.primaryPersonalityIndex)
-        } else {
-            primaryPersonalityId = nil
-        }
-
-        let secondaryPersonalityId: String?
-        if record.secondaryPersonalityIndex > 0 {
-            secondaryPersonalityId = await masterData.getSecondaryPersonalityId(for: record.secondaryPersonalityIndex)
-        } else {
-            secondaryPersonalityId = nil
-        }
-
         // 装備をスナップショット形式に変換（グループ化）
         var groupedEquipment: [String: (record: CharacterEquipmentRecord, count: Int)] = [:]
         for item in equipment {
@@ -482,8 +458,8 @@ private extension CharacterProgressService {
         )
 
         let personality = CharacterSnapshot.Personality(
-            primaryId: primaryPersonalityId,
-            secondaryId: secondaryPersonalityId
+            primaryIndex: record.primaryPersonalityIndex,
+            secondaryIndex: record.secondaryPersonalityIndex
         )
 
         // スキルは種族+職業+装備から導出（learnedSkillsは空配列）
