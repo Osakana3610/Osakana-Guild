@@ -8,6 +8,7 @@ actor MasterDataRepository {
     private var itemsById: [String: ItemDefinition]?
     private var skillsCache: [SkillDefinition]?
     private var skillsById: [String: SkillDefinition]?
+    private var skillsByIndex: [Int: SkillDefinition]?
     private var spellsCache: [SpellDefinition]?
     private var spellsById: [String: SpellDefinition]?
     private var enemiesCache: [EnemyDefinition]?
@@ -81,6 +82,7 @@ actor MasterDataRepository {
         let skills = try await manager.fetchAllSkills()
         self.skillsCache = skills
         self.skillsById = Dictionary(uniqueKeysWithValues: skills.map { ($0.id, $0) })
+        self.skillsByIndex = Dictionary(uniqueKeysWithValues: skills.map { ($0.skillIndex, $0) })
         return skills
     }
 
@@ -95,6 +97,23 @@ actor MasterDataRepository {
         for id in ids {
             guard let definition = skillsById[id] else {
                 throw RuntimeError.masterDataNotFound(entity: "skill", identifier: id)
+            }
+            definitions.append(definition)
+        }
+        return definitions
+    }
+
+    func skills(withIndices indices: [Int]) async throws -> [SkillDefinition] {
+        guard !indices.isEmpty else { return [] }
+        _ = try await allSkills()
+        guard let skillsByIndex else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill cache is unavailable")
+        }
+        var definitions: [SkillDefinition] = []
+        definitions.reserveCapacity(indices.count)
+        for index in indices {
+            guard let definition = skillsByIndex[index] else {
+                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: "\(index)")
             }
             definitions.append(definition)
         }

@@ -13,6 +13,7 @@ struct SkillDefinition: Identifiable, Sendable, Hashable {
     }
 
     let id: String
+    let skillIndex: Int
     let name: String
     let description: String
     let type: String

@@ -90,6 +90,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS skills (
                 id TEXT PRIMARY KEY,
+                skill_index INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,
                 type TEXT NOT NULL,

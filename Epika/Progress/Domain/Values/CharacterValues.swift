@@ -43,7 +43,7 @@ enum CharacterValues {
 
     struct LearnedSkill: Sendable, Hashable {
         var id: UUID
-        var skillId: String
+        var skillIndex: Int
         var level: Int
         var isEquipped: Bool
         var createdAt: Date
