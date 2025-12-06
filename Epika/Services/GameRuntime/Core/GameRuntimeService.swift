@@ -161,7 +161,7 @@ actor GameRuntimeService {
         try await CharacterAssembler.assembleRuntimeCharacter(repository: repository, from: progress)
     }
 
-    func runtimePartyState(party: RuntimePartyProgress, characters: [RuntimeCharacterProgress]) async throws -> RuntimePartyState {
+    func runtimePartyState(party: PartySnapshot, characters: [RuntimeCharacterProgress]) async throws -> RuntimePartyState {
         try await PartyAssembler.assembleState(repository: repository,
                                                party: party,
                                                characters: characters)
