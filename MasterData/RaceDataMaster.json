@@ -7,6 +7,7 @@
       "index": 1,
       "name": "人間（男）",
       "gender": "male",
+      "genderCode": 1,
       "category": "human",
       "baseStats": {
         "strength": 8,
@@ -23,6 +24,7 @@
       "index": 2,
       "name": "人間（女）",
       "gender": "female",
+      "genderCode": 2,
       "category": "human",
       "baseStats": {
         "strength": 6,
@@ -39,6 +41,7 @@
       "index": 3,
       "name": "ピグミーチャム",
       "gender": "male",
+      "genderCode": 1,
       "category": "humanoid",
       "baseStats": {
         "strength": 7,
@@ -55,6 +58,7 @@
       "index": 4,
       "name": "ノーム",
       "gender": "male",
+      "genderCode": 1,
       "category": "humanoid",
       "baseStats": {
         "strength": 7,
@@ -71,6 +75,7 @@
       "index": 5,
       "name": "ドワーフ",
       "gender": "male",
+      "genderCode": 1,
       "category": "humanoid",
       "baseStats": {
         "strength": 12,
@@ -87,6 +92,7 @@
       "index": 6,
       "name": "ダークエルフ",
       "gender": "male",
+      "genderCode": 1,
       "category": "elf",
       "baseStats": {
         "strength": 8,
@@ -103,6 +109,7 @@
       "index": 7,
       "name": "吸血鬼",
       "gender": "male",
+      "genderCode": 1,
       "category": "undead",
       "baseStats": {
         "strength": 12,
@@ -119,6 +126,7 @@
       "index": 8,
       "name": "エルフ",
       "gender": "female",
+      "genderCode": 2,
       "category": "elf",
       "baseStats": {
         "strength": 6,
@@ -135,6 +143,7 @@
       "index": 9,
       "name": "サイキック",
       "gender": "female",
+      "genderCode": 2,
       "category": "psychic",
       "baseStats": {
         "strength": 5,
@@ -151,6 +160,7 @@
       "index": 10,
       "name": "ワーキャット",
       "gender": "female",
+      "genderCode": 2,
       "category": "beast",
       "baseStats": {
         "strength": 10,
@@ -167,6 +177,7 @@
       "index": 11,
       "name": "ドラゴニュート",
       "gender": "female",
+      "genderCode": 2,
       "category": "dragon",
       "baseStats": {
         "strength": 11,
@@ -183,6 +194,7 @@
       "index": 12,
       "name": "アマゾネス",
       "gender": "female",
+      "genderCode": 2,
       "category": "human",
       "baseStats": {
         "strength": 12,
@@ -199,6 +211,7 @@
       "index": 13,
       "name": "魔造生物",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "construct",
       "baseStats": {
         "strength": 6,
@@ -215,6 +228,7 @@
       "index": 14,
       "name": "アンデッドマン",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "undead",
       "baseStats": {
         "strength": 8,
@@ -231,6 +245,7 @@
       "index": 15,
       "name": "巨人",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "giant",
       "baseStats": {
         "strength": 13,
@@ -247,6 +262,7 @@
       "index": 16,
       "name": "天狗",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "mythical",
       "baseStats": {
         "strength": 8,
@@ -263,6 +279,7 @@
       "index": 17,
       "name": "鬼",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "demon",
       "baseStats": {
         "strength": 15,
@@ -279,6 +296,7 @@
       "index": 18,
       "name": "サイボーグ",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "machine",
       "baseStats": {
         "strength": 8,

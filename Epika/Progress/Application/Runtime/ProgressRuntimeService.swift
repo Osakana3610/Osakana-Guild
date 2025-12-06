@@ -22,11 +22,11 @@ final class ProgressRuntimeService {
         return try await runtimeService.recalculateCombatStats(for: progress, pandoraBoxStackKeys: pandoraBoxStackKeys)
     }
 
-    func raceMaxLevel(for raceId: String) async throws -> Int {
-        if let definition = try await runtimeService.raceDefinition(withId: raceId) {
+    func raceMaxLevel(for raceIndex: UInt8) async throws -> Int {
+        if let definition = try await runtimeService.raceDefinition(withIndex: raceIndex) {
             return definition.maxLevel
         }
-        throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
+        throw ProgressError.invalidInput(description: "種族マスタに存在しないインデックスです (\(raceIndex))")
     }
 
     func cancelExploration(runId: UUID) async {
@@ -87,10 +87,9 @@ private extension ProgressRuntimeService {
         RuntimeCharacterProgress(
             id: snapshot.id,
             displayName: snapshot.displayName,
-            raceId: snapshot.raceId,
-            gender: snapshot.gender,
-            jobId: snapshot.jobId,
-            avatarIdentifier: snapshot.avatarIdentifier,
+            raceIndex: snapshot.raceIndex,
+            jobIndex: snapshot.jobIndex,
+            avatarIndex: snapshot.avatarIndex,
             level: snapshot.level,
             experience: snapshot.experience,
             attributes: snapshot.attributes,

@@ -3,8 +3,8 @@ import Foundation
 enum CharacterAssembler {
     static func assembleState(repository: MasterDataRepository,
                               from progress: RuntimeCharacterProgress) async throws -> RuntimeCharacterState {
-        async let raceDef = repository.race(withId: progress.raceId)
-        async let jobDef = repository.job(withId: progress.jobId)
+        async let raceDef = repository.race(withIndex: progress.raceIndex)
+        async let jobDef = repository.job(withIndex: progress.jobIndex)
         async let spellDefinitions = repository.allSpells()
 
         // 装備付与スキルを合成し、先勝ちで重複除去

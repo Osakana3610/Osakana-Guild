@@ -6,7 +6,7 @@ import SwiftUI
 struct CharacterHeaderSection: View {
     let character: RuntimeCharacter
     let onRename: ((String) async throws -> Void)?
-    let onAvatarChange: ((String) async throws -> Void)?
+    let onAvatarChange: ((UInt16) async throws -> Void)?
 
     @State private var nameText: String
     @State private var renameError: String?
@@ -18,7 +18,7 @@ struct CharacterHeaderSection: View {
 
     init(character: RuntimeCharacter,
          onRename: ((String) async throws -> Void)? = nil,
-         onAvatarChange: ((String) async throws -> Void)? = nil) {
+         onAvatarChange: ((UInt16) async throws -> Void)? = nil) {
         self.character = character
         self.onRename = onRename
         self.onAvatarChange = onAvatarChange
@@ -44,19 +44,19 @@ struct CharacterHeaderSection: View {
         .onChange(of: character.name) { _, newValue in
             nameText = newValue
         }
-        .onChange(of: character.avatarIdentifier) { _, _ in
+        .onChange(of: character.avatarIndex) { _, _ in
             avatarChangeError = nil
         }
         .sheet(isPresented: $isAvatarSheetPresented) {
-            CharacterAvatarSelectionSheet(currentIdentifier: character.avatarIdentifier,
-                                          defaultIdentifier: defaultAvatarIdentifier) { identifier in
-                applyAvatarChange(identifier)
+            CharacterAvatarSelectionSheet(currentAvatarIndex: character.avatarIndex,
+                                          defaultAvatarIndex: UInt16(character.raceIndex)) { newIndex in
+                applyAvatarChange(newIndex)
             }
         }
     }
 
     private var avatarView: some View {
-        CharacterImageView(avatarIdentifier: character.avatarIdentifier, size: 60)
+        CharacterImageView(avatarIndex: character.resolvedAvatarIndex, size: 60)
             .frame(width: 60, height: 60, alignment: .center)
             .overlay(alignment: .bottomTrailing) {
                 if onAvatarChange != nil {
@@ -112,10 +112,8 @@ struct CharacterHeaderSection: View {
         }
     }
 
-    private var defaultAvatarIdentifier: String? {
-        try? CharacterAvatarIdentifierResolver.defaultAvatarIdentifier(jobId: character.jobId,
-                                                                       genderRawValue: character.gender)
-    }
+    /// デフォルトのavatarIndexはRuntimeCharacterから直接取得可能
+    private var defaultAvatarIndex: UInt16 { character.avatarIndex }
 
     private func triggerRename() {
         guard let onRename else { return }
@@ -149,13 +147,13 @@ struct CharacterHeaderSection: View {
         }
     }
 
-    private func applyAvatarChange(_ identifier: String) {
+    private func applyAvatarChange(_ avatarIndex: UInt16) {
         guard let onAvatarChange else { return }
         avatarChangeError = nil
         isChangingAvatar = true
         Task {
             do {
-                try await onAvatarChange(identifier)
+                try await onAvatarChange(avatarIndex)
                 await MainActor.run {
                     isChangingAvatar = false
                     isAvatarSheetPresented = false

@@ -269,6 +269,9 @@
 			shellScript = (
 				"\"${SRCROOT}/Tools/MasterDataGenerator/generate_master_data.sh\"",
 				"",
+				"",
+				"",
+				"",
 			);
 		};
 /* End PBXShellScriptBuildPhase section */

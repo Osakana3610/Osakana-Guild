@@ -22,12 +22,12 @@ struct RuntimeCharacterDetailSheetView: View {
 struct CharacterDetailContent: View {
     let character: RuntimeCharacter
     let onRename: ((String) async throws -> Void)?
-    let onAvatarChange: ((String) async throws -> Void)?
+    let onAvatarChange: ((UInt16) async throws -> Void)?
     let onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)?
 
     init(character: RuntimeCharacter,
          onRename: ((String) async throws -> Void)? = nil,
-         onAvatarChange: ((String) async throws -> Void)? = nil,
+         onAvatarChange: ((UInt16) async throws -> Void)? = nil,
          onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)? = nil) {
         self.character = character
         self.onRename = onRename

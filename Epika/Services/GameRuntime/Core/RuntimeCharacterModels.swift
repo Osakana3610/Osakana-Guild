@@ -14,10 +14,9 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
 
     var id: UInt8
     var displayName: String
-    var raceId: String
-    var gender: String
-    var jobId: String
-    var avatarIdentifier: String
+    var raceIndex: UInt8
+    var jobIndex: UInt8
+    var avatarIndex: UInt16
     var level: Int
     var experience: Int
     var attributes: CoreAttributes
@@ -52,6 +51,15 @@ struct RuntimeCharacterState: Sendable {
     let spellLoadout: SkillRuntimeEffects.SpellLoadout
 
     var combatSnapshot: RuntimeCharacterProgress.Combat { progress.combat }
+
+    /// avatarIndex: 0=デフォルト（種族画像）、それ以外は保存値を使用
+    var avatarIndex: UInt16 { progress.avatarIndex }
+
+    /// 表示用の解決済みavatarIndex（0の場合はraceIndexを使用）
+    var resolvedAvatarIndex: UInt16 {
+        progress.avatarIndex == 0 ? UInt16(progress.raceIndex) : progress.avatarIndex
+    }
+
     var isMartialEligible: Bool {
         if progress.combat.isMartialEligible { return true }
         guard progress.combat.physicalAttack > 0 else { return false }
@@ -87,15 +95,22 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     var name: String { progress.displayName }
     var level: Int { progress.level }
     var experience: Int { progress.experience }
-    var jobId: String { progress.jobId }
-    var gender: String { progress.gender }
+    var raceIndex: UInt8 { progress.raceIndex }
+    var jobIndex: UInt8 { progress.jobIndex }
     var currentHP: Int { progress.hitPoints.current }
     var maxHP: Int { progress.hitPoints.maximum }
     var isAlive: Bool { currentHP > 0 }
 
-    var raceName: String { raceData?.name ?? progress.raceId }
-    var jobName: String { jobData?.name ?? progress.jobId }
-    var avatarIdentifier: String { progress.avatarIdentifier }
+    var raceName: String { raceData?.name ?? "種族\(progress.raceIndex)" }
+    var jobName: String { jobData?.name ?? "職業\(progress.jobIndex)" }
+
+    /// avatarIndex: 0=デフォルト（種族画像）、それ以外は保存値を使用
+    var avatarIndex: UInt16 { progress.avatarIndex }
+
+    /// 表示用の解決済みavatarIndex（0の場合はraceIndexを使用）
+    var resolvedAvatarIndex: UInt16 {
+        progress.avatarIndex == 0 ? UInt16(progress.raceIndex) : progress.avatarIndex
+    }
 
     var baseStats: RuntimeCharacterProgress.CoreAttributes { progress.attributes }
     var combatStats: RuntimeCharacterProgress.Combat { progress.combat }

@@ -6,7 +6,7 @@ import ImageIO
 /// 種族・職業画像を指定されたサイズで表示し、存在しない場合はSFSymbolフォールバックを提供
 struct CharacterImageView: View {
     enum ImageType {
-        case avatar(identifier: String)
+        case avatar(index: UInt16)
         case race(id: String, gender: String)
         case job(id: String, gender: String)
     }
@@ -21,8 +21,8 @@ struct CharacterImageView: View {
         self.size = size
     }
 
-    init(avatarIdentifier: String, size: CGFloat = 55) {
-        self.init(imageType: .avatar(identifier: avatarIdentifier), size: size)
+    init(avatarIndex: UInt16, size: CGFloat = 55) {
+        self.init(imageType: .avatar(index: avatarIndex), size: size)
     }
 
     var body: some View {
@@ -63,12 +63,16 @@ struct CharacterImageView: View {
     private func resolveResource() -> ImageResource? {
         do {
             switch imageType {
-            case .avatar(let identifier):
-                if UserAvatarStore.isUserAvatarIdentifier(identifier),
-                   let url = UserAvatarStore.fileURL(for: identifier) {
-                    return .file(url)
+            case .avatar(let index):
+                // 400以上はユーザーカスタムアバター
+                if index >= 400 {
+                    let identifier = String(index)
+                    if let url = UserAvatarStore.fileURL(for: identifier) {
+                        return .file(url)
+                    }
+                    return nil
                 } else {
-                    return .bundle(identifier)
+                    return .bundle(String(index))
                 }
             case .race(let id, let gender):
                 return .bundle(try CharacterAvatarIdentifierResolver.raceImagePath(raceId: id,

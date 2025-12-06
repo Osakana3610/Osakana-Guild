@@ -219,7 +219,7 @@ private struct GuildCharacterRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            CharacterImageView(avatarIdentifier: summary.avatarIdentifier, size: 32)
+            CharacterImageView(avatarIndex: summary.resolvedAvatarIndex, size: 32)
             VStack(alignment: .leading, spacing: 4) {
                 Text(summary.name)
                     .font(.headline)
@@ -330,12 +330,12 @@ private struct LazyRuntimeCharacterDetailView: View {
     }
 
     @MainActor
-    private func changeAvatar(to identifier: String) async throws {
-        if let current = runtimeCharacter, current.progress.avatarIdentifier == identifier {
+    private func changeAvatar(to avatarIndex: UInt16) async throws {
+        if let current = runtimeCharacter, current.avatarIndex == avatarIndex {
             return
         }
         let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
-            snapshot.avatarIdentifier = identifier
+            snapshot.avatarIndex = avatarIndex
         }
         runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
     }
@@ -1077,7 +1077,7 @@ private struct CharacterReviveView: View {
                     List {
                         ForEach(deadCharacters, id: \.id) { character in
                             HStack {
-                                CharacterImageView(avatarIdentifier: character.avatarIdentifier, size: 44)
+                                CharacterImageView(avatarIndex: character.resolvedAvatarIndex, size: 44)
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(character.name)
                                         .font(.headline)
@@ -1162,7 +1162,7 @@ private struct CharacterJobChangeView: View {
     @State private var characters: [RuntimeCharacter] = []
     @State private var jobs: [JobDefinition] = []
     @State private var selectedCharacterId: UInt8?
-    @State private var selectedJobId: String?
+    @State private var selectedJobIndex: UInt8?
     @State private var isLoading = false
     @State private var isProcessing = false
     @State private var errorMessage: String?
@@ -1193,10 +1193,10 @@ private struct CharacterJobChangeView: View {
                     if jobs.isEmpty {
                         ProgressView()
                     } else {
-                        Picker("新しい職業", selection: $selectedJobId) {
-                            Text("未選択").tag(String?.none)
+                        Picker("新しい職業", selection: $selectedJobIndex) {
+                            Text("未選択").tag(UInt8?.none)
                             ForEach(jobs) { job in
-                                Text(job.name).tag(String?.some(job.id))
+                                Text(job.name).tag(UInt8?.some(UInt8(job.index)))
                             }
                         }
                     }
@@ -1225,7 +1225,7 @@ private struct CharacterJobChangeView: View {
     }
 
     private var canSubmit: Bool {
-        selectedCharacterId != nil && selectedJobId != nil
+        selectedCharacterId != nil && selectedJobIndex != nil
     }
 
     @MainActor
@@ -1251,8 +1251,8 @@ private struct CharacterJobChangeView: View {
             if selectedCharacterId == nil {
                 selectedCharacterId = characters.first?.id
             }
-            if selectedJobId == nil {
-                selectedJobId = jobs.first?.id
+            if selectedJobIndex == nil {
+                selectedJobIndex = jobs.first.map { UInt8($0.index) }
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -1263,19 +1263,19 @@ private struct CharacterJobChangeView: View {
 
     @MainActor
     private func changeJob() async {
-        guard let characterId = selectedCharacterId, let jobId = selectedJobId else { return }
+        guard let characterId = selectedCharacterId, let jobIndex = selectedJobIndex else { return }
         if isProcessing { return }
         isProcessing = true
         errorMessage = nil
         defer { isProcessing = false }
         do {
             let updated = try await characterService.updateCharacter(id: characterId) { progress in
-                progress.jobId = jobId
-                if !progress.jobHistory.contains(where: { $0.jobId == jobId }) {
+                progress.jobIndex = jobIndex
+                if !progress.jobHistory.contains(where: { $0.jobIndex == jobIndex }) {
                     let now = Date()
                     progress.jobHistory.append(
                         .init(id: UUID(),
-                              jobId: jobId,
+                              jobIndex: jobIndex,
                               achievedAt: now,
                               createdAt: now,
                               updatedAt: now)

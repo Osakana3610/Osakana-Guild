@@ -178,6 +178,11 @@ actor MasterDataRepository {
         return jobsById?[id]
     }
 
+    func job(withIndex index: UInt8) async throws -> JobDefinition? {
+        let jobs = try await allJobs()
+        return jobs.first { $0.index == Int(index) }
+    }
+
     func allRaces() async throws -> [RaceDefinition] {
         if let racesCache { return racesCache }
         try await ensureInitialized()
@@ -191,6 +196,11 @@ actor MasterDataRepository {
         if let racesById, let definition = racesById[id] { return definition }
         _ = try await allRaces()
         return racesById?[id]
+    }
+
+    func race(withIndex index: UInt8) async throws -> RaceDefinition? {
+        let races = try await allRaces()
+        return races.first { $0.index == Int(index) }
     }
 
     func allShops() async throws -> [ShopDefinition] {
