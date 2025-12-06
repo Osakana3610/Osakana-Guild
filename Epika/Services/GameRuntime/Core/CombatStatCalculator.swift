@@ -30,10 +30,10 @@ struct CombatStatCalculator {
 
     static func calculate(for context: Context) throws -> Result {
         guard let race = context.state.race else {
-            throw CalculationError.missingRaceDefinition(context.progress.raceId)
+            throw CalculationError.missingRaceDefinition("index:\(context.progress.raceIndex)")
         }
         guard let job = context.state.job else {
-            throw CalculationError.missingJobDefinition(context.progress.jobId)
+            throw CalculationError.missingJobDefinition("index:\(context.progress.jobIndex)")
         }
 
         let skillEffects = try SkillEffectAggregator(skills: context.state.learnedSkills)
@@ -515,7 +515,7 @@ private struct CombatAccumulator {
     }
 
     func makeCombat() throws -> RuntimeCharacterProgress.Combat {
-        let baseLevelFactor = CombatFormulas.levelDependentValue(raceId: progress.raceId,
+        let baseLevelFactor = CombatFormulas.levelDependentValue(raceId: race.id,
                                                                  raceCategory: race.category,
                                                                  level: progress.level)
         let levelFactor = baseLevelFactor * growthMultiplier

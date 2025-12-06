@@ -95,7 +95,7 @@ enum CharacterValues {
 
     struct JobHistoryEntry: Sendable, Hashable {
         var id: UUID
-        var jobId: String
+        var jobIndex: UInt8
         var achievedAt: Date
         var createdAt: Date
         var updatedAt: Date

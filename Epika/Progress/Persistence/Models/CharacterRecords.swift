@@ -7,6 +7,7 @@ final class CharacterRecord {
     var displayName: String = ""
     var raceIndex: UInt8 = 0                   // 種族（18種）
     var jobIndex: UInt8 = 0                    // 職業（16種）
+    var avatarIndex: UInt16 = 0                // 0=デフォルト（種族画像）、101〜316=職業、400+=カスタム
     var level: UInt8 = 1                       // 最大200
     var experience: Int32 = 0                  // 数億まで
     var currentHP: Int32 = 0                   // 20万超の可能性
@@ -21,6 +22,7 @@ final class CharacterRecord {
          displayName: String,
          raceIndex: UInt8,
          jobIndex: UInt8,
+         avatarIndex: UInt16 = 0,
          level: UInt8 = 1,
          experience: Int32 = 0,
          currentHP: Int32 = 0,
@@ -34,6 +36,7 @@ final class CharacterRecord {
         self.displayName = displayName
         self.raceIndex = raceIndex
         self.jobIndex = jobIndex
+        self.avatarIndex = avatarIndex
         self.level = level
         self.experience = experience
         self.currentHP = currentHP

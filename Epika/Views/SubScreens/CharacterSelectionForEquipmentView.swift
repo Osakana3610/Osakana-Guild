@@ -84,7 +84,7 @@ private struct CharacterRowForEquipment: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            CharacterImageView(avatarIdentifier: character.avatarIdentifier, size: 44)
+            CharacterImageView(avatarIndex: character.avatarIndex, size: 44)
                 .frame(width: 44, height: 44)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -305,8 +305,9 @@ struct EquipmentEditorView: View {
 
         // 種族制限チェック
         if !definition.allowedRaces.isEmpty {
-            let canBypass = definition.bypassRaceRestrictions.contains(currentCharacter.progress.raceId)
-            let isAllowed = definition.allowedRaces.contains(currentCharacter.progress.raceId)
+            let raceId = currentCharacter.raceData?.id ?? ""
+            let canBypass = definition.bypassRaceRestrictions.contains(raceId)
+            let isAllowed = definition.allowedRaces.contains(raceId)
             if !canBypass && !isAllowed {
                 return (false, "種族制限により装備できません")
             }
@@ -314,14 +315,16 @@ struct EquipmentEditorView: View {
 
         // 職業制限チェック
         if !definition.allowedJobs.isEmpty {
-            if !definition.allowedJobs.contains(currentCharacter.progress.jobId) {
+            let jobId = currentCharacter.jobData?.id ?? ""
+            if !definition.allowedJobs.contains(jobId) {
                 return (false, "職業制限により装備できません")
             }
         }
 
         // 性別制限チェック
         if !definition.allowedGenders.isEmpty {
-            if !definition.allowedGenders.contains(currentCharacter.progress.gender) {
+            let gender = currentCharacter.raceData?.gender ?? ""
+            if !definition.allowedGenders.contains(gender) {
                 return (false, "性別制限により装備できません")
             }
         }

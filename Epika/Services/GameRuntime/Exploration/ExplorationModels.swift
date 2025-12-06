@@ -28,7 +28,7 @@ struct BattleParticipantSnapshot: Codable, Sendable {
     let partyMemberId: UInt8?
     let characterId: UInt8?
     let name: String
-    let avatarIdentifier: String?
+    let avatarIndex: UInt16?
     let level: Int?
     let maxHP: Int
 }

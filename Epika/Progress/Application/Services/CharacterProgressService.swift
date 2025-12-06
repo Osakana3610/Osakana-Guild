@@ -16,8 +16,8 @@ actor CharacterProgressService {
 
     private let container: ModelContainer
     private let runtime: ProgressRuntimeService
-    private var raceLevelCache: [String: Int] = [:]
-    private var raceMaxExperienceCache: [String: Int] = [:]
+    private var raceLevelCache: [UInt8: Int] = [:]
+    private var raceMaxExperienceCache: [UInt8: Int] = [:]
 
     init(container: ModelContainer, runtime: ProgressRuntimeService) {
         self.container = container
@@ -139,9 +139,9 @@ actor CharacterProgressService {
         if snapshot.experience < 0 {
             throw ProgressError.invalidInput(description: "経験値は0以上である必要があります")
         }
-        let clampedExperience = try await clampExperience(snapshot.experience, raceId: snapshot.raceId)
+        let clampedExperience = try await clampExperience(snapshot.experience, raceIndex: snapshot.raceIndex)
         snapshot.experience = clampedExperience
-        let normalizedLevel = try await resolveLevel(for: clampedExperience, raceId: snapshot.raceId)
+        let normalizedLevel = try await resolveLevel(for: clampedExperience, raceIndex: snapshot.raceIndex)
         snapshot.level = normalizedLevel
         apply(snapshot: snapshot, to: record)
         try context.save()
@@ -157,8 +157,6 @@ actor CharacterProgressService {
         let records = try context.fetch(descriptor)
         let map = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
 
-        let masterData = MasterDataRuntimeService.shared
-
         for update in updates {
             guard let record = map[update.characterId] else {
                 throw ProgressError.characterNotFound
@@ -171,14 +169,9 @@ actor CharacterProgressService {
                 }
                 let updatedExperience = max(0, Int(addition.partialValue))
 
-                // raceIdを取得
-                guard let raceId = await masterData.getRaceId(for: record.raceIndex) else {
-                    throw ProgressError.invalidInput(description: "種族情報が見つかりません")
-                }
-
-                let cappedExperience = try await clampExperience(updatedExperience, raceId: raceId)
+                let cappedExperience = try await clampExperience(updatedExperience, raceIndex: record.raceIndex)
                 record.experience = Int32(cappedExperience)
-                let computedLevel = try await resolveLevel(for: cappedExperience, raceId: raceId)
+                let computedLevel = try await resolveLevel(for: cappedExperience, raceIndex: record.raceIndex)
                 if computedLevel != Int(previousLevel) {
                     record.level = UInt8(computedLevel)
                 }
@@ -376,8 +369,8 @@ actor CharacterProgressService {
 // MARK: - Private Helpers
 
 private extension CharacterProgressService {
-    func resolveLevel(for experience: Int, raceId: String) async throws -> Int {
-        let maxLevel = try await raceMaxLevel(for: raceId)
+    func resolveLevel(for experience: Int, raceIndex: UInt8) async throws -> Int {
+        let maxLevel = try await raceMaxLevel(for: raceIndex)
         do {
             return try await MainActor.run {
                 try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
@@ -391,30 +384,30 @@ private extension CharacterProgressService {
         }
     }
 
-    func raceMaxLevel(for raceId: String) async throws -> Int {
-        if let cached = raceLevelCache[raceId] {
+    func raceMaxLevel(for raceIndex: UInt8) async throws -> Int {
+        if let cached = raceLevelCache[raceIndex] {
             return cached
         }
-        let resolved = try await runtime.raceMaxLevel(for: raceId)
-        raceLevelCache[raceId] = resolved
+        let resolved = try await runtime.raceMaxLevel(for: raceIndex)
+        raceLevelCache[raceIndex] = resolved
         return resolved
     }
 
-    func clampExperience(_ experience: Int, raceId: String) async throws -> Int {
+    func clampExperience(_ experience: Int, raceIndex: UInt8) async throws -> Int {
         guard experience > 0 else { return 0 }
-        let maximum = try await raceMaxExperience(for: raceId)
+        let maximum = try await raceMaxExperience(for: raceIndex)
         return min(experience, maximum)
     }
 
-    func raceMaxExperience(for raceId: String) async throws -> Int {
-        if let cached = raceMaxExperienceCache[raceId] {
+    func raceMaxExperience(for raceIndex: UInt8) async throws -> Int {
+        if let cached = raceMaxExperienceCache[raceIndex] {
             return cached
         }
-        let maxLevel = try await raceMaxLevel(for: raceId)
+        let maxLevel = try await raceMaxLevel(for: raceIndex)
         let maximumExperience = try await MainActor.run {
             try CharacterExperienceTable.totalExperience(toReach: maxLevel)
         }
-        raceMaxExperienceCache[raceId] = maximumExperience
+        raceMaxExperienceCache[raceIndex] = maximumExperience
         return maximumExperience
     }
 
@@ -441,14 +434,6 @@ private extension CharacterProgressService {
 
         let masterData = MasterDataRuntimeService.shared
 
-        // Index → ID 変換
-        guard let raceId = await masterData.getRaceId(for: record.raceIndex) else {
-            throw ProgressError.invalidInput(description: "種族情報が見つかりません")
-        }
-        guard let jobId = await masterData.getJobId(for: record.jobIndex) else {
-            throw ProgressError.invalidInput(description: "職業情報が見つかりません")
-        }
-
         let primaryPersonalityId: String?
         if record.primaryPersonalityIndex > 0 {
             primaryPersonalityId = await masterData.getPrimaryPersonalityId(for: record.primaryPersonalityIndex)
@@ -462,18 +447,6 @@ private extension CharacterProgressService {
         } else {
             secondaryPersonalityId = nil
         }
-
-        // 種族から性別を導出
-        let gender: String
-        let allRaces = try await masterData.getAllRaces()
-        if let raceDefinition = allRaces.first(where: { $0.id == raceId }) {
-            gender = raceDefinition.gender
-        } else {
-            gender = "other"
-        }
-
-        // アバター識別子を導出
-        let avatarIdentifier = try await resolveAvatarIdentifier(jobId: jobId, genderRawValue: gender)
 
         // 装備をスナップショット形式に変換（グループ化）
         var groupedEquipment: [String: (record: CharacterEquipmentRecord, count: Int)] = [:]
@@ -543,10 +516,9 @@ private extension CharacterProgressService {
             persistentIdentifier: record.persistentModelID,
             id: record.id,
             displayName: record.displayName,
-            raceId: raceId,
-            gender: gender,
-            jobId: jobId,
-            avatarIdentifier: avatarIdentifier,
+            raceIndex: record.raceIndex,
+            jobIndex: record.jobIndex,
+            avatarIndex: record.avatarIndex,
             level: Int(record.level),
             experience: Int(record.experience),
             attributes: dummyAttributes,
@@ -600,22 +572,9 @@ private extension CharacterProgressService {
         return snapshot
     }
 
-    func resolveAvatarIdentifier(jobId: String, genderRawValue: String) async throws -> String {
-        do {
-            return try await MainActor.run {
-                try CharacterAvatarIdentifierResolver.defaultAvatarIdentifier(jobId: jobId,
-                                                                              genderRawValue: genderRawValue)
-            }
-        } catch let resolverError as CharacterAvatarIdentifierResolverError {
-            let message = resolverError.errorDescription ?? resolverError.localizedDescription
-            throw ProgressError.invalidInput(description: message)
-        } catch {
-            throw error
-        }
-    }
-
     func apply(snapshot: CharacterSnapshot, to record: CharacterRecord) {
         record.displayName = snapshot.displayName
+        record.avatarIndex = snapshot.avatarIndex
         record.level = UInt8(snapshot.level)
         record.experience = Int32(snapshot.experience)
         record.currentHP = Int32(snapshot.hitPoints.current)

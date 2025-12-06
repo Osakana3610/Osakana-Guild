@@ -2,12 +2,10 @@ import SwiftUI
 import PhotosUI
 
 struct CharacterAvatarSelectionSheet: View {
-    let currentIdentifier: String
-    let defaultIdentifier: String?
-    let onSelect: (String) -> Void
+    let currentAvatarIndex: UInt16
+    let defaultAvatarIndex: UInt16  // 通常はraceIndex（種族画像）
+    let onSelect: (UInt16) -> Void
 
-    @State private var jobAvatars: [String] = CharacterAvatarIdentifierResolver.defaultJobAvatarIdentifiers
-    @State private var raceAvatars: [String] = CharacterAvatarIdentifierResolver.defaultRaceAvatarIdentifiers
     @State private var importedAvatars: [UserAvatar] = []
     @State private var isLoadingImported = false
     @State private var importError: String?
@@ -15,13 +13,32 @@ struct CharacterAvatarSelectionSheet: View {
 
     private let columns: [GridItem] = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
 
+    /// 職業画像のavatarIndex一覧（genderCode * 100 + jobIndex）
+    /// genderCode: 1=male, 2=female, 3=genderless
+    /// jobIndex: 1〜16
+    private var jobAvatarIndices: [UInt16] {
+        var indices: [UInt16] = []
+        for genderCode: UInt16 in 1...3 {
+            for jobIndex: UInt16 in 1...16 {
+                indices.append(genderCode * 100 + jobIndex)
+            }
+        }
+        return indices
+    }
+
+    /// 種族画像のavatarIndex一覧（1〜18）
+    private var raceAvatarIndices: [UInt16] {
+        Array(1...18)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    if let defaultIdentifier {
+                    // デフォルトに戻すボタン
+                    if currentAvatarIndex != 0 {
                         Button {
-                            onSelect(defaultIdentifier)
+                            onSelect(0)  // 0=デフォルト（種族画像）
                         } label: {
                             HStack {
                                 Spacer()
@@ -33,8 +50,8 @@ struct CharacterAvatarSelectionSheet: View {
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
                     }
-                    avatarSection(title: "職業イラスト", identifiers: jobAvatars)
-                    avatarSection(title: "種族イラスト", identifiers: raceAvatars)
+                    avatarSection(title: "種族イラスト", indices: raceAvatarIndices)
+                    avatarSection(title: "職業イラスト", indices: jobAvatarIndices)
                     importedSection
                 }
                 .padding()
@@ -70,13 +87,13 @@ struct CharacterAvatarSelectionSheet: View {
         }
     }
 
-    private func avatarSection(title: String, identifiers: [String]) -> some View {
+    private func avatarSection(title: String, indices: [UInt16]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)
-                LazyVGrid(columns: columns, spacing: 12) {
-                    ForEach(identifiers, id: \.self) { identifier in
-                        avatarCell(identifier: identifier, importedAvatar: nil)
+            LazyVGrid(columns: columns, spacing: 12) {
+                ForEach(indices, id: \.self) { index in
+                    avatarCell(avatarIndex: index, importedAvatar: nil)
                 }
             }
         }
@@ -99,7 +116,9 @@ struct CharacterAvatarSelectionSheet: View {
             } else {
                 LazyVGrid(columns: columns, spacing: 12) {
                     ForEach(importedAvatars) { avatar in
-                        avatarCell(identifier: avatar.id, importedAvatar: avatar)
+                        if let index = UInt16(avatar.id) {
+                            avatarCell(avatarIndex: index, importedAvatar: avatar)
+                        }
                     }
                 }
             }
@@ -107,17 +126,17 @@ struct CharacterAvatarSelectionSheet: View {
     }
 
     @ViewBuilder
-    private func avatarCell(identifier: String, importedAvatar: UserAvatar?) -> some View {
+    private func avatarCell(avatarIndex: UInt16, importedAvatar: UserAvatar?) -> some View {
         Button {
-            onSelect(identifier)
+            onSelect(avatarIndex)
         } label: {
             ZStack(alignment: .topTrailing) {
-                CharacterImageView(avatarIdentifier: identifier, size: 80)
+                CharacterImageView(avatarIndex: avatarIndex, size: 80)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .stroke(isCurrent(identifier) ? Color.accentColor : Color.clear, lineWidth: 3)
+                            .stroke(isCurrent(avatarIndex) ? Color.accentColor : Color.clear, lineWidth: 3)
                     )
-                if isCurrent(identifier) {
+                if isCurrent(avatarIndex) {
                     Image(systemName: "checkmark.circle.fill")
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(.white, Color.accentColor)
@@ -138,8 +157,12 @@ struct CharacterAvatarSelectionSheet: View {
         }
     }
 
-    private func isCurrent(_ identifier: String) -> Bool {
-        identifier == currentIdentifier
+    private func isCurrent(_ index: UInt16) -> Bool {
+        // 0=デフォルト（種族画像）の場合はdefaultAvatarIndexと比較
+        if currentAvatarIndex == 0 {
+            return index == defaultAvatarIndex
+        }
+        return index == currentAvatarIndex
     }
 
     private func loadImported() async {
@@ -170,7 +193,9 @@ struct CharacterAvatarSelectionSheet: View {
             let saved = try await UserAvatarStore.shared.save(data: data)
             await MainActor.run {
                 importedAvatars.insert(saved, at: 0)
-                onSelect(saved.id)
+                if let index = UInt16(saved.id) {
+                    onSelect(index)
+                }
             }
         } catch {
             await MainActor.run {
@@ -184,12 +209,8 @@ struct CharacterAvatarSelectionSheet: View {
             try await UserAvatarStore.shared.delete(identifier: avatar.id)
             await MainActor.run {
                 importedAvatars.removeAll { $0.id == avatar.id }
-                if currentIdentifier == avatar.id {
-                    if let defaultIdentifier {
-                        onSelect(defaultIdentifier)
-                    } else if let firstDefault = CharacterAvatarIdentifierResolver.defaultJobAvatarIdentifiers.first {
-                        onSelect(firstDefault)
-                    }
+                if let index = UInt16(avatar.id), currentAvatarIndex == index {
+                    onSelect(0)  // デフォルトに戻す
                 }
             }
         } catch {

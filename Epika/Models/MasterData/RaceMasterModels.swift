@@ -11,6 +11,7 @@ struct RaceDefinition: Identifiable, Sendable, Hashable {
     let index: Int
     let name: String
     let gender: String
+    let genderCode: UInt8
     let category: String
     let description: String
     let baseStats: [BaseStat]

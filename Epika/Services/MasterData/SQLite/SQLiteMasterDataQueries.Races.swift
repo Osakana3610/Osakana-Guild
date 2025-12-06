@@ -9,6 +9,7 @@ extension SQLiteMasterDataManager {
             var index: Int
             var name: String
             var gender: String
+            var genderCode: UInt8
             var category: String
             var description: String
             var baseStats: [RaceDefinition.BaseStat] = []
@@ -17,22 +18,24 @@ extension SQLiteMasterDataManager {
 
         var builders: [String: Builder] = [:]
         var order: [String] = []
-        let baseSQL = "SELECT id, race_index, name, gender, category, description FROM races ORDER BY race_index;"
+        let baseSQL = "SELECT id, race_index, name, gender, gender_code, category, description FROM races ORDER BY race_index;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(baseStatement, 0),
                   let nameC = sqlite3_column_text(baseStatement, 2),
                   let genderC = sqlite3_column_text(baseStatement, 3),
-                  let categoryC = sqlite3_column_text(baseStatement, 4),
-                  let descriptionC = sqlite3_column_text(baseStatement, 5) else { continue }
+                  let categoryC = sqlite3_column_text(baseStatement, 5),
+                  let descriptionC = sqlite3_column_text(baseStatement, 6) else { continue }
             let id = String(cString: idC)
             let index = Int(sqlite3_column_int(baseStatement, 1))
+            let genderCode = UInt8(sqlite3_column_int(baseStatement, 4))
             builders[id] = Builder(
                 id: id,
                 index: index,
                 name: String(cString: nameC),
                 gender: String(cString: genderC),
+                genderCode: genderCode,
                 category: String(cString: categoryC),
                 description: String(cString: descriptionC),
                 maxLevel: nil
@@ -71,6 +74,7 @@ extension SQLiteMasterDataManager {
                 index: builder.index,
                 name: builder.name,
                 gender: builder.gender,
+                genderCode: builder.genderCode,
                 category: builder.category,
                 description: builder.description,
                 baseStats: builder.baseStats.sorted { $0.stat < $1.stat },

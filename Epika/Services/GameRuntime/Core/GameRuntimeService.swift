@@ -171,6 +171,10 @@ actor GameRuntimeService {
         try await repository.race(withId: raceId)
     }
 
+    func raceDefinition(withIndex raceIndex: UInt8) async throws -> RaceDefinition? {
+        try await repository.race(withIndex: raceIndex)
+    }
+
     func recalculateCombatStats(for progress: RuntimeCharacterProgress,
                                    pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
         let state = try await CharacterAssembler.assembleState(repository: repository, from: progress)

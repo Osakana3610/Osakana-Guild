@@ -30,10 +30,9 @@ struct CombatSnapshotBuilder {
 
         let progress = RuntimeCharacterProgress(id: 0,  // 敵用の一時ID
                                                 displayName: definition.name,
-                                                raceId: definition.race,
-                                                gender: "enemy",
-                                                jobId: definition.job ?? "enemy.default",
-                                                avatarIdentifier: definition.id,
+                                                raceIndex: 0,  // 敵用の一時値
+                                                jobIndex: 0,   // 敵用の一時値
+                                                avatarIndex: 0, // 敵はアバター画像なし
                                                 level: level,
                                                 experience: 0,
                                                 attributes: baseAttributes,
@@ -89,6 +88,7 @@ private extension CombatSnapshotBuilder {
                               index: 0,
                               name: definition.race.capitalized,
                               gender: "enemy",
+                              genderCode: 0,  // 敵用
                               category: definition.category,
                               description: "Auto-generated enemy race",
                               baseStats: baseStats,

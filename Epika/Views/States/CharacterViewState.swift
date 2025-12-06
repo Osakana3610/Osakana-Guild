@@ -15,27 +15,32 @@ final class CharacterViewState {
         let raceName: String
         let isAlive: Bool
         let createdAt: Date
-        let jobId: String
-        let raceId: String
+        let jobIndex: UInt8
+        let raceIndex: UInt8
         let gender: String
         let currentHP: Int
         let maxHP: Int
-        let avatarIdentifier: String
+        let avatarIndex: UInt16
+
+        /// 表示用のavatarIndex（0の場合はraceIndexを使用）
+        var resolvedAvatarIndex: UInt16 {
+            avatarIndex == 0 ? UInt16(raceIndex) : avatarIndex
+        }
 
         init(snapshot: CharacterSnapshot, job: JobDefinition?, race: RaceDefinition?) {
             self.id = snapshot.id
             self.name = snapshot.displayName
             self.level = snapshot.level
-            self.jobName = job?.name ?? snapshot.jobId
-            self.raceName = race?.name ?? snapshot.raceId
+            self.jobName = job?.name ?? "職業\(snapshot.jobIndex)"
+            self.raceName = race?.name ?? "種族\(snapshot.raceIndex)"
             self.isAlive = snapshot.hitPoints.current > 0
             self.createdAt = snapshot.createdAt
-            self.jobId = snapshot.jobId
-            self.raceId = snapshot.raceId
-            self.gender = snapshot.gender
+            self.jobIndex = snapshot.jobIndex
+            self.raceIndex = snapshot.raceIndex
+            self.gender = race?.gender ?? "不明"
             self.currentHP = snapshot.hitPoints.current
             self.maxHP = snapshot.hitPoints.maximum
-            self.avatarIdentifier = snapshot.avatarIdentifier
+            self.avatarIndex = snapshot.avatarIndex
         }
 
     }
@@ -86,13 +91,13 @@ final class CharacterViewState {
         async let jobsTask = masterDataService.getAllJobs()
         async let racesTask = masterDataService.getAllRaces()
         let (jobs, races) = try await (jobsTask, racesTask)
-        let jobMap = Dictionary(uniqueKeysWithValues: jobs.map { ($0.id, $0) })
-        let raceMap = Dictionary(uniqueKeysWithValues: races.map { ($0.id, $0) })
+        let jobMap = Dictionary(uniqueKeysWithValues: jobs.map { (UInt8($0.index), $0) })
+        let raceMap = Dictionary(uniqueKeysWithValues: races.map { (UInt8($0.index), $0) })
 
         summaries = snapshots.map { snapshot in
             CharacterSummary(snapshot: snapshot,
-                             job: jobMap[snapshot.jobId],
-                             race: raceMap[snapshot.raceId])
+                             job: jobMap[snapshot.jobIndex],
+                             race: raceMap[snapshot.raceIndex])
         }
         .sorted { $0.createdAt < $1.createdAt }
     }
