@@ -35,8 +35,10 @@ enum CharacterValues {
     }
 
     struct Personality: Sendable, Hashable {
-        var primaryId: String?
-        var secondaryId: String?
+        /// 0 = なし
+        var primaryIndex: UInt8
+        /// 0 = なし
+        var secondaryIndex: UInt8
     }
 
     struct LearnedSkill: Sendable, Hashable {

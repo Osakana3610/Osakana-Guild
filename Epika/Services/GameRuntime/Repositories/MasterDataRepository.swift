@@ -277,6 +277,18 @@ actor MasterDataRepository {
         return personalitySecondaryById?[id]
     }
 
+    func personalityPrimary(withIndex index: UInt8) async throws -> PersonalityPrimaryDefinition? {
+        guard index > 0 else { return nil }
+        let personalities = try await allPersonalityPrimary()
+        return personalities.first { $0.index == Int(index) }
+    }
+
+    func personalitySecondary(withIndex index: UInt8) async throws -> PersonalitySecondaryDefinition? {
+        guard index > 0 else { return nil }
+        let personalities = try await allPersonalitySecondary()
+        return personalities.first { $0.index == Int(index) }
+    }
+
     func allDungeons() async throws -> ([DungeonDefinition], [EncounterTableDefinition], [DungeonFloorDefinition]) {
         if let dungeonsCache {
             if dungeonsById == nil {

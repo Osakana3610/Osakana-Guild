@@ -753,8 +753,8 @@ private struct CharacterCreationView: View {
         do {
             let request = CharacterProgressService.CharacterCreationRequest(
                 displayName: trimmed,
-                raceId: race.id,
-                jobId: job.id
+                raceIndex: UInt8(race.index),
+                jobIndex: UInt8(job.index)
             )
             _ = try await characterService.createCharacter(request)
             onComplete()

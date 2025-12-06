@@ -42,14 +42,8 @@ enum CharacterAssembler {
         }
 
         let loadout = try await assembleLoadout(repository: repository, from: revivedProgress.equippedItems)
-        var primary: PersonalityPrimaryDefinition? = nil
-        if let primaryId = revivedProgress.personality.primaryId {
-            primary = try await repository.personalityPrimary(withId: primaryId)
-        }
-        var secondary: PersonalitySecondaryDefinition? = nil
-        if let secondaryId = revivedProgress.personality.secondaryId {
-            secondary = try await repository.personalitySecondary(withId: secondaryId)
-        }
+        let primary = try await repository.personalityPrimary(withIndex: revivedProgress.personality.primaryIndex)
+        let secondary = try await repository.personalitySecondary(withIndex: revivedProgress.personality.secondaryIndex)
 
         let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
         let spells = try await spellDefinitions
