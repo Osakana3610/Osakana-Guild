@@ -3,8 +3,8 @@ import Foundation
 /// 戦闘実行時のコンテキスト。戦闘ごとにインスタンスを生成し、並行実行時のデータ競合を防ぐ。
 struct BattleContext {
     // MARK: - 参照データ（不変）
-    let statusDefinitions: [String: StatusEffectDefinition]
-    let skillDefinitions: [String: SkillDefinition]
+    let statusDefinitions: [UInt8: StatusEffectDefinition]
+    let skillDefinitions: [UInt16: SkillDefinition]
 
     // MARK: - 戦闘状態（可変）
     var players: [BattleActor]
@@ -21,8 +21,8 @@ struct BattleContext {
     // MARK: - 初期化
     init(players: [BattleActor],
          enemies: [BattleActor],
-         statusDefinitions: [String: StatusEffectDefinition],
-         skillDefinitions: [String: SkillDefinition],
+         statusDefinitions: [UInt8: StatusEffectDefinition],
+         skillDefinitions: [UInt16: SkillDefinition],
          random: GameRandomSource) {
         self.players = players
         self.enemies = enemies
@@ -95,7 +95,7 @@ struct BattleContext {
         statusDefinitions[effect.id]
     }
 
-    func skillDefinition(for skillId: String) -> SkillDefinition? {
+    func skillDefinition(for skillId: UInt16) -> SkillDefinition? {
         skillDefinitions[skillId]
     }
 

@@ -32,7 +32,7 @@ struct ExplorationEngine {
 
     static func prepare(provider: ExplorationMasterDataProvider,
                         repository: MasterDataRepository,
-                        dungeonId: String,
+                        dungeonId: UInt8,
                         targetFloorNumber: Int,
                         superRareState: SuperRareDailyState,
                         scheduler: ExplorationEventScheduler) async throws -> (Preparation, RunState) {

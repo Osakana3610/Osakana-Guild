@@ -18,7 +18,7 @@ struct TitleAssignmentEngine {
     }
 
     static func determineNormalTitle(repository: MasterDataRepository,
-                                     enemyTitleId: String?,
+                                     enemyTitleId: UInt8?,
                                      hasTitleTreasure: Bool,
                                      category: DropItemCategory,
                                      random: inout GameRandomSource) async throws -> TitleDefinition? {
@@ -51,7 +51,7 @@ struct TitleAssignmentEngine {
     }
 
     static func selectSuperRareTitle(repository: MasterDataRepository,
-                                     random: inout GameRandomSource) async throws -> String? {
+                                     random: inout GameRandomSource) async throws -> UInt8? {
         let titles = try await repository.allSuperRareTitles()
         guard !titles.isEmpty else { return nil }
         let index = random.nextInt(in: 0...(titles.count - 1))
@@ -95,7 +95,7 @@ struct TitleAssignmentEngine {
     }
 
     private static func judgmentCountForEnemyTitle(repository: MasterDataRepository,
-                                                    titleId: String?) async throws -> Int {
+                                                    titleId: UInt8?) async throws -> Int {
         guard let titleId else { return 1 }
         if let definition = try await repository.title(withId: titleId),
            let multiplier = definition.statMultiplier {

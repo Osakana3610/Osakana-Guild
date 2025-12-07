@@ -4,16 +4,16 @@ struct ExplorationDropReward: Sendable {
     let item: ItemDefinition
     let quantity: Int
     let trapDifficulty: Int?
-    let sourceEnemyId: String?
-    let normalTitleId: String?
-    let superRareTitleId: String?
+    let sourceEnemyId: UInt16?
+    let normalTitleId: UInt8?
+    let superRareTitleId: UInt8?
 
     init(item: ItemDefinition,
          quantity: Int,
          trapDifficulty: Int? = nil,
-         sourceEnemyId: String? = nil,
-         normalTitleId: String? = nil,
-         superRareTitleId: String? = nil) {
+         sourceEnemyId: UInt16? = nil,
+         normalTitleId: UInt8? = nil,
+         superRareTitleId: UInt8? = nil) {
         self.item = item
         self.quantity = max(0, quantity)
         self.trapDifficulty = trapDifficulty
@@ -35,7 +35,7 @@ struct BattleParticipantSnapshot: Codable, Sendable {
 
 struct BattleLogArchive: Codable, Sendable {
     let id: UUID
-    let enemyId: String
+    let enemyId: UInt16
     let enemyName: String
     let result: BattleService.BattleResult
     let turns: Int
@@ -58,7 +58,7 @@ struct CombatSummary: Sendable {
 }
 
 struct ScriptedEventSummary: Sendable {
-    let eventId: String
+    let eventId: UInt8
     let name: String
     let description: String
     let statusEffects: [StatusEffectDefinition]
@@ -84,7 +84,7 @@ struct ExplorationEventLogEntry: Sendable {
 
 enum ExplorationEndState: Sendable {
     case completed
-    case defeated(floorNumber: Int, eventIndex: Int, enemyId: String)
+    case defeated(floorNumber: Int, eventIndex: Int, enemyId: UInt16)
 }
 
 struct ExplorationRunArtifact: Sendable {

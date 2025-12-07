@@ -15,19 +15,19 @@ struct EnemyDefinition: Identifiable, Sendable {
 
     struct Skill: Sendable, Hashable {
         let orderIndex: Int
-        let skillId: String
+        let skillId: UInt16
     }
 
     struct Drop: Sendable, Hashable {
         let orderIndex: Int
-        let itemId: String
+        let itemId: UInt16
     }
 
     let id: UInt16
     let name: String
-    let race: String
+    let raceId: UInt8
     let category: String
-    let job: String?
+    let jobId: UInt8?
     let baseExperience: Int
     let isBoss: Bool
     let strength: Int
