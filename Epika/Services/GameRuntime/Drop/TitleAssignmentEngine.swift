@@ -91,7 +91,7 @@ struct TitleAssignmentEngine {
     }
 
     private static func titleRank(of title: TitleDefinition) -> Int {
-        title.rank ?? 0
+        Int(title.id)
     }
 
     private static func judgmentCountForEnemyTitle(repository: MasterDataRepository,

@@ -3,7 +3,7 @@ import Foundation
 struct ExplorationDungeonBundle: Sendable {
     let dungeon: DungeonDefinition
     let floors: [DungeonFloorDefinition]
-    let encounterTablesById: [String: EncounterTableDefinition]
+    let encounterTablesById: [UInt16: EncounterTableDefinition]
 }
 
 protocol ExplorationMasterDataProvider: Sendable {
@@ -25,7 +25,7 @@ struct MasterDataRepositoryExplorationProvider: ExplorationMasterDataProvider {
         }
 
         let relevantFloors = floors
-            .filter { $0.dungeonId == dungeonId }
+            .filter { $0.dungeonId == UInt16(dungeonId) }
             .sorted { $0.floorNumber < $1.floorNumber }
 
         guard !relevantFloors.isEmpty else {

@@ -196,7 +196,7 @@ actor ShopProgressService {
         try saveIfNeeded(context)
 
         _ = try await inventoryService.addItem(itemId: target.definition.id,
-                                               quantity: UInt16(quantity),
+                                               quantity: quantity,
                                                storage: .playerItem)
         return playerSnapshot
     }

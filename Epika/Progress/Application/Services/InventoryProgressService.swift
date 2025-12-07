@@ -8,16 +8,16 @@ actor InventoryProgressService {
     private let maxStackSize = 99
 
     struct BatchSeed: Sendable {
-        let masterDataIndex: Int16
+        let itemId: UInt16
         let quantity: Int
         let storage: ItemStorage
         let enhancements: ItemSnapshot.Enhancement
 
-        init(masterDataIndex: Int16,
+        init(itemId: UInt16,
              quantity: Int,
              storage: ItemStorage,
              enhancements: ItemSnapshot.Enhancement = .init()) {
-            self.masterDataIndex = masterDataIndex
+            self.itemId = itemId
             self.quantity = quantity
             self.storage = storage
             self.enhancements = enhancements
@@ -68,7 +68,7 @@ actor InventoryProgressService {
         let snapshots = try await allItems(storage: storage)
         if snapshots.isEmpty { return [] }
 
-        let masterIndices = Array(Set(snapshots.map { $0.masterDataIndex }))
+        let masterIndices = Array(Set(snapshots.map { $0.itemId }))
         let definitions = try await environment.masterDataService.getItemMasterData(byIndices: masterIndices)
         let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
         let missing = masterIndices.filter { definitionMap[$0] == nil }
@@ -78,12 +78,12 @@ actor InventoryProgressService {
         }
 
         return snapshots.compactMap { snapshot in
-            guard let definition = definitionMap[snapshot.masterDataIndex] else {
+            guard let definition = definitionMap[snapshot.itemId] else {
                 return nil
             }
             return RuntimeEquipment(
                 id: snapshot.stackKey,
-                masterDataIndex: snapshot.masterDataIndex,
+                itemId: snapshot.itemId,
                 masterDataId: definition.id,
                 displayName: definition.name,
                 description: definition.description,
@@ -92,11 +92,11 @@ actor InventoryProgressService {
                 baseValue: definition.basePrice,
                 sellValue: definition.sellValue,
                 enhancement: .init(
-                    superRareTitleIndex: snapshot.enhancements.superRareTitleIndex,
-                    normalTitleIndex: snapshot.enhancements.normalTitleIndex,
-                    socketSuperRareTitleIndex: snapshot.enhancements.socketSuperRareTitleIndex,
-                    socketNormalTitleIndex: snapshot.enhancements.socketNormalTitleIndex,
-                    socketMasterDataIndex: snapshot.enhancements.socketMasterDataIndex
+                    superRareTitleId: snapshot.enhancements.superRareTitleId,
+                    normalTitleId: snapshot.enhancements.normalTitleId,
+                    socketSuperRareTitleId: snapshot.enhancements.socketSuperRareTitleId,
+                    socketNormalTitleId: snapshot.enhancements.socketNormalTitleId,
+                    socketItemId: snapshot.enhancements.socketItemId
                 ),
                 rarity: definition.rarity,
                 statBonuses: definition.statBonuses,
@@ -106,35 +106,35 @@ actor InventoryProgressService {
         .sorted { lhs, rhs in
             // ソート順: アイテムごとに 通常称号のみ → 通常称号+ソケット → 超レア → 超レア+ソケット
             // 1. アイテム (ベースアイテムでグループ化)
-            if lhs.masterDataIndex != rhs.masterDataIndex {
-                return lhs.masterDataIndex < rhs.masterDataIndex
+            if lhs.itemId != rhs.itemId {
+                return lhs.itemId < rhs.itemId
             }
             // 2. 超レアの有無 (なしが先)
-            let lhsHasSuperRare = lhs.enhancement.superRareTitleIndex > 0
-            let rhsHasSuperRare = rhs.enhancement.superRareTitleIndex > 0
+            let lhsHasSuperRare = lhs.enhancement.superRareTitleId > 0
+            let rhsHasSuperRare = rhs.enhancement.superRareTitleId > 0
             if lhsHasSuperRare != rhsHasSuperRare {
                 return !lhsHasSuperRare
             }
             // 3. ソケットの有無 (なしが先)
-            let lhsHasSocket = lhs.enhancement.socketMasterDataIndex > 0
-            let rhsHasSocket = rhs.enhancement.socketMasterDataIndex > 0
+            let lhsHasSocket = lhs.enhancement.socketItemId > 0
+            let rhsHasSocket = rhs.enhancement.socketItemId > 0
             if lhsHasSocket != rhsHasSocket {
                 return !lhsHasSocket
             }
             // 4. 通常称号
-            if lhs.enhancement.normalTitleIndex != rhs.enhancement.normalTitleIndex {
-                return lhs.enhancement.normalTitleIndex < rhs.enhancement.normalTitleIndex
+            if lhs.enhancement.normalTitleId != rhs.enhancement.normalTitleId {
+                return lhs.enhancement.normalTitleId < rhs.enhancement.normalTitleId
             }
             // 5. 超レア称号の詳細
-            if lhs.enhancement.superRareTitleIndex != rhs.enhancement.superRareTitleIndex {
-                return lhs.enhancement.superRareTitleIndex < rhs.enhancement.superRareTitleIndex
+            if lhs.enhancement.superRareTitleId != rhs.enhancement.superRareTitleId {
+                return lhs.enhancement.superRareTitleId < rhs.enhancement.superRareTitleId
             }
             // 6. ソケットの詳細
-            return lhs.enhancement.socketMasterDataIndex < rhs.enhancement.socketMasterDataIndex
+            return lhs.enhancement.socketItemId < rhs.enhancement.socketItemId
         }
     }
 
-    func addItem(masterDataIndex: Int16,
+    func addItem(itemId: UInt16,
                  quantity: Int,
                  storage: ItemStorage,
                  enhancements: ItemSnapshot.Enhancement = .init()) async throws -> ItemSnapshot {
@@ -144,12 +144,12 @@ actor InventoryProgressService {
 
         let context = makeContext()
         let record = try fetchOrCreateRecord(
-            superRareTitleIndex: enhancements.superRareTitleIndex,
-            normalTitleIndex: enhancements.normalTitleIndex,
-            masterDataIndex: masterDataIndex,
-            socketSuperRareTitleIndex: enhancements.socketSuperRareTitleIndex,
-            socketNormalTitleIndex: enhancements.socketNormalTitleIndex,
-            socketMasterDataIndex: enhancements.socketMasterDataIndex,
+            superRareTitleId: enhancements.superRareTitleId,
+            normalTitleId: enhancements.normalTitleId,
+            itemId: itemId,
+            socketSuperRareTitleId: enhancements.socketSuperRareTitleId,
+            socketNormalTitleId: enhancements.socketNormalTitleId,
+            socketItemId: enhancements.socketItemId,
             storage: storage,
             context: context
         )
@@ -201,12 +201,12 @@ actor InventoryProgressService {
                         _ = applyIncrement(to: record, amount: entry.totalQuantity)
                     } else {
                         let newRecord = InventoryItemRecord(
-                            superRareTitleIndex: entry.seed.enhancements.superRareTitleIndex,
-                            normalTitleIndex: entry.seed.enhancements.normalTitleIndex,
-                            masterDataIndex: entry.seed.masterDataIndex,
-                            socketSuperRareTitleIndex: entry.seed.enhancements.socketSuperRareTitleIndex,
-                            socketNormalTitleIndex: entry.seed.enhancements.socketNormalTitleIndex,
-                            socketMasterDataIndex: entry.seed.enhancements.socketMasterDataIndex,
+                            superRareTitleId: entry.seed.enhancements.superRareTitleId,
+                            normalTitleId: entry.seed.enhancements.normalTitleId,
+                            itemId: entry.seed.itemId,
+                            socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
+                            socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
+                            socketItemId: entry.seed.enhancements.socketItemId,
                             quantity: 0,
                             storage: storage
                         )
@@ -237,12 +237,12 @@ actor InventoryProgressService {
             for i in index..<end {
                 let seed = seeds[i]
                 let record = InventoryItemRecord(
-                    superRareTitleIndex: seed.enhancements.superRareTitleIndex,
-                    normalTitleIndex: seed.enhancements.normalTitleIndex,
-                    masterDataIndex: seed.masterDataIndex,
-                    socketSuperRareTitleIndex: seed.enhancements.socketSuperRareTitleIndex,
-                    socketNormalTitleIndex: seed.enhancements.socketNormalTitleIndex,
-                    socketMasterDataIndex: seed.enhancements.socketMasterDataIndex,
+                    superRareTitleId: seed.enhancements.superRareTitleId,
+                    normalTitleId: seed.enhancements.normalTitleId,
+                    itemId: seed.itemId,
+                    socketSuperRareTitleId: seed.enhancements.socketSuperRareTitleId,
+                    socketNormalTitleId: seed.enhancements.socketNormalTitleId,
+                    socketItemId: seed.enhancements.socketItemId,
                     quantity: seed.quantity,
                     storage: seed.storage
                 )
@@ -271,12 +271,12 @@ actor InventoryProgressService {
         grouped.reserveCapacity(seeds.count)
         for seed in seeds {
             let stackKey = makeStackKey(
-                superRareTitleIndex: seed.enhancements.superRareTitleIndex,
-                normalTitleIndex: seed.enhancements.normalTitleIndex,
-                masterDataIndex: seed.masterDataIndex,
-                socketSuperRareTitleIndex: seed.enhancements.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: seed.enhancements.socketNormalTitleIndex,
-                socketMasterDataIndex: seed.enhancements.socketMasterDataIndex
+                superRareTitleId: seed.enhancements.superRareTitleId,
+                normalTitleId: seed.enhancements.normalTitleId,
+                itemId: seed.itemId,
+                socketSuperRareTitleId: seed.enhancements.socketSuperRareTitleId,
+                socketNormalTitleId: seed.enhancements.socketNormalTitleId,
+                socketItemId: seed.enhancements.socketItemId
             )
             let key = SeedKey(stackKey: stackKey, storageRaw: seed.storage.rawValue)
             if var existing = grouped[key] {
@@ -313,7 +313,7 @@ actor InventoryProgressService {
         guard !records.isEmpty else {
             return try await gameStateService.currentPlayer()
         }
-        let masterIndices = Array(Set(records.map { $0.masterDataIndex }))
+        let masterIndices = Array(Set(records.map { $0.itemId }))
         let definitions = try await environment.masterDataService.getItemMasterData(byIndices: masterIndices)
         let priceMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0.sellValue) })
         let missing = masterIndices.filter { priceMap[$0] == nil }
@@ -321,7 +321,7 @@ actor InventoryProgressService {
             throw ProgressError.itemDefinitionUnavailable(ids: missing.map { String($0) })
         }
         let totalGain = records.reduce(into: 0) { total, record in
-            guard record.quantity > 0, let value = priceMap[record.masterDataIndex] else { return }
+            guard record.quantity > 0, let value = priceMap[record.itemId] else { return }
             total += value * record.quantity
         }
         for record in records {
@@ -342,19 +342,19 @@ actor InventoryProgressService {
             throw ProgressError.invalidInput(description: "不正なstackKeyです")
         }
         let context = makeContext()
-        let superRare = c.superRareTitleIndex
-        let normal = c.normalTitleIndex
-        let master = c.masterDataIndex
-        let socketSuperRare = c.socketSuperRareTitleIndex
-        let socketNormal = c.socketNormalTitleIndex
-        let socketMaster = c.socketMasterDataIndex
+        let superRare = c.superRareTitleId
+        let normal = c.normalTitleId
+        let master = c.itemId
+        let socketSuperRare = c.socketSuperRareTitleId
+        let socketNormal = c.socketNormalTitleId
+        let socketMaster = c.socketItemId
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleIndex == superRare &&
-            $0.normalTitleIndex == normal &&
-            $0.masterDataIndex == master &&
-            $0.socketSuperRareTitleIndex == socketSuperRare &&
-            $0.socketNormalTitleIndex == socketNormal &&
-            $0.socketMasterDataIndex == socketMaster
+            $0.superRareTitleId == superRare &&
+            $0.normalTitleId == normal &&
+            $0.itemId == master &&
+            $0.socketSuperRareTitleId == socketSuperRare &&
+            $0.socketNormalTitleId == socketNormal &&
+            $0.socketItemId == socketMaster
         })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
@@ -371,19 +371,19 @@ actor InventoryProgressService {
             throw ProgressError.invalidInput(description: "不正なstackKeyです")
         }
         let context = makeContext()
-        let superRare = c.superRareTitleIndex
-        let normal = c.normalTitleIndex
-        let master = c.masterDataIndex
-        let socketSuperRare = c.socketSuperRareTitleIndex
-        let socketNormal = c.socketNormalTitleIndex
-        let socketMaster = c.socketMasterDataIndex
+        let superRare = c.superRareTitleId
+        let normal = c.normalTitleId
+        let master = c.itemId
+        let socketSuperRare = c.socketSuperRareTitleId
+        let socketNormal = c.socketNormalTitleId
+        let socketMaster = c.socketItemId
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleIndex == superRare &&
-            $0.normalTitleIndex == normal &&
-            $0.masterDataIndex == master &&
-            $0.socketSuperRareTitleIndex == socketSuperRare &&
-            $0.socketNormalTitleIndex == socketNormal &&
-            $0.socketMasterDataIndex == socketMaster
+            $0.superRareTitleId == superRare &&
+            $0.normalTitleId == normal &&
+            $0.itemId == master &&
+            $0.socketSuperRareTitleId == socketSuperRare &&
+            $0.socketNormalTitleId == socketNormal &&
+            $0.socketItemId == socketMaster
         })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
@@ -411,19 +411,19 @@ actor InventoryProgressService {
         let context = makeContext()
 
         // target fetch with individual field comparison
-        let tSuperRare = tc.superRareTitleIndex
-        let tNormal = tc.normalTitleIndex
-        let tMaster = tc.masterDataIndex
-        let tSocketSuperRare = tc.socketSuperRareTitleIndex
-        let tSocketNormal = tc.socketNormalTitleIndex
-        let tSocketMaster = tc.socketMasterDataIndex
+        let tSuperRare = tc.superRareTitleId
+        let tNormal = tc.normalTitleId
+        let tMaster = tc.itemId
+        let tSocketSuperRare = tc.socketSuperRareTitleId
+        let tSocketNormal = tc.socketNormalTitleId
+        let tSocketMaster = tc.socketItemId
         var targetFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleIndex == tSuperRare &&
-            $0.normalTitleIndex == tNormal &&
-            $0.masterDataIndex == tMaster &&
-            $0.socketSuperRareTitleIndex == tSocketSuperRare &&
-            $0.socketNormalTitleIndex == tSocketNormal &&
-            $0.socketMasterDataIndex == tSocketMaster
+            $0.superRareTitleId == tSuperRare &&
+            $0.normalTitleId == tNormal &&
+            $0.itemId == tMaster &&
+            $0.socketSuperRareTitleId == tSocketSuperRare &&
+            $0.socketNormalTitleId == tSocketNormal &&
+            $0.socketItemId == tSocketMaster
         })
         targetFetch.fetchLimit = 1
         guard let targetRecord = try context.fetch(targetFetch).first else {
@@ -431,19 +431,19 @@ actor InventoryProgressService {
         }
 
         // source fetch with individual field comparison
-        let sSuperRare = sc.superRareTitleIndex
-        let sNormal = sc.normalTitleIndex
-        let sMaster = sc.masterDataIndex
-        let sSocketSuperRare = sc.socketSuperRareTitleIndex
-        let sSocketNormal = sc.socketNormalTitleIndex
-        let sSocketMaster = sc.socketMasterDataIndex
+        let sSuperRare = sc.superRareTitleId
+        let sNormal = sc.normalTitleId
+        let sMaster = sc.itemId
+        let sSocketSuperRare = sc.socketSuperRareTitleId
+        let sSocketNormal = sc.socketNormalTitleId
+        let sSocketMaster = sc.socketItemId
         var sourceFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleIndex == sSuperRare &&
-            $0.normalTitleIndex == sNormal &&
-            $0.masterDataIndex == sMaster &&
-            $0.socketSuperRareTitleIndex == sSocketSuperRare &&
-            $0.socketNormalTitleIndex == sSocketNormal &&
-            $0.socketMasterDataIndex == sSocketMaster
+            $0.superRareTitleId == sSuperRare &&
+            $0.normalTitleId == sNormal &&
+            $0.itemId == sMaster &&
+            $0.socketSuperRareTitleId == sSocketSuperRare &&
+            $0.socketNormalTitleId == sSocketNormal &&
+            $0.socketItemId == sSocketMaster
         })
         sourceFetch.fetchLimit = 1
         guard let sourceRecord = try context.fetch(sourceFetch).first else {
@@ -456,11 +456,11 @@ actor InventoryProgressService {
             throw ProgressError.invalidInput(description: "提供アイテムは所持品から選択してください")
         }
 
-        targetRecord.superRareTitleIndex = newEnhancement.superRareTitleIndex
-        targetRecord.normalTitleIndex = newEnhancement.normalTitleIndex
-        targetRecord.socketSuperRareTitleIndex = newEnhancement.socketSuperRareTitleIndex
-        targetRecord.socketNormalTitleIndex = newEnhancement.socketNormalTitleIndex
-        targetRecord.socketMasterDataIndex = newEnhancement.socketMasterDataIndex
+        targetRecord.superRareTitleId = newEnhancement.superRareTitleId
+        targetRecord.normalTitleId = newEnhancement.normalTitleId
+        targetRecord.socketSuperRareTitleId = newEnhancement.socketSuperRareTitleId
+        targetRecord.socketNormalTitleId = newEnhancement.socketNormalTitleId
+        targetRecord.socketItemId = newEnhancement.socketItemId
 
         if sourceRecord.quantity <= 1 {
             context.delete(sourceRecord)
@@ -470,14 +470,14 @@ actor InventoryProgressService {
 
         try context.save()
 
-        let definitions = try await environment.masterDataService.getItemMasterData(byIndices: [targetRecord.masterDataIndex])
+        let definitions = try await environment.masterDataService.getItemMasterData(byIndices: [targetRecord.itemId])
         guard let definition = definitions.first else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.masterDataIndex)])
+            throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.itemId)])
         }
         let snapshot = makeSnapshot(targetRecord)
         return RuntimeEquipment(
             id: snapshot.stackKey,
-            masterDataIndex: snapshot.masterDataIndex,
+            itemId: snapshot.itemId,
             masterDataId: definition.id,
             displayName: definition.name,
             description: definition.description,
@@ -486,11 +486,11 @@ actor InventoryProgressService {
             baseValue: definition.basePrice,
             sellValue: definition.sellValue,
             enhancement: .init(
-                superRareTitleIndex: snapshot.enhancements.superRareTitleIndex,
-                normalTitleIndex: snapshot.enhancements.normalTitleIndex,
-                socketSuperRareTitleIndex: snapshot.enhancements.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: snapshot.enhancements.socketNormalTitleIndex,
-                socketMasterDataIndex: snapshot.enhancements.socketMasterDataIndex
+                superRareTitleId: snapshot.enhancements.superRareTitleId,
+                normalTitleId: snapshot.enhancements.normalTitleId,
+                socketSuperRareTitleId: snapshot.enhancements.socketSuperRareTitleId,
+                socketNormalTitleId: snapshot.enhancements.socketNormalTitleId,
+                socketItemId: snapshot.enhancements.socketItemId
             ),
             rarity: definition.rarity,
             statBonuses: definition.statBonuses,
@@ -510,10 +510,10 @@ actor InventoryProgressService {
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate { $0.storageRawValue == storage.rawValue })
         // Index順でソート（超レア称号 → 通常称号 → アイテム → ソケット）
         descriptor.sortBy = [
-            SortDescriptor(\InventoryItemRecord.superRareTitleIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.normalTitleIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.masterDataIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.socketMasterDataIndex, order: .forward)
+            SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.normalTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.itemId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.socketItemId, order: .forward)
         ]
         return descriptor
     }
@@ -522,44 +522,44 @@ actor InventoryProgressService {
         ItemSnapshot(
             persistentIdentifier: record.persistentModelID,
             stackKey: record.stackKey,
-            masterDataIndex: record.masterDataIndex,
+            itemId: record.itemId,
             quantity: record.quantity,
             storage: record.storage,
             enhancements: .init(
-                superRareTitleIndex: record.superRareTitleIndex,
-                normalTitleIndex: record.normalTitleIndex,
-                socketSuperRareTitleIndex: record.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: record.socketNormalTitleIndex,
-                socketMasterDataIndex: record.socketMasterDataIndex
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketItemId: record.socketItemId
             )
         )
     }
 
     private func fetchOrCreateRecord(
-        superRareTitleIndex: Int16,
-        normalTitleIndex: UInt8,
-        masterDataIndex: Int16,
-        socketSuperRareTitleIndex: Int16,
-        socketNormalTitleIndex: UInt8,
-        socketMasterDataIndex: Int16,
+        superRareTitleId: UInt16,
+        normalTitleId: UInt8,
+        itemId: UInt16,
+        socketSuperRareTitleId: UInt16,
+        socketNormalTitleId: UInt8,
+        socketItemId: UInt16,
         storage: ItemStorage,
         context: ModelContext
     ) throws -> InventoryItemRecord {
         // Capture values for #Predicate
-        let superRare = superRareTitleIndex
-        let normal = normalTitleIndex
-        let master = masterDataIndex
-        let socketSuperRare = socketSuperRareTitleIndex
-        let socketNormal = socketNormalTitleIndex
-        let socketMaster = socketMasterDataIndex
+        let superRare = superRareTitleId
+        let normal = normalTitleId
+        let master = itemId
+        let socketSuperRare = socketSuperRareTitleId
+        let socketNormal = socketNormalTitleId
+        let socketMaster = socketItemId
         let storageRaw = storage.rawValue
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleIndex == superRare &&
-            $0.normalTitleIndex == normal &&
-            $0.masterDataIndex == master &&
-            $0.socketSuperRareTitleIndex == socketSuperRare &&
-            $0.socketNormalTitleIndex == socketNormal &&
-            $0.socketMasterDataIndex == socketMaster &&
+            $0.superRareTitleId == superRare &&
+            $0.normalTitleId == normal &&
+            $0.itemId == master &&
+            $0.socketSuperRareTitleId == socketSuperRare &&
+            $0.socketNormalTitleId == socketNormal &&
+            $0.socketItemId == socketMaster &&
             $0.storageRawValue == storageRaw
         })
         descriptor.fetchLimit = 1
@@ -570,12 +570,12 @@ actor InventoryProgressService {
             return existing
         }
         let record = InventoryItemRecord(
-            superRareTitleIndex: superRareTitleIndex,
-            normalTitleIndex: normalTitleIndex,
-            masterDataIndex: masterDataIndex,
-            socketSuperRareTitleIndex: socketSuperRareTitleIndex,
-            socketNormalTitleIndex: socketNormalTitleIndex,
-            socketMasterDataIndex: socketMasterDataIndex,
+            superRareTitleId: superRareTitleId,
+            normalTitleId: normalTitleId,
+            itemId: itemId,
+            socketSuperRareTitleId: socketSuperRareTitleId,
+            socketNormalTitleId: socketNormalTitleId,
+            socketItemId: socketItemId,
             quantity: 0,
             storage: storage
         )
@@ -584,14 +584,14 @@ actor InventoryProgressService {
     }
 
     private func makeStackKey(
-        superRareTitleIndex: Int16,
-        normalTitleIndex: UInt8,
-        masterDataIndex: Int16,
-        socketSuperRareTitleIndex: Int16,
-        socketNormalTitleIndex: UInt8,
-        socketMasterDataIndex: Int16
+        superRareTitleId: UInt16,
+        normalTitleId: UInt8,
+        itemId: UInt16,
+        socketSuperRareTitleId: UInt16,
+        socketNormalTitleId: UInt8,
+        socketItemId: UInt16
     ) -> String {
-        "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"
+        "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
     }
 
     @discardableResult

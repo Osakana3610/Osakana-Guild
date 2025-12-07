@@ -7,8 +7,7 @@ actor MasterDataRepository {
     private var itemsCache: [ItemDefinition]?
     private var itemsById: [UInt16: ItemDefinition]?
     private var skillsCache: [SkillDefinition]?
-    private var skillsById: [String: SkillDefinition]?
-    private var skillsByIndex: [Int: SkillDefinition]?
+    private var skillsById: [UInt16: SkillDefinition]?
     private var spellsCache: [SpellDefinition]?
     private var spellsById: [UInt8: SpellDefinition]?
     private var enemiesCache: [EnemyDefinition]?
@@ -82,11 +81,10 @@ actor MasterDataRepository {
         let skills = try await manager.fetchAllSkills()
         self.skillsCache = skills
         self.skillsById = Dictionary(uniqueKeysWithValues: skills.map { ($0.id, $0) })
-        self.skillsByIndex = Dictionary(uniqueKeysWithValues: skills.map { ($0.skillIndex, $0) })
         return skills
     }
 
-    func skills(withIds ids: [String]) async throws -> [SkillDefinition] {
+    func skills(withIds ids: [UInt16]) async throws -> [SkillDefinition] {
         guard !ids.isEmpty else { return [] }
         _ = try await allSkills()
         guard let skillsById else {
@@ -96,23 +94,23 @@ actor MasterDataRepository {
         definitions.reserveCapacity(ids.count)
         for id in ids {
             guard let definition = skillsById[id] else {
-                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: id)
+                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: "\(id)")
             }
             definitions.append(definition)
         }
         return definitions
     }
 
-    func skills(withIndices indices: [Int]) async throws -> [SkillDefinition] {
+    func skills(withIndices indices: [UInt16]) async throws -> [SkillDefinition] {
         guard !indices.isEmpty else { return [] }
         _ = try await allSkills()
-        guard let skillsByIndex else {
+        guard let skillsById else {
             throw RuntimeError.invalidConfiguration(reason: "Skill cache is unavailable")
         }
         var definitions: [SkillDefinition] = []
         definitions.reserveCapacity(indices.count)
         for index in indices {
-            guard let definition = skillsByIndex[index] else {
+            guard let definition = skillsById[index] else {
                 throw RuntimeError.masterDataNotFound(entity: "skill", identifier: "\(index)")
             }
             definitions.append(definition)

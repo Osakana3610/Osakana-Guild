@@ -83,9 +83,9 @@ private extension CharacterLevelSection {
     }
 
     func experienceMultiplier() throws -> Double {
-        let equippedSkillIndices = Set(character.progress.learnedSkills.filter { $0.isEquipped }.map { $0.skillIndex })
-        guard !equippedSkillIndices.isEmpty else { return 1.0 }
-        let equippedDefinitions = character.masteredSkills.filter { equippedSkillIndices.contains($0.skillIndex) }
+        let equippedSkillIds = Set(character.progress.learnedSkills.filter { $0.isEquipped }.map { $0.skillId })
+        guard !equippedSkillIds.isEmpty else { return 1.0 }
+        let equippedDefinitions = character.masteredSkills.filter { equippedSkillIds.contains($0.id) }
         guard !equippedDefinitions.isEmpty else { return 1.0 }
         let components = try SkillRuntimeEffectCompiler.rewardComponents(from: equippedDefinitions)
         return components.experienceScale()
