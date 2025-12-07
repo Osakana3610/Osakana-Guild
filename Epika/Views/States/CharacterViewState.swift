@@ -15,27 +15,32 @@ final class CharacterViewState {
         let raceName: String
         let isAlive: Bool
         let createdAt: Date
-        let jobId: String
-        let raceId: String
+        let jobId: UInt8
+        let raceId: UInt8
         let gender: String
         let currentHP: Int
         let maxHP: Int
-        let avatarIdentifier: String
+        let avatarId: UInt16
+
+        /// 表示用のavatarId（0の場合はraceIdを使用）
+        var resolvedAvatarId: UInt16 {
+            avatarId == 0 ? UInt16(raceId) : avatarId
+        }
 
         init(snapshot: CharacterSnapshot, job: JobDefinition?, race: RaceDefinition?) {
             self.id = snapshot.id
             self.name = snapshot.displayName
             self.level = snapshot.level
-            self.jobName = job?.name ?? snapshot.jobId
-            self.raceName = race?.name ?? snapshot.raceId
+            self.jobName = job?.name ?? "職業\(snapshot.jobId)"
+            self.raceName = race?.name ?? "種族\(snapshot.raceId)"
             self.isAlive = snapshot.hitPoints.current > 0
             self.createdAt = snapshot.createdAt
             self.jobId = snapshot.jobId
             self.raceId = snapshot.raceId
-            self.gender = snapshot.gender
+            self.gender = race?.gender ?? "不明"
             self.currentHP = snapshot.hitPoints.current
             self.maxHP = snapshot.hitPoints.maximum
-            self.avatarIdentifier = snapshot.avatarIdentifier
+            self.avatarId = snapshot.avatarId
         }
 
     }

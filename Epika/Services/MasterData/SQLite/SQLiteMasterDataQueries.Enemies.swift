@@ -5,12 +5,11 @@ import SQLite3
 extension SQLiteMasterDataManager {
     func fetchAllEnemies() throws -> [EnemyDefinition] {
         struct Builder {
-            var index: UInt16
-            var id: String
+            var id: UInt16
             var name: String
-            var race: String
+            var raceId: UInt8
             var category: String
-            var job: String?
+            var jobId: UInt8?
             var baseExperience: Int
             var isBoss: Bool
             var strength: Int
@@ -26,31 +25,31 @@ extension SQLiteMasterDataManager {
             var groupSizeRange: ClosedRange<Int> = 1...1
         }
 
-        var builders: [String: Builder] = [:]
-        let baseSQL = "SELECT e.id, e.enemy_index, e.name, e.race, e.category, e.job, e.base_experience, e.is_boss, s.strength, s.wisdom, s.spirit, s.vitality, s.agility, s.luck FROM enemies e JOIN enemy_stats s ON e.id = s.enemy_id;"
+        var builders: [UInt16: Builder] = [:]
+        let baseSQL = "SELECT e.id, e.name, e.race_id, e.category, e.job_id, e.base_experience, e.is_boss, s.strength, s.wisdom, s.spirit, s.vitality, s.agility, s.luck FROM enemies e JOIN enemy_stats s ON e.id = s.enemy_id;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(baseStatement, 0),
-                  let nameC = sqlite3_column_text(baseStatement, 2),
-                  let raceC = sqlite3_column_text(baseStatement, 3),
-                  let categoryC = sqlite3_column_text(baseStatement, 4) else { continue }
-            let id = String(cString: idC)
+            guard let nameC = sqlite3_column_text(baseStatement, 1),
+                  let categoryC = sqlite3_column_text(baseStatement, 3) else { continue }
+            let id = UInt16(sqlite3_column_int(baseStatement, 0))
+            let raceId = UInt8(sqlite3_column_int(baseStatement, 2))
+            let jobIdRaw = sqlite3_column_int(baseStatement, 4)
+            let jobId: UInt8? = sqlite3_column_type(baseStatement, 4) == SQLITE_NULL ? nil : UInt8(jobIdRaw)
             builders[id] = Builder(
-                index: UInt16(sqlite3_column_int(baseStatement, 1)),
                 id: id,
                 name: String(cString: nameC),
-                race: String(cString: raceC),
+                raceId: raceId,
                 category: String(cString: categoryC),
-                job: sqlite3_column_text(baseStatement, 5).flatMap { String(cString: $0) },
-                baseExperience: Int(sqlite3_column_int(baseStatement, 6)),
-                isBoss: sqlite3_column_int(baseStatement, 7) == 1,
-                strength: Int(sqlite3_column_int(baseStatement, 8)),
-                wisdom: Int(sqlite3_column_int(baseStatement, 9)),
-                spirit: Int(sqlite3_column_int(baseStatement, 10)),
-                vitality: Int(sqlite3_column_int(baseStatement, 11)),
-                agility: Int(sqlite3_column_int(baseStatement, 12)),
-                luck: Int(sqlite3_column_int(baseStatement, 13))
+                jobId: jobId,
+                baseExperience: Int(sqlite3_column_int(baseStatement, 5)),
+                isBoss: sqlite3_column_int(baseStatement, 6) == 1,
+                strength: Int(sqlite3_column_int(baseStatement, 7)),
+                wisdom: Int(sqlite3_column_int(baseStatement, 8)),
+                spirit: Int(sqlite3_column_int(baseStatement, 9)),
+                vitality: Int(sqlite3_column_int(baseStatement, 10)),
+                agility: Int(sqlite3_column_int(baseStatement, 11)),
+                luck: Int(sqlite3_column_int(baseStatement, 12))
             )
         }
 
@@ -58,8 +57,8 @@ extension SQLiteMasterDataManager {
         let resistanceStatement = try prepare(resistanceSQL)
         defer { sqlite3_finalize(resistanceStatement) }
         while sqlite3_step(resistanceStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(resistanceStatement, 0),
-                  var builder = builders[String(cString: idC)],
+            let id = UInt16(sqlite3_column_int(resistanceStatement, 0))
+            guard var builder = builders[id],
                   let elementC = sqlite3_column_text(resistanceStatement, 1) else { continue }
             builder.resistances.append(.init(element: String(cString: elementC), value: sqlite3_column_double(resistanceStatement, 2)))
             builders[builder.id] = builder
@@ -69,10 +68,10 @@ extension SQLiteMasterDataManager {
         let skillStatement = try prepare(skillSQL)
         defer { sqlite3_finalize(skillStatement) }
         while sqlite3_step(skillStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(skillStatement, 0),
-                  var builder = builders[String(cString: idC)],
-                  let skillC = sqlite3_column_text(skillStatement, 2) else { continue }
-            builder.skills.append(.init(orderIndex: Int(sqlite3_column_int(skillStatement, 1)), skillId: String(cString: skillC)))
+            let id = UInt16(sqlite3_column_int(skillStatement, 0))
+            guard var builder = builders[id] else { continue }
+            let skillId = UInt16(sqlite3_column_int(skillStatement, 2))
+            builder.skills.append(.init(orderIndex: Int(sqlite3_column_int(skillStatement, 1)), skillId: skillId))
             builders[builder.id] = builder
         }
 
@@ -80,21 +79,20 @@ extension SQLiteMasterDataManager {
         let dropStatement = try prepare(dropSQL)
         defer { sqlite3_finalize(dropStatement) }
         while sqlite3_step(dropStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(dropStatement, 0),
-                  var builder = builders[String(cString: idC)],
-                  let itemC = sqlite3_column_text(dropStatement, 2) else { continue }
-            builder.drops.append(.init(orderIndex: Int(sqlite3_column_int(dropStatement, 1)), itemId: String(cString: itemC)))
+            let id = UInt16(sqlite3_column_int(dropStatement, 0))
+            guard var builder = builders[id] else { continue }
+            let itemId = UInt16(sqlite3_column_int(dropStatement, 2))
+            builder.drops.append(.init(orderIndex: Int(sqlite3_column_int(dropStatement, 1)), itemId: itemId))
             builders[builder.id] = builder
         }
 
         return builders.values.sorted { $0.name < $1.name }.map { builder in
             EnemyDefinition(
-                index: builder.index,
                 id: builder.id,
                 name: builder.name,
-                race: builder.race,
+                raceId: builder.raceId,
                 category: builder.category,
-                job: builder.job,
+                jobId: builder.jobId,
                 baseExperience: builder.baseExperience,
                 isBoss: builder.isBoss,
                 strength: builder.strength,

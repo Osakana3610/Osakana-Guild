@@ -8,13 +8,9 @@ enum ProgressModelSchema {
             CharacterEquipmentRecord.self,
             PartyRecord.self,
             InventoryItemRecord.self,
-            StoryRecord.self,
             StoryNodeProgressRecord.self,
             DungeonRecord.self,
-            DungeonFloorRecord.self,
-            DungeonEncounterRecord.self,
             ExplorationRunRecord.self,
-            ShopRecord.self,
             ShopStockRecord.self,
             AutoTradeRuleRecord.self
         ]

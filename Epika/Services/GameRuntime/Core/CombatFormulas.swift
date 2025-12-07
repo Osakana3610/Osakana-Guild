@@ -20,11 +20,11 @@ enum CombatFormulas {
     static let attackCountLevelCoefficient: Double = 0.025
     static let breathDamageCoefficient: Double = 1.0
 
-    static func levelDependentValue(raceId: String,
+    static func levelDependentValue(raceId: UInt8,
                                     raceCategory: String,
                                     level: Int) -> Double {
         let lv = Double(level)
-        let isHuman = raceCategory == "human" || raceId.contains("human")
+        let isHuman = raceCategory == "human"
 
         switch level {
         case ...30:

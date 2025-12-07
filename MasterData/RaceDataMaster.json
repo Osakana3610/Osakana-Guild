@@ -2,11 +2,12 @@
   "version": "1.0.0",
   "lastUpdated": "2025-07-20",
   "description": "種族データマスターデータ",
-  "raceData": {
-    "human_male": {
-      "index": 1,
+  "raceData": [
+    {
+      "id": 1,
       "name": "人間（男）",
       "gender": "male",
+      "genderCode": 1,
       "category": "human",
       "baseStats": {
         "strength": 8,
@@ -19,10 +20,11 @@
       "description": "基本性能が最も低い種族。雇用費用が安く成長も早いのが特徴。",
       "maxLevel": 200
     },
-    "human_female": {
-      "index": 2,
+    {
+      "id": 2,
       "name": "人間（女）",
       "gender": "female",
+      "genderCode": 2,
       "category": "human",
       "baseStats": {
         "strength": 6,
@@ -35,10 +37,11 @@
       "description": "基本性能が最も低い種族。雇用費用が安く成長も早いのが特徴。",
       "maxLevel": 200
     },
-    "pygmyChum": {
-      "index": 3,
+    {
+      "id": 3,
       "name": "ピグミーチャム",
       "gender": "male",
+      "genderCode": 1,
       "category": "humanoid",
       "baseStats": {
         "strength": 7,
@@ -51,10 +54,11 @@
       "description": "敏捷性が高く、危機を察知する本能を持つ。手先が器用で道具の扱いがうまい。",
       "maxLevel": 140
     },
-    "gnome": {
-      "index": 4,
+    {
+      "id": 4,
       "name": "ノーム",
       "gender": "male",
+      "genderCode": 1,
       "category": "humanoid",
       "baseStats": {
         "strength": 7,
@@ -67,10 +71,11 @@
       "description": "信仰心の高い種族。精神が高く、僧侶職に向いている。",
       "maxLevel": 140
     },
-    "dwarf": {
-      "index": 5,
+    {
+      "id": 5,
       "name": "ドワーフ",
       "gender": "male",
+      "genderCode": 1,
       "category": "humanoid",
       "baseStats": {
         "strength": 12,
@@ -83,10 +88,11 @@
       "description": "山岳や岩場を好み、手先が器用で工芸品などを作り出す。",
       "maxLevel": 140
     },
-    "darkElf": {
-      "index": 6,
+    {
+      "id": 6,
       "name": "ダークエルフ",
       "gender": "male",
+      "genderCode": 1,
       "category": "elf",
       "baseStats": {
         "strength": 8,
@@ -99,10 +105,11 @@
       "description": "森の闇に身を潜め、魔法と暗殺術に長けた種族。",
       "maxLevel": 150
     },
-    "vampire": {
-      "index": 7,
+    {
+      "id": 7,
       "name": "吸血鬼",
       "gender": "male",
+      "genderCode": 1,
       "category": "undead",
       "baseStats": {
         "strength": 12,
@@ -115,10 +122,11 @@
       "description": "夜間に力を発揮する貴族的な種族。ドレイン能力を持つ。",
       "maxLevel": 135
     },
-    "elf": {
-      "index": 8,
+    {
+      "id": 8,
       "name": "エルフ",
       "gender": "female",
+      "genderCode": 2,
       "category": "elf",
       "baseStats": {
         "strength": 6,
@@ -131,10 +139,11 @@
       "description": "森に住む美しい種族。自然と共に生き、治癒能力に長けている。",
       "maxLevel": 150
     },
-    "psychic": {
-      "index": 9,
+    {
+      "id": 9,
       "name": "サイキック",
       "gender": "female",
+      "genderCode": 2,
       "category": "psychic",
       "baseStats": {
         "strength": 5,
@@ -147,10 +156,11 @@
       "description": "強力な精神力を持つ超能力者。魔法攻撃に特化している。",
       "maxLevel": 140
     },
-    "workingCat": {
-      "index": 10,
+    {
+      "id": 10,
       "name": "ワーキャット",
       "gender": "female",
+      "genderCode": 2,
       "category": "beast",
       "baseStats": {
         "strength": 10,
@@ -163,10 +173,11 @@
       "description": "猫のような敏捷性と運を持つ種族。弱点を突く攻撃が得意。",
       "maxLevel": 135
     },
-    "dragonewt": {
-      "index": 11,
+    {
+      "id": 11,
       "name": "ドラゴニュート",
       "gender": "female",
+      "genderCode": 2,
       "category": "dragon",
       "baseStats": {
         "strength": 11,
@@ -179,10 +190,11 @@
       "description": "竜の血を引く種族。ブレス攻撃と高い攻撃力を持つ。",
       "maxLevel": 135
     },
-    "amazon": {
-      "index": 12,
+    {
+      "id": 12,
       "name": "アマゾネス",
       "gender": "female",
+      "genderCode": 2,
       "category": "human",
       "baseStats": {
         "strength": 12,
@@ -195,10 +207,11 @@
       "description": "戦いに生きる女戦士の種族。高い攻撃力と体力を持つ。",
       "maxLevel": 135
     },
-    "magicConstruct": {
-      "index": 13,
+    {
+      "id": 13,
       "name": "魔造生物",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "construct",
       "baseStats": {
         "strength": 6,
@@ -211,10 +224,11 @@
       "description": "素材でカスタマイズ可能な人工的な生命体。基本能力は低いが成長の可能性を秘める。",
       "maxLevel": 99
     },
-    "undeadMan": {
-      "index": 14,
+    {
+      "id": 14,
       "name": "アンデッドマン",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "undead",
       "baseStats": {
         "strength": 8,
@@ -227,10 +241,11 @@
       "description": "不死の特性を持つ種族。体力が非常に高く、死への耐性がある。",
       "maxLevel": 140
     },
-    "giant": {
-      "index": 15,
+    {
+      "id": 15,
       "name": "巨人",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "giant",
       "baseStats": {
         "strength": 13,
@@ -243,10 +258,11 @@
       "description": "巨大な体躯を持つ種族。圧倒的な力と体力でパーティを守る。",
       "maxLevel": 130
     },
-    "tengu": {
-      "index": 16,
+    {
+      "id": 16,
       "name": "天狗",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "mythical",
       "baseStats": {
         "strength": 8,
@@ -259,10 +275,11 @@
       "description": "空を舞う神秘的な種族。高い敏捷性と魔法能力を併せ持つ。",
       "maxLevel": 130
     },
-    "demon": {
-      "index": 17,
+    {
+      "id": 17,
       "name": "鬼",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "demon",
       "baseStats": {
         "strength": 15,
@@ -275,10 +292,11 @@
       "description": "凶暴で力強い種族。最高クラスの攻撃力を誇る。",
       "maxLevel": 130
     },
-    "cyborg": {
-      "index": 18,
+    {
+      "id": 18,
       "name": "サイボーグ",
       "gender": "genderless",
+      "genderCode": 3,
       "category": "machine",
       "baseStats": {
         "strength": 8,
@@ -291,5 +309,5 @@
       "description": "機械と生体の融合体。最高クラスの敏捷性を持つ。",
       "maxLevel": 130
     }
-  }
+  ]
 }

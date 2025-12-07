@@ -130,10 +130,10 @@ struct RuntimePartyDetailView: View {
             .sheet(isPresented: $showDungeonPicker) {
                 DungeonPickerView(
                     dungeons: dungeons,
-                    currentSelection: selectedDungeon?.definition.index ?? currentParty.lastSelectedDungeonIndex,
+                    currentSelection: selectedDungeon?.definition.id ?? currentParty.lastSelectedDungeonId,
                     currentDifficulty: Int(currentParty.lastSelectedDifficulty),
                     onSelectDungeon: { dungeon in
-                        await updateDungeonSelection(dungeonIndex: dungeon.definition.index)
+                        await updateDungeonSelection(dungeonId: dungeon.definition.id)
                     },
                     onSelectDifficulty: { dungeon, difficulty in
                         await updateDifficultySelectionFromDungeonPicker(dungeon: dungeon, difficulty: difficulty)
@@ -152,7 +152,7 @@ struct RuntimePartyDetailView: View {
     }
 
     private var activeDungeon: RuntimeDungeon? {
-        selectedDungeon ?? dungeons.first { $0.definition.index == currentParty.lastSelectedDungeonIndex }
+        selectedDungeon ?? dungeons.first { $0.definition.id == currentParty.lastSelectedDungeonId }
     }
 
     private var selectedDungeonName: String {
@@ -217,7 +217,7 @@ struct RuntimePartyDetailView: View {
             try await partyState.refresh()
             if let updated = partyState.parties.first(where: { $0.id == currentParty.id }) {
                 currentParty = updated
-                if let dungeon = dungeons.first(where: { $0.definition.index == updated.lastSelectedDungeonIndex }) {
+                if let dungeon = dungeons.first(where: { $0.definition.id == updated.lastSelectedDungeonId }) {
                     selectedDungeon = dungeon
                 } else {
                     selectedDungeon = nil
@@ -230,7 +230,7 @@ struct RuntimePartyDetailView: View {
                         try await partyState.refresh()
                         if let adjusted = partyState.parties.first(where: { $0.id == updated.id }) {
                             currentParty = adjusted
-                            selectedDungeon = dungeons.first(where: { $0.definition.index == adjusted.lastSelectedDungeonIndex })
+                            selectedDungeon = dungeons.first(where: { $0.definition.id == adjusted.lastSelectedDungeonId })
                         }
                     } catch {
                         errorMessage = error.localizedDescription
@@ -268,7 +268,7 @@ struct RuntimePartyDetailView: View {
     }
 
     private func canStartExploration(for party: RuntimeParty) -> Bool {
-        guard let dungeon = activeDungeon, !dungeon.id.isEmpty else { return false }
+        guard let dungeon = activeDungeon, dungeon.id > 0 else { return false }
         guard dungeon.isUnlocked else { return false }
         guard Int(party.lastSelectedDifficulty) <= dungeon.highestUnlockedDifficulty else { return false }
         guard !membersOfCurrentParty.isEmpty else { return false }
@@ -277,9 +277,9 @@ struct RuntimePartyDetailView: View {
 
     // MARK: - Mutations
 
-    private func updateDungeonSelection(dungeonIndex: UInt16) async -> Bool {
+    private func updateDungeonSelection(dungeonId: UInt16) async -> Bool {
         do {
-            _ = try await partyService.setLastSelectedDungeon(persistentIdentifier: currentParty.persistentIdentifier, dungeonIndex: dungeonIndex)
+            _ = try await partyService.setLastSelectedDungeon(persistentIdentifier: currentParty.persistentIdentifier, dungeonId: dungeonId)
             await refreshPartySnapshot()
             return true
         } catch {
@@ -358,10 +358,10 @@ private struct PartyEquipmentListView: View {
                         if equipment.isEmpty {
                             Text("装備なし").foregroundColor(.secondary)
                         } else {
-                            let itemsByIndex = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.index, $0) })
+                            let itemsById = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.id, $0) })
                             ForEach(equipment, id: \.stackKey) { entry in
-                                let itemName = itemsByIndex[entry.masterDataIndex]?.name ?? "不明なアイテム"
-                                if entry.superRareTitleIndex > 0 || entry.normalTitleIndex > 0 {
+                                let itemName = itemsById[entry.itemId]?.name ?? "不明なアイテム"
+                                if entry.superRareTitleId > 0 || entry.normalTitleId > 0 {
                                     Text("\(itemName) x\(entry.quantity) (称号付き)")
                                 } else {
                                     Text("\(itemName) x\(entry.quantity)")
@@ -567,7 +567,7 @@ private struct DungeonPickerView: View {
     }
 
     private func currentDifficulty(for dungeon: RuntimeDungeon) -> Int {
-        if currentSelection == dungeon.definition.index {
+        if currentSelection == dungeon.definition.id {
             return currentDifficulty
         }
         return min(currentDifficulty, dungeon.highestUnlockedDifficulty)

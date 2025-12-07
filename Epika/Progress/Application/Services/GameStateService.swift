@@ -18,13 +18,9 @@ actor GameStateService {
         try deleteAll(CharacterRecord.self, context: context)
         try deleteAll(CharacterEquipmentRecord.self, context: context)
         try deleteAll(PartyRecord.self, context: context)
-        try deleteAll(StoryRecord.self, context: context)
         try deleteAll(StoryNodeProgressRecord.self, context: context)
         try deleteAll(DungeonRecord.self, context: context)
-        try deleteAll(DungeonFloorRecord.self, context: context)
-        try deleteAll(DungeonEncounterRecord.self, context: context)
         try deleteAll(ExplorationRunRecord.self, context: context)
-        try deleteAll(ShopRecord.self, context: context)
         try deleteAll(ShopStockRecord.self, context: context)
         try deleteAll(AutoTradeRuleRecord.self, context: context)
 
@@ -60,13 +56,13 @@ actor GameStateService {
 
     // MARK: - Daily Processing
 
-    func lastDailyProcessedDate() async throws -> Int? {
+    func lastDailyProcessedDate() async throws -> UInt32? {
         let context = makeContext()
         let record = try ensureGameState(context: context)
         return record.lastDailyProcessedDate
     }
 
-    func markDailyProcessed(date: Int) async throws {
+    func markDailyProcessed(date: UInt32) async throws {
         let context = makeContext()
         let record = try ensureGameState(context: context)
         record.lastDailyProcessedDate = date
@@ -76,7 +72,7 @@ actor GameStateService {
 
     // MARK: - Player Snapshot
 
-    func loadCurrentPlayer(initialGold: Int = 1000) async throws -> PlayerSnapshot {
+    func loadCurrentPlayer(initialGold: UInt32 = 1000) async throws -> PlayerSnapshot {
         let context = makeContext()
         let record = try ensureGameState(context: context, initialGold: initialGold)
         try saveIfNeeded(context)
@@ -91,22 +87,16 @@ actor GameStateService {
 
     // MARK: - Gold Operations
 
-    func addGold(_ amount: Int) async throws -> PlayerSnapshot {
-        guard amount >= 0 else {
-            throw ProgressError.invalidInput(description: "追加ゴールドは0以上である必要があります")
-        }
+    func addGold(_ amount: UInt32) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
             wallet.gold &+= amount
         }
     }
 
-    func spendGold(_ amount: Int) async throws -> PlayerSnapshot {
-        guard amount >= 0 else {
-            throw ProgressError.invalidInput(description: "消費ゴールドは0以上である必要があります")
-        }
+    func spendGold(_ amount: UInt32) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
             guard wallet.gold >= amount else {
-                throw ProgressError.insufficientFunds(required: amount, available: wallet.gold)
+                throw ProgressError.insufficientFunds(required: Int(amount), available: Int(wallet.gold))
             }
             wallet.gold -= amount
         }
@@ -114,10 +104,7 @@ actor GameStateService {
 
     // MARK: - Cat Tickets
 
-    func addCatTickets(_ amount: Int) async throws -> PlayerSnapshot {
-        guard amount >= 0 else {
-            throw ProgressError.invalidInput(description: "追加キャット・チケットは0以上である必要があります")
-        }
+    func addCatTickets(_ amount: UInt16) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
             wallet.catTickets &+= amount
         }
@@ -177,7 +164,7 @@ private extension GameStateService {
         return context
     }
 
-    func ensureGameState(context: ModelContext, initialGold: Int = 1000) throws -> GameStateRecord {
+    func ensureGameState(context: ModelContext, initialGold: UInt32 = 1000) throws -> GameStateRecord {
         var descriptor = FetchDescriptor<GameStateRecord>()
         descriptor.fetchLimit = 1
         if let existing = try context.fetch(descriptor).first {

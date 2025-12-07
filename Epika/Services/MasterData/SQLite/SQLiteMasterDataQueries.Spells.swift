@@ -5,7 +5,7 @@ import SQLite3
 extension SQLiteMasterDataManager {
     func fetchAllSpells() throws -> [SpellDefinition] {
         struct Builder {
-            let id: String
+            let id: UInt8
             let name: String
             let schoolRaw: String
             let tier: Int
@@ -15,7 +15,7 @@ extension SQLiteMasterDataManager {
             let extraTargetsPerLevels: Double?
             let hitsPerCast: Int?
             let basePowerMultiplier: Double?
-            let statusId: String?
+            let statusId: UInt8?
             let healMultiplier: Double?
             let castCondition: String?
             let description: String
@@ -35,8 +35,8 @@ extension SQLiteMasterDataManager {
             return String(cString: text)
         }
 
-        var builders: [String: Builder] = [:]
-        var order: [String] = []
+        var builders: [UInt8: Builder] = [:]
+        var order: [UInt8] = []
         let spellSQL = """
             SELECT id, name, school, tier, category, targeting,
                    max_targets_base, extra_targets_per_levels,
@@ -48,15 +48,14 @@ extension SQLiteMasterDataManager {
         let spellStatement = try prepare(spellSQL)
         defer { sqlite3_finalize(spellStatement) }
         while sqlite3_step(spellStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(spellStatement, 0),
-                  let nameC = sqlite3_column_text(spellStatement, 1),
+            guard let nameC = sqlite3_column_text(spellStatement, 1),
                   let schoolC = sqlite3_column_text(spellStatement, 2),
                   let categoryC = sqlite3_column_text(spellStatement, 4),
                   let targetingC = sqlite3_column_text(spellStatement, 5),
                   let descriptionC = sqlite3_column_text(spellStatement, 13) else {
                 continue
             }
-            let id = String(cString: idC)
+            let id = UInt8(sqlite3_column_int(spellStatement, 0))
             let builder = Builder(
                 id: id,
                 name: String(cString: nameC),
@@ -68,7 +67,7 @@ extension SQLiteMasterDataManager {
                 extraTargetsPerLevels: optionalDouble(spellStatement, 7),
                 hitsPerCast: optionalInt(spellStatement, 8),
                 basePowerMultiplier: optionalDouble(spellStatement, 9),
-                statusId: optionalText(spellStatement, 10),
+                statusId: sqlite3_column_type(spellStatement, 10) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 10)),
                 healMultiplier: optionalDouble(spellStatement, 11),
                 castCondition: optionalText(spellStatement, 12),
                 description: String(cString: descriptionC)
@@ -81,9 +80,8 @@ extension SQLiteMasterDataManager {
         let buffStatement = try prepare(buffSQL)
         defer { sqlite3_finalize(buffStatement) }
         while sqlite3_step(buffStatement) == SQLITE_ROW {
-            guard let spellIDC = sqlite3_column_text(buffStatement, 0),
-                  let typeC = sqlite3_column_text(buffStatement, 2) else { continue }
-            let spellId = String(cString: spellIDC)
+            guard let typeC = sqlite3_column_text(buffStatement, 2) else { continue }
+            let spellId = UInt8(sqlite3_column_int(buffStatement, 0))
             guard var builder = builders[spellId] else { continue }
             let orderIndex = Int(sqlite3_column_int(buffStatement, 1))
             let typeRaw = String(cString: typeC)

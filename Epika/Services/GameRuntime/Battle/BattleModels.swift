@@ -1,9 +1,18 @@
 import Foundation
 
-enum BattleDamageType: Sendable {
-    case physical
-    case magical
-    case breath
+enum BattleDamageType: UInt8, Sendable {
+    case physical = 0
+    case magical = 1
+    case breath = 2
+
+    init?(identifier: String) {
+        switch identifier {
+        case "physical": self = .physical
+        case "magical": self = .magical
+        case "breath": self = .breath
+        default: return nil
+        }
+    }
 }
 
 struct BattleActionRates: Sendable, Hashable {
@@ -53,10 +62,10 @@ struct BattleActionResource: Sendable, Hashable {
     }
 
     private var storage: [String: Int]
-    private var spellCharges: [String: SpellChargeState]
+    private var spellCharges: [UInt8: SpellChargeState]
 
     init(initialValues: [String: Int] = [:],
-         spellCharges: [String: SpellChargeState] = [:]) {
+         spellCharges: [UInt8: SpellChargeState] = [:]) {
         self.storage = initialValues
         self.spellCharges = spellCharges
     }
@@ -90,15 +99,15 @@ struct BattleActionResource: Sendable, Hashable {
         storage[key.rawValue] = updated
     }
 
-    func charges(forSpellId spellId: String) -> Int {
+    func charges(forSpellId spellId: UInt8) -> Int {
         spellCharges[spellId]?.current ?? 0
     }
 
-    func maxCharges(forSpellId spellId: String) -> Int? {
+    func maxCharges(forSpellId spellId: UInt8) -> Int? {
         spellCharges[spellId]?.max
     }
 
-    mutating func setSpellCharges(for spellId: String, current: Int, max maxValue: Int) {
+    mutating func setSpellCharges(for spellId: UInt8, current: Int, max maxValue: Int) {
         let normalizedMax = Swift.max(0, maxValue)
         let normalizedCurrent = Swift.max(0, current)
         spellCharges[spellId] = SpellChargeState(current: normalizedCurrent, max: normalizedMax)
@@ -115,7 +124,7 @@ struct BattleActionResource: Sendable, Hashable {
         }
     }
 
-    mutating func consume(spellId: String, amount: Int = 1) -> Bool {
+    mutating func consume(spellId: UInt8, amount: Int = 1) -> Bool {
         guard amount > 0, var state = spellCharges[spellId], state.current >= amount else {
             return false
         }
@@ -124,7 +133,7 @@ struct BattleActionResource: Sendable, Hashable {
         return true
     }
 
-    mutating func addCharges(forSpellId spellId: String, amount: Int, cap: Int?) -> Bool {
+    mutating func addCharges(forSpellId spellId: UInt8, amount: Int, cap: Int?) -> Bool {
         guard amount > 0, var state = spellCharges[spellId] else { return false }
         let limit = max(cap ?? state.max, 0)
         let updated = limit > 0 ? min(limit, state.current + amount) : state.current
@@ -134,7 +143,7 @@ struct BattleActionResource: Sendable, Hashable {
         return true
     }
 
-    func hasAvailableCharges(for spellId: String) -> Bool {
+    func hasAvailableCharges(for spellId: UInt8) -> Bool {
         charges(forSpellId: spellId) > 0
     }
 
@@ -142,7 +151,7 @@ struct BattleActionResource: Sendable, Hashable {
         spells.contains { hasAvailableCharges(for: $0.id) }
     }
 
-    func spellChargeState(for spellId: String) -> SpellChargeState? {
+    func spellChargeState(for spellId: UInt8) -> SpellChargeState? {
         spellCharges[spellId]
     }
 
@@ -159,7 +168,7 @@ struct BattleActionResource: Sendable, Hashable {
 }
 
 struct AppliedStatusEffect: Sendable, Hashable {
-    let id: String
+    let id: UInt8
     var remainingTurns: Int
     let source: String?
     var stackValue: Double
@@ -306,7 +315,7 @@ struct BattleActor: Sendable {
         }
 
         struct StatusInflict: Sendable, Hashable {
-            let statusId: String
+            let statusId: UInt8
             let baseChancePercent: Double
         }
 
@@ -339,8 +348,8 @@ struct BattleActor: Sendable {
         struct VitalizeResurrection: Sendable, Hashable {
             let removePenalties: Bool
             let rememberSkills: Bool
-            let removeSkillIds: [String]
-            let grantSkillIds: [String]
+            let removeSkillIds: [UInt16]
+            let grantSkillIds: [UInt16]
         }
 
         struct SpecialAttack: Sendable, Hashable {
@@ -431,8 +440,8 @@ struct BattleActor: Sendable {
         var damageDealt: DamageMultipliers
         var damageDealtAgainst: TargetMultipliers
         var spellPower: SpellPower
-        var spellSpecificMultipliers: [String: Double]
-        var spellSpecificTakenMultipliers: [String: Double]
+        var spellSpecificMultipliers: [UInt8: Double]
+        var spellSpecificTakenMultipliers: [UInt8: Double]
         var criticalDamagePercent: Double
         var criticalDamageMultiplier: Double
         var criticalDamageTakenMultiplier: Double
@@ -468,20 +477,20 @@ struct BattleActor: Sendable {
         var reactions: [Reaction]
         var counterAttackEvasionMultiplier: Double
         var rowProfile: RowProfile
-        var statusResistances: [String: StatusResistance]
+        var statusResistances: [UInt8: StatusResistance]
         var timedBuffTriggers: [TimedBuffTrigger]
         var statusInflictions: [StatusInflict]
         var berserkChancePercent: Double?
         var breathExtraCharges: Int
-        var barrierCharges: [String: Int]
-        var guardBarrierCharges: [String: Int]
+        var barrierCharges: [UInt8: Int]
+        var guardBarrierCharges: [UInt8: Int]
         var parryEnabled: Bool
         var shieldBlockEnabled: Bool
         var parryBonusPercent: Double
         var shieldBlockBonusPercent: Double
         var dodgeCapMax: Double?
         var minHitScale: Double?
-        var spellChargeModifiers: [String: SpellChargeModifier]
+        var spellChargeModifiers: [UInt8: SpellChargeModifier]
         var defaultSpellChargeModifier: SpellChargeModifier?
         var absorptionPercent: Double
         var absorptionCapPercent: Double
@@ -598,9 +607,9 @@ struct BattleActor: Sendable {
     let partyMemberId: UInt8?
     let level: Int?
     let jobName: String?
-    let avatarIdentifier: String?
+    let avatarIndex: UInt16?
     let isMartialEligible: Bool
-    let raceId: String?
+    let raceId: UInt8?
     let raceCategory: String?
     let enemyMasterIndex: UInt16?  // 敵の場合のみ、EnemyDefinition.index
 
@@ -611,8 +620,8 @@ struct BattleActor: Sendable {
     var statusEffects: [AppliedStatusEffect]
     var timedBuffs: [TimedBuff]
     var guardActive: Bool
-    var barrierCharges: [String: Int]
-    var guardBarrierCharges: [String: Int]
+    var barrierCharges: [UInt8: Int]
+    var guardBarrierCharges: [UInt8: Int]
     var parryEnabled: Bool
     var shieldBlockEnabled: Bool
     var partyHostileAll: Bool
@@ -626,16 +635,16 @@ struct BattleActor: Sendable {
     var degradationPercent: Double
     var partyHostileTargets: Set<String>
         var partyProtectedTargets: Set<String>
-        var spellChargeRegenUsage: [String: Int]
+        var spellChargeRegenUsage: [UInt8: Int]
         var rescueActionCapacity: Int
         var rescueActionsUsed: Int
         var resurrectionTriggersUsed: Int
         var forcedResurrectionTriggersUsed: Int
         var necromancerLastTriggerTurn: Int?
         var vitalizeActive: Bool
-        var baseSkillIds: Set<String>
-        var suppressedSkillIds: Set<String>
-        var grantedSkillIds: Set<String>
+        var baseSkillIds: Set<UInt16>
+        var suppressedSkillIds: Set<UInt16>
+        var grantedSkillIds: Set<UInt16>
         var extraActionsNextTurn: Int
         var isSacrificeTarget: Bool
 
@@ -652,9 +661,9 @@ struct BattleActor: Sendable {
          partyMemberId: UInt8? = nil,
          level: Int? = nil,
          jobName: String? = nil,
-         avatarIdentifier: String? = nil,
+         avatarIndex: UInt16? = nil,
          isMartialEligible: Bool,
-         raceId: String? = nil,
+         raceId: UInt8? = nil,
          raceCategory: String? = nil,
          enemyMasterIndex: UInt16? = nil,
          snapshot: RuntimeCharacterProgress.Combat,
@@ -664,8 +673,8 @@ struct BattleActor: Sendable {
          statusEffects: [AppliedStatusEffect] = [],
          timedBuffs: [TimedBuff] = [],
          guardActive: Bool = false,
-         barrierCharges: [String: Int] = [:],
-         guardBarrierCharges: [String: Int] = [:],
+         barrierCharges: [UInt8: Int] = [:],
+         guardBarrierCharges: [UInt8: Int] = [:],
          parryEnabled: Bool = false,
          shieldBlockEnabled: Bool = false,
          partyHostileAll: Bool = false,
@@ -679,16 +688,16 @@ struct BattleActor: Sendable {
          degradationPercent: Double = 0.0,
          partyHostileTargets: Set<String> = [],
          partyProtectedTargets: Set<String> = [],
-         spellChargeRegenUsage: [String: Int] = [:],
+         spellChargeRegenUsage: [UInt8: Int] = [:],
          rescueActionCapacity: Int = 1,
          rescueActionsUsed: Int = 0,
          resurrectionTriggersUsed: Int = 0,
          forcedResurrectionTriggersUsed: Int = 0,
          necromancerLastTriggerTurn: Int? = nil,
          vitalizeActive: Bool = false,
-         baseSkillIds: Set<String> = [],
-         suppressedSkillIds: Set<String> = [],
-         grantedSkillIds: Set<String> = [],
+         baseSkillIds: Set<UInt16> = [],
+         suppressedSkillIds: Set<UInt16> = [],
+         grantedSkillIds: Set<UInt16> = [],
          extraActionsNextTurn: Int = 0,
          isSacrificeTarget: Bool = false) {
         self.identifier = identifier
@@ -704,7 +713,7 @@ struct BattleActor: Sendable {
         self.partyMemberId = partyMemberId
         self.level = level
         self.jobName = jobName
-        self.avatarIdentifier = avatarIdentifier
+        self.avatarIndex = avatarIndex
         self.isMartialEligible = isMartialEligible
         self.raceId = raceId
         self.raceCategory = raceCategory
@@ -750,7 +759,7 @@ struct BattleActor: Sendable {
 }
 
 extension BattleActor.SkillEffects {
-    func spellChargeModifier(for spellId: String) -> SpellChargeModifier? {
+    func spellChargeModifier(for spellId: UInt8) -> SpellChargeModifier? {
         var modifier = defaultSpellChargeModifier ?? SpellChargeModifier()
         if let specific = spellChargeModifiers[spellId] {
             modifier.merge(specific)

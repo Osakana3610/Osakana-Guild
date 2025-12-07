@@ -12,26 +12,17 @@ actor DungeonProgressService {
         let context = makeContext()
         let descriptor = FetchDescriptor<DungeonRecord>()
         let records = try context.fetch(descriptor)
-        var snapshots: [DungeonSnapshot] = []
-        snapshots.reserveCapacity(records.count)
-        for record in records {
-            let floors = try fetchFloors(for: record.id, context: context)
-            let encounters = try fetchEncounters(for: record.id, context: context)
-            snapshots.append(Self.snapshot(from: record, floors: floors, encounters: encounters))
-        }
-        return snapshots
+        return records.map { Self.snapshot(from: $0) }
     }
 
-    func ensureDungeonSnapshot(for dungeonId: String) async throws -> DungeonSnapshot {
+    func ensureDungeonSnapshot(for dungeonId: UInt16) async throws -> DungeonSnapshot {
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
-        let floors = try fetchFloors(for: record.id, context: context)
-        let encounters = try fetchEncounters(for: record.id, context: context)
         try saveIfNeeded(context)
-        return Self.snapshot(from: record, floors: floors, encounters: encounters)
+        return Self.snapshot(from: record)
     }
 
-    func setUnlocked(_ isUnlocked: Bool, dungeonId: String) async throws {
+    func setUnlocked(_ isUnlocked: Bool, dungeonId: UInt16) async throws {
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         if record.isUnlocked != isUnlocked {
@@ -41,34 +32,37 @@ actor DungeonProgressService {
         try saveIfNeeded(context)
     }
 
-    func markCleared(dungeonId: String, difficulty: Int, totalFloors: Int) async throws {
+    func markCleared(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws {
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         let now = Date()
-        if difficulty == 0 && record.isCleared == false {
-            record.isCleared = true
-        }
-        if record.highestClearedDifficulty < difficulty {
+
+        // クリアした難易度を更新
+        if let current = record.highestClearedDifficulty {
+            if difficulty > current {
+                record.highestClearedDifficulty = difficulty
+            }
+        } else {
             record.highestClearedDifficulty = difficulty
         }
+
         record.furthestClearedFloor = max(record.furthestClearedFloor, totalFloors)
         record.updatedAt = now
         try saveIfNeeded(context)
     }
 
-    func unlockDifficulty(dungeonId: String, difficulty: Int) async throws {
-        let capped = max(0, difficulty)
+    func unlockDifficulty(dungeonId: UInt16, difficulty: UInt8) async throws {
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
-        if record.highestUnlockedDifficulty < capped {
-            record.highestUnlockedDifficulty = capped
+        if record.highestUnlockedDifficulty < difficulty {
+            record.highestUnlockedDifficulty = difficulty
             record.furthestClearedFloor = 0
             record.updatedAt = Date()
         }
         try saveIfNeeded(context)
     }
 
-    func updatePartialProgress(dungeonId: String, difficulty: Int, furthestFloor: Int) async throws {
+    func updatePartialProgress(dungeonId: UInt16, difficulty: UInt8, furthestFloor: UInt8) async throws {
         guard furthestFloor > 0 else { return }
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
@@ -87,38 +81,21 @@ private extension DungeonProgressService {
         return context
     }
 
-    func ensureDungeonRecord(dungeonId: String, context: ModelContext) throws -> DungeonRecord {
+    func ensureDungeonRecord(dungeonId: UInt16, context: ModelContext) throws -> DungeonRecord {
         var descriptor = FetchDescriptor<DungeonRecord>(predicate: #Predicate { $0.dungeonId == dungeonId })
         descriptor.fetchLimit = 1
         if let existing = try context.fetch(descriptor).first {
-            if existing.highestClearedDifficulty == 0 && existing.isCleared == false {
-                existing.highestClearedDifficulty = -1
-            }
             return existing
         }
         let now = Date()
         let record = DungeonRecord(dungeonId: dungeonId,
                                    isUnlocked: false,
-                                   lastEnteredAt: nil,
-                                   isCleared: false,
                                    highestUnlockedDifficulty: 0,
-                                   highestClearedDifficulty: -1,
+                                   highestClearedDifficulty: nil,
                                    furthestClearedFloor: 0,
-                                   createdAt: now,
                                    updatedAt: now)
         context.insert(record)
         return record
-    }
-
-    func fetchFloors(for dungeonRecordId: UUID, context: ModelContext) throws -> [DungeonFloorRecord] {
-        var descriptor = FetchDescriptor<DungeonFloorRecord>(predicate: #Predicate { $0.dungeonRecordId == dungeonRecordId })
-        descriptor.sortBy = [SortDescriptor(\DungeonFloorRecord.floorNumber, order: .forward)]
-        return try context.fetch(descriptor)
-    }
-
-    func fetchEncounters(for dungeonRecordId: UUID, context: ModelContext) throws -> [DungeonEncounterRecord] {
-        let descriptor = FetchDescriptor<DungeonEncounterRecord>(predicate: #Predicate { $0.dungeonRecordId == dungeonRecordId })
-        return try context.fetch(descriptor)
     }
 
     func saveIfNeeded(_ context: ModelContext) throws {
@@ -126,37 +103,13 @@ private extension DungeonProgressService {
         try context.save()
     }
 
-    static func snapshot(from record: DungeonRecord,
-                         floors: [DungeonFloorRecord],
-                         encounters: [DungeonEncounterRecord]) -> DungeonSnapshot {
-        let floorSnapshots = floors.map { floor in
-            DungeonSnapshot.Floor(id: floor.id,
-                                  floorNumber: floor.floorNumber,
-                                  cleared: floor.cleared,
-                                  bestClearTime: floor.bestClearTime,
-                                  lastClearedAt: floor.lastClearedAt,
-                                  createdAt: floor.createdAt,
-                                  updatedAt: floor.updatedAt)
-        }
-        let encounterSnapshots = encounters.map { encounter in
-            DungeonSnapshot.Encounter(id: encounter.id,
-                                      enemyId: encounter.enemyId,
-                                      defeatedCount: encounter.defeatedCount,
-                                      createdAt: encounter.createdAt,
-                                      updatedAt: encounter.updatedAt)
-        }
-        return DungeonSnapshot(persistentIdentifier: record.persistentModelID,
-                                id: record.id,
-                                dungeonId: record.dungeonId,
-                                isUnlocked: record.isUnlocked,
-                                isCleared: record.isCleared,
-                                highestUnlockedDifficulty: record.highestUnlockedDifficulty,
-                                highestClearedDifficulty: record.highestClearedDifficulty,
-                                furthestClearedFloor: record.furthestClearedFloor,
-                                lastEnteredAt: record.lastEnteredAt,
-                                floors: floorSnapshots,
-                                encounters: encounterSnapshots,
-                                createdAt: record.createdAt,
-                                updatedAt: record.updatedAt)
+    static func snapshot(from record: DungeonRecord) -> DungeonSnapshot {
+        DungeonSnapshot(persistentIdentifier: record.persistentModelID,
+                        dungeonId: record.dungeonId,
+                        isUnlocked: record.isUnlocked,
+                        highestUnlockedDifficulty: record.highestUnlockedDifficulty,
+                        highestClearedDifficulty: record.highestClearedDifficulty,
+                        furthestClearedFloor: record.furthestClearedFloor,
+                        updatedAt: record.updatedAt)
     }
 }

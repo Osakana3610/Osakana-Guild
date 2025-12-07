@@ -5,8 +5,7 @@ import SQLite3
 extension SQLiteMasterDataManager {
     func fetchAllItems() throws -> [ItemDefinition] {
         struct Builder {
-            var id: String
-            var index: Int16
+            var id: UInt16
             var name: String
             var description: String
             var category: String
@@ -22,28 +21,25 @@ extension SQLiteMasterDataManager {
             var grantedSkills: [ItemDefinition.GrantedSkill] = []
         }
 
-        var builders: [String: Builder] = [:]
-        var orderedIds: [String] = []
+        var builders: [UInt16: Builder] = [:]
+        var orderedIds: [UInt16] = []
 
-        let itemSQL = "SELECT id, item_index, name, description, category, base_price, sell_value, rarity FROM items;"
+        let itemSQL = "SELECT id, name, description, category, base_price, sell_value, rarity FROM items;"
         let itemStatement = try prepare(itemSQL)
         defer { sqlite3_finalize(itemStatement) }
         while sqlite3_step(itemStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(itemStatement, 0),
-                  let nameC = sqlite3_column_text(itemStatement, 2),
-                  let descC = sqlite3_column_text(itemStatement, 3),
-                  let categoryC = sqlite3_column_text(itemStatement, 4) else { continue }
-            let id = String(cString: idC)
-            let index = Int16(sqlite3_column_int(itemStatement, 1))
+            guard let nameC = sqlite3_column_text(itemStatement, 1),
+                  let descC = sqlite3_column_text(itemStatement, 2),
+                  let categoryC = sqlite3_column_text(itemStatement, 3) else { continue }
+            let id = UInt16(sqlite3_column_int(itemStatement, 0))
             let name = String(cString: nameC)
             let description = String(cString: descC)
             let category = String(cString: categoryC)
-            let basePrice = Int(sqlite3_column_int(itemStatement, 5))
-            let sellValue = Int(sqlite3_column_int(itemStatement, 6))
-            let rarityValue = sqlite3_column_text(itemStatement, 7).flatMap { String(cString: $0) }
+            let basePrice = Int(sqlite3_column_int(itemStatement, 4))
+            let sellValue = Int(sqlite3_column_int(itemStatement, 5))
+            let rarityValue = sqlite3_column_text(itemStatement, 6).flatMap { String(cString: $0) }
             builders[id] = Builder(
                 id: id,
-                index: index,
                 name: name,
                 description: description,
                 category: category,
@@ -58,8 +54,7 @@ extension SQLiteMasterDataManager {
             let statement = try prepare(sql)
             defer { sqlite3_finalize(statement) }
             while sqlite3_step(statement) == SQLITE_ROW {
-                guard let idC = sqlite3_column_text(statement, 0) else { continue }
-                let id = String(cString: idC)
+                let id = UInt16(sqlite3_column_int(statement, 0))
                 guard var builder = builders[id] else { continue }
                 handler(&builder, statement)
                 builders[id] = builder
@@ -103,18 +98,17 @@ extension SQLiteMasterDataManager {
         let skillStatement = try prepare("SELECT item_id, order_index, skill_id FROM item_granted_skills ORDER BY item_id, order_index;")
         defer { sqlite3_finalize(skillStatement) }
         while sqlite3_step(skillStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(skillStatement, 0),
-                  var builder = builders[String(cString: idC)] else { continue }
+            let id = UInt16(sqlite3_column_int(skillStatement, 0))
+            guard var builder = builders[id] else { continue }
             let order = Int(sqlite3_column_int(skillStatement, 1))
-            guard let skillC = sqlite3_column_text(skillStatement, 2) else { continue }
-            builder.grantedSkills.append(.init(orderIndex: order, skillId: String(cString: skillC)))
+            let skillId = UInt16(sqlite3_column_int(skillStatement, 2))
+            builder.grantedSkills.append(.init(orderIndex: order, skillId: skillId))
             builders[builder.id] = builder
         }
 
         return orderedIds.compactMap { builders[$0] }.map { builder in
             ItemDefinition(
                 id: builder.id,
-                index: builder.index,
                 name: builder.name,
                 description: builder.description,
                 category: builder.category,

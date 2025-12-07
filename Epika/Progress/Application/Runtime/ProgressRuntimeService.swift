@@ -22,7 +22,7 @@ final class ProgressRuntimeService {
         return try await runtimeService.recalculateCombatStats(for: progress, pandoraBoxStackKeys: pandoraBoxStackKeys)
     }
 
-    func raceMaxLevel(for raceId: String) async throws -> Int {
+    func raceMaxLevel(for raceId: UInt8) async throws -> Int {
         if let definition = try await runtimeService.raceDefinition(withId: raceId) {
             return definition.maxLevel
         }
@@ -35,7 +35,7 @@ final class ProgressRuntimeService {
 
     func startExplorationRun(party: PartySnapshot,
                               characters: [CharacterSnapshot],
-                              dungeonId: String,
+                              dungeonId: UInt16,
                               targetFloorNumber: Int) async throws -> ExplorationRuntimeSession {
         let characterProgresses = characters.map(makeRuntimeCharacterProgress(from:))
         let partyState = try await runtimeService.runtimePartyState(party: party,
@@ -88,9 +88,8 @@ private extension ProgressRuntimeService {
             id: snapshot.id,
             displayName: snapshot.displayName,
             raceId: snapshot.raceId,
-            gender: snapshot.gender,
             jobId: snapshot.jobId,
-            avatarIdentifier: snapshot.avatarIdentifier,
+            avatarId: snapshot.avatarId,
             level: snapshot.level,
             experience: snapshot.experience,
             attributes: snapshot.attributes,

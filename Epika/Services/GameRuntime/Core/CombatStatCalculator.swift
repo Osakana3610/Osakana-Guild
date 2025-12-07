@@ -30,10 +30,10 @@ struct CombatStatCalculator {
 
     static func calculate(for context: Context) throws -> Result {
         guard let race = context.state.race else {
-            throw CalculationError.missingRaceDefinition(context.progress.raceId)
+            throw CalculationError.missingRaceDefinition("id:\(context.progress.raceId)")
         }
         guard let job = context.state.job else {
-            throw CalculationError.missingJobDefinition(context.progress.jobId)
+            throw CalculationError.missingJobDefinition("id:\(context.progress.jobId)")
         }
 
         let skillEffects = try SkillEffectAggregator(skills: context.state.learnedSkills)
@@ -127,10 +127,10 @@ private struct BaseStatAccumulator {
                         definitions: [ItemDefinition],
                         equipmentMultipliers: [String: Double],
                         pandoraBoxStackKeys: Set<String>) throws {
-        let definitionsByIndex = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
+        let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         for item in equipment {
-            guard let definition = definitionsByIndex[item.masterDataIndex] else {
-                throw CombatStatCalculator.CalculationError.missingItemDefinition(item.masterDataIndex)
+            guard let definition = definitionsById[item.itemId] else {
+                throw CombatStatCalculator.CalculationError.missingItemDefinition(Int16(item.itemId))
             }
             let categoryMultiplier = equipmentMultipliers[definition.category]
                 ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
@@ -141,8 +141,8 @@ private struct BaseStatAccumulator {
                 assign(bonus.stat, delta: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity)
             }
             // ソケット宝石の基礎ステータス（係数1.0）
-            if item.socketMasterDataIndex != 0,
-               let gemDefinition = definitionsByIndex[item.socketMasterDataIndex] {
+            if item.socketItemId != 0,
+               let gemDefinition = definitionsById[item.socketItemId] {
                 for bonus in gemDefinition.statBonuses {
                     // 宝石ステータスは装備数量に依存しない（1個の宝石が1個の装備に装着）
                     assign(bonus.stat, delta: bonus.value)
@@ -515,7 +515,7 @@ private struct CombatAccumulator {
     }
 
     func makeCombat() throws -> RuntimeCharacterProgress.Combat {
-        let baseLevelFactor = CombatFormulas.levelDependentValue(raceId: progress.raceId,
+        let baseLevelFactor = CombatFormulas.levelDependentValue(raceId: race.id,
                                                                  raceCategory: race.category,
                                                                  level: progress.level)
         let levelFactor = baseLevelFactor * growthMultiplier
@@ -805,9 +805,9 @@ private struct CombatAccumulator {
     }
 
     private func applyEquipmentCombatBonuses(to combat: inout RuntimeCharacterProgress.Combat) {
-        let definitionsByIndex = Dictionary(uniqueKeysWithValues: itemDefinitions.map { ($0.index, $0) })
+        let definitionsById = Dictionary(uniqueKeysWithValues: itemDefinitions.map { ($0.id, $0) })
         for item in equipment {
-            guard let definition = definitionsByIndex[item.masterDataIndex] else { continue }
+            guard let definition = definitionsById[item.itemId] else { continue }
             let categoryMultiplier = equipmentMultipliers[definition.category]
                 ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
                 ?? 1.0
@@ -819,8 +819,8 @@ private struct CombatAccumulator {
                 apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity, to: stat, combat: &combat)
             }
             // ソケット宝石の戦闘ステータス（係数: 通常0.5、魔法防御0.25）
-            if item.socketMasterDataIndex != 0,
-               let gemDefinition = definitionsByIndex[item.socketMasterDataIndex] {
+            if item.socketItemId != 0,
+               let gemDefinition = definitionsById[item.socketItemId] {
                 for bonus in gemDefinition.combatBonuses {
                     guard let stat = CombatStatKey(bonus.stat) else { continue }
                     let gemCoefficient: Double = (stat == .magicalDefense) ? 0.25 : 0.5
@@ -838,9 +838,9 @@ private struct CombatAccumulator {
     private static func containsPositivePhysicalAttack(equipment: [RuntimeCharacterProgress.EquippedItem],
                                                        definitions: [ItemDefinition]) -> Bool {
         guard !equipment.isEmpty else { return false }
-        let definitionsByIndex = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
+        let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         for item in equipment {
-            guard let definition = definitionsByIndex[item.masterDataIndex] else { continue }
+            guard let definition = definitionsById[item.itemId] else { continue }
             for bonus in definition.combatBonuses where bonus.stat == "physicalAttack" {
                 if bonus.value * item.quantity > 0 {
                     return true

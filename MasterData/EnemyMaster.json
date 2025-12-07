@@ -1,8 +1,7 @@
 {
   "enemyTemplates": [
     {
-      "index": 0,
-      "id": "goblin_warrior",
+      "id": 0,
       "baseName": "ゴブリン戦士",
       "race": "goblinoid",
       "baseExperience": 75,
@@ -72,8 +71,7 @@
       "job": null
     },
     {
-      "index": 1,
-      "id": "orc_berserker",
+      "id": 1,
       "baseName": "オークの狂戦士",
       "race": "orcish",
       "baseExperience": 240,
@@ -151,8 +149,7 @@
       "job": null
     },
     {
-      "index": 2,
-      "id": "skeleton_mage",
+      "id": 2,
       "baseName": "スケルトンメイジ",
       "race": "undead",
       "baseExperience": 150,
@@ -230,8 +227,7 @@
       "job": null
     },
     {
-      "index": 3,
-      "id": "crystal_slime",
+      "id": 3,
       "baseName": "クリスタルスライム",
       "race": "ooze",
       "baseExperience": 120,
@@ -308,8 +304,7 @@
       "job": null
     },
     {
-      "index": 4,
-      "id": "shadow_wolf",
+      "id": 4,
       "baseName": "シャドウウルフ",
       "race": "beast",
       "baseExperience": 300,
@@ -386,8 +381,7 @@
       "job": null
     },
     {
-      "index": 5,
-      "id": "ancient_dragon",
+      "id": 5,
       "baseName": "古代竜アンシエント",
       "race": "dragon",
       "baseExperience": 1500,
@@ -474,8 +468,7 @@
       "job": null
     },
     {
-      "index": 6,
-      "id": "goblin_captain",
+      "id": 6,
       "baseName": "ゴブリンキャプテン",
       "race": "goblinoid",
       "baseExperience": 120,
@@ -544,8 +537,7 @@
       "job": null
     },
     {
-      "index": 7,
-      "id": "forest_spirit",
+      "id": 7,
       "baseName": "森の精霊",
       "race": "spirit",
       "baseExperience": 240,
@@ -615,8 +607,7 @@
       "job": null
     },
     {
-      "index": 8,
-      "id": "cave_guardian",
+      "id": 8,
       "baseName": "洞窟の守護者",
       "race": "golem",
       "baseExperience": 300,
@@ -686,8 +677,7 @@
       "job": null
     },
     {
-      "index": 9,
-      "id": "forest_guardian",
+      "id": 9,
       "baseName": "森の番人",
       "race": "treant",
       "baseExperience": 400,

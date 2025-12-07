@@ -4,11 +4,11 @@ struct RuntimeDungeon: Identifiable, Hashable, Sendable {
     let definition: DungeonDefinition
     let progress: DungeonSnapshot?
 
-    var id: String { definition.id }
+    var id: UInt16 { definition.id }
     var isUnlocked: Bool { progress?.isUnlocked ?? false }
-    var highestUnlockedDifficulty: Int { progress?.highestUnlockedDifficulty ?? 0 }
-    var highestClearedDifficulty: Int { progress?.highestClearedDifficulty ?? 0 }
-    var furthestClearedFloor: Int { progress?.furthestClearedFloor ?? 0 }
+    var highestUnlockedDifficulty: Int { Int(progress?.highestUnlockedDifficulty ?? 0) }
+    var highestClearedDifficulty: Int { progress?.highestClearedDifficulty.map { Int($0) } ?? -1 }
+    var furthestClearedFloor: Int { Int(progress?.furthestClearedFloor ?? 0) }
 
     var availableDifficultyRanks: [Int] {
         let highest = max(0, highestUnlockedDifficulty)
@@ -25,7 +25,7 @@ struct RuntimeDungeon: Identifiable, Hashable, Sendable {
     }
 
     func statusDescription(for difficulty: Int) -> String {
-        let clearedThreshold = max(-1, highestClearedDifficulty)
+        let clearedThreshold = highestClearedDifficulty
         if difficulty <= clearedThreshold {
             return "（制覇）"
         }

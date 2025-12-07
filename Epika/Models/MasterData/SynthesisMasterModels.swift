@@ -1,8 +1,8 @@
 import Foundation
 
 struct SynthesisRecipeDefinition: Identifiable, Sendable {
-    let id: String
-    let parentItemId: String
-    let childItemId: String
-    let resultItemId: String
+    let id: UInt16
+    let parentItemId: UInt16
+    let childItemId: UInt16
+    let resultItemId: UInt16
 }

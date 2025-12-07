@@ -5,11 +5,11 @@ enum DropService {
     static func drops(repository: MasterDataRepository,
                       for enemy: EnemyDefinition,
                       party: RuntimePartyState,
-                      dungeonId: String? = nil,
+                      dungeonId: UInt16? = nil,
                       floorNumber: Int? = nil,
                       isRabiTicketActive: Bool = false,
                       hasTitleTreasure: Bool = false,
-                      enemyTitleId: String? = nil,
+                      enemyTitleId: UInt8? = nil,
                       dailySuperRareState: SuperRareDailyState,
                       random: inout GameRandomSource) async throws -> DropOutcome {
         guard !enemy.drops.isEmpty else { return DropOutcome(results: [], superRareState: dailySuperRareState) }
@@ -32,7 +32,7 @@ enum DropService {
 
         for drop in enemy.drops.sorted(by: { $0.orderIndex < $1.orderIndex }) {
             guard let item = try await repository.item(withId: drop.itemId) else {
-                throw RuntimeError.masterDataNotFound(entity: "item", identifier: drop.itemId)
+                throw RuntimeError.masterDataNotFound(entity: "item", identifier: String(drop.itemId))
             }
 
             let category = categorize(item: item)
@@ -43,8 +43,8 @@ enum DropService {
                                                    random: &random)
             guard roll.willDrop else { continue }
 
-            var normalTitleId: String? = nil
-            var superRareTitleId: String? = nil
+            var normalTitleId: UInt8? = nil
+            var superRareTitleId: UInt8? = nil
 
             if TitleAssignmentEngine.shouldAssignTitle(category: category,
                                                         partyBonuses: context.partyBonuses,
@@ -105,7 +105,7 @@ enum DropService {
                                           repository: MasterDataRepository,
                                           sessionState: inout SuperRareSessionState,
                                           dailyState: inout SuperRareDailyState,
-                                          random: inout GameRandomSource) async throws -> (normalTitleId: String?, superRareTitleId: String?) {
+                                          random: inout GameRandomSource) async throws -> (normalTitleId: UInt8?, superRareTitleId: UInt8?) {
         guard let rates = title.superRareRates else {
             return (title.id, nil)
         }
@@ -149,7 +149,7 @@ enum DropService {
             sessionState.normalItemTriggered = true
         }
 
-        var normalTitleId: String? = title.id
+        var normalTitleId: UInt8? = title.id
         if TitleAssignmentEngine.shouldRemoveNormalTitleAfterSuperRare(random: &random) {
             normalTitleId = nil
         }
@@ -159,7 +159,7 @@ enum DropService {
 
     private static func superRareEnemyMultiplier(for category: DropItemCategory,
                                                  enemyTitle: TitleDefinition?) -> Double {
-        guard let rank = enemyTitle?.rank, rank >= 6 else { return 1.0 }
+        guard let titleId = enemyTitle?.id, titleId >= 6 else { return 1.0 }
         switch category {
         case .normal, .good:
             return 50.0

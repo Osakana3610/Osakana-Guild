@@ -1,8 +1,6 @@
 {
   "dungeons": [
     {
-      "id": "online_babel",
-      "index": 1,
       "name": "オンラインバベル",
       "chapter": 0,
       "stage": 0,
@@ -19,18 +17,17 @@
       "eventsPerFloor": 5,
       "titleRank": 0,
       "floorEnemyMapping": [],
-      "floorCount": 1
+      "floorCount": 1,
+      "id": 1
     },
     {
-      "id": "forest_entrance",
-      "index": 2,
       "name": "森の入り口",
       "chapter": 1,
       "stage": 1,
       "description": "ギルドの近くにある平和な森。冒険者の第一歩に最適な場所です。",
       "recommendedLevel": 3,
       "unlockConditions": [
-        "storyRead:story_001"
+        "storyRead:1"
       ],
       "rewards": [
         "copper_coin",
@@ -106,18 +103,17 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 2
     },
     {
-      "id": "ancient_cave",
-      "index": 3,
       "name": "古い洞窟",
       "chapter": 1,
       "stage": 2,
       "description": "森の奥にある古い洞窟。何かが潜んでいるような気配がします。",
       "recommendedLevel": 5,
       "unlockConditions": [
-        "dungeonClear:forest_entrance"
+        "dungeonClear:2"
       ],
       "rewards": [
         "bone_fragment",
@@ -178,18 +174,17 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 3
     },
     {
-      "id": "forgotten_ruins",
-      "index": 4,
       "name": "忘れられた遺跡",
       "chapter": 1,
       "stage": 3,
       "description": "遺跡の中は薄暗く、古代の魔法が漂っています。",
       "recommendedLevel": 8,
       "unlockConditions": [
-        "dungeonClear:ancient_cave"
+        "dungeonClear:3"
       ],
       "rewards": [
         "cursed_powder",
@@ -276,18 +271,17 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 4
     },
     {
-      "id": "forest_guardian",
-      "index": 5,
       "name": "森の番人",
       "chapter": 1,
       "stage": 4,
       "description": "森の奥深くに住む古い番人。彼を倒せば第2章への道が開かれるでしょう。",
       "recommendedLevel": 12,
       "unlockConditions": [
-        "dungeonClear:forgotten_ruins"
+        "dungeonClear:4"
       ],
       "rewards": [
         "shadow_essence",
@@ -317,18 +311,17 @@
           ]
         }
       ],
-      "floorCount": 1
+      "floorCount": 1,
+      "id": 5
     },
     {
-      "id": "mountain_path",
-      "index": 6,
       "name": "山麓の道",
       "chapter": 2,
       "stage": 1,
       "description": "山へと続く道。険しい道のりが始まります。",
       "recommendedLevel": 15,
       "unlockConditions": [
-        "dungeonClear:forest_guardian"
+        "dungeonClear:5"
       ],
       "rewards": [
         "silver_coin",
@@ -389,18 +382,17 @@
           ]
         }
       ],
-      "floorCount": 2
+      "floorCount": 2,
+      "id": 6
     },
     {
-      "id": "ruined_village",
-      "index": 7,
       "name": "廃墟の村",
       "chapter": 2,
       "stage": 2,
       "description": "かつて栄えた村の廃墟。不気味な静寂が支配しています。",
       "recommendedLevel": 18,
       "unlockConditions": [
-        "dungeonClear:mountain_path"
+        "dungeonClear:6"
       ],
       "rewards": [
         "iron_axe",
@@ -487,18 +479,17 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 7
     },
     {
-      "id": "ancient_bridge",
-      "index": 8,
       "name": "古い橋",
       "chapter": 2,
       "stage": 3,
       "description": "谷に架かる古い橋。この先に待つものは...",
       "recommendedLevel": 22,
       "unlockConditions": [
-        "dungeonClear:ruined_village"
+        "dungeonClear:7"
       ],
       "rewards": [
         "crystal_core",
@@ -559,18 +550,17 @@
           ]
         }
       ],
-      "floorCount": 2
+      "floorCount": 2,
+      "id": 8
     },
     {
-      "id": "mountain_beast",
-      "index": 9,
       "name": "山の魔獣",
       "chapter": 2,
       "stage": 4,
       "description": "山の主である魔獣。強大な力を持つ相手です。",
       "recommendedLevel": 25,
       "unlockConditions": [
-        "dungeonClear:ancient_bridge"
+        "dungeonClear:8"
       ],
       "rewards": [
         "dragon_scale",
@@ -599,18 +589,17 @@
           ]
         }
       ],
-      "floorCount": 1
+      "floorCount": 1,
+      "id": 9
     },
     {
-      "id": "dark_forest",
-      "index": 10,
       "name": "暗黒の森",
       "chapter": 3,
       "stage": 1,
       "description": "闇に包まれた邪悪な森。強力な魔物が徘徊している。",
       "recommendedLevel": 30,
       "unlockConditions": [
-        "dungeonClear:mountain_beast"
+        "dungeonClear:9"
       ],
       "rewards": [
         "dark_essence",
@@ -697,18 +686,17 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 10
     },
     {
-      "id": "magic_lake",
-      "index": 11,
       "name": "魔法の湖",
       "chapter": 3,
       "stage": 2,
       "description": "神秘的な力を持つ湖。水面から魔力が立ち上る。",
       "recommendedLevel": 35,
       "unlockConditions": [
-        "dungeonClear:dark_forest"
+        "dungeonClear:10"
       ],
       "rewards": [
         "water_crystal",
@@ -795,18 +783,17 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 11
     },
     {
-      "id": "lost_city",
-      "index": 12,
       "name": "失われた都市",
       "chapter": 3,
       "stage": 3,
       "description": "古代文明の都市遺跡。強力な魔法の痕跡が残る。",
       "recommendedLevel": 40,
       "unlockConditions": [
-        "dungeonClear:magic_lake"
+        "dungeonClear:11"
       ],
       "rewards": [
         "ancient_relic",
@@ -893,18 +880,17 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 12
     },
     {
-      "id": "ancient_dragon_lair",
-      "index": 13,
       "name": "古代ドラゴンの住処",
       "chapter": 3,
       "stage": 4,
       "description": "最強の古代ドラゴンが眠る秘密の洞窟。",
       "recommendedLevel": 50,
       "unlockConditions": [
-        "dungeonClear:lost_city"
+        "dungeonClear:12"
       ],
       "rewards": [
         "dragon_heart",
@@ -980,7 +966,8 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 13
     }
   ]
 }

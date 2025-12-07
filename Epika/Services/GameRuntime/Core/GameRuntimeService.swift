@@ -18,7 +18,7 @@ actor GameRuntimeService {
         let continuation: AsyncStream<ExplorationEngine.StepOutcome>.Continuation
     }
 
-    func startExplorationRun(dungeonId: String,
+    func startExplorationRun(dungeonId: UInt16,
                              targetFloorNumber: Int,
                              party: RuntimePartyState,
                              superRareState: SuperRareDailyState) async throws -> ExplorationRunSession {
@@ -137,7 +137,7 @@ actor GameRuntimeService {
                                      })
     }
 
-    func prepareExplorationRun(dungeonId: String,
+    func prepareExplorationRun(dungeonId: UInt16,
                                targetFloorNumber: Int,
                                party: RuntimePartyState,
                                superRareState: SuperRareDailyState) async throws -> ExplorationRunPreparationData {
@@ -167,7 +167,7 @@ actor GameRuntimeService {
                                                characters: characters)
     }
 
-    func raceDefinition(withId raceId: String) async throws -> RaceDefinition? {
+    func raceDefinition(withId raceId: UInt8) async throws -> RaceDefinition? {
         try await repository.race(withId: raceId)
     }
 

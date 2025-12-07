@@ -14,11 +14,10 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
 
     struct GrantedSkill: Sendable, Hashable {
         let orderIndex: Int
-        let skillId: String
+        let skillId: UInt16
     }
 
-    let id: String
-    let index: Int16
+    let id: UInt16
     let name: String
     let description: String
     let category: String

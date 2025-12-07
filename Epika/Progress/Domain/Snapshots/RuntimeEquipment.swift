@@ -56,9 +56,9 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
         case gem
     }
 
-    /// スタック識別キー（6つのindexの組み合わせ）
+    /// スタック識別キー（6つのidの組み合わせ）
     let id: String
-    let masterDataIndex: Int16
+    let itemId: UInt16
     let masterDataId: String
     let displayName: String
     let description: String?
@@ -71,13 +71,13 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
     let statBonuses: [ItemDefinition.StatBonus]
     let combatBonuses: [ItemDefinition.CombatBonus]
 
-    /// Int Indexベースの強化情報
+    /// Int IDベースの強化情報
     struct Enhancement: Sendable, Hashable {
-        var superRareTitleIndex: Int16
-        var normalTitleIndex: UInt8
-        var socketSuperRareTitleIndex: Int16
-        var socketNormalTitleIndex: UInt8
-        var socketMasterDataIndex: Int16
+        var superRareTitleId: UInt8
+        var normalTitleId: UInt8
+        var socketSuperRareTitleId: UInt8
+        var socketNormalTitleId: UInt8
+        var socketItemId: UInt16
     }
 }
 

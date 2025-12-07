@@ -13,7 +13,8 @@ extension SkillRuntimeEffectCompiler {
                 switch payload.effectType {
                 case .explorationTimeMultiplier:
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                    let dungeonId = payload.parameters?["dungeonId"]
+                    let dungeonIdString = payload.parameters?["dungeonId"]
+                    let dungeonId: UInt16? = dungeonIdString.flatMap { UInt16($0) }
                     let dungeonName = payload.parameters?["dungeonName"]
                     modifiers.addEntry(multiplier: multiplier,
                                        dungeonId: dungeonId,

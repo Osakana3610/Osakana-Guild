@@ -8,13 +8,13 @@ struct DungeonDefinition: Identifiable, Sendable, Hashable {
 
     struct EncounterWeight: Sendable, Hashable {
         let orderIndex: Int
-        let enemyId: String
+        let enemyId: UInt16
         let weight: Double
     }
 
     struct EnemyGroupConfig: Sendable, Hashable {
         struct BossGroup: Sendable, Hashable {
-            let enemyId: String
+            let enemyId: UInt16
             let groupSize: Int?
         }
 
@@ -23,14 +23,13 @@ struct DungeonDefinition: Identifiable, Sendable, Hashable {
         let maxGroups: Int
         let defaultGroupSize: ClosedRange<Int>
         let mixRatio: Double // 0.0〜1.0, floorPoolの混在比率
-        let normalPool: [String]
-        let floorPools: [Int: [String]]
+        let normalPool: [UInt16]
+        let floorPools: [Int: [UInt16]]
         let midBossPool: [BossGroup]
         let bossPool: [BossGroup]
     }
 
-    let id: String
-    let index: UInt16
+    let id: UInt16
     let name: String
     let chapter: Int
     let stage: Int
@@ -49,7 +48,7 @@ struct EncounterTableDefinition: Identifiable, Sendable, Hashable {
     struct Event: Sendable, Hashable {
         let orderIndex: Int
         let eventType: String
-        let enemyId: String?
+        let enemyId: UInt16?
         let spawnRate: Double?
         let groupMin: Int?
         let groupMax: Int?
@@ -57,7 +56,7 @@ struct EncounterTableDefinition: Identifiable, Sendable, Hashable {
         let level: Int?
     }
 
-    let id: String
+    let id: UInt16
     let name: String
     let events: [Event]
 }
@@ -69,10 +68,10 @@ struct DungeonFloorDefinition: Identifiable, Sendable, Hashable {
     }
 
     let id: String
-    let dungeonId: String?
+    let dungeonId: UInt16?
     let name: String
     let floorNumber: Int
-    let encounterTableId: String
+    let encounterTableId: UInt16
     let description: String
     let specialEvents: [SpecialEvent]
 }

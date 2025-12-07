@@ -12,7 +12,7 @@ struct CharacterIdentitySection: View {
             VStack(alignment: .leading, spacing: 8) {
                 LabeledContent("種族", value: character.raceName)
                 LabeledContent("職業", value: character.jobName)
-                LabeledContent("性別", value: character.gender)
+                LabeledContent("性別", value: character.raceData?.gender ?? "不明")
             }
         }
     }

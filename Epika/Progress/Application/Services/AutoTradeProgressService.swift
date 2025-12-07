@@ -2,11 +2,17 @@ import Foundation
 import SwiftData
 
 actor AutoTradeProgressService {
-    struct Rule: Sendable, Identifiable {
-        let id: UUID
-        let compositeKey: String
-        let displayName: String
-        let createdAt: Date
+    struct Rule: Sendable, Identifiable, Hashable {
+        let id: String  // stackKey
+        let superRareTitleId: UInt8
+        let normalTitleId: UInt8
+        let itemId: UInt16
+        let socketSuperRareTitleId: UInt8
+        let socketNormalTitleId: UInt8
+        let socketItemId: UInt16
+        let updatedAt: Date
+
+        var stackKey: String { id }
     }
 
     private let container: ModelContainer
@@ -26,57 +32,87 @@ actor AutoTradeProgressService {
     func allRules() async throws -> [Rule] {
         let context = makeContext()
         var descriptor = FetchDescriptor<AutoTradeRuleRecord>()
-        descriptor.sortBy = [SortDescriptor(\AutoTradeRuleRecord.createdAt, order: .forward)]
+        descriptor.sortBy = [SortDescriptor(\AutoTradeRuleRecord.updatedAt, order: .forward)]
         let records = try context.fetch(descriptor)
         return records.map(makeRule(_:))
     }
 
-    func addRule(autoTradeKey: String, displayName: String) async throws -> Rule {
+    func addRule(superRareTitleId: UInt8,
+                 normalTitleId: UInt8,
+                 itemId: UInt16,
+                 socketSuperRareTitleId: UInt8 = 0,
+                 socketNormalTitleId: UInt8 = 0,
+                 socketItemId: UInt16 = 0) async throws -> Rule {
         let context = makeContext()
-        let existing = try fetchRecord(compositeKey: autoTradeKey, context: context)
+        let existing = try fetchRecord(
+            superRareTitleId: superRareTitleId,
+            normalTitleId: normalTitleId,
+            itemId: itemId,
+            socketSuperRareTitleId: socketSuperRareTitleId,
+            socketNormalTitleId: socketNormalTitleId,
+            socketItemId: socketItemId,
+            context: context
+        )
         if let existing {
             return makeRule(existing)
         }
         let now = Date()
-        let record = AutoTradeRuleRecord(compositeKey: autoTradeKey,
-                                          displayName: displayName,
-                                          createdAt: now)
+        let record = AutoTradeRuleRecord(
+            superRareTitleId: superRareTitleId,
+            normalTitleId: normalTitleId,
+            itemId: itemId,
+            socketSuperRareTitleId: socketSuperRareTitleId,
+            socketNormalTitleId: socketNormalTitleId,
+            socketItemId: socketItemId,
+            updatedAt: now
+        )
         context.insert(record)
         try context.save()
         return makeRule(record)
     }
 
-    func removeRule(compositeKey: String) async throws {
+    func removeRule(stackKey: String) async throws {
+        guard let components = StackKeyComponents(stackKey: stackKey) else {
+            throw ProgressError.invalidInput(description: "不正なstackKeyです: \(stackKey)")
+        }
         let context = makeContext()
-        guard let record = try fetchRecord(compositeKey: compositeKey, context: context) else {
-            throw ProgressError.invalidInput(description: "指定された自動売却ルールが見つかりません: \(compositeKey)")
+        guard let record = try fetchRecord(
+            superRareTitleId: components.superRareTitleId,
+            normalTitleId: components.normalTitleId,
+            itemId: components.itemId,
+            socketSuperRareTitleId: components.socketSuperRareTitleId,
+            socketNormalTitleId: components.socketNormalTitleId,
+            socketItemId: components.socketItemId,
+            context: context
+        ) else {
+            throw ProgressError.invalidInput(description: "指定された自動売却ルールが見つかりません: \(stackKey)")
         }
         context.delete(record)
         try context.save()
     }
 
-    func removeRule(id: UUID) async throws {
-        let context = makeContext()
-        var descriptor = FetchDescriptor<AutoTradeRuleRecord>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.invalidInput(description: "指定された自動売却ルールが見つかりません: \(id.uuidString)")
+    func shouldAutoSell(stackKey: String) async throws -> Bool {
+        guard let components = StackKeyComponents(stackKey: stackKey) else {
+            return false
         }
-        context.delete(record)
-        try context.save()
-    }
-
-    func shouldAutoSell(compositeKey: String) async throws -> Bool {
         let context = makeContext()
-        let record = try fetchRecord(compositeKey: compositeKey, context: context)
+        let record = try fetchRecord(
+            superRareTitleId: components.superRareTitleId,
+            normalTitleId: components.normalTitleId,
+            itemId: components.itemId,
+            socketSuperRareTitleId: components.socketSuperRareTitleId,
+            socketNormalTitleId: components.socketNormalTitleId,
+            socketItemId: components.socketItemId,
+            context: context
+        )
         return record != nil
     }
 
-    func registeredCompositeKeys() async throws -> Set<String> {
+    func registeredStackKeys() async throws -> Set<String> {
         let context = makeContext()
         let descriptor = FetchDescriptor<AutoTradeRuleRecord>()
         let records = try context.fetch(descriptor)
-        return Set(records.map { $0.compositeKey })
+        return Set(records.map { $0.stackKey })
     }
 
     // MARK: - Private Helpers
@@ -87,16 +123,33 @@ actor AutoTradeProgressService {
         return context
     }
 
-    private func fetchRecord(compositeKey: String, context: ModelContext) throws -> AutoTradeRuleRecord? {
-        var descriptor = FetchDescriptor<AutoTradeRuleRecord>(predicate: #Predicate { $0.compositeKey == compositeKey })
+    private func fetchRecord(superRareTitleId: UInt8,
+                             normalTitleId: UInt8,
+                             itemId: UInt16,
+                             socketSuperRareTitleId: UInt8,
+                             socketNormalTitleId: UInt8,
+                             socketItemId: UInt16,
+                             context: ModelContext) throws -> AutoTradeRuleRecord? {
+        var descriptor = FetchDescriptor<AutoTradeRuleRecord>(predicate: #Predicate {
+            $0.superRareTitleId == superRareTitleId &&
+            $0.normalTitleId == normalTitleId &&
+            $0.itemId == itemId &&
+            $0.socketSuperRareTitleId == socketSuperRareTitleId &&
+            $0.socketNormalTitleId == socketNormalTitleId &&
+            $0.socketItemId == socketItemId
+        })
         descriptor.fetchLimit = 1
         return try context.fetch(descriptor).first
     }
 
     private func makeRule(_ record: AutoTradeRuleRecord) -> Rule {
-        Rule(id: record.id,
-             compositeKey: record.compositeKey,
-             displayName: record.displayName,
-             createdAt: record.createdAt)
+        Rule(id: record.stackKey,
+             superRareTitleId: record.superRareTitleId,
+             normalTitleId: record.normalTitleId,
+             itemId: record.itemId,
+             socketSuperRareTitleId: record.socketSuperRareTitleId,
+             socketNormalTitleId: record.socketNormalTitleId,
+             socketItemId: record.socketItemId,
+             updatedAt: record.updatedAt)
     }
 }

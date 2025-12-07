@@ -4,6 +4,21 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
     enum School: String, Sendable, Hashable {
         case mage
         case priest
+
+        var index: UInt8 {
+            switch self {
+            case .mage: return 0
+            case .priest: return 1
+            }
+        }
+
+        init?(index: UInt8) {
+            switch index {
+            case 0: self = .mage
+            case 1: self = .priest
+            default: return nil
+            }
+        }
     }
 
     enum Category: String, Sendable, Hashable {
@@ -34,7 +49,7 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
         let multiplier: Double
     }
 
-    let id: String
+    let id: UInt8
     let name: String
     let school: School
     let tier: Int
@@ -44,7 +59,7 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
     let extraTargetsPerLevels: Double?
     let hitsPerCast: Int?
     let basePowerMultiplier: Double?
-    let statusId: String?
+    let statusId: UInt8?
     let buffs: [Buff]
     let healMultiplier: Double?
     let castCondition: String?
