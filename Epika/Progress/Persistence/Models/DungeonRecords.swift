@@ -3,11 +3,11 @@ import SwiftData
 
 /// ダンジョン進行状況Record
 /// - DungeonFloorRecord/DungeonEncounterRecordは未使用のため削除
-/// - dungeonIdはMasterDataのDungeon.idに対応（UInt8）
+/// - dungeonIdはMasterDataのDungeon.idに対応（UInt16）
 /// - isCleared は highestClearedDifficulty != nil で導出可能
 @Model
 final class DungeonRecord {
-    var dungeonId: UInt8 = 0                      // 一意キー
+    var dungeonId: UInt16 = 0                      // 一意キー
     var isUnlocked: Bool = false
     var highestUnlockedDifficulty: UInt8 = 0
     var highestClearedDifficulty: UInt8? = nil    // nil=未クリア
@@ -19,7 +19,7 @@ final class DungeonRecord {
         highestClearedDifficulty != nil
     }
 
-    init(dungeonId: UInt8,
+    init(dungeonId: UInt16,
          isUnlocked: Bool = false,
          highestUnlockedDifficulty: UInt8 = 0,
          highestClearedDifficulty: UInt8? = nil,

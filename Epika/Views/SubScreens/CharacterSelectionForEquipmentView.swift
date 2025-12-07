@@ -84,7 +84,7 @@ private struct CharacterRowForEquipment: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            CharacterImageView(avatarIndex: character.avatarIndex, size: 44)
+            CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 44)
                 .frame(width: 44, height: 44)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -118,7 +118,7 @@ struct EquipmentEditorView: View {
     @EnvironmentObject private var progressService: ProgressService
     @State private var currentCharacter: RuntimeCharacter
     @State private var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
-    @State private var itemDefinitions: [Int16: ItemDefinition] = [:]
+    @State private var itemDefinitions: [UInt16: ItemDefinition] = [:]
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var equipError: String?
@@ -222,7 +222,7 @@ struct EquipmentEditorView: View {
     }
 
     private func equipmentCandidateRow(_ item: LightweightItemData) -> some View {
-        let definition = itemDefinitions[item.masterDataIndex]
+        let definition = itemDefinitions[item.itemId]
         let validation = validateEquipment(definition: definition)
 
         return HStack {
@@ -272,12 +272,12 @@ struct EquipmentEditorView: View {
             cacheVersion = displayService.version
 
             // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
-            let availableIndices = categorizedItems.values.flatMap { $0.map { $0.masterDataIndex } }
-            let allItemIndices = Set(availableIndices)
-                .union(Set(currentCharacter.progress.equippedItems.map { $0.masterDataIndex }))
-            if !allItemIndices.isEmpty {
-                let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(byIndices: Array(allItemIndices))
-                itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
+            let availableIds = categorizedItems.values.flatMap { $0.map { $0.itemId } }
+            let allItemIds = Set(availableIds)
+                .union(Set(currentCharacter.progress.equippedItems.map { $0.itemId }))
+            if !allItemIds.isEmpty {
+                let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(allItemIds))
+                itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
             }
         } catch {
             loadError = error.localizedDescription
@@ -305,9 +305,9 @@ struct EquipmentEditorView: View {
 
         // 種族制限チェック
         if !definition.allowedRaces.isEmpty {
-            let raceId = currentCharacter.raceData?.id ?? ""
-            let canBypass = definition.bypassRaceRestrictions.contains(raceId)
-            let isAllowed = definition.allowedRaces.contains(raceId)
+            let raceIdString = currentCharacter.raceData.map { String($0.id) } ?? ""
+            let canBypass = definition.bypassRaceRestrictions.contains(raceIdString)
+            let isAllowed = definition.allowedRaces.contains(raceIdString)
             if !canBypass && !isAllowed {
                 return (false, "種族制限により装備できません")
             }
@@ -315,8 +315,8 @@ struct EquipmentEditorView: View {
 
         // 職業制限チェック
         if !definition.allowedJobs.isEmpty {
-            let jobId = currentCharacter.jobData?.id ?? ""
-            if !definition.allowedJobs.contains(jobId) {
+            let jobIdString = currentCharacter.jobData.map { String($0.id) } ?? ""
+            if !definition.allowedJobs.contains(jobIdString) {
                 return (false, "職業制限により装備できません")
             }
         }

@@ -60,10 +60,10 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(weightStatement) }
         while sqlite3_step(weightStatement) == SQLITE_ROW {
             let dungeonId = UInt16(sqlite3_column_int(weightStatement, 0))
-            guard let dungeon = dungeons[dungeonId],
-                  let enemyC = sqlite3_column_text(weightStatement, 2) else { continue }
+            guard let dungeon = dungeons[dungeonId] else { continue }
+            let enemyId = UInt16(sqlite3_column_int(weightStatement, 2))
             var weights = dungeon.encounterWeights
-            weights.append(.init(orderIndex: Int(sqlite3_column_int(weightStatement, 1)), enemyId: String(cString: enemyC), weight: sqlite3_column_double(weightStatement, 3)))
+            weights.append(.init(orderIndex: Int(sqlite3_column_int(weightStatement, 1)), enemyId: enemyId, weight: sqlite3_column_double(weightStatement, 3)))
             dungeons[dungeon.id] = DungeonDefinition(
                 id: dungeon.id,
                 name: dungeon.name,
@@ -81,14 +81,13 @@ extension SQLiteMasterDataManager {
             )
         }
 
-        var tables: [String: EncounterTableDefinition] = [:]
+        var tables: [UInt16: EncounterTableDefinition] = [:]
         let tableSQL = "SELECT id, name FROM encounter_tables;"
         let tableStatement = try prepare(tableSQL)
         defer { sqlite3_finalize(tableStatement) }
         while sqlite3_step(tableStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(tableStatement, 0),
-                  let nameC = sqlite3_column_text(tableStatement, 1) else { continue }
-            let id = String(cString: idC)
+            guard let nameC = sqlite3_column_text(tableStatement, 1) else { continue }
+            let id = UInt16(sqlite3_column_int(tableStatement, 0))
             tables[id] = EncounterTableDefinition(id: id, name: String(cString: nameC), events: [])
         }
 
@@ -96,13 +95,14 @@ extension SQLiteMasterDataManager {
         let eventStatement = try prepare(eventSQL)
         defer { sqlite3_finalize(eventStatement) }
         while sqlite3_step(eventStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(eventStatement, 0),
-                  let table = tables[String(cString: idC)],
+            let tableId = UInt16(sqlite3_column_int(eventStatement, 0))
+            guard let table = tables[tableId],
                   let typeC = sqlite3_column_text(eventStatement, 2) else { continue }
             var events = table.events
+            let enemyId: UInt16? = sqlite3_column_type(eventStatement, 3) == SQLITE_NULL ? nil : UInt16(sqlite3_column_int(eventStatement, 3))
             events.append(.init(orderIndex: Int(sqlite3_column_int(eventStatement, 1)),
                                 eventType: String(cString: typeC),
-                                enemyId: sqlite3_column_text(eventStatement, 3).flatMap { String(cString: $0) },
+                                enemyId: enemyId,
                                 spawnRate: sqlite3_column_type(eventStatement, 4) == SQLITE_NULL ? nil : sqlite3_column_double(eventStatement, 4),
                                 groupMin: sqlite3_column_type(eventStatement, 5) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 5)),
                                 groupMax: sqlite3_column_type(eventStatement, 6) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 6)),
@@ -118,15 +118,15 @@ extension SQLiteMasterDataManager {
         while sqlite3_step(floorStatement) == SQLITE_ROW {
             guard let idC = sqlite3_column_text(floorStatement, 0),
                   let nameC = sqlite3_column_text(floorStatement, 2),
-                  let encounterC = sqlite3_column_text(floorStatement, 4),
                   let descC = sqlite3_column_text(floorStatement, 5) else { continue }
             let dungeonId: UInt16? = sqlite3_column_type(floorStatement, 1) == SQLITE_NULL ? nil : UInt16(sqlite3_column_int(floorStatement, 1))
+            let encounterTableId = UInt16(sqlite3_column_int(floorStatement, 4))
             floors.append(DungeonFloorDefinition(
                 id: String(cString: idC),
                 dungeonId: dungeonId,
                 name: String(cString: nameC),
                 floorNumber: Int(sqlite3_column_int(floorStatement, 3)),
-                encounterTableId: String(cString: encounterC),
+                encounterTableId: encounterTableId,
                 description: String(cString: descC),
                 specialEvents: []
             ))

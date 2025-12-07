@@ -5,7 +5,7 @@ import SwiftData
 final class PartyRecord {
     var id: UInt8 = 1                         // 1〜8（識別子 兼 スロット番号）
     var displayName: String = ""
-    var lastSelectedDungeonId: UInt8 = 0      // 0=未選択、1〜=ダンジョンID
+    var lastSelectedDungeonId: UInt16 = 0     // 0=未選択、1〜=ダンジョンID
     var lastSelectedDifficulty: UInt8 = 0
     var targetFloor: UInt8 = 1
     var memberCharacterIds: [UInt8] = []      // メンバー（順序=配列index）
@@ -13,7 +13,7 @@ final class PartyRecord {
 
     init(id: UInt8 = 1,
          displayName: String = "",
-         lastSelectedDungeonId: UInt8 = 0,
+         lastSelectedDungeonId: UInt16 = 0,
          lastSelectedDifficulty: UInt8 = 0,
          targetFloor: UInt8 = 1,
          memberCharacterIds: [UInt8] = [],

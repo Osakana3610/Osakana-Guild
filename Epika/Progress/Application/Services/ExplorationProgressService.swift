@@ -16,7 +16,7 @@ final class ExplorationProgressService {
     }
 
     private enum ExplorationSnapshotBuildError: Error {
-        case dungeonNotFound(UInt8)
+        case dungeonNotFound(UInt16)
         case itemNotFound(UInt16)
         case enemyNotFound(UInt16)
         case statusEffectNotFound(String)

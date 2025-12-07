@@ -8,7 +8,7 @@ extension ProgressService {
                                   memberIds: [UInt8],
                                   runtimeMap: [UInt8: RuntimeCharacterState],
                                   runDifficulty: Int,
-                                  dungeonId: String,
+                                  dungeonId: UInt16,
                                   continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
         var totalExperience = 0
         var totalGold = 0
@@ -50,20 +50,20 @@ extension ProgressService {
                 let dungeonFloorCount = max(1, artifact.dungeon.floorCount)
                 if artifact.floorCount >= dungeonFloorCount {
                     try await dungeon.markCleared(dungeonId: artifact.dungeon.id,
-                                                  difficulty: runDifficulty,
-                                                  totalFloors: artifact.floorCount)
+                                                  difficulty: UInt8(runDifficulty),
+                                                  totalFloors: UInt8(artifact.floorCount))
                     let snapshot = try await dungeon.ensureDungeonSnapshot(for: artifact.dungeon.id)
                     _ = try await unlockManiaDifficultyIfEligible(for: snapshot)
                     try await synchronizeStoryAndDungeonUnlocks()
                 } else {
                     try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
-                                                            difficulty: runDifficulty,
-                                                            furthestFloor: artifact.floorCount)
+                                                            difficulty: UInt8(runDifficulty),
+                                                            furthestFloor: UInt8(artifact.floorCount))
                 }
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
-                                                        difficulty: runDifficulty,
-                                                        furthestFloor: max(0, floorNumber))
+                                                        difficulty: UInt8(runDifficulty),
+                                                        furthestFloor: UInt8(max(0, floorNumber)))
             }
             let finalUpdate = ExplorationRunUpdate(runId: session.runId,
                                                    stage: .completed(artifact))
@@ -130,7 +130,7 @@ extension ProgressService {
             let multiplier = partyGoldMultiplier(for: runtimeCharactersById.values)
             let reward = Int((Double(summary.goldEarned) * multiplier).rounded(.down))
             if reward > 0 {
-                _ = try await gameState.addGold(reward)
+                _ = try await gameState.addGold(UInt32(reward))
             }
         }
 
@@ -154,7 +154,7 @@ extension ProgressService {
             try await character.applyBattleResults(updates)
         }
         if goldBase > 0 {
-            _ = try await gameState.addGold(goldBase)
+            _ = try await gameState.addGold(UInt32(goldBase))
         }
         if !drops.isEmpty {
             try await applyDropRewards(drops)

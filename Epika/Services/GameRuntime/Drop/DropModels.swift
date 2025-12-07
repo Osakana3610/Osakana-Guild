@@ -55,8 +55,8 @@ struct DropRollResult: Sendable {
 
 /// 日次で共有する超レアドロップ状態。
 struct SuperRareDailyState: Sendable {
-    /// JST日付 (YYYYMMDD形式のInt)
-    var jstDate: Int
+    /// JST日付 (YYYYMMDD形式のUInt32)
+    var jstDate: UInt32
     var hasTriggered: Bool
 }
 

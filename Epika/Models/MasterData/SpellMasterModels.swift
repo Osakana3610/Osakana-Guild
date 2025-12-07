@@ -59,7 +59,7 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
     let extraTargetsPerLevels: Double?
     let hitsPerCast: Int?
     let basePowerMultiplier: Double?
-    let statusId: String?
+    let statusId: UInt8?
     let buffs: [Buff]
     let healMultiplier: Double?
     let castCondition: String?

@@ -156,7 +156,7 @@ final class AdventureViewState {
         do {
             let profile = try await gameStateService.loadCurrentPlayer()
             playerProgress = profile
-            _ = try await partyService.ensurePartySlots(atLeast: profile.partySlots)
+            _ = try await partyService.ensurePartySlots(atLeast: Int(profile.partySlots))
             try await partyState.refresh()
         } catch {
             present(error: error)
@@ -249,8 +249,8 @@ final class AdventureViewState {
         }
     }
 
-    private func resolveDungeonProgress(id: String,
-                                        cache: inout [String: DungeonSnapshot]) async throws -> DungeonSnapshot {
+    private func resolveDungeonProgress(id: UInt16,
+                                        cache: inout [UInt16: DungeonSnapshot]) async throws -> DungeonSnapshot {
         if let cached = cache[id] {
             return cached
         }

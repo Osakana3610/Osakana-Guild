@@ -38,7 +38,7 @@ struct CombatSnapshotBuilder {
                                                 attributes: baseAttributes,
                                                 hitPoints: .init(current: baseHP, maximum: baseHP),
                                                 combat: initialCombat,
-                                                personality: .init(primaryIndex: 0, secondaryIndex: 0),
+                                                personality: .init(primaryId: 0, secondaryId: 0),
                                                 learnedSkills: [],
                                                 equippedItems: [],
                                                 jobHistory: [],

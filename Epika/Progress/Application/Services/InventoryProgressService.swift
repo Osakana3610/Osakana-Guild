@@ -5,7 +5,7 @@ actor InventoryProgressService {
     private let container: ModelContainer
     private let gameStateService: GameStateService
     private let environment: ProgressEnvironment
-    private let maxStackSize = 99
+    private let maxStackSize: UInt16 = 99
 
     struct BatchSeed: Sendable {
         let itemId: UInt16
@@ -69,25 +69,25 @@ actor InventoryProgressService {
         if snapshots.isEmpty { return [] }
 
         let masterIndices = Array(Set(snapshots.map { $0.itemId }))
-        let definitions = try await environment.masterDataService.getItemMasterData(byIndices: masterIndices)
-        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
+        let definitions = try await environment.masterDataService.getItemMasterData(ids: masterIndices)
+        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         let missing = masterIndices.filter { definitionMap[$0] == nil }
         if !missing.isEmpty {
             let missingIds = missing.map { String($0) }
             throw ProgressError.itemDefinitionUnavailable(ids: missingIds)
         }
 
-        return snapshots.compactMap { snapshot in
+        return snapshots.compactMap { snapshot -> RuntimeEquipment? in
             guard let definition = definitionMap[snapshot.itemId] else {
                 return nil
             }
             return RuntimeEquipment(
                 id: snapshot.stackKey,
                 itemId: snapshot.itemId,
-                masterDataId: definition.id,
+                masterDataId: String(definition.id),
                 displayName: definition.name,
                 description: definition.description,
-                quantity: snapshot.quantity,
+                quantity: Int(snapshot.quantity),
                 category: RuntimeEquipment.Category(from: definition.category),
                 baseValue: definition.basePrice,
                 sellValue: definition.sellValue,
@@ -243,7 +243,7 @@ actor InventoryProgressService {
                     socketSuperRareTitleId: seed.enhancements.socketSuperRareTitleId,
                     socketNormalTitleId: seed.enhancements.socketNormalTitleId,
                     socketItemId: seed.enhancements.socketItemId,
-                    quantity: seed.quantity,
+                    quantity: UInt16(clamping: seed.quantity),
                     storage: seed.storage
                 )
                 context.insert(record)
@@ -314,15 +314,15 @@ actor InventoryProgressService {
             return try await gameStateService.currentPlayer()
         }
         let masterIndices = Array(Set(records.map { $0.itemId }))
-        let definitions = try await environment.masterDataService.getItemMasterData(byIndices: masterIndices)
-        let priceMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0.sellValue) })
+        let definitions = try await environment.masterDataService.getItemMasterData(ids: masterIndices)
+        let priceMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0.sellValue) })
         let missing = masterIndices.filter { priceMap[$0] == nil }
         if !missing.isEmpty {
             throw ProgressError.itemDefinitionUnavailable(ids: missing.map { String($0) })
         }
         let totalGain = records.reduce(into: 0) { total, record in
             guard record.quantity > 0, let value = priceMap[record.itemId] else { return }
-            total += value * record.quantity
+            total += value * Int(record.quantity)
         }
         for record in records {
             context.delete(record)
@@ -333,7 +333,7 @@ actor InventoryProgressService {
             return try await gameStateService.currentPlayer()
         }
 
-        return try await gameStateService.addGold(totalGain)
+        return try await gameStateService.addGold(UInt32(totalGain))
     }
 
     func updateItem(stackKey: String,
@@ -389,10 +389,10 @@ actor InventoryProgressService {
         guard let record = try context.fetch(descriptor).first else {
             throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
         }
-        guard record.quantity >= quantity else {
+        guard Int(record.quantity) >= quantity else {
             throw ProgressError.invalidInput(description: "アイテム数量が不足しています")
         }
-        record.quantity -= quantity
+        record.quantity -= UInt16(quantity)
         if record.quantity <= 0 {
             context.delete(record)
         }
@@ -470,7 +470,7 @@ actor InventoryProgressService {
 
         try context.save()
 
-        let definitions = try await environment.masterDataService.getItemMasterData(byIndices: [targetRecord.itemId])
+        let definitions = try await environment.masterDataService.getItemMasterData(ids: [targetRecord.itemId])
         guard let definition = definitions.first else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.itemId)])
         }
@@ -478,10 +478,10 @@ actor InventoryProgressService {
         return RuntimeEquipment(
             id: snapshot.stackKey,
             itemId: snapshot.itemId,
-            masterDataId: definition.id,
+            masterDataId: String(definition.id),
             displayName: definition.name,
             description: definition.description,
-            quantity: snapshot.quantity,
+            quantity: Int(snapshot.quantity),
             category: RuntimeEquipment.Category(from: definition.category),
             baseValue: definition.basePrice,
             sellValue: definition.sellValue,
@@ -536,10 +536,10 @@ actor InventoryProgressService {
     }
 
     private func fetchOrCreateRecord(
-        superRareTitleId: UInt16,
+        superRareTitleId: UInt8,
         normalTitleId: UInt8,
         itemId: UInt16,
-        socketSuperRareTitleId: UInt16,
+        socketSuperRareTitleId: UInt8,
         socketNormalTitleId: UInt8,
         socketItemId: UInt16,
         storage: ItemStorage,
@@ -584,10 +584,10 @@ actor InventoryProgressService {
     }
 
     private func makeStackKey(
-        superRareTitleId: UInt16,
+        superRareTitleId: UInt8,
         normalTitleId: UInt8,
         itemId: UInt16,
-        socketSuperRareTitleId: UInt16,
+        socketSuperRareTitleId: UInt8,
         socketNormalTitleId: UInt8,
         socketItemId: UInt16
     ) -> String {
@@ -601,9 +601,9 @@ actor InventoryProgressService {
         let clampedCurrent = min(record.quantity, maxStackSize)
         record.quantity = clampedCurrent
 
-        let capacity = max(0, maxStackSize - clampedCurrent)
+        let capacity = Int(max(0, maxStackSize - clampedCurrent))
         let addable = min(capacity, amount)
-        record.quantity = clampedCurrent + addable
+        record.quantity = clampedCurrent + UInt16(addable)
 
         return amount - addable
     }

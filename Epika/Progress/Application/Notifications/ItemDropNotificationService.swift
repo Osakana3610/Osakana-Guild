@@ -7,7 +7,7 @@ final class ItemDropNotificationService: ObservableObject {
 
     struct DroppedItemNotification: Identifiable, Hashable, Sendable {
         let id: UUID
-        let itemId: String
+        let itemId: UInt16
         let itemName: String
         let quantity: Int
         let rarity: String?

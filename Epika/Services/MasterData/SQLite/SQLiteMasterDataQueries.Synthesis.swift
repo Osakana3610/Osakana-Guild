@@ -9,16 +9,16 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(statement) }
         var recipes: [SynthesisRecipeDefinition] = []
         while sqlite3_step(statement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(statement, 0),
-                  let parentC = sqlite3_column_text(statement, 1),
-                  let childC = sqlite3_column_text(statement, 2),
-                  let resultC = sqlite3_column_text(statement, 3) else { continue }
+            let id = UInt16(sqlite3_column_int(statement, 0))
+            let parentItemId = UInt16(sqlite3_column_int(statement, 1))
+            let childItemId = UInt16(sqlite3_column_int(statement, 2))
+            let resultItemId = UInt16(sqlite3_column_int(statement, 3))
             recipes.append(
                 SynthesisRecipeDefinition(
-                    id: String(cString: idC),
-                    parentItemId: String(cString: parentC),
-                    childItemId: String(cString: childC),
-                    resultItemId: String(cString: resultC)
+                    id: id,
+                    parentItemId: parentItemId,
+                    childItemId: childItemId,
+                    resultItemId: resultItemId
                 )
             )
         }

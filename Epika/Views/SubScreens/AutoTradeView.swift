@@ -4,9 +4,12 @@ import SwiftUI
 struct AutoTradeView: View {
     @EnvironmentObject private var progressService: ProgressService
     @State private var rules: [AutoTradeProgressService.Rule] = []
+    @State private var ruleDisplayNames: [String: String] = [:]
     @State private var isLoading = false
     @State private var showError = false
     @State private var errorMessage = ""
+
+    private let masterDataService = MasterDataRuntimeService.shared
 
     var body: some View {
         NavigationStack {
@@ -49,7 +52,7 @@ struct AutoTradeView: View {
             Section {
                 ForEach(rules) { rule in
                     HStack {
-                        Text(rule.displayName)
+                        Text(ruleDisplayNames[rule.stackKey] ?? "アイテム #\(rule.itemId)")
                             .font(.body)
                         Spacer()
                     }
@@ -76,6 +79,7 @@ struct AutoTradeView: View {
         defer { isLoading = false }
         do {
             rules = try await progressService.autoTrade.allRules()
+            await loadDisplayNames()
             showError = false
         } catch {
             showError = true
@@ -84,10 +88,75 @@ struct AutoTradeView: View {
     }
 
     @MainActor
+    private func loadDisplayNames() async {
+        // Collect all item IDs and title IDs
+        let itemIds = Set(rules.map { $0.itemId })
+        let superRareTitleIds = Set(rules.map { $0.superRareTitleId }).filter { $0 > 0 }
+        let normalTitleIds = Set(rules.map { $0.normalTitleId }).filter { $0 > 0 }
+
+        // Load item definitions
+        var itemNames: [UInt16: String] = [:]
+        if !itemIds.isEmpty {
+            do {
+                let items = try await masterDataService.getItemMasterData(ids: Array(itemIds))
+                for item in items {
+                    itemNames[item.id] = item.name
+                }
+            } catch {
+                // Ignore errors, use fallback names
+            }
+        }
+
+        // Load title definitions
+        var superRareTitleNames: [UInt8: String] = [:]
+        var normalTitleNames: [UInt8: String] = [:]
+        if !superRareTitleIds.isEmpty {
+            do {
+                let superRareTitles = try await masterDataService.getAllSuperRareTitles()
+                for title in superRareTitles {
+                    superRareTitleNames[title.id] = title.name
+                }
+            } catch {
+                // Ignore errors, use fallback names
+            }
+        }
+        if !normalTitleIds.isEmpty {
+            do {
+                let normalTitles = try await masterDataService.getAllTitles()
+                for title in normalTitles {
+                    normalTitleNames[title.id] = title.name
+                }
+            } catch {
+                // Ignore errors, use fallback names
+            }
+        }
+
+        // Build display names
+        var names: [String: String] = [:]
+        for rule in rules {
+            var parts: [String] = []
+            if rule.superRareTitleId > 0, let name = superRareTitleNames[rule.superRareTitleId] {
+                parts.append(name)
+            }
+            if rule.normalTitleId > 0, let name = normalTitleNames[rule.normalTitleId] {
+                parts.append(name)
+            }
+            if let itemName = itemNames[rule.itemId] {
+                parts.append(itemName)
+            } else {
+                parts.append("アイテム #\(rule.itemId)")
+            }
+            names[rule.stackKey] = parts.joined(separator: " ")
+        }
+        ruleDisplayNames = names
+    }
+
+    @MainActor
     private func removeRule(_ rule: AutoTradeProgressService.Rule) async {
         do {
-            try await progressService.autoTrade.removeRule(id: rule.id)
+            try await progressService.autoTrade.removeRule(stackKey: rule.stackKey)
             rules.removeAll { $0.id == rule.id }
+            ruleDisplayNames.removeValue(forKey: rule.stackKey)
         } catch {
             showError = true
             errorMessage = error.localizedDescription

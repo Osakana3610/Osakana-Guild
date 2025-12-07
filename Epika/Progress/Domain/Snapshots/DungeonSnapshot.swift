@@ -3,7 +3,7 @@ import SwiftData
 
 struct DungeonSnapshot: Sendable, Hashable {
     let persistentIdentifier: PersistentIdentifier
-    var dungeonId: UInt8
+    var dungeonId: UInt16
     var isUnlocked: Bool
     var highestUnlockedDifficulty: UInt8
     var highestClearedDifficulty: UInt8?  // nil=未クリア

@@ -76,7 +76,7 @@ actor PartyProgressService {
         return Self.snapshot(from: party)
     }
 
-    func setLastSelectedDungeon(persistentIdentifier: PersistentIdentifier, dungeonId: UInt8) async throws -> PartySnapshot {
+    func setLastSelectedDungeon(persistentIdentifier: PersistentIdentifier, dungeonId: UInt16) async throws -> PartySnapshot {
         let context = makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.lastSelectedDungeonId = dungeonId

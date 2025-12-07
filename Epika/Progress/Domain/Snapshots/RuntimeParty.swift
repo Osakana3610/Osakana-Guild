@@ -6,7 +6,7 @@ struct RuntimeParty: Identifiable, Sendable, Hashable {
     let persistentIdentifier: PersistentIdentifier
     var name: String
     var memberIds: [UInt8]
-    var lastSelectedDungeonId: UInt8           // 0=未選択
+    var lastSelectedDungeonId: UInt16          // 0=未選択
     var lastSelectedDifficulty: UInt8
     var targetFloor: UInt8
     var updatedAt: Date

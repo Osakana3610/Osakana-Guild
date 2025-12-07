@@ -302,7 +302,8 @@ extension BattleTurnEngine {
                 let spellSpecificMods = trigger.modifiers.filter { $0.key.hasPrefix("spellSpecific:") }
                 if !spellSpecificMods.isEmpty {
                     for (key, mult) in spellSpecificMods {
-                        let spellId = String(key.dropFirst("spellSpecific:".count))
+                        let spellIdString = String(key.dropFirst("spellSpecific:".count))
+                        guard let spellId = UInt8(spellIdString) else { continue }
                         actor.skillEffects.spellSpecificMultipliers[spellId, default: 1.0] *= mult
                     }
                 }
