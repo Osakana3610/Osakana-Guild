@@ -29,42 +29,42 @@ actor EquipmentProgressService {
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.storageRawValue == storage.rawValue
         })
-        // Index順でソート（超レア → 通常称号 → アイテム → ソケット）
+        // Id順でソート（超レア → 通常称号 → アイテム → ソケット）
         descriptor.sortBy = [
-            SortDescriptor(\InventoryItemRecord.superRareTitleIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.normalTitleIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.masterDataIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.socketMasterDataIndex, order: .forward)
+            SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.normalTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.itemId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.socketItemId, order: .forward)
         ]
         let records = try context.fetch(descriptor)
 
         if records.isEmpty { return [] }
 
-        let masterIndices = Array(Set(records.map { $0.masterDataIndex }))
-        let definitions = try await masterDataService.getItemMasterData(byIndices: masterIndices)
-        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
+        let itemIds = Array(Set(records.map { $0.itemId }))
+        let definitions = try await masterDataService.getItemMasterData(ids: itemIds)
+        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
 
         // 除外カテゴリをフィルタ
         return records.compactMap { record -> RuntimeEquipment? in
-            guard let definition = definitionMap[record.masterDataIndex] else { return nil }
+            guard let definition = definitionMap[record.itemId] else { return nil }
             guard !Self.excludedCategories.contains(definition.category) else { return nil }
 
             return RuntimeEquipment(
                 id: record.stackKey,
-                masterDataIndex: record.masterDataIndex,
-                masterDataId: definition.id,
+                itemId: record.itemId,
+                masterDataId: String(definition.id),
                 displayName: definition.name,
                 description: definition.description,
-                quantity: record.quantity,
+                quantity: Int(record.quantity),
                 category: RuntimeEquipment.Category(from: definition.category),
                 baseValue: definition.basePrice,
                 sellValue: definition.sellValue,
                 enhancement: .init(
-                    superRareTitleIndex: record.superRareTitleIndex,
-                    normalTitleIndex: record.normalTitleIndex,
-                    socketSuperRareTitleIndex: record.socketSuperRareTitleIndex,
-                    socketNormalTitleIndex: record.socketNormalTitleIndex,
-                    socketMasterDataIndex: record.socketMasterDataIndex
+                    superRareTitleId: record.superRareTitleId,
+                    normalTitleId: record.normalTitleId,
+                    socketSuperRareTitleId: record.socketSuperRareTitleId,
+                    socketNormalTitleId: record.socketNormalTitleId,
+                    socketItemId: record.socketItemId
                 ),
                 rarity: definition.rarity,
                 statBonuses: definition.statBonuses,
@@ -73,26 +73,26 @@ actor EquipmentProgressService {
         }
         .sorted { lhs, rhs in
             // ソート順: アイテムごとに 通常称号のみ → 通常称号+ソケット → 超レア → 超レア+ソケット
-            if lhs.masterDataIndex != rhs.masterDataIndex {
-                return lhs.masterDataIndex < rhs.masterDataIndex
+            if lhs.itemId != rhs.itemId {
+                return lhs.itemId < rhs.itemId
             }
-            let lhsHasSuperRare = lhs.enhancement.superRareTitleIndex > 0
-            let rhsHasSuperRare = rhs.enhancement.superRareTitleIndex > 0
+            let lhsHasSuperRare = lhs.enhancement.superRareTitleId > 0
+            let rhsHasSuperRare = rhs.enhancement.superRareTitleId > 0
             if lhsHasSuperRare != rhsHasSuperRare {
                 return !lhsHasSuperRare
             }
-            let lhsHasSocket = lhs.enhancement.socketMasterDataIndex > 0
-            let rhsHasSocket = rhs.enhancement.socketMasterDataIndex > 0
+            let lhsHasSocket = lhs.enhancement.socketItemId > 0
+            let rhsHasSocket = rhs.enhancement.socketItemId > 0
             if lhsHasSocket != rhsHasSocket {
                 return !lhsHasSocket
             }
-            if lhs.enhancement.normalTitleIndex != rhs.enhancement.normalTitleIndex {
-                return lhs.enhancement.normalTitleIndex < rhs.enhancement.normalTitleIndex
+            if lhs.enhancement.normalTitleId != rhs.enhancement.normalTitleId {
+                return lhs.enhancement.normalTitleId < rhs.enhancement.normalTitleId
             }
-            if lhs.enhancement.superRareTitleIndex != rhs.enhancement.superRareTitleIndex {
-                return lhs.enhancement.superRareTitleIndex < rhs.enhancement.superRareTitleIndex
+            if lhs.enhancement.superRareTitleId != rhs.enhancement.superRareTitleId {
+                return lhs.enhancement.superRareTitleId < rhs.enhancement.superRareTitleId
             }
-            return lhs.enhancement.socketMasterDataIndex < rhs.enhancement.socketMasterDataIndex
+            return lhs.enhancement.socketItemId < rhs.enhancement.socketItemId
         }
     }
 
@@ -175,11 +175,11 @@ actor EquipmentProgressService {
         return max(0.0, 1.0 - penalty)
     }
 
-    /// 装備中のアイテムからマスターデータIndex別のカウントを取得
-    static func countItemsByMasterDataIndex(equippedItems: [RuntimeCharacterProgress.EquippedItem]) -> [Int16: Int] {
-        var counts: [Int16: Int] = [:]
+    /// 装備中のアイテムからアイテムId別のカウントを取得
+    static func countItemsByItemId(equippedItems: [RuntimeCharacterProgress.EquippedItem]) -> [UInt16: Int] {
+        var counts: [UInt16: Int] = [:]
         for item in equippedItems {
-            counts[item.masterDataIndex, default: 0] += item.quantity
+            counts[item.itemId, default: 0] += item.quantity
         }
         return counts
     }
@@ -193,11 +193,11 @@ actor EquipmentProgressService {
         var delta: [String: Int] = [:]
 
         // 現在の重複カウント
-        let currentCounts = countItemsByMasterDataIndex(equippedItems: currentEquippedItems)
+        let currentCounts = countItemsByItemId(equippedItems: currentEquippedItems)
 
         // 追加するアイテムの効果を計算
         if let addItem = itemDefinition {
-            let newCount = (currentCounts[addItem.index] ?? 0) + 1
+            let newCount = (currentCounts[addItem.id] ?? 0) + 1
             let multiplier = Self.duplicatePenaltyMultiplier(for: newCount)
 
             for bonus in addItem.statBonuses {
@@ -212,7 +212,7 @@ actor EquipmentProgressService {
 
         // 削除するアイテムの効果を計算（逆符号）
         if let removeItem = existingItemDefinition {
-            let currentCount = currentCounts[removeItem.index] ?? 1
+            let currentCount = currentCounts[removeItem.id] ?? 1
             let multiplier = Self.duplicatePenaltyMultiplier(for: currentCount)
 
             for bonus in removeItem.statBonuses {

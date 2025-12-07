@@ -30,14 +30,14 @@ actor TitleInheritanceProgressService {
         let currentTitle = try await titleDisplayName(for: inheritance.target.enhancement)
         let sourceTitle = try await titleDisplayName(for: inheritance.source.enhancement)
         let resultEnhancement = ItemSnapshot.Enhancement(
-            superRareTitleIndex: inheritance.source.enhancement.superRareTitleIndex,
-            normalTitleIndex: inheritance.source.enhancement.normalTitleIndex,
-            socketSuperRareTitleIndex: inheritance.target.enhancement.socketSuperRareTitleIndex,
-            socketNormalTitleIndex: inheritance.target.enhancement.socketNormalTitleIndex,
-            socketMasterDataIndex: inheritance.target.enhancement.socketMasterDataIndex
+            superRareTitleId: inheritance.source.enhancement.superRareTitleId,
+            normalTitleId: inheritance.source.enhancement.normalTitleId,
+            socketSuperRareTitleId: inheritance.target.enhancement.socketSuperRareTitleId,
+            socketNormalTitleId: inheritance.target.enhancement.socketNormalTitleId,
+            socketItemId: inheritance.target.enhancement.socketItemId
         )
-        let inheritsSameEnhancement = resultEnhancement.superRareTitleIndex == inheritance.target.enhancement.superRareTitleIndex &&
-            resultEnhancement.normalTitleIndex == inheritance.target.enhancement.normalTitleIndex
+        let inheritsSameEnhancement = resultEnhancement.superRareTitleId == inheritance.target.enhancement.superRareTitleId &&
+            resultEnhancement.normalTitleId == inheritance.target.enhancement.normalTitleId
         let resultTitle = inheritsSameEnhancement ? currentTitle : sourceTitle
         return TitleInheritancePreview(currentTitleName: currentTitle,
                                        sourceTitleName: sourceTitle,
@@ -48,11 +48,11 @@ actor TitleInheritanceProgressService {
     func inherit(targetStackKey: String, sourceStackKey: String) async throws -> RuntimeEquipment {
         let inheritance = try await resolveContext(targetStackKey: targetStackKey, sourceStackKey: sourceStackKey)
         let newEnhancement = ItemSnapshot.Enhancement(
-            superRareTitleIndex: inheritance.source.enhancement.superRareTitleIndex,
-            normalTitleIndex: inheritance.source.enhancement.normalTitleIndex,
-            socketSuperRareTitleIndex: inheritance.target.enhancement.socketSuperRareTitleIndex,
-            socketNormalTitleIndex: inheritance.target.enhancement.socketNormalTitleIndex,
-            socketMasterDataIndex: inheritance.target.enhancement.socketMasterDataIndex
+            superRareTitleId: inheritance.source.enhancement.superRareTitleId,
+            normalTitleId: inheritance.source.enhancement.normalTitleId,
+            socketSuperRareTitleId: inheritance.target.enhancement.socketSuperRareTitleId,
+            socketNormalTitleId: inheritance.target.enhancement.socketNormalTitleId,
+            socketItemId: inheritance.target.enhancement.socketItemId
         )
         return try await inventoryService.inheritItem(targetStackKey: targetStackKey,
                                                       sourceStackKey: sourceStackKey,
@@ -83,20 +83,18 @@ private extension TitleInheritanceProgressService {
 
     nonisolated func titleDisplayName(for enhancement: RuntimeEquipment.Enhancement) async throws -> String {
         // 超レア称号があればその名前を返す
-        if enhancement.superRareTitleIndex != 0 {
-            if let id = await masterDataService.getSuperRareTitleId(for: enhancement.superRareTitleIndex),
-               let definition = try await masterDataService.getSuperRareTitle(id: id) {
+        if enhancement.superRareTitleId != 0 {
+            if let definition = try await masterDataService.getSuperRareTitle(id: enhancement.superRareTitleId) {
                 return definition.name
             } else {
-                throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.superRareTitleIndex)])
+                throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.superRareTitleId)])
             }
         }
         // 通常称号は必ず存在する（rank 0〜8、無称号も rank=2 の称号で name=""）
-        if let id = await masterDataService.getTitleId(for: enhancement.normalTitleIndex),
-           let definition = try await masterDataService.getTitleMasterData(id: id) {
+        if let definition = try await masterDataService.getTitleMasterData(id: enhancement.normalTitleId) {
             return definition.name
         } else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.normalTitleIndex)])
+            throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.normalTitleId)])
         }
     }
 }

@@ -12,8 +12,8 @@ extension SkillRuntimeEffectCompiler {
         var targetMultipliers: [String: Double] = [:]
         var spellPowerPercent: Double = 0.0
         var spellPowerMultiplier: Double = 1.0
-        var spellSpecificMultipliers: [String: Double] = [:]
-        var spellSpecificTakenMultipliers: [String: Double] = [:]
+        var spellSpecificMultipliers: [UInt8: Double] = [:]
+        var spellSpecificTakenMultipliers: [UInt8: Double] = [:]
         var criticalDamagePercent: Double = 0.0
         var criticalDamageMultiplier: Double = 1.0
         var criticalDamageTakenMultiplier: Double = 1.0
@@ -34,7 +34,7 @@ extension SkillRuntimeEffectCompiler {
         var reactions: [BattleActor.SkillEffects.Reaction] = []
         var counterAttackEvasionMultiplier: Double = 1.0
         var rowProfile = BattleActor.SkillEffects.RowProfile()
-        var statusResistances: [String: BattleActor.SkillEffects.StatusResistance] = [:]
+        var statusResistances: [UInt8: BattleActor.SkillEffects.StatusResistance] = [:]
         var timedBuffTriggers: [BattleActor.SkillEffects.TimedBuffTrigger] = []
         var statusInflictions: [BattleActor.SkillEffects.StatusInflict] = []
         var berserkChancePercent: Double?
@@ -46,7 +46,7 @@ extension SkillRuntimeEffectCompiler {
         var dodgeCapMax: Double? = nil
         var minHitScale: Double? = nil
         var defaultSpellChargeModifier: BattleActor.SkillEffects.SpellChargeModifier? = nil
-        var spellChargeModifiers: [String: BattleActor.SkillEffects.SpellChargeModifier] = [:]
+        var spellChargeModifiers: [UInt8: BattleActor.SkillEffects.SpellChargeModifier] = [:]
         var absorptionPercent: Double = 0.0
         var absorptionCapPercent: Double = 0.0
         var partyHostileAll: Bool = false
@@ -56,8 +56,8 @@ extension SkillRuntimeEffectCompiler {
         var partyHostileTargets: Set<String> = []
         var partyProtectedTargets: Set<String> = []
         var equipmentStatMultipliers: [String: Double] = [:]
-        var barrierCharges: [String: Int] = [:]
-        var guardBarrierCharges: [String: Int] = [:]
+        var barrierCharges: [UInt8: Int] = [:]
+        var guardBarrierCharges: [UInt8: Int] = [:]
         let degradationPercent: Double = 0.0
         var degradationRepairMinPercent: Double = 0.0
         var degradationRepairMaxPercent: Double = 0.0
@@ -107,11 +107,17 @@ extension SkillRuntimeEffectCompiler {
                 case .spellPowerMultiplier:
                     spellPowerMultiplier *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                 case .spellSpecificMultiplier:
-                    let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
+                    let spellIdString = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
+                    guard let spellId = UInt8(spellIdString) else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) spellSpecificMultiplier の spellId が無効です: \(spellIdString)")
+                    }
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     spellSpecificMultipliers[spellId, default: 1.0] *= multiplier
                 case .spellSpecificTakenMultiplier:
-                    let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
+                    let spellIdString = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
+                    guard let spellId = UInt8(spellIdString) else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) spellSpecificTakenMultiplier の spellId が無効です: \(spellIdString)")
+                    }
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     spellSpecificTakenMultipliers[spellId, default: 1.0] *= multiplier
                 case .criticalDamagePercent:
@@ -171,19 +177,28 @@ extension SkillRuntimeEffectCompiler {
                 case .rowProfile:
                     rowProfile.applyParameters(payload.parameters)
                 case .statusResistanceMultiplier:
-                    let statusId = try payload.requireParam("status", skillId: skill.id, effectIndex: effect.index)
+                    let statusIdString = try payload.requireParam("status", skillId: skill.id, effectIndex: effect.index)
+                    guard let statusId = UInt8(statusIdString) else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) statusResistanceMultiplier の status が無効です: \(statusIdString)")
+                    }
                     let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
                     var entry = statusResistances[statusId] ?? .neutral
                     entry.multiplier *= multiplier
                     statusResistances[statusId] = entry
                 case .statusResistancePercent:
-                    let statusId = try payload.requireParam("status", skillId: skill.id, effectIndex: effect.index)
+                    let statusIdString = try payload.requireParam("status", skillId: skill.id, effectIndex: effect.index)
+                    guard let statusId = UInt8(statusIdString) else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) statusResistancePercent の status が無効です: \(statusIdString)")
+                    }
                     let value = try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index)
                     var entry = statusResistances[statusId] ?? .neutral
                     entry.additivePercent += value
                     statusResistances[statusId] = entry
                 case .statusInflict:
-                    let statusId = try payload.requireParam("statusId", skillId: skill.id, effectIndex: effect.index)
+                    let statusIdString = try payload.requireParam("statusId", skillId: skill.id, effectIndex: effect.index)
+                    guard let statusId = UInt8(statusIdString) else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) statusInflict の statusId が無効です: \(statusIdString)")
+                    }
                     let base = try payload.requireValue("baseChancePercent", skillId: skill.id, effectIndex: effect.index)
                     statusInflictions.append(.init(statusId: statusId, baseChancePercent: base))
                 case .breathVariant:
@@ -223,23 +238,29 @@ extension SkillRuntimeEffectCompiler {
                 case .antiHealing:
                     antiHealingEnabled = true
                 case .barrier:
-                    let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    let damageTypeString = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    guard let damageType = BattleDamageType(identifier: damageTypeString) else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) barrier の damageType が無効です: \(damageTypeString)")
+                    }
                     let charges = try payload.requireValue("charges", skillId: skill.id, effectIndex: effect.index)
                     let intCharges = max(0, Int(charges.rounded(.towardZero)))
                     guard intCharges > 0 else {
                         throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) barrier のchargesが不正です")
                     }
-                    let current = barrierCharges[damageType] ?? 0
-                    barrierCharges[damageType] = max(current, intCharges)
+                    let current = barrierCharges[damageType.rawValue] ?? 0
+                    barrierCharges[damageType.rawValue] = max(current, intCharges)
                 case .barrierOnGuard:
-                    let damageType = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    let damageTypeString = try payload.requireParam("damageType", skillId: skill.id, effectIndex: effect.index)
+                    guard let damageType = BattleDamageType(identifier: damageTypeString) else {
+                        throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) barrierOnGuard の damageType が無効です: \(damageTypeString)")
+                    }
                     let charges = try payload.requireValue("charges", skillId: skill.id, effectIndex: effect.index)
                     let intCharges = max(0, Int(charges.rounded(.towardZero)))
                     guard intCharges > 0 else {
                         throw RuntimeError.invalidConfiguration(reason: "Skill \(skill.id)#\(effect.index) barrierOnGuard のchargesが不正です")
                     }
-                    let current = guardBarrierCharges[damageType] ?? 0
-                    guardBarrierCharges[damageType] = max(current, intCharges)
+                    let current = guardBarrierCharges[damageType.rawValue] ?? 0
+                    guardBarrierCharges[damageType.rawValue] = max(current, intCharges)
                 case .parry:
                     parryEnabled = true
                     if let bonus = payload.value["bonusPercent"] {
@@ -266,7 +287,8 @@ extension SkillRuntimeEffectCompiler {
                         minHitScale = minHitScale.map { min($0, scale) } ?? scale
                     }
                 case .spellCharges:
-                    let targetSpellId = payload.parameters?["spellId"]
+                    let targetSpellIdString = payload.parameters?["spellId"]
+                    let targetSpellId = targetSpellIdString.flatMap { UInt8($0) }
                     var modifier = targetSpellId.flatMap { spellChargeModifiers[$0] }
                         ?? defaultSpellChargeModifier
                         ?? BattleActor.SkillEffects.SpellChargeModifier()
@@ -372,8 +394,8 @@ extension SkillRuntimeEffectCompiler {
                 case .resurrectionVitalize:
                     let removePenalties = payload.value["removePenalties"].map { $0 > 0 } ?? false
                     let rememberSkills = payload.value["rememberSkills"].map { $0 > 0 } ?? false
-                    let removeSkillIds = payload.stringArrayValues["removeSkillIds"] ?? []
-                    let grantSkillIds = payload.stringArrayValues["grantSkillIds"] ?? []
+                    let removeSkillIds = (payload.stringArrayValues["removeSkillIds"] ?? []).compactMap { UInt16($0) }
+                    let grantSkillIds = (payload.stringArrayValues["grantSkillIds"] ?? []).compactMap { UInt16($0) }
                     vitalizeResurrection = .init(removePenalties: removePenalties,
                                                  rememberSkills: rememberSkills,
                                                  removeSkillIds: removeSkillIds,
@@ -578,7 +600,7 @@ extension SkillRuntimeEffectCompiler {
 extension BattleActor.SkillEffects.Reaction {
     static func make(from payload: DecodedSkillEffectPayload,
                      skillName: String,
-                     skillId: String) -> BattleActor.SkillEffects.Reaction? {
+                     skillId: UInt16) -> BattleActor.SkillEffects.Reaction? {
         guard payload.effectType == .reaction else { return nil }
         guard let triggerRaw = payload.parameters?["trigger"],
               let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: triggerRaw) else { return nil }
@@ -593,7 +615,7 @@ extension BattleActor.SkillEffects.Reaction {
         let accuracyMultiplier = payload.value["accuracyMultiplier"] ?? 1.0
         let requiresAllyBehind = (payload.parameters?["requiresAllyBehind"]?.lowercased() == "true")
 
-        return BattleActor.SkillEffects.Reaction(identifier: skillId,
+        return BattleActor.SkillEffects.Reaction(identifier: String(skillId),
                                                  displayName: skillName,
                                                  trigger: trigger,
                                                  target: target,
@@ -604,21 +626,6 @@ extension BattleActor.SkillEffects.Reaction {
                                                  accuracyMultiplier: accuracyMultiplier,
                                                  requiresMartial: requiresMartial,
                                                  requiresAllyBehind: requiresAllyBehind)
-    }
-}
-
-extension BattleDamageType {
-    init?(identifier: String) {
-        switch identifier {
-        case "physical":
-            self = .physical
-        case "magical":
-            self = .magical
-        case "breath":
-            self = .breath
-        default:
-            return nil
-        }
     }
 }
 

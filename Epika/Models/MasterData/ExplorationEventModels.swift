@@ -1,8 +1,6 @@
 import Foundation
 
 struct ExplorationEventDefinition: Identifiable, Sendable {
-    let index: UInt16
-
     struct Tag: Sendable, Hashable {
         let orderIndex: Int
         let value: String
@@ -13,7 +11,7 @@ struct ExplorationEventDefinition: Identifiable, Sendable {
         let weight: Double
     }
 
-    let id: String
+    let id: UInt8
     let type: String
     let name: String
     let description: String

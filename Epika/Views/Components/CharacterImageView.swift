@@ -3,32 +3,20 @@ import CoreGraphics
 import ImageIO
 
 /// 統一されたキャラクター画像表示コンポーネント
-/// 種族・職業画像を指定されたサイズで表示し、存在しない場合はSFSymbolフォールバックを提供
+/// avatarIndexに基づいて画像を表示し、存在しない場合はフォールバックを提供
 struct CharacterImageView: View {
-    enum ImageType {
-        case avatar(identifier: String)
-        case race(id: String, gender: String)
-        case job(id: String, gender: String)
-    }
-
-    let imageType: ImageType
+    let avatarIndex: UInt16
     let size: CGFloat
 
     @Environment(\.colorScheme) private var colorScheme
 
-    init(imageType: ImageType, size: CGFloat = 55) {
-        self.imageType = imageType
+    init(avatarIndex: UInt16, size: CGFloat = 55) {
+        self.avatarIndex = avatarIndex
         self.size = size
-    }
-
-    init(avatarIdentifier: String, size: CGFloat = 55) {
-        self.init(imageType: .avatar(identifier: avatarIdentifier), size: size)
     }
 
     var body: some View {
         let resource = resolveResource()
-        let fallbackIcon = getFallbackIcon()
-        let fallbackText = getFallbackText()
 
         return Group {
             switch resource {
@@ -47,10 +35,10 @@ struct CharacterImageView: View {
                         .frame(width: size, height: size)
                         .cornerRadius(8)
                 } else {
-                    fallbackView(icon: fallbackIcon, text: fallbackText)
+                    fallbackView
                 }
             case .none:
-                fallbackView(icon: fallbackIcon, text: fallbackText)
+                fallbackView
             }
         }
     }
@@ -61,27 +49,19 @@ struct CharacterImageView: View {
     }
 
     private func resolveResource() -> ImageResource? {
-        do {
-            switch imageType {
-            case .avatar(let identifier):
-                if UserAvatarStore.isUserAvatarIdentifier(identifier),
-                   let url = UserAvatarStore.fileURL(for: identifier) {
-                    return .file(url)
-                } else {
-                    return .bundle(identifier)
-                }
-            case .race(let id, let gender):
-                return .bundle(try CharacterAvatarIdentifierResolver.raceImagePath(raceId: id,
-                                                                                    gender: gender))
-            case .job(let id, let gender):
-                return .bundle(try CharacterAvatarIdentifierResolver.jobImagePath(jobId: id,
-                                                                                   gender: gender))
+        // 400以上はユーザーカスタムアバター
+        if avatarIndex >= 400 {
+            let identifier = String(avatarIndex)
+            if let url = UserAvatarStore.fileURL(for: identifier) {
+                return .file(url)
             }
-        } catch {
-            #if DEBUG
-            assertionFailure("Character image path resolution failed: \(error)")
-            #endif
             return nil
+        } else if avatarIndex >= 100 {
+            // 100-399: 職業画像 (genderCode * 100 + jobId)
+            return .bundle("Characters/Jobs/\(avatarIndex)")
+        } else {
+            // 1-99: 種族画像 (raceId)
+            return .bundle("Characters/Races/\(avatarIndex)")
         }
     }
 
@@ -92,135 +72,14 @@ struct CharacterImageView: View {
     }
 
     @ViewBuilder
-    private func fallbackView(icon: String, text: String) -> some View {
+    private var fallbackView: some View {
         RoundedRectangle(cornerRadius: 8)
             .fill(Color.gray.opacity(0.3))
             .frame(width: size, height: size)
             .overlay(
-                VStack(spacing: 2) {
-                    Image(systemName: icon)
-                        .foregroundColor(.primary)
-                        .font(.system(size: size * 0.25))
-                    Text(text)
-                        .font(.system(size: size * 0.15))
-                        .foregroundColor(.primary)
-                }
+                Image(systemName: "person.fill")
+                    .foregroundColor(.primary)
+                    .font(.system(size: size * 0.4))
             )
-    }
-
-    private func getFallbackIcon() -> String {
-        switch imageType {
-        case .avatar:
-            return "person.fill"
-        case .race(let id, _):
-            return raceIcon(from: id)
-        case .job(let id, _):
-            return jobIcon(from: id)
-        }
-    }
-
-    private func getFallbackText() -> String {
-        switch imageType {
-        case .avatar:
-            return ""
-        case .race(let id, _):
-            return raceInitial(from: id)
-        case .job(let id, _):
-            return jobInitial(from: id)
-        }
-    }
-
-    // MARK: - Job metadata for fallbacks
-
-    private func jobIcon(from jobId: String) -> String {
-        switch jobId {
-        case "warrior": return "shield.fill"
-        case "swordsman": return "figure.fencing"
-        case "wizard": return "wand.and.stars"
-        case "priest": return "cross.fill"
-        case "thief": return "eye.slash.fill"
-        case "hunter": return "scope"
-        case "assassin": return "knife"
-        case "jester": return "theatermasks.fill"
-        case "monk": return "hands.clap.fill"
-        case "samurai": return "figure.martial.arts"
-        case "sword_saint": return "crown.fill"
-        case "mystic_swordsman": return "sparkles"
-        case "sage": return "book.fill"
-        case "ninja": return "star.fill"
-        case "lord": return "crown.fill"
-        case "royal_line": return "star.circle.fill"
-        default: return "person.fill"
-        }
-    }
-
-    private func jobInitial(from jobId: String) -> String {
-        switch jobId {
-        case "warrior": return "戦"
-        case "swordsman": return "剣"
-        case "wizard": return "魔"
-        case "priest": return "僧"
-        case "thief": return "盗"
-        case "hunter": return "狩"
-        case "assassin": return "暗"
-        case "jester": return "道"
-        case "monk": return "修"
-        case "samurai": return "侍"
-        case "sword_saint": return "聖"
-        case "mystic_swordsman": return "秘"
-        case "sage": return "賢"
-        case "ninja": return "忍"
-        case "lord": return "君"
-        case "royal_line": return "王"
-        default: return "？"
-        }
-    }
-
-    // MARK: - Race metadata for fallbacks
-
-    private func raceIcon(from raceId: String) -> String {
-        switch raceId {
-        case "human": return "person.fill"
-        case "elf": return "leaf.fill"
-        case "dwarf": return "hammer.fill"
-        case "gnome": return "circle.fill"
-        case "pigmy_chum": return "smallcircle.fill.circle"
-        case "dark_elf": return "moon.fill"
-        case "vampire": return "drop.fill"
-        case "psychic": return "brain.head.profile"
-        case "working_cat": return "cat.fill"
-        case "dragonewt": return "flame.fill"
-        case "amazon": return "shield.fill"
-        case "magic_construct": return "gear.circle.fill"
-        case "undead_man": return "skull.fill"
-        case "giant": return "mountain.2.fill"
-        case "tengu": return "bird.fill"
-        case "demon": return "horn.fill"
-        case "cyborg": return "cpu.fill"
-        default: return "person.fill"
-        }
-    }
-
-    private func raceInitial(from raceId: String) -> String {
-        switch raceId {
-        case "human": return "人"
-        case "elf": return "エ"
-        case "dwarf": return "ド"
-        case "gnome": return "ノ"
-        case "pigmy_chum": return "ピ"
-        case "dark_elf": return "ダ"
-        case "vampire": return "吸"
-        case "psychic": return "サ"
-        case "working_cat": return "猫"
-        case "dragonewt": return "竜"
-        case "amazon": return "ア"
-        case "magic_construct": return "魔"
-        case "undead_man": return "死"
-        case "giant": return "巨"
-        case "tengu": return "天"
-        case "demon": return "鬼"
-        case "cyborg": return "機"
-        default: return "？"
-        }
     }
 }

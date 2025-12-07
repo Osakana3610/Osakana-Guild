@@ -5,22 +5,20 @@ import SQLite3
 extension SQLiteMasterDataManager {
     func fetchAllExplorationEvents() throws -> [ExplorationEventDefinition] {
         var events: [ExplorationEventDefinition] = []
-        let baseSQL = "SELECT id, event_index, type, name, description, floor_min, floor_max FROM exploration_events;"
+        let baseSQL = "SELECT id, type, name, description, floor_min, floor_max FROM exploration_events;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(baseStatement, 0),
-                  let typeC = sqlite3_column_text(baseStatement, 2),
-                  let nameC = sqlite3_column_text(baseStatement, 3),
-                  let descC = sqlite3_column_text(baseStatement, 4) else { continue }
+            guard let typeC = sqlite3_column_text(baseStatement, 1),
+                  let nameC = sqlite3_column_text(baseStatement, 2),
+                  let descC = sqlite3_column_text(baseStatement, 3) else { continue }
             let definition = ExplorationEventDefinition(
-                index: UInt16(sqlite3_column_int(baseStatement, 1)),
-                id: String(cString: idC),
+                id: UInt8(sqlite3_column_int(baseStatement, 0)),
                 type: String(cString: typeC),
                 name: String(cString: nameC),
                 description: String(cString: descC),
-                floorMin: Int(sqlite3_column_int(baseStatement, 5)),
-                floorMax: Int(sqlite3_column_int(baseStatement, 6)),
+                floorMin: Int(sqlite3_column_int(baseStatement, 4)),
+                floorMax: Int(sqlite3_column_int(baseStatement, 5)),
                 tags: [],
                 weights: [],
                 payloadType: nil,
@@ -35,13 +33,12 @@ extension SQLiteMasterDataManager {
         let tagStatement = try prepare(tagSQL)
         defer { sqlite3_finalize(tagStatement) }
         while sqlite3_step(tagStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(tagStatement, 0),
-                  let event = eventMap[String(cString: idC)],
+            let eventId = UInt8(sqlite3_column_int(tagStatement, 0))
+            guard let event = eventMap[eventId],
                   let tagC = sqlite3_column_text(tagStatement, 2) else { continue }
             var tags = event.tags
             tags.append(.init(orderIndex: Int(sqlite3_column_int(tagStatement, 1)), value: String(cString: tagC)))
             eventMap[event.id] = ExplorationEventDefinition(
-                index: event.index,
                 id: event.id,
                 type: event.type,
                 name: event.name,
@@ -59,13 +56,12 @@ extension SQLiteMasterDataManager {
         let weightStatement = try prepare(weightSQL)
         defer { sqlite3_finalize(weightStatement) }
         while sqlite3_step(weightStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(weightStatement, 0),
-                  let event = eventMap[String(cString: idC)],
+            let eventId = UInt8(sqlite3_column_int(weightStatement, 0))
+            guard let event = eventMap[eventId],
                   let contextC = sqlite3_column_text(weightStatement, 1) else { continue }
             var weights = event.weights
             weights.append(.init(context: String(cString: contextC), weight: sqlite3_column_double(weightStatement, 2)))
             eventMap[event.id] = ExplorationEventDefinition(
-                index: event.index,
                 id: event.id,
                 type: event.type,
                 name: event.name,
@@ -83,12 +79,11 @@ extension SQLiteMasterDataManager {
         let payloadStatement = try prepare(payloadSQL)
         defer { sqlite3_finalize(payloadStatement) }
         while sqlite3_step(payloadStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(payloadStatement, 0),
-                  let event = eventMap[String(cString: idC)],
+            let eventId = UInt8(sqlite3_column_int(payloadStatement, 0))
+            guard let event = eventMap[eventId],
                   let typeC = sqlite3_column_text(payloadStatement, 1),
                   let jsonC = sqlite3_column_text(payloadStatement, 2) else { continue }
             eventMap[event.id] = ExplorationEventDefinition(
-                index: event.index,
                 id: event.id,
                 type: event.type,
                 name: event.name,

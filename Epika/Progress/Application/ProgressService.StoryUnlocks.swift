@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Story & Dungeon Unlocks
 extension ProgressService {
     @discardableResult
-    func markStoryNodeAsRead(_ nodeId: String) async throws -> StorySnapshot {
+    func markStoryNodeAsRead(_ nodeId: UInt16) async throws -> StorySnapshot {
         let snapshot = try await story.markNodeAsRead(nodeId)
         try await synchronizeStoryAndDungeonUnlocks()
         return snapshot
@@ -43,8 +43,8 @@ extension ProgressService {
     @discardableResult
     func unlockManiaDifficultyIfEligible(for snapshot: DungeonSnapshot) async throws -> Bool {
         guard snapshot.isCleared,
-              snapshot.highestUnlockedDifficulty < maniaDifficultyRank else { return false }
-        try await dungeon.unlockDifficulty(dungeonId: snapshot.dungeonId, difficulty: maniaDifficultyRank)
+              snapshot.highestUnlockedDifficulty < UInt8(maniaDifficultyRank) else { return false }
+        try await dungeon.unlockDifficulty(dungeonId: snapshot.dungeonId, difficulty: UInt8(maniaDifficultyRank))
         return true
     }
 }
@@ -52,19 +52,19 @@ extension ProgressService {
 // MARK: - Private Helpers
 private extension ProgressService {
     enum StoryRequirement {
-        case storyRead(String)
-        case dungeonCleared(String)
+        case storyRead(UInt16)
+        case dungeonCleared(UInt16)
     }
 
     enum DungeonRequirement {
-        case storyRead(String)
-        case dungeonCleared(String)
+        case storyRead(UInt16)
+        case dungeonCleared(UInt16)
         case alwaysUnlocked
     }
 
     func synchronizeStoryUnlocks(definitions: [StoryNodeDefinition],
-                                 readStoryIds: Set<String>,
-                                 clearedDungeonIds: Set<String>) async throws {
+                                 readStoryIds: Set<UInt16>,
+                                 clearedDungeonIds: Set<UInt16>) async throws {
         let sortedDefinitions = definitions.sorted { lhs, rhs in
             if lhs.chapter != rhs.chapter { return lhs.chapter < rhs.chapter }
             if lhs.section != rhs.section { return lhs.section < rhs.section }
@@ -97,8 +97,8 @@ private extension ProgressService {
     }
 
     func synchronizeDungeonUnlocks(definitions: [DungeonDefinition],
-                                   readStoryIds: Set<String>,
-                                   clearedDungeonIds: Set<String>) async throws {
+                                   readStoryIds: Set<UInt16>,
+                                   clearedDungeonIds: Set<UInt16>) async throws {
         for definition in definitions {
             let rawConditions = definition.unlockConditions
                 .sorted { $0.orderIndex < $1.orderIndex }
@@ -133,29 +133,39 @@ private extension ProgressService {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty { return nil }
         if trimmed.hasPrefix("dungeonClear:") {
-            let id = String(truncatedRequirementValue(trimmed))
+            let idString = String(truncatedRequirementValue(trimmed))
+            guard let id = UInt16(idString) else { return nil }
             return .dungeonCleared(id)
         }
         if trimmed.hasPrefix("story:") {
-            let id = String(truncatedRequirementValue(trimmed))
+            let idString = String(truncatedRequirementValue(trimmed))
+            guard let id = UInt16(idString) else { return nil }
             return .storyRead(id)
         }
         if trimmed.hasPrefix("storyRead:") {
-            let id = String(truncatedRequirementValue(trimmed))
+            let idString = String(truncatedRequirementValue(trimmed))
+            guard let id = UInt16(idString) else { return nil }
             return .storyRead(id)
         }
-        return .storyRead(trimmed)
+        guard let id = UInt16(trimmed) else { return nil }
+        return .storyRead(id)
     }
 
     func parseDungeonRequirement(_ raw: String) throws -> DungeonRequirement {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty { return .alwaysUnlocked }
         if trimmed.hasPrefix("storyRead:") {
-            let id = String(truncatedRequirementValue(trimmed))
+            let idString = String(truncatedRequirementValue(trimmed))
+            guard let id = UInt16(idString) else {
+                throw ProgressError.invalidInput(description: "無効なstoryRead ID: \(idString)")
+            }
             return .storyRead(id)
         }
         if trimmed.hasPrefix("dungeonClear:") {
-            let id = String(truncatedRequirementValue(trimmed))
+            let idString = String(truncatedRequirementValue(trimmed))
+            guard let id = UInt16(idString) else {
+                throw ProgressError.invalidInput(description: "無効なdungeonClear ID: \(idString)")
+            }
             return .dungeonCleared(id)
         }
         throw ProgressError.invalidInput(description: "未知のダンジョン解放条件を検出しました: \(trimmed)")

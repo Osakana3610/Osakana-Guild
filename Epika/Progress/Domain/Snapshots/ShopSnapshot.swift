@@ -3,20 +3,12 @@ import SwiftData
 
 struct ShopSnapshot: Sendable, Hashable {
     struct Stock: Sendable, Hashable {
-        var id: UUID
-        var itemId: String
-        var remaining: Int?
-        var restockAt: Date?
+        var itemId: UInt16
+        var remaining: UInt16?
         var isPlayerSold: Bool
-        var createdAt: Date
         var updatedAt: Date
     }
 
-    let persistentIdentifier: PersistentIdentifier
-    var id: UUID
-    var shopId: String
-    var isUnlocked: Bool
     var stocks: [Stock]
-    var createdAt: Date
     var updatedAt: Date
 }

@@ -12,7 +12,7 @@ struct SkillDefinition: Identifiable, Sendable, Hashable {
         let payloadJSON: String
     }
 
-    let id: String
+    let id: UInt16
     let name: String
     let description: String
     let type: String

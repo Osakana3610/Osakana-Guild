@@ -4,8 +4,8 @@ import SwiftData
 actor CharacterProgressService {
     struct CharacterCreationRequest: Sendable {
         var displayName: String
-        var raceId: String
-        var jobId: String
+        var raceId: UInt8
+        var jobId: UInt8
     }
 
     struct BattleResultUpdate: Sendable {
@@ -16,8 +16,8 @@ actor CharacterProgressService {
 
     private let container: ModelContainer
     private let runtime: ProgressRuntimeService
-    private var raceLevelCache: [String: Int] = [:]
-    private var raceMaxExperienceCache: [String: Int] = [:]
+    private var raceLevelCache: [UInt8: Int] = [:]
+    private var raceMaxExperienceCache: [UInt8: Int] = [:]
 
     init(container: ModelContainer, runtime: ProgressRuntimeService) {
         self.container = container
@@ -87,32 +87,25 @@ actor CharacterProgressService {
             throw ProgressError.invalidInput(description: "キャラクター名を入力してください")
         }
 
-        let masterData = MasterDataRuntimeService.shared
-        guard let raceIndex = await masterData.getRaceIndex(for: request.raceId) else {
-            throw ProgressError.invalidInput(description: "無効な種族IDです")
-        }
-        guard let jobIndex = await masterData.getJobIndex(for: request.jobId) else {
-            throw ProgressError.invalidInput(description: "無効な職業IDです")
-        }
-
         let context = makeContext()
 
         // ID採番: 1〜200で最小の未使用IDを割り当てる
         let newId = try allocateCharacterId(context: context)
 
         // 初期HPは一旦100を設定（最初のmakeSnapshotで再計算される）
-        let initialHP: Int32 = 100
+        let initialHP: UInt32 = 100
 
         let record = CharacterRecord(
             id: newId,
             displayName: trimmedName,
-            raceIndex: raceIndex,
-            jobIndex: jobIndex,
+            raceId: request.raceId,
+            jobId: request.jobId,
+            avatarId: 0,
             level: 1,
             experience: 0,
             currentHP: initialHP,
-            primaryPersonalityIndex: 0,
-            secondaryPersonalityIndex: 0,
+            primaryPersonalityId: 0,
+            secondaryPersonalityId: 0,
             actionRateAttack: 100,
             actionRatePriestMagic: 75,
             actionRateMageMagic: 75,
@@ -157,49 +150,42 @@ actor CharacterProgressService {
         let records = try context.fetch(descriptor)
         let map = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
 
-        let masterData = MasterDataRuntimeService.shared
-
         for update in updates {
             guard let record = map[update.characterId] else {
                 throw ProgressError.characterNotFound
             }
             if update.experienceDelta != 0 {
                 let previousLevel = record.level
-                let addition = Int32(record.experience).addingReportingOverflow(Int32(update.experienceDelta))
+                let addition = Int64(record.experience).addingReportingOverflow(Int64(update.experienceDelta))
                 guard !addition.overflow else {
                     throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
                 }
                 let updatedExperience = max(0, Int(addition.partialValue))
 
-                // raceIdを取得
-                guard let raceId = await masterData.getRaceId(for: record.raceIndex) else {
-                    throw ProgressError.invalidInput(description: "種族情報が見つかりません")
-                }
-
-                let cappedExperience = try await clampExperience(updatedExperience, raceId: raceId)
-                record.experience = Int32(cappedExperience)
-                let computedLevel = try await resolveLevel(for: cappedExperience, raceId: raceId)
+                let cappedExperience = try await clampExperience(updatedExperience, raceId: record.raceId)
+                record.experience = UInt32(cappedExperience)
+                let computedLevel = try await resolveLevel(for: cappedExperience, raceId: record.raceId)
                 if computedLevel != Int(previousLevel) {
                     record.level = UInt8(computedLevel)
                 }
             }
             if update.hpDelta != 0 {
-                let newHP = Int32(record.currentHP) + update.hpDelta
-                record.currentHP = max(0, newHP)
+                let newHP = Int64(record.currentHP) + Int64(update.hpDelta)
+                record.currentHP = UInt32(max(0, newHP))
             }
         }
         try context.save()
         notifyCharacterProgressDidChange()
     }
 
-    func updateHP(characterId: UInt8, newHP: Int32) async throws {
+    func updateHP(characterId: UInt8, newHP: UInt32) async throws {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
             throw ProgressError.characterNotFound
         }
-        record.currentHP = max(0, newHP)
+        record.currentHP = newHP
         try context.save()
         notifyCharacterProgressDidChange()
     }
@@ -260,18 +246,18 @@ actor CharacterProgressService {
         for _ in 0..<quantity {
             let equipmentRecord = CharacterEquipmentRecord(
                 characterId: characterId,
-                superRareTitleIndex: inventoryRecord.superRareTitleIndex,
-                normalTitleIndex: inventoryRecord.normalTitleIndex,
-                masterDataIndex: inventoryRecord.masterDataIndex,
-                socketSuperRareTitleIndex: inventoryRecord.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: inventoryRecord.socketNormalTitleIndex,
-                socketMasterDataIndex: inventoryRecord.socketMasterDataIndex
+                superRareTitleId: inventoryRecord.superRareTitleId,
+                normalTitleId: inventoryRecord.normalTitleId,
+                itemId: inventoryRecord.itemId,
+                socketSuperRareTitleId: inventoryRecord.socketSuperRareTitleId,
+                socketNormalTitleId: inventoryRecord.socketNormalTitleId,
+                socketItemId: inventoryRecord.socketItemId
             )
             context.insert(equipmentRecord)
         }
 
         // インベントリから減算
-        inventoryRecord.quantity -= quantity
+        inventoryRecord.quantity -= UInt16(quantity)
         if inventoryRecord.quantity <= 0 {
             context.delete(inventoryRecord)
         }
@@ -315,17 +301,17 @@ actor CharacterProgressService {
 
         if let existingInventory = allInventory.first(where: { $0.stackKey == equipmentStackKey }) {
             // 既存スタックに追加
-            existingInventory.quantity = min(existingInventory.quantity + quantity, 99)
+            existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
         } else if let firstEquip = matchingEquipment.first {
             // 新規インベントリレコード作成
             let inventoryRecord = InventoryItemRecord(
-                superRareTitleIndex: firstEquip.superRareTitleIndex,
-                normalTitleIndex: firstEquip.normalTitleIndex,
-                masterDataIndex: firstEquip.masterDataIndex,
-                socketSuperRareTitleIndex: firstEquip.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: firstEquip.socketNormalTitleIndex,
-                socketMasterDataIndex: firstEquip.socketMasterDataIndex,
-                quantity: quantity,
+                superRareTitleId: firstEquip.superRareTitleId,
+                normalTitleId: firstEquip.normalTitleId,
+                itemId: firstEquip.itemId,
+                socketSuperRareTitleId: firstEquip.socketSuperRareTitleId,
+                socketNormalTitleId: firstEquip.socketNormalTitleId,
+                socketItemId: firstEquip.socketItemId,
+                quantity: UInt16(quantity),
                 storage: storage
             )
             context.insert(inventoryRecord)
@@ -361,12 +347,12 @@ actor CharacterProgressService {
 
         return grouped.values.map { (record, count) in
             CharacterSnapshot.EquippedItem(
-                superRareTitleIndex: record.superRareTitleIndex,
-                normalTitleIndex: record.normalTitleIndex,
-                masterDataIndex: record.masterDataIndex,
-                socketSuperRareTitleIndex: record.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: record.socketNormalTitleIndex,
-                socketMasterDataIndex: record.socketMasterDataIndex,
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                itemId: record.itemId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketItemId: record.socketItemId,
                 quantity: count
             )
         }
@@ -376,7 +362,7 @@ actor CharacterProgressService {
 // MARK: - Private Helpers
 
 private extension CharacterProgressService {
-    func resolveLevel(for experience: Int, raceId: String) async throws -> Int {
+    func resolveLevel(for experience: Int, raceId: UInt8) async throws -> Int {
         let maxLevel = try await raceMaxLevel(for: raceId)
         do {
             return try await MainActor.run {
@@ -391,7 +377,7 @@ private extension CharacterProgressService {
         }
     }
 
-    func raceMaxLevel(for raceId: String) async throws -> Int {
+    func raceMaxLevel(for raceId: UInt8) async throws -> Int {
         if let cached = raceLevelCache[raceId] {
             return cached
         }
@@ -400,13 +386,13 @@ private extension CharacterProgressService {
         return resolved
     }
 
-    func clampExperience(_ experience: Int, raceId: String) async throws -> Int {
+    func clampExperience(_ experience: Int, raceId: UInt8) async throws -> Int {
         guard experience > 0 else { return 0 }
         let maximum = try await raceMaxExperience(for: raceId)
         return min(experience, maximum)
     }
 
-    func raceMaxExperience(for raceId: String) async throws -> Int {
+    func raceMaxExperience(for raceId: UInt8) async throws -> Int {
         if let cached = raceMaxExperienceCache[raceId] {
             return cached
         }
@@ -439,42 +425,6 @@ private extension CharacterProgressService {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let equipment = try context.fetch(equipmentDescriptor)
 
-        let masterData = MasterDataRuntimeService.shared
-
-        // Index → ID 変換
-        guard let raceId = await masterData.getRaceId(for: record.raceIndex) else {
-            throw ProgressError.invalidInput(description: "種族情報が見つかりません")
-        }
-        guard let jobId = await masterData.getJobId(for: record.jobIndex) else {
-            throw ProgressError.invalidInput(description: "職業情報が見つかりません")
-        }
-
-        let primaryPersonalityId: String?
-        if record.primaryPersonalityIndex > 0 {
-            primaryPersonalityId = await masterData.getPrimaryPersonalityId(for: record.primaryPersonalityIndex)
-        } else {
-            primaryPersonalityId = nil
-        }
-
-        let secondaryPersonalityId: String?
-        if record.secondaryPersonalityIndex > 0 {
-            secondaryPersonalityId = await masterData.getSecondaryPersonalityId(for: record.secondaryPersonalityIndex)
-        } else {
-            secondaryPersonalityId = nil
-        }
-
-        // 種族から性別を導出
-        let gender: String
-        let allRaces = try await masterData.getAllRaces()
-        if let raceDefinition = allRaces.first(where: { $0.id == raceId }) {
-            gender = raceDefinition.gender
-        } else {
-            gender = "other"
-        }
-
-        // アバター識別子を導出
-        let avatarIdentifier = try await resolveAvatarIdentifier(jobId: jobId, genderRawValue: gender)
-
         // 装備をスナップショット形式に変換（グループ化）
         var groupedEquipment: [String: (record: CharacterEquipmentRecord, count: Int)] = [:]
         for item in equipment {
@@ -488,12 +438,12 @@ private extension CharacterProgressService {
 
         let equippedItems = groupedEquipment.values.map { (item, count) in
             CharacterSnapshot.EquippedItem(
-                superRareTitleIndex: item.superRareTitleIndex,
-                normalTitleIndex: item.normalTitleIndex,
-                masterDataIndex: item.masterDataIndex,
-                socketSuperRareTitleIndex: item.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: item.socketNormalTitleIndex,
-                socketMasterDataIndex: item.socketMasterDataIndex,
+                superRareTitleId: item.superRareTitleId,
+                normalTitleId: item.normalTitleId,
+                itemId: item.itemId,
+                socketSuperRareTitleId: item.socketSuperRareTitleId,
+                socketNormalTitleId: item.socketNormalTitleId,
+                socketItemId: item.socketItemId,
                 quantity: count
             )
         }
@@ -509,8 +459,8 @@ private extension CharacterProgressService {
         )
 
         let personality = CharacterSnapshot.Personality(
-            primaryId: primaryPersonalityId,
-            secondaryId: secondaryPersonalityId
+            primaryId: record.primaryPersonalityId,
+            secondaryId: record.secondaryPersonalityId
         )
 
         // スキルは種族+職業+装備から導出（learnedSkillsは空配列）
@@ -543,10 +493,9 @@ private extension CharacterProgressService {
             persistentIdentifier: record.persistentModelID,
             id: record.id,
             displayName: record.displayName,
-            raceId: raceId,
-            gender: gender,
-            jobId: jobId,
-            avatarIdentifier: avatarIdentifier,
+            raceId: record.raceId,
+            jobId: record.jobId,
+            avatarId: record.avatarId,
             level: Int(record.level),
             experience: Int(record.experience),
             attributes: dummyAttributes,
@@ -600,30 +549,17 @@ private extension CharacterProgressService {
         return snapshot
     }
 
-    func resolveAvatarIdentifier(jobId: String, genderRawValue: String) async throws -> String {
-        do {
-            return try await MainActor.run {
-                try CharacterAvatarIdentifierResolver.defaultAvatarIdentifier(jobId: jobId,
-                                                                              genderRawValue: genderRawValue)
-            }
-        } catch let resolverError as CharacterAvatarIdentifierResolverError {
-            let message = resolverError.errorDescription ?? resolverError.localizedDescription
-            throw ProgressError.invalidInput(description: message)
-        } catch {
-            throw error
-        }
-    }
-
     func apply(snapshot: CharacterSnapshot, to record: CharacterRecord) {
         record.displayName = snapshot.displayName
+        record.avatarId = snapshot.avatarId
         record.level = UInt8(snapshot.level)
-        record.experience = Int32(snapshot.experience)
-        record.currentHP = Int32(snapshot.hitPoints.current)
+        record.experience = UInt32(snapshot.experience)
+        record.currentHP = UInt32(snapshot.hitPoints.current)
         record.actionRateAttack = UInt8(snapshot.actionPreferences.attack)
         record.actionRatePriestMagic = UInt8(snapshot.actionPreferences.priestMagic)
         record.actionRateMageMagic = UInt8(snapshot.actionPreferences.mageMagic)
         record.actionRateBreath = UInt8(snapshot.actionPreferences.breath)
-        // raceIndex, jobIndex, personalityIndexは変更しない（種族・職業変更は別APIで）
+        // raceId, jobId, personalityIdは変更しない（種族・職業変更は別APIで）
     }
 
     func deleteEquipment(for characterId: UInt8, context: ModelContext) throws {

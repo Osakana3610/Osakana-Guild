@@ -7,7 +7,7 @@ struct ExplorationEngine {
         let eventsPerFloor: Int
         let targetFloorNumber: Int
         let scriptEventsByFloor: [Int: [ExplorationEventDefinition]]
-        let encounterTablesById: [String: EncounterTableDefinition]
+        let encounterTablesById: [UInt16: EncounterTableDefinition]
         let scheduler: ExplorationEventScheduler
     }
 
@@ -32,7 +32,7 @@ struct ExplorationEngine {
 
     static func prepare(provider: ExplorationMasterDataProvider,
                         repository: MasterDataRepository,
-                        dungeonId: String,
+                        dungeonId: UInt16,
                         targetFloorNumber: Int,
                         superRareState: SuperRareDailyState,
                         scheduler: ExplorationEventScheduler) async throws -> (Preparation, RunState) {
@@ -196,10 +196,10 @@ private extension ExplorationEngine {
     }
 
     static func encounterEventsForFloor(_ floor: DungeonFloorDefinition,
-                                        tables: [String: EncounterTableDefinition]) -> [EncounterTableDefinition.Event] {
+                                        tables: [UInt16: EncounterTableDefinition]) -> [EncounterTableDefinition.Event] {
         guard let table = tables[floor.encounterTableId] else { return [] }
         return table.events.filter { event in
-            guard let enemyId = event.enemyId, !enemyId.isEmpty else { return false }
+            guard event.enemyId != nil else { return false }
             switch event.eventType {
             case "enemy_encounter", "boss_encounter":
                 return true
@@ -272,7 +272,7 @@ private extension ExplorationEngine {
 
     static func weight(for event: ExplorationEventDefinition,
                        dungeon: DungeonDefinition) -> Double {
-        if let direct = event.weights.first(where: { $0.context == dungeon.id }) {
+        if let direct = event.weights.first(where: { $0.context == String(dungeon.id) }) {
             return max(direct.weight, 0.0)
         }
         if let tagMatch = event.tags.first(where: { tag in dungeon.description.contains(tag.value) }) {
@@ -309,9 +309,9 @@ private extension ExplorationEngine {
         if let dropIds = json["items"] as? [String], !dropIds.isEmpty {
             let items = try await repository.allItems()
             let itemMap = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
-            dropRewards = try dropIds.map { identifier in
-                guard let item = itemMap[identifier] else {
-                    throw RuntimeError.masterDataNotFound(entity: "item", identifier: identifier)
+            dropRewards = try dropIds.map { identifierString in
+                guard let itemId = UInt16(identifierString), let item = itemMap[itemId] else {
+                    throw RuntimeError.masterDataNotFound(entity: "item", identifier: identifierString)
                 }
                 let difficulty = BattleRewardCalculator.trapDifficulty(for: item,
                                                                        dungeon: dungeon,
@@ -329,9 +329,9 @@ private extension ExplorationEngine {
         if let effectIds = json["statusEffects"] as? [String], !effectIds.isEmpty {
             let allEffects = try await repository.allStatusEffects()
             let map = Dictionary(uniqueKeysWithValues: allEffects.map { ($0.id, $0) })
-            statusEffects = try effectIds.map { identifier in
-                guard let definition = map[identifier] else {
-                    throw RuntimeError.masterDataNotFound(entity: "statusEffect", identifier: identifier)
+            statusEffects = try effectIds.map { identifierString in
+                guard let effectId = UInt8(identifierString), let definition = map[effectId] else {
+                    throw RuntimeError.masterDataNotFound(entity: "statusEffect", identifier: identifierString)
                 }
                 return definition
             }

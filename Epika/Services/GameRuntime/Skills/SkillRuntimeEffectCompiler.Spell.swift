@@ -4,9 +4,9 @@ import Foundation
 extension SkillRuntimeEffectCompiler {
     static func spellbook(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.Spellbook {
         guard !skills.isEmpty else { return SkillRuntimeEffects.emptySpellbook }
-        var learnedSpellIds: Set<String> = []
-        var forgottenSpellIds: Set<String> = []
-        var tierUnlocks: [String: Int] = [:]
+        var learnedSpellIds: Set<UInt8> = []
+        var forgottenSpellIds: Set<UInt8> = []
+        var tierUnlocks: [UInt8: Int] = [:]
 
         for skill in skills {
             for effect in skill.effects {
@@ -14,7 +14,8 @@ extension SkillRuntimeEffectCompiler {
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case .spellAccess:
-                    let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
+                    let spellIdValue = try payload.requireValue("spellId", skillId: skill.id, effectIndex: effect.index)
+                    let spellId = UInt8(spellIdValue.rounded(.towardZero))
                     let action = (payload.parameters?["action"] ?? "learn").lowercased()
                     if action == "forget" {
                         forgottenSpellIds.insert(spellId)
@@ -22,13 +23,14 @@ extension SkillRuntimeEffectCompiler {
                         learnedSpellIds.insert(spellId)
                     }
                 case .spellTierUnlock:
-                    let school = try payload.requireParam("school", skillId: skill.id, effectIndex: effect.index)
+                    let schoolRaw = try payload.requireParam("school", skillId: skill.id, effectIndex: effect.index)
+                    guard let schoolIndex = SpellDefinition.School(rawValue: schoolRaw)?.index else { continue }
                     let tierValue = try payload.requireValue("tier", skillId: skill.id, effectIndex: effect.index)
                     let tier = max(0, Int(tierValue.rounded(.towardZero)))
                     guard tier > 0 else { continue }
-                    let current = tierUnlocks[school] ?? 0
+                    let current = tierUnlocks[schoolIndex] ?? 0
                     if tier > current {
-                        tierUnlocks[school] = tier
+                        tierUnlocks[schoolIndex] = tier
                     }
                 case .absorption,
                      .actionOrderMultiplier,
@@ -134,8 +136,8 @@ extension SkillRuntimeEffectCompiler {
         guard !definitions.isEmpty else { return SkillRuntimeEffects.emptySpellLoadout }
 
         var unlocks: [SpellDefinition.School: Int] = [:]
-        for (raw, tier) in spellbook.tierUnlocks {
-            guard let school = SpellDefinition.School(rawValue: raw) else { continue }
+        for (schoolIndex, tier) in spellbook.tierUnlocks {
+            guard let school = SpellDefinition.School(index: schoolIndex) else { continue }
             let clampedTier = max(0, tier)
             if let current = unlocks[school] {
                 unlocks[school] = max(current, clampedTier)
@@ -144,7 +146,7 @@ extension SkillRuntimeEffectCompiler {
             }
         }
 
-        var allowedIds: Set<String> = []
+        var allowedIds: Set<UInt8> = []
         for definition in definitions {
             guard !spellbook.forgottenSpellIds.contains(definition.id) else { continue }
             if let unlockedTier = unlocks[definition.school],

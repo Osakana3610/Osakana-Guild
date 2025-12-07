@@ -5,31 +5,31 @@ import Foundation
 actor MasterDataRepository {
     private let manager: SQLiteMasterDataManager
     private var itemsCache: [ItemDefinition]?
-    private var itemsById: [String: ItemDefinition]?
+    private var itemsById: [UInt16: ItemDefinition]?
     private var skillsCache: [SkillDefinition]?
-    private var skillsById: [String: SkillDefinition]?
+    private var skillsById: [UInt16: SkillDefinition]?
     private var spellsCache: [SpellDefinition]?
-    private var spellsById: [String: SpellDefinition]?
+    private var spellsById: [UInt8: SpellDefinition]?
     private var enemiesCache: [EnemyDefinition]?
-    private var enemiesById: [String: EnemyDefinition]?
+    private var enemiesById: [UInt16: EnemyDefinition]?
     private var statusEffectsCache: [StatusEffectDefinition]?
-    private var statusEffectsById: [String: StatusEffectDefinition]?
+    private var statusEffectsById: [UInt8: StatusEffectDefinition]?
     private var jobsCache: [JobDefinition]?
-    private var jobsById: [String: JobDefinition]?
+    private var jobsById: [UInt8: JobDefinition]?
     private var racesCache: [RaceDefinition]?
-    private var racesById: [String: RaceDefinition]?
+    private var racesById: [UInt8: RaceDefinition]?
     private var titlesCache: [TitleDefinition]?
-    private var titlesById: [String: TitleDefinition]?
+    private var titlesById: [UInt8: TitleDefinition]?
     private var superRareTitlesCache: [SuperRareTitleDefinition]?
-    private var superRareTitlesById: [String: SuperRareTitleDefinition]?
+    private var superRareTitlesById: [UInt8: SuperRareTitleDefinition]?
     private var personalityPrimaryCache: [PersonalityPrimaryDefinition]?
-    private var personalityPrimaryById: [String: PersonalityPrimaryDefinition]?
+    private var personalityPrimaryById: [UInt8: PersonalityPrimaryDefinition]?
     private var personalitySecondaryCache: [PersonalitySecondaryDefinition]?
-    private var personalitySecondaryById: [String: PersonalitySecondaryDefinition]?
+    private var personalitySecondaryById: [UInt8: PersonalitySecondaryDefinition]?
     private var dungeonsCache: ([DungeonDefinition], [EncounterTableDefinition], [DungeonFloorDefinition])?
-    private var dungeonsById: [String: DungeonDefinition]?
+    private var dungeonsById: [UInt16: DungeonDefinition]?
     private var explorationEventsCache: [ExplorationEventDefinition]?
-    private var explorationEventsById: [String: ExplorationEventDefinition]?
+    private var explorationEventsById: [UInt8: ExplorationEventDefinition]?
     private var storiesCache: [StoryNodeDefinition]?
     private var synthesisCache: [SynthesisRecipeDefinition]?
     private var shopsCache: [ShopDefinition]?
@@ -52,13 +52,13 @@ actor MasterDataRepository {
         return items
     }
 
-    func item(withId id: String) async throws -> ItemDefinition? {
+    func item(withId id: UInt16) async throws -> ItemDefinition? {
         if let itemsById, let definition = itemsById[id] { return definition }
         _ = try await allItems()
         return itemsById?[id]
     }
 
-    func items(withIds ids: [String]) async throws -> [ItemDefinition] {
+    func items(withIds ids: [UInt16]) async throws -> [ItemDefinition] {
         guard !ids.isEmpty else { return [] }
         _ = try await allItems()
         guard let itemsById else {
@@ -68,7 +68,7 @@ actor MasterDataRepository {
         definitions.reserveCapacity(ids.count)
         for id in ids {
             guard let definition = itemsById[id] else {
-                throw RuntimeError.masterDataNotFound(entity: "item", identifier: id)
+                throw RuntimeError.masterDataNotFound(entity: "item", identifier: "\(id)")
             }
             definitions.append(definition)
         }
@@ -84,7 +84,7 @@ actor MasterDataRepository {
         return skills
     }
 
-    func skills(withIds ids: [String]) async throws -> [SkillDefinition] {
+    func skills(withIds ids: [UInt16]) async throws -> [SkillDefinition] {
         guard !ids.isEmpty else { return [] }
         _ = try await allSkills()
         guard let skillsById else {
@@ -94,7 +94,24 @@ actor MasterDataRepository {
         definitions.reserveCapacity(ids.count)
         for id in ids {
             guard let definition = skillsById[id] else {
-                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: id)
+                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: "\(id)")
+            }
+            definitions.append(definition)
+        }
+        return definitions
+    }
+
+    func skills(withIndices indices: [UInt16]) async throws -> [SkillDefinition] {
+        guard !indices.isEmpty else { return [] }
+        _ = try await allSkills()
+        guard let skillsById else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill cache is unavailable")
+        }
+        var definitions: [SkillDefinition] = []
+        definitions.reserveCapacity(indices.count)
+        for index in indices {
+            guard let definition = skillsById[index] else {
+                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: "\(index)")
             }
             definitions.append(definition)
         }
@@ -110,13 +127,13 @@ actor MasterDataRepository {
         return spells
     }
 
-    func spell(withId id: String) async throws -> SpellDefinition? {
+    func spell(withId id: UInt8) async throws -> SpellDefinition? {
         if let spellsById, let definition = spellsById[id] { return definition }
         _ = try await allSpells()
         return spellsById?[id]
     }
 
-    func spells(withIds ids: [String]) async throws -> [SpellDefinition] {
+    func spells(withIds ids: [UInt8]) async throws -> [SpellDefinition] {
         guard !ids.isEmpty else { return [] }
         _ = try await allSpells()
         guard let spellsById else {
@@ -126,7 +143,7 @@ actor MasterDataRepository {
         definitions.reserveCapacity(ids.count)
         for id in ids {
             guard let definition = spellsById[id] else {
-                throw RuntimeError.masterDataNotFound(entity: "spell", identifier: id)
+                throw RuntimeError.masterDataNotFound(entity: "spell", identifier: "\(id)")
             }
             definitions.append(definition)
         }
@@ -142,7 +159,7 @@ actor MasterDataRepository {
         return enemies
     }
 
-    func enemy(withId id: String) async throws -> EnemyDefinition? {
+    func enemy(withId id: UInt16) async throws -> EnemyDefinition? {
         if let enemiesById, let definition = enemiesById[id] { return definition }
         _ = try await allEnemies()
         return enemiesById?[id]
@@ -157,7 +174,7 @@ actor MasterDataRepository {
         return effects
     }
 
-    func statusEffect(withId id: String) async throws -> StatusEffectDefinition? {
+    func statusEffect(withId id: UInt8) async throws -> StatusEffectDefinition? {
         if let statusEffectsById, let definition = statusEffectsById[id] { return definition }
         _ = try await allStatusEffects()
         return statusEffectsById?[id]
@@ -172,7 +189,7 @@ actor MasterDataRepository {
         return jobs
     }
 
-    func job(withId id: String) async throws -> JobDefinition? {
+    func job(withId id: UInt8) async throws -> JobDefinition? {
         if let jobsById, let definition = jobsById[id] { return definition }
         _ = try await allJobs()
         return jobsById?[id]
@@ -187,7 +204,7 @@ actor MasterDataRepository {
         return races
     }
 
-    func race(withId id: String) async throws -> RaceDefinition? {
+    func race(withId id: UInt8) async throws -> RaceDefinition? {
         if let racesById, let definition = racesById[id] { return definition }
         _ = try await allRaces()
         return racesById?[id]
@@ -217,7 +234,7 @@ actor MasterDataRepository {
         return titles
     }
 
-    func title(withId id: String) async throws -> TitleDefinition? {
+    func title(withId id: UInt8) async throws -> TitleDefinition? {
         if let titlesById, let definition = titlesById[id] { return definition }
         _ = try await allTitles()
         return titlesById?[id]
@@ -232,7 +249,7 @@ actor MasterDataRepository {
         return titles
     }
 
-    func superRareTitle(withId id: String) async throws -> SuperRareTitleDefinition? {
+    func superRareTitle(withId id: UInt8) async throws -> SuperRareTitleDefinition? {
         if let superRareTitlesById, let definition = superRareTitlesById[id] { return definition }
         _ = try await allSuperRareTitles()
         return superRareTitlesById?[id]
@@ -249,7 +266,7 @@ actor MasterDataRepository {
         return bundle.primary
     }
 
-    func personalityPrimary(withId id: String) async throws -> PersonalityPrimaryDefinition? {
+    func personalityPrimary(withId id: UInt8) async throws -> PersonalityPrimaryDefinition? {
         if let personalityPrimaryById, let definition = personalityPrimaryById[id] { return definition }
         _ = try await allPersonalityPrimary()
         return personalityPrimaryById?[id]
@@ -261,7 +278,7 @@ actor MasterDataRepository {
         return personalitySecondaryCache ?? []
     }
 
-    func personalitySecondary(withId id: String) async throws -> PersonalitySecondaryDefinition? {
+    func personalitySecondary(withId id: UInt8) async throws -> PersonalitySecondaryDefinition? {
         if let personalitySecondaryById, let definition = personalitySecondaryById[id] { return definition }
         _ = try await allPersonalitySecondary()
         return personalitySecondaryById?[id]
@@ -283,7 +300,7 @@ actor MasterDataRepository {
         return data
     }
 
-    func dungeon(withId id: String) async throws -> DungeonDefinition? {
+    func dungeon(withId id: UInt16) async throws -> DungeonDefinition? {
         if let dungeonsById, let definition = dungeonsById[id] { return definition }
         let data = try await allDungeons()
         if let dungeonsById, let definition = dungeonsById[id] { return definition }
@@ -299,7 +316,7 @@ actor MasterDataRepository {
         return events
     }
 
-    func explorationEvent(withId id: String) async throws -> ExplorationEventDefinition? {
+    func explorationEvent(withId id: UInt8) async throws -> ExplorationEventDefinition? {
         if let explorationEventsById, let definition = explorationEventsById[id] { return definition }
         _ = try await allExplorationEvents()
         return explorationEventsById?[id]

@@ -6,7 +6,7 @@ extension ExplorationSnapshot.EncounterLog: Identifiable {}
 extension CharacterSnapshot: Identifiable {}
 
 private struct CharacterIconInfo: Hashable {
-    let avatarIdentifier: String
+    let avatarIndex: UInt16
     let displayName: String
 }
 
@@ -794,8 +794,8 @@ private struct EncounterDetailView: View {
                     allyNames[memberId] = participant.name
                     memberMap[participant.actorId] = memberId
                 }
-                if let avatar = participant.avatarIdentifier {
-                    iconMap[participant.actorId] = CharacterIconInfo(avatarIdentifier: avatar,
+                if let avatarIndex = participant.avatarIndex {
+                    iconMap[participant.actorId] = CharacterIconInfo(avatarIndex: avatarIndex,
                                                                      displayName: participant.name)
                 }
             }
@@ -964,7 +964,7 @@ private struct EncounterDetailView: View {
         var body: some View {
             Group {
                 if let iconInfo {
-                    CharacterImageView(avatarIdentifier: iconInfo.avatarIdentifier, size: 55)
+                    CharacterImageView(avatarIndex: iconInfo.avatarIndex, size: 55)
                 } else if actor?.role == .enemy {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.2))

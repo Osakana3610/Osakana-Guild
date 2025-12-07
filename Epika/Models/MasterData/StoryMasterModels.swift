@@ -16,7 +16,7 @@ struct StoryNodeDefinition: Identifiable, Sendable, Hashable {
         let moduleId: String
     }
 
-    let id: String
+    let id: UInt16
     let title: String
     let content: String
     let chapter: Int

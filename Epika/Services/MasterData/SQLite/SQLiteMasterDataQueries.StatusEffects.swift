@@ -4,16 +4,15 @@ import SQLite3
 // MARK: - Status Effects
 extension SQLiteMasterDataManager {
     func fetchAllStatusEffects() throws -> [StatusEffectDefinition] {
-        var effects: [String: StatusEffectDefinition] = [:]
+        var effects: [UInt8: StatusEffectDefinition] = [:]
         let baseSQL = "SELECT id, name, description, category, duration_turns, tick_damage_percent, action_locked, apply_message, expire_message FROM status_effects;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(baseStatement, 0),
-                  let nameC = sqlite3_column_text(baseStatement, 1),
+            let id = UInt8(sqlite3_column_int(baseStatement, 0))
+            guard let nameC = sqlite3_column_text(baseStatement, 1),
                   let descC = sqlite3_column_text(baseStatement, 2),
                   let categoryC = sqlite3_column_text(baseStatement, 3) else { continue }
-            let id = String(cString: idC)
             let definition = StatusEffectDefinition(
                 id: id,
                 name: String(cString: nameC),
@@ -34,8 +33,8 @@ extension SQLiteMasterDataManager {
         let tagStatement = try prepare(tagSQL)
         defer { sqlite3_finalize(tagStatement) }
         while sqlite3_step(tagStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(tagStatement, 0),
-                  let effect = effects[String(cString: idC)],
+            let effectId = UInt8(sqlite3_column_int(tagStatement, 0))
+            guard let effect = effects[effectId],
                   let tagC = sqlite3_column_text(tagStatement, 2) else { continue }
             var tags = effect.tags
             tags.append(.init(orderIndex: Int(sqlite3_column_int(tagStatement, 1)), value: String(cString: tagC)))
@@ -58,8 +57,8 @@ extension SQLiteMasterDataManager {
         let modifierStatement = try prepare(modifierSQL)
         defer { sqlite3_finalize(modifierStatement) }
         while sqlite3_step(modifierStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(modifierStatement, 0),
-                  let effect = effects[String(cString: idC)],
+            let effectId = UInt8(sqlite3_column_int(modifierStatement, 0))
+            guard let effect = effects[effectId],
                   let statC = sqlite3_column_text(modifierStatement, 1) else { continue }
             var modifiers = effect.statModifiers
             modifiers.append(.init(stat: String(cString: statC), value: sqlite3_column_double(modifierStatement, 2)))

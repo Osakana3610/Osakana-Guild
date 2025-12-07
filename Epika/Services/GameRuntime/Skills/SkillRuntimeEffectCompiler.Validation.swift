@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Payload Decoding & Validation
 extension SkillRuntimeEffectCompiler {
-    static func decodePayload(from effect: SkillDefinition.Effect, skillId: String) throws -> DecodedSkillEffectPayload? {
+    static func decodePayload(from effect: SkillDefinition.Effect, skillId: UInt16) throws -> DecodedSkillEffectPayload? {
         do {
             return try SkillEffectPayloadDecoder.decode(effect: effect, fallbackEffectType: effect.kind)
         } catch {
@@ -11,7 +11,7 @@ extension SkillRuntimeEffectCompiler {
     }
 
     static func validatePayload(_ payload: DecodedSkillEffectPayload,
-                                skillId: String,
+                                skillId: UInt16,
                                 effectIndex: Int) throws {
         if let requirements = requiredFields[payload.effectType] {
             for key in requirements.params {
@@ -157,14 +157,14 @@ struct DecodedSkillEffectPayload: Sendable, Hashable {
     let stringValues: [String: String]
     let stringArrayValues: [String: [String]]
 
-    func requireParam(_ key: String, skillId: String, effectIndex: Int) throws -> String {
+    func requireParam(_ key: String, skillId: UInt16, effectIndex: Int) throws -> String {
         guard let value = parameters?[key], !value.isEmpty else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.rawValue) の必須パラメータ \(key) がありません")
         }
         return value
     }
 
-    func requireValue(_ key: String, skillId: String, effectIndex: Int) throws -> Double {
+    func requireValue(_ key: String, skillId: UInt16, effectIndex: Int) throws -> Double {
         guard let value = self.value[key] else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.rawValue) の必須値 \(key) がありません")
         }

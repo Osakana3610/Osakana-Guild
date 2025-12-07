@@ -2,9 +2,8 @@ import Foundation
 import SwiftData
 
 struct StorySnapshot: Sendable, Hashable {
-    let persistentIdentifier: PersistentIdentifier
-    var unlockedNodeIds: Set<String>
-    var readNodeIds: Set<String>
-    var rewardedNodeIds: Set<String>
-    var metadata: ProgressMetadata
+    var unlockedNodeIds: Set<UInt16>
+    var readNodeIds: Set<UInt16>
+    var rewardedNodeIds: Set<UInt16>
+    var updatedAt: Date
 }
