@@ -578,7 +578,7 @@ extension SkillRuntimeEffectCompiler {
 extension BattleActor.SkillEffects.Reaction {
     static func make(from payload: DecodedSkillEffectPayload,
                      skillName: String,
-                     skillId: String) -> BattleActor.SkillEffects.Reaction? {
+                     skillId: UInt16) -> BattleActor.SkillEffects.Reaction? {
         guard payload.effectType == .reaction else { return nil }
         guard let triggerRaw = payload.parameters?["trigger"],
               let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: triggerRaw) else { return nil }
@@ -593,7 +593,7 @@ extension BattleActor.SkillEffects.Reaction {
         let accuracyMultiplier = payload.value["accuracyMultiplier"] ?? 1.0
         let requiresAllyBehind = (payload.parameters?["requiresAllyBehind"]?.lowercased() == "true")
 
-        return BattleActor.SkillEffects.Reaction(identifier: skillId,
+        return BattleActor.SkillEffects.Reaction(identifier: String(skillId),
                                                  displayName: skillName,
                                                  trigger: trigger,
                                                  target: target,

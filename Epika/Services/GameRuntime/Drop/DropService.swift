@@ -5,11 +5,11 @@ enum DropService {
     static func drops(repository: MasterDataRepository,
                       for enemy: EnemyDefinition,
                       party: RuntimePartyState,
-                      dungeonId: String? = nil,
+                      dungeonId: UInt8? = nil,
                       floorNumber: Int? = nil,
                       isRabiTicketActive: Bool = false,
                       hasTitleTreasure: Bool = false,
-                      enemyTitleId: String? = nil,
+                      enemyTitleId: UInt8? = nil,
                       dailySuperRareState: SuperRareDailyState,
                       random: inout GameRandomSource) async throws -> DropOutcome {
         guard !enemy.drops.isEmpty else { return DropOutcome(results: [], superRareState: dailySuperRareState) }
@@ -43,8 +43,8 @@ enum DropService {
                                                    random: &random)
             guard roll.willDrop else { continue }
 
-            var normalTitleId: String? = nil
-            var superRareTitleId: String? = nil
+            var normalTitleId: UInt8? = nil
+            var superRareTitleId: UInt8? = nil
 
             if TitleAssignmentEngine.shouldAssignTitle(category: category,
                                                         partyBonuses: context.partyBonuses,
@@ -105,7 +105,7 @@ enum DropService {
                                           repository: MasterDataRepository,
                                           sessionState: inout SuperRareSessionState,
                                           dailyState: inout SuperRareDailyState,
-                                          random: inout GameRandomSource) async throws -> (normalTitleId: String?, superRareTitleId: String?) {
+                                          random: inout GameRandomSource) async throws -> (normalTitleId: UInt8?, superRareTitleId: UInt8?) {
         guard let rates = title.superRareRates else {
             return (title.id, nil)
         }
@@ -149,7 +149,7 @@ enum DropService {
             sessionState.normalItemTriggered = true
         }
 
-        var normalTitleId: String? = title.id
+        var normalTitleId: UInt8? = title.id
         if TitleAssignmentEngine.shouldRemoveNormalTitleAfterSuperRare(random: &random) {
             normalTitleId = nil
         }

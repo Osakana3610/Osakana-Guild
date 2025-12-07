@@ -6,16 +6,16 @@ struct BattleEnemyGroupBuilder {
         let level: Int
     }
 
-    static func makeEnemies(baseEnemyId: String?,
+    static func makeEnemies(baseEnemyId: UInt16?,
                             baseEnemyLevel: Int?,
                             dungeon: DungeonDefinition,
                             floor: DungeonFloorDefinition,
-                            enemyDefinitions: [String: EnemyDefinition],
-                            skillDefinitions: [String: SkillDefinition],
-                            jobDefinitions: [String: JobDefinition],
-                            raceDefinitions: [String: RaceDefinition],
+                            enemyDefinitions: [UInt16: EnemyDefinition],
+                            skillDefinitions: [UInt16: SkillDefinition],
+                            jobDefinitions: [UInt8: JobDefinition],
+                            raceDefinitions: [UInt8: RaceDefinition],
                             random: inout GameRandomSource) throws -> ([BattleActor], [EncounteredEnemy]) {
-        var skillCache: [String: BattleActor.SkillEffects] = [:]
+        var skillCache: [UInt16: BattleActor.SkillEffects] = [:]
 
         if let baseEnemyId, let definition = enemyDefinitions[baseEnemyId] {
             let count = randomGroupSize(for: definition, random: &random)
@@ -108,10 +108,10 @@ struct BattleEnemyGroupBuilder {
     private static func makeActors(for definition: EnemyDefinition,
                                     levelOverride: Int?,
                                     count: Int,
-                                    skillDefinitions: [String: SkillDefinition],
-                                    jobDefinitions: [String: JobDefinition],
-                                    raceDefinitions: [String: RaceDefinition],
-                                    cache: inout [String: BattleActor.SkillEffects],
+                                    skillDefinitions: [UInt16: SkillDefinition],
+                                    jobDefinitions: [UInt8: JobDefinition],
+                                    raceDefinitions: [UInt8: RaceDefinition],
+                                    cache: inout [UInt16: BattleActor.SkillEffects],
                                     random: inout GameRandomSource) throws -> [BattleActor] {
         var actors: [BattleActor] = []
         for index in 0..<count {
@@ -169,16 +169,16 @@ struct BattleEnemyGroupBuilder {
     }
 
     private static func cachedSkillEffects(for definition: EnemyDefinition,
-                                           cache: inout [String: BattleActor.SkillEffects],
-                                           skillDefinitions: [String: SkillDefinition]) throws -> BattleActor.SkillEffects {
+                                           cache: inout [UInt16: BattleActor.SkillEffects],
+                                           skillDefinitions: [UInt16: SkillDefinition]) throws -> BattleActor.SkillEffects {
         if let cached = cache[definition.id] {
             return cached
         }
         let skills = try definition.skills.map { entry -> SkillDefinition in
-            guard let definition = skillDefinitions[entry.skillId] else {
-                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: entry.skillId)
+            guard let skill = skillDefinitions[entry.skillId] else {
+                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: String(entry.skillId))
             }
-            return definition
+            return skill
         }
         let effects = try SkillRuntimeEffectCompiler.actorEffects(from: skills)
         cache[definition.id] = effects
