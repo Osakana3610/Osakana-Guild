@@ -8,8 +8,13 @@
       "chapter": 1,
       "section": 1,
       "unlockRequirements": [],
-      "rewards": ["gold_100", "exp_50"],
-      "unlocksModules": ["forest_entrance"]
+      "rewards": [
+        "gold_100",
+        "exp_50"
+      ],
+      "unlocksModules": [
+        "2"
+      ]
     },
     {
       "id": 2,
@@ -18,11 +23,16 @@
       "chapter": 1,
       "section": 2,
       "unlockRequirements": [
-        "story_001",
-        "dungeonClear:forest_entrance"
+        "1",
+        "dungeonClear:2"
       ],
-      "rewards": ["gold_150", "exp_75"],
-      "unlocksModules": ["ancient_cave"]
+      "rewards": [
+        "gold_150",
+        "exp_75"
+      ],
+      "unlocksModules": [
+        "3"
+      ]
     },
     {
       "id": 3,
@@ -31,11 +41,16 @@
       "chapter": 1,
       "section": 3,
       "unlockRequirements": [
-        "story_002",
-        "dungeonClear:ancient_cave"
+        "2",
+        "dungeonClear:3"
       ],
-      "rewards": ["gold_200", "exp_100"],
-      "unlocksModules": ["forgotten_ruins"]
+      "rewards": [
+        "gold_200",
+        "exp_100"
+      ],
+      "unlocksModules": [
+        "4"
+      ]
     },
     {
       "id": 4,
@@ -44,11 +59,16 @@
       "chapter": 1,
       "section": 4,
       "unlockRequirements": [
-        "story_003",
-        "dungeonClear:forgotten_ruins"
+        "3",
+        "dungeonClear:4"
       ],
-      "rewards": ["gold_300", "exp_150"],
-      "unlocksModules": ["forest_guardian"]
+      "rewards": [
+        "gold_300",
+        "exp_150"
+      ],
+      "unlocksModules": [
+        "5"
+      ]
     },
     {
       "id": 5,
@@ -57,11 +77,16 @@
       "chapter": 2,
       "section": 1,
       "unlockRequirements": [
-        "story_004",
-        "dungeonClear:forest_guardian"
+        "4",
+        "dungeonClear:5"
       ],
-      "rewards": ["gold_400", "exp_200"],
-      "unlocksModules": ["mountain_path"]
+      "rewards": [
+        "gold_400",
+        "exp_200"
+      ],
+      "unlocksModules": [
+        "6"
+      ]
     },
     {
       "id": 6,
@@ -70,11 +95,16 @@
       "chapter": 2,
       "section": 2,
       "unlockRequirements": [
-        "story_005",
-        "dungeonClear:mountain_path"
+        "5",
+        "dungeonClear:6"
       ],
-      "rewards": ["gold_500", "exp_250"],
-      "unlocksModules": ["ruined_village"]
+      "rewards": [
+        "gold_500",
+        "exp_250"
+      ],
+      "unlocksModules": [
+        "7"
+      ]
     },
     {
       "id": 7,
@@ -83,11 +113,16 @@
       "chapter": 2,
       "section": 3,
       "unlockRequirements": [
-        "story_006",
-        "dungeonClear:ruined_village"
+        "6",
+        "dungeonClear:7"
       ],
-      "rewards": ["gold_600", "exp_300"],
-      "unlocksModules": ["ancient_bridge"]
+      "rewards": [
+        "gold_600",
+        "exp_300"
+      ],
+      "unlocksModules": [
+        "8"
+      ]
     },
     {
       "id": 8,
@@ -96,11 +131,16 @@
       "chapter": 2,
       "section": 4,
       "unlockRequirements": [
-        "story_007",
-        "dungeonClear:ancient_bridge"
+        "7",
+        "dungeonClear:8"
       ],
-      "rewards": ["gold_800", "exp_400"],
-      "unlocksModules": ["mountain_beast"]
+      "rewards": [
+        "gold_800",
+        "exp_400"
+      ],
+      "unlocksModules": [
+        "9"
+      ]
     },
     {
       "id": 9,
@@ -109,11 +149,16 @@
       "chapter": 3,
       "section": 1,
       "unlockRequirements": [
-        "story_008",
-        "dungeonClear:mountain_beast"
+        "8",
+        "dungeonClear:9"
       ],
-      "rewards": ["gold_1000", "exp_500"],
-      "unlocksModules": ["dark_forest"]
+      "rewards": [
+        "gold_1000",
+        "exp_500"
+      ],
+      "unlocksModules": [
+        "10"
+      ]
     },
     {
       "id": 10,
@@ -122,11 +167,16 @@
       "chapter": 3,
       "section": 2,
       "unlockRequirements": [
-        "story_009",
-        "dungeonClear:dark_forest"
+        "9",
+        "dungeonClear:10"
       ],
-      "rewards": ["gold_1200", "exp_600"],
-      "unlocksModules": ["magic_lake"]
+      "rewards": [
+        "gold_1200",
+        "exp_600"
+      ],
+      "unlocksModules": [
+        "11"
+      ]
     },
     {
       "id": 11,
@@ -135,11 +185,16 @@
       "chapter": 3,
       "section": 3,
       "unlockRequirements": [
-        "story_010",
-        "dungeonClear:magic_lake"
+        "10",
+        "dungeonClear:11"
       ],
-      "rewards": ["gold_1500", "exp_800"],
-      "unlocksModules": ["lost_city"]
+      "rewards": [
+        "gold_1500",
+        "exp_800"
+      ],
+      "unlocksModules": [
+        "12"
+      ]
     },
     {
       "id": 12,
@@ -148,11 +203,17 @@
       "chapter": 3,
       "section": 4,
       "unlockRequirements": [
-        "story_011",
-        "dungeonClear:lost_city"
+        "11",
+        "dungeonClear:12"
       ],
-      "rewards": ["gold_2000", "exp_1000", "item_dragon_sword"],
-      "unlocksModules": ["ancient_dragon_lair"]
+      "rewards": [
+        "gold_2000",
+        "exp_1000",
+        "item_dragon_sword"
+      ],
+      "unlocksModules": [
+        "ancient_dragon_lair"
+      ]
     }
   ]
 }
