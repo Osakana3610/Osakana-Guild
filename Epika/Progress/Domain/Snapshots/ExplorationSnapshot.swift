@@ -23,7 +23,7 @@ struct ExplorationSnapshot: Sendable, Hashable {
         }
 
         struct CombatSummary: Sendable, Hashable {
-            var enemyIndex: UInt16
+            var enemyId: UInt16
             var enemyName: String
             var result: String
             var turns: Int
@@ -54,7 +54,7 @@ struct ExplorationSnapshot: Sendable, Hashable {
 
     let persistentIdentifier: PersistentIdentifier
     var id: UUID
-    var dungeonIndex: UInt16
+    var dungeonId: UInt8
     var displayDungeonName: String
     var activeFloorNumber: Int
     var party: PartySummary
