@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "statusEffects": [
     {
-      "id": "status.sleep",
+      "id": 0,
       "name": "眠り",
       "description": "深い眠りに落ち、解除されるまで一切行動できない状態です。",
       "category": "debuff",
@@ -15,7 +15,7 @@
       "expireMessage": "眠りから目覚めた。"
     },
     {
-      "id": "status.confusion",
+      "id": 1,
       "name": "混乱",
       "description": "混乱して正しい行動が取れなくなる状態です。味方を攻撃することもあります。",
       "category": "debuff",

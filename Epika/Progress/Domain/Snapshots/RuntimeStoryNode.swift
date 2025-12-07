@@ -6,7 +6,7 @@ struct RuntimeStoryNode: Identifiable, Hashable, Sendable {
     let isCompleted: Bool
     let isRewardClaimed: Bool
 
-    var id: String { definition.id }
+    var id: UInt16 { definition.id }
     var title: String { definition.title }
     var content: String { definition.content }
     var chapterId: String { String(definition.chapter) }

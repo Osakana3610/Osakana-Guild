@@ -87,10 +87,10 @@ final class Generator {
 
     private func validateSchemas() throws {
         let validations: [(filename: String, rootKey: String?, expectedKeys: Set<String>)] = [
-            ("RaceDataMaster", "raceData", ["index", "name", "gender", "genderCode", "category", "baseStats", "description", "maxLevel"]),
-            ("JobMaster", "jobs", ["id", "index", "name", "category", "growthTendency", "combatCoefficients", "skills"]),
-            ("EnemyMaster", "enemies", ["index", "name", "race", "category", "job", "stats", "resistances", "skills", "drops", "groupSizeRange", "actionRates", "baseExperience", "isBoss"]),
-            ("ExplorationEventMaster", "events", ["id", "index", "type", "name", "description", "floorRange", "dungeonTags", "weights", "trap"]),
+            ("RaceDataMaster", "raceData", ["id", "name", "gender", "genderCode", "category", "baseStats", "description", "maxLevel"]),
+            ("JobMaster", "jobs", ["id", "name", "category", "growthTendency", "combatCoefficients", "skills"]),
+            ("EnemyMaster", "enemies", ["id", "name", "race", "category", "job", "stats", "resistances", "skills", "drops", "groupSizeRange", "actionRates", "baseExperience", "isBoss"]),
+            ("ExplorationEventMaster", "events", ["id", "type", "name", "description", "floorRange", "dungeonTags", "weights", "trap"]),
         ]
 
         var allMismatches: [(file: String, missing: Set<String>, extra: Set<String>)] = []

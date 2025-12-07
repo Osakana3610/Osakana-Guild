@@ -17,8 +17,7 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
         let skillId: String
     }
 
-    let id: String
-    let index: Int16
+    let id: UInt16
     let name: String
     let description: String
     let category: String

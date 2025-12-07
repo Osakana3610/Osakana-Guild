@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "storyNodes": [
     {
-      "id": "story_001",
+      "id": 1,
       "title": "冒険の始まり",
       "content": "あなたは冒険者として新たな一歩を踏み出した。\n未知なる世界があなたを待っている。",
       "chapter": 1,
@@ -12,7 +12,7 @@
       "unlocksModules": ["forest_entrance"]
     },
     {
-      "id": "story_002", 
+      "id": 2,
       "title": "古い洞窟の発見",
       "content": "森の奥深くで、古い洞窟の入り口を発見した。\n中からは不思議な気配が漂ってくる。",
       "chapter": 1,
@@ -25,7 +25,7 @@
       "unlocksModules": ["ancient_cave"]
     },
     {
-      "id": "story_003",
+      "id": 3,
       "title": "忘れられた遺跡",
       "content": "洞窟を抜けると、そこには忘れ去られた古代の遺跡があった。\n何か重要な秘密が隠されているようだ。",
       "chapter": 1,
@@ -38,7 +38,7 @@
       "unlocksModules": ["forgotten_ruins"]
     },
     {
-      "id": "story_004",
+      "id": 4,
       "title": "森の番人との出会い",
       "content": "遺跡を探索していると、森の番人と呼ばれる存在に遭遇した。\n彼は古代の秘密について何か知っているようだ。",
       "chapter": 1,
@@ -51,7 +51,7 @@
       "unlocksModules": ["forest_guardian"]
     },
     {
-      "id": "story_005",
+      "id": 5,
       "title": "山への道",
       "content": "森の番人から聞いた情報を元に、山へと向かうことになった。\n険しい道のりが予想される。",
       "chapter": 2,
@@ -64,7 +64,7 @@
       "unlocksModules": ["mountain_path"]
     },
     {
-      "id": "story_006",
+      "id": 6,
       "title": "廃墟の村",
       "content": "山麓で廃墟となった村を発見した。\nかつては栄えていたが、何かが起きたようだ。",
       "chapter": 2,
@@ -77,7 +77,7 @@
       "unlocksModules": ["ruined_village"]
     },
     {
-      "id": "story_007",
+      "id": 7,
       "title": "古い橋の守護者",
       "content": "山への道を阻む古い橋。\nそこには強力な守護者が待ち構えていた。",
       "chapter": 2,
@@ -90,7 +90,7 @@
       "unlocksModules": ["ancient_bridge"]
     },
     {
-      "id": "story_008",
+      "id": 8,
       "title": "山の魔獣",
       "content": "ついに山頂付近で伝説の魔獣と対峙する。\nこの戦いが運命を左右するだろう。",
       "chapter": 2,
@@ -103,7 +103,7 @@
       "unlocksModules": ["mountain_beast"]
     },
     {
-      "id": "story_009",
+      "id": 9,
       "title": "暗黒の森へ",
       "content": "山を越えた先には、光も届かない暗黒の森が広がっていた。\n最終決戦の地が近い。",
       "chapter": 3,
@@ -116,7 +116,7 @@
       "unlocksModules": ["dark_forest"]
     },
     {
-      "id": "story_010",
+      "id": 10,
       "title": "魔法の湖",
       "content": "暗黒の森の中心に、不思議な光を放つ湖があった。\n古代の魔法の力を感じる。",
       "chapter": 3,
@@ -129,7 +129,7 @@
       "unlocksModules": ["magic_lake"]
     },
     {
-      "id": "story_011",
+      "id": 11,
       "title": "失われた都市",
       "content": "湖の底から浮かび上がった失われた都市。\n全ての謎の答えがここにある。",
       "chapter": 3,
@@ -142,7 +142,7 @@
       "unlocksModules": ["lost_city"]
     },
     {
-      "id": "story_012",
+      "id": 12,
       "title": "古代ドラゴンとの決戦",
       "content": "ついに全ての元凶である古代ドラゴンと対峙する時が来た。\n世界の運命はあなたの手に委ねられている。",
       "chapter": 3,

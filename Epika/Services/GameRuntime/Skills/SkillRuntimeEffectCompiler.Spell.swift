@@ -4,8 +4,8 @@ import Foundation
 extension SkillRuntimeEffectCompiler {
     static func spellbook(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.Spellbook {
         guard !skills.isEmpty else { return SkillRuntimeEffects.emptySpellbook }
-        var learnedSpellIds: Set<String> = []
-        var forgottenSpellIds: Set<String> = []
+        var learnedSpellIds: Set<UInt8> = []
+        var forgottenSpellIds: Set<UInt8> = []
         var tierUnlocks: [String: Int] = [:]
 
         for skill in skills {
@@ -14,7 +14,8 @@ extension SkillRuntimeEffectCompiler {
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case .spellAccess:
-                    let spellId = try payload.requireParam("spellId", skillId: skill.id, effectIndex: effect.index)
+                    let spellIdValue = try payload.requireValue("spellId", skillId: skill.id, effectIndex: effect.index)
+                    let spellId = UInt8(spellIdValue.rounded(.towardZero))
                     let action = (payload.parameters?["action"] ?? "learn").lowercased()
                     if action == "forget" {
                         forgottenSpellIds.insert(spellId)
@@ -144,7 +145,7 @@ extension SkillRuntimeEffectCompiler {
             }
         }
 
-        var allowedIds: Set<String> = []
+        var allowedIds: Set<UInt8> = []
         for definition in definitions {
             guard !spellbook.forgottenSpellIds.contains(definition.id) else { continue }
             if let unlockedTier = unlocks[definition.school],

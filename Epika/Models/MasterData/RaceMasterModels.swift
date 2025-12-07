@@ -7,8 +7,7 @@ struct RaceDefinition: Identifiable, Sendable, Hashable {
         let value: Int
     }
 
-    let id: String
-    let index: Int
+    let id: UInt8
     let name: String
     let gender: String
     let genderCode: UInt8

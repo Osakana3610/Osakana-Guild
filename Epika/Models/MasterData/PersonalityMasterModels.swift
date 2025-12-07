@@ -8,8 +8,7 @@ struct PersonalityPrimaryDefinition: Identifiable, Sendable {
         let payloadJSON: String
     }
 
-    let id: String
-    let index: Int
+    let id: UInt8
     let name: String
     let kind: String
     let description: String
@@ -22,8 +21,7 @@ struct PersonalitySecondaryDefinition: Identifiable, Sendable {
         let value: Int
     }
 
-    let id: String
-    let index: Int
+    let id: UInt8
     let name: String
     let positiveSkillId: String
     let negativeSkillId: String

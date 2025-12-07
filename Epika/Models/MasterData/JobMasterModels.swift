@@ -12,8 +12,7 @@ struct JobDefinition: Identifiable, Sendable, Hashable {
         let skillId: String
     }
 
-    let id: String
-    let index: Int
+    let id: UInt8
     let name: String
     let category: String
     let growthTendency: String?
