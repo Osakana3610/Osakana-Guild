@@ -540,7 +540,9 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS personality_secondary (
                 id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL
+                name TEXT NOT NULL,
+                positive_skill_id TEXT NOT NULL,
+                negative_skill_id TEXT NOT NULL
             );
             """,
             """

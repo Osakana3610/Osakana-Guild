@@ -1520,6 +1520,8 @@ private struct PersonalitySecondaryEntry {
     let id: Int
     let name: String
     let statBonuses: [String: Int]
+    let positiveSkill: String
+    let negativeSkill: String
 }
 
 private struct PersonalitySkillEntry {
@@ -1604,7 +1606,9 @@ extension Generator {
 
         let secondaries = try secondaryList.map { dictionary -> PersonalitySecondaryEntry in
             guard let id = toInt(dictionary["id"]),
-                  let name = dictionary["name"] as? String else {
+                  let name = dictionary["name"] as? String,
+                  let positiveSkill = dictionary["positiveSkill"] as? String,
+                  let negativeSkill = dictionary["negativeSkill"] as? String else {
                 throw GeneratorError.executionFailed("personality2 セクションに不足項目があります")
             }
 
@@ -1617,7 +1621,7 @@ extension Generator {
                 statBonuses[stat] = intValue
             }
 
-            return PersonalitySecondaryEntry(id: id, name: name, statBonuses: statBonuses)
+            return PersonalitySecondaryEntry(id: id, name: name, statBonuses: statBonuses, positiveSkill: positiveSkill, negativeSkill: negativeSkill)
         }
 
         let skills = try skillsDict.map { key, value -> PersonalitySkillEntry in
@@ -1650,7 +1654,7 @@ extension Generator {
                 INSERT INTO personality_primary_effects (personality_id, order_index, effect_type, value, payload_json)
                 VALUES (?, ?, ?, ?, ?);
             """
-            let insertSecondarySQL = "INSERT INTO personality_secondary (id, name) VALUES (?, ?);"
+            let insertSecondarySQL = "INSERT INTO personality_secondary (id, name, positive_skill_id, negative_skill_id) VALUES (?, ?, ?, ?);"
             let insertSecondaryStatSQL = "INSERT INTO personality_secondary_stat_bonuses (personality_id, stat, value) VALUES (?, ?, ?);"
             let insertSkillSQL = "INSERT INTO personality_skills (id, name, kind, description) VALUES (?, ?, ?, ?);"
             let insertSkillEventSQL = "INSERT INTO personality_skill_event_effects (skill_id, order_index, effect_id) VALUES (?, ?, ?);"
@@ -1698,6 +1702,8 @@ extension Generator {
             for entry in secondaries {
                 bindInt(secondaryStatement, index: 1, value: entry.id)
                 bindText(secondaryStatement, index: 2, value: entry.name)
+                bindText(secondaryStatement, index: 3, value: entry.positiveSkill)
+                bindText(secondaryStatement, index: 4, value: entry.negativeSkill)
                 try step(secondaryStatement)
                 reset(secondaryStatement)
 
