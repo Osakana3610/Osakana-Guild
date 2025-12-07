@@ -70,7 +70,7 @@ extension SQLiteMasterDataManager {
     func fetchAllSuperRareTitles() throws -> [SuperRareTitleDefinition] {
         var titles: [UInt8: SuperRareTitleDefinition] = [:]
         var orderedIds: [UInt8] = []
-        let baseSQL = "SELECT id, name, sort_order FROM super_rare_titles ORDER BY sort_order;"
+        let baseSQL = "SELECT id, name FROM super_rare_titles ORDER BY id;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
