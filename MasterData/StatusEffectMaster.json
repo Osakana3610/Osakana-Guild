@@ -26,6 +26,32 @@
       "tags": ["confusion"],
       "applyMessage": "混乱してしまった！",
       "expireMessage": "混乱が収まった。"
+    },
+    {
+      "id": 2,
+      "name": "石化",
+      "description": "体が石化し、一切行動できなくなる状態です。",
+      "category": "debuff",
+      "durationTurns": -1,
+      "tickDamagePercent": 0,
+      "actionLocked": true,
+      "statModifiers": {},
+      "tags": ["petrify"],
+      "applyMessage": "石化してしまった！",
+      "expireMessage": "石化が解けた。"
+    },
+    {
+      "id": 3,
+      "name": "即死",
+      "description": "致命的な状態で、即座に戦闘不能になります。",
+      "category": "debuff",
+      "durationTurns": -1,
+      "tickDamagePercent": 0,
+      "actionLocked": true,
+      "statModifiers": {},
+      "tags": ["instantDeath"],
+      "applyMessage": "即死した！",
+      "expireMessage": ""
     }
   ]
 }
