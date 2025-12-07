@@ -47,9 +47,9 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(skillStatement) }
         while sqlite3_step(skillStatement) == SQLITE_ROW {
             let jobId = UInt8(sqlite3_column_int(skillStatement, 0))
-            guard var builder = builders[jobId],
-                  let skillC = sqlite3_column_text(skillStatement, 2) else { continue }
-            builder.learnedSkills.append(.init(orderIndex: Int(sqlite3_column_int(skillStatement, 1)), skillId: String(cString: skillC)))
+            guard var builder = builders[jobId] else { continue }
+            let skillId = UInt16(sqlite3_column_int(skillStatement, 2))
+            builder.learnedSkills.append(.init(orderIndex: Int(sqlite3_column_int(skillStatement, 1)), skillId: skillId))
             builders[builder.id] = builder
         }
 

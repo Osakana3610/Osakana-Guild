@@ -68,30 +68,15 @@ extension SQLiteMasterDataManager {
     }
 
     func fetchAllSuperRareTitles() throws -> [SuperRareTitleDefinition] {
-        var titles: [UInt8: SuperRareTitleDefinition] = [:]
-        var orderedIds: [UInt8] = []
-        let baseSQL = "SELECT id, name FROM super_rare_titles ORDER BY id;"
-        let baseStatement = try prepare(baseSQL)
-        defer { sqlite3_finalize(baseStatement) }
-        while sqlite3_step(baseStatement) == SQLITE_ROW {
-            guard let nameC = sqlite3_column_text(baseStatement, 1) else { continue }
-            let id = UInt8(sqlite3_column_int(baseStatement, 0))
-            titles[id] = SuperRareTitleDefinition(id: id, name: String(cString: nameC), skills: [])
-            orderedIds.append(id)
+        var titles: [SuperRareTitleDefinition] = []
+        let sql = "SELECT id, name FROM super_rare_titles ORDER BY id;"
+        let statement = try prepare(sql)
+        defer { sqlite3_finalize(statement) }
+        while sqlite3_step(statement) == SQLITE_ROW {
+            guard let nameC = sqlite3_column_text(statement, 1) else { continue }
+            let id = UInt8(sqlite3_column_int(statement, 0))
+            titles.append(SuperRareTitleDefinition(id: id, name: String(cString: nameC)))
         }
-
-        let skillSQL = "SELECT title_id, order_index, skill_id FROM super_rare_title_skills ORDER BY title_id, order_index;"
-        let skillStatement = try prepare(skillSQL)
-        defer { sqlite3_finalize(skillStatement) }
-        while sqlite3_step(skillStatement) == SQLITE_ROW {
-            let titleId = UInt8(sqlite3_column_int(skillStatement, 0))
-            guard let title = titles[titleId],
-                  let skillC = sqlite3_column_text(skillStatement, 2) else { continue }
-            var skills = title.skills
-            skills.append(.init(orderIndex: Int(sqlite3_column_int(skillStatement, 1)), skillId: String(cString: skillC)))
-            titles[title.id] = SuperRareTitleDefinition(id: title.id, name: title.name, skills: skills.sorted { $0.orderIndex < $1.orderIndex })
-        }
-
-        return orderedIds.compactMap { titles[$0] }
+        return titles
     }
 }
