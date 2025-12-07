@@ -14,9 +14,7 @@
         "human",
         "elf"
       ],
-      "allowedJobs": [
-        "merchant"
-      ],
+      "allowedJobs": [],
       "allowedGenders": [
         "male",
         "female"
