@@ -109,9 +109,9 @@ actor MasterDataRuntimeService {
 
     // MARK: - Shops
 
-    func getShopDefinition(id: String) async throws -> ShopDefinition? {
+    func getShopItems() async throws -> [MasterShopItem] {
         try await ensureInitialized()
-        return try await repository.shop(withId: id)
+        return try await repository.shopItems()
     }
 
     // MARK: - Titles
