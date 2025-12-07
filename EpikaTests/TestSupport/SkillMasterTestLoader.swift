@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 enum SkillMasterTestLoader {
-    static func loadDefinitions(ids: Set<String>) throws -> [SkillDefinition] {
+    static func loadDefinitions(ids: Set<UInt16>) throws -> [SkillDefinition] {
         let root = try loadRootJSON()
         return try buildDefinitions(from: root, filtering: ids)
     }
@@ -23,7 +23,7 @@ private struct VariantEffectPayload {
 
 private extension SkillMasterTestLoader {
     static func loadRootJSON() throws -> [String: Any] {
-        let fileURL = projectRoot.appendingPathComponent("Epika/Resources/SkillMaster.json")
+        let fileURL = projectRoot.appendingPathComponent("MasterData/SkillMaster.json")
         let data = try Data(contentsOf: fileURL)
         guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw RuntimeError.invalidConfiguration(reason: "SkillMaster.json が辞書として読み込めませんでした")
@@ -31,8 +31,21 @@ private extension SkillMasterTestLoader {
         return object
     }
 
+    static func convertToStringDict(_ dict: [String: Any]?) -> [String: String]? {
+        guard let dict else { return nil }
+        return dict.reduce(into: [String: String]()) { result, pair in
+            if let strValue = pair.value as? String {
+                result[pair.key] = strValue
+            } else if let intValue = pair.value as? Int {
+                result[pair.key] = String(intValue)
+            } else if let doubleValue = pair.value as? Double {
+                result[pair.key] = String(doubleValue)
+            }
+        }
+    }
+
     static func buildDefinitions(from root: [String: Any],
-                                 filtering ids: Set<String>?) throws -> [SkillDefinition] {
+                                 filtering ids: Set<UInt16>?) throws -> [SkillDefinition] {
         var results: [SkillDefinition] = []
         let categories = ["attack", "defense", "status", "reaction", "resurrection"]
 
@@ -42,13 +55,14 @@ private extension SkillMasterTestLoader {
             for family in families {
                 guard let familyId = family["familyId"] as? String,
                       let effectType = family["effectType"] as? String else { continue }
-                let defaultParameters = family["parameters"] as? [String: String]
+                let defaultParameters = convertToStringDict(family["parameters"] as? [String: Any])
                 let variants = family["variants"] as? [[String: Any]] ?? []
 
                 for variant in variants {
-                    guard let variantId = variant["id"] as? String else { continue }
+                    guard let variantIdInt = variant["id"] as? Int else { continue }
+                    let variantId = UInt16(variantIdInt)
                     if let ids, !ids.contains(variantId) { continue }
-                    let label = (variant["label"] as? String) ?? variantId
+                    let label = (variant["label"] as? String) ?? "Skill \(variantId)"
                     let effectPayloads = try payloads(for: variant,
                                                       familyId: familyId,
                                                       familyEffectType: effectType,
@@ -112,12 +126,12 @@ private extension SkillMasterTestLoader {
             return overrides ?? base
         }
 
-        let variantParameters = mergeParameters(defaultParameters, variant["parameters"] as? [String: String])
+        let variantParameters = mergeParameters(defaultParameters, convertToStringDict(variant["parameters"] as? [String: Any]))
 
         if let custom = variant["effects"] as? [[String: Any]], !custom.isEmpty {
             return custom.map { effect in
                 let effectType = (effect["effectType"] as? String) ?? familyEffectType
-                let parameters = mergeParameters(variantParameters, effect["parameters"] as? [String: String])
+                let parameters = mergeParameters(variantParameters, convertToStringDict(effect["parameters"] as? [String: Any]))
                 let values = effect["value"] as? [String: Any] ?? [:]
                 return VariantEffectPayload(familyId: familyId,
                                             effectType: effectType,
@@ -127,7 +141,7 @@ private extension SkillMasterTestLoader {
         }
 
         guard let value = variant["value"] as? [String: Any] else {
-            guard let id = variant["id"] as? String else {
+            guard let id = variant["id"] as? Int else {
                 throw RuntimeError.invalidConfiguration(reason: "Skill variant の id 取得に失敗しました")
             }
             throw RuntimeError.invalidConfiguration(reason: "Skill \(id) の value が不足しています")
