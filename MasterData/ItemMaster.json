@@ -25,9 +25,7 @@
       "combatBonuses": {
         "magicalDefense": 1
       },
-      "grantedSkills": [
-        "skill.lucky_charm"
-      ],
+      "grantedSkills": [],
       "id": 1
     },
     {

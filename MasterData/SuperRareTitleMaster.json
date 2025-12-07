@@ -3,63 +3,42 @@
     {
       "id": 1,
       "name": "神級の",
-      "skills": [
-        "skill.divine_light",
-        "skill.godly_strike"
-      ]
+      "skills": []
     },
     {
       "id": 2,
       "name": "天界の",
-      "skills": [
-        "skill.angelic_guard"
-      ]
+      "skills": []
     },
     {
       "id": 3,
       "name": "魔王の",
-      "skills": [
-        "skill.demonic_rage",
-        "skill.hell_fire"
-      ]
+      "skills": []
     },
     {
       "id": 4,
       "name": "太古の",
-      "skills": [
-        "skill.ancient_wisdom"
-      ]
+      "skills": []
     },
     {
       "id": 5,
       "name": "虚無の",
-      "skills": [
-        "skill.void_blast",
-        "skill.shadow_warp"
-      ]
+      "skills": []
     },
     {
       "id": 6,
       "name": "永遠の",
-      "skills": [
-        "skill.time_loop",
-        "skill.eternal_guard"
-      ]
+      "skills": []
     },
     {
       "id": 7,
       "name": "世界を砕く",
-      "skills": [
-        "skill.world_break"
-      ]
+      "skills": []
     },
     {
       "id": 8,
       "name": "全能の",
-      "skills": [
-        "skill.omniscience",
-        "skill.omnipotence"
-      ]
+      "skills": []
     },
     {
       "id": 9,

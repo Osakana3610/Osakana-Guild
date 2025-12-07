@@ -573,7 +573,6 @@
     "confusionResistanceEffects": {
       "attractive": {
         "personalityName": "容姿端麗",
-        "skillId": "attractive",
         "battleEffect": {
           "type": "confusionResistance",
           "value": -15,
@@ -583,7 +582,6 @@
       },
       "temptation_weak": {
         "personalityName": "誘惑に弱い",
-        "skillId": "temptation_weak",
         "battleEffect": {
           "type": "confusionVulnerability",
           "value": 15,

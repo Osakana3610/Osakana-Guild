@@ -17,7 +17,7 @@ private struct ItemMasterFile: Decodable {
         let allowedGenders: [String]?
         let bypassRaceRestriction: [String]?
         let combatBonuses: [String: Int]?
-        let grantedSkills: [String]?
+        let grantedSkills: [Int]?
         let rarity: String?
     }
 
@@ -131,10 +131,10 @@ extension Generator {
                 }
 
                 if let skills = item.grantedSkills {
-                    for (index, skill) in skills.enumerated() {
+                    for (index, skillId) in skills.enumerated() {
                         bindInt(skillStatement, index: 1, value: item.id)
                         bindInt(skillStatement, index: 2, value: index)
-                        bindText(skillStatement, index: 3, value: skill)
+                        bindInt(skillStatement, index: 3, value: skillId)
                         try step(skillStatement)
                         reset(skillStatement)
                     }
@@ -159,7 +159,7 @@ private struct SkillEntry {
         let payloadJSON: String
     }
 
-    let id: String
+    let id: Int
     let name: String
     let description: String
     let type: String
@@ -183,6 +183,7 @@ private struct SkillMasterRoot: Decodable {
     let status: SkillCategory?
     let reaction: SkillCategory?
     let resurrection: SkillCategory?
+    let combat: SkillCategory?
 }
 
 private struct SkillCategory: Decodable {
@@ -216,7 +217,7 @@ private struct SkillVariant: Decodable {
         }
     }
 
-    let id: String
+    let id: Int
     let label: String?
     let parameters: [String: String]?
     let payload: SkillEffectPayloadValues
@@ -232,7 +233,7 @@ private struct SkillVariant: Decodable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(String.self, forKey: .id)
+        id = try container.decode(Int.self, forKey: .id)
         label = try container.decodeIfPresent(String.self, forKey: .label)
         parameters = try container.decodeIfPresent([String: String].self, forKey: .parameters)
         payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
@@ -315,7 +316,8 @@ extension Generator {
             ("defense", root.defense),
             ("status", root.status),
             ("reaction", root.reaction),
-            ("resurrection", root.resurrection)
+            ("resurrection", root.resurrection),
+            ("combat", root.combat)
         ]
 
         let mergeParameters: ([String: String]?, [String: String]?) -> [String: String]? = { defaultParams, overrides in
@@ -366,7 +368,7 @@ extension Generator {
                     }
 
                     let acquisitionJSON = try encodeJSONObject([:], context: "Skill \(variant.id) の acquisitionConditions")
-                    let label = variant.label ?? variant.id
+                    let label = variant.label ?? String(variant.id)
                     var effects: [SkillEntry.Effect] = []
 
                     for (index, payload) in effectPayloads.enumerated() {
@@ -425,8 +427,8 @@ extension Generator {
             try execute("DELETE FROM skills;")
 
             let insertSkillSQL = """
-                INSERT INTO skills (id, skill_index, name, description, type, category, acquisition_conditions_json)
-                VALUES (?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO skills (id, name, description, type, category, acquisition_conditions_json)
+                VALUES (?, ?, ?, ?, ?, ?);
             """
             let insertEffectSQL = """
                 INSERT INTO skill_effects (skill_id, effect_index, kind, value, value_percent, stat_type, damage_type, payload_json)
@@ -440,19 +442,18 @@ extension Generator {
                 sqlite3_finalize(effectStatement)
             }
 
-            for (skillIndex, entry) in entries.enumerated() {
-                bindText(skillStatement, index: 1, value: entry.id)
-                bindInt(skillStatement, index: 2, value: skillIndex)
-                bindText(skillStatement, index: 3, value: entry.name)
-                bindText(skillStatement, index: 4, value: entry.description)
-                bindText(skillStatement, index: 5, value: entry.type)
-                bindText(skillStatement, index: 6, value: entry.category)
-                bindText(skillStatement, index: 7, value: entry.acquisitionJSON)
+            for entry in entries {
+                bindInt(skillStatement, index: 1, value: entry.id)
+                bindText(skillStatement, index: 2, value: entry.name)
+                bindText(skillStatement, index: 3, value: entry.description)
+                bindText(skillStatement, index: 4, value: entry.type)
+                bindText(skillStatement, index: 5, value: entry.category)
+                bindText(skillStatement, index: 6, value: entry.acquisitionJSON)
                 try step(skillStatement)
                 reset(skillStatement)
 
                 for effect in entry.effects {
-                    bindText(effectStatement, index: 1, value: entry.id)
+                    bindInt(effectStatement, index: 1, value: entry.id)
                     bindInt(effectStatement, index: 2, value: effect.index)
                     bindText(effectStatement, index: 3, value: effect.kind)
                     bindDouble(effectStatement, index: 4, value: effect.value)
@@ -600,7 +601,7 @@ private struct JobMasterFile: Decodable {
         let category: String
         let growthTendency: String?
         let combatCoefficients: [String: Double]
-        let skills: [String]?
+        let skills: [Int]?
     }
 
     let jobs: [Job]
@@ -647,10 +648,10 @@ extension Generator {
                 }
 
                 if let skills = job.skills {
-                    for (index, skill) in skills.enumerated() {
+                    for (index, skillId) in skills.enumerated() {
                         bindInt(skillStatement, index: 1, value: job.id)
                         bindInt(skillStatement, index: 2, value: index)
-                        bindText(skillStatement, index: 3, value: skill)
+                        bindInt(skillStatement, index: 3, value: skillId)
                         try step(skillStatement)
                         reset(skillStatement)
                     }
@@ -841,17 +842,13 @@ extension Generator {
         let file = try decoder.decode(SuperRareTitleMasterFile.self, from: data)
 
         try withTransaction {
-            try execute("DELETE FROM super_rare_title_skills;")
             try execute("DELETE FROM super_rare_titles;")
 
             let insertTitleSQL = "INSERT INTO super_rare_titles (id, name) VALUES (?, ?);"
-            let insertSkillSQL = "INSERT INTO super_rare_title_skills (title_id, order_index, skill_id) VALUES (?, ?, ?);"
 
             let titleStatement = try prepare(insertTitleSQL)
-            let skillStatement = try prepare(insertSkillSQL)
             defer {
                 sqlite3_finalize(titleStatement)
-                sqlite3_finalize(skillStatement)
             }
 
             for title in file.superRareTitles {
@@ -859,14 +856,6 @@ extension Generator {
                 bindText(titleStatement, index: 2, value: title.name)
                 try step(titleStatement)
                 reset(titleStatement)
-
-                for (index, skill) in title.skills.enumerated() {
-                    bindInt(skillStatement, index: 1, value: title.id)
-                    bindInt(skillStatement, index: 2, value: index)
-                    bindText(skillStatement, index: 3, value: skill)
-                    try step(skillStatement)
-                    reset(skillStatement)
-                }
             }
         }
 
@@ -965,7 +954,7 @@ private struct EnemyMasterFile: Decodable {
         let baseName: String
         let race: String
         let baseExperience: Int
-        let skills: [String]
+        let skills: [Int]
         let resistances: [String: Double]
         let isBoss: Bool
         let drops: [String]
@@ -1048,10 +1037,10 @@ extension Generator {
                     reset(resistanceStatement)
                 }
 
-                for (index, skill) in enemy.skills.enumerated() {
+                for (index, skillId) in enemy.skills.enumerated() {
                     bindInt(skillStatement, index: 1, value: enemy.id)
                     bindInt(skillStatement, index: 2, value: index)
-                    bindText(skillStatement, index: 3, value: skill)
+                    bindInt(skillStatement, index: 3, value: skillId)
                     try step(skillStatement)
                     reset(skillStatement)
                 }
@@ -1483,8 +1472,6 @@ private struct PersonalityPrimaryEntry {
 private struct PersonalitySecondaryEntry {
     let id: Int
     let name: String
-    let positiveSkillId: String
-    let negativeSkillId: String
     let statBonuses: [String: Int]
 }
 
@@ -1570,9 +1557,7 @@ extension Generator {
 
         let secondaries = try secondaryList.map { dictionary -> PersonalitySecondaryEntry in
             guard let id = toInt(dictionary["id"]),
-                  let name = dictionary["name"] as? String,
-                  let positive = dictionary["positiveSkill"] as? String,
-                  let negative = dictionary["negativeSkill"] as? String else {
+                  let name = dictionary["name"] as? String else {
                 throw GeneratorError.executionFailed("personality2 セクションに不足項目があります")
             }
 
@@ -1585,7 +1570,7 @@ extension Generator {
                 statBonuses[stat] = intValue
             }
 
-            return PersonalitySecondaryEntry(id: id, name: name, positiveSkillId: positive, negativeSkillId: negative, statBonuses: statBonuses)
+            return PersonalitySecondaryEntry(id: id, name: name, statBonuses: statBonuses)
         }
 
         let skills = try skillsDict.map { key, value -> PersonalitySkillEntry in
@@ -1618,7 +1603,7 @@ extension Generator {
                 INSERT INTO personality_primary_effects (personality_id, order_index, effect_type, value, payload_json)
                 VALUES (?, ?, ?, ?, ?);
             """
-            let insertSecondarySQL = "INSERT INTO personality_secondary (id, name, positive_skill_id, negative_skill_id) VALUES (?, ?, ?, ?);"
+            let insertSecondarySQL = "INSERT INTO personality_secondary (id, name) VALUES (?, ?);"
             let insertSecondaryStatSQL = "INSERT INTO personality_secondary_stat_bonuses (personality_id, stat, value) VALUES (?, ?, ?);"
             let insertSkillSQL = "INSERT INTO personality_skills (id, name, kind, description) VALUES (?, ?, ?, ?);"
             let insertSkillEventSQL = "INSERT INTO personality_skill_event_effects (skill_id, order_index, effect_id) VALUES (?, ?, ?);"
@@ -1666,8 +1651,6 @@ extension Generator {
             for entry in secondaries {
                 bindInt(secondaryStatement, index: 1, value: entry.id)
                 bindText(secondaryStatement, index: 2, value: entry.name)
-                bindText(secondaryStatement, index: 3, value: entry.positiveSkillId)
-                bindText(secondaryStatement, index: 4, value: entry.negativeSkillId)
                 try step(secondaryStatement)
                 reset(secondaryStatement)
 

@@ -80,7 +80,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS item_granted_skills (
                 item_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                skill_id TEXT NOT NULL,
+                skill_id INTEGER NOT NULL,
                 PRIMARY KEY (item_id, order_index),
                 FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
             );
@@ -88,8 +88,7 @@ extension Generator {
             // Skills
             """
             CREATE TABLE IF NOT EXISTS skills (
-                id TEXT PRIMARY KEY,
-                skill_index INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,
                 type TEXT NOT NULL,
@@ -99,7 +98,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS skill_effects (
-                skill_id TEXT NOT NULL,
+                skill_id INTEGER NOT NULL,
                 effect_index INTEGER NOT NULL,
                 kind TEXT NOT NULL,
                 value REAL,
@@ -161,7 +160,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS job_skills (
                 job_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                skill_id TEXT NOT NULL,
+                skill_id INTEGER NOT NULL,
                 PRIMARY KEY (job_id, order_index),
                 FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
             );
@@ -190,7 +189,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS race_passive_skills (
                 race_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                skill_id TEXT NOT NULL,
+                skill_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 effect TEXT NOT NULL,
                 description TEXT NOT NULL,
@@ -202,7 +201,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS race_skill_unlocks (
                 race_id INTEGER NOT NULL,
                 level_requirement INTEGER NOT NULL,
-                skill_id TEXT NOT NULL,
+                skill_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 effect TEXT NOT NULL,
                 description TEXT NOT NULL,
@@ -289,15 +288,6 @@ extension Generator {
                 name TEXT NOT NULL
             );
             """,
-            """
-            CREATE TABLE IF NOT EXISTS super_rare_title_skills (
-                title_id INTEGER NOT NULL,
-                order_index INTEGER NOT NULL,
-                skill_id TEXT NOT NULL,
-                PRIMARY KEY (title_id, order_index),
-                FOREIGN KEY (title_id) REFERENCES super_rare_titles(id) ON DELETE CASCADE
-            );
-            """,
             // Status effects
             """
             CREATE TABLE IF NOT EXISTS status_effects (
@@ -367,7 +357,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS enemy_skills (
                 enemy_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                skill_id TEXT NOT NULL,
+                skill_id INTEGER NOT NULL,
                 PRIMARY KEY (enemy_id, order_index),
                 FOREIGN KEY (enemy_id) REFERENCES enemies(id) ON DELETE CASCADE
             );
@@ -550,9 +540,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS personality_secondary (
                 id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
-                positive_skill_id TEXT NOT NULL,
-                negative_skill_id TEXT NOT NULL
+                name TEXT NOT NULL
             );
             """,
             """
