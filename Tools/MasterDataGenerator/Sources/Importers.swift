@@ -1313,7 +1313,7 @@ extension Generator {
 
 private struct ShopMasterFile: Decodable {
     struct Entry: Decodable {
-        let itemId: String
+        let itemId: Int
         let quantity: Int?
     }
 
@@ -1324,31 +1324,18 @@ extension Generator {
     func importShopMaster(_ data: Data) throws -> Int {
         let decoder = JSONDecoder()
         let file = try decoder.decode(ShopMasterFile.self, from: data)
-        let shopId = "default"
 
         try withTransaction {
             try execute("DELETE FROM shop_items;")
-            try execute("DELETE FROM shops;")
 
-            let insertShopSQL = "INSERT INTO shops (id, name) VALUES (?, ?);"
-            let insertItemSQL = "INSERT INTO shop_items (shop_id, order_index, item_id, quantity) VALUES (?, ?, ?, ?);"
-
-            let shopStatement = try prepare(insertShopSQL)
+            let insertItemSQL = "INSERT INTO shop_items (order_index, item_id, quantity) VALUES (?, ?, ?);"
             let itemStatement = try prepare(insertItemSQL)
-            defer {
-                sqlite3_finalize(shopStatement)
-                sqlite3_finalize(itemStatement)
-            }
-
-            bindText(shopStatement, index: 1, value: shopId)
-            bindText(shopStatement, index: 2, value: "Default Shop")
-            try step(shopStatement)
+            defer { sqlite3_finalize(itemStatement) }
 
             for (index, entry) in file.items.enumerated() {
-                bindText(itemStatement, index: 1, value: shopId)
-                bindInt(itemStatement, index: 2, value: index)
-                bindText(itemStatement, index: 3, value: entry.itemId)
-                bindInt(itemStatement, index: 4, value: entry.quantity)
+                bindInt(itemStatement, index: 1, value: index)
+                bindInt(itemStatement, index: 2, value: entry.itemId)
+                bindInt(itemStatement, index: 3, value: entry.quantity)
                 try step(itemStatement)
                 reset(itemStatement)
             }

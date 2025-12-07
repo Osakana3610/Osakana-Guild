@@ -449,19 +449,10 @@ extension Generator {
             """,
             // Shops
             """
-            CREATE TABLE IF NOT EXISTS shops (
-                id TEXT PRIMARY KEY,
-                name TEXT NOT NULL
-            );
-            """,
-            """
             CREATE TABLE IF NOT EXISTS shop_items (
-                shop_id TEXT NOT NULL,
-                order_index INTEGER NOT NULL,
-                item_id TEXT NOT NULL,
-                quantity INTEGER,
-                PRIMARY KEY (shop_id, order_index),
-                FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE
+                order_index INTEGER PRIMARY KEY,
+                item_id INTEGER NOT NULL,
+                quantity INTEGER
             );
             """,
             // Synthesis
