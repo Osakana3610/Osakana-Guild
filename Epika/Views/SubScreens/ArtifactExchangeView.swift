@@ -136,7 +136,7 @@ struct ArtifactExchangeView: View {
     private func tryPerformExchange(option: ArtifactExchangeProgressService.ArtifactOption, artifact: RuntimeEquipment) async {
         showArtifactPicker = false
         // 宝石改造が施されている場合は警告を表示
-        if artifact.enhancement.socketMasterDataIndex != 0 {
+        if artifact.enhancement.socketItemId != 0 {
             pendingExchange = (option, artifact)
             showGemWarning = true
         } else {

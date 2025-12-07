@@ -215,7 +215,7 @@ struct RuntimePartyMemberSlotView: View {
                     .font(.caption)
                     .foregroundColor(.primary)
 
-                CharacterImageView(avatarIndex: character.resolvedAvatarIndex, size: 55)
+                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 55)
 
                 Text("HP\(character.currentHP)")
                     .font(.caption)
@@ -270,7 +270,7 @@ struct RuntimeCharacterRowForPartyView: View {
     var body: some View {
         Button(action: onTap) {
             HStack {
-                CharacterImageView(avatarIndex: character.resolvedAvatarIndex, size: 50)
+                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 50)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(character.name)

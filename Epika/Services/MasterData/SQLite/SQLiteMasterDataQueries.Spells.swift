@@ -15,7 +15,7 @@ extension SQLiteMasterDataManager {
             let extraTargetsPerLevels: Double?
             let hitsPerCast: Int?
             let basePowerMultiplier: Double?
-            let statusId: String?
+            let statusId: UInt8?
             let healMultiplier: Double?
             let castCondition: String?
             let description: String
@@ -67,7 +67,7 @@ extension SQLiteMasterDataManager {
                 extraTargetsPerLevels: optionalDouble(spellStatement, 7),
                 hitsPerCast: optionalInt(spellStatement, 8),
                 basePowerMultiplier: optionalDouble(spellStatement, 9),
-                statusId: optionalText(spellStatement, 10),
+                statusId: sqlite3_column_type(spellStatement, 10) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 10)),
                 healMultiplier: optionalDouble(spellStatement, 11),
                 castCondition: optionalText(spellStatement, 12),
                 description: String(cString: descriptionC)

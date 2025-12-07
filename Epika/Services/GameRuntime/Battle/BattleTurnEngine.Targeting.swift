@@ -81,7 +81,8 @@ extension BattleTurnEngine {
     static func matchTargetId(_ targetId: String, to actor: BattleActor) -> Bool {
         let lower = targetId.lowercased()
         if lower == actor.identifier.lowercased() { return true }
-        if let raceId = actor.raceId, lower == raceId.lowercased() { return true }
+        // raceId is now UInt8, check if targetId matches as numeric ID
+        if let raceId = actor.raceId, lower == String(raceId) { return true }
         if let raceCategory = actor.raceCategory, lower == raceCategory.lowercased() { return true }
         if let jobName = actor.jobName, lower == jobName.lowercased() { return true }
         if lower == actor.displayName.lowercased() { return true }
@@ -153,7 +154,8 @@ extension BattleTurnEngine {
     }
 
     static func normalizedTargetCategory(for actor: BattleActor) -> String? {
-        let candidates = [actor.raceCategory, actor.raceId].compactMap { $0?.lowercased() }
+        // raceId is now UInt8, not included in string comparison; use raceCategory only
+        let candidates = [actor.raceCategory].compactMap { $0?.lowercased() }
         for candidate in candidates {
             if let mapped = mapTargetCategory(from: candidate) {
                 return mapped

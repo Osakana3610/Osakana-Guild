@@ -22,11 +22,11 @@ final class ProgressRuntimeService {
         return try await runtimeService.recalculateCombatStats(for: progress, pandoraBoxStackKeys: pandoraBoxStackKeys)
     }
 
-    func raceMaxLevel(for raceIndex: UInt8) async throws -> Int {
-        if let definition = try await runtimeService.raceDefinition(withIndex: raceIndex) {
+    func raceMaxLevel(for raceId: UInt8) async throws -> Int {
+        if let definition = try await runtimeService.raceDefinition(withId: raceId) {
             return definition.maxLevel
         }
-        throw ProgressError.invalidInput(description: "種族マスタに存在しないインデックスです (\(raceIndex))")
+        throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
     }
 
     func cancelExploration(runId: UUID) async {
@@ -35,7 +35,7 @@ final class ProgressRuntimeService {
 
     func startExplorationRun(party: PartySnapshot,
                               characters: [CharacterSnapshot],
-                              dungeonId: String,
+                              dungeonId: UInt16,
                               targetFloorNumber: Int) async throws -> ExplorationRuntimeSession {
         let characterProgresses = characters.map(makeRuntimeCharacterProgress(from:))
         let partyState = try await runtimeService.runtimePartyState(party: party,
@@ -87,9 +87,9 @@ private extension ProgressRuntimeService {
         RuntimeCharacterProgress(
             id: snapshot.id,
             displayName: snapshot.displayName,
-            raceIndex: snapshot.raceIndex,
-            jobIndex: snapshot.jobIndex,
-            avatarIndex: snapshot.avatarIndex,
+            raceId: snapshot.raceId,
+            jobId: snapshot.jobId,
+            avatarId: snapshot.avatarId,
             level: snapshot.level,
             experience: snapshot.experience,
             attributes: snapshot.attributes,

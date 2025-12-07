@@ -22,15 +22,15 @@ actor ItemSynthesisProgressService {
         let parentIds = Set(recipes.map { $0.parentItemId })
         guard !parentIds.isEmpty else { return [] }
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        return equipments.filter { parentIds.contains($0.masterDataId) }
+        return equipments.filter { parentIds.contains($0.itemId) }
     }
 
     func availableChildItems(forParent parent: RuntimeEquipment) async throws -> [RuntimeEquipment] {
         let recipes = try await loadRecipes()
-        let childIds = Set(recipes.filter { $0.parentItemId == parent.masterDataId }.map { $0.childItemId })
+        let childIds = Set(recipes.filter { $0.parentItemId == parent.itemId }.map { $0.childItemId })
         guard !childIds.isEmpty else { return [] }
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        return equipments.filter { $0.id != parent.id && childIds.contains($0.masterDataId) }
+        return equipments.filter { $0.id != parent.id && childIds.contains($0.itemId) }
     }
 
     func preview(parentStackKey: String, childStackKey: String) async throws -> SynthesisPreview {
@@ -108,7 +108,7 @@ actor ItemSynthesisProgressService {
         }
 
         let recipes = try await loadRecipes()
-        guard let recipe = recipes.first(where: { $0.parentItemId == parent.masterDataId && $0.childItemId == child.masterDataId }) else {
+        guard let recipe = recipes.first(where: { $0.parentItemId == parent.itemId && $0.childItemId == child.itemId }) else {
             throw ProgressError.invalidInput(description: "指定の組み合わせは合成レシピに存在しません")
         }
 

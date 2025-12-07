@@ -54,7 +54,7 @@ struct ExplorationSnapshot: Sendable, Hashable {
 
     let persistentIdentifier: PersistentIdentifier
     var id: UUID
-    var dungeonId: UInt8
+    var dungeonId: UInt16
     var displayDungeonName: String
     var activeFloorNumber: Int
     var party: PartySummary

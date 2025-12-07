@@ -219,7 +219,7 @@ private struct GuildCharacterRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            CharacterImageView(avatarIndex: summary.resolvedAvatarIndex, size: 32)
+            CharacterImageView(avatarIndex: summary.resolvedAvatarId, size: 32)
             VStack(alignment: .leading, spacing: 4) {
                 Text(summary.name)
                     .font(.headline)
@@ -330,12 +330,12 @@ private struct LazyRuntimeCharacterDetailView: View {
     }
 
     @MainActor
-    private func changeAvatar(to avatarIndex: UInt16) async throws {
-        if let current = runtimeCharacter, current.avatarIndex == avatarIndex {
+    private func changeAvatar(to avatarId: UInt16) async throws {
+        if let current = runtimeCharacter, current.avatarId == avatarId {
             return
         }
         let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
-            snapshot.avatarIndex = avatarIndex
+            snapshot.avatarId = avatarId
         }
         runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
     }
@@ -429,13 +429,13 @@ private struct CharacterCreationView: View {
 
     private var genderSections: [(gender: String, races: [RaceDefinition])] {
         var buckets: [String: [RaceDefinition]] = [:]
-        var raceOrder: [String: Int] = [:]
+        var raceOrder: [UInt8: Int] = [:]
         for (index, race) in races.enumerated() {
             raceOrder[race.id] = index
             buckets[race.gender, default: []].append(race)
         }
         let orderedGenders: [String] = ["male", "female", "genderless"]
-        return orderedGenders.compactMap { gender -> (String, [RaceDefinition])? in
+        return orderedGenders.compactMap { gender -> (gender: String, races: [RaceDefinition])? in
             guard let genderRaces = buckets[gender] else { return nil }
             let sorted = genderRaces.sorted { lhs, rhs in
                 guard let lhsIndex = raceOrder[lhs.id], let rhsIndex = raceOrder[rhs.id] else {
@@ -443,7 +443,7 @@ private struct CharacterCreationView: View {
                 }
                 return lhsIndex < rhsIndex
             }
-            return (gender, sorted)
+            return (gender: gender, races: sorted)
         }
     }
 
@@ -518,7 +518,7 @@ private struct CharacterCreationView: View {
 
                         HStack(alignment: .top, spacing: 16) {
                             CharacterImageView(
-                                avatarIndex: UInt16(race.genderCode) * 100 + UInt16(job.index),
+                                avatarIndex: UInt16(race.genderCode) * 100 + UInt16(job.id),
                                 size: 80
                             )
                             VStack(alignment: .leading, spacing: 8) {
@@ -603,7 +603,7 @@ private struct CharacterCreationView: View {
 
     private func raceTile(for race: RaceDefinition) -> some View {
         VStack(spacing: 6) {
-            CharacterImageView(avatarIndex: UInt16(race.index), size: 48)
+            CharacterImageView(avatarIndex: UInt16(race.id), size: 48)
             Text(race.name)
                 .font(.caption)
                 .multilineTextAlignment(.center)
@@ -629,7 +629,7 @@ private struct CharacterCreationView: View {
 
     private func jobTile(for job: JobDefinition) -> some View {
         VStack(spacing: 8) {
-            CharacterImageView(avatarIndex: UInt16(selectedRace?.genderCode ?? 3) * 100 + UInt16(job.index), size: 48)
+            CharacterImageView(avatarIndex: UInt16(selectedRace?.genderCode ?? 3) * 100 + UInt16(job.id), size: 48)
             Text(job.name)
                 .font(.caption)
                 .multilineTextAlignment(.center)
@@ -656,7 +656,7 @@ private struct CharacterCreationView: View {
     private func selectedRaceSummary(_ race: RaceDefinition) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
-                CharacterImageView(avatarIndex: UInt16(race.index), size: 56)
+                CharacterImageView(avatarIndex: UInt16(race.id), size: 56)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(race.name)
                         .font(.headline)
@@ -673,7 +673,7 @@ private struct CharacterCreationView: View {
     private func selectedJobSummary(_ job: JobDefinition) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
-                CharacterImageView(avatarIndex: UInt16(selectedRace?.genderCode ?? 3) * 100 + UInt16(job.index), size: 56)
+                CharacterImageView(avatarIndex: UInt16(selectedRace?.genderCode ?? 3) * 100 + UInt16(job.id), size: 56)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(job.name)
                         .font(.headline)
@@ -753,8 +753,8 @@ private struct CharacterCreationView: View {
         do {
             let request = CharacterProgressService.CharacterCreationRequest(
                 displayName: trimmed,
-                raceIndex: UInt8(race.index),
-                jobIndex: UInt8(job.index)
+                raceId: UInt8(race.id),
+                jobId: UInt8(job.id)
             )
             _ = try await characterService.createCharacter(request)
             onComplete()
@@ -835,7 +835,7 @@ private struct RaceDetailPreview: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 12) {
-            CharacterImageView(avatarIndex: UInt16(race.index), size: 64)
+            CharacterImageView(avatarIndex: UInt16(race.id), size: 64)
             VStack(alignment: .leading, spacing: 4) {
                 Text(race.name)
                     .font(.headline)
@@ -942,7 +942,7 @@ private struct JobDetailPreview: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 12) {
-            CharacterImageView(avatarIndex: UInt16(genderCode ?? 3) * 100 + UInt16(job.index), size: 64)
+            CharacterImageView(avatarIndex: UInt16(genderCode ?? 3) * 100 + UInt16(job.id), size: 64)
             VStack(alignment: .leading, spacing: 4) {
                 Text(job.name)
                     .font(.headline)
@@ -1077,7 +1077,7 @@ private struct CharacterReviveView: View {
                     List {
                         ForEach(deadCharacters, id: \.id) { character in
                             HStack {
-                                CharacterImageView(avatarIndex: character.resolvedAvatarIndex, size: 44)
+                                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 44)
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(character.name)
                                         .font(.headline)
@@ -1196,7 +1196,7 @@ private struct CharacterJobChangeView: View {
                         Picker("新しい職業", selection: $selectedJobIndex) {
                             Text("未選択").tag(UInt8?.none)
                             ForEach(jobs) { job in
-                                Text(job.name).tag(UInt8?.some(UInt8(job.index)))
+                                Text(job.name).tag(UInt8?.some(UInt8(job.id)))
                             }
                         }
                     }
@@ -1252,7 +1252,7 @@ private struct CharacterJobChangeView: View {
                 selectedCharacterId = characters.first?.id
             }
             if selectedJobIndex == nil {
-                selectedJobIndex = jobs.first.map { UInt8($0.index) }
+                selectedJobIndex = jobs.first?.id
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -1270,12 +1270,12 @@ private struct CharacterJobChangeView: View {
         defer { isProcessing = false }
         do {
             let updated = try await characterService.updateCharacter(id: characterId) { progress in
-                progress.jobIndex = jobIndex
-                if !progress.jobHistory.contains(where: { $0.jobIndex == jobIndex }) {
+                progress.jobId = jobIndex
+                if !progress.jobHistory.contains(where: { $0.jobId == jobIndex }) {
                     let now = Date()
                     progress.jobHistory.append(
                         .init(id: UUID(),
-                              jobIndex: jobIndex,
+                              jobId: jobIndex,
                               achievedAt: now,
                               createdAt: now,
                               updatedAt: now)
