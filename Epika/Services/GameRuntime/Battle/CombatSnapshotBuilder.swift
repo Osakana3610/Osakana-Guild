@@ -4,8 +4,8 @@ struct CombatSnapshotBuilder {
     static func makeEnemySnapshot(from definition: EnemyDefinition,
                                   baseHP: Int,
                                   levelOverride: Int?,
-                                  jobDefinitions: [String: JobDefinition],
-                                  raceDefinitions: [String: RaceDefinition]) -> RuntimeCharacterProgress.Combat {
+                                  jobDefinitions: [UInt8: JobDefinition],
+                                  raceDefinitions: [UInt8: RaceDefinition]) -> RuntimeCharacterProgress.Combat {
         let level = max(1, levelOverride ?? 1)
         let baseAttributes = RuntimeCharacterProgress.CoreAttributes(strength: definition.strength,
                                                                      wisdom: definition.wisdom,
@@ -30,9 +30,9 @@ struct CombatSnapshotBuilder {
 
         let progress = RuntimeCharacterProgress(id: 0,  // 敵用の一時ID
                                                 displayName: definition.name,
-                                                raceIndex: 0,  // 敵用の一時値
-                                                jobIndex: 0,   // 敵用の一時値
-                                                avatarIndex: 0, // 敵はアバター画像なし
+                                                raceId: definition.raceId,
+                                                jobId: definition.jobId ?? 0,
+                                                avatarId: 0, // 敵はアバター画像なし
                                                 level: level,
                                                 experience: 0,
                                                 attributes: baseAttributes,
@@ -51,8 +51,8 @@ struct CombatSnapshotBuilder {
                                                 createdAt: Date(),
                                                 updatedAt: Date())
 
-        let raceDefinition = raceDefinitions[definition.race] ?? makeFallbackRaceDefinition(for: definition)
-        let jobDefinition = jobDefinitions[definition.job ?? ""] ?? makeFallbackJobDefinition(for: definition)
+        let raceDefinition = raceDefinitions[definition.raceId] ?? makeFallbackRaceDefinition(for: definition)
+        let jobDefinition = definition.jobId.flatMap { jobDefinitions[$0] } ?? makeFallbackJobDefinition(for: definition)
 
         let state = RuntimeCharacterState(progress: progress,
                                           race: raceDefinition,
@@ -84,9 +84,8 @@ private extension CombatSnapshotBuilder {
             .init(stat: "agility", value: definition.agility),
             .init(stat: "luck", value: definition.luck)
         ]
-        return RaceDefinition(id: definition.race,
-                              index: 0,
-                              name: definition.race.capitalized,
+        return RaceDefinition(id: definition.raceId,
+                              name: "敵種族",
                               gender: "enemy",
                               genderCode: 0,  // 敵用
                               category: definition.category,
@@ -96,7 +95,6 @@ private extension CombatSnapshotBuilder {
     }
 
     static func makeFallbackJobDefinition(for definition: EnemyDefinition) -> JobDefinition {
-        let jobId = definition.job ?? "enemy.default"
         let metricKeys = ["maxHP",
                           "physicalAttack",
                           "magicalAttack",
@@ -113,9 +111,8 @@ private extension CombatSnapshotBuilder {
         let coefficients: [JobDefinition.CombatCoefficient] = metricKeys.map {
             JobDefinition.CombatCoefficient(stat: $0, value: 0.0)
         }
-        return JobDefinition(id: jobId,
-                             index: 0,
-                             name: jobId.capitalized,
+        return JobDefinition(id: definition.jobId ?? 0,
+                             name: "敵職業",
                              category: "enemy",
                              growthTendency: nil,
                              combatCoefficients: coefficients,

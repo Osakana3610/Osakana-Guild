@@ -3,7 +3,7 @@ import Foundation
 enum RuntimeError: Error, LocalizedError {
     case masterDataNotFound(entity: String, identifier: String)
     case invalidConfiguration(reason: String)
-    case explorationAlreadyActive(dungeonId: String)
+    case explorationAlreadyActive(dungeonId: UInt8)
     case missingProgressData(reason: String)
 
     var errorDescription: String? {

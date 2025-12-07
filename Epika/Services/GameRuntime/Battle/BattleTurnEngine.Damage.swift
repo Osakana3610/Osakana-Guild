@@ -68,7 +68,7 @@ extension BattleTurnEngine {
 
     static func computeMagicalDamage(attacker: BattleActor,
                                      defender: inout BattleActor,
-                                     spellId: String?,
+                                     spellId: UInt8?,
                                      context: inout BattleContext) -> Int {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
         let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
@@ -139,7 +139,7 @@ extension BattleTurnEngine {
 
     static func computeHealingAmount(caster: BattleActor,
                                      target: BattleActor,
-                                     spellId: String?,
+                                     spellId: UInt8?,
                                      context: inout BattleContext) -> Int {
         let multiplier = BattleRandomSystem.statMultiplier(luck: caster.luck, random: &context.random)
         var amount = Double(caster.snapshot.magicalHealing) * multiplier
@@ -219,7 +219,7 @@ extension BattleTurnEngine {
 
     static func damageTakenModifier(for defender: BattleActor,
                                     damageType: BattleDamageType,
-                                    spellId: String? = nil) -> Double {
+                                    spellId: UInt8? = nil) -> Double {
         let key = modifierKey(for: damageType, suffix: "DamageTakenMultiplier")
         let buffMultiplier = aggregateModifier(from: defender.timedBuffs, key: key)
         var result = buffMultiplier * defender.skillEffects.damageTaken.value(for: damageType)
@@ -253,11 +253,11 @@ extension BattleTurnEngine {
         return percentBonus * multiplierBonus
     }
 
-    static func barrierKey(for damageType: BattleDamageType) -> String {
+    static func barrierKey(for damageType: BattleDamageType) -> UInt8 {
         switch damageType {
-        case .physical: return "physical"
-        case .magical: return "magical"
-        case .breath: return "breath"
+        case .physical: return 0
+        case .magical: return 1
+        case .breath: return 2
         }
     }
 
@@ -305,11 +305,14 @@ extension BattleTurnEngine {
         defender.degradationPercent = min(100.0, d + increment)
     }
 
+    // 既知のスペルID定数（Definition層で確定後に更新）
+    static let magicArrowSpellId: UInt8 = 1
+
     static func applyMagicDegradation(to defender: inout BattleActor,
-                                      spellId: String,
+                                      spellId: UInt8,
                                       caster: BattleActor) {
         let master = (caster.jobName?.contains("マスター") == true) || (caster.jobName?.lowercased().contains("master") == true)
-        let isMagicArrow = spellId == "spell.mage.magic_arrow"
+        let isMagicArrow = spellId == magicArrowSpellId
         let coefficient: Double = {
             if isMagicArrow {
                 return master ? 5.0 : 3.0

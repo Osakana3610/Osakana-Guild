@@ -27,14 +27,14 @@ struct DropContext: Sendable {
     let partyBonuses: PartyDropBonuses
     let isRabiTicketActive: Bool
     let hasTitleTreasure: Bool
-    let dungeonId: String?
+    let dungeonId: UInt8?
     let floorNumber: Int?
 
     init(enemy: EnemyDefinition,
          partyBonuses: PartyDropBonuses,
          isRabiTicketActive: Bool = false,
          hasTitleTreasure: Bool = false,
-         dungeonId: String? = nil,
+         dungeonId: UInt8? = nil,
          floorNumber: Int? = nil) {
         self.enemy = enemy
         self.partyBonuses = partyBonuses

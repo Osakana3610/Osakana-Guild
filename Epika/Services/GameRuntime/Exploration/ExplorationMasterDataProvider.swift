@@ -7,7 +7,7 @@ struct ExplorationDungeonBundle: Sendable {
 }
 
 protocol ExplorationMasterDataProvider: Sendable {
-    func dungeonBundle(for dungeonId: String) async throws -> ExplorationDungeonBundle
+    func dungeonBundle(for dungeonId: UInt8) async throws -> ExplorationDungeonBundle
     func explorationEvents() async throws -> [ExplorationEventDefinition]
 }
 
@@ -18,10 +18,10 @@ struct MasterDataRepositoryExplorationProvider: ExplorationMasterDataProvider {
         self.repository = repository
     }
 
-    func dungeonBundle(for dungeonId: String) async throws -> ExplorationDungeonBundle {
+    func dungeonBundle(for dungeonId: UInt8) async throws -> ExplorationDungeonBundle {
         let (dungeons, encounterTables, floors) = try await repository.allDungeons()
         guard let dungeon = dungeons.first(where: { $0.id == dungeonId }) else {
-            throw RuntimeError.masterDataNotFound(entity: "dungeon", identifier: dungeonId)
+            throw RuntimeError.masterDataNotFound(entity: "dungeon", identifier: String(dungeonId))
         }
 
         let relevantFloors = floors

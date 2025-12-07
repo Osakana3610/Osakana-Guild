@@ -23,7 +23,7 @@ enum BattleService {
                               party: RuntimePartyState,
                               dungeon: DungeonDefinition,
                               floor: DungeonFloorDefinition,
-                              encounterEnemyId: String?,
+                              encounterEnemyId: UInt16?,
                               encounterLevel: Int?,
                               random: inout GameRandomSource) async throws -> Resolution {
         let skillDefinitions = try await repository.allSkills()

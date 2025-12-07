@@ -4,15 +4,15 @@ import Foundation
 struct ItemDropResult: Sendable, Hashable {
     let item: ItemDefinition
     let quantity: Int
-    let sourceEnemyId: String?
-    let normalTitleId: String?
-    let superRareTitleId: String?
+    let sourceEnemyId: UInt16?
+    let normalTitleId: UInt8?
+    let superRareTitleId: UInt8?
 
     init(item: ItemDefinition,
          quantity: Int,
-         sourceEnemyId: String? = nil,
-         normalTitleId: String? = nil,
-         superRareTitleId: String? = nil) {
+         sourceEnemyId: UInt16? = nil,
+         normalTitleId: UInt8? = nil,
+         superRareTitleId: UInt8? = nil) {
         self.item = item
         self.quantity = max(0, quantity)
         self.sourceEnemyId = sourceEnemyId
