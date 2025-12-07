@@ -1,54 +1,24 @@
 import Foundation
 import SwiftData
 
-@Model
-final class ShopRecord {
-    var id: UUID = UUID()
-    var shopId: String = ""
-    var isUnlocked: Bool = false
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
-
-    init(id: UUID = UUID(),
-         shopId: String,
-         isUnlocked: Bool,
-         createdAt: Date,
-         updatedAt: Date) {
-        self.id = id
-        self.shopId = shopId
-        self.isUnlocked = isUnlocked
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-    }
-}
-
+/// ショップ在庫Record
+/// - ShopRecordは1件固定で意味がないため削除
+/// - itemIdはMasterDataのItem.idに対応（UInt16）
 @Model
 final class ShopStockRecord {
-    var id: UUID = UUID()
-    var shopRecordId: UUID = UUID()
-    var itemId: String = ""
-    var remaining: Int = 0
-    var restockAt: Date?
+    var itemId: UInt16 = 0           // 一意キー
+    var remaining: UInt16? = nil     // nil=無限
     /// プレイヤーが売却したアイテムかどうか（マスターデータ同期で削除されない）
     var isPlayerSold: Bool = false
-    var createdAt: Date = Date()
     var updatedAt: Date = Date()
 
-    init(id: UUID = UUID(),
-         shopRecordId: UUID,
-         itemId: String,
-         remaining: Int,
-         restockAt: Date?,
+    init(itemId: UInt16,
+         remaining: UInt16? = nil,
          isPlayerSold: Bool = false,
-         createdAt: Date,
-         updatedAt: Date) {
-        self.id = id
-        self.shopRecordId = shopRecordId
+         updatedAt: Date = Date()) {
         self.itemId = itemId
         self.remaining = remaining
-        self.restockAt = restockAt
         self.isPlayerSold = isPlayerSold
-        self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
 }
