@@ -2,8 +2,11 @@ import Foundation
 
 // MARK: - Status Effects
 extension BattleTurnEngine {
+    // 既知のステータスID定数（Definition層で確定後に更新）
+    static let confusionStatusId: UInt8 = 1
+
     static func statusApplicationChancePercent(basePercent: Double,
-                                               statusId: String,
+                                               statusId: UInt8,
                                                target: BattleActor,
                                                sourceProcMultiplier: Double) -> Double {
         guard basePercent > 0 else { return 0.0 }
@@ -14,16 +17,19 @@ extension BattleTurnEngine {
         return max(0.0, scaled * additiveScale)
     }
 
-    static func statusBarrierAdjustment(statusId: String,
-                                        target: inout BattleActor) -> Double {
-        let lowered: [String] = ["sleep", "petrify", "sleep_cloud"]
-        guard lowered.contains(where: { statusId.contains($0) }) else { return 1.0 }
-        let damageType: BattleDamageType = statusId.contains("sleep_cloud") ? .breath : .magical
+    static func statusBarrierAdjustment(statusId: UInt8,
+                                        target: inout BattleActor,
+                                        context: BattleContext) -> Double {
+        // statusIdに対応する定義を取得してタグで判定
+        guard let definition = context.statusDefinitions[statusId] else { return 1.0 }
+        let hasSleepTag = definition.tags.contains { $0.value == "sleep" || $0.value == "petrify" }
+        guard hasSleepTag else { return 1.0 }
+        let damageType: BattleDamageType = definition.tags.contains(where: { $0.value == "breath" }) ? .breath : .magical
         return applyBarrierIfAvailable(for: damageType, defender: &target)
     }
 
     @discardableResult
-    static func attemptApplyStatus(statusId: String,
+    static func attemptApplyStatus(statusId: UInt8,
                                    baseChancePercent: Double,
                                    durationTurns: Int?,
                                    sourceId: String?,
@@ -31,7 +37,7 @@ extension BattleTurnEngine {
                                    context: inout BattleContext,
                                    sourceProcMultiplier: Double = 1.0) -> Bool {
         guard let definition = context.statusDefinitions[statusId] else { return false }
-        let barrierScale = statusBarrierAdjustment(statusId: statusId, target: &target)
+        let barrierScale = statusBarrierAdjustment(statusId: statusId, target: &target, context: context)
         let chancePercent = statusApplicationChancePercent(basePercent: baseChancePercent,
                                                            statusId: statusId,
                                                            target: target,
@@ -95,7 +101,7 @@ extension BattleTurnEngine {
         guard BattleRandomSystem.percentChance(capped, random: &context.random) else { return false }
         let alreadyConfused = hasStatus(tag: "confusion", in: actor, context: context)
         if !alreadyConfused {
-            let applied = AppliedStatusEffect(id: "status.confusion", remainingTurns: 3, source: actor.identifier, stackValue: 0.0)
+            let applied = AppliedStatusEffect(id: confusionStatusId, remainingTurns: 3, source: actor.identifier, stackValue: 0.0)
             actor.statusEffects.append(applied)
             // 暴走のログは呼び出し元でperformAction経由で出力する（side/indexの情報がないため）
         }
@@ -158,14 +164,12 @@ extension BattleTurnEngine {
                                         attacker: BattleActor,
                                         defender: BattleActor) -> Double {
         guard inflict.baseChancePercent > 0 else { return 0.0 }
-        switch inflict.statusId {
-        case "status.confusion":
+        if inflict.statusId == confusionStatusId {
             let span: Double = 34.0
             let spiritDelta = Double(attacker.spirit - defender.spirit)
             let normalized = max(0.0, min(1.0, (spiritDelta + span) / (span * 2.0)))
             return inflict.baseChancePercent * normalized
-        default:
-            return inflict.baseChancePercent
         }
+        return inflict.baseChancePercent
     }
 }

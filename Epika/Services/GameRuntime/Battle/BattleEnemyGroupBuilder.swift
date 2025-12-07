@@ -6,16 +6,16 @@ struct BattleEnemyGroupBuilder {
         let level: Int
     }
 
-    static func makeEnemies(baseEnemyId: String?,
+    static func makeEnemies(baseEnemyId: UInt16?,
                             baseEnemyLevel: Int?,
                             dungeon: DungeonDefinition,
                             floor: DungeonFloorDefinition,
-                            enemyDefinitions: [String: EnemyDefinition],
-                            skillDefinitions: [String: SkillDefinition],
-                            jobDefinitions: [String: JobDefinition],
-                            raceDefinitions: [String: RaceDefinition],
+                            enemyDefinitions: [UInt16: EnemyDefinition],
+                            skillDefinitions: [UInt16: SkillDefinition],
+                            jobDefinitions: [UInt8: JobDefinition],
+                            raceDefinitions: [UInt8: RaceDefinition],
                             random: inout GameRandomSource) throws -> ([BattleActor], [EncounteredEnemy]) {
-        var skillCache: [String: BattleActor.SkillEffects] = [:]
+        var skillCache: [UInt16: BattleActor.SkillEffects] = [:]
 
         if let baseEnemyId, let definition = enemyDefinitions[baseEnemyId] {
             let count = randomGroupSize(for: definition, random: &random)
@@ -59,7 +59,7 @@ struct BattleEnemyGroupBuilder {
                     resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
                 }
                 let identifier = "\(group.definition.id)_\(slotIndex)"
-                let raceCategory = raceDefinitions[group.definition.race]?.category ?? group.definition.race
+                let raceCategory = raceDefinitions[group.definition.raceId]?.category ?? "enemy"
                 let actor = BattleActor(identifier: identifier,
                                         displayName: group.definition.name,
                                         kind: .enemy,
@@ -72,10 +72,10 @@ struct BattleEnemyGroupBuilder {
                                         luck: group.definition.luck,
                                         partyMemberId: nil,
                                         level: levelOverride,
-                                        jobName: group.definition.job,
+                                        jobName: group.definition.jobId.flatMap { jobDefinitions[$0]?.name } ?? "敵",
                                         avatarIndex: nil,
                                         isMartialEligible: false,
-                                        raceId: group.definition.race,
+                                        raceId: group.definition.raceId,
                                         raceCategory: raceCategory,
                                         snapshot: snapshot,
                                         currentHP: snapshot.maxHP,
@@ -108,10 +108,10 @@ struct BattleEnemyGroupBuilder {
     private static func makeActors(for definition: EnemyDefinition,
                                     levelOverride: Int?,
                                     count: Int,
-                                    skillDefinitions: [String: SkillDefinition],
-                                    jobDefinitions: [String: JobDefinition],
-                                    raceDefinitions: [String: RaceDefinition],
-                                    cache: inout [String: BattleActor.SkillEffects],
+                                    skillDefinitions: [UInt16: SkillDefinition],
+                                    jobDefinitions: [UInt8: JobDefinition],
+                                    raceDefinitions: [UInt8: RaceDefinition],
+                                    cache: inout [UInt16: BattleActor.SkillEffects],
                                     random: inout GameRandomSource) throws -> [BattleActor] {
         var actors: [BattleActor] = []
         for index in 0..<count {
@@ -132,8 +132,8 @@ struct BattleEnemyGroupBuilder {
                 let current = resources.charges(for: .breath)
                 resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
             }
-            let identifier = index == 0 ? definition.id : "\(definition.id)_\(index)"
-            let raceCategory = raceDefinitions[definition.race]?.category ?? definition.race
+            let identifier = index == 0 ? String(definition.id) : "\(definition.id)_\(index)"
+            let raceCategory = raceDefinitions[definition.raceId]?.category ?? "enemy"
             let actor = BattleActor(identifier: identifier,
                                     displayName: definition.name,
                                     kind: .enemy,
@@ -146,10 +146,10 @@ struct BattleEnemyGroupBuilder {
                                     luck: definition.luck,
                                     partyMemberId: nil,
                                     level: level,
-                                    jobName: definition.job,
+                                    jobName: definition.jobId.flatMap { jobDefinitions[$0]?.name } ?? "敵",
                                     avatarIndex: nil,
                                     isMartialEligible: false,
-                                    raceId: definition.race,
+                                    raceId: definition.raceId,
                                         raceCategory: raceCategory,
                                         snapshot: snapshot,
                                         currentHP: snapshot.maxHP,
@@ -169,16 +169,16 @@ struct BattleEnemyGroupBuilder {
     }
 
     private static func cachedSkillEffects(for definition: EnemyDefinition,
-                                           cache: inout [String: BattleActor.SkillEffects],
-                                           skillDefinitions: [String: SkillDefinition]) throws -> BattleActor.SkillEffects {
+                                           cache: inout [UInt16: BattleActor.SkillEffects],
+                                           skillDefinitions: [UInt16: SkillDefinition]) throws -> BattleActor.SkillEffects {
         if let cached = cache[definition.id] {
             return cached
         }
         let skills = try definition.skills.map { entry -> SkillDefinition in
-            guard let definition = skillDefinitions[entry.skillId] else {
-                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: entry.skillId)
+            guard let skill = skillDefinitions[entry.skillId] else {
+                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: String(entry.skillId))
             }
-            return definition
+            return skill
         }
         let effects = try SkillRuntimeEffectCompiler.actorEffects(from: skills)
         cache[definition.id] = effects

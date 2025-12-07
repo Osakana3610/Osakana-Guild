@@ -4,7 +4,7 @@ struct SkillRuntimeEffects {
     struct Spellbook: Sendable, Hashable {
         var learnedSpellIds: Set<UInt8>
         var forgottenSpellIds: Set<UInt8>
-        var tierUnlocks: [String: Int]
+        var tierUnlocks: [UInt8: Int]
 
         static let empty = Spellbook(learnedSpellIds: [],
                                      forgottenSpellIds: [],
@@ -76,14 +76,14 @@ struct SkillRuntimeEffects {
     struct ExplorationModifiers: Sendable, Hashable {
         struct Entry: Sendable, Hashable {
             let multiplier: Double
-            let dungeonId: String?
+            let dungeonId: UInt8?
             let dungeonName: String?
         }
 
         private(set) var entries: [Entry] = []
 
         mutating func addEntry(multiplier: Double,
-                               dungeonId: String?,
+                               dungeonId: UInt8?,
                                dungeonName: String?) {
             guard multiplier != 1.0 else { return }
             entries.append(Entry(multiplier: multiplier,
@@ -95,7 +95,7 @@ struct SkillRuntimeEffects {
             entries.append(contentsOf: other.entries)
         }
 
-        func multiplier(forDungeonId dungeonId: String, dungeonName: String) -> Double {
+        func multiplier(forDungeonId dungeonId: UInt8, dungeonName: String) -> Double {
             entries.reduce(1.0) { result, entry in
                 if let scopedId = entry.dungeonId, scopedId != dungeonId {
                     return result
