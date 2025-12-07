@@ -9,7 +9,7 @@ struct JobDefinition: Identifiable, Sendable, Hashable {
 
     struct LearnedSkill: Sendable, Hashable {
         let orderIndex: Int
-        let skillId: String
+        let skillId: UInt16
     }
 
     let id: UInt8

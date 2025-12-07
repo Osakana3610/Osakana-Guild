@@ -896,7 +896,7 @@ private struct JobDetailPreview: View {
                         .fontWeight(.medium)
                     VStack(alignment: .leading, spacing: 4) {
                         ForEach(sortedSkills, id: \.self) { skill in
-                            DetailMetadataRow(label: orderLabel(for: skill.orderIndex), value: skill.skillId)
+                            DetailMetadataRow(label: orderLabel(for: skill.orderIndex), value: String(skill.skillId))
                         }
                     }
                 }

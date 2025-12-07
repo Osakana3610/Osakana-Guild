@@ -13,10 +13,7 @@
         "agility": 20,
         "luck": 10
       },
-      "skills": [
-        "goblin_slash",
-        "war_cry"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.0,
         "magical": 0.1,
@@ -83,11 +80,7 @@
         "agility": 12,
         "luck": 8
       },
-      "skills": [
-        "berserk_rage",
-        "crushing_blow",
-        "intimidate"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.15,
         "magical": -0.1,
@@ -161,11 +154,7 @@
         "agility": 15,
         "luck": 5
       },
-      "skills": [
-        "bone_spear",
-        "dark_magic",
-        "undead_resilience"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.3,
         "magical": 0.2,
@@ -239,11 +228,7 @@
         "agility": 8,
         "luck": 18
       },
-      "skills": [
-        "crystal_barrier",
-        "magic_reflection",
-        "split_form"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.4,
         "magical": -0.3,
@@ -316,11 +301,7 @@
         "agility": 35,
         "luck": 22
       },
-      "skills": [
-        "shadow_strike",
-        "pack_hunt",
-        "howl"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.1,
         "magical": 0.0,
@@ -393,13 +374,7 @@
         "agility": 25,
         "luck": 30
       },
-      "skills": [
-        "dragon_breath",
-        "ancient_magic",
-        "dragon_scale_armor",
-        "intimidating_roar",
-        "tail_sweep"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.3,
         "magical": 0.2,
@@ -480,11 +455,7 @@
         "agility": 25,
         "luck": 15
       },
-      "skills": [
-        "goblin_slash",
-        "war_cry",
-        "command"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.1,
         "magical": 0.1,
@@ -549,11 +520,7 @@
         "agility": 30,
         "luck": 25
       },
-      "skills": [
-        "nature_magic",
-        "healing_light",
-        "bark_skin"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.3,
         "magical": 0.2,
@@ -619,11 +586,7 @@
         "agility": 10,
         "luck": 5
       },
-      "skills": [
-        "rock_throw",
-        "stone_armor",
-        "earthquake"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.4,
         "magical": 0.1,
@@ -689,12 +652,7 @@
         "agility": 15,
         "luck": 30
       },
-      "skills": [
-        "nature_wrath",
-        "tree_bind",
-        "forest_healing",
-        "root_strike"
-      ],
+      "skills": [],
       "resistances": {
         "physical": 0.3,
         "magical": 0.2,
