@@ -14,9 +14,9 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
 
     var id: UInt8
     var displayName: String
-    var raceIndex: UInt8
-    var jobIndex: UInt8
-    var avatarIndex: UInt16
+    var raceId: UInt8
+    var jobId: UInt8
+    var avatarId: UInt16
     var level: Int
     var experience: Int
     var attributes: CoreAttributes
@@ -52,12 +52,12 @@ struct RuntimeCharacterState: Sendable {
 
     var combatSnapshot: RuntimeCharacterProgress.Combat { progress.combat }
 
-    /// avatarIndex: 0=デフォルト（種族画像）、それ以外は保存値を使用
-    var avatarIndex: UInt16 { progress.avatarIndex }
+    /// avatarId: 0=デフォルト（種族画像）、それ以外は保存値を使用
+    var avatarId: UInt16 { progress.avatarId }
 
-    /// 表示用の解決済みavatarIndex（0の場合はraceIndexを使用）
-    var resolvedAvatarIndex: UInt16 {
-        progress.avatarIndex == 0 ? UInt16(progress.raceIndex) : progress.avatarIndex
+    /// 表示用の解決済みavatarId（0の場合はraceIdを使用）
+    var resolvedAvatarId: UInt16 {
+        progress.avatarId == 0 ? UInt16(progress.raceId) : progress.avatarId
     }
 
     var isMartialEligible: Bool {
@@ -69,9 +69,9 @@ struct RuntimeCharacterState: Sendable {
     private static func hasPositivePhysicalAttackBonus(progress: RuntimeCharacterProgress,
                                                        loadout: Loadout) -> Bool {
         guard !progress.equippedItems.isEmpty else { return false }
-        let definitionsByIndex = Dictionary(uniqueKeysWithValues: loadout.items.map { ($0.index, $0) })
+        let definitionsById = Dictionary(uniqueKeysWithValues: loadout.items.map { ($0.id, $0) })
         for equipment in progress.equippedItems {
-            guard let definition = definitionsByIndex[equipment.masterDataIndex] else { continue }
+            guard let definition = definitionsById[equipment.itemId] else { continue }
             for bonus in definition.combatBonuses where bonus.stat == "physicalAttack" {
                 if bonus.value * equipment.quantity > 0 { return true }
             }
@@ -95,21 +95,21 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     var name: String { progress.displayName }
     var level: Int { progress.level }
     var experience: Int { progress.experience }
-    var raceIndex: UInt8 { progress.raceIndex }
-    var jobIndex: UInt8 { progress.jobIndex }
+    var raceId: UInt8 { progress.raceId }
+    var jobId: UInt8 { progress.jobId }
     var currentHP: Int { progress.hitPoints.current }
     var maxHP: Int { progress.hitPoints.maximum }
     var isAlive: Bool { currentHP > 0 }
 
-    var raceName: String { raceData?.name ?? "種族\(progress.raceIndex)" }
-    var jobName: String { jobData?.name ?? "職業\(progress.jobIndex)" }
+    var raceName: String { raceData?.name ?? "種族\(progress.raceId)" }
+    var jobName: String { jobData?.name ?? "職業\(progress.jobId)" }
 
-    /// avatarIndex: 0=デフォルト（種族画像）、それ以外は保存値を使用
-    var avatarIndex: UInt16 { progress.avatarIndex }
+    /// avatarId: 0=デフォルト（種族画像）、それ以外は保存値を使用
+    var avatarId: UInt16 { progress.avatarId }
 
-    /// 表示用の解決済みavatarIndex（0の場合はraceIndexを使用）
-    var resolvedAvatarIndex: UInt16 {
-        progress.avatarIndex == 0 ? UInt16(progress.raceIndex) : progress.avatarIndex
+    /// 表示用の解決済みavatarId（0の場合はraceIdを使用）
+    var resolvedAvatarId: UInt16 {
+        progress.avatarId == 0 ? UInt16(progress.raceId) : progress.avatarId
     }
 
     var baseStats: RuntimeCharacterProgress.CoreAttributes { progress.attributes }

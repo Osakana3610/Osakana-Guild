@@ -2,38 +2,16 @@ import Foundation
 import SwiftData
 
 struct DungeonSnapshot: Sendable, Hashable {
-    struct Floor: Sendable, Hashable {
-        var id: UUID
-        var floorNumber: Int
-        var cleared: Bool
-        var bestClearTime: TimeInterval?
-        var lastClearedAt: Date?
-        var createdAt: Date
-        var updatedAt: Date
-
-    }
-
-    struct Encounter: Sendable, Hashable {
-        var id: UUID
-        var enemyId: String
-        var defeatedCount: Int
-        var createdAt: Date
-        var updatedAt: Date
-
-    }
-
     let persistentIdentifier: PersistentIdentifier
-    var id: UUID
-    var dungeonId: String
+    var dungeonId: UInt8
     var isUnlocked: Bool
-    var isCleared: Bool
-    var highestUnlockedDifficulty: Int
-    var highestClearedDifficulty: Int
-    var furthestClearedFloor: Int
-    var lastEnteredAt: Date?
-    var floors: [Floor]
-    var encounters: [Encounter]
-    var createdAt: Date
+    var highestUnlockedDifficulty: UInt8
+    var highestClearedDifficulty: UInt8?  // nil=未クリア
+    var furthestClearedFloor: UInt8
     var updatedAt: Date
 
+    /// クリア済みかどうか（導出プロパティ）
+    var isCleared: Bool {
+        highestClearedDifficulty != nil
+    }
 }

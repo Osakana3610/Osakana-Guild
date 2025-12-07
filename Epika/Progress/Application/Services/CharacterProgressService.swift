@@ -4,8 +4,8 @@ import SwiftData
 actor CharacterProgressService {
     struct CharacterCreationRequest: Sendable {
         var displayName: String
-        var raceIndex: UInt8
-        var jobIndex: UInt8
+        var raceId: UInt8
+        var jobId: UInt8
     }
 
     struct BattleResultUpdate: Sendable {
@@ -93,18 +93,19 @@ actor CharacterProgressService {
         let newId = try allocateCharacterId(context: context)
 
         // 初期HPは一旦100を設定（最初のmakeSnapshotで再計算される）
-        let initialHP: Int32 = 100
+        let initialHP: UInt32 = 100
 
         let record = CharacterRecord(
             id: newId,
             displayName: trimmedName,
-            raceIndex: request.raceIndex,
-            jobIndex: request.jobIndex,
+            raceId: request.raceId,
+            jobId: request.jobId,
+            avatarId: 0,
             level: 1,
             experience: 0,
             currentHP: initialHP,
-            primaryPersonalityIndex: 0,
-            secondaryPersonalityIndex: 0,
+            primaryPersonalityId: 0,
+            secondaryPersonalityId: 0,
             actionRateAttack: 100,
             actionRatePriestMagic: 75,
             actionRateMageMagic: 75,
@@ -131,9 +132,9 @@ actor CharacterProgressService {
         if snapshot.experience < 0 {
             throw ProgressError.invalidInput(description: "経験値は0以上である必要があります")
         }
-        let clampedExperience = try await clampExperience(snapshot.experience, raceIndex: snapshot.raceIndex)
+        let clampedExperience = try await clampExperience(snapshot.experience, raceId: snapshot.raceId)
         snapshot.experience = clampedExperience
-        let normalizedLevel = try await resolveLevel(for: clampedExperience, raceIndex: snapshot.raceIndex)
+        let normalizedLevel = try await resolveLevel(for: clampedExperience, raceId: snapshot.raceId)
         snapshot.level = normalizedLevel
         apply(snapshot: snapshot, to: record)
         try context.save()
@@ -155,36 +156,36 @@ actor CharacterProgressService {
             }
             if update.experienceDelta != 0 {
                 let previousLevel = record.level
-                let addition = Int32(record.experience).addingReportingOverflow(Int32(update.experienceDelta))
+                let addition = Int64(record.experience).addingReportingOverflow(Int64(update.experienceDelta))
                 guard !addition.overflow else {
                     throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
                 }
                 let updatedExperience = max(0, Int(addition.partialValue))
 
-                let cappedExperience = try await clampExperience(updatedExperience, raceIndex: record.raceIndex)
-                record.experience = Int32(cappedExperience)
-                let computedLevel = try await resolveLevel(for: cappedExperience, raceIndex: record.raceIndex)
+                let cappedExperience = try await clampExperience(updatedExperience, raceId: record.raceId)
+                record.experience = UInt32(cappedExperience)
+                let computedLevel = try await resolveLevel(for: cappedExperience, raceId: record.raceId)
                 if computedLevel != Int(previousLevel) {
                     record.level = UInt8(computedLevel)
                 }
             }
             if update.hpDelta != 0 {
-                let newHP = Int32(record.currentHP) + update.hpDelta
-                record.currentHP = max(0, newHP)
+                let newHP = Int64(record.currentHP) + Int64(update.hpDelta)
+                record.currentHP = UInt32(max(0, newHP))
             }
         }
         try context.save()
         notifyCharacterProgressDidChange()
     }
 
-    func updateHP(characterId: UInt8, newHP: Int32) async throws {
+    func updateHP(characterId: UInt8, newHP: UInt32) async throws {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
             throw ProgressError.characterNotFound
         }
-        record.currentHP = max(0, newHP)
+        record.currentHP = newHP
         try context.save()
         notifyCharacterProgressDidChange()
     }
@@ -245,18 +246,18 @@ actor CharacterProgressService {
         for _ in 0..<quantity {
             let equipmentRecord = CharacterEquipmentRecord(
                 characterId: characterId,
-                superRareTitleIndex: inventoryRecord.superRareTitleIndex,
-                normalTitleIndex: inventoryRecord.normalTitleIndex,
-                masterDataIndex: inventoryRecord.masterDataIndex,
-                socketSuperRareTitleIndex: inventoryRecord.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: inventoryRecord.socketNormalTitleIndex,
-                socketMasterDataIndex: inventoryRecord.socketMasterDataIndex
+                superRareTitleId: inventoryRecord.superRareTitleId,
+                normalTitleId: inventoryRecord.normalTitleId,
+                itemId: inventoryRecord.itemId,
+                socketSuperRareTitleId: inventoryRecord.socketSuperRareTitleId,
+                socketNormalTitleId: inventoryRecord.socketNormalTitleId,
+                socketItemId: inventoryRecord.socketItemId
             )
             context.insert(equipmentRecord)
         }
 
         // インベントリから減算
-        inventoryRecord.quantity -= quantity
+        inventoryRecord.quantity -= UInt16(quantity)
         if inventoryRecord.quantity <= 0 {
             context.delete(inventoryRecord)
         }
@@ -300,17 +301,17 @@ actor CharacterProgressService {
 
         if let existingInventory = allInventory.first(where: { $0.stackKey == equipmentStackKey }) {
             // 既存スタックに追加
-            existingInventory.quantity = min(existingInventory.quantity + quantity, 99)
+            existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
         } else if let firstEquip = matchingEquipment.first {
             // 新規インベントリレコード作成
             let inventoryRecord = InventoryItemRecord(
-                superRareTitleIndex: firstEquip.superRareTitleIndex,
-                normalTitleIndex: firstEquip.normalTitleIndex,
-                masterDataIndex: firstEquip.masterDataIndex,
-                socketSuperRareTitleIndex: firstEquip.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: firstEquip.socketNormalTitleIndex,
-                socketMasterDataIndex: firstEquip.socketMasterDataIndex,
-                quantity: quantity,
+                superRareTitleId: firstEquip.superRareTitleId,
+                normalTitleId: firstEquip.normalTitleId,
+                itemId: firstEquip.itemId,
+                socketSuperRareTitleId: firstEquip.socketSuperRareTitleId,
+                socketNormalTitleId: firstEquip.socketNormalTitleId,
+                socketItemId: firstEquip.socketItemId,
+                quantity: UInt16(quantity),
                 storage: storage
             )
             context.insert(inventoryRecord)
@@ -346,12 +347,12 @@ actor CharacterProgressService {
 
         return grouped.values.map { (record, count) in
             CharacterSnapshot.EquippedItem(
-                superRareTitleIndex: record.superRareTitleIndex,
-                normalTitleIndex: record.normalTitleIndex,
-                masterDataIndex: record.masterDataIndex,
-                socketSuperRareTitleIndex: record.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: record.socketNormalTitleIndex,
-                socketMasterDataIndex: record.socketMasterDataIndex,
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                itemId: record.itemId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketItemId: record.socketItemId,
                 quantity: count
             )
         }
@@ -361,8 +362,8 @@ actor CharacterProgressService {
 // MARK: - Private Helpers
 
 private extension CharacterProgressService {
-    func resolveLevel(for experience: Int, raceIndex: UInt8) async throws -> Int {
-        let maxLevel = try await raceMaxLevel(for: raceIndex)
+    func resolveLevel(for experience: Int, raceId: UInt8) async throws -> Int {
+        let maxLevel = try await raceMaxLevel(for: raceId)
         do {
             return try await MainActor.run {
                 try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
@@ -376,30 +377,30 @@ private extension CharacterProgressService {
         }
     }
 
-    func raceMaxLevel(for raceIndex: UInt8) async throws -> Int {
-        if let cached = raceLevelCache[raceIndex] {
+    func raceMaxLevel(for raceId: UInt8) async throws -> Int {
+        if let cached = raceLevelCache[raceId] {
             return cached
         }
-        let resolved = try await runtime.raceMaxLevel(for: raceIndex)
-        raceLevelCache[raceIndex] = resolved
+        let resolved = try await runtime.raceMaxLevel(for: raceId)
+        raceLevelCache[raceId] = resolved
         return resolved
     }
 
-    func clampExperience(_ experience: Int, raceIndex: UInt8) async throws -> Int {
+    func clampExperience(_ experience: Int, raceId: UInt8) async throws -> Int {
         guard experience > 0 else { return 0 }
-        let maximum = try await raceMaxExperience(for: raceIndex)
+        let maximum = try await raceMaxExperience(for: raceId)
         return min(experience, maximum)
     }
 
-    func raceMaxExperience(for raceIndex: UInt8) async throws -> Int {
-        if let cached = raceMaxExperienceCache[raceIndex] {
+    func raceMaxExperience(for raceId: UInt8) async throws -> Int {
+        if let cached = raceMaxExperienceCache[raceId] {
             return cached
         }
-        let maxLevel = try await raceMaxLevel(for: raceIndex)
+        let maxLevel = try await raceMaxLevel(for: raceId)
         let maximumExperience = try await MainActor.run {
             try CharacterExperienceTable.totalExperience(toReach: maxLevel)
         }
-        raceMaxExperienceCache[raceIndex] = maximumExperience
+        raceMaxExperienceCache[raceId] = maximumExperience
         return maximumExperience
     }
 
@@ -437,12 +438,12 @@ private extension CharacterProgressService {
 
         let equippedItems = groupedEquipment.values.map { (item, count) in
             CharacterSnapshot.EquippedItem(
-                superRareTitleIndex: item.superRareTitleIndex,
-                normalTitleIndex: item.normalTitleIndex,
-                masterDataIndex: item.masterDataIndex,
-                socketSuperRareTitleIndex: item.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: item.socketNormalTitleIndex,
-                socketMasterDataIndex: item.socketMasterDataIndex,
+                superRareTitleId: item.superRareTitleId,
+                normalTitleId: item.normalTitleId,
+                itemId: item.itemId,
+                socketSuperRareTitleId: item.socketSuperRareTitleId,
+                socketNormalTitleId: item.socketNormalTitleId,
+                socketItemId: item.socketItemId,
                 quantity: count
             )
         }
@@ -458,8 +459,8 @@ private extension CharacterProgressService {
         )
 
         let personality = CharacterSnapshot.Personality(
-            primaryIndex: record.primaryPersonalityIndex,
-            secondaryIndex: record.secondaryPersonalityIndex
+            primaryId: record.primaryPersonalityId,
+            secondaryId: record.secondaryPersonalityId
         )
 
         // スキルは種族+職業+装備から導出（learnedSkillsは空配列）
@@ -492,9 +493,9 @@ private extension CharacterProgressService {
             persistentIdentifier: record.persistentModelID,
             id: record.id,
             displayName: record.displayName,
-            raceIndex: record.raceIndex,
-            jobIndex: record.jobIndex,
-            avatarIndex: record.avatarIndex,
+            raceId: record.raceId,
+            jobId: record.jobId,
+            avatarId: record.avatarId,
             level: Int(record.level),
             experience: Int(record.experience),
             attributes: dummyAttributes,
@@ -550,15 +551,15 @@ private extension CharacterProgressService {
 
     func apply(snapshot: CharacterSnapshot, to record: CharacterRecord) {
         record.displayName = snapshot.displayName
-        record.avatarIndex = snapshot.avatarIndex
+        record.avatarId = snapshot.avatarId
         record.level = UInt8(snapshot.level)
-        record.experience = Int32(snapshot.experience)
-        record.currentHP = Int32(snapshot.hitPoints.current)
+        record.experience = UInt32(snapshot.experience)
+        record.currentHP = UInt32(snapshot.hitPoints.current)
         record.actionRateAttack = UInt8(snapshot.actionPreferences.attack)
         record.actionRatePriestMagic = UInt8(snapshot.actionPreferences.priestMagic)
         record.actionRateMageMagic = UInt8(snapshot.actionPreferences.mageMagic)
         record.actionRateBreath = UInt8(snapshot.actionPreferences.breath)
-        // raceIndex, jobIndex, personalityIndexは変更しない（種族・職業変更は別APIで）
+        // raceId, jobId, personalityIdは変更しない（種族・職業変更は別APIで）
     }
 
     func deleteEquipment(for characterId: UInt8, context: ModelContext) throws {
