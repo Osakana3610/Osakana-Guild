@@ -7,7 +7,7 @@ struct CombatExecutionService {
         self.repository = repository
     }
 
-    func runCombat(enemyId: String,
+    func runCombat(enemyId: UInt16,
                    enemyLevel: Int?,
                    dungeon: DungeonDefinition,
                    floor: DungeonFloorDefinition,

@@ -239,7 +239,7 @@ extension BattleTurnEngine {
         return max(0.0, base * (luckScalePercent / 100.0))
     }
 
-    static func spellPowerModifier(for attacker: BattleActor, spellId: String? = nil) -> Double {
+    static func spellPowerModifier(for attacker: BattleActor, spellId: UInt8? = nil) -> Double {
         let percentScale = max(0.0, 1.0 + attacker.skillEffects.spellPower.percent / 100.0)
         var modifier = percentScale * attacker.skillEffects.spellPower.multiplier
         if let spellId,
