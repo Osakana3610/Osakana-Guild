@@ -13,7 +13,7 @@ final class ExplorationRunRecord {
     var partyId: UInt8 = 1
 
     /// ダンジョンID（MasterData）
-    var dungeonId: UInt8 = 0
+    var dungeonId: UInt16 = 0
 
     /// 難易度（0〜255）
     var difficulty: UInt8 = 0
@@ -43,7 +43,7 @@ final class ExplorationRunRecord {
     var eventsData: Data = Data()
 
     init(partyId: UInt8,
-         dungeonId: UInt8,
+         dungeonId: UInt16,
          difficulty: UInt8,
          targetFloor: UInt8,
          startedAt: Date) {

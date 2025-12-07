@@ -130,7 +130,7 @@ struct StoryView: View {
                 }
             }
         }
-        .navigationDestination(for: String.self) { nodeId in
+        .navigationDestination(for: UInt16.self) { nodeId in
             if let node = viewModel.nodes.first(where: { $0.id == nodeId }) {
                 StoryDetailView(story: node) {
                     Task { await viewModel.load() }

@@ -15,14 +15,14 @@ actor DungeonProgressService {
         return records.map { Self.snapshot(from: $0) }
     }
 
-    func ensureDungeonSnapshot(for dungeonId: UInt8) async throws -> DungeonSnapshot {
+    func ensureDungeonSnapshot(for dungeonId: UInt16) async throws -> DungeonSnapshot {
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         try saveIfNeeded(context)
         return Self.snapshot(from: record)
     }
 
-    func setUnlocked(_ isUnlocked: Bool, dungeonId: UInt8) async throws {
+    func setUnlocked(_ isUnlocked: Bool, dungeonId: UInt16) async throws {
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         if record.isUnlocked != isUnlocked {
@@ -32,7 +32,7 @@ actor DungeonProgressService {
         try saveIfNeeded(context)
     }
 
-    func markCleared(dungeonId: UInt8, difficulty: UInt8, totalFloors: UInt8) async throws {
+    func markCleared(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws {
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         let now = Date()
@@ -51,7 +51,7 @@ actor DungeonProgressService {
         try saveIfNeeded(context)
     }
 
-    func unlockDifficulty(dungeonId: UInt8, difficulty: UInt8) async throws {
+    func unlockDifficulty(dungeonId: UInt16, difficulty: UInt8) async throws {
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         if record.highestUnlockedDifficulty < difficulty {
@@ -62,7 +62,7 @@ actor DungeonProgressService {
         try saveIfNeeded(context)
     }
 
-    func updatePartialProgress(dungeonId: UInt8, difficulty: UInt8, furthestFloor: UInt8) async throws {
+    func updatePartialProgress(dungeonId: UInt16, difficulty: UInt8, furthestFloor: UInt8) async throws {
         guard furthestFloor > 0 else { return }
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
@@ -81,7 +81,7 @@ private extension DungeonProgressService {
         return context
     }
 
-    func ensureDungeonRecord(dungeonId: UInt8, context: ModelContext) throws -> DungeonRecord {
+    func ensureDungeonRecord(dungeonId: UInt16, context: ModelContext) throws -> DungeonRecord {
         var descriptor = FetchDescriptor<DungeonRecord>(predicate: #Predicate { $0.dungeonId == dungeonId })
         descriptor.fetchLimit = 1
         if let existing = try context.fetch(descriptor).first {

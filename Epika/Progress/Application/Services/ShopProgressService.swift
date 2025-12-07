@@ -212,9 +212,9 @@ private extension ShopProgressService {
     func loadShopSnapshot(definition: ShopDefinition) async throws -> ShopSnapshot {
         let context = makeContext()
         let now = Date()
-        let didChange = try syncStocks(definition: definition,
-                                       context: context,
-                                       timestamp: now)
+        _ = try syncStocks(definition: definition,
+                           context: context,
+                           timestamp: now)
         try saveIfNeeded(context)
         let stocks = try fetchAllStocks(context: context)
         let maxUpdatedAt = stocks.map(\.updatedAt).max() ?? now

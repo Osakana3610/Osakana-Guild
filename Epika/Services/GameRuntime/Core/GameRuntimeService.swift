@@ -18,7 +18,7 @@ actor GameRuntimeService {
         let continuation: AsyncStream<ExplorationEngine.StepOutcome>.Continuation
     }
 
-    func startExplorationRun(dungeonId: UInt8,
+    func startExplorationRun(dungeonId: UInt16,
                              targetFloorNumber: Int,
                              party: RuntimePartyState,
                              superRareState: SuperRareDailyState) async throws -> ExplorationRunSession {
@@ -137,7 +137,7 @@ actor GameRuntimeService {
                                      })
     }
 
-    func prepareExplorationRun(dungeonId: UInt8,
+    func prepareExplorationRun(dungeonId: UInt16,
                                targetFloorNumber: Int,
                                party: RuntimePartyState,
                                superRareState: SuperRareDailyState) async throws -> ExplorationRunPreparationData {

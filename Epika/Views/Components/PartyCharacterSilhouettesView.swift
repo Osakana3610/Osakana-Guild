@@ -31,7 +31,7 @@ struct PartyCharacterSilhouettesView: View {
                             if index < orderedMembers.count {
                                 let member = orderedMembers[index]
                                 VStack(spacing: 2) {
-                                    CharacterImageView(avatarIndex: member.resolvedAvatarIndex, size: 43)
+                                    CharacterImageView(avatarIndex: member.resolvedAvatarId, size: 43)
                                     VStack(spacing: 1) {
                                         Text("Lv.\(member.level)")
                                             .font(.caption2)

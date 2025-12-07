@@ -256,8 +256,11 @@ struct ItemSaleView: View {
     @MainActor
     private func addToAutoTrade(_ item: LightweightItemData) async {
         do {
-            _ = try await progressService.autoTrade.addRule(autoTradeKey: item.autoTradeKey,
-                                                             displayName: item.fullDisplayName)
+            _ = try await progressService.autoTrade.addRule(
+                superRareTitleId: item.enhancement.superRareTitleId,
+                normalTitleId: item.enhancement.normalTitleId,
+                itemId: item.itemId
+            )
             _ = try await progressService.sellItemsToShop(stackKeys: [item.stackKey])
             let service = ItemPreloadService.shared
             service.removeItems(stackKeys: [item.stackKey])

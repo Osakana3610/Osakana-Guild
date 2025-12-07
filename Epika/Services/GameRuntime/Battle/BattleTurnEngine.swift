@@ -20,8 +20,8 @@ struct BattleTurnEngine {
     /// - Returns: 戦闘結果
     static func runBattle(players: inout [BattleActor],
                           enemies: inout [BattleActor],
-                          statusEffects: [String: StatusEffectDefinition],
-                          skillDefinitions: [String: SkillDefinition],
+                          statusEffects: [UInt8: StatusEffectDefinition],
+                          skillDefinitions: [UInt16: SkillDefinition],
                           random: inout GameRandomSource) -> Result {
         var context = BattleContext(
             players: players,

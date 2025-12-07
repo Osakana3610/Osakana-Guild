@@ -120,7 +120,7 @@ final class ItemPreloadService {
 
     /// スタイル付き表示テキストを生成
     func makeStyledDisplayText(for item: LightweightItemData, includeSellValue: Bool = true) -> Text {
-        let isSuperRare = item.enhancement.superRareTitleIndex != 0
+        let isSuperRare = item.enhancement.superRareTitleId != 0
 
         var segments: [Text] = []
         if let name = item.superRareTitleName {
@@ -176,28 +176,28 @@ final class ItemPreloadService {
     }
 
     private func buildCache(from items: [ItemSnapshot]) async throws {
-        let masterIndices = Set(items.map { $0.masterDataIndex })
-        guard !masterIndices.isEmpty else {
+        let itemIds = Set(items.map { $0.itemId })
+        guard !itemIds.isEmpty else {
             categorizedItems.removeAll()
             return
         }
 
         let masterDataService = MasterDataRuntimeService.shared
-        let definitions = try await masterDataService.getItemMasterData(byIndices: Array(masterIndices))
-        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.index, $0) })
+        let definitions = try await masterDataService.getItemMasterData(ids: Array(itemIds))
+        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
 
         var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
-        var normalTitleIndices: Set<UInt8> = []
-        var superRareTitleIndices: Set<Int16> = []
-        var socketIndices: Set<Int16> = []
+        var normalTitleIds: Set<UInt8> = []
+        var superRareTitleIds: Set<UInt8> = []
+        var socketItemIds: Set<UInt16> = []
 
         for snapshot in items {
-            guard let definition = definitionMap[snapshot.masterDataIndex] else { continue }
+            guard let definition = definitionMap[snapshot.itemId] else { continue }
             let data = LightweightItemData(
                 stackKey: snapshot.stackKey,
-                masterDataIndex: snapshot.masterDataIndex,
+                itemId: snapshot.itemId,
                 name: definition.name,
-                quantity: snapshot.quantity,
+                quantity: Int(snapshot.quantity),
                 sellValue: definition.sellValue,
                 category: ItemSaleCategory(masterCategory: definition.category),
                 enhancement: snapshot.enhancements,
@@ -210,22 +210,22 @@ final class ItemPreloadService {
             grouped[data.category, default: []].append(data)
 
             // 通常称号は必ず存在する（rank 0〜8）
-            normalTitleIndices.insert(snapshot.enhancements.normalTitleIndex)
-            if snapshot.enhancements.superRareTitleIndex != 0 {
-                superRareTitleIndices.insert(snapshot.enhancements.superRareTitleIndex)
+            normalTitleIds.insert(snapshot.enhancements.normalTitleId)
+            if snapshot.enhancements.superRareTitleId != 0 {
+                superRareTitleIds.insert(snapshot.enhancements.superRareTitleId)
             }
-            if snapshot.enhancements.socketMasterDataIndex != 0 {
-                socketIndices.insert(snapshot.enhancements.socketMasterDataIndex)
+            if snapshot.enhancements.socketItemId != 0 {
+                socketItemIds.insert(snapshot.enhancements.socketItemId)
             }
         }
 
         let titleNames = try await resolveTitleNames(
-            normalIndices: normalTitleIndices,
-            superRareIndices: superRareTitleIndices,
+            normalIds: normalTitleIds,
+            superRareIds: superRareTitleIds,
             masterDataService: masterDataService
         )
         let gemDisplayNames = try await resolveGemNames(
-            socketIndices: socketIndices,
+            socketItemIds: socketItemIds,
             masterDataService: masterDataService
         )
 
@@ -233,36 +233,36 @@ final class ItemPreloadService {
             grouped[key] = grouped[key]?.map { item in
                 var updated = item
                 // 通常称号は必ず存在する（rank 0〜8、無称号も rank=2 の称号）
-                updated.normalTitleName = titleNames.normal[item.enhancement.normalTitleIndex]
-                if item.enhancement.superRareTitleIndex != 0 {
-                    updated.superRareTitleName = titleNames.superRare[item.enhancement.superRareTitleIndex]
+                updated.normalTitleName = titleNames.normal[item.enhancement.normalTitleId]
+                if item.enhancement.superRareTitleId != 0 {
+                    updated.superRareTitleName = titleNames.superRare[item.enhancement.superRareTitleId]
                 }
-                if item.enhancement.socketMasterDataIndex != 0 {
-                    updated.gemName = gemDisplayNames[item.enhancement.socketMasterDataIndex]
+                if item.enhancement.socketItemId != 0 {
+                    updated.gemName = gemDisplayNames[item.enhancement.socketItemId]
                 }
                 return updated
             }.sorted { lhs, rhs in
                 // ソート順: アイテムごとに 通常称号のみ → 通常称号+ソケット → 超レア → 超レア+ソケット
-                if lhs.masterDataIndex != rhs.masterDataIndex {
-                    return lhs.masterDataIndex < rhs.masterDataIndex
+                if lhs.itemId != rhs.itemId {
+                    return lhs.itemId < rhs.itemId
                 }
-                let lhsHasSuperRare = lhs.enhancement.superRareTitleIndex > 0
-                let rhsHasSuperRare = rhs.enhancement.superRareTitleIndex > 0
+                let lhsHasSuperRare = lhs.enhancement.superRareTitleId > 0
+                let rhsHasSuperRare = rhs.enhancement.superRareTitleId > 0
                 if lhsHasSuperRare != rhsHasSuperRare {
                     return !lhsHasSuperRare
                 }
-                let lhsHasSocket = lhs.enhancement.socketMasterDataIndex > 0
-                let rhsHasSocket = rhs.enhancement.socketMasterDataIndex > 0
+                let lhsHasSocket = lhs.enhancement.socketItemId > 0
+                let rhsHasSocket = rhs.enhancement.socketItemId > 0
                 if lhsHasSocket != rhsHasSocket {
                     return !lhsHasSocket
                 }
-                if lhs.enhancement.normalTitleIndex != rhs.enhancement.normalTitleIndex {
-                    return lhs.enhancement.normalTitleIndex < rhs.enhancement.normalTitleIndex
+                if lhs.enhancement.normalTitleId != rhs.enhancement.normalTitleId {
+                    return lhs.enhancement.normalTitleId < rhs.enhancement.normalTitleId
                 }
-                if lhs.enhancement.superRareTitleIndex != rhs.enhancement.superRareTitleIndex {
-                    return lhs.enhancement.superRareTitleIndex < rhs.enhancement.superRareTitleIndex
+                if lhs.enhancement.superRareTitleId != rhs.enhancement.superRareTitleId {
+                    return lhs.enhancement.superRareTitleId < rhs.enhancement.superRareTitleId
                 }
-                return lhs.enhancement.socketMasterDataIndex < rhs.enhancement.socketMasterDataIndex
+                return lhs.enhancement.socketItemId < rhs.enhancement.socketItemId
             }
         }
 
@@ -271,27 +271,25 @@ final class ItemPreloadService {
     }
 
     private func resolveTitleNames(
-        normalIndices: Set<UInt8>,
-        superRareIndices: Set<Int16>,
+        normalIds: Set<UInt8>,
+        superRareIds: Set<UInt8>,
         masterDataService: MasterDataRuntimeService
-    ) async throws -> (normal: [UInt8: String], superRare: [Int16: String]) {
-        guard !(normalIndices.isEmpty && superRareIndices.isEmpty) else {
+    ) async throws -> (normal: [UInt8: String], superRare: [UInt8: String]) {
+        guard !(normalIds.isEmpty && superRareIds.isEmpty) else {
             return ([:], [:])
         }
 
         var normal: [UInt8: String] = [:]
-        for index in normalIndices {
-            if let id = await masterDataService.getTitleId(for: index),
-               let definition = try await masterDataService.getTitleMasterData(id: id) {
-                normal[index] = definition.name
+        for id in normalIds {
+            if let definition = try await masterDataService.getTitleMasterData(id: id) {
+                normal[id] = definition.name
             }
         }
 
-        var superRare: [Int16: String] = [:]
-        for index in superRareIndices {
-            if let id = await masterDataService.getSuperRareTitleId(for: index),
-               let definition = try await masterDataService.getSuperRareTitle(id: id) {
-                superRare[index] = definition.name
+        var superRare: [UInt8: String] = [:]
+        for id in superRareIds {
+            if let definition = try await masterDataService.getSuperRareTitle(id: id) {
+                superRare[id] = definition.name
             }
         }
 
@@ -299,14 +297,14 @@ final class ItemPreloadService {
     }
 
     private func resolveGemNames(
-        socketIndices: Set<Int16>,
+        socketItemIds: Set<UInt16>,
         masterDataService: MasterDataRuntimeService
-    ) async throws -> [Int16: String] {
-        guard !socketIndices.isEmpty else { return [:] }
-        var names: [Int16: String] = [:]
-        for index in socketIndices {
-            if let definition = try await masterDataService.getItemMasterData(byIndex: index) {
-                names[index] = definition.name
+    ) async throws -> [UInt16: String] {
+        guard !socketItemIds.isEmpty else { return [:] }
+        var names: [UInt16: String] = [:]
+        for itemId in socketItemIds {
+            if let definition = try await masterDataService.getItemMasterData(id: itemId) {
+                names[itemId] = definition.name
             }
         }
         return names

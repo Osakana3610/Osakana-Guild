@@ -25,19 +25,19 @@ actor GemModificationProgressService {
             $0.storageRawValue == storage.rawValue
         })
         descriptor.sortBy = [
-            SortDescriptor(\InventoryItemRecord.superRareTitleIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.normalTitleIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.masterDataIndex, order: .forward)
+            SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.normalTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.itemId, order: .forward)
         ]
         let records = try context.fetch(descriptor)
         guard !records.isEmpty else { return [] }
 
-        let masterIndices = Array(Set(records.map { $0.masterDataIndex }))
-        let definitions = try await masterDataService.getItemMasterData(byIndices: masterIndices)
-        let gemIndices = Set(definitions.filter { $0.category.lowercased().contains("gem") }.map { $0.index })
+        let itemIds = Array(Set(records.map { $0.itemId }))
+        let definitions = try await masterDataService.getItemMasterData(ids: itemIds)
+        let gemIds = Set(definitions.filter { $0.category.lowercased().contains("gem") }.map { $0.id })
 
         return records
-            .filter { gemIndices.contains($0.masterDataIndex) }
+            .filter { gemIds.contains($0.itemId) }
             .map(makeSnapshot(_:))
     }
 
@@ -46,27 +46,27 @@ actor GemModificationProgressService {
         let context = makeContext()
         let storage = ItemStorage.playerItem
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageRawValue == storage.rawValue && $0.socketMasterDataIndex == 0
+            $0.storageRawValue == storage.rawValue && $0.socketItemId == 0
         })
         descriptor.sortBy = [
-            SortDescriptor(\InventoryItemRecord.superRareTitleIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.normalTitleIndex, order: .forward),
-            SortDescriptor(\InventoryItemRecord.masterDataIndex, order: .forward)
+            SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.normalTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.itemId, order: .forward)
         ]
         let records = try context.fetch(descriptor)
         guard !records.isEmpty else { return [] }
 
-        let masterIndices = Array(Set(records.map { $0.masterDataIndex }))
-        let definitions = try await masterDataService.getItemMasterData(byIndices: masterIndices)
+        let itemIds = Array(Set(records.map { $0.itemId }))
+        let definitions = try await masterDataService.getItemMasterData(ids: itemIds)
 
         // 宝石・合成用アイテムを除外
-        let socketableIndices = Set(definitions
+        let socketableIds = Set(definitions
             .filter { !$0.category.lowercased().contains("gem") }
             .filter { !Self.nonSocketableCategories.contains($0.category) }
-            .map { $0.index })
+            .map { $0.id })
 
         return records
-            .filter { socketableIndices.contains($0.masterDataIndex) }
+            .filter { socketableIds.contains($0.itemId) }
             .map(makeSnapshot(_:))
     }
 
@@ -81,19 +81,19 @@ actor GemModificationProgressService {
         let context = makeContext()
 
         // 宝石レコードの取得
-        let gSuperRare = gc.superRareTitleIndex
-        let gNormal = gc.normalTitleIndex
-        let gMaster = gc.masterDataIndex
-        let gSocketSuperRare = gc.socketSuperRareTitleIndex
-        let gSocketNormal = gc.socketNormalTitleIndex
-        let gSocketMaster = gc.socketMasterDataIndex
+        let gSuperRare = gc.superRareTitleId
+        let gNormal = gc.normalTitleId
+        let gItem = gc.itemId
+        let gSocketSuperRare = gc.socketSuperRareTitleId
+        let gSocketNormal = gc.socketNormalTitleId
+        let gSocketItem = gc.socketItemId
         var gemDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleIndex == gSuperRare &&
-            $0.normalTitleIndex == gNormal &&
-            $0.masterDataIndex == gMaster &&
-            $0.socketSuperRareTitleIndex == gSocketSuperRare &&
-            $0.socketNormalTitleIndex == gSocketNormal &&
-            $0.socketMasterDataIndex == gSocketMaster
+            $0.superRareTitleId == gSuperRare &&
+            $0.normalTitleId == gNormal &&
+            $0.itemId == gItem &&
+            $0.socketSuperRareTitleId == gSocketSuperRare &&
+            $0.socketNormalTitleId == gSocketNormal &&
+            $0.socketItemId == gSocketItem
         })
         gemDescriptor.fetchLimit = 1
         guard let gemRecord = try context.fetch(gemDescriptor).first else {
@@ -101,19 +101,19 @@ actor GemModificationProgressService {
         }
 
         // 対象アイテムレコードの取得
-        let tSuperRare = tc.superRareTitleIndex
-        let tNormal = tc.normalTitleIndex
-        let tMaster = tc.masterDataIndex
-        let tSocketSuperRare = tc.socketSuperRareTitleIndex
-        let tSocketNormal = tc.socketNormalTitleIndex
-        let tSocketMaster = tc.socketMasterDataIndex
+        let tSuperRare = tc.superRareTitleId
+        let tNormal = tc.normalTitleId
+        let tItem = tc.itemId
+        let tSocketSuperRare = tc.socketSuperRareTitleId
+        let tSocketNormal = tc.socketNormalTitleId
+        let tSocketItem = tc.socketItemId
         var targetDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleIndex == tSuperRare &&
-            $0.normalTitleIndex == tNormal &&
-            $0.masterDataIndex == tMaster &&
-            $0.socketSuperRareTitleIndex == tSocketSuperRare &&
-            $0.socketNormalTitleIndex == tSocketNormal &&
-            $0.socketMasterDataIndex == tSocketMaster
+            $0.superRareTitleId == tSuperRare &&
+            $0.normalTitleId == tNormal &&
+            $0.itemId == tItem &&
+            $0.socketSuperRareTitleId == tSocketSuperRare &&
+            $0.socketNormalTitleId == tSocketNormal &&
+            $0.socketItemId == tSocketItem
         })
         targetDescriptor.fetchLimit = 1
         guard let targetRecord = try context.fetch(targetDescriptor).first else {
@@ -121,19 +121,19 @@ actor GemModificationProgressService {
         }
 
         // 対象アイテムに既に宝石改造が施されていないか確認
-        guard targetRecord.socketMasterDataIndex == 0 else {
+        guard targetRecord.socketItemId == 0 else {
             throw ProgressError.invalidInput(description: "このアイテムには既に宝石改造が施されています")
         }
 
         // 宝石のカテゴリ確認
-        let gemDefinitions = try await masterDataService.getItemMasterData(byIndices: [gemRecord.masterDataIndex])
+        let gemDefinitions = try await masterDataService.getItemMasterData(ids: [gemRecord.itemId])
         guard let gemDefinition = gemDefinitions.first,
               gemDefinition.category.lowercased().contains("gem") else {
             throw ProgressError.invalidInput(description: "選択したアイテムは宝石ではありません")
         }
 
         // 対象アイテムがソケット装着可能か確認
-        let targetDefinitions = try await masterDataService.getItemMasterData(byIndices: [targetRecord.masterDataIndex])
+        let targetDefinitions = try await masterDataService.getItemMasterData(ids: [targetRecord.itemId])
         guard let targetDefinition = targetDefinitions.first else {
             throw ProgressError.invalidInput(description: "対象アイテムの定義が見つかりません")
         }
@@ -145,9 +145,9 @@ actor GemModificationProgressService {
         }
 
         // 宝石の称号情報を対象アイテムに転送
-        targetRecord.socketMasterDataIndex = gemRecord.masterDataIndex
-        targetRecord.socketSuperRareTitleIndex = gemRecord.superRareTitleIndex
-        targetRecord.socketNormalTitleIndex = gemRecord.normalTitleIndex
+        targetRecord.socketItemId = gemRecord.itemId
+        targetRecord.socketSuperRareTitleId = gemRecord.superRareTitleId
+        targetRecord.socketNormalTitleId = gemRecord.normalTitleId
 
         // 宝石をインベントリから削除（1個減算）
         if gemRecord.quantity <= 1 {
@@ -172,15 +172,15 @@ actor GemModificationProgressService {
         ItemSnapshot(
             persistentIdentifier: record.persistentModelID,
             stackKey: record.stackKey,
-            masterDataIndex: record.masterDataIndex,
+            itemId: record.itemId,
             quantity: record.quantity,
             storage: record.storage,
             enhancements: .init(
-                superRareTitleIndex: record.superRareTitleIndex,
-                normalTitleIndex: record.normalTitleIndex,
-                socketSuperRareTitleIndex: record.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: record.socketNormalTitleIndex,
-                socketMasterDataIndex: record.socketMasterDataIndex
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketItemId: record.socketItemId
             )
         )
     }
