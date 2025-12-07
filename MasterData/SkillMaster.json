@@ -1715,7 +1715,7 @@
         "familyId": "spellSpecificMultiplier.spell.mage.magic_arrow",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.mage.magic_arrow"
+          "spellId": 0
         },
         "variants": [
           {
@@ -1780,7 +1780,7 @@
         "familyId": "spellSpecificMultiplier.spell.mage.fireball",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.mage.fireball"
+          "spellId": 2
         },
         "variants": [
           {
@@ -1838,7 +1838,7 @@
         "familyId": "spellSpecificMultiplier.spell.mage.blizzard",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.mage.blizzard"
+          "spellId": 3
         },
         "variants": [
           {
@@ -1889,7 +1889,7 @@
         "familyId": "spellSpecificMultiplier.spell.mage.thunder_bolt",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.mage.thunder_bolt"
+          "spellId": 5
         },
         "variants": [
           {
@@ -1940,7 +1940,7 @@
         "familyId": "spellSpecificMultiplier.spell.mage.nuclear",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.mage.nuclear"
+          "spellId": 6
         },
         "variants": [
           {
@@ -2033,7 +2033,7 @@
         "familyId": "spellSpecificMultiplier.spell.priest.heal",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.priest.heal"
+          "spellId": 7
         },
         "variants": [
           {
@@ -2063,7 +2063,7 @@
         "familyId": "spellSpecificMultiplier.spell.priest.heal_plus",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.priest.heal_plus"
+          "spellId": 10
         },
         "variants": [
           {
@@ -2086,7 +2086,7 @@
         "familyId": "spellSpecificMultiplier.spell.priest.party_heal",
         "effectType": "spellSpecificMultiplier",
         "parameters": {
-          "spellId": "spell.priest.party_heal"
+          "spellId": 13
         },
         "variants": [
           {
@@ -3548,7 +3548,7 @@
         "familyId": "tacticSpellAmplify.magic_arrow",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.mage.magic_arrow"
+          "spellId": 0
         },
         "variants": [
           {
@@ -3581,7 +3581,7 @@
         "familyId": "tacticSpellAmplify.fireball",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.mage.fireball"
+          "spellId": 2
         },
         "variants": [
           {
@@ -3614,7 +3614,7 @@
         "familyId": "tacticSpellAmplify.blizzard",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.mage.blizzard"
+          "spellId": 3
         },
         "variants": [
           {
@@ -3647,7 +3647,7 @@
         "familyId": "tacticSpellAmplify.thunder_bolt",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.mage.thunder_bolt"
+          "spellId": 5
         },
         "variants": [
           {
@@ -3680,7 +3680,7 @@
         "familyId": "tacticSpellAmplify.nuclear",
         "effectType": "tacticSpellAmplify",
         "parameters": {
-          "spellId": "spell.mage.nuclear"
+          "spellId": 6
         },
         "variants": [
           {
@@ -3717,7 +3717,7 @@
             "id": 438,
             "label": "[3回] マジックアロー",
             "parameters": {
-              "spellId": "spell.mage.magic_arrow"
+              "spellId": 0
             },
             "value": {
               "maxCharges": 3,
@@ -3733,7 +3733,7 @@
             "id": 439,
             "label": "[3回] ファイヤーボール",
             "parameters": {
-              "spellId": "spell.mage.fireball"
+              "spellId": 2
             },
             "value": {
               "maxCharges": 3,
@@ -3749,7 +3749,7 @@
             "id": 440,
             "label": "[3回] ブリザード",
             "parameters": {
-              "spellId": "spell.mage.blizzard"
+              "spellId": 3
             },
             "value": {
               "maxCharges": 3,
@@ -3765,7 +3765,7 @@
             "id": 441,
             "label": "[3回] サンダーボルト",
             "parameters": {
-              "spellId": "spell.mage.thunder_bolt"
+              "spellId": 5
             },
             "value": {
               "maxCharges": 3,
@@ -3781,7 +3781,7 @@
             "id": 442,
             "label": "[3回] ニュークリア",
             "parameters": {
-              "spellId": "spell.mage.nuclear"
+              "spellId": 6
             },
             "value": {
               "maxCharges": 3,
@@ -3797,7 +3797,7 @@
             "id": 443,
             "label": "[3回] ヒール",
             "parameters": {
-              "spellId": "spell.priest.heal"
+              "spellId": 7
             },
             "value": {
               "maxCharges": 3,
@@ -3813,7 +3813,7 @@
             "id": 444,
             "label": "[3回] ヒールプラス",
             "parameters": {
-              "spellId": "spell.priest.heal_plus"
+              "spellId": 10
             },
             "value": {
               "maxCharges": 3,
@@ -3829,7 +3829,7 @@
             "id": 445,
             "label": "[3回] キュア",
             "parameters": {
-              "spellId": "spell.priest.cure"
+              "spellId": 9
             },
             "value": {
               "maxCharges": 3,
@@ -3845,7 +3845,7 @@
             "id": 446,
             "label": "[3回] フルヒール",
             "parameters": {
-              "spellId": "spell.priest.full_heal"
+              "spellId": 12
             },
             "value": {
               "maxCharges": 3,
@@ -3861,7 +3861,7 @@
             "id": 447,
             "label": "[3回] パーティヒール",
             "parameters": {
-              "spellId": "spell.priest.party_heal"
+              "spellId": 13
             },
             "value": {
               "maxCharges": 3,
@@ -7356,7 +7356,7 @@
         "familyId": "status.inflict.confusion",
         "effectType": "statusInflict",
         "parameters": {
-          "statusId": "status.confusion"
+          "statusId": 1
         },
         "variants": [
           {
@@ -7524,7 +7524,7 @@
         "familyId": "spellSpecificTakenMultiplier.fireball",
         "effectType": "spellSpecificTakenMultiplier",
         "parameters": {
-          "spellId": "spell.mage.fireball"
+          "spellId": 2
         },
         "variants": [
           {
@@ -7554,7 +7554,7 @@
         "familyId": "spellSpecificTakenMultiplier.magic_arrow",
         "effectType": "spellSpecificTakenMultiplier",
         "parameters": {
-          "spellId": "spell.mage.magic_arrow"
+          "spellId": 0
         },
         "variants": [
           {
@@ -7584,7 +7584,7 @@
         "familyId": "spellSpecificTakenMultiplier.blizzard",
         "effectType": "spellSpecificTakenMultiplier",
         "parameters": {
-          "spellId": "spell.mage.blizzard"
+          "spellId": 3
         },
         "variants": [
           {
@@ -7614,7 +7614,7 @@
         "familyId": "spellSpecificTakenMultiplier.thunder_bolt",
         "effectType": "spellSpecificTakenMultiplier",
         "parameters": {
-          "spellId": "spell.mage.thunder_bolt"
+          "spellId": 5
         },
         "variants": [
           {
@@ -7644,7 +7644,7 @@
         "familyId": "spellSpecificTakenMultiplier.nuclear",
         "effectType": "spellSpecificTakenMultiplier",
         "parameters": {
-          "spellId": "spell.mage.nuclear"
+          "spellId": 6
         },
         "variants": [
           {
@@ -8577,7 +8577,7 @@
         "familyId": "statusResistanceMultiplier.sleep",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": "sleep"
+          "status": 0
         },
         "variants": [
           {
@@ -8614,7 +8614,7 @@
         "familyId": "statusResistanceMultiplier.petrify",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": "petrify"
+          "status": 2
         },
         "variants": [
           {
@@ -8651,7 +8651,7 @@
         "familyId": "statusResistanceMultiplier.confusion",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": "confusion"
+          "status": 1
         },
         "variants": [
           {
@@ -8681,7 +8681,7 @@
         "familyId": "statusResistancePercent.confusion",
         "effectType": "statusResistancePercent",
         "parameters": {
-          "status": "confusion"
+          "status": 1
         },
         "variants": [
           {
@@ -8718,7 +8718,7 @@
         "familyId": "statusResistanceMultiplier.instantDeath",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": "instantDeath"
+          "status": 3
         },
         "variants": [
           {
@@ -11490,7 +11490,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.magic_arrow"
+                  "spellId": 0
                 },
                 "value": {}
               }
@@ -11503,7 +11503,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.sleep_cloud"
+                  "spellId": 1
                 },
                 "value": {}
               }
@@ -11516,7 +11516,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.fireball"
+                  "spellId": 2
                 },
                 "value": {}
               }
@@ -11529,7 +11529,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.blizzard"
+                  "spellId": 3
                 },
                 "value": {}
               }
@@ -11542,7 +11542,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.attack_up"
+                  "spellId": 4
                 },
                 "value": {}
               }
@@ -11555,7 +11555,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.thunder_bolt"
+                  "spellId": 5
                 },
                 "value": {}
               }
@@ -11568,7 +11568,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.nuclear"
+                  "spellId": 6
                 },
                 "value": {}
               }
@@ -11590,7 +11590,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.magic_arrow"
+                  "spellId": 0
                 },
                 "value": {}
               }
@@ -11603,7 +11603,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.sleep_cloud"
+                  "spellId": 1
                 },
                 "value": {}
               }
@@ -11616,7 +11616,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.fireball"
+                  "spellId": 2
                 },
                 "value": {}
               }
@@ -11629,7 +11629,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.blizzard"
+                  "spellId": 3
                 },
                 "value": {}
               }
@@ -11642,7 +11642,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.attack_up"
+                  "spellId": 4
                 },
                 "value": {}
               }
@@ -11655,7 +11655,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.thunder_bolt"
+                  "spellId": 5
                 },
                 "value": {}
               }
@@ -11668,7 +11668,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.mage.nuclear"
+                  "spellId": 6
                 },
                 "value": {}
               }
@@ -11690,7 +11690,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.heal"
+                  "spellId": 7
                 },
                 "value": {}
               }
@@ -11703,7 +11703,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.shield_barrier"
+                  "spellId": 8
                 },
                 "value": {}
               }
@@ -11716,7 +11716,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.cure"
+                  "spellId": 9
                 },
                 "value": {}
               }
@@ -11729,7 +11729,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.heal_plus"
+                  "spellId": 10
                 },
                 "value": {}
               }
@@ -11742,7 +11742,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.magic_barrier"
+                  "spellId": 11
                 },
                 "value": {}
               }
@@ -11755,7 +11755,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.full_heal"
+                  "spellId": 12
                 },
                 "value": {}
               }
@@ -11768,7 +11768,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.party_heal"
+                  "spellId": 13
                 },
                 "value": {}
               }
@@ -11790,7 +11790,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.heal"
+                  "spellId": 7
                 },
                 "value": {}
               }
@@ -11803,7 +11803,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.shield_barrier"
+                  "spellId": 8
                 },
                 "value": {}
               }
@@ -11816,7 +11816,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.cure"
+                  "spellId": 9
                 },
                 "value": {}
               }
@@ -11829,7 +11829,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.heal_plus"
+                  "spellId": 10
                 },
                 "value": {}
               }
@@ -11842,7 +11842,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.magic_barrier"
+                  "spellId": 11
                 },
                 "value": {}
               }
@@ -11855,7 +11855,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.full_heal"
+                  "spellId": 12
                 },
                 "value": {}
               }
@@ -11868,7 +11868,7 @@
               {
                 "effectType": "spellAccess",
                 "parameters": {
-                  "spellId": "spell.priest.party_heal"
+                  "spellId": 13
                 },
                 "value": {}
               }
@@ -12776,7 +12776,7 @@
         "familyId": "statusResistanceMultiplier.sleep",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": "sleep"
+          "status": 0
         },
         "variants": [
           {
@@ -12813,7 +12813,7 @@
         "familyId": "statusResistanceMultiplier.petrify",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": "petrify"
+          "status": 2
         },
         "variants": [
           {
@@ -12850,7 +12850,7 @@
         "familyId": "statusResistanceMultiplier.confusion",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": "confusion"
+          "status": 1
         },
         "variants": [
           {
@@ -12880,7 +12880,7 @@
         "familyId": "statusResistancePercent.confusion",
         "effectType": "statusResistancePercent",
         "parameters": {
-          "status": "confusion"
+          "status": 1
         },
         "variants": [
           {
@@ -12917,7 +12917,7 @@
         "familyId": "statusResistanceMultiplier.instantDeath",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": "instantDeath"
+          "status": 3
         },
         "variants": [
           {

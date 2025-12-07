@@ -190,11 +190,58 @@ private struct SkillCategory: Decodable {
     let families: [SkillFamily]
 }
 
+/// Dictionary that accepts both strings and numbers, converting numbers to strings
+private struct FlexibleStringDict: Decodable {
+    let values: [String: String]
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKey.self)
+        var result: [String: String] = [:]
+        for key in container.allKeys {
+            if let stringValue = try? container.decode(String.self, forKey: key) {
+                result[key.stringValue] = stringValue
+            } else if let intValue = try? container.decode(Int.self, forKey: key) {
+                result[key.stringValue] = String(intValue)
+            } else if let doubleValue = try? container.decode(Double.self, forKey: key) {
+                result[key.stringValue] = String(doubleValue)
+            }
+        }
+        values = result
+    }
+
+    private struct DynamicCodingKey: CodingKey {
+        var stringValue: String
+        var intValue: Int?
+
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+            self.intValue = nil
+        }
+
+        init?(intValue: Int) {
+            self.stringValue = String(intValue)
+            self.intValue = intValue
+        }
+    }
+}
+
 private struct SkillFamily: Decodable {
     let familyId: String
     let effectType: String
     let parameters: [String: String]?
     let variants: [SkillVariant]
+
+    private enum CodingKeys: String, CodingKey {
+        case familyId, effectType, parameters, variants
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        familyId = try container.decode(String.self, forKey: .familyId)
+        effectType = try container.decode(String.self, forKey: .effectType)
+        parameters = try container.decodeIfPresent(FlexibleStringDict.self, forKey: .parameters)?.values
+        variants = try container.decode([SkillVariant].self, forKey: .variants)
+    }
 }
 
 private struct SkillVariant: Decodable {
@@ -212,7 +259,7 @@ private struct SkillVariant: Decodable {
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             effectType = try container.decodeIfPresent(String.self, forKey: .effectType)
-            parameters = try container.decodeIfPresent([String: String].self, forKey: .parameters)
+            parameters = try container.decodeIfPresent(FlexibleStringDict.self, forKey: .parameters)?.values
             payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
         }
     }
@@ -235,7 +282,7 @@ private struct SkillVariant: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
         label = try container.decodeIfPresent(String.self, forKey: .label)
-        parameters = try container.decodeIfPresent([String: String].self, forKey: .parameters)
+        parameters = try container.decodeIfPresent(FlexibleStringDict.self, forKey: .parameters)?.values
         payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
         effects = try container.decodeIfPresent([CustomEffect].self, forKey: .effects)
     }
