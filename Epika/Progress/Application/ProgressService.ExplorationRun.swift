@@ -4,7 +4,7 @@ import SwiftData
 // MARK: - Exploration Run Management
 extension ProgressService {
     func startExplorationRun(for partyId: UInt8,
-                              dungeonId: String,
+                              dungeonId: UInt8,
                               targetFloor: Int) async throws -> ExplorationRunHandle {
         try await synchronizeStoryAndDungeonUnlocks()
 
@@ -13,7 +13,7 @@ extension ProgressService {
         }
         let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId)
         guard dungeonSnapshot.isUnlocked else {
-            throw ProgressError.dungeonLocked(id: dungeonId)
+            throw ProgressError.dungeonLocked(id: String(dungeonId))
         }
         let highestDifficulty = max(0, dungeonSnapshot.highestUnlockedDifficulty)
         if partySnapshot.lastSelectedDifficulty > highestDifficulty {

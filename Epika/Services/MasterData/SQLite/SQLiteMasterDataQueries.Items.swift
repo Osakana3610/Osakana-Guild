@@ -101,8 +101,8 @@ extension SQLiteMasterDataManager {
             let id = UInt16(sqlite3_column_int(skillStatement, 0))
             guard var builder = builders[id] else { continue }
             let order = Int(sqlite3_column_int(skillStatement, 1))
-            guard let skillC = sqlite3_column_text(skillStatement, 2) else { continue }
-            builder.grantedSkills.append(.init(orderIndex: order, skillId: String(cString: skillC)))
+            let skillId = UInt16(sqlite3_column_int(skillStatement, 2))
+            builder.grantedSkills.append(.init(orderIndex: order, skillId: skillId))
             builders[builder.id] = builder
         }
 

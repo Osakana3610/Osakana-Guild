@@ -70,7 +70,7 @@ struct CombatExecutionService {
         let playerSnapshots: [BattleParticipantSnapshot] = resolution.playerActors.map { actor in
             let characterState = actor.partyMemberId.flatMap { partyMembersById[$0] }
             let progress = characterState?.progress
-            let avatarIndex = characterState?.resolvedAvatarIndex
+            let avatarIndex = characterState?.resolvedAvatarId
             return BattleParticipantSnapshot(actorId: actor.identifier,
                                              partyMemberId: actor.partyMemberId,
                                              characterId: progress?.id,

@@ -4,6 +4,21 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
     enum School: String, Sendable, Hashable {
         case mage
         case priest
+
+        var index: UInt8 {
+            switch self {
+            case .mage: return 0
+            case .priest: return 1
+            }
+        }
+
+        init?(index: UInt8) {
+            switch index {
+            case 0: self = .mage
+            case 1: self = .priest
+            default: return nil
+            }
+        }
     }
 
     enum Category: String, Sendable, Hashable {
