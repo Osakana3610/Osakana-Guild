@@ -29,8 +29,7 @@ struct DungeonDefinition: Identifiable, Sendable, Hashable {
         let bossPool: [BossGroup]
     }
 
-    let id: String
-    let index: UInt16
+    let id: UInt16
     let name: String
     let chapter: Int
     let stage: Int
@@ -69,7 +68,7 @@ struct DungeonFloorDefinition: Identifiable, Sendable, Hashable {
     }
 
     let id: String
-    let dungeonId: String?
+    let dungeonId: UInt16?
     let name: String
     let floorNumber: Int
     let encounterTableId: String

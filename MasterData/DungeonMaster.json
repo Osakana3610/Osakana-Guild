@@ -1,8 +1,6 @@
 {
   "dungeons": [
     {
-      "id": "online_babel",
-      "index": 1,
       "name": "オンラインバベル",
       "chapter": 0,
       "stage": 0,
@@ -19,11 +17,10 @@
       "eventsPerFloor": 5,
       "titleRank": 0,
       "floorEnemyMapping": [],
-      "floorCount": 1
+      "floorCount": 1,
+      "id": 1
     },
     {
-      "id": "forest_entrance",
-      "index": 2,
       "name": "森の入り口",
       "chapter": 1,
       "stage": 1,
@@ -106,11 +103,10 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 2
     },
     {
-      "id": "ancient_cave",
-      "index": 3,
       "name": "古い洞窟",
       "chapter": 1,
       "stage": 2,
@@ -178,11 +174,10 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 3
     },
     {
-      "id": "forgotten_ruins",
-      "index": 4,
       "name": "忘れられた遺跡",
       "chapter": 1,
       "stage": 3,
@@ -276,11 +271,10 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 4
     },
     {
-      "id": "forest_guardian",
-      "index": 5,
       "name": "森の番人",
       "chapter": 1,
       "stage": 4,
@@ -317,11 +311,10 @@
           ]
         }
       ],
-      "floorCount": 1
+      "floorCount": 1,
+      "id": 5
     },
     {
-      "id": "mountain_path",
-      "index": 6,
       "name": "山麓の道",
       "chapter": 2,
       "stage": 1,
@@ -389,11 +382,10 @@
           ]
         }
       ],
-      "floorCount": 2
+      "floorCount": 2,
+      "id": 6
     },
     {
-      "id": "ruined_village",
-      "index": 7,
       "name": "廃墟の村",
       "chapter": 2,
       "stage": 2,
@@ -487,11 +479,10 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 7
     },
     {
-      "id": "ancient_bridge",
-      "index": 8,
       "name": "古い橋",
       "chapter": 2,
       "stage": 3,
@@ -559,11 +550,10 @@
           ]
         }
       ],
-      "floorCount": 2
+      "floorCount": 2,
+      "id": 8
     },
     {
-      "id": "mountain_beast",
-      "index": 9,
       "name": "山の魔獣",
       "chapter": 2,
       "stage": 4,
@@ -599,11 +589,10 @@
           ]
         }
       ],
-      "floorCount": 1
+      "floorCount": 1,
+      "id": 9
     },
     {
-      "id": "dark_forest",
-      "index": 10,
       "name": "暗黒の森",
       "chapter": 3,
       "stage": 1,
@@ -697,11 +686,10 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 10
     },
     {
-      "id": "magic_lake",
-      "index": 11,
       "name": "魔法の湖",
       "chapter": 3,
       "stage": 2,
@@ -795,11 +783,10 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 11
     },
     {
-      "id": "lost_city",
-      "index": 12,
       "name": "失われた都市",
       "chapter": 3,
       "stage": 3,
@@ -893,11 +880,10 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 12
     },
     {
-      "id": "ancient_dragon_lair",
-      "index": 13,
       "name": "古代ドラゴンの住処",
       "chapter": 3,
       "stage": 4,
@@ -980,7 +966,8 @@
           ]
         }
       ],
-      "floorCount": 3
+      "floorCount": 3,
+      "id": 13
     }
   ]
 }

@@ -10,20 +10,17 @@ extension SQLiteMasterDataManager {
         cancellations: [PersonalityCancellation],
         battleEffects: [PersonalityBattleEffect]
     ) {
-        var primary: [String: PersonalityPrimaryDefinition] = [:]
-        let primarySQL = "SELECT id, personality_index, name, kind, description FROM personality_primary ORDER BY personality_index;"
+        var primary: [UInt8: PersonalityPrimaryDefinition] = [:]
+        let primarySQL = "SELECT id, name, kind, description FROM personality_primary ORDER BY id;"
         let primaryStatement = try prepare(primarySQL)
         defer { sqlite3_finalize(primaryStatement) }
         while sqlite3_step(primaryStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(primaryStatement, 0),
-                  let nameC = sqlite3_column_text(primaryStatement, 2),
-                  let kindC = sqlite3_column_text(primaryStatement, 3),
-                  let descriptionC = sqlite3_column_text(primaryStatement, 4) else { continue }
-            let id = String(cString: idC)
-            let index = Int(sqlite3_column_int(primaryStatement, 1))
+            guard let nameC = sqlite3_column_text(primaryStatement, 1),
+                  let kindC = sqlite3_column_text(primaryStatement, 2),
+                  let descriptionC = sqlite3_column_text(primaryStatement, 3) else { continue }
+            let id = UInt8(sqlite3_column_int(primaryStatement, 0))
             primary[id] = PersonalityPrimaryDefinition(
                 id: id,
-                index: index,
                 name: String(cString: nameC),
                 kind: String(cString: kindC),
                 description: String(cString: descriptionC),
@@ -35,8 +32,8 @@ extension SQLiteMasterDataManager {
         let primaryEffectStatement = try prepare(primaryEffectSQL)
         defer { sqlite3_finalize(primaryEffectStatement) }
         while sqlite3_step(primaryEffectStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(primaryEffectStatement, 0),
-                  let definition = primary[String(cString: idC)],
+            let id = UInt8(sqlite3_column_int(primaryEffectStatement, 0))
+            guard let definition = primary[id],
                   let typeC = sqlite3_column_text(primaryEffectStatement, 2),
                   let payloadC = sqlite3_column_text(primaryEffectStatement, 4) else { continue }
             var effects = definition.effects
@@ -46,7 +43,6 @@ extension SQLiteMasterDataManager {
                                  payloadJSON: String(cString: payloadC)))
             primary[definition.id] = PersonalityPrimaryDefinition(
                 id: definition.id,
-                index: definition.index,
                 name: definition.name,
                 kind: definition.kind,
                 description: definition.description,
@@ -54,20 +50,17 @@ extension SQLiteMasterDataManager {
             )
         }
 
-        var secondary: [String: PersonalitySecondaryDefinition] = [:]
-        let secondarySQL = "SELECT id, personality_index, name, positive_skill_id, negative_skill_id FROM personality_secondary ORDER BY personality_index;"
+        var secondary: [UInt8: PersonalitySecondaryDefinition] = [:]
+        let secondarySQL = "SELECT id, name, positive_skill_id, negative_skill_id FROM personality_secondary ORDER BY id;"
         let secondaryStatement = try prepare(secondarySQL)
         defer { sqlite3_finalize(secondaryStatement) }
         while sqlite3_step(secondaryStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(secondaryStatement, 0),
-                  let nameC = sqlite3_column_text(secondaryStatement, 2),
-                  let positiveC = sqlite3_column_text(secondaryStatement, 3),
-                  let negativeC = sqlite3_column_text(secondaryStatement, 4) else { continue }
-            let id = String(cString: idC)
-            let index = Int(sqlite3_column_int(secondaryStatement, 1))
+            guard let nameC = sqlite3_column_text(secondaryStatement, 1),
+                  let positiveC = sqlite3_column_text(secondaryStatement, 2),
+                  let negativeC = sqlite3_column_text(secondaryStatement, 3) else { continue }
+            let id = UInt8(sqlite3_column_int(secondaryStatement, 0))
             secondary[id] = PersonalitySecondaryDefinition(
                 id: id,
-                index: index,
                 name: String(cString: nameC),
                 positiveSkillId: String(cString: positiveC),
                 negativeSkillId: String(cString: negativeC),
@@ -79,14 +72,13 @@ extension SQLiteMasterDataManager {
         let secondaryStatStatement = try prepare(secondaryStatSQL)
         defer { sqlite3_finalize(secondaryStatStatement) }
         while sqlite3_step(secondaryStatStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(secondaryStatStatement, 0),
-                  let definition = secondary[String(cString: idC)],
+            let id = UInt8(sqlite3_column_int(secondaryStatStatement, 0))
+            guard let definition = secondary[id],
                   let statC = sqlite3_column_text(secondaryStatStatement, 1) else { continue }
             var bonuses = definition.statBonuses
             bonuses.append(.init(stat: String(cString: statC), value: Int(sqlite3_column_int(secondaryStatStatement, 2))))
             secondary[definition.id] = PersonalitySecondaryDefinition(
                 id: definition.id,
-                index: definition.index,
                 name: definition.name,
                 positiveSkillId: definition.positiveSkillId,
                 negativeSkillId: definition.negativeSkillId,
@@ -152,8 +144,8 @@ extension SQLiteMasterDataManager {
         }
 
         return (
-            primary.values.sorted { $0.index < $1.index },
-            secondary.values.sorted { $0.index < $1.index },
+            primary.values.sorted { $0.id < $1.id },
+            secondary.values.sorted { $0.id < $1.id },
             skills.values.sorted { $0.name < $1.name },
             cancellations,
             battleEffects

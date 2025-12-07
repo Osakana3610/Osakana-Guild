@@ -1,120 +1,104 @@
 {
   "superRareTitles": [
     {
-      "id": "godlike",
+      "id": 1,
       "name": "神級の",
-      "order": 1,
       "skills": [
         "skill.divine_light",
         "skill.godly_strike"
       ]
     },
     {
-      "id": "celestial",
+      "id": 2,
       "name": "天界の",
-      "order": 2,
       "skills": [
         "skill.angelic_guard"
       ]
     },
     {
-      "id": "demonic_lord",
+      "id": 3,
       "name": "魔王の",
-      "order": 3,
       "skills": [
         "skill.demonic_rage",
         "skill.hell_fire"
       ]
     },
     {
-      "id": "ancient",
+      "id": 4,
       "name": "太古の",
-      "order": 4,
       "skills": [
         "skill.ancient_wisdom"
       ]
     },
     {
-      "id": "void",
+      "id": 5,
       "name": "虚無の",
-      "order": 5,
       "skills": [
         "skill.void_blast",
         "skill.shadow_warp"
       ]
     },
     {
-      "id": "eternal",
+      "id": 6,
       "name": "永遠の",
-      "order": 6,
       "skills": [
         "skill.time_loop",
         "skill.eternal_guard"
       ]
     },
     {
-      "id": "world_breaker",
+      "id": 7,
       "name": "世界を砕く",
-      "order": 7,
       "skills": [
         "skill.world_break"
       ]
     },
     {
-      "id": "omnipotent",
+      "id": 8,
       "name": "全能の",
-      "order": 8,
       "skills": [
         "skill.omniscience",
         "skill.omnipotence"
       ]
     },
     {
-      "id": "unprecedented",
+      "id": 9,
       "name": "空前絶後の",
-      "order": 9,
       "skills": []
     },
     {
-      "id": "ultra_raging",
+      "id": 10,
       "name": "超絶怒涛の",
-      "order": 10,
       "skills": []
     },
     {
-      "id": "flame_emperor",
+      "id": 11,
       "name": "炎帝の",
-      "order": 11,
       "skills": []
     },
     {
-      "id": "ice_sovereign",
+      "id": 12,
       "name": "氷皇の",
-      "order": 12,
       "skills": []
     },
     {
-      "id": "storm_king",
+      "id": 13,
       "name": "嵐王の",
-      "order": 13,
       "skills": []
     },
     {
-      "id": "despair_incarnate",
+      "id": 14,
       "name": "絶望に満ちた",
-      "order": 14,
       "skills": []
     },
     {
-      "id": "hope_bringer",
+      "id": 15,
       "name": "希望をもたらす",
-      "order": 15,
       "skills": []
     },
     {
-      "id": "reality_shaper",
+      "id": 16,
       "name": "現実を編む",
-      "order": 16,
       "skills": []
     }
   ]

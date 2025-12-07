@@ -34,7 +34,7 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
         let multiplier: Double
     }
 
-    let id: String
+    let id: UInt8
     let name: String
     let school: School
     let tier: Int

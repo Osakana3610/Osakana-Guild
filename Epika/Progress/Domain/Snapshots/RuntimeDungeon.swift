@@ -4,7 +4,7 @@ struct RuntimeDungeon: Identifiable, Hashable, Sendable {
     let definition: DungeonDefinition
     let progress: DungeonSnapshot?
 
-    var id: String { definition.id }
+    var id: UInt16 { definition.id }
     var isUnlocked: Bool { progress?.isUnlocked ?? false }
     var highestUnlockedDifficulty: Int { progress?.highestUnlockedDifficulty ?? 0 }
     var highestClearedDifficulty: Int { progress?.highestClearedDifficulty ?? 0 }

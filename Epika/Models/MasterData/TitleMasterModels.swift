@@ -1,7 +1,7 @@
 import Foundation
 
 struct TitleDefinition: Identifiable, Sendable, Hashable {
-    let id: String
+    let id: UInt8
     let name: String
     let description: String?
     let statMultiplier: Double?
@@ -10,7 +10,6 @@ struct TitleDefinition: Identifiable, Sendable, Hashable {
     let plusCorrection: Int?
     let minusCorrection: Int?
     let judgmentCount: Int?
-    let rank: Int?
     let dropProbability: Double?
     let allowWithTitleTreasure: Bool
     let superRareRates: TitleSuperRareRates?
@@ -22,9 +21,8 @@ struct SuperRareTitleDefinition: Identifiable, Sendable, Hashable {
         let skillId: String
     }
 
-    let id: String
+    let id: UInt8
     let name: String
-    let order: Int
     let skills: [Skill]
 }
 

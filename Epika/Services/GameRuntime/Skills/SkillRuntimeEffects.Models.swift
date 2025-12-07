@@ -2,8 +2,8 @@ import Foundation
 
 struct SkillRuntimeEffects {
     struct Spellbook: Sendable, Hashable {
-        var learnedSpellIds: Set<String>
-        var forgottenSpellIds: Set<String>
+        var learnedSpellIds: Set<UInt8>
+        var forgottenSpellIds: Set<UInt8>
         var tierUnlocks: [String: Int]
 
         static let empty = Spellbook(learnedSpellIds: [],

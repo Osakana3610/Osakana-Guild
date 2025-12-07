@@ -17,8 +17,7 @@ extension Generator {
             // Items
             """
             CREATE TABLE IF NOT EXISTS items (
-                id TEXT PRIMARY KEY,
-                item_index INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,
                 category TEXT NOT NULL,
@@ -29,7 +28,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS item_stat_bonuses (
-                item_id TEXT NOT NULL,
+                item_id INTEGER NOT NULL,
                 stat TEXT NOT NULL,
                 value INTEGER NOT NULL,
                 PRIMARY KEY (item_id, stat),
@@ -38,7 +37,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS item_combat_bonuses (
-                item_id TEXT NOT NULL,
+                item_id INTEGER NOT NULL,
                 stat TEXT NOT NULL,
                 value INTEGER NOT NULL,
                 PRIMARY KEY (item_id, stat),
@@ -47,7 +46,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS item_allowed_races (
-                item_id TEXT NOT NULL,
+                item_id INTEGER NOT NULL,
                 race_id TEXT NOT NULL,
                 PRIMARY KEY (item_id, race_id),
                 FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
@@ -55,7 +54,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS item_allowed_jobs (
-                item_id TEXT NOT NULL,
+                item_id INTEGER NOT NULL,
                 job_id TEXT NOT NULL,
                 PRIMARY KEY (item_id, job_id),
                 FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
@@ -63,7 +62,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS item_allowed_genders (
-                item_id TEXT NOT NULL,
+                item_id INTEGER NOT NULL,
                 gender TEXT NOT NULL,
                 PRIMARY KEY (item_id, gender),
                 FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
@@ -71,7 +70,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS item_bypass_race_restrictions (
-                item_id TEXT NOT NULL,
+                item_id INTEGER NOT NULL,
                 race_id TEXT NOT NULL,
                 PRIMARY KEY (item_id, race_id),
                 FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
@@ -79,7 +78,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS item_granted_skills (
-                item_id TEXT NOT NULL,
+                item_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 skill_id TEXT NOT NULL,
                 PRIMARY KEY (item_id, order_index),
@@ -114,7 +113,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS spells (
-                id TEXT PRIMARY KEY,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 school TEXT NOT NULL,
                 tier INTEGER NOT NULL,
@@ -124,7 +123,7 @@ extension Generator {
                 extra_targets_per_levels REAL,
                 hits_per_cast INTEGER,
                 base_power_multiplier REAL,
-                status_id TEXT,
+                status_id INTEGER,
                 heal_multiplier REAL,
                 cast_condition TEXT,
                 description TEXT NOT NULL
@@ -132,7 +131,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS spell_buffs (
-                spell_id TEXT NOT NULL,
+                spell_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 type TEXT NOT NULL,
                 multiplier REAL NOT NULL,
@@ -143,8 +142,7 @@ extension Generator {
             // Jobs
             """
             CREATE TABLE IF NOT EXISTS jobs (
-                id TEXT PRIMARY KEY,
-                job_index INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 category TEXT NOT NULL,
                 growth_tendency TEXT
@@ -152,7 +150,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS job_combat_coefficients (
-                job_id TEXT NOT NULL,
+                job_id INTEGER NOT NULL,
                 stat TEXT NOT NULL,
                 value REAL NOT NULL,
                 PRIMARY KEY (job_id, stat),
@@ -161,7 +159,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS job_skills (
-                job_id TEXT NOT NULL,
+                job_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 skill_id TEXT NOT NULL,
                 PRIMARY KEY (job_id, order_index),
@@ -171,8 +169,7 @@ extension Generator {
             // Races
             """
             CREATE TABLE IF NOT EXISTS races (
-                id TEXT PRIMARY KEY,
-                race_index INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 gender TEXT NOT NULL,
                 gender_code INTEGER NOT NULL,
@@ -182,7 +179,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS race_base_stats (
-                race_id TEXT NOT NULL,
+                race_id INTEGER NOT NULL,
                 stat TEXT NOT NULL,
                 value INTEGER NOT NULL,
                 PRIMARY KEY (race_id, stat),
@@ -191,7 +188,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS race_passive_skills (
-                race_id TEXT NOT NULL,
+                race_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 skill_id TEXT NOT NULL,
                 name TEXT NOT NULL,
@@ -203,7 +200,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS race_skill_unlocks (
-                race_id TEXT NOT NULL,
+                race_id INTEGER NOT NULL,
                 level_requirement INTEGER NOT NULL,
                 skill_id TEXT NOT NULL,
                 name TEXT NOT NULL,
@@ -222,7 +219,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS race_category_memberships (
                 category TEXT NOT NULL,
-                race_id TEXT NOT NULL,
+                race_id INTEGER NOT NULL,
                 PRIMARY KEY (category, race_id),
                 FOREIGN KEY (category) REFERENCES race_category_caps(category) ON DELETE CASCADE,
                 FOREIGN KEY (race_id) REFERENCES races(id) ON DELETE CASCADE
@@ -231,7 +228,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS race_gender_restrictions (
                 rule TEXT NOT NULL,
-                race_id TEXT NOT NULL,
+                race_id INTEGER NOT NULL,
                 PRIMARY KEY (rule, race_id),
                 FOREIGN KEY (race_id) REFERENCES races(id) ON DELETE CASCADE
             );
@@ -245,7 +242,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS race_hiring_cost_memberships (
                 category TEXT NOT NULL,
-                race_id TEXT NOT NULL,
+                race_id INTEGER NOT NULL,
                 PRIMARY KEY (category, race_id),
                 FOREIGN KEY (category) REFERENCES race_hiring_cost_categories(category) ON DELETE CASCADE,
                 FOREIGN KEY (race_id) REFERENCES races(id) ON DELETE CASCADE
@@ -260,7 +257,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS race_hiring_level_memberships (
                 category TEXT NOT NULL,
-                race_id TEXT NOT NULL,
+                race_id INTEGER NOT NULL,
                 PRIMARY KEY (category, race_id),
                 FOREIGN KEY (category) REFERENCES race_hiring_level_limits(category) ON DELETE CASCADE,
                 FOREIGN KEY (race_id) REFERENCES races(id) ON DELETE CASCADE
@@ -269,7 +266,7 @@ extension Generator {
             // Titles
             """
             CREATE TABLE IF NOT EXISTS titles (
-                id TEXT PRIMARY KEY,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 description TEXT,
                 stat_multiplier REAL,
@@ -278,7 +275,6 @@ extension Generator {
                 plus_correction INTEGER,
                 minus_correction INTEGER,
                 judgment_count INTEGER,
-                rank INTEGER,
                 drop_probability REAL,
                 allow_with_title_treasure INTEGER,
                 super_rare_rate_normal REAL,
@@ -289,14 +285,13 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS super_rare_titles (
-                id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                sort_order INTEGER NOT NULL
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL
             );
             """,
             """
             CREATE TABLE IF NOT EXISTS super_rare_title_skills (
-                title_id TEXT NOT NULL,
+                title_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 skill_id TEXT NOT NULL,
                 PRIMARY KEY (title_id, order_index),
@@ -306,7 +301,7 @@ extension Generator {
             // Status effects
             """
             CREATE TABLE IF NOT EXISTS status_effects (
-                id TEXT PRIMARY KEY,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,
                 category TEXT NOT NULL,
@@ -319,7 +314,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS status_effect_tags (
-                effect_id TEXT NOT NULL,
+                effect_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 tag TEXT NOT NULL,
                 PRIMARY KEY (effect_id, order_index),
@@ -328,7 +323,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS status_effect_stat_modifiers (
-                effect_id TEXT NOT NULL,
+                effect_id INTEGER NOT NULL,
                 stat TEXT NOT NULL,
                 value REAL NOT NULL,
                 PRIMARY KEY (effect_id, stat),
@@ -338,8 +333,7 @@ extension Generator {
             // Enemies
             """
             CREATE TABLE IF NOT EXISTS enemies (
-                id TEXT PRIMARY KEY,
-                enemy_index INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 race TEXT NOT NULL,
                 category TEXT NOT NULL,
@@ -350,7 +344,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS enemy_stats (
-                enemy_id TEXT PRIMARY KEY,
+                enemy_id INTEGER PRIMARY KEY,
                 strength INTEGER NOT NULL,
                 wisdom INTEGER NOT NULL,
                 spirit INTEGER NOT NULL,
@@ -362,7 +356,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS enemy_resistances (
-                enemy_id TEXT NOT NULL,
+                enemy_id INTEGER NOT NULL,
                 element TEXT NOT NULL,
                 value REAL NOT NULL,
                 PRIMARY KEY (enemy_id, element),
@@ -371,7 +365,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS enemy_skills (
-                enemy_id TEXT NOT NULL,
+                enemy_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 skill_id TEXT NOT NULL,
                 PRIMARY KEY (enemy_id, order_index),
@@ -380,7 +374,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS enemy_drops (
-                enemy_id TEXT NOT NULL,
+                enemy_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 item_id TEXT NOT NULL,
                 PRIMARY KEY (enemy_id, order_index),
@@ -390,8 +384,7 @@ extension Generator {
             // Dungeons
             """
             CREATE TABLE IF NOT EXISTS dungeons (
-                id TEXT PRIMARY KEY,
-                dungeon_index INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 chapter INTEGER NOT NULL,
                 stage INTEGER NOT NULL,
@@ -405,7 +398,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS dungeon_unlock_conditions (
-                dungeon_id TEXT NOT NULL,
+                dungeon_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 condition TEXT NOT NULL,
                 PRIMARY KEY (dungeon_id, order_index),
@@ -414,7 +407,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS dungeon_encounter_weights (
-                dungeon_id TEXT NOT NULL,
+                dungeon_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 enemy_id TEXT NOT NULL,
                 weight REAL NOT NULL,
@@ -446,7 +439,7 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS dungeon_floors (
                 id TEXT PRIMARY KEY,
-                dungeon_id TEXT,
+                dungeon_id INTEGER,
                 name TEXT NOT NULL,
                 floor_number INTEGER NOT NULL,
                 encounter_table_id TEXT NOT NULL,
@@ -478,8 +471,7 @@ extension Generator {
                 item_id TEXT NOT NULL,
                 quantity INTEGER,
                 PRIMARY KEY (shop_id, order_index),
-                FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE,
-                FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
+                FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE
             );
             """,
             // Synthesis
@@ -501,7 +493,7 @@ extension Generator {
             // Stories
             """
             CREATE TABLE IF NOT EXISTS story_nodes (
-                id TEXT PRIMARY KEY,
+                id INTEGER PRIMARY KEY,
                 title TEXT NOT NULL,
                 content TEXT NOT NULL,
                 chapter INTEGER NOT NULL,
@@ -510,7 +502,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS story_unlock_requirements (
-                story_id TEXT NOT NULL,
+                story_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 requirement TEXT NOT NULL,
                 PRIMARY KEY (story_id, order_index),
@@ -519,7 +511,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS story_rewards (
-                story_id TEXT NOT NULL,
+                story_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 reward TEXT NOT NULL,
                 PRIMARY KEY (story_id, order_index),
@@ -528,7 +520,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS story_unlock_modules (
-                story_id TEXT NOT NULL,
+                story_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 module_id TEXT NOT NULL,
                 PRIMARY KEY (story_id, order_index),
@@ -538,8 +530,7 @@ extension Generator {
             // Personality
             """
             CREATE TABLE IF NOT EXISTS personality_primary (
-                id TEXT PRIMARY KEY,
-                personality_index INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 kind TEXT NOT NULL,
                 description TEXT NOT NULL
@@ -547,7 +538,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS personality_primary_effects (
-                personality_id TEXT NOT NULL,
+                personality_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 effect_type TEXT NOT NULL,
                 value REAL,
@@ -558,8 +549,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS personality_secondary (
-                id TEXT PRIMARY KEY,
-                personality_index INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 positive_skill_id TEXT NOT NULL,
                 negative_skill_id TEXT NOT NULL
@@ -567,7 +557,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS personality_secondary_stat_bonuses (
-                personality_id TEXT NOT NULL,
+                personality_id INTEGER NOT NULL,
                 stat TEXT NOT NULL,
                 value INTEGER NOT NULL,
                 PRIMARY KEY (personality_id, stat),
@@ -607,8 +597,7 @@ extension Generator {
             // Exploration events
             """
             CREATE TABLE IF NOT EXISTS exploration_events (
-                id TEXT PRIMARY KEY,
-                event_index INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY,
                 type TEXT NOT NULL,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,
@@ -618,7 +607,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS exploration_event_tags (
-                event_id TEXT NOT NULL,
+                event_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
                 tag TEXT NOT NULL,
                 PRIMARY KEY (event_id, order_index),
@@ -627,7 +616,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS exploration_event_weights (
-                event_id TEXT NOT NULL,
+                event_id INTEGER NOT NULL,
                 context TEXT NOT NULL,
                 weight REAL NOT NULL,
                 PRIMARY KEY (event_id, context),
@@ -636,7 +625,7 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS exploration_event_payloads (
-                event_id TEXT PRIMARY KEY,
+                event_id INTEGER PRIMARY KEY,
                 payload_type TEXT NOT NULL,
                 payload_json TEXT NOT NULL,
                 FOREIGN KEY (event_id) REFERENCES exploration_events(id) ON DELETE CASCADE
