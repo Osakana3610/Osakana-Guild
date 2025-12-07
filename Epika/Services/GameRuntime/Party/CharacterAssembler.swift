@@ -3,24 +3,24 @@ import Foundation
 enum CharacterAssembler {
     static func assembleState(repository: MasterDataRepository,
                               from progress: RuntimeCharacterProgress) async throws -> RuntimeCharacterState {
-        async let raceDef = repository.race(withIndex: progress.raceIndex)
-        async let jobDef = repository.job(withIndex: progress.jobIndex)
+        async let raceDef = repository.race(withId: progress.raceId)
+        async let jobDef = repository.job(withId: progress.jobId)
         async let spellDefinitions = repository.allSpells()
 
         // 装備付与スキルを合成し、先勝ちで重複除去
-        let masterDataIndices = Set(progress.equippedItems.map { $0.masterDataIndex }).filter { $0 > 0 }
-        let equippedItemDefinitions = try await MasterDataRuntimeService.shared.getItemMasterData(byIndices: Array(masterDataIndices))
+        let itemIds = Set(progress.equippedItems.map { $0.itemId }).filter { $0 > 0 }
+        let equippedItemDefinitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(itemIds))
 
-        // 装備から付与されるスキルのskillId→skillIndex変換用マップを構築
+        // 装備から付与されるスキルのskillId→skillId変換用マップを構築
         let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkills.map { $0.skillId } }
         let grantedSkillDefinitions = try await repository.skills(withIds: grantedSkillIds)
-        let skillIdToIndex = Dictionary(uniqueKeysWithValues: grantedSkillDefinitions.map { ($0.id, $0.skillIndex) })
+        let skillIdToId = Dictionary(uniqueKeysWithValues: grantedSkillDefinitions.map { ($0.id, $0.skillId) })
 
         let equipmentSkills: [RuntimeCharacterProgress.LearnedSkill] = equippedItemDefinitions.flatMap { definition in
             definition.grantedSkills.sorted { $0.orderIndex < $1.orderIndex }.compactMap { granted in
-                guard let skillIndex = skillIdToIndex[granted.skillId] else { return nil }
+                guard let skillId = skillIdToId[granted.skillId] else { return nil }
                 return RuntimeCharacterProgress.LearnedSkill(id: UUID(),
-                                                             skillIndex: skillIndex,
+                                                             skillId: skillId,
                                                              level: 1,
                                                              isEquipped: true,
                                                              createdAt: Date(),
@@ -28,8 +28,8 @@ enum CharacterAssembler {
             }
         }
         let mergedLearnedSkills = deduplicatedSkills(progress.learnedSkills + equipmentSkills)
-        let learnedSkillIndices = mergedLearnedSkills.map { $0.skillIndex }
-        let learnedSkills = try await repository.skills(withIndices: learnedSkillIndices)
+        let learnedSkillIds = mergedLearnedSkills.map { $0.skillId }
+        let learnedSkills = try await repository.skills(withIds: learnedSkillIds)
 
         let slotModifiers = try SkillRuntimeEffectCompiler.equipmentSlots(from: learnedSkills)
         let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: progress.level,
@@ -49,8 +49,8 @@ enum CharacterAssembler {
         }
 
         let loadout = try await assembleLoadout(repository: repository, from: revivedProgress.equippedItems)
-        let primary = try await repository.personalityPrimary(withIndex: revivedProgress.personality.primaryIndex)
-        let secondary = try await repository.personalitySecondary(withIndex: revivedProgress.personality.secondaryIndex)
+        let primary = try await repository.personalityPrimary(withId: revivedProgress.personality.primaryId)
+        let secondary = try await repository.personalitySecondary(withId: revivedProgress.personality.secondaryId)
 
         let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
         let spells = try await spellDefinitions
@@ -90,32 +90,32 @@ enum CharacterAssembler {
                                         from equippedItems: [RuntimeCharacterProgress.EquippedItem]) async throws -> RuntimeCharacterState.Loadout {
         let runtimeService = MasterDataRuntimeService.shared
 
-        // アイテムインデックスを収集（装備とソケット宝石）
-        var itemIndices = Set(equippedItems.map { $0.masterDataIndex })
-        let socketItemIndices = Set(equippedItems.map { $0.socketMasterDataIndex }).filter { $0 > 0 }
-        itemIndices.formUnion(socketItemIndices)
-        let items = try await runtimeService.getItemMasterData(byIndices: Array(itemIndices.filter { $0 > 0 }))
+        // アイテムIDを収集（装備とソケット宝石）
+        var itemIds = Set(equippedItems.map { $0.itemId })
+        let socketItemIds = Set(equippedItems.map { $0.socketItemId }).filter { $0 > 0 }
+        itemIds.formUnion(socketItemIds)
+        let items = try await runtimeService.getItemMasterData(ids: Array(itemIds.filter { $0 > 0 }))
 
-        // 通常称号インデックスを収集（装備とソケット宝石）
-        var normalTitleIndices = Set(equippedItems.map { $0.normalTitleIndex })
-        let socketNormalTitleIndices = Set(equippedItems.map { $0.socketNormalTitleIndex })
-        normalTitleIndices.formUnion(socketNormalTitleIndices)
+        // 通常称号IDを収集（装備とソケット宝石）
+        var normalTitleIds = Set(equippedItems.map { $0.normalTitleId })
+        let socketNormalTitleIds = Set(equippedItems.map { $0.socketNormalTitleId })
+        normalTitleIds.formUnion(socketNormalTitleIds)
         var titles: [TitleDefinition] = []
-        for index in normalTitleIndices where index > 0 {
-            if let titleId = await runtimeService.getTitleId(for: index),
-               let definition = try await repository.title(withId: titleId) {
+        for titleId in normalTitleIds where titleId > 0 {
+            if let titleStringId = await runtimeService.getTitleId(for: titleId),
+               let definition = try await repository.title(withId: titleStringId) {
                 titles.append(definition)
             }
         }
 
-        // 超レア称号インデックスを収集（装備とソケット宝石）
-        var superRareTitleIndices = Set(equippedItems.map { $0.superRareTitleIndex })
-        let socketSuperRareTitleIndices = Set(equippedItems.map { $0.socketSuperRareTitleIndex })
-        superRareTitleIndices.formUnion(socketSuperRareTitleIndices)
+        // 超レア称号IDを収集（装備とソケット宝石）
+        var superRareTitleIds = Set(equippedItems.map { $0.superRareTitleId })
+        let socketSuperRareTitleIds = Set(equippedItems.map { $0.socketSuperRareTitleId })
+        superRareTitleIds.formUnion(socketSuperRareTitleIds)
         var superRareTitles: [SuperRareTitleDefinition] = []
-        for index in superRareTitleIndices where index > 0 {
-            if let titleId = await runtimeService.getSuperRareTitleId(for: index),
-               let definition = try await repository.superRareTitle(withId: titleId) {
+        for titleId in superRareTitleIds where titleId > 0 {
+            if let titleStringId = await runtimeService.getSuperRareTitleId(for: titleId),
+               let definition = try await repository.superRareTitle(withId: titleStringId) {
                 superRareTitles.append(definition)
             }
         }
@@ -157,11 +157,11 @@ private enum EquipmentSlotCalculator {
 // MARK: - Helpers
 
 private func deduplicatedSkills(_ skills: [RuntimeCharacterProgress.LearnedSkill]) -> [RuntimeCharacterProgress.LearnedSkill] {
-    var seen: Set<Int> = []
+    var seen: Set<UInt16> = []
     var result: [RuntimeCharacterProgress.LearnedSkill] = []
     result.reserveCapacity(skills.count)
     for entry in skills {
-        if seen.insert(entry.skillIndex).inserted {
+        if seen.insert(entry.skillId).inserted {
             result.append(entry)
         }
     }

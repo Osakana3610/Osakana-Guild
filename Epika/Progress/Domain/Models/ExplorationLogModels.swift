@@ -5,20 +5,20 @@ import Foundation
 struct EventEntry: Codable, Sendable {
     var floor: UInt8
     var kind: UInt8  // EventKind.rawValue
-    var enemyIndex: UInt16?
+    var enemyId: UInt16?
     var battleResult: UInt8?  // BattleResult.rawValue
     var battleLogData: Data?  // BattleLogArchive（将来はCompactLogEntry配列に変換予定）
-    var scriptedEventIndex: UInt16?
-    var exp: Int32
-    var gold: Int32
+    var scriptedEventId: UInt8?
+    var exp: UInt32
+    var gold: UInt32
     var drops: [DropEntry]
     var occurredAt: Date  // イベント発生時刻
 }
 
 struct DropEntry: Codable, Sendable {
-    var superRareTitleOrder: UInt8   // 超レア称号のorder（0=なし）
-    var normalTitleRank: UInt8       // 通常称号のrank（0=なし）
-    var itemIndex: Int16             // アイテムのindex（-1=なし）
+    var superRareTitleId: UInt8   // 超レア称号ID（0=なし）
+    var normalTitleId: UInt8      // 通常称号rank（0=なし）
+    var itemId: UInt16            // アイテムID
     var quantity: UInt16
 }
 
@@ -46,10 +46,10 @@ enum ExplorationResult: UInt8, Codable, Sendable {
 struct CompactLogEntry: Codable, Sendable {
     var turn: UInt8                // ターン番号（1〜255、20ターン上限なので十分）
     var template: UInt8            // LogTemplate.rawValue
-    var actorIndex: UInt16?        // 行動者（敵: suffix*1000+masterIndex, 味方: characterId）
-    var targetIndex: UInt16?       // 対象
+    var actorId: UInt16?           // 行動者（敵: suffix*1000+enemyId, 味方: characterId）
+    var targetId: UInt16?          // 対象
     var value: Int32?              // ダメージ/回復量（32,767超えあり）
-    var refIndex: UInt16?          // スキル/呪文のマスターデータindex
+    var refId: UInt16?             // スキル/呪文のID
 }
 
 /// rawValue固定の意図:
@@ -111,32 +111,32 @@ enum LogTemplate: UInt8, Codable, Sendable {
 
 // MARK: - Actor Index Encoding
 
-/// actorIndexのエンコード/デコードヘルパー
+/// actorIdのエンコード/デコードヘルパー
 ///
 /// エンコーディング規則:
 /// - 味方: characterId（1〜200）
-/// - 敵: suffix * 1000 + enemyMasterIndex（1000〜29999）
+/// - 敵: suffix * 1000 + enemyId（1000〜29999）
 ///   - suffix: 出現順（1=A, 2=B, 3=C...）
-///   - enemyMasterIndex: EnemyMaster.jsonのindex（0〜999）
-enum ActorIndexCoding: Sendable {
-    /// 敵のactorIndexを生成
-    nonisolated static func encodeEnemy(suffix: Int, masterIndex: UInt16) -> UInt16 {
-        UInt16(suffix) * 1000 + masterIndex
+///   - enemyId: EnemyMaster.jsonのid（0〜999）
+enum ActorIdCoding: Sendable {
+    /// 敵のactorIdを生成
+    nonisolated static func encodeEnemy(suffix: Int, enemyId: UInt16) -> UInt16 {
+        UInt16(suffix) * 1000 + enemyId
     }
 
-    /// actorIndexをデコード
-    nonisolated static func decode(_ index: UInt16) -> ActorType {
-        if index >= 1000 {
-            let suffix = Int(index / 1000)
-            let masterIndex = index % 1000
-            return .enemy(suffix: suffix, masterIndex: masterIndex)
+    /// actorIdをデコード
+    nonisolated static func decode(_ id: UInt16) -> ActorType {
+        if id >= 1000 {
+            let suffix = Int(id / 1000)
+            let enemyId = id % 1000
+            return .enemy(suffix: suffix, enemyId: enemyId)
         } else {
-            return .ally(characterId: UInt8(index))
+            return .ally(characterId: UInt8(id))
         }
     }
 
     enum ActorType: Sendable {
         case ally(characterId: UInt8)
-        case enemy(suffix: Int, masterIndex: UInt16)
+        case enemy(suffix: Int, enemyId: UInt16)
     }
 }
