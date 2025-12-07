@@ -56,8 +56,12 @@ struct CharacterImageView: View {
                 return .file(url)
             }
             return nil
+        } else if avatarIndex >= 100 {
+            // 100-399: 職業画像 (genderCode * 100 + jobId)
+            return .bundle("Characters/Jobs/\(avatarIndex)")
         } else {
-            return .bundle(String(avatarIndex))
+            // 1-99: 種族画像 (raceId)
+            return .bundle("Characters/Races/\(avatarIndex)")
         }
     }
 
