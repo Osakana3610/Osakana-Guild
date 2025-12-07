@@ -1,9 +1,18 @@
 import Foundation
 
-enum BattleDamageType: Sendable {
-    case physical
-    case magical
-    case breath
+enum BattleDamageType: UInt8, Sendable {
+    case physical = 0
+    case magical = 1
+    case breath = 2
+
+    init?(identifier: String) {
+        switch identifier {
+        case "physical": self = .physical
+        case "magical": self = .magical
+        case "breath": self = .breath
+        default: return nil
+        }
+    }
 }
 
 struct BattleActionRates: Sendable, Hashable {

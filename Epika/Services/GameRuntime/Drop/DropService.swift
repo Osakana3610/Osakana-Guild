@@ -5,7 +5,7 @@ enum DropService {
     static func drops(repository: MasterDataRepository,
                       for enemy: EnemyDefinition,
                       party: RuntimePartyState,
-                      dungeonId: UInt8? = nil,
+                      dungeonId: UInt16? = nil,
                       floorNumber: Int? = nil,
                       isRabiTicketActive: Bool = false,
                       hasTitleTreasure: Bool = false,
@@ -32,7 +32,7 @@ enum DropService {
 
         for drop in enemy.drops.sorted(by: { $0.orderIndex < $1.orderIndex }) {
             guard let item = try await repository.item(withId: drop.itemId) else {
-                throw RuntimeError.masterDataNotFound(entity: "item", identifier: drop.itemId)
+                throw RuntimeError.masterDataNotFound(entity: "item", identifier: String(drop.itemId))
             }
 
             let category = categorize(item: item)
@@ -159,7 +159,7 @@ enum DropService {
 
     private static func superRareEnemyMultiplier(for category: DropItemCategory,
                                                  enemyTitle: TitleDefinition?) -> Double {
-        guard let rank = enemyTitle?.rank, rank >= 6 else { return 1.0 }
+        guard let titleId = enemyTitle?.id, titleId >= 6 else { return 1.0 }
         switch category {
         case .normal, .good:
             return 50.0

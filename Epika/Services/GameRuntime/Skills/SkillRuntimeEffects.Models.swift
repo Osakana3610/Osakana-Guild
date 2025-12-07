@@ -76,14 +76,14 @@ struct SkillRuntimeEffects {
     struct ExplorationModifiers: Sendable, Hashable {
         struct Entry: Sendable, Hashable {
             let multiplier: Double
-            let dungeonId: UInt8?
+            let dungeonId: UInt16?
             let dungeonName: String?
         }
 
         private(set) var entries: [Entry] = []
 
         mutating func addEntry(multiplier: Double,
-                               dungeonId: UInt8?,
+                               dungeonId: UInt16?,
                                dungeonName: String?) {
             guard multiplier != 1.0 else { return }
             entries.append(Entry(multiplier: multiplier,
@@ -95,7 +95,7 @@ struct SkillRuntimeEffects {
             entries.append(contentsOf: other.entries)
         }
 
-        func multiplier(forDungeonId dungeonId: UInt8, dungeonName: String) -> Double {
+        func multiplier(forDungeonId dungeonId: UInt16, dungeonName: String) -> Double {
             entries.reduce(1.0) { result, entry in
                 if let scopedId = entry.dungeonId, scopedId != dungeonId {
                     return result

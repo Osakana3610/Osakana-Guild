@@ -162,42 +162,35 @@ extension ProgressService {
     }
 
     func applyDropRewards(_ drops: [ItemDropResult]) async throws {
-        let autoTradeKeys = try await autoTrade.registeredCompositeKeys()
+        let autoTradeKeys = try await autoTrade.registeredStackKeys()
         for drop in drops where drop.quantity > 0 {
-            // String IDをInt Indexに変換
-            let superRareTitleIndex: Int16 = await {
-                guard let id = drop.superRareTitleId else { return 0 }
-                return await masterData.getSuperRareTitleIndex(for: id) ?? 0
-            }()
-            let normalTitleIndex: UInt8 = await {
-                guard let id = drop.normalTitleId else { return 0 }
-                return await masterData.getTitleIndex(for: id) ?? 0
-            }()
+            let superRareTitleId: UInt8 = drop.superRareTitleId ?? 0
+            let normalTitleId: UInt8 = drop.normalTitleId ?? 0
 
             let enhancement = ItemSnapshot.Enhancement(
-                superRareTitleIndex: superRareTitleIndex,
-                normalTitleIndex: normalTitleIndex,
-                socketSuperRareTitleIndex: 0,
-                socketNormalTitleIndex: 0,
-                socketMasterDataIndex: 0
+                superRareTitleId: superRareTitleId,
+                normalTitleId: normalTitleId,
+                socketSuperRareTitleId: 0,
+                socketNormalTitleId: 0,
+                socketItemId: 0
             )
-            // 自動売却キーはソケットを除外した3要素形式（Int Index）
-            let autoTradeKey = "\(superRareTitleIndex)|\(normalTitleIndex)|\(drop.item.index)"
+            // 自動売却キーはソケットを除外した3要素形式
+            let autoTradeKey = "\(superRareTitleId)|\(normalTitleId)|\(drop.item.id)"
             if autoTradeKeys.contains(autoTradeKey) {
                 // 自動売却：ショップ在庫に追加してゴールド取得
                 let result = try await shop.addPlayerSoldItem(itemId: drop.item.id, quantity: drop.quantity)
                 if result.gold > 0 {
-                    _ = try await gameState.addGold(result.gold)
+                    _ = try await gameState.addGold(UInt32(result.gold))
                 }
                 // 上限超過分はインベントリに一時保管
                 if result.overflow > 0 {
-                    _ = try await inventory.addItem(masterDataIndex: drop.item.index,
+                    _ = try await inventory.addItem(itemId: drop.item.id,
                                                     quantity: result.overflow,
                                                     storage: .playerItem,
                                                     enhancements: enhancement)
                 }
             } else {
-                _ = try await inventory.addItem(masterDataIndex: drop.item.index,
+                _ = try await inventory.addItem(itemId: drop.item.id,
                                                 quantity: drop.quantity,
                                                 storage: .playerItem,
                                                 enhancements: enhancement)

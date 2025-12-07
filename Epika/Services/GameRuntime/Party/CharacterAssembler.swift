@@ -11,16 +11,16 @@ enum CharacterAssembler {
         let itemIds = Set(progress.equippedItems.map { $0.itemId }).filter { $0 > 0 }
         let equippedItemDefinitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(itemIds))
 
-        // 装備から付与されるスキルのskillId→skillId変換用マップを構築
+        // 装備から付与されるスキルIDを収集
         let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkills.map { $0.skillId } }
         let grantedSkillDefinitions = try await repository.skills(withIds: grantedSkillIds)
-        let skillIdToId = Dictionary(uniqueKeysWithValues: grantedSkillDefinitions.map { ($0.id, $0.skillId) })
+        let validSkillIds = Set(grantedSkillDefinitions.map { $0.id })
 
         let equipmentSkills: [RuntimeCharacterProgress.LearnedSkill] = equippedItemDefinitions.flatMap { definition in
             definition.grantedSkills.sorted { $0.orderIndex < $1.orderIndex }.compactMap { granted in
-                guard let skillId = skillIdToId[granted.skillId] else { return nil }
+                guard validSkillIds.contains(granted.skillId) else { return nil }
                 return RuntimeCharacterProgress.LearnedSkill(id: UUID(),
-                                                             skillId: skillId,
+                                                             skillId: granted.skillId,
                                                              level: 1,
                                                              isEquipped: true,
                                                              createdAt: Date(),
@@ -88,13 +88,11 @@ enum CharacterAssembler {
 
     private static func assembleLoadout(repository: MasterDataRepository,
                                         from equippedItems: [RuntimeCharacterProgress.EquippedItem]) async throws -> RuntimeCharacterState.Loadout {
-        let runtimeService = MasterDataRuntimeService.shared
-
         // アイテムIDを収集（装備とソケット宝石）
         var itemIds = Set(equippedItems.map { $0.itemId })
         let socketItemIds = Set(equippedItems.map { $0.socketItemId }).filter { $0 > 0 }
         itemIds.formUnion(socketItemIds)
-        let items = try await runtimeService.getItemMasterData(ids: Array(itemIds.filter { $0 > 0 }))
+        let items = try await repository.items(withIds: Array(itemIds.filter { $0 > 0 }))
 
         // 通常称号IDを収集（装備とソケット宝石）
         var normalTitleIds = Set(equippedItems.map { $0.normalTitleId })
@@ -102,8 +100,7 @@ enum CharacterAssembler {
         normalTitleIds.formUnion(socketNormalTitleIds)
         var titles: [TitleDefinition] = []
         for titleId in normalTitleIds where titleId > 0 {
-            if let titleStringId = await runtimeService.getTitleId(for: titleId),
-               let definition = try await repository.title(withId: titleStringId) {
+            if let definition = try await repository.title(withId: titleId) {
                 titles.append(definition)
             }
         }
@@ -114,8 +111,7 @@ enum CharacterAssembler {
         superRareTitleIds.formUnion(socketSuperRareTitleIds)
         var superRareTitles: [SuperRareTitleDefinition] = []
         for titleId in superRareTitleIds where titleId > 0 {
-            if let titleStringId = await runtimeService.getSuperRareTitleId(for: titleId),
-               let definition = try await repository.superRareTitle(withId: titleStringId) {
+            if let definition = try await repository.superRareTitle(withId: titleId) {
                 superRareTitles.append(definition)
             }
         }

@@ -168,7 +168,7 @@ actor GameRuntimeService {
     }
 
     func raceDefinition(withId raceId: UInt8) async throws -> RaceDefinition? {
-        try await repository.race(withIndex: raceId)
+        try await repository.race(withId: raceId)
     }
 
     func recalculateCombatStats(for progress: RuntimeCharacterProgress,

@@ -44,44 +44,39 @@ actor ItemSynthesisProgressService {
         let cost = calculateCost()
 
         if cost > 0 {
-            _ = try await gameStateService.spendGold(cost)
+            _ = try await gameStateService.spendGold(UInt32(cost))
         }
 
         try await inventoryService.decrementItem(stackKey: childStackKey, quantity: 1)
-
-        // 結果アイテムのマスターデータインデックスを取得
-        guard let resultIndex = await masterDataService.getItemIndex(for: synthesisContext.recipe.resultItemId) else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [synthesisContext.recipe.resultItemId])
-        }
 
         let snapshot = try await inventoryService.updateItem(stackKey: parentStackKey) { record in
             guard record.storage == .playerItem else {
                 throw ProgressError.invalidInput(description: "親アイテムは所持品から選択してください")
             }
-            // マスターデータインデックスを更新
-            record.masterDataIndex = resultIndex
+            // アイテムIDを更新
+            record.itemId = synthesisContext.resultDefinition.id
             // 称号情報をリセット
-            record.normalTitleIndex = 0
-            record.superRareTitleIndex = 0
+            record.normalTitleId = 0
+            record.superRareTitleId = 0
             // ソケット情報は維持
         }
 
         return RuntimeEquipment(
             id: snapshot.stackKey,
-            masterDataIndex: snapshot.masterDataIndex,
-            masterDataId: synthesisContext.resultDefinition.id,
+            itemId: snapshot.itemId,
+            masterDataId: String(synthesisContext.resultDefinition.id),
             displayName: synthesisContext.resultDefinition.name,
             description: synthesisContext.resultDefinition.description,
-            quantity: snapshot.quantity,
+            quantity: Int(snapshot.quantity),
             category: RuntimeEquipment.Category(from: synthesisContext.resultDefinition.category),
             baseValue: synthesisContext.resultDefinition.basePrice,
             sellValue: synthesisContext.resultDefinition.sellValue,
             enhancement: .init(
-                superRareTitleIndex: snapshot.enhancements.superRareTitleIndex,
-                normalTitleIndex: snapshot.enhancements.normalTitleIndex,
-                socketSuperRareTitleIndex: snapshot.enhancements.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: snapshot.enhancements.socketNormalTitleIndex,
-                socketMasterDataIndex: snapshot.enhancements.socketMasterDataIndex
+                superRareTitleId: snapshot.enhancements.superRareTitleId,
+                normalTitleId: snapshot.enhancements.normalTitleId,
+                socketSuperRareTitleId: snapshot.enhancements.socketSuperRareTitleId,
+                socketNormalTitleId: snapshot.enhancements.socketNormalTitleId,
+                socketItemId: snapshot.enhancements.socketItemId
             ),
             rarity: synthesisContext.resultDefinition.rarity,
             statBonuses: synthesisContext.resultDefinition.statBonuses,
@@ -118,7 +113,7 @@ actor ItemSynthesisProgressService {
         }
 
         guard let resultDefinition = try await masterDataService.getItemMasterData(id: recipe.resultItemId) else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [recipe.resultItemId])
+            throw ProgressError.itemDefinitionUnavailable(ids: [String(recipe.resultItemId)])
         }
 
         return (parent, child, recipe, resultDefinition)

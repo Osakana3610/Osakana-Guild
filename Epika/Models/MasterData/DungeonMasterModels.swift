@@ -71,7 +71,7 @@ struct DungeonFloorDefinition: Identifiable, Sendable, Hashable {
     let dungeonId: UInt16?
     let name: String
     let floorNumber: Int
-    let encounterTableId: String
+    let encounterTableId: UInt16
     let description: String
     let specialEvents: [SpecialEvent]
 }

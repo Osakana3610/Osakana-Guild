@@ -44,19 +44,19 @@ struct CharacterHeaderSection: View {
         .onChange(of: character.name) { _, newValue in
             nameText = newValue
         }
-        .onChange(of: character.avatarIndex) { _, _ in
+        .onChange(of: character.avatarId) { _, _ in
             avatarChangeError = nil
         }
         .sheet(isPresented: $isAvatarSheetPresented) {
-            CharacterAvatarSelectionSheet(currentAvatarIndex: character.avatarIndex,
-                                          defaultAvatarIndex: UInt16(character.raceIndex)) { newIndex in
+            CharacterAvatarSelectionSheet(currentAvatarIndex: character.avatarId,
+                                          defaultAvatarIndex: UInt16(character.raceId)) { newIndex in
                 applyAvatarChange(newIndex)
             }
         }
     }
 
     private var avatarView: some View {
-        CharacterImageView(avatarIndex: character.resolvedAvatarIndex, size: 60)
+        CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 60)
             .frame(width: 60, height: 60, alignment: .center)
             .overlay(alignment: .bottomTrailing) {
                 if onAvatarChange != nil {
@@ -112,8 +112,8 @@ struct CharacterHeaderSection: View {
         }
     }
 
-    /// デフォルトのavatarIndexはRuntimeCharacterから直接取得可能
-    private var defaultAvatarIndex: UInt16 { character.avatarIndex }
+    /// デフォルトのavatarIdはRuntimeCharacterから直接取得可能
+    private var defaultAvatarId: UInt16 { character.avatarId }
 
     private func triggerRename() {
         guard let onRename else { return }
