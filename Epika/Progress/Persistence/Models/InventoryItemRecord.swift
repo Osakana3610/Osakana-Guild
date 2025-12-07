@@ -4,17 +4,17 @@ import SwiftData
 @Model
 final class InventoryItemRecord {
     // アイテム本体
-    var superRareTitleIndex: Int16 = 0      // 超レア称号（0=なし、1〜=あり）
-    var normalTitleIndex: UInt8 = 0          // 通常称号rank（0=最低な〜2=無称号〜8=壊れた）
-    var masterDataIndex: Int16 = 0          // アイテム（1〜1000）
+    var superRareTitleId: UInt8 = 0          // 超レア称号ID（0=なし、1〜=あり）
+    var normalTitleId: UInt8 = 0             // 通常称号rank（0=最低な〜2=無称号〜8=壊れた）
+    var itemId: UInt16 = 0                   // アイテムID（1〜1000）
 
     // ソケット（宝石改造）
-    var socketSuperRareTitleIndex: Int16 = 0 // 宝石の超レア称号
-    var socketNormalTitleIndex: UInt8 = 0     // 宝石の通常称号
-    var socketMasterDataIndex: Int16 = 0     // 宝石（0=なし、1〜=あり）
+    var socketSuperRareTitleId: UInt8 = 0    // 宝石の超レア称号ID
+    var socketNormalTitleId: UInt8 = 0       // 宝石の通常称号
+    var socketItemId: UInt16 = 0             // 宝石ID（0=なし、1〜=あり）
 
     // その他
-    var quantity: Int = 0
+    var quantity: UInt16 = 0
     var storageRawValue: String = ItemStorage.playerItem.rawValue
 
     var storage: ItemStorage {
@@ -22,35 +22,35 @@ final class InventoryItemRecord {
         set { storageRawValue = newValue.rawValue }
     }
 
-    /// スタック識別キー（6つのindexの組み合わせ）
+    /// スタック識別キー（6つのidの組み合わせ）
     var stackKey: String {
-        "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"
+        "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
     }
 
     /// 自動売却ルール用キー（ソケット情報を除く）
     var autoTradeKey: String {
-        "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)"
+        "\(superRareTitleId)|\(normalTitleId)|\(itemId)"
     }
 
     /// 宝石改造が施されているか
     var hasSocket: Bool {
-        socketMasterDataIndex != 0
+        socketItemId != 0
     }
 
-    init(superRareTitleIndex: Int16,
-         normalTitleIndex: UInt8,
-         masterDataIndex: Int16,
-         socketSuperRareTitleIndex: Int16 = 0,
-         socketNormalTitleIndex: UInt8 = 0,
-         socketMasterDataIndex: Int16 = 0,
-         quantity: Int,
+    init(superRareTitleId: UInt8 = 0,
+         normalTitleId: UInt8 = 0,
+         itemId: UInt16,
+         socketSuperRareTitleId: UInt8 = 0,
+         socketNormalTitleId: UInt8 = 0,
+         socketItemId: UInt16 = 0,
+         quantity: UInt16,
          storage: ItemStorage) {
-        self.superRareTitleIndex = superRareTitleIndex
-        self.normalTitleIndex = normalTitleIndex
-        self.masterDataIndex = masterDataIndex
-        self.socketSuperRareTitleIndex = socketSuperRareTitleIndex
-        self.socketNormalTitleIndex = socketNormalTitleIndex
-        self.socketMasterDataIndex = socketMasterDataIndex
+        self.superRareTitleId = superRareTitleId
+        self.normalTitleId = normalTitleId
+        self.itemId = itemId
+        self.socketSuperRareTitleId = socketSuperRareTitleId
+        self.socketNormalTitleId = socketNormalTitleId
+        self.socketItemId = socketItemId
         self.quantity = quantity
         self.storageRawValue = storage.rawValue
     }

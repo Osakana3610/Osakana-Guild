@@ -56,7 +56,7 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
 struct LightweightItemData: Sendable {
     /// スタック識別キー
     var stackKey: String
-    var masterDataIndex: Int16
+    var itemId: UInt16
     var name: String
     var quantity: Int
     var sellValue: Int
@@ -70,12 +70,12 @@ struct LightweightItemData: Sendable {
 
     /// 自動売却ルール用のキー（称号のみ、ソケットは除外）
     var autoTradeKey: String {
-        "\(enhancement.superRareTitleIndex)|\(enhancement.normalTitleIndex)|\(masterDataIndex)"
+        "\(enhancement.superRareTitleId)|\(enhancement.normalTitleId)|\(itemId)"
     }
 
     /// 宝石改造が施されているか
     var hasGemModification: Bool {
-        enhancement.socketMasterDataIndex != 0
+        enhancement.socketItemId != 0
     }
 
     /// 称号を含むフルネーム（自動売却ルール表示用）
@@ -102,7 +102,7 @@ extension LightweightItemData: Identifiable {
 extension LightweightItemData: Equatable {
     static func == (lhs: LightweightItemData, rhs: LightweightItemData) -> Bool {
         lhs.stackKey == rhs.stackKey &&
-        lhs.masterDataIndex == rhs.masterDataIndex &&
+        lhs.itemId == rhs.itemId &&
         lhs.name == rhs.name &&
         lhs.quantity == rhs.quantity &&
         lhs.sellValue == rhs.sellValue &&
@@ -119,7 +119,7 @@ extension LightweightItemData: Equatable {
 extension LightweightItemData: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(stackKey)
-        hasher.combine(masterDataIndex)
+        hasher.combine(itemId)
         hasher.combine(name)
         hasher.combine(quantity)
         hasher.combine(sellValue)

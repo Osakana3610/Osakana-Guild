@@ -12,8 +12,8 @@ final class ExplorationRunRecord {
     /// パーティID
     var partyId: UInt8 = 1
 
-    /// ダンジョンのマスターデータindex
-    var dungeonIndex: UInt16 = 0
+    /// ダンジョンID（MasterData）
+    var dungeonId: UInt8 = 0
 
     /// 難易度（0〜255）
     var difficulty: UInt8 = 0
@@ -34,21 +34,21 @@ final class ExplorationRunRecord {
     var finalFloor: UInt8 = 0
 
     /// 獲得経験値合計
-    var totalExp: Int32 = 0
+    var totalExp: UInt32 = 0
 
     /// 獲得ゴールド合計
-    var totalGold: Int32 = 0
+    var totalGold: UInt32 = 0
 
     /// イベント情報（EventEntry配列をJSONエンコード）
     var eventsData: Data = Data()
 
     init(partyId: UInt8,
-         dungeonIndex: UInt16,
+         dungeonId: UInt8,
          difficulty: UInt8,
          targetFloor: UInt8,
          startedAt: Date) {
         self.partyId = partyId
-        self.dungeonIndex = dungeonIndex
+        self.dungeonId = dungeonId
         self.difficulty = difficulty
         self.targetFloor = targetFloor
         self.startedAt = startedAt
