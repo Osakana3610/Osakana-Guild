@@ -1,0 +1,247 @@
+import Foundation
+
+// MARK: - Combat Handlers (15)
+
+struct ProcMultiplierHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.procMultiplier
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.combat.procChanceMultiplier *= try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+    }
+}
+
+struct ProcRateHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.procRate
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let target = try payload.requireParam("target", skillId: context.skillId, effectIndex: context.effectIndex)
+        let stacking = try payload.requireParam("stacking", skillId: context.skillId, effectIndex: context.effectIndex)
+        switch stacking {
+        case "multiply":
+            let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+            accumulator.combat.procRateMultipliers[target, default: 1.0] *= multiplier
+        case "add":
+            let addPercent = try payload.requireValue("addPercent", skillId: context.skillId, effectIndex: context.effectIndex)
+            accumulator.combat.procRateAdditives[target, default: 0.0] += addPercent
+        default:
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) procRate の stacking が不正です: \(stacking)")
+        }
+    }
+}
+
+struct ExtraActionHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.extraAction
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let chance = payload.value["chancePercent"] ?? payload.value["valuePercent"] ?? 0.0
+        let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
+        let clampedCount = max(0, count)
+        guard chance > 0, clampedCount > 0 else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) extraAction が無効です")
+        }
+        accumulator.combat.extraActions.append(.init(chancePercent: chance, count: clampedCount))
+    }
+}
+
+struct ReactionNextTurnHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.reactionNextTurn
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
+        guard count > 0 else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) reactionNextTurn のcountが不正です")
+        }
+        accumulator.combat.nextTurnExtraActions &+= count
+    }
+}
+
+struct ActionOrderMultiplierHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.actionOrderMultiplier
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.combat.actionOrderMultiplier *= try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+    }
+}
+
+struct ActionOrderShuffleHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.actionOrderShuffle
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.combat.actionOrderShuffle = true
+    }
+}
+
+struct CounterAttackEvasionMultiplierHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.counterAttackEvasionMultiplier
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.combat.counterAttackEvasionMultiplier *= try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+    }
+}
+
+struct ReactionHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.reaction
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        if let reaction = BattleActor.SkillEffects.Reaction.make(
+            from: payload,
+            skillName: context.skillName,
+            skillId: context.skillId
+        ) {
+            accumulator.combat.reactions.append(reaction)
+        }
+    }
+}
+
+struct ParryHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.parry
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.combat.parryEnabled = true
+        if let bonus = payload.value["bonusPercent"] {
+            accumulator.combat.parryBonusPercent = max(accumulator.combat.parryBonusPercent, bonus)
+        } else {
+            accumulator.combat.parryBonusPercent = max(accumulator.combat.parryBonusPercent, 0.0)
+        }
+    }
+}
+
+struct ShieldBlockHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.shieldBlock
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.combat.shieldBlockEnabled = true
+        if let bonus = payload.value["bonusPercent"] {
+            accumulator.combat.shieldBlockBonusPercent = max(accumulator.combat.shieldBlockBonusPercent, bonus)
+        } else {
+            accumulator.combat.shieldBlockBonusPercent = max(accumulator.combat.shieldBlockBonusPercent, 0.0)
+        }
+    }
+}
+
+struct SpecialAttackHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.specialAttack
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let identifier = try payload.requireParam("specialAttackId", skillId: context.skillId, effectIndex: context.effectIndex)
+        let chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 50
+        if let descriptor = BattleActor.SkillEffects.SpecialAttack(
+            kindIdentifier: identifier,
+            chancePercent: chance
+        ) {
+            accumulator.combat.specialAttacks.append(descriptor)
+        }
+    }
+}
+
+struct BarrierHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.barrier
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let damageTypeString = try payload.requireParam("damageType", skillId: context.skillId, effectIndex: context.effectIndex)
+        guard let damageType = BattleDamageType(identifier: damageTypeString) else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) barrier の damageType が無効です: \(damageTypeString)")
+        }
+        let charges = try payload.requireValue("charges", skillId: context.skillId, effectIndex: context.effectIndex)
+        let intCharges = max(0, Int(charges.rounded(.towardZero)))
+        guard intCharges > 0 else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) barrier のchargesが不正です")
+        }
+        let current = accumulator.combat.barrierCharges[damageType.rawValue] ?? 0
+        accumulator.combat.barrierCharges[damageType.rawValue] = max(current, intCharges)
+    }
+}
+
+struct BarrierOnGuardHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.barrierOnGuard
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let damageTypeString = try payload.requireParam("damageType", skillId: context.skillId, effectIndex: context.effectIndex)
+        guard let damageType = BattleDamageType(identifier: damageTypeString) else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) barrierOnGuard の damageType が無効です: \(damageTypeString)")
+        }
+        let charges = try payload.requireValue("charges", skillId: context.skillId, effectIndex: context.effectIndex)
+        let intCharges = max(0, Int(charges.rounded(.towardZero)))
+        guard intCharges > 0 else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) barrierOnGuard のchargesが不正です")
+        }
+        let current = accumulator.combat.guardBarrierCharges[damageType.rawValue] ?? 0
+        accumulator.combat.guardBarrierCharges[damageType.rawValue] = max(current, intCharges)
+    }
+}
+
+struct AttackCountAdditiveHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.attackCountAdditive
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        // Actor.swift では continue（スキップ）
+    }
+}
+
+struct AttackCountMultiplierHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.attackCountMultiplier
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        // Actor.swift では continue（スキップ）
+    }
+}
