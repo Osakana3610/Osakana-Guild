@@ -32,8 +32,7 @@ actor MasterDataRepository {
     private var explorationEventsById: [UInt8: ExplorationEventDefinition]?
     private var storiesCache: [StoryNodeDefinition]?
     private var synthesisCache: [SynthesisRecipeDefinition]?
-    private var shopsCache: [ShopDefinition]?
-    private var shopsById: [String: ShopDefinition]?
+    private var shopItemsCache: [MasterShopItem]?
 
     init(manager: SQLiteMasterDataManager = .shared) {
         self.manager = manager
@@ -210,19 +209,12 @@ actor MasterDataRepository {
         return racesById?[id]
     }
 
-    func allShops() async throws -> [ShopDefinition] {
-        if let shopsCache { return shopsCache }
+    func shopItems() async throws -> [MasterShopItem] {
+        if let shopItemsCache { return shopItemsCache }
         try await ensureInitialized()
-        let shops = try await manager.fetchAllShops()
-        self.shopsCache = shops
-        self.shopsById = Dictionary(uniqueKeysWithValues: shops.map { ($0.id, $0) })
-        return shops
-    }
-
-    func shop(withId id: String) async throws -> ShopDefinition? {
-        if let shopsById, let definition = shopsById[id] { return definition }
-        _ = try await allShops()
-        return shopsById?[id]
+        let items = try await manager.fetchShopItems()
+        self.shopItemsCache = items
+        return items
     }
 
     func allTitles() async throws -> [TitleDefinition] {
