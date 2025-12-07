@@ -23,7 +23,7 @@ enum BattleService {
                               party: RuntimePartyState,
                               dungeon: DungeonDefinition,
                               floor: DungeonFloorDefinition,
-                              encounterEnemyId: String?,
+                              encounterEnemyId: UInt16?,
                               encounterLevel: Int?,
                               random: inout GameRandomSource) async throws -> Resolution {
         let skillDefinitions = try await repository.allSkills()
@@ -31,8 +31,9 @@ enum BattleService {
 
         let players = try BattleContextBuilder.makePlayerActors(from: party)
         guard !players.isEmpty else {
-            guard let enemyDefinition = try await repository.enemy(withId: encounterEnemyId ?? "") else {
-                throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: encounterEnemyId ?? "unknown")
+            guard let enemyId = encounterEnemyId,
+                  let enemyDefinition = try await repository.enemy(withId: enemyId) else {
+                throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: String(encounterEnemyId ?? 0))
             }
             return Resolution(result: .defeat,
                               survivingAllyIds: [],
@@ -71,7 +72,7 @@ enum BattleService {
         if enemies.isEmpty {
             guard let enemyId = encounterEnemyId,
                   let fallbackDefinition = enemyDictionary[enemyId] else {
-                throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: encounterEnemyId ?? "unknown")
+                throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: String(encounterEnemyId ?? 0))
             }
             let slot = BattleFormationSlot.frontLeft
             let fallbackLevel = encounterLevel ?? 1
@@ -84,11 +85,13 @@ enum BattleService {
             let resources = BattleActionResource.makeDefault(for: snapshot)
             let fallbackSkillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: fallbackDefinition.skills.map { entry in
                 guard let definition = skillDictionary[entry.skillId] else {
-                    throw RuntimeError.masterDataNotFound(entity: "skill", identifier: entry.skillId)
+                    throw RuntimeError.masterDataNotFound(entity: "skill", identifier: String(entry.skillId))
                 }
                 return definition
             })
-            enemies = [BattleActor(identifier: fallbackDefinition.id,
+            let jobName: String? = fallbackDefinition.jobId.flatMap { jobDictionary[$0]?.name }
+            let raceCategory = raceDictionary[fallbackDefinition.raceId]?.category ?? "unknown"
+            enemies = [BattleActor(identifier: String(fallbackDefinition.id),
                                    displayName: fallbackDefinition.name,
                                    kind: .enemy,
                                    formationSlot: slot,
@@ -100,11 +103,11 @@ enum BattleService {
                                    luck: fallbackDefinition.luck,
                                    partyMemberId: nil,
                                    level: fallbackLevel,
-                                   jobName: fallbackDefinition.job,
-                                   avatarIdentifier: nil,
+                                   jobName: jobName,
+                                   avatarIndex: nil,
                                    isMartialEligible: false,
-                                   raceId: fallbackDefinition.race,
-                                   raceCategory: raceDictionary[fallbackDefinition.race]?.category ?? fallbackDefinition.race,
+                                   raceId: fallbackDefinition.raceId,
+                                   raceCategory: raceCategory,
                                    snapshot: snapshot,
                                    currentHP: snapshot.maxHP,
                                    actionRates: BattleActionRates(attack: fallbackDefinition.actionRates.attack,
@@ -143,7 +146,7 @@ enum BattleService {
             .filter { $0.isAlive }
             .compactMap { $0.partyMemberId }
 
-        let enemyDefinition = encounteredEnemies.first?.definition ?? enemyDictionary[encounterEnemyId ?? ""] ?? enemyDefinitions.first!
+        let enemyDefinition = encounteredEnemies.first?.definition ?? enemyDictionary[encounterEnemyId ?? 0] ?? enemyDefinitions.first!
 
         let result: BattleResult
         switch battleResult.outcome {
@@ -181,4 +184,3 @@ private extension BattleService {
         }
     }
 }
-

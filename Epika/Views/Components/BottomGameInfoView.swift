@@ -124,8 +124,8 @@ struct BottomGameInfoView: View {
     @MainActor
     private func apply(_ snapshot: PlayerSnapshot) {
         currentPlayer = snapshot
-        catTicketCount = snapshot.catTickets
-        goldAmount = snapshot.gold
+        catTicketCount = Int(snapshot.catTickets)
+        goldAmount = Int(snapshot.gold)
     }
 
     @MainActor

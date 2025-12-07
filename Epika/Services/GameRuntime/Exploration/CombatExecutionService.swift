@@ -7,7 +7,7 @@ struct CombatExecutionService {
         self.repository = repository
     }
 
-    func runCombat(enemyId: String,
+    func runCombat(enemyId: UInt16,
                    enemyLevel: Int?,
                    dungeon: DungeonDefinition,
                    floor: DungeonFloorDefinition,
@@ -70,11 +70,12 @@ struct CombatExecutionService {
         let playerSnapshots: [BattleParticipantSnapshot] = resolution.playerActors.map { actor in
             let characterState = actor.partyMemberId.flatMap { partyMembersById[$0] }
             let progress = characterState?.progress
+            let avatarIndex = characterState?.resolvedAvatarId
             return BattleParticipantSnapshot(actorId: actor.identifier,
                                              partyMemberId: actor.partyMemberId,
                                              characterId: progress?.id,
                                              name: progress?.displayName ?? actor.displayName,
-                                             avatarIdentifier: progress?.avatarIdentifier,
+                                             avatarIndex: avatarIndex,
                                              level: progress?.level ?? actor.level,
                                              maxHP: actor.snapshot.maxHP)
         }
@@ -84,7 +85,7 @@ struct CombatExecutionService {
                                       partyMemberId: nil,
                                       characterId: nil,
                                       name: actor.displayName,
-                                      avatarIdentifier: nil,
+                                      avatarIndex: nil,
                                       level: actor.level,
                                       maxHP: actor.snapshot.maxHP)
         }

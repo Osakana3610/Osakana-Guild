@@ -11,8 +11,7 @@
   },
   "events": [
     {
-      "index": 0,
-      "id": "trap.pitfall",
+      "id": 0,
       "type": "trap",
       "name": "落とし穴",
       "description": "隠された落とし穴。落下ダメージを受ける。",
@@ -33,8 +32,7 @@
       }
     },
     {
-      "index": 1,
-      "id": "trap.poisonNeedle",
+      "id": 1,
       "type": "trap",
       "name": "毒針の罠",
       "description": "毒針が飛び出す罠。毒状態になることがある。",
@@ -55,8 +53,7 @@
       }
     },
     {
-      "index": 2,
-      "id": "trap.explosion",
+      "id": 2,
       "type": "trap",
       "name": "爆発の罠",
       "description": "魔力で炸裂する爆発の罠。",
@@ -78,8 +75,7 @@
       }
     },
     {
-      "index": 3,
-      "id": "trap.paralysis",
+      "id": 3,
       "type": "trap",
       "name": "麻痺の罠",
       "description": "電撃を放つ罠。麻痺状態になることがある。",
@@ -100,8 +96,7 @@
       }
     },
     {
-      "index": 4,
-      "id": "trap.sleepGas",
+      "id": 4,
       "type": "trap",
       "name": "睡眠ガスの罠",
       "description": "催眠ガスを噴出する罠。眠り状態になることがある。",
@@ -122,8 +117,7 @@
       }
     },
     {
-      "index": 5,
-      "id": "trap.arrow",
+      "id": 5,
       "type": "trap",
       "name": "矢の罠",
       "description": "壁から矢が飛び出す古典的な罠。",
@@ -145,8 +139,7 @@
       }
     },
     {
-      "index": 6,
-      "id": "narrative.oasisFountain",
+      "id": 6,
       "type": "narrative",
       "name": "神秘の泉",
       "description": "乾いた迷宮に現れる神秘的な泉。",
@@ -179,8 +172,7 @@
       }
     },
     {
-      "index": 7,
-      "id": "narrative.goddessFountain",
+      "id": 7,
       "type": "narrative",
       "name": "女神の泉",
       "description": "女神が現れる神聖な泉。",
@@ -213,8 +205,7 @@
       }
     },
     {
-      "index": 8,
-      "id": "narrative.succubusEncounter",
+      "id": 8,
       "type": "narrative",
       "name": "サキュバスの誘惑",
       "description": "誘惑を仕掛けてくる魔性の存在。",
@@ -246,8 +237,7 @@
       }
     },
     {
-      "index": 9,
-      "id": "merchant.wanderingMerchant",
+      "id": 9,
       "type": "merchant",
       "name": "行商人との遭遇",
       "description": "商品を抱えた行商人との取引。",
@@ -275,8 +265,7 @@
       }
     },
     {
-      "index": 10,
-      "id": "battle.enemyHorde",
+      "id": 10,
       "type": "battle",
       "name": "敵の大群",
       "description": "大量の敵に遭遇する危険な状況。",
@@ -297,8 +286,7 @@
       }
     },
     {
-      "index": 11,
-      "id": "resource.mysticMushroom",
+      "id": 11,
       "type": "resource",
       "name": "謎のキノコ",
       "description": "正体不明のキノコを見つけた。",

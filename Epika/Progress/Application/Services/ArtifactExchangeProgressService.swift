@@ -3,7 +3,7 @@ import Foundation
 actor ArtifactExchangeProgressService {
     struct ArtifactOption: Identifiable, Sendable, Hashable {
         let definition: ItemDefinition
-        var id: String { definition.id }
+        var id: UInt16 { definition.id }
 
         static func == (lhs: ArtifactOption, rhs: ArtifactOption) -> Bool {
             lhs.id == rhs.id
@@ -18,8 +18,8 @@ actor ArtifactExchangeProgressService {
     private let masterDataService = MasterDataRuntimeService.shared
 
     private struct ExchangeRule: Sendable, Hashable {
-        let requiredItemId: String
-        let rewardItemId: String
+        let requiredItemId: UInt16
+        let rewardItemId: UInt16
     }
 
     private let exchangeRules: [ExchangeRule] = []
@@ -43,7 +43,7 @@ actor ArtifactExchangeProgressService {
         try await inventoryService.allEquipment(storage: .playerItem)
     }
 
-    func exchange(givingItemStackKey: String, desiredItemId: String) async throws -> RuntimeEquipment {
+    func exchange(givingItemStackKey: String, desiredItemId: UInt16) async throws -> RuntimeEquipment {
         guard !exchangeRules.isEmpty else {
             throw ProgressError.invalidInput(description: "神器交換レシピが未定義です")
         }
@@ -55,14 +55,11 @@ actor ArtifactExchangeProgressService {
         guard let offering = equipments.first(where: { $0.id == givingItemStackKey }) else {
             throw ProgressError.invalidInput(description: "提供する神器が所持品に存在しません")
         }
-        guard offering.masterDataId == rule.requiredItemId else {
+        guard offering.itemId == rule.requiredItemId else {
             throw ProgressError.invalidInput(description: "交換条件を満たしていません")
         }
         guard let rewardDefinition = try await masterDataService.getItemMasterData(id: rule.rewardItemId) else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [rule.rewardItemId])
-        }
-        guard let rewardIndex = await masterDataService.getItemIndex(for: rule.rewardItemId) else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [rule.rewardItemId])
+            throw ProgressError.itemDefinitionUnavailable(ids: [String(rule.rewardItemId)])
         }
 
         let snapshot = try await inventoryService.updateItem(stackKey: givingItemStackKey) { record in
@@ -70,30 +67,30 @@ actor ArtifactExchangeProgressService {
                 throw ProgressError.invalidInput(description: "提供アイテムは所持品から選択してください")
             }
             // 提供アイテムは報酬アイテムに完全置換（称号・ソケット全てリセット）
-            record.masterDataIndex = rewardIndex
-            record.normalTitleIndex = 0
-            record.superRareTitleIndex = 0
-            record.socketMasterDataIndex = 0
-            record.socketSuperRareTitleIndex = 0
-            record.socketNormalTitleIndex = 0
+            record.itemId = rule.rewardItemId
+            record.normalTitleId = 0
+            record.superRareTitleId = 0
+            record.socketItemId = 0
+            record.socketSuperRareTitleId = 0
+            record.socketNormalTitleId = 0
         }
 
         return RuntimeEquipment(
             id: snapshot.stackKey,
-            masterDataIndex: snapshot.masterDataIndex,
-            masterDataId: rewardDefinition.id,
+            itemId: snapshot.itemId,
+            masterDataId: String(rewardDefinition.id),
             displayName: rewardDefinition.name,
             description: rewardDefinition.description,
-            quantity: snapshot.quantity,
+            quantity: Int(snapshot.quantity),
             category: RuntimeEquipment.Category(from: rewardDefinition.category),
             baseValue: rewardDefinition.basePrice,
             sellValue: rewardDefinition.sellValue,
             enhancement: .init(
-                superRareTitleIndex: snapshot.enhancements.superRareTitleIndex,
-                normalTitleIndex: snapshot.enhancements.normalTitleIndex,
-                socketSuperRareTitleIndex: snapshot.enhancements.socketSuperRareTitleIndex,
-                socketNormalTitleIndex: snapshot.enhancements.socketNormalTitleIndex,
-                socketMasterDataIndex: snapshot.enhancements.socketMasterDataIndex
+                superRareTitleId: snapshot.enhancements.superRareTitleId,
+                normalTitleId: snapshot.enhancements.normalTitleId,
+                socketSuperRareTitleId: snapshot.enhancements.socketSuperRareTitleId,
+                socketNormalTitleId: snapshot.enhancements.socketNormalTitleId,
+                socketItemId: snapshot.enhancements.socketItemId
             ),
             rarity: rewardDefinition.rarity,
             statBonuses: rewardDefinition.statBonuses,

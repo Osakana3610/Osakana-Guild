@@ -11,7 +11,7 @@ struct StatusEffectDefinition: Identifiable, Sendable, Hashable {
         let value: Double
     }
 
-    let id: String
+    let id: UInt8
     let name: String
     let description: String
     let category: String

@@ -3,13 +3,12 @@ import SwiftData
 
 actor ShopProgressService {
     struct ShopItem: Identifiable, Sendable, Hashable {
-        let id: UUID
-        let shopId: String
+        let id: UInt16  // itemId
         let definition: ItemDefinition
         let price: Int
-        let stockQuantity: Int?
+        let stockQuantity: UInt16?
         let isPlayerSold: Bool
-        let metadata: ProgressMetadata
+        let updatedAt: Date
 
         static func == (lhs: ShopItem, rhs: ShopItem) -> Bool { lhs.id == rhs.id }
 
@@ -29,8 +28,7 @@ actor ShopProgressService {
     private let environment: ProgressEnvironment
     private let inventoryService: InventoryProgressService
     private let gameStateService: GameStateService
-    private let defaultShopIdentifier = "default"
-    private let unlimitedSentinel = -1
+    private let unlimitedSentinel: UInt16? = nil
 
     init(container: ModelContainer,
          environment: ProgressEnvironment,
@@ -43,7 +41,7 @@ actor ShopProgressService {
     }
 
     func loadItems() async throws -> [ShopItem] {
-        guard let definition = try await environment.masterDataService.getShopDefinition(id: defaultShopIdentifier) else {
+        guard let definition = try await environment.masterDataService.getShopDefinition(id: "default") else {
             throw ProgressError.shopNotFound
         }
         let snapshot = try await loadShopSnapshot(definition: definition)
@@ -53,26 +51,25 @@ actor ShopProgressService {
         let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         let missing = Set(itemIds.filter { definitionMap[$0] == nil })
         if !missing.isEmpty {
-            throw ProgressError.itemDefinitionUnavailable(ids: missing.sorted())
+            throw ProgressError.itemDefinitionUnavailable(ids: missing.map { String($0) }.sorted())
         }
 
         return try snapshot.stocks.map { stock in
             guard let definition = definitionMap[stock.itemId] else {
-                throw ProgressError.itemDefinitionUnavailable(ids: [stock.itemId])
+                throw ProgressError.itemDefinitionUnavailable(ids: [String(stock.itemId)])
             }
-            return ShopItem(id: stock.id,
-                            shopId: snapshot.shopId,
+            return ShopItem(id: stock.itemId,
                             definition: definition,
                             price: definition.basePrice,
                             stockQuantity: stock.remaining,
                             isPlayerSold: stock.isPlayerSold,
-                            metadata: .init(createdAt: stock.createdAt, updatedAt: stock.updatedAt))
+                            updatedAt: stock.updatedAt)
         }
     }
 
     /// 在庫上限（表示上限99、内部上限110）
-    static let stockDisplayLimit = 99
-    static let stockInternalLimit = 110
+    static let stockDisplayLimit: UInt16 = 99
+    static let stockInternalLimit: UInt16 = 110
 
     /// プレイヤーがアイテムを売却した際にショップ在庫に追加する
     /// - Parameters:
@@ -80,48 +77,43 @@ actor ShopProgressService {
     ///   - quantity: 数量
     /// - Returns: 売却結果（追加数量、ゴールド、上限超過数量）
     @discardableResult
-    func addPlayerSoldItem(itemId: String, quantity: Int) async throws -> SoldResult {
+    func addPlayerSoldItem(itemId: UInt16, quantity: Int) async throws -> SoldResult {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "数量は1以上である必要があります")
         }
 
         let definitions = try await environment.masterDataService.getItemMasterData(ids: [itemId])
         guard let definition = definitions.first else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [itemId])
+            throw ProgressError.itemDefinitionUnavailable(ids: [String(itemId)])
         }
 
         let context = makeContext()
         let now = Date()
-        let shopRecord = try ensureShopRecord(shopId: defaultShopIdentifier, timestamp: now, context: context)
 
         // 既存の在庫を検索（プレイヤー売却品のみ）
-        let shopRecordId = shopRecord.id
         let descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate {
-            $0.shopRecordId == shopRecordId && $0.itemId == itemId && $0.isPlayerSold == true
+            $0.itemId == itemId && $0.isPlayerSold == true
         })
         let existingStock = try context.fetch(descriptor).first
 
         var actuallyAdded = quantity
         if let stock = existingStock {
             // 既存の在庫に加算（内部上限まで）
-            let previousRemaining = stock.remaining
-            stock.remaining = min(stock.remaining + quantity, Self.stockInternalLimit)
-            actuallyAdded = stock.remaining - previousRemaining
+            let previousRemaining = stock.remaining ?? 0
+            let newRemaining = min(previousRemaining + UInt16(quantity), Self.stockInternalLimit)
+            stock.remaining = newRemaining
+            actuallyAdded = Int(newRemaining - previousRemaining)
             stock.updatedAt = now
         } else {
             // 新規在庫を作成
-            actuallyAdded = min(quantity, Self.stockInternalLimit)
-            let stock = ShopStockRecord(shopRecordId: shopRecordId,
-                                        itemId: itemId,
-                                        remaining: actuallyAdded,
-                                        restockAt: nil,
+            actuallyAdded = min(quantity, Int(Self.stockInternalLimit))
+            let stock = ShopStockRecord(itemId: itemId,
+                                        remaining: UInt16(actuallyAdded),
                                         isPlayerSold: true,
-                                        createdAt: now,
                                         updatedAt: now)
             context.insert(stock)
         }
 
-        shopRecord.updatedAt = now
         try saveIfNeeded(context)
 
         let overflow = quantity - actuallyAdded
@@ -131,44 +123,34 @@ actor ShopProgressService {
 
     /// 在庫整理：指定アイテムの在庫を目標数量まで減らし、減少分に応じたキャット・チケットを返す
     /// - Parameters:
-    ///   - stockId: 在庫ID
+    ///   - itemId: アイテムID
     ///   - targetQuantity: 目標数量（デフォルト5、0以上）
     /// - Returns: 獲得キャット・チケット数
-    func cleanupStock(stockId: UUID, targetQuantity: Int = 5) async throws -> Int {
-        guard targetQuantity >= 0 else {
-            throw ProgressError.invalidInput(description: "目標数量は0以上である必要があります")
-        }
-
+    func cleanupStock(itemId: UInt16, targetQuantity: UInt16 = 5) async throws -> Int {
         let context = makeContext()
-        let stock = try fetchStockRecord(id: stockId, context: context)
+        let stock = try fetchStockRecord(itemId: itemId, context: context)
 
         guard stock.isPlayerSold else {
             throw ProgressError.invalidInput(description: "マスターデータ由来の在庫は整理できません")
         }
-        guard stock.remaining > targetQuantity else {
+        guard let remaining = stock.remaining, remaining > targetQuantity else {
             return 0
         }
 
         let definitions = try await environment.masterDataService.getItemMasterData(ids: [stock.itemId])
         guard let definition = definitions.first else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [stock.itemId])
+            throw ProgressError.itemDefinitionUnavailable(ids: [String(stock.itemId)])
         }
 
-        // ShopRecordも取得して更新
-        let shopRecordId = stock.shopRecordId
-        let shopDescriptor = FetchDescriptor<ShopRecord>(predicate: #Predicate { $0.id == shopRecordId })
-        let shopRecord = try context.fetch(shopDescriptor).first
-
         let now = Date()
-        let reducedQuantity = stock.remaining - targetQuantity
+        let reducedQuantity = remaining - targetQuantity
         stock.remaining = targetQuantity
         stock.updatedAt = now
-        shopRecord?.updatedAt = now
         try saveIfNeeded(context)
 
         // キャット・チケット計算：売値に応じた量（仮: 売値 / 100 * 減少数）
         let ticketsPerItem = max(1, definition.sellValue / 100)
-        return ticketsPerItem * reducedQuantity
+        return ticketsPerItem * Int(reducedQuantity)
     }
 
     /// 在庫整理対象のアイテム一覧を取得（表示上限超過のプレイヤー売却品）
@@ -187,35 +169,33 @@ actor ShopProgressService {
     }
 
     @discardableResult
-    func purchase(stockId: UUID, quantity: Int) async throws -> PlayerSnapshot {
+    func purchase(itemId: UInt16, quantity: Int) async throws -> PlayerSnapshot {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "購入数量は1以上である必要があります")
         }
 
         let items = try await loadItems()
-        guard let target = items.first(where: { $0.id == stockId }) else {
+        guard let target = items.first(where: { $0.id == itemId }) else {
             throw ProgressError.shopStockNotFound
         }
         if let stockQuantity = target.stockQuantity, stockQuantity < quantity {
-            throw ProgressError.insufficientStock(required: quantity, available: stockQuantity)
+            throw ProgressError.insufficientStock(required: quantity, available: Int(stockQuantity))
         }
         let totalCost = target.price * quantity
-        let playerSnapshot = try await gameStateService.spendGold(totalCost)
+        let playerSnapshot = try await gameStateService.spendGold(UInt32(totalCost))
 
         let context = makeContext()
-        let stockRecord = try fetchStockRecord(id: stockId, context: context)
-        if stockRecord.remaining >= 0 {
-            guard stockRecord.remaining >= quantity else {
-                throw ProgressError.insufficientStock(required: quantity, available: stockRecord.remaining)
+        let stockRecord = try fetchStockRecord(itemId: itemId, context: context)
+        if let remaining = stockRecord.remaining {
+            guard remaining >= quantity else {
+                throw ProgressError.insufficientStock(required: quantity, available: Int(remaining))
             }
-            stockRecord.remaining -= quantity
+            stockRecord.remaining = remaining - UInt16(quantity)
         }
         stockRecord.updatedAt = Date()
-        let shopRecord = try fetchShopRecord(id: stockRecord.shopRecordId, context: context)
-        shopRecord.updatedAt = Date()
         try saveIfNeeded(context)
 
-        _ = try await inventoryService.addItem(masterDataIndex: target.definition.index,
+        _ = try await inventoryService.addItem(itemId: target.definition.id,
                                                quantity: quantity,
                                                storage: .playerItem)
         return playerSnapshot
@@ -232,62 +212,35 @@ private extension ShopProgressService {
     func loadShopSnapshot(definition: ShopDefinition) async throws -> ShopSnapshot {
         let context = makeContext()
         let now = Date()
-        let shopRecord = try ensureShopRecord(shopId: definition.id, timestamp: now, context: context)
-        let didChange = try syncStocks(for: shopRecord,
-                                       definition: definition,
-                                       context: context,
-                                       timestamp: now)
-        if didChange {
-            shopRecord.updatedAt = now
-        }
+        _ = try syncStocks(definition: definition,
+                           context: context,
+                           timestamp: now)
         try saveIfNeeded(context)
-        let stocks = try fetchStocks(for: shopRecord.id, context: context)
-        return makeSnapshot(from: shopRecord, stocks: stocks)
+        let stocks = try fetchAllStocks(context: context)
+        let maxUpdatedAt = stocks.map(\.updatedAt).max() ?? now
+        return makeSnapshot(from: stocks, updatedAt: maxUpdatedAt)
     }
 
-    func ensureShopRecord(shopId: String, timestamp: Date, context: ModelContext) throws -> ShopRecord {
-        var descriptor = FetchDescriptor<ShopRecord>(predicate: #Predicate { $0.shopId == shopId })
-        descriptor.fetchLimit = 1
-        if let record = try context.fetch(descriptor).first {
-            return record
-        }
-        let record = ShopRecord(shopId: shopId,
-                                isUnlocked: true,
-                                createdAt: timestamp,
-                                updatedAt: timestamp)
-        context.insert(record)
-        return record
-    }
-
-    func syncStocks(for shop: ShopRecord,
-                    definition: ShopDefinition,
+    func syncStocks(definition: ShopDefinition,
                     context: ModelContext,
                     timestamp: Date) throws -> Bool {
         var changed = false
-        let shopRecordId = shop.id
-        let descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate { $0.shopRecordId == shopRecordId })
+        let descriptor = FetchDescriptor<ShopStockRecord>()
         var existing = Dictionary(uniqueKeysWithValues: try context.fetch(descriptor).map { ($0.itemId, $0) })
 
         for entry in definition.items.sorted(by: { $0.orderIndex < $1.orderIndex }) {
             if let stock = existing.removeValue(forKey: entry.itemId) {
-                let desiredRemaining = entry.quantity ?? unlimitedSentinel
+                let desiredRemaining: UInt16? = entry.quantity.map { UInt16($0) }
                 if stock.remaining != desiredRemaining {
                     stock.remaining = desiredRemaining
                     stock.updatedAt = timestamp
                     changed = true
                 }
-                if stock.restockAt != nil {
-                    stock.restockAt = nil
-                    stock.updatedAt = timestamp
-                    changed = true
-                }
             } else {
-                let remaining = entry.quantity ?? unlimitedSentinel
-                let stock = ShopStockRecord(shopRecordId: shopRecordId,
-                                            itemId: entry.itemId,
+                let remaining: UInt16? = entry.quantity.map { UInt16($0) }
+                let stock = ShopStockRecord(itemId: entry.itemId,
                                             remaining: remaining,
-                                            restockAt: nil,
-                                            createdAt: timestamp,
+                                            isPlayerSold: false,
                                             updatedAt: timestamp)
                 context.insert(stock)
                 changed = true
@@ -303,13 +256,13 @@ private extension ShopProgressService {
         return changed
     }
 
-    func fetchStocks(for shopRecordId: UUID, context: ModelContext) throws -> [ShopStockRecord] {
-        let descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate { $0.shopRecordId == shopRecordId })
+    func fetchAllStocks(context: ModelContext) throws -> [ShopStockRecord] {
+        let descriptor = FetchDescriptor<ShopStockRecord>()
         return try context.fetch(descriptor)
     }
 
-    func fetchStockRecord(id: UUID, context: ModelContext) throws -> ShopStockRecord {
-        var descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate { $0.id == id })
+    func fetchStockRecord(itemId: UInt16, context: ModelContext) throws -> ShopStockRecord {
+        var descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate { $0.itemId == itemId })
         descriptor.fetchLimit = 1
         guard let stock = try context.fetch(descriptor).first else {
             throw ProgressError.shopStockNotFound
@@ -317,33 +270,16 @@ private extension ShopProgressService {
         return stock
     }
 
-    func fetchShopRecord(id: UUID, context: ModelContext) throws -> ShopRecord {
-        var descriptor = FetchDescriptor<ShopRecord>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.shopNotFound
-        }
-        return record
-    }
-
-    func makeSnapshot(from record: ShopRecord,
-                      stocks: [ShopStockRecord]) -> ShopSnapshot {
+    func makeSnapshot(from stocks: [ShopStockRecord],
+                      updatedAt: Date) -> ShopSnapshot {
         let stockSnapshots = stocks.map { stock in
-            ShopSnapshot.Stock(id: stock.id,
-                               itemId: stock.itemId,
-                               remaining: stock.remaining >= 0 ? stock.remaining : nil,
-                               restockAt: stock.restockAt,
+            ShopSnapshot.Stock(itemId: stock.itemId,
+                               remaining: stock.remaining,
                                isPlayerSold: stock.isPlayerSold,
-                               createdAt: stock.createdAt,
                                updatedAt: stock.updatedAt)
         }
-        return ShopSnapshot(persistentIdentifier: record.persistentModelID,
-                             id: record.id,
-                             shopId: record.shopId,
-                             isUnlocked: record.isUnlocked,
-                             stocks: stockSnapshots,
-                             createdAt: record.createdAt,
-                             updatedAt: record.updatedAt)
+        return ShopSnapshot(stocks: stockSnapshots,
+                            updatedAt: updatedAt)
     }
 
     func saveIfNeeded(_ context: ModelContext) throws {

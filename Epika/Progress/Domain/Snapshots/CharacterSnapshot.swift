@@ -15,10 +15,9 @@ struct CharacterSnapshot: Sendable, Hashable {
     let persistentIdentifier: PersistentIdentifier
     let id: UInt8
     var displayName: String
-    var raceId: String
-    var gender: String
-    var jobId: String
-    var avatarIdentifier: String
+    var raceId: UInt8
+    var jobId: UInt8
+    var avatarId: UInt16
     var level: Int
     var experience: Int
     var attributes: CoreAttributes

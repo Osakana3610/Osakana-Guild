@@ -3,9 +3,9 @@ import Foundation
 /// アイテムのソート順を計算するサービス
 /// マスターデータのインデックスをキャッシュし、sortOrderを計算する
 actor ItemSortOrderCalculator {
-    private var itemIndexMap: [String: Int]?
-    private var titleRankMap: [String: Int]?
-    private var superRareTitleOrderMap: [String: Int]?
+    private var itemIndexMap: [UInt16: Int]?
+    private var titleIdSet: Set<UInt8>?
+    private var superRareTitleIdSet: Set<UInt8>?
     private let masterDataService: MasterDataRuntimeService
 
     init(masterDataService: MasterDataRuntimeService = .shared) {
@@ -18,35 +18,32 @@ actor ItemSortOrderCalculator {
             let items = try await masterDataService.getAllItems()
             itemIndexMap = Dictionary(uniqueKeysWithValues: items.enumerated().map { ($0.element.id, $0.offset) })
         }
-        if titleRankMap == nil {
+        if titleIdSet == nil {
             let titles = try await masterDataService.getAllTitles()
-            titleRankMap = Dictionary(uniqueKeysWithValues: titles.compactMap { title -> (String, Int)? in
-                guard let rank = title.rank else { return nil }
-                return (title.id, rank)
-            })
+            titleIdSet = Set(titles.map { $0.id })
         }
-        if superRareTitleOrderMap == nil {
+        if superRareTitleIdSet == nil {
             let superRareTitles = try await masterDataService.getAllSuperRareTitles()
-            superRareTitleOrderMap = Dictionary(uniqueKeysWithValues: superRareTitles.map { ($0.id, $0.order) })
+            superRareTitleIdSet = Set(superRareTitles.map { $0.id })
         }
     }
 
     /// アイテムのソート順を計算する
     /// - Parameters:
     ///   - itemId: アイテムID
-    ///   - superRareTitleId: 超レア称号ID（nil可）
-    ///   - normalTitleId: 通常称号ID（nil可）
-    ///   - socketKey: 宝石ID（nil可）
+    ///   - superRareTitleId: 超レア称号ID（0 = なし）
+    ///   - normalTitleId: 通常称号ID（0〜8、デフォルト2 = 無称号）
+    ///   - socketItemId: 宝石アイテムID（0 = なし）
     /// - Returns: ソート順（整数）
     func calculateSortOrder(
-        itemId: String,
-        superRareTitleId: String?,
-        normalTitleId: String?,
-        socketKey: String?
+        itemId: UInt16,
+        superRareTitleId: UInt8,
+        normalTitleId: UInt8,
+        socketItemId: UInt16
     ) async throws -> Int {
         try await ensureInitialized()
 
-        guard let itemIndexMap, let titleRankMap, let superRareTitleOrderMap else {
+        guard let itemIndexMap else {
             throw ProgressError.invalidInput(description: "ソート順計算のキャッシュが初期化されていません")
         }
 
@@ -55,39 +52,20 @@ actor ItemSortOrderCalculator {
             throw ProgressError.invalidInput(description: "未知のアイテムID: \(itemId)")
         }
 
-        // 超レア称号order（1〜100、なしの場合は0で先頭に）
-        let superRareOrder: Int
-        if let superRareTitleId {
-            guard let order = superRareTitleOrderMap[superRareTitleId] else {
-                throw ProgressError.invalidInput(description: "未知の超レア称号ID: \(superRareTitleId)")
-            }
-            superRareOrder = order
-        } else {
-            superRareOrder = 0
-        }
+        // 超レア称号ID（0〜100、0の場合は先頭に）
+        let superRareOrder = Int(superRareTitleId)
 
-        // 通常称号rank（0〜8、なしの場合はnormalのrank=2を使用）
-        let normalRank: Int
-        if let normalTitleId {
-            guard let rank = titleRankMap[normalTitleId] else {
-                throw ProgressError.invalidInput(description: "未知の通常称号ID: \(normalTitleId)")
-            }
-            normalRank = rank
-        } else {
-            // "normal" のrank（称号なし）を使用
-            guard let defaultRank = titleRankMap["normal"] else {
-                throw ProgressError.invalidInput(description: "デフォルト称号 'normal' が見つかりません")
-            }
-            normalRank = defaultRank
-        }
+        // 通常称号ID（0〜8）をそのままrankとして使用
+        let normalRank = Int(normalTitleId)
 
         // 宝石インデックス（0〜999、なしの場合は0で先頭に）
         let gemIndex: Int
-        if let socketKey {
-            guard let socketIndex = itemIndexMap[socketKey] else {
-                throw ProgressError.invalidInput(description: "未知の宝石ID: \(socketKey)")
+        if socketItemId > 0 {
+            if let socketIndex = itemIndexMap[socketItemId] {
+                gemIndex = socketIndex + 1
+            } else {
+                gemIndex = Int(socketItemId) + 1
             }
-            gemIndex = socketIndex + 1
         } else {
             gemIndex = 0
         }
@@ -101,7 +79,7 @@ actor ItemSortOrderCalculator {
 
     /// 複数アイテムのソート順を一括計算する
     func calculateSortOrders(
-        for items: [(itemId: String, superRareTitleId: String?, normalTitleId: String?, socketKey: String?)]
+        for items: [(itemId: UInt16, superRareTitleId: UInt8, normalTitleId: UInt8, socketItemId: UInt16)]
     ) async throws -> [Int] {
         try await ensureInitialized()
         var results: [Int] = []
@@ -111,7 +89,7 @@ actor ItemSortOrderCalculator {
                 itemId: item.itemId,
                 superRareTitleId: item.superRareTitleId,
                 normalTitleId: item.normalTitleId,
-                socketKey: item.socketKey
+                socketItemId: item.socketItemId
             )
             results.append(sortOrder)
         }
@@ -121,7 +99,7 @@ actor ItemSortOrderCalculator {
     /// キャッシュをクリアする
     func clearCache() {
         itemIndexMap = nil
-        titleRankMap = nil
-        superRareTitleOrderMap = nil
+        titleIdSet = nil
+        superRareTitleIdSet = nil
     }
 }

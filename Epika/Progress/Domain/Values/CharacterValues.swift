@@ -35,13 +35,15 @@ enum CharacterValues {
     }
 
     struct Personality: Sendable, Hashable {
-        var primaryId: String?
-        var secondaryId: String?
+        /// 0 = なし
+        var primaryId: UInt8
+        /// 0 = なし
+        var secondaryId: UInt8
     }
 
     struct LearnedSkill: Sendable, Hashable {
         var id: UUID
-        var skillId: String
+        var skillId: UInt16
         var level: Int
         var isEquipped: Bool
         var createdAt: Date
@@ -50,19 +52,19 @@ enum CharacterValues {
 
     struct EquippedItem: Sendable, Hashable {
         // アイテム本体
-        var superRareTitleIndex: Int16
-        var normalTitleIndex: UInt8
-        var masterDataIndex: Int16
+        var superRareTitleId: UInt8
+        var normalTitleId: UInt8
+        var itemId: UInt16
         // ソケット（宝石改造）
-        var socketSuperRareTitleIndex: Int16
-        var socketNormalTitleIndex: UInt8
-        var socketMasterDataIndex: Int16
+        var socketSuperRareTitleId: UInt8
+        var socketNormalTitleId: UInt8
+        var socketItemId: UInt16
         // 数量（グループ化後）
         var quantity: Int
 
         /// スタック識別キー
         var stackKey: String {
-            "\(superRareTitleIndex)|\(normalTitleIndex)|\(masterDataIndex)|\(socketSuperRareTitleIndex)|\(socketNormalTitleIndex)|\(socketMasterDataIndex)"
+            "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
         }
     }
 
@@ -95,7 +97,7 @@ enum CharacterValues {
 
     struct JobHistoryEntry: Sendable, Hashable {
         var id: UUID
-        var jobId: String
+        var jobId: UInt8
         var achievedAt: Date
         var createdAt: Date
         var updatedAt: Date

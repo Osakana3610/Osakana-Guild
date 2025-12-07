@@ -1,11 +1,10 @@
 {
   "normalTitles": [
     {
-      "id": "worst",
+      "id": 0,
       "name": "最低な",
       "statMultiplier": 0.25,
       "negativeMultiplier": 4.0,
-      "rank": 0,
       "dropProbability": 28.754,
       "allowWithTitleTreasure": false,
       "superRareRates": {
@@ -17,11 +16,10 @@
       "priceMultiplier": 0.25
     },
     {
-      "id": "stinky",
+      "id": 1,
       "name": "臭い",
       "statMultiplier": 0.5,
       "negativeMultiplier": 2.0,
-      "rank": 1,
       "dropProbability": 38.2294,
       "allowWithTitleTreasure": true,
       "superRareRates": {
@@ -33,19 +31,17 @@
       "priceMultiplier": 0.5
     },
     {
-      "id": "normal",
+      "id": 2,
       "name": "",
       "statMultiplier": 1.0,
       "negativeMultiplier": 1.0,
-      "rank": 2,
       "priceMultiplier": 1.0
     },
     {
-      "id": "masterwork",
+      "id": 3,
       "name": "名工の",
       "statMultiplier": 1.3195,
       "negativeMultiplier": 0.7579,
-      "rank": 3,
       "dropProbability": 28.7541,
       "allowWithTitleTreasure": true,
       "superRareRates": {
@@ -57,11 +53,10 @@
       "priceMultiplier": 2.0
     },
     {
-      "id": "demonic",
+      "id": 4,
       "name": "魔性の",
       "statMultiplier": 1.7411,
       "negativeMultiplier": 0.5743,
-      "rank": 4,
       "dropProbability": 3.2,
       "allowWithTitleTreasure": true,
       "superRareRates": {
@@ -73,11 +68,10 @@
       "priceMultiplier": 4.0
     },
     {
-      "id": "possessed",
+      "id": 5,
       "name": "宿った",
       "statMultiplier": 2.2974,
       "negativeMultiplier": 0.4353,
-      "rank": 5,
       "dropProbability": 0.8,
       "allowWithTitleTreasure": true,
       "superRareRates": {
@@ -89,11 +83,10 @@
       "priceMultiplier": 8.0
     },
     {
-      "id": "legendary",
+      "id": 6,
       "name": "伝説の",
       "statMultiplier": 3.0314,
       "negativeMultiplier": 0.3299,
-      "rank": 6,
       "dropProbability": 0.2,
       "allowWithTitleTreasure": true,
       "superRareRates": {
@@ -105,11 +98,10 @@
       "priceMultiplier": 16.0
     },
     {
-      "id": "terrifying",
+      "id": 7,
       "name": "恐ろしい",
       "statMultiplier": 4.0,
       "negativeMultiplier": 0.25,
-      "rank": 7,
       "dropProbability": 0.05,
       "allowWithTitleTreasure": true,
       "superRareRates": {
@@ -121,11 +113,10 @@
       "priceMultiplier": 32.0
     },
     {
-      "id": "broken",
+      "id": 8,
       "name": "壊れた",
       "statMultiplier": 5.278,
       "negativeMultiplier": 0.1895,
-      "rank": 8,
       "dropProbability": 0.0125,
       "allowWithTitleTreasure": true,
       "superRareRates": {

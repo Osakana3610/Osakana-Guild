@@ -26,12 +26,11 @@ extension SQLiteMasterDataManager {
         let itemStatement = try prepare(itemSQL)
         defer { sqlite3_finalize(itemStatement) }
         while sqlite3_step(itemStatement) == SQLITE_ROW {
-            guard let shopIdC = sqlite3_column_text(itemStatement, 0),
-                  let itemIdC = sqlite3_column_text(itemStatement, 2) else { continue }
+            guard let shopIdC = sqlite3_column_text(itemStatement, 0) else { continue }
             let shopId = String(cString: shopIdC)
             guard var builder = builders[shopId] else { continue }
             let orderIndex = Int(sqlite3_column_int(itemStatement, 1))
-            let itemId = String(cString: itemIdC)
+            let itemId = UInt16(sqlite3_column_int(itemStatement, 2))
             let quantityValue = sqlite3_column_type(itemStatement, 3) == SQLITE_NULL ? nil : Int(sqlite3_column_int(itemStatement, 3))
             builder.items.append(.init(orderIndex: orderIndex, itemId: itemId, quantity: quantityValue))
             builders[shopId] = builder

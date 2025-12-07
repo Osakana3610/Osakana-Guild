@@ -8,7 +8,7 @@ struct BattleEnemyGroupConfigService {
 
     static func makeEncounter(using configuration: DungeonDefinition.EnemyGroupConfig?,
                               floorNumber: Int,
-                              enemyPool: [String: EnemyDefinition],
+                              enemyPool: [UInt16: EnemyDefinition],
                               random: inout GameRandomSource) -> [GroupEnemy] {
         guard let configuration else { return [] }
 
@@ -55,7 +55,7 @@ struct BattleEnemyGroupConfigService {
     }
 
     private static func collectPool(configuration: DungeonDefinition.EnemyGroupConfig,
-                                     floorNumber: Int) -> [String] {
+                                     floorNumber: Int) -> [UInt16] {
         var pool = configuration.normalPool
         if let floorPool = configuration.floorPools[floorNumber] {
             let ratio = configuration.mixRatio
@@ -69,8 +69,8 @@ struct BattleEnemyGroupConfigService {
         return pool
     }
 
-    private static func randomEnemy(from pool: [String],
-                                    enemyPool: [String: EnemyDefinition],
+    private static func randomEnemy(from pool: [UInt16],
+                                    enemyPool: [UInt16: EnemyDefinition],
                                     random: inout GameRandomSource) -> EnemyDefinition? {
         guard !pool.isEmpty else { return nil }
         let pick = random.nextInt(in: 0...(pool.count - 1))

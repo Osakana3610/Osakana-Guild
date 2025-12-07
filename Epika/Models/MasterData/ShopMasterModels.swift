@@ -3,7 +3,7 @@ import Foundation
 struct ShopDefinition: Identifiable, Sendable {
     struct ShopItem: Sendable, Hashable {
         let orderIndex: Int
-        let itemId: String
+        let itemId: UInt16
         let quantity: Int?
     }
 

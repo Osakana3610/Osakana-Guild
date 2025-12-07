@@ -5,8 +5,7 @@ import SQLite3
 
 private struct ItemMasterFile: Decodable {
     struct Item: Decodable {
-        let id: String
-        let index: Int
+        let id: Int
         let name: String
         let description: String
         let category: String
@@ -34,8 +33,8 @@ extension Generator {
             try execute("DELETE FROM items;")
 
             let insertItemSQL = """
-                INSERT INTO items (id, item_index, name, description, category, base_price, sell_value, rarity)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO items (id, name, description, category, base_price, sell_value, rarity)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
             """
             let insertStatSQL = "INSERT INTO item_stat_bonuses (item_id, stat, value) VALUES (?, ?, ?);"
             let insertCombatSQL = "INSERT INTO item_combat_bonuses (item_id, stat, value) VALUES (?, ?, ?);"
@@ -65,20 +64,19 @@ extension Generator {
             }
 
             for item in file.items {
-                bindText(itemStatement, index: 1, value: item.id)
-                bindInt(itemStatement, index: 2, value: item.index)
-                bindText(itemStatement, index: 3, value: item.name)
-                bindText(itemStatement, index: 4, value: item.description)
-                bindText(itemStatement, index: 5, value: item.category)
-                bindInt(itemStatement, index: 6, value: item.basePrice)
-                bindInt(itemStatement, index: 7, value: item.sellValue)
-                bindText(itemStatement, index: 8, value: item.rarity)
+                bindInt(itemStatement, index: 1, value: item.id)
+                bindText(itemStatement, index: 2, value: item.name)
+                bindText(itemStatement, index: 3, value: item.description)
+                bindText(itemStatement, index: 4, value: item.category)
+                bindInt(itemStatement, index: 5, value: item.basePrice)
+                bindInt(itemStatement, index: 6, value: item.sellValue)
+                bindText(itemStatement, index: 7, value: item.rarity)
                 try step(itemStatement)
                 reset(itemStatement)
 
                 if let statBonuses = item.statBonuses {
                     for (stat, value) in statBonuses.sorted(by: { $0.key < $1.key }) {
-                        bindText(statStatement, index: 1, value: item.id)
+                        bindInt(statStatement, index: 1, value: item.id)
                         bindText(statStatement, index: 2, value: stat)
                         bindInt(statStatement, index: 3, value: value)
                         try step(statStatement)
@@ -88,7 +86,7 @@ extension Generator {
 
                 if let combatBonuses = item.combatBonuses {
                     for (stat, value) in combatBonuses.sorted(by: { $0.key < $1.key }) {
-                        bindText(combatStatement, index: 1, value: item.id)
+                        bindInt(combatStatement, index: 1, value: item.id)
                         bindText(combatStatement, index: 2, value: stat)
                         bindInt(combatStatement, index: 3, value: value)
                         try step(combatStatement)
@@ -98,7 +96,7 @@ extension Generator {
 
                 if let races = item.allowedRaces {
                     for race in races {
-                        bindText(raceStatement, index: 1, value: item.id)
+                        bindInt(raceStatement, index: 1, value: item.id)
                         bindText(raceStatement, index: 2, value: race)
                         try step(raceStatement)
                         reset(raceStatement)
@@ -107,7 +105,7 @@ extension Generator {
 
                 if let jobs = item.allowedJobs {
                     for job in jobs {
-                        bindText(jobStatement, index: 1, value: item.id)
+                        bindInt(jobStatement, index: 1, value: item.id)
                         bindText(jobStatement, index: 2, value: job)
                         try step(jobStatement)
                         reset(jobStatement)
@@ -116,7 +114,7 @@ extension Generator {
 
                 if let genders = item.allowedGenders {
                     for gender in genders {
-                        bindText(genderStatement, index: 1, value: item.id)
+                        bindInt(genderStatement, index: 1, value: item.id)
                         bindText(genderStatement, index: 2, value: gender)
                         try step(genderStatement)
                         reset(genderStatement)
@@ -125,7 +123,7 @@ extension Generator {
 
                 if let bypass = item.bypassRaceRestriction {
                     for race in bypass {
-                        bindText(bypassStatement, index: 1, value: item.id)
+                        bindInt(bypassStatement, index: 1, value: item.id)
                         bindText(bypassStatement, index: 2, value: race)
                         try step(bypassStatement)
                         reset(bypassStatement)
@@ -134,7 +132,7 @@ extension Generator {
 
                 if let skills = item.grantedSkills {
                     for (index, skill) in skills.enumerated() {
-                        bindText(skillStatement, index: 1, value: item.id)
+                        bindInt(skillStatement, index: 1, value: item.id)
                         bindInt(skillStatement, index: 2, value: index)
                         bindText(skillStatement, index: 3, value: skill)
                         try step(skillStatement)
@@ -427,8 +425,8 @@ extension Generator {
             try execute("DELETE FROM skills;")
 
             let insertSkillSQL = """
-                INSERT INTO skills (id, name, description, type, category, acquisition_conditions_json)
-                VALUES (?, ?, ?, ?, ?, ?);
+                INSERT INTO skills (id, skill_index, name, description, type, category, acquisition_conditions_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
             """
             let insertEffectSQL = """
                 INSERT INTO skill_effects (skill_id, effect_index, kind, value, value_percent, stat_type, damage_type, payload_json)
@@ -442,13 +440,14 @@ extension Generator {
                 sqlite3_finalize(effectStatement)
             }
 
-            for entry in entries {
+            for (skillIndex, entry) in entries.enumerated() {
                 bindText(skillStatement, index: 1, value: entry.id)
-                bindText(skillStatement, index: 2, value: entry.name)
-                bindText(skillStatement, index: 3, value: entry.description)
-                bindText(skillStatement, index: 4, value: entry.type)
-                bindText(skillStatement, index: 5, value: entry.category)
-                bindText(skillStatement, index: 6, value: entry.acquisitionJSON)
+                bindInt(skillStatement, index: 2, value: skillIndex)
+                bindText(skillStatement, index: 3, value: entry.name)
+                bindText(skillStatement, index: 4, value: entry.description)
+                bindText(skillStatement, index: 5, value: entry.type)
+                bindText(skillStatement, index: 6, value: entry.category)
+                bindText(skillStatement, index: 7, value: entry.acquisitionJSON)
                 try step(skillStatement)
                 reset(skillStatement)
 
@@ -509,7 +508,7 @@ private struct SpellEntry: Decodable {
         let multiplier: Double
     }
 
-    let id: String
+    let id: Int
     let name: String
     let school: String
     let tier: Int
@@ -558,7 +557,7 @@ extension Generator {
             }
 
             for spell in root.spells {
-                bindText(spellStatement, index: 1, value: spell.id)
+                bindInt(spellStatement, index: 1, value: spell.id)
                 bindText(spellStatement, index: 2, value: spell.name)
                 bindText(spellStatement, index: 3, value: spell.school)
                 bindInt(spellStatement, index: 4, value: spell.tier)
@@ -577,7 +576,7 @@ extension Generator {
 
                 if let buffs = spell.buffs {
                     for (index, buff) in buffs.enumerated() {
-                        bindText(buffStatement, index: 1, value: spell.id)
+                        bindInt(buffStatement, index: 1, value: spell.id)
                         bindInt(buffStatement, index: 2, value: index)
                         bindText(buffStatement, index: 3, value: buff.type)
                         bindDouble(buffStatement, index: 4, value: buff.multiplier)
@@ -596,8 +595,7 @@ extension Generator {
 
 private struct JobMasterFile: Decodable {
     struct Job: Decodable {
-        let id: String
-        let index: Int
+        let id: Int
         let name: String
         let category: String
         let growthTendency: String?
@@ -617,8 +615,8 @@ extension Generator {
             try execute("DELETE FROM jobs;")
 
             let insertJobSQL = """
-                INSERT INTO jobs (id, job_index, name, category, growth_tendency)
-                VALUES (?, ?, ?, ?, ?);
+                INSERT INTO jobs (id, name, category, growth_tendency)
+                VALUES (?, ?, ?, ?);
             """
             let insertCoefficientSQL = "INSERT INTO job_combat_coefficients (job_id, stat, value) VALUES (?, ?, ?);"
             let insertSkillSQL = "INSERT INTO job_skills (job_id, order_index, skill_id) VALUES (?, ?, ?);"
@@ -633,16 +631,15 @@ extension Generator {
             }
 
             for job in file.jobs {
-                bindText(jobStatement, index: 1, value: job.id)
-                bindInt(jobStatement, index: 2, value: job.index)
-                bindText(jobStatement, index: 3, value: job.name)
-                bindText(jobStatement, index: 4, value: job.category)
-                bindText(jobStatement, index: 5, value: job.growthTendency)
+                bindInt(jobStatement, index: 1, value: job.id)
+                bindText(jobStatement, index: 2, value: job.name)
+                bindText(jobStatement, index: 3, value: job.category)
+                bindText(jobStatement, index: 4, value: job.growthTendency)
                 try step(jobStatement)
                 reset(jobStatement)
 
                 for (stat, value) in job.combatCoefficients.sorted(by: { $0.key < $1.key }) {
-                    bindText(coefficientStatement, index: 1, value: job.id)
+                    bindInt(coefficientStatement, index: 1, value: job.id)
                     bindText(coefficientStatement, index: 2, value: stat)
                     bindDouble(coefficientStatement, index: 3, value: value)
                     try step(coefficientStatement)
@@ -651,7 +648,7 @@ extension Generator {
 
                 if let skills = job.skills {
                     for (index, skill) in skills.enumerated() {
-                        bindText(skillStatement, index: 1, value: job.id)
+                        bindInt(skillStatement, index: 1, value: job.id)
                         bindInt(skillStatement, index: 2, value: index)
                         bindText(skillStatement, index: 3, value: skill)
                         try step(skillStatement)
@@ -667,141 +664,24 @@ extension Generator {
 
 // MARK: - Race Master
 
-private extension CodingUserInfoKey {
-    static let raceMasterRawJSON: CodingUserInfoKey = {
-        guard let key = CodingUserInfoKey(rawValue: "jp.epika.masterdata.raceRawJSON") else {
-            fatalError("Failed to create CodingUserInfoKey for race master raw JSON")
-        }
-        return key
-    }()
-}
-
 private struct RaceDataMasterFile: Decodable {
     struct Race: Decodable {
-        let index: Int
+        let id: Int
         let name: String
         let gender: String
+        let genderCode: Int
         let category: String
         let baseStats: [String: Int]
         let description: String
         let maxLevel: Int
     }
 
-    let raceEntries: [(id: String, race: Race)]
-    let raceData: [String: Race]
-
-    enum CodingKeys: String, CodingKey {
-        case raceData
-    }
-
-    private struct DynamicCodingKey: CodingKey {
-        let stringValue: String
-        init?(stringValue: String) { self.stringValue = stringValue }
-        var intValue: Int? { nil }
-        init?(intValue: Int) { return nil }
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let raceContainer = try container.nestedContainer(keyedBy: DynamicCodingKey.self, forKey: .raceData)
-        let orderedKeys = (decoder.userInfo[.raceMasterRawJSON] as? Data).flatMap(Self.extractRaceKeys) ?? []
-
-        var ordered: [(String, Race)] = []
-        ordered.reserveCapacity(raceContainer.allKeys.count)
-
-        if !orderedKeys.isEmpty {
-            for key in orderedKeys {
-                guard let codingKey = DynamicCodingKey(stringValue: key) else { continue }
-                let race = try raceContainer.decode(Race.self, forKey: codingKey)
-                ordered.append((key, race))
-            }
-        }
-
-        if ordered.count != raceContainer.allKeys.count {
-            let existing = Set(ordered.map { $0.0 })
-            for key in raceContainer.allKeys where !existing.contains(key.stringValue) {
-                let race = try raceContainer.decode(Race.self, forKey: key)
-                ordered.append((key.stringValue, race))
-            }
-        }
-
-        self.raceEntries = ordered
-        self.raceData = Dictionary(uniqueKeysWithValues: ordered)
-    }
-
-    private static func extractRaceKeys(from data: Data) -> [String] {
-        guard let json = String(data: data, encoding: .utf8),
-              let raceRange = json.range(of: "\"raceData\"") else { return [] }
-
-        var index = raceRange.upperBound
-        let end = json.endIndex
-
-        while index < end, json[index] != "{" {
-            index = json.index(after: index)
-        }
-        guard index < end else { return [] }
-
-        index = json.index(after: index)
-        var depth = 1
-        var keys: [String] = []
-
-        while index < end, depth > 0 {
-            let character = json[index]
-            switch character {
-            case "\"":
-                let nextIndex = json.index(after: index)
-                guard let (stringValue, closingIndex) = parseJSONString(in: json, startingAt: nextIndex) else {
-                    return keys
-                }
-                var lookAhead = json.index(after: closingIndex)
-                while lookAhead < end, json[lookAhead].isWhitespace {
-                    lookAhead = json.index(after: lookAhead)
-                }
-                if depth == 1, lookAhead < end, json[lookAhead] == ":" {
-                    keys.append(stringValue)
-                }
-                index = closingIndex
-            case "{", "[":
-                depth += 1
-            case "}", "]":
-                depth -= 1
-            default:
-                break
-            }
-            index = json.index(after: index)
-        }
-
-        return keys
-    }
-
-    private static func parseJSONString(in source: String, startingAt index: String.Index) -> (String, String.Index)? {
-        var current = index
-        var result = ""
-        var isEscaping = false
-
-        while current < source.endIndex {
-            let character = source[current]
-            if isEscaping {
-                result.append(character)
-                isEscaping = false
-            } else if character == "\\" {
-                isEscaping = true
-            } else if character == "\"" {
-                return (result, current)
-            } else {
-                result.append(character)
-            }
-            current = source.index(after: current)
-        }
-
-        return nil
-    }
+    let raceData: [Race]
 }
 
 extension Generator {
     func importRaceMaster(_ data: Data) throws -> Int {
         let decoder = JSONDecoder()
-        decoder.userInfo[.raceMasterRawJSON] = data
         let file = try decoder.decode(RaceDataMasterFile.self, from: data)
 
         try withTransaction {
@@ -812,7 +692,7 @@ extension Generator {
             try execute("DELETE FROM races;")
 
             let insertRaceSQL = """
-                INSERT INTO races (id, race_index, name, gender, category, description)
+                INSERT INTO races (id, name, gender, gender_code, category, description)
                 VALUES (?, ?, ?, ?, ?, ?);
             """
             let insertStatSQL = "INSERT INTO race_base_stats (race_id, stat, value) VALUES (?, ?, ?);"
@@ -831,20 +711,20 @@ extension Generator {
             }
 
             var categoryCaps: [String: Int] = [:]
-            var memberships: [(category: String, raceId: String)] = []
+            var memberships: [(category: String, raceId: Int)] = []
 
-            for (raceId, race) in file.raceEntries {
-                bindText(raceStatement, index: 1, value: raceId)
-                bindInt(raceStatement, index: 2, value: race.index)
-                bindText(raceStatement, index: 3, value: race.name)
-                bindText(raceStatement, index: 4, value: race.gender)
+            for race in file.raceData {
+                bindInt(raceStatement, index: 1, value: race.id)
+                bindText(raceStatement, index: 2, value: race.name)
+                bindText(raceStatement, index: 3, value: race.gender)
+                bindInt(raceStatement, index: 4, value: race.genderCode)
                 bindText(raceStatement, index: 5, value: race.category)
                 bindText(raceStatement, index: 6, value: race.description)
                 try step(raceStatement)
                 reset(raceStatement)
 
                 for (stat, value) in race.baseStats.sorted(by: { $0.key < $1.key }) {
-                    bindText(statStatement, index: 1, value: raceId)
+                    bindInt(statStatement, index: 1, value: race.id)
                     bindText(statStatement, index: 2, value: stat)
                     bindInt(statStatement, index: 3, value: value)
                     try step(statStatement)
@@ -853,7 +733,7 @@ extension Generator {
 
                 let currentCap = categoryCaps[race.category] ?? race.maxLevel
                 categoryCaps[race.category] = max(currentCap, race.maxLevel)
-                memberships.append((category: race.category, raceId: raceId))
+                memberships.append((category: race.category, raceId: race.id))
             }
 
             for (category, maxLevel) in categoryCaps.sorted(by: { $0.key < $1.key }) {
@@ -865,7 +745,7 @@ extension Generator {
 
             for membership in memberships {
                 bindText(membershipStatement, index: 1, value: membership.category)
-                bindText(membershipStatement, index: 2, value: membership.raceId)
+                bindInt(membershipStatement, index: 2, value: membership.raceId)
                 try step(membershipStatement)
                 reset(membershipStatement)
             }
@@ -879,7 +759,7 @@ extension Generator {
 
 private struct TitleMasterFile: Decodable {
     struct Title: Decodable {
-        let id: String
+        let id: Int
         let name: String
         let description: String?
         let dropRate: Double?
@@ -888,7 +768,6 @@ private struct TitleMasterFile: Decodable {
         let judgmentCount: Int?
         let statMultiplier: Double?
         let negativeMultiplier: Double?
-        let rank: Int?
         let dropProbability: Double?
         let allowWithTitleTreasure: Bool?
         let superRareRates: SuperRareRates?
@@ -906,9 +785,8 @@ private struct TitleMasterFile: Decodable {
 
 private struct SuperRareTitleMasterFile: Decodable {
     struct Title: Decodable {
-        let id: String
+        let id: Int
         let name: String
-        let order: Int
         let skills: [String]
     }
 
@@ -926,16 +804,16 @@ extension Generator {
             let sql = """
                 INSERT INTO titles (
                     id, name, description, stat_multiplier, negative_multiplier,
-                    drop_rate, plus_correction, minus_correction, judgment_count, rank,
+                    drop_rate, plus_correction, minus_correction, judgment_count,
                     drop_probability, allow_with_title_treasure,
                     super_rare_rate_normal, super_rare_rate_good, super_rare_rate_rare, super_rare_rate_gem
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
             let statement = try prepare(sql)
             defer { sqlite3_finalize(statement) }
 
             for title in file.normalTitles {
-                bindText(statement, index: 1, value: title.id)
+                bindInt(statement, index: 1, value: title.id)
                 bindText(statement, index: 2, value: title.name)
                 bindText(statement, index: 3, value: title.description)
                 bindDouble(statement, index: 4, value: title.statMultiplier)
@@ -944,13 +822,12 @@ extension Generator {
                 bindInt(statement, index: 7, value: title.plusCorrection)
                 bindInt(statement, index: 8, value: title.minusCorrection)
                 bindInt(statement, index: 9, value: title.judgmentCount)
-                bindInt(statement, index: 10, value: title.rank)
-                bindDouble(statement, index: 11, value: title.dropProbability)
-                bindBool(statement, index: 12, value: title.allowWithTitleTreasure)
-                bindDouble(statement, index: 13, value: title.superRareRates?.normal)
-                bindDouble(statement, index: 14, value: title.superRareRates?.good)
-                bindDouble(statement, index: 15, value: title.superRareRates?.rare)
-                bindDouble(statement, index: 16, value: title.superRareRates?.gem)
+                bindDouble(statement, index: 10, value: title.dropProbability)
+                bindBool(statement, index: 11, value: title.allowWithTitleTreasure)
+                bindDouble(statement, index: 12, value: title.superRareRates?.normal)
+                bindDouble(statement, index: 13, value: title.superRareRates?.good)
+                bindDouble(statement, index: 14, value: title.superRareRates?.rare)
+                bindDouble(statement, index: 15, value: title.superRareRates?.gem)
                 try step(statement)
                 reset(statement)
             }
@@ -967,7 +844,7 @@ extension Generator {
             try execute("DELETE FROM super_rare_title_skills;")
             try execute("DELETE FROM super_rare_titles;")
 
-            let insertTitleSQL = "INSERT INTO super_rare_titles (id, name, sort_order) VALUES (?, ?, ?);"
+            let insertTitleSQL = "INSERT INTO super_rare_titles (id, name) VALUES (?, ?);"
             let insertSkillSQL = "INSERT INTO super_rare_title_skills (title_id, order_index, skill_id) VALUES (?, ?, ?);"
 
             let titleStatement = try prepare(insertTitleSQL)
@@ -978,14 +855,13 @@ extension Generator {
             }
 
             for title in file.superRareTitles {
-                bindText(titleStatement, index: 1, value: title.id)
+                bindInt(titleStatement, index: 1, value: title.id)
                 bindText(titleStatement, index: 2, value: title.name)
-                bindInt(titleStatement, index: 3, value: title.order)
                 try step(titleStatement)
                 reset(titleStatement)
 
                 for (index, skill) in title.skills.enumerated() {
-                    bindText(skillStatement, index: 1, value: title.id)
+                    bindInt(skillStatement, index: 1, value: title.id)
                     bindInt(skillStatement, index: 2, value: index)
                     bindText(skillStatement, index: 3, value: skill)
                     try step(skillStatement)
@@ -1002,7 +878,7 @@ extension Generator {
 
 private struct StatusEffectMasterFile: Decodable {
     struct StatusEffect: Decodable {
-        let id: String
+        let id: Int
         let name: String
         let description: String
         let category: String
@@ -1043,7 +919,7 @@ extension Generator {
             }
 
             for effect in file.statusEffects {
-                bindText(effectStatement, index: 1, value: effect.id)
+                bindInt(effectStatement, index: 1, value: effect.id)
                 bindText(effectStatement, index: 2, value: effect.name)
                 bindText(effectStatement, index: 3, value: effect.description)
                 bindText(effectStatement, index: 4, value: effect.category)
@@ -1057,7 +933,7 @@ extension Generator {
 
                 if let tags = effect.tags {
                     for (index, tag) in tags.enumerated() {
-                        bindText(tagStatement, index: 1, value: effect.id)
+                        bindInt(tagStatement, index: 1, value: effect.id)
                         bindInt(tagStatement, index: 2, value: index)
                         bindText(tagStatement, index: 3, value: tag)
                         try step(tagStatement)
@@ -1067,7 +943,7 @@ extension Generator {
 
                 if let modifiers = effect.statModifiers {
                     for (stat, value) in modifiers.sorted(by: { $0.key < $1.key }) {
-                        bindText(modifierStatement, index: 1, value: effect.id)
+                        bindInt(modifierStatement, index: 1, value: effect.id)
                         bindText(modifierStatement, index: 2, value: stat)
                         bindDouble(modifierStatement, index: 3, value: value)
                         try step(modifierStatement)
@@ -1085,8 +961,7 @@ extension Generator {
 
 private struct EnemyMasterFile: Decodable {
     struct Enemy: Decodable {
-        let index: Int
-        let id: String
+        let id: Int
         let baseName: String
         let race: String
         let baseExperience: Int
@@ -1111,8 +986,8 @@ extension Generator {
             try execute("DELETE FROM enemies;")
 
             let insertEnemySQL = """
-                INSERT INTO enemies (id, enemy_index, name, race, category, job, base_experience, is_boss)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO enemies (id, name, race, category, job, base_experience, is_boss)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
             """
             let insertStatsSQL = """
                 INSERT INTO enemy_stats (enemy_id, strength, wisdom, spirit, vitality, agility, luck)
@@ -1136,14 +1011,13 @@ extension Generator {
             }
 
             for enemy in file.enemyTemplates {
-                bindText(enemyStatement, index: 1, value: enemy.id)
-                bindInt(enemyStatement, index: 2, value: enemy.index)
-                bindText(enemyStatement, index: 3, value: enemy.baseName)
-                bindText(enemyStatement, index: 4, value: enemy.race)
-                bindText(enemyStatement, index: 5, value: enemy.category)
-                bindText(enemyStatement, index: 6, value: enemy.job)
-                bindInt(enemyStatement, index: 7, value: enemy.baseExperience)
-                bindBool(enemyStatement, index: 8, value: enemy.isBoss)
+                bindInt(enemyStatement, index: 1, value: enemy.id)
+                bindText(enemyStatement, index: 2, value: enemy.baseName)
+                bindText(enemyStatement, index: 3, value: enemy.race)
+                bindText(enemyStatement, index: 4, value: enemy.category)
+                bindText(enemyStatement, index: 5, value: enemy.job)
+                bindInt(enemyStatement, index: 6, value: enemy.baseExperience)
+                bindBool(enemyStatement, index: 7, value: enemy.isBoss)
                 try step(enemyStatement)
                 reset(enemyStatement)
 
@@ -1156,7 +1030,7 @@ extension Generator {
                     throw GeneratorError.executionFailed("Enemy \(enemy.id) の baseAttributes が不完全です")
                 }
 
-                bindText(statsStatement, index: 1, value: enemy.id)
+                bindInt(statsStatement, index: 1, value: enemy.id)
                 bindInt(statsStatement, index: 2, value: strength)
                 bindInt(statsStatement, index: 3, value: wisdom)
                 bindInt(statsStatement, index: 4, value: spirit)
@@ -1167,7 +1041,7 @@ extension Generator {
                 reset(statsStatement)
 
                 for (element, value) in enemy.resistances.sorted(by: { $0.key < $1.key }) {
-                    bindText(resistanceStatement, index: 1, value: enemy.id)
+                    bindInt(resistanceStatement, index: 1, value: enemy.id)
                     bindText(resistanceStatement, index: 2, value: element)
                     bindDouble(resistanceStatement, index: 3, value: value)
                     try step(resistanceStatement)
@@ -1175,7 +1049,7 @@ extension Generator {
                 }
 
                 for (index, skill) in enemy.skills.enumerated() {
-                    bindText(skillStatement, index: 1, value: enemy.id)
+                    bindInt(skillStatement, index: 1, value: enemy.id)
                     bindInt(skillStatement, index: 2, value: index)
                     bindText(skillStatement, index: 3, value: skill)
                     try step(skillStatement)
@@ -1183,7 +1057,7 @@ extension Generator {
                 }
 
                 for (index, item) in enemy.drops.enumerated() {
-                    bindText(dropStatement, index: 1, value: enemy.id)
+                    bindInt(dropStatement, index: 1, value: enemy.id)
                     bindInt(dropStatement, index: 2, value: index)
                     bindText(dropStatement, index: 3, value: item)
                     try step(dropStatement)
@@ -1217,8 +1091,7 @@ private struct DungeonMasterFile: Decodable {
     }
 
     struct Dungeon: Decodable {
-        let id: String
-        let index: Int
+        let id: Int
         let name: String
         let chapter: Int
         let stage: Int
@@ -1257,8 +1130,8 @@ extension Generator {
             try execute("DELETE FROM dungeons;")
 
             let insertDungeonSQL = """
-                INSERT INTO dungeons (id, dungeon_index, name, chapter, stage, description, recommended_level, exploration_time, events_per_floor, floor_count, story_text)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO dungeons (id, name, chapter, stage, description, recommended_level, exploration_time, events_per_floor, floor_count, story_text)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
             let insertUnlockSQL = "INSERT INTO dungeon_unlock_conditions (dungeon_id, order_index, condition) VALUES (?, ?, ?);"
             let insertWeightSQL = "INSERT INTO dungeon_encounter_weights (dungeon_id, order_index, enemy_id, weight) VALUES (?, ?, ?, ?);"
@@ -1314,7 +1187,7 @@ extension Generator {
                 }
             }
 
-            func nextEncounterTableId(base: String, floorNumber: Int) -> String {
+            func nextEncounterTableId(base: Int, floorNumber: Int) -> String {
                 var candidate = "\(base)_floor_\(floorNumber)"
                 var suffix = 0
                 while generatedTableIds.contains(candidate) {
@@ -1328,22 +1201,21 @@ extension Generator {
             for dungeon in file.dungeons {
                 let floorCount = max(1, dungeon.floorCount)
 
-                bindText(dungeonStatement, index: 1, value: dungeon.id)
-                bindInt(dungeonStatement, index: 2, value: dungeon.index)
-                bindText(dungeonStatement, index: 3, value: dungeon.name)
-                bindInt(dungeonStatement, index: 4, value: dungeon.chapter)
-                bindInt(dungeonStatement, index: 5, value: dungeon.stage)
-                bindText(dungeonStatement, index: 6, value: dungeon.description)
-                bindInt(dungeonStatement, index: 7, value: dungeon.recommendedLevel)
-                bindInt(dungeonStatement, index: 8, value: dungeon.explorationTime)
-                bindInt(dungeonStatement, index: 9, value: dungeon.eventsPerFloor)
-                bindInt(dungeonStatement, index: 10, value: floorCount)
-                bindText(dungeonStatement, index: 11, value: dungeon.storyText)
+                bindInt(dungeonStatement, index: 1, value: dungeon.id)
+                bindText(dungeonStatement, index: 2, value: dungeon.name)
+                bindInt(dungeonStatement, index: 3, value: dungeon.chapter)
+                bindInt(dungeonStatement, index: 4, value: dungeon.stage)
+                bindText(dungeonStatement, index: 5, value: dungeon.description)
+                bindInt(dungeonStatement, index: 6, value: dungeon.recommendedLevel)
+                bindInt(dungeonStatement, index: 7, value: dungeon.explorationTime)
+                bindInt(dungeonStatement, index: 8, value: dungeon.eventsPerFloor)
+                bindInt(dungeonStatement, index: 9, value: floorCount)
+                bindText(dungeonStatement, index: 10, value: dungeon.storyText)
                 try step(dungeonStatement)
                 reset(dungeonStatement)
 
                 for (index, condition) in dungeon.unlockConditions.enumerated() {
-                    bindText(unlockStatement, index: 1, value: dungeon.id)
+                    bindInt(unlockStatement, index: 1, value: dungeon.id)
                     bindInt(unlockStatement, index: 2, value: index)
                     bindText(unlockStatement, index: 3, value: condition)
                     try step(unlockStatement)
@@ -1352,7 +1224,7 @@ extension Generator {
 
                 if let weights = dungeon.encounterWeights {
                     for (index, weight) in weights.enumerated() {
-                        bindText(weightStatement, index: 1, value: dungeon.id)
+                        bindInt(weightStatement, index: 1, value: dungeon.id)
                         bindInt(weightStatement, index: 2, value: index)
                         bindText(weightStatement, index: 3, value: weight.enemyId)
                         bindDouble(weightStatement, index: 4, value: weight.weight)
@@ -1386,7 +1258,7 @@ extension Generator {
 
                     let floorId = "\(dungeon.id)_floor_\(floorNumber)"
                     bindText(floorStatement, index: 1, value: floorId)
-                    bindText(floorStatement, index: 2, value: dungeon.id)
+                    bindInt(floorStatement, index: 2, value: dungeon.id)
                     bindText(floorStatement, index: 3, value: "第\(floorNumber)階")
                     bindInt(floorStatement, index: 4, value: floorNumber)
                     bindText(floorStatement, index: 5, value: tableId)
@@ -1509,7 +1381,7 @@ extension Generator {
 
 private struct StoryMasterFile: Decodable {
     struct Story: Decodable {
-        let id: String
+        let id: Int
         let title: String
         let content: String
         let chapter: Int
@@ -1553,7 +1425,7 @@ extension Generator {
             }
 
             for story in file.storyNodes {
-                bindText(storyStatement, index: 1, value: story.id)
+                bindInt(storyStatement, index: 1, value: story.id)
                 bindText(storyStatement, index: 2, value: story.title)
                 bindText(storyStatement, index: 3, value: story.content)
                 bindInt(storyStatement, index: 4, value: story.chapter)
@@ -1562,7 +1434,7 @@ extension Generator {
                 reset(storyStatement)
 
                 for (index, condition) in story.unlockRequirements.enumerated() {
-                    bindText(requirementStatement, index: 1, value: story.id)
+                    bindInt(requirementStatement, index: 1, value: story.id)
                     bindInt(requirementStatement, index: 2, value: index)
                     bindText(requirementStatement, index: 3, value: condition)
                     try step(requirementStatement)
@@ -1570,7 +1442,7 @@ extension Generator {
                 }
 
                 for (index, reward) in story.rewards.enumerated() {
-                    bindText(rewardStatement, index: 1, value: story.id)
+                    bindInt(rewardStatement, index: 1, value: story.id)
                     bindInt(rewardStatement, index: 2, value: index)
                     bindText(rewardStatement, index: 3, value: reward)
                     try step(rewardStatement)
@@ -1578,7 +1450,7 @@ extension Generator {
                 }
 
                 for (index, module) in story.unlocksModules.enumerated() {
-                    bindText(moduleStatement, index: 1, value: story.id)
+                    bindInt(moduleStatement, index: 1, value: story.id)
                     bindInt(moduleStatement, index: 2, value: index)
                     bindText(moduleStatement, index: 3, value: module)
                     try step(moduleStatement)
@@ -1601,8 +1473,7 @@ private struct PersonalityPrimaryEntry {
         let payloadJSON: String
     }
 
-    let id: String
-    let index: Int
+    let id: Int
     let name: String
     let kind: String
     let description: String
@@ -1610,8 +1481,7 @@ private struct PersonalityPrimaryEntry {
 }
 
 private struct PersonalitySecondaryEntry {
-    let id: String
-    let index: Int
+    let id: Int
     let name: String
     let positiveSkillId: String
     let negativeSkillId: String
@@ -1678,8 +1548,7 @@ extension Generator {
         }
 
         let primaries = try primaryList.map { dictionary -> PersonalityPrimaryEntry in
-            guard let id = dictionary["id"] as? String,
-                  let personalityIndex = toInt(dictionary["index"]),
+            guard let id = toInt(dictionary["id"]),
                   let name = dictionary["name"] as? String,
                   let kind = dictionary["type"] as? String,
                   let description = dictionary["description"] as? String else {
@@ -1696,12 +1565,11 @@ extension Generator {
                 return PersonalityPrimaryEntry.Effect(index: index, type: type, value: value, payloadJSON: payload)
             }
 
-            return PersonalityPrimaryEntry(id: id, index: personalityIndex, name: name, kind: kind, description: description, effects: effects)
+            return PersonalityPrimaryEntry(id: id, name: name, kind: kind, description: description, effects: effects)
         }
 
         let secondaries = try secondaryList.map { dictionary -> PersonalitySecondaryEntry in
-            guard let id = dictionary["id"] as? String,
-                  let personalityIndex = toInt(dictionary["index"]),
+            guard let id = toInt(dictionary["id"]),
                   let name = dictionary["name"] as? String,
                   let positive = dictionary["positiveSkill"] as? String,
                   let negative = dictionary["negativeSkill"] as? String else {
@@ -1717,7 +1585,7 @@ extension Generator {
                 statBonuses[stat] = intValue
             }
 
-            return PersonalitySecondaryEntry(id: id, index: personalityIndex, name: name, positiveSkillId: positive, negativeSkillId: negative, statBonuses: statBonuses)
+            return PersonalitySecondaryEntry(id: id, name: name, positiveSkillId: positive, negativeSkillId: negative, statBonuses: statBonuses)
         }
 
         let skills = try skillsDict.map { key, value -> PersonalitySkillEntry in
@@ -1745,12 +1613,12 @@ extension Generator {
             try execute("DELETE FROM personality_primary_effects;")
             try execute("DELETE FROM personality_primary;")
 
-            let insertPrimarySQL = "INSERT INTO personality_primary (id, personality_index, name, kind, description) VALUES (?, ?, ?, ?, ?);"
+            let insertPrimarySQL = "INSERT INTO personality_primary (id, name, kind, description) VALUES (?, ?, ?, ?);"
             let insertPrimaryEffectSQL = """
                 INSERT INTO personality_primary_effects (personality_id, order_index, effect_type, value, payload_json)
                 VALUES (?, ?, ?, ?, ?);
             """
-            let insertSecondarySQL = "INSERT INTO personality_secondary (id, personality_index, name, positive_skill_id, negative_skill_id) VALUES (?, ?, ?, ?, ?);"
+            let insertSecondarySQL = "INSERT INTO personality_secondary (id, name, positive_skill_id, negative_skill_id) VALUES (?, ?, ?, ?);"
             let insertSecondaryStatSQL = "INSERT INTO personality_secondary_stat_bonuses (personality_id, stat, value) VALUES (?, ?, ?);"
             let insertSkillSQL = "INSERT INTO personality_skills (id, name, kind, description) VALUES (?, ?, ?, ?);"
             let insertSkillEventSQL = "INSERT INTO personality_skill_event_effects (skill_id, order_index, effect_id) VALUES (?, ?, ?);"
@@ -1777,16 +1645,15 @@ extension Generator {
             }
 
             for entry in primaries {
-                bindText(primaryStatement, index: 1, value: entry.id)
-                bindInt(primaryStatement, index: 2, value: entry.index)
-                bindText(primaryStatement, index: 3, value: entry.name)
-                bindText(primaryStatement, index: 4, value: entry.kind)
-                bindText(primaryStatement, index: 5, value: entry.description)
+                bindInt(primaryStatement, index: 1, value: entry.id)
+                bindText(primaryStatement, index: 2, value: entry.name)
+                bindText(primaryStatement, index: 3, value: entry.kind)
+                bindText(primaryStatement, index: 4, value: entry.description)
                 try step(primaryStatement)
                 reset(primaryStatement)
 
                 for effect in entry.effects {
-                    bindText(primaryEffectStatement, index: 1, value: entry.id)
+                    bindInt(primaryEffectStatement, index: 1, value: entry.id)
                     bindInt(primaryEffectStatement, index: 2, value: effect.index)
                     bindText(primaryEffectStatement, index: 3, value: effect.type)
                     bindDouble(primaryEffectStatement, index: 4, value: effect.value)
@@ -1797,16 +1664,15 @@ extension Generator {
             }
 
             for entry in secondaries {
-                bindText(secondaryStatement, index: 1, value: entry.id)
-                bindInt(secondaryStatement, index: 2, value: entry.index)
-                bindText(secondaryStatement, index: 3, value: entry.name)
-                bindText(secondaryStatement, index: 4, value: entry.positiveSkillId)
-                bindText(secondaryStatement, index: 5, value: entry.negativeSkillId)
+                bindInt(secondaryStatement, index: 1, value: entry.id)
+                bindText(secondaryStatement, index: 2, value: entry.name)
+                bindText(secondaryStatement, index: 3, value: entry.positiveSkillId)
+                bindText(secondaryStatement, index: 4, value: entry.negativeSkillId)
                 try step(secondaryStatement)
                 reset(secondaryStatement)
 
                 for (stat, value) in entry.statBonuses.sorted(by: { $0.key < $1.key }) {
-                    bindText(secondaryStatStatement, index: 1, value: entry.id)
+                    bindInt(secondaryStatStatement, index: 1, value: entry.id)
                     bindText(secondaryStatStatement, index: 2, value: stat)
                     bindInt(secondaryStatStatement, index: 3, value: value)
                     try step(secondaryStatStatement)
@@ -1858,8 +1724,7 @@ private struct ExplorationEventEntry {
         let value: Double
     }
 
-    let index: Int
-    let id: String
+    let id: Int
     let type: String
     let name: String
     let description: String
@@ -1918,8 +1783,7 @@ extension Generator {
         }
 
         let entries = try eventsArray.map { event -> ExplorationEventEntry in
-            guard let eventIndex = toInt(event["index"]),
-                  let id = event["id"] as? String,
+            guard let id = toInt(event["id"]),
                   let type = event["type"] as? String,
                   let name = event["name"] as? String,
                   let description = event["description"] as? String,
@@ -1951,8 +1815,7 @@ extension Generator {
                 payloadJSON = nil
             }
 
-            return ExplorationEventEntry(index: eventIndex,
-                                         id: id,
+            return ExplorationEventEntry(id: id,
                                          type: type,
                                          name: name,
                                          description: description,
@@ -1970,8 +1833,8 @@ extension Generator {
             try execute("DELETE FROM exploration_events;")
 
             let insertEventSQL = """
-                INSERT INTO exploration_events (id, event_index, type, name, description, floor_min, floor_max)
-                VALUES (?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO exploration_events (id, type, name, description, floor_min, floor_max)
+                VALUES (?, ?, ?, ?, ?, ?);
             """
             let insertTagSQL = "INSERT INTO exploration_event_tags (event_id, order_index, tag) VALUES (?, ?, ?);"
             let insertWeightSQL = "INSERT INTO exploration_event_weights (event_id, context, weight) VALUES (?, ?, ?);"
@@ -1989,18 +1852,17 @@ extension Generator {
             }
 
             for entry in entries {
-                bindText(eventStatement, index: 1, value: entry.id)
-                bindInt(eventStatement, index: 2, value: entry.index)
-                bindText(eventStatement, index: 3, value: entry.type)
-                bindText(eventStatement, index: 4, value: entry.name)
-                bindText(eventStatement, index: 5, value: entry.description)
-                bindInt(eventStatement, index: 6, value: entry.floorMin)
-                bindInt(eventStatement, index: 7, value: entry.floorMax)
+                bindInt(eventStatement, index: 1, value: entry.id)
+                bindText(eventStatement, index: 2, value: entry.type)
+                bindText(eventStatement, index: 3, value: entry.name)
+                bindText(eventStatement, index: 4, value: entry.description)
+                bindInt(eventStatement, index: 5, value: entry.floorMin)
+                bindInt(eventStatement, index: 6, value: entry.floorMax)
                 try step(eventStatement)
                 reset(eventStatement)
 
                 for (index, tag) in entry.dungeonTags.enumerated() {
-                    bindText(tagStatement, index: 1, value: entry.id)
+                    bindInt(tagStatement, index: 1, value: entry.id)
                     bindInt(tagStatement, index: 2, value: index)
                     bindText(tagStatement, index: 3, value: tag)
                     try step(tagStatement)
@@ -2008,7 +1870,7 @@ extension Generator {
                 }
 
                 for weight in entry.weights {
-                    bindText(weightStatement, index: 1, value: entry.id)
+                    bindInt(weightStatement, index: 1, value: entry.id)
                     bindText(weightStatement, index: 2, value: weight.context)
                     bindDouble(weightStatement, index: 3, value: weight.value)
                     try step(weightStatement)
@@ -2016,7 +1878,7 @@ extension Generator {
                 }
 
                 if let payloadJSON = entry.payloadJSON {
-                    bindText(payloadStatement, index: 1, value: entry.id)
+                    bindInt(payloadStatement, index: 1, value: entry.id)
                     bindText(payloadStatement, index: 2, value: entry.type)
                     bindText(payloadStatement, index: 3, value: payloadJSON)
                     try step(payloadStatement)

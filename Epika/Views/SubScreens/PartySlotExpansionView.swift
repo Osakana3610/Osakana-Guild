@@ -13,7 +13,7 @@ struct PartySlotExpansionView: View {
     @State private var errorMessage: String?
     @State private var successMessage: String?
 
-    private var currentGold: Int { playerSnapshot?.gold ?? 0 }
+    private var currentGold: Int { Int(playerSnapshot?.gold ?? 0) }
     private var currentSlots: Int { partySnapshots.count }
     private var nextSlot: Int { currentSlots + 1 }
     private var maxSlots: Int { AppConstants.Progress.maximumPartySlotsWithGold }
@@ -257,7 +257,7 @@ struct PartySlotExpansionView: View {
         successMessage = nil
         do {
             if cost > 0 {
-                _ = try await progressService.gameState.spendGold(cost)
+                _ = try await progressService.gameState.spendGold(UInt32(cost))
             }
             do {
                 let updatedParties = try await progressService.party.ensurePartySlots(atLeast: previousSlots + 1)
@@ -270,7 +270,7 @@ struct PartySlotExpansionView: View {
             } catch {
                 if cost > 0 {
                     do {
-                        _ = try await progressService.gameState.addGold(cost)
+                        _ = try await progressService.gameState.addGold(UInt32(cost))
                     } catch let refundError {
                         throw PartySlotExpansionError.rollbackFailed(original: error, rollback: refundError)
                     }

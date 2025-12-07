@@ -12,7 +12,7 @@ struct ItemPurchaseView: View {
 
     private var shopService: ShopProgressService { progressService.shop }
 
-    var playerGold: Int { player?.gold ?? 0 }
+    var playerGold: Int { Int(player?.gold ?? 0) }
 
     var body: some View {
         NavigationStack {
@@ -77,7 +77,7 @@ struct ItemPurchaseView: View {
     private func confirmPurchase(quantity: Int) async {
         guard let item = selectedItem else { return }
         do {
-            _ = try await shopService.purchase(stockId: item.id, quantity: quantity)
+            _ = try await shopService.purchase(itemId: item.id, quantity: quantity)
             selectedItem = nil
             await loadShopData()
         } catch {

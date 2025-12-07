@@ -27,14 +27,14 @@ struct DropContext: Sendable {
     let partyBonuses: PartyDropBonuses
     let isRabiTicketActive: Bool
     let hasTitleTreasure: Bool
-    let dungeonId: String?
+    let dungeonId: UInt16?
     let floorNumber: Int?
 
     init(enemy: EnemyDefinition,
          partyBonuses: PartyDropBonuses,
          isRabiTicketActive: Bool = false,
          hasTitleTreasure: Bool = false,
-         dungeonId: String? = nil,
+         dungeonId: UInt16? = nil,
          floorNumber: Int? = nil) {
         self.enemy = enemy
         self.partyBonuses = partyBonuses
@@ -55,8 +55,8 @@ struct DropRollResult: Sendable {
 
 /// 日次で共有する超レアドロップ状態。
 struct SuperRareDailyState: Sendable {
-    /// JST日付 (YYYYMMDD形式のInt)
-    var jstDate: Int
+    /// JST日付 (YYYYMMDD形式のUInt32)
+    var jstDate: UInt32
     var hasTriggered: Bool
 }
 

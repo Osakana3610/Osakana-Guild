@@ -17,7 +17,7 @@ final class ExplorationProgressService {
 
     private enum ExplorationSnapshotBuildError: Error {
         case dungeonNotFound(UInt16)
-        case itemNotFound(Int16)
+        case itemNotFound(UInt16)
         case enemyNotFound(UInt16)
         case statusEffectNotFound(String)
     }
@@ -49,7 +49,7 @@ final class ExplorationProgressService {
 
         let runRecord = ExplorationRunRecord(
             partyId: party.id,
-            dungeonIndex: dungeon.index,
+            dungeonId: dungeon.id,
             difficulty: UInt8(difficulty),
             targetFloor: UInt8(targetFloor),
             startedAt: startedAt
@@ -89,8 +89,8 @@ final class ExplorationProgressService {
         let runRecord = try fetchRunRecord(runId: runId, context: context)
         runRecord.endedAt = endedAt
         runRecord.result = resultValue(for: endState)
-        runRecord.totalExp = Int32(totalExperience)
-        runRecord.totalGold = Int32(totalGold)
+        runRecord.totalExp = UInt32(totalExperience)
+        runRecord.totalGold = UInt32(totalGold)
 
         if case let .defeated(floorNumber, _, _) = endState {
             runRecord.finalFloor = UInt8(floorNumber)
@@ -157,10 +157,10 @@ private extension ExplorationProgressService {
                          battleLog: BattleLogArchive?,
                          occurredAt: Date) async throws -> EventEntry {
         let kind: UInt8
-        var enemyIndex: UInt16?
+        var enemyId: UInt16?
         var battleResult: UInt8?
         var battleLogData: Data?
-        var scriptedEventIndex: UInt16?
+        var scriptedEventId: UInt8?
 
         switch event.kind {
         case .nothing:
@@ -168,7 +168,7 @@ private extension ExplorationProgressService {
 
         case .combat(let summary):
             kind = EventKind.combat.rawValue
-            enemyIndex = await masterData.getEnemyIndex(for: summary.enemy.id)
+            enemyId = summary.enemy.id
             if let log = battleLog {
                 battleResult = battleResultValue(log.result)
                 // 現時点ではBattleLogArchiveを丸ごと保存。
@@ -178,7 +178,7 @@ private extension ExplorationProgressService {
 
         case .scripted(let summary):
             kind = EventKind.scripted.rawValue
-            scriptedEventIndex = await masterData.getExplorationEventIndex(for: summary.eventId)
+            scriptedEventId = summary.eventId
         }
 
         let drops = await buildDropEntries(from: event.drops)
@@ -186,12 +186,12 @@ private extension ExplorationProgressService {
         return EventEntry(
             floor: UInt8(event.floorNumber),
             kind: kind,
-            enemyIndex: enemyIndex,
+            enemyId: enemyId,
             battleResult: battleResult,
             battleLogData: battleLogData,
-            scriptedEventIndex: scriptedEventIndex,
-            exp: Int32(event.experienceGained),
-            gold: Int32(event.goldGained),
+            scriptedEventId: scriptedEventId,
+            exp: UInt32(event.experienceGained),
+            gold: UInt32(event.goldGained),
             drops: drops,
             occurredAt: occurredAt
         )
@@ -202,26 +202,26 @@ private extension ExplorationProgressService {
         entries.reserveCapacity(drops.count)
 
         for drop in drops {
-            // 称号IDからindexへ変換。IDが無効な場合は0（称号なし）
+            // 称号IDからidへ変換。IDが無効な場合は0（称号なし）
             // ゲーム内で生成されたドロップなので、通常は有効なIDのみ
-            let superRareTitleOrder: UInt8
+            let superRareTitleId: UInt8
             if let superRareId = drop.superRareTitleId {
-                superRareTitleOrder = UInt8(await masterData.getSuperRareTitleIndex(for: superRareId) ?? 0)
+                superRareTitleId = superRareId
             } else {
-                superRareTitleOrder = 0
+                superRareTitleId = 0
             }
 
-            let normalTitleRank: UInt8
+            let normalTitleId: UInt8
             if let normalId = drop.normalTitleId {
-                normalTitleRank = await masterData.getTitleIndex(for: normalId) ?? 0
+                normalTitleId = normalId
             } else {
-                normalTitleRank = 0
+                normalTitleId = 0
             }
 
             entries.append(DropEntry(
-                superRareTitleOrder: superRareTitleOrder,
-                normalTitleRank: normalTitleRank,
-                itemIndex: drop.item.index,  // ItemDefinition.indexを直接使用
+                superRareTitleId: superRareTitleId,
+                normalTitleId: normalTitleId,
+                itemId: drop.item.id,
                 quantity: UInt16(drop.quantity)
             ))
         }
@@ -251,8 +251,8 @@ private extension ExplorationProgressService {
         let events = try run.decodeEvents()
 
         // ダンジョン情報取得
-        guard let dungeonDefinition = try await masterData.getDungeonDefinition(id: masterData.getDungeonId(for: run.dungeonIndex) ?? "") else {
-            throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonIndex)
+        guard let dungeonDefinition = try await masterData.getDungeonDefinition(id: run.dungeonId) else {
+            throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
         }
 
         let displayDungeonName = DungeonDisplayNameFormatter.displayName(
@@ -286,9 +286,8 @@ private extension ExplorationProgressService {
 
         for event in events {
             for drop in event.drops {
-                if drop.itemIndex >= 0 {
-                    if let itemId = await masterData.getItemId(for: drop.itemIndex),
-                       let item = try await masterData.getItemMasterData(id: itemId) {
+                if drop.itemId > 0 {
+                    if let item = try await masterData.getItemMasterData(id: drop.itemId) {
                         rewards[item.name, default: 0] += Int(drop.quantity)
                     }
                 }
@@ -317,7 +316,7 @@ private extension ExplorationProgressService {
         return ExplorationSnapshot(
             persistentIdentifier: run.persistentModelID,
             id: UUID(),  // 新構造ではUUIDは識別子として使わない
-            dungeonId: await masterData.getDungeonId(for: run.dungeonIndex) ?? "",
+            dungeonId: run.dungeonId,
             displayDungeonName: displayDungeonName,
             activeFloorNumber: Int(run.finalFloor),
             party: partySummary,
@@ -344,11 +343,9 @@ private extension ExplorationProgressService {
 
         case .combat:
             kind = .enemyEncounter
-            if let enemyIdx = event.enemyIndex {
-                let enemyId = await masterData.getEnemyId(for: enemyIdx)
-                referenceId = enemyId
-                if let id = enemyId,
-                   let enemy = try await masterData.getEnemyDefinition(id: id) {
+            if let enemyId = event.enemyId {
+                referenceId = String(enemyId)
+                if let enemy = try await masterData.getEnemyDefinition(id: enemyId) {
                     let result = battleResultString(event.battleResult ?? 0)
                     // battleLogDataからターン数を取得（デコードに失敗した場合は0）
                     var turns = 0
@@ -357,7 +354,7 @@ private extension ExplorationProgressService {
                         turns = archive.turns
                     }
                     combatSummary = ExplorationSnapshot.EncounterLog.CombatSummary(
-                        enemyId: id,
+                        enemyId: enemyId,
                         enemyName: enemy.name,
                         result: result,
                         turns: turns,
@@ -369,8 +366,8 @@ private extension ExplorationProgressService {
 
         case .scripted:
             kind = .scriptedEvent
-            if let eventIdx = event.scriptedEventIndex {
-                referenceId = await masterData.getExplorationEventId(for: eventIdx)
+            if let eventId = event.scriptedEventId {
+                referenceId = String(eventId)
             }
         }
 
@@ -385,9 +382,8 @@ private extension ExplorationProgressService {
         if !event.drops.isEmpty {
             var dropStrings: [String] = []
             for drop in event.drops {
-                if drop.itemIndex >= 0,
-                   let itemId = await masterData.getItemId(for: drop.itemIndex),
-                   let item = try await masterData.getItemMasterData(id: itemId) {
+                if drop.itemId > 0,
+                   let item = try await masterData.getItemMasterData(id: drop.itemId) {
                     dropStrings.append("\(item.name)x\(drop.quantity)")
                 }
             }

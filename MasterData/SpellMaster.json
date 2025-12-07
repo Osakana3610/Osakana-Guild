@@ -3,7 +3,7 @@
   "lastUpdated": "2025-11-08",
   "spells": [
     {
-      "id": "spell.mage.magic_arrow",
+      "id": 0,
       "name": "マジックアロー",
       "school": "mage",
       "tier": 1,
@@ -15,7 +15,7 @@
       "description": "3本の魔法の矢で任意の敵へダメージを与える。単体相手には複数命中することもある。"
     },
     {
-      "id": "spell.mage.sleep_cloud",
+      "id": 1,
       "name": "スリープクラウド",
       "school": "mage",
       "tier": 2,
@@ -27,7 +27,7 @@
       "description": "広範囲に眠りの雲を発生させ、多数の敵を眠らせる。ダメージは発生しない。"
     },
     {
-      "id": "spell.mage.fireball",
+      "id": 2,
       "name": "ファイヤーボール",
       "school": "mage",
       "tier": 3,
@@ -39,7 +39,7 @@
       "description": "炎の爆発で複数の敵へダメージ。魔法攻撃力の影響が大きい。"
     },
     {
-      "id": "spell.mage.blizzard",
+      "id": 3,
       "name": "ブリザード",
       "school": "mage",
       "tier": 4,
@@ -51,7 +51,7 @@
       "description": "吹雪で多数の敵を攻撃する。Lv上昇による威力増加が大きい。"
     },
     {
-      "id": "spell.mage.attack_up",
+      "id": 4,
       "name": "アタックアップ",
       "school": "mage",
       "tier": 5,
@@ -66,7 +66,7 @@
       "description": "味方の物理与ダメージを1.6倍にする戦術バフ。戦闘中永続。"
     },
     {
-      "id": "spell.mage.thunder_bolt",
+      "id": 5,
       "name": "サンダーボルト",
       "school": "mage",
       "tier": 6,
@@ -76,7 +76,7 @@
       "description": "単体へ強烈な雷撃を放ち大ダメージを与える。"
     },
     {
-      "id": "spell.mage.nuclear",
+      "id": 6,
       "name": "ニュークリア",
       "school": "mage",
       "tier": 7,
@@ -88,7 +88,7 @@
       "description": "核爆発で多数の敵を攻撃し、魔法防御の影響を半減させる。"
     },
     {
-      "id": "spell.priest.heal",
+      "id": 7,
       "name": "ヒール",
       "school": "priest",
       "tier": 1,
@@ -98,7 +98,7 @@
       "description": "味方1人のHPを回復する基本魔法。"
     },
     {
-      "id": "spell.priest.shield_barrier",
+      "id": 8,
       "name": "シールドバリア",
       "school": "priest",
       "tier": 2,
@@ -117,7 +117,7 @@
       "description": "味方が受ける攻撃・ブレスダメージを半減するバリアを展開。"
     },
     {
-      "id": "spell.priest.cure",
+      "id": 9,
       "name": "キュア",
       "school": "priest",
       "tier": 3,
@@ -126,7 +126,7 @@
       "description": "味方全員の状態異常を治療する。"
     },
     {
-      "id": "spell.priest.heal_plus",
+      "id": 10,
       "name": "ヒールプラス",
       "school": "priest",
       "tier": 4,
@@ -136,7 +136,7 @@
       "description": "味方1人のHPを大きく回復させる。"
     },
     {
-      "id": "spell.priest.magic_barrier",
+      "id": 11,
       "name": "マジックバリア",
       "school": "priest",
       "tier": 5,
@@ -151,7 +151,7 @@
       "description": "味方が受ける魔法ダメージを半減する結界を張る。"
     },
     {
-      "id": "spell.priest.full_heal",
+      "id": 12,
       "name": "フルヒール",
       "school": "priest",
       "tier": 6,
@@ -162,7 +162,7 @@
       "description": "HPが半分以下の味方を完全回復させる。"
     },
     {
-      "id": "spell.priest.party_heal",
+      "id": 13,
       "name": "パーティヒール",
       "school": "priest",
       "tier": 7,

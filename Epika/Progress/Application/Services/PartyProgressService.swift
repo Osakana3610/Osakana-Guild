@@ -34,7 +34,7 @@ actor PartyProgressService {
                 let partyId = UInt8(index + 1)
                 let record = PartyRecord(id: partyId,
                                          displayName: nameProvider(index),
-                                         lastSelectedDungeonIndex: 0,
+                                         lastSelectedDungeonId: 0,
                                          lastSelectedDifficulty: 0,
                                          targetFloor: 1,
                                          memberCharacterIds: [],
@@ -76,10 +76,10 @@ actor PartyProgressService {
         return Self.snapshot(from: party)
     }
 
-    func setLastSelectedDungeon(persistentIdentifier: PersistentIdentifier, dungeonIndex: UInt16) async throws -> PartySnapshot {
+    func setLastSelectedDungeon(persistentIdentifier: PersistentIdentifier, dungeonId: UInt16) async throws -> PartySnapshot {
         let context = makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
-        party.lastSelectedDungeonIndex = dungeonIndex
+        party.lastSelectedDungeonId = dungeonId
         party.updatedAt = Date()
         try context.save()
         return Self.snapshot(from: party)
@@ -159,7 +159,7 @@ private extension PartyProgressService {
         PartySnapshot(persistentIdentifier: record.persistentModelID,
                       id: record.id,
                       displayName: record.displayName,
-                      lastSelectedDungeonIndex: record.lastSelectedDungeonIndex,
+                      lastSelectedDungeonId: record.lastSelectedDungeonId,
                       lastSelectedDifficulty: record.lastSelectedDifficulty,
                       targetFloor: record.targetFloor,
                       memberCharacterIds: record.memberCharacterIds,

@@ -110,7 +110,7 @@ struct InventoryCleanupView: View {
     @MainActor
     private func cleanupItem(_ item: ShopProgressService.ShopItem) async {
         do {
-            let result = try await progressService.cleanupStockAndAutoSell(stockId: item.id)
+            let result = try await progressService.cleanupStockAndAutoSell(itemId: item.id)
             // キャット・チケットはcleanupStockAndAutoSell内で加算済み
             // 自動売却でゴールドも獲得
             _ = result // 結果をログ表示等で使う場合はここで
