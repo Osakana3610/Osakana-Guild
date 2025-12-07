@@ -1,64 +1,35 @@
 import Foundation
 import SwiftData
 
+/// ダンジョン進行状況Record
+/// - DungeonFloorRecord/DungeonEncounterRecordは未使用のため削除
+/// - dungeonIdはMasterDataのDungeon.idに対応（UInt8）
+/// - isCleared は highestClearedDifficulty != nil で導出可能
 @Model
 final class DungeonRecord {
-    var id: UUID = UUID()
-    var dungeonId: String = ""
+    var dungeonId: UInt8 = 0                      // 一意キー
     var isUnlocked: Bool = false
-    var lastEnteredAt: Date?
-    var isCleared: Bool = false
-    var highestUnlockedDifficulty: Int = 0
-    var highestClearedDifficulty: Int = 0
-    var furthestClearedFloor: Int = 0
-    var createdAt: Date = Date()
+    var highestUnlockedDifficulty: UInt8 = 0
+    var highestClearedDifficulty: UInt8? = nil    // nil=未クリア
+    var furthestClearedFloor: UInt8 = 0
     var updatedAt: Date = Date()
 
-    init(id: UUID = UUID(),
-         dungeonId: String,
-         isUnlocked: Bool,
-         lastEnteredAt: Date?,
-         isCleared: Bool,
-         highestUnlockedDifficulty: Int,
-         highestClearedDifficulty: Int,
-         furthestClearedFloor: Int,
-         createdAt: Date,
-         updatedAt: Date) {
-        self.id = id
+    /// クリア済みかどうか（導出プロパティ）
+    var isCleared: Bool {
+        highestClearedDifficulty != nil
+    }
+
+    init(dungeonId: UInt8,
+         isUnlocked: Bool = false,
+         highestUnlockedDifficulty: UInt8 = 0,
+         highestClearedDifficulty: UInt8? = nil,
+         furthestClearedFloor: UInt8 = 0,
+         updatedAt: Date = Date()) {
         self.dungeonId = dungeonId
         self.isUnlocked = isUnlocked
-        self.lastEnteredAt = lastEnteredAt
-        self.isCleared = isCleared
         self.highestUnlockedDifficulty = highestUnlockedDifficulty
         self.highestClearedDifficulty = highestClearedDifficulty
         self.furthestClearedFloor = furthestClearedFloor
-        self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
-}
-
-@Model
-final class DungeonFloorRecord {
-    var id: UUID = UUID()
-    var dungeonRecordId: UUID = UUID()
-    var floorNumber: Int = 0
-    var cleared: Bool = false
-    var bestClearTime: TimeInterval?
-    var lastClearedAt: Date?
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
-
-    init() {}
-}
-
-@Model
-final class DungeonEncounterRecord {
-    var id: UUID = UUID()
-    var dungeonRecordId: UUID = UUID()
-    var enemyId: String = ""
-    var defeatedCount: Int = 0
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
-
-    init() {}
 }
