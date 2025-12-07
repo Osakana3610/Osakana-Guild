@@ -305,9 +305,9 @@ struct EquipmentEditorView: View {
 
         // 種族制限チェック
         if !definition.allowedRaces.isEmpty {
-            let raceIdString = currentCharacter.raceData.map { String($0.id) } ?? ""
-            let canBypass = definition.bypassRaceRestrictions.contains(raceIdString)
-            let isAllowed = definition.allowedRaces.contains(raceIdString)
+            let raceCategory = currentCharacter.raceData?.category ?? ""
+            let canBypass = definition.bypassRaceRestrictions.contains(raceCategory)
+            let isAllowed = definition.allowedRaces.contains(raceCategory)
             if !canBypass && !isAllowed {
                 return (false, "種族制限により装備できません")
             }
@@ -315,8 +315,8 @@ struct EquipmentEditorView: View {
 
         // 職業制限チェック
         if !definition.allowedJobs.isEmpty {
-            let jobIdString = currentCharacter.jobData.map { String($0.id) } ?? ""
-            if !definition.allowedJobs.contains(jobIdString) {
+            let jobCategory = currentCharacter.jobData?.category ?? ""
+            if !definition.allowedJobs.contains(jobCategory) {
                 return (false, "職業制限により装備できません")
             }
         }
