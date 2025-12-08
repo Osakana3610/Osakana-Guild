@@ -73,16 +73,78 @@ enum CharacterAssembler {
     static func assembleRuntimeCharacter(repository: MasterDataRepository,
                                          from progress: RuntimeCharacterProgress) async throws -> RuntimeCharacter {
         let state = try await assembleState(repository: repository, from: progress)
+
+        // RuntimeCharacterProgressからCharacterInput形式の装備に変換
+        let equippedItems = progress.equippedItems.map { item in
+            CharacterInput.EquippedItem(
+                superRareTitleId: item.superRareTitleId,
+                normalTitleId: item.normalTitleId,
+                itemId: item.itemId,
+                socketSuperRareTitleId: item.socketSuperRareTitleId,
+                socketNormalTitleId: item.socketNormalTitleId,
+                socketItemId: item.socketItemId,
+                quantity: item.quantity
+            )
+        }
+
+        // RuntimeCharacter.Loadoutに変換
+        let loadout = RuntimeCharacter.Loadout(
+            items: state.loadout.items,
+            titles: state.loadout.titles,
+            superRareTitles: state.loadout.superRareTitles
+        )
+
         return RuntimeCharacter(
-            progress: state.progress,
-            raceData: state.race,
-            jobData: state.job,
-            masteredSkills: state.learnedSkills,
-            statusEffects: [],
-            martialEligible: state.isMartialEligible,
+            id: progress.id,
+            displayName: progress.displayName,
+            raceId: progress.raceId,
+            jobId: progress.jobId,
+            previousJobId: 0, // 旧progressにはないのでデフォルト
+            avatarId: progress.avatarId,
+            level: progress.level,
+            experience: progress.experience,
+            currentHP: state.progress.hitPoints.current,
+            equippedItems: equippedItems,
+            primaryPersonalityId: progress.personality.primaryId,
+            secondaryPersonalityId: progress.personality.secondaryId,
+            actionRateAttack: progress.actionPreferences.attack,
+            actionRatePriestMagic: progress.actionPreferences.priestMagic,
+            actionRateMageMagic: progress.actionPreferences.mageMagic,
+            actionRateBreath: progress.actionPreferences.breath,
+            updatedAt: progress.updatedAt,
+            attributes: RuntimeCharacter.CoreAttributes(
+                strength: progress.attributes.strength,
+                wisdom: progress.attributes.wisdom,
+                spirit: progress.attributes.spirit,
+                vitality: progress.attributes.vitality,
+                agility: progress.attributes.agility,
+                luck: progress.attributes.luck
+            ),
+            maxHP: state.progress.hitPoints.maximum,
+            combat: RuntimeCharacter.Combat(
+                maxHP: progress.combat.maxHP,
+                physicalAttack: progress.combat.physicalAttack,
+                magicalAttack: progress.combat.magicalAttack,
+                physicalDefense: progress.combat.physicalDefense,
+                magicalDefense: progress.combat.magicalDefense,
+                hitRate: progress.combat.hitRate,
+                evasionRate: progress.combat.evasionRate,
+                criticalRate: progress.combat.criticalRate,
+                attackCount: progress.combat.attackCount,
+                magicalHealing: progress.combat.magicalHealing,
+                trapRemoval: progress.combat.trapRemoval,
+                additionalDamage: progress.combat.additionalDamage,
+                breathDamage: progress.combat.breathDamage
+            ),
+            isMartialEligible: state.isMartialEligible,
+            race: state.race,
+            job: state.job,
+            personalityPrimary: state.personalityPrimary,
+            personalitySecondary: state.personalitySecondary,
+            learnedSkills: state.learnedSkills,
+            loadout: loadout,
             spellbook: state.spellbook,
-            spellLoadout: state.spellLoadout,
-            loadout: state.loadout
+            spellLoadout: state.spellLoadout
         )
     }
 

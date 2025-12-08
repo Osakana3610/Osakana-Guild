@@ -1,6 +1,132 @@
 import Foundation
 
+// MARK: - 新RuntimeCharacter（フラット化）
+
+/// ゲームロジックで使用するキャラクターの完全な表現。
+/// CharacterInput + マスターデータ + 計算結果を統合。
+struct RuntimeCharacter: Identifiable, Sendable, Hashable {
+    // === 永続化データ（CharacterInputから） ===
+    let id: UInt8
+    var displayName: String
+    let raceId: UInt8
+    let jobId: UInt8
+    let previousJobId: UInt8
+    let avatarId: UInt16
+    let level: Int
+    let experience: Int
+    var currentHP: Int
+    let equippedItems: [CharacterInput.EquippedItem]
+    let primaryPersonalityId: UInt8
+    let secondaryPersonalityId: UInt8
+    let actionRateAttack: Int
+    let actionRatePriestMagic: Int
+    let actionRateMageMagic: Int
+    let actionRateBreath: Int
+    let updatedAt: Date
+
+    // === 計算結果 ===
+    let attributes: CoreAttributes
+    let maxHP: Int
+    let combat: Combat
+    let isMartialEligible: Bool
+
+    // === マスターデータ ===
+    let race: RaceDefinition?
+    let job: JobDefinition?
+    let personalityPrimary: PersonalityPrimaryDefinition?
+    let personalitySecondary: PersonalitySecondaryDefinition?
+    let learnedSkills: [SkillDefinition]
+    let loadout: Loadout
+    let spellbook: SkillRuntimeEffects.Spellbook
+    let spellLoadout: SkillRuntimeEffects.SpellLoadout
+
+    // === 導出プロパティ ===
+    var name: String { displayName }
+    var isAlive: Bool { currentHP > 0 }
+    var raceName: String { race?.name ?? "種族\(raceId)" }
+    var jobName: String { job?.name ?? "職業\(jobId)" }
+
+    var resolvedAvatarId: UInt16 {
+        avatarId == 0 ? UInt16(raceId) : avatarId
+    }
+
+    // 互換性のためのエイリアス（Milestone 6で参照箇所更新後に削除）
+    var baseStats: CoreAttributes { attributes }
+    var combatStats: Combat { combat }
+
+    /// 行動優先度（互換用）
+    var actionPreferences: CharacterSnapshot.ActionPreferences {
+        CharacterSnapshot.ActionPreferences(
+            attack: actionRateAttack,
+            priestMagic: actionRatePriestMagic,
+            mageMagic: actionRateMageMagic,
+            breath: actionRateBreath
+        )
+    }
+
+    /// BattleActor用の互換プロパティ（CharacterValues.Combat形式）
+    var combatSnapshot: CharacterValues.Combat {
+        CharacterValues.Combat(
+            maxHP: combat.maxHP,
+            physicalAttack: combat.physicalAttack,
+            magicalAttack: combat.magicalAttack,
+            physicalDefense: combat.physicalDefense,
+            magicalDefense: combat.magicalDefense,
+            hitRate: combat.hitRate,
+            evasionRate: combat.evasionRate,
+            criticalRate: combat.criticalRate,
+            attackCount: combat.attackCount,
+            magicalHealing: combat.magicalHealing,
+            trapRemoval: combat.trapRemoval,
+            additionalDamage: combat.additionalDamage,
+            breathDamage: combat.breathDamage,
+            isMartialEligible: isMartialEligible
+        )
+    }
+
+    /// HP互換プロパティ
+    var hitPoints: CharacterValues.HitPoints {
+        CharacterValues.HitPoints(current: currentHP, maximum: maxHP)
+    }
+}
+
+extension RuntimeCharacter {
+    struct CoreAttributes: Sendable, Hashable {
+        var strength: Int
+        var wisdom: Int
+        var spirit: Int
+        var vitality: Int
+        var agility: Int
+        var luck: Int
+    }
+
+    struct Combat: Sendable, Hashable {
+        var maxHP: Int
+        var physicalAttack: Int
+        var magicalAttack: Int
+        var physicalDefense: Int
+        var magicalDefense: Int
+        var hitRate: Int
+        var evasionRate: Int
+        var criticalRate: Int
+        var attackCount: Int
+        var magicalHealing: Int
+        var trapRemoval: Int
+        var additionalDamage: Int
+        var breathDamage: Int
+    }
+
+    struct Loadout: Sendable, Hashable {
+        var items: [ItemDefinition]
+        var titles: [TitleDefinition]
+        var superRareTitles: [SuperRareTitleDefinition]
+    }
+}
+
+// MARK: - 旧構造体（Milestone 7で削除予定）
+
 /// ランタイム計算に必要なキャラクター進行データのスナップショット。
+/// @deprecated Milestone 7で削除予定。CharacterInputを使用してください。
 struct RuntimeCharacterProgress: Sendable, Hashable {
     typealias CoreAttributes = CharacterValues.CoreAttributes
     typealias HitPoints = CharacterValues.HitPoints
@@ -33,6 +159,7 @@ struct RuntimeCharacterProgress: Sendable, Hashable {
     var updatedAt: Date
 }
 
+/// @deprecated Milestone 7で削除予定。RuntimeCharacterを使用してください。
 struct RuntimeCharacterState: Sendable {
     struct Loadout: Sendable, Hashable {
         var items: [ItemDefinition]
@@ -78,41 +205,4 @@ struct RuntimeCharacterState: Sendable {
         }
         return false
     }
-}
-
-struct RuntimeCharacter: Identifiable, Sendable, Hashable {
-    let progress: RuntimeCharacterProgress
-    let raceData: RaceDefinition?
-    let jobData: JobDefinition?
-    let masteredSkills: [SkillDefinition]
-    let statusEffects: [StatusEffectDefinition]
-    let martialEligible: Bool
-    let spellbook: SkillRuntimeEffects.Spellbook
-    let spellLoadout: SkillRuntimeEffects.SpellLoadout
-    let loadout: RuntimeCharacterState.Loadout
-
-    var id: UInt8 { progress.id }
-    var name: String { progress.displayName }
-    var level: Int { progress.level }
-    var experience: Int { progress.experience }
-    var raceId: UInt8 { progress.raceId }
-    var jobId: UInt8 { progress.jobId }
-    var currentHP: Int { progress.hitPoints.current }
-    var maxHP: Int { progress.hitPoints.maximum }
-    var isAlive: Bool { currentHP > 0 }
-
-    var raceName: String { raceData?.name ?? "種族\(progress.raceId)" }
-    var jobName: String { jobData?.name ?? "職業\(progress.jobId)" }
-
-    /// avatarId: 0=デフォルト（種族画像）、それ以外は保存値を使用
-    var avatarId: UInt16 { progress.avatarId }
-
-    /// 表示用の解決済みavatarId（0の場合はraceIdを使用）
-    var resolvedAvatarId: UInt16 {
-        progress.avatarId == 0 ? UInt16(progress.raceId) : progress.avatarId
-    }
-
-    var baseStats: RuntimeCharacterProgress.CoreAttributes { progress.attributes }
-    var combatStats: RuntimeCharacterProgress.Combat { progress.combat }
-    var isMartialEligible: Bool { martialEligible }
 }

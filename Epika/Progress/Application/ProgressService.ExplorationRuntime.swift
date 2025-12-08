@@ -6,7 +6,7 @@ extension ProgressService {
     func processExplorationStream(session: ExplorationRuntimeSession,
                                   recordId: PersistentIdentifier,
                                   memberIds: [UInt8],
-                                  runtimeMap: [UInt8: RuntimeCharacterState],
+                                  runtimeMap: [UInt8: RuntimeCharacter],
                                   runDifficulty: Int,
                                   dungeonId: UInt16,
                                   continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
@@ -86,7 +86,7 @@ extension ProgressService {
     }
 
     func handleExplorationEvent(memberIds: [UInt8],
-                                runtimeCharactersById: [UInt8: RuntimeCharacterState],
+                                runtimeCharactersById: [UInt8: RuntimeCharacter],
                                 outcome: ExplorationEngine.StepOutcome) async throws {
         switch outcome.entry.kind {
         case .nothing:
@@ -108,7 +108,7 @@ extension ProgressService {
     }
 
     func applyCombatRewards(memberIds: [UInt8],
-                            runtimeCharactersById: [UInt8: RuntimeCharacterState],
+                            runtimeCharactersById: [UInt8: RuntimeCharacter],
                             summary: CombatSummary,
                             drops: [ItemDropResult]) async throws {
         let participants = uniqueOrdered(memberIds)
@@ -140,7 +140,7 @@ extension ProgressService {
     }
 
     func applyNonBattleRewards(memberIds: [UInt8],
-                               runtimeCharactersById: [UInt8: RuntimeCharacterState],
+                               runtimeCharactersById: [UInt8: RuntimeCharacter],
                                totalExperience: Int,
                                goldBase: Int,
                                drops: [ItemDropResult]) async throws {
@@ -200,7 +200,7 @@ extension ProgressService {
 
     func distributeFlatExperience(total: Int,
                                   recipients: [UInt8],
-                                  runtimeCharactersById: [UInt8: RuntimeCharacterState]) -> [UInt8: Int] {
+                                  runtimeCharactersById: [UInt8: RuntimeCharacter]) -> [UInt8: Int] {
         guard total > 0 else { return [:] }
         let eligible = recipients.filter { runtimeCharactersById[$0] != nil }
         guard !eligible.isEmpty else { return [:] }
@@ -225,9 +225,9 @@ extension ProgressService {
         return assignments
     }
 
-    func partyGoldMultiplier(for characters: some Collection<RuntimeCharacterState>) -> Double {
+    func partyGoldMultiplier(for characters: some Collection<RuntimeCharacter>) -> Double {
         guard !characters.isEmpty else { return 1.0 }
-        let luckSum = characters.reduce(0.0) { $0 + Double($1.progress.attributes.luck) }
+        let luckSum = characters.reduce(0.0) { $0 + Double($1.attributes.luck) }
         return 1.0 + min(luckSum / 1000.0, 2.0)
     }
 

@@ -41,10 +41,8 @@ actor ShopProgressService {
     }
 
     func loadItems() async throws -> [ShopItem] {
-        guard let definition = try await environment.masterDataService.getShopDefinition(id: "default") else {
-            throw ProgressError.shopNotFound
-        }
-        let snapshot = try await loadShopSnapshot(definition: definition)
+        let masterItems = try await environment.masterDataService.getShopItems()
+        let snapshot = try await loadShopSnapshot(masterItems: masterItems)
         let itemIds = snapshot.stocks.map { $0.itemId }
         let uniqueIds = Array(Set(itemIds))
         let definitions = try await environment.masterDataService.getItemMasterData(ids: uniqueIds)
@@ -209,10 +207,10 @@ private extension ShopProgressService {
         return context
     }
 
-    func loadShopSnapshot(definition: ShopDefinition) async throws -> ShopSnapshot {
+    func loadShopSnapshot(masterItems: [MasterShopItem]) async throws -> ShopSnapshot {
         let context = makeContext()
         let now = Date()
-        _ = try syncStocks(definition: definition,
+        _ = try syncStocks(masterItems: masterItems,
                            context: context,
                            timestamp: now)
         try saveIfNeeded(context)
@@ -221,14 +219,14 @@ private extension ShopProgressService {
         return makeSnapshot(from: stocks, updatedAt: maxUpdatedAt)
     }
 
-    func syncStocks(definition: ShopDefinition,
+    func syncStocks(masterItems: [MasterShopItem],
                     context: ModelContext,
                     timestamp: Date) throws -> Bool {
         var changed = false
         let descriptor = FetchDescriptor<ShopStockRecord>()
         var existing = Dictionary(uniqueKeysWithValues: try context.fetch(descriptor).map { ($0.itemId, $0) })
 
-        for entry in definition.items.sorted(by: { $0.orderIndex < $1.orderIndex }) {
+        for entry in masterItems.sorted(by: { $0.orderIndex < $1.orderIndex }) {
             if let stock = existing.removeValue(forKey: entry.itemId) {
                 let desiredRemaining: UInt16? = entry.quantity.map { UInt16($0) }
                 if stock.remaining != desiredRemaining {

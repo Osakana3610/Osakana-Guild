@@ -20,7 +20,7 @@ enum BattleRewardCalculator {
         let aliveCount = max(1, survivors.count)
         let survivorLevels = party.members
             .filter { survivors.contains($0.id) }
-            .map { max(1, $0.character.progress.level) }
+            .map { max(1, $0.character.level) }
         var experiencePerMember: [UInt8: Int] = [:]
         var totalExperience = 0
 
@@ -75,7 +75,7 @@ enum BattleRewardCalculator {
                                           rewardComponents: SkillRuntimeEffects.RewardComponents) -> Int {
         guard survivors.contains(member.id) else { return 0 }
         let character = member.character
-        let characterLevel = max(1, character.progress.level)
+        let characterLevel = max(1, character.level)
         var accumulated: Double = 0
         for enemy in enemies {
             let baseExp = Double(enemy.definition.baseExperience) / Double(aliveCount)
