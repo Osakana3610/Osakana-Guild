@@ -187,12 +187,20 @@ actor CharacterProgressService {
         // 初期HPは一旦100を設定（最初のmakeSnapshotで再計算される）
         let initialHP: UInt32 = 100
 
+        // 種族のgenderCodeを取得してavatarIdを計算（職業画像: genderCode * 100 + jobId）
+        let race = try await masterData.repository.race(withId: request.raceId)
+        let avatarId: UInt16 = if let race {
+            UInt16(race.genderCode) * 100 + UInt16(request.jobId)
+        } else {
+            0
+        }
+
         let record = CharacterRecord(
             id: newId,
             displayName: trimmedName,
             raceId: request.raceId,
             jobId: request.jobId,
-            avatarId: 0,
+            avatarId: avatarId,
             level: 1,
             experience: 0,
             currentHP: initialHP,

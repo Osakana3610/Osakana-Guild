@@ -8,6 +8,8 @@ final class ItemPreloadService {
     static let shared = ItemPreloadService()
 
     private var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
+    private var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
+    private var orderedSubcategories: [ItemDisplaySubcategory] = []
     private var cacheVersion: Int = 0
     private var isLoaded = false
     private var preloadTask: Task<Void, Error>?
@@ -42,6 +44,16 @@ final class ItemPreloadService {
         categorizedItems
     }
 
+    /// サブカテゴリ別にグループ化されたアイテムを取得（キャッシュ済み）
+    func getSubcategorizedItems() -> [ItemDisplaySubcategory: [LightweightItemData]] {
+        subcategorizedItems
+    }
+
+    /// サブカテゴリのソート済み順序を取得（キャッシュ済み）
+    func getOrderedSubcategories() -> [ItemDisplaySubcategory] {
+        orderedSubcategories
+    }
+
     /// 指定カテゴリのアイテムをフラット配列で取得（カテゴリ順序を保証）
     func getItems(categories: Set<ItemSaleCategory>) -> [LightweightItemData] {
         ItemSaleCategory.ordered
@@ -57,6 +69,8 @@ final class ItemPreloadService {
     /// キャッシュをクリアする
     func clearCache() {
         categorizedItems.removeAll()
+        subcategorizedItems.removeAll()
+        orderedSubcategories.removeAll()
         isLoaded = false
         cacheVersion &+= 1
     }
@@ -75,6 +89,10 @@ final class ItemPreloadService {
         for key in categorizedItems.keys {
             categorizedItems[key]?.removeAll { stackKeys.contains($0.stackKey) }
         }
+        for key in subcategorizedItems.keys {
+            subcategorizedItems[key]?.removeAll { stackKeys.contains($0.stackKey) }
+        }
+        rebuildOrderedSubcategories()
         cacheVersion &+= 1
     }
 
@@ -84,13 +102,23 @@ final class ItemPreloadService {
     func decrementQuantity(stackKey: String, by amount: Int) throws -> Int {
         for key in categorizedItems.keys {
             if let index = categorizedItems[key]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                let newQuantity = categorizedItems[key]![index].quantity - amount
+                let item = categorizedItems[key]![index]
+                let newQuantity = item.quantity - amount
                 if newQuantity <= 0 {
                     categorizedItems[key]?.remove(at: index)
+                    // サブカテゴリからも削除
+                    let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+                    subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
+                    rebuildOrderedSubcategories()
                     cacheVersion &+= 1
                     return 0
                 } else {
                     categorizedItems[key]![index].quantity = newQuantity
+                    // サブカテゴリも更新
+                    let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+                    if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
+                        subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
+                    }
                     cacheVersion &+= 1
                     return newQuantity
                 }
@@ -102,6 +130,9 @@ final class ItemPreloadService {
     /// キャッシュにアイテムを追加する（ドロップ時）
     func addItem(_ item: LightweightItemData) {
         categorizedItems[item.category, default: []].append(item)
+        let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+        subcategorizedItems[subcategory, default: []].append(item)
+        rebuildOrderedSubcategories()
         cacheVersion &+= 1
     }
 
@@ -109,11 +140,23 @@ final class ItemPreloadService {
     func incrementQuantity(stackKey: String, by amount: Int) {
         for key in categorizedItems.keys {
             if let index = categorizedItems[key]?.firstIndex(where: { $0.stackKey == stackKey }) {
+                let item = categorizedItems[key]![index]
                 categorizedItems[key]![index].quantity += amount
+                // サブカテゴリも更新
+                let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+                if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
+                    subcategorizedItems[subcategory]![subIndex].quantity += amount
+                }
                 cacheVersion &+= 1
                 return
             }
         }
+    }
+
+    /// サブカテゴリ順序を再構築
+    private func rebuildOrderedSubcategories() {
+        let nonEmptyKeys = subcategorizedItems.filter { !($0.value.isEmpty) }.keys
+        orderedSubcategories = nonEmptyKeys.sorted { $0.sortPriority < $1.sortPriority }
     }
 
     // MARK: - Display Helpers
@@ -267,6 +310,21 @@ final class ItemPreloadService {
         }
 
         categorizedItems = grouped
+
+        // サブカテゴリキャッシュを構築
+        var subgrouped: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
+        for (_, items) in grouped {
+            for item in items {
+                let subcategory = ItemDisplaySubcategory(
+                    mainCategory: item.category,
+                    subcategory: item.rarity
+                )
+                subgrouped[subcategory, default: []].append(item)
+            }
+        }
+        subcategorizedItems = subgrouped
+        orderedSubcategories = Set(subgrouped.keys).sorted { $0.sortPriority < $1.sortPriority }
+
         cacheVersion &+= 1
     }
 
