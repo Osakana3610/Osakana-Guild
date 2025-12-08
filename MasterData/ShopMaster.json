@@ -1,9 +1,9 @@
 {
   "items": [
-    { "itemId": "crystal_core", "quantity": 10 },
-    { "itemId": "magic_crystal", "quantity": 5 },
-    { "itemId": "dragon_scale", "quantity": 2 },
-    { "itemId": "healing_herb", "quantity": 20 },
-    { "itemId": "ore" }
+    { "itemId": 7, "quantity": 10 },
+    { "itemId": 8, "quantity": 5 },
+    { "itemId": 19, "quantity": 20 },
+    { "itemId": 21, "quantity": 15 },
+    { "itemId": 28, "quantity": 3 }
   ]
 }

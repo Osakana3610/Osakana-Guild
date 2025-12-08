@@ -1,8 +1,6 @@
 import Foundation
-import SwiftData
 
 struct DungeonSnapshot: Sendable, Hashable {
-    let persistentIdentifier: PersistentIdentifier
     var dungeonId: UInt16
     var isUnlocked: Bool
     var highestUnlockedDifficulty: UInt8

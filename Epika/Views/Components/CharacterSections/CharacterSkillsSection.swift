@@ -8,7 +8,7 @@ struct CharacterSkillsSection: View {
 
     var body: some View {
         GroupBox("習得スキル") {
-            let skills = character.masteredSkills
+            let skills = character.learnedSkills
             if skills.isEmpty {
                 Text("スキルなし")
                     .font(.caption)

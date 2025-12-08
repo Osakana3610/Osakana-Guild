@@ -5,15 +5,15 @@ struct RuntimePartyState: Sendable {
         var id: UInt8 { characterId }
         let characterId: UInt8
         let order: Int
-        let character: RuntimeCharacterState
+        let character: RuntimeCharacter
     }
 
     let party: PartySnapshot
     let members: [Member]
 
-    init(party: PartySnapshot, characters: [RuntimeCharacterState]) throws {
+    init(party: PartySnapshot, characters: [RuntimeCharacter]) throws {
         self.party = party
-        let characterMap = Dictionary(uniqueKeysWithValues: characters.map { ($0.progress.id, $0) })
+        let characterMap = Dictionary(uniqueKeysWithValues: characters.map { ($0.id, $0) })
         var mappedMembers: [Member] = []
         for (order, characterId) in party.memberIds.enumerated() {
             guard let character = characterMap[characterId] else {

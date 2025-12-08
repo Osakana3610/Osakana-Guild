@@ -52,7 +52,7 @@ private extension CharacterLevelSection {
 
     func makeExperienceData() throws -> ExperienceData {
         let level = max(1, character.level)
-        let cap = character.raceData?.maxLevel ?? 200
+        let cap = character.race?.maxLevel ?? 200
         let total = character.experience
         let progress = try CharacterExperienceTable.experienceIntoCurrentLevel(accumulatedExperience: total,
                                                                                level: level)
@@ -83,11 +83,9 @@ private extension CharacterLevelSection {
     }
 
     func experienceMultiplier() throws -> Double {
-        let equippedSkillIds = Set(character.progress.learnedSkills.filter { $0.isEquipped }.map { $0.skillId })
-        guard !equippedSkillIds.isEmpty else { return 1.0 }
-        let equippedDefinitions = character.masteredSkills.filter { equippedSkillIds.contains($0.id) }
-        guard !equippedDefinitions.isEmpty else { return 1.0 }
-        let components = try SkillRuntimeEffectCompiler.rewardComponents(from: equippedDefinitions)
+        // 新構造では装備から付与されるスキルのみがlearnedSkillsに含まれる
+        guard !character.learnedSkills.isEmpty else { return 1.0 }
+        let components = try SkillRuntimeEffectCompiler.rewardComponents(from: character.learnedSkills)
         return components.experienceScale()
     }
 

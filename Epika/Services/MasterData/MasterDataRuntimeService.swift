@@ -6,7 +6,7 @@ actor MasterDataRuntimeService {
     static let shared = MasterDataRuntimeService(repository: MasterDataRepository(),
                                                  manager: .shared)
 
-    private let repository: MasterDataRepository
+    let repository: MasterDataRepository
     private let manager: SQLiteMasterDataManager
     private var isInitialized: Bool = false
 
@@ -109,9 +109,9 @@ actor MasterDataRuntimeService {
 
     // MARK: - Shops
 
-    func getShopDefinition(id: String) async throws -> ShopDefinition? {
+    func getShopItems() async throws -> [MasterShopItem] {
         try await ensureInitialized()
-        return try await repository.shop(withId: id)
+        return try await repository.shopItems()
     }
 
     // MARK: - Titles

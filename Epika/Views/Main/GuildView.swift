@@ -1121,7 +1121,7 @@ private struct CharacterReviveView: View {
                 let character = try await characterService.runtimeCharacter(from: progress)
                 runtime.append(character)
             }
-            deadCharacters = runtime.sorted { $0.progress.createdAt < $1.progress.createdAt }
+            deadCharacters = runtime.sorted { $0.id < $1.id }
         } catch {
             errorMessage = error.localizedDescription
             deadCharacters = []
@@ -1246,7 +1246,7 @@ private struct CharacterJobChangeView: View {
                 let character = try await characterService.runtimeCharacter(from: progress)
                 runtime.append(character)
             }
-            characters = runtime.sorted { $0.progress.createdAt < $1.progress.createdAt }
+            characters = runtime.sorted { $0.id < $1.id }
             jobs = try await masterData.getAllJobs().sorted { $0.name < $1.name }
             if selectedCharacterId == nil {
                 selectedCharacterId = characters.first?.id

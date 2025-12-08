@@ -1,5 +1,4 @@
 import Foundation
-import SwiftData
 
 struct ItemSnapshot: Sendable {
     /// Int Idベースの強化情報
@@ -27,8 +26,6 @@ struct ItemSnapshot: Sendable {
             socketItemId != 0
         }
     }
-
-    let persistentIdentifier: PersistentIdentifier
 
     /// スタック識別キー（6つのidの組み合わせ）
     var stackKey: String
