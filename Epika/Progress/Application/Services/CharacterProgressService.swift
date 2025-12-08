@@ -587,16 +587,6 @@ private extension CharacterProgressService {
             isMartialEligible: runtimeCharacter.isMartialEligible
         )
 
-        // 廃止フィールドは空
-        let learnedSkills: [CharacterSnapshot.LearnedSkill] = []
-        let jobHistory: [CharacterSnapshot.JobHistoryEntry] = []
-        let explorationTags: Set<String> = []
-        let achievements = CharacterSnapshot.AchievementCounters(
-            totalBattles: 0,
-            totalVictories: 0,
-            defeatCount: 0
-        )
-
         return CharacterSnapshot(
             id: runtimeCharacter.id,
             displayName: runtimeCharacter.displayName,
@@ -610,11 +600,7 @@ private extension CharacterProgressService {
             hitPoints: hitPoints,
             combat: combat,
             personality: personality,
-            learnedSkills: learnedSkills,
             equippedItems: equippedItems,
-            jobHistory: jobHistory,
-            explorationTags: explorationTags,
-            achievements: achievements,
             actionPreferences: actionPreferences,
             createdAt: now,
             updatedAt: now
