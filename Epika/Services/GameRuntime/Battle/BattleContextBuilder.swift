@@ -12,7 +12,7 @@ struct BattleContextBuilder {
         for (index, member) in members.enumerated() {
             guard let slot = BattleContextBuilder.slot(for: index) else { continue }
             let character = member.character
-            let snapshot = character.combatSnapshot
+            let snapshot = character.combat
             var resources = BattleActionResource.makeDefault(for: snapshot,
                                                             spellLoadout: character.spellLoadout)
             let skillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: character.learnedSkills)
@@ -65,7 +65,7 @@ struct BattleContextBuilder {
 
     private static func playerActionRates(for character: RuntimeCharacter) -> BattleActionRates {
         let preferences = character.actionPreferences
-        let breath = character.combatSnapshot.breathDamage > 0 ? preferences.breath : 0
+        let breath = character.combat.breathDamage > 0 ? preferences.breath : 0
         return BattleActionRates(attack: preferences.attack,
                                  priestMagic: preferences.priestMagic,
                                  mageMagic: preferences.mageMagic,

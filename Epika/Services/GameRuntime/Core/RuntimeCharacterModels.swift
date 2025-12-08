@@ -28,7 +28,9 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     let attributes: CoreAttributes
     let maxHP: Int
     let combat: Combat
-    let isMartialEligible: Bool
+
+    // isMartialEligibleはcombatから取得
+    var isMartialEligible: Bool { combat.isMartialEligible }
 
     // === マスターデータ ===
     let race: RaceDefinition?
@@ -50,10 +52,6 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
         avatarId == 0 ? UInt16(raceId) : avatarId
     }
 
-    // 互換性のためのエイリアス（Milestone 6で参照箇所更新後に削除）
-    var baseStats: CoreAttributes { attributes }
-    var combatStats: Combat { combat }
-
     /// 行動優先度（互換用）
     var actionPreferences: CharacterSnapshot.ActionPreferences {
         CharacterSnapshot.ActionPreferences(
@@ -64,26 +62,6 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
         )
     }
 
-    /// BattleActor用の互換プロパティ（CharacterValues.Combat形式）
-    var combatSnapshot: CharacterValues.Combat {
-        CharacterValues.Combat(
-            maxHP: combat.maxHP,
-            physicalAttack: combat.physicalAttack,
-            magicalAttack: combat.magicalAttack,
-            physicalDefense: combat.physicalDefense,
-            magicalDefense: combat.magicalDefense,
-            hitRate: combat.hitRate,
-            evasionRate: combat.evasionRate,
-            criticalRate: combat.criticalRate,
-            attackCount: combat.attackCount,
-            magicalHealing: combat.magicalHealing,
-            trapRemoval: combat.trapRemoval,
-            additionalDamage: combat.additionalDamage,
-            breathDamage: combat.breathDamage,
-            isMartialEligible: isMartialEligible
-        )
-    }
-
     /// HP互換プロパティ
     var hitPoints: CharacterValues.HitPoints {
         CharacterValues.HitPoints(current: currentHP, maximum: maxHP)
@@ -91,30 +69,8 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
 }
 
 extension RuntimeCharacter {
-    struct CoreAttributes: Sendable, Hashable {
-        var strength: Int
-        var wisdom: Int
-        var spirit: Int
-        var vitality: Int
-        var agility: Int
-        var luck: Int
-    }
-
-    struct Combat: Sendable, Hashable {
-        var maxHP: Int
-        var physicalAttack: Int
-        var magicalAttack: Int
-        var physicalDefense: Int
-        var magicalDefense: Int
-        var hitRate: Int
-        var evasionRate: Int
-        var criticalRate: Int
-        var attackCount: Int
-        var magicalHealing: Int
-        var trapRemoval: Int
-        var additionalDamage: Int
-        var breathDamage: Int
-    }
+    typealias CoreAttributes = CharacterValues.CoreAttributes
+    typealias Combat = CharacterValues.Combat
 
     struct Loadout: Sendable, Hashable {
         var items: [ItemDefinition]

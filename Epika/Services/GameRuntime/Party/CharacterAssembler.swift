@@ -112,31 +112,13 @@ enum CharacterAssembler {
             actionRateMageMagic: progress.actionPreferences.mageMagic,
             actionRateBreath: progress.actionPreferences.breath,
             updatedAt: progress.updatedAt,
-            attributes: RuntimeCharacter.CoreAttributes(
-                strength: progress.attributes.strength,
-                wisdom: progress.attributes.wisdom,
-                spirit: progress.attributes.spirit,
-                vitality: progress.attributes.vitality,
-                agility: progress.attributes.agility,
-                luck: progress.attributes.luck
-            ),
+            attributes: progress.attributes,
             maxHP: state.progress.hitPoints.maximum,
-            combat: RuntimeCharacter.Combat(
-                maxHP: progress.combat.maxHP,
-                physicalAttack: progress.combat.physicalAttack,
-                magicalAttack: progress.combat.magicalAttack,
-                physicalDefense: progress.combat.physicalDefense,
-                magicalDefense: progress.combat.magicalDefense,
-                hitRate: progress.combat.hitRate,
-                evasionRate: progress.combat.evasionRate,
-                criticalRate: progress.combat.criticalRate,
-                attackCount: progress.combat.attackCount,
-                magicalHealing: progress.combat.magicalHealing,
-                trapRemoval: progress.combat.trapRemoval,
-                additionalDamage: progress.combat.additionalDamage,
-                breathDamage: progress.combat.breathDamage
-            ),
-            isMartialEligible: state.isMartialEligible,
+            combat: {
+                var combat = progress.combat
+                combat.isMartialEligible = state.isMartialEligible
+                return combat
+            }(),
             race: state.race,
             job: state.job,
             personalityPrimary: state.personalityPrimary,
