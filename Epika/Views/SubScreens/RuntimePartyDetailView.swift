@@ -326,7 +326,7 @@ private struct PartySkillsListView: View {
             } else {
                 ForEach(characters) { character in
                     Section(character.name) {
-                        let skills = character.masteredSkills
+                        let skills = character.learnedSkills
                         if skills.isEmpty {
                             Text("習得スキルなし").foregroundColor(.secondary)
                         } else {
@@ -354,7 +354,7 @@ private struct PartyEquipmentListView: View {
             } else {
                 ForEach(characters, id: \.id) { character in
                     Section(character.name) {
-                        let equipment = character.progress.equippedItems
+                        let equipment = character.equippedItems
                         if equipment.isEmpty {
                             Text("装備なし").foregroundColor(.secondary)
                         } else {

@@ -6,7 +6,7 @@ actor MasterDataRuntimeService {
     static let shared = MasterDataRuntimeService(repository: MasterDataRepository(),
                                                  manager: .shared)
 
-    private let repository: MasterDataRepository
+    let repository: MasterDataRepository
     private let manager: SQLiteMasterDataManager
     private var isInitialized: Bool = false
 

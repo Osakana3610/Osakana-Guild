@@ -1,5 +1,4 @@
 import Foundation
-import SwiftData
 
 struct CharacterSnapshot: Sendable, Hashable {
     typealias CoreAttributes = CharacterValues.CoreAttributes
@@ -12,11 +11,11 @@ struct CharacterSnapshot: Sendable, Hashable {
     typealias ActionPreferences = CharacterValues.ActionPreferences
     typealias JobHistoryEntry = CharacterValues.JobHistoryEntry
 
-    let persistentIdentifier: PersistentIdentifier
     let id: UInt8
     var displayName: String
     var raceId: UInt8
     var jobId: UInt8
+    var previousJobId: UInt8
     var avatarId: UInt16
     var level: Int
     var experience: Int

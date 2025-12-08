@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-struct PartySnapshot: Sendable, Hashable {
+struct PartySnapshot: Identifiable, Sendable, Hashable {
     let persistentIdentifier: PersistentIdentifier
     var id: UInt8                              // 1〜8
     var displayName: String
@@ -13,4 +13,7 @@ struct PartySnapshot: Sendable, Hashable {
 
     /// RuntimePartyProgress互換のプロパティ名
     var memberIds: [UInt8] { memberCharacterIds }
+
+    /// RuntimeParty互換のプロパティ名（displayNameのエイリアス）
+    var name: String { displayName }
 }

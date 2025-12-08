@@ -75,7 +75,7 @@ final class ProgressService: ObservableObject {
                                         environment: environment,
                                         inventoryService: self.inventory,
                                         gameStateService: gameStateService)
-        self.character = CharacterProgressService(container: container, runtime: runtime)
+        self.character = CharacterProgressService(container: container)
         self.exploration = ExplorationProgressService(container: container)
         self.dungeon = DungeonProgressService(container: container)
         self.story = StoryProgressService(container: container)

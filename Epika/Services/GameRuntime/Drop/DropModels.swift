@@ -78,7 +78,7 @@ extension RuntimePartyState {
         var luckSum = 0
         var spiritSum = 0
         for member in members {
-            let attributes = member.character.progress.attributes
+            let attributes = member.character.attributes
             luckSum += attributes.luck
             spiritSum += attributes.spirit
         }
