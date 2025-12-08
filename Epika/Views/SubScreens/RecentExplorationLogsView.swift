@@ -525,6 +525,7 @@ private struct EncounterDetailView: View {
 
     @Environment(\.modelContext) private var modelContext
 
+    @State private var battleLogArchive: BattleLogArchive?
     @State private var battleLogEntries: [BattleLogEntry] = []
     @State private var isLoadingBattleLog = false
     @State private var battleLogError: String?
@@ -564,36 +565,12 @@ private struct EncounterDetailView: View {
                         .font(.caption)
                         .foregroundStyle(.primary)
                 }
-            } else if battleLogEntries.isEmpty {
-                Section("戦闘") {
-                    Text("戦闘ログは記録されていません")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             } else {
-                let summaries = turnSummaries
-                if summaries.isEmpty {
-                    Section("戦闘") {
-                        ForEach(battleLogEntries.filter(shouldDisplayAction), id: \.self) { entry in
-                            BattleActionRowView(entry: entry,
-                                                actor: nil,
-                                                iconInfo: iconInfo(for: entry.actorId))
-                                .padding(.vertical, 4)
-                        }
-                    }
-                } else {
-                    ForEach(Array(summaries.enumerated()), id: \.element.id) { index, summary in
-                        BattleTurnView(summary: summary,
-                                       isFirst: index == 0,
-                                       partyName: party.name,
-                                       iconProvider: { participant in
-                                           if let memberId = participant?.partyMemberId,
-                                              let info = iconInfo(forMember: memberId) {
-                                                return info
-                                            }
-                                           return iconInfo(for: participant?.id)
-                                       })
-                    }
+                ForEach(turnSummaries, id: \.id) { summary in
+                    BattleTurnView(summary: summary,
+                                   isFirst: summary.turn == 1,
+                                   partyName: party.name,
+                                   iconProvider: { _ in nil })
                 }
             }
         }
@@ -604,20 +581,48 @@ private struct EncounterDetailView: View {
     }
 
     private func buildTurnSummaries() -> [TurnSummary] {
-        guard encounter.combatSummary != nil else { return [] }
-        var states: [String: ParticipantState] = [:]
-        var grouped: [Int: [BattleLogEntry]] = [:]
+        guard let archive = battleLogArchive else { return [] }
 
-        for entry in battleLogEntries {
-            if entry.turn == 0,
-               let state = makeParticipantState(from: entry) {
-                states[state.id] = state
-                continue
-            }
-            grouped[entry.turn, default: []].append(entry)
+        // 初期状態をarchiveから構築
+        var states: [String: ParticipantState] = [:]
+
+        for (index, participant) in archive.playerSnapshots.enumerated() {
+            let actorIndex = UInt16(index)
+            let initialHP = archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP)
+            states[participant.actorId] = ParticipantState(
+                id: participant.actorId,
+                name: participant.name,
+                currentHP: Int(initialHP),
+                maxHP: participant.maxHP,
+                level: participant.level,
+                jobName: nil,
+                partyMemberId: participant.partyMemberId,
+                role: .player,
+                order: index
+            )
         }
 
-        guard !states.isEmpty else { return [] }
+        for (index, participant) in archive.enemySnapshots.enumerated() {
+            let actorIndex = UInt16(1000 + index)
+            let initialHP = archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP)
+            states[participant.actorId] = ParticipantState(
+                id: participant.actorId,
+                name: participant.name,
+                currentHP: Int(initialHP),
+                maxHP: participant.maxHP,
+                level: participant.level,
+                jobName: nil,
+                partyMemberId: nil,
+                role: .enemy,
+                order: index
+            )
+        }
+
+        // ターンごとにエントリーをグループ化
+        var grouped: [Int: [BattleLogEntry]] = [:]
+        for entry in battleLogEntries {
+            grouped[entry.turn, default: []].append(entry)
+        }
 
         var result: [TurnSummary] = []
         var stateMap = states
@@ -632,60 +637,37 @@ private struct EncounterDetailView: View {
                 .sorted { $0.order < $1.order }
 
             let actions = (grouped[turn] ?? []).filter(shouldDisplayAction)
-            let participantsById = stateMap
             result.append(TurnSummary(id: turn,
                                       turn: turn,
                                       party: partyStates,
                                       enemies: enemyStates,
-                                      participants: participantsById,
+                                      participants: stateMap,
                                       actions: actions))
 
-            for entry in grouped[turn] ?? [] {
-                if let targetId = entry.targetId,
-                   let hpString = entry.metadata["targetHP"],
-                   let hp = Int(hpString),
-                   var state = stateMap[targetId] {
-                    state.currentHP = max(0, min(state.maxHP, hp))
-                    stateMap[targetId] = state
-                }
-                if let actorId = entry.actorId,
-                   let hpString = entry.metadata["actorHP"],
-                   let hp = Int(hpString),
-                   var state = stateMap[actorId] {
-                    state.currentHP = max(0, min(state.maxHP, hp))
-                    stateMap[actorId] = state
-                }
-            }
+            // HPを更新（ダメージ・回復を反映）
+            updateHP(from: grouped[turn] ?? [], stateMap: &stateMap)
         }
 
         return result
     }
 
-    private func makeParticipantState(from entry: BattleLogEntry) -> ParticipantState? {
-        guard entry.metadata["category"] == "initialState" else { return nil }
-        guard let rawId = entry.actorId ?? entry.metadata["identifier"],
-              let roleValue = entry.metadata["role"],
-              let current = entry.metadata["currentHP"].flatMap(Int.init),
-              let max = entry.metadata["maxHP"].flatMap(Int.init),
-              let order = entry.metadata["order"].flatMap(Int.init) else {
-            return nil
+    private func updateHP(from entries: [BattleLogEntry], stateMap: inout [String: ParticipantState]) {
+        for entry in entries {
+            if let targetId = entry.targetId,
+               let hpString = entry.metadata["targetHP"],
+               let hp = Int(hpString),
+               var state = stateMap[targetId] {
+                state.currentHP = max(0, min(state.maxHP, hp))
+                stateMap[targetId] = state
+            }
+            if let actorId = entry.actorId,
+               let hpString = entry.metadata["actorHP"],
+               let hp = Int(hpString),
+               var state = stateMap[actorId] {
+                state.currentHP = max(0, min(state.maxHP, hp))
+                stateMap[actorId] = state
+            }
         }
-
-        let role: ParticipantState.Role = roleValue == "player" ? .player : .enemy
-        let name = entry.metadata["name"].flatMap { $0.isEmpty ? nil : $0 } ?? "-"
-        let level = entry.metadata["level"].flatMap(Int.init)
-        let job = entry.metadata["job"].flatMap { $0.isEmpty ? nil : $0 }
-        let memberId = entry.metadata["partyMemberId"].flatMap(UInt8.init)
-
-        return ParticipantState(id: rawId,
-                                name: name,
-                                currentHP: current,
-                                maxHP: max,
-                                level: level,
-                                jobName: job,
-                                partyMemberId: memberId,
-                                role: role,
-                                order: order)
     }
 
     private func shouldDisplayAction(_ entry: BattleLogEntry) -> Bool {
@@ -732,11 +714,10 @@ private struct EncounterDetailView: View {
         let role: ParticipantState.Role
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 if let title, !title.isEmpty {
                     Text(title)
-                        .font(.subheadline)
-                        .fontWeight(.bold)
+                        .font(.caption)
                         .foregroundStyle(.primary)
                 }
 
@@ -746,30 +727,25 @@ private struct EncounterDetailView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(participants) { participant in
-                        HStack(spacing: 6) {
-                            Text("(\(participant.currentHP)/\(participant.maxHP))")
-                                .font(.caption)
-                                .foregroundStyle(.primary)
-
-                            Text(participant.name)
-                                .font(.caption)
-                                .foregroundStyle(.primary)
-
-                            if role == .player, let job = participant.jobName, !job.isEmpty {
-                                Text(job)
-                                    .font(.caption)
-                                    .foregroundStyle(.primary)
-                            }
-
-                            if let level = participant.level {
-                                Text("Lv.\(level)")
-                                    .font(.caption)
-                                    .foregroundStyle(.primary)
-                            }
-                        }
+                        Text(formatParticipantLine(participant, role: role))
+                            .font(.caption)
+                            .foregroundStyle(.primary)
                     }
                 }
             }
+        }
+
+        private func formatParticipantLine(_ p: ParticipantState, role: ParticipantState.Role) -> String {
+            var parts: [String] = []
+            parts.append("( \(p.currentHP) /\(p.maxHP) )")
+            parts.append(p.name)
+            if role == .player, let job = p.jobName, !job.isEmpty {
+                parts.append(job)
+            }
+            if let level = p.level {
+                parts.append("Lv\(level)")
+            }
+            return parts.joined(separator: " ")
         }
     }
 
@@ -782,6 +758,7 @@ private struct EncounterDetailView: View {
         battleLogError = nil
         do {
             let archive = try fetchBattleLogArchive()
+            battleLogArchive = archive
 
             // 名前マップを構築
             var allyNames: [UInt8: String] = [:]
@@ -864,64 +841,41 @@ private struct EncounterDetailView: View {
 
         var body: some View {
             Section {
-                VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 4) {
+                    // 味方HP
                     ParticipantSummaryView(title: partyName,
                                            participants: summary.party,
                                            role: .player)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
 
+                    // 敵HP
                     if !summary.enemies.isEmpty {
-                        Text("VS")
+                        Text("vs")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 6)
-
                         ParticipantSummaryView(title: nil,
                                                participants: summary.enemies,
                                                role: .enemy)
-                            .padding(.horizontal, 16)
                     }
 
+                    // アクション
                     if !summary.actions.isEmpty {
                         Divider()
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(Array(summary.actions.enumerated()), id: \.element) { index, entry in
-                                let participant = summary.participants[entry.actorId ?? ""]
-                                BattleActionRowView(entry: entry,
-                                                    actor: participant,
-                                                    iconInfo: iconProvider(participant))
-                                    .padding(.horizontal, 16)
-                                if index < summary.actions.count - 1 {
-                                    Divider()
-                                        .padding(.leading, 83)
-                                        .padding(.vertical, 4)
-                                }
-                            }
+                            .padding(.vertical, 4)
+                        ForEach(summary.actions, id: \.self) { entry in
+                            Text(entry.message)
+                                .font(.caption)
+                                .foregroundStyle(.primary)
                         }
-                        .padding(.bottom, 8)
                     }
                 }
-                .padding(.bottom, 8)
-                .background(Color(uiColor: .systemBackground))
-            } header: {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(summary.turn)ターン目")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.primary)
-                }
-                .padding(.top, isFirst ? 24 : 20)
                 .padding(.horizontal, 16)
-                .padding(.bottom, 4)
-                .background(Color(uiColor: .systemGroupedBackground))
+                .padding(.vertical, 8)
+            } header: {
+                Text("\(summary.turn)ターン目")
+                    .font(.caption)
+                    .foregroundStyle(.primary)
             }
             .textCase(nil)
-            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         }
     }
 

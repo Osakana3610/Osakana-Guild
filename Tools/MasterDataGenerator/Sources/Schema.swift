@@ -325,9 +325,9 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS enemies (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
-                race TEXT NOT NULL,
+                race_id INTEGER NOT NULL,
                 category TEXT NOT NULL,
-                job TEXT,
+                job_id INTEGER,
                 base_experience INTEGER NOT NULL,
                 is_boss INTEGER NOT NULL
             );

@@ -366,7 +366,11 @@ private extension ExplorationProgressService {
         case .scripted:
             kind = .scriptedEvent
             if let eventId = event.scriptedEventId {
-                referenceId = String(eventId)
+                if let eventDef = try await masterData.getExplorationEventDefinition(id: eventId) {
+                    referenceId = eventDef.name
+                } else {
+                    referenceId = String(eventId)
+                }
             }
         }
 
