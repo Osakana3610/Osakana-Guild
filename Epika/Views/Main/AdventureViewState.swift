@@ -92,6 +92,16 @@ final class AdventureViewState {
             if let progressService {
                 try await progressService.synchronizeStoryAndDungeonUnlocks()
             }
+        } catch {
+            present(error: error)
+            return
+        }
+        await reloadDungeonList()
+    }
+
+    /// 同期せずにダンジョンリストを再読み込み（通知ハンドラ用、無限ループ防止）
+    func reloadDungeonList() async {
+        do {
             async let definitionTask = masterDataService.getAllDungeons()
             async let progressTask = dungeonService.allDungeonSnapshots()
             let (definitions, progressSnapshots) = try await (definitionTask, progressTask)
