@@ -584,7 +584,7 @@ private extension CharacterProgressService {
             trapRemoval: runtimeCharacter.combat.trapRemoval,
             additionalDamage: runtimeCharacter.combat.additionalDamage,
             breathDamage: runtimeCharacter.combat.breathDamage,
-            isMartialEligible: runtimeCharacter.isMartialEligible
+            isMartialEligible: runtimeCharacter.combat.isMartialEligible
         )
 
         return CharacterSnapshot(
