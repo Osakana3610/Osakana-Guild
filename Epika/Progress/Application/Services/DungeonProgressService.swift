@@ -104,8 +104,7 @@ private extension DungeonProgressService {
     }
 
     static func snapshot(from record: DungeonRecord) -> DungeonSnapshot {
-        DungeonSnapshot(persistentIdentifier: record.persistentModelID,
-                        dungeonId: record.dungeonId,
+        DungeonSnapshot(dungeonId: record.dungeonId,
                         isUnlocked: record.isUnlocked,
                         highestUnlockedDifficulty: record.highestUnlockedDifficulty,
                         highestClearedDifficulty: record.highestClearedDifficulty,

@@ -4,17 +4,17 @@ import SwiftUI
 /// CharacterSectionType: equippedItems
 @MainActor
 struct CharacterEquippedItemsSection: View {
-    let equippedItems: [RuntimeCharacterProgress.EquippedItem]
+    let equippedItems: [CharacterInput.EquippedItem]
     let itemDefinitions: [UInt16: ItemDefinition]
-    let onUnequip: ((RuntimeCharacterProgress.EquippedItem) async throws -> Void)?
+    let onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)?
 
     @State private var unequipError: String?
     @State private var isUnequipping = false
 
     init(
-        equippedItems: [RuntimeCharacterProgress.EquippedItem],
+        equippedItems: [CharacterInput.EquippedItem],
         itemDefinitions: [UInt16: ItemDefinition],
-        onUnequip: ((RuntimeCharacterProgress.EquippedItem) async throws -> Void)? = nil
+        onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)? = nil
     ) {
         self.equippedItems = equippedItems
         self.itemDefinitions = itemDefinitions
@@ -48,7 +48,7 @@ struct CharacterEquippedItemsSection: View {
     }
 
     @ViewBuilder
-    private func equippedItemRow(_ item: RuntimeCharacterProgress.EquippedItem) -> some View {
+    private func equippedItemRow(_ item: CharacterInput.EquippedItem) -> some View {
         let definition = itemDefinitions[item.itemId]
         let name = definition?.name ?? "不明なアイテム"
 
@@ -73,7 +73,7 @@ struct CharacterEquippedItemsSection: View {
         }
     }
 
-    private func unequipItem(_ item: RuntimeCharacterProgress.EquippedItem) {
+    private func unequipItem(_ item: CharacterInput.EquippedItem) {
         guard let onUnequip else { return }
         isUnequipping = true
         unequipError = nil

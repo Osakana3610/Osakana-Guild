@@ -520,7 +520,6 @@ actor InventoryProgressService {
 
     private func makeSnapshot(_ record: InventoryItemRecord) -> ItemSnapshot {
         ItemSnapshot(
-            persistentIdentifier: record.persistentModelID,
             stackKey: record.stackKey,
             itemId: record.itemId,
             quantity: record.quantity,

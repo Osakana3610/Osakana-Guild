@@ -211,7 +211,6 @@ private extension GameStateService {
 
     nonisolated static func snapshot(from record: GameStateRecord) -> PlayerSnapshot {
         PlayerSnapshot(
-            persistentIdentifier: record.persistentModelID,
             gold: record.gold,
             catTickets: record.catTickets,
             partySlots: record.partySlots,

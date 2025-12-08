@@ -1,6 +1,6 @@
 import Foundation
 
-struct PersonalityPrimaryDefinition: Identifiable, Sendable {
+struct PersonalityPrimaryDefinition: Identifiable, Sendable, Hashable {
     struct Effect: Sendable, Hashable {
         let orderIndex: Int
         let effectType: String
@@ -15,7 +15,7 @@ struct PersonalityPrimaryDefinition: Identifiable, Sendable {
     let effects: [Effect]
 }
 
-struct PersonalitySecondaryDefinition: Identifiable, Sendable {
+struct PersonalitySecondaryDefinition: Identifiable, Sendable, Hashable {
     struct StatBonus: Sendable, Hashable {
         let stat: String
         let value: Int
