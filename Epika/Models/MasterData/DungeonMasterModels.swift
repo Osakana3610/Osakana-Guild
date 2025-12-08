@@ -56,7 +56,7 @@ struct EncounterTableDefinition: Identifiable, Sendable, Hashable {
         let level: Int?
     }
 
-    let id: UInt16
+    let id: String
     let name: String
     let events: [Event]
 }
@@ -71,7 +71,7 @@ struct DungeonFloorDefinition: Identifiable, Sendable, Hashable {
     let dungeonId: UInt16?
     let name: String
     let floorNumber: Int
-    let encounterTableId: UInt16
+    let encounterTableId: String
     let description: String
     let specialEvents: [SpecialEvent]
 }
