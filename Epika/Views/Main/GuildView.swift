@@ -1269,18 +1269,12 @@ private struct CharacterJobChangeView: View {
         errorMessage = nil
         defer { isProcessing = false }
         do {
-            let updated = try await characterService.updateCharacter(id: characterId) { progress in
-                progress.jobId = jobIndex
-                if !progress.jobHistory.contains(where: { $0.jobId == jobIndex }) {
-                    let now = Date()
-                    progress.jobHistory.append(
-                        .init(id: UUID(),
-                              jobId: jobIndex,
-                              achievedAt: now,
-                              createdAt: now,
-                              updatedAt: now)
-                    )
+            let updated = try await characterService.updateCharacter(id: characterId) { snapshot in
+                // 転職は1回のみ。previousJobIdが0（未転職）の場合のみ設定
+                if snapshot.previousJobId == 0 && snapshot.jobId != jobIndex {
+                    snapshot.previousJobId = snapshot.jobId
                 }
+                snapshot.jobId = jobIndex
             }
             let runtime = try await characterService.runtimeCharacter(from: updated)
             if let index = characters.firstIndex(where: { $0.id == runtime.id }) {
