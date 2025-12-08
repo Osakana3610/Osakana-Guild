@@ -1014,6 +1014,19 @@ private struct EnemyMasterFile: Decodable {
 }
 
 extension Generator {
+    /// 敵種族名から数値IDへのマッピング（100番台でプレイヤー種族と区別）
+    private static let enemyRaceMapping: [String: Int] = [
+        "goblinoid": 101,
+        "orcish": 102,
+        "beast": 103,
+        "undead": 104,
+        "spirit": 105,
+        "dragon": 106,
+        "golem": 107,
+        "treant": 108,
+        "ooze": 109
+    ]
+
     func importEnemyMaster(_ data: Data) throws -> Int {
         let decoder = JSONDecoder()
         let file = try decoder.decode(EnemyMasterFile.self, from: data)
@@ -1022,7 +1035,7 @@ extension Generator {
             try execute("DELETE FROM enemies;")
 
             let insertEnemySQL = """
-                INSERT INTO enemies (id, name, race, category, job, base_experience, is_boss)
+                INSERT INTO enemies (id, name, race_id, category, job_id, base_experience, is_boss)
                 VALUES (?, ?, ?, ?, ?, ?, ?);
             """
             let insertStatsSQL = """
@@ -1047,11 +1060,14 @@ extension Generator {
             }
 
             for enemy in file.enemyTemplates {
+                guard let raceId = Self.enemyRaceMapping[enemy.race] else {
+                    throw GeneratorError.executionFailed("Enemy \(enemy.id) の race '\(enemy.race)' が未定義です")
+                }
                 bindInt(enemyStatement, index: 1, value: enemy.id)
                 bindText(enemyStatement, index: 2, value: enemy.baseName)
-                bindText(enemyStatement, index: 3, value: enemy.race)
+                bindInt(enemyStatement, index: 3, value: raceId)
                 bindText(enemyStatement, index: 4, value: enemy.category)
-                bindText(enemyStatement, index: 5, value: enemy.job)
+                bindInt(enemyStatement, index: 5, value: nil)  // jobは常にnull
                 bindInt(enemyStatement, index: 6, value: enemy.baseExperience)
                 bindBool(enemyStatement, index: 7, value: enemy.isBoss)
                 try step(enemyStatement)
