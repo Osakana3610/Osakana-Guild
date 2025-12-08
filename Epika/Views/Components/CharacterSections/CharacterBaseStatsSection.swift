@@ -9,12 +9,12 @@ struct CharacterBaseStatsSection: View {
     var body: some View {
         GroupBox("基本能力値") {
             LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
-                BaseStatRow(label: "力", value: character.baseStats.strength)
-                BaseStatRow(label: "知恵", value: character.baseStats.wisdom)
-                BaseStatRow(label: "精神", value: character.baseStats.spirit)
-                BaseStatRow(label: "体力", value: character.baseStats.vitality)
-                BaseStatRow(label: "敏捷", value: character.baseStats.agility)
-                BaseStatRow(label: "運", value: character.baseStats.luck)
+                BaseStatRow(label: "力", value: character.attributes.strength)
+                BaseStatRow(label: "知恵", value: character.attributes.wisdom)
+                BaseStatRow(label: "精神", value: character.attributes.spirit)
+                BaseStatRow(label: "体力", value: character.attributes.vitality)
+                BaseStatRow(label: "敏捷", value: character.attributes.agility)
+                BaseStatRow(label: "運", value: character.attributes.luck)
             }
         }
     }

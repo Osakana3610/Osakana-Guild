@@ -1304,11 +1304,11 @@ private struct BattleStatsView: View {
                         Text(character.name)
                             .font(.headline)
                         HStack(spacing: 12) {
-                            statItem(label: "HP", value: character.combatStats.maxHP)
-                            statItem(label: "物攻", value: character.combatStats.physicalAttack)
-                            statItem(label: "魔攻", value: character.combatStats.magicalAttack)
-                            statItem(label: "物防", value: character.combatStats.physicalDefense)
-                            statItem(label: "魔防", value: character.combatStats.magicalDefense)
+                            statItem(label: "HP", value: character.combat.maxHP)
+                            statItem(label: "物攻", value: character.combat.physicalAttack)
+                            statItem(label: "魔攻", value: character.combat.magicalAttack)
+                            statItem(label: "物防", value: character.combat.physicalDefense)
+                            statItem(label: "魔防", value: character.combat.magicalDefense)
                         }
                         .font(.caption)
                         .foregroundStyle(.secondary)
