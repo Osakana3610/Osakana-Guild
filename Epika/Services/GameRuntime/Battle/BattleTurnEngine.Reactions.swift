@@ -11,7 +11,7 @@ extension BattleTurnEngine {
         let base = 10.0 + defenderBonus - attackerPenalty + defender.skillEffects.parryBonusPercent
         let chance = max(0, min(100, Int((base * defender.skillEffects.procChanceMultiplier).rounded())))
         guard BattleRandomSystem.percentChance(chance, random: &context.random) else { return false }
-        // パリィは performAttack 内でログ済みなので、ここでは追加しない
+        // パリィのログはapplyAttackOutcomeで追加される
         return true
     }
 
@@ -22,7 +22,7 @@ extension BattleTurnEngine {
         let base = 30.0 - Double(attacker.snapshot.additionalDamage) / 2.0 + defender.skillEffects.shieldBlockBonusPercent
         let chance = max(0, min(100, Int((base * defender.skillEffects.procChanceMultiplier).rounded())))
         guard BattleRandomSystem.percentChance(chance, random: &context.random) else { return false }
-        // シールドブロックは performAttack 内でログ済みなので、ここでは追加しない
+        // シールドブロックのログはapplyAttackOutcomeで追加される
         return true
     }
 
@@ -345,6 +345,18 @@ extension BattleTurnEngine {
             } else if attemptRescue(of: defenderIndex, side: defenderSide, context: &context) {
                 currentDefender = context.actor(for: defenderSide, index: defenderIndex)
             }
+        }
+
+        if attackResult.wasParried, let defenderActor = currentDefender, defenderActor.isAlive {
+            let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+            let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
+            context.appendAction(kind: .physicalParry, actor: defenderIdx, target: attackerIdx)
+        }
+
+        if attackResult.wasBlocked, let defenderActor = currentDefender, defenderActor.isAlive {
+            let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+            let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
+            context.appendAction(kind: .physicalBlock, actor: defenderIdx, target: attackerIdx)
         }
 
         if attackResult.wasDodged, let defenderActor = currentDefender, defenderActor.isAlive {

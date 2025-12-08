@@ -174,9 +174,26 @@ actor GameRuntimeService {
     func recalculateCombatStats(for progress: RuntimeCharacterProgress,
                                    pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
         let state = try await CharacterAssembler.assembleState(repository: repository, from: progress)
-        let context = CombatStatCalculator.Context(progress: progress,
-                                                    state: state,
-                                                    pandoraBoxStackKeys: pandoraBoxStackKeys)
+        guard let race = state.race, let job = state.job else {
+            throw RuntimeError.invalidConfiguration(reason: "種族または職業のマスターデータが見つかりません")
+        }
+        let context = CombatStatCalculator.Context(
+            raceId: progress.raceId,
+            jobId: progress.jobId,
+            level: progress.level,
+            currentHP: progress.hitPoints.current,
+            equippedItems: progress.equippedItems,
+            race: race,
+            job: job,
+            personalitySecondary: state.personalitySecondary,
+            learnedSkills: state.learnedSkills,
+            loadout: RuntimeCharacter.Loadout(
+                items: state.loadout.items,
+                titles: state.loadout.titles,
+                superRareTitles: state.loadout.superRareTitles
+            ),
+            pandoraBoxStackKeys: pandoraBoxStackKeys
+        )
         return try await MainActor.run {
             try CombatStatCalculator.calculate(for: context)
         }

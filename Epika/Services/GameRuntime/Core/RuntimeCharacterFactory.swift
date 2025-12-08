@@ -17,14 +17,18 @@ enum RuntimeCharacterFactory {
         async let secondaryDef = repository.personalitySecondary(withId: input.secondaryPersonalityId)
         async let spellDefinitions = repository.allSpells()
 
-        let race = try await raceDef
-        let job = try await jobDef
+        guard let race = try await raceDef else {
+            throw RuntimeError.invalidConfiguration(reason: "種族ID \(input.raceId) のマスターデータが見つかりません")
+        }
+        guard let job = try await jobDef else {
+            throw RuntimeError.invalidConfiguration(reason: "職業ID \(input.jobId) のマスターデータが見つかりません")
+        }
         let primaryPersonality = try await primaryDef
         let secondaryPersonality = try await secondaryDef
 
         // 装備からアイテム定義を取得
         let itemIds = Set(input.equippedItems.map { $0.itemId }).filter { $0 > 0 }
-        let equippedItemDefinitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(itemIds))
+        let equippedItemDefinitions = try await repository.items(withIds: Array(itemIds))
 
         // 装備から付与されるスキルIDを収集
         let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkills.map { $0.skillId } }
@@ -46,27 +50,35 @@ enum RuntimeCharacterFactory {
         let spells = try await spellDefinitions
         let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(from: spellbook, definitions: spells)
 
-        // 戦闘ステータス計算（CombatStatCalculatorは旧形式を使用するため互換形式を構築）
-        let tempProgress = makeTemporaryProgress(from: input)
-        let tempState = RuntimeCharacterState(
-            progress: tempProgress,
+        // 装備を CharacterValues.EquippedItem に変換
+        let equippedItemsValues = input.equippedItems.map { item in
+            CharacterValues.EquippedItem(
+                superRareTitleId: item.superRareTitleId,
+                normalTitleId: item.normalTitleId,
+                itemId: item.itemId,
+                socketSuperRareTitleId: item.socketSuperRareTitleId,
+                socketNormalTitleId: item.socketNormalTitleId,
+                socketItemId: item.socketItemId,
+                quantity: item.quantity
+            )
+        }
+
+        // 戦闘ステータス計算
+        let calcContext = CombatStatCalculator.Context(
+            raceId: input.raceId,
+            jobId: input.jobId,
+            level: input.level,
+            currentHP: input.currentHP,
+            equippedItems: equippedItemsValues,
             race: race,
             job: job,
-            personalityPrimary: primaryPersonality,
             personalitySecondary: secondaryPersonality,
             learnedSkills: learnedSkills,
-            loadout: RuntimeCharacterState.Loadout(
+            loadout: RuntimeCharacter.Loadout(
                 items: loadout.items,
                 titles: loadout.titles,
                 superRareTitles: loadout.superRareTitles
             ),
-            spellbook: spellbook,
-            spellLoadout: spellLoadout
-        )
-
-        let calcContext = CombatStatCalculator.Context(
-            progress: tempProgress,
-            state: tempState,
             pandoraBoxStackKeys: pandoraBoxStackKeys
         )
 
@@ -84,6 +96,10 @@ enum RuntimeCharacterFactory {
                 resolvedCurrentHP = max(1, calcResult.hitPoints.maximum)
             }
         }
+
+        // combatにisMartialEligibleを設定
+        var combat = calcResult.combat
+        combat.isMartialEligible = isMartialEligible
 
         return RuntimeCharacter(
             id: input.id,
@@ -103,31 +119,9 @@ enum RuntimeCharacterFactory {
             actionRateMageMagic: input.actionRateMageMagic,
             actionRateBreath: input.actionRateBreath,
             updatedAt: input.updatedAt,
-            attributes: RuntimeCharacter.CoreAttributes(
-                strength: calcResult.attributes.strength,
-                wisdom: calcResult.attributes.wisdom,
-                spirit: calcResult.attributes.spirit,
-                vitality: calcResult.attributes.vitality,
-                agility: calcResult.attributes.agility,
-                luck: calcResult.attributes.luck
-            ),
+            attributes: calcResult.attributes,
             maxHP: calcResult.hitPoints.maximum,
-            combat: RuntimeCharacter.Combat(
-                maxHP: calcResult.combat.maxHP,
-                physicalAttack: calcResult.combat.physicalAttack,
-                magicalAttack: calcResult.combat.magicalAttack,
-                physicalDefense: calcResult.combat.physicalDefense,
-                magicalDefense: calcResult.combat.magicalDefense,
-                hitRate: calcResult.combat.hitRate,
-                evasionRate: calcResult.combat.evasionRate,
-                criticalRate: calcResult.combat.criticalRate,
-                attackCount: calcResult.combat.attackCount,
-                magicalHealing: calcResult.combat.magicalHealing,
-                trapRemoval: calcResult.combat.trapRemoval,
-                additionalDamage: calcResult.combat.additionalDamage,
-                breathDamage: calcResult.combat.breathDamage
-            ),
-            isMartialEligible: isMartialEligible,
+            combat: combat,
             race: race,
             job: job,
             personalityPrimary: primaryPersonality,
@@ -193,64 +187,6 @@ enum RuntimeCharacterFactory {
             }
         }
         return false
-    }
-
-    /// CharacterInputからCombatStatCalculator用の一時的なRuntimeCharacterProgressを作成
-    private static func makeTemporaryProgress(from input: CharacterInput) -> RuntimeCharacterProgress {
-        let equippedItems = input.equippedItems.map { item in
-            CharacterValues.EquippedItem(
-                superRareTitleId: item.superRareTitleId,
-                normalTitleId: item.normalTitleId,
-                itemId: item.itemId,
-                socketSuperRareTitleId: item.socketSuperRareTitleId,
-                socketNormalTitleId: item.socketNormalTitleId,
-                socketItemId: item.socketItemId,
-                quantity: item.quantity
-            )
-        }
-
-        let dummyAttributes = CharacterValues.CoreAttributes(
-            strength: 0, wisdom: 0, spirit: 0, vitality: 0, agility: 0, luck: 0
-        )
-        let dummyHitPoints = CharacterValues.HitPoints(current: input.currentHP, maximum: 100)
-        let dummyCombat = CharacterValues.Combat(
-            maxHP: 100, physicalAttack: 0, magicalAttack: 0,
-            physicalDefense: 0, magicalDefense: 0, hitRate: 0, evasionRate: 0,
-            criticalRate: 0, attackCount: 1, magicalHealing: 0, trapRemoval: 0,
-            additionalDamage: 0, breathDamage: 0, isMartialEligible: false
-        )
-        let personality = CharacterValues.Personality(
-            primaryId: input.primaryPersonalityId,
-            secondaryId: input.secondaryPersonalityId
-        )
-        let actionPreferences = CharacterValues.ActionPreferences(
-            attack: input.actionRateAttack,
-            priestMagic: input.actionRatePriestMagic,
-            mageMagic: input.actionRateMageMagic,
-            breath: input.actionRateBreath
-        )
-
-        return RuntimeCharacterProgress(
-            id: input.id,
-            displayName: input.displayName,
-            raceId: input.raceId,
-            jobId: input.jobId,
-            avatarId: input.avatarId,
-            level: input.level,
-            experience: input.experience,
-            attributes: dummyAttributes,
-            hitPoints: dummyHitPoints,
-            combat: dummyCombat,
-            personality: personality,
-            learnedSkills: [],
-            equippedItems: equippedItems,
-            jobHistory: [],
-            explorationTags: [],
-            achievements: CharacterValues.AchievementCounters(totalBattles: 0, totalVictories: 0, defeatCount: 0),
-            actionPreferences: actionPreferences,
-            createdAt: input.updatedAt,
-            updatedAt: input.updatedAt
-        )
     }
 }
 

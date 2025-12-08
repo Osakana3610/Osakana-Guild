@@ -124,7 +124,7 @@ private extension CharacterActionPreferencesSection {
     }
 
     var canEditBreathRate: Bool {
-        character.combatStats.breathDamage > 0
+        character.combat.breathDamage > 0
     }
 
     var attackSliderBinding: Binding<Double> {

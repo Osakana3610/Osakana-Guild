@@ -2,21 +2,50 @@ import Foundation
 
 struct CombatStatCalculator {
     struct Result: Sendable {
-        var attributes: RuntimeCharacterProgress.CoreAttributes
-        var hitPoints: RuntimeCharacterProgress.HitPoints
-        var combat: RuntimeCharacterProgress.Combat
+        var attributes: CharacterValues.CoreAttributes
+        var hitPoints: CharacterValues.HitPoints
+        var combat: CharacterValues.Combat
     }
 
     struct Context: Sendable {
-        let progress: RuntimeCharacterProgress
-        let state: RuntimeCharacterState
+        // 永続化データ（CharacterInputから）
+        let raceId: UInt8
+        let jobId: UInt8
+        let level: Int
+        let currentHP: Int
+        let equippedItems: [CharacterValues.EquippedItem]
+
+        // マスターデータ（必須 - 欠落時は呼び出し元でthrow）
+        let race: RaceDefinition
+        let job: JobDefinition
+        let personalitySecondary: PersonalitySecondaryDefinition?
+        let learnedSkills: [SkillDefinition]
+        let loadout: RuntimeCharacter.Loadout
+
+        // オプション
         let pandoraBoxStackKeys: Set<String>
 
-        nonisolated init(progress: RuntimeCharacterProgress,
-                         state: RuntimeCharacterState,
+        nonisolated init(raceId: UInt8,
+                         jobId: UInt8,
+                         level: Int,
+                         currentHP: Int,
+                         equippedItems: [CharacterValues.EquippedItem],
+                         race: RaceDefinition,
+                         job: JobDefinition,
+                         personalitySecondary: PersonalitySecondaryDefinition?,
+                         learnedSkills: [SkillDefinition],
+                         loadout: RuntimeCharacter.Loadout,
                          pandoraBoxStackKeys: Set<String> = []) {
-            self.progress = progress
-            self.state = state
+            self.raceId = raceId
+            self.jobId = jobId
+            self.level = level
+            self.currentHP = currentHP
+            self.equippedItems = equippedItems
+            self.race = race
+            self.job = job
+            self.personalitySecondary = personalitySecondary
+            self.learnedSkills = learnedSkills
+            self.loadout = loadout
             self.pandoraBoxStackKeys = pandoraBoxStackKeys
         }
     }
@@ -29,23 +58,19 @@ struct CombatStatCalculator {
     }
 
     static func calculate(for context: Context) throws -> Result {
-        guard let race = context.state.race else {
-            throw CalculationError.missingRaceDefinition("id:\(context.progress.raceId)")
-        }
-        guard let job = context.state.job else {
-            throw CalculationError.missingJobDefinition("id:\(context.progress.jobId)")
-        }
+        let race = context.race
+        let job = context.job
 
-        let skillEffects = try SkillEffectAggregator(skills: context.state.learnedSkills)
+        let skillEffects = try SkillEffectAggregator(skills: context.learnedSkills)
 
         var base = BaseStatAccumulator()
         base.apply(raceBase: race)
-        base.applyLevelBonus(level: context.progress.level)
-        if let secondary = context.state.personalitySecondary {
+        base.applyLevelBonus(level: context.level)
+        if let secondary = context.personalitySecondary {
             base.apply(personality: secondary)
         }
-        try base.apply(equipment: context.progress.equippedItems,
-                       definitions: context.state.loadout.items,
+        try base.apply(equipment: context.equippedItems,
+                       definitions: context.loadout.items,
                        equipmentMultipliers: skillEffects.equipmentMultipliers,
                        pandoraBoxStackKeys: context.pandoraBoxStackKeys)
 
@@ -58,7 +83,8 @@ struct CombatStatCalculator {
         attributes.vitality = max(0, attributes.vitality)
         attributes.agility = max(0, attributes.agility)
         attributes.luck = max(0, attributes.luck)
-        let combatResult = CombatAccumulator(progress: context.progress,
+        let combatResult = CombatAccumulator(raceId: context.raceId,
+                                             level: context.level,
                                              attributes: attributes,
                                              race: race,
                                              job: job,
@@ -66,8 +92,8 @@ struct CombatStatCalculator {
                                              passives: skillEffects.passives,
                                              additives: skillEffects.additives,
                                              critical: skillEffects.critical,
-                                             equipment: context.progress.equippedItems,
-                                             itemDefinitions: context.state.loadout.items,
+                                             equipment: context.equippedItems,
+                                             itemDefinitions: context.loadout.items,
                                              martial: skillEffects.martialBonuses,
                                              growthMultiplier: skillEffects.growthMultiplier,
                                              statConversions: skillEffects.statConversions,
@@ -82,8 +108,8 @@ struct CombatStatCalculator {
         combat = combatResult.clampCombat(combat)
 
         let maxHP = max(1, combat.maxHP)
-        let hitPoints = RuntimeCharacterProgress.HitPoints(current: min(context.progress.hitPoints.current, maxHP),
-                                                           maximum: maxHP)
+        let hitPoints = CharacterValues.HitPoints(current: min(context.currentHP, maxHP),
+                                                  maximum: maxHP)
 
         return Result(attributes: attributes,
                       hitPoints: hitPoints,
@@ -123,7 +149,7 @@ private struct BaseStatAccumulator {
         }
     }
 
-    mutating func apply(equipment: [RuntimeCharacterProgress.EquippedItem],
+    mutating func apply(equipment: [CharacterValues.EquippedItem],
                         definitions: [ItemDefinition],
                         equipmentMultipliers: [String: Double],
                         pandoraBoxStackKeys: Set<String>) throws {
@@ -151,13 +177,13 @@ private struct BaseStatAccumulator {
         }
     }
 
-    func makeAttributes() -> RuntimeCharacterProgress.CoreAttributes {
-        RuntimeCharacterProgress.CoreAttributes(strength: strength,
-                                                wisdom: wisdom,
-                                                spirit: spirit,
-                                                vitality: vitality,
-                                                agility: agility,
-                                                luck: luck)
+    func makeAttributes() -> CharacterValues.CoreAttributes {
+        CharacterValues.CoreAttributes(strength: strength,
+                                       wisdom: wisdom,
+                                       spirit: spirit,
+                                       vitality: vitality,
+                                       agility: agility,
+                                       luck: luck)
     }
 
     private mutating func assign(_ name: String, value: Int) {
@@ -457,15 +483,16 @@ private extension SkillEffectAggregator {
 // MARK: - Combat Calculation
 
 private struct CombatAccumulator {
-    private let progress: RuntimeCharacterProgress
-    private let attributes: RuntimeCharacterProgress.CoreAttributes
+    private let raceId: UInt8
+    private let level: Int
+    private let attributes: CharacterValues.CoreAttributes
     private let race: RaceDefinition
     private let job: JobDefinition
     private let talents: SkillEffectAggregator.TalentModifiers
     private let passives: SkillEffectAggregator.PassiveMultipliers
     private let additives: SkillEffectAggregator.AdditiveBonuses
     private let criticalParams: SkillEffectAggregator.CriticalParameters
-    private let equipment: [RuntimeCharacterProgress.EquippedItem]
+    private let equipment: [CharacterValues.EquippedItem]
     private let itemDefinitions: [ItemDefinition]
     private let martialBonuses: SkillEffectAggregator.MartialBonuses
     private let growthMultiplier: Double
@@ -476,15 +503,16 @@ private struct CombatAccumulator {
     private let pandoraBoxStackKeys: Set<String>
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
-    init(progress: RuntimeCharacterProgress,
-         attributes: RuntimeCharacterProgress.CoreAttributes,
+    init(raceId: UInt8,
+         level: Int,
+         attributes: CharacterValues.CoreAttributes,
          race: RaceDefinition,
          job: JobDefinition,
          talents: SkillEffectAggregator.TalentModifiers,
          passives: SkillEffectAggregator.PassiveMultipliers,
          additives: SkillEffectAggregator.AdditiveBonuses,
          critical: SkillEffectAggregator.CriticalParameters,
-         equipment: [RuntimeCharacterProgress.EquippedItem],
+         equipment: [CharacterValues.EquippedItem],
          itemDefinitions: [ItemDefinition],
          martial: SkillEffectAggregator.MartialBonuses,
          growthMultiplier: Double,
@@ -493,7 +521,8 @@ private struct CombatAccumulator {
          equipmentMultipliers: [String: Double],
          itemStatMultipliers: [CombatStatKey: Double],
          pandoraBoxStackKeys: Set<String>) {
-        self.progress = progress
+        self.raceId = raceId
+        self.level = level
         self.attributes = attributes
         self.race = race
         self.job = job
@@ -514,10 +543,10 @@ private struct CombatAccumulator {
                                                                                                    definitions: itemDefinitions)
     }
 
-    func makeCombat() throws -> RuntimeCharacterProgress.Combat {
-        let baseLevelFactor = CombatFormulas.levelDependentValue(raceId: race.id,
+    func makeCombat() throws -> CharacterValues.Combat {
+        let baseLevelFactor = CombatFormulas.levelDependentValue(raceId: raceId,
                                                                  raceCategory: race.category,
-                                                                 level: progress.level)
+                                                                 level: level)
         let levelFactor = baseLevelFactor * growthMultiplier
         let coefficients = JobCoefficientLookup(definition: job)
         let vitality = Double(attributes.vitality)
@@ -593,7 +622,7 @@ private struct CombatAccumulator {
         stats[.trapRemoval] = trapRemoval
 
         let additionalDependency = CombatFormulas.strengthDependency(value: attributes.strength)
-        let additionalGrowth = CombatFormulas.additionalDamageGrowth(level: progress.level,
+        let additionalGrowth = CombatFormulas.additionalDamageGrowth(level: level,
                                                                      jobCoefficient: coefficients.value(for: .physicalAttack),
                                                                      growthMultiplier: growthMultiplier)
         var additionalDamage = additionalDependency * (1.0 + additionalGrowth)
@@ -674,20 +703,20 @@ private struct CombatAccumulator {
         }
         let finalAttackCount = forcedToOne.contains(.attackCount) ? 1 : attackCount
 
-        var combat = RuntimeCharacterProgress.Combat(maxHP: Int(maxHP.rounded(.towardZero)),
-                                                     physicalAttack: Int(physicalAttack.rounded(.towardZero)),
-                                                     magicalAttack: Int(magicalAttack.rounded(.towardZero)),
-                                                     physicalDefense: Int(physicalDefense.rounded(.towardZero)),
-                                                     magicalDefense: Int(magicalDefense.rounded(.towardZero)),
-                                                     hitRate: Int(hitRate.rounded(.towardZero)),
-                                                     evasionRate: Int(evasion.rounded(.towardZero)),
-                                                     criticalRate: Int(criticalRate.rounded(.towardZero)),
-                                                     attackCount: finalAttackCount,
-                                                     magicalHealing: Int(magicalHealing.rounded(.towardZero)),
-                                                     trapRemoval: Int(trapRemoval.rounded(.towardZero)),
-                                                     additionalDamage: Int(additionalDamage.rounded(.towardZero)),
-                                                     breathDamage: Int(breathDamage.rounded(.towardZero)),
-                                                     isMartialEligible: shouldApplyMartialBonuses)
+        var combat = CharacterValues.Combat(maxHP: Int(maxHP.rounded(.towardZero)),
+                                              physicalAttack: Int(physicalAttack.rounded(.towardZero)),
+                                              magicalAttack: Int(magicalAttack.rounded(.towardZero)),
+                                              physicalDefense: Int(physicalDefense.rounded(.towardZero)),
+                                              magicalDefense: Int(magicalDefense.rounded(.towardZero)),
+                                              hitRate: Int(hitRate.rounded(.towardZero)),
+                                              evasionRate: Int(evasion.rounded(.towardZero)),
+                                              criticalRate: Int(criticalRate.rounded(.towardZero)),
+                                              attackCount: finalAttackCount,
+                                              magicalHealing: Int(magicalHealing.rounded(.towardZero)),
+                                              trapRemoval: Int(trapRemoval.rounded(.towardZero)),
+                                              additionalDamage: Int(additionalDamage.rounded(.towardZero)),
+                                              breathDamage: Int(breathDamage.rounded(.towardZero)),
+                                              isMartialEligible: shouldApplyMartialBonuses)
 
         applyEquipmentCombatBonuses(to: &combat)
 
@@ -763,8 +792,8 @@ private struct CombatAccumulator {
         return ordered
     }
 
-    func applyTwentyOneBonuses(to combat: RuntimeCharacterProgress.Combat,
-                               attributes: RuntimeCharacterProgress.CoreAttributes) -> RuntimeCharacterProgress.Combat {
+    func applyTwentyOneBonuses(to combat: CharacterValues.Combat,
+                               attributes: CharacterValues.CoreAttributes) -> CharacterValues.Combat {
         var result = combat
         if attributes.strength >= 21 {
             let multiplier = CombatFormulas.statBonusMultiplier(value: attributes.strength)
@@ -796,7 +825,7 @@ private struct CombatAccumulator {
         return result
     }
 
-    func clampCombat(_ combat: RuntimeCharacterProgress.Combat) -> RuntimeCharacterProgress.Combat {
+    func clampCombat(_ combat: CharacterValues.Combat) -> CharacterValues.Combat {
         var result = combat
         result.maxHP = max(1, result.maxHP)
         result.attackCount = max(1, result.attackCount)
@@ -804,7 +833,7 @@ private struct CombatAccumulator {
         return result
     }
 
-    private func applyEquipmentCombatBonuses(to combat: inout RuntimeCharacterProgress.Combat) {
+    private func applyEquipmentCombatBonuses(to combat: inout CharacterValues.Combat) {
         let definitionsById = Dictionary(uniqueKeysWithValues: itemDefinitions.map { ($0.id, $0) })
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
@@ -835,7 +864,7 @@ private struct CombatAccumulator {
         !hasPositivePhysicalAttackEquipment
     }
 
-    private static func containsPositivePhysicalAttack(equipment: [RuntimeCharacterProgress.EquippedItem],
+    private static func containsPositivePhysicalAttack(equipment: [CharacterValues.EquippedItem],
                                                        definitions: [ItemDefinition]) -> Bool {
         guard !equipment.isEmpty else { return false }
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
@@ -850,7 +879,7 @@ private struct CombatAccumulator {
         return false
     }
 
-    private func apply(bonus: Int, to stat: CombatStatKey, combat: inout RuntimeCharacterProgress.Combat) {
+    private func apply(bonus: Int, to stat: CombatStatKey, combat: inout CharacterValues.Combat) {
         switch stat {
         case .maxHP: combat.maxHP += bonus
         case .physicalAttack: combat.physicalAttack += bonus

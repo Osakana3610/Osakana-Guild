@@ -15,11 +15,13 @@ actor CharacterProgressService {
     }
 
     private let container: ModelContainer
+    private let masterData: MasterDataRuntimeService
     private var raceLevelCache: [UInt8: Int] = [:]
     private var raceMaxExperienceCache: [UInt8: Int] = [:]
 
-    init(container: ModelContainer) {
+    init(container: ModelContainer, masterData: MasterDataRuntimeService = .shared) {
         self.container = container
+        self.masterData = masterData
     }
 
     private func notifyCharacterProgressDidChange() {
@@ -78,7 +80,7 @@ actor CharacterProgressService {
         let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: makeContext())
         return try await RuntimeCharacterFactory.make(
             from: input,
-            repository: MasterDataRuntimeService.shared.repository,
+            repository: masterData.repository,
             pandoraBoxStackKeys: pandoraStackKeys
         )
     }
@@ -471,8 +473,7 @@ private extension CharacterProgressService {
         if let cached = raceLevelCache[raceId] {
             return cached
         }
-        // MasterDataRuntimeService を直接使用（Progress層からRuntime層への依存を削除）
-        guard let definition = try await MasterDataRuntimeService.shared.getRaceDefinition(id: raceId) else {
+        guard let definition = try await masterData.getRaceDefinition(id: raceId) else {
             throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
         }
         let resolved = definition.maxLevel
@@ -522,7 +523,7 @@ private extension CharacterProgressService {
         let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
         let runtimeCharacter = try await RuntimeCharacterFactory.make(
             from: input,
-            repository: MasterDataRuntimeService.shared.repository,
+            repository: masterData.repository,
             pandoraBoxStackKeys: pandoraStackKeys
         )
 
@@ -584,17 +585,7 @@ private extension CharacterProgressService {
             trapRemoval: runtimeCharacter.combat.trapRemoval,
             additionalDamage: runtimeCharacter.combat.additionalDamage,
             breathDamage: runtimeCharacter.combat.breathDamage,
-            isMartialEligible: runtimeCharacter.isMartialEligible
-        )
-
-        // 廃止フィールドは空
-        let learnedSkills: [CharacterSnapshot.LearnedSkill] = []
-        let jobHistory: [CharacterSnapshot.JobHistoryEntry] = []
-        let explorationTags: Set<String> = []
-        let achievements = CharacterSnapshot.AchievementCounters(
-            totalBattles: 0,
-            totalVictories: 0,
-            defeatCount: 0
+            isMartialEligible: runtimeCharacter.combat.isMartialEligible
         )
 
         return CharacterSnapshot(
@@ -610,11 +601,7 @@ private extension CharacterProgressService {
             hitPoints: hitPoints,
             combat: combat,
             personality: personality,
-            learnedSkills: learnedSkills,
             equippedItems: equippedItems,
-            jobHistory: jobHistory,
-            explorationTags: explorationTags,
-            achievements: achievements,
             actionPreferences: actionPreferences,
             createdAt: now,
             updatedAt: now

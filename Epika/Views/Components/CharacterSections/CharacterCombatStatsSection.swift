@@ -8,7 +8,7 @@ struct CharacterCombatStatsSection: View {
 
     var body: some View {
         GroupBox("戦闘ステータス") {
-            let stats = character.combatStats
+            let stats = character.combat
             let isMartial = character.isMartialEligible
             let physicalLabel = isMartial ? "物理攻撃(格闘)" : "物理攻撃"
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
