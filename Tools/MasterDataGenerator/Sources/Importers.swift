@@ -1132,7 +1132,7 @@ private struct DungeonMasterFile: Decodable {
 
     struct FloorEnemyMapping: Decodable {
         struct EnemyGroup: Decodable {
-            let enemyId: String
+            let enemyId: Int
             let weight: Double
             let minLevel: Int
             let maxLevel: Int
@@ -1227,7 +1227,7 @@ extension Generator {
                     bindInt(eventStatement, index: 2, value: index)
                     let isBoss = groups.count == 1
                     bindText(eventStatement, index: 3, value: isBoss ? "boss_encounter" : "enemy_encounter")
-                    bindText(eventStatement, index: 4, value: group.enemyId)
+                    bindInt(eventStatement, index: 4, value: group.enemyId)
                     bindDouble(eventStatement, index: 5, value: group.weight)
                     bindInt(eventStatement, index: 6, value: nil)
                     bindInt(eventStatement, index: 7, value: nil)
