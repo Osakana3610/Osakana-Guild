@@ -43,63 +43,24 @@
       "titleRank": 0,
       "floorEnemyMapping": [
         {
-          "floorRange": [
-            1,
-            1
-          ],
+          "floorRange": [1, 1],
           "enemyGroups": [
-            {
-              "enemyId": "crystal_slime",
-              "weight": 40,
-              "minLevel": 1,
-              "maxLevel": 3
-            },
-            {
-              "enemyId": "goblin_warrior",
-              "weight": 60,
-              "minLevel": 2,
-              "maxLevel": 4
-            }
+            { "enemyId": 3, "weight": 40, "minLevel": 1, "maxLevel": 3 },
+            { "enemyId": 0, "weight": 60, "minLevel": 2, "maxLevel": 4 }
           ]
         },
         {
-          "floorRange": [
-            2,
-            2
-          ],
+          "floorRange": [2, 2],
           "enemyGroups": [
-            {
-              "enemyId": "goblin_warrior",
-              "weight": 50,
-              "minLevel": 3,
-              "maxLevel": 5
-            },
-            {
-              "enemyId": "shadow_wolf",
-              "weight": 50,
-              "minLevel": 5,
-              "maxLevel": 5
-            }
+            { "enemyId": 0, "weight": 50, "minLevel": 3, "maxLevel": 5 },
+            { "enemyId": 4, "weight": 50, "minLevel": 5, "maxLevel": 5 }
           ]
         },
         {
-          "floorRange": [
-            3,
-            3
-          ],
+          "floorRange": [3, 3],
           "enemyGroups": [
-            {
-              "enemyId": "shadow_wolf",
-              "weight": 40,
-              "minLevel": 4,
-              "maxLevel": 6
-            },
-            {
-              "enemyId": "forest_spirit",
-              "weight": 30,
-              "minLevel": 5,
-              "maxLevel": 7
-            }
+            { "enemyId": 4, "weight": 40, "minLevel": 4, "maxLevel": 6 },
+            { "enemyId": 7, "weight": 30, "minLevel": 5, "maxLevel": 7 }
           ]
         }
       ],
@@ -128,49 +89,18 @@
       "eventsPerFloor": 5,
       "floorEnemyMapping": [
         {
-          "floorRange": [
-            1,
-            1
-          ],
+          "floorRange": [1, 1],
           "enemyGroups": [
-            {
-              "enemyId": "skeleton_mage",
-              "weight": 50,
-              "minLevel": 4,
-              "maxLevel": 6
-            },
-            {
-              "enemyId": "orc_berserker",
-              "weight": 50,
-              "minLevel": 5,
-              "maxLevel": 7
-            }
+            { "enemyId": 2, "weight": 50, "minLevel": 4, "maxLevel": 6 },
+            { "enemyId": 1, "weight": 50, "minLevel": 5, "maxLevel": 7 }
           ]
         },
         {
-          "floorRange": [
-            2,
-            3
-          ],
+          "floorRange": [2, 3],
           "enemyGroups": [
-            {
-              "enemyId": "skeleton_mage",
-              "weight": 40,
-              "minLevel": 6,
-              "maxLevel": 8
-            },
-            {
-              "enemyId": "orc_berserker",
-              "weight": 40,
-              "minLevel": 7,
-              "maxLevel": 9
-            },
-            {
-              "enemyId": "cave_guardian",
-              "weight": 20,
-              "minLevel": 8,
-              "maxLevel": 10
-            }
+            { "enemyId": 2, "weight": 40, "minLevel": 6, "maxLevel": 8 },
+            { "enemyId": 1, "weight": 40, "minLevel": 7, "maxLevel": 9 },
+            { "enemyId": 8, "weight": 20, "minLevel": 8, "maxLevel": 10 }
           ]
         }
       ],
@@ -197,80 +127,7 @@
       "baseGold": 60,
       "explorationTime": 45,
       "eventsPerFloor": 5,
-      "floorEnemyMapping": [
-        {
-          "floorRange": [
-            1,
-            1
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "dark_mage",
-              "weight": 50,
-              "minLevel": 7,
-              "maxLevel": 9
-            },
-            {
-              "enemyId": "skeleton_mage",
-              "weight": 50,
-              "minLevel": 8,
-              "maxLevel": 10
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            2,
-            2
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "dark_mage",
-              "weight": 40,
-              "minLevel": 9,
-              "maxLevel": 11
-            },
-            {
-              "enemyId": "wraith",
-              "weight": 30,
-              "minLevel": 10,
-              "maxLevel": 12
-            },
-            {
-              "enemyId": "necromancer",
-              "weight": 30,
-              "minLevel": 10,
-              "maxLevel": 12
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            3,
-            3
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "wraith",
-              "weight": 40,
-              "minLevel": 11,
-              "maxLevel": 13
-            },
-            {
-              "enemyId": "necromancer",
-              "weight": 40,
-              "minLevel": 12,
-              "maxLevel": 14
-            },
-            {
-              "enemyId": "ancient_guardian",
-              "weight": 20,
-              "minLevel": 13,
-              "maxLevel": 15
-            }
-          ]
-        }
-      ],
+      "floorEnemyMapping": [],
       "floorCount": 3,
       "id": 4
     },
@@ -295,22 +152,7 @@
       "baseGold": 100,
       "explorationTime": 90,
       "eventsPerFloor": 5,
-      "floorEnemyMapping": [
-        {
-          "floorRange": [
-            1,
-            1
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "forest_guardian",
-              "weight": 100,
-              "minLevel": 15,
-              "maxLevel": 15
-            }
-          ]
-        }
-      ],
+      "floorEnemyMapping": [],
       "floorCount": 1,
       "id": 5
     },
@@ -334,54 +176,7 @@
       "baseGold": 125,
       "explorationTime": 45,
       "eventsPerFloor": 5,
-      "floorEnemyMapping": [
-        {
-          "floorRange": [
-            1,
-            1
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "orc_berserker",
-              "weight": 50,
-              "minLevel": 14,
-              "maxLevel": 16
-            },
-            {
-              "enemyId": "mountain_golem",
-              "weight": 50,
-              "minLevel": 15,
-              "maxLevel": 17
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            2,
-            2
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "mountain_golem",
-              "weight": 40,
-              "minLevel": 16,
-              "maxLevel": 18
-            },
-            {
-              "enemyId": "rock_elemental",
-              "weight": 30,
-              "minLevel": 17,
-              "maxLevel": 19
-            },
-            {
-              "enemyId": "orc_shaman",
-              "weight": 30,
-              "minLevel": 16,
-              "maxLevel": 18
-            }
-          ]
-        }
-      ],
+      "floorEnemyMapping": [],
       "floorCount": 2,
       "id": 6
     },
@@ -405,80 +200,7 @@
       "baseGold": 150,
       "explorationTime": 45,
       "eventsPerFloor": 5,
-      "floorEnemyMapping": [
-        {
-          "floorRange": [
-            1,
-            1
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "zombie",
-              "weight": 50,
-              "minLevel": 17,
-              "maxLevel": 19
-            },
-            {
-              "enemyId": "ghost",
-              "weight": 50,
-              "minLevel": 18,
-              "maxLevel": 20
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            2,
-            2
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "ghost",
-              "weight": 40,
-              "minLevel": 19,
-              "maxLevel": 21
-            },
-            {
-              "enemyId": "wraith",
-              "weight": 30,
-              "minLevel": 20,
-              "maxLevel": 22
-            },
-            {
-              "enemyId": "cursed_villager",
-              "weight": 30,
-              "minLevel": 19,
-              "maxLevel": 21
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            3,
-            3
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "wraith",
-              "weight": 40,
-              "minLevel": 21,
-              "maxLevel": 23
-            },
-            {
-              "enemyId": "cursed_villager",
-              "weight": 40,
-              "minLevel": 22,
-              "maxLevel": 24
-            },
-            {
-              "enemyId": "village_chief_specter",
-              "weight": 20,
-              "minLevel": 23,
-              "maxLevel": 25
-            }
-          ]
-        }
-      ],
+      "floorEnemyMapping": [],
       "floorCount": 3,
       "id": 7
     },
@@ -502,54 +224,7 @@
       "baseGold": 200,
       "explorationTime": 60,
       "eventsPerFloor": 5,
-      "floorEnemyMapping": [
-        {
-          "floorRange": [
-            1,
-            1
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "harpy",
-              "weight": 50,
-              "minLevel": 21,
-              "maxLevel": 23
-            },
-            {
-              "enemyId": "wind_elemental",
-              "weight": 50,
-              "minLevel": 22,
-              "maxLevel": 24
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            2,
-            2
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "wind_elemental",
-              "weight": 40,
-              "minLevel": 23,
-              "maxLevel": 25
-            },
-            {
-              "enemyId": "bridge_guardian",
-              "weight": 30,
-              "minLevel": 24,
-              "maxLevel": 26
-            },
-            {
-              "enemyId": "storm_crow",
-              "weight": 30,
-              "minLevel": 23,
-              "maxLevel": 25
-            }
-          ]
-        }
-      ],
+      "floorEnemyMapping": [],
       "floorCount": 2,
       "id": 8
     },
@@ -573,22 +248,7 @@
       "baseGold": 300,
       "explorationTime": 90,
       "eventsPerFloor": 5,
-      "floorEnemyMapping": [
-        {
-          "floorRange": [
-            1,
-            1
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "mountain_beast",
-              "weight": 100,
-              "minLevel": 28,
-              "maxLevel": 28
-            }
-          ]
-        }
-      ],
+      "floorEnemyMapping": [],
       "floorCount": 1,
       "id": 9
     },
@@ -605,87 +265,14 @@
         "dark_essence",
         "shadow_fragment"
       ],
-      "storyText": "第3章の始まり。闇の力が満ちた危険な森。",
+      "storyText": "第3章の始まり。闘の力が満ちた危険な森。",
       "isLimitedTime": false,
       "eventId": null,
       "baseExperience": 500,
       "baseGold": 400,
       "explorationTime": 60,
       "eventsPerFloor": 5,
-      "floorEnemyMapping": [
-        {
-          "floorRange": [
-            1,
-            1
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "dark_elf",
-              "weight": 50,
-              "minLevel": 29,
-              "maxLevel": 31
-            },
-            {
-              "enemyId": "shadow_beast",
-              "weight": 50,
-              "minLevel": 30,
-              "maxLevel": 32
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            2,
-            2
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "shadow_beast",
-              "weight": 40,
-              "minLevel": 31,
-              "maxLevel": 33
-            },
-            {
-              "enemyId": "nightmare",
-              "weight": 30,
-              "minLevel": 32,
-              "maxLevel": 34
-            },
-            {
-              "enemyId": "dark_treant",
-              "weight": 30,
-              "minLevel": 31,
-              "maxLevel": 33
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            3,
-            3
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "nightmare",
-              "weight": 40,
-              "minLevel": 33,
-              "maxLevel": 35
-            },
-            {
-              "enemyId": "dark_treant",
-              "weight": 40,
-              "minLevel": 34,
-              "maxLevel": 36
-            },
-            {
-              "enemyId": "shadow_lord",
-              "weight": 20,
-              "minLevel": 35,
-              "maxLevel": 37
-            }
-          ]
-        }
-      ],
+      "floorEnemyMapping": [],
       "floorCount": 3,
       "id": 10
     },
@@ -709,80 +296,7 @@
       "baseGold": 500,
       "explorationTime": 60,
       "eventsPerFloor": 5,
-      "floorEnemyMapping": [
-        {
-          "floorRange": [
-            1,
-            1
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "water_elemental",
-              "weight": 50,
-              "minLevel": 34,
-              "maxLevel": 36
-            },
-            {
-              "enemyId": "mermaid_warrior",
-              "weight": 50,
-              "minLevel": 35,
-              "maxLevel": 37
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            2,
-            2
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "mermaid_warrior",
-              "weight": 40,
-              "minLevel": 36,
-              "maxLevel": 38
-            },
-            {
-              "enemyId": "sea_serpent",
-              "weight": 30,
-              "minLevel": 37,
-              "maxLevel": 39
-            },
-            {
-              "enemyId": "water_spirit",
-              "weight": 30,
-              "minLevel": 36,
-              "maxLevel": 38
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            3,
-            3
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "sea_serpent",
-              "weight": 40,
-              "minLevel": 38,
-              "maxLevel": 40
-            },
-            {
-              "enemyId": "water_spirit",
-              "weight": 40,
-              "minLevel": 39,
-              "maxLevel": 41
-            },
-            {
-              "enemyId": "lake_guardian",
-              "weight": 20,
-              "minLevel": 40,
-              "maxLevel": 42
-            }
-          ]
-        }
-      ],
+      "floorEnemyMapping": [],
       "floorCount": 3,
       "id": 11
     },
@@ -806,80 +320,7 @@
       "baseGold": 700,
       "explorationTime": 75,
       "eventsPerFloor": 5,
-      "floorEnemyMapping": [
-        {
-          "floorRange": [
-            1,
-            1
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "ancient_soldier",
-              "weight": 50,
-              "minLevel": 39,
-              "maxLevel": 41
-            },
-            {
-              "enemyId": "stone_golem",
-              "weight": 50,
-              "minLevel": 40,
-              "maxLevel": 42
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            2,
-            2
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "stone_golem",
-              "weight": 40,
-              "minLevel": 41,
-              "maxLevel": 43
-            },
-            {
-              "enemyId": "ancient_mage",
-              "weight": 30,
-              "minLevel": 42,
-              "maxLevel": 44
-            },
-            {
-              "enemyId": "city_guardian",
-              "weight": 30,
-              "minLevel": 41,
-              "maxLevel": 43
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            3,
-            3
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "ancient_mage",
-              "weight": 40,
-              "minLevel": 43,
-              "maxLevel": 45
-            },
-            {
-              "enemyId": "city_guardian",
-              "weight": 40,
-              "minLevel": 44,
-              "maxLevel": 46
-            },
-            {
-              "enemyId": "ancient_king",
-              "weight": 20,
-              "minLevel": 45,
-              "maxLevel": 47
-            }
-          ]
-        }
-      ],
+      "floorEnemyMapping": [],
       "floorCount": 3,
       "id": 12
     },
@@ -906,63 +347,9 @@
       "eventsPerFloor": 5,
       "floorEnemyMapping": [
         {
-          "floorRange": [
-            1,
-            1
-          ],
+          "floorRange": [3, 3],
           "enemyGroups": [
-            {
-              "enemyId": "drake",
-              "weight": 50,
-              "minLevel": 48,
-              "maxLevel": 50
-            },
-            {
-              "enemyId": "dragon_cultist",
-              "weight": 50,
-              "minLevel": 47,
-              "maxLevel": 49
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            2,
-            2
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "drake",
-              "weight": 40,
-              "minLevel": 49,
-              "maxLevel": 51
-            },
-            {
-              "enemyId": "elder_drake",
-              "weight": 30,
-              "minLevel": 50,
-              "maxLevel": 52
-            },
-            {
-              "enemyId": "dragon_priest",
-              "weight": 30,
-              "minLevel": 49,
-              "maxLevel": 51
-            }
-          ]
-        },
-        {
-          "floorRange": [
-            3,
-            3
-          ],
-          "enemyGroups": [
-            {
-              "enemyId": "ancient_dragon",
-              "weight": 100,
-              "minLevel": 55,
-              "maxLevel": 55
-            }
+            { "enemyId": 5, "weight": 100, "minLevel": 55, "maxLevel": 55 }
           ]
         }
       ],
