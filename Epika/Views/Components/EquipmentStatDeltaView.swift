@@ -19,13 +19,18 @@ struct EquipmentStatDeltaView: View {
         }
     }
 
-    @ViewBuilder
     private func deltaRow(_ delta: (label: String, value: Int)) -> some View {
         let isPositive = delta.value > 0
         let sign = isPositive ? "+" : ""
-        let text = "[\(sign)\(delta.value)] \(delta.label)"
+        // 攻撃回数は10倍スケールで保存されているため、0.1倍して表示
+        let valueText: String = if delta.label == "攻撃回数" {
+            String(format: "%.1f", Double(delta.value) * 0.1)
+        } else {
+            "\(delta.value)"
+        }
+        let text = "[\(sign)\(valueText)] \(delta.label)"
 
-        Text(text)
+        return Text(text)
             .font(.subheadline)
             .fontWeight(.regular)
             .foregroundColor(isPositive ? .green : .red)

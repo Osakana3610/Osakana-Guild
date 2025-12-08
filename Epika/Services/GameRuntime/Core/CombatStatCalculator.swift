@@ -835,6 +835,9 @@ private struct CombatAccumulator {
 
     private func applyEquipmentCombatBonuses(to combat: inout CharacterValues.Combat) {
         let definitionsById = Dictionary(uniqueKeysWithValues: itemDefinitions.map { ($0.id, $0) })
+        // attackCountは10倍スケールで保存されているため、合計してから0.1倍して丸める
+        var attackCountAccumulator: Double = 0
+
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
             let categoryMultiplier = equipmentMultipliers[definition.category]
@@ -845,7 +848,12 @@ private struct CombatAccumulator {
                 guard let stat = CombatStatKey(bonus.stat) else { continue }
                 let statMultiplier = itemStatMultipliers[stat] ?? 1.0
                 let scaled = Double(bonus.value) * categoryMultiplier * statMultiplier * pandoraMultiplier
-                apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity, to: stat, combat: &combat)
+                if stat == .attackCount {
+                    // attackCountは後でまとめて処理
+                    attackCountAccumulator += scaled * Double(item.quantity)
+                } else {
+                    apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity, to: stat, combat: &combat)
+                }
             }
             // ソケット宝石の戦闘ステータス（係数: 通常0.5、魔法防御0.25）
             if item.socketItemId != 0,
@@ -854,10 +862,18 @@ private struct CombatAccumulator {
                     guard let stat = CombatStatKey(bonus.stat) else { continue }
                     let gemCoefficient: Double = (stat == .magicalDefense) ? 0.25 : 0.5
                     let scaled = Double(bonus.value) * gemCoefficient
-                    apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)), to: stat, combat: &combat)
+                    if stat == .attackCount {
+                        attackCountAccumulator += scaled
+                    } else {
+                        apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)), to: stat, combat: &combat)
+                    }
                 }
             }
         }
+
+        // attackCountを0.1倍（10倍スケール → 実数）してから丸めて適用
+        let scaledAttackCount = attackCountAccumulator * 0.1
+        combat.attackCount += Int(scaledAttackCount.rounded(FloatingPointRoundingRule.towardZero))
     }
 
     private var shouldApplyMartialBonuses: Bool {
