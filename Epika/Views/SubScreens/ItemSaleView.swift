@@ -15,8 +15,11 @@ struct ItemSaleView: View {
 
     private var totalSellPriceText: String { "\(selectedTotalSellPrice)GP" }
     private var hasSelection: Bool { !selectedDisplayItems.isEmpty }
-    private var categorizedDisplayItems: [ItemSaleCategory: [LightweightItemData]] {
-        ItemPreloadService.shared.getCategorizedItems()
+    private var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] {
+        ItemPreloadService.shared.getSubcategorizedItems()
+    }
+    private var orderedSubcategories: [ItemDisplaySubcategory] {
+        ItemPreloadService.shared.getOrderedSubcategories()
     }
 
     var body: some View {
@@ -43,8 +46,8 @@ struct ItemSaleView: View {
             }
 
             List {
-                ForEach(ItemSaleCategory.ordered, id: \.self) { category in
-                    buildCategorySection(for: category)
+                ForEach(orderedSubcategories, id: \.self) { subcategory in
+                    buildSubcategorySection(for: subcategory)
                 }
             }
             .id(cacheVersion)
@@ -87,8 +90,8 @@ struct ItemSaleView: View {
     }
 
     @ViewBuilder
-    private func buildCategorySection(for category: ItemSaleCategory) -> some View {
-        let items = categorizedDisplayItems[category] ?? []
+    private func buildSubcategorySection(for subcategory: ItemDisplaySubcategory) -> some View {
+        let items = subcategorizedItems[subcategory] ?? []
         if items.isEmpty {
             EmptyView()
         } else {
@@ -98,7 +101,7 @@ struct ItemSaleView: View {
                 }
             } header: {
                 HStack {
-                    Text(category.displayName)
+                    Text(subcategory.displayName)
                         .font(.headline)
                         .fontWeight(.semibold)
                     Spacer()
@@ -107,6 +110,7 @@ struct ItemSaleView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            .headerProminence(.increased)
         }
     }
 

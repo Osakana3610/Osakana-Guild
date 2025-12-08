@@ -1,5 +1,44 @@
 import Foundation
 
+// MARK: - Item Display Subcategory
+
+/// アイテム表示用のサブカテゴリ（メインカテゴリ + レアリティ/サブタイプ）
+struct ItemDisplaySubcategory: Hashable, Sendable {
+    let mainCategory: ItemSaleCategory
+    let subcategory: String?
+
+    /// 表示名（例: "細剣（ノーマル）", "剣（Tier1）", "護剣"）
+    var displayName: String {
+        if let sub = subcategory {
+            return "\(mainCategory.displayName)（\(sub)）"
+        }
+        return mainCategory.displayName
+    }
+
+    /// ソート用の優先度（メインカテゴリのordered順 + サブカテゴリ）
+    var sortPriority: (Int, Int, String) {
+        let mainIndex = ItemSaleCategory.ordered.firstIndex(of: mainCategory) ?? 999
+        let (subPriority, subName) = Self.subcategorySortKey(subcategory)
+        return (mainIndex, subPriority, subName)
+    }
+
+    /// サブカテゴリのソート優先度
+    /// ノーマル→Tier1-4→その他（アルファベット順）→nil
+    private static func subcategorySortKey(_ sub: String?) -> (Int, String) {
+        guard let sub = sub else { return (999, "") }
+        switch sub {
+        case "ノーマル": return (0, sub)
+        case "Tier1": return (1, sub)
+        case "Tier2": return (2, sub)
+        case "Tier3": return (3, sub)
+        case "Tier4": return (4, sub)
+        default: return (10, sub)
+        }
+    }
+}
+
+// MARK: - Item Sale Category
+
 enum ItemSaleCategory: String, CaseIterable, Sendable {
     case thinSword = "thin_sword"
     case sword = "sword"
