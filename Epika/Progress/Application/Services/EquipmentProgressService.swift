@@ -176,7 +176,7 @@ actor EquipmentProgressService {
     }
 
     /// 装備中のアイテムからアイテムId別のカウントを取得
-    static func countItemsByItemId(equippedItems: [RuntimeCharacterProgress.EquippedItem]) -> [UInt16: Int] {
+    static func countItemsByItemId(equippedItems: [CharacterInput.EquippedItem]) -> [UInt16: Int] {
         var counts: [UInt16: Int] = [:]
         for item in equippedItems {
             counts[item.itemId, default: 0] += item.quantity
@@ -188,7 +188,7 @@ actor EquipmentProgressService {
     static func calculateStatDelta(
         adding itemDefinition: ItemDefinition?,
         removing existingItemDefinition: ItemDefinition?,
-        currentEquippedItems: [RuntimeCharacterProgress.EquippedItem]
+        currentEquippedItems: [CharacterInput.EquippedItem]
     ) -> [String: Int] {
         var delta: [String: Int] = [:]
 

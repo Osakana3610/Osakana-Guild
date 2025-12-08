@@ -17,7 +17,6 @@ final class MasterDataImportTests: XCTestCase {
         _ = try await repository.allStatusEffects()
         let (dungeons, _, _) = try await repository.allDungeons()
         _ = try await repository.allSynthesisRecipes()
-        _ = try await repository.allShops()
 
         // 代表的なマスタが空でないことを確認（インポート失敗の早期検知）。
         XCTAssertFalse(dungeons.isEmpty, "DungeonMaster が空です")

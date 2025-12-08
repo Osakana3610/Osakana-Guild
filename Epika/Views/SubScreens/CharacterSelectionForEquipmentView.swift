@@ -102,7 +102,7 @@ private struct CharacterRowForEquipment: View {
 
             Spacer()
 
-            let equipCount = character.progress.equippedItems.reduce(0) { $0 + $1.quantity }
+            let equipCount = character.equippedItems.reduce(0) { $0 + $1.quantity }
             Text("\(equipCount)/\(EquipmentProgressService.maxEquippedItems)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -160,7 +160,7 @@ struct EquipmentEditorView: View {
                     // 装備中アイテムセクション
                     Section("装備中") {
                         CharacterEquippedItemsSection(
-                            equippedItems: currentCharacter.progress.equippedItems,
+                            equippedItems: currentCharacter.equippedItems,
                             itemDefinitions: itemDefinitions,
                             onUnequip: { item in
                                 try await performUnequip(item)
@@ -274,7 +274,7 @@ struct EquipmentEditorView: View {
             // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
             let availableIds = categorizedItems.values.flatMap { $0.map { $0.itemId } }
             let allItemIds = Set(availableIds)
-                .union(Set(currentCharacter.progress.equippedItems.map { $0.itemId }))
+                .union(Set(currentCharacter.equippedItems.map { $0.itemId }))
             if !allItemIds.isEmpty {
                 let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(allItemIds))
                 itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
@@ -291,7 +291,7 @@ struct EquipmentEditorView: View {
             return (false, "アイテム情報がありません")
         }
 
-        let currentCount = currentCharacter.progress.equippedItems.reduce(0) { $0 + $1.quantity }
+        let currentCount = currentCharacter.equippedItems.reduce(0) { $0 + $1.quantity }
 
         // 装備数上限チェック
         if currentCount >= EquipmentProgressService.maxEquippedItems {
@@ -305,7 +305,7 @@ struct EquipmentEditorView: View {
 
         // 種族制限チェック
         if !definition.allowedRaces.isEmpty {
-            let raceCategory = currentCharacter.raceData?.category ?? ""
+            let raceCategory = currentCharacter.race?.category ?? ""
             let canBypass = definition.bypassRaceRestrictions.contains(raceCategory)
             let isAllowed = definition.allowedRaces.contains(raceCategory)
             if !canBypass && !isAllowed {
@@ -315,7 +315,7 @@ struct EquipmentEditorView: View {
 
         // 職業制限チェック
         if !definition.allowedJobs.isEmpty {
-            let jobCategory = currentCharacter.jobData?.category ?? ""
+            let jobCategory = currentCharacter.job?.category ?? ""
             if !definition.allowedJobs.contains(jobCategory) {
                 return (false, "職業制限により装備できません")
             }
@@ -323,7 +323,7 @@ struct EquipmentEditorView: View {
 
         // 性別制限チェック
         if !definition.allowedGenders.isEmpty {
-            let gender = currentCharacter.raceData?.gender ?? ""
+            let gender = currentCharacter.race?.gender ?? ""
             if !definition.allowedGenders.contains(gender) {
                 return (false, "性別制限により装備できません")
             }
@@ -351,7 +351,7 @@ struct EquipmentEditorView: View {
     }
 
     @MainActor
-    private func performUnequip(_ item: RuntimeCharacterProgress.EquippedItem) async throws {
+    private func performUnequip(_ item: CharacterInput.EquippedItem) async throws {
         equipError = nil
 
         let snapshot = try await characterService.unequipItem(
@@ -370,7 +370,7 @@ struct EquipmentEditorView: View {
         let delta = EquipmentProgressService.calculateStatDelta(
             adding: isEquipping ? definition : nil,
             removing: isEquipping ? nil : definition,
-            currentEquippedItems: currentCharacter.progress.equippedItems
+            currentEquippedItems: currentCharacter.equippedItems
         )
 
         statDeltas = delta.map { (StatLabelResolver.label(for: $0.key), $0.value) }

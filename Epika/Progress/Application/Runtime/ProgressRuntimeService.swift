@@ -11,24 +11,6 @@ final class ProgressRuntimeService {
         self.gameStateService = gameStateService
     }
 
-    func runtimeCharacter(from snapshot: CharacterSnapshot) async throws -> RuntimeCharacter {
-        let progress = makeRuntimeCharacterProgress(from: snapshot)
-        return try await runtimeService.runtimeCharacter(from: progress)
-    }
-
-    func recalculateCombatSnapshot(for snapshot: CharacterSnapshot,
-                                    pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
-        let progress = makeRuntimeCharacterProgress(from: snapshot)
-        return try await runtimeService.recalculateCombatStats(for: progress, pandoraBoxStackKeys: pandoraBoxStackKeys)
-    }
-
-    func raceMaxLevel(for raceId: UInt8) async throws -> Int {
-        if let definition = try await runtimeService.raceDefinition(withId: raceId) {
-            return definition.maxLevel
-        }
-        throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
-    }
-
     func cancelExploration(runId: UUID) async {
         await runtimeService.cancelExploration(runId: runId)
     }
@@ -75,7 +57,7 @@ struct ExplorationRuntimeSession: Sendable {
     let explorationInterval: TimeInterval
     let events: AsyncStream<ExplorationEngine.StepOutcome>
     let runtimePartyState: RuntimePartyState
-    let runtimeCharacters: [RuntimeCharacterState]
+    let runtimeCharacters: [RuntimeCharacter]
     let waitForCompletion: @Sendable () async throws -> ExplorationRunArtifact
     let cancel: @Sendable () async -> Void
 }

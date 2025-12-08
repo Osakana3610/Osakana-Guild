@@ -18,7 +18,7 @@ struct CharacterActionPreferencesSection: View {
          onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)? = nil) {
         self.character = character
         self.onActionPreferencesChange = onActionPreferencesChange
-        let preferences = character.progress.actionPreferences
+        let preferences = character.actionPreferences
         _actionPreferenceAttack = State(initialValue: Double(preferences.attack))
         _actionPreferencePriest = State(initialValue: Double(preferences.priestMagic))
         _actionPreferenceMage = State(initialValue: Double(preferences.mageMagic))
@@ -33,7 +33,7 @@ struct CharacterActionPreferencesSection: View {
                 actionPreferenceSummary
             }
         }
-        .onChange(of: character.progress.actionPreferences) { _, newValue in
+        .onChange(of: character.actionPreferences) { _, newValue in
             actionPreferenceAttack = Double(newValue.attack)
             actionPreferencePriest = Double(newValue.priestMagic)
             actionPreferenceMage = Double(newValue.mageMagic)
@@ -91,7 +91,7 @@ struct CharacterActionPreferencesSection: View {
 
     private var actionPreferenceSummary: some View {
         VStack(alignment: .leading, spacing: 8) {
-            let prefs = character.progress.actionPreferences
+            let prefs = character.actionPreferences
             Text("行動抽選の重みを表示します。")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -105,11 +105,7 @@ struct CharacterActionPreferencesSection: View {
 
 private extension CharacterActionPreferencesSection {
     var originalActionPreferences: CharacterSnapshot.ActionPreferences {
-        let prefs = character.progress.actionPreferences
-        return CharacterSnapshot.ActionPreferences(attack: prefs.attack,
-                                                   priestMagic: prefs.priestMagic,
-                                                   mageMagic: prefs.mageMagic,
-                                                   breath: prefs.breath)
+        character.actionPreferences
     }
 
     var editedActionPreferences: CharacterSnapshot.ActionPreferences {

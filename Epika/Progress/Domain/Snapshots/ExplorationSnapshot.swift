@@ -1,5 +1,4 @@
 import Foundation
-import SwiftData
 
 struct ExplorationSnapshot: Sendable, Hashable {
     enum Status: String, Sendable, Hashable {
@@ -52,7 +51,6 @@ struct ExplorationSnapshot: Sendable, Hashable {
         var body: String
     }
 
-    let persistentIdentifier: PersistentIdentifier
     var id: UUID
     var dungeonId: UInt16
     var displayDungeonName: String

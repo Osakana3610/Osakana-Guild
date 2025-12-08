@@ -132,7 +132,7 @@ struct LazyDismissCharacterView: View {
                 let runtime = try await characterService.runtimeCharacter(from: snapshot)
                 runtimeCharacters.append(runtime)
             }
-            fullCharacters = runtimeCharacters.sorted { $0.progress.createdAt < $1.progress.createdAt }
+            fullCharacters = runtimeCharacters.sorted { $0.id < $1.id }
         } catch {
             errorMessage = error.localizedDescription
             showError = true

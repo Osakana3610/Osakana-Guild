@@ -41,7 +41,7 @@ extension ProgressService {
             throw originalError
         }
 
-        let runtimeMap = Dictionary(uniqueKeysWithValues: session.runtimeCharacters.map { ($0.progress.id, $0) })
+        let runtimeMap = Dictionary(uniqueKeysWithValues: session.runtimeCharacters.map { ($0.id, $0) })
         let memberIds = partySnapshot.memberCharacterIds
 
         let updates = AsyncThrowingStream<ExplorationRunUpdate, Error> { continuation in

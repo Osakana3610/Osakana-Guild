@@ -5,11 +5,14 @@ enum PartyAssembler {
                               party: PartySnapshot,
                               characters: [RuntimeCharacterProgress]) async throws -> RuntimePartyState {
         let characterMap = Dictionary(uniqueKeysWithValues: characters.map { ($0.id, $0) })
-        var assembled: [RuntimeCharacterState] = []
+        var assembled: [RuntimeCharacter] = []
         for characterId in party.memberIds {
             guard let progress = characterMap[characterId] else { continue }
-            let state = try await CharacterAssembler.assembleState(repository: repository, from: progress)
-            assembled.append(state)
+            let runtimeCharacter = try await CharacterAssembler.assembleRuntimeCharacter(
+                repository: repository,
+                from: progress
+            )
+            assembled.append(runtimeCharacter)
         }
         return try RuntimePartyState(party: party, characters: assembled)
     }
