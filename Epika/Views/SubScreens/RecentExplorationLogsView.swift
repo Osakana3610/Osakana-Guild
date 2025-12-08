@@ -910,7 +910,7 @@ private struct EncounterDetailView: View {
                 .padding(.vertical, 4)
 
                 // 各アクションを個別の行として表示
-                ForEach(summary.actions, id: \.self) { entry in
+                ForEach(Array(summary.actions.enumerated()), id: \.offset) { _, entry in
                     let participant = summary.participants[entry.actorId ?? ""]
                     BattleActionRowView(entry: entry,
                                         actor: participant,
