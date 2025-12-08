@@ -595,6 +595,7 @@ private struct EncounterDetailView: View {
         var states: [String: ParticipantState] = [:]
 
         for (index, participant) in archive.playerSnapshots.enumerated() {
+            // initialHPは列挙インデックスをキーに使用
             let actorIndex = UInt16(index)
             let initialHP = archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP)
             states[participant.actorId] = ParticipantState(
@@ -608,7 +609,10 @@ private struct EncounterDetailView: View {
                 role: .player,
                 order: index
             )
-            indexToId[actorIndex] = participant.actorId
+            // BattleAction.actor はpartyMemberIdを使用
+            if let memberId = participant.partyMemberId {
+                indexToId[UInt16(memberId)] = participant.actorId
+            }
         }
 
         for (index, participant) in archive.enemySnapshots.enumerated() {
