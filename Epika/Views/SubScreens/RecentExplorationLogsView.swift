@@ -570,7 +570,12 @@ private struct EncounterDetailView: View {
                     BattleTurnView(summary: summary,
                                    isFirst: summary.turn == 1,
                                    partyName: party.name,
-                                   iconProvider: { _ in nil })
+                                   iconProvider: { participant in
+                                       guard let memberId = participant?.partyMemberId else {
+                                           return nil
+                                       }
+                                       return iconInfo(forMember: memberId)
+                                   })
                 }
             }
         }
@@ -582,6 +587,9 @@ private struct EncounterDetailView: View {
 
     private func buildTurnSummaries() -> [TurnSummary] {
         guard let archive = battleLogArchive else { return [] }
+
+        // actorIndex → actorId のマッピング
+        var indexToId: [UInt16: String] = [:]
 
         // 初期状態をarchiveから構築
         var states: [String: ParticipantState] = [:]
@@ -600,6 +608,7 @@ private struct EncounterDetailView: View {
                 role: .player,
                 order: index
             )
+            indexToId[actorIndex] = participant.actorId
         }
 
         for (index, participant) in archive.enemySnapshots.enumerated() {
@@ -616,9 +625,16 @@ private struct EncounterDetailView: View {
                 role: .enemy,
                 order: index
             )
+            indexToId[actorIndex] = participant.actorId
         }
 
-        // ターンごとにエントリーをグループ化
+        // 生アクションをターンごとにグループ化（HP計算用）
+        var rawActionsByTurn: [Int: [BattleAction]] = [:]
+        for action in archive.battleLog.actions {
+            rawActionsByTurn[Int(action.turn), default: []].append(action)
+        }
+
+        // 表示用エントリーをターンごとにグループ化
         var grouped: [Int: [BattleLogEntry]] = [:]
         for entry in battleLogEntries {
             grouped[entry.turn, default: []].append(entry)
@@ -644,28 +660,59 @@ private struct EncounterDetailView: View {
                                       participants: stateMap,
                                       actions: actions))
 
-            // HPを更新（ダメージ・回復を反映）
-            updateHP(from: grouped[turn] ?? [], stateMap: &stateMap)
+            // 生アクションからHPを更新
+            applyHPChanges(from: rawActionsByTurn[turn] ?? [], stateMap: &stateMap, indexToId: indexToId)
         }
 
         return result
     }
 
-    private func updateHP(from entries: [BattleLogEntry], stateMap: inout [String: ParticipantState]) {
-        for entry in entries {
-            if let targetId = entry.targetId,
-               let hpString = entry.metadata["targetHP"],
-               let hp = Int(hpString),
-               var state = stateMap[targetId] {
-                state.currentHP = max(0, min(state.maxHP, hp))
-                stateMap[targetId] = state
-            }
-            if let actorId = entry.actorId,
-               let hpString = entry.metadata["actorHP"],
-               let hp = Int(hpString),
-               var state = stateMap[actorId] {
-                state.currentHP = max(0, min(state.maxHP, hp))
-                stateMap[actorId] = state
+    private func applyHPChanges(from actions: [BattleAction], stateMap: inout [String: ParticipantState], indexToId: [UInt16: String]) {
+        for action in actions {
+            guard let kind = ActionKind(rawValue: action.kind) else { continue }
+            let value = Int(action.value ?? 0)
+
+            switch kind {
+            // ダメージ（ターゲットのHPを減らす）
+            case .physicalDamage, .magicDamage, .breathDamage, .statusTick:
+                if let target = action.target,
+                   let targetId = indexToId[target],
+                   var state = stateMap[targetId] {
+                    state.currentHP = max(0, state.currentHP - value)
+                    stateMap[targetId] = state
+                }
+            // 自傷ダメージ
+            case .damageSelf:
+                if let actorId = indexToId[action.actor],
+                   var state = stateMap[actorId] {
+                    state.currentHP = max(0, state.currentHP - value)
+                    stateMap[actorId] = state
+                }
+            // 回復（ターゲットのHPを増やす）
+            case .magicHeal, .healParty:
+                if let target = action.target,
+                   let targetId = indexToId[target],
+                   var state = stateMap[targetId] {
+                    state.currentHP = min(state.maxHP, state.currentHP + value)
+                    stateMap[targetId] = state
+                }
+            // 自己回復
+            case .healAbsorb, .healVampire, .healSelf:
+                if let actorId = indexToId[action.actor],
+                   var state = stateMap[actorId] {
+                    state.currentHP = min(state.maxHP, state.currentHP + value)
+                    stateMap[actorId] = state
+                }
+            // 戦闘不能
+            case .physicalKill:
+                if let target = action.target,
+                   let targetId = indexToId[target],
+                   var state = stateMap[targetId] {
+                    state.currentHP = 0
+                    stateMap[targetId] = state
+                }
+            default:
+                break
             }
         }
     }
@@ -841,6 +888,7 @@ private struct EncounterDetailView: View {
 
         var body: some View {
             Section {
+                // HP概要
                 VStack(alignment: .leading, spacing: 4) {
                     // 味方HP
                     ParticipantSummaryView(title: partyName,
@@ -856,20 +904,16 @@ private struct EncounterDetailView: View {
                                                participants: summary.enemies,
                                                role: .enemy)
                     }
-
-                    // アクション
-                    if !summary.actions.isEmpty {
-                        Divider()
-                            .padding(.vertical, 4)
-                        ForEach(summary.actions, id: \.self) { entry in
-                            Text(entry.message)
-                                .font(.caption)
-                                .foregroundStyle(.primary)
-                        }
-                    }
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.vertical, 4)
+
+                // 各アクションを個別の行として表示
+                ForEach(summary.actions, id: \.self) { entry in
+                    let participant = summary.participants[entry.actorId ?? ""]
+                    BattleActionRowView(entry: entry,
+                                        actor: participant,
+                                        iconInfo: iconProvider(participant))
+                }
             } header: {
                 Text("\(summary.turn)ターン目")
                     .font(.caption)
