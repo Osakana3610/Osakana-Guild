@@ -97,6 +97,10 @@ enum RuntimeCharacterFactory {
             }
         }
 
+        // combatにisMartialEligibleを設定
+        var combat = calcResult.combat
+        combat.isMartialEligible = isMartialEligible
+
         return RuntimeCharacter(
             id: input.id,
             displayName: input.displayName,
@@ -115,31 +119,9 @@ enum RuntimeCharacterFactory {
             actionRateMageMagic: input.actionRateMageMagic,
             actionRateBreath: input.actionRateBreath,
             updatedAt: input.updatedAt,
-            attributes: RuntimeCharacter.CoreAttributes(
-                strength: calcResult.attributes.strength,
-                wisdom: calcResult.attributes.wisdom,
-                spirit: calcResult.attributes.spirit,
-                vitality: calcResult.attributes.vitality,
-                agility: calcResult.attributes.agility,
-                luck: calcResult.attributes.luck
-            ),
+            attributes: calcResult.attributes,
             maxHP: calcResult.hitPoints.maximum,
-            combat: RuntimeCharacter.Combat(
-                maxHP: calcResult.combat.maxHP,
-                physicalAttack: calcResult.combat.physicalAttack,
-                magicalAttack: calcResult.combat.magicalAttack,
-                physicalDefense: calcResult.combat.physicalDefense,
-                magicalDefense: calcResult.combat.magicalDefense,
-                hitRate: calcResult.combat.hitRate,
-                evasionRate: calcResult.combat.evasionRate,
-                criticalRate: calcResult.combat.criticalRate,
-                attackCount: calcResult.combat.attackCount,
-                magicalHealing: calcResult.combat.magicalHealing,
-                trapRemoval: calcResult.combat.trapRemoval,
-                additionalDamage: calcResult.combat.additionalDamage,
-                breathDamage: calcResult.combat.breathDamage
-            ),
-            isMartialEligible: isMartialEligible,
+            combat: combat,
             race: race,
             job: job,
             personalityPrimary: primaryPersonality,

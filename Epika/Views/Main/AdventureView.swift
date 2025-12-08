@@ -130,8 +130,8 @@ struct AdventureView: View {
 
     private func partyBonuses(for members: [RuntimeCharacter]) -> PartySlotBonuses {
         guard !members.isEmpty else { return .zero }
-        let luckSum = members.reduce(0) { $0 + $1.baseStats.luck }
-        let spiritSum = members.reduce(0) { $0 + $1.baseStats.spirit }
+        let luckSum = members.reduce(0) { $0 + $1.attributes.luck }
+        let spiritSum = members.reduce(0) { $0 + $1.attributes.spirit }
         let gold = clampMultiplier(1.0 + Double(luckSum) * 0.001, limit: 250.0)
         let rare = clampMultiplier(1.0 + Double(luckSum + spiritSum) * 0.0005, limit: 99.9)
         let averageLuck = Double(luckSum) / Double(members.count)
