@@ -3,7 +3,7 @@ import Foundation
 struct BattleContextBuilder {
     static func makePlayerActors(from party: RuntimePartyState) throws -> [BattleActor] {
         let members = party.members
-            .filter { $0.character.progress.hitPoints.maximum > 0 }
+            .filter { $0.character.hitPoints.maximum > 0 }
             .sorted { $0.order < $1.order }
 
         var actors: [BattleActor] = []
@@ -11,46 +11,46 @@ struct BattleContextBuilder {
 
         for (index, member) in members.enumerated() {
             guard let slot = BattleContextBuilder.slot(for: index) else { continue }
-            let snapshot = member.character.combatSnapshot
-            let state = member.character
+            let character = member.character
+            let snapshot = character.combatSnapshot
             var resources = BattleActionResource.makeDefault(for: snapshot,
-                                                            spellLoadout: state.spellLoadout)
-            let skillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: state.learnedSkills)
+                                                            spellLoadout: character.spellLoadout)
+            let skillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: character.learnedSkills)
             applySpellChargeModifiers(skillEffects: skillEffects,
-                                      loadout: state.spellLoadout,
+                                      loadout: character.spellLoadout,
                                       resources: &resources)
             if skillEffects.breathExtraCharges > 0 {
                 let current = resources.charges(for: BattleActionResource.Key.breath)
                 resources.setCharges(for: BattleActionResource.Key.breath, value: current + skillEffects.breathExtraCharges)
             }
-            let martialEligible = state.isMartialEligible
+            let martialEligible = character.isMartialEligible
             let actor = BattleActor(
                 identifier: String(member.characterId),
-                displayName: state.progress.displayName,
+                displayName: character.displayName,
                 kind: .player,
                 formationSlot: slot,
-                strength: state.progress.attributes.strength,
-                wisdom: state.progress.attributes.wisdom,
-                spirit: state.progress.attributes.spirit,
-                vitality: state.progress.attributes.vitality,
-                agility: state.progress.attributes.agility,
-                luck: state.progress.attributes.luck,
+                strength: character.attributes.strength,
+                wisdom: character.attributes.wisdom,
+                spirit: character.attributes.spirit,
+                vitality: character.attributes.vitality,
+                agility: character.attributes.agility,
+                luck: character.attributes.luck,
                 partyMemberId: member.characterId,
-                level: state.progress.level,
-                jobName: state.job?.name ?? "職業\(state.progress.jobId)",
-                avatarIndex: state.avatarId,
+                level: character.level,
+                jobName: character.job?.name ?? "職業\(character.jobId)",
+                avatarIndex: character.avatarId,
                 isMartialEligible: martialEligible,
-                raceId: state.race?.id,
-                raceCategory: state.race?.category,
+                raceId: character.race?.id,
+                raceCategory: character.race?.category,
                 snapshot: snapshot,
-                currentHP: state.progress.hitPoints.current,
-                actionRates: BattleContextBuilder.playerActionRates(for: state),
+                currentHP: character.hitPoints.current,
+                actionRates: BattleContextBuilder.playerActionRates(for: character),
                 actionResources: resources,
                 barrierCharges: skillEffects.barrierCharges,
                 skillEffects: skillEffects,
-                spellbook: state.spellbook,
-                spells: state.spellLoadout,
-                baseSkillIds: Set(state.learnedSkills.map { $0.id })
+                spellbook: character.spellbook,
+                spells: character.spellLoadout,
+                baseSkillIds: Set(character.learnedSkills.map { $0.id })
             )
             actors.append(actor)
         }
@@ -63,8 +63,8 @@ struct BattleContextBuilder {
         return BattleFormationSlot.allCases[index]
     }
 
-    private static func playerActionRates(for character: RuntimeCharacterState) -> BattleActionRates {
-        let preferences = character.progress.actionPreferences
+    private static func playerActionRates(for character: RuntimeCharacter) -> BattleActionRates {
+        let preferences = character.actionPreferences
         let breath = character.combatSnapshot.breathDamage > 0 ? preferences.breath : 0
         return BattleActionRates(attack: preferences.attack,
                                  priestMagic: preferences.priestMagic,

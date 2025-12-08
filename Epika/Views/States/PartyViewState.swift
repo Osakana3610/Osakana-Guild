@@ -29,9 +29,7 @@ final class PartyViewState {
                 ongoingLoad = nil
             }
             let partySnapshots = try await partyService.allParties()
-            parties = partySnapshots
-                .map { RuntimeParty(snapshot: $0) }
-                .sorted { $0.id < $1.id }
+            parties = partySnapshots.sorted { $0.id < $1.id }
         }
         ongoingLoad = task
         try await task.value

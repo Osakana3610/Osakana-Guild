@@ -64,19 +64,18 @@ struct CombatExecutionService {
 
         // survivingAllyIds (partyMemberId) から characterId を取得
         let survivingCharacterIds: [UInt8] = resolution.survivingAllyIds.compactMap { partyMemberId in
-            partyMembersById[partyMemberId]?.progress.id
+            partyMembersById[partyMemberId]?.id
         }
 
         let playerSnapshots: [BattleParticipantSnapshot] = resolution.playerActors.map { actor in
-            let characterState = actor.partyMemberId.flatMap { partyMembersById[$0] }
-            let progress = characterState?.progress
-            let avatarIndex = characterState?.resolvedAvatarId
+            let character = actor.partyMemberId.flatMap { partyMembersById[$0] }
+            let avatarIndex = character?.resolvedAvatarId
             return BattleParticipantSnapshot(actorId: actor.identifier,
                                              partyMemberId: actor.partyMemberId,
-                                             characterId: progress?.id,
-                                             name: progress?.displayName ?? actor.displayName,
+                                             characterId: character?.id,
+                                             name: character?.displayName ?? actor.displayName,
                                              avatarIndex: avatarIndex,
-                                             level: progress?.level ?? actor.level,
+                                             level: character?.level ?? actor.level,
                                              maxHP: actor.snapshot.maxHP)
         }
 

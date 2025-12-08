@@ -114,7 +114,7 @@ final class CharacterViewState {
             buffer.append(character)
         }
         allCharacters = buffer.sorted { lhs, rhs in
-            lhs.progress.createdAt < rhs.progress.createdAt
+            lhs.id < rhs.id
         }
     }
 

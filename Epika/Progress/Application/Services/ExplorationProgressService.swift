@@ -314,7 +314,6 @@ private extension ExplorationProgressService {
         )
 
         return ExplorationSnapshot(
-            persistentIdentifier: run.persistentModelID,
             id: UUID(),  // 新構造ではUUIDは識別子として使わない
             dungeonId: run.dungeonId,
             displayDungeonName: displayDungeonName,
