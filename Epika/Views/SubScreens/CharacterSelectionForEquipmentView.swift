@@ -117,7 +117,8 @@ struct EquipmentEditorView: View {
 
     @EnvironmentObject private var progressService: ProgressService
     @State private var currentCharacter: RuntimeCharacter
-    @State private var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
+    @State private var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
+    @State private var orderedSubcategories: [ItemDisplaySubcategory] = []
     @State private var itemDefinitions: [UInt16: ItemDefinition] = [:]
     @State private var isLoading = true
     @State private var loadError: String?
@@ -129,9 +130,8 @@ struct EquipmentEditorView: View {
     private var inventoryService: InventoryProgressService { progressService.inventory }
     private var displayService: ItemPreloadService { ItemPreloadService.shared }
 
-    /// 装備画面で表示するカテゴリ（合成素材・魔造素材を除く）
-    private static let equipCategories: [ItemSaleCategory] = ItemSaleCategory.ordered
-        .filter { $0 != .forSynthesis && $0 != .mazoMaterial }
+    /// 装備画面で除外するメインカテゴリ（合成素材・魔造素材）
+    private static let excludedCategories: Set<ItemSaleCategory> = [.forSynthesis, .mazoMaterial]
 
     init(character: RuntimeCharacter) {
         self.character = character
@@ -168,9 +168,9 @@ struct EquipmentEditorView: View {
                         )
                     }
 
-                    // 装備候補セクション（カテゴリ別）
-                    ForEach(Self.equipCategories, id: \.self) { category in
-                        buildCategorySection(for: category)
+                    // 装備候補セクション（サブカテゴリ別）
+                    ForEach(orderedSubcategories, id: \.self) { subcategory in
+                        buildSubcategorySection(for: subcategory)
                     }
 
                     if let error = equipError {
@@ -198,8 +198,8 @@ struct EquipmentEditorView: View {
     }
 
     @ViewBuilder
-    private func buildCategorySection(for category: ItemSaleCategory) -> some View {
-        let items = categorizedItems[category] ?? []
+    private func buildSubcategorySection(for subcategory: ItemDisplaySubcategory) -> some View {
+        let items = subcategorizedItems[subcategory] ?? []
         if items.isEmpty {
             EmptyView()
         } else {
@@ -209,7 +209,7 @@ struct EquipmentEditorView: View {
                 }
             } header: {
                 HStack {
-                    Text(category.displayName)
+                    Text(subcategory.displayName)
                         .font(.headline)
                         .fontWeight(.semibold)
                     Spacer()
@@ -218,6 +218,7 @@ struct EquipmentEditorView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            .headerProminence(.increased)
         }
     }
 
@@ -266,13 +267,15 @@ struct EquipmentEditorView: View {
                 try await displayService.waitForPreload()
             }
 
-            // カテゴリ別アイテムを取得（合成素材・魔造素材を除く）
-            let allCategorized = displayService.getCategorizedItems()
-            categorizedItems = allCategorized.filter { Self.equipCategories.contains($0.key) }
+            // サブカテゴリ別アイテムを取得（合成素材・魔造素材を除く）
+            let allSubcategorized = displayService.getSubcategorizedItems()
+            subcategorizedItems = allSubcategorized.filter { !Self.excludedCategories.contains($0.key.mainCategory) }
+            orderedSubcategories = displayService.getOrderedSubcategories()
+                .filter { !Self.excludedCategories.contains($0.mainCategory) }
             cacheVersion = displayService.version
 
             // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
-            let availableIds = categorizedItems.values.flatMap { $0.map { $0.itemId } }
+            let availableIds = subcategorizedItems.values.flatMap { $0.map { $0.itemId } }
             let allItemIds = Set(availableIds)
                 .union(Set(currentCharacter.equippedItems.map { $0.itemId }))
             if !allItemIds.isEmpty {
