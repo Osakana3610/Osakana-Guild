@@ -346,10 +346,10 @@ private extension ExplorationProgressService {
                 referenceId = String(enemyId)
                 if let enemy = try await masterData.getEnemyDefinition(id: enemyId) {
                     let result = battleResultString(event.battleResult ?? 0)
-                    // battleLogDataからターン数を取得（デコードに失敗した場合は0）
+                    // battleLogDataからターン数を取得
                     var turns = 0
-                    if let logData = event.battleLogData,
-                       let archive = try? JSONDecoder().decode(BattleLogArchive.self, from: logData) {
+                    if let logData = event.battleLogData {
+                        let archive = try JSONDecoder().decode(BattleLogArchive.self, from: logData)
                         turns = archive.turns
                     }
                     combatSummary = ExplorationSnapshot.EncounterLog.CombatSummary(
