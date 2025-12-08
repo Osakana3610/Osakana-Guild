@@ -28,7 +28,7 @@ enum RuntimeCharacterFactory {
 
         // 装備からアイテム定義を取得
         let itemIds = Set(input.equippedItems.map { $0.itemId }).filter { $0 > 0 }
-        let equippedItemDefinitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(itemIds))
+        let equippedItemDefinitions = try await repository.items(withIds: Array(itemIds))
 
         // 装備から付与されるスキルIDを収集
         let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkills.map { $0.skillId } }
