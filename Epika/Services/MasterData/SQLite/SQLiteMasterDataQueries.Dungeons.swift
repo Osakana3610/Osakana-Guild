@@ -29,15 +29,15 @@ extension SQLiteMasterDataManager {
             )
         }
 
-        let unlockSQL = "SELECT dungeon_id, order_index, condition FROM dungeon_unlock_conditions ORDER BY dungeon_id, order_index;"
+        let unlockSQL = "SELECT dungeon_id, condition FROM dungeon_unlock_conditions ORDER BY dungeon_id, order_index;"
         let unlockStatement = try prepare(unlockSQL)
         defer { sqlite3_finalize(unlockStatement) }
         while sqlite3_step(unlockStatement) == SQLITE_ROW {
             let dungeonId = UInt16(sqlite3_column_int(unlockStatement, 0))
             guard let dungeon = dungeons[dungeonId],
-                  let condC = sqlite3_column_text(unlockStatement, 2) else { continue }
+                  let condC = sqlite3_column_text(unlockStatement, 1) else { continue }
             var conditions = dungeon.unlockConditions
-            conditions.append(.init(orderIndex: Int(sqlite3_column_int(unlockStatement, 1)), value: String(cString: condC)))
+            conditions.append(String(cString: condC))
             dungeons[dungeon.id] = DungeonDefinition(
                 id: dungeon.id,
                 name: dungeon.name,
@@ -49,21 +49,21 @@ extension SQLiteMasterDataManager {
                 eventsPerFloor: dungeon.eventsPerFloor,
                 floorCount: dungeon.floorCount,
                 storyText: dungeon.storyText,
-                unlockConditions: conditions.sorted { $0.orderIndex < $1.orderIndex },
+                unlockConditions: conditions,
                 encounterWeights: dungeon.encounterWeights,
                 enemyGroupConfig: dungeon.enemyGroupConfig
             )
         }
 
-        let weightSQL = "SELECT dungeon_id, order_index, enemy_id, weight FROM dungeon_encounter_weights ORDER BY dungeon_id, order_index;"
+        let weightSQL = "SELECT dungeon_id, enemy_id, weight FROM dungeon_encounter_weights ORDER BY dungeon_id, order_index;"
         let weightStatement = try prepare(weightSQL)
         defer { sqlite3_finalize(weightStatement) }
         while sqlite3_step(weightStatement) == SQLITE_ROW {
             let dungeonId = UInt16(sqlite3_column_int(weightStatement, 0))
             guard let dungeon = dungeons[dungeonId] else { continue }
-            let enemyId = UInt16(sqlite3_column_int(weightStatement, 2))
+            let enemyId = UInt16(sqlite3_column_int(weightStatement, 1))
             var weights = dungeon.encounterWeights
-            weights.append(.init(orderIndex: Int(sqlite3_column_int(weightStatement, 1)), enemyId: enemyId, weight: sqlite3_column_double(weightStatement, 3)))
+            weights.append(.init(enemyId: enemyId, weight: sqlite3_column_double(weightStatement, 2)))
             dungeons[dungeon.id] = DungeonDefinition(
                 id: dungeon.id,
                 name: dungeon.name,
@@ -76,7 +76,7 @@ extension SQLiteMasterDataManager {
                 floorCount: dungeon.floorCount,
                 storyText: dungeon.storyText,
                 unlockConditions: dungeon.unlockConditions,
-                encounterWeights: weights.sorted { $0.orderIndex < $1.orderIndex },
+                encounterWeights: weights,
                 enemyGroupConfig: dungeon.enemyGroupConfig
             )
         }
@@ -92,25 +92,24 @@ extension SQLiteMasterDataManager {
             tables[id] = EncounterTableDefinition(id: id, name: String(cString: nameC), events: [])
         }
 
-        let eventSQL = "SELECT table_id, order_index, event_type, enemy_id, spawn_rate, group_min, group_max, is_boss, enemy_level FROM encounter_events ORDER BY table_id, order_index;"
+        let eventSQL = "SELECT table_id, event_type, enemy_id, spawn_rate, group_min, group_max, is_boss, enemy_level FROM encounter_events ORDER BY table_id, order_index;"
         let eventStatement = try prepare(eventSQL)
         defer { sqlite3_finalize(eventStatement) }
         while sqlite3_step(eventStatement) == SQLITE_ROW {
             guard let tableIdC = sqlite3_column_text(eventStatement, 0),
-                  let typeC = sqlite3_column_text(eventStatement, 2) else { continue }
+                  let typeC = sqlite3_column_text(eventStatement, 1) else { continue }
             let tableId = String(cString: tableIdC)
             guard let table = tables[tableId] else { continue }
             var events = table.events
-            let enemyId: UInt16? = sqlite3_column_type(eventStatement, 3) == SQLITE_NULL ? nil : UInt16(sqlite3_column_int(eventStatement, 3))
-            events.append(.init(orderIndex: Int(sqlite3_column_int(eventStatement, 1)),
-                                eventType: String(cString: typeC),
+            let enemyId: UInt16? = sqlite3_column_type(eventStatement, 2) == SQLITE_NULL ? nil : UInt16(sqlite3_column_int(eventStatement, 2))
+            events.append(.init(eventType: String(cString: typeC),
                                 enemyId: enemyId,
-                                spawnRate: sqlite3_column_type(eventStatement, 4) == SQLITE_NULL ? nil : sqlite3_column_double(eventStatement, 4),
-                                groupMin: sqlite3_column_type(eventStatement, 5) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 5)),
-                                groupMax: sqlite3_column_type(eventStatement, 6) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 6)),
-                                isBoss: sqlite3_column_type(eventStatement, 7) == SQLITE_NULL ? nil : sqlite3_column_int(eventStatement, 7) == 1,
-                                level: sqlite3_column_type(eventStatement, 8) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 8))))
-            tables[table.id] = EncounterTableDefinition(id: table.id, name: table.name, events: events.sorted { $0.orderIndex < $1.orderIndex })
+                                spawnRate: sqlite3_column_type(eventStatement, 3) == SQLITE_NULL ? nil : sqlite3_column_double(eventStatement, 3),
+                                groupMin: sqlite3_column_type(eventStatement, 4) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 4)),
+                                groupMax: sqlite3_column_type(eventStatement, 5) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 5)),
+                                isBoss: sqlite3_column_type(eventStatement, 6) == SQLITE_NULL ? nil : sqlite3_column_int(eventStatement, 6) == 1,
+                                level: sqlite3_column_type(eventStatement, 7) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 7))))
+            tables[table.id] = EncounterTableDefinition(id: table.id, name: table.name, events: events)
         }
 
         var floors: [DungeonFloorDefinition] = []
@@ -130,20 +129,20 @@ extension SQLiteMasterDataManager {
                 floorNumber: Int(sqlite3_column_int(floorStatement, 3)),
                 encounterTableId: String(cString: encounterTableIdC),
                 description: String(cString: descC),
-                specialEvents: []
+                specialEventIds: []
             ))
         }
 
-        let floorEventSQL = "SELECT floor_id, order_index, event_id FROM dungeon_floor_special_events ORDER BY floor_id, order_index;"
+        let floorEventSQL = "SELECT floor_id, event_id FROM dungeon_floor_special_events ORDER BY floor_id, order_index;"
         let floorEventStatement = try prepare(floorEventSQL)
         defer { sqlite3_finalize(floorEventStatement) }
         var floorMap = Dictionary(uniqueKeysWithValues: floors.map { ($0.id, $0) })
         while sqlite3_step(floorEventStatement) == SQLITE_ROW {
             guard let floorIdC = sqlite3_column_text(floorEventStatement, 0),
                   let floor = floorMap[String(cString: floorIdC)],
-                  let eventC = sqlite3_column_text(floorEventStatement, 2) else { continue }
-            var events = floor.specialEvents
-            events.append(.init(orderIndex: Int(sqlite3_column_int(floorEventStatement, 1)), eventId: String(cString: eventC)))
+                  let eventC = sqlite3_column_text(floorEventStatement, 1) else { continue }
+            var eventIds = floor.specialEventIds
+            eventIds.append(String(cString: eventC))
             floorMap[floor.id] = DungeonFloorDefinition(
                 id: floor.id,
                 dungeonId: floor.dungeonId,
@@ -151,7 +150,7 @@ extension SQLiteMasterDataManager {
                 floorNumber: floor.floorNumber,
                 encounterTableId: floor.encounterTableId,
                 description: floor.description,
-                specialEvents: events.sorted { $0.orderIndex < $1.orderIndex }
+                specialEventIds: eventIds
             )
         }
 

@@ -1,11 +1,6 @@
 import Foundation
 
 struct ExplorationEventDefinition: Identifiable, Sendable {
-    struct Tag: Sendable, Hashable {
-        let orderIndex: Int
-        let value: String
-    }
-
     struct Weight: Sendable, Hashable {
         let context: String
         let weight: Double
@@ -17,7 +12,7 @@ struct ExplorationEventDefinition: Identifiable, Sendable {
     let description: String
     let floorMin: Int
     let floorMax: Int
-    let tags: [Tag]
+    let tags: [String]
     let weights: [Weight]
     let payloadType: String?
     let payloadJSON: String?

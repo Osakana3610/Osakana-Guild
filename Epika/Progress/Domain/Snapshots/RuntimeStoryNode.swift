@@ -14,21 +14,14 @@ struct RuntimeStoryNode: Identifiable, Hashable, Sendable {
 
     var unlockConditions: [String] {
         definition.unlockRequirements
-            .sorted { $0.orderIndex < $1.orderIndex }
-            .map { $0.value }
     }
 
     var unlocksModules: [String] {
-        definition.unlockModules
-            .sorted { $0.orderIndex < $1.orderIndex }
-            .map { $0.moduleId }
+        definition.unlockModuleIds
     }
 
     var rewardSummary: String {
-        let rewards = definition.rewards
-            .sorted { $0.orderIndex < $1.orderIndex }
-            .map { $0.value }
-        return rewards.isEmpty ? "" : rewards.joined(separator: ", ")
+        definition.rewards.isEmpty ? "" : definition.rewards.joined(separator: ", ")
     }
 
     var canRead: Bool { isUnlocked && !isCompleted }

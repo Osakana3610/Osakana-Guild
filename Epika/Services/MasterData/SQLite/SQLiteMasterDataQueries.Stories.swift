@@ -10,9 +10,9 @@ extension SQLiteMasterDataManager {
             var content: String
             var chapter: Int
             var section: Int
-            var unlockRequirements: [StoryNodeDefinition.UnlockRequirement] = []
-            var rewards: [StoryNodeDefinition.Reward] = []
-            var unlockModules: [StoryNodeDefinition.UnlockModule] = []
+            var unlockRequirements: [String] = []
+            var rewards: [String] = []
+            var unlockModuleIds: [String] = []
         }
 
         var builders: [UInt16: Builder] = [:]
@@ -48,22 +48,19 @@ extension SQLiteMasterDataManager {
             }
         }
 
-        try applyList(sql: "SELECT story_id, order_index, requirement FROM story_unlock_requirements;") { builder, statement in
-            let order = Int(sqlite3_column_int(statement, 1))
-            guard let valueC = sqlite3_column_text(statement, 2) else { return }
-            builder.unlockRequirements.append(.init(orderIndex: order, value: String(cString: valueC)))
+        try applyList(sql: "SELECT story_id, requirement FROM story_unlock_requirements ORDER BY story_id, order_index;") { builder, statement in
+            guard let valueC = sqlite3_column_text(statement, 1) else { return }
+            builder.unlockRequirements.append(String(cString: valueC))
         }
 
-        try applyList(sql: "SELECT story_id, order_index, reward FROM story_rewards;") { builder, statement in
-            let order = Int(sqlite3_column_int(statement, 1))
-            guard let valueC = sqlite3_column_text(statement, 2) else { return }
-            builder.rewards.append(.init(orderIndex: order, value: String(cString: valueC)))
+        try applyList(sql: "SELECT story_id, reward FROM story_rewards ORDER BY story_id, order_index;") { builder, statement in
+            guard let valueC = sqlite3_column_text(statement, 1) else { return }
+            builder.rewards.append(String(cString: valueC))
         }
 
-        try applyList(sql: "SELECT story_id, order_index, module_id FROM story_unlock_modules;") { builder, statement in
-            let order = Int(sqlite3_column_int(statement, 1))
-            guard let valueC = sqlite3_column_text(statement, 2) else { return }
-            builder.unlockModules.append(.init(orderIndex: order, moduleId: String(cString: valueC)))
+        try applyList(sql: "SELECT story_id, module_id FROM story_unlock_modules ORDER BY story_id, order_index;") { builder, statement in
+            guard let valueC = sqlite3_column_text(statement, 1) else { return }
+            builder.unlockModuleIds.append(String(cString: valueC))
         }
 
         let sorted = builders.values.sorted { lhs, rhs in
@@ -79,9 +76,9 @@ extension SQLiteMasterDataManager {
                 content: builder.content,
                 chapter: builder.chapter,
                 section: builder.section,
-                unlockRequirements: builder.unlockRequirements.sorted { $0.orderIndex < $1.orderIndex },
-                rewards: builder.rewards.sorted { $0.orderIndex < $1.orderIndex },
-                unlockModules: builder.unlockModules.sorted { $0.orderIndex < $1.orderIndex }
+                unlockRequirements: builder.unlockRequirements,
+                rewards: builder.rewards,
+                unlockModuleIds: builder.unlockModuleIds
             )
         }
     }
