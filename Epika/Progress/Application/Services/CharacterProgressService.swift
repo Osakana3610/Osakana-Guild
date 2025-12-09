@@ -184,9 +184,6 @@ actor CharacterProgressService {
         // ID採番: 1〜200で最小の未使用IDを割り当てる
         let newId = try allocateCharacterId(context: context)
 
-        // 初期HPは一旦100を設定（最初のmakeSnapshotで再計算される）
-        let initialHP: UInt32 = 100
-
         // 種族のgenderCodeを取得してavatarIdを計算（職業画像: genderCode * 100 + jobId）
         let race = try await masterData.repository.race(withId: request.raceId)
         let avatarId: UInt16 = if let race {
@@ -203,7 +200,7 @@ actor CharacterProgressService {
             avatarId: avatarId,
             level: 1,
             experience: 0,
-            currentHP: initialHP,
+            currentHP: 0,  // makeSnapshot後に正しい値を設定
             primaryPersonalityId: 0,
             secondaryPersonalityId: 0,
             actionRateAttack: 100,
@@ -213,8 +210,14 @@ actor CharacterProgressService {
         )
         context.insert(record)
         try context.save()
+
+        // ステータス計算を行い、maxHPを取得してrecordに書き戻す
+        let snapshot = try await makeSnapshot(record, context: context)
+        record.currentHP = UInt32(snapshot.hitPoints.maximum)
+        try context.save()
+
         notifyCharacterProgressDidChange()
-        return try await makeSnapshot(record, context: context)
+        return snapshot
     }
 
     // MARK: - Update
