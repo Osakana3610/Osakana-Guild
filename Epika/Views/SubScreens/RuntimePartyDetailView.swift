@@ -26,7 +26,7 @@ struct RuntimePartyDetailView: View {
                     PartySlotCardView(
                         party: currentParty,
                         members: membersOfCurrentParty,
-                        bonuses: partyBonuses(for: membersOfCurrentParty),
+                        bonuses: PartySlotBonuses(members: membersOfCurrentParty),
                         isExploring: adventureState.isExploring(partyId: currentParty.id),
                         canStartExploration: canStartExploration(for: currentParty),
                         onPrimaryAction: {
@@ -477,26 +477,6 @@ private struct TargetFloorPickerMenu: View {
     }
 }
 
-// MARK: - Bonus Calculation Helpers
-
-private func partyBonuses(for members: [RuntimeCharacter]) -> PartySlotBonuses {
-    guard !members.isEmpty else { return .zero }
-    let luckSum = members.reduce(0) { $0 + $1.attributes.luck }
-    let spiritSum = members.reduce(0) { $0 + $1.attributes.spirit }
-    let gold = clampMultiplier(1.0 + Double(luckSum) * 0.001, limit: 250.0)
-    let rare = clampMultiplier(1.0 + Double(luckSum + spiritSum) * 0.0005, limit: 99.9)
-    let averageLuck = Double(luckSum) / Double(members.count)
-    let title = clampMultiplier(1.0 + averageLuck * 0.002, limit: 99.9)
-    let fortune = Int(averageLuck.rounded())
-    return PartySlotBonuses(goldMultiplier: gold,
-                            rareMultiplier: rare,
-                            titleMultiplier: title,
-                            fortune: fortune)
-}
-
-private func clampMultiplier(_ value: Double, limit: Double) -> Double {
-    min(max(value, 0.0), limit)
-}
 
 // MARK: - Sheet Components
 
