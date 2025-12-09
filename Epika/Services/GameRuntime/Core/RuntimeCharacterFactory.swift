@@ -92,7 +92,7 @@ enum RuntimeCharacterFactory {
         var resolvedCurrentHP = min(input.currentHP, calcResult.hitPoints.maximum)
         if resolvedCurrentHP <= 0 {
             let effects = try SkillRuntimeEffectCompiler.actorEffects(from: learnedSkills)
-            if effects.resurrectionPassiveBetweenFloors {
+            if effects.resurrection.passiveBetweenFloors {
                 resolvedCurrentHP = max(1, calcResult.hitPoints.maximum)
             }
         }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// CharacterSnapshotとRuntimeCharacterProgressで共有される値型の名前空間。
+/// CharacterSnapshotとRuntimeCharacterで共有される値型の名前空間。
 /// インスタンス化は意図しない（enumとして定義）。
 enum CharacterValues {
     struct CoreAttributes: Sendable, Hashable {

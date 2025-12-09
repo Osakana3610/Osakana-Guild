@@ -54,9 +54,9 @@ struct BattleEnemyGroupBuilder {
                 let skillEffects = try cachedSkillEffects(for: group.definition,
                                                           cache: &skillCache,
                                                           skillDefinitions: skillDefinitions)
-                if skillEffects.breathExtraCharges > 0 {
+                if skillEffects.spell.breathExtraCharges > 0 {
                     let current = resources.charges(for: .breath)
-                    resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
+                    resources.setCharges(for: .breath, value: current + skillEffects.spell.breathExtraCharges)
                 }
                 let identifier = "\(group.definition.id)_\(slotIndex)"
                 let actor = BattleActor(identifier: identifier,
@@ -82,7 +82,7 @@ struct BattleEnemyGroupBuilder {
                                                                        mageMagic: group.definition.actionRates.mageMagic,
                                                                        breath: group.definition.actionRates.breath),
                                         actionResources: resources,
-                                        barrierCharges: skillEffects.barrierCharges,
+                                        barrierCharges: skillEffects.combat.barrierCharges,
                                         skillEffects: skillEffects,
                                         spellbook: .empty,
                                         spells: .empty,
@@ -126,9 +126,9 @@ struct BattleEnemyGroupBuilder {
             let skillEffects = try cachedSkillEffects(for: definition,
                                                       cache: &cache,
                                                       skillDefinitions: skillDefinitions)
-            if skillEffects.breathExtraCharges > 0 {
+            if skillEffects.spell.breathExtraCharges > 0 {
                 let current = resources.charges(for: .breath)
-                resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
+                resources.setCharges(for: .breath, value: current + skillEffects.spell.breathExtraCharges)
             }
             let identifier = index == 0 ? String(definition.id) : "\(definition.id)_\(index)"
             let actor = BattleActor(identifier: identifier,
@@ -154,7 +154,7 @@ struct BattleEnemyGroupBuilder {
                                                                        mageMagic: definition.actionRates.mageMagic,
                                                                        breath: definition.actionRates.breath),
                                     actionResources: resources,
-                                    barrierCharges: skillEffects.barrierCharges,
+                                    barrierCharges: skillEffects.combat.barrierCharges,
                                     skillEffects: skillEffects,
                                     spellbook: .empty,
                                     spells: .empty,

@@ -61,8 +61,8 @@ extension BattleTurnEngine {
     static func filterAlliedTargets(for attacker: BattleActor,
                                     allies: [ActorReference],
                                     context: BattleContext) -> [ActorReference] {
-        let protected = attacker.skillEffects.partyProtectedTargets
-        let hostileTargets = attacker.skillEffects.partyHostileTargets
+        let protected = attacker.skillEffects.misc.partyProtectedTargets
+        let hostileTargets = attacker.skillEffects.misc.partyHostileTargets
         var filtered: [ActorReference] = []
         for reference in allies {
             let (side, index) = referenceToSideIndex(reference)
@@ -165,7 +165,7 @@ extension BattleTurnEngine {
         var minHit = baseMinHit
 
         if let defender {
-            if let minScale = defender.skillEffects.minHitScale {
+            if let minScale = defender.skillEffects.damage.minHitScale {
                 minHit *= minScale
             }
             if defender.agility > 20 {
@@ -177,7 +177,7 @@ extension BattleTurnEngine {
         minHit = max(0.0, min(1.0, minHit))
         var maxHit = min(1.0 - minHit, 0.95)
 
-        if let capPercent = defender?.skillEffects.dodgeCapMax {
+        if let capPercent = defender?.skillEffects.misc.dodgeCapMax {
             let hitUpper = max(0.0, 1.0 - capPercent / 100.0)
             maxHit = min(maxHit, hitUpper)
         }

@@ -23,53 +23,72 @@ struct ActorEffectsAccumulator {
             magical: damage.totalTakenMultiplier(for: "magical"),
             breath: damage.totalTakenMultiplier(for: "breath")
         )
-        let categoryMultipliers = BattleActor.SkillEffects.TargetMultipliers(storage: damage.targetMultipliers)
-        let spellPower = BattleActor.SkillEffects.SpellPower(
-            percent: spell.spellPowerPercent,
-            multiplier: spell.spellPowerMultiplier
-        )
 
-        return BattleActor.SkillEffects(
-            damageTaken: taken,
-            damageDealt: dealt,
-            damageDealtAgainst: categoryMultipliers,
-            spellPower: spellPower,
-            spellSpecificMultipliers: spell.spellSpecificMultipliers,
-            spellSpecificTakenMultipliers: spell.spellSpecificTakenMultipliers,
-            criticalDamagePercent: damage.criticalDamagePercent,
-            criticalDamageMultiplier: damage.criticalDamageMultiplier,
-            criticalDamageTakenMultiplier: damage.criticalDamageTakenMultiplier,
-            penetrationDamageTakenMultiplier: damage.penetrationDamageTakenMultiplier,
+        let damageGroup = BattleActor.SkillEffects.Damage(
+            taken: taken,
+            dealt: dealt,
+            dealtAgainst: .init(storage: damage.targetMultipliers),
+            criticalPercent: damage.criticalDamagePercent,
+            criticalMultiplier: damage.criticalDamageMultiplier,
+            criticalTakenMultiplier: damage.criticalDamageTakenMultiplier,
+            penetrationTakenMultiplier: damage.penetrationDamageTakenMultiplier,
             martialBonusPercent: damage.martialBonusPercent,
             martialBonusMultiplier: damage.martialBonusMultiplier,
+            minHitScale: damage.minHitScale
+        )
+
+        let spellGroup = BattleActor.SkillEffects.Spell(
+            power: .init(percent: spell.spellPowerPercent, multiplier: spell.spellPowerMultiplier),
+            specificMultipliers: spell.spellSpecificMultipliers,
+            specificTakenMultipliers: spell.spellSpecificTakenMultipliers,
+            chargeModifiers: spell.spellChargeModifiers,
+            defaultChargeModifier: spell.defaultSpellChargeModifier,
+            breathExtraCharges: spell.breathExtraCharges
+        )
+
+        let combatGroup = BattleActor.SkillEffects.Combat(
             procChanceMultiplier: combat.procChanceMultiplier,
             procRateModifier: .init(multipliers: combat.procRateMultipliers, additives: combat.procRateAdditives),
             extraActions: combat.extraActions,
             nextTurnExtraActions: combat.nextTurnExtraActions,
             actionOrderMultiplier: combat.actionOrderMultiplier,
             actionOrderShuffle: combat.actionOrderShuffle,
+            counterAttackEvasionMultiplier: combat.counterAttackEvasionMultiplier,
+            reactions: combat.reactions,
+            parryEnabled: combat.parryEnabled,
+            parryBonusPercent: combat.parryBonusPercent,
+            shieldBlockEnabled: combat.shieldBlockEnabled,
+            shieldBlockBonusPercent: combat.shieldBlockBonusPercent,
+            barrierCharges: combat.barrierCharges,
+            guardBarrierCharges: combat.guardBarrierCharges,
+            specialAttacks: combat.specialAttacks
+        )
+
+        let statusGroup = BattleActor.SkillEffects.Status(
+            resistances: status.statusResistances,
+            inflictions: status.statusInflictions,
+            berserkChancePercent: status.berserkChancePercent,
+            timedBuffTriggers: status.timedBuffTriggers
+        )
+
+        let resurrectionGroup = BattleActor.SkillEffects.Resurrection(
+            rescueCapabilities: resurrection.rescueCapabilities,
+            rescueModifiers: resurrection.rescueModifiers,
+            actives: resurrection.resurrectionActives,
+            forced: resurrection.forcedResurrection,
+            vitalize: resurrection.vitalizeResurrection,
+            necromancerInterval: resurrection.necromancerInterval,
+            passiveBetweenFloors: resurrection.resurrectionPassiveBetweenFloors,
+            sacrificeInterval: resurrection.sacrificeInterval
+        )
+
+        let miscGroup = BattleActor.SkillEffects.Misc(
             healingGiven: misc.healingGiven,
             healingReceived: misc.healingReceived,
             endOfTurnHealingPercent: misc.endOfTurnHealingPercent,
             endOfTurnSelfHPPercent: misc.endOfTurnSelfHPPercent,
-            reactions: combat.reactions,
-            counterAttackEvasionMultiplier: combat.counterAttackEvasionMultiplier,
             rowProfile: misc.rowProfile,
-            statusResistances: status.statusResistances,
-            timedBuffTriggers: status.timedBuffTriggers,
-            statusInflictions: status.statusInflictions,
-            berserkChancePercent: status.berserkChancePercent,
-            breathExtraCharges: spell.breathExtraCharges,
-            barrierCharges: combat.barrierCharges,
-            guardBarrierCharges: combat.guardBarrierCharges,
-            parryEnabled: combat.parryEnabled,
-            shieldBlockEnabled: combat.shieldBlockEnabled,
-            parryBonusPercent: combat.parryBonusPercent,
-            shieldBlockBonusPercent: combat.shieldBlockBonusPercent,
             dodgeCapMax: misc.dodgeCapMax,
-            minHitScale: damage.minHitScale,
-            spellChargeModifiers: spell.spellChargeModifiers,
-            defaultSpellChargeModifier: spell.defaultSpellChargeModifier,
             absorptionPercent: misc.absorptionPercent,
             absorptionCapPercent: misc.absorptionCapPercent,
             partyHostileAll: misc.partyHostileAll,
@@ -84,19 +103,19 @@ struct ActorEffectsAccumulator {
             autoDegradationRepair: misc.autoDegradationRepair,
             partyHostileTargets: misc.partyHostileTargets,
             partyProtectedTargets: misc.partyProtectedTargets,
-            specialAttacks: combat.specialAttacks,
-            rescueCapabilities: resurrection.rescueCapabilities,
-            rescueModifiers: resurrection.rescueModifiers,
-            resurrectionActives: resurrection.resurrectionActives,
-            forcedResurrection: resurrection.forcedResurrection,
-            vitalizeResurrection: resurrection.vitalizeResurrection,
-            necromancerInterval: resurrection.necromancerInterval,
-            resurrectionPassiveBetweenFloors: resurrection.resurrectionPassiveBetweenFloors,
             magicRunaway: misc.magicRunaway,
             damageRunaway: misc.damageRunaway,
-            sacrificeInterval: resurrection.sacrificeInterval,
             retreatTurn: misc.retreatTurn,
             retreatChancePercent: misc.retreatChancePercent
+        )
+
+        return BattleActor.SkillEffects(
+            damage: damageGroup,
+            spell: spellGroup,
+            combat: combatGroup,
+            status: statusGroup,
+            resurrection: resurrectionGroup,
+            misc: miscGroup
         )
     }
 }

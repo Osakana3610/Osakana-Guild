@@ -5,11 +5,11 @@ extension BattleTurnEngine {
     static func shouldTriggerParry(defender: inout BattleActor,
                                    attacker: BattleActor,
                                    context: inout BattleContext) -> Bool {
-        guard defender.skillEffects.parryEnabled else { return false }
+        guard defender.skillEffects.combat.parryEnabled else { return false }
         let defenderBonus = Double(defender.snapshot.additionalDamage) * 0.25
         let attackerPenalty = Double(attacker.snapshot.additionalDamage) * 0.5
-        let base = 10.0 + defenderBonus - attackerPenalty + defender.skillEffects.parryBonusPercent
-        let chance = max(0, min(100, Int((base * defender.skillEffects.procChanceMultiplier).rounded())))
+        let base = 10.0 + defenderBonus - attackerPenalty + defender.skillEffects.combat.parryBonusPercent
+        let chance = max(0, min(100, Int((base * defender.skillEffects.combat.procChanceMultiplier).rounded())))
         guard BattleRandomSystem.percentChance(chance, random: &context.random) else { return false }
         // パリィのログはapplyAttackOutcomeで追加される
         return true
@@ -18,9 +18,9 @@ extension BattleTurnEngine {
     static func shouldTriggerShieldBlock(defender: inout BattleActor,
                                          attacker: BattleActor,
                                          context: inout BattleContext) -> Bool {
-        guard defender.skillEffects.shieldBlockEnabled else { return false }
-        let base = 30.0 - Double(attacker.snapshot.additionalDamage) / 2.0 + defender.skillEffects.shieldBlockBonusPercent
-        let chance = max(0, min(100, Int((base * defender.skillEffects.procChanceMultiplier).rounded())))
+        guard defender.skillEffects.combat.shieldBlockEnabled else { return false }
+        let base = 30.0 - Double(attacker.snapshot.additionalDamage) / 2.0 + defender.skillEffects.combat.shieldBlockBonusPercent
+        let chance = max(0, min(100, Int((base * defender.skillEffects.combat.procChanceMultiplier).rounded())))
         guard BattleRandomSystem.percentChance(chance, random: &context.random) else { return false }
         // シールドブロックのログはapplyAttackOutcomeで追加される
         return true
@@ -32,9 +32,9 @@ extension BattleTurnEngine {
                                         context: inout BattleContext) {
         guard damageDealt > 0 else { return }
         guard damageType == .physical else { return }
-        let percent = attacker.skillEffects.absorptionPercent
+        let percent = attacker.skillEffects.misc.absorptionPercent
         guard percent > 0 else { return }
-        let capPercent = attacker.skillEffects.absorptionCapPercent
+        let capPercent = attacker.skillEffects.misc.absorptionCapPercent
         let baseHeal = Double(damageDealt) * percent / 100.0
         let scaledHeal = baseHeal * healingDealtModifier(for: attacker) * healingReceivedModifier(for: attacker)
         let rawHeal = Int(scaledHeal.rounded())
@@ -55,7 +55,7 @@ extension BattleTurnEngine {
         let spells = attacker.spells.mage + attacker.spells.priest
         guard !spells.isEmpty else { return }
         for spell in spells {
-            guard let modifier = attacker.skillEffects.spellChargeModifier(for: spell.id),
+            guard let modifier = attacker.skillEffects.spell.chargeModifier(for: spell.id),
                   let gain = modifier.gainOnPhysicalHit,
                   gain > 0 else { continue }
             let cap = modifier.maxOverride ?? attacker.actionResources.maxCharges(forSpellId: spell.id)
@@ -83,7 +83,7 @@ extension BattleTurnEngine {
             guard let runaway else { return }
             let thresholdValue = Double(maxHP) * runaway.thresholdPercent / 100.0
             guard Double(damage) >= thresholdValue else { return }
-            let probability = max(0.0, min(1.0, (runaway.chancePercent * defender.skillEffects.procChanceMultiplier) / 100.0))
+            let probability = max(0.0, min(1.0, (runaway.chancePercent * defender.skillEffects.combat.procChanceMultiplier) / 100.0))
             guard context.random.nextBool(probability: probability) else { return }
 
             let baseDamage = Double(damage)
@@ -117,8 +117,8 @@ extension BattleTurnEngine {
             context.updateActor(defender, side: defenderSide, index: defenderIndex)
         }
 
-        trigger(runaway: defender.skillEffects.magicRunaway, isMagic: true)
-        trigger(runaway: defender.skillEffects.damageRunaway, isMagic: false)
+        trigger(runaway: defender.skillEffects.misc.magicRunaway, isMagic: true)
+        trigger(runaway: defender.skillEffects.misc.damageRunaway, isMagic: false)
     }
 
     static func dispatchReactions(for event: ReactionEvent,
@@ -147,7 +147,7 @@ extension BattleTurnEngine {
                                  depth: Int,
                                  context: inout BattleContext) {
         guard let performer = context.actor(for: side, index: actorIndex), performer.isAlive else { return }
-        let candidates = performer.skillEffects.reactions.filter { $0.trigger.matches(event: event) }
+        let candidates = performer.skillEffects.combat.reactions.filter { $0.trigger.matches(event: event) }
         guard !candidates.isEmpty else { return }
 
         for reaction in candidates {
@@ -199,8 +199,8 @@ extension BattleTurnEngine {
             guard let targetActor = context.actor(for: resolvedTarget.0, index: resolvedTarget.1),
                   targetActor.isAlive else { continue }
 
-            var chance = max(0.0, reaction.baseChancePercent) * currentPerformer.skillEffects.procChanceMultiplier
-            chance *= targetActor.skillEffects.counterAttackEvasionMultiplier
+            var chance = max(0.0, reaction.baseChancePercent) * currentPerformer.skillEffects.combat.procChanceMultiplier
+            chance *= targetActor.skillEffects.combat.counterAttackEvasionMultiplier
             let cappedChance = max(0, min(100, Int(floor(chance))))
             guard cappedChance > 0 else { continue }
             guard BattleRandomSystem.percentChance(cappedChance, random: &context.random) else { continue }

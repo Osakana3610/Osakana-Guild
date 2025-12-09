@@ -30,7 +30,7 @@ extension BattleTurnEngine {
         actor.guardBarrierCharges = [:]
         actor.attackHistory.reset()
         applyStatusTicks(for: side, index: index, actor: &actor, context: &context)
-        if actor.skillEffects.autoDegradationRepair {
+        if actor.skillEffects.misc.autoDegradationRepair {
             applyDegradationRepairIfAvailable(to: &actor)
         }
         applySpellChargeRegenIfNeeded(for: &actor, context: context)
@@ -48,15 +48,15 @@ extension BattleTurnEngine {
         guard let healerIndex = actors.indices.max(by: { lhs, rhs in
             let left = actors[lhs]
             let right = actors[rhs]
-            if left.skillEffects.endOfTurnHealingPercent == right.skillEffects.endOfTurnHealingPercent {
+            if left.skillEffects.misc.endOfTurnHealingPercent == right.skillEffects.misc.endOfTurnHealingPercent {
                 return lhs < rhs
             }
-            return left.skillEffects.endOfTurnHealingPercent < right.skillEffects.endOfTurnHealingPercent
+            return left.skillEffects.misc.endOfTurnHealingPercent < right.skillEffects.misc.endOfTurnHealingPercent
         }) else { return }
 
         let healer = actors[healerIndex]
         guard healer.isAlive else { return }
-        let percent = healer.skillEffects.endOfTurnHealingPercent
+        let percent = healer.skillEffects.misc.endOfTurnHealingPercent
         guard percent > 0 else { return }
         let factor = percent / 100.0
         let baseHealing = Double(healer.snapshot.magicalHealing) * factor
@@ -84,7 +84,7 @@ extension BattleTurnEngine {
                                                    actor: inout BattleActor,
                                                    context: inout BattleContext) {
         guard actor.isAlive else { return }
-        let percent = actor.skillEffects.endOfTurnSelfHPPercent
+        let percent = actor.skillEffects.misc.endOfTurnSelfHPPercent
         guard percent != 0 else { return }
         let magnitude = abs(percent) / 100.0
         guard magnitude > 0 else { return }
@@ -116,7 +116,7 @@ extension BattleTurnEngine {
                                                    allowVitalize: Bool) {
         guard !actor.isAlive else { return }
 
-        guard let best = actor.skillEffects.resurrectionActives.max(by: { lhs, rhs in
+        guard let best = actor.skillEffects.resurrection.actives.max(by: { lhs, rhs in
             if lhs.chancePercent == rhs.chancePercent {
                 return (lhs.maxTriggers ?? .max) < (rhs.maxTriggers ?? .max)
             }
@@ -129,7 +129,7 @@ extension BattleTurnEngine {
         }
 
         var forcedTriggered = false
-        if let forced = actor.skillEffects.forcedResurrection {
+        if let forced = actor.skillEffects.resurrection.forced {
             let limit = forced.maxTriggers ?? 1
             if actor.forcedResurrectionTriggersUsed < limit {
                 actor.forcedResurrectionTriggersUsed += 1
@@ -158,7 +158,7 @@ extension BattleTurnEngine {
         actor.resurrectionTriggersUsed += 1
 
         if allowVitalize,
-           let vitalize = actor.skillEffects.vitalizeResurrection,
+           let vitalize = actor.skillEffects.resurrection.vitalize,
            !actor.vitalizeActive {
             actor.vitalizeActive = true
             if vitalize.removePenalties {
@@ -193,13 +193,13 @@ extension BattleTurnEngine {
             let effects = try SkillRuntimeEffectCompiler.actorEffects(from: definitions)
             actor.skillEffects = effects
 
-            for (key, value) in effects.barrierCharges {
+            for (key, value) in effects.combat.barrierCharges {
                 let current = actor.barrierCharges[key] ?? 0
                 if value > current {
                     actor.barrierCharges[key] = value
                 }
             }
-            for (key, value) in effects.guardBarrierCharges {
+            for (key, value) in effects.combat.guardBarrierCharges {
                 let current = actor.guardBarrierCharges[key] ?? 0
                 if value > current {
                     actor.guardBarrierCharges[key] = value
@@ -216,7 +216,7 @@ extension BattleTurnEngine {
         var usage = actor.spellChargeRegenUsage
         var touched = false
         for spell in spells {
-            guard let modifier = actor.skillEffects.spellChargeModifier(for: spell.id),
+            guard let modifier = actor.skillEffects.spell.chargeModifier(for: spell.id),
                   let regen = modifier.regen,
                   regen.every > 0 else { continue }
             if let maxTriggers = regen.maxTriggers,
@@ -238,11 +238,11 @@ extension BattleTurnEngine {
     static func applyNecromancerIfNeeded(for side: ActorSide, context: inout BattleContext) {
         guard context.turn >= 2 else { return }
         let actors: [BattleActor] = side == .player ? context.players : context.enemies
-        guard actors.contains(where: { $0.skillEffects.necromancerInterval != nil }) else { return }
+        guard actors.contains(where: { $0.skillEffects.resurrection.necromancerInterval != nil }) else { return }
 
         for index in actors.indices {
             var actor = side == .player ? context.players[index] : context.enemies[index]
-            guard let interval = actor.skillEffects.necromancerInterval else { continue }
+            guard let interval = actor.skillEffects.resurrection.necromancerInterval else { continue }
             if let last = actor.necromancerLastTriggerTurn, context.turn <= last { continue }
             let offset = context.turn - 2
             guard offset >= 0, offset % interval == 0 else { continue }
@@ -250,7 +250,7 @@ extension BattleTurnEngine {
             context.updateActor(actor, side: side, index: index)
 
             let allActors: [BattleActor] = side == .player ? context.players : context.enemies
-            if let reviveIndex = allActors.indices.first(where: { !allActors[$0].isAlive && !allActors[$0].skillEffects.resurrectionActives.isEmpty }) {
+            if let reviveIndex = allActors.indices.first(where: { !allActors[$0].isAlive && !allActors[$0].skillEffects.resurrection.actives.isEmpty }) {
                 var target = side == .player ? context.players[reviveIndex] : context.enemies[reviveIndex]
                 target.resurrectionTriggersUsed = 0
                 applyEndOfTurnResurrectionIfNeeded(for: side, index: reviveIndex, actor: &target, context: &context, allowVitalize: false)
@@ -276,14 +276,14 @@ extension BattleTurnEngine {
         for index in actors.indices {
             var actor = actors[index]
             var remaining: [BattleActor.SkillEffects.TimedBuffTrigger] = []
-            for trigger in actor.skillEffects.timedBuffTriggers {
+            for trigger in actor.skillEffects.status.timedBuffTriggers {
                 if trigger.triggerTurn == context.turn && actor.isAlive {
                     fired.append(trigger)
                 } else {
                     remaining.append(trigger)
                 }
             }
-            actor.skillEffects.timedBuffTriggers = remaining
+            actor.skillEffects.status.timedBuffTriggers = remaining
             actors[index] = actor
         }
 
@@ -304,7 +304,7 @@ extension BattleTurnEngine {
                     for (key, mult) in spellSpecificMods {
                         let spellIdString = String(key.dropFirst("spellSpecific:".count))
                         guard let spellId = UInt8(spellIdString) else { continue }
-                        actor.skillEffects.spellSpecificMultipliers[spellId, default: 1.0] *= mult
+                        actor.skillEffects.spell.specificMultipliers[spellId, default: 1.0] *= mult
                     }
                 }
 
@@ -381,7 +381,7 @@ extension BattleTurnEngine {
 
         let allies: [BattleActor] = side == .player ? context.players : context.enemies
         let candidateIndices = allies.enumerated()
-            .filter { $0.element.isAlive && !$0.element.skillEffects.rescueCapabilities.isEmpty }
+            .filter { $0.element.isAlive && !$0.element.skillEffects.resurrection.rescueCapabilities.isEmpty }
             .sorted { lhs, rhs in
                 let leftRow = lhs.element.formationSlot.rawValue
                 let rightRow = rhs.element.formationSlot.rawValue
@@ -415,7 +415,7 @@ extension BattleTurnEngine {
                 appliedHeal = max(1, healAmount)
             }
 
-            if !rescuer.skillEffects.rescueModifiers.ignoreActionCost {
+            if !rescuer.skillEffects.resurrection.rescueModifiers.ignoreActionCost {
                 rescuer.rescueActionsUsed += 1
             }
 
@@ -452,7 +452,7 @@ extension BattleTurnEngine {
 
     static func availableRescueCapabilities(for actor: BattleActor) -> [BattleActor.SkillEffects.RescueCapability] {
         let level = actor.level ?? 0
-        return actor.skillEffects.rescueCapabilities.filter { level >= $0.minLevel }
+        return actor.skillEffects.resurrection.rescueCapabilities.filter { level >= $0.minLevel }
     }
 
     static func rescueChance(for actor: BattleActor) -> Int {
@@ -463,7 +463,7 @@ extension BattleTurnEngine {
         guard actor.isAlive else { return false }
         guard actor.rescueActionCapacity > 0 else { return false }
         if actor.rescueActionsUsed >= actor.rescueActionCapacity,
-           !actor.skillEffects.rescueModifiers.ignoreActionCost {
+           !actor.skillEffects.resurrection.rescueModifiers.ignoreActionCost {
             return false
         }
         return true

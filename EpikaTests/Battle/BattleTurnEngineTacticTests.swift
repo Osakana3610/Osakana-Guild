@@ -14,7 +14,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     func testSpecialAttackTriggers() {
         var attackerEffects = BattleActor.SkillEffects.neutral
-        attackerEffects.specialAttacks = [.init(kind: .specialA, chancePercent: 100)]
+        attackerEffects.combat.specialAttacks = [.init(kind: .specialA, chancePercent: 100)]
 
         var players = [
             BattleTestFactory.actor(
@@ -40,7 +40,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     func testAntiHealingReplacesPhysicalAttack() {
         var effects = BattleActor.SkillEffects.neutral
-        effects.antiHealingEnabled = true
+        effects.misc.antiHealingEnabled = true
 
         var players = [
             BattleTestFactory.actor(
@@ -74,8 +74,8 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     func testParryStopsMultiHit() {
         var defenseEffects = BattleActor.SkillEffects.neutral
-        defenseEffects.parryEnabled = true
-        defenseEffects.parryBonusPercent = 100
+        defenseEffects.combat.parryEnabled = true
+        defenseEffects.combat.parryBonusPercent = 100
 
         let defenderHP = 150
         var players = [BattleTestFactory.actor(id: "player", kind: .player, combat: BattleTestFactory.combat())]
@@ -105,8 +105,8 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     func testShieldBlockPreventsDamage() {
         var defenseEffects = BattleActor.SkillEffects.neutral
-        defenseEffects.shieldBlockEnabled = true
-        defenseEffects.shieldBlockBonusPercent = 100
+        defenseEffects.combat.shieldBlockEnabled = true
+        defenseEffects.combat.shieldBlockBonusPercent = 100
 
         let defenderHP = 120
         var players = [BattleTestFactory.actor(id: "player", kind: .player, combat: BattleTestFactory.combat())]
@@ -135,7 +135,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     func testReactionAndExtraActionStackWithoutConflict() {
         var playerEffects = BattleActor.SkillEffects.neutral
-        playerEffects.reactions = [
+        playerEffects.combat.reactions = [
             .init(identifier: "counter.chain",
                   displayName: "連係反撃",
                   trigger: .selfDamagedPhysical,
@@ -148,7 +148,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
                   requiresMartial: false,
                   requiresAllyBehind: false)
         ]
-        playerEffects.extraActions = [.init(chancePercent: 100, count: 1)]
+        playerEffects.combat.extraActions = [.init(chancePercent: 100, count: 1)]
 
         var players = [
             BattleTestFactory.actor(
@@ -183,7 +183,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     func testSacrificeSelectsTargetOnInterval() {
         var sacrificeEffects = BattleActor.SkillEffects.neutral
-        sacrificeEffects.sacrificeInterval = 2
+        sacrificeEffects.resurrection.sacrificeInterval = 2
 
         var players = [
             BattleTestFactory.actor(id: "sacrificer", name: "術者", kind: .player, combat: BattleTestFactory.combat(), level: 10, skillEffects: sacrificeEffects),
@@ -204,10 +204,10 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     func testNecromancerRevivesFallenAlly() {
         var necroEffects = BattleActor.SkillEffects.neutral
-        necroEffects.necromancerInterval = 1
+        necroEffects.resurrection.necromancerInterval = 1
 
         var reviveEffects = BattleActor.SkillEffects.neutral
-        reviveEffects.resurrectionActives = [.init(chancePercent: 100, hpScale: .magicalHealing, maxTriggers: 1)]
+        reviveEffects.resurrection.actives = [.init(chancePercent: 100, hpScale: .magicalHealing, maxTriggers: 1)]
 
         var players = [
             BattleTestFactory.actor(id: "necromancer",
@@ -254,9 +254,9 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     func testAutoDegradationRepairReducesWear() {
         var effects = BattleActor.SkillEffects.neutral
-        effects.degradationRepairMinPercent = 2.0
-        effects.degradationRepairMaxPercent = 2.0
-        effects.autoDegradationRepair = true
+        effects.misc.degradationRepairMinPercent = 2.0
+        effects.misc.degradationRepairMaxPercent = 2.0
+        effects.misc.autoDegradationRepair = true
 
         var players = [
             BattleTestFactory.actor(id: "repairer",
@@ -293,8 +293,8 @@ private enum BattleTestFactory {
                        attackCount: Int = 1,
                        magicalHealing: Int = 0,
                        additionalDamage: Int = 0,
-                       breathDamage: Int = 0) -> RuntimeCharacterProgress.Combat {
-        RuntimeCharacterProgress.Combat(maxHP: maxHP,
+                       breathDamage: Int = 0) -> CharacterValues.Combat {
+        CharacterValues.Combat(maxHP: maxHP,
                                         physicalAttack: physicalAttack,
                                         magicalAttack: magicalAttack,
                                         physicalDefense: physicalDefense,
@@ -313,7 +313,7 @@ private enum BattleTestFactory {
     static func actor(id: String,
                       name: String? = nil,
                       kind: BattleActorKind,
-                      combat: RuntimeCharacterProgress.Combat,
+                      combat: CharacterValues.Combat,
                       level: Int? = nil,
                       skillEffects: BattleActor.SkillEffects = .neutral,
                       actionRates: BattleActionRates? = nil,
@@ -327,9 +327,9 @@ private enum BattleTestFactory {
 
         let rates = actionRates ?? BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: combat.breathDamage > 0 ? 100 : 0)
         var resources = BattleActionResource.makeDefault(for: combat, spellLoadout: spells)
-        if mutableEffects.breathExtraCharges > 0 {
+        if mutableEffects.spell.breathExtraCharges > 0 {
             let current = resources.charges(for: .breath)
-            resources.setCharges(for: .breath, value: current + mutableEffects.breathExtraCharges)
+            resources.setCharges(for: .breath, value: current + mutableEffects.spell.breathExtraCharges)
         }
 
         return BattleActor(identifier: id,
