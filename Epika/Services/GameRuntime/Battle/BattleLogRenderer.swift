@@ -82,8 +82,7 @@ struct BattleLogRenderer {
             message: message,
             type: type,
             actorId: actorId,
-            targetId: targetId,
-            metadata: [:]
+            targetId: targetId
         )
     }
 
