@@ -12,15 +12,16 @@ enum CharacterAssembler {
         let equippedItemDefinitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(itemIds))
 
         // 装備から付与されるスキルIDを収集
-        let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkills.map { $0.skillId } }
+        let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkillIds }
         let grantedSkillDefinitions = try await repository.skills(withIds: grantedSkillIds)
         let validSkillIds = Set(grantedSkillDefinitions.map { $0.id })
 
+        // grantedSkillIds は SQLite で ORDER BY order_index 済みなので順序が保持される
         let equipmentSkills: [RuntimeCharacterProgress.LearnedSkill] = equippedItemDefinitions.flatMap { definition in
-            definition.grantedSkills.sorted { $0.orderIndex < $1.orderIndex }.compactMap { granted in
-                guard validSkillIds.contains(granted.skillId) else { return nil }
+            definition.grantedSkillIds.compactMap { skillId in
+                guard validSkillIds.contains(skillId) else { return nil }
                 return RuntimeCharacterProgress.LearnedSkill(id: UUID(),
-                                                             skillId: granted.skillId,
+                                                             skillId: skillId,
                                                              level: 1,
                                                              isEquipped: true,
                                                              createdAt: Date(),

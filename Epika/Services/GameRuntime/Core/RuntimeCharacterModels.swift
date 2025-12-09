@@ -155,9 +155,7 @@ struct RuntimeCharacterState: Sendable {
         let definitionsById = Dictionary(uniqueKeysWithValues: loadout.items.map { ($0.id, $0) })
         for equipment in progress.equippedItems {
             guard let definition = definitionsById[equipment.itemId] else { continue }
-            for bonus in definition.combatBonuses where bonus.stat == "physicalAttack" {
-                if bonus.value * equipment.quantity > 0 { return true }
-            }
+            if definition.combatBonuses.physicalAttack * equipment.quantity > 0 { return true }
         }
         return false
     }

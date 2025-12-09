@@ -197,13 +197,13 @@ actor EquipmentProgressService {
             let newCount = (currentCounts[addItem.id] ?? 0) + 1
             let multiplier = Self.duplicatePenaltyMultiplier(for: newCount)
 
-            for bonus in addItem.statBonuses {
-                let adjustedValue = Int(Double(bonus.value) * multiplier)
-                delta[bonus.stat, default: 0] += adjustedValue
+            addItem.statBonuses.forEachNonZero { stat, value in
+                let adjustedValue = Int(Double(value) * multiplier)
+                delta[stat, default: 0] += adjustedValue
             }
-            for bonus in addItem.combatBonuses {
-                let adjustedValue = Int(Double(bonus.value) * multiplier)
-                delta[bonus.stat, default: 0] += adjustedValue
+            addItem.combatBonuses.forEachNonZero { stat, value in
+                let adjustedValue = Int(Double(value) * multiplier)
+                delta[stat, default: 0] += adjustedValue
             }
         }
 
@@ -212,13 +212,13 @@ actor EquipmentProgressService {
             let currentCount = currentCounts[removeItem.id] ?? 1
             let multiplier = Self.duplicatePenaltyMultiplier(for: currentCount)
 
-            for bonus in removeItem.statBonuses {
-                let adjustedValue = Int(Double(bonus.value) * multiplier)
-                delta[bonus.stat, default: 0] -= adjustedValue
+            removeItem.statBonuses.forEachNonZero { stat, value in
+                let adjustedValue = Int(Double(value) * multiplier)
+                delta[stat, default: 0] -= adjustedValue
             }
-            for bonus in removeItem.combatBonuses {
-                let adjustedValue = Int(Double(bonus.value) * multiplier)
-                delta[bonus.stat, default: 0] -= adjustedValue
+            removeItem.combatBonuses.forEachNonZero { stat, value in
+                let adjustedValue = Int(Double(value) * multiplier)
+                delta[stat, default: 0] -= adjustedValue
             }
         }
 
