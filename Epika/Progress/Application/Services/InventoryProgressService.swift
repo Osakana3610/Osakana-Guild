@@ -88,7 +88,7 @@ actor InventoryProgressService {
                 displayName: definition.name,
                 description: definition.description,
                 quantity: Int(snapshot.quantity),
-                category: RuntimeEquipment.Category(from: definition.category),
+                category: ItemSaleCategory(masterCategory: definition.category),
                 baseValue: definition.basePrice,
                 sellValue: definition.sellValue,
                 enhancement: .init(
@@ -482,7 +482,7 @@ actor InventoryProgressService {
             displayName: definition.name,
             description: definition.description,
             quantity: Int(snapshot.quantity),
-            category: RuntimeEquipment.Category(from: definition.category),
+            category: ItemSaleCategory(masterCategory: definition.category),
             baseValue: definition.basePrice,
             sellValue: definition.sellValue,
             enhancement: .init(
