@@ -315,13 +315,11 @@ struct EquipmentEditorView: View {
             }
         }
 
-        // 職業制限チェック（Phase 2でjobIdベースに変更予定）
-        if !definition.allowedJobs.isEmpty {
-            let jobCategory = currentCharacter.job?.category ?? ""
-            if !definition.allowedJobs.contains(jobCategory) {
-                return (false, "職業制限により装備できません")
-            }
-        }
+        // 職業制限チェック（Phase 4で allowedJobIds ベースに変更予定）
+        // 現在 allowedJobs はジョブカテゴリ（文字列）を期待しているが、
+        // JobDefinition.category は Phase 2 で削除されたため、一時的にスキップ
+        // TODO: Phase 4 で ItemDefinition.allowedJobIds に変更し、このチェックを有効化
+        // if !definition.allowedJobs.isEmpty { ... }
 
         // 性別制限チェック（genderCodeで直接判定）
         if !definition.allowedGenderCodes.isEmpty {

@@ -66,28 +66,25 @@ private extension CombatSnapshotBuilder {
     }
 
     static func makeFallbackJobDefinition(for definition: EnemyDefinition) -> JobDefinition {
-        let metricKeys = ["maxHP",
-                          "physicalAttack",
-                          "magicalAttack",
-                          "physicalDefense",
-                          "magicalDefense",
-                          "hitRate",
-                          "evasionRate",
-                          "criticalRate",
-                          "attackCount",
-                          "magicalHealing",
-                          "trapRemoval",
-                          "additionalDamage",
-                          "breathDamage"]
-        let coefficients: [JobDefinition.CombatCoefficient] = metricKeys.map {
-            JobDefinition.CombatCoefficient(stat: $0, value: 0.0)
-        }
+        let coefficients = JobDefinition.CombatCoefficients(
+            maxHP: 0.0,
+            physicalAttack: 0.0,
+            magicalAttack: 0.0,
+            physicalDefense: 0.0,
+            magicalDefense: 0.0,
+            hitRate: 0.0,
+            evasionRate: 0.0,
+            criticalRate: 0.0,
+            attackCount: 0.0,
+            magicalHealing: 0.0,
+            trapRemoval: 0.0,
+            additionalDamage: 0.0,
+            breathDamage: 0.0
+        )
         return JobDefinition(id: definition.jobId ?? 0,
                              name: "敵職業",
-                             category: "enemy",
-                             growthTendency: nil,
                              combatCoefficients: coefficients,
-                             learnedSkills: [])
+                             learnedSkillIds: [])
     }
 
     static func normalized(combat: CharacterValues.Combat,

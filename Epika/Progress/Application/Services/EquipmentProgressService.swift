@@ -139,15 +139,12 @@ actor EquipmentProgressService {
             }
         }
 
-        // 職業制限チェック（Phase 2でjobIdベースに変更予定）
-        if !itemDefinition.allowedJobs.isEmpty {
-            if !itemDefinition.allowedJobs.contains(characterJobCategory) {
-                return EquipmentValidationResult(
-                    canEquip: false,
-                    reason: "職業制限により装備できません"
-                )
-            }
-        }
+        // 職業制限チェック（Phase 4で allowedJobIds ベースに変更予定）
+        // 現在 allowedJobs はジョブカテゴリ（文字列）を期待しているが、
+        // JobDefinition.category は Phase 2 で削除されたため、一時的にスキップ
+        // TODO: Phase 4 で ItemDefinition.allowedJobIds に変更し、このチェックを有効化
+        // if !itemDefinition.allowedJobs.isEmpty { ... }
+        _ = characterJobCategory // 未使用警告を抑制
 
         // 性別制限チェック
         if !itemDefinition.allowedGenderCodes.isEmpty {
