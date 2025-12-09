@@ -73,8 +73,7 @@ private extension ProgressService {
 
         for definition in sortedDefinitions {
             let requirements = definition.unlockRequirements
-                .sorted { $0.orderIndex < $1.orderIndex }
-                .compactMap { parseStoryRequirement($0.value) }
+                .compactMap { parseStoryRequirement($0) }
 
             var shouldUnlock: Bool
             if requirements.isEmpty {
@@ -100,10 +99,7 @@ private extension ProgressService {
                                    readStoryIds: Set<UInt16>,
                                    clearedDungeonIds: Set<UInt16>) async throws {
         for definition in definitions {
-            let rawConditions = definition.unlockConditions
-                .sorted { $0.orderIndex < $1.orderIndex }
-
-            let requirements = try rawConditions.map { try parseDungeonRequirement($0.value) }
+            let requirements = try definition.unlockConditions.map { try parseDungeonRequirement($0) }
 
             var shouldUnlock: Bool
             if requirements.isEmpty {

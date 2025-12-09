@@ -275,8 +275,8 @@ private extension ExplorationEngine {
         if let direct = event.weights.first(where: { $0.context == String(dungeon.id) }) {
             return max(direct.weight, 0.0)
         }
-        if let tagMatch = event.tags.first(where: { tag in dungeon.description.contains(tag.value) }) {
-            if let weightEntry = event.weights.first(where: { $0.context == tagMatch.value }) {
+        if let tagMatch = event.tags.first(where: { tag in dungeon.description.contains(tag) }) {
+            if let weightEntry = event.weights.first(where: { $0.context == tagMatch }) {
                 return max(weightEntry.weight, 0.0)
             }
         }
