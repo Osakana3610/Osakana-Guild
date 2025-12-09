@@ -35,9 +35,6 @@ struct PandoraBoxView: View {
             .task {
                 await loadData()
             }
-            .refreshable {
-                await loadData()
-            }
             .sheet(isPresented: $showingItemPicker) {
                 ItemPickerSheet(
                     availableItems: availableItems.filter { item in

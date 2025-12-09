@@ -33,7 +33,6 @@ struct GuildView: View {
                 characterState.configureIfNeeded(with: progressService)
                 Task { await loadOnce() }
             }
-            .refreshable { await reload() }
         }
     }
 

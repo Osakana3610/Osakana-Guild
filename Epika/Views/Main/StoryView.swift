@@ -109,9 +109,6 @@ struct StoryView: View {
                     }
                 }
             }
-            .refreshable {
-                await viewModel.load()
-            }
             .onReceive(NotificationCenter.default.publisher(for: .progressUnlocksDidChange)) { _ in
                 Task { await viewModel.load() }
             }
