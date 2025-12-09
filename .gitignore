@@ -55,3 +55,4 @@ Epika/Generated/master_data.db
 # MasterDataGenerator build artifacts
 Tools/MasterDataGenerator/.build/
 Tools/MasterDataGenerator/output/
+.agent
