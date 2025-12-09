@@ -7,32 +7,31 @@ extension SQLiteMasterDataManager {
         struct Builder {
             var id: UInt8
             var name: String
-            var gender: String
             var genderCode: UInt8
-            var category: String
             var description: String
-            var baseStats: [RaceDefinition.BaseStat] = []
+            var strength: Int = 0
+            var wisdom: Int = 0
+            var spirit: Int = 0
+            var vitality: Int = 0
+            var agility: Int = 0
+            var luck: Int = 0
             var maxLevel: Int?
         }
 
         var builders: [UInt8: Builder] = [:]
         var order: [UInt8] = []
-        let baseSQL = "SELECT id, name, gender, gender_code, category, description FROM races ORDER BY id;"
+        let baseSQL = "SELECT id, name, gender_code, description FROM races ORDER BY id;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
             guard let nameC = sqlite3_column_text(baseStatement, 1),
-                  let genderC = sqlite3_column_text(baseStatement, 2),
-                  let categoryC = sqlite3_column_text(baseStatement, 4),
-                  let descriptionC = sqlite3_column_text(baseStatement, 5) else { continue }
+                  let descriptionC = sqlite3_column_text(baseStatement, 3) else { continue }
             let id = UInt8(sqlite3_column_int(baseStatement, 0))
-            let genderCode = UInt8(sqlite3_column_int(baseStatement, 3))
+            let genderCode = UInt8(sqlite3_column_int(baseStatement, 2))
             builders[id] = Builder(
                 id: id,
                 name: String(cString: nameC),
-                gender: String(cString: genderC),
                 genderCode: genderCode,
-                category: String(cString: categoryC),
                 description: String(cString: descriptionC),
                 maxLevel: nil
             )
@@ -46,7 +45,17 @@ extension SQLiteMasterDataManager {
             let id = UInt8(sqlite3_column_int(statStatement, 0))
             guard var builder = builders[id],
                   let statC = sqlite3_column_text(statStatement, 1) else { continue }
-            builder.baseStats.append(.init(stat: String(cString: statC), value: Int(sqlite3_column_int(statStatement, 2))))
+            let stat = String(cString: statC)
+            let value = Int(sqlite3_column_int(statStatement, 2))
+            switch stat {
+            case "strength": builder.strength = value
+            case "wisdom": builder.wisdom = value
+            case "spirit": builder.spirit = value
+            case "vitality": builder.vitality = value
+            case "agility": builder.agility = value
+            case "luck": builder.luck = value
+            default: break
+            }
             builders[builder.id] = builder
         }
 
@@ -68,11 +77,16 @@ extension SQLiteMasterDataManager {
             RaceDefinition(
                 id: builder.id,
                 name: builder.name,
-                gender: builder.gender,
                 genderCode: builder.genderCode,
-                category: builder.category,
                 description: builder.description,
-                baseStats: builder.baseStats.sorted { $0.stat < $1.stat },
+                baseStats: .init(
+                    strength: builder.strength,
+                    wisdom: builder.wisdom,
+                    spirit: builder.spirit,
+                    vitality: builder.vitality,
+                    agility: builder.agility,
+                    luck: builder.luck
+                ),
                 maxLevel: builder.maxLevel ?? 200
             )
         }

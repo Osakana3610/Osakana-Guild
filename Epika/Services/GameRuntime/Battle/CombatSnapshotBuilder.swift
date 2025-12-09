@@ -49,19 +49,17 @@ struct CombatSnapshotBuilder {
 
 private extension CombatSnapshotBuilder {
     static func makeFallbackRaceDefinition(for definition: EnemyDefinition) -> RaceDefinition {
-        let baseStats: [RaceDefinition.BaseStat] = [
-            .init(stat: "strength", value: definition.strength),
-            .init(stat: "wisdom", value: definition.wisdom),
-            .init(stat: "spirit", value: definition.spirit),
-            .init(stat: "vitality", value: definition.vitality),
-            .init(stat: "agility", value: definition.agility),
-            .init(stat: "luck", value: definition.luck)
-        ]
+        let baseStats = RaceDefinition.BaseStats(
+            strength: definition.strength,
+            wisdom: definition.wisdom,
+            spirit: definition.spirit,
+            vitality: definition.vitality,
+            agility: definition.agility,
+            luck: definition.luck
+        )
         return RaceDefinition(id: definition.raceId,
                               name: "敵種族",
-                              gender: "enemy",
                               genderCode: 0,  // 敵用
-                              category: definition.category,
                               description: "Auto-generated enemy race",
                               baseStats: baseStats,
                               maxLevel: 200)

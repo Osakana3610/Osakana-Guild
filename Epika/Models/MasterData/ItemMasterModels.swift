@@ -26,9 +26,9 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
     let rarity: String?
     let statBonuses: [StatBonus]
     let combatBonuses: [CombatBonus]
-    let allowedRaces: [String]
-    let allowedJobs: [String]
-    let allowedGenders: [String]
-    let bypassRaceRestrictions: [String]
+    let allowedRaceIds: [UInt8]       // カテゴリではなくraceId
+    let allowedJobs: [String]          // Phase 2でjobIdに変更予定
+    let allowedGenderCodes: [UInt8]   // 1=male, 2=female
+    let bypassRaceIds: [UInt8]        // カテゴリではなくraceId
     let grantedSkills: [GrantedSkill]
 }

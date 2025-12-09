@@ -37,7 +37,7 @@ final class CharacterViewState {
             self.createdAt = snapshot.createdAt
             self.jobId = snapshot.jobId
             self.raceId = snapshot.raceId
-            self.gender = race?.gender ?? "不明"
+            self.gender = race?.genderDisplayName ?? "不明"
             self.currentHP = snapshot.hitPoints.current
             self.maxHP = snapshot.hitPoints.maximum
             self.avatarId = snapshot.avatarId

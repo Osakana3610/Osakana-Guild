@@ -146,7 +146,7 @@ actor ShopProgressService {
         stock.updatedAt = now
         try saveIfNeeded(context)
 
-        // キャット・チケット計算：売値に応じた量（仮: 売値 / 100 * 減少数）
+        // キャット・チケット計算：売値 / 100 * 減少数
         let ticketsPerItem = max(1, definition.sellValue / 100)
         return ticketsPerItem * Int(reducedQuantity)
     }

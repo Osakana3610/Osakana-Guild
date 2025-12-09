@@ -81,9 +81,7 @@ extension BattleTurnEngine {
     static func matchTargetId(_ targetId: String, to actor: BattleActor) -> Bool {
         let lower = targetId.lowercased()
         if lower == actor.identifier.lowercased() { return true }
-        // raceId is now UInt8, check if targetId matches as numeric ID
         if let raceId = actor.raceId, lower == String(raceId) { return true }
-        if let raceCategory = actor.raceCategory, lower == raceCategory.lowercased() { return true }
         if let jobName = actor.jobName, lower == jobName.lowercased() { return true }
         if lower == actor.displayName.lowercased() { return true }
         return false
@@ -151,43 +149,6 @@ extension BattleTurnEngine {
         }
         let count = min(maxTargets, pool.count)
         return Array(pool.prefix(count))
-    }
-
-    static func normalizedTargetCategory(for actor: BattleActor) -> String? {
-        // raceId is now UInt8, not included in string comparison; use raceCategory only
-        let candidates = [actor.raceCategory].compactMap { $0?.lowercased() }
-        for candidate in candidates {
-            if let mapped = mapTargetCategory(from: candidate) {
-                return mapped
-            }
-            let components = candidate.split { !$0.isLetter }
-            for component in components {
-                if let mapped = mapTargetCategory(from: String(component)) {
-                    return mapped
-                }
-            }
-        }
-        return nil
-    }
-
-    static func mapTargetCategory(from token: String) -> String? {
-        let normalized = token.lowercased()
-        if humanoidKeywords.contains(where: { normalized.contains($0) }) {
-            return "humanoid"
-        }
-        if undeadKeywords.contains(where: { normalized.contains($0) }) {
-            return "undead"
-        }
-        if dragonKeywords.contains(where: { normalized.contains($0) }) {
-            return "dragon"
-        }
-        if divineKeywords.contains(where: { normalized.contains($0) }) {
-            return "divine"
-        }
-        if monsterKeywords.contains(where: { normalized.contains($0) }) {
-            return "monster"
-        }
-        return nil
     }
 
     static func actorIndices(for side: ActorSide, context: BattleContext) -> [Int] {

@@ -206,9 +206,8 @@ extension BattleTurnEngine {
                                     damageType: BattleDamageType) -> Double {
         let key = modifierKey(for: damageType, suffix: "DamageDealtMultiplier")
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
-        let category = normalizedTargetCategory(for: defender)
-        let categoryMultiplier = attacker.skillEffects.damageDealtAgainst.value(for: category)
-        return buffMultiplier * attacker.skillEffects.damageDealt.value(for: damageType) * categoryMultiplier
+        let raceMultiplier = attacker.skillEffects.damageDealtAgainst.value(for: defender.raceId)
+        return buffMultiplier * attacker.skillEffects.damageDealt.value(for: damageType) * raceMultiplier
     }
 
     static func antiHealingDamageDealtModifier(for attacker: BattleActor) -> Double {

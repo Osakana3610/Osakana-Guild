@@ -14,10 +14,10 @@ extension SQLiteMasterDataManager {
             var rarity: String?
             var statBonuses: [ItemDefinition.StatBonus] = []
             var combatBonuses: [ItemDefinition.CombatBonus] = []
-            var allowedRaces: Set<String> = []
+            var allowedRaceIds: Set<UInt8> = []
             var allowedJobs: Set<String> = []
-            var allowedGenders: Set<String> = []
-            var bypassRaceRestrictions: Set<String> = []
+            var allowedGenderCodes: Set<UInt8> = []
+            var bypassRaceIds: Set<UInt8> = []
             var grantedSkills: [ItemDefinition.GrantedSkill] = []
         }
 
@@ -76,8 +76,8 @@ extension SQLiteMasterDataManager {
         }
 
         try applyPairs(sql: "SELECT item_id, race_id FROM item_allowed_races;") { builder, statement in
-            guard let raceC = sqlite3_column_text(statement, 1) else { return }
-            builder.allowedRaces.insert(String(cString: raceC))
+            let raceId = UInt8(sqlite3_column_int(statement, 1))
+            builder.allowedRaceIds.insert(raceId)
         }
 
         try applyPairs(sql: "SELECT item_id, job_id FROM item_allowed_jobs;") { builder, statement in
@@ -86,13 +86,13 @@ extension SQLiteMasterDataManager {
         }
 
         try applyPairs(sql: "SELECT item_id, gender FROM item_allowed_genders;") { builder, statement in
-            guard let genderC = sqlite3_column_text(statement, 1) else { return }
-            builder.allowedGenders.insert(String(cString: genderC))
+            let genderCode = UInt8(sqlite3_column_int(statement, 1))
+            builder.allowedGenderCodes.insert(genderCode)
         }
 
         try applyPairs(sql: "SELECT item_id, race_id FROM item_bypass_race_restrictions;") { builder, statement in
-            guard let raceC = sqlite3_column_text(statement, 1) else { return }
-            builder.bypassRaceRestrictions.insert(String(cString: raceC))
+            let raceId = UInt8(sqlite3_column_int(statement, 1))
+            builder.bypassRaceIds.insert(raceId)
         }
 
         let skillStatement = try prepare("SELECT item_id, order_index, skill_id FROM item_granted_skills ORDER BY item_id, order_index;")
@@ -117,10 +117,10 @@ extension SQLiteMasterDataManager {
                 rarity: builder.rarity,
                 statBonuses: builder.statBonuses,
                 combatBonuses: builder.combatBonuses,
-                allowedRaces: Array(builder.allowedRaces).sorted(),
+                allowedRaceIds: Array(builder.allowedRaceIds).sorted(),
                 allowedJobs: Array(builder.allowedJobs).sorted(),
-                allowedGenders: Array(builder.allowedGenders).sorted(),
-                bypassRaceRestrictions: Array(builder.bypassRaceRestrictions).sorted(),
+                allowedGenderCodes: Array(builder.allowedGenderCodes).sorted(),
+                bypassRaceIds: Array(builder.bypassRaceIds).sorted(),
                 grantedSkills: builder.grantedSkills.sorted { $0.orderIndex < $1.orderIndex }
             )
         }

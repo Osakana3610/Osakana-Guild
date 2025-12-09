@@ -170,6 +170,13 @@ struct DecodedSkillEffectPayload: Sendable, Hashable {
         }
         return value
     }
+
+    func requireStringArray(_ key: String, skillId: UInt16, effectIndex: Int) throws -> [String] {
+        guard let array = self.stringArrayValues[key] else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.rawValue) の必須配列 \(key) がありません")
+        }
+        return array
+    }
 }
 
 // MARK: - Payload Decoder

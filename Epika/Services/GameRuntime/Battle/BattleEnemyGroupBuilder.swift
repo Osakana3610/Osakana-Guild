@@ -59,7 +59,6 @@ struct BattleEnemyGroupBuilder {
                     resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
                 }
                 let identifier = "\(group.definition.id)_\(slotIndex)"
-                let raceCategory = raceDefinitions[group.definition.raceId]?.category ?? "enemy"
                 let actor = BattleActor(identifier: identifier,
                                         displayName: group.definition.name,
                                         kind: .enemy,
@@ -76,7 +75,6 @@ struct BattleEnemyGroupBuilder {
                                         avatarIndex: nil,
                                         isMartialEligible: false,
                                         raceId: group.definition.raceId,
-                                        raceCategory: raceCategory,
                                         snapshot: snapshot,
                                         currentHP: snapshot.maxHP,
                                         actionRates: BattleActionRates(attack: group.definition.actionRates.attack,
@@ -133,7 +131,6 @@ struct BattleEnemyGroupBuilder {
                 resources.setCharges(for: .breath, value: current + skillEffects.breathExtraCharges)
             }
             let identifier = index == 0 ? String(definition.id) : "\(definition.id)_\(index)"
-            let raceCategory = raceDefinitions[definition.raceId]?.category ?? "enemy"
             let actor = BattleActor(identifier: identifier,
                                     displayName: definition.name,
                                     kind: .enemy,
@@ -150,8 +147,7 @@ struct BattleEnemyGroupBuilder {
                                     avatarIndex: nil,
                                     isMartialEligible: false,
                                     raceId: definition.raceId,
-                                        raceCategory: raceCategory,
-                                        snapshot: snapshot,
+                                    snapshot: snapshot,
                                         currentHP: snapshot.maxHP,
                                         actionRates: BattleActionRates(attack: definition.actionRates.attack,
                                                                        priestMagic: definition.actionRates.priestMagic,

@@ -222,26 +222,15 @@ struct BattleActor: Sendable {
         }
 
         struct TargetMultipliers: Sendable, Hashable {
-            private var storage: [String: Double]
+            private var storage: [UInt8: Double]
 
-            init(storage: [String: Double] = [:]) {
+            init(storage: [UInt8: Double] = [:]) {
                 self.storage = storage
             }
 
-            func value(for rawCategory: String?) -> Double {
-                guard let raw = rawCategory else { return 1.0 }
-                return storage[raw, default: 1.0]
-            }
-
-            static func == (lhs: TargetMultipliers, rhs: TargetMultipliers) -> Bool {
-                lhs.storage == rhs.storage
-            }
-
-            func hash(into hasher: inout Hasher) {
-                for key in storage.keys.sorted() {
-                    hasher.combine(key)
-                    hasher.combine(storage[key])
-                }
+            func value(for raceId: UInt8?) -> Double {
+                guard let id = raceId else { return 1.0 }
+                return storage[id, default: 1.0]
             }
 
             static let neutral = TargetMultipliers()
@@ -610,7 +599,6 @@ struct BattleActor: Sendable {
     let avatarIndex: UInt16?
     let isMartialEligible: Bool
     let raceId: UInt8?
-    let raceCategory: String?
     let enemyMasterIndex: UInt16?  // 敵の場合のみ、EnemyDefinition.index
 
     var snapshot: RuntimeCharacterProgress.Combat
@@ -664,7 +652,6 @@ struct BattleActor: Sendable {
          avatarIndex: UInt16? = nil,
          isMartialEligible: Bool,
          raceId: UInt8? = nil,
-         raceCategory: String? = nil,
          enemyMasterIndex: UInt16? = nil,
          snapshot: RuntimeCharacterProgress.Combat,
          currentHP: Int,
@@ -716,7 +703,6 @@ struct BattleActor: Sendable {
         self.avatarIndex = avatarIndex
         self.isMartialEligible = isMartialEligible
         self.raceId = raceId
-        self.raceCategory = raceCategory
         self.enemyMasterIndex = enemyMasterIndex
         self.snapshot = snapshot
         self.currentHP = max(0, min(snapshot.maxHP, currentHP))

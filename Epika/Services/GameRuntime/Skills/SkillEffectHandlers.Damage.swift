@@ -66,9 +66,12 @@ struct DamageDealtMultiplierAgainstHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let category = try payload.requireParam("targetCategory", skillId: context.skillId, effectIndex: context.effectIndex)
+        let raceIds = try payload.requireStringArray("targetRaceIds", skillId: context.skillId, effectIndex: context.effectIndex)
         let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
-        accumulator.damage.targetMultipliers[category, default: 1.0] *= multiplier
+        for raceIdValue in raceIds {
+            guard let raceId = UInt8(raceIdValue) else { continue }
+            accumulator.damage.targetMultipliers[raceId, default: 1.0] *= multiplier
+        }
     }
 }
 
