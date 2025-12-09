@@ -15,12 +15,12 @@
       },
       "isBoss": false,
       "baseStats": {
-        "strength": 18,
+        "strength": 8,
         "wisdom": 5,
-        "spirit": 8,
-        "vitality": 12,
-        "agility": 20,
-        "luck": 10
+        "spirit": 6,
+        "vitality": 6,
+        "agility": 9,
+        "luck": 6
       },
       "drops": [1, 2],
       "category": "enemy",
@@ -41,12 +41,12 @@
       },
       "isBoss": false,
       "baseStats": {
-        "strength": 45,
-        "wisdom": 8,
-        "spirit": 15,
-        "vitality": 25,
-        "agility": 12,
-        "luck": 8
+        "strength": 12,
+        "wisdom": 5,
+        "spirit": 7,
+        "vitality": 10,
+        "agility": 6,
+        "luck": 5
       },
       "drops": [2, 3],
       "category": "enemy",
@@ -69,11 +69,11 @@
       },
       "isBoss": false,
       "baseStats": {
-        "strength": 15,
-        "wisdom": 35,
-        "spirit": 28,
-        "vitality": 18,
-        "agility": 15,
+        "strength": 6,
+        "wisdom": 11,
+        "spirit": 9,
+        "vitality": 7,
+        "agility": 7,
         "luck": 5
       },
       "drops": [3, 4],
@@ -84,7 +84,7 @@
       "id": 3,
       "baseName": "クリスタルスライム",
       "race": "ooze",
-      "baseExperience": 120,
+      "baseExperience": 50,
       "skills": [],
       "resistances": {
         "physical": 0.4,
@@ -96,12 +96,12 @@
       },
       "isBoss": false,
       "baseStats": {
-        "strength": 12,
-        "wisdom": 25,
-        "spirit": 35,
-        "vitality": 8,
-        "agility": 8,
-        "luck": 18
+        "strength": 5,
+        "wisdom": 7,
+        "spirit": 8,
+        "vitality": 6,
+        "agility": 5,
+        "luck": 9
       },
       "drops": [4, 5],
       "category": "enemy",
@@ -123,12 +123,12 @@
       },
       "isBoss": false,
       "baseStats": {
-        "strength": 38,
-        "wisdom": 15,
-        "spirit": 18,
-        "vitality": 20,
-        "agility": 35,
-        "luck": 22
+        "strength": 11,
+        "wisdom": 6,
+        "spirit": 7,
+        "vitality": 8,
+        "agility": 12,
+        "luck": 8
       },
       "drops": [5, 6],
       "category": "enemy",
@@ -152,12 +152,12 @@
       },
       "isBoss": true,
       "baseStats": {
-        "strength": 120,
-        "wisdom": 150,
-        "spirit": 100,
-        "vitality": 80,
-        "agility": 25,
-        "luck": 30
+        "strength": 15,
+        "wisdom": 15,
+        "spirit": 14,
+        "vitality": 15,
+        "agility": 10,
+        "luck": 12
       },
       "drops": [6, 7, 8],
       "category": "enemy",
@@ -178,12 +178,12 @@
       },
       "isBoss": true,
       "baseStats": {
-        "strength": 28,
-        "wisdom": 8,
-        "spirit": 12,
-        "vitality": 18,
-        "agility": 25,
-        "luck": 15
+        "strength": 10,
+        "wisdom": 6,
+        "spirit": 7,
+        "vitality": 9,
+        "agility": 10,
+        "luck": 7
       },
       "drops": [1, 3],
       "category": "enemy",
@@ -205,12 +205,12 @@
       },
       "isBoss": false,
       "baseStats": {
-        "strength": 20,
-        "wisdom": 45,
-        "spirit": 40,
-        "vitality": 25,
-        "agility": 30,
-        "luck": 25
+        "strength": 7,
+        "wisdom": 12,
+        "spirit": 11,
+        "vitality": 8,
+        "agility": 10,
+        "luck": 9
       },
       "drops": [7, 8],
       "category": "enemy",
@@ -232,11 +232,11 @@
       },
       "isBoss": true,
       "baseStats": {
-        "strength": 40,
-        "wisdom": 20,
-        "spirit": 35,
-        "vitality": 50,
-        "agility": 10,
+        "strength": 12,
+        "wisdom": 6,
+        "spirit": 10,
+        "vitality": 14,
+        "agility": 5,
         "luck": 5
       },
       "drops": [8, 9],
@@ -259,12 +259,12 @@
       },
       "isBoss": true,
       "baseStats": {
-        "strength": 60,
-        "wisdom": 70,
-        "spirit": 55,
-        "vitality": 45,
-        "agility": 15,
-        "luck": 30
+        "strength": 13,
+        "wisdom": 13,
+        "spirit": 12,
+        "vitality": 13,
+        "agility": 7,
+        "luck": 10
       },
       "drops": [9, 10],
       "category": "enemy",
