@@ -252,7 +252,7 @@ final class AdventureViewState {
             return
         }
         do {
-            try await progressService.cancelExplorationRun(runId: running.id)
+            try await progressService.cancelPersistedExplorationRun(partyId: running.party.partyId, startedAt: running.startedAt)
             await loadExplorationProgress()
         } catch {
             present(error: error)

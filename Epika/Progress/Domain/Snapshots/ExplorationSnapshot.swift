@@ -51,13 +51,17 @@ struct ExplorationSnapshot: Sendable, Hashable {
         var body: String
     }
 
-    var id: UUID
     var dungeonId: UInt16
     var displayDungeonName: String
     var activeFloorNumber: Int
     var party: PartySummary
     var startedAt: Date
     var lastUpdatedAt: Date
+
+    /// Identifiable用のID（startedAtのミリ秒タイムスタンプ）
+    var id: Int64 {
+        Int64(startedAt.timeIntervalSince1970 * 1000)
+    }
     var expectedReturnAt: Date?
     var encounterLogs: [EncounterLog]
     var rewards: [String: Int]
