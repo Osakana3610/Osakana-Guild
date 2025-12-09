@@ -87,4 +87,9 @@ extension ProgressService {
         // but runtime cancellation handles the active session.
         // The persistence record will be cleaned up by purge logic.
     }
+
+    /// partyIdとstartedAtで永続化Runをキャンセル
+    func cancelPersistedExplorationRun(partyId: UInt8, startedAt: Date) async throws {
+        try await exploration.cancelRun(partyId: partyId, startedAt: startedAt)
+    }
 }

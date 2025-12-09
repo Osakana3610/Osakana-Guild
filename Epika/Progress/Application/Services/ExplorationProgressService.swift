@@ -107,6 +107,20 @@ final class ExplorationProgressService {
         runRecord.result = ExplorationResult.cancelled.rawValue
         try saveIfNeeded(context)
     }
+
+    /// partyIdとstartedAtで特定のRunをキャンセル
+    func cancelRun(partyId: UInt8, startedAt: Date, endedAt: Date = Date()) async throws {
+        let context = makeContext()
+        let descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+        )
+        guard let record = try context.fetch(descriptor).first else {
+            throw ProgressPersistenceError.explorationRunNotFound(runId: UUID())
+        }
+        record.endedAt = endedAt
+        record.result = ExplorationResult.cancelled.rawValue
+        try saveIfNeeded(context)
+    }
 }
 
 // MARK: - Private Helpers
@@ -314,7 +328,6 @@ private extension ExplorationProgressService {
         )
 
         return ExplorationSnapshot(
-            id: UUID(),  // 新構造ではUUIDは識別子として使わない
             dungeonId: run.dungeonId,
             displayDungeonName: displayDungeonName,
             activeFloorNumber: Int(run.finalFloor),
