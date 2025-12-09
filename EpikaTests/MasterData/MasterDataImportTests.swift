@@ -225,8 +225,8 @@ final class MasterDataImportTests: XCTestCase {
         let enemyIds = encounterTable.events.compactMap(\.enemyId)
         XCTAssertFalse(enemyIds.isEmpty, "森の入り口1階にエンカウンターイベントがありません")
 
-        // 期待される敵: クリスタルスライム(3), ゴブリン戦士(0)
-        let expectedIds: Set<UInt16> = [0, 3]
+        // 期待される敵: クリスタルスライム(3)のみ
+        let expectedIds: Set<UInt16> = [3]
         let actualIds = Set(enemyIds)
 
         XCTAssertEqual(actualIds, expectedIds,

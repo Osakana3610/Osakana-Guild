@@ -5,14 +5,6 @@
       "baseName": "ゴブリン戦士",
       "race": "goblinoid",
       "baseExperience": 75,
-      "baseStats": {
-        "strength": 18,
-        "wisdom": 5,
-        "spirit": 8,
-        "vitality": 12,
-        "agility": 20,
-        "luck": 10
-      },
       "skills": [],
       "resistances": {
         "physical": 0.0,
@@ -21,35 +13,8 @@
         "ice": 0.1,
         "poison": 0.3
       },
-      "variations": [
-        "fierce",
-        "sneaky"
-      ],
-      "titleRank": "lowest",
-      "titleJudgmentCount": 1,
       "isBoss": false,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "coin_old",
-            "dropRate": 0.8,
-            "isRare": false
-          },
-          {
-            "itemId": "goblin_ear",
-            "dropRate": 0.4,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "sharp_fang",
-            "dropRate": 0.15,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 18,
         "wisdom": 5,
         "spirit": 8,
@@ -57,13 +22,7 @@
         "agility": 20,
         "luck": 10
       },
-      "baseHP": 85,
-      "drops": [
-        "coin_old",
-        "goblin_ear",
-        "sharp_fang"
-      ],
-      "baseLevel": 5,
+      "drops": [1, 2],
       "category": "enemy",
       "job": null
     },
@@ -72,14 +31,6 @@
       "baseName": "オークの狂戦士",
       "race": "orcish",
       "baseExperience": 240,
-      "baseStats": {
-        "strength": 45,
-        "wisdom": 8,
-        "spirit": 15,
-        "vitality": 25,
-        "agility": 12,
-        "luck": 8
-      },
       "skills": [],
       "resistances": {
         "physical": 0.15,
@@ -88,41 +39,8 @@
         "ice": -0.2,
         "charm": 0.8
       },
-      "variations": [
-        "warrior",
-        "berserker",
-        "chieftain"
-      ],
-      "titleRank": "masterwork",
-      "titleJudgmentCount": 1,
       "isBoss": false,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "coin_old",
-            "dropRate": 0.7,
-            "isRare": false
-          },
-          {
-            "itemId": "orc_fang",
-            "dropRate": 0.5,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "ruby",
-            "dropRate": 0.12,
-            "isRare": true
-          },
-          {
-            "itemId": "wolf_fur",
-            "dropRate": 0.08,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 45,
         "wisdom": 8,
         "spirit": 15,
@@ -130,14 +48,7 @@
         "agility": 12,
         "luck": 8
       },
-      "baseHP": 220,
-      "drops": [
-        "coin_old",
-        "orc_fang",
-        "ruby",
-        "wolf_fur"
-      ],
-      "baseLevel": 12,
+      "drops": [2, 3],
       "category": "enemy",
       "job": null
     },
@@ -146,14 +57,6 @@
       "baseName": "スケルトンメイジ",
       "race": "undead",
       "baseExperience": 150,
-      "baseStats": {
-        "strength": 15,
-        "wisdom": 35,
-        "spirit": 28,
-        "vitality": 18,
-        "agility": 15,
-        "luck": 5
-      },
       "skills": [],
       "resistances": {
         "physical": 0.3,
@@ -164,39 +67,8 @@
         "death": 1.0,
         "holy": -0.5
       },
-      "variations": [
-        "ancient",
-        "mage",
-        "warrior"
-      ],
       "isBoss": false,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "coin_old",
-            "dropRate": 0.4,
-            "isRare": false
-          },
-          {
-            "itemId": "bone_fragment",
-            "dropRate": 0.9,
-            "isRare": false
-          },
-          {
-            "itemId": "curse_powder",
-            "dropRate": 0.3,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "shadow_essence",
-            "dropRate": 0.1,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 15,
         "wisdom": 35,
         "spirit": 28,
@@ -204,14 +76,7 @@
         "agility": 15,
         "luck": 5
       },
-      "baseHP": 120,
-      "drops": [
-        "coin_old",
-        "bone_fragment",
-        "curse_powder",
-        "shadow_essence"
-      ],
-      "baseLevel": 10,
+      "drops": [3, 4],
       "category": "enemy",
       "job": null
     },
@@ -220,14 +85,6 @@
       "baseName": "クリスタルスライム",
       "race": "ooze",
       "baseExperience": 120,
-      "baseStats": {
-        "strength": 12,
-        "wisdom": 25,
-        "spirit": 35,
-        "vitality": 8,
-        "agility": 8,
-        "luck": 18
-      },
       "skills": [],
       "resistances": {
         "physical": 0.4,
@@ -237,39 +94,8 @@
         "poison": 0.9,
         "earth": 0.6
       },
-      "variations": [
-        "giant",
-        "poisonous",
-        "crystal"
-      ],
       "isBoss": false,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "coin_old",
-            "dropRate": 0.7,
-            "isRare": false
-          },
-          {
-            "itemId": "slime_jelly",
-            "dropRate": 0.95,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "crystal_core",
-            "dropRate": 0.25,
-            "isRare": true
-          },
-          {
-            "itemId": "magic_crystal",
-            "dropRate": 0.05,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 12,
         "wisdom": 25,
         "spirit": 35,
@@ -277,14 +103,7 @@
         "agility": 8,
         "luck": 18
       },
-      "baseHP": 150,
-      "drops": [
-        "coin_old",
-        "slime_jelly",
-        "crystal_core",
-        "magic_crystal"
-      ],
-      "baseLevel": 8,
+      "drops": [4, 5],
       "category": "enemy",
       "job": null
     },
@@ -293,14 +112,6 @@
       "baseName": "シャドウウルフ",
       "race": "beast",
       "baseExperience": 300,
-      "baseStats": {
-        "strength": 38,
-        "wisdom": 15,
-        "spirit": 18,
-        "vitality": 20,
-        "agility": 35,
-        "luck": 22
-      },
       "skills": [],
       "resistances": {
         "physical": 0.1,
@@ -310,39 +121,8 @@
         "dark": 0.8,
         "light": -0.3
       },
-      "variations": [
-        "alpha",
-        "shadow",
-        "winter"
-      ],
       "isBoss": false,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "coin_old",
-            "dropRate": 0.5,
-            "isRare": false
-          },
-          {
-            "itemId": "wolf_fur",
-            "dropRate": 0.8,
-            "isRare": false
-          },
-          {
-            "itemId": "sharp_fang",
-            "dropRate": 0.6,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "shadow_essence",
-            "dropRate": 0.15,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 38,
         "wisdom": 15,
         "spirit": 18,
@@ -350,14 +130,7 @@
         "agility": 35,
         "luck": 22
       },
-      "baseHP": 180,
-      "drops": [
-        "coin_old",
-        "wolf_fur",
-        "sharp_fang",
-        "shadow_essence"
-      ],
-      "baseLevel": 15,
+      "drops": [5, 6],
       "category": "enemy",
       "job": null
     },
@@ -366,14 +139,6 @@
       "baseName": "古代竜アンシエント",
       "race": "dragon",
       "baseExperience": 1500,
-      "baseStats": {
-        "strength": 120,
-        "wisdom": 150,
-        "spirit": 100,
-        "vitality": 80,
-        "agility": 25,
-        "luck": 30
-      },
       "skills": [],
       "resistances": {
         "physical": 0.3,
@@ -385,44 +150,8 @@
         "poison": 0.7,
         "charm": 0.9
       },
-      "variations": [
-        "ancient",
-        "elder",
-        "wyrm"
-      ],
       "isBoss": true,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "coin_old",
-            "dropRate": 0.3,
-            "isRare": false
-          },
-          {
-            "itemId": "dragon_scale",
-            "dropRate": 1.0,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "dragon_heart",
-            "dropRate": 0.8,
-            "isRare": true
-          },
-          {
-            "itemId": "ancient_treasure",
-            "dropRate": 0.5,
-            "isRare": true
-          },
-          {
-            "itemId": "diamond",
-            "dropRate": 0.05,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 120,
         "wisdom": 150,
         "spirit": 100,
@@ -430,15 +159,7 @@
         "agility": 25,
         "luck": 30
       },
-      "baseHP": 2500,
-      "drops": [
-        "coin_old",
-        "dragon_scale",
-        "dragon_heart",
-        "ancient_treasure",
-        "diamond"
-      ],
-      "baseLevel": 50,
+      "drops": [6, 7, 8],
       "category": "enemy",
       "job": null
     },
@@ -447,14 +168,6 @@
       "baseName": "ゴブリンキャプテン",
       "race": "goblinoid",
       "baseExperience": 120,
-      "baseStats": {
-        "strength": 28,
-        "wisdom": 8,
-        "spirit": 12,
-        "vitality": 18,
-        "agility": 25,
-        "luck": 15
-      },
       "skills": [],
       "resistances": {
         "physical": 0.1,
@@ -463,33 +176,8 @@
         "ice": 0.1,
         "poison": 0.3
       },
-      "variations": [
-        "fierce",
-        "sneaky"
-      ],
       "isBoss": true,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "coin_old",
-            "dropRate": 0.9,
-            "isRare": false
-          },
-          {
-            "itemId": "wolf_fur",
-            "dropRate": 0.5,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "emerald",
-            "dropRate": 0.2,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 28,
         "wisdom": 8,
         "spirit": 12,
@@ -497,13 +185,7 @@
         "agility": 25,
         "luck": 15
       },
-      "baseHP": 150,
-      "drops": [
-        "coin_old",
-        "wolf_fur",
-        "emerald"
-      ],
-      "baseLevel": 8,
+      "drops": [1, 3],
       "category": "enemy",
       "job": null
     },
@@ -512,14 +194,6 @@
       "baseName": "森の精霊",
       "race": "spirit",
       "baseExperience": 240,
-      "baseStats": {
-        "strength": 20,
-        "wisdom": 45,
-        "spirit": 40,
-        "vitality": 25,
-        "agility": 30,
-        "luck": 25
-      },
       "skills": [],
       "resistances": {
         "physical": 0.3,
@@ -529,33 +203,8 @@
         "earth": 0.8,
         "poison": 0.9
       },
-      "variations": [
-        "ancient",
-        "nature"
-      ],
       "isBoss": false,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "nature_fragment",
-            "dropRate": 0.8,
-            "isRare": false
-          },
-          {
-            "itemId": "healing_herb",
-            "dropRate": 0.7,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "ancient_sap",
-            "dropRate": 0.15,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 20,
         "wisdom": 45,
         "spirit": 40,
@@ -563,13 +212,7 @@
         "agility": 30,
         "luck": 25
       },
-      "baseHP": 200,
-      "drops": [
-        "nature_fragment",
-        "healing_herb",
-        "ancient_sap"
-      ],
-      "baseLevel": 12,
+      "drops": [7, 8],
       "category": "enemy",
       "job": null
     },
@@ -578,14 +221,6 @@
       "baseName": "洞窟の守護者",
       "race": "golem",
       "baseExperience": 300,
-      "baseStats": {
-        "strength": 40,
-        "wisdom": 20,
-        "spirit": 35,
-        "vitality": 50,
-        "agility": 10,
-        "luck": 5
-      },
       "skills": [],
       "resistances": {
         "physical": 0.4,
@@ -595,33 +230,8 @@
         "earth": 0.9,
         "poison": 1.0
       },
-      "variations": [
-        "stone",
-        "crystal"
-      ],
       "isBoss": true,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "stone_fragment",
-            "dropRate": 0.9,
-            "isRare": false
-          },
-          {
-            "itemId": "ore",
-            "dropRate": 0.8,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "golem_fragment",
-            "dropRate": 0.25,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 40,
         "wisdom": 20,
         "spirit": 35,
@@ -629,13 +239,7 @@
         "agility": 10,
         "luck": 5
       },
-      "baseHP": 300,
-      "drops": [
-        "stone_fragment",
-        "ore",
-        "golem_fragment"
-      ],
-      "baseLevel": 15,
+      "drops": [8, 9],
       "category": "enemy",
       "job": null
     },
@@ -644,14 +248,6 @@
       "baseName": "森の番人",
       "race": "treant",
       "baseExperience": 400,
-      "baseStats": {
-        "strength": 60,
-        "wisdom": 70,
-        "spirit": 55,
-        "vitality": 45,
-        "agility": 15,
-        "luck": 30
-      },
       "skills": [],
       "resistances": {
         "physical": 0.3,
@@ -661,38 +257,8 @@
         "earth": 0.8,
         "poison": 0.9
       },
-      "variations": [
-        "ancient",
-        "elder"
-      ],
       "isBoss": true,
-      "dropTable": {
-        "normalItems": [
-          {
-            "itemId": "ancient_sap",
-            "dropRate": 1.0,
-            "isRare": false
-          },
-          {
-            "itemId": "guardian_seed",
-            "dropRate": 0.8,
-            "isRare": false
-          }
-        ],
-        "rareItems": [
-          {
-            "itemId": "golem_core",
-            "dropRate": 0.4,
-            "isRare": true
-          },
-          {
-            "itemId": "nature_fragment",
-            "dropRate": 0.3,
-            "isRare": true
-          }
-        ]
-      },
-      "baseAttributes": {
+      "baseStats": {
         "strength": 60,
         "wisdom": 70,
         "spirit": 55,
@@ -700,14 +266,7 @@
         "agility": 15,
         "luck": 30
       },
-      "baseHP": 500,
-      "drops": [
-        "ancient_sap",
-        "guardian_seed",
-        "golem_core",
-        "nature_fragment"
-      ],
-      "baseLevel": 20,
+      "drops": [9, 10],
       "category": "enemy",
       "job": null
     }
