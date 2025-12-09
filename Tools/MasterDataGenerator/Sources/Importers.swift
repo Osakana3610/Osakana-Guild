@@ -1004,8 +1004,8 @@ private struct EnemyMasterFile: Decodable {
         let skills: [Int]
         let resistances: [String: Double]
         let isBoss: Bool
-        let drops: [String]
-        let baseAttributes: [String: Int]
+        let drops: [Int]
+        let baseStats: [String: Int]
         let category: String
         let job: String?
     }
@@ -1073,13 +1073,13 @@ extension Generator {
                 try step(enemyStatement)
                 reset(enemyStatement)
 
-                guard let strength = enemy.baseAttributes["strength"],
-                      let wisdom = enemy.baseAttributes["wisdom"],
-                      let spirit = enemy.baseAttributes["spirit"],
-                      let vitality = enemy.baseAttributes["vitality"],
-                      let agility = enemy.baseAttributes["agility"],
-                      let luck = enemy.baseAttributes["luck"] else {
-                    throw GeneratorError.executionFailed("Enemy \(enemy.id) の baseAttributes が不完全です")
+                guard let strength = enemy.baseStats["strength"],
+                      let wisdom = enemy.baseStats["wisdom"],
+                      let spirit = enemy.baseStats["spirit"],
+                      let vitality = enemy.baseStats["vitality"],
+                      let agility = enemy.baseStats["agility"],
+                      let luck = enemy.baseStats["luck"] else {
+                    throw GeneratorError.executionFailed("Enemy \(enemy.id) の baseStats が不完全です")
                 }
 
                 bindInt(statsStatement, index: 1, value: enemy.id)
@@ -1108,10 +1108,10 @@ extension Generator {
                     reset(skillStatement)
                 }
 
-                for (index, item) in enemy.drops.enumerated() {
+                for (index, itemId) in enemy.drops.enumerated() {
                     bindInt(dropStatement, index: 1, value: enemy.id)
                     bindInt(dropStatement, index: 2, value: index)
-                    bindText(dropStatement, index: 3, value: item)
+                    bindInt(dropStatement, index: 3, value: itemId)
                     try step(dropStatement)
                     reset(dropStatement)
                 }

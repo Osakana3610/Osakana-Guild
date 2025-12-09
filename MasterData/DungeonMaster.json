@@ -43,24 +43,9 @@
       "titleRank": 0,
       "floorEnemyMapping": [
         {
-          "floorRange": [1, 1],
+          "floorRange": [1, 3],
           "enemyGroups": [
-            { "enemyId": 3, "weight": 40, "minLevel": 1, "maxLevel": 3 },
-            { "enemyId": 0, "weight": 60, "minLevel": 2, "maxLevel": 4 }
-          ]
-        },
-        {
-          "floorRange": [2, 2],
-          "enemyGroups": [
-            { "enemyId": 0, "weight": 50, "minLevel": 3, "maxLevel": 5 },
-            { "enemyId": 4, "weight": 50, "minLevel": 5, "maxLevel": 5 }
-          ]
-        },
-        {
-          "floorRange": [3, 3],
-          "enemyGroups": [
-            { "enemyId": 4, "weight": 40, "minLevel": 4, "maxLevel": 6 },
-            { "enemyId": 7, "weight": 30, "minLevel": 5, "maxLevel": 7 }
+            { "enemyId": 3, "weight": 100, "minLevel": 1, "maxLevel": 2 }
           ]
         }
       ],

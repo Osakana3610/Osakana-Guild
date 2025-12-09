@@ -366,7 +366,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS enemy_drops (
                 enemy_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                item_id TEXT NOT NULL,
+                item_id INTEGER NOT NULL,
                 PRIMARY KEY (enemy_id, order_index),
                 FOREIGN KEY (enemy_id) REFERENCES enemies(id) ON DELETE CASCADE
             );
