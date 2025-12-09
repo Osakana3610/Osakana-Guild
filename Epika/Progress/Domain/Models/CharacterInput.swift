@@ -56,18 +56,6 @@ extension CharacterInput {
         )
     }
 
-    /// 装備アイテムの中間表現
-    struct EquippedItem: Sendable, Hashable {
-        let superRareTitleId: UInt8
-        let normalTitleId: UInt8
-        let itemId: UInt16
-        let socketSuperRareTitleId: UInt8
-        let socketNormalTitleId: UInt8
-        let socketItemId: UInt16
-        let quantity: Int
-
-        var stackKey: String {
-            "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
-        }
-    }
+    /// 装備アイテムの中間表現（CharacterValues.EquippedItemと統一）
+    typealias EquippedItem = CharacterValues.EquippedItem
 }
