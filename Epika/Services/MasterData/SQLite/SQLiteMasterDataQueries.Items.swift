@@ -4,6 +4,79 @@ import SQLite3
 // MARK: - Items
 extension SQLiteMasterDataManager {
     func fetchAllItems() throws -> [ItemDefinition] {
+        struct StatBonusesBuilder {
+            var strength: Int = 0
+            var wisdom: Int = 0
+            var spirit: Int = 0
+            var vitality: Int = 0
+            var agility: Int = 0
+            var luck: Int = 0
+
+            mutating func apply(stat: String, value: Int) {
+                switch stat {
+                case "strength": strength = value
+                case "wisdom": wisdom = value
+                case "spirit": spirit = value
+                case "vitality": vitality = value
+                case "agility": agility = value
+                case "luck": luck = value
+                default: break
+                }
+            }
+
+            func build() -> ItemDefinition.StatBonuses {
+                ItemDefinition.StatBonuses(
+                    strength: strength, wisdom: wisdom, spirit: spirit,
+                    vitality: vitality, agility: agility, luck: luck
+                )
+            }
+        }
+
+        struct CombatBonusesBuilder {
+            var maxHP: Int = 0
+            var physicalAttack: Int = 0
+            var magicalAttack: Int = 0
+            var physicalDefense: Int = 0
+            var magicalDefense: Int = 0
+            var hitRate: Int = 0
+            var evasionRate: Int = 0
+            var criticalRate: Int = 0
+            var attackCount: Int = 0
+            var magicalHealing: Int = 0
+            var trapRemoval: Int = 0
+            var additionalDamage: Int = 0
+            var breathDamage: Int = 0
+
+            mutating func apply(stat: String, value: Int) {
+                switch stat {
+                case "maxHP": maxHP = value
+                case "physicalAttack": physicalAttack = value
+                case "magicalAttack": magicalAttack = value
+                case "physicalDefense": physicalDefense = value
+                case "magicalDefense": magicalDefense = value
+                case "hitRate": hitRate = value
+                case "evasionRate": evasionRate = value
+                case "criticalRate": criticalRate = value
+                case "attackCount": attackCount = value
+                case "magicalHealing": magicalHealing = value
+                case "trapRemoval": trapRemoval = value
+                case "additionalDamage": additionalDamage = value
+                case "breathDamage": breathDamage = value
+                default: break
+                }
+            }
+
+            func build() -> ItemDefinition.CombatBonuses {
+                ItemDefinition.CombatBonuses(
+                    maxHP: maxHP, physicalAttack: physicalAttack, magicalAttack: magicalAttack,
+                    physicalDefense: physicalDefense, magicalDefense: magicalDefense,
+                    hitRate: hitRate, evasionRate: evasionRate, criticalRate: criticalRate, attackCount: attackCount,
+                    magicalHealing: magicalHealing, trapRemoval: trapRemoval,
+                    additionalDamage: additionalDamage, breathDamage: breathDamage
+                )
+            }
+        }
+
         struct Builder {
             var id: UInt16
             var name: String
@@ -12,13 +85,13 @@ extension SQLiteMasterDataManager {
             var basePrice: Int
             var sellValue: Int
             var rarity: String?
-            var statBonuses: [ItemDefinition.StatBonus] = []
-            var combatBonuses: [ItemDefinition.CombatBonus] = []
+            var statBonuses = StatBonusesBuilder()
+            var combatBonuses = CombatBonusesBuilder()
             var allowedRaceIds: Set<UInt8> = []
             var allowedJobs: Set<String> = []
             var allowedGenderCodes: Set<UInt8> = []
             var bypassRaceIds: Set<UInt8> = []
-            var grantedSkills: [ItemDefinition.GrantedSkill] = []
+            var grantedSkillIds: [UInt16] = []
         }
 
         var builders: [UInt16: Builder] = [:]
@@ -65,14 +138,14 @@ extension SQLiteMasterDataManager {
             guard let statC = sqlite3_column_text(statement, 1) else { return }
             let stat = String(cString: statC)
             let value = Int(sqlite3_column_int(statement, 2))
-            builder.statBonuses.append(.init(stat: stat, value: value))
+            builder.statBonuses.apply(stat: stat, value: value)
         }
 
         try applyPairs(sql: "SELECT item_id, stat, value FROM item_combat_bonuses;") { builder, statement in
             guard let statC = sqlite3_column_text(statement, 1) else { return }
             let stat = String(cString: statC)
             let value = Int(sqlite3_column_int(statement, 2))
-            builder.combatBonuses.append(.init(stat: stat, value: value))
+            builder.combatBonuses.apply(stat: stat, value: value)
         }
 
         try applyPairs(sql: "SELECT item_id, race_id FROM item_allowed_races;") { builder, statement in
@@ -95,14 +168,14 @@ extension SQLiteMasterDataManager {
             builder.bypassRaceIds.insert(raceId)
         }
 
-        let skillStatement = try prepare("SELECT item_id, order_index, skill_id FROM item_granted_skills ORDER BY item_id, order_index;")
+        // ORDER BY order_index で取得しているため、配列の順序は保持される
+        let skillStatement = try prepare("SELECT item_id, skill_id FROM item_granted_skills ORDER BY item_id, order_index;")
         defer { sqlite3_finalize(skillStatement) }
         while sqlite3_step(skillStatement) == SQLITE_ROW {
             let id = UInt16(sqlite3_column_int(skillStatement, 0))
             guard var builder = builders[id] else { continue }
-            let order = Int(sqlite3_column_int(skillStatement, 1))
-            let skillId = UInt16(sqlite3_column_int(skillStatement, 2))
-            builder.grantedSkills.append(.init(orderIndex: order, skillId: skillId))
+            let skillId = UInt16(sqlite3_column_int(skillStatement, 1))
+            builder.grantedSkillIds.append(skillId)
             builders[builder.id] = builder
         }
 
@@ -115,13 +188,13 @@ extension SQLiteMasterDataManager {
                 basePrice: builder.basePrice,
                 sellValue: builder.sellValue,
                 rarity: builder.rarity,
-                statBonuses: builder.statBonuses,
-                combatBonuses: builder.combatBonuses,
+                statBonuses: builder.statBonuses.build(),
+                combatBonuses: builder.combatBonuses.build(),
                 allowedRaceIds: Array(builder.allowedRaceIds).sorted(),
                 allowedJobs: Array(builder.allowedJobs).sorted(),
                 allowedGenderCodes: Array(builder.allowedGenderCodes).sorted(),
                 bypassRaceIds: Array(builder.bypassRaceIds).sorted(),
-                grantedSkills: builder.grantedSkills.sorted { $0.orderIndex < $1.orderIndex }
+                grantedSkillIds: builder.grantedSkillIds  // ORDER BY order_index でソート済み
             )
         }
     }

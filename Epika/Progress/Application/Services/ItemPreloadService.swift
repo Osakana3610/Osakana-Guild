@@ -201,11 +201,11 @@ final class ItemPreloadService {
     /// 装備のステータス差分表示を取得
     func getCombatDeltaDisplay(for equipment: RuntimeEquipment) -> [(String, Int)] {
         var deltas: [(String, Int)] = []
-        for bonus in equipment.statBonuses where bonus.value != 0 {
-            deltas.append((label(for: bonus.stat), bonus.value))
+        equipment.statBonuses.forEachNonZero { stat, value in
+            deltas.append((label(for: stat), value))
         }
-        for bonus in equipment.combatBonuses where bonus.value != 0 {
-            deltas.append((label(for: bonus.stat), bonus.value))
+        equipment.combatBonuses.forEachNonZero { stat, value in
+            deltas.append((label(for: stat), value))
         }
         return deltas
     }
