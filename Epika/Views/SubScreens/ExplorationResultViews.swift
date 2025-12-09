@@ -20,12 +20,12 @@ struct ExplorationRunResultSummaryView: View {
 
                     Text("最終到達階層：\(snapshot.summary.floorNumber)F")
 
-                    if let experience = snapshot.rewards["経験値"], experience > 0 {
-                        Text("獲得経験値：\(formatNumber(experience))")
+                    if snapshot.rewards.experience > 0 {
+                        Text("獲得経験値：\(formatNumber(snapshot.rewards.experience))")
                     }
 
-                    if let gold = snapshot.rewards["ゴールド"], gold > 0 {
-                        Text("獲得ゴールド：\(formatNumber(gold))")
+                    if snapshot.rewards.gold > 0 {
+                        Text("獲得ゴールド：\(formatNumber(snapshot.rewards.gold))")
                     }
 
                     if !itemRows.isEmpty {
@@ -78,8 +78,7 @@ struct ExplorationRunResultSummaryView: View {
     }
 
     private var itemRows: [(name: String, count: String)] {
-        snapshot.rewards
-            .filter { key, _ in key != "経験値" && key != "ゴールド" }
+        snapshot.rewards.itemDrops
             .sorted { lhs, rhs in lhs.key.localizedCompare(rhs.key) == .orderedAscending }
             .map { ($0.key, formatNumber($0.value)) }
     }

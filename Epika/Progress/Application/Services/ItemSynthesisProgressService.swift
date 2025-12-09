@@ -68,7 +68,7 @@ actor ItemSynthesisProgressService {
             displayName: synthesisContext.resultDefinition.name,
             description: synthesisContext.resultDefinition.description,
             quantity: Int(snapshot.quantity),
-            category: RuntimeEquipment.Category(from: synthesisContext.resultDefinition.category),
+            category: ItemSaleCategory(masterCategory: synthesisContext.resultDefinition.category),
             baseValue: synthesisContext.resultDefinition.basePrice,
             sellValue: synthesisContext.resultDefinition.sellValue,
             enhancement: .init(

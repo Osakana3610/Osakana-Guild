@@ -8,6 +8,13 @@ struct ExplorationSnapshot: Sendable, Hashable {
         case defeated
     }
 
+    /// 探索報酬（経験値・ゴールド・アイテムドロップ）
+    struct Rewards: Sendable, Hashable {
+        var experience: Int = 0
+        var gold: Int = 0
+        var itemDrops: [String: Int] = [:]  // アイテム名 -> 数量
+    }
+
     struct PartySummary: Sendable, Hashable {
         var partyId: UInt8
         var memberCharacterIds: [UInt8]
@@ -64,7 +71,7 @@ struct ExplorationSnapshot: Sendable, Hashable {
     }
     var expectedReturnAt: Date?
     var encounterLogs: [EncounterLog]
-    var rewards: [String: Int]
+    var rewards: Rewards
     var summary: Summary
     var status: Status
     var metadata: ProgressMetadata

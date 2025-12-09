@@ -81,7 +81,7 @@ private extension TitleInheritanceProgressService {
         return (target, source)
     }
 
-    nonisolated func titleDisplayName(for enhancement: RuntimeEquipment.Enhancement) async throws -> String {
+    nonisolated func titleDisplayName(for enhancement: ItemSnapshot.Enhancement) async throws -> String {
         // 超レア称号があればその名前を返す
         if enhancement.superRareTitleId != 0 {
             if let definition = try await masterDataService.getSuperRareTitle(id: enhancement.superRareTitleId) {

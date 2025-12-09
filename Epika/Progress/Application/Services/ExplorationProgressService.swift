@@ -290,19 +290,15 @@ private extension ExplorationProgressService {
         }
 
         // 報酬集計
-        var rewards: [String: Int] = [:]
-        if run.totalExp > 0 {
-            rewards["経験値"] = Int(run.totalExp)
-        }
-        if run.totalGold > 0 {
-            rewards["ゴールド"] = Int(run.totalGold)
-        }
+        var rewards = ExplorationSnapshot.Rewards()
+        rewards.experience = Int(run.totalExp)
+        rewards.gold = Int(run.totalGold)
 
         for event in events {
             for drop in event.drops {
                 if drop.itemId > 0 {
                     if let item = try await masterData.getItemMasterData(id: drop.itemId) {
-                        rewards[item.name, default: 0] += Int(drop.quantity)
+                        rewards.itemDrops[item.name, default: 0] += Int(drop.quantity)
                     }
                 }
             }

@@ -87,7 +87,32 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
         }
     }
 
-    init(masterCategory: String) {
+    var iconName: String {
+        switch self {
+        case .armor, .heavyArmor, .shield:
+            return "shield"
+        case .bow:
+            return "bow.and.arrow"
+        case .forSynthesis, .mazoMaterial:
+            return "hammer"
+        case .gauntlet:
+            return "hand.raised"
+        case .gem:
+            return "diamond"
+        case .grimoire, .robe:
+            return "book"
+        case .katana, .sword, .thinSword:
+            return "sword"
+        case .raceSpecific:
+            return "person.3"
+        case .rod, .wand:
+            return "wand.and.stars"
+        case .other:
+            return "cube.transparent"
+        }
+    }
+
+    nonisolated init(masterCategory: String) {
         self = ItemSaleCategory(rawValue: masterCategory.lowercased()) ?? .other
     }
 }

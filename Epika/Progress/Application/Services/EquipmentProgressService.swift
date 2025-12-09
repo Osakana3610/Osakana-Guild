@@ -56,7 +56,7 @@ actor EquipmentProgressService {
                 displayName: definition.name,
                 description: definition.description,
                 quantity: Int(record.quantity),
-                category: RuntimeEquipment.Category(from: definition.category),
+                category: ItemSaleCategory(masterCategory: definition.category),
                 baseValue: definition.basePrice,
                 sellValue: definition.sellValue,
                 enhancement: .init(

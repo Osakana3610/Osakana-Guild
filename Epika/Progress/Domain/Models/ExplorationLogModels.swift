@@ -26,12 +26,46 @@ enum EventKind: UInt8, Codable, Sendable {
     case nothing = 0
     case combat = 1
     case scripted = 2
+
+    /// ExplorationSnapshot.EncounterLog.Kindとの相互変換
+    init(_ kind: ExplorationSnapshot.EncounterLog.Kind) {
+        switch kind {
+        case .nothing: self = .nothing
+        case .enemyEncounter: self = .combat
+        case .scriptedEvent: self = .scripted
+        }
+    }
+
+    var snapshotKind: ExplorationSnapshot.EncounterLog.Kind {
+        switch self {
+        case .nothing: return .nothing
+        case .combat: return .enemyEncounter
+        case .scripted: return .scriptedEvent
+        }
+    }
 }
 
 enum BattleResult: UInt8, Codable, Sendable {
     case victory = 0
     case defeat = 1
     case retreat = 2
+
+    /// BattleService.BattleResultとの相互変換
+    init(_ result: BattleService.BattleResult) {
+        switch result {
+        case .victory: self = .victory
+        case .defeat: self = .defeat
+        case .retreat: self = .retreat
+        }
+    }
+
+    var serviceBattleResult: BattleService.BattleResult {
+        switch self {
+        case .victory: return .victory
+        case .defeat: return .defeat
+        case .retreat: return .retreat
+        }
+    }
 }
 
 enum ExplorationResult: UInt8, Codable, Sendable {
@@ -39,6 +73,25 @@ enum ExplorationResult: UInt8, Codable, Sendable {
     case completed = 1
     case defeated = 2
     case cancelled = 3
+
+    /// ExplorationSnapshot.Statusとの相互変換
+    init(_ status: ExplorationSnapshot.Status) {
+        switch status {
+        case .running: self = .running
+        case .completed: self = .completed
+        case .cancelled: self = .cancelled
+        case .defeated: self = .defeated
+        }
+    }
+
+    var snapshotStatus: ExplorationSnapshot.Status {
+        switch self {
+        case .running: return .running
+        case .completed: return .completed
+        case .defeated: return .defeated
+        case .cancelled: return .cancelled
+        }
+    }
 }
 
 // MARK: - Compact Battle Log
