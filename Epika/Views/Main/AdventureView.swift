@@ -48,7 +48,6 @@ struct AdventureView: View {
                 }
             }
             .onAppear { Task { await loadOnce() } }
-            .refreshable { await reload() }
             .onReceive(NotificationCenter.default.publisher(for: .progressUnlocksDidChange)) { _ in
                 Task { await adventureState.reloadDungeonList() }
             }
