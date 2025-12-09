@@ -2,7 +2,6 @@ import Foundation
 
 struct PersonalityPrimaryDefinition: Identifiable, Sendable, Hashable {
     struct Effect: Sendable, Hashable {
-        let orderIndex: Int
         let effectType: String
         let value: Double?
         let payloadJSON: String
@@ -10,7 +9,6 @@ struct PersonalityPrimaryDefinition: Identifiable, Sendable, Hashable {
 
     let id: UInt8
     let name: String
-    let kind: String
     let description: String
     let effects: [Effect]
 }
@@ -30,13 +28,11 @@ struct PersonalitySecondaryDefinition: Identifiable, Sendable, Hashable {
 
 struct PersonalitySkillDefinition: Identifiable, Sendable {
     struct EventEffect: Sendable, Hashable {
-        let orderIndex: Int
         let effectId: String
     }
 
     let id: String
     let name: String
-    let kind: String
     let description: String
     let eventEffects: [EventEffect]
 }
