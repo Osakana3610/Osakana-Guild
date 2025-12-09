@@ -107,7 +107,7 @@ extension BattleTurnEngine {
 
             if !hasStatus(tag: "confusion", in: defender, context: context) {
                 // Find confusion status ID from master data definitions
-                if let confusionId = context.statusDefinitions.first(where: { $0.value.tags.contains { $0.value == "confusion" } })?.key {
+                if let confusionId = context.statusDefinitions.first(where: { $0.value.tags.contains("confusion") })?.key {
                     defender.statusEffects.append(.init(id: confusionId,
                                                         remainingTurns: 3,
                                                         source: defender.identifier,
