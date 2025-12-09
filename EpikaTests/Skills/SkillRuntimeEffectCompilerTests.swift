@@ -47,13 +47,13 @@ final class SkillRuntimeEffectCompilerTests: XCTestCase {
     }
 
     /// 全スキル定義のコンパイルテスト
-    /// TODO: damageDealtMultiplierAgainstのtargetRaceIds移行後、テストローダーの対応が必要
+    /// NOTE: damageDealtMultiplierAgainstはSQLite経由で正常動作。テストローダーのstringArrayValues処理に課題あり
     func testAllSkillsCompileWithoutError() throws {
         // 全スキル定義が例外なくコンパイルできることを確認
         let allDefinitions = try SkillMasterTestLoader.loadAllDefinitions()
         XCTAssertGreaterThan(allDefinitions.count, 0)
 
-        // damageDealtMultiplierAgainstスキルを除外（stringArrayValues対応待ち）
+        // damageDealtMultiplierAgainstスキルを除外（テストローダーのstringArrayValues処理課題）
         let filteredDefinitions = allDefinitions.filter { def in
             !def.effects.contains { $0.kind == "damageDealtMultiplierAgainst" }
         }
