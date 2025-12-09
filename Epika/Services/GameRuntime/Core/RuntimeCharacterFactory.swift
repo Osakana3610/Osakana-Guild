@@ -31,7 +31,7 @@ enum RuntimeCharacterFactory {
         let equippedItemDefinitions = try await repository.items(withIds: Array(itemIds))
 
         // 装備から付与されるスキルIDを収集
-        let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkills.map { $0.skillId } }
+        let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkillIds }
         let learnedSkills = try await repository.skills(withIds: grantedSkillIds)
 
         // 装備スロット計算
@@ -182,9 +182,7 @@ enum RuntimeCharacterFactory {
         let definitionsById = Dictionary(uniqueKeysWithValues: loadout.items.map { ($0.id, $0) })
         for equipment in input.equippedItems {
             guard let definition = definitionsById[equipment.itemId] else { continue }
-            for bonus in definition.combatBonuses where bonus.stat == "physicalAttack" {
-                if bonus.value * equipment.quantity > 0 { return true }
-            }
+            if definition.combatBonuses.physicalAttack * equipment.quantity > 0 { return true }
         }
         return false
     }

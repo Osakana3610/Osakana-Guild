@@ -165,16 +165,16 @@ private struct BaseStatAccumulator {
                 ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
                 ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
-            for bonus in definition.statBonuses {
-                let scaled = Double(bonus.value) * categoryMultiplier * pandoraMultiplier
-                assign(bonus.stat, delta: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity)
+            definition.statBonuses.forEachNonZero { stat, value in
+                let scaled = Double(value) * categoryMultiplier * pandoraMultiplier
+                assign(stat, delta: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity)
             }
             // ソケット宝石の基礎ステータス（係数1.0）
             if item.socketItemId != 0,
                let gemDefinition = definitionsById[item.socketItemId] {
-                for bonus in gemDefinition.statBonuses {
+                gemDefinition.statBonuses.forEachNonZero { stat, value in
                     // 宝石ステータスは装備数量に依存しない（1個の宝石が1個の装備に装着）
-                    assign(bonus.stat, delta: bonus.value)
+                    assign(stat, delta: value)
                 }
             }
         }
@@ -846,10 +846,10 @@ private struct CombatAccumulator {
                 ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
                 ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
-            for bonus in definition.combatBonuses {
-                guard let stat = CombatStatKey(bonus.stat) else { continue }
+            definition.combatBonuses.forEachNonZero { statName, value in
+                guard let stat = CombatStatKey(statName) else { return }
                 let statMultiplier = itemStatMultipliers[stat] ?? 1.0
-                let scaled = Double(bonus.value) * categoryMultiplier * statMultiplier * pandoraMultiplier
+                let scaled = Double(value) * categoryMultiplier * statMultiplier * pandoraMultiplier
                 if stat == .attackCount {
                     // attackCountは後でまとめて処理
                     attackCountAccumulator += scaled * Double(item.quantity)
@@ -860,10 +860,10 @@ private struct CombatAccumulator {
             // ソケット宝石の戦闘ステータス（係数: 通常0.5、魔法防御0.25）
             if item.socketItemId != 0,
                let gemDefinition = definitionsById[item.socketItemId] {
-                for bonus in gemDefinition.combatBonuses {
-                    guard let stat = CombatStatKey(bonus.stat) else { continue }
+                gemDefinition.combatBonuses.forEachNonZero { statName, value in
+                    guard let stat = CombatStatKey(statName) else { return }
                     let gemCoefficient: Double = (stat == .magicalDefense) ? 0.25 : 0.5
-                    let scaled = Double(bonus.value) * gemCoefficient
+                    let scaled = Double(value) * gemCoefficient
                     if stat == .attackCount {
                         attackCountAccumulator += scaled
                     } else {
@@ -888,10 +888,8 @@ private struct CombatAccumulator {
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
-            for bonus in definition.combatBonuses where bonus.stat == "physicalAttack" {
-                if bonus.value * item.quantity > 0 {
-                    return true
-                }
+            if definition.combatBonuses.physicalAttack * item.quantity > 0 {
+                return true
             }
         }
         return false
