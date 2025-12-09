@@ -1,13 +1,7 @@
 import Foundation
 
 struct DungeonDefinition: Identifiable, Sendable, Hashable {
-    struct UnlockCondition: Sendable, Hashable {
-        let orderIndex: Int
-        let value: String
-    }
-
     struct EncounterWeight: Sendable, Hashable {
-        let orderIndex: Int
         let enemyId: UInt16
         let weight: Double
     }
@@ -39,14 +33,13 @@ struct DungeonDefinition: Identifiable, Sendable, Hashable {
     let eventsPerFloor: Int
     let floorCount: Int
     let storyText: String?
-    let unlockConditions: [UnlockCondition]
+    let unlockConditions: [String]
     let encounterWeights: [EncounterWeight]
     let enemyGroupConfig: EnemyGroupConfig?
 }
 
 struct EncounterTableDefinition: Identifiable, Sendable, Hashable {
     struct Event: Sendable, Hashable {
-        let orderIndex: Int
         let eventType: String
         let enemyId: UInt16?
         let spawnRate: Double?
@@ -62,16 +55,11 @@ struct EncounterTableDefinition: Identifiable, Sendable, Hashable {
 }
 
 struct DungeonFloorDefinition: Identifiable, Sendable, Hashable {
-    struct SpecialEvent: Sendable, Hashable {
-        let orderIndex: Int
-        let eventId: String
-    }
-
     let id: String
     let dungeonId: UInt16?
     let name: String
     let floorNumber: Int
     let encounterTableId: String
     let description: String
-    let specialEvents: [SpecialEvent]
+    let specialEventIds: [String]
 }

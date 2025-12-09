@@ -29,15 +29,15 @@ extension SQLiteMasterDataManager {
 
         var eventMap = Dictionary(uniqueKeysWithValues: events.map { ($0.id, $0) })
 
-        let tagSQL = "SELECT event_id, order_index, tag FROM exploration_event_tags ORDER BY event_id, order_index;"
+        let tagSQL = "SELECT event_id, tag FROM exploration_event_tags ORDER BY event_id, order_index;"
         let tagStatement = try prepare(tagSQL)
         defer { sqlite3_finalize(tagStatement) }
         while sqlite3_step(tagStatement) == SQLITE_ROW {
             let eventId = UInt8(sqlite3_column_int(tagStatement, 0))
             guard let event = eventMap[eventId],
-                  let tagC = sqlite3_column_text(tagStatement, 2) else { continue }
+                  let tagC = sqlite3_column_text(tagStatement, 1) else { continue }
             var tags = event.tags
-            tags.append(.init(orderIndex: Int(sqlite3_column_int(tagStatement, 1)), value: String(cString: tagC)))
+            tags.append(String(cString: tagC))
             eventMap[event.id] = ExplorationEventDefinition(
                 id: event.id,
                 type: event.type,
@@ -45,7 +45,7 @@ extension SQLiteMasterDataManager {
                 description: event.description,
                 floorMin: event.floorMin,
                 floorMax: event.floorMax,
-                tags: tags.sorted { $0.orderIndex < $1.orderIndex },
+                tags: tags,
                 weights: event.weights,
                 payloadType: event.payloadType,
                 payloadJSON: event.payloadJSON
