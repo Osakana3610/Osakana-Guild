@@ -90,7 +90,6 @@ enum BattleService {
                 return definition
             })
             let jobName: String? = fallbackDefinition.jobId.flatMap { jobDictionary[$0]?.name }
-            let raceCategory = raceDictionary[fallbackDefinition.raceId]?.category ?? "unknown"
             enemies = [BattleActor(identifier: String(fallbackDefinition.id),
                                    displayName: fallbackDefinition.name,
                                    kind: .enemy,
@@ -107,7 +106,6 @@ enum BattleService {
                                    avatarIndex: nil,
                                    isMartialEligible: false,
                                    raceId: fallbackDefinition.raceId,
-                                   raceCategory: raceCategory,
                                    snapshot: snapshot,
                                    currentHP: snapshot.maxHP,
                                    actionRates: BattleActionRates(attack: fallbackDefinition.actionRates.attack,

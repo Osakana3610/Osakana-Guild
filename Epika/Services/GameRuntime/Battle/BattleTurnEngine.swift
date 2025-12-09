@@ -156,20 +156,20 @@ extension BattleTurnEngine {
         var forceHit: Bool
         var criticalRateMultiplier: Double
         var maxAttackMultiplier: Double
-        var doubleDamageAgainstDivine: Bool
+        var doubleDamageAgainstRaceIds: Set<UInt8>
 
         init(physicalAttackOverride: Int? = nil,
              ignoreDefense: Bool = false,
              forceHit: Bool = false,
              criticalRateMultiplier: Double = 1.0,
              maxAttackMultiplier: Double = 1.0,
-             doubleDamageAgainstDivine: Bool = false) {
+             doubleDamageAgainstRaceIds: Set<UInt8> = []) {
             self.physicalAttackOverride = physicalAttackOverride
             self.ignoreDefense = ignoreDefense
             self.forceHit = forceHit
             self.criticalRateMultiplier = criticalRateMultiplier
             self.maxAttackMultiplier = maxAttackMultiplier
-            self.doubleDamageAgainstDivine = doubleDamageAgainstDivine
+            self.doubleDamageAgainstRaceIds = doubleDamageAgainstRaceIds
         }
     }
 

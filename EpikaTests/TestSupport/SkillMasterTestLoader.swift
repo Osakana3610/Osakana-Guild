@@ -18,6 +18,7 @@ private struct VariantEffectPayload {
     let familyId: String
     let effectType: String
     let parameters: [String: String]?
+    let stringArrayValues: [String: [String]]?
     let value: [String: Any]
 }
 
@@ -44,6 +45,17 @@ private extension SkillMasterTestLoader {
         }
     }
 
+    static func convertToStringArrayDict(_ dict: [String: Any]?) -> [String: [String]]? {
+        guard let dict else { return nil }
+        return dict.reduce(into: [String: [String]]()) { result, pair in
+            if let array = pair.value as? [String] {
+                result[pair.key] = array
+            } else if let intArray = pair.value as? [Int] {
+                result[pair.key] = intArray.map { String($0) }
+            }
+        }
+    }
+
     static func buildDefinitions(from root: [String: Any],
                                  filtering ids: Set<UInt16>?) throws -> [SkillDefinition] {
         var results: [SkillDefinition] = []
@@ -56,6 +68,7 @@ private extension SkillMasterTestLoader {
                 guard let familyId = family["familyId"] as? String,
                       let effectType = family["effectType"] as? String else { continue }
                 let defaultParameters = convertToStringDict(family["parameters"] as? [String: Any])
+                let defaultStringArrayValues = convertToStringArrayDict(family["stringArrayValues"] as? [String: Any])
                 let variants = family["variants"] as? [[String: Any]] ?? []
 
                 for variant in variants {
@@ -66,7 +79,8 @@ private extension SkillMasterTestLoader {
                     let effectPayloads = try payloads(for: variant,
                                                       familyId: familyId,
                                                       familyEffectType: effectType,
-                                                      defaultParameters: defaultParameters)
+                                                      defaultParameters: defaultParameters,
+                                                      defaultStringArrayValues: defaultStringArrayValues)
 
                     var effects: [SkillDefinition.Effect] = []
                     effects.reserveCapacity(effectPayloads.count)
@@ -80,6 +94,9 @@ private extension SkillMasterTestLoader {
                             ]
                             if let parameters = payload.parameters {
                                 base["parameters"] = parameters
+                            }
+                            if let stringArrayValues = payload.stringArrayValues {
+                                base["stringArrayValues"] = stringArrayValues
                             }
                             return base
                         }()
@@ -120,22 +137,30 @@ private extension SkillMasterTestLoader {
     static func payloads(for variant: [String: Any],
                          familyId: String,
                          familyEffectType: String,
-                         defaultParameters: [String: String]?) throws -> [VariantEffectPayload] {
+                         defaultParameters: [String: String]?,
+                         defaultStringArrayValues: [String: [String]]?) throws -> [VariantEffectPayload] {
         let mergeParameters: ([String: String]?, [String: String]?) -> [String: String]? = { base, overrides in
+            if let base, let overrides { return base.merging(overrides) { _, new in new } }
+            return overrides ?? base
+        }
+        let mergeStringArrayValues: ([String: [String]]?, [String: [String]]?) -> [String: [String]]? = { base, overrides in
             if let base, let overrides { return base.merging(overrides) { _, new in new } }
             return overrides ?? base
         }
 
         let variantParameters = mergeParameters(defaultParameters, convertToStringDict(variant["parameters"] as? [String: Any]))
+        let variantStringArrayValues = mergeStringArrayValues(defaultStringArrayValues, convertToStringArrayDict(variant["stringArrayValues"] as? [String: Any]))
 
         if let custom = variant["effects"] as? [[String: Any]], !custom.isEmpty {
             return custom.map { effect in
                 let effectType = (effect["effectType"] as? String) ?? familyEffectType
                 let parameters = mergeParameters(variantParameters, convertToStringDict(effect["parameters"] as? [String: Any]))
+                let stringArrayValues = mergeStringArrayValues(variantStringArrayValues, convertToStringArrayDict(effect["stringArrayValues"] as? [String: Any]))
                 let values = effect["value"] as? [String: Any] ?? [:]
                 return VariantEffectPayload(familyId: familyId,
                                             effectType: effectType,
                                             parameters: parameters,
+                                            stringArrayValues: stringArrayValues,
                                             value: values)
             }
         }
@@ -149,6 +174,7 @@ private extension SkillMasterTestLoader {
         return [VariantEffectPayload(familyId: familyId,
                                      effectType: familyEffectType,
                                      parameters: variantParameters,
+                                     stringArrayValues: variantStringArrayValues,
                                      value: value)]
     }
 

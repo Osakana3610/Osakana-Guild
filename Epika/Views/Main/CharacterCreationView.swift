@@ -73,22 +73,29 @@ struct CharacterCreationView: View {
     }
 
     private var genderSections: [(gender: String, races: [RaceDefinition])] {
-        var buckets: [String: [RaceDefinition]] = [:]
+        var buckets: [UInt8: [RaceDefinition]] = [:]
         var raceOrder: [UInt8: Int] = [:]
         for (index, race) in races.enumerated() {
             raceOrder[race.id] = index
-            buckets[race.gender, default: []].append(race)
+            buckets[race.genderCode, default: []].append(race)
         }
-        let orderedGenders: [String] = ["male", "female", "genderless"]
-        return orderedGenders.compactMap { gender -> (gender: String, races: [RaceDefinition])? in
-            guard let genderRaces = buckets[gender] else { return nil }
+        // genderCode: 1=male, 2=female, 3=genderless
+        let orderedGenderCodes: [UInt8] = [1, 2, 3]
+        return orderedGenderCodes.compactMap { code -> (gender: String, races: [RaceDefinition])? in
+            guard let genderRaces = buckets[code] else { return nil }
             let sorted = genderRaces.sorted { lhs, rhs in
                 guard let lhsIndex = raceOrder[lhs.id], let rhsIndex = raceOrder[rhs.id] else {
                     return lhs.id < rhs.id
                 }
                 return lhsIndex < rhsIndex
             }
-            return (gender: gender, races: sorted)
+            let genderString: String
+            switch code {
+            case 1: genderString = "male"
+            case 2: genderString = "female"
+            default: genderString = "genderless"
+            }
+            return (gender: genderString, races: sorted)
         }
     }
 
@@ -335,8 +342,8 @@ struct CharacterCreationView: View {
     }
 
     private func previewStats(for race: RaceDefinition) -> [StatRow] {
-        race.baseStats.map { base in
-            StatRow(label: statLabel(for: base.stat), value: "\(base.value)")
+        BaseStat.allCases.map { stat in
+            StatRow(label: stat.displayName, value: "\(stat.value(from: race.baseStats))")
         }
     }
 
@@ -348,8 +355,8 @@ struct CharacterCreationView: View {
     }
 
     private func raceDescription(_ race: RaceDefinition) -> String {
-        if let stat = race.baseStats.max(by: { $0.value < $1.value }) {
-            return "特徴: \(statLabel(for: stat.stat))"
+        if let stat = BaseStat.allCases.max(by: { $0.value(from: race.baseStats) < $1.value(from: race.baseStats) }) {
+            return "特徴: \(stat.displayName)"
         }
         return "固有の特徴を持つ種族"
     }
@@ -445,15 +452,13 @@ struct RaceDetailPreview: View {
         VStack(alignment: .leading, spacing: 16) {
             header
 
-            if !race.baseStats.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("基礎能力")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                        ForEach(race.baseStats, id: \.stat) { stat in
-                            DetailStatItem(label: statLabel(for: stat.stat), value: String(stat.value))
-                        }
+            VStack(alignment: .leading, spacing: 8) {
+                Text("基礎能力")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                    ForEach(BaseStat.allCases, id: \.self) { stat in
+                        DetailStatItem(label: stat.displayName, value: String(stat.value(from: race.baseStats)))
                     }
                 }
             }
@@ -487,31 +492,20 @@ struct RaceDetailPreview: View {
                 Text(race.name)
                     .font(.headline)
                     .fontWeight(.bold)
-                Text("性別: \(localizedGender(race.gender))")
+                Text("性別: \(localizedGender(race.genderCode))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                if let category = nonEmptyCategory {
-                    Text("カテゴリ: \(category)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
             Spacer(minLength: 0)
         }
     }
 
-    private func localizedGender(_ gender: String) -> String {
-        switch gender {
-        case "male": return "男性"
-        case "female": return "女性"
-        case "genderless": return "性別不明"
-        default: return gender
+    private func localizedGender(_ genderCode: UInt8) -> String {
+        switch genderCode {
+        case 1: return "男性"
+        case 2: return "女性"
+        default: return "性別不明"
         }
-    }
-
-    private var nonEmptyCategory: String? {
-        let trimmed = race.category.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? nil : trimmed
     }
 }
 

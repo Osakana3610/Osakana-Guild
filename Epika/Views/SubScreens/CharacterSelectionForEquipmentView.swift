@@ -303,17 +303,19 @@ struct EquipmentEditorView: View {
             return (false, "このアイテムは装備できません")
         }
 
-        // 種族制限チェック
-        if !definition.allowedRaces.isEmpty {
-            let raceCategory = currentCharacter.race?.category ?? ""
-            let canBypass = definition.bypassRaceRestrictions.contains(raceCategory)
-            let isAllowed = definition.allowedRaces.contains(raceCategory)
+        // 種族制限チェック（raceIdで直接判定）
+        if !definition.allowedRaceIds.isEmpty {
+            guard let raceId = currentCharacter.race?.id else {
+                return (false, "種族制限により装備できません")
+            }
+            let canBypass = definition.bypassRaceIds.contains(raceId)
+            let isAllowed = definition.allowedRaceIds.contains(raceId)
             if !canBypass && !isAllowed {
                 return (false, "種族制限により装備できません")
             }
         }
 
-        // 職業制限チェック
+        // 職業制限チェック（Phase 2でjobIdベースに変更予定）
         if !definition.allowedJobs.isEmpty {
             let jobCategory = currentCharacter.job?.category ?? ""
             if !definition.allowedJobs.contains(jobCategory) {
@@ -321,10 +323,12 @@ struct EquipmentEditorView: View {
             }
         }
 
-        // 性別制限チェック
-        if !definition.allowedGenders.isEmpty {
-            let gender = currentCharacter.race?.gender ?? ""
-            if !definition.allowedGenders.contains(gender) {
+        // 性別制限チェック（genderCodeで直接判定）
+        if !definition.allowedGenderCodes.isEmpty {
+            guard let genderCode = currentCharacter.race?.genderCode else {
+                return (false, "性別制限により装備できません")
+            }
+            if !definition.allowedGenderCodes.contains(genderCode) {
                 return (false, "性別制限により装備できません")
             }
         }

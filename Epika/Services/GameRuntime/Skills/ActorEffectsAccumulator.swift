@@ -108,7 +108,7 @@ struct DamageAccumulator {
     var dealtMultiplierByType: [String: Double] = ["physical": 1.0, "magical": 1.0, "breath": 1.0]
     var takenPercentByType: [String: Double] = ["physical": 0.0, "magical": 0.0, "breath": 0.0]
     var takenMultiplierByType: [String: Double] = ["physical": 1.0, "magical": 1.0, "breath": 1.0]
-    var targetMultipliers: [String: Double] = [:]
+    var targetMultipliers: [UInt8: Double] = [:]
     var criticalDamagePercent: Double = 0.0
     var criticalDamageMultiplier: Double = 1.0
     var criticalDamageTakenMultiplier: Double = 1.0
