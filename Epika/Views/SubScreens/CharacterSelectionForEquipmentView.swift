@@ -36,9 +36,6 @@ struct CharacterSelectionForEquipmentView: View {
             .task {
                 await loadCharacters()
             }
-            .refreshable {
-                await loadCharacters()
-            }
         }
     }
 

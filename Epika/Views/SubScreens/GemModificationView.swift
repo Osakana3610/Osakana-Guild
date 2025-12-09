@@ -37,9 +37,6 @@ struct GemModificationView: View {
             .task {
                 await loadData()
             }
-            .refreshable {
-                await loadData()
-            }
             .sheet(isPresented: Binding(
                 get: { selectedGem != nil },
                 set: { if !$0 { selectedGem = nil } }
