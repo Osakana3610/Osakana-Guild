@@ -202,12 +202,12 @@ struct CharacterCreationView: View {
                             }
                         }
 
-                        if !job.learnedSkills.isEmpty {
+                        if !job.learnedSkillIds.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("習得スキル")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                Text("初期習得: \(job.learnedSkills.filter { $0.orderIndex == 0 }.count)件 / レベル習得: \(job.learnedSkills.filter { $0.orderIndex > 0 }.count)件")
+                                Text("習得スキル数: \(job.learnedSkillIds.count)件")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -348,9 +348,9 @@ struct CharacterCreationView: View {
     }
 
     private func jobCoefficients(for job: JobDefinition) -> [StatRow] {
-        job.combatCoefficients.map { coeff in
-            let formatted = String(format: "%.2fx", coeff.value)
-            return StatRow(label: statLabel(for: coeff.stat), value: formatted)
+        CombatStat.allCases.map { stat in
+            let formatted = String(format: "%.2fx", stat.value(from: job.combatCoefficients))
+            return StatRow(label: stat.displayName, value: formatted)
         }
     }
 
@@ -362,10 +362,8 @@ struct CharacterCreationView: View {
     }
 
     private func jobDescription(_ job: JobDefinition) -> String {
-        if let tendency = job.growthTendency, !tendency.isEmpty {
-            return tendency
-        }
-        return job.category
+        // 職業名だけで十分な説明となる
+        job.name
     }
 
     private func creationCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
@@ -517,27 +515,28 @@ struct JobDetailPreview: View {
         VStack(alignment: .leading, spacing: 16) {
             header
 
-            if !combatCoefficientItems.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("戦闘補正")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                        ForEach(Array(combatCoefficientItems.enumerated()), id: \.offset) { _, item in
-                            DetailStatItem(label: item.label, value: String(format: "%.2fx", item.value))
-                        }
+            VStack(alignment: .leading, spacing: 8) {
+                Text("戦闘補正")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                    ForEach(CombatStat.allCases, id: \.self) { stat in
+                        DetailStatItem(
+                            label: stat.displayName,
+                            value: String(format: "%.2fx", stat.value(from: job.combatCoefficients))
+                        )
                     }
                 }
             }
 
-            if !sortedSkills.isEmpty {
+            if !job.learnedSkillIds.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("習得スキル")
                         .font(.subheadline)
                         .fontWeight(.medium)
                     VStack(alignment: .leading, spacing: 4) {
-                        ForEach(sortedSkills, id: \.self) { skill in
-                            DetailMetadataRow(label: orderLabel(for: skill.orderIndex), value: String(skill.skillId))
+                        ForEach(Array(job.learnedSkillIds.enumerated()), id: \.offset) { index, skillId in
+                            DetailMetadataRow(label: orderLabel(for: index), value: String(skillId))
                         }
                     }
                 }
@@ -548,39 +547,6 @@ struct JobDetailPreview: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    private var sortedSkills: [JobDefinition.LearnedSkill] {
-        job.learnedSkills.sorted { lhs, rhs in
-            if lhs.orderIndex == rhs.orderIndex {
-                return lhs.skillId < rhs.skillId
-            }
-            return lhs.orderIndex < rhs.orderIndex
-        }
-    }
-
-    private var combatCoefficientItems: [(label: String, value: Double)] {
-        let lookup: [String: Double] = Dictionary(uniqueKeysWithValues: job.combatCoefficients.map { ($0.stat.lowercased(), $0.value) })
-        return Self.combatStatDisplayOrder.map { key in
-            let value = lookup[key] ?? 1.0
-            return (label: statLabel(for: key), value: value)
-        }
-    }
-
-    private static let combatStatDisplayOrder: [String] = [
-        "maxhp",
-        "physicalattack",
-        "magicalattack",
-        "physicaldefense",
-        "magicaldefense",
-        "hitrate",
-        "evasionrate",
-        "criticalrate",
-        "attackcount",
-        "magicalhealing",
-        "trapremoval",
-        "additionaldamage",
-        "breathdamage"
-    ]
-
     private var header: some View {
         HStack(alignment: .top, spacing: 12) {
             CharacterImageView(avatarIndex: UInt16(genderCode ?? 3) * 100 + UInt16(job.id), size: 64)
@@ -588,11 +554,6 @@ struct JobDetailPreview: View {
                 Text(job.name)
                     .font(.headline)
                     .fontWeight(.bold)
-                if let tendency = nonEmptyTendency {
-                    Text(tendency)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
             Spacer(minLength: 0)
         }
@@ -600,13 +561,6 @@ struct JobDetailPreview: View {
 
     private func orderLabel(for index: Int) -> String {
         index == 0 ? "初期" : "Lv.\(index)"
-    }
-
-    private var nonEmptyTendency: String? {
-        guard let tendency = job.growthTendency?.trimmingCharacters(in: .whitespacesAndNewlines), !tendency.isEmpty else {
-            return nil
-        }
-        return tendency
     }
 }
 
@@ -648,27 +602,3 @@ struct DetailMetadataRow: View {
     }
 }
 
-func statLabel(for key: String) -> String {
-    switch key.lowercased() {
-    case "strength": return "力"
-    case "wisdom": return "知恵"
-    case "spirit": return "精神"
-    case "vitality": return "体力"
-    case "agility": return "敏捷"
-    case "luck": return "運"
-    case "maxhp", "hp": return "最大HP"
-    case "physicalattack": return "物理攻撃"
-    case "magicalattack": return "魔法攻撃"
-    case "physicaldefense": return "物理防御"
-    case "magicaldefense": return "魔法防御"
-    case "hitrate": return "命中"
-    case "evasionrate": return "回避"
-    case "criticalrate": return "クリティカル"
-    case "attackcount": return "攻撃回数"
-    case "magicalhealing": return "魔法回復"
-    case "trapremoval": return "罠解除"
-    case "additionaldamage": return "追加ダメージ"
-    case "breathdamage": return "ブレスダメージ"
-    default: return key
-    }
-}

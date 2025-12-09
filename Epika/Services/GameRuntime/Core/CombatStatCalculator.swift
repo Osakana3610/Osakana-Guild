@@ -957,19 +957,27 @@ private enum CombatStatKey: String, CaseIterable {
 }
 
 private struct JobCoefficientLookup {
-    private let values: [CombatStatKey: Double]
+    private let coefficients: JobDefinition.CombatCoefficients
 
     init(definition: JobDefinition) {
-        var map: [CombatStatKey: Double] = [:]
-        for coefficient in definition.combatCoefficients {
-            if let key = CombatStatKey(coefficient.stat) {
-                map[key] = coefficient.value
-            }
-        }
-        self.values = map
+        self.coefficients = definition.combatCoefficients
     }
 
     func value(for stat: CombatStatKey) -> Double {
-        values[stat] ?? 0.0
+        switch stat {
+        case .maxHP: return coefficients.maxHP
+        case .physicalAttack: return coefficients.physicalAttack
+        case .magicalAttack: return coefficients.magicalAttack
+        case .physicalDefense: return coefficients.physicalDefense
+        case .magicalDefense: return coefficients.magicalDefense
+        case .hitRate: return coefficients.hitRate
+        case .evasionRate: return coefficients.evasionRate
+        case .criticalRate: return coefficients.criticalRate
+        case .attackCount: return coefficients.attackCount
+        case .magicalHealing: return coefficients.magicalHealing
+        case .trapRemoval: return coefficients.trapRemoval
+        case .additionalDamage: return coefficients.additionalDamage
+        case .breathDamage: return coefficients.breathDamage
+        }
     }
 }
