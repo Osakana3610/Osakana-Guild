@@ -30,9 +30,9 @@ enum DropService {
         }
         var results: [ItemDropResult] = []
 
-        for drop in enemy.drops.sorted(by: { $0.orderIndex < $1.orderIndex }) {
-            guard let item = try await repository.item(withId: drop.itemId) else {
-                throw RuntimeError.masterDataNotFound(entity: "item", identifier: String(drop.itemId))
+        for itemId in enemy.drops {
+            guard let item = try await repository.item(withId: itemId) else {
+                throw RuntimeError.masterDataNotFound(entity: "item", identifier: String(itemId))
             }
 
             let category = categorize(item: item)

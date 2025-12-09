@@ -8,25 +8,33 @@ struct EnemyDefinition: Identifiable, Sendable {
         let breath: Int
     }
 
-    struct Resistance: Sendable, Hashable {
-        let element: String
-        let value: Double
+    struct Resistances: Sendable, Hashable {
+        let physical: Double
+        let magical: Double
+        let fire: Double
+        let ice: Double
+        let wind: Double
+        let earth: Double
+        let light: Double
+        let dark: Double
+        let holy: Double
+        let death: Double
+        let poison: Double
+        let charm: Double
+
+        static let zero = Resistances(
+            physical: 0, magical: 0, fire: 0, ice: 0, wind: 0, earth: 0,
+            light: 0, dark: 0, holy: 0, death: 0, poison: 0, charm: 0
+        )
     }
 
     struct Skill: Sendable, Hashable {
-        let orderIndex: Int
         let skillId: UInt16
-    }
-
-    struct Drop: Sendable, Hashable {
-        let orderIndex: Int
-        let itemId: UInt16
     }
 
     let id: UInt16
     let name: String
     let raceId: UInt8
-    let category: String
     let jobId: UInt8?
     let baseExperience: Int
     let isBoss: Bool
@@ -36,9 +44,9 @@ struct EnemyDefinition: Identifiable, Sendable {
     let vitality: Int
     let agility: Int
     let luck: Int
-    let resistances: [Resistance]
+    let resistances: Resistances
     let skills: [Skill]
-    let drops: [Drop]
+    let drops: [UInt16]
     let actionRates: ActionRates
     let groupSizeRange: ClosedRange<Int>
 }
