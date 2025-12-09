@@ -106,9 +106,9 @@ actor EquipmentProgressService {
     /// アイテムがキャラクターに装備可能かチェック
     func validateEquipment(
         itemDefinition: ItemDefinition,
-        characterRaceId: String,
-        characterJobId: String,
-        characterGender: String,
+        characterRaceId: UInt8,
+        characterJobCategory: String,
+        characterGenderCode: UInt8,
         currentEquippedCount: Int
     ) async throws -> EquipmentValidationResult {
         // 装備数上限チェック
@@ -127,10 +127,10 @@ actor EquipmentProgressService {
             )
         }
 
-        // 種族制限チェック（bypassRaceRestrictionsで回避可能）
-        if !itemDefinition.allowedRaces.isEmpty {
-            let canBypass = itemDefinition.bypassRaceRestrictions.contains(characterRaceId)
-            let isAllowed = itemDefinition.allowedRaces.contains(characterRaceId)
+        // 種族制限チェック（bypassRaceIdsで回避可能）
+        if !itemDefinition.allowedRaceIds.isEmpty {
+            let canBypass = itemDefinition.bypassRaceIds.contains(characterRaceId)
+            let isAllowed = itemDefinition.allowedRaceIds.contains(characterRaceId)
             if !canBypass && !isAllowed {
                 return EquipmentValidationResult(
                     canEquip: false,
@@ -139,9 +139,9 @@ actor EquipmentProgressService {
             }
         }
 
-        // 職業制限チェック
+        // 職業制限チェック（Phase 2でjobIdベースに変更予定）
         if !itemDefinition.allowedJobs.isEmpty {
-            if !itemDefinition.allowedJobs.contains(characterJobId) {
+            if !itemDefinition.allowedJobs.contains(characterJobCategory) {
                 return EquipmentValidationResult(
                     canEquip: false,
                     reason: "職業制限により装備できません"
@@ -150,8 +150,8 @@ actor EquipmentProgressService {
         }
 
         // 性別制限チェック
-        if !itemDefinition.allowedGenders.isEmpty {
-            if !itemDefinition.allowedGenders.contains(characterGender) {
+        if !itemDefinition.allowedGenderCodes.isEmpty {
+            if !itemDefinition.allowedGenderCodes.contains(characterGenderCode) {
                 return EquipmentValidationResult(
                     canEquip: false,
                     reason: "性別制限により装備できません"

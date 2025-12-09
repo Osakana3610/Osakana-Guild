@@ -230,7 +230,8 @@ extension BattleTurnEngine {
             specialAccuracyMultiplier = 2.0
         case .specialE:
             let scaled = attacker.snapshot.physicalAttack * max(1, attacker.snapshot.attackCount)
-            overrides = PhysicalAttackOverrides(physicalAttackOverride: scaled, doubleDamageAgainstDivine: true)
+            // 現在divineカテゴリに相当するraceIdは未定義（将来的に追加可能）
+            overrides = PhysicalAttackOverrides(physicalAttackOverride: scaled, doubleDamageAgainstRaceIds: [])
             hitCountOverride = 1
         }
 
@@ -353,8 +354,10 @@ extension BattleTurnEngine {
                                                hitIndex: hitIndex,
                                                context: &context)
             var pendingDamage = result.damage
-            if overrides?.doubleDamageAgainstDivine == true,
-               normalizedTargetCategory(for: defenderCopy) == "divine" {
+            if let targetRaceIds = overrides?.doubleDamageAgainstRaceIds,
+               !targetRaceIds.isEmpty,
+               let defenderRaceId = defenderCopy.raceId,
+               targetRaceIds.contains(defenderRaceId) {
                 pendingDamage = min(Int.max, pendingDamage * 2)
             }
             let applied = applyDamage(amount: pendingDamage, to: &defenderCopy)

@@ -702,8 +702,8 @@
       {
         "familyId": "damageDealtMultiplierAgainst.humanoid",
         "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "targetCategory": "humanoid"
+        "stringArrayValues": {
+          "targetRaceIds": ["3", "4", "5"]
         },
         "variants": [
           {
@@ -760,8 +760,8 @@
       {
         "familyId": "damageDealtMultiplierAgainst.monster",
         "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "targetCategory": "monster"
+        "stringArrayValues": {
+          "targetRaceIds": []
         },
         "variants": [
           {
@@ -818,8 +818,8 @@
       {
         "familyId": "damageDealtMultiplierAgainst.undead",
         "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "targetCategory": "undead"
+        "stringArrayValues": {
+          "targetRaceIds": ["7", "14"]
         },
         "variants": [
           {
@@ -876,8 +876,8 @@
       {
         "familyId": "damageDealtMultiplierAgainst.dragon",
         "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "targetCategory": "dragon"
+        "stringArrayValues": {
+          "targetRaceIds": ["11"]
         },
         "variants": [
           {
@@ -934,8 +934,8 @@
       {
         "familyId": "damageDealtMultiplierAgainst.divine",
         "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "targetCategory": "divine"
+        "stringArrayValues": {
+          "targetRaceIds": []
         },
         "variants": [
           {

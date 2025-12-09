@@ -128,9 +128,12 @@ private struct BaseStatAccumulator {
     private var luck: Int = 0
 
     mutating func apply(raceBase race: RaceDefinition) {
-        for stat in race.baseStats {
-            assign(stat.stat, value: stat.value)
-        }
+        strength = race.baseStats.strength
+        wisdom = race.baseStats.wisdom
+        spirit = race.baseStats.spirit
+        vitality = race.baseStats.vitality
+        agility = race.baseStats.agility
+        luck = race.baseStats.luck
     }
 
     mutating func applyLevelBonus(level: Int) {
@@ -545,7 +548,6 @@ private struct CombatAccumulator {
 
     func makeCombat() throws -> CharacterValues.Combat {
         let baseLevelFactor = CombatFormulas.levelDependentValue(raceId: raceId,
-                                                                 raceCategory: race.category,
                                                                  level: level)
         let levelFactor = baseLevelFactor * growthMultiplier
         let coefficients = JobCoefficientLookup(definition: job)

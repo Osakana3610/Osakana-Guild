@@ -41,7 +41,6 @@ struct BattleContextBuilder {
                 avatarIndex: character.avatarId,
                 isMartialEligible: martialEligible,
                 raceId: character.race?.id,
-                raceCategory: character.race?.category,
                 snapshot: snapshot,
                 currentHP: character.hitPoints.current,
                 actionRates: BattleContextBuilder.playerActionRates(for: character),
