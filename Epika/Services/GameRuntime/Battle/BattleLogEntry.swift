@@ -19,19 +19,16 @@ struct BattleLogEntry: Codable, Sendable, Hashable {
     let type: LogType
     let actorId: String?
     let targetId: String?
-    let metadata: [String: String]
 
     nonisolated init(turn: Int,
                      message: String,
                      type: LogType,
                      actorId: String? = nil,
-                     targetId: String? = nil,
-                     metadata: [String: String] = [:]) {
+                     targetId: String? = nil) {
         self.turn = turn
         self.message = message
         self.type = type
         self.actorId = actorId
         self.targetId = targetId
-        self.metadata = metadata
     }
 }

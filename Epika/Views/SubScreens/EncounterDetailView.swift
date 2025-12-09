@@ -203,7 +203,6 @@ struct EncounterDetailView: View {
     }
 
     private func shouldDisplayAction(_ entry: BattleLogEntry) -> Bool {
-        if entry.metadata["category"] == "initialState" { return false }
         if entry.turn == 0 { return false }
         if entry.message.isEmpty { return false }
         if entry.type == .system {
