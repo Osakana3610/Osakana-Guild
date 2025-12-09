@@ -229,10 +229,11 @@ private struct SkillFamily: Decodable {
     let familyId: String
     let effectType: String
     let parameters: [String: String]?
+    let stringArrayValues: [String: [String]]?
     let variants: [SkillVariant]
 
     private enum CodingKeys: String, CodingKey {
-        case familyId, effectType, parameters, variants
+        case familyId, effectType, parameters, stringArrayValues, variants
     }
 
     init(from decoder: Decoder) throws {
@@ -240,6 +241,7 @@ private struct SkillFamily: Decodable {
         familyId = try container.decode(String.self, forKey: .familyId)
         effectType = try container.decode(String.self, forKey: .effectType)
         parameters = try container.decodeIfPresent(FlexibleStringDict.self, forKey: .parameters)?.values
+        stringArrayValues = try container.decodeIfPresent([String: [String]].self, forKey: .stringArrayValues)
         variants = try container.decode([SkillVariant].self, forKey: .variants)
     }
 }
@@ -374,6 +376,13 @@ extension Generator {
             return defaultParams ?? overrides
         }
 
+        let mergeStringArrayValues: ([String: [String]]?, [String: [String]]) -> [String: [String]] = { base, overrides in
+            if let base = base {
+                return base.merging(overrides) { _, new in new }
+            }
+            return overrides
+        }
+
         for (categoryKey, category) in categories {
             guard let families = category?.families else { continue }
             for family in families {
@@ -386,12 +395,13 @@ extension Generator {
                                 throw GeneratorError.executionFailed("Skill \(variant.id) の effectType が指定されていません")
                             }
                             let parameters = mergeParameters(mergeParameters(family.parameters, variant.parameters), custom.parameters)
+                            let stringArrays = mergeStringArrayValues(family.stringArrayValues, custom.payload.stringArrayValues)
                             return VariantEffectPayload(familyId: family.familyId,
                                                         effectType: effectType,
                                                         parameters: parameters,
                                                         numericValues: custom.payload.numericValues,
                                                         stringValues: custom.payload.stringValues,
-                                                        stringArrayValues: custom.payload.stringArrayValues)
+                                                        stringArrayValues: stringArrays)
                         }
                     } else {
                         guard !family.effectType.isEmpty else {
@@ -399,9 +409,10 @@ extension Generator {
                         }
                         let mergedParameters = mergeParameters(family.parameters, variant.parameters)
                         let payload = variant.payload
+                        let mergedStringArrayValues = mergeStringArrayValues(family.stringArrayValues, payload.stringArrayValues)
                         let hasPayload = !payload.numericValues.isEmpty
                             || !payload.stringValues.isEmpty
-                            || !payload.stringArrayValues.isEmpty
+                            || !mergedStringArrayValues.isEmpty
                             || !(mergedParameters?.isEmpty ?? true)
                         guard hasPayload else {
                             throw GeneratorError.executionFailed("Skill \(variant.id) の value が不足しています")
@@ -411,7 +422,7 @@ extension Generator {
                                                                parameters: mergedParameters,
                                                                numericValues: payload.numericValues,
                                                                stringValues: payload.stringValues,
-                                                               stringArrayValues: payload.stringArrayValues)]
+                                                               stringArrayValues: mergedStringArrayValues)]
                     }
 
                     let acquisitionJSON = try encodeJSONObject([:], context: "Skill \(variant.id) の acquisitionConditions")
