@@ -274,9 +274,6 @@ private struct ExplorationRunSummaryView: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
-                        Text("Run ID: \(snapshot.id.uuidString)")
-                            .font(.caption)
-                            .foregroundColor(.primary)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -387,11 +384,6 @@ private struct ExplorationRunResultSummaryView: View {
                     }
 
                     Text("パーティ人数：\(party.memberIds.count)人")
-
-                    Text("Run ID：\(snapshot.id.uuidString)")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(24)
