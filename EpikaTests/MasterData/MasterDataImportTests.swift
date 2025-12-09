@@ -3,23 +3,141 @@ import XCTest
 
 @MainActor
 final class MasterDataImportTests: XCTestCase {
-    func testAllMastersImportAndAreReadable() async throws {
-        // MasterDataRepository は初回呼び出し時に SQLite を初期化し、リソースを全件インポートする。
+
+    // MARK: - 全マスタデータ件数検証
+
+    /// 全マスタデータがJSONからSQLiteに正しくインポートされ、全件読み込めることを検証
+    func testAllMasterDataCountsMatchExpected() async throws {
         let repository = MasterDataRepository()
 
-        _ = try await repository.allItems()
-        _ = try await repository.allSkills()
-        _ = try await repository.allSpells()
-        _ = try await repository.allJobs()
-        _ = try await repository.allRaces()
-        _ = try await repository.allTitles()
-        _ = try await repository.allSuperRareTitles()
-        _ = try await repository.allStatusEffects()
-        let (dungeons, _, _) = try await repository.allDungeons()
-        _ = try await repository.allSynthesisRecipes()
+        // 各マスタの期待件数（MasterDataGenerator出力と一致すべき）
+        let items = try await repository.allItems()
+        XCTAssertEqual(items.count, 1023, "ItemMaster 件数不一致")
 
-        // 代表的なマスタが空でないことを確認（インポート失敗の早期検知）。
-        XCTAssertFalse(dungeons.isEmpty, "DungeonMaster が空です")
+        let skills = try await repository.allSkills()
+        XCTAssertEqual(skills.count, 1495, "SkillMaster 件数不一致")
+
+        let spells = try await repository.allSpells()
+        XCTAssertEqual(spells.count, 14, "SpellMaster 件数不一致")
+
+        let jobs = try await repository.allJobs()
+        XCTAssertEqual(jobs.count, 16, "JobMaster 件数不一致")
+
+        let races = try await repository.allRaces()
+        XCTAssertEqual(races.count, 18, "RaceDataMaster 件数不一致")
+
+        let titles = try await repository.allTitles()
+        XCTAssertEqual(titles.count, 9, "TitleMaster 件数不一致")
+
+        let superRareTitles = try await repository.allSuperRareTitles()
+        XCTAssertEqual(superRareTitles.count, 16, "SuperRareTitleMaster 件数不一致")
+
+        let statusEffects = try await repository.allStatusEffects()
+        XCTAssertEqual(statusEffects.count, 4, "StatusEffectMaster 件数不一致")
+
+        let enemies = try await repository.allEnemies()
+        XCTAssertEqual(enemies.count, 10, "EnemyMaster 件数不一致")
+
+        let (dungeons, encounterTables, floors) = try await repository.allDungeons()
+        XCTAssertEqual(dungeons.count, 13, "DungeonMaster 件数不一致")
+        XCTAssertFalse(encounterTables.isEmpty, "EncounterTables が空")
+        XCTAssertFalse(floors.isEmpty, "DungeonFloors が空")
+
+        let recipes = try await repository.allSynthesisRecipes()
+        XCTAssertEqual(recipes.count, 8, "SynthesisRecipeMaster 件数不一致")
+
+        let stories = try await repository.allStories()
+        XCTAssertEqual(stories.count, 12, "StoryMaster 件数不一致")
+
+        let personalitiesPrimary = try await repository.allPersonalityPrimary()
+        let personalitiesSecondary = try await repository.allPersonalitySecondary()
+        XCTAssertEqual(personalitiesPrimary.count + personalitiesSecondary.count, 33, "PersonalityMaster 件数不一致")
+
+        let explorationEvents = try await repository.allExplorationEvents()
+        XCTAssertEqual(explorationEvents.count, 12, "ExplorationEventMaster 件数不一致")
+    }
+
+    // MARK: - 各マスタの必須フィールド検証
+
+    /// 全アイテムの必須フィールドが正しく読み込まれていることを検証
+    func testAllItemsHaveRequiredFields() async throws {
+        let repository = MasterDataRepository()
+        let items = try await repository.allItems()
+
+        for item in items {
+            XCTAssertFalse(item.name.isEmpty, "Item id=\(item.id) の name が空")
+            XCTAssertGreaterThan(item.id, 0, "Item の id が 0 以下")
+        }
+    }
+
+    /// 全スキルの必須フィールドが正しく読み込まれていることを検証
+    func testAllSkillsHaveRequiredFields() async throws {
+        let repository = MasterDataRepository()
+        let skills = try await repository.allSkills()
+
+        for skill in skills {
+            XCTAssertFalse(skill.name.isEmpty, "Skill id=\(skill.id) の name が空")
+            XCTAssertGreaterThan(skill.id, 0, "Skill の id が 0 以下")
+        }
+    }
+
+    /// 全職業の必須フィールドが正しく読み込まれていることを検証
+    func testAllJobsHaveRequiredFields() async throws {
+        let repository = MasterDataRepository()
+        let jobs = try await repository.allJobs()
+
+        for job in jobs {
+            XCTAssertFalse(job.name.isEmpty, "Job id=\(job.id) の name が空")
+        }
+    }
+
+    /// 全種族の必須フィールドが正しく読み込まれていることを検証
+    func testAllRacesHaveRequiredFields() async throws {
+        let repository = MasterDataRepository()
+        let races = try await repository.allRaces()
+
+        for race in races {
+            XCTAssertFalse(race.name.isEmpty, "Race id=\(race.id) の name が空")
+        }
+    }
+
+    /// 全敵の必須フィールドが正しく読み込まれていることを検証
+    func testAllEnemiesHaveRequiredFields() async throws {
+        let repository = MasterDataRepository()
+        let enemies = try await repository.allEnemies()
+
+        for enemy in enemies {
+            XCTAssertFalse(enemy.name.isEmpty, "Enemy id=\(enemy.id) の name が空")
+            XCTAssertGreaterThan(enemy.vitality, 0, "Enemy id=\(enemy.id) の vitality が 0 以下")
+        }
+    }
+
+    /// 全ダンジョンの必須フィールドが正しく読み込まれていることを検証
+    func testAllDungeonsHaveRequiredFields() async throws {
+        let repository = MasterDataRepository()
+        let (dungeons, _, floors) = try await repository.allDungeons()
+
+        for dungeon in dungeons {
+            XCTAssertFalse(dungeon.name.isEmpty, "Dungeon id=\(dungeon.id) の name が空")
+            XCTAssertGreaterThan(dungeon.floorCount, 0, "Dungeon id=\(dungeon.id) の floorCount が 0 以下")
+        }
+
+        // 各ダンジョンに対応するフロアが存在することを確認
+        for dungeon in dungeons {
+            let dungeonFloors = floors.filter { $0.dungeonId == dungeon.id }
+            XCTAssertEqual(dungeonFloors.count, dungeon.floorCount,
+                           "Dungeon id=\(dungeon.id) のフロア数が floorCount と不一致")
+        }
+    }
+
+    /// 全ストーリーの必須フィールドが正しく読み込まれていることを検証
+    func testAllStoriesHaveRequiredFields() async throws {
+        let repository = MasterDataRepository()
+        let stories = try await repository.allStories()
+
+        for story in stories {
+            XCTAssertFalse(story.title.isEmpty, "Story id=\(story.id) の title が空")
+        }
     }
 
     /// ダンジョンのエンカウンターイベントで参照される敵IDが、全てEnemyMasterに存在することを検証
