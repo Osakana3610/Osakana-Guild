@@ -111,8 +111,3 @@ struct SkillRuntimeEffects {
     }
 }
 
-extension BattleActor.SkillEffects.DamageMultipliers {
-    static let neutral = BattleActor.SkillEffects.DamageMultipliers(physical: 1.0,
-                                                                    magical: 1.0,
-                                                                    breath: 1.0)
-}

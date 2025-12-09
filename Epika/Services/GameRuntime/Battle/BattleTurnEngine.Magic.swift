@@ -120,7 +120,7 @@ extension BattleTurnEngine {
                                        sourceId: refreshedAttacker.identifier,
                                        to: &freshTarget,
                                        context: &context,
-                                       sourceProcMultiplier: refreshedAttacker.skillEffects.procChanceMultiplier)
+                                       sourceProcMultiplier: refreshedAttacker.skillEffects.combat.procChanceMultiplier)
                 context.updateActor(freshTarget, side: targetRef.0, index: targetRef.1)
             }
         }
@@ -240,10 +240,10 @@ extension BattleTurnEngine {
     }
 
     static func spellPowerModifier(for attacker: BattleActor, spellId: UInt8? = nil) -> Double {
-        let percentScale = max(0.0, 1.0 + attacker.skillEffects.spellPower.percent / 100.0)
-        var modifier = percentScale * attacker.skillEffects.spellPower.multiplier
+        let percentScale = max(0.0, 1.0 + attacker.skillEffects.spell.power.percent / 100.0)
+        var modifier = percentScale * attacker.skillEffects.spell.power.multiplier
         if let spellId,
-           let specific = attacker.skillEffects.spellSpecificMultipliers[spellId] {
+           let specific = attacker.skillEffects.spell.specificMultipliers[spellId] {
             modifier *= specific
         }
         return modifier

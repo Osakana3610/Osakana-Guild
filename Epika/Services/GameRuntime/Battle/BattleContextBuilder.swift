@@ -19,9 +19,9 @@ struct BattleContextBuilder {
             applySpellChargeModifiers(skillEffects: skillEffects,
                                       loadout: character.spellLoadout,
                                       resources: &resources)
-            if skillEffects.breathExtraCharges > 0 {
+            if skillEffects.spell.breathExtraCharges > 0 {
                 let current = resources.charges(for: BattleActionResource.Key.breath)
-                resources.setCharges(for: BattleActionResource.Key.breath, value: current + skillEffects.breathExtraCharges)
+                resources.setCharges(for: BattleActionResource.Key.breath, value: current + skillEffects.spell.breathExtraCharges)
             }
             let martialEligible = character.isMartialEligible
             let actor = BattleActor(
@@ -45,7 +45,7 @@ struct BattleContextBuilder {
                 currentHP: character.hitPoints.current,
                 actionRates: BattleContextBuilder.playerActionRates(for: character),
                 actionResources: resources,
-                barrierCharges: skillEffects.barrierCharges,
+                barrierCharges: skillEffects.combat.barrierCharges,
                 skillEffects: skillEffects,
                 spellbook: character.spellbook,
                 spells: character.spellLoadout,
@@ -80,7 +80,7 @@ private extension BattleContextBuilder {
         let spells = loadout.mage + loadout.priest
         guard !spells.isEmpty else { return }
         for spell in spells {
-            guard let modifier = skillEffects.spellChargeModifier(for: spell.id), !modifier.isEmpty else { continue }
+            guard let modifier = skillEffects.spell.chargeModifier(for: spell.id), !modifier.isEmpty else { continue }
             let baseState = resources.spellChargeState(for: spell.id)
                 ?? BattleActionResource.SpellChargeState(current: 1, max: 1)
             let baseInitial = baseState.current

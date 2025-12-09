@@ -157,11 +157,11 @@ actor GameRuntimeService {
                                              explorationInterval: interval)
     }
 
-    func runtimeCharacter(from progress: RuntimeCharacterProgress) async throws -> RuntimeCharacter {
-        try await CharacterAssembler.assembleRuntimeCharacter(repository: repository, from: progress)
+    func runtimeCharacter(from input: CharacterInput) async throws -> RuntimeCharacter {
+        try await RuntimeCharacterFactory.make(from: input, repository: repository)
     }
 
-    func runtimePartyState(party: PartySnapshot, characters: [RuntimeCharacterProgress]) async throws -> RuntimePartyState {
+    func runtimePartyState(party: PartySnapshot, characters: [CharacterInput]) async throws -> RuntimePartyState {
         try await PartyAssembler.assembleState(repository: repository,
                                                party: party,
                                                characters: characters)
@@ -171,32 +171,18 @@ actor GameRuntimeService {
         try await repository.race(withId: raceId)
     }
 
-    func recalculateCombatStats(for progress: RuntimeCharacterProgress,
+    func recalculateCombatStats(for input: CharacterInput,
                                    pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
-        let state = try await CharacterAssembler.assembleState(repository: repository, from: progress)
-        guard let race = state.race, let job = state.job else {
-            throw RuntimeError.invalidConfiguration(reason: "種族または職業のマスターデータが見つかりません")
-        }
-        let context = CombatStatCalculator.Context(
-            raceId: progress.raceId,
-            jobId: progress.jobId,
-            level: progress.level,
-            currentHP: progress.hitPoints.current,
-            equippedItems: progress.equippedItems,
-            race: race,
-            job: job,
-            personalitySecondary: state.personalitySecondary,
-            learnedSkills: state.learnedSkills,
-            loadout: RuntimeCharacter.Loadout(
-                items: state.loadout.items,
-                titles: state.loadout.titles,
-                superRareTitles: state.loadout.superRareTitles
-            ),
+        let runtimeCharacter = try await RuntimeCharacterFactory.make(
+            from: input,
+            repository: repository,
             pandoraBoxStackKeys: pandoraBoxStackKeys
         )
-        return try await MainActor.run {
-            try CombatStatCalculator.calculate(for: context)
-        }
+        return CombatStatCalculator.Result(
+            attributes: runtimeCharacter.attributes,
+            hitPoints: CharacterValues.HitPoints(current: runtimeCharacter.currentHP, maximum: runtimeCharacter.maxHP),
+            combat: runtimeCharacter.combat
+        )
     }
 
     private func awaitRunArtifact(_ runId: UUID) async throws -> ExplorationRunArtifact {

@@ -11,7 +11,7 @@ extension BattleTurnEngine {
                                                sourceProcMultiplier: Double) -> Double {
         guard basePercent > 0 else { return 0.0 }
         let scaledSource = basePercent * max(0.0, sourceProcMultiplier)
-        let resistance = target.skillEffects.statusResistances[statusId] ?? .neutral
+        let resistance = target.skillEffects.status.resistances[statusId] ?? .neutral
         let scaled = scaledSource * resistance.multiplier
         let additiveScale = max(0.0, 1.0 + resistance.additivePercent / 100.0)
         return max(0.0, scaled * additiveScale)
@@ -78,7 +78,7 @@ extension BattleTurnEngine {
     }
 
     static func hasVampiricImpulse(actor: BattleActor) -> Bool {
-        actor.skillEffects.vampiricImpulse && !actor.skillEffects.vampiricSuppression
+        actor.skillEffects.misc.vampiricImpulse && !actor.skillEffects.misc.vampiricSuppression
     }
 
     static func isActionLocked(actor: BattleActor, context: BattleContext) -> Bool {
@@ -94,9 +94,9 @@ extension BattleTurnEngine {
 
     static func shouldTriggerBerserk(for actor: inout BattleActor,
                                      context: inout BattleContext) -> Bool {
-        guard let chance = actor.skillEffects.berserkChancePercent,
+        guard let chance = actor.skillEffects.status.berserkChancePercent,
               chance > 0 else { return false }
-        let scaled = chance * actor.skillEffects.procChanceMultiplier
+        let scaled = chance * actor.skillEffects.combat.procChanceMultiplier
         let capped = max(0, min(100, Int(scaled.rounded(.towardZero))))
         guard BattleRandomSystem.percentChance(capped, random: &context.random) else { return false }
         let alreadyConfused = hasStatus(tag: "confusion", in: actor, context: context)
@@ -146,8 +146,8 @@ extension BattleTurnEngine {
     static func attemptInflictStatuses(from attacker: BattleActor,
                                        to defender: inout BattleActor,
                                        context: inout BattleContext) {
-        guard !attacker.skillEffects.statusInflictions.isEmpty else { return }
-        for inflict in attacker.skillEffects.statusInflictions {
+        guard !attacker.skillEffects.status.inflictions.isEmpty else { return }
+        for inflict in attacker.skillEffects.status.inflictions {
             let baseChance = statusInflictBaseChance(for: inflict, attacker: attacker, defender: defender)
             guard baseChance > 0 else { continue }
             _ = attemptApplyStatus(statusId: inflict.statusId,
@@ -156,7 +156,7 @@ extension BattleTurnEngine {
                                    sourceId: attacker.identifier,
                                    to: &defender,
                                    context: &context,
-                                   sourceProcMultiplier: attacker.skillEffects.procChanceMultiplier)
+                                   sourceProcMultiplier: attacker.skillEffects.combat.procChanceMultiplier)
         }
     }
 

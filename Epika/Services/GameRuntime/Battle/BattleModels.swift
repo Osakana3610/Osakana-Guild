@@ -155,7 +155,7 @@ struct BattleActionResource: Sendable, Hashable {
         spellCharges[spellId]
     }
 
-    static func makeDefault(for snapshot: RuntimeCharacterProgress.Combat,
+    static func makeDefault(for snapshot: CharacterValues.Combat,
                             spellLoadout: SkillRuntimeEffects.SpellLoadout = .empty) -> BattleActionResource {
         var values: [String: Int] = [:]
         if snapshot.breathDamage > 0 {
@@ -207,6 +207,8 @@ struct BattleAttackHistory: Sendable, Hashable {
 
 struct BattleActor: Sendable {
     struct SkillEffects: Sendable, Hashable {
+        // MARK: - Shared Types
+
         struct DamageMultipliers: Sendable, Hashable {
             var physical: Double
             var magical: Double
@@ -219,6 +221,8 @@ struct BattleActor: Sendable {
                 case .breath: return breath
                 }
             }
+
+            static let neutral = DamageMultipliers(physical: 1.0, magical: 1.0, breath: 1.0)
         }
 
         struct TargetMultipliers: Sendable, Hashable {
@@ -241,127 +245,6 @@ struct BattleActor: Sendable {
             var multiplier: Double
 
             static let neutral = SpellPower(percent: 0.0, multiplier: 1.0)
-        }
-
-        struct Reaction: Sendable, Hashable {
-            enum Trigger: String, Sendable {
-                case allyDefeated
-                case selfEvadePhysical
-                case selfDamagedPhysical
-                case selfDamagedMagical
-                case allyDamagedPhysical
-            }
-
-            enum Target: String, Sendable {
-                case attacker
-                case killer
-            }
-
-            let identifier: String
-            let displayName: String
-            let trigger: Trigger
-            let target: Target
-            let damageType: BattleDamageType
-            let baseChancePercent: Double
-            let attackCountMultiplier: Double
-            let criticalRateMultiplier: Double
-            let accuracyMultiplier: Double
-            let requiresMartial: Bool
-            let requiresAllyBehind: Bool
-        }
-
-        struct RowProfile: Sendable, Hashable {
-            enum Base: String, Sendable {
-                case melee
-                case ranged
-                case mixed
-                case balanced
-            }
-
-            var base: Base = .melee
-            var hasMeleeApt: Bool = false
-            var hasRangedApt: Bool = false
-        }
-
-        struct StatusResistance: Sendable, Hashable {
-            var multiplier: Double
-            var additivePercent: Double
-
-            static let neutral = StatusResistance(multiplier: 1.0, additivePercent: 0.0)
-        }
-
-        struct TimedBuffTrigger: Sendable, Hashable {
-            enum Scope: String, Sendable {
-                case party
-            }
-
-            let id: String
-            let displayName: String
-            let triggerTurn: Int
-            let modifiers: [String: Double]
-            let scope: Scope
-            let category: String
-        }
-
-        struct StatusInflict: Sendable, Hashable {
-            let statusId: UInt8
-            let baseChancePercent: Double
-        }
-
-        struct RescueCapability: Sendable, Hashable {
-            let usesPriestMagic: Bool
-            let minLevel: Int
-        }
-
-        struct RescueModifiers: Sendable, Hashable {
-            var ignoreActionCost: Bool = false
-
-            static let neutral = RescueModifiers(ignoreActionCost: false)
-        }
-
-        struct ResurrectionActive: Sendable, Hashable {
-            enum HPScale: String, Sendable {
-                case magicalHealing
-                case maxHP5Percent
-            }
-
-            let chancePercent: Int
-            let hpScale: HPScale
-            let maxTriggers: Int?
-        }
-
-        struct ForcedResurrection: Sendable, Hashable {
-            let maxTriggers: Int?
-        }
-
-        struct VitalizeResurrection: Sendable, Hashable {
-            let removePenalties: Bool
-            let rememberSkills: Bool
-            let removeSkillIds: [UInt16]
-            let grantSkillIds: [UInt16]
-        }
-
-        struct SpecialAttack: Sendable, Hashable {
-            enum Kind: String, Sendable {
-                case specialA
-                case specialB
-                case specialC
-                case specialD
-                case specialE
-            }
-
-            let kind: Kind
-            let chancePercent: Int
-
-            init?(kindIdentifier: String, chancePercent: Int) {
-                guard let parsed = Kind(rawValue: kindIdentifier) else { return nil }
-                self.init(kind: parsed, chancePercent: chancePercent)
-            }
-
-            init(kind: Kind, chancePercent: Int) {
-                self.kind = kind
-                self.chancePercent = max(0, min(100, chancePercent))
-            }
         }
 
         struct SpellChargeRegen: Sendable, Hashable {
@@ -425,19 +308,6 @@ struct BattleActor: Sendable {
             }
         }
 
-        var damageTaken: DamageMultipliers
-        var damageDealt: DamageMultipliers
-        var damageDealtAgainst: TargetMultipliers
-        var spellPower: SpellPower
-        var spellSpecificMultipliers: [UInt8: Double]
-        var spellSpecificTakenMultipliers: [UInt8: Double]
-        var criticalDamagePercent: Double
-        var criticalDamageMultiplier: Double
-        var criticalDamageTakenMultiplier: Double
-        var penetrationDamageTakenMultiplier: Double
-        var martialBonusPercent: Double
-        var martialBonusMultiplier: Double
-        var procChanceMultiplier: Double
         struct ProcRateModifier: Sendable, Hashable {
             var multipliers: [String: Double]
             var additives: [String: Double]
@@ -450,138 +320,342 @@ struct BattleActor: Sendable {
                 return (base + added) * multiplied
             }
         }
-        var procRateModifier: ProcRateModifier
+
         struct ExtraAction: Sendable, Hashable {
             let chancePercent: Double
             let count: Int
         }
-        var extraActions: [ExtraAction]
-        var nextTurnExtraActions: Int
-        var actionOrderMultiplier: Double
-        var actionOrderShuffle: Bool
-        var healingGiven: Double
-        var healingReceived: Double
-        var endOfTurnHealingPercent: Double
-        var endOfTurnSelfHPPercent: Double
-        var reactions: [Reaction]
-        var counterAttackEvasionMultiplier: Double
-        var rowProfile: RowProfile
-        var statusResistances: [UInt8: StatusResistance]
-        var timedBuffTriggers: [TimedBuffTrigger]
-        var statusInflictions: [StatusInflict]
-        var berserkChancePercent: Double?
-        var breathExtraCharges: Int
-        var barrierCharges: [UInt8: Int]
-        var guardBarrierCharges: [UInt8: Int]
-        var parryEnabled: Bool
-        var shieldBlockEnabled: Bool
-        var parryBonusPercent: Double
-        var shieldBlockBonusPercent: Double
-        var dodgeCapMax: Double?
-        var minHitScale: Double?
-        var spellChargeModifiers: [UInt8: SpellChargeModifier]
-        var defaultSpellChargeModifier: SpellChargeModifier?
-        var absorptionPercent: Double
-        var absorptionCapPercent: Double
-        var partyHostileAll: Bool
-        var vampiricImpulse: Bool
-        var vampiricSuppression: Bool
-        var antiHealingEnabled: Bool
-        var equipmentStatMultipliers: [String: Double]
-        var degradationPercent: Double
-        var degradationRepairMinPercent: Double
-        var degradationRepairMaxPercent: Double
-        var degradationRepairBonusPercent: Double
-        var autoDegradationRepair: Bool
-        var partyHostileTargets: Set<String>
-        var partyProtectedTargets: Set<String>
-        var specialAttacks: [SpecialAttack]
-        var rescueCapabilities: [RescueCapability]
-        var rescueModifiers: RescueModifiers
-        var resurrectionActives: [ResurrectionActive]
-        var forcedResurrection: ForcedResurrection?
-        var vitalizeResurrection: VitalizeResurrection?
-        var necromancerInterval: Int?
-        var resurrectionPassiveBetweenFloors: Bool
+
+        struct Reaction: Sendable, Hashable {
+            enum Trigger: String, Sendable {
+                case allyDefeated
+                case selfEvadePhysical
+                case selfDamagedPhysical
+                case selfDamagedMagical
+                case allyDamagedPhysical
+            }
+
+            enum Target: String, Sendable {
+                case attacker
+                case killer
+            }
+
+            let identifier: String
+            let displayName: String
+            let trigger: Trigger
+            let target: Target
+            let damageType: BattleDamageType
+            let baseChancePercent: Double
+            let attackCountMultiplier: Double
+            let criticalRateMultiplier: Double
+            let accuracyMultiplier: Double
+            let requiresMartial: Bool
+            let requiresAllyBehind: Bool
+        }
+
+        struct SpecialAttack: Sendable, Hashable {
+            enum Kind: String, Sendable {
+                case specialA
+                case specialB
+                case specialC
+                case specialD
+                case specialE
+            }
+
+            let kind: Kind
+            let chancePercent: Int
+
+            init?(kindIdentifier: String, chancePercent: Int) {
+                guard let parsed = Kind(rawValue: kindIdentifier) else { return nil }
+                self.init(kind: parsed, chancePercent: chancePercent)
+            }
+
+            init(kind: Kind, chancePercent: Int) {
+                self.kind = kind
+                self.chancePercent = max(0, min(100, chancePercent))
+            }
+        }
+
+        struct StatusResistance: Sendable, Hashable {
+            var multiplier: Double
+            var additivePercent: Double
+
+            static let neutral = StatusResistance(multiplier: 1.0, additivePercent: 0.0)
+        }
+
+        struct TimedBuffTrigger: Sendable, Hashable {
+            enum Scope: String, Sendable {
+                case party
+            }
+
+            let id: String
+            let displayName: String
+            let triggerTurn: Int
+            let modifiers: [String: Double]
+            let scope: Scope
+            let category: String
+        }
+
+        struct StatusInflict: Sendable, Hashable {
+            let statusId: UInt8
+            let baseChancePercent: Double
+        }
+
+        struct RescueCapability: Sendable, Hashable {
+            let usesPriestMagic: Bool
+            let minLevel: Int
+        }
+
+        struct RescueModifiers: Sendable, Hashable {
+            var ignoreActionCost: Bool = false
+
+            static let neutral = RescueModifiers(ignoreActionCost: false)
+        }
+
+        struct ResurrectionActive: Sendable, Hashable {
+            enum HPScale: String, Sendable {
+                case magicalHealing
+                case maxHP5Percent
+            }
+
+            let chancePercent: Int
+            let hpScale: HPScale
+            let maxTriggers: Int?
+        }
+
+        struct ForcedResurrection: Sendable, Hashable {
+            let maxTriggers: Int?
+        }
+
+        struct VitalizeResurrection: Sendable, Hashable {
+            let removePenalties: Bool
+            let rememberSkills: Bool
+            let removeSkillIds: [UInt16]
+            let grantSkillIds: [UInt16]
+        }
+
+        struct RowProfile: Sendable, Hashable {
+            enum Base: String, Sendable {
+                case melee
+                case ranged
+                case mixed
+                case balanced
+            }
+
+            var base: Base = .melee
+            var hasMeleeApt: Bool = false
+            var hasRangedApt: Bool = false
+        }
+
         struct Runaway: Sendable, Hashable {
             let thresholdPercent: Double
             let chancePercent: Double
         }
-        var magicRunaway: Runaway?
-        var damageRunaway: Runaway?
-        var sacrificeInterval: Int?
-        var retreatTurn: Int?
-        var retreatChancePercent: Double?
+
+        // MARK: - Damage Group
+
+        struct Damage: Sendable, Hashable {
+            var taken: DamageMultipliers
+            var dealt: DamageMultipliers
+            var dealtAgainst: TargetMultipliers
+            var criticalPercent: Double
+            var criticalMultiplier: Double
+            var criticalTakenMultiplier: Double
+            var penetrationTakenMultiplier: Double
+            var martialBonusPercent: Double
+            var martialBonusMultiplier: Double
+            var minHitScale: Double?
+
+            static let neutral = Damage(
+                taken: DamageMultipliers.neutral,
+                dealt: DamageMultipliers.neutral,
+                dealtAgainst: TargetMultipliers.neutral,
+                criticalPercent: 0.0,
+                criticalMultiplier: 1.0,
+                criticalTakenMultiplier: 1.0,
+                penetrationTakenMultiplier: 1.0,
+                martialBonusPercent: 0.0,
+                martialBonusMultiplier: 1.0,
+                minHitScale: nil
+            )
+        }
+
+        // MARK: - Spell Group
+
+        struct Spell: Sendable, Hashable {
+            var power: SpellPower
+            var specificMultipliers: [UInt8: Double]
+            var specificTakenMultipliers: [UInt8: Double]
+            var chargeModifiers: [UInt8: SpellChargeModifier]
+            var defaultChargeModifier: SpellChargeModifier?
+            var breathExtraCharges: Int
+
+            func chargeModifier(for spellId: UInt8) -> SpellChargeModifier? {
+                chargeModifiers[spellId] ?? defaultChargeModifier
+            }
+
+            static let neutral = Spell(
+                power: SpellPower.neutral,
+                specificMultipliers: [:],
+                specificTakenMultipliers: [:],
+                chargeModifiers: [:],
+                defaultChargeModifier: nil,
+                breathExtraCharges: 0
+            )
+        }
+
+        // MARK: - Combat Group
+
+        struct Combat: Sendable, Hashable {
+            var procChanceMultiplier: Double
+            var procRateModifier: ProcRateModifier
+            var extraActions: [ExtraAction]
+            var nextTurnExtraActions: Int
+            var actionOrderMultiplier: Double
+            var actionOrderShuffle: Bool
+            var counterAttackEvasionMultiplier: Double
+            var reactions: [Reaction]
+            var parryEnabled: Bool
+            var parryBonusPercent: Double
+            var shieldBlockEnabled: Bool
+            var shieldBlockBonusPercent: Double
+            var barrierCharges: [UInt8: Int]
+            var guardBarrierCharges: [UInt8: Int]
+            var specialAttacks: [SpecialAttack]
+
+            static let neutral = Combat(
+                procChanceMultiplier: 1.0,
+                procRateModifier: .neutral,
+                extraActions: [],
+                nextTurnExtraActions: 0,
+                actionOrderMultiplier: 1.0,
+                actionOrderShuffle: false,
+                counterAttackEvasionMultiplier: 1.0,
+                reactions: [],
+                parryEnabled: false,
+                parryBonusPercent: 0.0,
+                shieldBlockEnabled: false,
+                shieldBlockBonusPercent: 0.0,
+                barrierCharges: [:],
+                guardBarrierCharges: [:],
+                specialAttacks: []
+            )
+        }
+
+        // MARK: - Status Group
+
+        struct Status: Sendable, Hashable {
+            var resistances: [UInt8: StatusResistance]
+            var inflictions: [StatusInflict]
+            var berserkChancePercent: Double?
+            var timedBuffTriggers: [TimedBuffTrigger]
+
+            static let neutral = Status(
+                resistances: [:],
+                inflictions: [],
+                berserkChancePercent: nil,
+                timedBuffTriggers: []
+            )
+        }
+
+        // MARK: - Resurrection Group
+
+        struct Resurrection: Sendable, Hashable {
+            var rescueCapabilities: [RescueCapability]
+            var rescueModifiers: RescueModifiers
+            var actives: [ResurrectionActive]
+            var forced: ForcedResurrection?
+            var vitalize: VitalizeResurrection?
+            var necromancerInterval: Int?
+            var passiveBetweenFloors: Bool
+            var sacrificeInterval: Int?
+
+            static let neutral = Resurrection(
+                rescueCapabilities: [],
+                rescueModifiers: .neutral,
+                actives: [],
+                forced: nil,
+                vitalize: nil,
+                necromancerInterval: nil,
+                passiveBetweenFloors: false,
+                sacrificeInterval: nil
+            )
+        }
+
+        // MARK: - Misc Group
+
+        struct Misc: Sendable, Hashable {
+            var healingGiven: Double
+            var healingReceived: Double
+            var endOfTurnHealingPercent: Double
+            var endOfTurnSelfHPPercent: Double
+            var rowProfile: RowProfile
+            var dodgeCapMax: Double?
+            var absorptionPercent: Double
+            var absorptionCapPercent: Double
+            var partyHostileAll: Bool
+            var vampiricImpulse: Bool
+            var vampiricSuppression: Bool
+            var antiHealingEnabled: Bool
+            var equipmentStatMultipliers: [String: Double]
+            var degradationPercent: Double
+            var degradationRepairMinPercent: Double
+            var degradationRepairMaxPercent: Double
+            var degradationRepairBonusPercent: Double
+            var autoDegradationRepair: Bool
+            var partyHostileTargets: Set<String>
+            var partyProtectedTargets: Set<String>
+            var magicRunaway: Runaway?
+            var damageRunaway: Runaway?
+            var retreatTurn: Int?
+            var retreatChancePercent: Double?
+
+            static let neutral = Misc(
+                healingGiven: 1.0,
+                healingReceived: 1.0,
+                endOfTurnHealingPercent: 0.0,
+                endOfTurnSelfHPPercent: 0.0,
+                rowProfile: .init(),
+                dodgeCapMax: nil,
+                absorptionPercent: 0.0,
+                absorptionCapPercent: 0.0,
+                partyHostileAll: false,
+                vampiricImpulse: false,
+                vampiricSuppression: false,
+                antiHealingEnabled: false,
+                equipmentStatMultipliers: [:],
+                degradationPercent: 0.0,
+                degradationRepairMinPercent: 0.0,
+                degradationRepairMaxPercent: 0.0,
+                degradationRepairBonusPercent: 0.0,
+                autoDegradationRepair: false,
+                partyHostileTargets: [],
+                partyProtectedTargets: [],
+                magicRunaway: nil,
+                damageRunaway: nil,
+                retreatTurn: nil,
+                retreatChancePercent: nil
+            )
+        }
+
+        // MARK: - Group Properties
+
+        var damage: Damage
+        var spell: Spell
+        var combat: Combat
+        var status: Status
+        var resurrection: Resurrection
+        var misc: Misc
 
         static let neutral = SkillEffects(
-            damageTaken: .init(physical: 1.0, magical: 1.0, breath: 1.0),
-            damageDealt: .init(physical: 1.0, magical: 1.0, breath: 1.0),
-            damageDealtAgainst: .neutral,
-            spellPower: .neutral,
-            spellSpecificMultipliers: [:],
-            spellSpecificTakenMultipliers: [:],
-            criticalDamagePercent: 0.0,
-            criticalDamageMultiplier: 1.0,
-            criticalDamageTakenMultiplier: 1.0,
-            penetrationDamageTakenMultiplier: 1.0,
-            martialBonusPercent: 0.0,
-            martialBonusMultiplier: 1.0,
-            procChanceMultiplier: 1.0,
-            procRateModifier: .neutral,
-            extraActions: [],
-            nextTurnExtraActions: 0,
-            actionOrderMultiplier: 1.0,
-            actionOrderShuffle: false,
-            healingGiven: 1.0,
-            healingReceived: 1.0,
-            endOfTurnHealingPercent: 0.0,
-            endOfTurnSelfHPPercent: 0.0,
-            reactions: [],
-            counterAttackEvasionMultiplier: 1.0,
-            rowProfile: .init(),
-            statusResistances: [:],
-            timedBuffTriggers: [],
-            statusInflictions: [],
-            berserkChancePercent: nil,
-            breathExtraCharges: 0,
-            barrierCharges: [:],
-            guardBarrierCharges: [:],
-            parryEnabled: false,
-            shieldBlockEnabled: false,
-            parryBonusPercent: 0.0,
-            shieldBlockBonusPercent: 0.0,
-            dodgeCapMax: nil,
-            minHitScale: nil,
-            spellChargeModifiers: [:],
-            defaultSpellChargeModifier: nil,
-            absorptionPercent: 0.0,
-            absorptionCapPercent: 0.0,
-            partyHostileAll: false,
-            vampiricImpulse: false,
-            vampiricSuppression: false,
-            antiHealingEnabled: false,
-            equipmentStatMultipliers: [:],
-            degradationPercent: 0.0,
-            degradationRepairMinPercent: 0.0,
-            degradationRepairMaxPercent: 0.0,
-            degradationRepairBonusPercent: 0.0,
-            autoDegradationRepair: false,
-            partyHostileTargets: [],
-            partyProtectedTargets: [],
-            specialAttacks: [],
-            rescueCapabilities: [],
-            rescueModifiers: .neutral,
-            resurrectionActives: [],
-            forcedResurrection: nil,
-            vitalizeResurrection: nil,
-            necromancerInterval: nil,
-            resurrectionPassiveBetweenFloors: false,
-            magicRunaway: nil,
-            damageRunaway: nil,
-            sacrificeInterval: nil,
-            retreatTurn: nil,
-            retreatChancePercent: nil)
-        }
+            damage: .neutral,
+            spell: .neutral,
+            combat: .neutral,
+            status: .neutral,
+            resurrection: .neutral,
+            misc: .neutral
+        )
+    }
 
     let identifier: String
     let displayName: String
@@ -601,7 +675,7 @@ struct BattleActor: Sendable {
     let raceId: UInt8?
     let enemyMasterIndex: UInt16?  // 敵の場合のみ、EnemyDefinition.index
 
-    var snapshot: RuntimeCharacterProgress.Combat
+    var snapshot: CharacterValues.Combat
     var currentHP: Int
     var actionRates: BattleActionRates
     var actionResources: BattleActionResource
@@ -653,7 +727,7 @@ struct BattleActor: Sendable {
          isMartialEligible: Bool,
          raceId: UInt8? = nil,
          enemyMasterIndex: UInt16? = nil,
-         snapshot: RuntimeCharacterProgress.Combat,
+         snapshot: CharacterValues.Combat,
          currentHP: Int,
          actionRates: BattleActionRates,
          actionResources: BattleActionResource = BattleActionResource(),
@@ -744,12 +818,3 @@ struct BattleActor: Sendable {
     var rowIndex: Int { formationSlot.row }
 }
 
-extension BattleActor.SkillEffects {
-    func spellChargeModifier(for spellId: UInt8) -> SpellChargeModifier? {
-        var modifier = defaultSpellChargeModifier ?? SpellChargeModifier()
-        if let specific = spellChargeModifiers[spellId] {
-            modifier.merge(specific)
-        }
-        return modifier.isEmpty ? nil : modifier
-    }
-}
