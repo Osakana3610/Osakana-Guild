@@ -170,7 +170,7 @@ private extension BattleService {
     static func applyBetweenFloorsResurrection(to actors: [BattleActor]) -> [BattleActor] {
         actors.map { actor in
             guard !actor.isAlive,
-                  actor.skillEffects.resurrectionPassiveBetweenFloors else {
+                  actor.skillEffects.resurrection.passiveBetweenFloors else {
                 return actor
             }
 

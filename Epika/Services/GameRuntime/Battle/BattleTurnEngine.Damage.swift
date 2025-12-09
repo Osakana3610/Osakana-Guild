@@ -39,7 +39,7 @@ extension BattleTurnEngine {
         let rowMultiplier = rowDamageModifier(for: attacker, damageType: .physical)
         let dealtMultiplier = damageDealtModifier(for: attacker, against: defender, damageType: .physical)
         let takenMultiplier = damageTakenModifier(for: defender, damageType: .physical)
-        let penetrationTakenMultiplier = defender.skillEffects.penetrationDamageTakenMultiplier
+        let penetrationTakenMultiplier = defender.skillEffects.damage.penetrationTakenMultiplier
 
         var coreDamage = baseDifference
         if hitIndex == 1 {
@@ -52,7 +52,7 @@ extension BattleTurnEngine {
 
         if isCritical {
             totalDamage *= criticalDamageBonus(for: attacker)
-            totalDamage *= defender.skillEffects.criticalDamageTakenMultiplier
+            totalDamage *= defender.skillEffects.damage.criticalTakenMultiplier
         }
 
         let barrierMultiplier = applyBarrierIfAvailable(for: .physical, defender: &defender)
@@ -106,7 +106,7 @@ extension BattleTurnEngine {
 
         if isCritical {
             damage *= criticalDamageBonus(for: attacker)
-            damage *= defender.skillEffects.criticalDamageTakenMultiplier
+            damage *= defender.skillEffects.damage.criticalTakenMultiplier
         }
 
         let barrierMultiplier = applyBarrierIfAvailable(for: .magical, defender: &defender)
@@ -181,7 +181,7 @@ extension BattleTurnEngine {
     static func rowDamageModifier(for attacker: BattleActor, damageType: BattleDamageType) -> Double {
         guard damageType == .physical else { return 1.0 }
         let row = max(0, min(5, attacker.rowIndex))
-        let profile = attacker.skillEffects.rowProfile
+        let profile = attacker.skillEffects.misc.rowProfile
         switch profile.base {
         case .melee:
             return profile.hasMeleeApt ? meleeAptRow[row] : meleeBaseRow[row]
@@ -206,14 +206,14 @@ extension BattleTurnEngine {
                                     damageType: BattleDamageType) -> Double {
         let key = modifierKey(for: damageType, suffix: "DamageDealtMultiplier")
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
-        let raceMultiplier = attacker.skillEffects.damageDealtAgainst.value(for: defender.raceId)
-        return buffMultiplier * attacker.skillEffects.damageDealt.value(for: damageType) * raceMultiplier
+        let raceMultiplier = attacker.skillEffects.damage.dealtAgainst.value(for: defender.raceId)
+        return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: damageType) * raceMultiplier
     }
 
     static func antiHealingDamageDealtModifier(for attacker: BattleActor) -> Double {
         let key = modifierKey(for: .magical, suffix: "DamageDealtMultiplier")
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
-        return buffMultiplier * attacker.skillEffects.damageDealt.value(for: .magical)
+        return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: .magical)
     }
 
     static func damageTakenModifier(for defender: BattleActor,
@@ -221,21 +221,21 @@ extension BattleTurnEngine {
                                     spellId: UInt8? = nil) -> Double {
         let key = modifierKey(for: damageType, suffix: "DamageTakenMultiplier")
         let buffMultiplier = aggregateModifier(from: defender.timedBuffs, key: key)
-        var result = buffMultiplier * defender.skillEffects.damageTaken.value(for: damageType)
+        var result = buffMultiplier * defender.skillEffects.damage.taken.value(for: damageType)
         if let spellId {
-            result *= defender.skillEffects.spellSpecificTakenMultipliers[spellId, default: 1.0]
+            result *= defender.skillEffects.spell.specificTakenMultipliers[spellId, default: 1.0]
         }
         return result
     }
 
     static func healingDealtModifier(for caster: BattleActor) -> Double {
         let buffMultiplier = aggregateModifier(from: caster.timedBuffs, key: "healingDealtMultiplier")
-        return buffMultiplier * caster.skillEffects.healingGiven
+        return buffMultiplier * caster.skillEffects.misc.healingGiven
     }
 
     static func healingReceivedModifier(for target: BattleActor) -> Double {
         let buffMultiplier = aggregateModifier(from: target.timedBuffs, key: "healingReceivedMultiplier")
-        return buffMultiplier * target.skillEffects.healingReceived
+        return buffMultiplier * target.skillEffects.misc.healingReceived
     }
 
     static func shouldTriggerCritical(attacker: BattleActor,
@@ -247,8 +247,8 @@ extension BattleTurnEngine {
     }
 
     static func criticalDamageBonus(for attacker: BattleActor) -> Double {
-        let percentBonus = max(0.0, 1.0 + attacker.skillEffects.criticalDamagePercent / 100.0)
-        let multiplierBonus = max(0.0, attacker.skillEffects.criticalDamageMultiplier)
+        let percentBonus = max(0.0, 1.0 + attacker.skillEffects.damage.criticalPercent / 100.0)
+        let multiplierBonus = max(0.0, attacker.skillEffects.damage.criticalMultiplier)
         return percentBonus * multiplierBonus
     }
 
@@ -325,10 +325,10 @@ extension BattleTurnEngine {
     }
 
     static func applyDegradationRepairIfAvailable(to actor: inout BattleActor) {
-        let minP = actor.skillEffects.degradationRepairMinPercent
-        let maxP = actor.skillEffects.degradationRepairMaxPercent
+        let minP = actor.skillEffects.misc.degradationRepairMinPercent
+        let maxP = actor.skillEffects.misc.degradationRepairMaxPercent
         guard minP > 0, maxP >= minP else { return }
-        let bonus = actor.skillEffects.degradationRepairBonusPercent
+        let bonus = actor.skillEffects.misc.degradationRepairBonusPercent
         let range = maxP - minP
         let roll = minP + Double.random(in: 0...range)
         let repaired = roll * (1.0 + bonus / 100.0)

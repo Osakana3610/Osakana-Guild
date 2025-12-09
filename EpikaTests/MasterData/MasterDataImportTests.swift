@@ -155,12 +155,12 @@ final class MasterDataImportTests: XCTestCase {
         var invalidReferences: [(tableId: String, eventIndex: Int, enemyId: UInt16)] = []
 
         for table in encounterTables {
-            for event in table.events {
+            for (index, event) in table.events.enumerated() {
                 guard let enemyId = event.enemyId else { continue }
 
                 // enemyId が 0 の場合は特に注意（文字列を数値として読んだ場合のフォールバック値）
                 if !validEnemyIds.contains(enemyId) {
-                    invalidReferences.append((table.id, event.orderIndex, enemyId))
+                    invalidReferences.append((table.id, index, enemyId))
                 }
             }
         }

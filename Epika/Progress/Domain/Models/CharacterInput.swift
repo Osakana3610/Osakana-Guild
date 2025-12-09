@@ -23,6 +23,39 @@ struct CharacterInput: Sendable, Hashable {
 }
 
 extension CharacterInput {
+    /// CharacterSnapshotからCharacterInputを生成
+    init(from snapshot: CharacterSnapshot) {
+        self.init(
+            id: snapshot.id,
+            displayName: snapshot.displayName,
+            raceId: snapshot.raceId,
+            jobId: snapshot.jobId,
+            previousJobId: snapshot.previousJobId,
+            avatarId: snapshot.avatarId,
+            level: snapshot.level,
+            experience: snapshot.experience,
+            currentHP: snapshot.hitPoints.current,
+            primaryPersonalityId: snapshot.personality.primaryId,
+            secondaryPersonalityId: snapshot.personality.secondaryId,
+            actionRateAttack: snapshot.actionPreferences.attack,
+            actionRatePriestMagic: snapshot.actionPreferences.priestMagic,
+            actionRateMageMagic: snapshot.actionPreferences.mageMagic,
+            actionRateBreath: snapshot.actionPreferences.breath,
+            updatedAt: snapshot.updatedAt,
+            equippedItems: snapshot.equippedItems.map { item in
+                EquippedItem(
+                    superRareTitleId: item.superRareTitleId,
+                    normalTitleId: item.normalTitleId,
+                    itemId: item.itemId,
+                    socketSuperRareTitleId: item.socketSuperRareTitleId,
+                    socketNormalTitleId: item.socketNormalTitleId,
+                    socketItemId: item.socketItemId,
+                    quantity: item.quantity
+                )
+            }
+        )
+    }
+
     /// 装備アイテムの中間表現
     struct EquippedItem: Sendable, Hashable {
         let superRareTitleId: UInt8

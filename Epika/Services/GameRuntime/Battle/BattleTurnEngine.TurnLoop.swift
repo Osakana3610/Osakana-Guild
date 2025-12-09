@@ -7,26 +7,26 @@ extension BattleTurnEngine {
         var entries: [(ActorReference, Int, Double)] = []
         for (idx, actor) in context.players.enumerated() where actor.isAlive {
             let speed: Int
-            if actor.skillEffects.actionOrderShuffle {
+            if actor.skillEffects.combat.actionOrderShuffle {
                 speed = context.random.nextInt(in: 0...10_000)
             } else {
-                let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.actionOrderMultiplier)
+                let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.combat.actionOrderMultiplier)
                 speed = Int(scaled.rounded(.towardZero))
             }
-            let slots = max(1, 1 + actor.skillEffects.nextTurnExtraActions + actor.extraActionsNextTurn)
+            let slots = max(1, 1 + actor.skillEffects.combat.nextTurnExtraActions + actor.extraActionsNextTurn)
             for _ in 0..<slots {
                 entries.append((.player(idx), speed, context.random.nextDouble(in: 0.0...1.0)))
             }
         }
         for (idx, actor) in context.enemies.enumerated() where actor.isAlive {
             let speed: Int
-            if actor.skillEffects.actionOrderShuffle {
+            if actor.skillEffects.combat.actionOrderShuffle {
                 speed = context.random.nextInt(in: 0...10_000)
             } else {
-                let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.actionOrderMultiplier)
+                let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.combat.actionOrderMultiplier)
                 speed = Int(scaled.rounded(.towardZero))
             }
-            let slots = max(1, 1 + actor.skillEffects.nextTurnExtraActions + actor.extraActionsNextTurn)
+            let slots = max(1, 1 + actor.skillEffects.combat.nextTurnExtraActions + actor.extraActionsNextTurn)
             for _ in 0..<slots {
                 entries.append((.enemy(idx), speed, context.random.nextDouble(in: 0.0...1.0)))
             }
@@ -112,10 +112,10 @@ extension BattleTurnEngine {
 
         if let refreshedActor = context.actor(for: side, index: actorIndex),
            refreshedActor.isAlive,
-           !refreshedActor.skillEffects.extraActions.isEmpty {
-            for extra in refreshedActor.skillEffects.extraActions {
+           !refreshedActor.skillEffects.combat.extraActions.isEmpty {
+            for extra in refreshedActor.skillEffects.combat.extraActions {
                 for _ in 0..<extra.count {
-                    let probability = max(0.0, min(1.0, (extra.chancePercent * refreshedActor.skillEffects.procChanceMultiplier) / 100.0))
+                    let probability = max(0.0, min(1.0, (extra.chancePercent * refreshedActor.skillEffects.combat.procChanceMultiplier) / 100.0))
                     guard context.random.nextBool(probability: probability) else { continue }
                     performAction(for: side,
                                   actorIndex: actorIndex,
@@ -238,7 +238,7 @@ extension BattleTurnEngine {
             var actor = context.players[actorIndex]
             guard actor.isAlive else { return }
             actor.guardActive = true
-            actor.guardBarrierCharges = actor.skillEffects.guardBarrierCharges
+            actor.guardBarrierCharges = actor.skillEffects.combat.guardBarrierCharges
             applyDegradationRepairIfAvailable(to: &actor)
             context.players[actorIndex] = actor
             appendActionLog(for: actor, side: .player, index: actorIndex, category: .defend, context: &context)
@@ -247,7 +247,7 @@ extension BattleTurnEngine {
             var actor = context.enemies[actorIndex]
             guard actor.isAlive else { return }
             actor.guardActive = true
-            actor.guardBarrierCharges = actor.skillEffects.guardBarrierCharges
+            actor.guardBarrierCharges = actor.skillEffects.combat.guardBarrierCharges
             applyDegradationRepairIfAvailable(to: &actor)
             context.enemies[actorIndex] = actor
             appendActionLog(for: actor, side: .enemy, index: actorIndex, category: .defend, context: &context)
@@ -272,9 +272,9 @@ extension BattleTurnEngine {
         let actors: [BattleActor] = side == .player ? context.players : context.enemies
         for index in actors.indices where actors[index].isAlive {
             var actor = actors[index]
-            if let forcedTurn = actor.skillEffects.retreatTurn,
+            if let forcedTurn = actor.skillEffects.misc.retreatTurn,
                context.turn >= forcedTurn {
-                let probability = max(0.0, min(1.0, (actor.skillEffects.retreatChancePercent ?? 100.0) / 100.0))
+                let probability = max(0.0, min(1.0, (actor.skillEffects.misc.retreatChancePercent ?? 100.0) / 100.0))
                 if context.random.nextBool(probability: probability) {
                     actor.currentHP = 0
                     context.updateActor(actor, side: side, index: index)
@@ -283,8 +283,8 @@ extension BattleTurnEngine {
                 }
                 continue
             }
-            if let chance = actor.skillEffects.retreatChancePercent,
-               actor.skillEffects.retreatTurn == nil {
+            if let chance = actor.skillEffects.misc.retreatChancePercent,
+               actor.skillEffects.misc.retreatTurn == nil {
                 let probability = max(0.0, min(1.0, chance / 100.0))
                 if context.random.nextBool(probability: probability) {
                     actor.currentHP = 0
@@ -304,7 +304,7 @@ extension BattleTurnEngine {
             for index in sacrifices {
                 let actor = group[index]
                 guard actor.isAlive,
-                      let interval = actor.skillEffects.sacrificeInterval,
+                      let interval = actor.skillEffects.resurrection.sacrificeInterval,
                       interval > 0,
                       turn % interval == 0 else { continue }
                 let candidates = group.enumerated()
@@ -320,8 +320,8 @@ extension BattleTurnEngine {
             return nil
         }
 
-        let playerSacrificeIndices = context.players.enumerated().filter { $0.element.skillEffects.sacrificeInterval != nil }.map { $0.offset }
-        let enemySacrificeIndices = context.enemies.enumerated().filter { $0.element.skillEffects.sacrificeInterval != nil }.map { $0.offset }
+        let playerSacrificeIndices = context.players.enumerated().filter { $0.element.skillEffects.resurrection.sacrificeInterval != nil }.map { $0.offset }
+        let enemySacrificeIndices = context.enemies.enumerated().filter { $0.element.skillEffects.resurrection.sacrificeInterval != nil }.map { $0.offset }
 
         let playerTarget = pickTarget(from: context.players,
                                       sacrifices: playerSacrificeIndices,

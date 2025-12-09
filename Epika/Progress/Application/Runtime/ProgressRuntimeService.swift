@@ -19,9 +19,9 @@ final class ProgressRuntimeService {
                               characters: [CharacterSnapshot],
                               dungeonId: UInt16,
                               targetFloorNumber: Int) async throws -> ExplorationRuntimeSession {
-        let characterProgresses = characters.map(makeRuntimeCharacterProgress(from:))
+        let characterInputs = characters.map { CharacterInput(from: $0) }
         let partyState = try await runtimeService.runtimePartyState(party: party,
-                                                                   characters: characterProgresses)
+                                                                   characters: characterInputs)
         let runtimeCharacters = partyState.members.map { $0.character }
         let superRareState = try await gameStateService.loadSuperRareDailyState()
         let session = try await runtimeService.startExplorationRun(dungeonId: dungeonId,
@@ -60,31 +60,4 @@ struct ExplorationRuntimeSession: Sendable {
     let runtimeCharacters: [RuntimeCharacter]
     let waitForCompletion: @Sendable () async throws -> ExplorationRunArtifact
     let cancel: @Sendable () async -> Void
-}
-
-private extension ProgressRuntimeService {
-    /// CharacterSnapshotからRuntimeCharacterProgressへ変換する。
-    /// ネスト型は共有値型（CharacterValues）への typealias のため直接代入可能。
-    func makeRuntimeCharacterProgress(from snapshot: CharacterSnapshot) -> RuntimeCharacterProgress {
-        RuntimeCharacterProgress(
-            id: snapshot.id,
-            displayName: snapshot.displayName,
-            raceId: snapshot.raceId,
-            jobId: snapshot.jobId,
-            avatarId: snapshot.avatarId,
-            level: snapshot.level,
-            experience: snapshot.experience,
-            attributes: snapshot.attributes,
-            hitPoints: snapshot.hitPoints,
-            combat: snapshot.combat,
-            personality: snapshot.personality,
-            learnedSkills: [],
-            equippedItems: snapshot.equippedItems,
-            jobHistory: [],
-            explorationTags: [],
-            achievements: .init(totalBattles: 0, totalVictories: 0, defeatCount: 0),
-            actionPreferences: snapshot.actionPreferences,
-            createdAt: snapshot.createdAt,
-            updatedAt: snapshot.updatedAt)
-    }
 }

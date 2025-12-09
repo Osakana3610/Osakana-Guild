@@ -12,8 +12,8 @@ extension BattleTurnEngine {
         }
 
         let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker, context: context)
-            || attacker.skillEffects.partyHostileAll
-            || !attacker.skillEffects.partyHostileTargets.isEmpty
+            || attacker.skillEffects.misc.partyHostileAll
+            || !attacker.skillEffects.misc.partyHostileTargets.isEmpty
         guard let target = selectOffensiveTarget(attackerSide: side,
                                                  context: &context,
                                                  allowFriendlyTargets: allowFriendlyTargets,
@@ -34,7 +34,7 @@ extension BattleTurnEngine {
         guard var attacker = context.actor(for: attackerSide, index: attackerIndex) else { return }
         guard var defender = context.actor(for: target.0, index: target.1) else { return }
 
-        let useAntiHealing = attacker.skillEffects.antiHealingEnabled && attacker.snapshot.magicalHealing > 0
+        let useAntiHealing = attacker.skillEffects.misc.antiHealingEnabled && attacker.snapshot.magicalHealing > 0
         let isMartial = shouldUseMartialAttack(attacker: attacker)
         let accuracyMultiplier = isMartial ? BattleContext.martialAccuracyMultiplier : 1.0
 
@@ -125,7 +125,7 @@ extension BattleTurnEngine {
                                       attackerIndex: Int,
                                       attacker: BattleActor,
                                       context: inout BattleContext) -> Bool {
-        guard attacker.skillEffects.vampiricImpulse, !attacker.skillEffects.vampiricSuppression else { return false }
+        guard attacker.skillEffects.misc.vampiricImpulse, !attacker.skillEffects.misc.vampiricSuppression else { return false }
         guard attacker.currentHP * 2 <= attacker.snapshot.maxHP else { return false }
 
         let rawChance = 50.0 - Double(attacker.spirit) * 2.0
@@ -189,7 +189,7 @@ extension BattleTurnEngine {
 
     static func selectSpecialAttack(for attacker: BattleActor,
                                     context: inout BattleContext) -> BattleActor.SkillEffects.SpecialAttack? {
-        let specials = attacker.skillEffects.specialAttacks
+        let specials = attacker.skillEffects.combat.specialAttacks
         guard !specials.isEmpty else { return nil }
         for descriptor in specials {
             guard descriptor.chancePercent > 0 else { continue }

@@ -35,14 +35,14 @@ final class SkillRuntimeEffectCompilerTests: XCTestCase {
         }
 
         // 特殊攻撃がコンパイルされていることを確認
-        if !effects.specialAttacks.isEmpty {
-            let specialKinds = Set(effects.specialAttacks.map(\.kind))
+        if !effects.combat.specialAttacks.isEmpty {
+            let specialKinds = Set(effects.combat.specialAttacks.map(\.kind))
             XCTAssertFalse(specialKinds.isEmpty)
         }
 
         // ブレスが有効な場合
-        if effects.breathExtraCharges > 0 {
-            XCTAssertGreaterThan(effects.breathExtraCharges, 0)
+        if effects.spell.breathExtraCharges > 0 {
+            XCTAssertGreaterThan(effects.spell.breathExtraCharges, 0)
         }
     }
 
