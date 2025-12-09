@@ -1,17 +1,5 @@
 import SwiftUI
 
-struct PartySlotBonuses: Sendable {
-    let goldMultiplier: Double
-    let rareMultiplier: Double
-    let titleMultiplier: Double
-    let fortune: Int
-
-    static let zero = PartySlotBonuses(goldMultiplier: 0.0,
-                                       rareMultiplier: 0.0,
-                                       titleMultiplier: 0.0,
-                                       fortune: 0)
-}
-
 struct PartySlotCardView<Footer: View>: View {
     let party: RuntimeParty
     let members: [RuntimeCharacter]
