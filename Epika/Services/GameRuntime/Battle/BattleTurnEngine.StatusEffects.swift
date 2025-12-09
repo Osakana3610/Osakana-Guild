@@ -22,9 +22,9 @@ extension BattleTurnEngine {
                                         context: BattleContext) -> Double {
         // statusIdに対応する定義を取得してタグで判定
         guard let definition = context.statusDefinitions[statusId] else { return 1.0 }
-        let hasSleepTag = definition.tags.contains { $0.value == "sleep" || $0.value == "petrify" }
+        let hasSleepTag = definition.tags.contains("sleep") || definition.tags.contains("petrify")
         guard hasSleepTag else { return 1.0 }
-        let damageType: BattleDamageType = definition.tags.contains(where: { $0.value == "breath" }) ? .breath : .magical
+        let damageType: BattleDamageType = definition.tags.contains("breath") ? .breath : .magical
         return applyBarrierIfAvailable(for: damageType, defender: &target)
     }
 
@@ -73,7 +73,7 @@ extension BattleTurnEngine {
     static func hasStatus(tag: String, in actor: BattleActor, context: BattleContext) -> Bool {
         actor.statusEffects.contains { effect in
             guard let definition = context.statusDefinition(for: effect) else { return false }
-            return definition.tags.contains { $0.value == tag }
+            return definition.tags.contains(tag)
         }
     }
 
