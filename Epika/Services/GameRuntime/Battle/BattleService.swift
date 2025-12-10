@@ -55,6 +55,8 @@ enum BattleService {
         let jobDictionary = Dictionary(uniqueKeysWithValues: jobDefinitions.map { ($0.id, $0) })
         let raceDefinitions = try await repository.allRaces()
         let raceDictionary = Dictionary(uniqueKeysWithValues: raceDefinitions.map { ($0.id, $0) })
+        let enemySkillDefinitions = try await repository.allEnemySkills()
+        let enemySkillDictionary = Dictionary(uniqueKeysWithValues: enemySkillDefinitions.map { ($0.id, $0) })
 
         var localRandom = random
         let enemyResult = try BattleEnemyGroupBuilder.makeEnemies(baseEnemyId: encounterEnemyId,
@@ -129,6 +131,7 @@ enum BattleService {
                                                       enemies: &mutableEnemies,
                                                       statusEffects: statusDefinitions,
                                                       skillDefinitions: skillDictionary,
+                                                      enemySkillDefinitions: enemySkillDictionary,
                                                       random: &mutableRandom)
         random = mutableRandom
 

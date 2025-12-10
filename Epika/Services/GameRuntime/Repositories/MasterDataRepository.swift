@@ -12,6 +12,8 @@ actor MasterDataRepository {
     private var spellsById: [UInt8: SpellDefinition]?
     private var enemiesCache: [EnemyDefinition]?
     private var enemiesById: [UInt16: EnemyDefinition]?
+    private var enemySkillsCache: [EnemySkillDefinition]?
+    private var enemySkillsById: [UInt16: EnemySkillDefinition]?
     private var statusEffectsCache: [StatusEffectDefinition]?
     private var statusEffectsById: [UInt8: StatusEffectDefinition]?
     private var jobsCache: [JobDefinition]?
@@ -162,6 +164,21 @@ actor MasterDataRepository {
         if let enemiesById, let definition = enemiesById[id] { return definition }
         _ = try await allEnemies()
         return enemiesById?[id]
+    }
+
+    func allEnemySkills() async throws -> [EnemySkillDefinition] {
+        if let enemySkillsCache { return enemySkillsCache }
+        try await ensureInitialized()
+        let skills = try await manager.fetchAllEnemySkills()
+        self.enemySkillsCache = skills
+        self.enemySkillsById = Dictionary(uniqueKeysWithValues: skills.map { ($0.id, $0) })
+        return skills
+    }
+
+    func enemySkill(withId id: UInt16) async throws -> EnemySkillDefinition? {
+        if let enemySkillsById, let definition = enemySkillsById[id] { return definition }
+        _ = try await allEnemySkills()
+        return enemySkillsById?[id]
     }
 
     func allStatusEffects() async throws -> [StatusEffectDefinition] {

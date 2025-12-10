@@ -105,6 +105,13 @@ extension BattleTurnEngine {
                               forcedTargets: forcedTargets) {
                 activateGuard(for: side, actorIndex: actorIndex, context: &context)
             }
+        case .enemySpecialSkill:
+            if !executeEnemySpecialSkill(for: side,
+                                         actorIndex: actorIndex,
+                                         context: &context,
+                                         forcedTargets: forcedTargets) {
+                activateGuard(for: side, actorIndex: actorIndex, context: &context)
+            }
         default:
             // selectAction は行動選択用のケースのみ返すので、ここには到達しない
             activateGuard(for: side, actorIndex: actorIndex, context: &context)
@@ -150,6 +157,13 @@ extension BattleTurnEngine {
 
         guard actor.isAlive else { return .defend }
 
+        // 敵の場合、専用技を先にチェック
+        if side == .enemy, !actor.baseSkillIds.isEmpty {
+            if let _ = selectEnemySpecialSkill(for: actor, allies: allies, opponents: opponents, context: &context) {
+                return .enemySpecialSkill
+            }
+        }
+
         let candidates = buildCandidates(for: actor, allies: allies, opponents: opponents)
         if candidates.isEmpty {
             if canPerformPhysical(actor: actor, opponents: opponents) {
@@ -179,6 +193,46 @@ extension BattleTurnEngine {
             return .physicalAttack
         }
         return .defend
+    }
+
+    /// 敵専用技を選択（発動判定込み）
+    /// - Returns: 発動するスキルID（nilの場合は通常行動）
+    static func selectEnemySpecialSkill(for actor: BattleActor,
+                                        allies: [BattleActor],
+                                        opponents: [BattleActor],
+                                        context: inout BattleContext) -> UInt16? {
+        guard actor.isAlive else { return nil }
+
+        for skillId in actor.baseSkillIds {
+            guard let skill = context.enemySkillDefinition(for: skillId) else { continue }
+
+            // 使用回数制限チェック
+            let usageCount = context.enemySkillUsageCount(actorIdentifier: actor.identifier, skillId: skillId)
+            guard usageCount < skill.usesPerBattle else { continue }
+
+            // ターゲット条件チェック
+            switch skill.targeting {
+            case .single, .random, .all:
+                guard opponents.contains(where: { $0.isAlive }) else { continue }
+            case .`self`, .allAllies:
+                // 自己対象・味方対象は常に可能（自分が生きていれば）
+                break
+            }
+
+            // 回復スキルは味方のHPが減っている場合のみ
+            if skill.type == .heal {
+                let needsHeal = allies.contains { $0.isAlive && $0.currentHP < $0.snapshot.maxHP }
+                guard needsHeal else { continue }
+            }
+
+            // 発動確率判定
+            let probability = Double(skill.chancePercent) / 100.0
+            if context.random.nextBool(probability: probability) {
+                return skillId
+            }
+        }
+
+        return nil
     }
 
     /// 行動候補を構築

@@ -5,6 +5,7 @@ struct BattleContext {
     // MARK: - 参照データ（不変）
     let statusDefinitions: [UInt8: StatusEffectDefinition]
     let skillDefinitions: [UInt16: SkillDefinition]
+    let enemySkillDefinitions: [UInt16: EnemySkillDefinition]
 
     // MARK: - 戦闘状態（可変）
     var players: [BattleActor]
@@ -13,6 +14,8 @@ struct BattleContext {
     var initialHP: [UInt16: UInt32]
     var turn: Int
     var random: GameRandomSource
+    /// 敵専用技の使用回数追跡: [actorIdentifier: [skillId: usageCount]]
+    var enemySkillUsage: [String: [UInt16: Int]]
 
     // MARK: - 定数
     static let maxTurns = 20
@@ -23,15 +26,18 @@ struct BattleContext {
          enemies: [BattleActor],
          statusDefinitions: [UInt8: StatusEffectDefinition],
          skillDefinitions: [UInt16: SkillDefinition],
+         enemySkillDefinitions: [UInt16: EnemySkillDefinition] = [:],
          random: GameRandomSource) {
         self.players = players
         self.enemies = enemies
         self.statusDefinitions = statusDefinitions
         self.skillDefinitions = skillDefinitions
+        self.enemySkillDefinitions = enemySkillDefinitions
         self.random = random
         self.actions = []
         self.initialHP = [:]
         self.turn = 0
+        self.enemySkillUsage = [:]
     }
 
     // MARK: - 初期HP記録
@@ -97,6 +103,19 @@ struct BattleContext {
 
     func skillDefinition(for skillId: UInt16) -> SkillDefinition? {
         skillDefinitions[skillId]
+    }
+
+    func enemySkillDefinition(for skillId: UInt16) -> EnemySkillDefinition? {
+        enemySkillDefinitions[skillId]
+    }
+
+    // MARK: - 敵専用技使用回数管理
+    mutating func incrementEnemySkillUsage(actorIdentifier: String, skillId: UInt16) {
+        enemySkillUsage[actorIdentifier, default: [:]][skillId, default: 0] += 1
+    }
+
+    func enemySkillUsageCount(actorIdentifier: String, skillId: UInt16) -> Int {
+        enemySkillUsage[actorIdentifier]?[skillId] ?? 0
     }
 
     // MARK: - アクション追加

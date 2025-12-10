@@ -120,4 +120,48 @@ extension SQLiteMasterDataManager {
             )
         }
     }
+
+    func fetchAllEnemySkills() throws -> [EnemySkillDefinition] {
+        let sql = """
+            SELECT id, name, type, targeting, chance_percent, uses_per_battle,
+                   multiplier, hit_count, ignore_defense, element,
+                   status_id, status_chance, heal_percent, buff_type, buff_multiplier
+            FROM enemy_special_skills;
+        """
+        let statement = try prepare(sql)
+        defer { sqlite3_finalize(statement) }
+
+        var skills: [EnemySkillDefinition] = []
+        while sqlite3_step(statement) == SQLITE_ROW {
+            guard let nameC = sqlite3_column_text(statement, 1),
+                  let typeC = sqlite3_column_text(statement, 2),
+                  let targetingC = sqlite3_column_text(statement, 3) else { continue }
+
+            let typeStr = String(cString: typeC)
+            let targetingStr = String(cString: targetingC)
+
+            guard let type = EnemySkillDefinition.SkillType(rawValue: typeStr),
+                  let targeting = EnemySkillDefinition.Targeting(rawValue: targetingStr) else { continue }
+
+            let skill = EnemySkillDefinition(
+                id: UInt16(sqlite3_column_int(statement, 0)),
+                name: String(cString: nameC),
+                type: type,
+                targeting: targeting,
+                chancePercent: Int(sqlite3_column_int(statement, 4)),
+                usesPerBattle: Int(sqlite3_column_int(statement, 5)),
+                multiplier: sqlite3_column_type(statement, 6) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 6),
+                hitCount: sqlite3_column_type(statement, 7) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 7)),
+                ignoreDefense: sqlite3_column_int(statement, 8) == 1,
+                element: sqlite3_column_type(statement, 9) == SQLITE_NULL ? nil : String(cString: sqlite3_column_text(statement, 9)!),
+                statusId: sqlite3_column_type(statement, 10) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 10)),
+                statusChance: sqlite3_column_type(statement, 11) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 11)),
+                healPercent: sqlite3_column_type(statement, 12) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 12)),
+                buffType: sqlite3_column_type(statement, 13) == SQLITE_NULL ? nil : String(cString: sqlite3_column_text(statement, 13)!),
+                buffMultiplier: sqlite3_column_type(statement, 14) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 14)
+            )
+            skills.append(skill)
+        }
+        return skills
+    }
 }
