@@ -36,13 +36,21 @@ struct ExplorationSnapshot: Sendable, Hashable {
             var battleLogData: Data?
         }
 
+        /// イベントの付加情報（表示用）
+        struct Context: Sendable, Hashable {
+            var exp: String?
+            var gold: String?
+            var drops: String?
+            var effects: String?
+        }
+
         var id: UUID
         var floorNumber: Int
         var eventIndex: Int
         var kind: Kind
         var referenceId: String?
         var occurredAt: Date
-        var context: [String: String]
+        var context: Context
         var metadata: ProgressMetadata
         var combatSummary: CombatSummary?
     }
@@ -147,8 +155,9 @@ extension ExplorationSnapshot {
             }
         }
 
-        if let resultRaw = encounter.context["result"], !resultRaw.isEmpty {
-            return "\(base)(\(localizedCombatResult(resultRaw)))"
+        // 戦闘結果は CombatSummary から取得
+        if let result = encounter.combatSummary?.result, !result.isEmpty {
+            return "\(base)(\(localizedCombatResult(result)))"
         }
         return base
     }
