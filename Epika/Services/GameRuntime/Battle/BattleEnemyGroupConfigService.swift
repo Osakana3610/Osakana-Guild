@@ -24,10 +24,7 @@ struct BattleEnemyGroupConfigService {
         var totalEnemies = 0
         while groups.count < maxGroups && totalEnemies < minEnemies {
             guard let enemyDefinition = randomEnemy(from: pool, enemyPool: enemyPool, random: &random) else { break }
-            let range = enemyDefinition.groupSizeRange
-            let lower = max(defaultRange.lowerBound, range.lowerBound)
-            let upper = max(lower, range.upperBound)
-            let groupSize = random.nextInt(in: lower...upper)
+            let groupSize = random.nextInt(in: defaultRange)
             groups.append(GroupEnemy(definition: enemyDefinition, count: groupSize))
             totalEnemies += groupSize
         }

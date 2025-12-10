@@ -25,6 +25,8 @@ enum BattleService {
                               floor: DungeonFloorDefinition,
                               encounterEnemyId: UInt16?,
                               encounterLevel: Int?,
+                              encounterGroupMin: Int?,
+                              encounterGroupMax: Int?,
                               random: inout GameRandomSource) async throws -> Resolution {
         let skillDefinitions = try await repository.allSkills()
         let skillDictionary = Dictionary(uniqueKeysWithValues: skillDefinitions.map { ($0.id, $0) })
@@ -61,6 +63,8 @@ enum BattleService {
         var localRandom = random
         let enemyResult = try BattleEnemyGroupBuilder.makeEnemies(baseEnemyId: encounterEnemyId,
                                                                  baseEnemyLevel: encounterLevel,
+                                                                 groupMin: encounterGroupMin,
+                                                                 groupMax: encounterGroupMax,
                                                                  dungeon: dungeon,
                                                                  floor: floor,
                                                                  enemyDefinitions: enemyDictionary,

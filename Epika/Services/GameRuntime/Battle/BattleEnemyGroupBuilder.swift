@@ -8,6 +8,8 @@ struct BattleEnemyGroupBuilder {
 
     static func makeEnemies(baseEnemyId: UInt16?,
                             baseEnemyLevel: Int?,
+                            groupMin: Int?,
+                            groupMax: Int?,
                             dungeon: DungeonDefinition,
                             floor: DungeonFloorDefinition,
                             enemyDefinitions: [UInt16: EnemyDefinition],
@@ -18,7 +20,7 @@ struct BattleEnemyGroupBuilder {
         var skillCache: [UInt16: BattleActor.SkillEffects] = [:]
 
         if let baseEnemyId, let definition = enemyDefinitions[baseEnemyId] {
-            let count = randomGroupSize(for: definition, random: &random)
+            let count = randomGroupSize(groupMin: groupMin, groupMax: groupMax, dungeon: dungeon, random: &random)
             let actors = try makeActors(for: definition,
                                         levelOverride: baseEnemyLevel,
                                         count: count,
@@ -96,11 +98,17 @@ struct BattleEnemyGroupBuilder {
         return (actors, encountered)
     }
 
-    private static func randomGroupSize(for definition: EnemyDefinition,
+    private static func randomGroupSize(groupMin: Int?,
+                                        groupMax: Int?,
+                                        dungeon: DungeonDefinition,
                                         random: inout GameRandomSource) -> Int {
-        let range = definition.groupSizeRange
-        if range.lowerBound == range.upperBound { return range.lowerBound }
-        return random.nextInt(in: range.lowerBound...range.upperBound)
+        // Use passed-in group size from encounter event, or fallback to dungeon config
+        let minSize = groupMin ?? dungeon.enemyGroupConfig?.defaultGroupSize.lowerBound ?? 1
+        let maxSize = groupMax ?? dungeon.enemyGroupConfig?.defaultGroupSize.upperBound ?? 1
+        let lower = max(1, minSize)
+        let upper = max(lower, maxSize)
+        if lower == upper { return lower }
+        return random.nextInt(in: lower...upper)
     }
 
     private static func makeActors(for definition: EnemyDefinition,
