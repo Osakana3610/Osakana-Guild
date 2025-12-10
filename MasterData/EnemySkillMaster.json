@@ -1,0 +1,367 @@
+{
+  "enemySkills": [
+    {
+      "id": 1,
+      "name": "強撃",
+      "type": "physical",
+      "multiplier": 2.0,
+      "chancePercent": 30,
+      "usesPerBattle": -1,
+      "targeting": "single"
+    },
+    {
+      "id": 2,
+      "name": "剛撃",
+      "type": "physical",
+      "multiplier": 3.0,
+      "chancePercent": 20,
+      "usesPerBattle": 3,
+      "targeting": "single"
+    },
+    {
+      "id": 3,
+      "name": "烈撃",
+      "type": "physical",
+      "multiplier": 5.0,
+      "chancePercent": 15,
+      "usesPerBattle": 2,
+      "targeting": "single"
+    },
+    {
+      "id": 4,
+      "name": "必殺撃",
+      "type": "physical",
+      "multiplier": 10.0,
+      "chancePercent": 10,
+      "usesPerBattle": 1,
+      "targeting": "single"
+    },
+    {
+      "id": 5,
+      "name": "薙ぎ払い",
+      "type": "physical",
+      "multiplier": 1.5,
+      "chancePercent": 25,
+      "usesPerBattle": -1,
+      "targeting": "all"
+    },
+    {
+      "id": 6,
+      "name": "乱撃",
+      "type": "physical",
+      "multiplier": 0.8,
+      "chancePercent": 20,
+      "usesPerBattle": -1,
+      "targeting": "random",
+      "hitCount": 5
+    },
+    {
+      "id": 7,
+      "name": "貫通撃",
+      "type": "physical",
+      "multiplier": 2.5,
+      "chancePercent": 15,
+      "usesPerBattle": 2,
+      "targeting": "single",
+      "ignoreDefense": true
+    },
+    {
+      "id": 8,
+      "name": "渾身撃",
+      "type": "physical",
+      "multiplier": 8.0,
+      "chancePercent": 5,
+      "usesPerBattle": 1,
+      "targeting": "single"
+    },
+    {
+      "id": 11,
+      "name": "魔弾",
+      "type": "magical",
+      "multiplier": 2.0,
+      "chancePercent": 30,
+      "usesPerBattle": -1,
+      "targeting": "single"
+    },
+    {
+      "id": 12,
+      "name": "魔砲",
+      "type": "magical",
+      "multiplier": 3.0,
+      "chancePercent": 20,
+      "usesPerBattle": 3,
+      "targeting": "single"
+    },
+    {
+      "id": 13,
+      "name": "滅砲",
+      "type": "magical",
+      "multiplier": 5.0,
+      "chancePercent": 15,
+      "usesPerBattle": 2,
+      "targeting": "single"
+    },
+    {
+      "id": 14,
+      "name": "極砲",
+      "type": "magical",
+      "multiplier": 10.0,
+      "chancePercent": 10,
+      "usesPerBattle": 1,
+      "targeting": "single"
+    },
+    {
+      "id": 15,
+      "name": "魔波",
+      "type": "magical",
+      "multiplier": 1.5,
+      "chancePercent": 25,
+      "usesPerBattle": -1,
+      "targeting": "all"
+    },
+    {
+      "id": 16,
+      "name": "乱魔弾",
+      "type": "magical",
+      "multiplier": 0.8,
+      "chancePercent": 20,
+      "usesPerBattle": -1,
+      "targeting": "random",
+      "hitCount": 5
+    },
+    {
+      "id": 17,
+      "name": "貫魔砲",
+      "type": "magical",
+      "multiplier": 2.5,
+      "chancePercent": 15,
+      "usesPerBattle": 2,
+      "targeting": "single",
+      "ignoreDefense": true
+    },
+    {
+      "id": 18,
+      "name": "崩壊砲",
+      "type": "magical",
+      "multiplier": 8.0,
+      "chancePercent": 5,
+      "usesPerBattle": 1,
+      "targeting": "single"
+    },
+    {
+      "id": 21,
+      "name": "火炎息",
+      "type": "breath",
+      "multiplier": 2.0,
+      "chancePercent": 30,
+      "usesPerBattle": -1,
+      "targeting": "all",
+      "element": "fire"
+    },
+    {
+      "id": 22,
+      "name": "業火息",
+      "type": "breath",
+      "multiplier": 3.5,
+      "chancePercent": 20,
+      "usesPerBattle": 3,
+      "targeting": "all",
+      "element": "fire"
+    },
+    {
+      "id": 23,
+      "name": "冷気息",
+      "type": "breath",
+      "multiplier": 2.0,
+      "chancePercent": 30,
+      "usesPerBattle": -1,
+      "targeting": "all",
+      "element": "ice"
+    },
+    {
+      "id": 24,
+      "name": "凍結息",
+      "type": "breath",
+      "multiplier": 3.5,
+      "chancePercent": 20,
+      "usesPerBattle": 3,
+      "targeting": "all",
+      "element": "ice"
+    },
+    {
+      "id": 25,
+      "name": "毒霧息",
+      "type": "breath",
+      "multiplier": 1.5,
+      "chancePercent": 35,
+      "usesPerBattle": -1,
+      "targeting": "all",
+      "element": "poison"
+    },
+    {
+      "id": 26,
+      "name": "雷撃息",
+      "type": "breath",
+      "multiplier": 2.5,
+      "chancePercent": 25,
+      "usesPerBattle": -1,
+      "targeting": "all",
+      "element": "lightning"
+    },
+    {
+      "id": 27,
+      "name": "聖光息",
+      "type": "breath",
+      "multiplier": 3.0,
+      "chancePercent": 20,
+      "usesPerBattle": 2,
+      "targeting": "all",
+      "element": "holy"
+    },
+    {
+      "id": 28,
+      "name": "暗黒息",
+      "type": "breath",
+      "multiplier": 3.0,
+      "chancePercent": 20,
+      "usesPerBattle": 2,
+      "targeting": "all",
+      "element": "dark"
+    },
+    {
+      "id": 29,
+      "name": "滅息",
+      "type": "breath",
+      "multiplier": 5.0,
+      "chancePercent": 10,
+      "usesPerBattle": 1,
+      "targeting": "all"
+    },
+    {
+      "id": 30,
+      "name": "神滅息",
+      "type": "breath",
+      "multiplier": 10.0,
+      "chancePercent": 5,
+      "usesPerBattle": 1,
+      "targeting": "all"
+    },
+    {
+      "id": 41,
+      "name": "睡眠撃",
+      "type": "status",
+      "statusId": 0,
+      "chancePercent": 20,
+      "usesPerBattle": -1,
+      "targeting": "single",
+      "statusChance": 50
+    },
+    {
+      "id": 42,
+      "name": "混乱撃",
+      "type": "status",
+      "statusId": 1,
+      "chancePercent": 20,
+      "usesPerBattle": -1,
+      "targeting": "single",
+      "statusChance": 40
+    },
+    {
+      "id": 43,
+      "name": "石化撃",
+      "type": "status",
+      "statusId": 2,
+      "chancePercent": 15,
+      "usesPerBattle": 2,
+      "targeting": "single",
+      "statusChance": 30
+    },
+    {
+      "id": 44,
+      "name": "即死撃",
+      "type": "status",
+      "statusId": 3,
+      "chancePercent": 10,
+      "usesPerBattle": 1,
+      "targeting": "single",
+      "statusChance": 20
+    },
+    {
+      "id": 45,
+      "name": "睡眠波",
+      "type": "status",
+      "statusId": 0,
+      "chancePercent": 15,
+      "usesPerBattle": 2,
+      "targeting": "all",
+      "statusChance": 30
+    },
+    {
+      "id": 46,
+      "name": "混乱波",
+      "type": "status",
+      "statusId": 1,
+      "chancePercent": 15,
+      "usesPerBattle": 2,
+      "targeting": "all",
+      "statusChance": 25
+    },
+    {
+      "id": 51,
+      "name": "自己回復",
+      "type": "heal",
+      "healPercent": 20,
+      "chancePercent": 20,
+      "usesPerBattle": 3,
+      "targeting": "self"
+    },
+    {
+      "id": 52,
+      "name": "大回復",
+      "type": "heal",
+      "healPercent": 50,
+      "chancePercent": 10,
+      "usesPerBattle": 1,
+      "targeting": "self"
+    },
+    {
+      "id": 53,
+      "name": "全体回復",
+      "type": "heal",
+      "healPercent": 15,
+      "chancePercent": 15,
+      "usesPerBattle": 2,
+      "targeting": "allAllies"
+    },
+    {
+      "id": 61,
+      "name": "攻撃強化",
+      "type": "buff",
+      "buffType": "physicalAttack",
+      "buffMultiplier": 1.5,
+      "chancePercent": 20,
+      "usesPerBattle": 2,
+      "targeting": "self"
+    },
+    {
+      "id": 62,
+      "name": "防御強化",
+      "type": "buff",
+      "buffType": "physicalDefense",
+      "buffMultiplier": 1.5,
+      "chancePercent": 20,
+      "usesPerBattle": 2,
+      "targeting": "self"
+    },
+    {
+      "id": 63,
+      "name": "魔力強化",
+      "type": "buff",
+      "buffType": "magicalAttack",
+      "buffMultiplier": 1.5,
+      "chancePercent": 20,
+      "usesPerBattle": 2,
+      "targeting": "self"
+    }
+  ]
+}

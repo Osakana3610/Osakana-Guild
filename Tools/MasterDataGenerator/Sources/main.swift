@@ -89,7 +89,7 @@ final class Generator {
         let validations: [(filename: String, rootKey: String?, expectedKeys: Set<String>)] = [
             ("RaceDataMaster", "raceData", ["id", "name", "gender", "genderCode", "category", "baseStats", "description", "maxLevel", "passiveSkillIds", "skillUnlocks"]),
             ("JobMaster", "jobs", ["id", "name", "category", "growthTendency", "combatCoefficients", "passiveSkillIds", "skillUnlocks"]),
-            ("EnemyMaster", "enemies", ["id", "name", "race", "category", "job", "stats", "resistances", "skills", "drops", "groupSizeRange", "actionRates", "baseExperience", "isBoss"]),
+            ("EnemyRaceMaster", "enemyRaces", ["id", "name", "baseResistances"]),
             ("ExplorationEventMaster", "events", ["id", "type", "name", "description", "floorRange", "dungeonTags", "weights", "trap"]),
         ]
 
@@ -159,6 +159,8 @@ final class Generator {
             ("TitleMaster", importTitleMaster),
             ("SuperRareTitleMaster", importSuperRareTitleMaster),
             ("StatusEffectMaster", importStatusEffectMaster),
+            ("EnemyRaceMaster", importEnemyRaceMaster),
+            ("EnemySkillMaster", importEnemySkillMaster),
             ("EnemyMaster", importEnemyMaster),
             ("DungeonMaster", importDungeonMaster),
             ("ShopMaster", importShopMaster),
