@@ -87,8 +87,8 @@ final class Generator {
 
     private func validateSchemas() throws {
         let validations: [(filename: String, rootKey: String?, expectedKeys: Set<String>)] = [
-            ("RaceDataMaster", "raceData", ["id", "name", "gender", "genderCode", "category", "baseStats", "description", "maxLevel"]),
-            ("JobMaster", "jobs", ["id", "name", "category", "growthTendency", "combatCoefficients", "skills"]),
+            ("RaceDataMaster", "raceData", ["id", "name", "gender", "genderCode", "category", "baseStats", "description", "maxLevel", "passiveSkillIds", "skillUnlocks"]),
+            ("JobMaster", "jobs", ["id", "name", "category", "growthTendency", "combatCoefficients", "passiveSkillIds", "skillUnlocks"]),
             ("EnemyMaster", "enemies", ["id", "name", "race", "category", "job", "stats", "resistances", "skills", "drops", "groupSizeRange", "actionRates", "baseExperience", "isBoss"]),
             ("ExplorationEventMaster", "events", ["id", "type", "name", "description", "floorRange", "dungeonTags", "weights", "trap"]),
         ]

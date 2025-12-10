@@ -653,13 +653,19 @@ extension Generator {
 // MARK: - Job Master
 
 private struct JobMasterFile: Decodable {
+    struct SkillUnlock: Decodable {
+        let level: Int
+        let skillId: Int
+    }
+
     struct Job: Decodable {
         let id: Int
         let name: String
         let category: String
         let growthTendency: String?
         let combatCoefficients: [String: Double]
-        let skills: [Int]?
+        let passiveSkillIds: [Int]?
+        let skillUnlocks: [SkillUnlock]?
     }
 
     let jobs: [Job]
@@ -672,21 +678,26 @@ extension Generator {
 
         try withTransaction {
             try execute("DELETE FROM jobs;")
+            try execute("DELETE FROM job_skills;")
+            try execute("DELETE FROM job_skill_unlocks;")
 
             let insertJobSQL = """
                 INSERT INTO jobs (id, name, category, growth_tendency)
                 VALUES (?, ?, ?, ?);
             """
             let insertCoefficientSQL = "INSERT INTO job_combat_coefficients (job_id, stat, value) VALUES (?, ?, ?);"
-            let insertSkillSQL = "INSERT INTO job_skills (job_id, order_index, skill_id) VALUES (?, ?, ?);"
+            let insertPassiveSkillSQL = "INSERT INTO job_skills (job_id, order_index, skill_id) VALUES (?, ?, ?);"
+            let insertSkillUnlockSQL = "INSERT INTO job_skill_unlocks (job_id, level_requirement, skill_id) VALUES (?, ?, ?);"
 
             let jobStatement = try prepare(insertJobSQL)
             let coefficientStatement = try prepare(insertCoefficientSQL)
-            let skillStatement = try prepare(insertSkillSQL)
+            let passiveSkillStatement = try prepare(insertPassiveSkillSQL)
+            let skillUnlockStatement = try prepare(insertSkillUnlockSQL)
             defer {
                 sqlite3_finalize(jobStatement)
                 sqlite3_finalize(coefficientStatement)
-                sqlite3_finalize(skillStatement)
+                sqlite3_finalize(passiveSkillStatement)
+                sqlite3_finalize(skillUnlockStatement)
             }
 
             for job in file.jobs {
@@ -705,13 +716,25 @@ extension Generator {
                     reset(coefficientStatement)
                 }
 
-                if let skills = job.skills {
-                    for (index, skillId) in skills.enumerated() {
-                        bindInt(skillStatement, index: 1, value: job.id)
-                        bindInt(skillStatement, index: 2, value: index)
-                        bindInt(skillStatement, index: 3, value: skillId)
-                        try step(skillStatement)
-                        reset(skillStatement)
+                // パッシブスキル
+                if let passiveSkillIds = job.passiveSkillIds {
+                    for (index, skillId) in passiveSkillIds.enumerated() {
+                        bindInt(passiveSkillStatement, index: 1, value: job.id)
+                        bindInt(passiveSkillStatement, index: 2, value: index)
+                        bindInt(passiveSkillStatement, index: 3, value: skillId)
+                        try step(passiveSkillStatement)
+                        reset(passiveSkillStatement)
+                    }
+                }
+
+                // レベル解禁スキル
+                if let skillUnlocks = job.skillUnlocks {
+                    for unlock in skillUnlocks {
+                        bindInt(skillUnlockStatement, index: 1, value: job.id)
+                        bindInt(skillUnlockStatement, index: 2, value: unlock.level)
+                        bindInt(skillUnlockStatement, index: 3, value: unlock.skillId)
+                        try step(skillUnlockStatement)
+                        reset(skillUnlockStatement)
                     }
                 }
             }
@@ -724,6 +747,11 @@ extension Generator {
 // MARK: - Race Master
 
 private struct RaceDataMasterFile: Decodable {
+    struct SkillUnlock: Decodable {
+        let level: Int
+        let skillId: Int
+    }
+
     struct Race: Decodable {
         let id: Int
         let name: String
@@ -733,6 +761,8 @@ private struct RaceDataMasterFile: Decodable {
         let baseStats: [String: Int]
         let description: String
         let maxLevel: Int
+        let passiveSkillIds: [Int]?
+        let skillUnlocks: [SkillUnlock]?
     }
 
     let raceData: [Race]
@@ -748,6 +778,8 @@ extension Generator {
             try execute("DELETE FROM race_category_memberships;")
             try execute("DELETE FROM race_hiring_cost_categories;")
             try execute("DELETE FROM race_hiring_level_limits;")
+            try execute("DELETE FROM race_passive_skills;")
+            try execute("DELETE FROM race_skill_unlocks;")
             try execute("DELETE FROM races;")
 
             let insertRaceSQL = """
@@ -757,16 +789,22 @@ extension Generator {
             let insertStatSQL = "INSERT INTO race_base_stats (race_id, stat, value) VALUES (?, ?, ?);"
             let insertCategorySQL = "INSERT INTO race_category_caps (category, max_level) VALUES (?, ?);"
             let insertMembershipSQL = "INSERT INTO race_category_memberships (category, race_id) VALUES (?, ?);"
+            let insertPassiveSkillSQL = "INSERT INTO race_passive_skills (race_id, order_index, skill_id, name, effect, description) VALUES (?, ?, ?, '', '', '');"
+            let insertSkillUnlockSQL = "INSERT INTO race_skill_unlocks (race_id, level_requirement, skill_id, name, effect, description) VALUES (?, ?, ?, '', '', '');"
 
             let raceStatement = try prepare(insertRaceSQL)
             let statStatement = try prepare(insertStatSQL)
             let categoryStatement = try prepare(insertCategorySQL)
             let membershipStatement = try prepare(insertMembershipSQL)
+            let passiveSkillStatement = try prepare(insertPassiveSkillSQL)
+            let skillUnlockStatement = try prepare(insertSkillUnlockSQL)
             defer {
                 sqlite3_finalize(raceStatement)
                 sqlite3_finalize(statStatement)
                 sqlite3_finalize(categoryStatement)
                 sqlite3_finalize(membershipStatement)
+                sqlite3_finalize(passiveSkillStatement)
+                sqlite3_finalize(skillUnlockStatement)
             }
 
             var categoryCaps: [String: Int] = [:]
@@ -788,6 +826,28 @@ extension Generator {
                     bindInt(statStatement, index: 3, value: value)
                     try step(statStatement)
                     reset(statStatement)
+                }
+
+                // パッシブスキル
+                if let passiveSkillIds = race.passiveSkillIds {
+                    for (index, skillId) in passiveSkillIds.enumerated() {
+                        bindInt(passiveSkillStatement, index: 1, value: race.id)
+                        bindInt(passiveSkillStatement, index: 2, value: index)
+                        bindInt(passiveSkillStatement, index: 3, value: skillId)
+                        try step(passiveSkillStatement)
+                        reset(passiveSkillStatement)
+                    }
+                }
+
+                // レベル解禁スキル
+                if let skillUnlocks = race.skillUnlocks {
+                    for unlock in skillUnlocks {
+                        bindInt(skillUnlockStatement, index: 1, value: race.id)
+                        bindInt(skillUnlockStatement, index: 2, value: unlock.level)
+                        bindInt(skillUnlockStatement, index: 3, value: unlock.skillId)
+                        try step(skillUnlockStatement)
+                        reset(skillUnlockStatement)
+                    }
                 }
 
                 let currentCap = categoryCaps[race.category] ?? race.maxLevel
