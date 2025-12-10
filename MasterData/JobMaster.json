@@ -20,7 +20,24 @@
         "magicalDefense": 1.15,
         "trapRemoval": 0.81
       },
-      "skills": []
+      "passiveSkillIds": [
+        65001,
+        65002
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65003
+        },
+        {
+          "level": 30,
+          "skillId": 65004
+        },
+        {
+          "level": 70,
+          "skillId": 65005
+        }
+      ]
     },
     {
       "id": 2,
@@ -40,7 +57,24 @@
         "magicalDefense": 0.57,
         "trapRemoval": 0.81
       },
-      "skills": []
+      "passiveSkillIds": [
+        65011,
+        65012
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65013
+        },
+        {
+          "level": 30,
+          "skillId": 65014
+        },
+        {
+          "level": 70,
+          "skillId": 65015
+        }
+      ]
     },
     {
       "id": 3,
@@ -60,7 +94,24 @@
         "magicalDefense": 0.59,
         "trapRemoval": 1.94
       },
-      "skills": []
+      "passiveSkillIds": [
+        65021,
+        65022
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65023
+        },
+        {
+          "level": 30,
+          "skillId": 65024
+        },
+        {
+          "level": 70,
+          "skillId": 65025
+        }
+      ]
     },
     {
       "id": 4,
@@ -80,7 +131,24 @@
         "magicalDefense": 0.38,
         "trapRemoval": 1.57
       },
-      "skills": []
+      "passiveSkillIds": [
+        65031,
+        65032
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65033
+        },
+        {
+          "level": 30,
+          "skillId": 65034
+        },
+        {
+          "level": 70,
+          "skillId": 65035
+        }
+      ]
     },
     {
       "id": 5,
@@ -100,7 +168,24 @@
         "magicalDefense": 0.82,
         "trapRemoval": 1.02
       },
-      "skills": []
+      "passiveSkillIds": [
+        65041,
+        65042
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65043
+        },
+        {
+          "level": 30,
+          "skillId": 65044
+        },
+        {
+          "level": 70,
+          "skillId": 65045
+        }
+      ]
     },
     {
       "id": 6,
@@ -120,7 +205,24 @@
         "magicalDefense": 1.63,
         "trapRemoval": 0.82
       },
-      "skills": []
+      "passiveSkillIds": [
+        65051,
+        65052
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65053
+        },
+        {
+          "level": 30,
+          "skillId": 65054
+        },
+        {
+          "level": 70,
+          "skillId": 65055
+        }
+      ]
     },
     {
       "id": 7,
@@ -140,7 +242,24 @@
         "magicalDefense": 1.08,
         "trapRemoval": 0.81
       },
-      "skills": []
+      "passiveSkillIds": [
+        65061,
+        65062
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65063
+        },
+        {
+          "level": 30,
+          "skillId": 65064
+        },
+        {
+          "level": 70,
+          "skillId": 65065
+        }
+      ]
     },
     {
       "id": 8,
@@ -160,7 +279,24 @@
         "magicalDefense": 0.57,
         "trapRemoval": 1.06
       },
-      "skills": []
+      "passiveSkillIds": [
+        65071,
+        65072
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65073
+        },
+        {
+          "level": 30,
+          "skillId": 65074
+        },
+        {
+          "level": 70,
+          "skillId": 65075
+        }
+      ]
     },
     {
       "id": 9,
@@ -180,7 +316,24 @@
         "magicalDefense": 1.13,
         "trapRemoval": 0.84
       },
-      "skills": []
+      "passiveSkillIds": [
+        65081,
+        65082
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65083
+        },
+        {
+          "level": 30,
+          "skillId": 65084
+        },
+        {
+          "level": 70,
+          "skillId": 65085
+        }
+      ]
     },
     {
       "id": 10,
@@ -200,7 +353,24 @@
         "magicalDefense": 0.55,
         "trapRemoval": 0.77
       },
-      "skills": []
+      "passiveSkillIds": [
+        65091,
+        65092
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65093
+        },
+        {
+          "level": 30,
+          "skillId": 65094
+        },
+        {
+          "level": 70,
+          "skillId": 65095
+        }
+      ]
     },
     {
       "id": 11,
@@ -220,7 +390,24 @@
         "magicalDefense": 0.59,
         "trapRemoval": 0.8
       },
-      "skills": []
+      "passiveSkillIds": [
+        65101,
+        65102
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65103
+        },
+        {
+          "level": 30,
+          "skillId": 65104
+        },
+        {
+          "level": 70,
+          "skillId": 65105
+        }
+      ]
     },
     {
       "id": 12,
@@ -240,7 +427,24 @@
         "magicalDefense": 1.16,
         "trapRemoval": 0.81
       },
-      "skills": []
+      "passiveSkillIds": [
+        65111,
+        65112
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65113
+        },
+        {
+          "level": 30,
+          "skillId": 65114
+        },
+        {
+          "level": 70,
+          "skillId": 65115
+        }
+      ]
     },
     {
       "id": 13,
@@ -260,7 +464,24 @@
         "magicalDefense": 1.74,
         "trapRemoval": 1.49
       },
-      "skills": []
+      "passiveSkillIds": [
+        65121,
+        65122
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65123
+        },
+        {
+          "level": 30,
+          "skillId": 65124
+        },
+        {
+          "level": 70,
+          "skillId": 65125
+        }
+      ]
     },
     {
       "id": 14,
@@ -280,7 +501,24 @@
         "magicalDefense": 1.11,
         "trapRemoval": 1.42
       },
-      "skills": []
+      "passiveSkillIds": [
+        65131,
+        65132
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65133
+        },
+        {
+          "level": 30,
+          "skillId": 65134
+        },
+        {
+          "level": 70,
+          "skillId": 65135
+        }
+      ]
     },
     {
       "id": 15,
@@ -300,7 +538,24 @@
         "magicalDefense": 1.13,
         "trapRemoval": 0.82
       },
-      "skills": []
+      "passiveSkillIds": [
+        65141,
+        65142
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65143
+        },
+        {
+          "level": 30,
+          "skillId": 65144
+        },
+        {
+          "level": 70,
+          "skillId": 65145
+        }
+      ]
     },
     {
       "id": 16,
@@ -320,7 +575,24 @@
         "magicalDefense": 1.11,
         "trapRemoval": 0.8
       },
-      "skills": []
+      "passiveSkillIds": [
+        65151,
+        65152
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65153
+        },
+        {
+          "level": 30,
+          "skillId": 65154
+        },
+        {
+          "level": 70,
+          "skillId": 65155
+        }
+      ]
     }
   ]
 }

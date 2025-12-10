@@ -165,6 +165,15 @@ extension Generator {
                 FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
             );
             """,
+            """
+            CREATE TABLE IF NOT EXISTS job_skill_unlocks (
+                job_id INTEGER NOT NULL,
+                level_requirement INTEGER NOT NULL,
+                skill_id INTEGER NOT NULL,
+                PRIMARY KEY (job_id, level_requirement),
+                FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
+            );
+            """,
             // Races
             """
             CREATE TABLE IF NOT EXISTS races (
