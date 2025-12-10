@@ -100,7 +100,7 @@ private struct CharacterRowForEquipment: View {
             Spacer()
 
             let equipCount = character.equippedItems.reduce(0) { $0 + $1.quantity }
-            Text("\(equipCount)/\(EquipmentProgressService.maxEquippedItems)")
+            Text("\(equipCount)/\(character.equipmentCapacity)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -159,6 +159,7 @@ struct EquipmentEditorView: View {
                         CharacterEquippedItemsSection(
                             equippedItems: currentCharacter.equippedItems,
                             itemDefinitions: itemDefinitions,
+                            equipmentCapacity: currentCharacter.equipmentCapacity,
                             onUnequip: { item in
                                 try await performUnequip(item)
                             }
@@ -294,7 +295,7 @@ struct EquipmentEditorView: View {
         let currentCount = currentCharacter.equippedItems.reduce(0) { $0 + $1.quantity }
 
         // 装備数上限チェック
-        if currentCount >= EquipmentProgressService.maxEquippedItems {
+        if currentCount >= currentCharacter.equipmentCapacity {
             return (false, "装備数が上限に達しています")
         }
 

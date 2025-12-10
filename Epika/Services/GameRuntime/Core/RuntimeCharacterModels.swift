@@ -28,6 +28,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     let attributes: CoreAttributes
     let maxHP: Int
     let combat: Combat
+    let equipmentCapacity: Int
 
     // isMartialEligibleはcombatから取得
     var isMartialEligible: Bool { combat.isMartialEligible }
