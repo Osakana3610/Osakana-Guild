@@ -380,6 +380,40 @@ extension Generator {
                 FOREIGN KEY (enemy_id) REFERENCES enemies(id) ON DELETE CASCADE
             );
             """,
+            """
+            CREATE TABLE IF NOT EXISTS enemy_races (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS enemy_race_resistances (
+                race_id INTEGER NOT NULL,
+                element TEXT NOT NULL,
+                value REAL NOT NULL,
+                PRIMARY KEY (race_id, element),
+                FOREIGN KEY (race_id) REFERENCES enemy_races(id) ON DELETE CASCADE
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS enemy_special_skills (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                targeting TEXT NOT NULL,
+                chance_percent INTEGER NOT NULL,
+                uses_per_battle INTEGER NOT NULL,
+                multiplier REAL,
+                hit_count INTEGER,
+                ignore_defense INTEGER NOT NULL DEFAULT 0,
+                element TEXT,
+                status_id INTEGER,
+                status_chance INTEGER,
+                heal_percent INTEGER,
+                buff_type TEXT,
+                buff_multiplier REAL
+            );
+            """,
             // Dungeons
             """
             CREATE TABLE IF NOT EXISTS dungeons (

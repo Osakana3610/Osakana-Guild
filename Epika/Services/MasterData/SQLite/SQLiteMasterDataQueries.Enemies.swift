@@ -18,7 +18,7 @@ extension SQLiteMasterDataManager {
             var agility: Int
             var luck: Int
             var resistances: [String: Double] = [:]
-            var skills: [UInt16] = []
+            var specialSkillIds: [UInt16] = []
             var drops: [UInt16] = []
             var actionRates: EnemyDefinition.ActionRates = .init(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
             var groupSizeRange: ClosedRange<Int> = 1...1
@@ -68,7 +68,7 @@ extension SQLiteMasterDataManager {
             let id = UInt16(sqlite3_column_int(skillStatement, 0))
             guard var builder = builders[id] else { continue }
             let skillId = UInt16(sqlite3_column_int(skillStatement, 1))
-            builder.skills.append(skillId)
+            builder.specialSkillIds.append(skillId)
             builders[builder.id] = builder
         }
 
@@ -112,7 +112,8 @@ extension SQLiteMasterDataManager {
                 agility: builder.agility,
                 luck: builder.luck,
                 resistances: resistances,
-                skills: builder.skills.map { EnemyDefinition.Skill(skillId: $0) },
+                resistanceOverrides: nil,
+                specialSkillIds: builder.specialSkillIds,
                 drops: builder.drops,
                 actionRates: builder.actionRates,
                 groupSizeRange: builder.groupSizeRange

@@ -1,0 +1,94 @@
+{
+  "enemyRaces": [
+    {
+      "id": 1,
+      "name": "人型",
+      "baseResistances": {
+        "physical": 0.0,
+        "magical": 0.0,
+        "fire": 0.0,
+        "ice": 0.0,
+        "wind": 0.0,
+        "earth": 0.0,
+        "light": 0.0,
+        "dark": 0.0,
+        "holy": 0.0,
+        "death": 0.0,
+        "poison": 0.0,
+        "charm": 0.0
+      }
+    },
+    {
+      "id": 2,
+      "name": "魔物",
+      "baseResistances": {
+        "physical": 0.1,
+        "magical": -0.1,
+        "fire": 0.0,
+        "ice": 0.0,
+        "wind": 0.0,
+        "earth": 0.1,
+        "light": -0.1,
+        "dark": 0.1,
+        "holy": -0.1,
+        "death": 0.0,
+        "poison": 0.2,
+        "charm": 0.1
+      }
+    },
+    {
+      "id": 3,
+      "name": "不死",
+      "baseResistances": {
+        "physical": 0.2,
+        "magical": 0.1,
+        "fire": -0.3,
+        "ice": 0.3,
+        "wind": 0.0,
+        "earth": 0.0,
+        "light": -0.4,
+        "dark": 0.5,
+        "holy": -0.5,
+        "death": 1.0,
+        "poison": 1.0,
+        "charm": 0.8
+      }
+    },
+    {
+      "id": 4,
+      "name": "竜族",
+      "baseResistances": {
+        "physical": 0.2,
+        "magical": 0.1,
+        "fire": 0.5,
+        "ice": -0.2,
+        "wind": 0.2,
+        "earth": 0.2,
+        "light": 0.0,
+        "dark": 0.0,
+        "holy": 0.0,
+        "death": 0.3,
+        "poison": 0.4,
+        "charm": 0.5
+      }
+    },
+    {
+      "id": 5,
+      "name": "神魔",
+      "baseResistances": {
+        "physical": 0.3,
+        "magical": 0.3,
+        "fire": 0.2,
+        "ice": 0.2,
+        "wind": 0.2,
+        "earth": 0.2,
+        "light": 0.3,
+        "dark": 0.3,
+        "holy": 0.2,
+        "death": 0.8,
+        "poison": 0.7,
+        "charm": 0.9
+      }
+    }
+  ]
+}
