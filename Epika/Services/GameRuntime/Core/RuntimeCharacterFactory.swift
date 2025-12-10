@@ -122,6 +122,7 @@ enum RuntimeCharacterFactory {
             attributes: calcResult.attributes,
             maxHP: calcResult.hitPoints.maximum,
             combat: combat,
+            equipmentCapacity: allowedSlots,
             race: race,
             job: job,
             personalityPrimary: primaryPersonality,
@@ -190,20 +191,20 @@ enum RuntimeCharacterFactory {
 
 // MARK: - Equipment Slot Calculator
 
-private enum EquipmentSlotCalculator {
-    static func capacity(forLevel level: Int, modifiers: SkillRuntimeEffects.EquipmentSlots) -> Int {
+enum EquipmentSlotCalculator: Sendable {
+    /// スキル修正込みの装備可能数を計算
+    nonisolated static func capacity(forLevel level: Int, modifiers: SkillRuntimeEffects.EquipmentSlots) -> Int {
         let base = baseCapacity(forLevel: level)
         let scaled = Double(base) * max(0.0, modifiers.multiplier)
         let adjusted = Int(scaled.rounded()) + modifiers.additive
         return max(1, adjusted)
     }
 
-    private static func baseCapacity(forLevel rawLevel: Int) -> Int {
+    /// レベルに基づく基本装備可能数（スキル修正なし）
+    nonisolated static func baseCapacity(forLevel rawLevel: Int) -> Int {
         let level = max(1, rawLevel)
-        if level <= 18 {
-            let value = 0.34 * Double(level * level) + 0.55 * Double(level)
-            return max(1, Int(value.rounded()))
-        }
-        return max(1, 118 + (level - 18) * 16)
+        // 装備可能数 = (√(1.5 × レベル + 0.3) - 0.5) / 0.7
+        let value = (sqrt(1.5 * Double(level) + 0.3) - 0.5) / 0.7
+        return max(1, Int(value))
     }
 }

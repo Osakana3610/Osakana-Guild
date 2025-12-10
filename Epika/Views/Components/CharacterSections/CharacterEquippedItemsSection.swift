@@ -6,6 +6,7 @@ import SwiftUI
 struct CharacterEquippedItemsSection: View {
     let equippedItems: [CharacterInput.EquippedItem]
     let itemDefinitions: [UInt16: ItemDefinition]
+    let equipmentCapacity: Int
     let onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)?
 
     @State private var unequipError: String?
@@ -14,15 +15,17 @@ struct CharacterEquippedItemsSection: View {
     init(
         equippedItems: [CharacterInput.EquippedItem],
         itemDefinitions: [UInt16: ItemDefinition],
+        equipmentCapacity: Int,
         onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)? = nil
     ) {
         self.equippedItems = equippedItems
         self.itemDefinitions = itemDefinitions
+        self.equipmentCapacity = equipmentCapacity
         self.onUnequip = onUnequip
     }
 
     var body: some View {
-        GroupBox("装備中アイテム (\(totalCount)/\(EquipmentProgressService.maxEquippedItems))") {
+        GroupBox("装備中アイテム (\(totalCount)/\(equipmentCapacity))") {
             if equippedItems.isEmpty {
                 Text("装備なし")
                     .font(.caption)
