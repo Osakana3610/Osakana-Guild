@@ -45,5 +45,4 @@ struct EnemyDefinition: Identifiable, Sendable {
     let specialSkillIds: [UInt16]
     let drops: [UInt16]
     let actionRates: ActionRates
-    let groupSizeRange: ClosedRange<Int>
 }

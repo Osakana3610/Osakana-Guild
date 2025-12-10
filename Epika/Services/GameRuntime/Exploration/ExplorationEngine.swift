@@ -136,6 +136,8 @@ struct ExplorationEngine {
             let combatService = CombatExecutionService(repository: repository)
             let combatResult = try await combatService.runCombat(enemyId: enemyId,
                                                                  enemyLevel: encounterChoice.level,
+                                                                 groupMin: encounterChoice.groupMin,
+                                                                 groupMax: encounterChoice.groupMax,
                                                                  dungeon: preparation.dungeon,
                                                                  floor: floor,
                                                                  party: party,

@@ -1079,13 +1079,7 @@ private struct EnemyMasterFile: Decodable {
         let baseStats: [String: Int]
         let category: String
         let job: Int?
-        let groupSizeRange: GroupSizeRange?
         let actionRates: ActionRates?
-    }
-
-    struct GroupSizeRange: Decodable {
-        let min: Int
-        let max: Int
     }
 
     struct ActionRates: Decodable {
@@ -1205,6 +1199,8 @@ private struct DungeonMasterFile: Decodable {
             let weight: Double
             let minLevel: Int
             let maxLevel: Int
+            let groupMin: Int?
+            let groupMax: Int?
         }
 
         let floorRange: [Int]
@@ -1298,8 +1294,8 @@ extension Generator {
                     bindText(eventStatement, index: 3, value: isBoss ? "boss_encounter" : "enemy_encounter")
                     bindInt(eventStatement, index: 4, value: group.enemyId)
                     bindDouble(eventStatement, index: 5, value: group.weight)
-                    bindInt(eventStatement, index: 6, value: nil)
-                    bindInt(eventStatement, index: 7, value: nil)
+                    bindInt(eventStatement, index: 6, value: group.groupMin)
+                    bindInt(eventStatement, index: 7, value: group.groupMax)
                     bindBool(eventStatement, index: 8, value: isBoss)
                     let averageLevel = (group.minLevel + group.maxLevel) / 2
                     bindInt(eventStatement, index: 9, value: averageLevel)
