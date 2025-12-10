@@ -11,7 +11,9 @@
       "eventsPerFloor": 2,
       "floorCount": 4,
       "storyText": null,
-      "unlockConditions": [],
+      "unlockConditions": [
+        "story:1"
+      ],
       "floorEnemyMapping": [
         {
           "floorRange": [
@@ -139,7 +141,7 @@
       "floorCount": 4,
       "storyText": null,
       "unlockConditions": [
-        "chapter1Stage1Clear"
+        "story:2"
       ],
       "floorEnemyMapping": [
         {
@@ -268,7 +270,7 @@
       "floorCount": 5,
       "storyText": null,
       "unlockConditions": [
-        "chapter1Stage2Clear"
+        "story:3"
       ],
       "floorEnemyMapping": [
         {
@@ -397,7 +399,7 @@
       "floorCount": 5,
       "storyText": null,
       "unlockConditions": [
-        "chapter1Stage3Clear"
+        "story:4"
       ],
       "floorEnemyMapping": [
         {
@@ -526,7 +528,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "chapter1Stage4Clear"
+        "story:5"
       ],
       "floorEnemyMapping": [
         {
@@ -655,7 +657,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "chapter1Stage5Clear"
+        "story:6"
       ],
       "floorEnemyMapping": [
         {
@@ -784,7 +786,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "chapter1Stage6Clear"
+        "story:7"
       ],
       "floorEnemyMapping": [
         {
@@ -913,7 +915,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "chapter1Stage7Clear"
+        "story:8"
       ],
       "floorEnemyMapping": [
         {
@@ -1042,7 +1044,7 @@
       "floorCount": 5,
       "storyText": null,
       "unlockConditions": [
-        "chapter1Clear"
+        "story:9"
       ],
       "floorEnemyMapping": [
         {
@@ -1171,7 +1173,7 @@
       "floorCount": 5,
       "storyText": null,
       "unlockConditions": [
-        "chapter2Stage1Clear"
+        "story:10"
       ],
       "floorEnemyMapping": [
         {
@@ -1300,7 +1302,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "chapter2Stage2Clear"
+        "story:11"
       ],
       "floorEnemyMapping": [
         {
@@ -1429,7 +1431,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "chapter2Stage3Clear"
+        "story:12"
       ],
       "floorEnemyMapping": [
         {
@@ -1558,7 +1560,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "chapter2Stage4Clear"
+        "story:13"
       ],
       "floorEnemyMapping": [
         {
@@ -1687,7 +1689,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "chapter2Stage5Clear"
+        "story:14"
       ],
       "floorEnemyMapping": [
         {
@@ -1816,7 +1818,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "chapter2Stage6Clear"
+        "story:15"
       ],
       "floorEnemyMapping": [
         {
@@ -1945,7 +1947,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "chapter2Stage7Clear"
+        "story:16"
       ],
       "floorEnemyMapping": [
         {
@@ -2074,7 +2076,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "chapter2Clear"
+        "story:17"
       ],
       "floorEnemyMapping": [
         {
@@ -2203,7 +2205,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "chapter3Stage1Clear"
+        "story:18"
       ],
       "floorEnemyMapping": [
         {
@@ -2332,7 +2334,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "chapter3Stage2Clear"
+        "story:19"
       ],
       "floorEnemyMapping": [
         {
@@ -2461,7 +2463,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "chapter3Stage3Clear"
+        "story:20"
       ],
       "floorEnemyMapping": [
         {
@@ -2590,7 +2592,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "chapter3Stage4Clear"
+        "story:21"
       ],
       "floorEnemyMapping": [
         {
@@ -2719,7 +2721,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "chapter3Stage5Clear"
+        "story:22"
       ],
       "floorEnemyMapping": [
         {
@@ -2848,7 +2850,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "chapter3Stage6Clear"
+        "story:23"
       ],
       "floorEnemyMapping": [
         {
@@ -2977,7 +2979,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "chapter3Stage7Clear"
+        "story:24"
       ],
       "floorEnemyMapping": [
         {
@@ -3106,7 +3108,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "chapter3Clear"
+        "story:25"
       ],
       "floorEnemyMapping": [
         {
@@ -3235,7 +3237,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "chapter4Stage1Clear"
+        "story:26"
       ],
       "floorEnemyMapping": [
         {
@@ -3364,7 +3366,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "chapter4Stage2Clear"
+        "story:27"
       ],
       "floorEnemyMapping": [
         {
@@ -3493,7 +3495,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "chapter4Stage3Clear"
+        "story:28"
       ],
       "floorEnemyMapping": [
         {
@@ -3622,7 +3624,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "chapter4Stage4Clear"
+        "story:29"
       ],
       "floorEnemyMapping": [
         {
@@ -3751,7 +3753,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "chapter4Stage5Clear"
+        "story:30"
       ],
       "floorEnemyMapping": [
         {
@@ -3880,7 +3882,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "chapter4Stage6Clear"
+        "story:31"
       ],
       "floorEnemyMapping": [
         {
@@ -4009,7 +4011,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "chapter4Stage7Clear"
+        "story:32"
       ],
       "floorEnemyMapping": [
         {
@@ -4138,7 +4140,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "chapter4Clear"
+        "story:33"
       ],
       "floorEnemyMapping": [
         {
@@ -4267,7 +4269,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "chapter5Stage1Clear"
+        "story:34"
       ],
       "floorEnemyMapping": [
         {
@@ -4396,7 +4398,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "chapter5Stage2Clear"
+        "story:35"
       ],
       "floorEnemyMapping": [
         {
@@ -4525,7 +4527,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "chapter5Stage3Clear"
+        "story:36"
       ],
       "floorEnemyMapping": [
         {
@@ -4654,7 +4656,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "chapter5Stage4Clear"
+        "story:37"
       ],
       "floorEnemyMapping": [
         {
@@ -4783,7 +4785,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "chapter5Stage5Clear"
+        "story:38"
       ],
       "floorEnemyMapping": [
         {
@@ -4912,7 +4914,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "chapter5Stage6Clear"
+        "story:39"
       ],
       "floorEnemyMapping": [
         {
@@ -5041,7 +5043,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "chapter5Stage7Clear"
+        "story:40"
       ],
       "floorEnemyMapping": [
         {
@@ -5170,7 +5172,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "chapter5Clear"
+        "story:41"
       ],
       "floorEnemyMapping": [
         {
@@ -5299,7 +5301,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "chapter6Stage1Clear"
+        "story:42"
       ],
       "floorEnemyMapping": [
         {
@@ -5428,7 +5430,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "chapter6Stage2Clear"
+        "story:43"
       ],
       "floorEnemyMapping": [
         {
@@ -5557,7 +5559,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "chapter6Stage3Clear"
+        "story:44"
       ],
       "floorEnemyMapping": [
         {
@@ -5686,7 +5688,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "chapter6Stage4Clear"
+        "story:45"
       ],
       "floorEnemyMapping": [
         {
@@ -5815,7 +5817,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "chapter6Stage5Clear"
+        "story:46"
       ],
       "floorEnemyMapping": [
         {
@@ -5944,7 +5946,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "chapter6Stage6Clear"
+        "story:47"
       ],
       "floorEnemyMapping": [
         {
@@ -6073,7 +6075,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "chapter6Stage7Clear"
+        "story:48"
       ],
       "floorEnemyMapping": [
         {
@@ -6202,7 +6204,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "chapter6Clear"
+        "story:49"
       ],
       "floorEnemyMapping": [
         {
@@ -6331,7 +6333,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "chapter7Stage1Clear"
+        "story:50"
       ],
       "floorEnemyMapping": [
         {
@@ -6460,7 +6462,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "chapter7Stage2Clear"
+        "story:51"
       ],
       "floorEnemyMapping": [
         {
@@ -6589,7 +6591,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "chapter7Stage3Clear"
+        "story:52"
       ],
       "floorEnemyMapping": [
         {
@@ -6718,7 +6720,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "chapter7Stage4Clear"
+        "story:53"
       ],
       "floorEnemyMapping": [
         {
@@ -6847,7 +6849,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "chapter7Stage5Clear"
+        "story:54"
       ],
       "floorEnemyMapping": [
         {
@@ -6976,7 +6978,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "chapter7Stage6Clear"
+        "story:55"
       ],
       "floorEnemyMapping": [
         {
@@ -7105,7 +7107,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "chapter7Stage7Clear"
+        "story:56"
       ],
       "floorEnemyMapping": [
         {
@@ -7234,7 +7236,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "chapter7Clear"
+        "story:57"
       ],
       "floorEnemyMapping": [
         {
@@ -7363,7 +7365,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "chapter8Stage1Clear"
+        "story:58"
       ],
       "floorEnemyMapping": [
         {
@@ -7492,7 +7494,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "chapter8Stage2Clear"
+        "story:59"
       ],
       "floorEnemyMapping": [
         {
@@ -7621,7 +7623,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "chapter8Stage3Clear"
+        "story:60"
       ],
       "floorEnemyMapping": [
         {
@@ -7750,7 +7752,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "chapter8Stage4Clear"
+        "story:61"
       ],
       "floorEnemyMapping": [
         {
@@ -7879,7 +7881,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "chapter8Stage5Clear"
+        "story:62"
       ],
       "floorEnemyMapping": [
         {
@@ -8008,7 +8010,7 @@
       "floorCount": 14,
       "storyText": null,
       "unlockConditions": [
-        "chapter8Stage6Clear"
+        "story:63"
       ],
       "floorEnemyMapping": [
         {
@@ -8137,7 +8139,7 @@
       "floorCount": 14,
       "storyText": null,
       "unlockConditions": [
-        "chapter8Stage7Clear"
+        "story:64"
       ],
       "floorEnemyMapping": [
         {
@@ -8266,7 +8268,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "chapter8Clear"
+        "story:65"
       ],
       "floorEnemyMapping": [
         {
@@ -8395,7 +8397,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "chapter9Stage1Clear"
+        "story:66"
       ],
       "floorEnemyMapping": [
         {
@@ -8524,7 +8526,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "chapter9Stage2Clear"
+        "story:67"
       ],
       "floorEnemyMapping": [
         {
@@ -8653,7 +8655,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "chapter9Stage3Clear"
+        "story:68"
       ],
       "floorEnemyMapping": [
         {
@@ -8782,7 +8784,7 @@
       "floorCount": 14,
       "storyText": null,
       "unlockConditions": [
-        "chapter9Stage4Clear"
+        "story:69"
       ],
       "floorEnemyMapping": [
         {
@@ -8911,7 +8913,7 @@
       "floorCount": 14,
       "storyText": null,
       "unlockConditions": [
-        "chapter9Stage5Clear"
+        "story:70"
       ],
       "floorEnemyMapping": [
         {
@@ -9040,7 +9042,7 @@
       "floorCount": 15,
       "storyText": null,
       "unlockConditions": [
-        "chapter9Stage6Clear"
+        "story:71"
       ],
       "floorEnemyMapping": [
         {
@@ -9169,7 +9171,7 @@
       "floorCount": 15,
       "storyText": null,
       "unlockConditions": [
-        "chapter9Stage7Clear"
+        "story:72"
       ],
       "floorEnemyMapping": [
         {
