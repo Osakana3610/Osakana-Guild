@@ -83,12 +83,7 @@ enum BattleService {
                                                                    jobDefinitions: jobDictionary,
                                                                    raceDefinitions: raceDictionary)
             let resources = BattleActionResource.makeDefault(for: snapshot)
-            let fallbackSkillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: fallbackDefinition.skills.map { entry in
-                guard let definition = skillDictionary[entry.skillId] else {
-                    throw RuntimeError.masterDataNotFound(entity: "skill", identifier: String(entry.skillId))
-                }
-                return definition
-            })
+            let fallbackSkillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: fallbackDefinition.specialSkillIds.compactMap { skillDictionary[$0] })
             let jobName: String? = fallbackDefinition.jobId.flatMap { jobDictionary[$0]?.name }
             enemies = [BattleActor(identifier: String(fallbackDefinition.id),
                                    displayName: fallbackDefinition.name,
@@ -116,7 +111,7 @@ enum BattleService {
                                    skillEffects: fallbackSkillEffects,
                                    spellbook: .empty,
                                    spells: .empty,
-                                   baseSkillIds: Set(fallbackDefinition.skills.map { $0.skillId }) )]
+                                   baseSkillIds: Set(fallbackDefinition.specialSkillIds) )]
             encounteredEnemies = [BattleEnemyGroupBuilder.EncounteredEnemy(definition: fallbackDefinition,
                                                                           level: encounterLevel ?? 1)]
             random = localRandom

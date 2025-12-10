@@ -1070,34 +1070,35 @@ private struct EnemyMasterFile: Decodable {
     struct Enemy: Decodable {
         let id: Int
         let baseName: String
-        let race: String
+        let race: Int
         let baseExperience: Int
-        let skills: [Int]
+        let specialSkillIds: [Int]
         let resistances: [String: Double]
         let isBoss: Bool
         let drops: [Int]
         let baseStats: [String: Int]
         let category: String
-        let job: String?
+        let job: Int?
+        let groupSizeRange: GroupSizeRange?
+        let actionRates: ActionRates?
+    }
+
+    struct GroupSizeRange: Decodable {
+        let min: Int
+        let max: Int
+    }
+
+    struct ActionRates: Decodable {
+        let attack: Int
+        let priestMagic: Int
+        let mageMagic: Int
+        let breath: Int
     }
 
     let enemyTemplates: [Enemy]
 }
 
 extension Generator {
-    /// 敵種族名から数値IDへのマッピング（100番台でプレイヤー種族と区別）
-    private static let enemyRaceMapping: [String: Int] = [
-        "goblinoid": 101,
-        "orcish": 102,
-        "beast": 103,
-        "undead": 104,
-        "spirit": 105,
-        "dragon": 106,
-        "golem": 107,
-        "treant": 108,
-        "ooze": 109
-    ]
-
     func importEnemyMaster(_ data: Data) throws -> Int {
         let decoder = JSONDecoder()
         let file = try decoder.decode(EnemyMasterFile.self, from: data)
@@ -1131,14 +1132,11 @@ extension Generator {
             }
 
             for enemy in file.enemyTemplates {
-                guard let raceId = Self.enemyRaceMapping[enemy.race] else {
-                    throw GeneratorError.executionFailed("Enemy \(enemy.id) の race '\(enemy.race)' が未定義です")
-                }
                 bindInt(enemyStatement, index: 1, value: enemy.id)
                 bindText(enemyStatement, index: 2, value: enemy.baseName)
-                bindInt(enemyStatement, index: 3, value: raceId)
+                bindInt(enemyStatement, index: 3, value: enemy.race)
                 bindText(enemyStatement, index: 4, value: enemy.category)
-                bindInt(enemyStatement, index: 5, value: nil)  // jobは常にnull
+                bindInt(enemyStatement, index: 5, value: enemy.job)
                 bindInt(enemyStatement, index: 6, value: enemy.baseExperience)
                 bindBool(enemyStatement, index: 7, value: enemy.isBoss)
                 try step(enemyStatement)
@@ -1171,7 +1169,7 @@ extension Generator {
                     reset(resistanceStatement)
                 }
 
-                for (index, skillId) in enemy.skills.enumerated() {
+                for (index, skillId) in enemy.specialSkillIds.enumerated() {
                     bindInt(skillStatement, index: 1, value: enemy.id)
                     bindInt(skillStatement, index: 2, value: index)
                     bindInt(skillStatement, index: 3, value: skillId)
@@ -1998,5 +1996,123 @@ extension Generator {
         }
 
         return entries.count
+    }
+}
+
+// MARK: - Enemy Race Master
+
+private struct EnemyRaceMasterFile: Decodable {
+    struct Race: Decodable {
+        let id: Int
+        let name: String
+        let baseResistances: [String: Double]
+    }
+
+    let enemyRaces: [Race]
+}
+
+extension Generator {
+    func importEnemyRaceMaster(_ data: Data) throws -> Int {
+        let decoder = JSONDecoder()
+        let file = try decoder.decode(EnemyRaceMasterFile.self, from: data)
+
+        try withTransaction {
+            try execute("DELETE FROM enemy_races;")
+            try execute("DELETE FROM enemy_race_resistances;")
+
+            let insertRaceSQL = "INSERT INTO enemy_races (id, name) VALUES (?, ?);"
+            let insertResistanceSQL = "INSERT INTO enemy_race_resistances (race_id, element, value) VALUES (?, ?, ?);"
+
+            let raceStatement = try prepare(insertRaceSQL)
+            let resistanceStatement = try prepare(insertResistanceSQL)
+            defer {
+                sqlite3_finalize(raceStatement)
+                sqlite3_finalize(resistanceStatement)
+            }
+
+            for race in file.enemyRaces {
+                bindInt(raceStatement, index: 1, value: race.id)
+                bindText(raceStatement, index: 2, value: race.name)
+                try step(raceStatement)
+                reset(raceStatement)
+
+                for (element, value) in race.baseResistances.sorted(by: { $0.key < $1.key }) {
+                    bindInt(resistanceStatement, index: 1, value: race.id)
+                    bindText(resistanceStatement, index: 2, value: element)
+                    bindDouble(resistanceStatement, index: 3, value: value)
+                    try step(resistanceStatement)
+                    reset(resistanceStatement)
+                }
+            }
+        }
+
+        return file.enemyRaces.count
+    }
+}
+
+// MARK: - Enemy Skill Master
+
+private struct EnemySkillMasterFile: Decodable {
+    struct Skill: Decodable {
+        let id: Int
+        let name: String
+        let type: String
+        let targeting: String
+        let chancePercent: Int
+        let usesPerBattle: Int
+        let multiplier: Double?
+        let hitCount: Int?
+        let ignoreDefense: Bool?
+        let element: String?
+        let statusId: Int?
+        let statusChance: Int?
+        let healPercent: Int?
+        let buffType: String?
+        let buffMultiplier: Double?
+    }
+
+    let enemySkills: [Skill]
+}
+
+extension Generator {
+    func importEnemySkillMaster(_ data: Data) throws -> Int {
+        let decoder = JSONDecoder()
+        let file = try decoder.decode(EnemySkillMasterFile.self, from: data)
+
+        try withTransaction {
+            try execute("DELETE FROM enemy_special_skills;")
+
+            let sql = """
+                INSERT INTO enemy_special_skills (
+                    id, name, type, targeting, chance_percent, uses_per_battle,
+                    multiplier, hit_count, ignore_defense, element,
+                    status_id, status_chance, heal_percent, buff_type, buff_multiplier
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """
+            let statement = try prepare(sql)
+            defer { sqlite3_finalize(statement) }
+
+            for skill in file.enemySkills {
+                bindInt(statement, index: 1, value: skill.id)
+                bindText(statement, index: 2, value: skill.name)
+                bindText(statement, index: 3, value: skill.type)
+                bindText(statement, index: 4, value: skill.targeting)
+                bindInt(statement, index: 5, value: skill.chancePercent)
+                bindInt(statement, index: 6, value: skill.usesPerBattle)
+                bindDouble(statement, index: 7, value: skill.multiplier)
+                bindInt(statement, index: 8, value: skill.hitCount)
+                bindBool(statement, index: 9, value: skill.ignoreDefense ?? false)
+                bindText(statement, index: 10, value: skill.element)
+                bindInt(statement, index: 11, value: skill.statusId)
+                bindInt(statement, index: 12, value: skill.statusChance)
+                bindInt(statement, index: 13, value: skill.healPercent)
+                bindText(statement, index: 14, value: skill.buffType)
+                bindDouble(statement, index: 15, value: skill.buffMultiplier)
+                try step(statement)
+                reset(statement)
+            }
+        }
+
+        return file.enemySkills.count
     }
 }

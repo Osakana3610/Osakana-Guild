@@ -28,10 +28,6 @@ struct EnemyDefinition: Identifiable, Sendable {
         )
     }
 
-    struct Skill: Sendable, Hashable {
-        let skillId: UInt16
-    }
-
     let id: UInt16
     let name: String
     let raceId: UInt8
@@ -45,7 +41,8 @@ struct EnemyDefinition: Identifiable, Sendable {
     let agility: Int
     let luck: Int
     let resistances: Resistances
-    let skills: [Skill]
+    let resistanceOverrides: Resistances?
+    let specialSkillIds: [UInt16]
     let drops: [UInt16]
     let actionRates: ActionRates
     let groupSizeRange: ClosedRange<Int>

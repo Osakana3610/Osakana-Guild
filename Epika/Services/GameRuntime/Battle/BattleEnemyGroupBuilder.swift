@@ -86,7 +86,7 @@ struct BattleEnemyGroupBuilder {
                                         skillEffects: skillEffects,
                                         spellbook: .empty,
                                         spells: .empty,
-                                        baseSkillIds: Set(group.definition.skills.map { $0.skillId }) )
+                                        baseSkillIds: Set(group.definition.specialSkillIds) )
                 actors.append(actor)
                 encountered.append(EncounteredEnemy(definition: group.definition, level: levelOverride))
                 slotIndex += 1
@@ -158,7 +158,7 @@ struct BattleEnemyGroupBuilder {
                                     skillEffects: skillEffects,
                                     spellbook: .empty,
                                     spells: .empty,
-                                    baseSkillIds: Set(definition.skills.map { $0.skillId }) )
+                                    baseSkillIds: Set(definition.specialSkillIds) )
             actors.append(actor)
         }
         return actors
@@ -170,12 +170,7 @@ struct BattleEnemyGroupBuilder {
         if let cached = cache[definition.id] {
             return cached
         }
-        let skills = try definition.skills.map { entry -> SkillDefinition in
-            guard let skill = skillDefinitions[entry.skillId] else {
-                throw RuntimeError.masterDataNotFound(entity: "skill", identifier: String(entry.skillId))
-            }
-            return skill
-        }
+        let skills = definition.specialSkillIds.compactMap { skillDefinitions[$0] }
         let effects = try SkillRuntimeEffectCompiler.actorEffects(from: skills)
         cache[definition.id] = effects
         return effects
