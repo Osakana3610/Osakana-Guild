@@ -100,6 +100,12 @@ enum ActionKind: UInt8, Codable, Sendable {
 
     // 敵出現
     case enemyAppear = 110        // "{enemy}が現れた！"
+
+    // 敵専用技
+    case enemySpecialSkill = 120  // "{actor}の{skill}！"
+    case enemySpecialDamage = 121 // "{target}に{value}のダメージ！"
+    case enemySpecialHeal = 122   // "{actor}は{value}回復した！"
+    case enemySpecialBuff = 123   // "{actor}は{buff}を発動した！"
 }
 
 // MARK: - Outcome Values

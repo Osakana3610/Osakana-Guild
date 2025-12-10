@@ -16,18 +16,21 @@ struct BattleTurnEngine {
     ///   - enemies: 敵側アクター（inout）
     ///   - statusEffects: ステータス効果定義
     ///   - skillDefinitions: スキル定義
+    ///   - enemySkillDefinitions: 敵専用技定義
     ///   - random: 乱数生成器（inout）
     /// - Returns: 戦闘結果
     static func runBattle(players: inout [BattleActor],
                           enemies: inout [BattleActor],
                           statusEffects: [UInt8: StatusEffectDefinition],
                           skillDefinitions: [UInt16: SkillDefinition],
+                          enemySkillDefinitions: [UInt16: EnemySkillDefinition] = [:],
                           random: inout GameRandomSource) -> Result {
         var context = BattleContext(
             players: players,
             enemies: enemies,
             statusDefinitions: statusEffects,
             skillDefinitions: skillDefinitions,
+            enemySkillDefinitions: enemySkillDefinitions,
             random: random
         )
 

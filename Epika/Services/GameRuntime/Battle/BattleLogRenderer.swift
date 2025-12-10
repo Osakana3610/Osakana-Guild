@@ -229,6 +229,19 @@ struct BattleLogRenderer {
         // 敵出現
         case .enemyAppear:
             return ("敵が現れた！", .system)
+
+        // 敵専用技
+        case .enemySpecialSkill:
+            return ("\(actorName)の特殊攻撃！", .action)
+        case .enemySpecialDamage:
+            let target = targetName ?? "対象"
+            let dmg = value ?? 0
+            return ("\(target)に\(dmg)のダメージ！", .damage)
+        case .enemySpecialHeal:
+            let heal = value ?? 0
+            return ("\(actorName)は\(heal)回復した！", .heal)
+        case .enemySpecialBuff:
+            return ("\(actorName)は能力を強化した！", .status)
         }
     }
 }
