@@ -9,6 +9,8 @@ struct CombatExecutionService {
 
     func runCombat(enemyId: UInt16,
                    enemyLevel: Int?,
+                   groupMin: Int?,
+                   groupMax: Int?,
                    dungeon: DungeonDefinition,
                    floor: DungeonFloorDefinition,
                    party: RuntimePartyState,
@@ -21,6 +23,8 @@ struct CombatExecutionService {
                                                                floor: floor,
                                                                encounterEnemyId: enemyId,
                                                                encounterLevel: enemyLevel,
+                                                               encounterGroupMin: groupMin,
+                                                               encounterGroupMax: groupMax,
                                                                random: &battleRandom)
         random = battleRandom
 

@@ -21,7 +21,6 @@ extension SQLiteMasterDataManager {
             var specialSkillIds: [UInt16] = []
             var drops: [UInt16] = []
             var actionRates: EnemyDefinition.ActionRates = .init(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
-            var groupSizeRange: ClosedRange<Int> = 1...1
         }
 
         var builders: [UInt16: Builder] = [:]
@@ -115,8 +114,7 @@ extension SQLiteMasterDataManager {
                 resistanceOverrides: nil,
                 specialSkillIds: builder.specialSkillIds,
                 drops: builder.drops,
-                actionRates: builder.actionRates,
-                groupSizeRange: builder.groupSizeRange
+                actionRates: builder.actionRates
             )
         }
     }
