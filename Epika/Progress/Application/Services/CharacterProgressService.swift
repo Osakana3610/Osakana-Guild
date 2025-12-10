@@ -341,8 +341,10 @@ actor CharacterProgressService {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let currentEquipment = try context.fetch(equipmentDescriptor)
 
-        if currentEquipment.count + quantity > EquipmentProgressService.maxEquippedItems {
-            throw ProgressError.invalidInput(description: "装備数が上限(\(EquipmentProgressService.maxEquippedItems)個)を超えます")
+        // 装備可能数はレベルベースで計算（スキル修正は後で適用可能）
+        let equipmentCapacity = EquipmentSlotCalculator.baseCapacity(forLevel: Int(characterRecord.level))
+        if currentEquipment.count + quantity > equipmentCapacity {
+            throw ProgressError.invalidInput(description: "装備数が上限(\(equipmentCapacity)個)を超えます")
         }
 
         // 装備レコード作成（1アイテム1レコード、quantityなし）

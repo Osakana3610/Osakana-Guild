@@ -10,9 +10,6 @@ actor EquipmentProgressService {
     /// 装備除外カテゴリ（装備候補に表示しない）
     static let excludedCategories: Set<String> = ["mazo_material", "for_synthesis"]
 
-    /// 装備可能数の上限
-    static let maxEquippedItems = 26
-
     /// 同一ベースID重複ペナルティの開始数
     static let duplicatePenaltyThreshold = 3
 
@@ -109,13 +106,14 @@ actor EquipmentProgressService {
         characterRaceId: UInt8,
         characterJobCategory: String,
         characterGenderCode: UInt8,
-        currentEquippedCount: Int
+        currentEquippedCount: Int,
+        equipmentCapacity: Int
     ) async throws -> EquipmentValidationResult {
         // 装備数上限チェック
-        if currentEquippedCount >= Self.maxEquippedItems {
+        if currentEquippedCount >= equipmentCapacity {
             return EquipmentValidationResult(
                 canEquip: false,
-                reason: "装備数が上限(\(Self.maxEquippedItems)個)に達しています"
+                reason: "装備数が上限(\(equipmentCapacity)個)に達しています"
             )
         }
 
