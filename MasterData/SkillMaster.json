@@ -13787,6 +13787,274 @@
             }
           }
         ]
+      },
+      {
+        "familyId": "race.human.adaptation",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "all"
+        },
+        "variants": [
+          {
+            "id": 64004,
+            "label": "[種族:人間] 順応 全被ダメ-5%",
+            "value": {
+              "valuePercent": -5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.pygmychum.wit",
+        "effectType": "statPercent",
+        "parameters": {
+          "stat": "hitRate"
+        },
+        "variants": [
+          {
+            "id": 64014,
+            "label": "[種族:ピグミーチャム] 機転 命中+10%",
+            "value": {
+              "valuePercent": 10
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.gnome.faith",
+        "effectType": "statPercent",
+        "parameters": {
+          "stat": "magicalHealing"
+        },
+        "variants": [
+          {
+            "id": 64024,
+            "label": "[種族:ノーム] 信仰 魔法回復+10%",
+            "value": {
+              "valuePercent": 10
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.dwarf.sturdy",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 64034,
+            "label": "[種族:ドワーフ] 堅牢 物理被ダメ-8%",
+            "value": {
+              "valuePercent": -8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.darkelf.darkvision",
+        "effectType": "statPercent",
+        "parameters": {
+          "stat": "hitRate"
+        },
+        "variants": [
+          {
+            "id": 64044,
+            "label": "[種族:ダークエルフ] 暗視 命中+12%",
+            "value": {
+              "valuePercent": 12
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.vampire.drain",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 64054,
+            "label": "[種族:吸血鬼] 吸血 物理攻撃+8%",
+            "value": {
+              "valuePercent": 8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.elf.harmony",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "magical"
+        },
+        "variants": [
+          {
+            "id": 64064,
+            "label": "[種族:エルフ] 調和 魔法被ダメ-8%",
+            "value": {
+              "valuePercent": -8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.psychic.focus",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "magical"
+        },
+        "variants": [
+          {
+            "id": 64074,
+            "label": "[種族:サイキック] 集中 魔法攻撃+12%",
+            "value": {
+              "valuePercent": 12
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.werecat.instinct",
+        "effectType": "criticalDamagePercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 64084,
+            "label": "[種族:ワーキャット] 野性 必殺威力+12%",
+            "value": {
+              "valuePercent": 12
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.dragonewt.scales",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 64094,
+            "label": "[種族:ドラゴニュート] 鱗 物理被ダメ-10%",
+            "value": {
+              "valuePercent": -10
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.amazoness.valor",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 64104,
+            "label": "[種族:アマゾネス] 勇猛 物理攻撃+8%",
+            "value": {
+              "valuePercent": 8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.homunculus.enhance",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "stat": "maxHP"
+        },
+        "variants": [
+          {
+            "id": 64114,
+            "label": "[種族:魔造生物] 強化 最大HP×1.15",
+            "value": {
+              "multiplier": 1.15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.undead.immortal",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 64124,
+            "label": "[種族:アンデッドマン] 不死 物理被ダメ-8%",
+            "value": {
+              "valuePercent": -8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.giant.colossus",
+        "effectType": "statMultiplier",
+        "parameters": {
+          "stat": "maxHP"
+        },
+        "variants": [
+          {
+            "id": 64134,
+            "label": "[種族:巨人] 巨躯 最大HP×1.10",
+            "value": {
+              "multiplier": 1.1
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.tengu.wind",
+        "effectType": "statPercent",
+        "parameters": {
+          "stat": "evasionRate"
+        },
+        "variants": [
+          {
+            "id": 64144,
+            "label": "[種族:天狗] 風 回避+10%",
+            "value": {
+              "valuePercent": 10
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.oni.might",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 64154,
+            "label": "[種族:鬼] 剛力 物理攻撃+8%",
+            "value": {
+              "valuePercent": 8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.cyborg.overclock",
+        "effectType": "attackCountAdditive",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 64164,
+            "label": "[種族:サイボーグ] 機械化 攻撃回数+1",
+            "value": {
+              "additive": 1
+            }
+          }
+        ]
       }
     ]
   },

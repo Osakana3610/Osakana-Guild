@@ -25,6 +25,10 @@
       ],
       "skillUnlocks": [
         {
+          "level": 50,
+          "skillId": 64004
+        },
+        {
           "level": 99,
           "skillId": 64003
         }
@@ -51,6 +55,10 @@
         64002
       ],
       "skillUnlocks": [
+        {
+          "level": 50,
+          "skillId": 64004
+        },
         {
           "level": 99,
           "skillId": 64003
@@ -79,6 +87,10 @@
       ],
       "skillUnlocks": [
         {
+          "level": 50,
+          "skillId": 64014
+        },
+        {
           "level": 99,
           "skillId": 64013
         }
@@ -105,6 +117,10 @@
         64022
       ],
       "skillUnlocks": [
+        {
+          "level": 50,
+          "skillId": 64024
+        },
         {
           "level": 99,
           "skillId": 64023
@@ -133,6 +149,10 @@
       ],
       "skillUnlocks": [
         {
+          "level": 50,
+          "skillId": 64034
+        },
+        {
           "level": 99,
           "skillId": 64033
         }
@@ -159,6 +179,10 @@
         64042
       ],
       "skillUnlocks": [
+        {
+          "level": 50,
+          "skillId": 64044
+        },
         {
           "level": 99,
           "skillId": 64043
@@ -187,6 +211,10 @@
       ],
       "skillUnlocks": [
         {
+          "level": 50,
+          "skillId": 64054
+        },
+        {
           "level": 99,
           "skillId": 64053
         }
@@ -213,6 +241,10 @@
         64062
       ],
       "skillUnlocks": [
+        {
+          "level": 50,
+          "skillId": 64064
+        },
         {
           "level": 99,
           "skillId": 64063
@@ -241,6 +273,10 @@
       ],
       "skillUnlocks": [
         {
+          "level": 50,
+          "skillId": 64074
+        },
+        {
           "level": 99,
           "skillId": 64073
         }
@@ -267,6 +303,10 @@
         64082
       ],
       "skillUnlocks": [
+        {
+          "level": 50,
+          "skillId": 64084
+        },
         {
           "level": 99,
           "skillId": 64083
@@ -295,6 +335,10 @@
       ],
       "skillUnlocks": [
         {
+          "level": 50,
+          "skillId": 64094
+        },
+        {
           "level": 99,
           "skillId": 64093
         }
@@ -321,6 +365,10 @@
         64102
       ],
       "skillUnlocks": [
+        {
+          "level": 50,
+          "skillId": 64104
+        },
         {
           "level": 99,
           "skillId": 64103
@@ -349,6 +397,10 @@
       ],
       "skillUnlocks": [
         {
+          "level": 50,
+          "skillId": 64114
+        },
+        {
           "level": 99,
           "skillId": 64113
         }
@@ -375,6 +427,10 @@
         64122
       ],
       "skillUnlocks": [
+        {
+          "level": 50,
+          "skillId": 64124
+        },
         {
           "level": 99,
           "skillId": 64123
@@ -403,6 +459,10 @@
       ],
       "skillUnlocks": [
         {
+          "level": 50,
+          "skillId": 64134
+        },
+        {
           "level": 99,
           "skillId": 64133
         }
@@ -429,6 +489,10 @@
         64142
       ],
       "skillUnlocks": [
+        {
+          "level": 50,
+          "skillId": 64144
+        },
         {
           "level": 99,
           "skillId": 64143
@@ -457,6 +521,10 @@
       ],
       "skillUnlocks": [
         {
+          "level": 50,
+          "skillId": 64154
+        },
+        {
           "level": 99,
           "skillId": 64153
         }
@@ -483,6 +551,10 @@
         64162
       ],
       "skillUnlocks": [
+        {
+          "level": 50,
+          "skillId": 64164
+        },
         {
           "level": 99,
           "skillId": 64163
