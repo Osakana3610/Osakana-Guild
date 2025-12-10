@@ -148,24 +148,25 @@ struct SimplifiedEventSummaryRowView: View {
     }
 
     private var subtitleText: String? {
-        if let drops = encounter.context["drops"], !drops.isEmpty {
+        if let drops = encounter.context.drops, !drops.isEmpty {
             return drops
         }
-        if let exp = encounter.context["exp"], !exp.isEmpty {
+        if let exp = encounter.context.exp, !exp.isEmpty {
             return "経験値 \(exp)"
         }
-        if let gold = encounter.context["gold"], !gold.isEmpty {
+        if let gold = encounter.context.gold, !gold.isEmpty {
             return "GP \(gold)"
         }
-        if let effects = encounter.context["effects"], !effects.isEmpty {
+        if let effects = encounter.context.effects, !effects.isEmpty {
             return effects
         }
         return nil
     }
 
     private var resultText: String? {
-        if let raw = encounter.context["result"], !raw.isEmpty {
-            return ExplorationSnapshot.localizedCombatResult(raw)
+        // 戦闘結果は CombatSummary から取得
+        if let result = encounter.combatSummary?.result, !result.isEmpty {
+            return ExplorationSnapshot.localizedCombatResult(result)
         }
         return nil
     }

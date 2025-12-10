@@ -343,7 +343,6 @@ private extension ExplorationProgressService {
         let kind: ExplorationSnapshot.EncounterLog.Kind
         var referenceId: String?
         var combatSummary: ExplorationSnapshot.EncounterLog.CombatSummary?
-        var contextEntries: [String: String] = [:]
 
         switch EventKind(rawValue: event.kind) {
         case .nothing, .none:
@@ -368,7 +367,6 @@ private extension ExplorationProgressService {
                         turns: turns,
                         battleLogData: event.battleLogData
                     )
-                    contextEntries["result"] = result
                 }
             }
 
@@ -383,14 +381,14 @@ private extension ExplorationProgressService {
             }
         }
 
+        // Context構造体を構築
+        var context = ExplorationSnapshot.EncounterLog.Context()
         if event.exp > 0 {
-            contextEntries["exp"] = "\(event.exp)"
+            context.exp = "\(event.exp)"
         }
         if event.gold > 0 {
-            contextEntries["gold"] = "\(event.gold)"
+            context.gold = "\(event.gold)"
         }
-
-        // ドロップ情報
         if !event.drops.isEmpty {
             var dropStrings: [String] = []
             for drop in event.drops {
@@ -400,7 +398,7 @@ private extension ExplorationProgressService {
                 }
             }
             if !dropStrings.isEmpty {
-                contextEntries["drops"] = dropStrings.joined(separator: ", ")
+                context.drops = dropStrings.joined(separator: ", ")
             }
         }
 
@@ -411,7 +409,7 @@ private extension ExplorationProgressService {
             kind: kind,
             referenceId: referenceId,
             occurredAt: event.occurredAt,
-            context: contextEntries,
+            context: context,
             metadata: ProgressMetadata(createdAt: event.occurredAt, updatedAt: event.occurredAt),
             combatSummary: combatSummary
         )
