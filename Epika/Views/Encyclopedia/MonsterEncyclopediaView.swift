@@ -70,17 +70,17 @@ struct MonsterEncyclopediaView: View {
     private func loadData() async {
         do {
             let service = MasterDataRuntimeService.shared
-            async let dungeonsTask = service.getAllDungeons()
+            async let dungeonsTask = service.getAllDungeonsWithEncounters()
             async let enemiesTask = service.getAllEnemies()
             async let jobsTask = service.getAllJobs()
 
-            let (loadedDungeons, loadedEnemies, loadedJobs) = try await (dungeonsTask, enemiesTask, jobsTask)
+            let ((loadedDungeons, encounterTables, floors), loadedEnemies, loadedJobs) = try await (dungeonsTask, enemiesTask, jobsTask)
 
             dungeons = loadedDungeons.sorted { $0.id < $1.id }
             enemies = loadedEnemies
             jobs = Dictionary(uniqueKeysWithValues: loadedJobs.map { ($0.id, $0.name) })
 
-            // Load enemy races from database
+            // Enemy races
             enemyRaces = [
                 1: "人型",
                 2: "魔物",
@@ -89,23 +89,21 @@ struct MonsterEncyclopediaView: View {
                 5: "神魔"
             ]
 
-            // Build dungeon → enemy mapping from encounter config
+            // Build dungeon → enemy mapping from floors and encounter tables
+            let tableMap = Dictionary(uniqueKeysWithValues: encounterTables.map { ($0.id, $0) })
             var mapping: [UInt16: Set<UInt16>] = [:]
-            for dungeon in dungeons {
-                if let config = dungeon.enemyGroupConfig {
-                    var enemySet = Set<UInt16>()
-                    enemySet.formUnion(config.normalPool)
-                    for (_, pool) in config.floorPools {
-                        enemySet.formUnion(pool)
+
+            for floor in floors {
+                guard let dungeonId = floor.dungeonId,
+                      let table = tableMap[floor.encounterTableId] else { continue }
+
+                var enemySet = mapping[dungeonId] ?? Set<UInt16>()
+                for event in table.events {
+                    if let enemyId = event.enemyId {
+                        enemySet.insert(enemyId)
                     }
-                    for boss in config.midBossPool {
-                        enemySet.insert(boss.enemyId)
-                    }
-                    for boss in config.bossPool {
-                        enemySet.insert(boss.enemyId)
-                    }
-                    mapping[dungeon.id] = enemySet
                 }
+                mapping[dungeonId] = enemySet
             }
             dungeonEnemyMap = mapping
 
