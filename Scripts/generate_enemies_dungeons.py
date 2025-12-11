@@ -185,24 +185,33 @@ def generate_enemy(enemy_id: int, chapter: int, stage: int, enemy_type: str, ind
     exp_multiplier = {"boss": 10, "elite": 3, "normal": 1}[enemy_type]
     base_experience = base_exp * exp_multiplier
 
-    # 耐性 (章に応じて強化)
-    resistance_base = min(0.8, chapter * 0.05)
+    # 耐性（ダメージ倍率: 1.0=通常, 0.5=半減, 2.0=弱点）
+    # 章が進むと耐性が上がる（倍率が下がる）
+    base_resist = max(0.5, 1.0 - chapter * 0.03)  # 1章=0.97, 9章=0.73
     resistances = {
-        "physical": round(resistance_base + random.uniform(-0.1, 0.1), 2),
-        "magical": round(resistance_base + random.uniform(-0.1, 0.1), 2),
+        "physical": round(base_resist + random.uniform(-0.05, 0.05), 2),
+        "piercing": round(base_resist + random.uniform(-0.05, 0.05), 2),
+        "critical": round(base_resist + random.uniform(-0.05, 0.05), 2),
+        "breath": 1.0,  # デフォルトはブレス等倍
     }
 
-    # 種族別の追加耐性
-    if race_id == RACE_UNDEAD:
-        resistances["holy"] = round(-0.3 - chapter * 0.03, 2)
-        resistances["death"] = 1.0
-        resistances["poison"] = 1.0
-    elif race_id == RACE_DRAGON:
-        resistances["fire"] = round(0.3 + chapter * 0.05, 2)
-        resistances["ice"] = round(-0.2 - chapter * 0.02, 2)
+    # 種族別の耐性調整
+    # spell.0 = マジックアロー, spell.2 = ファイヤーボール, spell.3 = ブリザード
+    # spell.5 = サンダーボルト, spell.6 = ニュークリア
+    if race_id == RACE_DRAGON:
+        # 竜族: 炎耐性、氷弱点、ブレス耐性
+        resistances["spell.2"] = round(0.5 - chapter * 0.02, 2)   # ファイヤーボール耐性
+        resistances["spell.3"] = round(1.5 + chapter * 0.05, 2)   # ブリザード弱点
+        resistances["breath"] = round(0.7 - chapter * 0.02, 2)    # ブレス耐性
     elif race_id == RACE_DIVINE:
-        resistances["holy"] = round(0.2 + chapter * 0.05, 2)
-        resistances["death"] = round(0.5 + chapter * 0.03, 2)
+        # 神魔: 高レベル魔法耐性、物理弱点
+        resistances["physical"] = round(1.2 + chapter * 0.02, 2)  # 物理弱点
+        resistances["spell.6"] = round(0.4 - chapter * 0.02, 2)   # ニュークリア耐性
+        resistances["critical"] = round(0.5 - chapter * 0.02, 2)  # クリティカル耐性
+    elif race_id == RACE_UNDEAD:
+        # 不死: 物理耐性、マジックアロー弱点
+        resistances["physical"] = round(0.6 - chapter * 0.02, 2)  # 物理耐性
+        resistances["spell.0"] = round(1.3 + chapter * 0.03, 2)   # マジックアロー弱点
 
     # スキル決定
     skills = []

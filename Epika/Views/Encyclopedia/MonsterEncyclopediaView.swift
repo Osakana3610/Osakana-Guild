@@ -266,18 +266,17 @@ private struct EnemyDetailView: View {
                 }
             }
 
-            // 耐性（実際に戦闘で使用される値）
+            // 耐性（ダメージ倍率: 1.0=通常, 0.5=半減, 2.0=弱点）
             Section("耐性") {
                 let r = enemy.resistances
-                HStack {
-                    ResistLabel(name: "物理", value: r.physical)
-                    ResistLabel(name: "魔法", value: r.magical)
-                }
-                if !r.spellSpecific.isEmpty {
-                    ForEach(r.spellSpecific.keys.sorted(), id: \.self) { spellId in
-                        if let multiplier = r.spellSpecific[spellId] {
-                            let spellName = spells[spellId] ?? "呪文ID:\(spellId)"
-                            ResistLabel(name: spellName, value: multiplier - 1.0)
+                LabeledContent("物理", value: formatResist(r.physical))
+                LabeledContent("貫通", value: formatResist(r.piercing))
+                LabeledContent("クリティカル", value: formatResist(r.critical))
+                LabeledContent("ブレス", value: formatResist(r.breath))
+                if !r.spells.isEmpty {
+                    ForEach(r.spells.keys.sorted(), id: \.self) { spellId in
+                        if let multiplier = r.spells[spellId] {
+                            LabeledContent(spellName(spellId: spellId), value: formatResist(multiplier))
                         }
                     }
                 }
@@ -330,6 +329,14 @@ private struct EnemyDetailView: View {
         }
         .navigationTitle(enemy.name)
     }
+
+    private func spellName(spellId: UInt8) -> String {
+        spells[spellId] ?? "呪文ID:\(spellId)"
+    }
+
+    private func formatResist(_ value: Double) -> String {
+        String(format: "%.2f", value)
+    }
 }
 
 private struct StatLabel: View {
@@ -343,35 +350,6 @@ private struct StatLabel: View {
             Text("\(value)")
                 .fontWeight(.medium)
         }
-        .frame(maxWidth: .infinity)
-    }
-}
-
-private struct ResistLabel: View {
-    let name: String
-    let value: Double
-
-    private var displayValue: String {
-        if value == 0 { return "0%" }
-        let percent = Int(value * 100)
-        return percent > 0 ? "+\(percent)%" : "\(percent)%"
-    }
-
-    private var valueColor: Color {
-        if value > 0 { return .green }
-        if value < 0 { return .red }
-        return .secondary
-    }
-
-    var body: some View {
-        HStack(spacing: 2) {
-            Text(name)
-                .foregroundColor(.secondary)
-            Text(displayValue)
-                .foregroundColor(valueColor)
-                .fontWeight(.medium)
-        }
-        .font(.caption)
         .frame(maxWidth: .infinity)
     }
 }

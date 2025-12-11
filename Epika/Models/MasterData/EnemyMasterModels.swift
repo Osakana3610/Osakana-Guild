@@ -8,12 +8,17 @@ struct EnemyDefinition: Identifiable, Sendable {
         let breath: Int
     }
 
+    /// 耐性値（ダメージ倍率: 1.0=通常, 0.5=半減, 2.0=弱点）
     struct Resistances: Sendable, Hashable {
-        let physical: Double
-        let magical: Double
-        let spellSpecific: [UInt8: Double]  // spellId → 耐性倍率（1.0未満=耐性、1.0超=弱点）
+        let physical: Double      // 物理攻撃
+        let piercing: Double      // 追加ダメージ（貫通）
+        let critical: Double      // クリティカルダメージ
+        let breath: Double        // ブレス
+        let spells: [UInt8: Double]  // 個別魔法（spellId → 倍率）
 
-        static let zero = Resistances(physical: 0, magical: 0, spellSpecific: [:])
+        static let neutral = Resistances(
+            physical: 1.0, piercing: 1.0, critical: 1.0, breath: 1.0, spells: [:]
+        )
     }
 
     let id: UInt16

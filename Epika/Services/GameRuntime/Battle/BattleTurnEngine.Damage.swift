@@ -47,12 +47,17 @@ extension BattleTurnEngine {
         }
         coreDamage *= damageMultiplier
 
-        let bonusDamage = additionalDamage * damageMultiplier * penetrationTakenMultiplier
-        var totalDamage = (coreDamage + bonusDamage) * rowMultiplier * dealtMultiplier * takenMultiplier
+        // 固有耐性を適用
+        let innatePhysical = defender.innateResistances.physical
+        let innatePiercing = defender.innateResistances.piercing
+
+        let bonusDamage = additionalDamage * damageMultiplier * penetrationTakenMultiplier * innatePiercing
+        var totalDamage = (coreDamage * innatePhysical + bonusDamage) * rowMultiplier * dealtMultiplier * takenMultiplier
 
         if isCritical {
             totalDamage *= criticalDamageBonus(for: attacker)
             totalDamage *= defender.skillEffects.damage.criticalTakenMultiplier
+            totalDamage *= defender.innateResistances.critical  // クリティカル耐性
         }
 
         let barrierMultiplier = applyBarrierIfAvailable(for: .physical, defender: &defender)
@@ -80,6 +85,11 @@ extension BattleTurnEngine {
         damage *= spellPowerModifier(for: attacker, spellId: spellId)
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .magical)
         damage *= damageTakenModifier(for: defender, damageType: .magical, spellId: spellId)
+
+        // 個別魔法耐性を適用
+        if let spellId {
+            damage *= defender.innateResistances.spells[spellId, default: 1.0]
+        }
 
         let barrierMultiplier = applyBarrierIfAvailable(for: .magical, defender: &defender)
         var adjusted = damage * barrierMultiplier
@@ -127,6 +137,7 @@ extension BattleTurnEngine {
 
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .breath)
         damage *= damageTakenModifier(for: defender, damageType: .breath)
+        damage *= defender.innateResistances.breath  // ブレス耐性
 
         let barrierMultiplier = applyBarrierIfAvailable(for: .breath, defender: &defender)
         var adjusted = damage * barrierMultiplier
