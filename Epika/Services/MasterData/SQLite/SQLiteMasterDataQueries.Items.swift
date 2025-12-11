@@ -97,7 +97,7 @@ extension SQLiteMasterDataManager {
         var builders: [UInt16: Builder] = [:]
         var orderedIds: [UInt16] = []
 
-        let itemSQL = "SELECT id, name, description, category, base_price, sell_value, rarity FROM items;"
+        let itemSQL = "SELECT id, name, description, category, base_price, sell_value, rarity FROM items ORDER BY id;"
         let itemStatement = try prepare(itemSQL)
         defer { sqlite3_finalize(itemStatement) }
         while sqlite3_step(itemStatement) == SQLITE_ROW {
