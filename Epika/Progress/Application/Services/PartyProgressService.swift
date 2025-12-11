@@ -34,7 +34,7 @@ actor PartyProgressService {
                 let partyId = UInt8(index + 1)
                 let record = PartyRecord(id: partyId,
                                          displayName: nameProvider(index),
-                                         lastSelectedDungeonId: 0,
+                                         lastSelectedDungeonId: nil,
                                          lastSelectedDifficulty: 0,
                                          targetFloor: 1,
                                          memberCharacterIds: [],

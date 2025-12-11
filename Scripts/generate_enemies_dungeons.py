@@ -394,7 +394,7 @@ def generate_dungeon(dungeon_id: int, chapter: int, stage: int, enemy_start_id: 
         "eventsPerFloor": 2 + chapter // 3,
         "floorCount": floor_count,
         "storyText": None,
-        "unlockConditions": [f"storyRead:{dungeon_id + 1}"],  # ストーリーN読了でダンジョンN解放
+        "unlockConditions": [f"storyRead:{dungeon_id}"],  # ストーリーNを読むとダンジョンNが解放
         "floorEnemyMapping": floor_enemy_mapping,
     }
 
@@ -405,7 +405,7 @@ def main():
     all_enemies = []
     all_dungeons = []
     enemy_id = 0
-    dungeon_id = 0
+    dungeon_id = 1  # ストーリーIDと対応させるため1から開始
 
     # 8章 × 8ステージ
     for chapter in range(1, 9):

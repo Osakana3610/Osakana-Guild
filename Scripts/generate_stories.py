@@ -140,7 +140,11 @@ CHAPTER_STORIES = {
 
 
 def generate_stories():
-    """ストーリーデータを生成"""
+    """ストーリーデータを生成
+
+    ID対応: ストーリーN → ダンジョンN（1:1対応）
+    フロー: ストーリーN読了 → ダンジョンN解放 → クリア → ストーリーN+1解放
+    """
     stories = []
     story_id = 1
 
@@ -148,15 +152,14 @@ def generate_stories():
         chapter_data = CHAPTER_STORIES[chapter]
 
         for stage_idx, (title, content) in enumerate(chapter_data["stories"], 1):
-            # ダンジョンID: (chapter-1) * 8 + (stage-1)
-            dungeon_id = (chapter - 1) * 8 + (stage_idx - 1)
+            # ストーリーNはダンジョンNを解放（1:1対応）
+            dungeon_id = story_id
 
             # 解放条件: 最初のストーリー以外は前のダンジョンクリアが必要
             if story_id == 1:
                 unlock_requirements = []
             else:
-                prev_dungeon_id = dungeon_id - 1
-                unlock_requirements = [f"dungeonClear:{prev_dungeon_id}"]
+                unlock_requirements = [f"dungeonClear:{story_id - 1}"]
 
             # 報酬（章が進むほど増加）
             base_gold = 100 * chapter

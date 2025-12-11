@@ -13,7 +13,7 @@
         "exp_75"
       ],
       "unlocksModules": [
-        "dungeon:0"
+        "dungeon:1"
       ]
     },
     {
@@ -23,14 +23,14 @@
       "chapter": 1,
       "section": 2,
       "unlockRequirements": [
-        "dungeonClear:0"
+        "dungeonClear:1"
       ],
       "rewards": [
         "gold_200",
         "exp_100"
       ],
       "unlocksModules": [
-        "dungeon:1"
+        "dungeon:2"
       ]
     },
     {
@@ -40,14 +40,14 @@
       "chapter": 1,
       "section": 3,
       "unlockRequirements": [
-        "dungeonClear:1"
+        "dungeonClear:2"
       ],
       "rewards": [
         "gold_250",
         "exp_125"
       ],
       "unlocksModules": [
-        "dungeon:2"
+        "dungeon:3"
       ]
     },
     {
@@ -57,14 +57,14 @@
       "chapter": 1,
       "section": 4,
       "unlockRequirements": [
-        "dungeonClear:2"
+        "dungeonClear:3"
       ],
       "rewards": [
         "gold_300",
         "exp_150"
       ],
       "unlocksModules": [
-        "dungeon:3"
+        "dungeon:4"
       ]
     },
     {
@@ -74,14 +74,14 @@
       "chapter": 1,
       "section": 5,
       "unlockRequirements": [
-        "dungeonClear:3"
+        "dungeonClear:4"
       ],
       "rewards": [
         "gold_350",
         "exp_175"
       ],
       "unlocksModules": [
-        "dungeon:4"
+        "dungeon:5"
       ]
     },
     {
@@ -91,14 +91,14 @@
       "chapter": 1,
       "section": 6,
       "unlockRequirements": [
-        "dungeonClear:4"
+        "dungeonClear:5"
       ],
       "rewards": [
         "gold_400",
         "exp_200"
       ],
       "unlocksModules": [
-        "dungeon:5"
+        "dungeon:6"
       ]
     },
     {
@@ -108,14 +108,14 @@
       "chapter": 1,
       "section": 7,
       "unlockRequirements": [
-        "dungeonClear:5"
+        "dungeonClear:6"
       ],
       "rewards": [
         "gold_450",
         "exp_225"
       ],
       "unlocksModules": [
-        "dungeon:6"
+        "dungeon:7"
       ]
     },
     {
@@ -125,14 +125,14 @@
       "chapter": 1,
       "section": 8,
       "unlockRequirements": [
-        "dungeonClear:6"
+        "dungeonClear:7"
       ],
       "rewards": [
         "gold_500",
         "exp_250"
       ],
       "unlocksModules": [
-        "dungeon:7"
+        "dungeon:8"
       ]
     },
     {
@@ -142,14 +142,14 @@
       "chapter": 2,
       "section": 1,
       "unlockRequirements": [
-        "dungeonClear:7"
+        "dungeonClear:8"
       ],
       "rewards": [
         "gold_250",
         "exp_125"
       ],
       "unlocksModules": [
-        "dungeon:8"
+        "dungeon:9"
       ]
     },
     {
@@ -159,14 +159,14 @@
       "chapter": 2,
       "section": 2,
       "unlockRequirements": [
-        "dungeonClear:8"
+        "dungeonClear:9"
       ],
       "rewards": [
         "gold_300",
         "exp_150"
       ],
       "unlocksModules": [
-        "dungeon:9"
+        "dungeon:10"
       ]
     },
     {
@@ -176,14 +176,14 @@
       "chapter": 2,
       "section": 3,
       "unlockRequirements": [
-        "dungeonClear:9"
+        "dungeonClear:10"
       ],
       "rewards": [
         "gold_350",
         "exp_175"
       ],
       "unlocksModules": [
-        "dungeon:10"
+        "dungeon:11"
       ]
     },
     {
@@ -193,14 +193,14 @@
       "chapter": 2,
       "section": 4,
       "unlockRequirements": [
-        "dungeonClear:10"
+        "dungeonClear:11"
       ],
       "rewards": [
         "gold_400",
         "exp_200"
       ],
       "unlocksModules": [
-        "dungeon:11"
+        "dungeon:12"
       ]
     },
     {
@@ -210,14 +210,14 @@
       "chapter": 2,
       "section": 5,
       "unlockRequirements": [
-        "dungeonClear:11"
+        "dungeonClear:12"
       ],
       "rewards": [
         "gold_450",
         "exp_225"
       ],
       "unlocksModules": [
-        "dungeon:12"
+        "dungeon:13"
       ]
     },
     {
@@ -227,14 +227,14 @@
       "chapter": 2,
       "section": 6,
       "unlockRequirements": [
-        "dungeonClear:12"
+        "dungeonClear:13"
       ],
       "rewards": [
         "gold_500",
         "exp_250"
       ],
       "unlocksModules": [
-        "dungeon:13"
+        "dungeon:14"
       ]
     },
     {
@@ -244,14 +244,14 @@
       "chapter": 2,
       "section": 7,
       "unlockRequirements": [
-        "dungeonClear:13"
+        "dungeonClear:14"
       ],
       "rewards": [
         "gold_550",
         "exp_275"
       ],
       "unlocksModules": [
-        "dungeon:14"
+        "dungeon:15"
       ]
     },
     {
@@ -261,14 +261,14 @@
       "chapter": 2,
       "section": 8,
       "unlockRequirements": [
-        "dungeonClear:14"
+        "dungeonClear:15"
       ],
       "rewards": [
         "gold_600",
         "exp_300"
       ],
       "unlocksModules": [
-        "dungeon:15"
+        "dungeon:16"
       ]
     },
     {
@@ -278,14 +278,14 @@
       "chapter": 3,
       "section": 1,
       "unlockRequirements": [
-        "dungeonClear:15"
+        "dungeonClear:16"
       ],
       "rewards": [
         "gold_350",
         "exp_175"
       ],
       "unlocksModules": [
-        "dungeon:16"
+        "dungeon:17"
       ]
     },
     {
@@ -295,14 +295,14 @@
       "chapter": 3,
       "section": 2,
       "unlockRequirements": [
-        "dungeonClear:16"
+        "dungeonClear:17"
       ],
       "rewards": [
         "gold_400",
         "exp_200"
       ],
       "unlocksModules": [
-        "dungeon:17"
+        "dungeon:18"
       ]
     },
     {
@@ -312,14 +312,14 @@
       "chapter": 3,
       "section": 3,
       "unlockRequirements": [
-        "dungeonClear:17"
+        "dungeonClear:18"
       ],
       "rewards": [
         "gold_450",
         "exp_225"
       ],
       "unlocksModules": [
-        "dungeon:18"
+        "dungeon:19"
       ]
     },
     {
@@ -329,14 +329,14 @@
       "chapter": 3,
       "section": 4,
       "unlockRequirements": [
-        "dungeonClear:18"
+        "dungeonClear:19"
       ],
       "rewards": [
         "gold_500",
         "exp_250"
       ],
       "unlocksModules": [
-        "dungeon:19"
+        "dungeon:20"
       ]
     },
     {
@@ -346,14 +346,14 @@
       "chapter": 3,
       "section": 5,
       "unlockRequirements": [
-        "dungeonClear:19"
+        "dungeonClear:20"
       ],
       "rewards": [
         "gold_550",
         "exp_275"
       ],
       "unlocksModules": [
-        "dungeon:20"
+        "dungeon:21"
       ]
     },
     {
@@ -363,14 +363,14 @@
       "chapter": 3,
       "section": 6,
       "unlockRequirements": [
-        "dungeonClear:20"
+        "dungeonClear:21"
       ],
       "rewards": [
         "gold_600",
         "exp_300"
       ],
       "unlocksModules": [
-        "dungeon:21"
+        "dungeon:22"
       ]
     },
     {
@@ -380,14 +380,14 @@
       "chapter": 3,
       "section": 7,
       "unlockRequirements": [
-        "dungeonClear:21"
+        "dungeonClear:22"
       ],
       "rewards": [
         "gold_650",
         "exp_325"
       ],
       "unlocksModules": [
-        "dungeon:22"
+        "dungeon:23"
       ]
     },
     {
@@ -397,14 +397,14 @@
       "chapter": 3,
       "section": 8,
       "unlockRequirements": [
-        "dungeonClear:22"
+        "dungeonClear:23"
       ],
       "rewards": [
         "gold_700",
         "exp_350"
       ],
       "unlocksModules": [
-        "dungeon:23"
+        "dungeon:24"
       ]
     },
     {
@@ -414,14 +414,14 @@
       "chapter": 4,
       "section": 1,
       "unlockRequirements": [
-        "dungeonClear:23"
+        "dungeonClear:24"
       ],
       "rewards": [
         "gold_450",
         "exp_225"
       ],
       "unlocksModules": [
-        "dungeon:24"
+        "dungeon:25"
       ]
     },
     {
@@ -431,14 +431,14 @@
       "chapter": 4,
       "section": 2,
       "unlockRequirements": [
-        "dungeonClear:24"
+        "dungeonClear:25"
       ],
       "rewards": [
         "gold_500",
         "exp_250"
       ],
       "unlocksModules": [
-        "dungeon:25"
+        "dungeon:26"
       ]
     },
     {
@@ -448,14 +448,14 @@
       "chapter": 4,
       "section": 3,
       "unlockRequirements": [
-        "dungeonClear:25"
+        "dungeonClear:26"
       ],
       "rewards": [
         "gold_550",
         "exp_275"
       ],
       "unlocksModules": [
-        "dungeon:26"
+        "dungeon:27"
       ]
     },
     {
@@ -465,14 +465,14 @@
       "chapter": 4,
       "section": 4,
       "unlockRequirements": [
-        "dungeonClear:26"
+        "dungeonClear:27"
       ],
       "rewards": [
         "gold_600",
         "exp_300"
       ],
       "unlocksModules": [
-        "dungeon:27"
+        "dungeon:28"
       ]
     },
     {
@@ -482,14 +482,14 @@
       "chapter": 4,
       "section": 5,
       "unlockRequirements": [
-        "dungeonClear:27"
+        "dungeonClear:28"
       ],
       "rewards": [
         "gold_650",
         "exp_325"
       ],
       "unlocksModules": [
-        "dungeon:28"
+        "dungeon:29"
       ]
     },
     {
@@ -499,14 +499,14 @@
       "chapter": 4,
       "section": 6,
       "unlockRequirements": [
-        "dungeonClear:28"
+        "dungeonClear:29"
       ],
       "rewards": [
         "gold_700",
         "exp_350"
       ],
       "unlocksModules": [
-        "dungeon:29"
+        "dungeon:30"
       ]
     },
     {
@@ -516,14 +516,14 @@
       "chapter": 4,
       "section": 7,
       "unlockRequirements": [
-        "dungeonClear:29"
+        "dungeonClear:30"
       ],
       "rewards": [
         "gold_750",
         "exp_375"
       ],
       "unlocksModules": [
-        "dungeon:30"
+        "dungeon:31"
       ]
     },
     {
@@ -533,14 +533,14 @@
       "chapter": 4,
       "section": 8,
       "unlockRequirements": [
-        "dungeonClear:30"
+        "dungeonClear:31"
       ],
       "rewards": [
         "gold_800",
         "exp_400"
       ],
       "unlocksModules": [
-        "dungeon:31"
+        "dungeon:32"
       ]
     },
     {
@@ -550,14 +550,14 @@
       "chapter": 5,
       "section": 1,
       "unlockRequirements": [
-        "dungeonClear:31"
+        "dungeonClear:32"
       ],
       "rewards": [
         "gold_550",
         "exp_275"
       ],
       "unlocksModules": [
-        "dungeon:32"
+        "dungeon:33"
       ]
     },
     {
@@ -567,14 +567,14 @@
       "chapter": 5,
       "section": 2,
       "unlockRequirements": [
-        "dungeonClear:32"
+        "dungeonClear:33"
       ],
       "rewards": [
         "gold_600",
         "exp_300"
       ],
       "unlocksModules": [
-        "dungeon:33"
+        "dungeon:34"
       ]
     },
     {
@@ -584,14 +584,14 @@
       "chapter": 5,
       "section": 3,
       "unlockRequirements": [
-        "dungeonClear:33"
+        "dungeonClear:34"
       ],
       "rewards": [
         "gold_650",
         "exp_325"
       ],
       "unlocksModules": [
-        "dungeon:34"
+        "dungeon:35"
       ]
     },
     {
@@ -601,14 +601,14 @@
       "chapter": 5,
       "section": 4,
       "unlockRequirements": [
-        "dungeonClear:34"
+        "dungeonClear:35"
       ],
       "rewards": [
         "gold_700",
         "exp_350"
       ],
       "unlocksModules": [
-        "dungeon:35"
+        "dungeon:36"
       ]
     },
     {
@@ -618,14 +618,14 @@
       "chapter": 5,
       "section": 5,
       "unlockRequirements": [
-        "dungeonClear:35"
+        "dungeonClear:36"
       ],
       "rewards": [
         "gold_750",
         "exp_375"
       ],
       "unlocksModules": [
-        "dungeon:36"
+        "dungeon:37"
       ]
     },
     {
@@ -635,14 +635,14 @@
       "chapter": 5,
       "section": 6,
       "unlockRequirements": [
-        "dungeonClear:36"
+        "dungeonClear:37"
       ],
       "rewards": [
         "gold_800",
         "exp_400"
       ],
       "unlocksModules": [
-        "dungeon:37"
+        "dungeon:38"
       ]
     },
     {
@@ -652,14 +652,14 @@
       "chapter": 5,
       "section": 7,
       "unlockRequirements": [
-        "dungeonClear:37"
+        "dungeonClear:38"
       ],
       "rewards": [
         "gold_850",
         "exp_425"
       ],
       "unlocksModules": [
-        "dungeon:38"
+        "dungeon:39"
       ]
     },
     {
@@ -669,14 +669,14 @@
       "chapter": 5,
       "section": 8,
       "unlockRequirements": [
-        "dungeonClear:38"
+        "dungeonClear:39"
       ],
       "rewards": [
         "gold_900",
         "exp_450"
       ],
       "unlocksModules": [
-        "dungeon:39"
+        "dungeon:40"
       ]
     },
     {
@@ -686,14 +686,14 @@
       "chapter": 6,
       "section": 1,
       "unlockRequirements": [
-        "dungeonClear:39"
+        "dungeonClear:40"
       ],
       "rewards": [
         "gold_650",
         "exp_325"
       ],
       "unlocksModules": [
-        "dungeon:40"
+        "dungeon:41"
       ]
     },
     {
@@ -703,14 +703,14 @@
       "chapter": 6,
       "section": 2,
       "unlockRequirements": [
-        "dungeonClear:40"
+        "dungeonClear:41"
       ],
       "rewards": [
         "gold_700",
         "exp_350"
       ],
       "unlocksModules": [
-        "dungeon:41"
+        "dungeon:42"
       ]
     },
     {
@@ -720,14 +720,14 @@
       "chapter": 6,
       "section": 3,
       "unlockRequirements": [
-        "dungeonClear:41"
+        "dungeonClear:42"
       ],
       "rewards": [
         "gold_750",
         "exp_375"
       ],
       "unlocksModules": [
-        "dungeon:42"
+        "dungeon:43"
       ]
     },
     {
@@ -737,14 +737,14 @@
       "chapter": 6,
       "section": 4,
       "unlockRequirements": [
-        "dungeonClear:42"
+        "dungeonClear:43"
       ],
       "rewards": [
         "gold_800",
         "exp_400"
       ],
       "unlocksModules": [
-        "dungeon:43"
+        "dungeon:44"
       ]
     },
     {
@@ -754,14 +754,14 @@
       "chapter": 6,
       "section": 5,
       "unlockRequirements": [
-        "dungeonClear:43"
+        "dungeonClear:44"
       ],
       "rewards": [
         "gold_850",
         "exp_425"
       ],
       "unlocksModules": [
-        "dungeon:44"
+        "dungeon:45"
       ]
     },
     {
@@ -771,14 +771,14 @@
       "chapter": 6,
       "section": 6,
       "unlockRequirements": [
-        "dungeonClear:44"
+        "dungeonClear:45"
       ],
       "rewards": [
         "gold_900",
         "exp_450"
       ],
       "unlocksModules": [
-        "dungeon:45"
+        "dungeon:46"
       ]
     },
     {
@@ -788,14 +788,14 @@
       "chapter": 6,
       "section": 7,
       "unlockRequirements": [
-        "dungeonClear:45"
+        "dungeonClear:46"
       ],
       "rewards": [
         "gold_950",
         "exp_475"
       ],
       "unlocksModules": [
-        "dungeon:46"
+        "dungeon:47"
       ]
     },
     {
@@ -805,14 +805,14 @@
       "chapter": 6,
       "section": 8,
       "unlockRequirements": [
-        "dungeonClear:46"
+        "dungeonClear:47"
       ],
       "rewards": [
         "gold_1000",
         "exp_500"
       ],
       "unlocksModules": [
-        "dungeon:47"
+        "dungeon:48"
       ]
     },
     {
@@ -822,14 +822,14 @@
       "chapter": 7,
       "section": 1,
       "unlockRequirements": [
-        "dungeonClear:47"
+        "dungeonClear:48"
       ],
       "rewards": [
         "gold_750",
         "exp_375"
       ],
       "unlocksModules": [
-        "dungeon:48"
+        "dungeon:49"
       ]
     },
     {
@@ -839,14 +839,14 @@
       "chapter": 7,
       "section": 2,
       "unlockRequirements": [
-        "dungeonClear:48"
+        "dungeonClear:49"
       ],
       "rewards": [
         "gold_800",
         "exp_400"
       ],
       "unlocksModules": [
-        "dungeon:49"
+        "dungeon:50"
       ]
     },
     {
@@ -856,14 +856,14 @@
       "chapter": 7,
       "section": 3,
       "unlockRequirements": [
-        "dungeonClear:49"
+        "dungeonClear:50"
       ],
       "rewards": [
         "gold_850",
         "exp_425"
       ],
       "unlocksModules": [
-        "dungeon:50"
+        "dungeon:51"
       ]
     },
     {
@@ -873,14 +873,14 @@
       "chapter": 7,
       "section": 4,
       "unlockRequirements": [
-        "dungeonClear:50"
+        "dungeonClear:51"
       ],
       "rewards": [
         "gold_900",
         "exp_450"
       ],
       "unlocksModules": [
-        "dungeon:51"
+        "dungeon:52"
       ]
     },
     {
@@ -890,14 +890,14 @@
       "chapter": 7,
       "section": 5,
       "unlockRequirements": [
-        "dungeonClear:51"
+        "dungeonClear:52"
       ],
       "rewards": [
         "gold_950",
         "exp_475"
       ],
       "unlocksModules": [
-        "dungeon:52"
+        "dungeon:53"
       ]
     },
     {
@@ -907,14 +907,14 @@
       "chapter": 7,
       "section": 6,
       "unlockRequirements": [
-        "dungeonClear:52"
+        "dungeonClear:53"
       ],
       "rewards": [
         "gold_1000",
         "exp_500"
       ],
       "unlocksModules": [
-        "dungeon:53"
+        "dungeon:54"
       ]
     },
     {
@@ -924,14 +924,14 @@
       "chapter": 7,
       "section": 7,
       "unlockRequirements": [
-        "dungeonClear:53"
+        "dungeonClear:54"
       ],
       "rewards": [
         "gold_1050",
         "exp_525"
       ],
       "unlocksModules": [
-        "dungeon:54"
+        "dungeon:55"
       ]
     },
     {
@@ -941,14 +941,14 @@
       "chapter": 7,
       "section": 8,
       "unlockRequirements": [
-        "dungeonClear:54"
+        "dungeonClear:55"
       ],
       "rewards": [
         "gold_1100",
         "exp_550"
       ],
       "unlocksModules": [
-        "dungeon:55"
+        "dungeon:56"
       ]
     },
     {
@@ -958,14 +958,14 @@
       "chapter": 8,
       "section": 1,
       "unlockRequirements": [
-        "dungeonClear:55"
+        "dungeonClear:56"
       ],
       "rewards": [
         "gold_850",
         "exp_425"
       ],
       "unlocksModules": [
-        "dungeon:56"
+        "dungeon:57"
       ]
     },
     {
@@ -975,14 +975,14 @@
       "chapter": 8,
       "section": 2,
       "unlockRequirements": [
-        "dungeonClear:56"
+        "dungeonClear:57"
       ],
       "rewards": [
         "gold_900",
         "exp_450"
       ],
       "unlocksModules": [
-        "dungeon:57"
+        "dungeon:58"
       ]
     },
     {
@@ -992,14 +992,14 @@
       "chapter": 8,
       "section": 3,
       "unlockRequirements": [
-        "dungeonClear:57"
+        "dungeonClear:58"
       ],
       "rewards": [
         "gold_950",
         "exp_475"
       ],
       "unlocksModules": [
-        "dungeon:58"
+        "dungeon:59"
       ]
     },
     {
@@ -1009,14 +1009,14 @@
       "chapter": 8,
       "section": 4,
       "unlockRequirements": [
-        "dungeonClear:58"
+        "dungeonClear:59"
       ],
       "rewards": [
         "gold_1000",
         "exp_500"
       ],
       "unlocksModules": [
-        "dungeon:59"
+        "dungeon:60"
       ]
     },
     {
@@ -1026,14 +1026,14 @@
       "chapter": 8,
       "section": 5,
       "unlockRequirements": [
-        "dungeonClear:59"
+        "dungeonClear:60"
       ],
       "rewards": [
         "gold_1050",
         "exp_525"
       ],
       "unlocksModules": [
-        "dungeon:60"
+        "dungeon:61"
       ]
     },
     {
@@ -1043,14 +1043,14 @@
       "chapter": 8,
       "section": 6,
       "unlockRequirements": [
-        "dungeonClear:60"
+        "dungeonClear:61"
       ],
       "rewards": [
         "gold_1100",
         "exp_550"
       ],
       "unlocksModules": [
-        "dungeon:61"
+        "dungeon:62"
       ]
     },
     {
@@ -1060,14 +1060,14 @@
       "chapter": 8,
       "section": 7,
       "unlockRequirements": [
-        "dungeonClear:61"
+        "dungeonClear:62"
       ],
       "rewards": [
         "gold_1150",
         "exp_575"
       ],
       "unlocksModules": [
-        "dungeon:62"
+        "dungeon:63"
       ]
     },
     {
@@ -1077,14 +1077,14 @@
       "chapter": 8,
       "section": 8,
       "unlockRequirements": [
-        "dungeonClear:62"
+        "dungeonClear:63"
       ],
       "rewards": [
         "gold_1200",
         "exp_600"
       ],
       "unlocksModules": [
-        "dungeon:63"
+        "dungeon:64"
       ]
     },
     {
@@ -1094,14 +1094,14 @@
       "chapter": 9,
       "section": 1,
       "unlockRequirements": [
-        "dungeonClear:63"
+        "dungeonClear:64"
       ],
       "rewards": [
         "gold_950",
         "exp_475"
       ],
       "unlocksModules": [
-        "dungeon:64"
+        "dungeon:65"
       ]
     },
     {
@@ -1111,14 +1111,14 @@
       "chapter": 9,
       "section": 2,
       "unlockRequirements": [
-        "dungeonClear:64"
+        "dungeonClear:65"
       ],
       "rewards": [
         "gold_1000",
         "exp_500"
       ],
       "unlocksModules": [
-        "dungeon:65"
+        "dungeon:66"
       ]
     },
     {
@@ -1128,14 +1128,14 @@
       "chapter": 9,
       "section": 3,
       "unlockRequirements": [
-        "dungeonClear:65"
+        "dungeonClear:66"
       ],
       "rewards": [
         "gold_1050",
         "exp_525"
       ],
       "unlocksModules": [
-        "dungeon:66"
+        "dungeon:67"
       ]
     },
     {
@@ -1145,14 +1145,14 @@
       "chapter": 9,
       "section": 4,
       "unlockRequirements": [
-        "dungeonClear:66"
+        "dungeonClear:67"
       ],
       "rewards": [
         "gold_1100",
         "exp_550"
       ],
       "unlocksModules": [
-        "dungeon:67"
+        "dungeon:68"
       ]
     },
     {
@@ -1162,14 +1162,14 @@
       "chapter": 9,
       "section": 5,
       "unlockRequirements": [
-        "dungeonClear:67"
+        "dungeonClear:68"
       ],
       "rewards": [
         "gold_1150",
         "exp_575"
       ],
       "unlocksModules": [
-        "dungeon:68"
+        "dungeon:69"
       ]
     },
     {
@@ -1179,14 +1179,14 @@
       "chapter": 9,
       "section": 6,
       "unlockRequirements": [
-        "dungeonClear:68"
+        "dungeonClear:69"
       ],
       "rewards": [
         "gold_1200",
         "exp_600"
       ],
       "unlocksModules": [
-        "dungeon:69"
+        "dungeon:70"
       ]
     },
     {
@@ -1196,14 +1196,14 @@
       "chapter": 9,
       "section": 7,
       "unlockRequirements": [
-        "dungeonClear:69"
+        "dungeonClear:70"
       ],
       "rewards": [
         "gold_1250",
         "exp_625"
       ],
       "unlocksModules": [
-        "dungeon:70"
+        "dungeon:71"
       ]
     },
     {
@@ -1213,14 +1213,14 @@
       "chapter": 9,
       "section": 8,
       "unlockRequirements": [
-        "dungeonClear:70"
+        "dungeonClear:71"
       ],
       "rewards": [
         "gold_1300",
         "exp_650"
       ],
       "unlocksModules": [
-        "dungeon:71"
+        "dungeon:72"
       ]
     }
   ]
