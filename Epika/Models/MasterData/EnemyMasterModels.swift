@@ -11,21 +11,9 @@ struct EnemyDefinition: Identifiable, Sendable {
     struct Resistances: Sendable, Hashable {
         let physical: Double
         let magical: Double
-        let fire: Double
-        let ice: Double
-        let wind: Double
-        let earth: Double
-        let light: Double
-        let dark: Double
-        let holy: Double
-        let death: Double
-        let poison: Double
-        let charm: Double
+        let spellSpecific: [UInt8: Double]  // spellId → 耐性倍率（1.0未満=耐性、1.0超=弱点）
 
-        static let zero = Resistances(
-            physical: 0, magical: 0, fire: 0, ice: 0, wind: 0, earth: 0,
-            light: 0, dark: 0, holy: 0, death: 0, poison: 0, charm: 0
-        )
+        static let zero = Resistances(physical: 0, magical: 0, spellSpecific: [:])
     }
 
     let id: UInt16
