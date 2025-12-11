@@ -6,6 +6,7 @@ struct MonsterEncyclopediaView: View {
     @State private var enemyRaces: [UInt8: String] = [:]
     @State private var jobs: [UInt8: String] = [:]
     @State private var enemySkills: [UInt16: EnemySkillDefinition] = [:]
+    @State private var spells: [UInt8: String] = [:]  // spellId → name
     @State private var dungeonEnemyMap: [UInt16: Set<UInt16>] = [:]
     @State private var enemyLevelMap: [UInt16: Int] = [:]  // enemy ID → level
     @State private var isLoading = true
@@ -44,6 +45,7 @@ struct MonsterEncyclopediaView: View {
                                         enemyRaces: enemyRaces,
                                         jobs: jobs,
                                         enemySkills: enemySkills,
+                                        spells: spells,
                                         enemyLevelMap: enemyLevelMap
                                     )
                                 } label: {
@@ -78,14 +80,16 @@ struct MonsterEncyclopediaView: View {
             async let enemiesTask = service.getAllEnemies()
             async let jobsTask = service.getAllJobs()
             async let skillsTask = service.getAllEnemySkills()
+            async let spellsTask = service.getAllSpells()
 
-            let ((loadedDungeons, encounterTables, floors), loadedEnemies, loadedJobs, loadedSkills) =
-                try await (dungeonsTask, enemiesTask, jobsTask, skillsTask)
+            let ((loadedDungeons, encounterTables, floors), loadedEnemies, loadedJobs, loadedSkills, loadedSpells) =
+                try await (dungeonsTask, enemiesTask, jobsTask, skillsTask, spellsTask)
 
             dungeons = loadedDungeons.sorted { $0.id < $1.id }
             enemies = loadedEnemies
             jobs = Dictionary(uniqueKeysWithValues: loadedJobs.map { ($0.id, $0.name) })
             enemySkills = Dictionary(uniqueKeysWithValues: loadedSkills.map { ($0.id, $0) })
+            spells = Dictionary(uniqueKeysWithValues: loadedSpells.map { ($0.id, $0.name) })
 
             // Enemy races
             enemyRaces = [
@@ -134,6 +138,7 @@ private struct DungeonEnemyListView: View {
     let enemyRaces: [UInt8: String]
     let jobs: [UInt8: String]
     let enemySkills: [UInt16: EnemySkillDefinition]
+    let spells: [UInt8: String]
     let enemyLevelMap: [UInt16: Int]
 
     var body: some View {
@@ -146,7 +151,8 @@ private struct DungeonEnemyListView: View {
                             level: enemyLevelMap[enemy.id] ?? 1,
                             enemyRaces: enemyRaces,
                             jobs: jobs,
-                            enemySkills: enemySkills
+                            enemySkills: enemySkills,
+                            spells: spells
                         )
                     } label: {
                         EnemyRowView(
@@ -220,6 +226,7 @@ private struct EnemyDetailView: View {
     let enemyRaces: [UInt8: String]
     let jobs: [UInt8: String]
     let enemySkills: [UInt16: EnemySkillDefinition]
+    let spells: [UInt8: String]
 
     private var calculatedHP: Int {
         let vitality = max(1, enemy.vitality)
@@ -259,29 +266,19 @@ private struct EnemyDetailView: View {
                 }
             }
 
-            // 耐性
+            // 耐性（実際に戦闘で使用される値）
             Section("耐性") {
                 let r = enemy.resistances
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        ResistLabel(name: "物理", value: r.physical)
-                        ResistLabel(name: "魔法", value: r.magical)
-                    }
-                    HStack {
-                        ResistLabel(name: "炎", value: r.fire)
-                        ResistLabel(name: "氷", value: r.ice)
-                        ResistLabel(name: "風", value: r.wind)
-                        ResistLabel(name: "地", value: r.earth)
-                    }
-                    HStack {
-                        ResistLabel(name: "光", value: r.light)
-                        ResistLabel(name: "闇", value: r.dark)
-                        ResistLabel(name: "聖", value: r.holy)
-                    }
-                    HStack {
-                        ResistLabel(name: "即死", value: r.death)
-                        ResistLabel(name: "毒", value: r.poison)
-                        ResistLabel(name: "魅了", value: r.charm)
+                HStack {
+                    ResistLabel(name: "物理", value: r.physical)
+                    ResistLabel(name: "魔法", value: r.magical)
+                }
+                if !r.spellSpecific.isEmpty {
+                    ForEach(r.spellSpecific.keys.sorted(), id: \.self) { spellId in
+                        if let multiplier = r.spellSpecific[spellId] {
+                            let spellName = spells[spellId] ?? "呪文ID:\(spellId)"
+                            ResistLabel(name: spellName, value: multiplier - 1.0)
+                        }
                     }
                 }
             }
