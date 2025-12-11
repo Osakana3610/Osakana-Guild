@@ -390,7 +390,7 @@ def generate_dungeon(dungeon_id: int, chapter: int, stage: int, enemy_start_id: 
         "stage": stage,
         "description": f"{theme['name']}の{stage}番目のダンジョン",
         "recommendedLevel": dungeon_level_min,
-        "explorationTime": 60 + chapter * 10 + stage * 5,
+        "explorationTime": 1,  # 仮データ: テスト用に1秒
         "eventsPerFloor": 2 + chapter // 3,
         "floorCount": floor_count,
         "storyText": None,
