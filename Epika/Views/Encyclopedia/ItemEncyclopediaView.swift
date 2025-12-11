@@ -56,6 +56,7 @@ struct ItemEncyclopediaView: View {
             }
         }
         .navigationTitle("アイテム図鑑")
+        .avoidBottomGameInfo()
         .task { await loadData() }
     }
 
@@ -139,6 +140,7 @@ private struct ItemCategoryListView: View {
             }
         }
         .navigationTitle(categoryName)
+        .avoidBottomGameInfo()
     }
 
     private var sortedTiers: [String] {
@@ -216,6 +218,7 @@ private struct ItemDetailView: View {
             }
         }
         .navigationTitle(item.name)
+        .avoidBottomGameInfo()
     }
 
     private var hasStatBonuses: Bool {
