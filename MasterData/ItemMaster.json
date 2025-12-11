@@ -2,7 +2,7 @@
   "items": [
     {
       "id": 1,
-      "name": "細剣（ノーマル）1",
+      "name": "レイピア",
       "description": "細剣（ノーマル）1の説明",
       "category": "thin_sword",
       "basePrice": 100,
@@ -22,7 +22,7 @@
     },
     {
       "id": 2,
-      "name": "細剣（ノーマル）2",
+      "name": "エストック",
       "description": "細剣（ノーマル）2の説明",
       "category": "thin_sword",
       "basePrice": 500,
@@ -42,7 +42,7 @@
     },
     {
       "id": 3,
-      "name": "細剣（ノーマル）3",
+      "name": "フルーレ",
       "description": "細剣（ノーマル）3の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -62,7 +62,7 @@
     },
     {
       "id": 4,
-      "name": "細剣（ノーマル）4",
+      "name": "サーベル",
       "description": "細剣（ノーマル）4の説明",
       "category": "thin_sword",
       "basePrice": 12500,
@@ -82,7 +82,7 @@
     },
     {
       "id": 5,
-      "name": "細剣（ノーマル）5",
+      "name": "小剣",
       "description": "細剣（ノーマル）5の説明",
       "category": "thin_sword",
       "basePrice": 60000,
@@ -102,7 +102,7 @@
     },
     {
       "id": 6,
-      "name": "細剣（ノーマル）6",
+      "name": "刺突剣",
       "description": "細剣（ノーマル）6の説明",
       "category": "thin_sword",
       "basePrice": 240000,
@@ -122,7 +122,7 @@
     },
     {
       "id": 7,
-      "name": "細剣（ノーマル）7",
+      "name": "軽量剣",
       "description": "細剣（ノーマル）7の説明",
       "category": "thin_sword",
       "basePrice": 720000,
@@ -142,7 +142,7 @@
     },
     {
       "id": 8,
-      "name": "細剣（ノーマル）8",
+      "name": "決闘剣",
       "description": "細剣（ノーマル）8の説明",
       "category": "thin_sword",
       "basePrice": 1440000,
@@ -162,7 +162,7 @@
     },
     {
       "id": 9,
-      "name": "細剣（Tier1）1",
+      "name": "銀のレイピア",
       "description": "細剣（Tier1）1の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -182,7 +182,7 @@
     },
     {
       "id": 10,
-      "name": "細剣（Tier1）2",
+      "name": "ミスリルエストック",
       "description": "細剣（Tier1）2の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -202,7 +202,7 @@
     },
     {
       "id": 11,
-      "name": "細剣（Tier1）3",
+      "name": "貴族の剣",
       "description": "細剣（Tier1）3の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -222,7 +222,7 @@
     },
     {
       "id": 12,
-      "name": "細剣（Tier1）4",
+      "name": "騎士の細剣",
       "description": "細剣（Tier1）4の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -242,7 +242,7 @@
     },
     {
       "id": 13,
-      "name": "細剣（Tier1）5",
+      "name": "舞踏剣",
       "description": "細剣（Tier1）5の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -262,7 +262,7 @@
     },
     {
       "id": 14,
-      "name": "細剣（Tier1）6",
+      "name": "羽根剣",
       "description": "細剣（Tier1）6の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -282,7 +282,7 @@
     },
     {
       "id": 15,
-      "name": "細剣（Tier1）7",
+      "name": "風切りの剣",
       "description": "細剣（Tier1）7の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -302,7 +302,7 @@
     },
     {
       "id": 16,
-      "name": "細剣（Tier1）8",
+      "name": "疾風の剣",
       "description": "細剣（Tier1）8の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -322,7 +322,7 @@
     },
     {
       "id": 17,
-      "name": "細剣（Tier1）9",
+      "name": "月影の剣",
       "description": "細剣（Tier1）9の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -342,7 +342,7 @@
     },
     {
       "id": 18,
-      "name": "細剣（Tier1）10",
+      "name": "星光の剣",
       "description": "細剣（Tier1）10の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -362,7 +362,7 @@
     },
     {
       "id": 19,
-      "name": "細剣（Tier1）11",
+      "name": "朝露の剣",
       "description": "細剣（Tier1）11の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -382,7 +382,7 @@
     },
     {
       "id": 20,
-      "name": "細剣（Tier1）12",
+      "name": "夕凪の剣",
       "description": "細剣（Tier1）12の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -402,7 +402,7 @@
     },
     {
       "id": 21,
-      "name": "細剣（Tier1）13",
+      "name": "白鳥の剣",
       "description": "細剣（Tier1）13の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -422,7 +422,7 @@
     },
     {
       "id": 22,
-      "name": "細剣（Tier1）14",
+      "name": "蝶の剣",
       "description": "細剣（Tier1）14の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -442,7 +442,7 @@
     },
     {
       "id": 23,
-      "name": "細剣（Tier1）15",
+      "name": "薔薇の剣",
       "description": "細剣（Tier1）15の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -462,7 +462,7 @@
     },
     {
       "id": 24,
-      "name": "細剣（Tier1）16",
+      "name": "百合の剣",
       "description": "細剣（Tier1）16の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -482,7 +482,7 @@
     },
     {
       "id": 25,
-      "name": "細剣（Tier1）17",
+      "name": "銀嶺の剣",
       "description": "細剣（Tier1）17の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -502,7 +502,7 @@
     },
     {
       "id": 26,
-      "name": "細剣（Tier1）18",
+      "name": "蒼海の剣",
       "description": "細剣（Tier1）18の説明",
       "category": "thin_sword",
       "basePrice": 2500,
@@ -522,7 +522,7 @@
     },
     {
       "id": 27,
-      "name": "細剣（Tier2）1",
+      "name": "炎舞の剣",
       "description": "細剣（Tier2）1の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -543,7 +543,7 @@
     },
     {
       "id": 28,
-      "name": "細剣（Tier2）2",
+      "name": "氷華の剣",
       "description": "細剣（Tier2）2の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -564,7 +564,7 @@
     },
     {
       "id": 29,
-      "name": "細剣（Tier2）3",
+      "name": "雷光の剣",
       "description": "細剣（Tier2）3の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -585,7 +585,7 @@
     },
     {
       "id": 30,
-      "name": "細剣（Tier2）4",
+      "name": "聖なる細剣",
       "description": "細剣（Tier2）4の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -606,7 +606,7 @@
     },
     {
       "id": 31,
-      "name": "細剣（Tier2）5",
+      "name": "暗黒の細剣",
       "description": "細剣（Tier2）5の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -627,7 +627,7 @@
     },
     {
       "id": 32,
-      "name": "細剣（Tier2）6",
+      "name": "妖精の剣",
       "description": "細剣（Tier2）6の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -647,7 +647,7 @@
     },
     {
       "id": 33,
-      "name": "細剣（Tier2）7",
+      "name": "精霊の剣",
       "description": "細剣（Tier2）7の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -667,7 +667,7 @@
     },
     {
       "id": 34,
-      "name": "細剣（Tier2）8",
+      "name": "天使の羽根剣",
       "description": "細剣（Tier2）8の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -687,7 +687,7 @@
     },
     {
       "id": 35,
-      "name": "細剣（Tier2）9",
+      "name": "悪魔の爪剣",
       "description": "細剣（Tier2）9の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -707,7 +707,7 @@
     },
     {
       "id": 36,
-      "name": "細剣（Tier2）10",
+      "name": "竜牙の剣",
       "description": "細剣（Tier2）10の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -727,7 +727,7 @@
     },
     {
       "id": 37,
-      "name": "細剣（Tier2）11",
+      "name": "鳳凰の剣",
       "description": "細剣（Tier2）11の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -747,7 +747,7 @@
     },
     {
       "id": 38,
-      "name": "細剣（Tier2）12",
+      "name": "麒麟の剣",
       "description": "細剣（Tier2）12の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -767,7 +767,7 @@
     },
     {
       "id": 39,
-      "name": "細剣（Tier2）13",
+      "name": "獅子王の剣",
       "description": "細剣（Tier2）13の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -787,7 +787,7 @@
     },
     {
       "id": 40,
-      "name": "細剣（Tier2）14",
+      "name": "鷹の剣",
       "description": "細剣（Tier2）14の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -807,7 +807,7 @@
     },
     {
       "id": 41,
-      "name": "細剣（Tier2）15",
+      "name": "蛇の剣",
       "description": "細剣（Tier2）15の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -827,7 +827,7 @@
     },
     {
       "id": 42,
-      "name": "細剣（Tier2）16",
+      "name": "蠍の剣",
       "description": "細剣（Tier2）16の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -847,7 +847,7 @@
     },
     {
       "id": 43,
-      "name": "細剣（Tier2）17",
+      "name": "宝剣エペ",
       "description": "細剣（Tier2）17の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -867,7 +867,7 @@
     },
     {
       "id": 44,
-      "name": "細剣（Tier2）18",
+      "name": "名剣フルーレ",
       "description": "細剣（Tier2）18の説明",
       "category": "thin_sword",
       "basePrice": 90000,
@@ -887,7 +887,7 @@
     },
     {
       "id": 45,
-      "name": "細剣（格闘）1",
+      "name": "ナックルダスター",
       "description": "細剣（格闘）1の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -902,7 +902,7 @@
     },
     {
       "id": 46,
-      "name": "細剣（格闘）2",
+      "name": "鉄拳",
       "description": "細剣（格闘）2の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -917,7 +917,7 @@
     },
     {
       "id": 47,
-      "name": "細剣（格闘）3",
+      "name": "爪",
       "description": "細剣（格闘）3の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -932,7 +932,7 @@
     },
     {
       "id": 48,
-      "name": "細剣（格闘）4",
+      "name": "トンファー",
       "description": "細剣（格闘）4の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -947,7 +947,7 @@
     },
     {
       "id": 49,
-      "name": "細剣（格闘）5",
+      "name": "ヌンチャク",
       "description": "細剣（格闘）5の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -962,7 +962,7 @@
     },
     {
       "id": 50,
-      "name": "細剣（格闘）6",
+      "name": "三節棍",
       "description": "細剣（格闘）6の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -977,7 +977,7 @@
     },
     {
       "id": 51,
-      "name": "細剣（投刃）1",
+      "name": "投げナイフ",
       "description": "細剣（投刃）1の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -992,7 +992,7 @@
     },
     {
       "id": 52,
-      "name": "細剣（投刃）2",
+      "name": "スローイングダガー",
       "description": "細剣（投刃）2の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -1007,7 +1007,7 @@
     },
     {
       "id": 53,
-      "name": "細剣（投刃）3",
+      "name": "手裏剣",
       "description": "細剣（投刃）3の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -1022,7 +1022,7 @@
     },
     {
       "id": 54,
-      "name": "細剣（投刃）4",
+      "name": "クナイ",
       "description": "細剣（投刃）4の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -1037,7 +1037,7 @@
     },
     {
       "id": 55,
-      "name": "細剣（投刃）5",
+      "name": "チャクラム",
       "description": "細剣（投刃）5の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -1052,7 +1052,7 @@
     },
     {
       "id": 56,
-      "name": "細剣（投刃）6",
+      "name": "ブーメラン",
       "description": "細剣（投刃）6の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -1067,7 +1067,7 @@
     },
     {
       "id": 57,
-      "name": "細剣（投刃）7",
+      "name": "投擲斧",
       "description": "細剣（投刃）7の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -1082,7 +1082,7 @@
     },
     {
       "id": 58,
-      "name": "細剣（投刃）8",
+      "name": "投げ槍",
       "description": "細剣（投刃）8の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -1097,7 +1097,7 @@
     },
     {
       "id": 59,
-      "name": "細剣（投刃）9",
+      "name": "ダーツ",
       "description": "細剣（投刃）9の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -1112,7 +1112,7 @@
     },
     {
       "id": 60,
-      "name": "細剣（投刃）10",
+      "name": "針",
       "description": "細剣（投刃）10の説明",
       "category": "thin_sword",
       "basePrice": 10000,
@@ -1127,7 +1127,7 @@
     },
     {
       "id": 61,
-      "name": "剣（ノーマル）1",
+      "name": "ショートソード",
       "description": "剣（ノーマル）1の説明",
       "category": "sword",
       "basePrice": 100,
@@ -1145,7 +1145,7 @@
     },
     {
       "id": 62,
-      "name": "剣（ノーマル）2",
+      "name": "ロングソード",
       "description": "剣（ノーマル）2の説明",
       "category": "sword",
       "basePrice": 500,
@@ -1163,7 +1163,7 @@
     },
     {
       "id": 63,
-      "name": "剣（ノーマル）3",
+      "name": "ブロードソード",
       "description": "剣（ノーマル）3の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1181,7 +1181,7 @@
     },
     {
       "id": 64,
-      "name": "剣（ノーマル）4",
+      "name": "バスタードソード",
       "description": "剣（ノーマル）4の説明",
       "category": "sword",
       "basePrice": 12500,
@@ -1199,7 +1199,7 @@
     },
     {
       "id": 65,
-      "name": "剣（ノーマル）5",
+      "name": "傭兵の剣",
       "description": "剣（ノーマル）5の説明",
       "category": "sword",
       "basePrice": 60000,
@@ -1217,7 +1217,7 @@
     },
     {
       "id": 66,
-      "name": "剣（ノーマル）6",
+      "name": "錆びた長剣",
       "description": "剣（ノーマル）6の説明",
       "category": "sword",
       "basePrice": 240000,
@@ -1235,7 +1235,7 @@
     },
     {
       "id": 67,
-      "name": "剣（ノーマル）7",
+      "name": "鉄の剣",
       "description": "剣（ノーマル）7の説明",
       "category": "sword",
       "basePrice": 720000,
@@ -1253,7 +1253,7 @@
     },
     {
       "id": 68,
-      "name": "剣（ノーマル）8",
+      "name": "鋼の剣",
       "description": "剣（ノーマル）8の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -1271,7 +1271,7 @@
     },
     {
       "id": 69,
-      "name": "剣（Tier1）1",
+      "name": "銀の剣",
       "description": "剣（Tier1）1の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1289,7 +1289,7 @@
     },
     {
       "id": 70,
-      "name": "剣（Tier1）2",
+      "name": "ミスリルブレード",
       "description": "剣（Tier1）2の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1307,7 +1307,7 @@
     },
     {
       "id": 71,
-      "name": "剣（Tier1）3",
+      "name": "騎士の剣",
       "description": "剣（Tier1）3の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1325,7 +1325,7 @@
     },
     {
       "id": 72,
-      "name": "剣（Tier1）4",
+      "name": "傭兵隊長の剣",
       "description": "剣（Tier1）4の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1343,7 +1343,7 @@
     },
     {
       "id": 73,
-      "name": "剣（Tier1）5",
+      "name": "祝福の剣",
       "description": "剣（Tier1）5の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1361,7 +1361,7 @@
     },
     {
       "id": 74,
-      "name": "剣（Tier1）6",
+      "name": "月光の剣",
       "description": "剣（Tier1）6の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1379,7 +1379,7 @@
     },
     {
       "id": 75,
-      "name": "剣（Tier1）7",
+      "name": "星屑の剣",
       "description": "剣（Tier1）7の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1397,7 +1397,7 @@
     },
     {
       "id": 76,
-      "name": "剣（Tier1）8",
+      "name": "黄昏の剣",
       "description": "剣（Tier1）8の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1415,7 +1415,7 @@
     },
     {
       "id": 77,
-      "name": "剣（Tier1）9",
+      "name": "暁の剣",
       "description": "剣（Tier1）9の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1433,7 +1433,7 @@
     },
     {
       "id": 78,
-      "name": "剣（Tier1）10",
+      "name": "蒼穹の剣",
       "description": "剣（Tier1）10の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1451,7 +1451,7 @@
     },
     {
       "id": 79,
-      "name": "剣（Tier1）11",
+      "name": "紅蓮の剣",
       "description": "剣（Tier1）11の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1469,7 +1469,7 @@
     },
     {
       "id": 80,
-      "name": "剣（Tier1）12",
+      "name": "翠緑の剣",
       "description": "剣（Tier1）12の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1487,7 +1487,7 @@
     },
     {
       "id": 81,
-      "name": "剣（Tier1）13",
+      "name": "白銀の剣",
       "description": "剣（Tier1）13の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1505,7 +1505,7 @@
     },
     {
       "id": 82,
-      "name": "剣（Tier1）14",
+      "name": "黒鉄の剣",
       "description": "剣（Tier1）14の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1523,7 +1523,7 @@
     },
     {
       "id": 83,
-      "name": "剣（Tier1）15",
+      "name": "黄金の剣",
       "description": "剣（Tier1）15の説明",
       "category": "sword",
       "basePrice": 2500,
@@ -1541,7 +1541,7 @@
     },
     {
       "id": 84,
-      "name": "剣（Tier2）1",
+      "name": "炎の剣",
       "description": "剣（Tier2）1の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1560,7 +1560,7 @@
     },
     {
       "id": 85,
-      "name": "剣（Tier2）2",
+      "name": "氷の剣",
       "description": "剣（Tier2）2の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1579,7 +1579,7 @@
     },
     {
       "id": 86,
-      "name": "剣（Tier2）3",
+      "name": "雷鳴の剣",
       "description": "剣（Tier2）3の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1598,7 +1598,7 @@
     },
     {
       "id": 87,
-      "name": "剣（Tier2）4",
+      "name": "聖騎士の剣",
       "description": "剣（Tier2）4の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1617,7 +1617,7 @@
     },
     {
       "id": 88,
-      "name": "剣（Tier2）5",
+      "name": "暗黒騎士の剣",
       "description": "剣（Tier2）5の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1636,7 +1636,7 @@
     },
     {
       "id": 89,
-      "name": "剣（Tier2）6",
+      "name": "竜殺しの剣",
       "description": "剣（Tier2）6の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1654,7 +1654,7 @@
     },
     {
       "id": 90,
-      "name": "剣（Tier2）7",
+      "name": "魔獣の剣",
       "description": "剣（Tier2）7の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1672,7 +1672,7 @@
     },
     {
       "id": 91,
-      "name": "剣（Tier2）8",
+      "name": "精霊の剣",
       "description": "剣（Tier2）8の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1690,7 +1690,7 @@
     },
     {
       "id": 92,
-      "name": "剣（Tier2）9",
+      "name": "妖精の剣",
       "description": "剣（Tier2）9の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1708,7 +1708,7 @@
     },
     {
       "id": 93,
-      "name": "剣（Tier2）10",
+      "name": "天使の剣",
       "description": "剣（Tier2）10の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1726,7 +1726,7 @@
     },
     {
       "id": 94,
-      "name": "剣（Tier2）11",
+      "name": "悪魔の剣",
       "description": "剣（Tier2）11の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1744,7 +1744,7 @@
     },
     {
       "id": 95,
-      "name": "剣（Tier2）12",
+      "name": "死神の剣",
       "description": "剣（Tier2）12の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1762,7 +1762,7 @@
     },
     {
       "id": 96,
-      "name": "剣（Tier2）13",
+      "name": "戦神の剣",
       "description": "剣（Tier2）13の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1780,7 +1780,7 @@
     },
     {
       "id": 97,
-      "name": "剣（Tier2）14",
+      "name": "守護の剣",
       "description": "剣（Tier2）14の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1798,7 +1798,7 @@
     },
     {
       "id": 98,
-      "name": "剣（Tier2）15",
+      "name": "裁きの剣",
       "description": "剣（Tier2）15の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1816,7 +1816,7 @@
     },
     {
       "id": 99,
-      "name": "剣（Tier2）16",
+      "name": "復讐の剣",
       "description": "剣（Tier2）16の説明",
       "category": "sword",
       "basePrice": 90000,
@@ -1834,7 +1834,7 @@
     },
     {
       "id": 100,
-      "name": "剣（Tier3）1",
+      "name": "デーモンベイン",
       "description": "剣（Tier3）1の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -1853,7 +1853,7 @@
     },
     {
       "id": 101,
-      "name": "剣（Tier3）2",
+      "name": "ドラゴンスレイヤー",
       "description": "剣（Tier3）2の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -1872,7 +1872,7 @@
     },
     {
       "id": 102,
-      "name": "剣（Tier3）3",
+      "name": "英雄王の剣",
       "description": "剣（Tier3）3の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -1891,7 +1891,7 @@
     },
     {
       "id": 103,
-      "name": "剣（Tier3）4",
+      "name": "覇王の剣",
       "description": "剣（Tier3）4の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -1910,7 +1910,7 @@
     },
     {
       "id": 104,
-      "name": "剣（Tier3）5",
+      "name": "魔王の剣",
       "description": "剣（Tier3）5の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -1929,7 +1929,7 @@
     },
     {
       "id": 105,
-      "name": "剣（Tier3）6",
+      "name": "聖剣ガラティーン",
       "description": "剣（Tier3）6の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -1947,7 +1947,7 @@
     },
     {
       "id": 106,
-      "name": "剣（Tier3）7",
+      "name": "魔剣アロンダイト",
       "description": "剣（Tier3）7の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -1965,7 +1965,7 @@
     },
     {
       "id": 107,
-      "name": "剣（Tier3）8",
+      "name": "炎剣レーヴァテイン",
       "description": "剣（Tier3）8の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -1983,7 +1983,7 @@
     },
     {
       "id": 108,
-      "name": "剣（Tier3）9",
+      "name": "氷剣フロストブランド",
       "description": "剣（Tier3）9の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2001,7 +2001,7 @@
     },
     {
       "id": 109,
-      "name": "剣（Tier3）10",
+      "name": "雷剣ミョルニル",
       "description": "剣（Tier3）10の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2019,7 +2019,7 @@
     },
     {
       "id": 110,
-      "name": "剣（Tier3）11",
+      "name": "風剣シルフィード",
       "description": "剣（Tier3）11の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2037,7 +2037,7 @@
     },
     {
       "id": 111,
-      "name": "剣（Tier3）12",
+      "name": "地剣テラブレイド",
       "description": "剣（Tier3）12の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2055,7 +2055,7 @@
     },
     {
       "id": 112,
-      "name": "剣（Tier3）13",
+      "name": "光剣ルミナス",
       "description": "剣（Tier3）13の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2073,7 +2073,7 @@
     },
     {
       "id": 113,
-      "name": "剣（Tier3）14",
+      "name": "闇剣ダークブレイド",
       "description": "剣（Tier3）14の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2091,7 +2091,7 @@
     },
     {
       "id": 114,
-      "name": "剣（Tier3）15",
+      "name": "聖剣クラレント",
       "description": "剣（Tier3）15の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2109,7 +2109,7 @@
     },
     {
       "id": 115,
-      "name": "剣（Tier3）16",
+      "name": "魔剣ティルフィング",
       "description": "剣（Tier3）16の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2127,7 +2127,7 @@
     },
     {
       "id": 116,
-      "name": "剣（Tier3）17",
+      "name": "神剣フラガラッハ",
       "description": "剣（Tier3）17の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2145,7 +2145,7 @@
     },
     {
       "id": 117,
-      "name": "剣（Tier3）18",
+      "name": "妖剣カラドボルグ",
       "description": "剣（Tier3）18の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2163,7 +2163,7 @@
     },
     {
       "id": 118,
-      "name": "剣（Tier3）19",
+      "name": "霊剣ダインスレイフ",
       "description": "剣（Tier3）19の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2181,7 +2181,7 @@
     },
     {
       "id": 119,
-      "name": "剣（Tier3）20",
+      "name": "鬼剣ラグナロク",
       "description": "剣（Tier3）20の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2199,7 +2199,7 @@
     },
     {
       "id": 120,
-      "name": "剣（Tier3）21",
+      "name": "天剣セレスティアル",
       "description": "剣（Tier3）21の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2217,7 +2217,7 @@
     },
     {
       "id": 121,
-      "name": "剣（Tier3）22",
+      "name": "冥剣タルタロス",
       "description": "剣（Tier3）22の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2235,7 +2235,7 @@
     },
     {
       "id": 122,
-      "name": "剣（Tier3）23",
+      "name": "王剣エクスカリバー",
       "description": "剣（Tier3）23の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2253,7 +2253,7 @@
     },
     {
       "id": 123,
-      "name": "剣（Tier3）24",
+      "name": "皇剣インペリアル",
       "description": "剣（Tier3）24の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2271,7 +2271,7 @@
     },
     {
       "id": 124,
-      "name": "剣（Tier3）25",
+      "name": "覇剣コンクエスト",
       "description": "剣（Tier3）25の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2289,7 +2289,7 @@
     },
     {
       "id": 125,
-      "name": "剣（Tier3）26",
+      "name": "聖剣デュランダル",
       "description": "剣（Tier3）26の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2307,7 +2307,7 @@
     },
     {
       "id": 126,
-      "name": "剣（Tier3）27",
+      "name": "魔剣グラム",
       "description": "剣（Tier3）27の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2325,7 +2325,7 @@
     },
     {
       "id": 127,
-      "name": "剣（Tier3）28",
+      "name": "神剣ミストルテイン",
       "description": "剣（Tier3）28の説明",
       "category": "sword",
       "basePrice": 1440000,
@@ -2343,7 +2343,7 @@
     },
     {
       "id": 128,
-      "name": "剣（Tier4）1",
+      "name": "グングニル",
       "description": "剣（Tier4）1の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2362,7 +2362,7 @@
     },
     {
       "id": 129,
-      "name": "剣（Tier4）2",
+      "name": "ミョルニル",
       "description": "剣（Tier4）2の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2381,7 +2381,7 @@
     },
     {
       "id": 130,
-      "name": "剣（Tier4）3",
+      "name": "グラム",
       "description": "剣（Tier4）3の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2400,7 +2400,7 @@
     },
     {
       "id": 131,
-      "name": "剣（Tier4）4",
+      "name": "ティルフィング",
       "description": "剣（Tier4）4の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2419,7 +2419,7 @@
     },
     {
       "id": 132,
-      "name": "剣（Tier4）5",
+      "name": "ダインスレイフ",
       "description": "剣（Tier4）5の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2438,7 +2438,7 @@
     },
     {
       "id": 133,
-      "name": "剣（Tier4）6",
+      "name": "フルンティング",
       "description": "剣（Tier4）6の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2456,7 +2456,7 @@
     },
     {
       "id": 134,
-      "name": "剣（Tier4）7",
+      "name": "ナグリング",
       "description": "剣（Tier4）7の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2474,7 +2474,7 @@
     },
     {
       "id": 135,
-      "name": "剣（Tier4）8",
+      "name": "リディル",
       "description": "剣（Tier4）8の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2492,7 +2492,7 @@
     },
     {
       "id": 136,
-      "name": "剣（Tier4）9",
+      "name": "ブリューナク",
       "description": "剣（Tier4）9の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2510,7 +2510,7 @@
     },
     {
       "id": 137,
-      "name": "剣（Tier4）10",
+      "name": "レーヴァテイン",
       "description": "剣（Tier4）10の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2528,7 +2528,7 @@
     },
     {
       "id": 138,
-      "name": "剣（Tier4）11",
+      "name": "スルトの炎剣",
       "description": "剣（Tier4）11の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2546,7 +2546,7 @@
     },
     {
       "id": 139,
-      "name": "剣（Tier4）12",
+      "name": "フレイの勝利剣",
       "description": "剣（Tier4）12の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2564,7 +2564,7 @@
     },
     {
       "id": 140,
-      "name": "剣（Tier4）13",
+      "name": "ヘイムダルの剣",
       "description": "剣（Tier4）13の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2582,7 +2582,7 @@
     },
     {
       "id": 141,
-      "name": "剣（Tier4）14",
+      "name": "テュールの剣",
       "description": "剣（Tier4）14の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2600,7 +2600,7 @@
     },
     {
       "id": 142,
-      "name": "剣（Tier4）15",
+      "name": "バルドルの剣",
       "description": "剣（Tier4）15の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2618,7 +2618,7 @@
     },
     {
       "id": 143,
-      "name": "剣（Tier4）16",
+      "name": "ヴィーザルの剣",
       "description": "剣（Tier4）16の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2636,7 +2636,7 @@
     },
     {
       "id": 144,
-      "name": "剣（Tier4）17",
+      "name": "フォルセティの剣",
       "description": "剣（Tier4）17の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2654,7 +2654,7 @@
     },
     {
       "id": 145,
-      "name": "剣（Tier4）18",
+      "name": "ウルの剣",
       "description": "剣（Tier4）18の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2672,7 +2672,7 @@
     },
     {
       "id": 146,
-      "name": "剣（Tier4）19",
+      "name": "スカジの剣",
       "description": "剣（Tier4）19の説明",
       "category": "sword",
       "basePrice": 3600000,
@@ -2690,7 +2690,7 @@
     },
     {
       "id": 147,
-      "name": "魔剣（魔法使い系）1",
+      "name": "魔剣",
       "description": "魔剣（魔法使い系）1の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2705,7 +2705,7 @@
     },
     {
       "id": 148,
-      "name": "魔剣（魔法使い系）2",
+      "name": "炎魔剣",
       "description": "魔剣（魔法使い系）2の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2720,7 +2720,7 @@
     },
     {
       "id": 149,
-      "name": "魔剣（魔法使い系）3",
+      "name": "氷魔剣",
       "description": "魔剣（魔法使い系）3の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2735,7 +2735,7 @@
     },
     {
       "id": 150,
-      "name": "魔剣（魔法使い系）4",
+      "name": "雷魔剣",
       "description": "魔剣（魔法使い系）4の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2750,7 +2750,7 @@
     },
     {
       "id": 151,
-      "name": "魔剣（魔法使い系）5",
+      "name": "風魔剣",
       "description": "魔剣（魔法使い系）5の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2765,7 +2765,7 @@
     },
     {
       "id": 152,
-      "name": "魔剣（魔法使い系）6",
+      "name": "地魔剣",
       "description": "魔剣（魔法使い系）6の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2780,7 +2780,7 @@
     },
     {
       "id": 153,
-      "name": "魔剣（魔法使い系）7",
+      "name": "闘魔剣",
       "description": "魔剣（魔法使い系）7の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2795,7 +2795,7 @@
     },
     {
       "id": 154,
-      "name": "魔剣（僧侶系）1",
+      "name": "聖剣",
       "description": "魔剣（僧侶系）1の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2810,7 +2810,7 @@
     },
     {
       "id": 155,
-      "name": "魔剣（僧侶系）2",
+      "name": "浄化の剣",
       "description": "魔剣（僧侶系）2の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2825,7 +2825,7 @@
     },
     {
       "id": 156,
-      "name": "魔剣（僧侶系）3",
+      "name": "祝福の剣",
       "description": "魔剣（僧侶系）3の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2840,7 +2840,7 @@
     },
     {
       "id": 157,
-      "name": "魔剣（僧侶系）4",
+      "name": "癒しの剣",
       "description": "魔剣（僧侶系）4の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2855,7 +2855,7 @@
     },
     {
       "id": 158,
-      "name": "魔剣（僧侶系）5",
+      "name": "聖光の剣",
       "description": "魔剣（僧侶系）5の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2870,7 +2870,7 @@
     },
     {
       "id": 159,
-      "name": "魔剣（僧侶系）6",
+      "name": "神罰の剣",
       "description": "魔剣（僧侶系）6の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2885,7 +2885,7 @@
     },
     {
       "id": 160,
-      "name": "魔剣（僧侶系）7",
+      "name": "裁きの剣",
       "description": "魔剣（僧侶系）7の説明",
       "category": "magic_sword",
       "basePrice": 10000,
@@ -2900,7 +2900,7 @@
     },
     {
       "id": 161,
-      "name": "上級魔剣（魔法使い系）1",
+      "name": "大魔剣",
       "description": "上級魔剣（魔法使い系）1の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -2915,7 +2915,7 @@
     },
     {
       "id": 162,
-      "name": "上級魔剣（魔法使い系）2",
+      "name": "業火魔剣",
       "description": "上級魔剣（魔法使い系）2の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -2930,7 +2930,7 @@
     },
     {
       "id": 163,
-      "name": "上級魔剣（魔法使い系）3",
+      "name": "絶対零度魔剣",
       "description": "上級魔剣（魔法使い系）3の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -2945,7 +2945,7 @@
     },
     {
       "id": 164,
-      "name": "上級魔剣（魔法使い系）4",
+      "name": "神雷魔剣",
       "description": "上級魔剣（魔法使い系）4の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -2960,7 +2960,7 @@
     },
     {
       "id": 165,
-      "name": "上級魔剣（魔法使い系）5",
+      "name": "暴風魔剣",
       "description": "上級魔剣（魔法使い系）5の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -2975,7 +2975,7 @@
     },
     {
       "id": 166,
-      "name": "上級魔剣（魔法使い系）6",
+      "name": "大地魔剣",
       "description": "上級魔剣（魔法使い系）6の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -2990,7 +2990,7 @@
     },
     {
       "id": 167,
-      "name": "上級魔剣（魔法使い系）7",
+      "name": "混沌魔剣",
       "description": "上級魔剣（魔法使い系）7の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -3005,7 +3005,7 @@
     },
     {
       "id": 168,
-      "name": "上級魔剣（僧侶系）1",
+      "name": "大聖剣",
       "description": "上級魔剣（僧侶系）1の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -3020,7 +3020,7 @@
     },
     {
       "id": 169,
-      "name": "上級魔剣（僧侶系）2",
+      "name": "神聖剣",
       "description": "上級魔剣（僧侶系）2の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -3035,7 +3035,7 @@
     },
     {
       "id": 170,
-      "name": "上級魔剣（僧侶系）3",
+      "name": "光輝の剣",
       "description": "上級魔剣（僧侶系）3の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -3050,7 +3050,7 @@
     },
     {
       "id": 171,
-      "name": "上級魔剣（僧侶系）4",
+      "name": "天罰の剣",
       "description": "上級魔剣（僧侶系）4の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -3065,7 +3065,7 @@
     },
     {
       "id": 172,
-      "name": "上級魔剣（僧侶系）5",
+      "name": "聖者の剣",
       "description": "上級魔剣（僧侶系）5の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -3080,7 +3080,7 @@
     },
     {
       "id": 173,
-      "name": "上級魔剣（僧侶系）6",
+      "name": "大司教の剣",
       "description": "上級魔剣（僧侶系）6の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -3095,7 +3095,7 @@
     },
     {
       "id": 174,
-      "name": "上級魔剣（僧侶系）7",
+      "name": "救世の剣",
       "description": "上級魔剣（僧侶系）7の説明",
       "category": "advanced_magic_sword",
       "basePrice": 10000,
@@ -3280,7 +3280,7 @@
     },
     {
       "id": 186,
-      "name": "刀（ノーマル）1",
+      "name": "打刀",
       "description": "刀（ノーマル）1の説明",
       "category": "katana",
       "basePrice": 2000,
@@ -3297,7 +3297,7 @@
     },
     {
       "id": 187,
-      "name": "刀（ノーマル）2",
+      "name": "太刀",
       "description": "刀（ノーマル）2の説明",
       "category": "katana",
       "basePrice": 10000,
@@ -3314,7 +3314,7 @@
     },
     {
       "id": 188,
-      "name": "刀（ノーマル）3",
+      "name": "脇差",
       "description": "刀（ノーマル）3の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3331,7 +3331,7 @@
     },
     {
       "id": 189,
-      "name": "刀（ノーマル）4",
+      "name": "短刀",
       "description": "刀（ノーマル）4の説明",
       "category": "katana",
       "basePrice": 250000,
@@ -3348,7 +3348,7 @@
     },
     {
       "id": 190,
-      "name": "刀（ノーマル）5",
+      "name": "野太刀",
       "description": "刀（ノーマル）5の説明",
       "category": "katana",
       "basePrice": 1000000,
@@ -3365,7 +3365,7 @@
     },
     {
       "id": 191,
-      "name": "刀（ノーマル）6",
+      "name": "薙刀",
       "description": "刀（ノーマル）6の説明",
       "category": "katana",
       "basePrice": 3000000,
@@ -3382,7 +3382,7 @@
     },
     {
       "id": 192,
-      "name": "刀（ノーマル）7",
+      "name": "無銘の刀",
       "description": "刀（ノーマル）7の説明",
       "category": "katana",
       "basePrice": 6000000,
@@ -3399,7 +3399,7 @@
     },
     {
       "id": 193,
-      "name": "刀（ノーマル）8",
+      "name": "錆びた刀",
       "description": "刀（ノーマル）8の説明",
       "category": "katana",
       "basePrice": 9000000,
@@ -3416,7 +3416,7 @@
     },
     {
       "id": 194,
-      "name": "刀（Tier1）1",
+      "name": "備前長船",
       "description": "刀（Tier1）1の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3433,7 +3433,7 @@
     },
     {
       "id": 195,
-      "name": "刀（Tier1）2",
+      "name": "和泉守兼定",
       "description": "刀（Tier1）2の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3450,7 +3450,7 @@
     },
     {
       "id": 196,
-      "name": "刀（Tier1）3",
+      "name": "堀川国広",
       "description": "刀（Tier1）3の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3467,7 +3467,7 @@
     },
     {
       "id": 197,
-      "name": "刀（Tier1）4",
+      "name": "陸奥守吉行",
       "description": "刀（Tier1）4の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3484,7 +3484,7 @@
     },
     {
       "id": 198,
-      "name": "刀（Tier1）5",
+      "name": "長曽祢虎徹",
       "description": "刀（Tier1）5の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3501,7 +3501,7 @@
     },
     {
       "id": 199,
-      "name": "刀（Tier1）6",
+      "name": "加州清光",
       "description": "刀（Tier1）6の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3518,7 +3518,7 @@
     },
     {
       "id": 200,
-      "name": "刀（Tier1）7",
+      "name": "大和守安定",
       "description": "刀（Tier1）7の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3535,7 +3535,7 @@
     },
     {
       "id": 201,
-      "name": "刀（Tier1）8",
+      "name": "蜂須賀虎徹",
       "description": "刀（Tier1）8の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3552,7 +3552,7 @@
     },
     {
       "id": 202,
-      "name": "刀（Tier1）9",
+      "name": "山姥切国広",
       "description": "刀（Tier1）9の説明",
       "category": "katana",
       "basePrice": 50000,
@@ -3569,7 +3569,7 @@
     },
     {
       "id": 203,
-      "name": "刀（Tier2）1",
+      "name": "村正",
       "description": "刀（Tier2）1の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3587,7 +3587,7 @@
     },
     {
       "id": 204,
-      "name": "刀（Tier2）2",
+      "name": "正宗",
       "description": "刀（Tier2）2の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3605,7 +3605,7 @@
     },
     {
       "id": 205,
-      "name": "刀（Tier2）3",
+      "name": "虎徹",
       "description": "刀（Tier2）3の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3623,7 +3623,7 @@
     },
     {
       "id": 206,
-      "name": "刀（Tier2）4",
+      "name": "童子切安綱",
       "description": "刀（Tier2）4の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3641,7 +3641,7 @@
     },
     {
       "id": 207,
-      "name": "刀（Tier2）5",
+      "name": "鬼丸国綱",
       "description": "刀（Tier2）5の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3659,7 +3659,7 @@
     },
     {
       "id": 208,
-      "name": "刀（Tier2）6",
+      "name": "三日月宗近",
       "description": "刀（Tier2）6の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3676,7 +3676,7 @@
     },
     {
       "id": 209,
-      "name": "刀（Tier2）7",
+      "name": "大典太光世",
       "description": "刀（Tier2）7の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3693,7 +3693,7 @@
     },
     {
       "id": 210,
-      "name": "刀（Tier2）8",
+      "name": "数珠丸恒次",
       "description": "刀（Tier2）8の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3710,7 +3710,7 @@
     },
     {
       "id": 211,
-      "name": "刀（Tier2）9",
+      "name": "鶴丸国永",
       "description": "刀（Tier2）9の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3727,7 +3727,7 @@
     },
     {
       "id": 212,
-      "name": "刀（Tier2）10",
+      "name": "燭台切光忠",
       "description": "刀（Tier2）10の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3744,7 +3744,7 @@
     },
     {
       "id": 213,
-      "name": "刀（Tier2）11",
+      "name": "獅子王",
       "description": "刀（Tier2）11の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3761,7 +3761,7 @@
     },
     {
       "id": 214,
-      "name": "刀（Tier2）12",
+      "name": "小烏丸",
       "description": "刀（Tier2）12の説明",
       "category": "katana",
       "basePrice": 1500000,
@@ -3778,7 +3778,7 @@
     },
     {
       "id": 215,
-      "name": "刀（Tier3）1",
+      "name": "天叢雲剣",
       "description": "刀（Tier3）1の説明",
       "category": "katana",
       "basePrice": 12000000,
@@ -3796,7 +3796,7 @@
     },
     {
       "id": 216,
-      "name": "刀（Tier3）2",
+      "name": "草薙剣",
       "description": "刀（Tier3）2の説明",
       "category": "katana",
       "basePrice": 12000000,
@@ -3814,7 +3814,7 @@
     },
     {
       "id": 217,
-      "name": "刀（Tier3）3",
+      "name": "布都御魂",
       "description": "刀（Tier3）3の説明",
       "category": "katana",
       "basePrice": 12000000,
@@ -3832,7 +3832,7 @@
     },
     {
       "id": 218,
-      "name": "刀（Tier3）4",
+      "name": "十握剣",
       "description": "刀（Tier3）4の説明",
       "category": "katana",
       "basePrice": 12000000,
@@ -3850,7 +3850,7 @@
     },
     {
       "id": 219,
-      "name": "刀（Tier3）5",
+      "name": "天之尾羽張",
       "description": "刀（Tier3）5の説明",
       "category": "katana",
       "basePrice": 12000000,
@@ -3868,7 +3868,7 @@
     },
     {
       "id": 220,
-      "name": "刀（Tier3）6",
+      "name": "神度剣",
       "description": "刀（Tier3）6の説明",
       "category": "katana",
       "basePrice": 12000000,
@@ -3885,7 +3885,7 @@
     },
     {
       "id": 221,
-      "name": "刀（Tier3）7",
+      "name": "韴霊剣",
       "description": "刀（Tier3）7の説明",
       "category": "katana",
       "basePrice": 12000000,
@@ -3902,7 +3902,7 @@
     },
     {
       "id": 222,
-      "name": "刀（Tier3）8",
+      "name": "蛇之麁正",
       "description": "刀（Tier3）8の説明",
       "category": "katana",
       "basePrice": 12000000,
@@ -3919,7 +3919,7 @@
     },
     {
       "id": 223,
-      "name": "刀（Tier4・斧系）1",
+      "name": "ヤールングレイプル",
       "description": "刀（Tier4・斧系）1の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -3937,7 +3937,7 @@
     },
     {
       "id": 224,
-      "name": "刀（Tier4・斧系）2",
+      "name": "メギンギョルズ",
       "description": "刀（Tier4・斧系）2の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -3955,7 +3955,7 @@
     },
     {
       "id": 225,
-      "name": "刀（Tier4・斧系）3",
+      "name": "スキーズブラズニル",
       "description": "刀（Tier4・斧系）3の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -3973,7 +3973,7 @@
     },
     {
       "id": 226,
-      "name": "刀（Tier4・斧系）4",
+      "name": "ドラウプニル",
       "description": "刀（Tier4・斧系）4の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -3991,7 +3991,7 @@
     },
     {
       "id": 227,
-      "name": "刀（Tier4・斧系）5",
+      "name": "ブリーシンガメン",
       "description": "刀（Tier4・斧系）5の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4009,7 +4009,7 @@
     },
     {
       "id": 228,
-      "name": "刀（Tier4・斧系）6",
+      "name": "グレイプニル",
       "description": "刀（Tier4・斧系）6の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4026,7 +4026,7 @@
     },
     {
       "id": 229,
-      "name": "刀（Tier4・斧系）7",
+      "name": "フェンリルの牙",
       "description": "刀（Tier4・斧系）7の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4043,7 +4043,7 @@
     },
     {
       "id": 230,
-      "name": "刀（Tier4・斧系）8",
+      "name": "スレイプニルの蹄",
       "description": "刀（Tier4・斧系）8の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4060,7 +4060,7 @@
     },
     {
       "id": 231,
-      "name": "刀（Tier4・斧系）9",
+      "name": "フギンの翼",
       "description": "刀（Tier4・斧系）9の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4077,7 +4077,7 @@
     },
     {
       "id": 232,
-      "name": "刀（Tier4・斧系）10",
+      "name": "ムニンの翼",
       "description": "刀（Tier4・斧系）10の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4094,7 +4094,7 @@
     },
     {
       "id": 233,
-      "name": "刀（Tier4・斧系）11",
+      "name": "ゲリの爪",
       "description": "刀（Tier4・斧系）11の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4111,7 +4111,7 @@
     },
     {
       "id": 234,
-      "name": "刀（Tier4・斧系）12",
+      "name": "フレキの爪",
       "description": "刀（Tier4・斧系）12の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4128,7 +4128,7 @@
     },
     {
       "id": 235,
-      "name": "刀（Tier4・斧系）13",
+      "name": "タングリスニの角",
       "description": "刀（Tier4・斧系）13の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4145,7 +4145,7 @@
     },
     {
       "id": 236,
-      "name": "刀（Tier4・斧系）14",
+      "name": "タングニョーストの角",
       "description": "刀（Tier4・斧系）14の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4162,7 +4162,7 @@
     },
     {
       "id": 237,
-      "name": "刀（Tier4・斧系）15",
+      "name": "ヴィゾフニルの羽根",
       "description": "刀（Tier4・斧系）15の説明",
       "category": "katana",
       "basePrice": 22500000,
@@ -4179,7 +4179,7 @@
     },
     {
       "id": 238,
-      "name": "弓（ノーマル）1",
+      "name": "ショートボウ",
       "description": "弓（ノーマル）1の説明",
       "category": "bow",
       "basePrice": 100,
@@ -4198,7 +4198,7 @@
     },
     {
       "id": 239,
-      "name": "弓（ノーマル）2",
+      "name": "ロングボウ",
       "description": "弓（ノーマル）2の説明",
       "category": "bow",
       "basePrice": 500,
@@ -4217,7 +4217,7 @@
     },
     {
       "id": 240,
-      "name": "弓（ノーマル）3",
+      "name": "狩人の弓",
       "description": "弓（ノーマル）3の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4236,7 +4236,7 @@
     },
     {
       "id": 241,
-      "name": "弓（ノーマル）4",
+      "name": "木の弓",
       "description": "弓（ノーマル）4の説明",
       "category": "bow",
       "basePrice": 12500,
@@ -4255,7 +4255,7 @@
     },
     {
       "id": 242,
-      "name": "弓（ノーマル）5",
+      "name": "竹弓",
       "description": "弓（ノーマル）5の説明",
       "category": "bow",
       "basePrice": 60000,
@@ -4274,7 +4274,7 @@
     },
     {
       "id": 243,
-      "name": "弓（ノーマル）6",
+      "name": "角弓",
       "description": "弓（ノーマル）6の説明",
       "category": "bow",
       "basePrice": 240000,
@@ -4293,7 +4293,7 @@
     },
     {
       "id": 244,
-      "name": "弓（ノーマル）7",
+      "name": "合成弓",
       "description": "弓（ノーマル）7の説明",
       "category": "bow",
       "basePrice": 720000,
@@ -4312,7 +4312,7 @@
     },
     {
       "id": 245,
-      "name": "弓（ノーマル）8",
+      "name": "戦弓",
       "description": "弓（ノーマル）8の説明",
       "category": "bow",
       "basePrice": 1440000,
@@ -4331,7 +4331,7 @@
     },
     {
       "id": 246,
-      "name": "弓（Tier1）1",
+      "name": "コンポジットボウ",
       "description": "弓（Tier1）1の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4350,7 +4350,7 @@
     },
     {
       "id": 247,
-      "name": "弓（Tier1）2",
+      "name": "エルフの弓",
       "description": "弓（Tier1）2の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4369,7 +4369,7 @@
     },
     {
       "id": 248,
-      "name": "弓（Tier1）3",
+      "name": "銀の弓",
       "description": "弓（Tier1）3の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4388,7 +4388,7 @@
     },
     {
       "id": 249,
-      "name": "弓（Tier1）4",
+      "name": "ミスリルボウ",
       "description": "弓（Tier1）4の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4407,7 +4407,7 @@
     },
     {
       "id": 250,
-      "name": "弓（Tier1）5",
+      "name": "騎士の弓",
       "description": "弓（Tier1）5の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4426,7 +4426,7 @@
     },
     {
       "id": 251,
-      "name": "弓（Tier1）6",
+      "name": "王国弓",
       "description": "弓（Tier1）6の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4445,7 +4445,7 @@
     },
     {
       "id": 252,
-      "name": "弓（Tier1）7",
+      "name": "精霊弓",
       "description": "弓（Tier1）7の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4464,7 +4464,7 @@
     },
     {
       "id": 253,
-      "name": "弓（Tier1）8",
+      "name": "妖精弓",
       "description": "弓（Tier1）8の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4483,7 +4483,7 @@
     },
     {
       "id": 254,
-      "name": "弓（Tier1）9",
+      "name": "月の弓",
       "description": "弓（Tier1）9の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4502,7 +4502,7 @@
     },
     {
       "id": 255,
-      "name": "弓（Tier1）10",
+      "name": "星の弓",
       "description": "弓（Tier1）10の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4521,7 +4521,7 @@
     },
     {
       "id": 256,
-      "name": "弓（Tier1）11",
+      "name": "風の弓",
       "description": "弓（Tier1）11の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4540,7 +4540,7 @@
     },
     {
       "id": 257,
-      "name": "弓（Tier1）12",
+      "name": "森の弓",
       "description": "弓（Tier1）12の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4559,7 +4559,7 @@
     },
     {
       "id": 258,
-      "name": "弓（Tier1）13",
+      "name": "狼の弓",
       "description": "弓（Tier1）13の説明",
       "category": "bow",
       "basePrice": 2500,
@@ -4578,7 +4578,7 @@
     },
     {
       "id": 259,
-      "name": "弓（特効）1",
+      "name": "竜殺しの弓",
       "description": "弓（特効）1の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4593,7 +4593,7 @@
     },
     {
       "id": 260,
-      "name": "弓（特効）2",
+      "name": "魔獣の弓",
       "description": "弓（特効）2の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4608,7 +4608,7 @@
     },
     {
       "id": 261,
-      "name": "弓（特効）3",
+      "name": "不死殺しの弓",
       "description": "弓（特効）3の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4623,7 +4623,7 @@
     },
     {
       "id": 262,
-      "name": "弓（特効）4",
+      "name": "悪魔殺しの弓",
       "description": "弓（特効）4の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4638,7 +4638,7 @@
     },
     {
       "id": 263,
-      "name": "弓（特効）5",
+      "name": "天使殺しの弓",
       "description": "弓（特効）5の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4653,7 +4653,7 @@
     },
     {
       "id": 264,
-      "name": "弓（特効）6",
+      "name": "巨人殺しの弓",
       "description": "弓（特効）6の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4668,7 +4668,7 @@
     },
     {
       "id": 265,
-      "name": "弓（特効）7",
+      "name": "妖精殺しの弓",
       "description": "弓（特効）7の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4683,7 +4683,7 @@
     },
     {
       "id": 266,
-      "name": "弓（特効）8",
+      "name": "精霊殺しの弓",
       "description": "弓（特効）8の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4698,7 +4698,7 @@
     },
     {
       "id": 267,
-      "name": "弓（特効）9",
+      "name": "神殺しの弓",
       "description": "弓（特効）9の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4713,7 +4713,7 @@
     },
     {
       "id": 268,
-      "name": "弓（特効）10",
+      "name": "魔王殺しの弓",
       "description": "弓（特効）10の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4728,7 +4728,7 @@
     },
     {
       "id": 269,
-      "name": "弓（特効）11",
+      "name": "アルテミスの弓",
       "description": "弓（特効）11の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4743,7 +4743,7 @@
     },
     {
       "id": 270,
-      "name": "弓（連射弓）1",
+      "name": "速射弓",
       "description": "弓（連射弓）1の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4758,7 +4758,7 @@
     },
     {
       "id": 271,
-      "name": "弓（連射弓）2",
+      "name": "連弩",
       "description": "弓（連射弓）2の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4773,7 +4773,7 @@
     },
     {
       "id": 272,
-      "name": "弓（連射弓）3",
+      "name": "リピーターボウ",
       "description": "弓（連射弓）3の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4788,7 +4788,7 @@
     },
     {
       "id": 273,
-      "name": "弓（連射弓）4",
+      "name": "ダブルボウ",
       "description": "弓（連射弓）4の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4803,7 +4803,7 @@
     },
     {
       "id": 274,
-      "name": "弓（連射弓）5",
+      "name": "機械弓",
       "description": "弓（連射弓）5の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4818,7 +4818,7 @@
     },
     {
       "id": 275,
-      "name": "弓（長弓）1",
+      "name": "イングランドロングボウ",
       "description": "弓（長弓）1の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4833,7 +4833,7 @@
     },
     {
       "id": 276,
-      "name": "弓（長弓）2",
+      "name": "ウェールズ弓",
       "description": "弓（長弓）2の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4848,7 +4848,7 @@
     },
     {
       "id": 277,
-      "name": "弓（長弓）3",
+      "name": "大弓",
       "description": "弓（長弓）3の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4863,7 +4863,7 @@
     },
     {
       "id": 278,
-      "name": "弓（長弓）4",
+      "name": "和弓",
       "description": "弓（長弓）4の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4878,7 +4878,7 @@
     },
     {
       "id": 279,
-      "name": "弓（長弓）5",
+      "name": "騎馬弓",
       "description": "弓（長弓）5の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4893,7 +4893,7 @@
     },
     {
       "id": 280,
-      "name": "弓（長弓）6",
+      "name": "攻城弓",
       "description": "弓（長弓）6の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4908,7 +4908,7 @@
     },
     {
       "id": 281,
-      "name": "弓（長弓）7",
+      "name": "狙撃弓",
       "description": "弓（長弓）7の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4923,7 +4923,7 @@
     },
     {
       "id": 282,
-      "name": "弓（長弓）8",
+      "name": "重弓",
       "description": "弓（長弓）8の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4938,7 +4938,7 @@
     },
     {
       "id": 283,
-      "name": "弓（銃器）1",
+      "name": "火縄銃",
       "description": "弓（銃器）1の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4953,7 +4953,7 @@
     },
     {
       "id": 284,
-      "name": "弓（銃器）2",
+      "name": "フリントロック",
       "description": "弓（銃器）2の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4968,7 +4968,7 @@
     },
     {
       "id": 285,
-      "name": "弓（銃器）3",
+      "name": "マスケット",
       "description": "弓（銃器）3の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4983,7 +4983,7 @@
     },
     {
       "id": 286,
-      "name": "弓（銃器）4",
+      "name": "カービン",
       "description": "弓（銃器）4の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -4998,7 +4998,7 @@
     },
     {
       "id": 287,
-      "name": "弓（銃器）5",
+      "name": "散弾銃",
       "description": "弓（銃器）5の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -5013,7 +5013,7 @@
     },
     {
       "id": 288,
-      "name": "弓（銃器）6",
+      "name": "狙撃銃",
       "description": "弓（銃器）6の説明",
       "category": "bow",
       "basePrice": 10000,
@@ -5028,7 +5028,7 @@
     },
     {
       "id": 289,
-      "name": "鎧（ノーマル）1",
+      "name": "レザーアーマー",
       "description": "鎧（ノーマル）1の説明",
       "category": "armor",
       "basePrice": 100,
@@ -5045,7 +5045,7 @@
     },
     {
       "id": 290,
-      "name": "鎧（ノーマル）2",
+      "name": "スタデッドレザー",
       "description": "鎧（ノーマル）2の説明",
       "category": "armor",
       "basePrice": 500,
@@ -5062,7 +5062,7 @@
     },
     {
       "id": 291,
-      "name": "鎧（ノーマル）3",
+      "name": "ハードレザー",
       "description": "鎧（ノーマル）3の説明",
       "category": "armor",
       "basePrice": 2500,
@@ -5079,7 +5079,7 @@
     },
     {
       "id": 292,
-      "name": "鎧（ノーマル）4",
+      "name": "キルトアーマー",
       "description": "鎧（ノーマル）4の説明",
       "category": "armor",
       "basePrice": 12500,
@@ -5096,7 +5096,7 @@
     },
     {
       "id": 293,
-      "name": "鎧（ノーマル）5",
+      "name": "パデッドアーマー",
       "description": "鎧（ノーマル）5の説明",
       "category": "armor",
       "basePrice": 60000,
@@ -5113,7 +5113,7 @@
     },
     {
       "id": 294,
-      "name": "鎧（ノーマル）6",
+      "name": "ハイドアーマー",
       "description": "鎧（ノーマル）6の説明",
       "category": "armor",
       "basePrice": 240000,
@@ -5130,7 +5130,7 @@
     },
     {
       "id": 295,
-      "name": "鎧（ノーマル）7",
+      "name": "旅人の服",
       "description": "鎧（ノーマル）7の説明",
       "category": "armor",
       "basePrice": 720000,
@@ -5147,7 +5147,7 @@
     },
     {
       "id": 296,
-      "name": "鎧（ノーマル）8",
+      "name": "冒険者の服",
       "description": "鎧（ノーマル）8の説明",
       "category": "armor",
       "basePrice": 1440000,
@@ -5164,7 +5164,7 @@
     },
     {
       "id": 297,
-      "name": "鎧（Tier1）1",
+      "name": "リングメイル",
       "description": "鎧（Tier1）1の説明",
       "category": "armor",
       "basePrice": 2500,
@@ -5181,7 +5181,7 @@
     },
     {
       "id": 298,
-      "name": "鎧（Tier1）2",
+      "name": "スケイルメイル",
       "description": "鎧（Tier1）2の説明",
       "category": "armor",
       "basePrice": 2500,
@@ -5198,7 +5198,7 @@
     },
     {
       "id": 299,
-      "name": "鎧（Tier1）3",
+      "name": "チェインシャツ",
       "description": "鎧（Tier1）3の説明",
       "category": "armor",
       "basePrice": 2500,
@@ -5215,7 +5215,7 @@
     },
     {
       "id": 300,
-      "name": "鎧（Tier1）4",
+      "name": "ブリガンダイン",
       "description": "鎧（Tier1）4の説明",
       "category": "armor",
       "basePrice": 2500,
@@ -5232,7 +5232,7 @@
     },
     {
       "id": 301,
-      "name": "鎧（Tier1）5",
+      "name": "ラメラーアーマー",
       "description": "鎧（Tier1）5の説明",
       "category": "armor",
       "basePrice": 2500,
@@ -5249,7 +5249,7 @@
     },
     {
       "id": 302,
-      "name": "鎧（Tier1）6",
+      "name": "騎士の鎧",
       "description": "鎧（Tier1）6の説明",
       "category": "armor",
       "basePrice": 2500,
@@ -5266,7 +5266,7 @@
     },
     {
       "id": 303,
-      "name": "鎧（Tier2）1",
+      "name": "チェインメイル",
       "description": "鎧（Tier2）1の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5283,7 +5283,7 @@
     },
     {
       "id": 304,
-      "name": "鎧（Tier2）2",
+      "name": "スプリントメイル",
       "description": "鎧（Tier2）2の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5300,7 +5300,7 @@
     },
     {
       "id": 305,
-      "name": "鎧（Tier2）3",
+      "name": "バンデッドメイル",
       "description": "鎧（Tier2）3の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5317,7 +5317,7 @@
     },
     {
       "id": 306,
-      "name": "鎧（Tier2）4",
+      "name": "ハーフプレート",
       "description": "鎧（Tier2）4の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5334,7 +5334,7 @@
     },
     {
       "id": 307,
-      "name": "鎧（Tier2）5",
+      "name": "ミスリルチェイン",
       "description": "鎧（Tier2）5の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5351,7 +5351,7 @@
     },
     {
       "id": 308,
-      "name": "鎧（Tier2）6",
+      "name": "エルフの鎧",
       "description": "鎧（Tier2）6の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5368,7 +5368,7 @@
     },
     {
       "id": 309,
-      "name": "鎧（Tier2）7",
+      "name": "ドワーフの鎧",
       "description": "鎧（Tier2）7の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5385,7 +5385,7 @@
     },
     {
       "id": 310,
-      "name": "鎧（Tier2）8",
+      "name": "精霊の鎧",
       "description": "鎧（Tier2）8の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5402,7 +5402,7 @@
     },
     {
       "id": 311,
-      "name": "鎧（Tier2）9",
+      "name": "守護の鎧",
       "description": "鎧（Tier2）9の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5419,7 +5419,7 @@
     },
     {
       "id": 312,
-      "name": "鎧（Tier2）10",
+      "name": "聖騎士の鎧",
       "description": "鎧（Tier2）10の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5436,7 +5436,7 @@
     },
     {
       "id": 313,
-      "name": "鎧（Tier2）11",
+      "name": "暗黒騎士の鎧",
       "description": "鎧（Tier2）11の説明",
       "category": "armor",
       "basePrice": 90000,
@@ -5453,7 +5453,7 @@
     },
     {
       "id": 314,
-      "name": "鎧（Tier3）1",
+      "name": "ミスリルプレート",
       "description": "鎧（Tier3）1の説明",
       "category": "armor",
       "basePrice": 1440000,
@@ -5470,7 +5470,7 @@
     },
     {
       "id": 315,
-      "name": "鎧（Tier3）2",
+      "name": "アダマンタイト鎧",
       "description": "鎧（Tier3）2の説明",
       "category": "armor",
       "basePrice": 1440000,
@@ -5487,7 +5487,7 @@
     },
     {
       "id": 316,
-      "name": "鎧（Tier3）3",
+      "name": "オリハルコン鎧",
       "description": "鎧（Tier3）3の説明",
       "category": "armor",
       "basePrice": 1440000,
@@ -5504,7 +5504,7 @@
     },
     {
       "id": 317,
-      "name": "鎧（Tier3）4",
+      "name": "竜鱗の鎧",
       "description": "鎧（Tier3）4の説明",
       "category": "armor",
       "basePrice": 1440000,
@@ -5521,7 +5521,7 @@
     },
     {
       "id": 318,
-      "name": "鎧（Tier3）5",
+      "name": "鳳凰の鎧",
       "description": "鎧（Tier3）5の説明",
       "category": "armor",
       "basePrice": 1440000,
@@ -5538,7 +5538,7 @@
     },
     {
       "id": 319,
-      "name": "鎧（Tier3）6",
+      "name": "神獣の鎧",
       "description": "鎧（Tier3）6の説明",
       "category": "armor",
       "basePrice": 1440000,
@@ -5555,7 +5555,7 @@
     },
     {
       "id": 320,
-      "name": "鎧（Tier4）1",
+      "name": "フレイヤの鎧",
       "description": "鎧（Tier4）1の説明",
       "category": "armor",
       "basePrice": 3600000,
@@ -5572,7 +5572,7 @@
     },
     {
       "id": 321,
-      "name": "鎧（Tier4）2",
+      "name": "ヴァルキリーの鎧",
       "description": "鎧（Tier4）2の説明",
       "category": "armor",
       "basePrice": 3600000,
@@ -5589,7 +5589,7 @@
     },
     {
       "id": 322,
-      "name": "鎧（Tier4）3",
+      "name": "エインヘリャルの鎧",
       "description": "鎧（Tier4）3の説明",
       "category": "armor",
       "basePrice": 3600000,
@@ -5606,7 +5606,7 @@
     },
     {
       "id": 323,
-      "name": "鎧（Tier4）4",
+      "name": "オーディンの鎧",
       "description": "鎧（Tier4）4の説明",
       "category": "armor",
       "basePrice": 3600000,
@@ -5623,7 +5623,7 @@
     },
     {
       "id": 324,
-      "name": "鎧（Tier4）5",
+      "name": "トールの鎧",
       "description": "鎧（Tier4）5の説明",
       "category": "armor",
       "basePrice": 3600000,
@@ -5640,7 +5640,7 @@
     },
     {
       "id": 325,
-      "name": "鎧（Tier4）6",
+      "name": "バルドルの鎧",
       "description": "鎧（Tier4）6の説明",
       "category": "armor",
       "basePrice": 3600000,
@@ -5657,7 +5657,7 @@
     },
     {
       "id": 326,
-      "name": "鎧（Tier4）7",
+      "name": "フェンリルの毛皮",
       "description": "鎧（Tier4）7の説明",
       "category": "armor",
       "basePrice": 3600000,
@@ -5674,7 +5674,7 @@
     },
     {
       "id": 327,
-      "name": "鎧（Tier4）8",
+      "name": "ヨルムンガンドの鱗鎧",
       "description": "鎧（Tier4）8の説明",
       "category": "armor",
       "basePrice": 3600000,
@@ -5691,7 +5691,7 @@
     },
     {
       "id": 328,
-      "name": "鎧（特殊）1",
+      "name": "炎耐性の鎧",
       "description": "鎧（特殊）1の説明",
       "category": "armor",
       "basePrice": 10000,
@@ -5706,7 +5706,7 @@
     },
     {
       "id": 329,
-      "name": "鎧（特殊）2",
+      "name": "氷耐性の鎧",
       "description": "鎧（特殊）2の説明",
       "category": "armor",
       "basePrice": 10000,
@@ -5721,7 +5721,7 @@
     },
     {
       "id": 330,
-      "name": "鎧（特殊）3",
+      "name": "雷耐性の鎧",
       "description": "鎧（特殊）3の説明",
       "category": "armor",
       "basePrice": 10000,
@@ -5736,7 +5736,7 @@
     },
     {
       "id": 331,
-      "name": "鎧（特殊）4",
+      "name": "毒耐性の鎧",
       "description": "鎧（特殊）4の説明",
       "category": "armor",
       "basePrice": 10000,
@@ -5751,7 +5751,7 @@
     },
     {
       "id": 332,
-      "name": "鎧（特殊）5",
+      "name": "全属性耐性の鎧",
       "description": "鎧（特殊）5の説明",
       "category": "armor",
       "basePrice": 10000,
@@ -5766,7 +5766,7 @@
     },
     {
       "id": 333,
-      "name": "鎧（特殊）6",
+      "name": "回避の鎧",
       "description": "鎧（特殊）6の説明",
       "category": "armor",
       "basePrice": 10000,
@@ -5781,7 +5781,7 @@
     },
     {
       "id": 334,
-      "name": "鎧（特殊）7",
+      "name": "再生の鎧",
       "description": "鎧（特殊）7の説明",
       "category": "armor",
       "basePrice": 10000,
@@ -5796,7 +5796,7 @@
     },
     {
       "id": 335,
-      "name": "鎧（特殊）8",
+      "name": "不死の鎧",
       "description": "鎧（特殊）8の説明",
       "category": "armor",
       "basePrice": 10000,
@@ -5811,7 +5811,7 @@
     },
     {
       "id": 336,
-      "name": "重鎧（ノーマル）1",
+      "name": "フルプレート",
       "description": "重鎧（ノーマル）1の説明",
       "category": "heavy_armor",
       "basePrice": 400,
@@ -5827,7 +5827,7 @@
     },
     {
       "id": 337,
-      "name": "重鎧（ノーマル）2",
+      "name": "ゴシックプレート",
       "description": "重鎧（ノーマル）2の説明",
       "category": "heavy_armor",
       "basePrice": 2000,
@@ -5843,7 +5843,7 @@
     },
     {
       "id": 338,
-      "name": "重鎧（ノーマル）3",
+      "name": "マクシミリアン鎧",
       "description": "重鎧（ノーマル）3の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -5859,7 +5859,7 @@
     },
     {
       "id": 339,
-      "name": "重鎧（ノーマル）4",
+      "name": "騎士甲冑",
       "description": "重鎧（ノーマル）4の説明",
       "category": "heavy_armor",
       "basePrice": 50000,
@@ -5875,7 +5875,7 @@
     },
     {
       "id": 340,
-      "name": "重鎧（ノーマル）5",
+      "name": "重装鎧",
       "description": "重鎧（ノーマル）5の説明",
       "category": "heavy_armor",
       "basePrice": 250000,
@@ -5891,7 +5891,7 @@
     },
     {
       "id": 341,
-      "name": "重鎧（ノーマル）6",
+      "name": "戦闘甲冑",
       "description": "重鎧（ノーマル）6の説明",
       "category": "heavy_armor",
       "basePrice": 1000000,
@@ -5907,7 +5907,7 @@
     },
     {
       "id": 342,
-      "name": "重鎧（ノーマル）7",
+      "name": "要塞鎧",
       "description": "重鎧（ノーマル）7の説明",
       "category": "heavy_armor",
       "basePrice": 3000000,
@@ -5923,7 +5923,7 @@
     },
     {
       "id": 343,
-      "name": "重鎧（ノーマル）8",
+      "name": "城壁の鎧",
       "description": "重鎧（ノーマル）8の説明",
       "category": "heavy_armor",
       "basePrice": 6000000,
@@ -5939,7 +5939,7 @@
     },
     {
       "id": 344,
-      "name": "重鎧（Tier1）1",
+      "name": "銀の重鎧",
       "description": "重鎧（Tier1）1の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -5955,7 +5955,7 @@
     },
     {
       "id": 345,
-      "name": "重鎧（Tier1）2",
+      "name": "ミスリルプレート",
       "description": "重鎧（Tier1）2の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -5971,7 +5971,7 @@
     },
     {
       "id": 346,
-      "name": "重鎧（Tier1）3",
+      "name": "王国の重鎧",
       "description": "重鎧（Tier1）3の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -5987,7 +5987,7 @@
     },
     {
       "id": 347,
-      "name": "重鎧（Tier1）4",
+      "name": "帝国の重鎧",
       "description": "重鎧（Tier1）4の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -6003,7 +6003,7 @@
     },
     {
       "id": 348,
-      "name": "重鎧（Tier1）5",
+      "name": "聖騎士の重鎧",
       "description": "重鎧（Tier1）5の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -6019,7 +6019,7 @@
     },
     {
       "id": 349,
-      "name": "重鎧（Tier1）6",
+      "name": "暗黒騎士の重鎧",
       "description": "重鎧（Tier1）6の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -6035,7 +6035,7 @@
     },
     {
       "id": 350,
-      "name": "重鎧（Tier1）7",
+      "name": "竜騎士の重鎧",
       "description": "重鎧（Tier1）7の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -6051,7 +6051,7 @@
     },
     {
       "id": 351,
-      "name": "重鎧（Tier1）8",
+      "name": "魔導騎士の重鎧",
       "description": "重鎧（Tier1）8の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -6067,7 +6067,7 @@
     },
     {
       "id": 352,
-      "name": "重鎧（Tier1）9",
+      "name": "守護騎士の重鎧",
       "description": "重鎧（Tier1）9の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -6083,7 +6083,7 @@
     },
     {
       "id": 353,
-      "name": "重鎧（Tier1）10",
+      "name": "征服王の重鎧",
       "description": "重鎧（Tier1）10の説明",
       "category": "heavy_armor",
       "basePrice": 10000,
@@ -6099,7 +6099,7 @@
     },
     {
       "id": 354,
-      "name": "重鎧（Tier2）1",
+      "name": "アダマンタイト重鎧",
       "description": "重鎧（Tier2）1の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6115,7 +6115,7 @@
     },
     {
       "id": 355,
-      "name": "重鎧（Tier2）2",
+      "name": "オリハルコン重鎧",
       "description": "重鎧（Tier2）2の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6131,7 +6131,7 @@
     },
     {
       "id": 356,
-      "name": "重鎧（Tier2）3",
+      "name": "竜鱗の重鎧",
       "description": "重鎧（Tier2）3の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6147,7 +6147,7 @@
     },
     {
       "id": 357,
-      "name": "重鎧（Tier2）4",
+      "name": "神鉄の重鎧",
       "description": "重鎧（Tier2）4の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6163,7 +6163,7 @@
     },
     {
       "id": 358,
-      "name": "重鎧（Tier2）5",
+      "name": "魔鋼の重鎧",
       "description": "重鎧（Tier2）5の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6179,7 +6179,7 @@
     },
     {
       "id": 359,
-      "name": "重鎧（Tier2）6",
+      "name": "聖鋼の重鎧",
       "description": "重鎧（Tier2）6の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6195,7 +6195,7 @@
     },
     {
       "id": 360,
-      "name": "重鎧（Tier2）7",
+      "name": "冥鋼の重鎧",
       "description": "重鎧（Tier2）7の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6211,7 +6211,7 @@
     },
     {
       "id": 361,
-      "name": "重鎧（Tier2）8",
+      "name": "星鋼の重鎧",
       "description": "重鎧（Tier2）8の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6227,7 +6227,7 @@
     },
     {
       "id": 362,
-      "name": "重鎧（Tier2）9",
+      "name": "月鋼の重鎧",
       "description": "重鎧（Tier2）9の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6243,7 +6243,7 @@
     },
     {
       "id": 363,
-      "name": "重鎧（Tier2）10",
+      "name": "太陽鋼の重鎧",
       "description": "重鎧（Tier2）10の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6259,7 +6259,7 @@
     },
     {
       "id": 364,
-      "name": "重鎧（Tier2）11",
+      "name": "雷鋼の重鎧",
       "description": "重鎧（Tier2）11の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6275,7 +6275,7 @@
     },
     {
       "id": 365,
-      "name": "重鎧（Tier2）12",
+      "name": "炎鋼の重鎧",
       "description": "重鎧（Tier2）12の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6291,7 +6291,7 @@
     },
     {
       "id": 366,
-      "name": "重鎧（Tier2）13",
+      "name": "氷鋼の重鎧",
       "description": "重鎧（Tier2）13の説明",
       "category": "heavy_armor",
       "basePrice": 375000,
@@ -6307,7 +6307,7 @@
     },
     {
       "id": 367,
-      "name": "超重鎧（ノーマル）1",
+      "name": "要塞甲冑",
       "description": "超重鎧（ノーマル）1の説明",
       "category": "super_heavy_armor",
       "basePrice": 10000,
@@ -6322,7 +6322,7 @@
     },
     {
       "id": 368,
-      "name": "超重鎧（ノーマル）2",
+      "name": "城門の鎧",
       "description": "超重鎧（ノーマル）2の説明",
       "category": "super_heavy_armor",
       "basePrice": 10000,
@@ -6337,7 +6337,7 @@
     },
     {
       "id": 369,
-      "name": "超重鎧（ノーマル）3",
+      "name": "山岳鎧",
       "description": "超重鎧（ノーマル）3の説明",
       "category": "super_heavy_armor",
       "basePrice": 10000,
@@ -6352,7 +6352,7 @@
     },
     {
       "id": 370,
-      "name": "超重鎧（ノーマル）4",
+      "name": "大地の鎧",
       "description": "超重鎧（ノーマル）4の説明",
       "category": "super_heavy_armor",
       "basePrice": 10000,
@@ -6367,7 +6367,7 @@
     },
     {
       "id": 371,
-      "name": "超重鎧（ノーマル）5",
+      "name": "鉄壁の鎧",
       "description": "超重鎧（ノーマル）5の説明",
       "category": "super_heavy_armor",
       "basePrice": 10000,
@@ -6382,7 +6382,7 @@
     },
     {
       "id": 372,
-      "name": "超重鎧（ノーマル）6",
+      "name": "不動の鎧",
       "description": "超重鎧（ノーマル）6の説明",
       "category": "super_heavy_armor",
       "basePrice": 10000,
@@ -6397,7 +6397,7 @@
     },
     {
       "id": 373,
-      "name": "超重鎧（ノーマル）7",
+      "name": "巨人の鎧",
       "description": "超重鎧（ノーマル）7の説明",
       "category": "super_heavy_armor",
       "basePrice": 10000,
@@ -6412,7 +6412,7 @@
     },
     {
       "id": 374,
-      "name": "超重鎧（ノーマル）8",
+      "name": "タイタンアーマー",
       "description": "超重鎧（ノーマル）8の説明",
       "category": "super_heavy_armor",
       "basePrice": 10000,
@@ -6427,7 +6427,7 @@
     },
     {
       "id": 375,
-      "name": "超重鎧（Tier1）1",
+      "name": "ジャガーノート",
       "description": "超重鎧（Tier1）1の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6442,7 +6442,7 @@
     },
     {
       "id": 376,
-      "name": "超重鎧（Tier1）2",
+      "name": "ベヒーモスアーマー",
       "description": "超重鎧（Tier1）2の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6457,7 +6457,7 @@
     },
     {
       "id": 377,
-      "name": "超重鎧（Tier1）3",
+      "name": "リヴァイアサンアーマー",
       "description": "超重鎧（Tier1）3の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6472,7 +6472,7 @@
     },
     {
       "id": 378,
-      "name": "超重鎧（Tier1）4",
+      "name": "ドラゴンアーマー",
       "description": "超重鎧（Tier1）4の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6487,7 +6487,7 @@
     },
     {
       "id": 379,
-      "name": "超重鎧（Tier1）5",
+      "name": "ゴーレムアーマー",
       "description": "超重鎧（Tier1）5の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6502,7 +6502,7 @@
     },
     {
       "id": 380,
-      "name": "超重鎧（Tier1）6",
+      "name": "コロッサスアーマー",
       "description": "超重鎧（Tier1）6の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6517,7 +6517,7 @@
     },
     {
       "id": 381,
-      "name": "超重鎧（Tier1）7",
+      "name": "タイタンプレート",
       "description": "超重鎧（Tier1）7の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6532,7 +6532,7 @@
     },
     {
       "id": 382,
-      "name": "超重鎧（Tier1）8",
+      "name": "ギガントアーマー",
       "description": "超重鎧（Tier1）8の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6547,7 +6547,7 @@
     },
     {
       "id": 383,
-      "name": "超重鎧（Tier1）9",
+      "name": "メガリスアーマー",
       "description": "超重鎧（Tier1）9の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6562,7 +6562,7 @@
     },
     {
       "id": 384,
-      "name": "超重鎧（Tier1）10",
+      "name": "モノリスアーマー",
       "description": "超重鎧（Tier1）10の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6577,7 +6577,7 @@
     },
     {
       "id": 385,
-      "name": "超重鎧（Tier1）11",
+      "name": "フォートレスアーマー",
       "description": "超重鎧（Tier1）11の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6592,7 +6592,7 @@
     },
     {
       "id": 386,
-      "name": "超重鎧（Tier1）12",
+      "name": "シタデルアーマー",
       "description": "超重鎧（Tier1）12の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6607,7 +6607,7 @@
     },
     {
       "id": 387,
-      "name": "超重鎧（Tier1）13",
+      "name": "バスティオンアーマー",
       "description": "超重鎧（Tier1）13の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6622,7 +6622,7 @@
     },
     {
       "id": 388,
-      "name": "超重鎧（Tier1）14",
+      "name": "ラムパートアーマー",
       "description": "超重鎧（Tier1）14の説明",
       "category": "super_heavy_armor",
       "basePrice": 50000,
@@ -6637,7 +6637,7 @@
     },
     {
       "id": 389,
-      "name": "盾（ノーマル）1",
+      "name": "バックラー",
       "description": "盾（ノーマル）1の説明",
       "category": "shield",
       "basePrice": 80,
@@ -6654,7 +6654,7 @@
     },
     {
       "id": 390,
-      "name": "盾（ノーマル）2",
+      "name": "ラウンドシールド",
       "description": "盾（ノーマル）2の説明",
       "category": "shield",
       "basePrice": 400,
@@ -6671,7 +6671,7 @@
     },
     {
       "id": 391,
-      "name": "盾（ノーマル）3",
+      "name": "ウッドシールド",
       "description": "盾（ノーマル）3の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -6688,7 +6688,7 @@
     },
     {
       "id": 392,
-      "name": "盾（ノーマル）4",
+      "name": "アイアンシールド",
       "description": "盾（ノーマル）4の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6705,7 +6705,7 @@
     },
     {
       "id": 393,
-      "name": "盾（ノーマル）5",
+      "name": "皮盾",
       "description": "盾（ノーマル）5の説明",
       "category": "shield",
       "basePrice": 50000,
@@ -6722,7 +6722,7 @@
     },
     {
       "id": 394,
-      "name": "盾（ノーマル）6",
+      "name": "木盾",
       "description": "盾（ノーマル）6の説明",
       "category": "shield",
       "basePrice": 200000,
@@ -6739,7 +6739,7 @@
     },
     {
       "id": 395,
-      "name": "盾（ノーマル）7",
+      "name": "鉄盾",
       "description": "盾（ノーマル）7の説明",
       "category": "shield",
       "basePrice": 600000,
@@ -6756,7 +6756,7 @@
     },
     {
       "id": 396,
-      "name": "盾（ノーマル）8",
+      "name": "銅盾",
       "description": "盾（ノーマル）8の説明",
       "category": "shield",
       "basePrice": 1200000,
@@ -6773,7 +6773,7 @@
     },
     {
       "id": 397,
-      "name": "盾（特殊）1",
+      "name": "魔法反射の盾",
       "description": "盾（特殊）1の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6788,7 +6788,7 @@
     },
     {
       "id": 398,
-      "name": "盾（特殊）2",
+      "name": "呪い返しの盾",
       "description": "盾（特殊）2の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6803,7 +6803,7 @@
     },
     {
       "id": 399,
-      "name": "盾（特殊）3",
+      "name": "炎耐性の盾",
       "description": "盾（特殊）3の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6818,7 +6818,7 @@
     },
     {
       "id": 400,
-      "name": "盾（特殊）4",
+      "name": "氷耐性の盾",
       "description": "盾（特殊）4の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6833,7 +6833,7 @@
     },
     {
       "id": 401,
-      "name": "盾（特殊）5",
+      "name": "雷耐性の盾",
       "description": "盾（特殊）5の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6848,7 +6848,7 @@
     },
     {
       "id": 402,
-      "name": "盾（特殊）6",
+      "name": "毒耐性の盾",
       "description": "盾（特殊）6の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6863,7 +6863,7 @@
     },
     {
       "id": 403,
-      "name": "盾（特殊）7",
+      "name": "麻痺耐性の盾",
       "description": "盾（特殊）7の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6878,7 +6878,7 @@
     },
     {
       "id": 404,
-      "name": "盾（特殊）8",
+      "name": "石化耐性の盾",
       "description": "盾（特殊）8の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6893,7 +6893,7 @@
     },
     {
       "id": 405,
-      "name": "盾（特殊）9",
+      "name": "即死耐性の盾",
       "description": "盾（特殊）9の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6908,7 +6908,7 @@
     },
     {
       "id": 406,
-      "name": "盾（特殊）10",
+      "name": "全属性耐性の盾",
       "description": "盾（特殊）10の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6923,7 +6923,7 @@
     },
     {
       "id": 407,
-      "name": "盾（特殊）11",
+      "name": "物理反射の盾",
       "description": "盾（特殊）11の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6938,7 +6938,7 @@
     },
     {
       "id": 408,
-      "name": "盾（特殊）12",
+      "name": "魔法吸収の盾",
       "description": "盾（特殊）12の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6953,7 +6953,7 @@
     },
     {
       "id": 409,
-      "name": "盾（特殊）13",
+      "name": "オートガードの盾",
       "description": "盾（特殊）13の説明",
       "category": "shield",
       "basePrice": 10000,
@@ -6968,7 +6968,7 @@
     },
     {
       "id": 410,
-      "name": "盾（Tier1）1",
+      "name": "カイトシールド",
       "description": "盾（Tier1）1の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -6985,7 +6985,7 @@
     },
     {
       "id": 411,
-      "name": "盾（Tier1）2",
+      "name": "ヒーターシールド",
       "description": "盾（Tier1）2の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -7002,7 +7002,7 @@
     },
     {
       "id": 412,
-      "name": "盾（Tier1）3",
+      "name": "騎士の盾",
       "description": "盾（Tier1）3の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -7019,7 +7019,7 @@
     },
     {
       "id": 413,
-      "name": "盾（Tier1）4",
+      "name": "王国の盾",
       "description": "盾（Tier1）4の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -7036,7 +7036,7 @@
     },
     {
       "id": 414,
-      "name": "盾（Tier1）5",
+      "name": "銀の盾",
       "description": "盾（Tier1）5の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -7053,7 +7053,7 @@
     },
     {
       "id": 415,
-      "name": "盾（Tier1）6",
+      "name": "ミスリルシールド",
       "description": "盾（Tier1）6の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -7070,7 +7070,7 @@
     },
     {
       "id": 416,
-      "name": "盾（Tier1）7",
+      "name": "精霊の盾",
       "description": "盾（Tier1）7の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -7087,7 +7087,7 @@
     },
     {
       "id": 417,
-      "name": "盾（Tier1）8",
+      "name": "守護の盾",
       "description": "盾（Tier1）8の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -7104,7 +7104,7 @@
     },
     {
       "id": 418,
-      "name": "盾（Tier1）9",
+      "name": "聖騎士の盾",
       "description": "盾（Tier1）9の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -7121,7 +7121,7 @@
     },
     {
       "id": 419,
-      "name": "盾（Tier1）10",
+      "name": "暗黒騎士の盾",
       "description": "盾（Tier1）10の説明",
       "category": "shield",
       "basePrice": 2000,
@@ -7138,7 +7138,7 @@
     },
     {
       "id": 420,
-      "name": "盾（Tier2）1",
+      "name": "タワーシールド",
       "description": "盾（Tier2）1の説明",
       "category": "shield",
       "basePrice": 75000,
@@ -7155,7 +7155,7 @@
     },
     {
       "id": 421,
-      "name": "盾（Tier2）2",
+      "name": "ドラゴンシールド",
       "description": "盾（Tier2）2の説明",
       "category": "shield",
       "basePrice": 75000,
@@ -7172,7 +7172,7 @@
     },
     {
       "id": 422,
-      "name": "盾（Tier2）3",
+      "name": "鳳凰の盾",
       "description": "盾（Tier2）3の説明",
       "category": "shield",
       "basePrice": 75000,
@@ -7189,7 +7189,7 @@
     },
     {
       "id": 423,
-      "name": "盾（Tier2）4",
+      "name": "獅子の盾",
       "description": "盾（Tier2）4の説明",
       "category": "shield",
       "basePrice": 75000,
@@ -7206,7 +7206,7 @@
     },
     {
       "id": 424,
-      "name": "盾（Tier2）5",
+      "name": "鷲の盾",
       "description": "盾（Tier2）5の説明",
       "category": "shield",
       "basePrice": 75000,
@@ -7223,7 +7223,7 @@
     },
     {
       "id": 425,
-      "name": "盾（Tier3）1",
+      "name": "聖盾アイギス",
       "description": "盾（Tier3）1の説明",
       "category": "shield",
       "basePrice": 1200000,
@@ -7240,7 +7240,7 @@
     },
     {
       "id": 426,
-      "name": "盾（Tier3）2",
+      "name": "魔盾タルタロス",
       "description": "盾（Tier3）2の説明",
       "category": "shield",
       "basePrice": 1200000,
@@ -7257,7 +7257,7 @@
     },
     {
       "id": 427,
-      "name": "盾（Tier3）3",
+      "name": "神盾ディバイン",
       "description": "盾（Tier3）3の説明",
       "category": "shield",
       "basePrice": 1200000,
@@ -7274,7 +7274,7 @@
     },
     {
       "id": 428,
-      "name": "盾（Tier4）1",
+      "name": "スヴァリンの盾",
       "description": "盾（Tier4）1の説明",
       "category": "shield",
       "basePrice": 3000000,
@@ -7291,7 +7291,7 @@
     },
     {
       "id": 429,
-      "name": "盾（Tier4）2",
+      "name": "フレイヤの盾",
       "description": "盾（Tier4）2の説明",
       "category": "shield",
       "basePrice": 3000000,
@@ -7308,7 +7308,7 @@
     },
     {
       "id": 430,
-      "name": "盾（Tier4）3",
+      "name": "ヘイムダルの盾",
       "description": "盾（Tier4）3の説明",
       "category": "shield",
       "basePrice": 3000000,
@@ -7325,7 +7325,7 @@
     },
     {
       "id": 431,
-      "name": "盾（Tier4）4",
+      "name": "オーディンの盾",
       "description": "盾（Tier4）4の説明",
       "category": "shield",
       "basePrice": 3000000,
@@ -7342,7 +7342,7 @@
     },
     {
       "id": 432,
-      "name": "盾（Tier4）5",
+      "name": "トールの盾",
       "description": "盾（Tier4）5の説明",
       "category": "shield",
       "basePrice": 3000000,
@@ -7359,7 +7359,7 @@
     },
     {
       "id": 433,
-      "name": "盾（Tier4）6",
+      "name": "バルドルの盾",
       "description": "盾（Tier4）6の説明",
       "category": "shield",
       "basePrice": 3000000,
@@ -7376,7 +7376,7 @@
     },
     {
       "id": 434,
-      "name": "盾（Tier4）7",
+      "name": "ヴァルキリーの盾",
       "description": "盾（Tier4）7の説明",
       "category": "shield",
       "basePrice": 3000000,
@@ -7393,7 +7393,7 @@
     },
     {
       "id": 435,
-      "name": "盾（Tier4）8",
+      "name": "エインヘリャルの盾",
       "description": "盾（Tier4）8の説明",
       "category": "shield",
       "basePrice": 3000000,
@@ -7410,7 +7410,7 @@
     },
     {
       "id": 436,
-      "name": "盾（Tier4）9",
+      "name": "ユグドラシルの盾",
       "description": "盾（Tier4）9の説明",
       "category": "shield",
       "basePrice": 3000000,
@@ -7427,7 +7427,7 @@
     },
     {
       "id": 437,
-      "name": "小手（ノーマル）1",
+      "name": "革の籠手",
       "description": "小手（ノーマル）1の説明",
       "category": "gauntlet",
       "basePrice": 2000,
@@ -7444,7 +7444,7 @@
     },
     {
       "id": 438,
-      "name": "小手（ノーマル）2",
+      "name": "鉄の籠手",
       "description": "小手（ノーマル）2の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -7461,7 +7461,7 @@
     },
     {
       "id": 439,
-      "name": "小手（ノーマル）3",
+      "name": "鋼の籠手",
       "description": "小手（ノーマル）3の説明",
       "category": "gauntlet",
       "basePrice": 50000,
@@ -7478,7 +7478,7 @@
     },
     {
       "id": 440,
-      "name": "小手（ノーマル）4",
+      "name": "鎖籠手",
       "description": "小手（ノーマル）4の説明",
       "category": "gauntlet",
       "basePrice": 250000,
@@ -7495,7 +7495,7 @@
     },
     {
       "id": 441,
-      "name": "小手（ノーマル）5",
+      "name": "指貫",
       "description": "小手（ノーマル）5の説明",
       "category": "gauntlet",
       "basePrice": 1250000,
@@ -7512,7 +7512,7 @@
     },
     {
       "id": 442,
-      "name": "小手（ノーマル）6",
+      "name": "手甲",
       "description": "小手（ノーマル）6の説明",
       "category": "gauntlet",
       "basePrice": 2500000,
@@ -7529,7 +7529,7 @@
     },
     {
       "id": 443,
-      "name": "小手（ノーマル）7",
+      "name": "篭手",
       "description": "小手（ノーマル）7の説明",
       "category": "gauntlet",
       "basePrice": 5000000,
@@ -7546,7 +7546,7 @@
     },
     {
       "id": 444,
-      "name": "小手（ノーマル）8",
+      "name": "腕当て",
       "description": "小手（ノーマル）8の説明",
       "category": "gauntlet",
       "basePrice": 10000000,
@@ -7563,7 +7563,7 @@
     },
     {
       "id": 445,
-      "name": "小手（Tier1）1",
+      "name": "銀の籠手",
       "description": "小手（Tier1）1の説明",
       "category": "gauntlet",
       "basePrice": 50000,
@@ -7580,7 +7580,7 @@
     },
     {
       "id": 446,
-      "name": "小手（Tier1）2",
+      "name": "ミスリルの籠手",
       "description": "小手（Tier1）2の説明",
       "category": "gauntlet",
       "basePrice": 50000,
@@ -7597,7 +7597,7 @@
     },
     {
       "id": 447,
-      "name": "小手（Tier1）3",
+      "name": "騎士の籠手",
       "description": "小手（Tier1）3の説明",
       "category": "gauntlet",
       "basePrice": 50000,
@@ -7614,7 +7614,7 @@
     },
     {
       "id": 448,
-      "name": "小手（Tier1）4",
+      "name": "戦士の籠手",
       "description": "小手（Tier1）4の説明",
       "category": "gauntlet",
       "basePrice": 50000,
@@ -7631,7 +7631,7 @@
     },
     {
       "id": 449,
-      "name": "小手（Tier1）5",
+      "name": "王国の籠手",
       "description": "小手（Tier1）5の説明",
       "category": "gauntlet",
       "basePrice": 50000,
@@ -7648,7 +7648,7 @@
     },
     {
       "id": 450,
-      "name": "小手（Tier2）1",
+      "name": "炎の籠手",
       "description": "小手（Tier2）1の説明",
       "category": "gauntlet",
       "basePrice": 1875000,
@@ -7665,7 +7665,7 @@
     },
     {
       "id": 451,
-      "name": "小手（Tier2）2",
+      "name": "氷の籠手",
       "description": "小手（Tier2）2の説明",
       "category": "gauntlet",
       "basePrice": 1875000,
@@ -7682,7 +7682,7 @@
     },
     {
       "id": 452,
-      "name": "小手（Tier2）3",
+      "name": "雷の籠手",
       "description": "小手（Tier2）3の説明",
       "category": "gauntlet",
       "basePrice": 1875000,
@@ -7699,7 +7699,7 @@
     },
     {
       "id": 453,
-      "name": "小手（Tier2）4",
+      "name": "聖なる籠手",
       "description": "小手（Tier2）4の説明",
       "category": "gauntlet",
       "basePrice": 1875000,
@@ -7716,7 +7716,7 @@
     },
     {
       "id": 454,
-      "name": "小手（Tier2）5",
+      "name": "魔の籠手",
       "description": "小手（Tier2）5の説明",
       "category": "gauntlet",
       "basePrice": 1875000,
@@ -7733,7 +7733,7 @@
     },
     {
       "id": 455,
-      "name": "小手（Tier2）6",
+      "name": "竜の籠手",
       "description": "小手（Tier2）6の説明",
       "category": "gauntlet",
       "basePrice": 1875000,
@@ -7750,7 +7750,7 @@
     },
     {
       "id": 456,
-      "name": "小手（Tier3）1",
+      "name": "神の籠手",
       "description": "小手（Tier3）1の説明",
       "category": "gauntlet",
       "basePrice": 10000000,
@@ -7767,7 +7767,7 @@
     },
     {
       "id": 457,
-      "name": "小手（Tier3）2",
+      "name": "魔王の籠手",
       "description": "小手（Tier3）2の説明",
       "category": "gauntlet",
       "basePrice": 10000000,
@@ -7784,7 +7784,7 @@
     },
     {
       "id": 458,
-      "name": "小手（Tier3）3",
+      "name": "英雄の籠手",
       "description": "小手（Tier3）3の説明",
       "category": "gauntlet",
       "basePrice": 10000000,
@@ -7801,7 +7801,7 @@
     },
     {
       "id": 459,
-      "name": "小手（Tier3）4",
+      "name": "覇王の籠手",
       "description": "小手（Tier3）4の説明",
       "category": "gauntlet",
       "basePrice": 10000000,
@@ -7818,7 +7818,7 @@
     },
     {
       "id": 460,
-      "name": "小手（Tier3）5",
+      "name": "聖騎士の籠手",
       "description": "小手（Tier3）5の説明",
       "category": "gauntlet",
       "basePrice": 10000000,
@@ -7835,7 +7835,7 @@
     },
     {
       "id": 461,
-      "name": "小手（Tier3）6",
+      "name": "暗黒騎士の籠手",
       "description": "小手（Tier3）6の説明",
       "category": "gauntlet",
       "basePrice": 10000000,
@@ -7852,7 +7852,7 @@
     },
     {
       "id": 462,
-      "name": "小手（Tier3）7",
+      "name": "竜騎士の籠手",
       "description": "小手（Tier3）7の説明",
       "category": "gauntlet",
       "basePrice": 10000000,
@@ -7869,7 +7869,7 @@
     },
     {
       "id": 463,
-      "name": "小手（Tier3）8",
+      "name": "魔導騎士の籠手",
       "description": "小手（Tier3）8の説明",
       "category": "gauntlet",
       "basePrice": 10000000,
@@ -7886,7 +7886,7 @@
     },
     {
       "id": 464,
-      "name": "小手（格闘系）1",
+      "name": "鉄拳",
       "description": "小手（格闘系）1の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -7901,7 +7901,7 @@
     },
     {
       "id": 465,
-      "name": "小手（格闘系）2",
+      "name": "鋼の拳",
       "description": "小手（格闘系）2の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -7916,7 +7916,7 @@
     },
     {
       "id": 466,
-      "name": "小手（格闘系）3",
+      "name": "ナックル",
       "description": "小手（格闘系）3の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -7931,7 +7931,7 @@
     },
     {
       "id": 467,
-      "name": "小手（格闘系）4",
+      "name": "セスタス",
       "description": "小手（格闘系）4の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -7946,7 +7946,7 @@
     },
     {
       "id": 468,
-      "name": "小手（ブレスレット）1",
+      "name": "銀の腕輪",
       "description": "小手（ブレスレット）1の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -7961,7 +7961,7 @@
     },
     {
       "id": 469,
-      "name": "小手（ブレスレット）2",
+      "name": "金の腕輪",
       "description": "小手（ブレスレット）2の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -7976,7 +7976,7 @@
     },
     {
       "id": 470,
-      "name": "小手（ブレスレット）3",
+      "name": "ミスリルの腕輪",
       "description": "小手（ブレスレット）3の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -7991,7 +7991,7 @@
     },
     {
       "id": 471,
-      "name": "小手（ブレスレット）4",
+      "name": "精霊の腕輪",
       "description": "小手（ブレスレット）4の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -8006,7 +8006,7 @@
     },
     {
       "id": 472,
-      "name": "小手（ブレスレット）5",
+      "name": "守護の腕輪",
       "description": "小手（ブレスレット）5の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -8021,7 +8021,7 @@
     },
     {
       "id": 473,
-      "name": "小手（ブレスレット）6",
+      "name": "祝福の腕輪",
       "description": "小手（ブレスレット）6の説明",
       "category": "gauntlet",
       "basePrice": 10000,
@@ -8036,7 +8036,7 @@
     },
     {
       "id": 474,
-      "name": "ワンド（ノーマル）1",
+      "name": "木の杖",
       "description": "ワンド（ノーマル）1の説明",
       "category": "wand",
       "basePrice": 200,
@@ -8052,7 +8052,7 @@
     },
     {
       "id": 475,
-      "name": "ワンド（ノーマル）2",
+      "name": "樫の杖",
       "description": "ワンド（ノーマル）2の説明",
       "category": "wand",
       "basePrice": 1000,
@@ -8068,7 +8068,7 @@
     },
     {
       "id": 476,
-      "name": "ワンド（ノーマル）3",
+      "name": "柳の杖",
       "description": "ワンド（ノーマル）3の説明",
       "category": "wand",
       "basePrice": 5000,
@@ -8084,7 +8084,7 @@
     },
     {
       "id": 477,
-      "name": "ワンド（ノーマル）4",
+      "name": "楓の杖",
       "description": "ワンド（ノーマル）4の説明",
       "category": "wand",
       "basePrice": 25000,
@@ -8100,7 +8100,7 @@
     },
     {
       "id": 478,
-      "name": "ワンド（ノーマル）5",
+      "name": "魔法の杖",
       "description": "ワンド（ノーマル）5の説明",
       "category": "wand",
       "basePrice": 125000,
@@ -8116,7 +8116,7 @@
     },
     {
       "id": 479,
-      "name": "ワンド（ノーマル）6",
+      "name": "見習いの杖",
       "description": "ワンド（ノーマル）6の説明",
       "category": "wand",
       "basePrice": 500000,
@@ -8132,7 +8132,7 @@
     },
     {
       "id": 480,
-      "name": "ワンド（ノーマル）7",
+      "name": "旅の杖",
       "description": "ワンド（ノーマル）7の説明",
       "category": "wand",
       "basePrice": 1500000,
@@ -8148,7 +8148,7 @@
     },
     {
       "id": 481,
-      "name": "ワンド（ノーマル）8",
+      "name": "学者の杖",
       "description": "ワンド（ノーマル）8の説明",
       "category": "wand",
       "basePrice": 3000000,
@@ -8164,7 +8164,7 @@
     },
     {
       "id": 482,
-      "name": "ワンド（強化系）1",
+      "name": "力の杖",
       "description": "ワンド（強化系）1の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8179,7 +8179,7 @@
     },
     {
       "id": 483,
-      "name": "ワンド（強化系）2",
+      "name": "知恵の杖",
       "description": "ワンド（強化系）2の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8194,7 +8194,7 @@
     },
     {
       "id": 484,
-      "name": "ワンド（強化系）3",
+      "name": "精神の杖",
       "description": "ワンド（強化系）3の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8209,7 +8209,7 @@
     },
     {
       "id": 485,
-      "name": "ワンド（強化系）4",
+      "name": "体力の杖",
       "description": "ワンド（強化系）4の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8224,7 +8224,7 @@
     },
     {
       "id": 486,
-      "name": "ワンド（強化系）5",
+      "name": "速さの杖",
       "description": "ワンド（強化系）5の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8239,7 +8239,7 @@
     },
     {
       "id": 487,
-      "name": "ワンド（強化系）6",
+      "name": "運の杖",
       "description": "ワンド（強化系）6の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8254,7 +8254,7 @@
     },
     {
       "id": 488,
-      "name": "ワンド（強化系）7",
+      "name": "攻撃の杖",
       "description": "ワンド（強化系）7の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8269,7 +8269,7 @@
     },
     {
       "id": 489,
-      "name": "ワンド（強化系）8",
+      "name": "防御の杖",
       "description": "ワンド（強化系）8の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8284,7 +8284,7 @@
     },
     {
       "id": 490,
-      "name": "ワンド（強化系）9",
+      "name": "命中の杖",
       "description": "ワンド（強化系）9の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8299,7 +8299,7 @@
     },
     {
       "id": 491,
-      "name": "ワンド（強化系）10",
+      "name": "回避の杖",
       "description": "ワンド（強化系）10の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8314,7 +8314,7 @@
     },
     {
       "id": 492,
-      "name": "ワンド（強化系）11",
+      "name": "必殺の杖",
       "description": "ワンド（強化系）11の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8329,7 +8329,7 @@
     },
     {
       "id": 493,
-      "name": "ワンド（強化系）12",
+      "name": "魔力の杖",
       "description": "ワンド（強化系）12の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8344,7 +8344,7 @@
     },
     {
       "id": 494,
-      "name": "ワンド（強化系）13",
+      "name": "回復の杖",
       "description": "ワンド（強化系）13の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8359,7 +8359,7 @@
     },
     {
       "id": 495,
-      "name": "ワンド（強化系）14",
+      "name": "蘇生の杖",
       "description": "ワンド（強化系）14の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8374,7 +8374,7 @@
     },
     {
       "id": 496,
-      "name": "ワンド（強化系）15",
+      "name": "浄化の杖",
       "description": "ワンド（強化系）15の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8389,7 +8389,7 @@
     },
     {
       "id": 497,
-      "name": "ワンド（強化系）16",
+      "name": "祝福の杖",
       "description": "ワンド（強化系）16の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8404,7 +8404,7 @@
     },
     {
       "id": 498,
-      "name": "ワンド（強化系）17",
+      "name": "呪いの杖",
       "description": "ワンド（強化系）17の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8419,7 +8419,7 @@
     },
     {
       "id": 499,
-      "name": "ワンド（強化系）18",
+      "name": "毒の杖",
       "description": "ワンド（強化系）18の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8434,7 +8434,7 @@
     },
     {
       "id": 500,
-      "name": "ワンド（強化系）19",
+      "name": "麻痺の杖",
       "description": "ワンド（強化系）19の説明",
       "category": "wand",
       "basePrice": 10000,
@@ -8449,7 +8449,7 @@
     },
     {
       "id": 501,
-      "name": "ワンド（Tier1）1",
+      "name": "銀の杖",
       "description": "ワンド（Tier1）1の説明",
       "category": "wand",
       "basePrice": 5000,
@@ -8465,7 +8465,7 @@
     },
     {
       "id": 502,
-      "name": "ワンド（Tier1）2",
+      "name": "金の杖",
       "description": "ワンド（Tier1）2の説明",
       "category": "wand",
       "basePrice": 5000,
@@ -8481,7 +8481,7 @@
     },
     {
       "id": 503,
-      "name": "ワンド（Tier1）3",
+      "name": "ミスリルの杖",
       "description": "ワンド（Tier1）3の説明",
       "category": "wand",
       "basePrice": 5000,
@@ -8497,7 +8497,7 @@
     },
     {
       "id": 504,
-      "name": "ワンド（Tier1）4",
+      "name": "精霊の杖",
       "description": "ワンド（Tier1）4の説明",
       "category": "wand",
       "basePrice": 5000,
@@ -8513,7 +8513,7 @@
     },
     {
       "id": 505,
-      "name": "ワンド（Tier1）5",
+      "name": "妖精の杖",
       "description": "ワンド（Tier1）5の説明",
       "category": "wand",
       "basePrice": 5000,
@@ -8529,7 +8529,7 @@
     },
     {
       "id": 506,
-      "name": "ワンド（Tier1）6",
+      "name": "賢者の杖",
       "description": "ワンド（Tier1）6の説明",
       "category": "wand",
       "basePrice": 5000,
@@ -8545,7 +8545,7 @@
     },
     {
       "id": 507,
-      "name": "ワンド（Tier1）7",
+      "name": "魔導師の杖",
       "description": "ワンド（Tier1）7の説明",
       "category": "wand",
       "basePrice": 5000,
@@ -8561,7 +8561,7 @@
     },
     {
       "id": 508,
-      "name": "ワンド（Tier2）1",
+      "name": "炎の杖",
       "description": "ワンド（Tier2）1の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8577,7 +8577,7 @@
     },
     {
       "id": 509,
-      "name": "ワンド（Tier2）2",
+      "name": "氷の杖",
       "description": "ワンド（Tier2）2の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8593,7 +8593,7 @@
     },
     {
       "id": 510,
-      "name": "ワンド（Tier2）3",
+      "name": "雷の杖",
       "description": "ワンド（Tier2）3の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8609,7 +8609,7 @@
     },
     {
       "id": 511,
-      "name": "ワンド（Tier2）4",
+      "name": "風の杖",
       "description": "ワンド（Tier2）4の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8625,7 +8625,7 @@
     },
     {
       "id": 512,
-      "name": "ワンド（Tier2）5",
+      "name": "地の杖",
       "description": "ワンド（Tier2）5の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8641,7 +8641,7 @@
     },
     {
       "id": 513,
-      "name": "ワンド（Tier2）6",
+      "name": "光の杖",
       "description": "ワンド（Tier2）6の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8657,7 +8657,7 @@
     },
     {
       "id": 514,
-      "name": "ワンド（Tier2）7",
+      "name": "闇の杖",
       "description": "ワンド（Tier2）7の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8673,7 +8673,7 @@
     },
     {
       "id": 515,
-      "name": "ワンド（Tier2）8",
+      "name": "聖なる杖",
       "description": "ワンド（Tier2）8の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8689,7 +8689,7 @@
     },
     {
       "id": 516,
-      "name": "ワンド（Tier2）9",
+      "name": "魔の杖",
       "description": "ワンド（Tier2）9の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8705,7 +8705,7 @@
     },
     {
       "id": 517,
-      "name": "ワンド（Tier2）10",
+      "name": "生命の杖",
       "description": "ワンド（Tier2）10の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8721,7 +8721,7 @@
     },
     {
       "id": 518,
-      "name": "ワンド（Tier2）11",
+      "name": "死の杖",
       "description": "ワンド（Tier2）11の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8737,7 +8737,7 @@
     },
     {
       "id": 519,
-      "name": "ワンド（Tier2）12",
+      "name": "時の杖",
       "description": "ワンド（Tier2）12の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8753,7 +8753,7 @@
     },
     {
       "id": 520,
-      "name": "ワンド（Tier2）13",
+      "name": "星の杖",
       "description": "ワンド（Tier2）13の説明",
       "category": "wand",
       "basePrice": 187500,
@@ -8769,7 +8769,7 @@
     },
     {
       "id": 521,
-      "name": "ロッド（ノーマル）1",
+      "name": "木のロッド",
       "description": "ロッド（ノーマル）1の説明",
       "category": "rod",
       "basePrice": 200,
@@ -8785,7 +8785,7 @@
     },
     {
       "id": 522,
-      "name": "ロッド（ノーマル）2",
+      "name": "鉄のロッド",
       "description": "ロッド（ノーマル）2の説明",
       "category": "rod",
       "basePrice": 1000,
@@ -8801,7 +8801,7 @@
     },
     {
       "id": 523,
-      "name": "ロッド（ノーマル）3",
+      "name": "銅のロッド",
       "description": "ロッド（ノーマル）3の説明",
       "category": "rod",
       "basePrice": 5000,
@@ -8817,7 +8817,7 @@
     },
     {
       "id": 524,
-      "name": "ロッド（ノーマル）4",
+      "name": "真鍮のロッド",
       "description": "ロッド（ノーマル）4の説明",
       "category": "rod",
       "basePrice": 25000,
@@ -8833,7 +8833,7 @@
     },
     {
       "id": 525,
-      "name": "ロッド（ノーマル）5",
+      "name": "魔法のロッド",
       "description": "ロッド（ノーマル）5の説明",
       "category": "rod",
       "basePrice": 125000,
@@ -8849,7 +8849,7 @@
     },
     {
       "id": 526,
-      "name": "ロッド（ノーマル）6",
+      "name": "見習いのロッド",
       "description": "ロッド（ノーマル）6の説明",
       "category": "rod",
       "basePrice": 500000,
@@ -8865,7 +8865,7 @@
     },
     {
       "id": 527,
-      "name": "ロッド（ノーマル）7",
+      "name": "旅のロッド",
       "description": "ロッド（ノーマル）7の説明",
       "category": "rod",
       "basePrice": 1500000,
@@ -8881,7 +8881,7 @@
     },
     {
       "id": 528,
-      "name": "ロッド（ノーマル）8",
+      "name": "学者のロッド",
       "description": "ロッド（ノーマル）8の説明",
       "category": "rod",
       "basePrice": 3000000,
@@ -8897,7 +8897,7 @@
     },
     {
       "id": 529,
-      "name": "ロッド（強化系）1",
+      "name": "力のロッド",
       "description": "ロッド（強化系）1の説明",
       "category": "rod",
       "basePrice": 10000,
@@ -8912,7 +8912,7 @@
     },
     {
       "id": 530,
-      "name": "ロッド（強化系）2",
+      "name": "知恵のロッド",
       "description": "ロッド（強化系）2の説明",
       "category": "rod",
       "basePrice": 10000,
@@ -8927,7 +8927,7 @@
     },
     {
       "id": 531,
-      "name": "ロッド（強化系）3",
+      "name": "精神のロッド",
       "description": "ロッド（強化系）3の説明",
       "category": "rod",
       "basePrice": 10000,
@@ -8942,7 +8942,7 @@
     },
     {
       "id": 532,
-      "name": "ロッド（強化系）4",
+      "name": "体力のロッド",
       "description": "ロッド（強化系）4の説明",
       "category": "rod",
       "basePrice": 10000,
@@ -8957,7 +8957,7 @@
     },
     {
       "id": 533,
-      "name": "ロッド（強化系）5",
+      "name": "速さのロッド",
       "description": "ロッド（強化系）5の説明",
       "category": "rod",
       "basePrice": 10000,
@@ -8972,7 +8972,7 @@
     },
     {
       "id": 534,
-      "name": "ロッド（強化系）6",
+      "name": "運のロッド",
       "description": "ロッド（強化系）6の説明",
       "category": "rod",
       "basePrice": 10000,
@@ -8987,7 +8987,7 @@
     },
     {
       "id": 535,
-      "name": "ロッド（強化系）7",
+      "name": "攻撃のロッド",
       "description": "ロッド（強化系）7の説明",
       "category": "rod",
       "basePrice": 10000,
@@ -9002,7 +9002,7 @@
     },
     {
       "id": 536,
-      "name": "ロッド（強化系）8",
+      "name": "防御のロッド",
       "description": "ロッド（強化系）8の説明",
       "category": "rod",
       "basePrice": 10000,
@@ -9017,7 +9017,7 @@
     },
     {
       "id": 537,
-      "name": "ロッド（強化系）9",
+      "name": "命中のロッド",
       "description": "ロッド（強化系）9の説明",
       "category": "rod",
       "basePrice": 10000,
@@ -9032,7 +9032,7 @@
     },
     {
       "id": 538,
-      "name": "ロッド（Tier1）1",
+      "name": "銀のロッド",
       "description": "ロッド（Tier1）1の説明",
       "category": "rod",
       "basePrice": 5000,
@@ -9048,7 +9048,7 @@
     },
     {
       "id": 539,
-      "name": "ロッド（Tier1）2",
+      "name": "金のロッド",
       "description": "ロッド（Tier1）2の説明",
       "category": "rod",
       "basePrice": 5000,
@@ -9064,7 +9064,7 @@
     },
     {
       "id": 540,
-      "name": "ロッド（Tier1）3",
+      "name": "ミスリルロッド",
       "description": "ロッド（Tier1）3の説明",
       "category": "rod",
       "basePrice": 5000,
@@ -9080,7 +9080,7 @@
     },
     {
       "id": 541,
-      "name": "ロッド（Tier1）4",
+      "name": "精霊のロッド",
       "description": "ロッド（Tier1）4の説明",
       "category": "rod",
       "basePrice": 5000,
@@ -9096,7 +9096,7 @@
     },
     {
       "id": 542,
-      "name": "ロッド（Tier1）5",
+      "name": "妖精のロッド",
       "description": "ロッド（Tier1）5の説明",
       "category": "rod",
       "basePrice": 5000,
@@ -9112,7 +9112,7 @@
     },
     {
       "id": 543,
-      "name": "ロッド（Tier1）6",
+      "name": "賢者のロッド",
       "description": "ロッド（Tier1）6の説明",
       "category": "rod",
       "basePrice": 5000,
@@ -9128,7 +9128,7 @@
     },
     {
       "id": 544,
-      "name": "ロッド（Tier1）7",
+      "name": "魔導師のロッド",
       "description": "ロッド（Tier1）7の説明",
       "category": "rod",
       "basePrice": 5000,
@@ -9144,7 +9144,7 @@
     },
     {
       "id": 545,
-      "name": "ロッド（Tier2）1",
+      "name": "炎のロッド",
       "description": "ロッド（Tier2）1の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9160,7 +9160,7 @@
     },
     {
       "id": 546,
-      "name": "ロッド（Tier2）2",
+      "name": "氷のロッド",
       "description": "ロッド（Tier2）2の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9176,7 +9176,7 @@
     },
     {
       "id": 547,
-      "name": "ロッド（Tier2）3",
+      "name": "雷のロッド",
       "description": "ロッド（Tier2）3の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9192,7 +9192,7 @@
     },
     {
       "id": 548,
-      "name": "ロッド（Tier2）4",
+      "name": "風のロッド",
       "description": "ロッド（Tier2）4の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9208,7 +9208,7 @@
     },
     {
       "id": 549,
-      "name": "ロッド（Tier2）5",
+      "name": "地のロッド",
       "description": "ロッド（Tier2）5の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9224,7 +9224,7 @@
     },
     {
       "id": 550,
-      "name": "ロッド（Tier2）6",
+      "name": "光のロッド",
       "description": "ロッド（Tier2）6の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9240,7 +9240,7 @@
     },
     {
       "id": 551,
-      "name": "ロッド（Tier2）7",
+      "name": "闘のロッド",
       "description": "ロッド（Tier2）7の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9256,7 +9256,7 @@
     },
     {
       "id": 552,
-      "name": "ロッド（Tier2）8",
+      "name": "聖なるロッド",
       "description": "ロッド（Tier2）8の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9272,7 +9272,7 @@
     },
     {
       "id": 553,
-      "name": "ロッド（Tier2）9",
+      "name": "魔のロッド",
       "description": "ロッド（Tier2）9の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9288,7 +9288,7 @@
     },
     {
       "id": 554,
-      "name": "ロッド（Tier2）10",
+      "name": "生命のロッド",
       "description": "ロッド（Tier2）10の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9304,7 +9304,7 @@
     },
     {
       "id": 555,
-      "name": "ロッド（Tier2）11",
+      "name": "死のロッド",
       "description": "ロッド（Tier2）11の説明",
       "category": "rod",
       "basePrice": 187500,
@@ -9320,7 +9320,7 @@
     },
     {
       "id": 556,
-      "name": "魔道書（基礎）1",
+      "name": "初級魔導書",
       "description": "魔道書（基礎）1の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9335,7 +9335,7 @@
     },
     {
       "id": 557,
-      "name": "魔道書（基礎）2",
+      "name": "中級魔導書",
       "description": "魔道書（基礎）2の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9350,7 +9350,7 @@
     },
     {
       "id": 558,
-      "name": "魔道書（基礎）3",
+      "name": "上級魔導書",
       "description": "魔道書（基礎）3の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9365,7 +9365,7 @@
     },
     {
       "id": 559,
-      "name": "魔道書（基礎）4",
+      "name": "入門魔導書",
       "description": "魔道書（基礎）4の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9380,7 +9380,7 @@
     },
     {
       "id": 560,
-      "name": "魔道書（基礎）5",
+      "name": "基礎魔法の書",
       "description": "魔道書（基礎）5の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9395,7 +9395,7 @@
     },
     {
       "id": 561,
-      "name": "魔道書（基礎）6",
+      "name": "応用魔法の書",
       "description": "魔道書（基礎）6の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9410,7 +9410,7 @@
     },
     {
       "id": 562,
-      "name": "魔道書（基礎）7",
+      "name": "実践魔法の書",
       "description": "魔道書（基礎）7の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9425,7 +9425,7 @@
     },
     {
       "id": 563,
-      "name": "魔道書（基礎）8",
+      "name": "理論魔法の書",
       "description": "魔道書（基礎）8の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9440,7 +9440,7 @@
     },
     {
       "id": 564,
-      "name": "魔道書（呪文書）1",
+      "name": "ファイアの書",
       "description": "魔道書（呪文書）1の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9455,7 +9455,7 @@
     },
     {
       "id": 565,
-      "name": "魔道書（呪文書）2",
+      "name": "ブリザドの書",
       "description": "魔道書（呪文書）2の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9470,7 +9470,7 @@
     },
     {
       "id": 566,
-      "name": "魔道書（呪文書）3",
+      "name": "サンダーの書",
       "description": "魔道書（呪文書）3の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9485,7 +9485,7 @@
     },
     {
       "id": 567,
-      "name": "魔道書（呪文書）4",
+      "name": "ケアルの書",
       "description": "魔道書（呪文書）4の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9500,7 +9500,7 @@
     },
     {
       "id": 568,
-      "name": "魔道書（呪文書）5",
+      "name": "レイズの書",
       "description": "魔道書（呪文書）5の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9515,7 +9515,7 @@
     },
     {
       "id": 569,
-      "name": "魔道書（呪文書）6",
+      "name": "ヘイストの書",
       "description": "魔道書（呪文書）6の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9530,7 +9530,7 @@
     },
     {
       "id": 570,
-      "name": "魔道書（呪文書）7",
+      "name": "スロウの書",
       "description": "魔道書（呪文書）7の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9545,7 +9545,7 @@
     },
     {
       "id": 571,
-      "name": "魔道書（Tier1）1",
+      "name": "炎術の書",
       "description": "魔道書（Tier1）1の説明",
       "category": "grimoire",
       "basePrice": 50000,
@@ -9560,7 +9560,7 @@
     },
     {
       "id": 572,
-      "name": "魔道書（Tier1）2",
+      "name": "氷術の書",
       "description": "魔道書（Tier1）2の説明",
       "category": "grimoire",
       "basePrice": 50000,
@@ -9575,7 +9575,7 @@
     },
     {
       "id": 573,
-      "name": "魔道書（Tier1）3",
+      "name": "雷術の書",
       "description": "魔道書（Tier1）3の説明",
       "category": "grimoire",
       "basePrice": 50000,
@@ -9590,7 +9590,7 @@
     },
     {
       "id": 574,
-      "name": "魔道書（Tier1）4",
+      "name": "風術の書",
       "description": "魔道書（Tier1）4の説明",
       "category": "grimoire",
       "basePrice": 50000,
@@ -9605,7 +9605,7 @@
     },
     {
       "id": 575,
-      "name": "魔道書（Tier2）1",
+      "name": "業火の書",
       "description": "魔道書（Tier2）1の説明",
       "category": "grimoire",
       "basePrice": 100000,
@@ -9620,7 +9620,7 @@
     },
     {
       "id": 576,
-      "name": "魔道書（Tier2）2",
+      "name": "氷結の書",
       "description": "魔道書（Tier2）2の説明",
       "category": "grimoire",
       "basePrice": 100000,
@@ -9635,7 +9635,7 @@
     },
     {
       "id": 577,
-      "name": "魔道書（Tier2）3",
+      "name": "雷撃の書",
       "description": "魔道書（Tier2）3の説明",
       "category": "grimoire",
       "basePrice": 100000,
@@ -9650,7 +9650,7 @@
     },
     {
       "id": 578,
-      "name": "魔道書（Tier2）4",
+      "name": "暴風の書",
       "description": "魔道書（Tier2）4の説明",
       "category": "grimoire",
       "basePrice": 100000,
@@ -9665,7 +9665,7 @@
     },
     {
       "id": 579,
-      "name": "魔道書（Tier2）5",
+      "name": "地震の書",
       "description": "魔道書（Tier2）5の説明",
       "category": "grimoire",
       "basePrice": 100000,
@@ -9680,7 +9680,7 @@
     },
     {
       "id": 580,
-      "name": "魔道書（Tier3）1",
+      "name": "禁断の書",
       "description": "魔道書（Tier3）1の説明",
       "category": "grimoire",
       "basePrice": 150000,
@@ -9695,7 +9695,7 @@
     },
     {
       "id": 581,
-      "name": "魔道書（Tier3）2",
+      "name": "死霊術の書",
       "description": "魔道書（Tier3）2の説明",
       "category": "grimoire",
       "basePrice": 150000,
@@ -9710,7 +9710,7 @@
     },
     {
       "id": 582,
-      "name": "魔道書（Tier3）3",
+      "name": "召喚術の書",
       "description": "魔道書（Tier3）3の説明",
       "category": "grimoire",
       "basePrice": 150000,
@@ -9725,7 +9725,7 @@
     },
     {
       "id": 583,
-      "name": "魔道書（Tier3）4",
+      "name": "古代魔法の書",
       "description": "魔道書（Tier3）4の説明",
       "category": "grimoire",
       "basePrice": 150000,
@@ -9740,7 +9740,7 @@
     },
     {
       "id": 584,
-      "name": "魔道書（Tier4）1",
+      "name": "ルーンの書",
       "description": "魔道書（Tier4）1の説明",
       "category": "grimoire",
       "basePrice": 200000,
@@ -9755,7 +9755,7 @@
     },
     {
       "id": 585,
-      "name": "魔道書（Tier4）2",
+      "name": "ガルドラの書",
       "description": "魔道書（Tier4）2の説明",
       "category": "grimoire",
       "basePrice": 200000,
@@ -9770,7 +9770,7 @@
     },
     {
       "id": 586,
-      "name": "魔道書（Tier4）3",
+      "name": "セイズの書",
       "description": "魔道書（Tier4）3の説明",
       "category": "grimoire",
       "basePrice": 200000,
@@ -9785,7 +9785,7 @@
     },
     {
       "id": 587,
-      "name": "魔道書（Tier4）4",
+      "name": "ヴォルヴァの書",
       "description": "魔道書（Tier4）4の説明",
       "category": "grimoire",
       "basePrice": 200000,
@@ -9800,7 +9800,7 @@
     },
     {
       "id": 588,
-      "name": "魔道書（Tier4）5",
+      "name": "オーディンの智慧書",
       "description": "魔道書（Tier4）5の説明",
       "category": "grimoire",
       "basePrice": 200000,
@@ -9815,7 +9815,7 @@
     },
     {
       "id": 589,
-      "name": "魔道書（Tier4）6",
+      "name": "フレイヤの魔術書",
       "description": "魔道書（Tier4）6の説明",
       "category": "grimoire",
       "basePrice": 200000,
@@ -9830,7 +9830,7 @@
     },
     {
       "id": 590,
-      "name": "魔道書（Tier4）7",
+      "name": "ヘルの死霊書",
       "description": "魔道書（Tier4）7の説明",
       "category": "grimoire",
       "basePrice": 200000,
@@ -9845,7 +9845,7 @@
     },
     {
       "id": 591,
-      "name": "魔道書（Tier4）8",
+      "name": "ロキの欺きの書",
       "description": "魔道書（Tier4）8の説明",
       "category": "grimoire",
       "basePrice": 200000,
@@ -9860,7 +9860,7 @@
     },
     {
       "id": 592,
-      "name": "魔道書（魔道教典）1",
+      "name": "魔導典",
       "description": "魔道書（魔道教典）1の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9875,7 +9875,7 @@
     },
     {
       "id": 593,
-      "name": "魔道書（魔道教典）2",
+      "name": "黒の書",
       "description": "魔道書（魔道教典）2の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9890,7 +9890,7 @@
     },
     {
       "id": 594,
-      "name": "魔道書（魔道教典）3",
+      "name": "影の書",
       "description": "魔道書（魔道教典）3の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9905,7 +9905,7 @@
     },
     {
       "id": 595,
-      "name": "魔道書（魔道教典）4",
+      "name": "血の書",
       "description": "魔道書（魔道教典）4の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9920,7 +9920,7 @@
     },
     {
       "id": 596,
-      "name": "魔道書（魔道教典）5",
+      "name": "骨の書",
       "description": "魔道書（魔道教典）5の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9935,7 +9935,7 @@
     },
     {
       "id": 597,
-      "name": "魔道書（魔道教典）6",
+      "name": "魂の書",
       "description": "魔道書（魔道教典）6の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9950,7 +9950,7 @@
     },
     {
       "id": 598,
-      "name": "魔道書（魔道教典）7",
+      "name": "混沌の書",
       "description": "魔道書（魔道教典）7の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9965,7 +9965,7 @@
     },
     {
       "id": 599,
-      "name": "魔道書（神聖教典）1",
+      "name": "聖典",
       "description": "魔道書（神聖教典）1の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9980,7 +9980,7 @@
     },
     {
       "id": 600,
-      "name": "魔道書（神聖教典）2",
+      "name": "福音書",
       "description": "魔道書（神聖教典）2の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -9995,7 +9995,7 @@
     },
     {
       "id": 601,
-      "name": "魔道書（神聖教典）3",
+      "name": "黙示録",
       "description": "魔道書（神聖教典）3の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10010,7 +10010,7 @@
     },
     {
       "id": 602,
-      "name": "魔道書（神聖教典）4",
+      "name": "創世記",
       "description": "魔道書（神聖教典）4の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10025,7 +10025,7 @@
     },
     {
       "id": 603,
-      "name": "魔道書（神聖教典）5",
+      "name": "出エジプト記",
       "description": "魔道書（神聖教典）5の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10040,7 +10040,7 @@
     },
     {
       "id": 604,
-      "name": "魔道書（神聖教典）6",
+      "name": "詩篇",
       "description": "魔道書（神聖教典）6の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10055,7 +10055,7 @@
     },
     {
       "id": 605,
-      "name": "魔道書（神聖教典）7",
+      "name": "箴言",
       "description": "魔道書（神聖教典）7の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10070,7 +10070,7 @@
     },
     {
       "id": 606,
-      "name": "魔道書（忘却書）1",
+      "name": "忘却の書・炎",
       "description": "魔道書（忘却書）1の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10085,7 +10085,7 @@
     },
     {
       "id": 607,
-      "name": "魔道書（忘却書）2",
+      "name": "忘却の書・氷",
       "description": "魔道書（忘却書）2の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10100,7 +10100,7 @@
     },
     {
       "id": 608,
-      "name": "魔道書（忘却書）3",
+      "name": "忘却の書・雷",
       "description": "魔道書（忘却書）3の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10115,7 +10115,7 @@
     },
     {
       "id": 609,
-      "name": "魔道書（忘却書）4",
+      "name": "忘却の書・風",
       "description": "魔道書（忘却書）4の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10130,7 +10130,7 @@
     },
     {
       "id": 610,
-      "name": "魔道書（忘却書）5",
+      "name": "忘却の書・地",
       "description": "魔道書（忘却書）5の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10145,7 +10145,7 @@
     },
     {
       "id": 611,
-      "name": "魔道書（忘却書）6",
+      "name": "忘却の書・光",
       "description": "魔道書（忘却書）6の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10160,7 +10160,7 @@
     },
     {
       "id": 612,
-      "name": "魔道書（忘却書）7",
+      "name": "忘却の書・闇",
       "description": "魔道書（忘却書）7の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10175,7 +10175,7 @@
     },
     {
       "id": 613,
-      "name": "魔道書（忘却書）8",
+      "name": "忘却の書・聖",
       "description": "魔道書（忘却書）8の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10190,7 +10190,7 @@
     },
     {
       "id": 614,
-      "name": "魔道書（忘却書）9",
+      "name": "忘却の書・魔",
       "description": "魔道書（忘却書）9の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10205,7 +10205,7 @@
     },
     {
       "id": 615,
-      "name": "魔道書（忘却書）10",
+      "name": "忘却の書・時",
       "description": "魔道書（忘却書）10の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10220,7 +10220,7 @@
     },
     {
       "id": 616,
-      "name": "魔道書（忘却書）11",
+      "name": "忘却の書・空",
       "description": "魔道書（忘却書）11の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10235,7 +10235,7 @@
     },
     {
       "id": 617,
-      "name": "魔道書（忘却書）12",
+      "name": "忘却の書・力",
       "description": "魔道書（忘却書）12の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10250,7 +10250,7 @@
     },
     {
       "id": 618,
-      "name": "魔道書（忘却書）13",
+      "name": "忘却の書・知",
       "description": "魔道書（忘却書）13の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10265,7 +10265,7 @@
     },
     {
       "id": 619,
-      "name": "魔道書（忘却書）14",
+      "name": "忘却の書・精",
       "description": "魔道書（忘却書）14の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10280,7 +10280,7 @@
     },
     {
       "id": 620,
-      "name": "魔道書（忘却書）15",
+      "name": "忘却の書・体",
       "description": "魔道書（忘却書）15の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10295,7 +10295,7 @@
     },
     {
       "id": 621,
-      "name": "魔道書（忘却書）16",
+      "name": "忘却の書・速",
       "description": "魔道書（忘却書）16の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10310,7 +10310,7 @@
     },
     {
       "id": 622,
-      "name": "魔道書（忘却書）17",
+      "name": "忘却の書・運",
       "description": "魔道書（忘却書）17の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10325,7 +10325,7 @@
     },
     {
       "id": 623,
-      "name": "魔道書（忘却書）18",
+      "name": "忘却の書・命",
       "description": "魔道書（忘却書）18の説明",
       "category": "grimoire",
       "basePrice": 10000,
@@ -10340,7 +10340,7 @@
     },
     {
       "id": 624,
-      "name": "法衣（ノーマル）1",
+      "name": "魔法使いのローブ",
       "description": "法衣（ノーマル）1の説明",
       "category": "robe",
       "basePrice": 100,
@@ -10356,7 +10356,7 @@
     },
     {
       "id": 625,
-      "name": "法衣（ノーマル）2",
+      "name": "見習いのローブ",
       "description": "法衣（ノーマル）2の説明",
       "category": "robe",
       "basePrice": 500,
@@ -10372,7 +10372,7 @@
     },
     {
       "id": 626,
-      "name": "法衣（ノーマル）3",
+      "name": "旅のローブ",
       "description": "法衣（ノーマル）3の説明",
       "category": "robe",
       "basePrice": 2500,
@@ -10388,7 +10388,7 @@
     },
     {
       "id": 627,
-      "name": "法衣（ノーマル）4",
+      "name": "学者のローブ",
       "description": "法衣（ノーマル）4の説明",
       "category": "robe",
       "basePrice": 12500,
@@ -10404,7 +10404,7 @@
     },
     {
       "id": 628,
-      "name": "法衣（ノーマル）5",
+      "name": "司祭のローブ",
       "description": "法衣（ノーマル）5の説明",
       "category": "robe",
       "basePrice": 60000,
@@ -10420,7 +10420,7 @@
     },
     {
       "id": 629,
-      "name": "法衣（ノーマル）6",
+      "name": "修道士のローブ",
       "description": "法衣（ノーマル）6の説明",
       "category": "robe",
       "basePrice": 240000,
@@ -10436,7 +10436,7 @@
     },
     {
       "id": 630,
-      "name": "法衣（ノーマル）7",
+      "name": "賢者のローブ",
       "description": "法衣（ノーマル）7の説明",
       "category": "robe",
       "basePrice": 720000,
@@ -10452,7 +10452,7 @@
     },
     {
       "id": 631,
-      "name": "法衣（ノーマル）8",
+      "name": "占い師のローブ",
       "description": "法衣（ノーマル）8の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10468,7 +10468,7 @@
     },
     {
       "id": 632,
-      "name": "法衣（Tier1）1",
+      "name": "高級ローブ",
       "description": "法衣（Tier1）1の説明",
       "category": "robe",
       "basePrice": 2500,
@@ -10484,7 +10484,7 @@
     },
     {
       "id": 633,
-      "name": "法衣（Tier1）2",
+      "name": "上質なローブ",
       "description": "法衣（Tier1）2の説明",
       "category": "robe",
       "basePrice": 2500,
@@ -10500,7 +10500,7 @@
     },
     {
       "id": 634,
-      "name": "法衣（Tier1）3",
+      "name": "絹のローブ",
       "description": "法衣（Tier1）3の説明",
       "category": "robe",
       "basePrice": 2500,
@@ -10516,7 +10516,7 @@
     },
     {
       "id": 635,
-      "name": "法衣（Tier1）4",
+      "name": "銀糸のローブ",
       "description": "法衣（Tier1）4の説明",
       "category": "robe",
       "basePrice": 2500,
@@ -10532,7 +10532,7 @@
     },
     {
       "id": 636,
-      "name": "法衣（Tier1）5",
+      "name": "金糸のローブ",
       "description": "法衣（Tier1）5の説明",
       "category": "robe",
       "basePrice": 2500,
@@ -10548,7 +10548,7 @@
     },
     {
       "id": 637,
-      "name": "法衣（Tier1）6",
+      "name": "宮廷魔術師のローブ",
       "description": "法衣（Tier1）6の説明",
       "category": "robe",
       "basePrice": 2500,
@@ -10564,7 +10564,7 @@
     },
     {
       "id": 638,
-      "name": "法衣（Tier1）7",
+      "name": "大司教のローブ",
       "description": "法衣（Tier1）7の説明",
       "category": "robe",
       "basePrice": 2500,
@@ -10580,7 +10580,7 @@
     },
     {
       "id": 639,
-      "name": "法衣（Tier1）8",
+      "name": "賢者のガウン",
       "description": "法衣（Tier1）8の説明",
       "category": "robe",
       "basePrice": 2500,
@@ -10596,7 +10596,7 @@
     },
     {
       "id": 640,
-      "name": "法衣（Tier2）1",
+      "name": "炎のローブ",
       "description": "法衣（Tier2）1の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10612,7 +10612,7 @@
     },
     {
       "id": 641,
-      "name": "法衣（Tier2）2",
+      "name": "氷のローブ",
       "description": "法衣（Tier2）2の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10628,7 +10628,7 @@
     },
     {
       "id": 642,
-      "name": "法衣（Tier2）3",
+      "name": "雷のローブ",
       "description": "法衣（Tier2）3の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10644,7 +10644,7 @@
     },
     {
       "id": 643,
-      "name": "法衣（Tier2）4",
+      "name": "風のローブ",
       "description": "法衣（Tier2）4の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10660,7 +10660,7 @@
     },
     {
       "id": 644,
-      "name": "法衣（Tier2）5",
+      "name": "地のローブ",
       "description": "法衣（Tier2）5の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10676,7 +10676,7 @@
     },
     {
       "id": 645,
-      "name": "法衣（Tier2）6",
+      "name": "光のローブ",
       "description": "法衣（Tier2）6の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10692,7 +10692,7 @@
     },
     {
       "id": 646,
-      "name": "法衣（Tier2）7",
+      "name": "闇のローブ",
       "description": "法衣（Tier2）7の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10708,7 +10708,7 @@
     },
     {
       "id": 647,
-      "name": "法衣（Tier2）8",
+      "name": "聖なるローブ",
       "description": "法衣（Tier2）8の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10724,7 +10724,7 @@
     },
     {
       "id": 648,
-      "name": "法衣（Tier2）9",
+      "name": "魔導師のローブ",
       "description": "法衣（Tier2）9の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10740,7 +10740,7 @@
     },
     {
       "id": 649,
-      "name": "法衣（Tier2）10",
+      "name": "大魔導師のローブ",
       "description": "法衣（Tier2）10の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10756,7 +10756,7 @@
     },
     {
       "id": 650,
-      "name": "法衣（Tier2）11",
+      "name": "賢者王のローブ",
       "description": "法衣（Tier2）11の説明",
       "category": "robe",
       "basePrice": 90000,
@@ -10772,7 +10772,7 @@
     },
     {
       "id": 651,
-      "name": "法衣（Tier3）1",
+      "name": "大賢者のローブ",
       "description": "法衣（Tier3）1の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10788,7 +10788,7 @@
     },
     {
       "id": 652,
-      "name": "法衣（Tier3）2",
+      "name": "魔導王のローブ",
       "description": "法衣（Tier3）2の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10804,7 +10804,7 @@
     },
     {
       "id": 653,
-      "name": "法衣（Tier3）3",
+      "name": "聖者のローブ",
       "description": "法衣（Tier3）3の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10820,7 +10820,7 @@
     },
     {
       "id": 654,
-      "name": "法衣（Tier3）4",
+      "name": "神官長のローブ",
       "description": "法衣（Tier3）4の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10836,7 +10836,7 @@
     },
     {
       "id": 655,
-      "name": "法衣（Tier3）5",
+      "name": "精霊王のローブ",
       "description": "法衣（Tier3）5の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10852,7 +10852,7 @@
     },
     {
       "id": 656,
-      "name": "法衣（Tier3）6",
+      "name": "妖精王のローブ",
       "description": "法衣（Tier3）6の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10868,7 +10868,7 @@
     },
     {
       "id": 657,
-      "name": "法衣（Tier3）7",
+      "name": "天使のローブ",
       "description": "法衣（Tier3）7の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10884,7 +10884,7 @@
     },
     {
       "id": 658,
-      "name": "法衣（Tier3）8",
+      "name": "悪魔のローブ",
       "description": "法衣（Tier3）8の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10900,7 +10900,7 @@
     },
     {
       "id": 659,
-      "name": "法衣（Tier3）9",
+      "name": "竜のローブ",
       "description": "法衣（Tier3）9の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10916,7 +10916,7 @@
     },
     {
       "id": 660,
-      "name": "法衣（Tier3）10",
+      "name": "鳳凰のローブ",
       "description": "法衣（Tier3）10の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10932,7 +10932,7 @@
     },
     {
       "id": 661,
-      "name": "法衣（Tier3）11",
+      "name": "麒麟のローブ",
       "description": "法衣（Tier3）11の説明",
       "category": "robe",
       "basePrice": 1440000,
@@ -10948,7 +10948,7 @@
     },
     {
       "id": 662,
-      "name": "宝石（最高級）1",
+      "name": "ダイヤモンド",
       "description": "宝石（最高級）1の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -10963,7 +10963,7 @@
     },
     {
       "id": 663,
-      "name": "宝石（最高級）2",
+      "name": "ルビー",
       "description": "宝石（最高級）2の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -10978,7 +10978,7 @@
     },
     {
       "id": 664,
-      "name": "宝石（最高級）3",
+      "name": "サファイア",
       "description": "宝石（最高級）3の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -10993,7 +10993,7 @@
     },
     {
       "id": 665,
-      "name": "宝石（最高級）4",
+      "name": "エメラルド",
       "description": "宝石（最高級）4の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11008,7 +11008,7 @@
     },
     {
       "id": 666,
-      "name": "宝石（最高級）5",
+      "name": "アレキサンドライト",
       "description": "宝石（最高級）5の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11023,7 +11023,7 @@
     },
     {
       "id": 667,
-      "name": "宝石（最高級）6",
+      "name": "タンザナイト",
       "description": "宝石（最高級）6の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11038,7 +11038,7 @@
     },
     {
       "id": 668,
-      "name": "宝石（高級）1",
+      "name": "パール",
       "description": "宝石（高級）1の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11053,7 +11053,7 @@
     },
     {
       "id": 669,
-      "name": "宝石（高級）2",
+      "name": "ジェイド",
       "description": "宝石（高級）2の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11068,7 +11068,7 @@
     },
     {
       "id": 670,
-      "name": "宝石（高級）3",
+      "name": "オパール",
       "description": "宝石（高級）3の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11083,7 +11083,7 @@
     },
     {
       "id": 671,
-      "name": "宝石（高級）4",
+      "name": "デマントイド",
       "description": "宝石（高級）4の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11098,7 +11098,7 @@
     },
     {
       "id": 672,
-      "name": "宝石（高級）5",
+      "name": "アクアマリン",
       "description": "宝石（高級）5の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11113,7 +11113,7 @@
     },
     {
       "id": 673,
-      "name": "宝石（高級）6",
+      "name": "ツァボライト",
       "description": "宝石（高級）6の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11128,7 +11128,7 @@
     },
     {
       "id": 674,
-      "name": "宝石（中級）1",
+      "name": "スピネル",
       "description": "宝石（中級）1の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11143,7 +11143,7 @@
     },
     {
       "id": 675,
-      "name": "宝石（中級）2",
+      "name": "トルマリン",
       "description": "宝石（中級）2の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11158,7 +11158,7 @@
     },
     {
       "id": 676,
-      "name": "宝石（中級）3",
+      "name": "ペリドット",
       "description": "宝石（中級）3の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11173,7 +11173,7 @@
     },
     {
       "id": 677,
-      "name": "宝石（中級）4",
+      "name": "ガーネット",
       "description": "宝石（中級）4の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11188,7 +11188,7 @@
     },
     {
       "id": 678,
-      "name": "宝石（中級）5",
+      "name": "トパーズ",
       "description": "宝石（中級）5の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11203,7 +11203,7 @@
     },
     {
       "id": 679,
-      "name": "宝石（中級）6",
+      "name": "ムーンストーン",
       "description": "宝石（中級）6の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11218,7 +11218,7 @@
     },
     {
       "id": 680,
-      "name": "宝石（低級）1",
+      "name": "アメジスト",
       "description": "宝石（低級）1の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11233,7 +11233,7 @@
     },
     {
       "id": 681,
-      "name": "宝石（低級）2",
+      "name": "シトリン",
       "description": "宝石（低級）2の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11248,7 +11248,7 @@
     },
     {
       "id": 682,
-      "name": "宝石（低級）3",
+      "name": "ターコイズ",
       "description": "宝石（低級）3の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11263,7 +11263,7 @@
     },
     {
       "id": 683,
-      "name": "宝石（低級）4",
+      "name": "ラピスラズリ",
       "description": "宝石（低級）4の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11278,7 +11278,7 @@
     },
     {
       "id": 684,
-      "name": "宝石（低級）5",
+      "name": "アンバー",
       "description": "宝石（低級）5の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11293,7 +11293,7 @@
     },
     {
       "id": 685,
-      "name": "宝石（低級）6",
+      "name": "コーラル",
       "description": "宝石（低級）6の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11308,7 +11308,7 @@
     },
     {
       "id": 686,
-      "name": "宝石（低級）7",
+      "name": "ジルコン",
       "description": "宝石（低級）7の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11323,7 +11323,7 @@
     },
     {
       "id": 687,
-      "name": "宝石（低級）8",
+      "name": "クンツァイト",
       "description": "宝石（低級）8の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11338,7 +11338,7 @@
     },
     {
       "id": 688,
-      "name": "宝石（低級）9",
+      "name": "モルガナイト",
       "description": "宝石（低級）9の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11353,7 +11353,7 @@
     },
     {
       "id": 689,
-      "name": "宝石（低級）10",
+      "name": "クリソプレーズ",
       "description": "宝石（低級）10の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11368,7 +11368,7 @@
     },
     {
       "id": 690,
-      "name": "宝石（低級）11",
+      "name": "サードオニキス",
       "description": "宝石（低級）11の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11383,7 +11383,7 @@
     },
     {
       "id": 691,
-      "name": "宝石（低級）12",
+      "name": "カイヤナイト",
       "description": "宝石（低級）12の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11398,7 +11398,7 @@
     },
     {
       "id": 692,
-      "name": "宝石（低級）13",
+      "name": "プレーナイト",
       "description": "宝石（低級）13の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11413,7 +11413,7 @@
     },
     {
       "id": 693,
-      "name": "宝石（低級）14",
+      "name": "セレスタイト",
       "description": "宝石（低級）14の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11428,7 +11428,7 @@
     },
     {
       "id": 694,
-      "name": "宝石（低級）15",
+      "name": "アパタイト",
       "description": "宝石（低級）15の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11443,7 +11443,7 @@
     },
     {
       "id": 695,
-      "name": "宝石（最下級）1",
+      "name": "クォーツ",
       "description": "宝石（最下級）1の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11458,7 +11458,7 @@
     },
     {
       "id": 696,
-      "name": "宝石（最下級）2",
+      "name": "ローズクォーツ",
       "description": "宝石（最下級）2の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11473,7 +11473,7 @@
     },
     {
       "id": 697,
-      "name": "宝石（最下級）3",
+      "name": "スモーキークォーツ",
       "description": "宝石（最下級）3の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11488,7 +11488,7 @@
     },
     {
       "id": 698,
-      "name": "宝石（最下級）4",
+      "name": "アゲート",
       "description": "宝石（最下級）4の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11503,7 +11503,7 @@
     },
     {
       "id": 699,
-      "name": "宝石（最下級）5",
+      "name": "カルセドニー",
       "description": "宝石（最下級）5の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11518,7 +11518,7 @@
     },
     {
       "id": 700,
-      "name": "宝石（最下級）6",
+      "name": "ジャスパー",
       "description": "宝石（最下級）6の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11533,7 +11533,7 @@
     },
     {
       "id": 701,
-      "name": "宝石（最下級）7",
+      "name": "オニキス",
       "description": "宝石（最下級）7の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11548,7 +11548,7 @@
     },
     {
       "id": 702,
-      "name": "宝石（最下級）8",
+      "name": "カーネリアン",
       "description": "宝石（最下級）8の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11563,7 +11563,7 @@
     },
     {
       "id": 703,
-      "name": "宝石（最下級）9",
+      "name": "タイガーアイ",
       "description": "宝石（最下級）9の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11578,7 +11578,7 @@
     },
     {
       "id": 704,
-      "name": "宝石（最下級）10",
+      "name": "ヘマタイト",
       "description": "宝石（最下級）10の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11593,7 +11593,7 @@
     },
     {
       "id": 705,
-      "name": "宝石（最下級）11",
+      "name": "オブシディアン",
       "description": "宝石（最下級）11の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11608,7 +11608,7 @@
     },
     {
       "id": 706,
-      "name": "宝石（最下級）12",
+      "name": "フローライト",
       "description": "宝石（最下級）12の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11623,7 +11623,7 @@
     },
     {
       "id": 707,
-      "name": "宝石（最下級）13",
+      "name": "アベンチュリン",
       "description": "宝石（最下級）13の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11638,7 +11638,7 @@
     },
     {
       "id": 708,
-      "name": "宝石（最下級）14",
+      "name": "ブラッドストーン",
       "description": "宝石（最下級）14の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11653,7 +11653,7 @@
     },
     {
       "id": 709,
-      "name": "宝石（最下級）15",
+      "name": "ソーダライト",
       "description": "宝石（最下級）15の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11668,7 +11668,7 @@
     },
     {
       "id": 710,
-      "name": "宝石（最下級）16",
+      "name": "ハウライト",
       "description": "宝石（最下級）16の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11683,7 +11683,7 @@
     },
     {
       "id": 711,
-      "name": "宝石（最下級）17",
+      "name": "ラブラドライト",
       "description": "宝石（最下級）17の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11698,7 +11698,7 @@
     },
     {
       "id": 712,
-      "name": "宝石（最下級）18",
+      "name": "マラカイト",
       "description": "宝石（最下級）18の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11713,7 +11713,7 @@
     },
     {
       "id": 713,
-      "name": "宝石（最下級）19",
+      "name": "ロードナイト",
       "description": "宝石（最下級）19の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11728,7 +11728,7 @@
     },
     {
       "id": 714,
-      "name": "宝石（最下級）20",
+      "name": "アイオライト",
       "description": "宝石（最下級）20の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11743,7 +11743,7 @@
     },
     {
       "id": 715,
-      "name": "宝石（最下級）21",
+      "name": "プレナイト",
       "description": "宝石（最下級）21の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11758,7 +11758,7 @@
     },
     {
       "id": 716,
-      "name": "宝石（最下級）22",
+      "name": "サンストーン",
       "description": "宝石（最下級）22の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11773,7 +11773,7 @@
     },
     {
       "id": 717,
-      "name": "宝石（最下級）23",
+      "name": "モルダバイト",
       "description": "宝石（最下級）23の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11788,7 +11788,7 @@
     },
     {
       "id": 718,
-      "name": "宝石（最下級）24",
+      "name": "ラリマー",
       "description": "宝石（最下級）24の説明",
       "category": "gem",
       "basePrice": 10000,
@@ -11803,7 +11803,7 @@
     },
     {
       "id": 719,
-      "name": "その他（罠解除）1",
+      "name": "盗賊のピック",
       "description": "その他（罠解除）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11818,7 +11818,7 @@
     },
     {
       "id": 720,
-      "name": "その他（罠解除）2",
+      "name": "精密工具",
       "description": "その他（罠解除）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11833,7 +11833,7 @@
     },
     {
       "id": 721,
-      "name": "その他（罠解除）3",
+      "name": "魔法の鍵",
       "description": "その他（罠解除）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11848,7 +11848,7 @@
     },
     {
       "id": 722,
-      "name": "その他（罠解除）4",
+      "name": "万能鍵",
       "description": "その他（罠解除）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11863,7 +11863,7 @@
     },
     {
       "id": 723,
-      "name": "その他（罠解除）5",
+      "name": "解錠のペンダント",
       "description": "その他（罠解除）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11878,7 +11878,7 @@
     },
     {
       "id": 724,
-      "name": "その他（罠解除）6",
+      "name": "開錠の指輪",
       "description": "その他（罠解除）6の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11893,7 +11893,7 @@
     },
     {
       "id": 725,
-      "name": "その他（罠解除）7",
+      "name": "鍵師の道具",
       "description": "その他（罠解除）7の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11908,7 +11908,7 @@
     },
     {
       "id": 726,
-      "name": "その他（HP1）1",
+      "name": "生命の指輪",
       "description": "その他（HP1）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11923,7 +11923,7 @@
     },
     {
       "id": 727,
-      "name": "その他（HP1）2",
+      "name": "活力の腕輪",
       "description": "その他（HP1）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11938,7 +11938,7 @@
     },
     {
       "id": 728,
-      "name": "その他（HP1）3",
+      "name": "再生のペンダント",
       "description": "その他（HP1）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11953,7 +11953,7 @@
     },
     {
       "id": 729,
-      "name": "その他（HP1）4",
+      "name": "不死鳥の羽根",
       "description": "その他（HP1）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11968,7 +11968,7 @@
     },
     {
       "id": 730,
-      "name": "その他（HP1）5",
+      "name": "生命の宝珠",
       "description": "その他（HP1）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11983,7 +11983,7 @@
     },
     {
       "id": 731,
-      "name": "その他（HP2）1",
+      "name": "大いなる生命の指輪",
       "description": "その他（HP2）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -11998,7 +11998,7 @@
     },
     {
       "id": 732,
-      "name": "その他（HP2）2",
+      "name": "強靭な活力の腕輪",
       "description": "その他（HP2）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12013,7 +12013,7 @@
     },
     {
       "id": 733,
-      "name": "その他（HP2）3",
+      "name": "高速再生のペンダント",
       "description": "その他（HP2）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12028,7 +12028,7 @@
     },
     {
       "id": 734,
-      "name": "その他（HP2）4",
+      "name": "蘇りの羽根",
       "description": "その他（HP2）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12043,7 +12043,7 @@
     },
     {
       "id": 735,
-      "name": "その他（HP2）5",
+      "name": "輝く生命の宝珠",
       "description": "その他（HP2）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12058,7 +12058,7 @@
     },
     {
       "id": 736,
-      "name": "その他（HP2）6",
+      "name": "永遠の生命石",
       "description": "その他（HP2）6の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12073,7 +12073,7 @@
     },
     {
       "id": 737,
-      "name": "その他（HP2）7",
+      "name": "不滅の心臓",
       "description": "その他（HP2）7の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12088,7 +12088,7 @@
     },
     {
       "id": 738,
-      "name": "その他（HP2）8",
+      "name": "回復のオーブ",
       "description": "その他（HP2）8の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12103,7 +12103,7 @@
     },
     {
       "id": 739,
-      "name": "その他（HP2）9",
+      "name": "治癒のアミュレット",
       "description": "その他（HP2）9の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12118,7 +12118,7 @@
     },
     {
       "id": 740,
-      "name": "その他（HP2）10",
+      "name": "癒しのブローチ",
       "description": "その他（HP2）10の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12133,7 +12133,7 @@
     },
     {
       "id": 741,
-      "name": "その他（HP2）11",
+      "name": "再生の首飾り",
       "description": "その他（HP2）11の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12148,7 +12148,7 @@
     },
     {
       "id": 742,
-      "name": "その他（HP2）12",
+      "name": "復活の耳飾り",
       "description": "その他（HP2）12の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12163,7 +12163,7 @@
     },
     {
       "id": 743,
-      "name": "その他（HP2）13",
+      "name": "蘇生の腕輪",
       "description": "その他（HP2）13の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12178,7 +12178,7 @@
     },
     {
       "id": 744,
-      "name": "その他（HP2）14",
+      "name": "生命力の指輪",
       "description": "その他（HP2）14の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12193,7 +12193,7 @@
     },
     {
       "id": 745,
-      "name": "その他（獲得系）1",
+      "name": "幸運のコイン",
       "description": "その他（獲得系）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12208,7 +12208,7 @@
     },
     {
       "id": 746,
-      "name": "その他（獲得系）2",
+      "name": "黄金の指輪",
       "description": "その他（獲得系）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12223,7 +12223,7 @@
     },
     {
       "id": 747,
-      "name": "その他（獲得系）3",
+      "name": "商人のお守り",
       "description": "その他（獲得系）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12238,7 +12238,7 @@
     },
     {
       "id": 748,
-      "name": "その他（獲得系）4",
+      "name": "宝探しの羅針盤",
       "description": "その他（獲得系）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12253,7 +12253,7 @@
     },
     {
       "id": 749,
-      "name": "その他（獲得系）5",
+      "name": "財宝の地図",
       "description": "その他（獲得系）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12268,7 +12268,7 @@
     },
     {
       "id": 750,
-      "name": "その他（獲得系）6",
+      "name": "金運のペンダント",
       "description": "その他（獲得系）6の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12283,7 +12283,7 @@
     },
     {
       "id": 751,
-      "name": "その他（獲得系）7",
+      "name": "富の腕輪",
       "description": "その他（獲得系）7の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12298,7 +12298,7 @@
     },
     {
       "id": 752,
-      "name": "その他（獲得系）8",
+      "name": "繁栄の首飾り",
       "description": "その他（獲得系）8の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12313,7 +12313,7 @@
     },
     {
       "id": 753,
-      "name": "その他（獲得系）9",
+      "name": "豊穣の耳飾り",
       "description": "その他（獲得系）9の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12328,7 +12328,7 @@
     },
     {
       "id": 754,
-      "name": "その他（獲得系）10",
+      "name": "収穫のブローチ",
       "description": "その他（獲得系）10の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12343,7 +12343,7 @@
     },
     {
       "id": 755,
-      "name": "その他（獲得系）11",
+      "name": "略奪者の指輪",
       "description": "その他（獲得系）11の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12358,7 +12358,7 @@
     },
     {
       "id": 756,
-      "name": "その他（獲得系）12",
+      "name": "盗賊の宝珠",
       "description": "その他（獲得系）12の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12373,7 +12373,7 @@
     },
     {
       "id": 757,
-      "name": "その他（獲得系）13",
+      "name": "冒険者のコイン",
       "description": "その他（獲得系）13の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12388,7 +12388,7 @@
     },
     {
       "id": 758,
-      "name": "その他（獲得系）14",
+      "name": "探検家のメダル",
       "description": "その他（獲得系）14の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12403,7 +12403,7 @@
     },
     {
       "id": 759,
-      "name": "その他（獲得系）15",
+      "name": "発見者の勲章",
       "description": "その他（獲得系）15の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12418,7 +12418,7 @@
     },
     {
       "id": 760,
-      "name": "その他（獲得系）16",
+      "name": "収集家の証",
       "description": "その他（獲得系）16の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12433,7 +12433,7 @@
     },
     {
       "id": 761,
-      "name": "その他（獲得系）17",
+      "name": "鑑定士の眼鏡",
       "description": "その他（獲得系）17の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12448,7 +12448,7 @@
     },
     {
       "id": 762,
-      "name": "その他（獲得系）18",
+      "name": "商人の天秤",
       "description": "その他（獲得系）18の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12463,7 +12463,7 @@
     },
     {
       "id": 763,
-      "name": "その他（獲得系）19",
+      "name": "両替商の印",
       "description": "その他（獲得系）19の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12478,7 +12478,7 @@
     },
     {
       "id": 764,
-      "name": "その他（ブレス系）1",
+      "name": "竜の牙",
       "description": "その他（ブレス系）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12493,7 +12493,7 @@
     },
     {
       "id": 765,
-      "name": "その他（ブレス系）2",
+      "name": "火竜のペンダント",
       "description": "その他（ブレス系）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12508,7 +12508,7 @@
     },
     {
       "id": 766,
-      "name": "その他（ブレス系）3",
+      "name": "氷竜の鱗",
       "description": "その他（ブレス系）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12523,7 +12523,7 @@
     },
     {
       "id": 767,
-      "name": "その他（ブレス系）4",
+      "name": "雷竜の角",
       "description": "その他（ブレス系）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12538,7 +12538,7 @@
     },
     {
       "id": 768,
-      "name": "その他（ブレス系）5",
+      "name": "風竜の羽根",
       "description": "その他（ブレス系）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12553,7 +12553,7 @@
     },
     {
       "id": 769,
-      "name": "その他（ブレス系）6",
+      "name": "地竜の爪",
       "description": "その他（ブレス系）6の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12568,7 +12568,7 @@
     },
     {
       "id": 770,
-      "name": "その他（ブレス系）7",
+      "name": "光竜の眼",
       "description": "その他（ブレス系）7の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12583,7 +12583,7 @@
     },
     {
       "id": 771,
-      "name": "その他（ブレス系）8",
+      "name": "闇竜の心臓",
       "description": "その他（ブレス系）8の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12598,7 +12598,7 @@
     },
     {
       "id": 772,
-      "name": "その他（ブレス系）9",
+      "name": "竜王の宝珠",
       "description": "その他（ブレス系）9の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12613,7 +12613,7 @@
     },
     {
       "id": 773,
-      "name": "その他（ブレス系）10",
+      "name": "古竜の涙",
       "description": "その他（ブレス系）10の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12628,7 +12628,7 @@
     },
     {
       "id": 774,
-      "name": "その他（ブレス系）11",
+      "name": "幼竜の卵",
       "description": "その他（ブレス系）11の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12643,7 +12643,7 @@
     },
     {
       "id": 775,
-      "name": "その他（ブレス系）12",
+      "name": "竜騎士の紋章",
       "description": "その他（ブレス系）12の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12658,7 +12658,7 @@
     },
     {
       "id": 776,
-      "name": "その他（杖）1",
+      "name": "魔法の杖飾り",
       "description": "その他（杖）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12673,7 +12673,7 @@
     },
     {
       "id": 777,
-      "name": "その他（杖）2",
+      "name": "精霊のオーブ",
       "description": "その他（杖）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12688,7 +12688,7 @@
     },
     {
       "id": 778,
-      "name": "その他（杖）3",
+      "name": "賢者の宝珠",
       "description": "その他（杖）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12703,7 +12703,7 @@
     },
     {
       "id": 779,
-      "name": "その他（杖）4",
+      "name": "魔導師の結晶",
       "description": "その他（杖）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12718,7 +12718,7 @@
     },
     {
       "id": 780,
-      "name": "その他（杖）5",
+      "name": "妖精の涙",
       "description": "その他（杖）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12733,7 +12733,7 @@
     },
     {
       "id": 781,
-      "name": "その他（杖）6",
+      "name": "竜の眼",
       "description": "その他（杖）6の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12748,7 +12748,7 @@
     },
     {
       "id": 782,
-      "name": "その他（杖）7",
+      "name": "鳳凰の炎",
       "description": "その他（杖）7の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12763,7 +12763,7 @@
     },
     {
       "id": 783,
-      "name": "その他（杖）8",
+      "name": "麒麟の角",
       "description": "その他（杖）8の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12778,7 +12778,7 @@
     },
     {
       "id": 784,
-      "name": "その他（補助1）1",
+      "name": "守護のお守り",
       "description": "その他（補助1）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12793,7 +12793,7 @@
     },
     {
       "id": 785,
-      "name": "その他（補助1）2",
+      "name": "加護のペンダント",
       "description": "その他（補助1）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12808,7 +12808,7 @@
     },
     {
       "id": 786,
-      "name": "その他（補助1）3",
+      "name": "祝福の指輪",
       "description": "その他（補助1）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12823,7 +12823,7 @@
     },
     {
       "id": 787,
-      "name": "その他（補助1）4",
+      "name": "神の恵み",
       "description": "その他（補助1）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12838,7 +12838,7 @@
     },
     {
       "id": 788,
-      "name": "その他（補助2）1",
+      "name": "炎耐性のお守り",
       "description": "その他（補助2）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12853,7 +12853,7 @@
     },
     {
       "id": 789,
-      "name": "その他（補助2）2",
+      "name": "氷耐性のお守り",
       "description": "その他（補助2）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12868,7 +12868,7 @@
     },
     {
       "id": 790,
-      "name": "その他（補助2）3",
+      "name": "雷耐性のお守り",
       "description": "その他（補助2）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12883,7 +12883,7 @@
     },
     {
       "id": 791,
-      "name": "その他（補助2）4",
+      "name": "毒耐性のお守り",
       "description": "その他（補助2）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12898,7 +12898,7 @@
     },
     {
       "id": 792,
-      "name": "その他（補助2）5",
+      "name": "麻痺耐性のお守り",
       "description": "その他（補助2）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12913,7 +12913,7 @@
     },
     {
       "id": 793,
-      "name": "その他（補助2）6",
+      "name": "石化耐性のお守り",
       "description": "その他（補助2）6の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12928,7 +12928,7 @@
     },
     {
       "id": 794,
-      "name": "その他（補助2）7",
+      "name": "即死耐性のお守り",
       "description": "その他（補助2）7の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12943,7 +12943,7 @@
     },
     {
       "id": 795,
-      "name": "その他（補助2）8",
+      "name": "呪い耐性のお守り",
       "description": "その他（補助2）8の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12958,7 +12958,7 @@
     },
     {
       "id": 796,
-      "name": "その他（補助2）9",
+      "name": "沈黙耐性のお守り",
       "description": "その他（補助2）9の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12973,7 +12973,7 @@
     },
     {
       "id": 797,
-      "name": "その他（補助2）10",
+      "name": "混乱耐性のお守り",
       "description": "その他（補助2）10の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -12988,7 +12988,7 @@
     },
     {
       "id": 798,
-      "name": "その他（補助2）11",
+      "name": "睡眠耐性のお守り",
       "description": "その他（補助2）11の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13003,7 +13003,7 @@
     },
     {
       "id": 799,
-      "name": "その他（補助2）12",
+      "name": "魅了耐性のお守り",
       "description": "その他（補助2）12の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13018,7 +13018,7 @@
     },
     {
       "id": 800,
-      "name": "その他（補助2）13",
+      "name": "全状態異常耐性のお守り",
       "description": "その他（補助2）13の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13033,7 +13033,7 @@
     },
     {
       "id": 801,
-      "name": "その他（補助2）14",
+      "name": "全属性耐性のお守り",
       "description": "その他（補助2）14の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13048,7 +13048,7 @@
     },
     {
       "id": 802,
-      "name": "その他（補助2）15",
+      "name": "万能のお守り",
       "description": "その他（補助2）15の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13063,7 +13063,7 @@
     },
     {
       "id": 803,
-      "name": "その他（指輪1）1",
+      "name": "力の指輪",
       "description": "その他（指輪1）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13078,7 +13078,7 @@
     },
     {
       "id": 804,
-      "name": "その他（指輪1）2",
+      "name": "知恵の指輪",
       "description": "その他（指輪1）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13093,7 +13093,7 @@
     },
     {
       "id": 805,
-      "name": "その他（指輪1）3",
+      "name": "精神の指輪",
       "description": "その他（指輪1）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13108,7 +13108,7 @@
     },
     {
       "id": 806,
-      "name": "その他（指輪1）4",
+      "name": "体力の指輪",
       "description": "その他（指輪1）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13123,7 +13123,7 @@
     },
     {
       "id": 807,
-      "name": "その他（指輪1）5",
+      "name": "速さの指輪",
       "description": "その他（指輪1）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13138,7 +13138,7 @@
     },
     {
       "id": 808,
-      "name": "その他（指輪1）6",
+      "name": "運の指輪",
       "description": "その他（指輪1）6の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13153,7 +13153,7 @@
     },
     {
       "id": 809,
-      "name": "その他（指輪2）1",
+      "name": "大いなる力の指輪",
       "description": "その他（指輪2）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13168,7 +13168,7 @@
     },
     {
       "id": 810,
-      "name": "その他（指輪2）2",
+      "name": "大いなる知恵の指輪",
       "description": "その他（指輪2）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13183,7 +13183,7 @@
     },
     {
       "id": 811,
-      "name": "その他（指輪2）3",
+      "name": "大いなる精神の指輪",
       "description": "その他（指輪2）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13198,7 +13198,7 @@
     },
     {
       "id": 812,
-      "name": "その他（指輪2）4",
+      "name": "大いなる体力の指輪",
       "description": "その他（指輪2）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13213,7 +13213,7 @@
     },
     {
       "id": 813,
-      "name": "その他（指輪2）5",
+      "name": "大いなる速さの指輪",
       "description": "その他（指輪2）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13228,7 +13228,7 @@
     },
     {
       "id": 814,
-      "name": "その他（指輪2）6",
+      "name": "大いなる運の指輪",
       "description": "その他（指輪2）6の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13243,7 +13243,7 @@
     },
     {
       "id": 815,
-      "name": "その他（指輪2）7",
+      "name": "全能の指輪",
       "description": "その他（指輪2）7の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13258,7 +13258,7 @@
     },
     {
       "id": 816,
-      "name": "その他（指輪3）1",
+      "name": "攻撃の指輪",
       "description": "その他（指輪3）1の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13273,7 +13273,7 @@
     },
     {
       "id": 817,
-      "name": "その他（指輪3）2",
+      "name": "防御の指輪",
       "description": "その他（指輪3）2の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13288,7 +13288,7 @@
     },
     {
       "id": 818,
-      "name": "その他（指輪3）3",
+      "name": "命中の指輪",
       "description": "その他（指輪3）3の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13303,7 +13303,7 @@
     },
     {
       "id": 819,
-      "name": "その他（指輪3）4",
+      "name": "回避の指輪",
       "description": "その他（指輪3）4の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13318,7 +13318,7 @@
     },
     {
       "id": 820,
-      "name": "その他（指輪3）5",
+      "name": "必殺の指輪",
       "description": "その他（指輪3）5の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13333,7 +13333,7 @@
     },
     {
       "id": 821,
-      "name": "その他（指輪3）6",
+      "name": "魔力の指輪",
       "description": "その他（指輪3）6の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13348,7 +13348,7 @@
     },
     {
       "id": 822,
-      "name": "その他（指輪3）7",
+      "name": "魔防の指輪",
       "description": "その他（指輪3）7の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -13363,7 +13363,7 @@
     },
     {
       "id": 823,
-      "name": "その他（指輪3）8",
+      "name": "全能力の指輪",
       "description": "その他（指輪3）8の説明",
       "category": "accessory",
       "basePrice": 10000,
@@ -14353,7 +14353,7 @@
     },
     {
       "id": 889,
-      "name": "合成アイテム（エクストラ）1",
+      "name": "ユグドラシルの葉",
       "description": "合成アイテム（エクストラ）1の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14366,7 +14366,7 @@
     },
     {
       "id": 890,
-      "name": "合成アイテム（エクストラ）2",
+      "name": "ミーミルの泉水",
       "description": "合成アイテム（エクストラ）2の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14379,7 +14379,7 @@
     },
     {
       "id": 891,
-      "name": "合成アイテム（エクストラ）3",
+      "name": "ニーズヘッグの鱗",
       "description": "合成アイテム（エクストラ）3の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14392,7 +14392,7 @@
     },
     {
       "id": 892,
-      "name": "合成アイテム（エクストラ）4",
+      "name": "フェンリルの牙",
       "description": "合成アイテム（エクストラ）4の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14405,7 +14405,7 @@
     },
     {
       "id": 893,
-      "name": "合成アイテム（エクストラ）5",
+      "name": "ヨルムンガンドの毒",
       "description": "合成アイテム（エクストラ）5の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14418,7 +14418,7 @@
     },
     {
       "id": 894,
-      "name": "合成アイテム（エクストラ）6",
+      "name": "スレイプニルの蹄鉄",
       "description": "合成アイテム（エクストラ）6の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14431,7 +14431,7 @@
     },
     {
       "id": 895,
-      "name": "合成アイテム（エクストラ）7",
+      "name": "ヴァルキリーの羽根",
       "description": "合成アイテム（エクストラ）7の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14444,7 +14444,7 @@
     },
     {
       "id": 896,
-      "name": "合成アイテム（エクストラ）8",
+      "name": "エインヘリャルの魂",
       "description": "合成アイテム（エクストラ）8の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14457,7 +14457,7 @@
     },
     {
       "id": 897,
-      "name": "合成アイテム（エクストラ）9",
+      "name": "オーディンの知恵",
       "description": "合成アイテム（エクストラ）9の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14470,7 +14470,7 @@
     },
     {
       "id": 898,
-      "name": "合成アイテム（エクストラ）10",
+      "name": "トールの雷",
       "description": "合成アイテム（エクストラ）10の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14483,7 +14483,7 @@
     },
     {
       "id": 899,
-      "name": "合成アイテム（エクストラ）11",
+      "name": "フレイヤの涙",
       "description": "合成アイテム（エクストラ）11の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14496,7 +14496,7 @@
     },
     {
       "id": 900,
-      "name": "合成アイテム（エクストラ）12",
+      "name": "ヘルの息吹",
       "description": "合成アイテム（エクストラ）12の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14509,7 +14509,7 @@
     },
     {
       "id": 901,
-      "name": "合成アイテム（エクストラ）13",
+      "name": "ラグナロクの灰",
       "description": "合成アイテム（エクストラ）13の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14522,7 +14522,7 @@
     },
     {
       "id": 902,
-      "name": "合成アイテム（一章）1",
+      "name": "狼の毛皮",
       "description": "合成アイテム（一章）1の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14535,7 +14535,7 @@
     },
     {
       "id": 903,
-      "name": "合成アイテム（一章）2",
+      "name": "蜘蛛の糸",
       "description": "合成アイテム（一章）2の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14548,7 +14548,7 @@
     },
     {
       "id": 904,
-      "name": "合成アイテム（一章）3",
+      "name": "コボルトの牙",
       "description": "合成アイテム（一章）3の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14561,7 +14561,7 @@
     },
     {
       "id": 905,
-      "name": "合成アイテム（一章）4",
+      "name": "ゴブリンの耳",
       "description": "合成アイテム（一章）4の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14574,7 +14574,7 @@
     },
     {
       "id": 906,
-      "name": "合成アイテム（一章）5",
+      "name": "森の苔",
       "description": "合成アイテム（一章）5の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14587,7 +14587,7 @@
     },
     {
       "id": 907,
-      "name": "合成アイテム（一章）6",
+      "name": "洞窟キノコ",
       "description": "合成アイテム（一章）6の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14600,7 +14600,7 @@
     },
     {
       "id": 908,
-      "name": "合成アイテム（一章）7",
+      "name": "蛇の抜け殻",
       "description": "合成アイテム（一章）7の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14613,7 +14613,7 @@
     },
     {
       "id": 909,
-      "name": "合成アイテム（一章）8",
+      "name": "熊の爪",
       "description": "合成アイテム（一章）8の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14626,7 +14626,7 @@
     },
     {
       "id": 910,
-      "name": "合成アイテム（一章）9",
+      "name": "鼠の尻尾",
       "description": "合成アイテム（一章）9の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14639,7 +14639,7 @@
     },
     {
       "id": 911,
-      "name": "合成アイテム（二章）1",
+      "name": "ハーピーの羽根",
       "description": "合成アイテム（二章）1の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14652,7 +14652,7 @@
     },
     {
       "id": 912,
-      "name": "合成アイテム（二章）2",
+      "name": "ガーゴイルの欠片",
       "description": "合成アイテム（二章）2の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14665,7 +14665,7 @@
     },
     {
       "id": 913,
-      "name": "合成アイテム（二章）3",
+      "name": "山賊の証",
       "description": "合成アイテム（二章）3の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14678,7 +14678,7 @@
     },
     {
       "id": 914,
-      "name": "合成アイテム（二章）4",
+      "name": "岩猿の毛",
       "description": "合成アイテム（二章）4の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14691,7 +14691,7 @@
     },
     {
       "id": 915,
-      "name": "合成アイテム（二章）5",
+      "name": "ワイバーンの鱗",
       "description": "合成アイテム（二章）5の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14704,7 +14704,7 @@
     },
     {
       "id": 916,
-      "name": "合成アイテム（二章）6",
+      "name": "山岳鉱石",
       "description": "合成アイテム（二章）6の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14717,7 +14717,7 @@
     },
     {
       "id": 917,
-      "name": "合成アイテム（二章）7",
+      "name": "風の結晶",
       "description": "合成アイテム（二章）7の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14730,7 +14730,7 @@
     },
     {
       "id": 918,
-      "name": "合成アイテム（二章）8",
+      "name": "雷の石",
       "description": "合成アイテム（二章）8の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14743,7 +14743,7 @@
     },
     {
       "id": 919,
-      "name": "合成アイテム（二章）9",
+      "name": "コカトリスの羽",
       "description": "合成アイテム（二章）9の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14756,7 +14756,7 @@
     },
     {
       "id": 920,
-      "name": "合成アイテム（二章）10",
+      "name": "バジリスクの眼",
       "description": "合成アイテム（二章）10の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14769,7 +14769,7 @@
     },
     {
       "id": 921,
-      "name": "合成アイテム（二章）11",
+      "name": "グリフォンの羽根",
       "description": "合成アイテム（二章）11の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14782,7 +14782,7 @@
     },
     {
       "id": 922,
-      "name": "合成アイテム（二章）12",
+      "name": "山の霊木",
       "description": "合成アイテム（二章）12の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14795,7 +14795,7 @@
     },
     {
       "id": 923,
-      "name": "合成アイテム（二章）13",
+      "name": "峠の花",
       "description": "合成アイテム（二章）13の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14808,7 +14808,7 @@
     },
     {
       "id": 924,
-      "name": "合成アイテム（二章）14",
+      "name": "岩塩",
       "description": "合成アイテム（二章）14の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14821,7 +14821,7 @@
     },
     {
       "id": 925,
-      "name": "合成アイテム（二章）15",
+      "name": "山蜜",
       "description": "合成アイテム（二章）15の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14834,7 +14834,7 @@
     },
     {
       "id": 926,
-      "name": "合成アイテム（二章）16",
+      "name": "鷲の羽根",
       "description": "合成アイテム（二章）16の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14847,7 +14847,7 @@
     },
     {
       "id": 927,
-      "name": "合成アイテム（三章）1",
+      "name": "骸骨の骨",
       "description": "合成アイテム（三章）1の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14860,7 +14860,7 @@
     },
     {
       "id": 928,
-      "name": "合成アイテム（三章）2",
+      "name": "ミイラの包帯",
       "description": "合成アイテム（三章）2の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14873,7 +14873,7 @@
     },
     {
       "id": 929,
-      "name": "合成アイテム（三章）3",
+      "name": "古代のコイン",
       "description": "合成アイテム（三章）3の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14886,7 +14886,7 @@
     },
     {
       "id": 930,
-      "name": "合成アイテム（四章）1",
+      "name": "スライムゼリー",
       "description": "合成アイテム（四章）1の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14899,7 +14899,7 @@
     },
     {
       "id": 931,
-      "name": "合成アイテム（四章）2",
+      "name": "毒蛙の粘液",
       "description": "合成アイテム（四章）2の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14912,7 +14912,7 @@
     },
     {
       "id": 932,
-      "name": "合成アイテム（四章）3",
+      "name": "瘴気の結晶",
       "description": "合成アイテム（四章）3の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14925,7 +14925,7 @@
     },
     {
       "id": 933,
-      "name": "合成アイテム（四章）4",
+      "name": "沼の泥",
       "description": "合成アイテム（四章）4の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14938,7 +14938,7 @@
     },
     {
       "id": 934,
-      "name": "合成アイテム（四章）5",
+      "name": "腐った木材",
       "description": "合成アイテム（四章）5の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14951,7 +14951,7 @@
     },
     {
       "id": 935,
-      "name": "合成アイテム（四章）6",
+      "name": "疫病の胞子",
       "description": "合成アイテム（四章）6の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14964,7 +14964,7 @@
     },
     {
       "id": 936,
-      "name": "合成アイテム（四章）7",
+      "name": "ヒルの体液",
       "description": "合成アイテム（四章）7の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14977,7 +14977,7 @@
     },
     {
       "id": 937,
-      "name": "合成アイテム（四章）8",
+      "name": "毒キノコ",
       "description": "合成アイテム（四章）8の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -14990,7 +14990,7 @@
     },
     {
       "id": 938,
-      "name": "合成アイテム（四章）9",
+      "name": "沼草",
       "description": "合成アイテム（四章）9の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15003,7 +15003,7 @@
     },
     {
       "id": 939,
-      "name": "合成アイテム（五章）1",
+      "name": "溶岩石",
       "description": "合成アイテム（五章）1の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15016,7 +15016,7 @@
     },
     {
       "id": 940,
-      "name": "合成アイテム（五章）2",
+      "name": "炎の精霊石",
       "description": "合成アイテム（五章）2の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15029,7 +15029,7 @@
     },
     {
       "id": 941,
-      "name": "合成アイテム（五章）3",
+      "name": "サラマンダーの鱗",
       "description": "合成アイテム（五章）3の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15042,7 +15042,7 @@
     },
     {
       "id": 942,
-      "name": "合成アイテム（五章）4",
+      "name": "火竜の牙",
       "description": "合成アイテム（五章）4の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15055,7 +15055,7 @@
     },
     {
       "id": 943,
-      "name": "合成アイテム（五章）5",
+      "name": "マグマスライムの核",
       "description": "合成アイテム（五章）5の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15068,7 +15068,7 @@
     },
     {
       "id": 944,
-      "name": "合成アイテム（五章）6",
+      "name": "灼熱の石",
       "description": "合成アイテム（五章）6の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15081,7 +15081,7 @@
     },
     {
       "id": 945,
-      "name": "合成アイテム（五章）7",
+      "name": "炎の羽根",
       "description": "合成アイテム（五章）7の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15094,7 +15094,7 @@
     },
     {
       "id": 946,
-      "name": "合成アイテム（五章）8",
+      "name": "溶岩の欠片",
       "description": "合成アイテム（五章）8の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15107,7 +15107,7 @@
     },
     {
       "id": 947,
-      "name": "合成アイテム（五章）9",
+      "name": "火山灰",
       "description": "合成アイテム（五章）9の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15120,7 +15120,7 @@
     },
     {
       "id": 948,
-      "name": "合成アイテム（五章）10",
+      "name": "硫黄",
       "description": "合成アイテム（五章）10の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15133,7 +15133,7 @@
     },
     {
       "id": 949,
-      "name": "合成アイテム（五章）11",
+      "name": "炎の花",
       "description": "合成アイテム（五章）11の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15146,7 +15146,7 @@
     },
     {
       "id": 950,
-      "name": "合成アイテム（五章）12",
+      "name": "灼熱鉱石",
       "description": "合成アイテム（五章）12の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15159,7 +15159,7 @@
     },
     {
       "id": 951,
-      "name": "合成アイテム（五章）13",
+      "name": "ヘルハウンドの牙",
       "description": "合成アイテム（五章）13の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15172,7 +15172,7 @@
     },
     {
       "id": 952,
-      "name": "合成アイテム（五章）14",
+      "name": "フェニックスの羽根",
       "description": "合成アイテム（五章）14の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15185,7 +15185,7 @@
     },
     {
       "id": 953,
-      "name": "合成アイテム（五章）15",
+      "name": "イフリートの角",
       "description": "合成アイテム（五章）15の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15198,7 +15198,7 @@
     },
     {
       "id": 954,
-      "name": "合成アイテム（五章）16",
+      "name": "炎の心臓",
       "description": "合成アイテム（五章）16の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15211,7 +15211,7 @@
     },
     {
       "id": 955,
-      "name": "合成アイテム（五章）17",
+      "name": "燃える骨",
       "description": "合成アイテム（五章）17の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15224,7 +15224,7 @@
     },
     {
       "id": 956,
-      "name": "合成アイテム（五章）18",
+      "name": "火の精霊核",
       "description": "合成アイテム（五章）18の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15237,7 +15237,7 @@
     },
     {
       "id": 957,
-      "name": "合成アイテム（五章）19",
+      "name": "業火の結晶",
       "description": "合成アイテム（五章）19の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15250,7 +15250,7 @@
     },
     {
       "id": 958,
-      "name": "合成アイテム（五章）20",
+      "name": "紅蓮の宝石",
       "description": "合成アイテム（五章）20の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15263,7 +15263,7 @@
     },
     {
       "id": 959,
-      "name": "合成アイテム（五章）21",
+      "name": "炎帝の欠片",
       "description": "合成アイテム（五章）21の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15276,7 +15276,7 @@
     },
     {
       "id": 960,
-      "name": "合成アイテム（五章）22",
+      "name": "不死鳥の灰",
       "description": "合成アイテム（五章）22の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15289,7 +15289,7 @@
     },
     {
       "id": 961,
-      "name": "合成アイテム（六章）1",
+      "name": "氷の結晶",
       "description": "合成アイテム（六章）1の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15302,7 +15302,7 @@
     },
     {
       "id": 962,
-      "name": "合成アイテム（六章）2",
+      "name": "雪女の涙",
       "description": "合成アイテム（六章）2の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15315,7 +15315,7 @@
     },
     {
       "id": 963,
-      "name": "合成アイテム（六章）3",
+      "name": "フロストドレイクの鱗",
       "description": "合成アイテム（六章）3の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15328,7 +15328,7 @@
     },
     {
       "id": 964,
-      "name": "合成アイテム（六章）4",
+      "name": "永久氷",
       "description": "合成アイテム（六章）4の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15341,7 +15341,7 @@
     },
     {
       "id": 965,
-      "name": "合成アイテム（六章）5",
+      "name": "氷の花",
       "description": "合成アイテム（六章）5の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15354,7 +15354,7 @@
     },
     {
       "id": 966,
-      "name": "合成アイテム（六章）6",
+      "name": "凍った心臓",
       "description": "合成アイテム（六章）6の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15367,7 +15367,7 @@
     },
     {
       "id": 967,
-      "name": "合成アイテム（七章）1",
+      "name": "剣闘士のメダル",
       "description": "合成アイテム（七章）1の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15380,7 +15380,7 @@
     },
     {
       "id": 968,
-      "name": "合成アイテム（七章）2",
+      "name": "闘士の血",
       "description": "合成アイテム（七章）2の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15393,7 +15393,7 @@
     },
     {
       "id": 969,
-      "name": "合成アイテム（七章）3",
+      "name": "キメラの牙",
       "description": "合成アイテム（七章）3の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15406,7 +15406,7 @@
     },
     {
       "id": 970,
-      "name": "合成アイテム（七章）4",
+      "name": "ミノタウロスの角",
       "description": "合成アイテム（七章）4の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15419,7 +15419,7 @@
     },
     {
       "id": 971,
-      "name": "合成アイテム（七章）5",
+      "name": "マンティコアの棘",
       "description": "合成アイテム（七章）5の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15432,7 +15432,7 @@
     },
     {
       "id": 972,
-      "name": "合成アイテム（七章）6",
+      "name": "闘神の欠片",
       "description": "合成アイテム（七章）6の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15445,7 +15445,7 @@
     },
     {
       "id": 973,
-      "name": "合成アイテム（七章）7",
+      "name": "勝利の証",
       "description": "合成アイテム（七章）7の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15458,7 +15458,7 @@
     },
     {
       "id": 974,
-      "name": "合成アイテム（七章）8",
+      "name": "敗者の涙",
       "description": "合成アイテム（七章）8の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15471,7 +15471,7 @@
     },
     {
       "id": 975,
-      "name": "合成アイテム（七章）9",
+      "name": "血塗られた剣片",
       "description": "合成アイテム（七章）9の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15484,7 +15484,7 @@
     },
     {
       "id": 976,
-      "name": "合成アイテム（七章）10",
+      "name": "壊れた鎧片",
       "description": "合成アイテム（七章）10の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15497,7 +15497,7 @@
     },
     {
       "id": 977,
-      "name": "合成アイテム（七章）11",
+      "name": "闘士の汗",
       "description": "合成アイテム（七章）11の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15510,7 +15510,7 @@
     },
     {
       "id": 978,
-      "name": "合成アイテム（七章）12",
+      "name": "獣の咆哮石",
       "description": "合成アイテム（七章）12の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15523,7 +15523,7 @@
     },
     {
       "id": 979,
-      "name": "合成アイテム（七章）13",
+      "name": "デーモンの角",
       "description": "合成アイテム（七章）13の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15536,7 +15536,7 @@
     },
     {
       "id": 980,
-      "name": "合成アイテム（七章）14",
+      "name": "魔闘士の心臓",
       "description": "合成アイテム（七章）14の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15549,7 +15549,7 @@
     },
     {
       "id": 981,
-      "name": "合成アイテム（七章）15",
+      "name": "覇者の冠片",
       "description": "合成アイテム（七章）15の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15562,7 +15562,7 @@
     },
     {
       "id": 982,
-      "name": "合成アイテム（七章）16",
+      "name": "英雄の魂",
       "description": "合成アイテム（七章）16の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15575,7 +15575,7 @@
     },
     {
       "id": 983,
-      "name": "合成アイテム（七章）17",
+      "name": "戦神の加護",
       "description": "合成アイテム（七章）17の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15588,7 +15588,7 @@
     },
     {
       "id": 984,
-      "name": "合成アイテム（七章）18",
+      "name": "不屈の意志",
       "description": "合成アイテム（七章）18の説明",
       "category": "synthesis",
       "basePrice": 10000,
@@ -15601,7 +15601,7 @@
     },
     {
       "id": 985,
-      "name": "合成アイテム（七章）19",
+      "name": "闘志の結晶",
       "description": "合成アイテム（七章）19の説明",
       "category": "synthesis",
       "basePrice": 10000,

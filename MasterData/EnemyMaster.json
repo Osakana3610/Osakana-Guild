@@ -2,7 +2,7 @@
   "enemyTemplates": [
     {
       "id": 0,
-      "baseName": "ゴブリン・1-1",
+      "baseName": "洞窟コウモリ",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -37,7 +37,7 @@
     },
     {
       "id": 1,
-      "baseName": "コボルド・1-2",
+      "baseName": "ジャイアントラット",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -72,7 +72,7 @@
     },
     {
       "id": 2,
-      "baseName": "毒蛇・1-3",
+      "baseName": "スライム",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -107,7 +107,7 @@
     },
     {
       "id": 3,
-      "baseName": "大蜘蛛・1-4",
+      "baseName": "コボルト",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -142,7 +142,7 @@
     },
     {
       "id": 4,
-      "baseName": "洞窟熊・1",
+      "baseName": "コボルトアーチャー",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [
@@ -179,7 +179,7 @@
     },
     {
       "id": 5,
-      "baseName": "森の主【1章】",
+      "baseName": "洞窟コウモリの長",
       "race": 1,
       "baseExperience": 1000,
       "specialSkillIds": [
@@ -219,7 +219,7 @@
     },
     {
       "id": 6,
-      "baseName": "ゴブリン・2-1",
+      "baseName": "ウルフ",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -254,7 +254,7 @@
     },
     {
       "id": 7,
-      "baseName": "毒蛇・2-2",
+      "baseName": "ダイアウルフ",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -289,7 +289,7 @@
     },
     {
       "id": 8,
-      "baseName": "大蜘蛛・2-3",
+      "baseName": "ウルフパップ",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -322,7 +322,7 @@
     },
     {
       "id": 9,
-      "baseName": "大蜘蛛・2-4",
+      "baseName": "野犬",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -356,7 +356,7 @@
     },
     {
       "id": 10,
-      "baseName": "ゴブリンリーダー・2",
+      "baseName": "狂犬",
       "race": 2,
       "baseExperience": 300,
       "specialSkillIds": [
@@ -392,7 +392,7 @@
     },
     {
       "id": 11,
-      "baseName": "森の主【2章】",
+      "baseName": "灰色狼の首領",
       "race": 1,
       "baseExperience": 1000,
       "specialSkillIds": [
@@ -431,7 +431,7 @@
     },
     {
       "id": 12,
-      "baseName": "野犬・3-1",
+      "baseName": "ジャイアントスパイダー",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -464,7 +464,7 @@
     },
     {
       "id": 13,
-      "baseName": "毒蛇・3-2",
+      "baseName": "森コウモリ",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -499,7 +499,7 @@
     },
     {
       "id": 14,
-      "baseName": "野犬・3-3",
+      "baseName": "ワイルドボア",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -532,7 +532,7 @@
     },
     {
       "id": 15,
-      "baseName": "ゴブリン・3-4",
+      "baseName": "毒キノコ",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -565,7 +565,7 @@
     },
     {
       "id": 16,
-      "baseName": "洞窟熊・3",
+      "baseName": "歩く樹",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [
@@ -602,7 +602,7 @@
     },
     {
       "id": 17,
-      "baseName": "森の主【3章】",
+      "baseName": "森の大蜘蛛",
       "race": 1,
       "baseExperience": 1000,
       "specialSkillIds": [
@@ -640,7 +640,7 @@
     },
     {
       "id": 18,
-      "baseName": "野犬・4-1",
+      "baseName": "ポイズンスネーク",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -675,7 +675,7 @@
     },
     {
       "id": 19,
-      "baseName": "コボルド・4-2",
+      "baseName": "沼トカゲ",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -709,7 +709,7 @@
     },
     {
       "id": 20,
-      "baseName": "大蜘蛛・4-3",
+      "baseName": "毒蛙",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -742,7 +742,7 @@
     },
     {
       "id": 21,
-      "baseName": "大蜘蛛・4-4",
+      "baseName": "リーチ",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -775,7 +775,7 @@
     },
     {
       "id": 22,
-      "baseName": "ゴブリンリーダー・4",
+      "baseName": "マッドクラブ",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [
@@ -811,7 +811,7 @@
     },
     {
       "id": 23,
-      "baseName": "森の主【4章】",
+      "baseName": "毒蛇の女王",
       "race": 1,
       "baseExperience": 1000,
       "specialSkillIds": [
@@ -851,7 +851,7 @@
     },
     {
       "id": 24,
-      "baseName": "大蜘蛛・5-1",
+      "baseName": "小蜘蛛",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -886,7 +886,7 @@
     },
     {
       "id": 25,
-      "baseName": "大蜘蛛・5-2",
+      "baseName": "毒蜘蛛",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -919,7 +919,7 @@
     },
     {
       "id": 26,
-      "baseName": "コボルド・5-3",
+      "baseName": "糸吐き蜘蛛",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -953,7 +953,7 @@
     },
     {
       "id": 27,
-      "baseName": "野犬・5-4",
+      "baseName": "跳び蜘蛛",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -986,7 +986,7 @@
     },
     {
       "id": 28,
-      "baseName": "洞窟熊・5",
+      "baseName": "蜘蛛の卵",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [
@@ -1024,7 +1024,7 @@
     },
     {
       "id": 29,
-      "baseName": "森の主【5章】",
+      "baseName": "巨大女郎蜘蛛",
       "race": 2,
       "baseExperience": 1000,
       "specialSkillIds": [
@@ -1062,7 +1062,7 @@
     },
     {
       "id": 30,
-      "baseName": "毒蛇・6-1",
+      "baseName": "野生の猪",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1096,7 +1096,7 @@
     },
     {
       "id": 31,
-      "baseName": "コボルド・6-2",
+      "baseName": "山猫",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1131,7 +1131,7 @@
     },
     {
       "id": 32,
-      "baseName": "ゴブリン・6-3",
+      "baseName": "大鷲",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1165,7 +1165,7 @@
     },
     {
       "id": 33,
-      "baseName": "毒蛇・6-4",
+      "baseName": "ブラウンベア",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1200,7 +1200,7 @@
     },
     {
       "id": 34,
-      "baseName": "洞窟熊・6",
+      "baseName": "餓狼",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [
@@ -1238,7 +1238,7 @@
     },
     {
       "id": 35,
-      "baseName": "森の主【6章】",
+      "baseName": "人喰い大熊",
       "race": 2,
       "baseExperience": 1000,
       "specialSkillIds": [
@@ -1277,7 +1277,7 @@
     },
     {
       "id": 36,
-      "baseName": "野犬・7-1",
+      "baseName": "ゴブリン",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1312,7 +1312,7 @@
     },
     {
       "id": 37,
-      "baseName": "ゴブリン・7-2",
+      "baseName": "ゴブリンアーチャー",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1345,7 +1345,7 @@
     },
     {
       "id": 38,
-      "baseName": "ゴブリン・7-3",
+      "baseName": "ゴブリンシャーマン",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1380,7 +1380,7 @@
     },
     {
       "id": 39,
-      "baseName": "コボルド・7-4",
+      "baseName": "ホブゴブリン",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1415,7 +1415,7 @@
     },
     {
       "id": 40,
-      "baseName": "ゴブリンリーダー・7",
+      "baseName": "ゴブリンライダー",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [
@@ -1452,7 +1452,7 @@
     },
     {
       "id": 41,
-      "baseName": "森の主【7章】",
+      "baseName": "呪われた猟師",
       "race": 2,
       "baseExperience": 1000,
       "specialSkillIds": [
@@ -1492,7 +1492,7 @@
     },
     {
       "id": 42,
-      "baseName": "コボルド・8-1",
+      "baseName": "トレント苗",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1525,7 +1525,7 @@
     },
     {
       "id": 43,
-      "baseName": "コボルド・8-2",
+      "baseName": "森の精霊",
       "race": 1,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1560,7 +1560,7 @@
     },
     {
       "id": 44,
-      "baseName": "毒蛇・8-3",
+      "baseName": "フェアリー",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1595,7 +1595,7 @@
     },
     {
       "id": 45,
-      "baseName": "コボルド・8-4",
+      "baseName": "ドライアド",
       "race": 2,
       "baseExperience": 100,
       "specialSkillIds": [],
@@ -1629,7 +1629,7 @@
     },
     {
       "id": 46,
-      "baseName": "ゴブリンリーダー・8",
+      "baseName": "木の化身",
       "race": 2,
       "baseExperience": 300,
       "specialSkillIds": [
@@ -1666,7 +1666,7 @@
     },
     {
       "id": 47,
-      "baseName": "森の主【8章】",
+      "baseName": "森の守護者トレント",
       "race": 2,
       "baseExperience": 1000,
       "specialSkillIds": [
@@ -1705,7 +1705,7 @@
     },
     {
       "id": 48,
-      "baseName": "岩猿・1-1",
+      "baseName": "ハーピー",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -1740,7 +1740,7 @@
     },
     {
       "id": 49,
-      "baseName": "山賊・1-2",
+      "baseName": "山岳コウモリ",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -1773,7 +1773,7 @@
     },
     {
       "id": 50,
-      "baseName": "山狼・1-3",
+      "baseName": "ロックバード",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -1806,7 +1806,7 @@
     },
     {
       "id": 51,
-      "baseName": "岩猿・1-4",
+      "baseName": "風の精霊",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -1840,7 +1840,7 @@
     },
     {
       "id": 52,
-      "baseName": "山賊頭目・1",
+      "baseName": "ガスト",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -1877,7 +1877,7 @@
     },
     {
       "id": 53,
-      "baseName": "峠の魔獣【1章】",
+      "baseName": "峠のハーピークイーン",
       "race": 2,
       "baseExperience": 2000,
       "specialSkillIds": [
@@ -1916,7 +1916,7 @@
     },
     {
       "id": 54,
-      "baseName": "山狼・2-1",
+      "baseName": "ロックエイプ",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -1950,7 +1950,7 @@
     },
     {
       "id": 55,
-      "baseName": "山狼・2-2",
+      "baseName": "岩投げ猿",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -1985,7 +1985,7 @@
     },
     {
       "id": 56,
-      "baseName": "山賊・2-3",
+      "baseName": "ボス猿",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2019,7 +2019,7 @@
     },
     {
       "id": 57,
-      "baseName": "岩猿・2-4",
+      "baseName": "子猿の群れ",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2054,7 +2054,7 @@
     },
     {
       "id": 58,
-      "baseName": "風使い・2",
+      "baseName": "銀毛猿",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -2091,7 +2091,7 @@
     },
     {
       "id": 59,
-      "baseName": "峠の魔獣【2章】",
+      "baseName": "岩猿の大王",
       "race": 1,
       "baseExperience": 2000,
       "specialSkillIds": [
@@ -2129,7 +2129,7 @@
     },
     {
       "id": 60,
-      "baseName": "鷲獅子・3-1",
+      "baseName": "ストーンゴーレム",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2162,7 +2162,7 @@
     },
     {
       "id": 61,
-      "baseName": "山賊・3-2",
+      "baseName": "ロックワーム",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2197,7 +2197,7 @@
     },
     {
       "id": 62,
-      "baseName": "鷲獅子・3-3",
+      "baseName": "岩トカゲ",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2230,7 +2230,7 @@
     },
     {
       "id": 63,
-      "baseName": "岩猿・3-4",
+      "baseName": "鉱石カニ",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2264,7 +2264,7 @@
     },
     {
       "id": 64,
-      "baseName": "風使い・3",
+      "baseName": "地の精霊",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -2301,7 +2301,7 @@
     },
     {
       "id": 65,
-      "baseName": "峠の魔獣【3章】",
+      "baseName": "岩石巨人",
       "race": 1,
       "baseExperience": 2000,
       "specialSkillIds": [
@@ -2340,7 +2340,7 @@
     },
     {
       "id": 66,
-      "baseName": "岩猿・4-1",
+      "baseName": "コボルトマイナー",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2375,7 +2375,7 @@
     },
     {
       "id": 67,
-      "baseName": "山狼・4-2",
+      "baseName": "コボルトガード",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2409,7 +2409,7 @@
     },
     {
       "id": 68,
-      "baseName": "鷲獅子・4-3",
+      "baseName": "坑道コウモリ",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2444,7 +2444,7 @@
     },
     {
       "id": 69,
-      "baseName": "山狼・4-4",
+      "baseName": "鉱石スライム",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2477,7 +2477,7 @@
     },
     {
       "id": 70,
-      "baseName": "風使い・4",
+      "baseName": "ダークドワーフ",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -2514,7 +2514,7 @@
     },
     {
       "id": 71,
-      "baseName": "峠の魔獣【4章】",
+      "baseName": "鉱山の主コボルトキング",
       "race": 2,
       "baseExperience": 2000,
       "specialSkillIds": [
@@ -2552,7 +2552,7 @@
     },
     {
       "id": 72,
-      "baseName": "山賊・5-1",
+      "baseName": "山賊",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2587,7 +2587,7 @@
     },
     {
       "id": 73,
-      "baseName": "ハーピー・5-2",
+      "baseName": "山賊射手",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2621,7 +2621,7 @@
     },
     {
       "id": 74,
-      "baseName": "山賊・5-3",
+      "baseName": "山賊剣士",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2655,7 +2655,7 @@
     },
     {
       "id": 75,
-      "baseName": "鷲獅子・5-4",
+      "baseName": "山賊魔術師",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2689,7 +2689,7 @@
     },
     {
       "id": 76,
-      "baseName": "風使い・5",
+      "baseName": "盗賊",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -2726,7 +2726,7 @@
     },
     {
       "id": 77,
-      "baseName": "峠の魔獣【5章】",
+      "baseName": "山賊頭ゴルド",
       "race": 2,
       "baseExperience": 2000,
       "specialSkillIds": [
@@ -2765,7 +2765,7 @@
     },
     {
       "id": 78,
-      "baseName": "山賊・6-1",
+      "baseName": "ガーゴイル",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2800,7 +2800,7 @@
     },
     {
       "id": 79,
-      "baseName": "岩猿・6-2",
+      "baseName": "ストーンガーゴイル",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2834,7 +2834,7 @@
     },
     {
       "id": 80,
-      "baseName": "山賊・6-3",
+      "baseName": "霧の魔物",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2867,7 +2867,7 @@
     },
     {
       "id": 81,
-      "baseName": "鷲獅子・6-4",
+      "baseName": "コカトリス",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -2901,7 +2901,7 @@
     },
     {
       "id": 82,
-      "baseName": "山賊頭目・6",
+      "baseName": "バジリスク",
       "race": 1,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -2938,7 +2938,7 @@
     },
     {
       "id": 83,
-      "baseName": "峠の魔獣【6章】",
+      "baseName": "霧の魔獣グリフォン",
       "race": 2,
       "baseExperience": 2000,
       "specialSkillIds": [
@@ -2976,7 +2976,7 @@
     },
     {
       "id": 84,
-      "baseName": "山狼・7-1",
+      "baseName": "邪教徒",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -3010,7 +3010,7 @@
     },
     {
       "id": 85,
-      "baseName": "ハーピー・7-2",
+      "baseName": "邪教の戦士",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -3044,7 +3044,7 @@
     },
     {
       "id": 86,
-      "baseName": "ハーピー・7-3",
+      "baseName": "邪教の司祭",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -3078,7 +3078,7 @@
     },
     {
       "id": 87,
-      "baseName": "山賊・7-4",
+      "baseName": "生贄ゴーレム",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -3113,7 +3113,7 @@
     },
     {
       "id": 88,
-      "baseName": "風使い・7",
+      "baseName": "闇の使徒",
       "race": 1,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -3149,7 +3149,7 @@
     },
     {
       "id": 89,
-      "baseName": "峠の魔獣【7章】",
+      "baseName": "邪教の大司祭",
       "race": 2,
       "baseExperience": 2000,
       "specialSkillIds": [
@@ -3189,7 +3189,7 @@
     },
     {
       "id": 90,
-      "baseName": "ハーピー・8-1",
+      "baseName": "ワイバーン",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -3224,7 +3224,7 @@
     },
     {
       "id": 91,
-      "baseName": "山狼・8-2",
+      "baseName": "サンダーバード",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -3258,7 +3258,7 @@
     },
     {
       "id": 92,
-      "baseName": "ハーピー・8-3",
+      "baseName": "雷の精霊",
       "race": 2,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -3292,7 +3292,7 @@
     },
     {
       "id": 93,
-      "baseName": "山狼・8-4",
+      "baseName": "風竜の子",
       "race": 1,
       "baseExperience": 200,
       "specialSkillIds": [],
@@ -3325,7 +3325,7 @@
     },
     {
       "id": 94,
-      "baseName": "山賊頭目・8",
+      "baseName": "嵐の化身",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -3362,7 +3362,7 @@
     },
     {
       "id": 95,
-      "baseName": "峠の魔獣【8章】",
+      "baseName": "嵐龍ワイバーンロード",
       "race": 1,
       "baseExperience": 2000,
       "specialSkillIds": [
@@ -3402,7 +3402,7 @@
     },
     {
       "id": 96,
-      "baseName": "石像兵・1-1",
+      "baseName": "スケルトン",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3437,7 +3437,7 @@
     },
     {
       "id": 97,
-      "baseName": "スケルトン・1-2",
+      "baseName": "スケルトンアーチャー",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3471,7 +3471,7 @@
     },
     {
       "id": 98,
-      "baseName": "スケルトン・1-3",
+      "baseName": "スケルトンメイジ",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3506,7 +3506,7 @@
     },
     {
       "id": 99,
-      "baseName": "スケルトン・1-4",
+      "baseName": "堕落した司祭",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3541,7 +3541,7 @@
     },
     {
       "id": 100,
-      "baseName": "古代の番人・1",
+      "baseName": "呪いの像",
       "race": 3,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -3578,7 +3578,7 @@
     },
     {
       "id": 101,
-      "baseName": "遺跡の守護者【1章】",
+      "baseName": "堕落した神官長",
       "race": 1,
       "baseExperience": 3000,
       "specialSkillIds": [
@@ -3617,7 +3617,7 @@
     },
     {
       "id": 102,
-      "baseName": "幽霊・2-1",
+      "baseName": "ミイラ",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3652,7 +3652,7 @@
     },
     {
       "id": 103,
-      "baseName": "呪われた騎士・2-2",
+      "baseName": "ミイラ兵",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3687,7 +3687,7 @@
     },
     {
       "id": 104,
-      "baseName": "スケルトン・2-3",
+      "baseName": "砂漠の亡霊",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3720,7 +3720,7 @@
     },
     {
       "id": 105,
-      "baseName": "石像兵・2-4",
+      "baseName": "スカラベ",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3754,7 +3754,7 @@
     },
     {
       "id": 106,
-      "baseName": "古代の番人・2",
+      "baseName": "砂の精霊",
       "race": 3,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -3792,7 +3792,7 @@
     },
     {
       "id": 107,
-      "baseName": "遺跡の守護者【2章】",
+      "baseName": "ファラオの亡霊",
       "race": 1,
       "baseExperience": 3000,
       "specialSkillIds": [
@@ -3832,7 +3832,7 @@
     },
     {
       "id": 108,
-      "baseName": "石像兵・3-1",
+      "baseName": "オートマトン",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3867,7 +3867,7 @@
     },
     {
       "id": 109,
-      "baseName": "ゾンビ・3-2",
+      "baseName": "歯車ゴーレム",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3902,7 +3902,7 @@
     },
     {
       "id": 110,
-      "baseName": "スケルトン・3-3",
+      "baseName": "時計兵",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3936,7 +3936,7 @@
     },
     {
       "id": 111,
-      "baseName": "幽霊・3-4",
+      "baseName": "ブロンズゴーレム",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -3972,7 +3972,7 @@
     },
     {
       "id": 112,
-      "baseName": "死霊術師・3",
+      "baseName": "機械蜘蛛",
       "race": 3,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -4009,7 +4009,7 @@
     },
     {
       "id": 113,
-      "baseName": "遺跡の守護者【3章】",
+      "baseName": "時計仕掛けの守護者",
       "race": 1,
       "baseExperience": 3000,
       "specialSkillIds": [
@@ -4048,7 +4048,7 @@
     },
     {
       "id": 114,
-      "baseName": "呪われた騎士・4-1",
+      "baseName": "リビングアーマー",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4083,7 +4083,7 @@
     },
     {
       "id": 115,
-      "baseName": "幽霊・4-2",
+      "baseName": "呪われた本",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4118,7 +4118,7 @@
     },
     {
       "id": 116,
-      "baseName": "呪われた騎士・4-3",
+      "baseName": "インク魔物",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4153,7 +4153,7 @@
     },
     {
       "id": 117,
-      "baseName": "呪われた騎士・4-4",
+      "baseName": "ホムンクルス",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4188,7 +4188,7 @@
     },
     {
       "id": 118,
-      "baseName": "死霊術師・4",
+      "baseName": "魔導人形",
       "race": 1,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -4226,7 +4226,7 @@
     },
     {
       "id": 119,
-      "baseName": "遺跡の守護者【4章】",
+      "baseName": "狂った魔導師",
       "race": 3,
       "baseExperience": 3000,
       "specialSkillIds": [
@@ -4267,7 +4267,7 @@
     },
     {
       "id": 120,
-      "baseName": "呪われた騎士・5-1",
+      "baseName": "レッサーデーモン",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4302,7 +4302,7 @@
     },
     {
       "id": 121,
-      "baseName": "ゾンビ・5-2",
+      "baseName": "シャドウ",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4338,7 +4338,7 @@
     },
     {
       "id": 122,
-      "baseName": "呪われた騎士・5-3",
+      "baseName": "ダークスピリット",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4371,7 +4371,7 @@
     },
     {
       "id": 123,
-      "baseName": "ゾンビ・5-4",
+      "baseName": "封印の番人",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4405,7 +4405,7 @@
     },
     {
       "id": 124,
-      "baseName": "古代の番人・5",
+      "baseName": "闇の眷属",
       "race": 1,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -4443,7 +4443,7 @@
     },
     {
       "id": 125,
-      "baseName": "遺跡の守護者【5章】",
+      "baseName": "封印されし悪魔",
       "race": 1,
       "baseExperience": 3000,
       "specialSkillIds": [
@@ -4481,7 +4481,7 @@
     },
     {
       "id": 126,
-      "baseName": "呪われた騎士・6-1",
+      "baseName": "スケルトンナイト",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4516,7 +4516,7 @@
     },
     {
       "id": 127,
-      "baseName": "石像兵・6-2",
+      "baseName": "スケルトンロード",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4550,7 +4550,7 @@
     },
     {
       "id": 128,
-      "baseName": "ゾンビ・6-3",
+      "baseName": "ボーンドラゴン",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4585,7 +4585,7 @@
     },
     {
       "id": 129,
-      "baseName": "ゾンビ・6-4",
+      "baseName": "デスナイト",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4619,7 +4619,7 @@
     },
     {
       "id": 130,
-      "baseName": "死霊術師・6",
+      "baseName": "骨の巨人",
       "race": 3,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -4658,7 +4658,7 @@
     },
     {
       "id": 131,
-      "baseName": "遺跡の守護者【6章】",
+      "baseName": "骸骨王スカルロード",
       "race": 3,
       "baseExperience": 3000,
       "specialSkillIds": [
@@ -4697,7 +4697,7 @@
     },
     {
       "id": 132,
-      "baseName": "スケルトン・7-1",
+      "baseName": "ゾンビ",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4732,7 +4732,7 @@
     },
     {
       "id": 133,
-      "baseName": "スケルトン・7-2",
+      "baseName": "グール",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4766,7 +4766,7 @@
     },
     {
       "id": 134,
-      "baseName": "スケルトン・7-3",
+      "baseName": "ゴースト",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4801,7 +4801,7 @@
     },
     {
       "id": 135,
-      "baseName": "石像兵・7-4",
+      "baseName": "レイス",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4834,7 +4834,7 @@
     },
     {
       "id": 136,
-      "baseName": "死霊術師・7",
+      "baseName": "バンシー",
       "race": 1,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -4872,7 +4872,7 @@
     },
     {
       "id": 137,
-      "baseName": "遺跡の守護者【7章】",
+      "baseName": "呪術師リッチ",
       "race": 1,
       "baseExperience": 3000,
       "specialSkillIds": [
@@ -4912,7 +4912,7 @@
     },
     {
       "id": 138,
-      "baseName": "呪われた騎士・8-1",
+      "baseName": "アイアンゴーレム",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4947,7 +4947,7 @@
     },
     {
       "id": 139,
-      "baseName": "幽霊・8-2",
+      "baseName": "ストーンガーディアン",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -4980,7 +4980,7 @@
     },
     {
       "id": 140,
-      "baseName": "ゾンビ・8-3",
+      "baseName": "古代兵士の霊",
       "race": 1,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -5014,7 +5014,7 @@
     },
     {
       "id": 141,
-      "baseName": "スケルトン・8-4",
+      "baseName": "守護像",
       "race": 3,
       "baseExperience": 300,
       "specialSkillIds": [],
@@ -5049,7 +5049,7 @@
     },
     {
       "id": 142,
-      "baseName": "古代の番人・8",
+      "baseName": "試練の化身",
       "race": 1,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -5085,7 +5085,7 @@
     },
     {
       "id": 143,
-      "baseName": "遺跡の守護者【8章】",
+      "baseName": "古代の守護者ゴーレム",
       "race": 1,
       "baseExperience": 3000,
       "specialSkillIds": [
@@ -5123,7 +5123,7 @@
     },
     {
       "id": 144,
-      "baseName": "毒蛾・1-1",
+      "baseName": "ポイズントード",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5160,7 +5160,7 @@
     },
     {
       "id": 145,
-      "baseName": "沼の触手・1-2",
+      "baseName": "沼蛇",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5195,7 +5195,7 @@
     },
     {
       "id": 146,
-      "baseName": "沼の触手・1-3",
+      "baseName": "腐敗スライム",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5232,7 +5232,7 @@
     },
     {
       "id": 147,
-      "baseName": "スライム・1-4",
+      "baseName": "ヒル",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5269,7 +5269,7 @@
     },
     {
       "id": 148,
-      "baseName": "腐敗の王・1",
+      "baseName": "毒キノコ人",
       "race": 2,
       "baseExperience": 1200,
       "specialSkillIds": [
@@ -5306,7 +5306,7 @@
     },
     {
       "id": 149,
-      "baseName": "沼の主【1章】",
+      "baseName": "腐敗の大蛙",
       "race": 3,
       "baseExperience": 4000,
       "specialSkillIds": [
@@ -5345,7 +5345,7 @@
     },
     {
       "id": 150,
-      "baseName": "腐食獣・2-1",
+      "baseName": "マンイーター",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5381,7 +5381,7 @@
     },
     {
       "id": 151,
-      "baseName": "毒蛙・2-2",
+      "baseName": "毒花",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5419,7 +5419,7 @@
     },
     {
       "id": 152,
-      "baseName": "毒蛾・2-3",
+      "baseName": "胞子撒き",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5456,7 +5456,7 @@
     },
     {
       "id": 153,
-      "baseName": "毒蛾・2-4",
+      "baseName": "瘴気の精霊",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5493,7 +5493,7 @@
     },
     {
       "id": 154,
-      "baseName": "沼の魔女・2",
+      "baseName": "腐った樹",
       "race": 2,
       "baseExperience": 1200,
       "specialSkillIds": [
@@ -5531,7 +5531,7 @@
     },
     {
       "id": 155,
-      "baseName": "沼の主【2章】",
+      "baseName": "瘴気の主マンイーター",
       "race": 2,
       "baseExperience": 4000,
       "specialSkillIds": [
@@ -5571,7 +5571,7 @@
     },
     {
       "id": 156,
-      "baseName": "腐食獣・3-1",
+      "baseName": "溺死体",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5609,7 +5609,7 @@
     },
     {
       "id": 157,
-      "baseName": "スライム・3-2",
+      "baseName": "水死人",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5647,7 +5647,7 @@
     },
     {
       "id": 158,
-      "baseName": "スライム・3-3",
+      "baseName": "沼ゾンビ",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5685,7 +5685,7 @@
     },
     {
       "id": 159,
-      "baseName": "沼の触手・3-4",
+      "baseName": "幽霊漁師",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5720,7 +5720,7 @@
     },
     {
       "id": 160,
-      "baseName": "腐敗の王・3",
+      "baseName": "呪われた村人",
       "race": 2,
       "baseExperience": 1200,
       "specialSkillIds": [
@@ -5756,7 +5756,7 @@
     },
     {
       "id": 161,
-      "baseName": "沼の主【3章】",
+      "baseName": "溺死者の長",
       "race": 3,
       "baseExperience": 4000,
       "specialSkillIds": [
@@ -5795,7 +5795,7 @@
     },
     {
       "id": 162,
-      "baseName": "沼の触手・4-1",
+      "baseName": "スワンプスライム",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5833,7 +5833,7 @@
     },
     {
       "id": 163,
-      "baseName": "毒蛾・4-2",
+      "baseName": "毒水の精霊",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5871,7 +5871,7 @@
     },
     {
       "id": 164,
-      "baseName": "沼の触手・4-3",
+      "baseName": "汚染魚",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5909,7 +5909,7 @@
     },
     {
       "id": 165,
-      "baseName": "毒蛙・4-4",
+      "baseName": "ヘドロ怪物",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -5945,7 +5945,7 @@
     },
     {
       "id": 166,
-      "baseName": "腐敗の王・4",
+      "baseName": "酸の塊",
       "race": 2,
       "baseExperience": 1200,
       "specialSkillIds": [
@@ -5983,7 +5983,7 @@
     },
     {
       "id": 167,
-      "baseName": "沼の主【4章】",
+      "baseName": "汚染の根源スライムキング",
       "race": 3,
       "baseExperience": 4000,
       "specialSkillIds": [
@@ -6023,7 +6023,7 @@
     },
     {
       "id": 168,
-      "baseName": "スライム・5-1",
+      "baseName": "プラークラット",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6059,7 +6059,7 @@
     },
     {
       "id": 169,
-      "baseName": "腐食獣・5-2",
+      "baseName": "疫病蝿",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6096,7 +6096,7 @@
     },
     {
       "id": 170,
-      "baseName": "毒蛾・5-3",
+      "baseName": "病の使徒",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6132,7 +6132,7 @@
     },
     {
       "id": 171,
-      "baseName": "毒蛾・5-4",
+      "baseName": "腐敗した獣",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6169,7 +6169,7 @@
     },
     {
       "id": 172,
-      "baseName": "腐敗の王・5",
+      "baseName": "膿の塊",
       "race": 3,
       "baseExperience": 1200,
       "specialSkillIds": [
@@ -6207,7 +6207,7 @@
     },
     {
       "id": 173,
-      "baseName": "沼の主【5章】",
+      "baseName": "疫病王ペストロード",
       "race": 2,
       "baseExperience": 4000,
       "specialSkillIds": [
@@ -6247,7 +6247,7 @@
     },
     {
       "id": 174,
-      "baseName": "スライム・6-1",
+      "baseName": "アシッドスライム",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6284,7 +6284,7 @@
     },
     {
       "id": 175,
-      "baseName": "沼の触手・6-2",
+      "baseName": "腐食虫",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6321,7 +6321,7 @@
     },
     {
       "id": 176,
-      "baseName": "スライム・6-3",
+      "baseName": "溶解獣",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6357,7 +6357,7 @@
     },
     {
       "id": 177,
-      "baseName": "スライム・6-4",
+      "baseName": "酸の精霊",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6393,7 +6393,7 @@
     },
     {
       "id": 178,
-      "baseName": "沼の魔女・6",
+      "baseName": "腐食ワーム",
       "race": 2,
       "baseExperience": 1200,
       "specialSkillIds": [
@@ -6430,7 +6430,7 @@
     },
     {
       "id": 179,
-      "baseName": "沼の主【6章】",
+      "baseName": "腐食竜",
       "race": 3,
       "baseExperience": 4000,
       "specialSkillIds": [
@@ -6469,7 +6469,7 @@
     },
     {
       "id": 180,
-      "baseName": "スライム・7-1",
+      "baseName": "スワンプハイドラ",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6507,7 +6507,7 @@
     },
     {
       "id": 181,
-      "baseName": "スライム・7-2",
+      "baseName": "沼の触手",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6542,7 +6542,7 @@
     },
     {
       "id": 182,
-      "baseName": "毒蛾・7-3",
+      "baseName": "泥人形",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6580,7 +6580,7 @@
     },
     {
       "id": 183,
-      "baseName": "沼の触手・7-4",
+      "baseName": "ガスクラウド",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6618,7 +6618,7 @@
     },
     {
       "id": 184,
-      "baseName": "腐敗の王・7",
+      "baseName": "沼の亡霊",
       "race": 2,
       "baseExperience": 1200,
       "specialSkillIds": [
@@ -6655,7 +6655,7 @@
     },
     {
       "id": 185,
-      "baseName": "沼の主【7章】",
+      "baseName": "沼の魔女",
       "race": 2,
       "baseExperience": 4000,
       "specialSkillIds": [
@@ -6694,7 +6694,7 @@
     },
     {
       "id": 186,
-      "baseName": "毒蛾・8-1",
+      "baseName": "瘴気の塊",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6729,7 +6729,7 @@
     },
     {
       "id": 187,
-      "baseName": "毒蛾・8-2",
+      "baseName": "毒霧の精霊",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6765,7 +6765,7 @@
     },
     {
       "id": 188,
-      "baseName": "沼の触手・8-3",
+      "baseName": "腐敗の権化",
       "race": 2,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6801,7 +6801,7 @@
     },
     {
       "id": 189,
-      "baseName": "毒蛾・8-4",
+      "baseName": "死毒の化身",
       "race": 3,
       "baseExperience": 400,
       "specialSkillIds": [
@@ -6838,7 +6838,7 @@
     },
     {
       "id": 190,
-      "baseName": "腐敗の王・8",
+      "baseName": "瘴気の眷属",
       "race": 2,
       "baseExperience": 1200,
       "specialSkillIds": [
@@ -6875,7 +6875,7 @@
     },
     {
       "id": 191,
-      "baseName": "沼の主【8章】",
+      "baseName": "瘴気の化身ミアズマ",
       "race": 3,
       "baseExperience": 4000,
       "specialSkillIds": [
@@ -6915,7 +6915,7 @@
     },
     {
       "id": 192,
-      "baseName": "溶岩蛇・1-1",
+      "baseName": "ファイアビートル",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -6954,7 +6954,7 @@
     },
     {
       "id": 193,
-      "baseName": "火炎犬・1-2",
+      "baseName": "マグマワーム",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -6992,7 +6992,7 @@
     },
     {
       "id": 194,
-      "baseName": "炎の鳥・1-3",
+      "baseName": "炎コウモリ",
       "race": 2,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7029,7 +7029,7 @@
     },
     {
       "id": 195,
-      "baseName": "溶岩蛇・1-4",
+      "baseName": "溶岩カニ",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7067,7 +7067,7 @@
     },
     {
       "id": 196,
-      "baseName": "炎の巨人・1",
+      "baseName": "火トカゲ",
       "race": 4,
       "baseExperience": 1500,
       "specialSkillIds": [
@@ -7106,7 +7106,7 @@
     },
     {
       "id": 197,
-      "baseName": "炎の王【1章】",
+      "baseName": "炎の坑夫長",
       "race": 2,
       "baseExperience": 5000,
       "specialSkillIds": [
@@ -7146,7 +7146,7 @@
     },
     {
       "id": 198,
-      "baseName": "マグマゴーレム・2-1",
+      "baseName": "ラーバスライム",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7185,7 +7185,7 @@
     },
     {
       "id": 199,
-      "baseName": "火の精・2-2",
+      "baseName": "マグマゴーレム",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7224,7 +7224,7 @@
     },
     {
       "id": 200,
-      "baseName": "炎の鳥・2-3",
+      "baseName": "溶岩の精霊",
       "race": 2,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7259,7 +7259,7 @@
     },
     {
       "id": 201,
-      "baseName": "マグマゴーレム・2-4",
+      "baseName": "炎の蛇",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7297,7 +7297,7 @@
     },
     {
       "id": 202,
-      "baseName": "炎の巨人・2",
+      "baseName": "溶岩魚",
       "race": 2,
       "baseExperience": 1500,
       "specialSkillIds": [
@@ -7334,7 +7334,7 @@
     },
     {
       "id": 203,
-      "baseName": "炎の王【2章】",
+      "baseName": "溶岩巨人",
       "race": 4,
       "baseExperience": 5000,
       "specialSkillIds": [
@@ -7375,7 +7375,7 @@
     },
     {
       "id": 204,
-      "baseName": "火炎犬・3-1",
+      "baseName": "フレイムインプ",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7414,7 +7414,7 @@
     },
     {
       "id": 205,
-      "baseName": "溶岩蛇・3-2",
+      "baseName": "炎の司祭",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7453,7 +7453,7 @@
     },
     {
       "id": 206,
-      "baseName": "マグマゴーレム・3-3",
+      "baseName": "火炎の使徒",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7490,7 +7490,7 @@
     },
     {
       "id": 207,
-      "baseName": "マグマゴーレム・3-4",
+      "baseName": "燃える骸骨",
       "race": 2,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7527,7 +7527,7 @@
     },
     {
       "id": 208,
-      "baseName": "炎の巨人・3",
+      "baseName": "炎の信徒",
       "race": 4,
       "baseExperience": 1500,
       "specialSkillIds": [
@@ -7567,7 +7567,7 @@
     },
     {
       "id": 209,
-      "baseName": "炎の王【3章】",
+      "baseName": "炎の大司祭",
       "race": 4,
       "baseExperience": 5000,
       "specialSkillIds": [
@@ -7609,7 +7609,7 @@
     },
     {
       "id": 210,
-      "baseName": "溶岩蛇・4-1",
+      "baseName": "ファイアドレイク",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7647,7 +7647,7 @@
     },
     {
       "id": 211,
-      "baseName": "マグマゴーレム・4-2",
+      "baseName": "炎のトカゲ",
       "race": 2,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7683,7 +7683,7 @@
     },
     {
       "id": 212,
-      "baseName": "溶岩蛇・4-3",
+      "baseName": "火竜の子",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7722,7 +7722,7 @@
     },
     {
       "id": 213,
-      "baseName": "炎の鳥・4-4",
+      "baseName": "火炎蜥蜴",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7759,7 +7759,7 @@
     },
     {
       "id": 214,
-      "baseName": "火竜の子・4",
+      "baseName": "ドラゴンパピー",
       "race": 2,
       "baseExperience": 1500,
       "specialSkillIds": [
@@ -7797,7 +7797,7 @@
     },
     {
       "id": 215,
-      "baseName": "炎の王【4章】",
+      "baseName": "若き火竜",
       "race": 4,
       "baseExperience": 5000,
       "specialSkillIds": [
@@ -7838,7 +7838,7 @@
     },
     {
       "id": 216,
-      "baseName": "溶岩蛇・5-1",
+      "baseName": "フレイムナイト",
       "race": 2,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7873,7 +7873,7 @@
     },
     {
       "id": 217,
-      "baseName": "炎の鳥・5-2",
+      "baseName": "炎の亡霊",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7912,7 +7912,7 @@
     },
     {
       "id": 218,
-      "baseName": "炎の鳥・5-3",
+      "baseName": "燃える鎧",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7949,7 +7949,7 @@
     },
     {
       "id": 219,
-      "baseName": "炎の鳥・5-4",
+      "baseName": "火炎のレイス",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -7987,7 +7987,7 @@
     },
     {
       "id": 220,
-      "baseName": "炎の巨人・5",
+      "baseName": "灼熱の守護者",
       "race": 4,
       "baseExperience": 1500,
       "specialSkillIds": [
@@ -8028,7 +8028,7 @@
     },
     {
       "id": 221,
-      "baseName": "炎の王【5章】",
+      "baseName": "炎に囚われし騎士",
       "race": 2,
       "baseExperience": 5000,
       "specialSkillIds": [
@@ -8066,7 +8066,7 @@
     },
     {
       "id": 222,
-      "baseName": "溶岩蛇・6-1",
+      "baseName": "サラマンダー",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8104,7 +8104,7 @@
     },
     {
       "id": 223,
-      "baseName": "火の精・6-2",
+      "baseName": "ファイアエレメンタル",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8142,7 +8142,7 @@
     },
     {
       "id": 224,
-      "baseName": "マグマゴーレム・6-3",
+      "baseName": "炎の巨人",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8180,7 +8180,7 @@
     },
     {
       "id": 225,
-      "baseName": "炎の鳥・6-4",
+      "baseName": "マグマドラゴン",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8219,7 +8219,7 @@
     },
     {
       "id": 226,
-      "baseName": "火竜の子・6",
+      "baseName": "火山の化身",
       "race": 4,
       "baseExperience": 1500,
       "specialSkillIds": [
@@ -8258,7 +8258,7 @@
     },
     {
       "id": 227,
-      "baseName": "炎の王【6章】",
+      "baseName": "火山の主サラマンダーキング",
       "race": 4,
       "baseExperience": 5000,
       "specialSkillIds": [
@@ -8298,7 +8298,7 @@
     },
     {
       "id": 228,
-      "baseName": "火炎犬・7-1",
+      "baseName": "ヘルハウンド",
       "race": 2,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8335,7 +8335,7 @@
     },
     {
       "id": 229,
-      "baseName": "火炎犬・7-2",
+      "baseName": "炎の悪魔",
       "race": 2,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8372,7 +8372,7 @@
     },
     {
       "id": 230,
-      "baseName": "火の精・7-3",
+      "baseName": "業火の使者",
       "race": 2,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8408,7 +8408,7 @@
     },
     {
       "id": 231,
-      "baseName": "炎の鳥・7-4",
+      "baseName": "地獄の番犬",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8445,7 +8445,7 @@
     },
     {
       "id": 232,
-      "baseName": "火竜の子・7",
+      "baseName": "火炎デーモン",
       "race": 2,
       "baseExperience": 1500,
       "specialSkillIds": [
@@ -8483,7 +8483,7 @@
     },
     {
       "id": 233,
-      "baseName": "炎の王【7章】",
+      "baseName": "炎獄の門番イフリート",
       "race": 4,
       "baseExperience": 5000,
       "specialSkillIds": [
@@ -8523,7 +8523,7 @@
     },
     {
       "id": 234,
-      "baseName": "マグマゴーレム・8-1",
+      "baseName": "フェニックス",
       "race": 2,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8558,7 +8558,7 @@
     },
     {
       "id": 235,
-      "baseName": "火の精・8-2",
+      "baseName": "炎の精霊王",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8597,7 +8597,7 @@
     },
     {
       "id": 236,
-      "baseName": "火の精・8-3",
+      "baseName": "不死鳥の雛",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8634,7 +8634,7 @@
     },
     {
       "id": 237,
-      "baseName": "火の精・8-4",
+      "baseName": "炎帝の近衛",
       "race": 4,
       "baseExperience": 500,
       "specialSkillIds": [
@@ -8673,7 +8673,7 @@
     },
     {
       "id": 238,
-      "baseName": "炎の巨人・8",
+      "baseName": "灼熱の化身",
       "race": 2,
       "baseExperience": 1500,
       "specialSkillIds": [
@@ -8710,7 +8710,7 @@
     },
     {
       "id": 239,
-      "baseName": "炎の王【8章】",
+      "baseName": "炎帝フレイムロード",
       "race": 2,
       "baseExperience": 5000,
       "specialSkillIds": [
@@ -8750,7 +8750,7 @@
     },
     {
       "id": 240,
-      "baseName": "雪女・1-1",
+      "baseName": "フロストウルフ",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -8785,7 +8785,7 @@
     },
     {
       "id": 241,
-      "baseName": "氷狼・1-2",
+      "baseName": "雪狼",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -8822,7 +8822,7 @@
     },
     {
       "id": 242,
-      "baseName": "フロストゴーレム・1-3",
+      "baseName": "氷のコウモリ",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -8859,7 +8859,7 @@
     },
     {
       "id": 243,
-      "baseName": "氷の精・1-4",
+      "baseName": "凍てついた鳥",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -8895,7 +8895,7 @@
     },
     {
       "id": 244,
-      "baseName": "吹雪の使者・1",
+      "baseName": "雪兎",
       "race": 2,
       "baseExperience": 1800,
       "specialSkillIds": [
@@ -8933,7 +8933,7 @@
     },
     {
       "id": 245,
-      "baseName": "氷の女王【1章】",
+      "baseName": "氷の巨狼",
       "race": 3,
       "baseExperience": 6000,
       "specialSkillIds": [
@@ -8973,7 +8973,7 @@
     },
     {
       "id": 246,
-      "baseName": "フロストゴーレム・2-1",
+      "baseName": "アイスゴーレム",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9010,7 +9010,7 @@
     },
     {
       "id": 247,
-      "baseName": "雪女・2-2",
+      "baseName": "フロストスライム",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9045,7 +9045,7 @@
     },
     {
       "id": 248,
-      "baseName": "氷狼・2-3",
+      "baseName": "氷の彫像",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9080,7 +9080,7 @@
     },
     {
       "id": 249,
-      "baseName": "凍結獣・2-4",
+      "baseName": "凍結した番人",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9118,7 +9118,7 @@
     },
     {
       "id": 250,
-      "baseName": "氷竜の子・2",
+      "baseName": "氷の壁",
       "race": 3,
       "baseExperience": 1800,
       "specialSkillIds": [
@@ -9157,7 +9157,7 @@
     },
     {
       "id": 251,
-      "baseName": "氷の女王【2章】",
+      "baseName": "氷迷宮の主",
       "race": 3,
       "baseExperience": 6000,
       "specialSkillIds": [
@@ -9198,7 +9198,7 @@
     },
     {
       "id": 252,
-      "baseName": "氷狼・3-1",
+      "baseName": "雪女の従者",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9236,7 +9236,7 @@
     },
     {
       "id": 253,
-      "baseName": "氷狼・3-2",
+      "baseName": "氷の精霊",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9273,7 +9273,7 @@
     },
     {
       "id": 254,
-      "baseName": "氷狼・3-3",
+      "baseName": "フロストスプライト",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9308,7 +9308,7 @@
     },
     {
       "id": 255,
-      "baseName": "雪女・3-4",
+      "baseName": "凍える幽霊",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9344,7 +9344,7 @@
     },
     {
       "id": 256,
-      "baseName": "氷竜の子・3",
+      "baseName": "雪の化身",
       "race": 2,
       "baseExperience": 1800,
       "specialSkillIds": [
@@ -9382,7 +9382,7 @@
     },
     {
       "id": 257,
-      "baseName": "氷の女王【3章】",
+      "baseName": "雪女",
       "race": 2,
       "baseExperience": 6000,
       "specialSkillIds": [
@@ -9421,7 +9421,7 @@
     },
     {
       "id": 258,
-      "baseName": "雪女・4-1",
+      "baseName": "フロストスケルトン",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9458,7 +9458,7 @@
     },
     {
       "id": 259,
-      "baseName": "氷狼・4-2",
+      "baseName": "氷漬けの戦士",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9494,7 +9494,7 @@
     },
     {
       "id": 260,
-      "baseName": "氷狼・4-3",
+      "baseName": "凍結ゾンビ",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9531,7 +9531,7 @@
     },
     {
       "id": 261,
-      "baseName": "氷狼・4-4",
+      "baseName": "氷の亡霊",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9566,7 +9566,7 @@
     },
     {
       "id": 262,
-      "baseName": "吹雪の使者・4",
+      "baseName": "凍てついた騎士",
       "race": 3,
       "baseExperience": 1800,
       "specialSkillIds": [
@@ -9605,7 +9605,7 @@
     },
     {
       "id": 263,
-      "baseName": "氷の女王【4章】",
+      "baseName": "凍てついた王",
       "race": 3,
       "baseExperience": 6000,
       "specialSkillIds": [
@@ -9644,7 +9644,7 @@
     },
     {
       "id": 264,
-      "baseName": "氷の精・5-1",
+      "baseName": "ブリザードイーグル",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9681,7 +9681,7 @@
     },
     {
       "id": 265,
-      "baseName": "凍結獣・5-2",
+      "baseName": "雪の巨人",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9716,7 +9716,7 @@
     },
     {
       "id": 266,
-      "baseName": "雪女・5-3",
+      "baseName": "氷のハーピー",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9753,7 +9753,7 @@
     },
     {
       "id": 267,
-      "baseName": "凍結獣・5-4",
+      "baseName": "吹雪の精霊",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9788,7 +9788,7 @@
     },
     {
       "id": 268,
-      "baseName": "吹雪の使者・5",
+      "baseName": "アイスワイバーン",
       "race": 2,
       "baseExperience": 1800,
       "specialSkillIds": [
@@ -9826,7 +9826,7 @@
     },
     {
       "id": 269,
-      "baseName": "氷の女王【5章】",
+      "baseName": "ブリザードドレイク",
       "race": 2,
       "baseExperience": 6000,
       "specialSkillIds": [
@@ -9865,7 +9865,7 @@
     },
     {
       "id": 270,
-      "baseName": "雪女・6-1",
+      "baseName": "アイスワーム",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9903,7 +9903,7 @@
     },
     {
       "id": 271,
-      "baseName": "凍結獣・6-2",
+      "baseName": "フロストドレイク",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9940,7 +9940,7 @@
     },
     {
       "id": 272,
-      "baseName": "フロストゴーレム・6-3",
+      "baseName": "氷竜の子",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -9976,7 +9976,7 @@
     },
     {
       "id": 273,
-      "baseName": "フロストゴーレム・6-4",
+      "baseName": "氷鱗の蛇",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -10011,7 +10011,7 @@
     },
     {
       "id": 274,
-      "baseName": "氷竜の子・6",
+      "baseName": "凍結ドラゴン",
       "race": 2,
       "baseExperience": 1800,
       "specialSkillIds": [
@@ -10050,7 +10050,7 @@
     },
     {
       "id": 275,
-      "baseName": "氷の女王【6章】",
+      "baseName": "氷竜フロストワーム",
       "race": 2,
       "baseExperience": 6000,
       "specialSkillIds": [
@@ -10089,7 +10089,7 @@
     },
     {
       "id": 276,
-      "baseName": "氷狼・7-1",
+      "baseName": "フロストワイト",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -10125,7 +10125,7 @@
     },
     {
       "id": 277,
-      "baseName": "雪女・7-2",
+      "baseName": "凍死者",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -10160,7 +10160,7 @@
     },
     {
       "id": 278,
-      "baseName": "凍結獣・7-3",
+      "baseName": "氷のバンシー",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -10196,7 +10196,7 @@
     },
     {
       "id": 279,
-      "baseName": "フロストゴーレム・7-4",
+      "baseName": "凍てついたリッチ",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -10233,7 +10233,7 @@
     },
     {
       "id": 280,
-      "baseName": "吹雪の使者・7",
+      "baseName": "氷結の亡者",
       "race": 2,
       "baseExperience": 1800,
       "specialSkillIds": [
@@ -10271,7 +10271,7 @@
     },
     {
       "id": 281,
-      "baseName": "氷の女王【7章】",
+      "baseName": "凍死の王フロストリッチ",
       "race": 2,
       "baseExperience": 6000,
       "specialSkillIds": [
@@ -10310,7 +10310,7 @@
     },
     {
       "id": 282,
-      "baseName": "凍結獣・8-1",
+      "baseName": "アイスエレメンタル",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -10347,7 +10347,7 @@
     },
     {
       "id": 283,
-      "baseName": "氷の精・8-2",
+      "baseName": "氷の女王の近衛",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -10384,7 +10384,7 @@
     },
     {
       "id": 284,
-      "baseName": "氷狼・8-3",
+      "baseName": "ウィンターナイト",
       "race": 2,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -10421,7 +10421,7 @@
     },
     {
       "id": 285,
-      "baseName": "氷狼・8-4",
+      "baseName": "氷結の化身",
       "race": 3,
       "baseExperience": 600,
       "specialSkillIds": [
@@ -10457,7 +10457,7 @@
     },
     {
       "id": 286,
-      "baseName": "吹雪の使者・8",
+      "baseName": "極寒の精霊",
       "race": 3,
       "baseExperience": 1800,
       "specialSkillIds": [
@@ -10497,7 +10497,7 @@
     },
     {
       "id": 287,
-      "baseName": "氷の女王【8章】",
+      "baseName": "氷原の女王グラシア",
       "race": 3,
       "baseExperience": 6000,
       "specialSkillIds": [
@@ -10537,7 +10537,7 @@
     },
     {
       "id": 288,
-      "baseName": "悪魔兵・1-1",
+      "baseName": "グラディエーター",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -10574,7 +10574,7 @@
     },
     {
       "id": 289,
-      "baseName": "堕天使・1-2",
+      "baseName": "剣闘士",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -10612,7 +10612,7 @@
     },
     {
       "id": 290,
-      "baseName": "堕天使・1-3",
+      "baseName": "闘奴",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -10651,7 +10651,7 @@
     },
     {
       "id": 291,
-      "baseName": "深淵の眼・1-4",
+      "baseName": "戦士",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -10689,7 +10689,7 @@
     },
     {
       "id": 292,
-      "baseName": "深淵の使者・1",
+      "baseName": "格闘家",
       "race": 3,
       "baseExperience": 2100,
       "specialSkillIds": [
@@ -10729,7 +10729,7 @@
     },
     {
       "id": 293,
-      "baseName": "魔王【1章】",
+      "baseName": "闘士長グラディウス",
       "race": 3,
       "baseExperience": 7000,
       "specialSkillIds": [
@@ -10768,7 +10768,7 @@
     },
     {
       "id": 294,
-      "baseName": "堕天使・2-1",
+      "baseName": "亡霊剣闘士",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -10806,7 +10806,7 @@
     },
     {
       "id": 295,
-      "baseName": "堕天使・2-2",
+      "baseName": "骸骨戦士",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -10844,7 +10844,7 @@
     },
     {
       "id": 296,
-      "baseName": "深淵の眼・2-3",
+      "baseName": "死せる闘士",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -10882,7 +10882,7 @@
     },
     {
       "id": 297,
-      "baseName": "魔界の獣・2-4",
+      "baseName": "怨念の剣士",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -10920,7 +10920,7 @@
     },
     {
       "id": 298,
-      "baseName": "深淵の使者・2",
+      "baseName": "呪われた闘奴",
       "race": 5,
       "baseExperience": 2100,
       "specialSkillIds": [
@@ -10959,7 +10959,7 @@
     },
     {
       "id": 299,
-      "baseName": "魔王【2章】",
+      "baseName": "不死の剣闘士",
       "race": 5,
       "baseExperience": 7000,
       "specialSkillIds": [
@@ -10997,7 +10997,7 @@
     },
     {
       "id": 300,
-      "baseName": "魔界の獣・3-1",
+      "baseName": "試練の戦士",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11035,7 +11035,7 @@
     },
     {
       "id": 301,
-      "baseName": "影の従者・3-2",
+      "baseName": "幻影剣士",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11074,7 +11074,7 @@
     },
     {
       "id": 302,
-      "baseName": "影の従者・3-3",
+      "baseName": "影の闘士",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11112,7 +11112,7 @@
     },
     {
       "id": 303,
-      "baseName": "悪魔兵・3-4",
+      "baseName": "試練のゴーレム",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11149,7 +11149,7 @@
     },
     {
       "id": 304,
-      "baseName": "深淵の使者・3",
+      "baseName": "武神の使い",
       "race": 3,
       "baseExperience": 2100,
       "specialSkillIds": [
@@ -11189,7 +11189,7 @@
     },
     {
       "id": 305,
-      "baseName": "魔王【3章】",
+      "baseName": "試練の番人",
       "race": 5,
       "baseExperience": 7000,
       "specialSkillIds": [
@@ -11228,7 +11228,7 @@
     },
     {
       "id": 306,
-      "baseName": "影の従者・4-1",
+      "baseName": "ウォーライオン",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11266,7 +11266,7 @@
     },
     {
       "id": 307,
-      "baseName": "影の従者・4-2",
+      "baseName": "戦闘熊",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11305,7 +11305,7 @@
     },
     {
       "id": 308,
-      "baseName": "悪魔兵・4-3",
+      "baseName": "鎖付き獣",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11342,7 +11342,7 @@
     },
     {
       "id": 309,
-      "baseName": "悪魔兵・4-4",
+      "baseName": "キメラ",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11381,7 +11381,7 @@
     },
     {
       "id": 310,
-      "baseName": "深淵の使者・4",
+      "baseName": "マンティコア",
       "race": 3,
       "baseExperience": 2100,
       "specialSkillIds": [
@@ -11421,7 +11421,7 @@
     },
     {
       "id": 311,
-      "baseName": "魔王【4章】",
+      "baseName": "獣王キマイラ",
       "race": 3,
       "baseExperience": 7000,
       "specialSkillIds": [
@@ -11461,7 +11461,7 @@
     },
     {
       "id": 312,
-      "baseName": "深淵の眼・5-1",
+      "baseName": "デスブリンガー",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11500,7 +11500,7 @@
     },
     {
       "id": 313,
-      "baseName": "深淵の眼・5-2",
+      "baseName": "死神の戦士",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11537,7 +11537,7 @@
     },
     {
       "id": 314,
-      "baseName": "悪魔兵・5-3",
+      "baseName": "血塗れの剣士",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11574,7 +11574,7 @@
     },
     {
       "id": 315,
-      "baseName": "堕天使・5-4",
+      "baseName": "殺戮者",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11612,7 +11612,7 @@
     },
     {
       "id": 316,
-      "baseName": "深淵の使者・5",
+      "baseName": "死の執行者",
       "race": 5,
       "baseExperience": 2100,
       "specialSkillIds": [
@@ -11650,7 +11650,7 @@
     },
     {
       "id": 317,
-      "baseName": "魔王【5章】",
+      "baseName": "死闘の覇者",
       "race": 5,
       "baseExperience": 7000,
       "specialSkillIds": [
@@ -11690,7 +11690,7 @@
     },
     {
       "id": 318,
-      "baseName": "悪魔兵・6-1",
+      "baseName": "堕落した騎士",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11729,7 +11729,7 @@
     },
     {
       "id": 319,
-      "baseName": "魔界の獣・6-2",
+      "baseName": "闇落ちの勇者",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11768,7 +11768,7 @@
     },
     {
       "id": 320,
-      "baseName": "深淵の眼・6-3",
+      "baseName": "裏切りの戦士",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11805,7 +11805,7 @@
     },
     {
       "id": 321,
-      "baseName": "深淵の眼・6-4",
+      "baseName": "呪われた英雄",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11843,7 +11843,7 @@
     },
     {
       "id": 322,
-      "baseName": "魔将・6",
+      "baseName": "背信の剣聖",
       "race": 3,
       "baseExperience": 2100,
       "specialSkillIds": [
@@ -11883,7 +11883,7 @@
     },
     {
       "id": 323,
-      "baseName": "魔王【6章】",
+      "baseName": "堕ちた英雄",
       "race": 5,
       "baseExperience": 7000,
       "specialSkillIds": [
@@ -11923,7 +11923,7 @@
     },
     {
       "id": 324,
-      "baseName": "影の従者・7-1",
+      "baseName": "デーモンウォリアー",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11962,7 +11962,7 @@
     },
     {
       "id": 325,
-      "baseName": "悪魔兵・7-2",
+      "baseName": "魔闘士",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -11999,7 +11999,7 @@
     },
     {
       "id": 326,
-      "baseName": "影の従者・7-3",
+      "baseName": "アークデーモン",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -12037,7 +12037,7 @@
     },
     {
       "id": 327,
-      "baseName": "影の従者・7-4",
+      "baseName": "悪魔剣士",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -12074,7 +12074,7 @@
     },
     {
       "id": 328,
-      "baseName": "魔将・7",
+      "baseName": "地獄の闘士",
       "race": 3,
       "baseExperience": 2100,
       "specialSkillIds": [
@@ -12114,7 +12114,7 @@
     },
     {
       "id": 329,
-      "baseName": "魔王【7章】",
+      "baseName": "魔闘士デーモンチャンピオン",
       "race": 5,
       "baseExperience": 7000,
       "specialSkillIds": [
@@ -12154,7 +12154,7 @@
     },
     {
       "id": 330,
-      "baseName": "堕天使・8-1",
+      "baseName": "ウォーオーク",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -12191,7 +12191,7 @@
     },
     {
       "id": 331,
-      "baseName": "悪魔兵・8-2",
+      "baseName": "ミノタウロス",
       "race": 5,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -12229,7 +12229,7 @@
     },
     {
       "id": 332,
-      "baseName": "悪魔兵・8-3",
+      "baseName": "巨人戦士",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -12268,7 +12268,7 @@
     },
     {
       "id": 333,
-      "baseName": "堕天使・8-4",
+      "baseName": "タイタン",
       "race": 3,
       "baseExperience": 700,
       "specialSkillIds": [
@@ -12307,7 +12307,7 @@
     },
     {
       "id": 334,
-      "baseName": "魔将・8",
+      "baseName": "戦神の化身",
       "race": 5,
       "baseExperience": 2100,
       "specialSkillIds": [
@@ -12346,7 +12346,7 @@
     },
     {
       "id": 335,
-      "baseName": "魔王【8章】",
+      "baseName": "闘神アレス",
       "race": 5,
       "baseExperience": 7000,
       "specialSkillIds": [
@@ -12384,7 +12384,7 @@
     },
     {
       "id": 336,
-      "baseName": "聖獣・1-1",
+      "baseName": "エンジェルソルジャー",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12422,7 +12422,7 @@
     },
     {
       "id": 337,
-      "baseName": "聖獣・1-2",
+      "baseName": "天使の見習い",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12461,7 +12461,7 @@
     },
     {
       "id": 338,
-      "baseName": "光の精・1-3",
+      "baseName": "光の精霊",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12498,7 +12498,7 @@
     },
     {
       "id": 339,
-      "baseName": "光の精・1-4",
+      "baseName": "聖なる鳥",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12538,7 +12538,7 @@
     },
     {
       "id": 340,
-      "baseName": "神竜の子・1",
+      "baseName": "天空の番人",
       "race": 5,
       "baseExperience": 2400,
       "specialSkillIds": [
@@ -12576,7 +12576,7 @@
     },
     {
       "id": 341,
-      "baseName": "神竜【1章】",
+      "baseName": "天空の門番",
       "race": 4,
       "baseExperience": 8000,
       "specialSkillIds": [
@@ -12618,7 +12618,7 @@
     },
     {
       "id": 342,
-      "baseName": "天使兵・2-1",
+      "baseName": "ペガサス",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12657,7 +12657,7 @@
     },
     {
       "id": 343,
-      "baseName": "天空の番人・2-2",
+      "baseName": "ユニコーン",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12695,7 +12695,7 @@
     },
     {
       "id": 344,
-      "baseName": "聖獣・2-3",
+      "baseName": "聖獣の仔",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12733,7 +12733,7 @@
     },
     {
       "id": 345,
-      "baseName": "神の使い・2-4",
+      "baseName": "神殿の守護者",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12772,7 +12772,7 @@
     },
     {
       "id": 346,
-      "baseName": "神竜の子・2",
+      "baseName": "光の使い",
       "race": 4,
       "baseExperience": 2400,
       "specialSkillIds": [
@@ -12813,7 +12813,7 @@
     },
     {
       "id": 347,
-      "baseName": "神竜【2章】",
+      "baseName": "聖獣ペガサス",
       "race": 4,
       "baseExperience": 8000,
       "specialSkillIds": [
@@ -12855,7 +12855,7 @@
     },
     {
       "id": 348,
-      "baseName": "聖獣・3-1",
+      "baseName": "パワー",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12893,7 +12893,7 @@
     },
     {
       "id": 349,
-      "baseName": "天使兵・3-2",
+      "baseName": "ドミニオン",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12932,7 +12932,7 @@
     },
     {
       "id": 350,
-      "baseName": "聖獣・3-3",
+      "baseName": "プリンシパリティ",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -12971,7 +12971,7 @@
     },
     {
       "id": 351,
-      "baseName": "光の精・3-4",
+      "baseName": "ヴァーチュ",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13010,7 +13010,7 @@
     },
     {
       "id": 352,
-      "baseName": "神竜の子・3",
+      "baseName": "スローン",
       "race": 4,
       "baseExperience": 2400,
       "specialSkillIds": [
@@ -13050,7 +13050,7 @@
     },
     {
       "id": 353,
-      "baseName": "神竜【3章】",
+      "baseName": "大天使ミカエル",
       "race": 4,
       "baseExperience": 8000,
       "specialSkillIds": [
@@ -13092,7 +13092,7 @@
     },
     {
       "id": 354,
-      "baseName": "天使兵・4-1",
+      "baseName": "審判の天使",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13132,7 +13132,7 @@
     },
     {
       "id": 355,
-      "baseName": "神の使い・4-2",
+      "baseName": "裁きの使者",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13169,7 +13169,7 @@
     },
     {
       "id": 356,
-      "baseName": "聖獣・4-3",
+      "baseName": "正義の剣士",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13208,7 +13208,7 @@
     },
     {
       "id": 357,
-      "baseName": "聖獣・4-4",
+      "baseName": "断罪者",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13246,7 +13246,7 @@
     },
     {
       "id": 358,
-      "baseName": "神竜の子・4",
+      "baseName": "浄化の炎",
       "race": 5,
       "baseExperience": 2400,
       "specialSkillIds": [
@@ -13285,7 +13285,7 @@
     },
     {
       "id": 359,
-      "baseName": "神竜【4章】",
+      "baseName": "審判者ラファエル",
       "race": 5,
       "baseExperience": 8000,
       "specialSkillIds": [
@@ -13324,7 +13324,7 @@
     },
     {
       "id": 360,
-      "baseName": "天空の番人・5-1",
+      "baseName": "水の精霊",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13361,7 +13361,7 @@
     },
     {
       "id": 361,
-      "baseName": "天空の番人・5-2",
+      "baseName": "聖水のスライム",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13399,7 +13399,7 @@
     },
     {
       "id": 362,
-      "baseName": "聖獣・5-3",
+      "baseName": "浄化の光",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13437,7 +13437,7 @@
     },
     {
       "id": 363,
-      "baseName": "天使兵・5-4",
+      "baseName": "泉の守り手",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13475,7 +13475,7 @@
     },
     {
       "id": 364,
-      "baseName": "神竜の子・5",
+      "baseName": "聖なる魚",
       "race": 5,
       "baseExperience": 2400,
       "specialSkillIds": [
@@ -13513,7 +13513,7 @@
     },
     {
       "id": 365,
-      "baseName": "神竜【5章】",
+      "baseName": "聖泉の守護者",
       "race": 4,
       "baseExperience": 8000,
       "specialSkillIds": [
@@ -13555,7 +13555,7 @@
     },
     {
       "id": 366,
-      "baseName": "天空の番人・6-1",
+      "baseName": "セラフィム",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13592,7 +13592,7 @@
     },
     {
       "id": 367,
-      "baseName": "天空の番人・6-2",
+      "baseName": "神官",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13631,7 +13631,7 @@
     },
     {
       "id": 368,
-      "baseName": "光の精・6-3",
+      "baseName": "巫女",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13671,7 +13671,7 @@
     },
     {
       "id": 369,
-      "baseName": "天使兵・6-4",
+      "baseName": "神託の使い",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13710,7 +13710,7 @@
     },
     {
       "id": 370,
-      "baseName": "神竜の子・6",
+      "baseName": "祈りの化身",
       "race": 4,
       "baseExperience": 2400,
       "specialSkillIds": [
@@ -13751,7 +13751,7 @@
     },
     {
       "id": 371,
-      "baseName": "神竜【6章】",
+      "baseName": "神託の巫女",
       "race": 4,
       "baseExperience": 8000,
       "specialSkillIds": [
@@ -13791,7 +13791,7 @@
     },
     {
       "id": 372,
-      "baseName": "神の使い・7-1",
+      "baseName": "ケルビム",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13831,7 +13831,7 @@
     },
     {
       "id": 373,
-      "baseName": "神の使い・7-2",
+      "baseName": "門の守護者",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13870,7 +13870,7 @@
     },
     {
       "id": 374,
-      "baseName": "光の精・7-3",
+      "baseName": "聖なる獅子",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13909,7 +13909,7 @@
     },
     {
       "id": 375,
-      "baseName": "神の使い・7-4",
+      "baseName": "神域の番人",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -13947,7 +13947,7 @@
     },
     {
       "id": 376,
-      "baseName": "神竜の子・7",
+      "baseName": "光の壁",
       "race": 4,
       "baseExperience": 2400,
       "specialSkillIds": [
@@ -13988,7 +13988,7 @@
     },
     {
       "id": 377,
-      "baseName": "神竜【7章】",
+      "baseName": "門番ケルビム",
       "race": 5,
       "baseExperience": 8000,
       "specialSkillIds": [
@@ -14026,7 +14026,7 @@
     },
     {
       "id": 378,
-      "baseName": "光の精・8-1",
+      "baseName": "アークエンジェル",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -14065,7 +14065,7 @@
     },
     {
       "id": 379,
-      "baseName": "天空の番人・8-2",
+      "baseName": "熾天使",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -14105,7 +14105,7 @@
     },
     {
       "id": 380,
-      "baseName": "光の精・8-3",
+      "baseName": "神獣",
       "race": 5,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -14144,7 +14144,7 @@
     },
     {
       "id": 381,
-      "baseName": "聖獣・8-4",
+      "baseName": "光の化身",
       "race": 4,
       "baseExperience": 800,
       "specialSkillIds": [
@@ -14182,7 +14182,7 @@
     },
     {
       "id": 382,
-      "baseName": "大天使・8",
+      "baseName": "神の眷属",
       "race": 4,
       "baseExperience": 2400,
       "specialSkillIds": [
@@ -14223,7 +14223,7 @@
     },
     {
       "id": 383,
-      "baseName": "神竜【8章】",
+      "baseName": "神竜バハムート",
       "race": 4,
       "baseExperience": 8000,
       "specialSkillIds": [
@@ -14265,7 +14265,7 @@
     },
     {
       "id": 384,
-      "baseName": "終焉の使者・1-1",
+      "baseName": "ヘルの従者",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14303,7 +14303,7 @@
     },
     {
       "id": 385,
-      "baseName": "超越者・1-2",
+      "baseName": "死者の魂",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14341,7 +14341,7 @@
     },
     {
       "id": 386,
-      "baseName": "虚無の眼・1-3",
+      "baseName": "虚無の影",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14378,7 +14378,7 @@
     },
     {
       "id": 387,
-      "baseName": "始原の精・1-4",
+      "baseName": "冥界の番犬",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14417,7 +14417,7 @@
     },
     {
       "id": 388,
-      "baseName": "世界の敵・1",
+      "baseName": "闇の亡者",
       "race": 4,
       "baseExperience": 2700,
       "specialSkillIds": [
@@ -14458,7 +14458,7 @@
     },
     {
       "id": 389,
-      "baseName": "超越神【EX1】",
+      "baseName": "虚無の番人ガルム",
       "race": 5,
       "baseExperience": 9000,
       "specialSkillIds": [
@@ -14497,7 +14497,7 @@
     },
     {
       "id": 390,
-      "baseName": "虚無の眼・2-1",
+      "baseName": "スルトの眷属",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14534,7 +14534,7 @@
     },
     {
       "id": 391,
-      "baseName": "虚無の眼・2-2",
+      "baseName": "炎の巨人",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14574,7 +14574,7 @@
     },
     {
       "id": 392,
-      "baseName": "終焉の使者・2-3",
+      "baseName": "ムスペルの戦士",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14614,7 +14614,7 @@
     },
     {
       "id": 393,
-      "baseName": "虚無の眼・2-4",
+      "baseName": "原初の炎",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14654,7 +14654,7 @@
     },
     {
       "id": 394,
-      "baseName": "世界の敵・2",
+      "baseName": "混沌の化身",
       "race": 5,
       "baseExperience": 2700,
       "specialSkillIds": [
@@ -14692,7 +14692,7 @@
     },
     {
       "id": 395,
-      "baseName": "超越神【EX2】",
+      "baseName": "原初の巨人スルト",
       "race": 5,
       "baseExperience": 9000,
       "specialSkillIds": [
@@ -14732,7 +14732,7 @@
     },
     {
       "id": 396,
-      "baseName": "虚無の眼・3-1",
+      "baseName": "ヨトゥン",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14772,7 +14772,7 @@
     },
     {
       "id": 397,
-      "baseName": "始原の精・3-2",
+      "baseName": "霜の巨人",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14811,7 +14811,7 @@
     },
     {
       "id": 398,
-      "baseName": "混沌の獣・3-3",
+      "baseName": "氷の戦士",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14851,7 +14851,7 @@
     },
     {
       "id": 399,
-      "baseName": "超越者・3-4",
+      "baseName": "ニヴルヘイムの民",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -14890,7 +14890,7 @@
     },
     {
       "id": 400,
-      "baseName": "世界の敵・3",
+      "baseName": "原初の氷",
       "race": 4,
       "baseExperience": 2700,
       "specialSkillIds": [
@@ -14931,7 +14931,7 @@
     },
     {
       "id": 401,
-      "baseName": "超越神【EX3】",
+      "baseName": "氷の巨人スリュム",
       "race": 4,
       "baseExperience": 9000,
       "specialSkillIds": [
@@ -14973,7 +14973,7 @@
     },
     {
       "id": 402,
-      "baseName": "超越者・4-1",
+      "baseName": "ヘルの戦士",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15010,7 +15010,7 @@
     },
     {
       "id": 403,
-      "baseName": "超越者・4-2",
+      "baseName": "死の使い",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15048,7 +15048,7 @@
     },
     {
       "id": 404,
-      "baseName": "混沌の獣・4-3",
+      "baseName": "冥府の門番",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15086,7 +15086,7 @@
     },
     {
       "id": 405,
-      "baseName": "混沌の獣・4-4",
+      "baseName": "死霊の騎士",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15124,7 +15124,7 @@
     },
     {
       "id": 406,
-      "baseName": "世界の敵・4",
+      "baseName": "終焉の予言者",
       "race": 4,
       "baseExperience": 2700,
       "specialSkillIds": [
@@ -15163,7 +15163,7 @@
     },
     {
       "id": 407,
-      "baseName": "超越神【EX4】",
+      "baseName": "死の女神ヘル",
       "race": 5,
       "baseExperience": 9000,
       "specialSkillIds": [
@@ -15201,7 +15201,7 @@
     },
     {
       "id": 408,
-      "baseName": "始原の精・5-1",
+      "baseName": "ニーズヘッグの鱗",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15240,7 +15240,7 @@
     },
     {
       "id": 409,
-      "baseName": "超越者・5-2",
+      "baseName": "根を喰む蛇",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15280,7 +15280,7 @@
     },
     {
       "id": 410,
-      "baseName": "混沌の獣・5-3",
+      "baseName": "世界樹の虫",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15318,7 +15318,7 @@
     },
     {
       "id": 411,
-      "baseName": "混沌の獣・5-4",
+      "baseName": "闇のリス",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15355,7 +15355,7 @@
     },
     {
       "id": 412,
-      "baseName": "神殺し・5",
+      "baseName": "腐敗の竜",
       "race": 4,
       "baseExperience": 2700,
       "specialSkillIds": [
@@ -15394,7 +15394,7 @@
     },
     {
       "id": 413,
-      "baseName": "超越神【EX5】",
+      "baseName": "大蛇ニーズヘッグ",
       "race": 5,
       "baseExperience": 9000,
       "specialSkillIds": [
@@ -15434,7 +15434,7 @@
     },
     {
       "id": 414,
-      "baseName": "終焉の使者・6-1",
+      "baseName": "エインヘリャル",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15472,7 +15472,7 @@
     },
     {
       "id": 415,
-      "baseName": "混沌の獣・6-2",
+      "baseName": "ヴァルキリー",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15509,7 +15509,7 @@
     },
     {
       "id": 416,
-      "baseName": "始原の精・6-3",
+      "baseName": "戦乙女",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15548,7 +15548,7 @@
     },
     {
       "id": 417,
-      "baseName": "始原の精・6-4",
+      "baseName": "戦死者の魂",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15586,7 +15586,7 @@
     },
     {
       "id": 418,
-      "baseName": "世界の敵・6",
+      "baseName": "ヴァルハラの戦士",
       "race": 5,
       "baseExperience": 2700,
       "specialSkillIds": [
@@ -15626,7 +15626,7 @@
     },
     {
       "id": 419,
-      "baseName": "超越神【EX6】",
+      "baseName": "軍神テュール",
       "race": 4,
       "baseExperience": 9000,
       "specialSkillIds": [
@@ -15667,7 +15667,7 @@
     },
     {
       "id": 420,
-      "baseName": "虚無の眼・7-1",
+      "baseName": "海蛇の子",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15705,7 +15705,7 @@
     },
     {
       "id": 421,
-      "baseName": "混沌の獣・7-2",
+      "baseName": "深海の怪物",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15744,7 +15744,7 @@
     },
     {
       "id": 422,
-      "baseName": "混沌の獣・7-3",
+      "baseName": "ミドガルドの守り",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15783,7 +15783,7 @@
     },
     {
       "id": 423,
-      "baseName": "始原の精・7-4",
+      "baseName": "大海の眷属",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15821,7 +15821,7 @@
     },
     {
       "id": 424,
-      "baseName": "世界の敵・7",
+      "baseName": "世界蛇の鱗",
       "race": 5,
       "baseExperience": 2700,
       "specialSkillIds": [
@@ -15861,7 +15861,7 @@
     },
     {
       "id": 425,
-      "baseName": "超越神【EX7】",
+      "baseName": "大海蛇ヨルムンガンド",
       "race": 5,
       "baseExperience": 9000,
       "specialSkillIds": [
@@ -15900,7 +15900,7 @@
     },
     {
       "id": 426,
-      "baseName": "始原の精・8-1",
+      "baseName": "フギンとムニン",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15938,7 +15938,7 @@
     },
     {
       "id": 427,
-      "baseName": "混沌の獣・8-2",
+      "baseName": "ゲリとフレキ",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -15976,7 +15976,7 @@
     },
     {
       "id": 428,
-      "baseName": "超越者・8-3",
+      "baseName": "スレイプニル",
       "race": 4,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -16014,7 +16014,7 @@
     },
     {
       "id": 429,
-      "baseName": "終焉の使者・8-4",
+      "baseName": "オーディンの槍",
       "race": 5,
       "baseExperience": 900,
       "specialSkillIds": [
@@ -16051,7 +16051,7 @@
     },
     {
       "id": 430,
-      "baseName": "世界の敵・8",
+      "baseName": "全父の眼",
       "race": 5,
       "baseExperience": 2700,
       "specialSkillIds": [
@@ -16090,7 +16090,7 @@
     },
     {
       "id": 431,
-      "baseName": "超越神【EX8】",
+      "baseName": "全父オーディン",
       "race": 4,
       "baseExperience": 9000,
       "specialSkillIds": [
