@@ -280,7 +280,6 @@
 				"",
 				"",
 				"",
-				"",
 			);
 		};
 /* End PBXShellScriptBuildPhase section */
