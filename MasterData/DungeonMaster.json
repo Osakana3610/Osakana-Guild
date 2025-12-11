@@ -12,7 +12,7 @@
       "floorCount": 4,
       "storyText": null,
       "unlockConditions": [
-        "story:1"
+        "storyRead:1"
       ],
       "floorEnemyMapping": [
         {
@@ -141,7 +141,7 @@
       "floorCount": 4,
       "storyText": null,
       "unlockConditions": [
-        "story:2"
+        "storyRead:2"
       ],
       "floorEnemyMapping": [
         {
@@ -270,7 +270,7 @@
       "floorCount": 5,
       "storyText": null,
       "unlockConditions": [
-        "story:3"
+        "storyRead:3"
       ],
       "floorEnemyMapping": [
         {
@@ -399,7 +399,7 @@
       "floorCount": 5,
       "storyText": null,
       "unlockConditions": [
-        "story:4"
+        "storyRead:4"
       ],
       "floorEnemyMapping": [
         {
@@ -528,7 +528,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "story:5"
+        "storyRead:5"
       ],
       "floorEnemyMapping": [
         {
@@ -657,7 +657,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "story:6"
+        "storyRead:6"
       ],
       "floorEnemyMapping": [
         {
@@ -786,7 +786,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "story:7"
+        "storyRead:7"
       ],
       "floorEnemyMapping": [
         {
@@ -915,7 +915,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "story:8"
+        "storyRead:8"
       ],
       "floorEnemyMapping": [
         {
@@ -1044,7 +1044,7 @@
       "floorCount": 5,
       "storyText": null,
       "unlockConditions": [
-        "story:9"
+        "storyRead:9"
       ],
       "floorEnemyMapping": [
         {
@@ -1173,7 +1173,7 @@
       "floorCount": 5,
       "storyText": null,
       "unlockConditions": [
-        "story:10"
+        "storyRead:10"
       ],
       "floorEnemyMapping": [
         {
@@ -1302,7 +1302,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "story:11"
+        "storyRead:11"
       ],
       "floorEnemyMapping": [
         {
@@ -1431,7 +1431,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "story:12"
+        "storyRead:12"
       ],
       "floorEnemyMapping": [
         {
@@ -1560,7 +1560,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "story:13"
+        "storyRead:13"
       ],
       "floorEnemyMapping": [
         {
@@ -1689,7 +1689,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "story:14"
+        "storyRead:14"
       ],
       "floorEnemyMapping": [
         {
@@ -1818,7 +1818,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "story:15"
+        "storyRead:15"
       ],
       "floorEnemyMapping": [
         {
@@ -1947,7 +1947,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "story:16"
+        "storyRead:16"
       ],
       "floorEnemyMapping": [
         {
@@ -2076,7 +2076,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "story:17"
+        "storyRead:17"
       ],
       "floorEnemyMapping": [
         {
@@ -2205,7 +2205,7 @@
       "floorCount": 6,
       "storyText": null,
       "unlockConditions": [
-        "story:18"
+        "storyRead:18"
       ],
       "floorEnemyMapping": [
         {
@@ -2334,7 +2334,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "story:19"
+        "storyRead:19"
       ],
       "floorEnemyMapping": [
         {
@@ -2463,7 +2463,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "story:20"
+        "storyRead:20"
       ],
       "floorEnemyMapping": [
         {
@@ -2592,7 +2592,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "story:21"
+        "storyRead:21"
       ],
       "floorEnemyMapping": [
         {
@@ -2721,7 +2721,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "story:22"
+        "storyRead:22"
       ],
       "floorEnemyMapping": [
         {
@@ -2850,7 +2850,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "story:23"
+        "storyRead:23"
       ],
       "floorEnemyMapping": [
         {
@@ -2979,7 +2979,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "story:24"
+        "storyRead:24"
       ],
       "floorEnemyMapping": [
         {
@@ -3108,7 +3108,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "story:25"
+        "storyRead:25"
       ],
       "floorEnemyMapping": [
         {
@@ -3237,7 +3237,7 @@
       "floorCount": 7,
       "storyText": null,
       "unlockConditions": [
-        "story:26"
+        "storyRead:26"
       ],
       "floorEnemyMapping": [
         {
@@ -3366,7 +3366,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "story:27"
+        "storyRead:27"
       ],
       "floorEnemyMapping": [
         {
@@ -3495,7 +3495,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "story:28"
+        "storyRead:28"
       ],
       "floorEnemyMapping": [
         {
@@ -3624,7 +3624,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "story:29"
+        "storyRead:29"
       ],
       "floorEnemyMapping": [
         {
@@ -3753,7 +3753,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "story:30"
+        "storyRead:30"
       ],
       "floorEnemyMapping": [
         {
@@ -3882,7 +3882,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "story:31"
+        "storyRead:31"
       ],
       "floorEnemyMapping": [
         {
@@ -4011,7 +4011,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "story:32"
+        "storyRead:32"
       ],
       "floorEnemyMapping": [
         {
@@ -4140,7 +4140,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "story:33"
+        "storyRead:33"
       ],
       "floorEnemyMapping": [
         {
@@ -4269,7 +4269,7 @@
       "floorCount": 8,
       "storyText": null,
       "unlockConditions": [
-        "story:34"
+        "storyRead:34"
       ],
       "floorEnemyMapping": [
         {
@@ -4398,7 +4398,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "story:35"
+        "storyRead:35"
       ],
       "floorEnemyMapping": [
         {
@@ -4527,7 +4527,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "story:36"
+        "storyRead:36"
       ],
       "floorEnemyMapping": [
         {
@@ -4656,7 +4656,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "story:37"
+        "storyRead:37"
       ],
       "floorEnemyMapping": [
         {
@@ -4785,7 +4785,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "story:38"
+        "storyRead:38"
       ],
       "floorEnemyMapping": [
         {
@@ -4914,7 +4914,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "story:39"
+        "storyRead:39"
       ],
       "floorEnemyMapping": [
         {
@@ -5043,7 +5043,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "story:40"
+        "storyRead:40"
       ],
       "floorEnemyMapping": [
         {
@@ -5172,7 +5172,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "story:41"
+        "storyRead:41"
       ],
       "floorEnemyMapping": [
         {
@@ -5301,7 +5301,7 @@
       "floorCount": 9,
       "storyText": null,
       "unlockConditions": [
-        "story:42"
+        "storyRead:42"
       ],
       "floorEnemyMapping": [
         {
@@ -5430,7 +5430,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "story:43"
+        "storyRead:43"
       ],
       "floorEnemyMapping": [
         {
@@ -5559,7 +5559,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "story:44"
+        "storyRead:44"
       ],
       "floorEnemyMapping": [
         {
@@ -5688,7 +5688,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "story:45"
+        "storyRead:45"
       ],
       "floorEnemyMapping": [
         {
@@ -5817,7 +5817,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "story:46"
+        "storyRead:46"
       ],
       "floorEnemyMapping": [
         {
@@ -5946,7 +5946,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "story:47"
+        "storyRead:47"
       ],
       "floorEnemyMapping": [
         {
@@ -6075,7 +6075,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "story:48"
+        "storyRead:48"
       ],
       "floorEnemyMapping": [
         {
@@ -6204,7 +6204,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "story:49"
+        "storyRead:49"
       ],
       "floorEnemyMapping": [
         {
@@ -6333,7 +6333,7 @@
       "floorCount": 10,
       "storyText": null,
       "unlockConditions": [
-        "story:50"
+        "storyRead:50"
       ],
       "floorEnemyMapping": [
         {
@@ -6462,7 +6462,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "story:51"
+        "storyRead:51"
       ],
       "floorEnemyMapping": [
         {
@@ -6591,7 +6591,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "story:52"
+        "storyRead:52"
       ],
       "floorEnemyMapping": [
         {
@@ -6720,7 +6720,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "story:53"
+        "storyRead:53"
       ],
       "floorEnemyMapping": [
         {
@@ -6849,7 +6849,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "story:54"
+        "storyRead:54"
       ],
       "floorEnemyMapping": [
         {
@@ -6978,7 +6978,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "story:55"
+        "storyRead:55"
       ],
       "floorEnemyMapping": [
         {
@@ -7107,7 +7107,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "story:56"
+        "storyRead:56"
       ],
       "floorEnemyMapping": [
         {
@@ -7236,7 +7236,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "story:57"
+        "storyRead:57"
       ],
       "floorEnemyMapping": [
         {
@@ -7365,7 +7365,7 @@
       "floorCount": 11,
       "storyText": null,
       "unlockConditions": [
-        "story:58"
+        "storyRead:58"
       ],
       "floorEnemyMapping": [
         {
@@ -7494,7 +7494,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "story:59"
+        "storyRead:59"
       ],
       "floorEnemyMapping": [
         {
@@ -7623,7 +7623,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "story:60"
+        "storyRead:60"
       ],
       "floorEnemyMapping": [
         {
@@ -7752,7 +7752,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "story:61"
+        "storyRead:61"
       ],
       "floorEnemyMapping": [
         {
@@ -7881,7 +7881,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "story:62"
+        "storyRead:62"
       ],
       "floorEnemyMapping": [
         {
@@ -8010,7 +8010,7 @@
       "floorCount": 14,
       "storyText": null,
       "unlockConditions": [
-        "story:63"
+        "storyRead:63"
       ],
       "floorEnemyMapping": [
         {
@@ -8139,7 +8139,7 @@
       "floorCount": 14,
       "storyText": null,
       "unlockConditions": [
-        "story:64"
+        "storyRead:64"
       ],
       "floorEnemyMapping": [
         {
@@ -8268,7 +8268,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "story:65"
+        "storyRead:65"
       ],
       "floorEnemyMapping": [
         {
@@ -8397,7 +8397,7 @@
       "floorCount": 12,
       "storyText": null,
       "unlockConditions": [
-        "story:66"
+        "storyRead:66"
       ],
       "floorEnemyMapping": [
         {
@@ -8526,7 +8526,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "story:67"
+        "storyRead:67"
       ],
       "floorEnemyMapping": [
         {
@@ -8655,7 +8655,7 @@
       "floorCount": 13,
       "storyText": null,
       "unlockConditions": [
-        "story:68"
+        "storyRead:68"
       ],
       "floorEnemyMapping": [
         {
@@ -8784,7 +8784,7 @@
       "floorCount": 14,
       "storyText": null,
       "unlockConditions": [
-        "story:69"
+        "storyRead:69"
       ],
       "floorEnemyMapping": [
         {
@@ -8913,7 +8913,7 @@
       "floorCount": 14,
       "storyText": null,
       "unlockConditions": [
-        "story:70"
+        "storyRead:70"
       ],
       "floorEnemyMapping": [
         {
@@ -9042,7 +9042,7 @@
       "floorCount": 15,
       "storyText": null,
       "unlockConditions": [
-        "story:71"
+        "storyRead:71"
       ],
       "floorEnemyMapping": [
         {
@@ -9171,7 +9171,7 @@
       "floorCount": 15,
       "storyText": null,
       "unlockConditions": [
-        "story:72"
+        "storyRead:72"
       ],
       "floorEnemyMapping": [
         {
