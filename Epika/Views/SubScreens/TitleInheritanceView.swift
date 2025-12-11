@@ -115,8 +115,9 @@ struct TitleInheritanceView: View {
                 }
             }
             .padding()
-            .avoidBottomGameInfo()
         }
+        .background(Color(.systemGroupedBackground))
+        .avoidBottomGameInfo()
     }
 
     @MainActor

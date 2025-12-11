@@ -5,20 +5,28 @@ import SQLite3
 
 @main
 struct MasterDataGenerator {
+    static let defaultInput = "MasterData"
+    static let defaultOutput = "Epika/Generated/master_data.db"
+
     static func main() throws {
         let arguments = CommandLine.arguments
 
-        guard arguments.count >= 5,
-              let inputIndex = arguments.firstIndex(of: "--input"),
-              let outputIndex = arguments.firstIndex(of: "--output"),
-              inputIndex + 1 < arguments.count,
-              outputIndex + 1 < arguments.count else {
-            printUsage()
-            exit(1)
+        let inputDir: String
+        let outputPath: String
+
+        if let inputIndex = arguments.firstIndex(of: "--input"),
+           inputIndex + 1 < arguments.count {
+            inputDir = arguments[inputIndex + 1]
+        } else {
+            inputDir = defaultInput
         }
 
-        let inputDir = arguments[inputIndex + 1]
-        let outputPath = arguments[outputIndex + 1]
+        if let outputIndex = arguments.firstIndex(of: "--output"),
+           outputIndex + 1 < arguments.count {
+            outputPath = arguments[outputIndex + 1]
+        } else {
+            outputPath = defaultOutput
+        }
 
         print("[MasterDataGenerator] Input: \(inputDir)")
         print("[MasterDataGenerator] Output: \(outputPath)")
@@ -31,7 +39,8 @@ struct MasterDataGenerator {
     }
 
     static func printUsage() {
-        print("Usage: MasterDataGenerator --input <json_directory> --output <sqlite_path>")
+        print("Usage: MasterDataGenerator [--input <json_directory>] [--output <sqlite_path>]")
+        print("Defaults: --input \(defaultInput) --output \(defaultOutput)")
     }
 }
 

@@ -30,10 +30,7 @@ struct CharacterHeaderSection: View {
             avatarView
             nameAndErrorView
         }
-        .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
         .overlay(alignment: .topLeading) {
             if isChangingAvatar {
                 ProgressView()

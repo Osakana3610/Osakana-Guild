@@ -7,20 +7,18 @@ struct CharacterLevelSection: View {
     let character: RuntimeCharacter
 
     var body: some View {
-        GroupBox("レベル / 経験値") {
-            VStack(alignment: .leading, spacing: 8) {
-                switch experienceSummary {
-                case .success(let data):
-                    Text(summaryLine(from: data))
-                        .font(.body)
-                        .foregroundStyle(.primary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .monospacedDigit()
-                case .failure(let message):
-                    Text("経験値情報を取得できません: \(message)")
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                }
+        VStack(alignment: .leading, spacing: 8) {
+            switch experienceSummary {
+            case .success(let data):
+                Text(summaryLine(from: data))
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .monospacedDigit()
+            case .failure(let message):
+                Text("経験値情報を取得できません: \(message)")
+                    .font(.footnote)
+                    .foregroundStyle(.red)
             }
         }
     }
