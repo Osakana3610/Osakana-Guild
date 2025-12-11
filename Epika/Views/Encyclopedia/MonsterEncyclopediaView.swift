@@ -66,6 +66,7 @@ struct MonsterEncyclopediaView: View {
             }
         }
         .navigationTitle("モンスター図鑑")
+        .avoidBottomGameInfo()
         .task { await loadData() }
     }
 
@@ -172,6 +173,7 @@ private struct DungeonEnemyListView: View {
             }
         }
         .navigationTitle(dungeon.name)
+        .avoidBottomGameInfo()
     }
 }
 
@@ -336,6 +338,7 @@ private struct EnemyDetailView: View {
             }
         }
         .navigationTitle(enemy.name)
+        .avoidBottomGameInfo()
     }
 
     private func spellName(spellId: UInt8) -> String {
