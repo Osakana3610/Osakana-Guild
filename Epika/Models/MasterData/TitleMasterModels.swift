@@ -18,6 +18,7 @@ struct TitleDefinition: Identifiable, Sendable, Hashable {
 struct SuperRareTitleDefinition: Identifiable, Sendable, Hashable {
     let id: UInt8
     let name: String
+    let skillIds: [UInt16]
 }
 
 struct TitleSuperRareRates: Sendable, Hashable {

@@ -98,7 +98,6 @@ struct RuntimePartyMemberEditView: View {
             .padding(.horizontal)
             .padding(.bottom, 16)
         }
-        .background(Color(.systemGray6))
     }
 
     private var searchSection: some View {
@@ -119,7 +118,6 @@ struct RuntimePartyMemberEditView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
-        .background(Color(.systemBackground))
     }
 
     private var availableCharacterSection: some View {

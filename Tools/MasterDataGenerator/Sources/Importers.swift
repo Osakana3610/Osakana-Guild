@@ -906,7 +906,7 @@ private struct SuperRareTitleMasterFile: Decodable {
     struct Title: Decodable {
         let id: Int
         let name: String
-        let skills: [String]
+        let skills: [Int]
     }
 
     let superRareTitles: [Title]
@@ -961,12 +961,16 @@ extension Generator {
 
         try withTransaction {
             try execute("DELETE FROM super_rare_titles;")
+            try execute("DELETE FROM super_rare_title_skills;")
 
             let insertTitleSQL = "INSERT INTO super_rare_titles (id, name) VALUES (?, ?);"
+            let insertSkillSQL = "INSERT INTO super_rare_title_skills (title_id, order_index, skill_id) VALUES (?, ?, ?);"
 
             let titleStatement = try prepare(insertTitleSQL)
+            let skillStatement = try prepare(insertSkillSQL)
             defer {
                 sqlite3_finalize(titleStatement)
+                sqlite3_finalize(skillStatement)
             }
 
             for title in file.superRareTitles {
@@ -974,6 +978,14 @@ extension Generator {
                 bindText(titleStatement, index: 2, value: title.name)
                 try step(titleStatement)
                 reset(titleStatement)
+
+                for (index, skillId) in title.skills.enumerated() {
+                    bindInt(skillStatement, index: 1, value: title.id)
+                    bindInt(skillStatement, index: 2, value: index)
+                    bindInt(skillStatement, index: 3, value: skillId)
+                    try step(skillStatement)
+                    reset(skillStatement)
+                }
             }
         }
 

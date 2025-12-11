@@ -130,6 +130,12 @@ struct EquipmentEditorView: View {
     /// 装備画面で除外するメインカテゴリ（合成素材・魔造素材）
     private static let excludedCategories: Set<ItemSaleCategory> = [.forSynthesis, .mazoMaterial]
 
+    /// 装備数サマリー
+    private var equippedItemsSummary: String {
+        let count = currentCharacter.equippedItems.reduce(0) { $0 + $1.quantity }
+        return "\(count)/\(currentCharacter.equipmentCapacity)"
+    }
+
     init(character: RuntimeCharacter) {
         self.character = character
         _currentCharacter = State(initialValue: character)
@@ -147,15 +153,23 @@ struct EquipmentEditorView: View {
                 }
             } else {
                 List {
-                    // キャラクター情報セクション
+                    // キャラクターヘッダー
                     Section {
                         CharacterHeaderSection(character: currentCharacter)
+                    }
+
+                    // 基本能力値
+                    Section("基本能力値") {
                         CharacterBaseStatsSection(character: currentCharacter)
+                    }
+
+                    // 戦闘ステータス
+                    Section("戦闘ステータス") {
                         CharacterCombatStatsSection(character: currentCharacter)
                     }
 
-                    // 装備中アイテムセクション
-                    Section("装備中") {
+                    // 装備中アイテム
+                    Section("装備中 (\(equippedItemsSummary))") {
                         CharacterEquippedItemsSection(
                             equippedItems: currentCharacter.equippedItems,
                             itemDefinitions: itemDefinitions,
@@ -166,17 +180,15 @@ struct EquipmentEditorView: View {
                         )
                     }
 
-                    // 装備候補セクション（サブカテゴリ別）
+                    // 装備候補セクション（売却画面と同じSection構造）
                     ForEach(orderedSubcategories, id: \.self) { subcategory in
                         buildSubcategorySection(for: subcategory)
                     }
 
                     if let error = equipError {
-                        Section {
-                            Text(error)
-                                .font(.caption)
-                                .foregroundStyle(.red)
-                        }
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
                     }
                 }
                 .id(cacheVersion)

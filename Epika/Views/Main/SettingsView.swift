@@ -15,6 +15,11 @@ struct SettingsView: View {
                     } label: {
                         Label("アイテム図鑑", systemImage: "bag.fill")
                     }
+                    NavigationLink {
+                        SuperRareTitleEncyclopediaView()
+                    } label: {
+                        Label("超レア図鑑", systemImage: "sparkles")
+                    }
                 }
 #if DEBUG
                 Section("開発支援") {

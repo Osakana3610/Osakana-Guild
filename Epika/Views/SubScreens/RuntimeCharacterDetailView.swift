@@ -38,32 +38,41 @@ struct CharacterDetailContent: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                // Section order: name(1), characterImage(2) - combined in header
-                CharacterHeaderSection(character: character,
-                                       onRename: onRename,
-                                       onAvatarChange: onAvatarChange)
+                // ヘッダー
+                GroupBox {
+                    CharacterHeaderSection(character: character,
+                                           onRename: onRename,
+                                           onAvatarChange: onAvatarChange)
+                }
 
-                // Section order: race(3), job(4)
-                CharacterIdentitySection(character: character)
+                GroupBox("プロフィール") {
+                    CharacterIdentitySection(character: character)
+                }
 
-                // Section order: levelExp(7)
-                CharacterLevelSection(character: character)
+                GroupBox("レベル / 経験値") {
+                    CharacterLevelSection(character: character)
+                }
 
-                // Section order: baseStats(9)
-                CharacterBaseStatsSection(character: character)
+                GroupBox("基本能力値") {
+                    CharacterBaseStatsSection(character: character)
+                }
 
-                // Section order: combatStats(10)
-                CharacterCombatStatsSection(character: character)
+                GroupBox("戦闘ステータス") {
+                    CharacterCombatStatsSection(character: character)
+                }
 
-                // Section order: actionPreferences(18)
-                CharacterActionPreferencesSection(character: character,
-                                                  onActionPreferencesChange: onActionPreferencesChange)
+                GroupBox("行動優先度") {
+                    CharacterActionPreferencesSection(character: character,
+                                                      onActionPreferencesChange: onActionPreferencesChange)
+                }
 
-                // Section order: ownedSkills(17)
-                CharacterSkillsSection(character: character)
+                GroupBox("習得スキル") {
+                    CharacterSkillsSection(character: character)
+                }
             }
             .padding()
         }
+        .background(Color(.systemGroupedBackground))
         .avoidBottomGameInfo()
     }
 }

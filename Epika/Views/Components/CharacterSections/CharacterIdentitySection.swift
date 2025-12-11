@@ -8,12 +8,10 @@ struct CharacterIdentitySection: View {
     let character: RuntimeCharacter
 
     var body: some View {
-        GroupBox("プロフィール") {
-            VStack(alignment: .leading, spacing: 8) {
-                LabeledContent("種族", value: character.raceName)
-                LabeledContent("職業", value: character.jobName)
-                LabeledContent("性別", value: character.race?.genderDisplayName ?? "不明")
-            }
+        VStack(alignment: .leading, spacing: 8) {
+            LabeledContent("種族", value: character.raceName)
+            LabeledContent("職業", value: character.jobName)
+            LabeledContent("性別", value: character.race?.genderDisplayName ?? "不明")
         }
     }
 }

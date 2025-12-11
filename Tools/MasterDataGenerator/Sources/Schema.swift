@@ -297,6 +297,15 @@ extension Generator {
                 name TEXT NOT NULL
             );
             """,
+            """
+            CREATE TABLE IF NOT EXISTS super_rare_title_skills (
+                title_id INTEGER NOT NULL,
+                order_index INTEGER NOT NULL,
+                skill_id INTEGER NOT NULL,
+                PRIMARY KEY (title_id, order_index),
+                FOREIGN KEY (title_id) REFERENCES super_rare_titles(id) ON DELETE CASCADE
+            );
+            """,
             // Status effects
             """
             CREATE TABLE IF NOT EXISTS status_effects (
