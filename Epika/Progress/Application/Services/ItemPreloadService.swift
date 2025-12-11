@@ -8,6 +8,7 @@ final class ItemPreloadService {
     static let shared = ItemPreloadService()
 
     private var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
+    private var orderedCategories: [ItemSaleCategory] = []
     private var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
     private var orderedSubcategories: [ItemDisplaySubcategory] = []
     private var cacheVersion: Int = 0
@@ -56,19 +57,20 @@ final class ItemPreloadService {
 
     /// 指定カテゴリのアイテムをフラット配列で取得（カテゴリ順序を保証）
     func getItems(categories: Set<ItemSaleCategory>) -> [LightweightItemData] {
-        ItemSaleCategory.ordered
+        orderedCategories
             .filter { categories.contains($0) }
             .flatMap { categorizedItems[$0] ?? [] }
     }
 
     /// 全カテゴリのアイテムをフラット配列で取得
     func getAllItems() -> [LightweightItemData] {
-        ItemSaleCategory.ordered.flatMap { categorizedItems[$0] ?? [] }
+        orderedCategories.flatMap { categorizedItems[$0] ?? [] }
     }
 
     /// キャッシュをクリアする
     func clearCache() {
         categorizedItems.removeAll()
+        orderedCategories.removeAll()
         subcategorizedItems.removeAll()
         orderedSubcategories.removeAll()
         isLoaded = false
@@ -153,10 +155,14 @@ final class ItemPreloadService {
         }
     }
 
-    /// サブカテゴリ順序を再構築
+    /// カテゴリ・サブカテゴリの順序を再構築（各グループ内の最小itemIdでソート）
     private func rebuildOrderedSubcategories() {
-        let nonEmptyKeys = subcategorizedItems.filter { !($0.value.isEmpty) }.keys
-        orderedSubcategories = nonEmptyKeys.sorted { $0.sortPriority < $1.sortPriority }
+        orderedCategories = categorizedItems.keys
+            .filter { !(categorizedItems[$0]?.isEmpty ?? true) }
+            .sorted { (categorizedItems[$0]?.first?.itemId ?? .max) < (categorizedItems[$1]?.first?.itemId ?? .max) }
+        orderedSubcategories = subcategorizedItems.keys
+            .filter { !(subcategorizedItems[$0]?.isEmpty ?? true) }
+            .sorted { (subcategorizedItems[$0]?.first?.itemId ?? .max) < (subcategorizedItems[$1]?.first?.itemId ?? .max) }
     }
 
     // MARK: - Display Helpers
@@ -310,6 +316,9 @@ final class ItemPreloadService {
         }
 
         categorizedItems = grouped
+        orderedCategories = grouped.keys.sorted {
+            (grouped[$0]?.first?.itemId ?? .max) < (grouped[$1]?.first?.itemId ?? .max)
+        }
 
         // サブカテゴリキャッシュを構築
         var subgrouped: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
@@ -323,7 +332,9 @@ final class ItemPreloadService {
             }
         }
         subcategorizedItems = subgrouped
-        orderedSubcategories = Set(subgrouped.keys).sorted { $0.sortPriority < $1.sortPriority }
+        orderedSubcategories = subgrouped.keys.sorted {
+            (subgrouped[$0]?.first?.itemId ?? .max) < (subgrouped[$1]?.first?.itemId ?? .max)
+        }
 
         cacheVersion &+= 1
     }

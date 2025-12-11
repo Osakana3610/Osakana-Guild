@@ -14,27 +14,6 @@ struct ItemDisplaySubcategory: Hashable, Sendable {
         }
         return mainCategory.displayName
     }
-
-    /// ソート用の優先度（メインカテゴリのordered順 + サブカテゴリ）
-    var sortPriority: (Int, Int, String) {
-        let mainIndex = ItemSaleCategory.ordered.firstIndex(of: mainCategory) ?? 999
-        let (subPriority, subName) = Self.subcategorySortKey(subcategory)
-        return (mainIndex, subPriority, subName)
-    }
-
-    /// サブカテゴリのソート優先度
-    /// ノーマル→Tier1-4→その他（アルファベット順）→nil
-    private static func subcategorySortKey(_ sub: String?) -> (Int, String) {
-        guard let sub = sub else { return (999, "") }
-        switch sub {
-        case "ノーマル": return (0, sub)
-        case "Tier1": return (1, sub)
-        case "Tier2": return (2, sub)
-        case "Tier3": return (3, sub)
-        case "Tier4": return (4, sub)
-        default: return (10, sub)
-        }
-    }
 }
 
 // MARK: - Item Sale Category
@@ -64,14 +43,6 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
     case raceSpecific = "race_specific"
     case forSynthesis = "for_synthesis"
     case mazoMaterial = "mazo_material"
-
-    static let ordered: [ItemSaleCategory] = [
-        .thinSword, .sword, .magicSword, .advancedMagicSword, .guardianSword, .katana, .bow,
-        .armor, .heavyArmor, .superHeavyArmor, .shield, .gauntlet, .accessory,
-        .wand, .rod, .grimoire, .robe, .gem,
-        .homunculus, .synthesis,
-        .other, .raceSpecific, .forSynthesis, .mazoMaterial
-    ]
 
     var displayName: String {
         switch self {

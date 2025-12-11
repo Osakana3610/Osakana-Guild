@@ -10,8 +10,10 @@ struct ItemEncyclopediaView: View {
     }
 
     private var sortedCategories: [ItemSaleCategory] {
-        let presentCategories = Set(itemsByCategory.keys)
-        return ItemSaleCategory.ordered.filter { presentCategories.contains($0) }
+        let byCategory = itemsByCategory
+        return byCategory.keys.sorted {
+            (byCategory[$0]?.first?.id ?? .max) < (byCategory[$1]?.first?.id ?? .max)
+        }
     }
 
     var body: some View {
@@ -69,24 +71,11 @@ private struct ItemCategoryListView: View {
         Dictionary(grouping: items) { $0.rarity ?? "ノーマル" }
     }
 
-    private var rarityOrder: [String] {
-        ["ノーマル", "Tier1", "Tier2", "Tier3", "Tier4"]
-    }
-
     private var sortedRarities: [String] {
-        let presentRarities = Set(itemsByRarity.keys)
-        var result: [String] = []
-        for rarity in rarityOrder {
-            if presentRarities.contains(rarity) {
-                result.append(rarity)
-            }
+        let byRarity = itemsByRarity
+        return byRarity.keys.sorted {
+            (byRarity[$0]?.first?.id ?? .max) < (byRarity[$1]?.first?.id ?? .max)
         }
-        for rarity in presentRarities.sorted() {
-            if !result.contains(rarity) {
-                result.append(rarity)
-            }
-        }
-        return result
     }
 
     var body: some View {
