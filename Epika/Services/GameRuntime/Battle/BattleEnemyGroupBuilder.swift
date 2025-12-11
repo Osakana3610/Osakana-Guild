@@ -88,7 +88,8 @@ struct BattleEnemyGroupBuilder {
                                         skillEffects: skillEffects,
                                         spellbook: .empty,
                                         spells: .empty,
-                                        baseSkillIds: Set(group.definition.specialSkillIds) )
+                                        baseSkillIds: Set(group.definition.specialSkillIds),
+                                        innateResistances: BattleInnateResistances(from: group.definition.resistances))
                 actors.append(actor)
                 encountered.append(EncounteredEnemy(definition: group.definition, level: levelOverride))
                 slotIndex += 1
@@ -156,17 +157,18 @@ struct BattleEnemyGroupBuilder {
                                     isMartialEligible: false,
                                     raceId: definition.raceId,
                                     snapshot: snapshot,
-                                        currentHP: snapshot.maxHP,
-                                        actionRates: BattleActionRates(attack: definition.actionRates.attack,
-                                                                       priestMagic: definition.actionRates.priestMagic,
-                                                                       mageMagic: definition.actionRates.mageMagic,
-                                                                       breath: definition.actionRates.breath),
+                                    currentHP: snapshot.maxHP,
+                                    actionRates: BattleActionRates(attack: definition.actionRates.attack,
+                                                                   priestMagic: definition.actionRates.priestMagic,
+                                                                   mageMagic: definition.actionRates.mageMagic,
+                                                                   breath: definition.actionRates.breath),
                                     actionResources: resources,
                                     barrierCharges: skillEffects.combat.barrierCharges,
                                     skillEffects: skillEffects,
                                     spellbook: .empty,
                                     spells: .empty,
-                                    baseSkillIds: Set(definition.specialSkillIds) )
+                                    baseSkillIds: Set(definition.specialSkillIds),
+                                    innateResistances: BattleInnateResistances(from: definition.resistances))
             actors.append(actor)
         }
         return actors

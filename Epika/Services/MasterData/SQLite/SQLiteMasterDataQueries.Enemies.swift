@@ -84,16 +84,18 @@ extension SQLiteMasterDataManager {
 
         return builders.values.sorted { $0.name < $1.name }.map { builder in
             // 個別魔法耐性を抽出（"spell.X"形式のキーから）
-            var spellSpecific: [UInt8: Double] = [:]
+            var spellResistances: [UInt8: Double] = [:]
             for (key, value) in builder.resistances {
                 if key.hasPrefix("spell."), let spellId = UInt8(key.dropFirst(6)) {
-                    spellSpecific[spellId] = value
+                    spellResistances[spellId] = value
                 }
             }
             let resistances = EnemyDefinition.Resistances(
-                physical: builder.resistances["physical"] ?? 0,
-                magical: builder.resistances["magical"] ?? 0,
-                spellSpecific: spellSpecific
+                physical: builder.resistances["physical"] ?? 1.0,
+                piercing: builder.resistances["piercing"] ?? 1.0,
+                critical: builder.resistances["critical"] ?? 1.0,
+                breath: builder.resistances["breath"] ?? 1.0,
+                spells: spellResistances
             )
             return EnemyDefinition(
                 id: builder.id,

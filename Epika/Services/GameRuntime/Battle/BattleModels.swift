@@ -205,6 +205,39 @@ struct BattleAttackHistory: Sendable, Hashable {
     }
 }
 
+/// 敵の固有耐性（ダメージ倍率: 1.0=通常, 0.5=半減, 2.0=弱点）
+struct BattleInnateResistances: Sendable, Hashable {
+    let physical: Double      // 物理攻撃
+    let piercing: Double      // 追加ダメージ（貫通）
+    let critical: Double      // クリティカルダメージ
+    let breath: Double        // ブレス
+    let spells: [UInt8: Double]  // 個別魔法（spellId → 倍率）
+
+    static let neutral = BattleInnateResistances(
+        physical: 1.0, piercing: 1.0, critical: 1.0, breath: 1.0, spells: [:]
+    )
+
+    init(physical: Double = 1.0,
+         piercing: Double = 1.0,
+         critical: Double = 1.0,
+         breath: Double = 1.0,
+         spells: [UInt8: Double] = [:]) {
+        self.physical = physical
+        self.piercing = piercing
+        self.critical = critical
+        self.breath = breath
+        self.spells = spells
+    }
+
+    init(from definition: EnemyDefinition.Resistances) {
+        self.physical = definition.physical
+        self.piercing = definition.piercing
+        self.critical = definition.critical
+        self.breath = definition.breath
+        self.spells = definition.spells
+    }
+}
+
 struct BattleActor: Sendable {
     struct SkillEffects: Sendable, Hashable {
         // MARK: - Shared Types
@@ -709,6 +742,7 @@ struct BattleActor: Sendable {
         var grantedSkillIds: Set<UInt16>
         var extraActionsNextTurn: Int
         var isSacrificeTarget: Bool
+        var innateResistances: BattleInnateResistances
 
     init(identifier: String,
          displayName: String,
@@ -760,7 +794,8 @@ struct BattleActor: Sendable {
          suppressedSkillIds: Set<UInt16> = [],
          grantedSkillIds: Set<UInt16> = [],
          extraActionsNextTurn: Int = 0,
-         isSacrificeTarget: Bool = false) {
+         isSacrificeTarget: Bool = false,
+         innateResistances: BattleInnateResistances = .neutral) {
         self.identifier = identifier
         self.displayName = displayName
         self.kind = kind
@@ -812,6 +847,7 @@ struct BattleActor: Sendable {
         self.grantedSkillIds = grantedSkillIds
         self.extraActionsNextTurn = extraActionsNextTurn
         self.isSacrificeTarget = isSacrificeTarget
+        self.innateResistances = innateResistances
     }
 
     var isAlive: Bool { currentHP > 0 }
