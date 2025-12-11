@@ -7,6 +7,7 @@ struct MonsterEncyclopediaView: View {
     @State private var jobs: [UInt8: String] = [:]
     @State private var enemySkills: [UInt16: EnemySkillDefinition] = [:]
     @State private var spells: [UInt8: String] = [:]  // spellId → name
+    @State private var items: [UInt16: String] = [:]  // itemId → name
     @State private var dungeonEnemyMap: [UInt16: Set<UInt16>] = [:]
     @State private var enemyLevelMap: [UInt16: Int] = [:]  // enemy ID → level
     @State private var isLoading = true
@@ -46,6 +47,7 @@ struct MonsterEncyclopediaView: View {
                                         jobs: jobs,
                                         enemySkills: enemySkills,
                                         spells: spells,
+                                        items: items,
                                         enemyLevelMap: enemyLevelMap
                                     )
                                 } label: {
@@ -81,15 +83,17 @@ struct MonsterEncyclopediaView: View {
             async let jobsTask = service.getAllJobs()
             async let skillsTask = service.getAllEnemySkills()
             async let spellsTask = service.getAllSpells()
+            async let itemsTask = service.getAllItems()
 
-            let ((loadedDungeons, encounterTables, floors), loadedEnemies, loadedJobs, loadedSkills, loadedSpells) =
-                try await (dungeonsTask, enemiesTask, jobsTask, skillsTask, spellsTask)
+            let ((loadedDungeons, encounterTables, floors), loadedEnemies, loadedJobs, loadedSkills, loadedSpells, loadedItems) =
+                try await (dungeonsTask, enemiesTask, jobsTask, skillsTask, spellsTask, itemsTask)
 
             dungeons = loadedDungeons.sorted { $0.id < $1.id }
             enemies = loadedEnemies
             jobs = Dictionary(uniqueKeysWithValues: loadedJobs.map { ($0.id, $0.name) })
             enemySkills = Dictionary(uniqueKeysWithValues: loadedSkills.map { ($0.id, $0) })
             spells = Dictionary(uniqueKeysWithValues: loadedSpells.map { ($0.id, $0.name) })
+            items = Dictionary(uniqueKeysWithValues: loadedItems.map { ($0.id, $0.name) })
 
             // Enemy races
             enemyRaces = [
@@ -139,6 +143,7 @@ private struct DungeonEnemyListView: View {
     let jobs: [UInt8: String]
     let enemySkills: [UInt16: EnemySkillDefinition]
     let spells: [UInt8: String]
+    let items: [UInt16: String]
     let enemyLevelMap: [UInt16: Int]
 
     var body: some View {
@@ -152,7 +157,8 @@ private struct DungeonEnemyListView: View {
                             enemyRaces: enemyRaces,
                             jobs: jobs,
                             enemySkills: enemySkills,
-                            spells: spells
+                            spells: spells,
+                            items: items
                         )
                     } label: {
                         EnemyRowView(
@@ -227,6 +233,7 @@ private struct EnemyDetailView: View {
     let jobs: [UInt8: String]
     let enemySkills: [UInt16: EnemySkillDefinition]
     let spells: [UInt8: String]
+    let items: [UInt16: String]
 
     private var calculatedHP: Int {
         let vitality = max(1, enemy.vitality)
@@ -322,8 +329,9 @@ private struct EnemyDetailView: View {
             // ドロップアイテム
             if !enemy.drops.isEmpty {
                 Section("ドロップアイテム") {
-                    Text("\(enemy.drops.count)種類のアイテム")
-                        .foregroundColor(.secondary)
+                    ForEach(enemy.drops, id: \.self) { itemId in
+                        Text(items[itemId] ?? "アイテムID: \(itemId)")
+                    }
                 }
             }
         }
