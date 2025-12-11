@@ -71,6 +71,11 @@ actor MasterDataRuntimeService {
         return try await repository.allEnemies()
     }
 
+    func getAllEnemySkills() async throws -> [EnemySkillDefinition] {
+        try await ensureInitialized()
+        return try await repository.allEnemySkills()
+    }
+
     // MARK: - Exploration Events
 
     func getExplorationEventDefinition(id: UInt8) async throws -> ExplorationEventDefinition? {
