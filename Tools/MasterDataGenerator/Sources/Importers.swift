@@ -17,7 +17,7 @@ private struct ItemMasterFile: Decodable {
         let allowedGenders: [String]?
         let bypassRaceRestriction: [String]?
         let combatBonuses: [String: Int]?
-        let grantedSkills: [Int]?
+        let grantedSkillIds: [Int]?
         let rarity: String?
     }
 
@@ -130,7 +130,7 @@ extension Generator {
                     }
                 }
 
-                if let skills = item.grantedSkills {
+                if let skills = item.grantedSkillIds {
                     for (index, skillId) in skills.enumerated() {
                         bindInt(skillStatement, index: 1, value: item.id)
                         bindInt(skillStatement, index: 2, value: index)
