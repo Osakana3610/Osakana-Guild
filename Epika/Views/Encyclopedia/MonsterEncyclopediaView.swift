@@ -5,7 +5,9 @@ struct MonsterEncyclopediaView: View {
     @State private var enemies: [EnemyDefinition] = []
     @State private var enemyRaces: [UInt8: String] = [:]
     @State private var jobs: [UInt8: String] = [:]
+    @State private var enemySkills: [UInt16: EnemySkillDefinition] = [:]
     @State private var dungeonEnemyMap: [UInt16: Set<UInt16>] = [:]
+    @State private var enemyLevelMap: [UInt16: Int] = [:]  // enemy ID → level
     @State private var isLoading = true
 
     private var dungeonsByChapter: [Int: [DungeonDefinition]] {
@@ -20,7 +22,7 @@ struct MonsterEncyclopediaView: View {
             4: "瘴気の地",
             5: "炎の試練",
             6: "凍てつく世界",
-            7: "闇の領域",
+            7: "闘の領域",
             8: "神々の領域",
             9: "世界の果て"
         ]
@@ -40,7 +42,9 @@ struct MonsterEncyclopediaView: View {
                                         dungeon: dungeon,
                                         enemies: enemiesForDungeon(dungeon.id),
                                         enemyRaces: enemyRaces,
-                                        jobs: jobs
+                                        jobs: jobs,
+                                        enemySkills: enemySkills,
+                                        enemyLevelMap: enemyLevelMap
                                     )
                                 } label: {
                                     VStack(alignment: .leading, spacing: 4) {
@@ -73,12 +77,15 @@ struct MonsterEncyclopediaView: View {
             async let dungeonsTask = service.getAllDungeonsWithEncounters()
             async let enemiesTask = service.getAllEnemies()
             async let jobsTask = service.getAllJobs()
+            async let skillsTask = service.getAllEnemySkills()
 
-            let ((loadedDungeons, encounterTables, floors), loadedEnemies, loadedJobs) = try await (dungeonsTask, enemiesTask, jobsTask)
+            let ((loadedDungeons, encounterTables, floors), loadedEnemies, loadedJobs, loadedSkills) =
+                try await (dungeonsTask, enemiesTask, jobsTask, skillsTask)
 
             dungeons = loadedDungeons.sorted { $0.id < $1.id }
             enemies = loadedEnemies
             jobs = Dictionary(uniqueKeysWithValues: loadedJobs.map { ($0.id, $0.name) })
+            enemySkills = Dictionary(uniqueKeysWithValues: loadedSkills.map { ($0.id, $0) })
 
             // Enemy races
             enemyRaces = [
@@ -89,9 +96,10 @@ struct MonsterEncyclopediaView: View {
                 5: "神魔"
             ]
 
-            // Build dungeon → enemy mapping from floors and encounter tables
+            // Build dungeon → enemy mapping and enemy → level mapping
             let tableMap = Dictionary(uniqueKeysWithValues: encounterTables.map { ($0.id, $0) })
             var mapping: [UInt16: Set<UInt16>] = [:]
+            var levelMap: [UInt16: Int] = [:]
 
             for floor in floors {
                 guard let dungeonId = floor.dungeonId,
@@ -101,11 +109,16 @@ struct MonsterEncyclopediaView: View {
                 for event in table.events {
                     if let enemyId = event.enemyId {
                         enemySet.insert(enemyId)
+                        // Store the level (prefer higher level if already exists)
+                        if let level = event.level {
+                            levelMap[enemyId] = max(levelMap[enemyId] ?? 0, level)
+                        }
                     }
                 }
                 mapping[dungeonId] = enemySet
             }
             dungeonEnemyMap = mapping
+            enemyLevelMap = levelMap
 
             isLoading = false
         } catch {
@@ -120,15 +133,28 @@ private struct DungeonEnemyListView: View {
     let enemies: [EnemyDefinition]
     let enemyRaces: [UInt8: String]
     let jobs: [UInt8: String]
+    let enemySkills: [UInt16: EnemySkillDefinition]
+    let enemyLevelMap: [UInt16: Int]
 
     var body: some View {
         List {
             Section(dungeon.name) {
                 ForEach(enemies, id: \.id) { enemy in
                     NavigationLink {
-                        EnemyDetailView(enemy: enemy, enemyRaces: enemyRaces, jobs: jobs)
+                        EnemyDetailView(
+                            enemy: enemy,
+                            level: enemyLevelMap[enemy.id] ?? 1,
+                            enemyRaces: enemyRaces,
+                            jobs: jobs,
+                            enemySkills: enemySkills
+                        )
                     } label: {
-                        EnemyRowView(enemy: enemy, enemyRaces: enemyRaces, jobs: jobs)
+                        EnemyRowView(
+                            enemy: enemy,
+                            level: enemyLevelMap[enemy.id] ?? 1,
+                            enemyRaces: enemyRaces,
+                            jobs: jobs
+                        )
                     }
                 }
             }
@@ -139,12 +165,19 @@ private struct DungeonEnemyListView: View {
 
 private struct EnemyRowView: View {
     let enemy: EnemyDefinition
+    let level: Int
     let enemyRaces: [UInt8: String]
     let jobs: [UInt8: String]
 
+    private var calculatedHP: Int {
+        let vitality = max(1, enemy.vitality)
+        let spirit = max(1, enemy.spirit)
+        let effectiveLevel = max(1, level)
+        return vitality * 12 + spirit * 6 + effectiveLevel * 8
+    }
+
     var body: some View {
         HStack(spacing: 12) {
-            // Placeholder icon
             Image(systemName: "pawprint.fill")
                 .font(.title2)
                 .foregroundColor(.secondary)
@@ -165,7 +198,10 @@ private struct EnemyRowView: View {
                     }
                 }
 
-                HStack(spacing: 4) {
+                HStack(spacing: 8) {
+                    Text("Lv\(level)")
+                        .fontWeight(.medium)
+                    Text("HP\(calculatedHP)")
                     Text("(\(enemyRaces[enemy.raceId] ?? "不明"))")
                     if let jobId = enemy.jobId, let jobName = jobs[jobId] {
                         Text(jobName)
@@ -180,24 +216,37 @@ private struct EnemyRowView: View {
 
 private struct EnemyDetailView: View {
     let enemy: EnemyDefinition
+    let level: Int
     let enemyRaces: [UInt8: String]
     let jobs: [UInt8: String]
+    let enemySkills: [UInt16: EnemySkillDefinition]
+
+    private var calculatedHP: Int {
+        let vitality = max(1, enemy.vitality)
+        let spirit = max(1, enemy.spirit)
+        let effectiveLevel = max(1, level)
+        return vitality * 12 + spirit * 6 + effectiveLevel * 8
+    }
 
     var body: some View {
         List {
+            // 基本情報
             Section("基本情報") {
                 LabeledContent("名前", value: enemy.name)
                 LabeledContent("種族", value: enemyRaces[enemy.raceId] ?? "不明")
                 if let jobId = enemy.jobId, let jobName = jobs[jobId] {
                     LabeledContent("職業", value: jobName)
                 }
+                LabeledContent("レベル", value: "\(level)")
+                LabeledContent("HP", value: "\(calculatedHP)")
                 LabeledContent("基本経験値", value: "\(enemy.baseExperience)")
                 if enemy.isBoss {
                     LabeledContent("タイプ", value: "ボス")
                 }
             }
 
-            Section("ステータス") {
+            // 基礎ステータス
+            Section("基礎ステータス") {
                 HStack {
                     StatLabel(name: "力", value: enemy.strength)
                     StatLabel(name: "知", value: enemy.wisdom)
@@ -210,6 +259,34 @@ private struct EnemyDetailView: View {
                 }
             }
 
+            // 耐性
+            Section("耐性") {
+                let r = enemy.resistances
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        ResistLabel(name: "物理", value: r.physical)
+                        ResistLabel(name: "魔法", value: r.magical)
+                    }
+                    HStack {
+                        ResistLabel(name: "炎", value: r.fire)
+                        ResistLabel(name: "氷", value: r.ice)
+                        ResistLabel(name: "風", value: r.wind)
+                        ResistLabel(name: "地", value: r.earth)
+                    }
+                    HStack {
+                        ResistLabel(name: "光", value: r.light)
+                        ResistLabel(name: "闇", value: r.dark)
+                        ResistLabel(name: "聖", value: r.holy)
+                    }
+                    HStack {
+                        ResistLabel(name: "即死", value: r.death)
+                        ResistLabel(name: "毒", value: r.poison)
+                        ResistLabel(name: "魅了", value: r.charm)
+                    }
+                }
+            }
+
+            // 行動パターン
             Section("行動パターン") {
                 let rates = enemy.actionRates
                 let total = rates.attack + rates.priestMagic + rates.mageMagic + rates.breath
@@ -226,6 +303,31 @@ private struct EnemyDetailView: View {
                     if rates.breath > 0 {
                         LabeledContent("ブレス", value: "\(rates.breath * 100 / total)%")
                     }
+                } else {
+                    Text("通常攻撃のみ")
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            // 特殊スキル
+            if !enemy.specialSkillIds.isEmpty {
+                Section("特殊スキル") {
+                    ForEach(enemy.specialSkillIds, id: \.self) { skillId in
+                        if let skill = enemySkills[skillId] {
+                            EnemySkillRow(skill: skill)
+                        } else {
+                            Text("スキルID: \(skillId)")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+
+            // ドロップアイテム
+            if !enemy.drops.isEmpty {
+                Section("ドロップアイテム") {
+                    Text("\(enemy.drops.count)種類のアイテム")
+                        .foregroundColor(.secondary)
                 }
             }
         }
@@ -245,5 +347,142 @@ private struct StatLabel: View {
                 .fontWeight(.medium)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+private struct ResistLabel: View {
+    let name: String
+    let value: Double
+
+    private var displayValue: String {
+        if value == 0 { return "0%" }
+        let percent = Int(value * 100)
+        return percent > 0 ? "+\(percent)%" : "\(percent)%"
+    }
+
+    private var valueColor: Color {
+        if value > 0 { return .green }
+        if value < 0 { return .red }
+        return .secondary
+    }
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Text(name)
+                .foregroundColor(.secondary)
+            Text(displayValue)
+                .foregroundColor(valueColor)
+                .fontWeight(.medium)
+        }
+        .font(.caption)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+private struct EnemySkillRow: View {
+    let skill: EnemySkillDefinition
+
+    private var typeIcon: String {
+        switch skill.type {
+        case .physical: return "bolt.fill"
+        case .magical: return "sparkles"
+        case .breath: return "wind"
+        case .status: return "exclamationmark.triangle.fill"
+        case .heal: return "heart.fill"
+        case .buff: return "arrow.up.circle.fill"
+        }
+    }
+
+    private var typeColor: Color {
+        switch skill.type {
+        case .physical: return .orange
+        case .magical: return .purple
+        case .breath: return .cyan
+        case .status: return .yellow
+        case .heal: return .green
+        case .buff: return .blue
+        }
+    }
+
+    private var targetingText: String {
+        switch skill.targeting {
+        case .single: return "単体"
+        case .random: return "ランダム"
+        case .all: return "全体"
+        case .`self`: return "自身"
+        case .allAllies: return "味方全体"
+        }
+    }
+
+    private var detailText: String {
+        var parts: [String] = []
+
+        if let multiplier = skill.multiplier, multiplier != 1.0 {
+            parts.append("威力\(Int(multiplier * 100))%")
+        }
+        if let hitCount = skill.hitCount, hitCount > 1 {
+            parts.append("\(hitCount)回攻撃")
+        }
+        if skill.ignoreDefense {
+            parts.append("防御無視")
+        }
+        if let element = skill.element {
+            parts.append(localizedElement(element))
+        }
+        if let statusChance = skill.statusChance, statusChance > 0 {
+            parts.append("付与率\(statusChance)%")
+        }
+        if let healPercent = skill.healPercent {
+            parts.append("回復\(healPercent)%")
+        }
+        if let buffType = skill.buffType, let buffMultiplier = skill.buffMultiplier {
+            parts.append("\(buffType) x\(String(format: "%.1f", buffMultiplier))")
+        }
+
+        return parts.isEmpty ? "" : parts.joined(separator: " / ")
+    }
+
+    private func localizedElement(_ element: String) -> String {
+        switch element {
+        case "fire": return "炎属性"
+        case "ice": return "氷属性"
+        case "wind": return "風属性"
+        case "earth": return "地属性"
+        case "light": return "光属性"
+        case "dark": return "闇属性"
+        case "holy": return "聖属性"
+        default: return element
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Image(systemName: typeIcon)
+                    .foregroundColor(typeColor)
+                Text(skill.name)
+                    .fontWeight(.medium)
+                Spacer()
+                Text(targetingText)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            HStack {
+                Text("発動率\(skill.chancePercent)%")
+                if skill.usesPerBattle > 0 {
+                    Text("/ 戦闘中\(skill.usesPerBattle)回まで")
+                }
+            }
+            .font(.caption)
+            .foregroundColor(.secondary)
+
+            if !detailText.isEmpty {
+                Text(detailText)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.vertical, 2)
     }
 }
