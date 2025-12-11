@@ -25,16 +25,14 @@ struct CharacterEquippedItemsSection: View {
     }
 
     var body: some View {
-        GroupBox("装備中アイテム (\(totalCount)/\(equipmentCapacity))") {
+        Group {
             if equippedItems.isEmpty {
                 Text("装備なし")
                     .font(.caption)
                     .foregroundColor(.secondary)
             } else {
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(equippedItems, id: \.stackKey) { item in
-                        equippedItemRow(item)
-                    }
+                ForEach(equippedItems, id: \.stackKey) { item in
+                    equippedItemRow(item)
                 }
 
                 if let error = unequipError {
@@ -44,6 +42,11 @@ struct CharacterEquippedItemsSection: View {
                 }
             }
         }
+    }
+
+    /// 装備数サマリー（親側でヘッダーに使用）
+    var summaryText: String {
+        "\(totalCount)/\(equipmentCapacity)"
     }
 
     private var totalCount: Int {

@@ -124,8 +124,9 @@ struct ItemSynthesisView: View {
                 }
             }
             .padding()
-            .avoidBottomGameInfo()
         }
+        .background(Color(.systemGroupedBackground))
+        .avoidBottomGameInfo()
     }
 
     @MainActor
@@ -256,38 +257,34 @@ struct ItemSelectionCard: View {
     let onClear: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            if let item = selectedItem {
-                HStack {
-                    RuntimeEquipmentRow(equipment: item, showPrice: false)
-
-                    Button("変更", action: onSelect)
-                        .buttonStyle(.bordered)
-
-                    Button("クリア", action: onClear)
-                        .buttonStyle(.bordered)
-                        .foregroundColor(.primary)
+        GroupBox {
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.headline)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-            } else {
-                Button("アイテムを選択", action: onSelect)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue.opacity(0.1))
-                    .foregroundColor(.primary)
-                    .cornerRadius(8)
+
+                if let item = selectedItem {
+                    HStack {
+                        RuntimeEquipmentRow(equipment: item, showPrice: false)
+
+                        Button("変更", action: onSelect)
+                            .buttonStyle(.bordered)
+
+                        Button("クリア", action: onClear)
+                            .buttonStyle(.bordered)
+                            .foregroundColor(.primary)
+                    }
+                } else {
+                    Button("アイテムを選択", action: onSelect)
+                        .frame(maxWidth: .infinity)
+                        .buttonStyle(.bordered)
+                }
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
     }
 }
 

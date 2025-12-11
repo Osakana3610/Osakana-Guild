@@ -40,8 +40,8 @@ struct CharacterCreationView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 24)
                     }
-                    .avoidBottomGameInfo()
                     .background(Color(.systemGroupedBackground))
+                    .avoidBottomGameInfo()
                 }
             }
             .navigationTitle("キャラクター作成")
@@ -367,10 +367,9 @@ struct CharacterCreationView: View {
     }
 
     private func creationCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 16, content: content)
-            .padding(16)
-            .background(Color(.secondarySystemGroupedBackground))
-            .cornerRadius(18)
+        GroupBox {
+            VStack(alignment: .leading, spacing: 16, content: content)
+        }
     }
 
     @MainActor

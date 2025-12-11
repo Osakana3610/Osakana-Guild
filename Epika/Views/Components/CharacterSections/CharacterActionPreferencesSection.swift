@@ -26,7 +26,7 @@ struct CharacterActionPreferencesSection: View {
     }
 
     var body: some View {
-        GroupBox("行動優先度") {
+        Group {
             if onActionPreferencesChange != nil {
                 actionPreferenceEditor
             } else {

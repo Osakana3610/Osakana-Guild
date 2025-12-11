@@ -43,6 +43,7 @@ struct StoryDetailView: View {
             }
             .padding()
         }
+        .background(Color(.systemGroupedBackground))
         .avoidBottomGameInfo()
         .navigationTitle(story.title)
         .navigationBarTitleDisplayMode(.inline)
