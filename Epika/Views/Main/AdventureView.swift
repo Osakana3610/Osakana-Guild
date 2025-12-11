@@ -221,12 +221,12 @@ struct AdventureView: View {
     }
 
     private func selectedDungeon(for party: RuntimeParty) -> RuntimeDungeon? {
-        guard party.lastSelectedDungeonId > 0 else { return nil }
-        return adventureState.runtimeDungeons.first { $0.definition.id == party.lastSelectedDungeonId }
+        guard let dungeonId = party.lastSelectedDungeonId else { return nil }
+        return adventureState.runtimeDungeons.first { $0.definition.id == dungeonId }
     }
 
     private func canStartExploration(for party: RuntimeParty) -> Bool {
-        guard let dungeon = selectedDungeon(for: party), dungeon.id > 0 else { return false }
+        guard let dungeon = selectedDungeon(for: party) else { return false }
         guard dungeon.isUnlocked else { return false }
         guard party.lastSelectedDifficulty <= dungeon.highestUnlockedDifficulty else { return false }
         guard !runtimeMembers(for: party).isEmpty else { return false }

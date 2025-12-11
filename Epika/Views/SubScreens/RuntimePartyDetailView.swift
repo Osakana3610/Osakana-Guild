@@ -268,7 +268,7 @@ struct RuntimePartyDetailView: View {
     }
 
     private func canStartExploration(for party: RuntimeParty) -> Bool {
-        guard let dungeon = activeDungeon, dungeon.id > 0 else { return false }
+        guard let dungeon = activeDungeon else { return false }
         guard dungeon.isUnlocked else { return false }
         guard Int(party.lastSelectedDifficulty) <= dungeon.highestUnlockedDifficulty else { return false }
         guard !membersOfCurrentParty.isEmpty else { return false }
@@ -482,7 +482,7 @@ private struct TargetFloorPickerMenu: View {
 
 private struct DungeonPickerView: View {
     let dungeons: [RuntimeDungeon]
-    let currentSelection: UInt16
+    let currentSelection: UInt16?
     let currentDifficulty: Int
     let onSelectDungeon: (RuntimeDungeon) async -> Bool
     let onSelectDifficulty: (RuntimeDungeon, Int) async -> Bool
