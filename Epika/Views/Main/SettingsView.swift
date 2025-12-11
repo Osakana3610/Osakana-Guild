@@ -4,6 +4,18 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("図鑑") {
+                    NavigationLink {
+                        MonsterEncyclopediaView()
+                    } label: {
+                        Label("モンスター図鑑", systemImage: "pawprint.fill")
+                    }
+                    NavigationLink {
+                        ItemEncyclopediaView()
+                    } label: {
+                        Label("アイテム図鑑", systemImage: "bag.fill")
+                    }
+                }
 #if DEBUG
                 Section("開発支援") {
                     NavigationLink("デバッグメニュー") {
@@ -12,7 +24,7 @@ struct SettingsView: View {
                 }
 #endif
             }
-            .navigationTitle("設定")
+            .navigationTitle("その他")
             .navigationBarTitleDisplayMode(.large)
         }
     }
