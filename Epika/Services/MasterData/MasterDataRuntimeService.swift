@@ -161,6 +161,11 @@ actor MasterDataRuntimeService {
         return dungeons
     }
 
+    func getAllDungeonsWithEncounters() async throws -> ([DungeonDefinition], [EncounterTableDefinition], [DungeonFloorDefinition]) {
+        try await ensureInitialized()
+        return try await repository.allDungeons()
+    }
+
     func getDungeonDefinition(id: UInt16) async throws -> DungeonDefinition? {
         try await ensureInitialized()
         return try await repository.dungeon(withId: id)
