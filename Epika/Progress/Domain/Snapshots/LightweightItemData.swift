@@ -42,26 +42,34 @@ struct ItemDisplaySubcategory: Hashable, Sendable {
 enum ItemSaleCategory: String, CaseIterable, Sendable {
     case thinSword = "thin_sword"
     case sword = "sword"
+    case magicSword = "magic_sword"
+    case advancedMagicSword = "advanced_magic_sword"
+    case guardianSword = "guardian_sword"
     case katana = "katana"
     case bow = "bow"
     case armor = "armor"
     case heavyArmor = "heavy_armor"
+    case superHeavyArmor = "super_heavy_armor"
     case shield = "shield"
     case gauntlet = "gauntlet"
+    case accessory = "accessory"
     case wand = "wand"
     case rod = "rod"
     case grimoire = "grimoire"
     case robe = "robe"
     case gem = "gem"
+    case homunculus = "homunculus"
+    case synthesis = "synthesis"
     case other = "other"
     case raceSpecific = "race_specific"
     case forSynthesis = "for_synthesis"
     case mazoMaterial = "mazo_material"
 
     static let ordered: [ItemSaleCategory] = [
-        .thinSword, .sword, .katana, .bow,
-        .armor, .heavyArmor, .shield, .gauntlet,
+        .thinSword, .sword, .magicSword, .advancedMagicSword, .guardianSword, .katana, .bow,
+        .armor, .heavyArmor, .superHeavyArmor, .shield, .gauntlet, .accessory,
         .wand, .rod, .grimoire, .robe, .gem,
+        .homunculus, .synthesis,
         .other, .raceSpecific, .forSynthesis, .mazoMaterial
     ]
 
@@ -69,17 +77,24 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
         switch self {
         case .thinSword: return "細剣"
         case .sword: return "剣"
+        case .magicSword: return "魔剣"
+        case .advancedMagicSword: return "上級魔剣"
+        case .guardianSword: return "護剣"
         case .katana: return "刀"
         case .bow: return "弓"
         case .armor: return "鎧"
         case .heavyArmor: return "重鎧"
+        case .superHeavyArmor: return "超重鎧"
         case .shield: return "盾"
         case .gauntlet: return "小手"
+        case .accessory: return "その他"
         case .wand: return "ワンド"
         case .rod: return "ロッド"
         case .grimoire: return "魔道書"
         case .robe: return "法衣"
         case .gem: return "宝石"
+        case .homunculus: return "魔造生物"
+        case .synthesis: return "合成素材"
         case .other: return "その他"
         case .raceSpecific: return "種族専用"
         case .forSynthesis: return "合成用"
@@ -89,24 +104,26 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
 
     var iconName: String {
         switch self {
-        case .armor, .heavyArmor, .shield:
+        case .armor, .heavyArmor, .superHeavyArmor, .shield:
             return "shield"
         case .bow:
             return "bow.and.arrow"
-        case .forSynthesis, .mazoMaterial:
+        case .forSynthesis, .mazoMaterial, .synthesis:
             return "hammer"
-        case .gauntlet:
+        case .gauntlet, .accessory:
             return "hand.raised"
         case .gem:
             return "diamond"
         case .grimoire, .robe:
             return "book"
-        case .katana, .sword, .thinSword:
+        case .katana, .sword, .thinSword, .magicSword, .advancedMagicSword, .guardianSword:
             return "sword"
         case .raceSpecific:
             return "person.3"
         case .rod, .wand:
             return "wand.and.stars"
+        case .homunculus:
+            return "person.crop.circle"
         case .other:
             return "cube.transparent"
         }
