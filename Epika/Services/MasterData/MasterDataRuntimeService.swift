@@ -183,6 +183,13 @@ actor MasterDataRuntimeService {
         return try await repository.allStories()
     }
 
+    // MARK: - Skills
+
+    func getAllSkills() async throws -> [SkillDefinition] {
+        try await ensureInitialized()
+        return try await repository.allSkills()
+    }
+
     // MARK: - Synthesis
     func getAllSynthesisRecipes() async throws -> [SynthesisRecipeDefinition] {
         try await ensureInitialized()

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ItemEncyclopediaView: View {
     @State private var items: [ItemDefinition] = []
+    @State private var skills: [UInt16: String] = [:]
     @State private var isLoading = true
 
     private var itemsByCategory: [ItemSaleCategory: [ItemDefinition]] {
@@ -23,7 +24,8 @@ struct ItemEncyclopediaView: View {
                         NavigationLink {
                             ItemCategoryListView(
                                 category: category,
-                                items: itemsByCategory[category] ?? []
+                                items: itemsByCategory[category] ?? [],
+                                skills: skills
                             )
                         } label: {
                             HStack {
@@ -45,7 +47,11 @@ struct ItemEncyclopediaView: View {
 
     private func loadData() async {
         do {
-            items = try await MasterDataRuntimeService.shared.getAllItems()
+            async let itemsTask = MasterDataRuntimeService.shared.getAllItems()
+            async let skillsTask = MasterDataRuntimeService.shared.getAllSkills()
+            let (loadedItems, loadedSkills) = try await (itemsTask, skillsTask)
+            items = loadedItems
+            skills = Dictionary(uniqueKeysWithValues: loadedSkills.map { ($0.id, $0.name) })
             isLoading = false
         } catch {
             print("Failed to load item encyclopedia data: \(error)")
@@ -57,6 +63,7 @@ struct ItemEncyclopediaView: View {
 private struct ItemCategoryListView: View {
     let category: ItemSaleCategory
     let items: [ItemDefinition]
+    let skills: [UInt16: String]
 
     private var itemsByRarity: [String: [ItemDefinition]] {
         Dictionary(grouping: items) { $0.rarity ?? "ノーマル" }
@@ -88,7 +95,7 @@ private struct ItemCategoryListView: View {
                 Section(rarity) {
                     ForEach(itemsByRarity[rarity] ?? [], id: \.id) { item in
                         NavigationLink {
-                            ItemDetailView(item: item)
+                            ItemDetailView(item: item, skills: skills)
                         } label: {
                             ItemRowView(item: item)
                         }
@@ -121,6 +128,7 @@ private struct ItemRowView: View {
 
 private struct ItemDetailView: View {
     let item: ItemDefinition
+    let skills: [UInt16: String]
 
     var body: some View {
         List {
@@ -153,8 +161,9 @@ private struct ItemDetailView: View {
 
             if !item.grantedSkillIds.isEmpty {
                 Section("付与スキル") {
-                    Text("\(item.grantedSkillIds.count)個のスキル")
-                        .foregroundColor(.secondary)
+                    ForEach(item.grantedSkillIds, id: \.self) { skillId in
+                        Text(skills[skillId] ?? "スキルID: \(skillId)")
+                    }
                 }
             }
         }
