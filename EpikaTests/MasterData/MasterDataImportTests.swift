@@ -1,8 +1,117 @@
 import XCTest
+import SQLite3
 @testable import Epika
 
 @MainActor
 final class MasterDataImportTests: XCTestCase {
+
+    // MARK: - JSON↔SQLite整合性検証
+
+    /// ItemMaster.jsonの全フィールドがSQLiteに正しくインポートされていることを検証
+    /// これにより grantedSkillIds のようなフィールドの欠落を防ぐ
+    func testItemMasterJSONFieldsMatchSQLite() async throws {
+        // 1. JSONを直接パース
+        let jsonURL = URL(fileURLWithPath: "/Users/licht/Development/Epika/MasterData/ItemMaster.json")
+        let jsonData = try Data(contentsOf: jsonURL)
+        let jsonFile = try JSONDecoder().decode(ItemMasterJSONFile.self, from: jsonData)
+
+        // 2. SQLiteから各テーブルの件数を取得
+        let sqliteURL = URL(fileURLWithPath: "/Users/licht/Development/Epika/MasterData/MasterData.sqlite")
+        let counts = try querySQLiteCounts(dbURL: sqliteURL)
+
+        // 3. JSONから期待値を計算
+        var expectedGrantedSkills = 0
+        var expectedStatBonuses = 0
+        var expectedCombatBonuses = 0
+        var expectedAllowedRaces = 0
+        var expectedAllowedJobs = 0
+        var expectedAllowedGenders = 0
+        var expectedBypassRaceRestrictions = 0
+
+        for item in jsonFile.items {
+            expectedGrantedSkills += item.grantedSkillIds?.count ?? 0
+            expectedStatBonuses += item.statBonuses?.count ?? 0
+            expectedCombatBonuses += item.combatBonuses?.count ?? 0
+            expectedAllowedRaces += item.allowedRaces?.count ?? 0
+            expectedAllowedJobs += item.allowedJobs?.count ?? 0
+            expectedAllowedGenders += item.allowedGenders?.count ?? 0
+            expectedBypassRaceRestrictions += item.bypassRaceRestriction?.count ?? 0
+        }
+
+        // 4. 検証
+        XCTAssertEqual(counts.items, jsonFile.items.count,
+                       "items テーブルの件数がJSONと不一致")
+        XCTAssertEqual(counts.grantedSkills, expectedGrantedSkills,
+                       "item_granted_skills の件数がJSONと不一致 (JSON: \(expectedGrantedSkills), SQLite: \(counts.grantedSkills))")
+        XCTAssertEqual(counts.statBonuses, expectedStatBonuses,
+                       "item_stat_bonuses の件数がJSONと不一致 (JSON: \(expectedStatBonuses), SQLite: \(counts.statBonuses))")
+        XCTAssertEqual(counts.combatBonuses, expectedCombatBonuses,
+                       "item_combat_bonuses の件数がJSONと不一致 (JSON: \(expectedCombatBonuses), SQLite: \(counts.combatBonuses))")
+        XCTAssertEqual(counts.allowedRaces, expectedAllowedRaces,
+                       "item_allowed_races の件数がJSONと不一致 (JSON: \(expectedAllowedRaces), SQLite: \(counts.allowedRaces))")
+        XCTAssertEqual(counts.allowedJobs, expectedAllowedJobs,
+                       "item_allowed_jobs の件数がJSONと不一致 (JSON: \(expectedAllowedJobs), SQLite: \(counts.allowedJobs))")
+        XCTAssertEqual(counts.allowedGenders, expectedAllowedGenders,
+                       "item_allowed_genders の件数がJSONと不一致 (JSON: \(expectedAllowedGenders), SQLite: \(counts.allowedGenders))")
+        XCTAssertEqual(counts.bypassRaceRestrictions, expectedBypassRaceRestrictions,
+                       "item_bypass_race_restrictions の件数がJSONと不一致 (JSON: \(expectedBypassRaceRestrictions), SQLite: \(counts.bypassRaceRestrictions))")
+    }
+
+    // MARK: - Helper Types for JSON Parsing
+
+    private struct ItemMasterJSONFile: Decodable {
+        let items: [ItemJSON]
+    }
+
+    private struct ItemJSON: Decodable {
+        let id: Int
+        let name: String
+        let grantedSkillIds: [Int]?
+        let statBonuses: [String: Int]?
+        let combatBonuses: [String: Int]?
+        let allowedRaces: [String]?
+        let allowedJobs: [String]?
+        let allowedGenders: [String]?
+        let bypassRaceRestriction: [String]?
+    }
+
+    private struct ItemTableCounts {
+        var items: Int = 0
+        var grantedSkills: Int = 0
+        var statBonuses: Int = 0
+        var combatBonuses: Int = 0
+        var allowedRaces: Int = 0
+        var allowedJobs: Int = 0
+        var allowedGenders: Int = 0
+        var bypassRaceRestrictions: Int = 0
+    }
+
+    private func querySQLiteCounts(dbURL: URL) throws -> ItemTableCounts {
+        var db: OpaquePointer?
+        guard sqlite3_open(dbURL.path, &db) == SQLITE_OK else {
+            throw NSError(domain: "SQLite", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to open database"])
+        }
+        defer { sqlite3_close(db) }
+
+        func queryCount(_ table: String) -> Int {
+            var stmt: OpaquePointer?
+            defer { sqlite3_finalize(stmt) }
+            guard sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM \(table)", -1, &stmt, nil) == SQLITE_OK,
+                  sqlite3_step(stmt) == SQLITE_ROW else { return 0 }
+            return Int(sqlite3_column_int(stmt, 0))
+        }
+
+        return ItemTableCounts(
+            items: queryCount("items"),
+            grantedSkills: queryCount("item_granted_skills"),
+            statBonuses: queryCount("item_stat_bonuses"),
+            combatBonuses: queryCount("item_combat_bonuses"),
+            allowedRaces: queryCount("item_allowed_races"),
+            allowedJobs: queryCount("item_allowed_jobs"),
+            allowedGenders: queryCount("item_allowed_genders"),
+            bypassRaceRestrictions: queryCount("item_bypass_race_restrictions")
+        )
+    }
 
     // MARK: - 全マスタデータ件数検証
 
