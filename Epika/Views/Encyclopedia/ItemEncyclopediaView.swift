@@ -4,26 +4,13 @@ struct ItemEncyclopediaView: View {
     @State private var items: [ItemDefinition] = []
     @State private var isLoading = true
 
-    private var itemsByCategory: [String: [ItemDefinition]] {
-        Dictionary(grouping: items) { $0.category }
+    private var itemsByCategory: [ItemSaleCategory: [ItemDefinition]] {
+        Dictionary(grouping: items) { ItemSaleCategory(masterCategory: $0.category) }
     }
 
-    private var categoryOrder: [String] {
-        ["weapon", "armor", "helmet", "gloves", "boots", "accessory", "shield", "consumable", "material"]
-    }
-
-    private var categoryNames: [String: String] {
-        [
-            "weapon": "武器",
-            "armor": "鎧",
-            "helmet": "兜",
-            "gloves": "小手",
-            "boots": "靴",
-            "accessory": "装飾品",
-            "shield": "盾",
-            "consumable": "消耗品",
-            "material": "素材"
-        ]
+    private var sortedCategories: [ItemSaleCategory] {
+        let presentCategories = Set(itemsByCategory.keys)
+        return ItemSaleCategory.ordered.filter { presentCategories.contains($0) }
     }
 
     var body: some View {
@@ -36,15 +23,11 @@ struct ItemEncyclopediaView: View {
                         NavigationLink {
                             ItemCategoryListView(
                                 category: category,
-                                categoryName: categoryNames[category] ?? category,
                                 items: itemsByCategory[category] ?? []
                             )
                         } label: {
                             HStack {
-                                Image(systemName: iconForCategory(category))
-                                    .foregroundColor(.secondary)
-                                    .frame(width: 24)
-                                Text(categoryNames[category] ?? category)
+                                Text(category.displayName)
                                 Spacer()
                                 Text("\(itemsByCategory[category]?.count ?? 0)種")
                                     .font(.caption)
@@ -60,37 +43,6 @@ struct ItemEncyclopediaView: View {
         .task { await loadData() }
     }
 
-    private var sortedCategories: [String] {
-        let allCategories = Set(items.map { $0.category })
-        var result: [String] = []
-        for cat in categoryOrder {
-            if allCategories.contains(cat) {
-                result.append(cat)
-            }
-        }
-        for cat in allCategories.sorted() {
-            if !result.contains(cat) {
-                result.append(cat)
-            }
-        }
-        return result
-    }
-
-    private func iconForCategory(_ category: String) -> String {
-        switch category {
-        case "weapon": return "bolt.fill"
-        case "armor": return "shield.lefthalf.filled"
-        case "helmet": return "crown.fill"
-        case "gloves": return "hand.raised.fill"
-        case "boots": return "shoe.fill"
-        case "accessory": return "sparkles"
-        case "shield": return "shield.fill"
-        case "consumable": return "cross.vial.fill"
-        case "material": return "cube.fill"
-        default: return "questionmark.circle"
-        }
-    }
-
     private func loadData() async {
         do {
             items = try await MasterDataRuntimeService.shared.getAllItems()
@@ -103,33 +55,38 @@ struct ItemEncyclopediaView: View {
 }
 
 private struct ItemCategoryListView: View {
-    let category: String
-    let categoryName: String
+    let category: ItemSaleCategory
     let items: [ItemDefinition]
 
-    private var itemsByTier: [String: [ItemDefinition]] {
-        Dictionary(grouping: items) { $0.rarity ?? "common" }
+    private var itemsByRarity: [String: [ItemDefinition]] {
+        Dictionary(grouping: items) { $0.rarity ?? "ノーマル" }
     }
 
-    private var tierOrder: [String] {
-        ["common", "uncommon", "rare", "epic", "legendary"]
+    private var rarityOrder: [String] {
+        ["ノーマル", "Tier1", "Tier2", "Tier3", "Tier4"]
     }
 
-    private var tierNames: [String: String] {
-        [
-            "common": "コモン",
-            "uncommon": "アンコモン",
-            "rare": "レア",
-            "epic": "エピック",
-            "legendary": "レジェンダリー"
-        ]
+    private var sortedRarities: [String] {
+        let presentRarities = Set(itemsByRarity.keys)
+        var result: [String] = []
+        for rarity in rarityOrder {
+            if presentRarities.contains(rarity) {
+                result.append(rarity)
+            }
+        }
+        for rarity in presentRarities.sorted() {
+            if !result.contains(rarity) {
+                result.append(rarity)
+            }
+        }
+        return result
     }
 
     var body: some View {
         List {
-            ForEach(sortedTiers, id: \.self) { tier in
-                Section(tierNames[tier] ?? tier) {
-                    ForEach(itemsByTier[tier] ?? [], id: \.id) { item in
+            ForEach(sortedRarities, id: \.self) { rarity in
+                Section(rarity) {
+                    ForEach(itemsByRarity[rarity] ?? [], id: \.id) { item in
                         NavigationLink {
                             ItemDetailView(item: item)
                         } label: {
@@ -139,24 +96,8 @@ private struct ItemCategoryListView: View {
                 }
             }
         }
-        .navigationTitle(categoryName)
+        .navigationTitle(category.displayName)
         .avoidBottomGameInfo()
-    }
-
-    private var sortedTiers: [String] {
-        let allTiers = Set(items.map { $0.rarity ?? "common" })
-        var result: [String] = []
-        for tier in tierOrder {
-            if allTiers.contains(tier) {
-                result.append(tier)
-            }
-        }
-        for tier in allTiers.sorted() {
-            if !result.contains(tier) {
-                result.append(tier)
-            }
-        }
-        return result
     }
 }
 
@@ -190,9 +131,9 @@ private struct ItemDetailView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                LabeledContent("カテゴリ", value: localizedCategory(item.category))
+                LabeledContent("カテゴリ", value: ItemSaleCategory(masterCategory: item.category).displayName)
                 if let rarity = item.rarity {
-                    LabeledContent("レアリティ", value: localizedRarity(rarity))
+                    LabeledContent("レアリティ", value: rarity)
                 }
                 LabeledContent("価格", value: "\(item.basePrice)G")
                 LabeledContent("売値", value: "\(item.sellValue)G")
@@ -267,31 +208,5 @@ private struct ItemDetailView: View {
 
     private func formatBonus(_ value: Int) -> String {
         value > 0 ? "+\(value)" : "\(value)"
-    }
-
-    private func localizedCategory(_ category: String) -> String {
-        switch category {
-        case "weapon": return "武器"
-        case "armor": return "鎧"
-        case "helmet": return "兜"
-        case "gloves": return "小手"
-        case "boots": return "靴"
-        case "accessory": return "装飾品"
-        case "shield": return "盾"
-        case "consumable": return "消耗品"
-        case "material": return "素材"
-        default: return category
-        }
-    }
-
-    private func localizedRarity(_ rarity: String) -> String {
-        switch rarity {
-        case "common": return "コモン"
-        case "uncommon": return "アンコモン"
-        case "rare": return "レア"
-        case "epic": return "エピック"
-        case "legendary": return "レジェンダリー"
-        default: return rarity
-        }
     }
 }
