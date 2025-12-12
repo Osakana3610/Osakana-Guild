@@ -559,15 +559,8 @@ struct RaceDetailSheet: View {
     @ViewBuilder
     private func skillRow(skillId: UInt16) -> some View {
         if let skill = skills[skillId] {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(skill.name)
-                    .font(.body)
-                if !skill.description.isEmpty {
-                    Text(skill.description)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            Text(skill.name)
+                .font(.body)
         } else {
             Text("スキルID: \(skillId)")
                 .foregroundStyle(.secondary)
@@ -681,15 +674,8 @@ struct JobDetailSheet: View {
     @ViewBuilder
     private func skillRow(skillId: UInt16) -> some View {
         if let skill = skills[skillId] {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(skill.name)
-                    .font(.body)
-                if !skill.description.isEmpty {
-                    Text(skill.description)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            Text(skill.name)
+                .font(.body)
         } else {
             Text("スキルID: \(skillId)")
                 .foregroundStyle(.secondary)
