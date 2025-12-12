@@ -15,6 +15,8 @@ struct CharacterCreationView: View {
     @State private var isSaving = false
     @State private var loadErrorMessage: String?
     @State private var creationErrorMessage: String?
+    @State private var raceDetailToShow: RaceDefinition?
+    @State private var jobDetailToShow: JobDefinition?
 
     private let masterData = MasterDataRuntimeService.shared
     private var characterService: CharacterProgressService { progressService.character }
@@ -53,6 +55,12 @@ struct CharacterCreationView: View {
                 Button("OK", role: .cancel) { creationErrorMessage = nil }
             } message: {
                 Text(creationErrorMessage ?? "")
+            }
+            .sheet(item: $raceDetailToShow) { race in
+                RaceDetailSheet(race: race)
+            }
+            .sheet(item: $jobDetailToShow) { job in
+                JobDetailSheet(job: job, genderCode: selectedRace?.genderCode)
             }
         }
     }
@@ -277,8 +285,11 @@ struct CharacterCreationView: View {
             } label: {
                 Label("この種族を選択", systemImage: "checkmark.circle")
             }
-        } preview: {
-            RaceDetailPreview(race: race)
+            Button {
+                raceDetailToShow = race
+            } label: {
+                Label("詳細を見る", systemImage: "info.circle")
+            }
         }
     }
 
@@ -303,8 +314,11 @@ struct CharacterCreationView: View {
             } label: {
                 Label("この職業を選択", systemImage: "checkmark.circle")
             }
-        } preview: {
-            JobDetailPreview(job: job, genderCode: selectedRace?.genderCode)
+            Button {
+                jobDetailToShow = job
+            } label: {
+                Label("詳細を見る", systemImage: "info.circle")
+            }
         }
     }
 
@@ -446,162 +460,152 @@ struct StatGrid: View {
     }
 }
 
-struct RaceDetailPreview: View {
+struct RaceDetailSheet: View {
     let race: RaceDefinition
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            header
+    @Environment(\.dismiss) private var dismiss
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("基礎能力")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                    ForEach(BaseStat.allCases, id: \.self) { stat in
-                        DetailStatItem(label: stat.displayName, value: String(stat.value(from: race.baseStats)))
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    HStack(spacing: 16) {
+                        CharacterImageView(avatarIndex: UInt16(race.id), size: 80)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(race.name)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                            Text(race.genderDisplayName)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Text("最大Lv: \(race.maxLevel)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .listRowBackground(Color.clear)
+                }
+
+                if !race.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Section("説明") {
+                        Text(race.description)
+                            .font(.body)
                     }
                 }
             }
-
-            if let description = descriptionText {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("説明")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    Text(description)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+            .navigationTitle(race.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("閉じる") { dismiss() }
                 }
             }
-        }
-        .padding(16)
-        .frame(minWidth: 360, maxWidth: 440)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    private var descriptionText: String? {
-        let trimmed = race.description.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? nil : trimmed
-    }
-
-    private var header: some View {
-        HStack(alignment: .top, spacing: 12) {
-            CharacterImageView(avatarIndex: UInt16(race.id), size: 64)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(race.name)
-                    .font(.headline)
-                    .fontWeight(.bold)
-                Text("性別: \(localizedGender(race.genderCode))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer(minLength: 0)
-        }
-    }
-
-    private func localizedGender(_ genderCode: UInt8) -> String {
-        switch genderCode {
-        case 1: return "男性"
-        case 2: return "女性"
-        default: return "性別不明"
         }
     }
 }
 
-struct JobDetailPreview: View {
+struct JobDetailSheet: View {
     let job: JobDefinition
     let genderCode: UInt8?
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            header
+    @Environment(\.dismiss) private var dismiss
+    @State private var skills: [UInt16: SkillDefinition] = [:]
+    @State private var skillUnlocks: [(level: Int, skillId: UInt16)] = []
+    @State private var isLoading = true
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("戦闘補正")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                    ForEach(CombatStat.allCases, id: \.self) { stat in
-                        DetailStatItem(
-                            label: stat.displayName,
-                            value: String(format: "%.2fx", stat.value(from: job.combatCoefficients))
-                        )
+    private let masterData = MasterDataRuntimeService.shared
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    HStack(spacing: 16) {
+                        CharacterImageView(avatarIndex: UInt16(genderCode ?? 3) * 100 + UInt16(job.id), size: 80)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(job.name)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                        }
+                    }
+                    .listRowBackground(Color.clear)
+                }
+
+                if !job.learnedSkillIds.isEmpty {
+                    Section("パッシブスキル") {
+                        if isLoading {
+                            ProgressView()
+                        } else {
+                            ForEach(job.learnedSkillIds, id: \.self) { skillId in
+                                skillRow(skillId: skillId)
+                            }
+                        }
                     }
                 }
-            }
 
-            if !job.learnedSkillIds.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("習得スキル")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    VStack(alignment: .leading, spacing: 4) {
-                        ForEach(Array(job.learnedSkillIds.enumerated()), id: \.offset) { index, skillId in
-                            DetailMetadataRow(label: orderLabel(for: index), value: String(skillId))
+                if !skillUnlocks.isEmpty {
+                    Section("レベルで習得するスキル") {
+                        if isLoading {
+                            ProgressView()
+                        } else {
+                            ForEach(skillUnlocks, id: \.skillId) { unlock in
+                                HStack {
+                                    Text("Lv.\(unlock.level)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .frame(width: 50, alignment: .leading)
+                                    skillRow(skillId: unlock.skillId)
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
-        .padding(16)
-        .frame(minWidth: 360, maxWidth: 440)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    private var header: some View {
-        HStack(alignment: .top, spacing: 12) {
-            CharacterImageView(avatarIndex: UInt16(genderCode ?? 3) * 100 + UInt16(job.id), size: 64)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(job.name)
-                    .font(.headline)
-                    .fontWeight(.bold)
+            .navigationTitle(job.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("閉じる") { dismiss() }
+                }
             }
-            Spacer(minLength: 0)
+            .task { await loadData() }
         }
     }
 
-    private func orderLabel(for index: Int) -> String {
-        index == 0 ? "初期" : "Lv.\(index)"
-    }
-}
-
-struct DetailStatItem: View {
-    let label: String
-    let value: String
-
-    var body: some View {
-        VStack(spacing: 2) {
-            Text(label)
-                .font(.caption2)
+    @ViewBuilder
+    private func skillRow(skillId: UInt16) -> some View {
+        if let skill = skills[skillId] {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(skill.name)
+                    .font(.body)
+                if !skill.description.isEmpty {
+                    Text(skill.description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } else {
+            Text("スキルID: \(skillId)")
                 .foregroundStyle(.secondary)
-            Text(value)
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundStyle(.primary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 6)
-        .background(Color(.systemGray5), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-    }
-}
-
-struct DetailMetadataRow: View {
-    let label: String
-    let value: String
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            Spacer(minLength: 8)
-            Text(value)
-                .font(.caption)
-                .multilineTextAlignment(.trailing)
-                .foregroundStyle(.primary)
         }
     }
-}
 
+    @MainActor
+    private func loadData() async {
+        do {
+            async let skillsTask = masterData.getAllSkills()
+            async let unlocksTask = masterData.getJobSkillUnlocks()
+
+            let (allSkills, allUnlocks) = try await (skillsTask, unlocksTask)
+
+            var skillMap: [UInt16: SkillDefinition] = [:]
+            for skill in allSkills {
+                skillMap[skill.id] = skill
+            }
+            skills = skillMap
+            skillUnlocks = allUnlocks[job.id] ?? []
+        } catch {
+            // 取得失敗時は空のまま
+        }
+        isLoading = false
+    }
+}

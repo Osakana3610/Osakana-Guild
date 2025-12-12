@@ -59,6 +59,11 @@ actor MasterDataRuntimeService {
         return try await repository.job(withId: id)
     }
 
+    func getJobSkillUnlocks() async throws -> [UInt8: [(level: Int, skillId: UInt16)]] {
+        try await ensureInitialized()
+        return try await manager.fetchAllJobSkillUnlocks()
+    }
+
     // MARK: - Enemies
 
     func getEnemyDefinition(id: UInt16) async throws -> EnemyDefinition? {
