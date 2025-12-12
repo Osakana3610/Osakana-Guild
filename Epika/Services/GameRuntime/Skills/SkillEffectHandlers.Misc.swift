@@ -243,3 +243,28 @@ struct RetreatAtTurnHandler: SkillEffectHandler {
         }
     }
 }
+
+struct TargetingWeightHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.targetingWeight
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        accumulator.misc.targetingWeight *= multiplier
+    }
+}
+
+struct CoverRowsBehindHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.coverRowsBehind
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.misc.coverRowsBehind = true
+    }
+}

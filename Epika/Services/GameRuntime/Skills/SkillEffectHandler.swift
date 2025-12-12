@@ -25,6 +25,42 @@ struct SkillEffectContext: Sendable {
     let skillId: UInt16
     let skillName: String
     let effectIndex: Int
+    let actorStats: ActorStats?
+}
+
+/// コンパイル時に参照可能なアクターのステータス
+struct ActorStats: Sendable {
+    let strength: Int
+    let wisdom: Int
+    let spirit: Int
+    let vitality: Int
+    let agility: Int
+    let luck: Int
+
+    func value(for stat: String) -> Int {
+        switch stat {
+        case "strength": return strength
+        case "wisdom": return wisdom
+        case "spirit": return spirit
+        case "vitality": return vitality
+        case "agility": return agility
+        case "luck": return luck
+        default: return 0
+        }
+    }
+}
+
+/// statScaling計算のヘルパー
+extension DecodedSkillEffectPayload {
+    /// statScalingが指定されている場合、ステータス値×係数を返す
+    func scaledValue(from stats: ActorStats?) -> Double {
+        guard let scalingStat = parameters?["scalingStat"],
+              let coefficient = value["scalingCoefficient"],
+              let stats = stats else {
+            return 0.0
+        }
+        return Double(stats.value(for: scalingStat)) * coefficient
+    }
 }
 
 // MARK: - SkillEffectHandlerRegistry
@@ -52,8 +88,9 @@ enum SkillEffectHandlerRegistry {
             AdditionalDamageAdditiveHandler.self,
             AdditionalDamageMultiplierHandler.self,
             MinHitScaleHandler.self,
+            MagicNullifyChancePercentHandler.self,
 
-            // MARK: Spell Handlers (8)
+            // MARK: Spell Handlers (9)
             SpellPowerPercentHandler.self,
             SpellPowerMultiplierHandler.self,
             SpellSpecificMultiplierHandler.self,
@@ -62,6 +99,7 @@ enum SkillEffectHandlerRegistry {
             SpellAccessHandler.self,
             SpellTierUnlockHandler.self,
             TacticSpellAmplifyHandler.self,
+            MagicCriticalChancePercentHandler.self,
 
             // MARK: Combat Handlers (15)
             ProcMultiplierHandler.self,
@@ -115,6 +153,8 @@ enum SkillEffectHandlerRegistry {
             RunawayMagicHandler.self,
             RunawayDamageHandler.self,
             RetreatAtTurnHandler.self,
+            TargetingWeightHandler.self,
+            CoverRowsBehindHandler.self,
 
             // MARK: Passthrough Handlers (Actor.swiftでは処理しないが登録は必要)
             CriticalRateAdditiveHandler.self,

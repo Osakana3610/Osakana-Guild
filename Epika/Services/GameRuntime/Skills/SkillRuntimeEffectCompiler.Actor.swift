@@ -3,9 +3,11 @@ import Foundation
 // MARK: - Actor Effects Compilation
 extension SkillRuntimeEffectCompiler {
     /// スキル定義から BattleActor.SkillEffects を構築する
-    /// - Parameter skills: コンパイル対象のスキル定義配列
+    /// - Parameters:
+    ///   - skills: コンパイル対象のスキル定義配列
+    ///   - stats: アクターのステータス（statScaling計算用、nilの場合はスケーリングなし）
     /// - Returns: 構築された SkillEffects
-    static func actorEffects(from skills: [SkillDefinition]) throws -> BattleActor.SkillEffects {
+    static func actorEffects(from skills: [SkillDefinition], stats: ActorStats? = nil) throws -> BattleActor.SkillEffects {
         guard !skills.isEmpty else { return .neutral }
 
         var accumulator = ActorEffectsAccumulator()
@@ -18,7 +20,8 @@ extension SkillRuntimeEffectCompiler {
                 let context = SkillEffectContext(
                     skillId: skill.id,
                     skillName: skill.name,
-                    effectIndex: effect.index
+                    effectIndex: effect.index,
+                    actorStats: stats
                 )
 
                 guard let handler = SkillEffectHandlerRegistry.handler(for: payload.effectType) else {
@@ -39,7 +42,8 @@ extension SkillRuntimeEffectCompiler {
 extension BattleActor.SkillEffects.Reaction {
     static func make(from payload: DecodedSkillEffectPayload,
                      skillName: String,
-                     skillId: UInt16) -> BattleActor.SkillEffects.Reaction? {
+                     skillId: UInt16,
+                     stats: ActorStats?) -> BattleActor.SkillEffects.Reaction? {
         guard payload.effectType == .reaction else { return nil }
         guard let triggerRaw = payload.parameters?["trigger"],
               let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: triggerRaw) else { return nil }
@@ -48,7 +52,9 @@ extension BattleActor.SkillEffects.Reaction {
         let requiresMartial = (payload.parameters?["requiresMartial"]?.lowercased() == "true")
         let damageIdentifier = payload.parameters?["damageType"] ?? "physical"
         let damageType = BattleDamageType(identifier: damageIdentifier) ?? .physical
-        let baseChance = payload.value["baseChancePercent"] ?? 100.0
+        var baseChance = payload.value["baseChancePercent"] ?? 100.0
+        // statScalingをコンパイル時に計算してbaseChanceに加算
+        baseChance += payload.scaledValue(from: stats)
         let attackCountMultiplier = payload.value["attackCountMultiplier"] ?? 0.3
         let criticalRateMultiplier = payload.value["criticalRateMultiplier"] ?? 0.5
         let accuracyMultiplier = payload.value["accuracyMultiplier"] ?? 1.0

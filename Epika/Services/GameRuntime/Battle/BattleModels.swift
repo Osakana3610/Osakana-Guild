@@ -366,11 +366,14 @@ struct BattleActor: Sendable {
                 case selfDamagedPhysical
                 case selfDamagedMagical
                 case allyDamagedPhysical
+                case selfKilledEnemy      // 敵を倒した時
+                case allyMagicAttack      // 味方が魔法攻撃した時
             }
 
             enum Target: String, Sendable {
                 case attacker
                 case killer
+                case randomEnemy          // ランダムな敵
             }
 
             let identifier: String
@@ -378,7 +381,7 @@ struct BattleActor: Sendable {
             let trigger: Trigger
             let target: Target
             let damageType: BattleDamageType
-            let baseChancePercent: Double
+            let baseChancePercent: Double  // statScalingはコンパイル時に計算済み
             let attackCountMultiplier: Double
             let criticalRateMultiplier: Double
             let accuracyMultiplier: Double
@@ -397,15 +400,17 @@ struct BattleActor: Sendable {
 
             let kind: Kind
             let chancePercent: Int
+            let preemptive: Bool  // 先制攻撃フラグ
 
-            init?(kindIdentifier: String, chancePercent: Int) {
+            init?(kindIdentifier: String, chancePercent: Int, preemptive: Bool = false) {
                 guard let parsed = Kind(rawValue: kindIdentifier) else { return nil }
-                self.init(kind: parsed, chancePercent: chancePercent)
+                self.init(kind: parsed, chancePercent: chancePercent, preemptive: preemptive)
             }
 
-            init(kind: Kind, chancePercent: Int) {
+            init(kind: Kind, chancePercent: Int, preemptive: Bool = false) {
                 self.kind = kind
                 self.chancePercent = max(0, min(100, chancePercent))
+                self.preemptive = preemptive
             }
         }
 
@@ -419,6 +424,7 @@ struct BattleActor: Sendable {
         struct TimedBuffTrigger: Sendable, Hashable {
             enum Scope: String, Sendable {
                 case party
+                case `self`  // 自分のみ
             }
 
             let id: String
@@ -498,6 +504,7 @@ struct BattleActor: Sendable {
             var martialBonusPercent: Double
             var martialBonusMultiplier: Double
             var minHitScale: Double?
+            var magicNullifyChancePercent: Double  // 魔法無効化確率
 
             static let neutral = Damage(
                 taken: DamageMultipliers.neutral,
@@ -509,7 +516,8 @@ struct BattleActor: Sendable {
                 penetrationTakenMultiplier: 1.0,
                 martialBonusPercent: 0.0,
                 martialBonusMultiplier: 1.0,
-                minHitScale: nil
+                minHitScale: nil,
+                magicNullifyChancePercent: 0.0
             )
         }
 
@@ -522,6 +530,8 @@ struct BattleActor: Sendable {
             var chargeModifiers: [UInt8: SpellChargeModifier]
             var defaultChargeModifier: SpellChargeModifier?
             var breathExtraCharges: Int
+            var magicCriticalChancePercent: Double  // 必殺魔法発動率
+            var magicCriticalMultiplier: Double     // 必殺魔法倍率
 
             func chargeModifier(for spellId: UInt8) -> SpellChargeModifier? {
                 chargeModifiers[spellId] ?? defaultChargeModifier
@@ -533,7 +543,9 @@ struct BattleActor: Sendable {
                 specificTakenMultipliers: [:],
                 chargeModifiers: [:],
                 defaultChargeModifier: nil,
-                breathExtraCharges: 0
+                breathExtraCharges: 0,
+                magicCriticalChancePercent: 0.0,
+                magicCriticalMultiplier: 1.5
             )
         }
 
@@ -642,6 +654,8 @@ struct BattleActor: Sendable {
             var damageRunaway: Runaway?
             var retreatTurn: Int?
             var retreatChancePercent: Double?
+            var targetingWeight: Double  // 狙われ率の重み（デフォルト1.0、高いほど狙われやすい）
+            var coverRowsBehind: Bool    // 後列の味方をかばう（前列にいる場合）
 
             static let neutral = Misc(
                 healingGiven: 1.0,
@@ -667,7 +681,9 @@ struct BattleActor: Sendable {
                 magicRunaway: nil,
                 damageRunaway: nil,
                 retreatTurn: nil,
-                retreatChancePercent: nil
+                retreatChancePercent: nil,
+                targetingWeight: 1.0,
+                coverRowsBehind: false
             )
         }
 
