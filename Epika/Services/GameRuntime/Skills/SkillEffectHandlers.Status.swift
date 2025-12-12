@@ -133,3 +133,15 @@ struct TimedBreathPowerAmplifyHandler: SkillEffectHandler {
         ))
     }
 }
+
+struct AutoStatusCureOnAllyHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.autoStatusCureOnAlly
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.status.autoStatusCureOnAlly = true
+    }
+}

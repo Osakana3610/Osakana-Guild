@@ -367,6 +367,11 @@ extension BattleTurnEngine {
             applyAbsorptionIfNeeded(for: &attackerCopy, damageDealt: applied, damageType: .physical, context: &context)
             attemptInflictStatuses(from: attackerCopy, to: &defenderCopy, context: &context)
 
+            // autoStatusCureOnAlly判定（物理攻撃からの状態異常付与後）
+            if let defSide = defenderSide, let defIndex = defenderIndex {
+                applyAutoStatusCureIfNeeded(for: defSide, targetIndex: defIndex, context: &context)
+            }
+
             attackerCopy.attackHistory.registerHit()
             totalDamage += applied
             successfulHits += 1

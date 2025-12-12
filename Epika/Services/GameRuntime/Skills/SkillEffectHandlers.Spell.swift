@@ -196,3 +196,19 @@ struct MagicCriticalChancePercentHandler: SkillEffectHandler {
         }
     }
 }
+
+struct SpellChargeRecoveryChanceHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.spellChargeRecoveryChance
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        var baseChance = payload.value["chancePercent"] ?? 0.0
+        baseChance += payload.scaledValue(from: context.actorStats)
+        let schoolString = payload.stringValues["school"]
+        let school: UInt8? = schoolString.flatMap { UInt8($0) }
+        accumulator.spell.chargeRecoveries.append(.init(baseChancePercent: baseChance, school: school))
+    }
+}
