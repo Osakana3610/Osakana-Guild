@@ -175,6 +175,19 @@ private struct VariantEffectPayload {
     let numericValues: [String: Double]
     let stringValues: [String: String]
     let stringArrayValues: [String: [String]]
+    let statScale: StatScale?
+
+    init(familyId: String, effectType: String, parameters: [String: String]?,
+         numericValues: [String: Double], stringValues: [String: String],
+         stringArrayValues: [String: [String]], statScale: StatScale? = nil) {
+        self.familyId = familyId
+        self.effectType = effectType
+        self.parameters = parameters
+        self.numericValues = numericValues
+        self.stringValues = stringValues
+        self.stringArrayValues = stringArrayValues
+        self.statScale = statScale
+    }
 }
 
 private struct SkillMasterRoot: Decodable {
@@ -184,6 +197,8 @@ private struct SkillMasterRoot: Decodable {
     let reaction: SkillCategory?
     let resurrection: SkillCategory?
     let combat: SkillCategory?
+    let race: SkillCategory?
+    let job: SkillCategory?
 }
 
 private struct SkillCategory: Decodable {
@@ -246,6 +261,11 @@ private struct SkillFamily: Decodable {
     }
 }
 
+private struct StatScale: Decodable {
+    let stat: String
+    let percent: Double
+}
+
 private struct SkillVariant: Decodable {
     struct CustomEffect: Decodable {
         let effectType: String?
@@ -271,6 +291,7 @@ private struct SkillVariant: Decodable {
     let parameters: [String: String]?
     let payload: SkillEffectPayloadValues
     let effects: [CustomEffect]?
+    let statScale: StatScale?
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -278,6 +299,7 @@ private struct SkillVariant: Decodable {
         case parameters
         case value
         case effects
+        case statScale
     }
 
     init(from decoder: Decoder) throws {
@@ -287,6 +309,7 @@ private struct SkillVariant: Decodable {
         parameters = try container.decodeIfPresent(FlexibleStringDict.self, forKey: .parameters)?.values
         payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
         effects = try container.decodeIfPresent([CustomEffect].self, forKey: .effects)
+        statScale = try container.decodeIfPresent(StatScale.self, forKey: .statScale)
     }
 }
 
@@ -366,7 +389,9 @@ extension Generator {
             ("status", root.status),
             ("reaction", root.reaction),
             ("resurrection", root.resurrection),
-            ("combat", root.combat)
+            ("combat", root.combat),
+            ("race", root.race),
+            ("job", root.job)
         ]
 
         let mergeParameters: ([String: String]?, [String: String]?) -> [String: String]? = { defaultParams, overrides in
@@ -410,19 +435,14 @@ extension Generator {
                         let mergedParameters = mergeParameters(family.parameters, variant.parameters)
                         let payload = variant.payload
                         let mergedStringArrayValues = mergeStringArrayValues(family.stringArrayValues, payload.stringArrayValues)
-                        let hasPayload = !payload.numericValues.isEmpty
-                            || !payload.stringValues.isEmpty
-                            || !mergedStringArrayValues.isEmpty
-                            || !(mergedParameters?.isEmpty ?? true)
-                        guard hasPayload else {
-                            throw GeneratorError.executionFailed("Skill \(variant.id) の value が不足しています")
-                        }
+                        // effectTypeがあれば値がなくても有効なスキルとして扱う（フラグ系のスキル用）
                         effectPayloads = [VariantEffectPayload(familyId: family.familyId,
                                                                effectType: family.effectType,
                                                                parameters: mergedParameters,
                                                                numericValues: payload.numericValues,
                                                                stringValues: payload.stringValues,
-                                                               stringArrayValues: mergedStringArrayValues)]
+                                                               stringArrayValues: mergedStringArrayValues,
+                                                               statScale: variant.statScale)]
                     }
 
                     let acquisitionJSON = try encodeJSONObject([:], context: "Skill \(variant.id) の acquisitionConditions")
@@ -443,6 +463,12 @@ extension Generator {
                         }
                         if !payload.stringArrayValues.isEmpty {
                             payloadDictionary["stringArrayValues"] = payload.stringArrayValues
+                        }
+                        if let statScale = payload.statScale {
+                            payloadDictionary["statScale"] = [
+                                "stat": statScale.stat,
+                                "percent": statScale.percent
+                            ]
                         }
                         let payloadJSON = try encodeJSONObject(payloadDictionary, context: "Skill \(variant.id) の payload")
 
