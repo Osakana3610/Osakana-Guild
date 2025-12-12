@@ -464,6 +464,12 @@ struct RaceDetailSheet: View {
     let race: RaceDefinition
 
     @Environment(\.dismiss) private var dismiss
+    @State private var skills: [UInt16: SkillDefinition] = [:]
+    @State private var passiveSkillIds: [UInt16] = []
+    @State private var skillUnlocks: [(level: Int, skillId: UInt16)] = []
+    @State private var isLoading = true
+
+    private let masterData = MasterDataRuntimeService.shared
 
     var body: some View {
         NavigationStack {
@@ -492,6 +498,52 @@ struct RaceDetailSheet: View {
                             .font(.body)
                     }
                 }
+
+                Section("基礎能力") {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                        ForEach(BaseStat.allCases, id: \.self) { stat in
+                            VStack(spacing: 2) {
+                                Text(stat.displayName)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                Text("\(stat.value(from: race.baseStats))")
+                                    .font(.body)
+                                    .fontWeight(.medium)
+                            }
+                        }
+                    }
+                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                }
+
+                if !passiveSkillIds.isEmpty {
+                    Section("パッシブスキル") {
+                        if isLoading {
+                            ProgressView()
+                        } else {
+                            ForEach(passiveSkillIds, id: \.self) { skillId in
+                                skillRow(skillId: skillId)
+                            }
+                        }
+                    }
+                }
+
+                if !skillUnlocks.isEmpty {
+                    Section("レベルで習得するスキル") {
+                        if isLoading {
+                            ProgressView()
+                        } else {
+                            ForEach(skillUnlocks, id: \.skillId) { unlock in
+                                HStack {
+                                    Text("Lv.\(unlock.level)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .frame(width: 50, alignment: .leading)
+                                    skillRow(skillId: unlock.skillId)
+                                }
+                            }
+                        }
+                    }
+                }
             }
             .navigationTitle(race.name)
             .navigationBarTitleDisplayMode(.inline)
@@ -500,7 +552,48 @@ struct RaceDetailSheet: View {
                     Button("閉じる") { dismiss() }
                 }
             }
+            .task { await loadData() }
         }
+    }
+
+    @ViewBuilder
+    private func skillRow(skillId: UInt16) -> some View {
+        if let skill = skills[skillId] {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(skill.name)
+                    .font(.body)
+                if !skill.description.isEmpty {
+                    Text(skill.description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } else {
+            Text("スキルID: \(skillId)")
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @MainActor
+    private func loadData() async {
+        do {
+            async let skillsTask = masterData.getAllSkills()
+            async let passiveTask = masterData.getRacePassiveSkills()
+            async let unlocksTask = masterData.getRaceSkillUnlocks()
+
+            let (allSkills, allPassive, allUnlocks) = try await (skillsTask, passiveTask, unlocksTask)
+
+            var skillMap: [UInt16: SkillDefinition] = [:]
+            for skill in allSkills {
+                skillMap[skill.id] = skill
+            }
+            skills = skillMap
+            passiveSkillIds = allPassive[race.id] ?? []
+            skillUnlocks = allUnlocks[race.id] ?? []
+        } catch {
+            // 取得失敗時は空のまま
+        }
+        isLoading = false
     }
 }
 
@@ -511,6 +604,8 @@ struct JobDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var skills: [UInt16: SkillDefinition] = [:]
     @State private var skillUnlocks: [(level: Int, skillId: UInt16)] = []
+    @State private var category: String?
+    @State private var growthTendency: String?
     @State private var isLoading = true
 
     private let masterData = MasterDataRuntimeService.shared
@@ -525,9 +620,21 @@ struct JobDetailSheet: View {
                             Text(job.name)
                                 .font(.title2)
                                 .fontWeight(.bold)
+                            if let category {
+                                Text(localizedCategory(category))
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                     .listRowBackground(Color.clear)
+                }
+
+                if let growthTendency, !growthTendency.isEmpty {
+                    Section("成長傾向") {
+                        Text(growthTendency)
+                            .font(.body)
+                    }
                 }
 
                 if !job.learnedSkillIds.isEmpty {
@@ -589,13 +696,23 @@ struct JobDetailSheet: View {
         }
     }
 
+    private func localizedCategory(_ category: String) -> String {
+        switch category {
+        case "frontline": return "前衛"
+        case "midline": return "中衛"
+        case "backline": return "後衛"
+        default: return category
+        }
+    }
+
     @MainActor
     private func loadData() async {
         do {
             async let skillsTask = masterData.getAllSkills()
             async let unlocksTask = masterData.getJobSkillUnlocks()
+            async let metadataTask = masterData.getJobMetadata()
 
-            let (allSkills, allUnlocks) = try await (skillsTask, unlocksTask)
+            let (allSkills, allUnlocks, allMetadata) = try await (skillsTask, unlocksTask, metadataTask)
 
             var skillMap: [UInt16: SkillDefinition] = [:]
             for skill in allSkills {
@@ -603,6 +720,11 @@ struct JobDetailSheet: View {
             }
             skills = skillMap
             skillUnlocks = allUnlocks[job.id] ?? []
+
+            if let metadata = allMetadata[job.id] {
+                category = metadata.category
+                growthTendency = metadata.growthTendency
+            }
         } catch {
             // 取得失敗時は空のまま
         }

@@ -64,6 +64,23 @@ actor MasterDataRuntimeService {
         return try await manager.fetchAllJobSkillUnlocks()
     }
 
+    func getJobMetadata() async throws -> [UInt8: (category: String, growthTendency: String?)] {
+        try await ensureInitialized()
+        return try await manager.fetchAllJobMetadata()
+    }
+
+    // MARK: - Races (extended)
+
+    func getRacePassiveSkills() async throws -> [UInt8: [UInt16]] {
+        try await ensureInitialized()
+        return try await manager.fetchAllRacePassiveSkills()
+    }
+
+    func getRaceSkillUnlocks() async throws -> [UInt8: [(level: Int, skillId: UInt16)]] {
+        try await ensureInitialized()
+        return try await manager.fetchAllRaceSkillUnlocks()
+    }
+
     // MARK: - Enemies
 
     func getEnemyDefinition(id: UInt16) async throws -> EnemyDefinition? {
