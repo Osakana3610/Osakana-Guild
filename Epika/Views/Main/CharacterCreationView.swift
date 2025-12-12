@@ -116,7 +116,10 @@ struct CharacterCreationView: View {
                     selectedRaceSummary(currentRace)
                 } else {
                     VStack(alignment: .leading, spacing: 16) {
-                        ForEach(genderSections, id: \.gender) { section in
+                        ForEach(Array(genderSections.enumerated()), id: \.element.gender) { index, section in
+                            if index > 0 {
+                                Divider()
+                            }
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(genderTitle(for: section.gender))
                                     .font(.subheadline)
@@ -367,9 +370,9 @@ struct CharacterCreationView: View {
     }
 
     private func creationCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        GroupBox {
-            VStack(alignment: .leading, spacing: 16, content: content)
-        }
+        VStack(alignment: .leading, spacing: 16, content: content)
+            .padding(16)
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     @MainActor
@@ -382,7 +385,8 @@ struct CharacterCreationView: View {
             async let jobsTask = masterData.getAllJobs()
             let (raceResults, jobResults) = try await (racesTask, jobsTask)
             races = raceResults
-            jobs = jobResults
+            // マスター職業（ID 101-116）は転職画面でのみ表示
+            jobs = jobResults.filter { $0.id < 101 || $0.id > 116 }
         } catch {
             loadErrorMessage = error.localizedDescription
         }
