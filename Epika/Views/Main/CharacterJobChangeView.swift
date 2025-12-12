@@ -19,30 +19,63 @@ struct CharacterJobChangeView: View {
 
     private var characterService: CharacterProgressService { progressService.character }
 
+    /// 転職可能なキャラクター（未転職のみ）
+    private var eligibleCharacters: [RuntimeCharacter] {
+        characters.filter { $0.previousJobId == 0 }
+    }
+
+    /// 選択中のキャラクター
+    private var selectedCharacter: RuntimeCharacter? {
+        guard let id = selectedCharacterId else { return nil }
+        return characters.first { $0.id == id }
+    }
+
     var body: some View {
         NavigationStack {
             Form {
                 Section("キャラクター") {
                     if characters.isEmpty {
                         ProgressView()
+                    } else if eligibleCharacters.isEmpty {
+                        Text("転職可能なキャラクターがいません")
+                            .foregroundColor(.secondary)
                     } else {
                         Picker("対象", selection: $selectedCharacterId) {
                             Text("未選択").tag(UInt8?.none)
-                            ForEach(characters, id: \.id) { character in
-                                Text("\(character.name) (Lv.\(character.level))").tag(UInt8?.some(character.id))
+                            ForEach(eligibleCharacters, id: \.id) { character in
+                                Text("\(character.name) (Lv.\(character.level) \(character.job?.name ?? ""))").tag(UInt8?.some(character.id))
                             }
                         }
                     }
                 }
 
-                Section("職業") {
-                    if jobs.isEmpty {
-                        ProgressView()
-                    } else {
-                        Picker("新しい職業", selection: $selectedJobIndex) {
-                            Text("未選択").tag(UInt8?.none)
-                            ForEach(jobs) { job in
-                                Text(job.name).tag(UInt8?.some(UInt8(job.id)))
+                if let character = selectedCharacter {
+                    Section("職業") {
+                        if jobs.isEmpty {
+                            ProgressView()
+                        } else {
+                            Picker("新しい職業", selection: $selectedJobIndex) {
+                                Text("未選択").tag(UInt8?.none)
+                                ForEach(jobs) { job in
+                                    let jobId = UInt8(job.id)
+                                    let isCurrentJob = character.jobId == jobId
+                                    let isMasterJob = jobId >= 101 && jobId <= 116
+                                    let masterBaseJobId = isMasterJob ? jobId - 100 : 0
+
+                                    if isMasterJob {
+                                        if character.jobId == masterBaseJobId {
+                                            // 対応する基本職の場合、Lv50条件を表示
+                                            if character.level >= 50 {
+                                                Text(job.name).tag(UInt8?.some(jobId))
+                                            } else {
+                                                Text("\(job.name) (Lv50必要)").tag(UInt8?.none)
+                                            }
+                                        }
+                                        // 対応しない職業の場合は表示しない
+                                    } else if !isCurrentJob {
+                                        Text(job.name).tag(UInt8?.some(jobId))
+                                    }
+                                }
                             }
                         }
                     }
@@ -51,7 +84,7 @@ struct CharacterJobChangeView: View {
                 if let errorMessage {
                     Section {
                         Text(errorMessage)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.red)
                             .font(.caption)
                     }
                 }
@@ -93,12 +126,9 @@ struct CharacterJobChangeView: View {
                 runtime.append(character)
             }
             characters = runtime.sorted { $0.id < $1.id }
-            jobs = try await masterData.getAllJobs().sorted { $0.name < $1.name }
+            jobs = try await masterData.getAllJobs().sorted { $0.id < $1.id }
             if selectedCharacterId == nil {
-                selectedCharacterId = characters.first?.id
-            }
-            if selectedJobIndex == nil {
-                selectedJobIndex = jobs.first?.id
+                selectedCharacterId = eligibleCharacters.first?.id
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -115,13 +145,7 @@ struct CharacterJobChangeView: View {
         errorMessage = nil
         defer { isProcessing = false }
         do {
-            let updated = try await characterService.updateCharacter(id: characterId) { snapshot in
-                // 転職は1回のみ。previousJobIdが0（未転職）の場合のみ設定
-                if snapshot.previousJobId == 0 && snapshot.jobId != jobIndex {
-                    snapshot.previousJobId = snapshot.jobId
-                }
-                snapshot.jobId = jobIndex
-            }
+            let updated = try await characterService.changeJob(characterId: characterId, newJobId: jobIndex)
             let runtime = try await characterService.runtimeCharacter(from: updated)
             if let index = characters.firstIndex(where: { $0.id == runtime.id }) {
                 characters[index] = runtime

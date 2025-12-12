@@ -293,6 +293,60 @@ actor CharacterProgressService {
         notifyCharacterProgressDidChange()
     }
 
+    // MARK: - Job Change
+
+    /// 転職処理（1回のみ可能、レベル・経験値はリセット）
+    /// - Parameters:
+    ///   - characterId: キャラクターID
+    ///   - newJobId: 新しい職業ID（1〜16: 通常職、101〜116: マスター職）
+    /// - Returns: 更新後のスナップショット
+    func changeJob(characterId: UInt8, newJobId: UInt8) async throws -> CharacterSnapshot {
+        let context = makeContext()
+        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+        descriptor.fetchLimit = 1
+        guard let record = try context.fetch(descriptor).first else {
+            throw ProgressError.characterNotFound
+        }
+
+        // 転職は1回のみ
+        if record.previousJobId != 0 {
+            throw ProgressError.invalidInput(description: "このキャラクターは既に転職済みです")
+        }
+
+        // マスター職（id 101〜116）への転職条件チェック
+        if newJobId >= 101 && newJobId <= 116 {
+            let baseJobId = newJobId - 100  // 101→1, 102→2, ...
+            // 現在の職業が対応する基本職で、かつLv50以上であること
+            if record.jobId != baseJobId {
+                throw ProgressError.invalidInput(description: "マスター職への転職は元の職業から行う必要があります")
+            }
+            if record.level < 50 {
+                throw ProgressError.invalidInput(description: "マスター職への転職にはLv50以上が必要です")
+            }
+        }
+
+        // 同じ職業への転職は不可
+        if record.jobId == newJobId {
+            throw ProgressError.invalidInput(description: "現在と同じ職業には転職できません")
+        }
+
+        // 転職実行
+        record.previousJobId = record.jobId
+        record.jobId = newJobId
+        record.level = 1
+        record.experience = 0
+
+        // avatarIdを再計算（職業画像: genderCode * 100 + jobId）
+        let race = try await masterData.repository.race(withId: record.raceId)
+        if let race {
+            record.avatarId = UInt16(race.genderCode) * 100 + UInt16(newJobId)
+        }
+
+        try context.save()
+        notifyCharacterProgressDidChange()
+        return try await makeSnapshot(record, context: context)
+    }
+
     // MARK: - Delete
 
     func deleteCharacter(id: UInt8) async throws {
