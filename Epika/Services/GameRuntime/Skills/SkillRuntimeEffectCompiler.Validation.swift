@@ -145,7 +145,13 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .tacticSpellAmplify: .init(params: ["spellId"], values: ["multiplier", "triggerTurn"]),
     .timedBreathPowerAmplify: .init(params: [], values: ["triggerTurn", "multiplier"]),
     .timedBuffTrigger: .init(params: [], values: ["triggerTurn"]),
-    .timedMagicPowerAmplify: .init(params: [], values: ["triggerTurn", "multiplier"])
+    .timedMagicPowerAmplify: .init(params: [], values: ["triggerTurn", "multiplier"]),
+    // 職業スキル用（道化師）
+    .enemySingleActionSkipChance: .init(params: [], values: ["chancePercent"]),
+    .actionOrderShuffleEnemy: .init(params: [], values: []),
+    .firstStrike: .init(params: [], values: []),
+    // 職業スキル用（暗殺者）
+    .damageDealtMultiplierByTargetHP: .init(params: [], values: ["hpThresholdPercent", "multiplier"])
 ]
 
 // MARK: - Decoded Payload

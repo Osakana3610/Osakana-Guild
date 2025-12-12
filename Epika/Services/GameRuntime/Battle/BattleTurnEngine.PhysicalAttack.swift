@@ -189,7 +189,8 @@ extension BattleTurnEngine {
 
     static func selectSpecialAttack(for attacker: BattleActor,
                                     context: inout BattleContext) -> BattleActor.SkillEffects.SpecialAttack? {
-        let specials = attacker.skillEffects.combat.specialAttacks
+        // 通常行動時は先制攻撃を除外
+        let specials = attacker.skillEffects.combat.specialAttacks.filter { !$0.preemptive }
         guard !specials.isEmpty else { return nil }
         for descriptor in specials {
             guard descriptor.chancePercent > 0 else { continue }
@@ -366,6 +367,11 @@ extension BattleTurnEngine {
             applyAbsorptionIfNeeded(for: &attackerCopy, damageDealt: applied, damageType: .physical, context: &context)
             attemptInflictStatuses(from: attackerCopy, to: &defenderCopy, context: &context)
 
+            // autoStatusCureOnAlly判定（物理攻撃からの状態異常付与後）
+            if let defSide = defenderSide, let defIndex = defenderIndex {
+                applyAutoStatusCureIfNeeded(for: defSide, targetIndex: defIndex, context: &context)
+            }
+
             attackerCopy.attackHistory.registerHit()
             totalDamage += applied
             successfulHits += 1
@@ -519,5 +525,70 @@ extension BattleTurnEngine {
     static func martialChancePercent(for attacker: BattleActor) -> Int {
         let clampedStrength = max(0, attacker.strength)
         return min(100, clampedStrength)
+    }
+
+    // MARK: - Preemptive Attacks
+
+    /// 戦闘開始時の先制攻撃を実行
+    static func executePreemptiveAttacks(_ context: inout BattleContext) {
+        // プレイヤー側の先制攻撃
+        for index in context.players.indices {
+            guard context.players[index].isAlive else { continue }
+            executePreemptiveAttacksForActor(side: .player, index: index, context: &context)
+            if context.isBattleOver { return }
+        }
+
+        // 敵側の先制攻撃
+        for index in context.enemies.indices {
+            guard context.enemies[index].isAlive else { continue }
+            executePreemptiveAttacksForActor(side: .enemy, index: index, context: &context)
+            if context.isBattleOver { return }
+        }
+    }
+
+    private static func executePreemptiveAttacksForActor(side: ActorSide, index: Int, context: inout BattleContext) {
+        guard let attacker = context.actor(for: side, index: index), attacker.isAlive else { return }
+
+        let preemptives = attacker.skillEffects.combat.specialAttacks.filter { $0.preemptive }
+        guard !preemptives.isEmpty else { return }
+
+        for descriptor in preemptives {
+            guard descriptor.chancePercent > 0 else { continue }
+            guard BattleRandomSystem.percentChance(descriptor.chancePercent, random: &context.random) else { continue }
+
+            // 先制攻撃のターゲットを選択
+            guard let target = selectOffensiveTarget(attackerSide: side,
+                                                     context: &context,
+                                                     allowFriendlyTargets: false,
+                                                     attacker: attacker,
+                                                     forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil))
+            else { continue }
+
+            guard let refreshedAttacker = context.actor(for: side, index: index), refreshedAttacker.isAlive else { return }
+            guard let defender = context.actor(for: target.0, index: target.1), defender.isAlive else { continue }
+
+            // 先制攻撃のログ
+            appendActionLog(for: refreshedAttacker, side: side, index: index, category: .physicalAttack, context: &context)
+
+            let attackResult = performSpecialAttack(descriptor,
+                                                    attackerSide: side,
+                                                    attackerIndex: index,
+                                                    attacker: refreshedAttacker,
+                                                    defenderSide: target.0,
+                                                    defenderIndex: target.1,
+                                                    defender: defender,
+                                                    context: &context)
+            _ = applyAttackOutcome(attackerSide: side,
+                                   attackerIndex: index,
+                                   defenderSide: target.0,
+                                   defenderIndex: target.1,
+                                   attacker: attackResult.attacker,
+                                   defender: attackResult.defender,
+                                   attackResult: attackResult,
+                                   context: &context,
+                                   reactionDepth: 0)
+
+            if context.isBattleOver { return }
+        }
     }
 }

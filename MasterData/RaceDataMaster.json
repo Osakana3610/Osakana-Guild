@@ -20,17 +20,24 @@
       "description": "基本性能が最も低い種族。雇用費用が安く成長も早いのが特徴。",
       "maxLevel": 200,
       "passiveSkillIds": [
-        64001,
-        64002
+        342, 365, 406, 1086, 1080, 12, 34, 264, 1091, 1130
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64004
+          "skillId": 64001
         },
         {
           "level": 99,
+          "skillId": 64002
+        },
+        {
+          "level": 150,
           "skillId": 64003
+        },
+        {
+          "level": 200,
+          "skillId": 64004
         }
       ]
     },
@@ -51,17 +58,24 @@
       "description": "基本性能が最も低い種族。雇用費用が安く成長も早いのが特徴。",
       "maxLevel": 200,
       "passiveSkillIds": [
-        64001,
-        64002
+        342, 365, 406, 1086, 1080, 39, 264, 1169, 1190, 1211
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64004
+          "skillId": 64001
         },
         {
           "level": 99,
+          "skillId": 64002
+        },
+        {
+          "level": 150,
           "skillId": 64003
+        },
+        {
+          "level": 200,
+          "skillId": 64004
         }
       ]
     },
@@ -82,13 +96,16 @@
       "description": "敏捷性が高く、危機を察知する本能を持つ。手先が器用で道具の扱いがうまい。",
       "maxLevel": 140,
       "passiveSkillIds": [
-        64011,
-        64012
+        545, 407, 410, 273, 302, 1280, 17, 97, 1025, 1151, 340
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64014
+          "skillId": 64011
+        },
+        {
+          "level": 50,
+          "skillId": 64012
         },
         {
           "level": 99,
@@ -113,17 +130,16 @@
       "description": "信仰心の高い種族。精神が高く、僧侶職に向いている。",
       "maxLevel": 140,
       "passiveSkillIds": [
-        64021,
-        64022
+        261, 262, 259, 444, 48, 44, 1032, 1029, 1191, 1211, 340
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64024
+          "skillId": 64021
         },
         {
           "level": 99,
-          "skillId": 64023
+          "skillId": 64022
         }
       ]
     },
@@ -144,17 +160,16 @@
       "description": "山岳や岩場を好み、手先が器用で工芸品などを作り出す。",
       "maxLevel": 140,
       "passiveSkillIds": [
-        64031,
-        64032
+        546, 21, 17, 104, 1029, 1135, 661, 680, 640, 340, 1280
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64034
+          "skillId": 64031
         },
         {
           "level": 99,
-          "skillId": 64033
+          "skillId": 64032
         }
       ]
     },
@@ -175,17 +190,16 @@
       "description": "森の闇に身を潜め、魔法と暗殺術に長けた種族。",
       "maxLevel": 150,
       "passiveSkillIds": [
-        64041,
-        64042
+        273, 274, 305, 302, 44, 17, 111, 1025, 1152, 340, 1280
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64044
+          "skillId": 64041
         },
         {
           "level": 99,
-          "skillId": 64043
+          "skillId": 64042
         }
       ]
     },
@@ -206,17 +220,16 @@
       "description": "夜間に力を発揮する貴族的な種族。ドレイン能力を持つ。",
       "maxLevel": 135,
       "passiveSkillIds": [
-        64051,
-        64052
+        1061, 1059, 21, 17, 111, 1023, 1035, 272, 1152, 340, 1095
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64054
+          "skillId": 64051
         },
         {
           "level": 99,
-          "skillId": 64053
+          "skillId": 64052
         }
       ]
     },
@@ -237,17 +250,16 @@
       "description": "森に住む美しい種族。自然と共に生き、治癒能力に長けている。",
       "maxLevel": 150,
       "passiveSkillIds": [
-        64061,
-        64062
+        261, 262, 445, 51, 1025, 1192, 1211, 1152, 340, 407
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64064
+          "skillId": 64061
         },
         {
           "level": 99,
-          "skillId": 64063
+          "skillId": 64062
         }
       ]
     },
@@ -268,17 +280,16 @@
       "description": "強力な精神力を持つ超能力者。魔法攻撃に特化している。",
       "maxLevel": 140,
       "passiveSkillIds": [
-        64071,
-        64072
+        51, 50, 77, 78, 1176, 1032, 1025, 121, 340, 1
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64074
+          "skillId": 64071
         },
         {
           "level": 99,
-          "skillId": 64073
+          "skillId": 64072
         }
       ]
     },
@@ -299,13 +310,16 @@
       "description": "猫のような敏捷性と運を持つ種族。弱点を突く攻撃が得意。",
       "maxLevel": 135,
       "passiveSkillIds": [
-        64081,
-        64082
+        274, 273, 305, 1281, 17, 104, 1025, 1154, 340, 407
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64084
+          "skillId": 64081
+        },
+        {
+          "level": 50,
+          "skillId": 64082
         },
         {
           "level": 99,
@@ -330,17 +344,16 @@
       "description": "竜の血を引く種族。ブレス攻撃と高い攻撃力を持つ。",
       "maxLevel": 135,
       "passiveSkillIds": [
-        64091,
-        64092
+        61, 60, 86, 84, 21, 118, 1095, 340, 1280
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64094
+          "skillId": 64091
         },
         {
           "level": 99,
-          "skillId": 64093
+          "skillId": 64092
         }
       ]
     },
@@ -361,17 +374,16 @@
       "description": "戦いに生きる女戦士の種族。高い攻撃力と体力を持つ。",
       "maxLevel": 135,
       "passiveSkillIds": [
-        64101,
-        64102
+        24, 23, 68, 1281, 97, 1095, 1132, 340, 272, 1025
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64104
+          "skillId": 64101
         },
         {
           "level": 99,
-          "skillId": 64103
+          "skillId": 64102
         }
       ]
     },
@@ -392,17 +404,24 @@
       "description": "素材でカスタマイズ可能な人工的な生命体。基本能力は低いが成長の可能性を秘める。",
       "maxLevel": 99,
       "passiveSkillIds": [
-        64111,
-        64112
+        547, 1023, 1027, 1031, 1035, 1, 26, 336
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64114
+          "skillId": 64111
+        },
+        {
+          "level": 99,
+          "skillId": 64112
         },
         {
           "level": 99,
           "skillId": 64113
+        },
+        {
+          "level": 99,
+          "skillId": 64114
         }
       ]
     },
@@ -423,17 +442,16 @@
       "description": "不死の特性を持つ種族。体力が非常に高く、死への耐性がある。",
       "maxLevel": 140,
       "passiveSkillIds": [
-        64121,
-        64122
+        1023, 1035, 1027, 1249, 1247, 111, 21, 1134, 340, 1059
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64124
+          "skillId": 64121
         },
         {
           "level": 99,
-          "skillId": 64123
+          "skillId": 64122
         }
       ]
     },
@@ -454,17 +472,16 @@
       "description": "巨大な体躯を持つ種族。圧倒的な力と体力でパーティを守る。",
       "maxLevel": 130,
       "passiveSkillIds": [
-        64131,
-        64132
+        25, 24, 69, 1100, 1143, 1249, 104, 340, 1278, 1029
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64134
+          "skillId": 64131
         },
         {
           "level": 99,
-          "skillId": 64133
+          "skillId": 64132
         }
       ]
     },
@@ -485,13 +502,16 @@
       "description": "空を舞う神秘的な種族。高い敏捷性と魔法能力を併せ持つ。",
       "maxLevel": 130,
       "passiveSkillIds": [
-        64141,
-        64142
+        1155, 1281, 44, 17, 1025, 121, 340, 364, 272, 1172
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64144
+          "skillId": 64141
+        },
+        {
+          "level": 50,
+          "skillId": 64142
         },
         {
           "level": 99,
@@ -516,17 +536,16 @@
       "description": "凶暴で力強い種族。最高クラスの攻撃力を誇る。",
       "maxLevel": 130,
       "passiveSkillIds": [
-        64151,
-        64152
+        25, 24, 68, 69, 1100, 1282, 104, 97, 340, 272
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64154
+          "skillId": 64151
         },
         {
           "level": 99,
-          "skillId": 64153
+          "skillId": 64152
         }
       ]
     },
@@ -547,17 +566,16 @@
       "description": "機械と生体の融合体。最高クラスの敏捷性を持つ。",
       "maxLevel": 130,
       "passiveSkillIds": [
-        64161,
-        64162
+        546, 1283, 1282, 17, 273, 1153, 1025, 1027, 340, 407
       ],
       "skillUnlocks": [
         {
           "level": 50,
-          "skillId": 64164
+          "skillId": 64161
         },
         {
           "level": 99,
-          "skillId": 64163
+          "skillId": 64162
         }
       ]
     }

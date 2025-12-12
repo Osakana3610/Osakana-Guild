@@ -172,4 +172,38 @@ extension BattleTurnEngine {
         }
         return inflict.baseChancePercent
     }
+
+    // MARK: - Auto Status Cure
+
+    /// 味方が状態異常を受けた時、autoStatusCureOnAllyを持つ味方がいれば自動でキュア
+    /// - Parameters:
+    ///   - targetSide: 状態異常を受けたキャラのサイド
+    ///   - targetIndex: 状態異常を受けたキャラのインデックス
+    ///   - context: 戦闘コンテキスト
+    static func applyAutoStatusCureIfNeeded(for targetSide: ActorSide,
+                                            targetIndex: Int,
+                                            context: inout BattleContext) {
+        // 対象を取得
+        guard var target = context.actor(for: targetSide, index: targetIndex),
+              target.isAlive,
+              !target.statusEffects.isEmpty else { return }
+
+        // 同じサイドの味方でautoStatusCureOnAllyを持つキャラを探す
+        let allies: [BattleActor] = targetSide == .player ? context.players : context.enemies
+        let hasCurer = allies.enumerated().contains { index, ally in
+            index != targetIndex && ally.isAlive && ally.skillEffects.status.autoStatusCureOnAlly
+        }
+        guard hasCurer else { return }
+
+        // 状態異常を全てクリア
+        let hadStatus = !target.statusEffects.isEmpty
+        target.statusEffects = []
+        context.updateActor(target, side: targetSide, index: targetIndex)
+
+        // ログ出力
+        if hadStatus {
+            let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
+            context.appendAction(kind: .statusRecover, actor: targetIdx)
+        }
+    }
 }
