@@ -96,7 +96,7 @@ extension BattleTurnEngine {
             }
             for ref in targets {
                 guard var target = context.actor(for: ref.0, index: ref.1) else { continue }
-                let modifier = damageTakenModifier(for: target, damageType: isMagic ? .magical : .physical)
+                let modifier = damageTakenModifier(for: target, damageType: isMagic ? .magical : .physical, attacker: defender)
                 let applied = max(1, Int((baseDamage * modifier).rounded()))
                 _ = applyDamage(amount: applied, to: &target)
                 context.updateActor(target, side: ref.0, index: ref.1)

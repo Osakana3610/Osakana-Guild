@@ -112,7 +112,16 @@ extension SkillRuntimeEffectCompiler {
                      .targetingWeight,
                      .coverRowsBehind,
                      .magicNullifyChancePercent,
-                     .magicCriticalChancePercent:
+                     .magicCriticalChancePercent,
+                     .levelComparisonDamageTaken,
+                     .spellChargeRecoveryChance,
+                     .enemyActionDebuffChance,
+                     .autoStatusCureOnAlly,
+                     .cumulativeHitDamageBonus,
+                     .enemySingleActionSkipChance,
+                     .actionOrderShuffleEnemy,
+                     .firstStrike,
+                     .damageDealtMultiplierByTargetHP:
                     continue
             }
         }

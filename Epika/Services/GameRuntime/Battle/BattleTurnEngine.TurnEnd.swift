@@ -489,4 +489,70 @@ extension BattleTurnEngine {
         }
         return true
     }
+
+    // MARK: - Spell Charge Recovery
+
+    static func applySpellChargeRecovery(_ context: inout BattleContext) {
+        applySpellChargeRecoveryForSide(.player, context: &context)
+        applySpellChargeRecoveryForSide(.enemy, context: &context)
+    }
+
+    private static func applySpellChargeRecoveryForSide(_ side: ActorSide, context: inout BattleContext) {
+        var actors: [BattleActor] = side == .player ? context.players : context.enemies
+        guard !actors.isEmpty else { return }
+
+        for index in actors.indices {
+            var actor = actors[index]
+            guard actor.isAlive else { continue }
+
+            let recoveries = actor.skillEffects.spell.chargeRecoveries
+            guard !recoveries.isEmpty else { continue }
+
+            for recovery in recoveries {
+                let chance = max(0.0, min(100.0, recovery.baseChancePercent))
+                guard chance > 0 else { continue }
+                let probability = chance / 100.0
+                guard context.random.nextBool(probability: probability) else { continue }
+
+                // 回復対象の呪文を取得
+                let targetSpells: [SpellDefinition]
+                if let schoolIndex = recovery.school {
+                    // 特定スクール
+                    if schoolIndex == 0 {
+                        targetSpells = actor.spells.mage
+                    } else {
+                        targetSpells = actor.spells.priest
+                    }
+                } else {
+                    // 全呪文
+                    targetSpells = actor.spells.mage + actor.spells.priest
+                }
+
+                // チャージが最大未満の呪文をフィルタ
+                let recoverableSpells = targetSpells.filter { spell in
+                    guard let state = actor.actionResources.spellChargeState(for: spell.id) else { return false }
+                    return state.current < state.max
+                }
+
+                guard !recoverableSpells.isEmpty else { continue }
+
+                // ランダムに1つ選んで回復
+                let randomIndex = context.random.nextInt(in: 0...(recoverableSpells.count - 1))
+                let targetSpell = recoverableSpells[randomIndex]
+                _ = actor.actionResources.addCharges(forSpellId: targetSpell.id, amount: 1, cap: Int.max)
+
+                // ログ出力（オプション）
+                let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+                context.appendAction(kind: .spellChargeRecover, actor: actorIdx, value: UInt32(targetSpell.id))
+            }
+
+            actors[index] = actor
+        }
+
+        if side == .player {
+            context.players = actors
+        } else {
+            context.enemies = actors
+        }
+    }
 }

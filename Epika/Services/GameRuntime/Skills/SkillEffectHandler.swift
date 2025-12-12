@@ -73,7 +73,7 @@ enum SkillEffectHandlerRegistry {
         var dict: [SkillEffectType: any SkillEffectHandler.Type] = [:]
 
         let allHandlers: [any SkillEffectHandler.Type] = [
-            // MARK: Damage Handlers (14)
+            // MARK: Damage Handlers (17)
             DamageDealtPercentHandler.self,
             DamageDealtMultiplierHandler.self,
             DamageTakenPercentHandler.self,
@@ -89,8 +89,10 @@ enum SkillEffectHandlerRegistry {
             AdditionalDamageMultiplierHandler.self,
             MinHitScaleHandler.self,
             MagicNullifyChancePercentHandler.self,
+            LevelComparisonDamageTakenHandler.self,
+            DamageDealtMultiplierByTargetHPHandler.self,
 
-            // MARK: Spell Handlers (9)
+            // MARK: Spell Handlers (10)
             SpellPowerPercentHandler.self,
             SpellPowerMultiplierHandler.self,
             SpellSpecificMultiplierHandler.self,
@@ -100,8 +102,9 @@ enum SkillEffectHandlerRegistry {
             SpellTierUnlockHandler.self,
             TacticSpellAmplifyHandler.self,
             MagicCriticalChancePercentHandler.self,
+            SpellChargeRecoveryChanceHandler.self,
 
-            // MARK: Combat Handlers (15)
+            // MARK: Combat Handlers (20)
             ProcMultiplierHandler.self,
             ProcRateHandler.self,
             ExtraActionHandler.self,
@@ -117,8 +120,13 @@ enum SkillEffectHandlerRegistry {
             BarrierOnGuardHandler.self,
             AttackCountAdditiveHandler.self,
             AttackCountMultiplierHandler.self,
+            EnemyActionDebuffChanceHandler.self,
+            CumulativeHitDamageBonusHandler.self,
+            EnemySingleActionSkipChanceHandler.self,
+            ActionOrderShuffleEnemyHandler.self,
+            FirstStrikeHandler.self,
 
-            // MARK: Status Handlers (7)
+            // MARK: Status Handlers (8)
             StatusResistanceMultiplierHandler.self,
             StatusResistancePercentHandler.self,
             StatusInflictHandler.self,
@@ -126,6 +134,7 @@ enum SkillEffectHandlerRegistry {
             TimedBuffTriggerHandler.self,
             TimedMagicPowerAmplifyHandler.self,
             TimedBreathPowerAmplifyHandler.self,
+            AutoStatusCureOnAllyHandler.self,
 
             // MARK: Resurrection Handlers (7)
             ResurrectionSaveHandler.self,

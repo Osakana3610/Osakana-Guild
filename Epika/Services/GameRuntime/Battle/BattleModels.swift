@@ -273,6 +273,12 @@ struct BattleActor: Sendable {
             static let neutral = TargetMultipliers()
         }
 
+        /// HP閾値に応じたダメージ倍率（暗殺者スキル用）
+        struct HPThresholdMultiplier: Sendable, Hashable {
+            let hpThresholdPercent: Double  // この%以下でトリガー
+            let multiplier: Double          // 適用する倍率
+        }
+
         struct SpellPower: Sendable, Hashable {
             var percent: Double
             var multiplier: Double
@@ -368,6 +374,8 @@ struct BattleActor: Sendable {
                 case allyDamagedPhysical
                 case selfKilledEnemy      // 敵を倒した時
                 case allyMagicAttack      // 味方が魔法攻撃した時
+                case selfAttackNoKill     // 攻撃したが敵を倒せなかった時
+                case selfMagicAttack      // 自分が魔法攻撃した時
             }
 
             enum Target: String, Sendable {
@@ -505,6 +513,8 @@ struct BattleActor: Sendable {
             var martialBonusMultiplier: Double
             var minHitScale: Double?
             var magicNullifyChancePercent: Double  // 魔法無効化確率
+            var levelComparisonDamageTakenPercent: Double  // 低Lv敵からの被ダメ軽減%
+            var hpThresholdMultipliers: [HPThresholdMultiplier]  // HP閾値ダメージ倍率（暗殺者スキル用）
 
             static let neutral = Damage(
                 taken: DamageMultipliers.neutral,
@@ -517,11 +527,18 @@ struct BattleActor: Sendable {
                 martialBonusPercent: 0.0,
                 martialBonusMultiplier: 1.0,
                 minHitScale: nil,
-                magicNullifyChancePercent: 0.0
+                magicNullifyChancePercent: 0.0,
+                levelComparisonDamageTakenPercent: 0.0,
+                hpThresholdMultipliers: []
             )
         }
 
         // MARK: - Spell Group
+
+        struct SpellChargeRecovery: Sendable, Hashable {
+            let baseChancePercent: Double  // 基本確率（statScaleで計算済み）
+            let school: UInt8?             // nil=全呪文、0=mage、1=priest
+        }
 
         struct Spell: Sendable, Hashable {
             var power: SpellPower
@@ -532,6 +549,7 @@ struct BattleActor: Sendable {
             var breathExtraCharges: Int
             var magicCriticalChancePercent: Double  // 必殺魔法発動率
             var magicCriticalMultiplier: Double     // 必殺魔法倍率
+            var chargeRecoveries: [SpellChargeRecovery]  // ターン開始時呪文回復
 
             func chargeModifier(for spellId: UInt8) -> SpellChargeModifier? {
                 chargeModifiers[spellId] ?? defaultChargeModifier
@@ -545,11 +563,22 @@ struct BattleActor: Sendable {
                 defaultChargeModifier: nil,
                 breathExtraCharges: 0,
                 magicCriticalChancePercent: 0.0,
-                magicCriticalMultiplier: 1.5
+                magicCriticalMultiplier: 1.5,
+                chargeRecoveries: []
             )
         }
 
         // MARK: - Combat Group
+
+        struct EnemyActionDebuff: Sendable, Hashable {
+            let baseChancePercent: Double  // 基本確率（statScaleで計算済み）
+            let reduction: Int             // 減少量
+        }
+
+        struct CumulativeHitBonus: Sendable, Hashable {
+            let damagePercentPerHit: Double  // 命中ごとの追加ダメージ%
+            let hitRatePercentPerHit: Double // 命中ごとの命中率上昇%
+        }
 
         struct Combat: Sendable, Hashable {
             var procChanceMultiplier: Double
@@ -567,6 +596,11 @@ struct BattleActor: Sendable {
             var barrierCharges: [UInt8: Int]
             var guardBarrierCharges: [UInt8: Int]
             var specialAttacks: [SpecialAttack]
+            var enemyActionDebuffs: [EnemyActionDebuff]  // 敵行動回数減少
+            var cumulativeHitBonus: CumulativeHitBonus?  // 命中累積ボーナス
+            var enemySingleActionSkipChancePercent: Double  // 道化師スキル: 敵単体行動スキップ確率
+            var actionOrderShuffleEnemy: Bool  // 道化師スキル: 敵の行動順シャッフル
+            var firstStrike: Bool  // 道化師スキル: 先制攻撃
 
             static let neutral = Combat(
                 procChanceMultiplier: 1.0,
@@ -583,7 +617,12 @@ struct BattleActor: Sendable {
                 shieldBlockBonusPercent: 0.0,
                 barrierCharges: [:],
                 guardBarrierCharges: [:],
-                specialAttacks: []
+                specialAttacks: [],
+                enemyActionDebuffs: [],
+                cumulativeHitBonus: nil,
+                enemySingleActionSkipChancePercent: 0.0,
+                actionOrderShuffleEnemy: false,
+                firstStrike: false
             )
         }
 
@@ -594,12 +633,14 @@ struct BattleActor: Sendable {
             var inflictions: [StatusInflict]
             var berserkChancePercent: Double?
             var timedBuffTriggers: [TimedBuffTrigger]
+            var autoStatusCureOnAlly: Bool  // 味方が異常状態になった時、自動でキュア発動
 
             static let neutral = Status(
                 resistances: [:],
                 inflictions: [],
                 berserkChancePercent: nil,
-                timedBuffTriggers: []
+                timedBuffTriggers: [],
+                autoStatusCureOnAlly: false
             )
         }
 
@@ -758,6 +799,7 @@ struct BattleActor: Sendable {
         var grantedSkillIds: Set<UInt16>
         var extraActionsNextTurn: Int
         var isSacrificeTarget: Bool
+        var skipActionThisTurn: Bool  // 道化師スキルによる行動スキップ
         var innateResistances: BattleInnateResistances
 
     init(identifier: String,
@@ -811,6 +853,7 @@ struct BattleActor: Sendable {
          grantedSkillIds: Set<UInt16> = [],
          extraActionsNextTurn: Int = 0,
          isSacrificeTarget: Bool = false,
+         skipActionThisTurn: Bool = false,
          innateResistances: BattleInnateResistances = .neutral) {
         self.identifier = identifier
         self.displayName = displayName
@@ -863,6 +906,7 @@ struct BattleActor: Sendable {
         self.grantedSkillIds = grantedSkillIds
         self.extraActionsNextTurn = extraActionsNextTurn
         self.isSacrificeTarget = isSacrificeTarget
+        self.skipActionThisTurn = skipActionThisTurn
         self.innateResistances = innateResistances
     }
 

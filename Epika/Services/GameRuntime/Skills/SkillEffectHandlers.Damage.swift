@@ -203,3 +203,35 @@ struct MagicNullifyChancePercentHandler: SkillEffectHandler {
         accumulator.damage.magicNullifyChancePercent = max(accumulator.damage.magicNullifyChancePercent, value)
     }
 }
+
+struct LevelComparisonDamageTakenHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.levelComparisonDamageTaken
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        var value = payload.value["valuePercent"] ?? 0.0
+        value += payload.scaledValue(from: context.actorStats)
+        accumulator.damage.levelComparisonDamageTakenPercent += value
+    }
+}
+
+// MARK: - Assassin Skills (暗殺者)
+
+struct DamageDealtMultiplierByTargetHPHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.damageDealtMultiplierByTargetHP
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let hpThreshold = try payload.requireValue("hpThresholdPercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        accumulator.damage.hpThresholdMultipliers.append(
+            .init(hpThresholdPercent: hpThreshold, multiplier: multiplier)
+        )
+    }
+}
