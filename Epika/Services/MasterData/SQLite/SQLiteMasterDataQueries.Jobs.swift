@@ -126,4 +126,26 @@ extension SQLiteMasterDataManager {
         }
         return result
     }
+
+    /// 職業の追加情報（カテゴリ、成長傾向）を取得
+    /// - Returns: [jobId: (category, growthTendency)]
+    func fetchAllJobMetadata() throws -> [UInt8: (category: String, growthTendency: String?)] {
+        var result: [UInt8: (category: String, growthTendency: String?)] = [:]
+        let sql = "SELECT id, category, growth_tendency FROM jobs;"
+        let statement = try prepare(sql)
+        defer { sqlite3_finalize(statement) }
+        while sqlite3_step(statement) == SQLITE_ROW {
+            let jobId = UInt8(sqlite3_column_int(statement, 0))
+            guard let categoryC = sqlite3_column_text(statement, 1) else { continue }
+            let category = String(cString: categoryC)
+            let growthTendency: String?
+            if let tendencyC = sqlite3_column_text(statement, 2) {
+                growthTendency = String(cString: tendencyC)
+            } else {
+                growthTendency = nil
+            }
+            result[jobId] = (category: category, growthTendency: growthTendency)
+        }
+        return result
+    }
 }
