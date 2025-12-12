@@ -14930,6 +14930,882 @@
             }
           }
         ]
+      },
+      {
+        "familyId": "master.warrior.guardian",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "all",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65163,
+            "label": "[マスター:戦士] 守護・極 味方被ダメ-8%",
+            "value": {
+              "valuePercent": -8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.warrior.fortify",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65164,
+            "label": "[マスター:戦士] 頑健・極 防御20%→HP+物理被ダメ-5%",
+            "effects": [
+              {
+                "effectType": "statConversionPercent",
+                "parameters": {
+                  "from": "physicalDefense",
+                  "to": "maxHP"
+                },
+                "value": {
+                  "valuePercent": 20
+                }
+              },
+              {
+                "effectType": "damageTakenPercent",
+                "parameters": {
+                  "damageType": "physical"
+                },
+                "value": {
+                  "valuePercent": -5
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.warrior.armament",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65165,
+            "label": "[マスター:戦士] 武装・極 盾+40%+パリィ率+10%",
+            "effects": [
+              {
+                "effectType": "equipmentStatMultiplier",
+                "parameters": {
+                  "equipmentCategory": "shield"
+                },
+                "value": {
+                  "multiplier": 1.4
+                }
+              },
+              {
+                "effectType": "procRateAdditive",
+                "parameters": {
+                  "procType": "parry"
+                },
+                "value": {
+                  "additive": 10
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.swordsman.counter",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "counter"
+        },
+        "variants": [
+          {
+            "id": 65173,
+            "label": "[マスター:剣士] 反撃・極 被ダメ時18%反撃",
+            "value": {
+              "additive": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.swordsman.followup",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "pursuit"
+        },
+        "variants": [
+          {
+            "id": 65174,
+            "label": "[マスター:剣士] 追撃・極 味方魔法後追撃35%",
+            "value": {
+              "additive": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.swordsman.combo",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 65175,
+            "label": "[マスター:剣士] 連撃・極 攻撃威力+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.thief.fortune",
+        "effectType": "rewardItemPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65183,
+            "label": "[マスター:盗賊] 幸運・極 アイテム獲得+25%",
+            "value": {
+              "valuePercent": 25
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.thief.doubleAction",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "extraAction"
+        },
+        "variants": [
+          {
+            "id": 65184,
+            "label": "[マスター:盗賊] 連続行動・極 35%で2回行動",
+            "value": {
+              "additive": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.thief.survival",
+        "effectType": "statusResistancePercent",
+        "parameters": {
+          "statusType": "instantDeath"
+        },
+        "variants": [
+          {
+            "id": 65185,
+            "label": "[マスター:盗賊] 危機回避・極 即死耐性+50%",
+            "value": {
+              "valuePercent": 50
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.assassin.weakpoint",
+        "effectType": "damageDealtMultiplierByTargetHP",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65193,
+            "label": "[マスター:暗殺者] 弱点攻撃・極 HP60%以下の敵へダメ×1.8",
+            "value": {
+              "hpThresholdPercent": 60,
+              "multiplier": 1.8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.assassin.lethal",
+        "effectType": "criticalDamagePercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65194,
+            "label": "[マスター:暗殺者] 致命打・極 必殺威力+65%",
+            "value": {
+              "valuePercent": 65
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.assassin.mastery",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65195,
+            "label": "[マスター:暗殺者] 暗殺術・極 短剣×1.6+HP40%以下×2.5",
+            "effects": [
+              {
+                "effectType": "equipmentStatMultiplier",
+                "parameters": {
+                  "equipmentType": "dagger"
+                },
+                "value": {
+                  "multiplier": 1.6
+                }
+              },
+              {
+                "effectType": "damageDealtMultiplierByTargetHP",
+                "parameters": {},
+                "value": {
+                  "hpThresholdPercent": 40,
+                  "multiplier": 2.5
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.jester.mischief",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65203,
+            "label": "[マスター:道化師] 悪戯・極 行動スキップ10%+敵命中-3%",
+            "effects": [
+              {
+                "effectType": "enemySingleActionSkipChance",
+                "parameters": {},
+                "value": {
+                  "chancePercent": 10
+                }
+              },
+              {
+                "effectType": "statDebuff",
+                "parameters": {
+                  "stat": "hitRate",
+                  "target": "enemy"
+                },
+                "value": {
+                  "valuePercent": -3
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.jester.confusion",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65204,
+            "label": "[マスター:道化師] 混乱・極 敵行動シャッフル+敵攻撃-5%",
+            "effects": [
+              {
+                "effectType": "actionOrderShuffleEnemy",
+                "parameters": {},
+                "value": {}
+              },
+              {
+                "effectType": "statDebuff",
+                "parameters": {
+                  "stat": "physicalAttack",
+                  "target": "enemy"
+                },
+                "value": {
+                  "valuePercent": -5
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.jester.finale",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65205,
+            "label": "[マスター:道化師] 大舞台・極 シャッフル+先制+味方攻撃+10%",
+            "effects": [
+              {
+                "effectType": "actionOrderShuffle",
+                "parameters": {},
+                "value": {}
+              },
+              {
+                "effectType": "firstStrike",
+                "parameters": {},
+                "value": {}
+              },
+              {
+                "effectType": "damageDealtPercent",
+                "parameters": {
+                  "damageType": "physical",
+                  "target": "party"
+                },
+                "value": {
+                  "valuePercent": 10
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.priest.protect",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "magical",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65213,
+            "label": "[マスター:僧侶] 保護・極 味方魔法被ダメ-14%",
+            "value": {
+              "valuePercent": -14
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.priest.blessing",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "magical",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65214,
+            "label": "[マスター:僧侶] 祝福・極 味方魔法+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.priest.salvation",
+        "effectType": "resurrectionChancePercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65215,
+            "label": "[マスター:僧侶] 救済・極 蘇生確率+35%",
+            "value": {
+              "valuePercent": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.mage.amplify",
+        "effectType": "spellPowerPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65223,
+            "label": "[マスター:魔法使い] 増幅・極 魔法威力+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.mage.absorb",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65224,
+            "label": "[マスター:魔法使い] 吸収・極 MP回復10%+チャージ回復+5%",
+            "effects": [
+              {
+                "effectType": "mpRecoveryPercent",
+                "parameters": {},
+                "value": {
+                  "valuePercent": 10
+                }
+              },
+              {
+                "effectType": "spellChargeRecoveryPercent",
+                "parameters": {},
+                "value": {
+                  "valuePercent": 5
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.mage.destroy",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65225,
+            "label": "[マスター:魔法使い] 破壊・極 敵魔防-18%+魔法攻撃+10%",
+            "effects": [
+              {
+                "effectType": "statDebuff",
+                "parameters": {
+                  "stat": "magicalDefense",
+                  "target": "enemy"
+                },
+                "value": {
+                  "valuePercent": -18
+                }
+              },
+              {
+                "effectType": "damageDealtPercent",
+                "parameters": {
+                  "damageType": "magical"
+                },
+                "value": {
+                  "valuePercent": 10
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.hunter.precision",
+        "effectType": "criticalRateAdd",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65233,
+            "label": "[マスター:狩人] 精密・極 必殺率+15",
+            "value": {
+              "additive": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.hunter.pierce",
+        "effectType": "armorPenetrationPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65234,
+            "label": "[マスター:狩人] 貫通・極 防御無視18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.hunter.volley",
+        "effectType": "attackCountAdditive",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65235,
+            "label": "[マスター:狩人] 一斉射撃・極 攻撃回数+2",
+            "value": {
+              "additive": 2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.monk.meditate",
+        "effectType": "statPercent",
+        "parameters": {
+          "stat": "magicalHealing"
+        },
+        "variants": [
+          {
+            "id": 65243,
+            "label": "[マスター:修道者] 瞑想・極 魔法回復+22%",
+            "value": {
+              "valuePercent": 22
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.monk.ward",
+        "effectType": "statusResistancePercent",
+        "parameters": {
+          "statusType": "all"
+        },
+        "variants": [
+          {
+            "id": 65244,
+            "label": "[マスター:修道者] 加護・極 状態異常耐性+28%",
+            "value": {
+              "valuePercent": 28
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.monk.enlighten",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "all"
+        },
+        "variants": [
+          {
+            "id": 65245,
+            "label": "[マスター:修道者] 悟り・極 全被ダメ-15%",
+            "value": {
+              "valuePercent": -15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.samurai.iai",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "firstStrike"
+        },
+        "variants": [
+          {
+            "id": 65253,
+            "label": "[マスター:侍] 居合・極 先制攻撃+18%",
+            "value": {
+              "additive": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.samurai.slash",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 65254,
+            "label": "[マスター:侍] 斬撃・極 物理攻撃+22%",
+            "value": {
+              "valuePercent": 22
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.samurai.spirit",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65255,
+            "label": "[マスター:侍] 剣気・極 必殺率+25+必殺威力+15%",
+            "effects": [
+              {
+                "effectType": "criticalRateAdd",
+                "parameters": {},
+                "value": {
+                  "additive": 25
+                }
+              },
+              {
+                "effectType": "criticalDamagePercent",
+                "parameters": {},
+                "value": {
+                  "valuePercent": 15
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.blademaster.technique",
+        "effectType": "attackCountAdditive",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65263,
+            "label": "[マスター:剣聖] 剣技・極 攻撃回数+2",
+            "value": {
+              "additive": 2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.blademaster.master",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "counterOnEvade"
+        },
+        "variants": [
+          {
+            "id": 65264,
+            "label": "[マスター:剣聖] 達人・極 回避時反撃80%",
+            "value": {
+              "additive": 80
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.blademaster.peerless",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 65265,
+            "label": "[マスター:剣聖] 無双・極 物理攻撃+35%",
+            "value": {
+              "valuePercent": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.spellblade.magicSword",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "magical"
+        },
+        "variants": [
+          {
+            "id": 65273,
+            "label": "[マスター:秘法剣士] 魔剣・極 魔法攻撃+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.spellblade.bladeMagic",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 65274,
+            "label": "[マスター:秘法剣士] 術剣・極 物理攻撃+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.spellblade.fusion",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "all"
+        },
+        "variants": [
+          {
+            "id": 65275,
+            "label": "[マスター:秘法剣士] 融合・極 全攻撃+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.sage.knowledge",
+        "effectType": "spellPowerPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65283,
+            "label": "[マスター:賢者] 知識・極 魔法威力+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.sage.wisdom",
+        "effectType": "spellPowerPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65284,
+            "label": "[マスター:賢者] 叡智・極 全魔法+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.sage.versatile",
+        "effectType": "statPercent",
+        "parameters": {
+          "stat": "all"
+        },
+        "variants": [
+          {
+            "id": 65285,
+            "label": "[マスター:賢者] 万能・極 全ステ+10%",
+            "value": {
+              "valuePercent": 10
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.ninja.stealth",
+        "effectType": "explorationTimePercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65293,
+            "label": "[マスター:忍者] 隠密・極 探索時間-18%",
+            "value": {
+              "valuePercent": -18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.ninja.shadowClone",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "counterOnEvade"
+        },
+        "variants": [
+          {
+            "id": 65294,
+            "label": "[マスター:忍者] 分身・極 回避時反撃70%",
+            "value": {
+              "additive": 70
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.ninja.deathblow",
+        "effectType": "criticalRateMax",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65295,
+            "label": "[マスター:忍者] 必殺・極 必殺率上限+35",
+            "value": {
+              "additive": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.lord.command",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65303,
+            "label": "[マスター:君主] 指揮・極 味方全体攻撃+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.lord.rally",
+        "effectType": "attackCountAdditive",
+        "parameters": {
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65304,
+            "label": "[マスター:君主] 号令・極 味方攻撃回数+2",
+            "value": {
+              "additive": 2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.lord.control",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "all",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65305,
+            "label": "[マスター:君主] 統率・極 味方全体被ダメ-18%",
+            "value": {
+              "valuePercent": -18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.royalline.majesty",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65313,
+            "label": "[マスター:ロイヤルライン] 王威・極 味方物理+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.royalline.aura",
+        "effectType": "statDebuff",
+        "parameters": {
+          "stat": "physicalAttack",
+          "target": "enemy"
+        },
+        "variants": [
+          {
+            "id": 65314,
+            "label": "[マスター:ロイヤルライン] 威光・極 敵攻撃-15%",
+            "value": {
+              "valuePercent": -15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.royalline.dominion",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "all"
+        },
+        "variants": [
+          {
+            "id": 65315,
+            "label": "[マスター:ロイヤルライン] 覇道・極 全攻撃+25%",
+            "value": {
+              "valuePercent": 25
+            }
+          }
+        ]
       }
     ]
   }
