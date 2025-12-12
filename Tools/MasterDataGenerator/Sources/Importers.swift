@@ -465,10 +465,14 @@ extension Generator {
                             payloadDictionary["stringArrayValues"] = payload.stringArrayValues
                         }
                         if let statScale = payload.statScale {
-                            payloadDictionary["statScale"] = [
-                                "stat": statScale.stat,
-                                "percent": statScale.percent
-                            ]
+                            // scaledValue()が参照するキー形式に変換
+                            var params = (payloadDictionary["parameters"] as? [String: String]) ?? [:]
+                            params["scalingStat"] = statScale.stat
+                            payloadDictionary["parameters"] = params
+
+                            var values = (payloadDictionary["value"] as? [String: Double]) ?? [:]
+                            values["scalingCoefficient"] = statScale.percent
+                            payloadDictionary["value"] = values
                         }
                         let payloadJSON = try encodeJSONObject(payloadDictionary, context: "Skill \(variant.id) の payload")
 
