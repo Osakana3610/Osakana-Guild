@@ -87,6 +87,7 @@ struct BattleTurnEngine {
             applyRetreatIfNeeded(&context)
             let sacrificeTargets = computeSacrificeTargets(&context)
             applyTimedBuffTriggers(&context)
+            applySpellChargeRecovery(&context)
 
             let order = actionOrder(&context)
             prepareTurnActions(&context, sacrificeTargets: sacrificeTargets)
@@ -117,10 +118,63 @@ struct BattleTurnEngine {
         for index in context.players.indices {
             context.players[index].extraActionsNextTurn = 0
             context.players[index].isSacrificeTarget = sacrificeTargets.playerTarget == index
+            context.players[index].skipActionThisTurn = false
         }
         for index in context.enemies.indices {
             context.enemies[index].extraActionsNextTurn = 0
             context.enemies[index].isSacrificeTarget = sacrificeTargets.enemyTarget == index
+            context.enemies[index].skipActionThisTurn = false
+        }
+
+        // 道化師スキル: 敵の行動スキップ判定
+        applyEnemyActionSkip(&context)
+
+        // 敵の行動回数減少
+        applyEnemyActionDebuffs(&context)
+    }
+
+    /// 味方のスキルによる敵行動回数減少
+    private static func applyEnemyActionDebuffs(_ context: inout BattleContext) {
+        // 味方のenemyActionDebuffsを収集
+        var debuffs: [(chancePercent: Double, reduction: Int)] = []
+        for player in context.players where player.isAlive {
+            for debuff in player.skillEffects.combat.enemyActionDebuffs {
+                debuffs.append((debuff.baseChancePercent, debuff.reduction))
+            }
+        }
+        guard !debuffs.isEmpty else { return }
+
+        // 各敵に対して発動判定
+        for index in context.enemies.indices where context.enemies[index].isAlive {
+            for debuff in debuffs {
+                let probability = max(0.0, min(1.0, debuff.chancePercent / 100.0))
+                if context.random.nextBool(probability: probability) {
+                    // 行動スロット減少（負の値で減算）
+                    context.enemies[index].extraActionsNextTurn -= debuff.reduction
+                }
+            }
+        }
+    }
+
+    /// 道化師スキルによる敵行動スキップの判定
+    private static func applyEnemyActionSkip(_ context: inout BattleContext) {
+        // 生存している敵のインデックスを取得
+        let aliveEnemyIndices = context.enemies.enumerated()
+            .filter { $0.element.isAlive }
+            .map { $0.offset }
+        guard !aliveEnemyIndices.isEmpty else { return }
+
+        // 各味方のスキップ確率を確認し、保持者ごとに1回抽選
+        for player in context.players where player.isAlive {
+            let skipChance = player.skillEffects.combat.enemySingleActionSkipChancePercent
+            guard skipChance > 0 else { continue }
+
+            let probability = max(0.0, min(1.0, skipChance / 100.0))
+            if context.random.nextBool(probability: probability) {
+                // ランダムな敵を選択（同じ敵が複数回選ばれても1回のスキップ）
+                let targetIdx = aliveEnemyIndices[context.random.nextInt(in: 0...(aliveEnemyIndices.count - 1))]
+                context.enemies[targetIdx].skipActionThisTurn = true
+            }
         }
     }
 
@@ -137,6 +191,10 @@ struct BattleTurnEngine {
                           forcedTargets: sacrificeTargets)
         case .enemy(let index):
             guard context.enemies.indices.contains(index), context.enemies[index].isAlive else { return }
+            // 道化師スキルによる行動スキップ判定
+            if context.enemies[index].skipActionThisTurn {
+                return  // このターンの行動を全てスキップ
+            }
             performAction(for: .enemy,
                           actorIndex: index,
                           context: &context,

@@ -121,14 +121,19 @@ extension BattleTurnEngine {
                 guard var freshTarget = context.actor(for: targetRef.0, index: targetRef.1),
                       freshTarget.isAlive else { continue }
                 let baseChance = baseStatusChancePercent(spell: spell, caster: refreshedAttacker, target: freshTarget)
-                _ = attemptApplyStatus(statusId: statusId,
-                                       baseChancePercent: baseChance,
-                                       durationTurns: nil,
-                                       sourceId: refreshedAttacker.identifier,
-                                       to: &freshTarget,
-                                       context: &context,
-                                       sourceProcMultiplier: refreshedAttacker.skillEffects.combat.procChanceMultiplier)
+                let statusApplied = attemptApplyStatus(statusId: statusId,
+                                                       baseChancePercent: baseChance,
+                                                       durationTurns: nil,
+                                                       sourceId: refreshedAttacker.identifier,
+                                                       to: &freshTarget,
+                                                       context: &context,
+                                                       sourceProcMultiplier: refreshedAttacker.skillEffects.combat.procChanceMultiplier)
                 context.updateActor(freshTarget, side: targetRef.0, index: targetRef.1)
+
+                // autoStatusCureOnAlly判定
+                if statusApplied {
+                    applyAutoStatusCureIfNeeded(for: targetRef.0, targetIndex: targetRef.1, context: &context)
+                }
             }
         }
 

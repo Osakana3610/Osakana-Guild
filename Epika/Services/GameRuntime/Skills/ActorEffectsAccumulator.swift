@@ -35,7 +35,9 @@ struct ActorEffectsAccumulator {
             martialBonusPercent: damage.martialBonusPercent,
             martialBonusMultiplier: damage.martialBonusMultiplier,
             minHitScale: damage.minHitScale,
-            magicNullifyChancePercent: damage.magicNullifyChancePercent
+            magicNullifyChancePercent: damage.magicNullifyChancePercent,
+            levelComparisonDamageTakenPercent: damage.levelComparisonDamageTakenPercent,
+            hpThresholdMultipliers: damage.hpThresholdMultipliers
         )
 
         let spellGroup = BattleActor.SkillEffects.Spell(
@@ -46,7 +48,8 @@ struct ActorEffectsAccumulator {
             defaultChargeModifier: spell.defaultSpellChargeModifier,
             breathExtraCharges: spell.breathExtraCharges,
             magicCriticalChancePercent: spell.magicCriticalChancePercent,
-            magicCriticalMultiplier: spell.magicCriticalMultiplier
+            magicCriticalMultiplier: spell.magicCriticalMultiplier,
+            chargeRecoveries: spell.chargeRecoveries
         )
 
         let combatGroup = BattleActor.SkillEffects.Combat(
@@ -64,14 +67,20 @@ struct ActorEffectsAccumulator {
             shieldBlockBonusPercent: combat.shieldBlockBonusPercent,
             barrierCharges: combat.barrierCharges,
             guardBarrierCharges: combat.guardBarrierCharges,
-            specialAttacks: combat.specialAttacks
+            specialAttacks: combat.specialAttacks,
+            enemyActionDebuffs: combat.enemyActionDebuffs,
+            cumulativeHitBonus: combat.cumulativeHitBonus,
+            enemySingleActionSkipChancePercent: combat.enemySingleActionSkipChancePercent,
+            actionOrderShuffleEnemy: combat.actionOrderShuffleEnemy,
+            firstStrike: combat.firstStrike
         )
 
         let statusGroup = BattleActor.SkillEffects.Status(
             resistances: status.statusResistances,
             inflictions: status.statusInflictions,
             berserkChancePercent: status.berserkChancePercent,
-            timedBuffTriggers: status.timedBuffTriggers
+            timedBuffTriggers: status.timedBuffTriggers,
+            autoStatusCureOnAlly: status.autoStatusCureOnAlly
         )
 
         let resurrectionGroup = BattleActor.SkillEffects.Resurrection(
@@ -141,6 +150,8 @@ struct DamageAccumulator {
     var martialBonusMultiplier: Double = 1.0
     var minHitScale: Double?
     var magicNullifyChancePercent: Double = 0.0
+    var levelComparisonDamageTakenPercent: Double = 0.0
+    var hpThresholdMultipliers: [BattleActor.SkillEffects.HPThresholdMultiplier] = []
 
     func totalMultiplier(for damageType: String) -> Double {
         let percent = dealtPercentByType[damageType] ?? 0.0
@@ -167,6 +178,7 @@ struct SpellAccumulator {
     var breathExtraCharges: Int = 0
     var magicCriticalChancePercent: Double = 0.0
     var magicCriticalMultiplier: Double = 1.5
+    var chargeRecoveries: [BattleActor.SkillEffects.SpellChargeRecovery] = []
 }
 
 // MARK: - ActorCombatAccumulator
@@ -188,6 +200,11 @@ struct ActorCombatAccumulator {
     var barrierCharges: [UInt8: Int] = [:]
     var guardBarrierCharges: [UInt8: Int] = [:]
     var specialAttacks: [BattleActor.SkillEffects.SpecialAttack] = []
+    var enemyActionDebuffs: [BattleActor.SkillEffects.EnemyActionDebuff] = []
+    var cumulativeHitBonus: BattleActor.SkillEffects.CumulativeHitBonus?
+    var enemySingleActionSkipChancePercent: Double = 0.0
+    var actionOrderShuffleEnemy: Bool = false
+    var firstStrike: Bool = false
 }
 
 // MARK: - StatusAccumulator
@@ -197,6 +214,7 @@ struct StatusAccumulator {
     var statusInflictions: [BattleActor.SkillEffects.StatusInflict] = []
     var berserkChancePercent: Double?
     var timedBuffTriggers: [BattleActor.SkillEffects.TimedBuffTrigger] = []
+    var autoStatusCureOnAlly: Bool = false
 }
 
 // MARK: - ResurrectionAccumulator

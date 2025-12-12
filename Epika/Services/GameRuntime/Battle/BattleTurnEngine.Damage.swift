@@ -17,7 +17,15 @@ extension BattleTurnEngine {
         let randomFactor = attackerRoll / max(0.01, defenderRoll)
         let luckModifier = Double(attacker.luck - defender.luck) * 0.002
         let accuracyMod = hitAccuracyModifier(for: hitIndex)
-        let rawChance = (baseRatio * randomFactor + luckModifier) * accuracyMod * accuracyMultiplier
+
+        // 累積ヒットボーナス（命中率）
+        var cumulativeHitRateBonus = 0.0
+        if let bonus = attacker.skillEffects.combat.cumulativeHitBonus {
+            let consecutiveHits = attacker.attackHistory.consecutiveHits
+            cumulativeHitRateBonus = bonus.hitRatePercentPerHit * Double(consecutiveHits) / 100.0
+        }
+
+        let rawChance = (baseRatio * randomFactor + luckModifier + cumulativeHitRateBonus) * accuracyMod * accuracyMultiplier
         return clampProbability(rawChance, defender: defender)
     }
 
@@ -38,8 +46,15 @@ extension BattleTurnEngine {
         let damageMultiplier = damageModifier(for: hitIndex)
         let rowMultiplier = rowDamageModifier(for: attacker, damageType: .physical)
         let dealtMultiplier = damageDealtModifier(for: attacker, against: defender, damageType: .physical)
-        let takenMultiplier = damageTakenModifier(for: defender, damageType: .physical)
+        let takenMultiplier = damageTakenModifier(for: defender, damageType: .physical, attacker: attacker)
         let penetrationTakenMultiplier = defender.skillEffects.damage.penetrationTakenMultiplier
+
+        // 累積ヒットボーナス（ダメージ）
+        var cumulativeDamageMultiplier = 1.0
+        if let bonus = attacker.skillEffects.combat.cumulativeHitBonus {
+            let consecutiveHits = attacker.attackHistory.consecutiveHits
+            cumulativeDamageMultiplier = 1.0 + bonus.damagePercentPerHit * Double(consecutiveHits) / 100.0
+        }
 
         var coreDamage = baseDifference
         if hitIndex == 1 {
@@ -52,7 +67,7 @@ extension BattleTurnEngine {
         let innatePiercing = defender.innateResistances.piercing
 
         let bonusDamage = additionalDamage * damageMultiplier * penetrationTakenMultiplier * innatePiercing
-        var totalDamage = (coreDamage * innatePhysical + bonusDamage) * rowMultiplier * dealtMultiplier * takenMultiplier
+        var totalDamage = (coreDamage * innatePhysical + bonusDamage) * rowMultiplier * dealtMultiplier * takenMultiplier * cumulativeDamageMultiplier
 
         if isCritical {
             totalDamage *= criticalDamageBonus(for: attacker)
@@ -93,7 +108,7 @@ extension BattleTurnEngine {
 
         damage *= spellPowerModifier(for: attacker, spellId: spellId)
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .magical)
-        damage *= damageTakenModifier(for: defender, damageType: .magical, spellId: spellId)
+        damage *= damageTakenModifier(for: defender, damageType: .magical, spellId: spellId, attacker: attacker)
 
         // 必殺魔法（魔法クリティカル）判定
         let criticalChance = attacker.skillEffects.spell.magicCriticalChancePercent
@@ -130,7 +145,7 @@ extension BattleTurnEngine {
         var damage = max(1.0, attackPower - effectiveDefense)
 
         damage *= antiHealingDamageDealtModifier(for: attacker)
-        damage *= damageTakenModifier(for: defender, damageType: .magical)
+        damage *= damageTakenModifier(for: defender, damageType: .magical, attacker: attacker)
 
         if isCritical {
             damage *= criticalDamageBonus(for: attacker)
@@ -154,7 +169,7 @@ extension BattleTurnEngine {
         var damage = Double(attacker.snapshot.breathDamage) * variance
 
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .breath)
-        damage *= damageTakenModifier(for: defender, damageType: .breath)
+        damage *= damageTakenModifier(for: defender, damageType: .breath, attacker: attacker)
         damage *= defender.innateResistances.breath  // ブレス耐性
 
         let barrierMultiplier = applyBarrierIfAvailable(for: .breath, defender: &defender)
@@ -236,7 +251,17 @@ extension BattleTurnEngine {
         let key = modifierKey(for: damageType, suffix: "DamageDealtMultiplier")
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
         let raceMultiplier = attacker.skillEffects.damage.dealtAgainst.value(for: defender.raceId)
-        return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: damageType) * raceMultiplier
+
+        // HP閾値倍率（暗殺者スキル用）
+        let defenderHPPercent = Double(defender.currentHP) / Double(max(1, defender.snapshot.maxHP)) * 100.0
+        var hpThresholdMultiplier = 1.0
+        for threshold in attacker.skillEffects.damage.hpThresholdMultipliers {
+            if defenderHPPercent <= threshold.hpThresholdPercent {
+                hpThresholdMultiplier *= threshold.multiplier
+            }
+        }
+
+        return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: damageType) * raceMultiplier * hpThresholdMultiplier
     }
 
     static func antiHealingDamageDealtModifier(for attacker: BattleActor) -> Double {
@@ -247,13 +272,28 @@ extension BattleTurnEngine {
 
     static func damageTakenModifier(for defender: BattleActor,
                                     damageType: BattleDamageType,
-                                    spellId: UInt8? = nil) -> Double {
+                                    spellId: UInt8? = nil,
+                                    attacker: BattleActor? = nil) -> Double {
         let key = modifierKey(for: damageType, suffix: "DamageTakenMultiplier")
         let buffMultiplier = aggregateModifier(from: defender.timedBuffs, key: key)
         var result = buffMultiplier * defender.skillEffects.damage.taken.value(for: damageType)
         if let spellId {
             result *= defender.skillEffects.spell.specificTakenMultipliers[spellId, default: 1.0]
         }
+
+        // レベル比較ダメージ軽減（低レベル敵からの被ダメ軽減）
+        if let attacker,
+           let defenderLevel = defender.level,
+           let attackerLevel = attacker.level,
+           defender.skillEffects.damage.levelComparisonDamageTakenPercent > 0 {
+            let levelDiff = defenderLevel - attackerLevel
+            if levelDiff > 0 {
+                let reductionPercent = defender.skillEffects.damage.levelComparisonDamageTakenPercent * Double(levelDiff)
+                let reductionMultiplier = max(0.0, 1.0 - reductionPercent / 100.0)
+                result *= reductionMultiplier
+            }
+        }
+
         return result
     }
 
