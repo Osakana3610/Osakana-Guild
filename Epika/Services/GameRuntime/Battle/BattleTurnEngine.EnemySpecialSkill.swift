@@ -448,6 +448,8 @@ extension BattleTurnEngine {
 
         if applied {
             context.appendAction(kind: .statusInflict, target: targetIdx, skillIndex: UInt16(statusId))
+            // autoStatusCureOnAlly判定
+            applyAutoStatusCureIfNeeded(for: targetSide, targetIndex: targetIndex, context: &context)
         } else {
             context.appendAction(kind: .statusResist, target: targetIdx, skillIndex: UInt16(statusId))
         }

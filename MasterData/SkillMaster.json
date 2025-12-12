@@ -13005,67 +13005,83 @@
         "variants": [
           {
             "id": 64001,
-            "label": "[種族:人間] 獲得経験値+50%",
+            "label": "[種族:人間Lv50] 経験値+25%",
             "value": {
-              "valuePercent": 50
+              "valuePercent": 25
             }
           }
         ]
       },
       {
-        "familyId": "race.human.gpBonus",
-        "effectType": "rewardGoldPercent",
+        "familyId": "race.human.levelDamageTaken",
+        "effectType": "levelComparisonDamageTaken",
         "parameters": {},
         "variants": [
           {
             "id": 64002,
-            "label": "[種族:人間] 取得GP+40%",
+            "label": "[種族:人間Lv99] 低Lv敵から被ダメ-15%",
             "value": {
-              "valuePercent": 40
+              "valuePercent": -15
             }
           }
         ]
       },
       {
-        "familyId": "race.human.intimidation",
-        "effectType": "damageTakenPercent",
+        "familyId": "race.human.turnBuff",
+        "effectType": "timedBuffTrigger",
         "parameters": {
-          "damageType": "physical"
+          "trigger": "turnElapsed",
+          "buffType": "accuracy"
         },
         "variants": [
           {
             "id": 64003,
-            "label": "[種族:人間] 威圧 物理被ダメ-10%",
+            "label": "[種族:人間Lv150] ターン経過で命中/回避+2%/ターン",
             "value": {
-              "valuePercent": -10
+              "hitRatePerTurn": 2,
+              "evasionRatePerTurn": 2
             }
           }
         ]
       },
       {
-        "familyId": "race.pygmychum.evasion",
-        "effectType": "statPercent",
+        "familyId": "race.human.procBoost",
+        "effectType": "procMultiplier",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 64004,
+            "label": "[種族:人間Lv200] 特殊行動発動率+20%",
+            "value": {
+              "multiplier": 1.2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.pygmychum.breathEvade",
+        "effectType": "damageTakenPercent",
         "parameters": {
-          "stat": "evasionRate"
+          "damageType": "breath"
         },
         "variants": [
           {
             "id": 64011,
-            "label": "[種族:ピグミーチャム] 回避率+10%",
+            "label": "[種族:ピグミーチャムLv50] ブレス回避+20%",
             "value": {
-              "valuePercent": 10
+              "valuePercent": -20
             }
           }
         ]
       },
       {
-        "familyId": "race.pygmychum.itemFind",
-        "effectType": "rewardItemPercent",
+        "familyId": "race.pygmychum.critDamage",
+        "effectType": "criticalDamagePercent",
         "parameters": {},
         "variants": [
           {
             "id": 64012,
-            "label": "[種族:ピグミーチャム] アイテム獲得+15%",
+            "label": "[種族:ピグミーチャムLv50] 必殺威力+15%",
             "value": {
               "valuePercent": 15
             }
@@ -13073,467 +13089,357 @@
         ]
       },
       {
-        "familyId": "race.pygmychum.cheer",
-        "effectType": "damageDealtPercent",
+        "familyId": "race.pygmychum.extraAction",
+        "effectType": "extraAction",
         "parameters": {
-          "damageType": "physical"
+          "trigger": "turnStart"
         },
         "variants": [
           {
             "id": 64013,
-            "label": "[種族:ピグミーチャム] 声援 味方物理+8%",
+            "label": "[種族:ピグミーチャムLv99] 精神依存で味方行動+1",
             "value": {
-              "valuePercent": 8
+              "count": 1,
+              "target": "ally"
+            },
+            "statScale": {
+              "stat": "spirit",
+              "percent": 0.5
             }
           }
         ]
       },
       {
-        "familyId": "race.gnome.undeadSlayer",
-        "effectType": "damageDealtMultiplierAgainst",
+        "familyId": "race.gnome.magicPower",
+        "effectType": "damageDealtPercent",
         "parameters": {
-          "raceCategory": "undead"
+          "damageType": "magical"
         },
         "variants": [
           {
             "id": 64021,
-            "label": "[種族:ノーム] 不死特効×1.4",
-            "value": {
-              "multiplier": 1.4
+            "label": "[種族:ノームLv50] 精神依存で魔法威力増",
+            "value": {},
+            "statScale": {
+              "stat": "spirit",
+              "percent": 0.5
             }
           }
         ]
       },
       {
-        "familyId": "race.gnome.healBonus",
-        "effectType": "statPercent",
-        "parameters": {
-          "stat": "magicalHealing"
-        },
+        "familyId": "race.gnome.spellRecovery",
+        "effectType": "spellChargeRecoveryChance",
+        "parameters": {},
         "variants": [
           {
             "id": 64022,
-            "label": "[種族:ノーム] 魔法回復+15%",
-            "value": {
-              "valuePercent": 15
+            "label": "[種族:ノームLv99] 精神依存で呪文回復",
+            "value": {},
+            "statScale": {
+              "stat": "spirit",
+              "percent": 0.3
             }
           }
         ]
       },
       {
-        "familyId": "race.gnome.prayer",
-        "effectType": "damageTakenPercent",
+        "familyId": "race.dwarf.counterAttack",
+        "effectType": "reaction",
         "parameters": {
-          "damageType": "magical"
-        },
-        "variants": [
-          {
-            "id": 64023,
-            "label": "[種族:ノーム] 祈祷 魔法被ダメ-15%",
-            "value": {
-              "valuePercent": -15
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.dwarf.toughness",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "physical"
+          "trigger": "selfDamagedPhysical",
+          "action": "physicalCounter"
         },
         "variants": [
           {
             "id": 64031,
-            "label": "[種族:ドワーフ] 物理被ダメ-10%",
+            "label": "[種族:ドワーフLv50] 被攻撃時10%で反撃",
             "value": {
-              "valuePercent": -10
+              "chancePercent": 10
             }
           }
         ]
       },
       {
-        "familyId": "race.dwarf.gpBonus",
-        "effectType": "rewardGoldPercent",
+        "familyId": "race.dwarf.enemyDebuff",
+        "effectType": "enemyActionDebuffChance",
         "parameters": {},
         "variants": [
           {
             "id": 64032,
-            "label": "[種族:ドワーフ] 取得GP+35%",
+            "label": "[種族:ドワーフLv99] 敏捷依存で敵行動-1",
             "value": {
-              "valuePercent": 35
+              "reduction": 1
+            },
+            "statScale": {
+              "stat": "agility",
+              "percent": 0.5
             }
           }
         ]
       },
       {
-        "familyId": "race.dwarf.charge",
-        "effectType": "damageDealtPercent",
+        "familyId": "race.darkelf.killReaction",
+        "effectType": "reaction",
         "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64033,
-            "label": "[種族:ドワーフ] 突進 物理攻撃+12%",
-            "value": {
-              "valuePercent": 12
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.darkelf.magicPower",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "magical"
+          "trigger": "selfKilledEnemy",
+          "action": "extraAttack"
         },
         "variants": [
           {
             "id": 64041,
-            "label": "[種族:ダークエルフ] 魔法攻撃+15%",
-            "value": {
-              "valuePercent": 15
+            "label": "[種族:ダークエルフLv50] 敵撃破時、敏捷依存で再攻撃",
+            "value": {},
+            "statScale": {
+              "stat": "agility",
+              "percent": 0.5
             }
           }
         ]
       },
       {
-        "familyId": "race.darkelf.multiAttack",
-        "effectType": "attackCountAdditive",
-        "parameters": {},
-        "variants": [
-          {
-            "id": 64042,
-            "label": "[種族:ダークエルフ] 攻撃回数+1",
-            "value": {
-              "additive": 1
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.darkelf.hunterEye",
-        "effectType": "statPercent",
+        "familyId": "race.darkelf.allyMagicReaction",
+        "effectType": "reaction",
         "parameters": {
-          "stat": "hitRate"
+          "trigger": "allyMagicAttack",
+          "action": "physicalPursuit"
         },
         "variants": [
           {
-            "id": 64043,
-            "label": "[種族:ダークエルフ] 狩人の眼 命中+20%",
-            "value": {
-              "valuePercent": 20
+            "id": 64042,
+            "label": "[種族:ダークエルフLv99] 味方魔法後、知恵依存で追撃",
+            "value": {},
+            "statScale": {
+              "stat": "wisdom",
+              "percent": 0.5
             }
           }
         ]
       },
       {
-        "familyId": "race.vampire.humanoidSlayer",
-        "effectType": "damageDealtMultiplierAgainst",
+        "familyId": "race.vampire.magicCounter",
+        "effectType": "reaction",
         "parameters": {
-          "raceCategory": "humanoid"
+          "trigger": "selfDamagedPhysical",
+          "action": "magicCounter"
         },
         "variants": [
           {
             "id": 64051,
-            "label": "[種族:吸血鬼] 人型特効×1.4",
+            "label": "[種族:吸血鬼Lv50] 被攻撃時10%で魔法反撃",
             "value": {
-              "multiplier": 1.4
+              "chancePercent": 10
             }
           }
         ]
       },
       {
-        "familyId": "race.vampire.physResist",
-        "effectType": "damageTakenPercent",
+        "familyId": "race.vampire.openingBuff",
+        "effectType": "timedBuffTrigger",
         "parameters": {
-          "damageType": "physical"
+          "trigger": "battleStart",
+          "buffType": "damage"
         },
         "variants": [
           {
             "id": 64052,
-            "label": "[種族:吸血鬼] 物理被ダメ-8%",
+            "label": "[種族:吸血鬼Lv99] 戦闘開始時、与ダメ+50%（1ターン）",
             "value": {
-              "valuePercent": -8
+              "damageDealtPercent": 50,
+              "duration": 1
             }
           }
         ]
       },
       {
-        "familyId": "race.vampire.awakening",
-        "effectType": "damageTakenPercent",
+        "familyId": "race.elf.magicHealReaction",
+        "effectType": "reaction",
         "parameters": {
-          "damageType": "magical"
-        },
-        "variants": [
-          {
-            "id": 64053,
-            "label": "[種族:吸血鬼] 目覚め 魔法被ダメ-12%",
-            "value": {
-              "valuePercent": -12
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.elf.undeadSlayer",
-        "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "raceCategory": "undead"
+          "trigger": "selfMagicAttack",
+          "action": "partyHeal"
         },
         "variants": [
           {
             "id": 64061,
-            "label": "[種族:エルフ] 不死特効×1.4",
+            "label": "[種族:エルフLv50] 魔法攻撃時10%で全体回復",
             "value": {
-              "multiplier": 1.4
+              "chancePercent": 10
             }
           }
         ]
       },
       {
-        "familyId": "race.elf.healBonus",
-        "effectType": "statPercent",
-        "parameters": {
-          "stat": "magicalHealing"
-        },
+        "familyId": "race.elf.autoStatusCure",
+        "effectType": "autoStatusCureOnAlly",
+        "parameters": {},
         "variants": [
           {
             "id": 64062,
-            "label": "[種族:エルフ] 魔法回復+20%",
-            "value": {
-              "valuePercent": 20
-            }
+            "label": "[種族:エルフLv99] 味方異常時、即座にキュア",
+            "value": {}
           }
         ]
       },
       {
-        "familyId": "race.elf.purify",
-        "effectType": "statusResistancePercent",
-        "parameters": {
-          "statusType": "all"
-        },
-        "variants": [
-          {
-            "id": 64063,
-            "label": "[種族:エルフ] 浄化 状態異常耐性+30%",
-            "value": {
-              "valuePercent": 30
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.psychic.humanoidSlayer",
-        "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "raceCategory": "humanoid"
-        },
+        "familyId": "race.psychic.magicNullify",
+        "effectType": "magicNullifyChancePercent",
+        "parameters": {},
         "variants": [
           {
             "id": 64071,
-            "label": "[種族:サイキック] 人型特効×1.3",
-            "value": {
-              "multiplier": 1.3
+            "label": "[種族:サイキックLv50] 知恵依存で魔法無効",
+            "value": {},
+            "statScale": {
+              "stat": "wisdom",
+              "percent": 0.8
             }
           }
         ]
       },
       {
-        "familyId": "race.psychic.magicPower",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "magical"
-        },
+        "familyId": "race.psychic.magicCrit",
+        "effectType": "magicCriticalChancePercent",
+        "parameters": {},
         "variants": [
           {
             "id": 64072,
-            "label": "[種族:サイキック] 魔法攻撃+20%",
-            "value": {
-              "valuePercent": 20
+            "label": "[種族:サイキックLv99] 知恵依存で魔法必殺率増",
+            "value": {},
+            "statScale": {
+              "stat": "wisdom",
+              "percent": 0.3
             }
           }
         ]
       },
       {
-        "familyId": "race.psychic.mindBlast",
-        "effectType": "criticalRateAdd",
+        "familyId": "race.werecat.targeting",
+        "effectType": "targetingWeight",
         "parameters": {
-          "attackType": "magical"
-        },
-        "variants": [
-          {
-            "id": 64073,
-            "label": "[種族:サイキック] 念撃 魔法必殺率+15",
-            "value": {
-              "additive": 15
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.werecat.monsterSlayer",
-        "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "raceCategory": "monster"
+          "preference": "backRow"
         },
         "variants": [
           {
             "id": 64081,
-            "label": "[種族:ワーキャット] 魔物特効×1.4",
+            "label": "[種族:ワーキャットLv50] 後列狙い優先",
             "value": {
-              "multiplier": 1.4
+              "weight": 2.0
             }
           }
         ]
       },
       {
-        "familyId": "race.werecat.critRate",
-        "effectType": "criticalRateAdd",
+        "familyId": "race.werecat.critCap",
+        "effectType": "criticalRateCap",
         "parameters": {},
         "variants": [
           {
             "id": 64082,
-            "label": "[種族:ワーキャット] 必殺率+20",
+            "label": "[種族:ワーキャットLv50] 必殺上限+3%",
             "value": {
-              "additive": 20
+              "additive": 3
             }
           }
         ]
       },
       {
-        "familyId": "race.werecat.firstStrike",
-        "effectType": "criticalDamagePercent",
-        "parameters": {},
+        "familyId": "race.werecat.firstTurnHit",
+        "effectType": "timedBuffTrigger",
+        "parameters": {
+          "trigger": "battleStart",
+          "buffType": "accuracy"
+        },
         "variants": [
           {
             "id": 64083,
-            "label": "[種族:ワーキャット] 先制攻撃 必殺威力+20%",
+            "label": "[種族:ワーキャットLv99] 1ターン目命中+50%",
             "value": {
-              "valuePercent": 20
+              "hitRatePercent": 50,
+              "duration": 1
             }
           }
         ]
       },
       {
-        "familyId": "race.dragonewt.breathPower",
-        "effectType": "damageDealtPercent",
+        "familyId": "race.dragonewt.breathCounter",
+        "effectType": "reaction",
         "parameters": {
-          "damageType": "breath"
+          "trigger": "selfDamagedPhysical",
+          "action": "breathCounter"
         },
         "variants": [
           {
             "id": 64091,
-            "label": "[種族:ドラゴニュート] ブレス威力+20%",
+            "label": "[種族:ドラゴニュートLv50] 被攻撃時10%でブレス反撃",
             "value": {
-              "valuePercent": 20
+              "chancePercent": 10
             }
           }
         ]
       },
       {
-        "familyId": "race.dragonewt.breathResist",
-        "effectType": "damageTakenPercent",
+        "familyId": "race.dragonewt.preemptiveBreath",
+        "effectType": "specialAttack",
         "parameters": {
-          "damageType": "breath"
+          "mode": "preemptive",
+          "type": "breath"
         },
         "variants": [
           {
             "id": 64092,
-            "label": "[種族:ドラゴニュート] ブレス被ダメ-80%",
-            "value": {
-              "valuePercent": -80
+            "label": "[種族:ドラゴニュートLv99] 体力依存で先制ブレス",
+            "value": {},
+            "statScale": {
+              "stat": "vitality",
+              "percent": 0.5
             }
           }
         ]
       },
       {
-        "familyId": "race.dragonewt.openingBreath",
-        "effectType": "damageDealtPercent",
+        "familyId": "race.amazoness.magicDamagedCounter",
+        "effectType": "reaction",
         "parameters": {
-          "damageType": "breath"
-        },
-        "variants": [
-          {
-            "id": 64093,
-            "label": "[種族:ドラゴニュート] 開幕ブレス ブレス+30%",
-            "value": {
-              "valuePercent": 30
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.amazoness.physPower",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "physical"
+          "trigger": "selfDamagedMagical",
+          "action": "physicalCounter"
         },
         "variants": [
           {
             "id": 64101,
-            "label": "[種族:アマゾネス] 物理攻撃+10%",
+            "label": "[種族:アマゾネスLv50] 魔法被弾時10%で反撃",
             "value": {
-              "valuePercent": 10
+              "chancePercent": 10
             }
           }
         ]
       },
       {
-        "familyId": "race.amazoness.critRate",
-        "effectType": "criticalRateAdd",
-        "parameters": {},
+        "familyId": "race.amazoness.turnAttackCount",
+        "effectType": "timedBuffTrigger",
+        "parameters": {
+          "trigger": "turnElapsed",
+          "buffType": "attackCount"
+        },
         "variants": [
           {
             "id": 64102,
-            "label": "[種族:アマゾネス] 必殺率+12",
+            "label": "[種族:アマゾネスLv99] ターン経過で攻撃回数+2%/ターン",
             "value": {
-              "additive": 12
+              "attackCountPercentPerTurn": 2
             }
           }
         ]
       },
       {
-        "familyId": "race.amazoness.fightingSpirit",
-        "effectType": "attackCountAdditive",
-        "parameters": {},
-        "variants": [
-          {
-            "id": 64103,
-            "label": "[種族:アマゾネス] 闘志 攻撃回数+1",
-            "value": {
-              "additive": 1
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.homunculus.physPower",
-        "effectType": "damageDealtPercent",
+        "familyId": "race.homunculus.healBonus",
+        "effectType": "spellPowerPercent",
         "parameters": {
-          "damageType": "physical"
+          "school": "priest"
         },
         "variants": [
           {
             "id": 64111,
-            "label": "[種族:魔造生物] 物理攻撃+15%",
-            "value": {
-              "valuePercent": 15
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.homunculus.magicWeak",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "magical"
-        },
-        "variants": [
-          {
-            "id": 64112,
-            "label": "[種族:魔造生物] 魔法に弱い+20%",
+            "label": "[種族:魔造生物Lv50] 魔法回復量+20%",
             "value": {
               "valuePercent": 20
             }
@@ -13541,469 +13447,15 @@
         ]
       },
       {
-        "familyId": "race.homunculus.perfection",
+        "familyId": "race.homunculus.allStatBoost",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "maxHP"
+          "stat": "all"
         },
         "variants": [
           {
-            "id": 64113,
-            "label": "[種族:魔造生物] 完全体 最大HP×1.25",
-            "value": {
-              "multiplier": 1.25
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.undead.critResist",
-        "effectType": "criticalDamageTakenPercent",
-        "parameters": {},
-        "variants": [
-          {
-            "id": 64121,
-            "label": "[種族:アンデッドマン] 必殺被ダメ-30%",
-            "value": {
-              "valuePercent": -30
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.undead.magicResist",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "magical"
-        },
-        "variants": [
-          {
-            "id": 64122,
-            "label": "[種族:アンデッドマン] 魔法被ダメ-10%",
-            "value": {
-              "valuePercent": -10
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.undead.deathMarch",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64123,
-            "label": "[種族:アンデッドマン] 死の行進 物理+15%",
-            "value": {
-              "valuePercent": 15
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.giant.dragonSlayer",
-        "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "raceCategory": "dragon"
-        },
-        "variants": [
-          {
-            "id": 64131,
-            "label": "[種族:巨人] 竜族特効×1.4",
-            "value": {
-              "multiplier": 1.4
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.giant.maxHP",
-        "effectType": "statMultiplier",
-        "parameters": {
-          "stat": "maxHP"
-        },
-        "variants": [
-          {
-            "id": 64132,
-            "label": "[種族:巨人] 最大HP×1.15",
-            "value": {
-              "multiplier": 1.15
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.giant.fortitude",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64133,
-            "label": "[種族:巨人] 不屈 物理被ダメ-15%",
-            "value": {
-              "valuePercent": -15
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.tengu.magicPower",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "magical"
-        },
-        "variants": [
-          {
-            "id": 64141,
-            "label": "[種族:天狗] 魔法攻撃+25%",
-            "value": {
-              "valuePercent": 25
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.tengu.evasion",
-        "effectType": "statPercent",
-        "parameters": {
-          "stat": "evasionRate"
-        },
-        "variants": [
-          {
-            "id": 64142,
-            "label": "[種族:天狗] 回避率+8%",
-            "value": {
-              "valuePercent": 8
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.tengu.swiftness",
-        "effectType": "attackCountAdditive",
-        "parameters": {},
-        "variants": [
-          {
-            "id": 64143,
-            "label": "[種族:天狗] 神速 攻撃回数+1",
-            "value": {
-              "additive": 1
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.oni.humanoidSlayer",
-        "effectType": "damageDealtMultiplierAgainst",
-        "parameters": {
-          "raceCategory": "humanoid"
-        },
-        "variants": [
-          {
-            "id": 64151,
-            "label": "[種族:鬼] 人型特効×1.5",
-            "value": {
-              "multiplier": 1.5
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.oni.physPower",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64152,
-            "label": "[種族:鬼] 物理攻撃+10%",
-            "value": {
-              "valuePercent": 10
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.oni.rage",
-        "effectType": "criticalDamagePercent",
-        "parameters": {},
-        "variants": [
-          {
-            "id": 64153,
-            "label": "[種族:鬼] 憤怒 必殺威力+25%",
-            "value": {
-              "valuePercent": 25
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.cyborg.multiAttack",
-        "effectType": "attackCountAdditive",
-        "parameters": {},
-        "variants": [
-          {
-            "id": 64161,
-            "label": "[種族:サイボーグ] 攻撃回数+2",
-            "value": {
-              "additive": 2
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.cyborg.magicResist",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "magical"
-        },
-        "variants": [
-          {
-            "id": 64162,
-            "label": "[種族:サイボーグ] 魔法被ダメ-10%",
-            "value": {
-              "valuePercent": -10
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.cyborg.acceleration",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "breath"
-        },
-        "variants": [
-          {
-            "id": 64163,
-            "label": "[種族:サイボーグ] 加速 ブレス被ダメ-15%",
-            "value": {
-              "valuePercent": -15
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.human.adaptation",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "all"
-        },
-        "variants": [
-          {
-            "id": 64004,
-            "label": "[種族:人間] 順応 全被ダメ-5%",
-            "value": {
-              "valuePercent": -5
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.pygmychum.wit",
-        "effectType": "statPercent",
-        "parameters": {
-          "stat": "hitRate"
-        },
-        "variants": [
-          {
-            "id": 64014,
-            "label": "[種族:ピグミーチャム] 機転 命中+10%",
-            "value": {
-              "valuePercent": 10
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.gnome.faith",
-        "effectType": "statPercent",
-        "parameters": {
-          "stat": "magicalHealing"
-        },
-        "variants": [
-          {
-            "id": 64024,
-            "label": "[種族:ノーム] 信仰 魔法回復+10%",
-            "value": {
-              "valuePercent": 10
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.dwarf.sturdy",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64034,
-            "label": "[種族:ドワーフ] 堅牢 物理被ダメ-8%",
-            "value": {
-              "valuePercent": -8
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.darkelf.darkvision",
-        "effectType": "statPercent",
-        "parameters": {
-          "stat": "hitRate"
-        },
-        "variants": [
-          {
-            "id": 64044,
-            "label": "[種族:ダークエルフ] 暗視 命中+12%",
-            "value": {
-              "valuePercent": 12
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.vampire.drain",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64054,
-            "label": "[種族:吸血鬼] 吸血 物理攻撃+8%",
-            "value": {
-              "valuePercent": 8
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.elf.harmony",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "magical"
-        },
-        "variants": [
-          {
-            "id": 64064,
-            "label": "[種族:エルフ] 調和 魔法被ダメ-8%",
-            "value": {
-              "valuePercent": -8
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.psychic.focus",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "magical"
-        },
-        "variants": [
-          {
-            "id": 64074,
-            "label": "[種族:サイキック] 集中 魔法攻撃+12%",
-            "value": {
-              "valuePercent": 12
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.werecat.instinct",
-        "effectType": "criticalDamagePercent",
-        "parameters": {},
-        "variants": [
-          {
-            "id": 64084,
-            "label": "[種族:ワーキャット] 野性 必殺威力+12%",
-            "value": {
-              "valuePercent": 12
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.dragonewt.scales",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64094,
-            "label": "[種族:ドラゴニュート] 鱗 物理被ダメ-10%",
-            "value": {
-              "valuePercent": -10
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.amazoness.valor",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64104,
-            "label": "[種族:アマゾネス] 勇猛 物理攻撃+8%",
-            "value": {
-              "valuePercent": 8
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.homunculus.enhance",
-        "effectType": "statMultiplier",
-        "parameters": {
-          "stat": "maxHP"
-        },
-        "variants": [
-          {
-            "id": 64114,
-            "label": "[種族:魔造生物] 強化 最大HP×1.15",
-            "value": {
-              "multiplier": 1.15
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.undead.immortal",
-        "effectType": "damageTakenPercent",
-        "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64124,
-            "label": "[種族:アンデッドマン] 不死 物理被ダメ-8%",
-            "value": {
-              "valuePercent": -8
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.giant.colossus",
-        "effectType": "statMultiplier",
-        "parameters": {
-          "stat": "maxHP"
-        },
-        "variants": [
-          {
-            "id": 64134,
-            "label": "[種族:巨人] 巨躯 最大HP×1.10",
+            "id": 64112,
+            "label": "[種族:魔造生物Lv99] 全能力+10%",
             "value": {
               "multiplier": 1.1
             }
@@ -14011,47 +13463,201 @@
         ]
       },
       {
-        "familyId": "race.tengu.wind",
+        "familyId": "race.homunculus.additionalDamage",
+        "effectType": "additionalDamagePercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 64113,
+            "label": "[種族:魔造生物Lv99] 追加ダメ+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.homunculus.equipSlot",
+        "effectType": "equipmentSlotAdditive",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 64114,
+            "label": "[種族:魔造生物Lv99] 装備枠+1",
+            "value": {
+              "add": 1
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.undead.autoResurrection",
+        "effectType": "resurrectionPassive",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 64121,
+            "label": "[種族:アンデッドマンLv50] 体力依存で自動蘇生",
+            "value": {},
+            "statScale": {
+              "stat": "vitality",
+              "percent": 0.5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.undead.deathSave",
+        "effectType": "resurrectionSave",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 64122,
+            "label": "[種族:アンデッドマンLv99] 死亡直後に蘇生判定（最大30%）",
+            "value": {
+              "maxChancePercent": 30
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.giant.coverAlly",
+        "effectType": "coverRowsBehind",
+        "parameters": {
+          "condition": "allyHPBelow50"
+        },
+        "variants": [
+          {
+            "id": 64131,
+            "label": "[種族:巨人Lv50] HP半分以下の味方を庇う",
+            "value": {}
+          }
+        ]
+      },
+      {
+        "familyId": "race.giant.turnHealing",
+        "effectType": "endOfTurnHealing",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 64132,
+            "label": "[種族:巨人Lv99] ターン経過でHP+1%/ターン",
+            "value": {
+              "valuePercent": 1
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.tengu.evasionBoost",
         "effectType": "statPercent",
         "parameters": {
           "stat": "evasionRate"
         },
         "variants": [
           {
-            "id": 64144,
-            "label": "[種族:天狗] 風 回避+10%",
+            "id": 64141,
+            "label": "[種族:天狗Lv50] 回避+20%",
             "value": {
-              "valuePercent": 10
+              "valuePercent": 20
             }
           }
         ]
       },
       {
-        "familyId": "race.oni.might",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "physical"
-        },
-        "variants": [
-          {
-            "id": 64154,
-            "label": "[種族:鬼] 剛力 物理攻撃+8%",
-            "value": {
-              "valuePercent": 8
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "race.cyborg.overclock",
-        "effectType": "attackCountAdditive",
+        "familyId": "race.tengu.counterPenalty",
+        "effectType": "counterAttackEvasionMultiplier",
         "parameters": {},
         "variants": [
           {
-            "id": 64164,
-            "label": "[種族:サイボーグ] 機械化 攻撃回数+1",
+            "id": 64142,
+            "label": "[種族:天狗Lv50] 反撃確率-50%",
             "value": {
-              "additive": 1
+              "multiplier": 0.5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.tengu.firstTurnAction",
+        "effectType": "extraAction",
+        "parameters": {
+          "trigger": "battleStart"
+        },
+        "variants": [
+          {
+            "id": 64143,
+            "label": "[種族:天狗Lv99] 1ターン目のみ行動+1",
+            "value": {
+              "count": 1,
+              "duration": 1
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.oni.noKillReaction",
+        "effectType": "reaction",
+        "parameters": {
+          "trigger": "selfAttackNoKill",
+          "action": "extraAttack"
+        },
+        "variants": [
+          {
+            "id": 64151,
+            "label": "[種族:鬼Lv50] 未撃破時、力依存で再攻撃",
+            "value": {},
+            "statScale": {
+              "stat": "strength",
+              "percent": 0.5
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.oni.turnStatBuff",
+        "effectType": "timedBuffTrigger",
+        "parameters": {
+          "trigger": "turnElapsed",
+          "buffType": "combat"
+        },
+        "variants": [
+          {
+            "id": 64152,
+            "label": "[種族:鬼Lv99] ターン経過で攻撃/防御+2%/ターン",
+            "value": {
+              "attackPercentPerTurn": 2,
+              "defensePercentPerTurn": 2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.cyborg.cumulativeHit",
+        "effectType": "cumulativeHitDamageBonus",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 64161,
+            "label": "[種族:サイボーグLv50] 命中ごとに追加ダメ+3%累積",
+            "value": {
+              "damagePercent": 3
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "race.cyborg.lateAction",
+        "effectType": "extraAction",
+        "parameters": {
+          "trigger": "afterTurn8"
+        },
+        "variants": [
+          {
+            "id": 64162,
+            "label": "[種族:サイボーグLv99] 8ターン以降、行動+1",
+            "value": {
+              "count": 1
             }
           }
         ]
@@ -14327,46 +13933,61 @@
         ]
       },
       {
-        "familyId": "job.assassin.vital",
-        "effectType": "criticalRateAdd",
+        "familyId": "job.assassin.weakPointStrike",
+        "effectType": "damageDealtMultiplierByTargetHP",
         "parameters": {},
         "variants": [
           {
             "id": 65033,
-            "label": "[職業:暗殺者] 急所 必殺率+10",
+            "label": "[職業:暗殺者] 弱点攻撃 HP50%以下の敵へダメ×1.5",
             "value": {
-              "additive": 10
+              "hpThresholdPercent": 50,
+              "multiplier": 1.5
             }
           }
         ]
       },
       {
-        "familyId": "job.assassin.execute",
-        "effectType": "statusInflictPercent",
-        "parameters": {
-          "statusType": "instantDeath"
-        },
-        "variants": [
-          {
-            "id": 65034,
-            "label": "[職業:暗殺者] 暗殺 即死付与5%",
-            "value": {
-              "valuePercent": 5
-            }
-          }
-        ]
-      },
-      {
-        "familyId": "job.assassin.lethal",
+        "familyId": "job.assassin.lethalBlow",
         "effectType": "criticalDamagePercent",
         "parameters": {},
         "variants": [
           {
-            "id": 65035,
-            "label": "[職業:暗殺者] 致命 必殺威力+15%",
+            "id": 65034,
+            "label": "[職業:暗殺者] 致命打 必殺威力+40%",
             "value": {
-              "valuePercent": 15
+              "valuePercent": 40
             }
+          }
+        ]
+      },
+      {
+        "familyId": "job.assassin.masterAssassin",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65035,
+            "label": "[職業:暗殺者] 暗殺術 短剣性能×1.4+HP30%以下の敵へダメ×2",
+            "effects": [
+              {
+                "effectType": "equipmentStatMultiplier",
+                "parameters": {
+                  "equipmentType": "dagger"
+                },
+                "value": {
+                  "multiplier": 1.4
+                }
+              },
+              {
+                "effectType": "damageDealtMultiplierByTargetHP",
+                "parameters": {},
+                "value": {
+                  "hpThresholdPercent": 30,
+                  "multiplier": 2.0
+                }
+              }
+            ]
           }
         ]
       },
@@ -14403,52 +14024,51 @@
         ]
       },
       {
-        "familyId": "job.jester.trick",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "all"
-        },
+        "familyId": "job.jester.mischief",
+        "effectType": "enemySingleActionSkipChance",
+        "parameters": {},
         "variants": [
           {
             "id": 65043,
-            "label": "[職業:道化師] 奇術 全攻撃+5%",
+            "label": "[職業:道化師] 悪戯 敵単体行動スキップ5%",
             "value": {
-              "valuePercent": 5
+              "chancePercent": 5
             }
           }
         ]
       },
       {
-        "familyId": "job.jester.illusion",
-        "effectType": "statDebuff",
-        "parameters": {
-          "stat": "hitRate",
-          "target": "enemy"
-        },
+        "familyId": "job.jester.confusion",
+        "effectType": "actionOrderShuffleEnemy",
+        "parameters": {},
         "variants": [
           {
             "id": 65044,
-            "label": "[職業:道化師] 幻惑 敵命中-10%",
-            "value": {
-              "valuePercent": -10
-            }
+            "label": "[職業:道化師] 混乱 敵の行動順シャッフル",
+            "value": {}
           }
         ]
       },
       {
-        "familyId": "job.jester.performance",
-        "effectType": "damageDealtPercent",
-        "parameters": {
-          "damageType": "physical",
-          "target": "party"
-        },
+        "familyId": "job.jester.grandFinale",
+        "effectType": "multi",
+        "parameters": {},
         "variants": [
           {
             "id": 65045,
-            "label": "[職業:道化師] 大道芸 味方物理+5%",
-            "value": {
-              "valuePercent": 5
-            }
+            "label": "[職業:道化師] 大舞台 行動順シャッフル+自分先制",
+            "effects": [
+              {
+                "effectType": "actionOrderShuffle",
+                "parameters": {},
+                "value": {}
+              },
+              {
+                "effectType": "firstStrike",
+                "parameters": {},
+                "value": {}
+              }
+            ]
           }
         ]
       },
@@ -15307,6 +14927,882 @@
             "label": "[職業:ロイヤルライン] 覇道 全攻撃+15%",
             "value": {
               "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.warrior.guardian",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "all",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65163,
+            "label": "[マスター:戦士] 守護 味方被ダメ-8%",
+            "value": {
+              "valuePercent": -8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.warrior.fortify",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65164,
+            "label": "[マスター:戦士] 頑健 防御20%→HP+物理被ダメ-5%",
+            "effects": [
+              {
+                "effectType": "statConversionPercent",
+                "parameters": {
+                  "from": "physicalDefense",
+                  "to": "maxHP"
+                },
+                "value": {
+                  "valuePercent": 20
+                }
+              },
+              {
+                "effectType": "damageTakenPercent",
+                "parameters": {
+                  "damageType": "physical"
+                },
+                "value": {
+                  "valuePercent": -5
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.warrior.armament",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65165,
+            "label": "[マスター:戦士] 武装 盾+40%+パリィ率+10%",
+            "effects": [
+              {
+                "effectType": "equipmentStatMultiplier",
+                "parameters": {
+                  "equipmentCategory": "shield"
+                },
+                "value": {
+                  "multiplier": 1.4
+                }
+              },
+              {
+                "effectType": "procRateAdditive",
+                "parameters": {
+                  "procType": "parry"
+                },
+                "value": {
+                  "additive": 10
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.swordsman.counter",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "counter"
+        },
+        "variants": [
+          {
+            "id": 65173,
+            "label": "[マスター:剣士] 反撃 被ダメ時18%反撃",
+            "value": {
+              "additive": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.swordsman.followup",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "pursuit"
+        },
+        "variants": [
+          {
+            "id": 65174,
+            "label": "[マスター:剣士] 追撃 味方魔法後追撃35%",
+            "value": {
+              "additive": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.swordsman.combo",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 65175,
+            "label": "[マスター:剣士] 連撃 攻撃威力+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.thief.fortune",
+        "effectType": "rewardItemPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65183,
+            "label": "[マスター:盗賊] 幸運 アイテム獲得+25%",
+            "value": {
+              "valuePercent": 25
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.thief.doubleAction",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "extraAction"
+        },
+        "variants": [
+          {
+            "id": 65184,
+            "label": "[マスター:盗賊] 連続行動 35%で2回行動",
+            "value": {
+              "additive": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.thief.survival",
+        "effectType": "statusResistancePercent",
+        "parameters": {
+          "statusType": "instantDeath"
+        },
+        "variants": [
+          {
+            "id": 65185,
+            "label": "[マスター:盗賊] 危機回避 即死耐性+50%",
+            "value": {
+              "valuePercent": 50
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.assassin.weakpoint",
+        "effectType": "damageDealtMultiplierByTargetHP",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65193,
+            "label": "[マスター:暗殺者] 弱点攻撃 HP60%以下の敵へダメ×1.8",
+            "value": {
+              "hpThresholdPercent": 60,
+              "multiplier": 1.8
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.assassin.lethal",
+        "effectType": "criticalDamagePercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65194,
+            "label": "[マスター:暗殺者] 致命打 必殺威力+65%",
+            "value": {
+              "valuePercent": 65
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.assassin.mastery",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65195,
+            "label": "[マスター:暗殺者] 暗殺術 短剣×1.6+HP40%以下×2.5",
+            "effects": [
+              {
+                "effectType": "equipmentStatMultiplier",
+                "parameters": {
+                  "equipmentType": "dagger"
+                },
+                "value": {
+                  "multiplier": 1.6
+                }
+              },
+              {
+                "effectType": "damageDealtMultiplierByTargetHP",
+                "parameters": {},
+                "value": {
+                  "hpThresholdPercent": 40,
+                  "multiplier": 2.5
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.jester.mischief",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65203,
+            "label": "[マスター:道化師] 悪戯 行動スキップ10%+敵命中-3%",
+            "effects": [
+              {
+                "effectType": "enemySingleActionSkipChance",
+                "parameters": {},
+                "value": {
+                  "chancePercent": 10
+                }
+              },
+              {
+                "effectType": "statDebuff",
+                "parameters": {
+                  "stat": "hitRate",
+                  "target": "enemy"
+                },
+                "value": {
+                  "valuePercent": -3
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.jester.confusion",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65204,
+            "label": "[マスター:道化師] 混乱 敵行動シャッフル+敵攻撃-5%",
+            "effects": [
+              {
+                "effectType": "actionOrderShuffleEnemy",
+                "parameters": {},
+                "value": {}
+              },
+              {
+                "effectType": "statDebuff",
+                "parameters": {
+                  "stat": "physicalAttack",
+                  "target": "enemy"
+                },
+                "value": {
+                  "valuePercent": -5
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.jester.finale",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65205,
+            "label": "[マスター:道化師] 大舞台 シャッフル+先制+味方攻撃+10%",
+            "effects": [
+              {
+                "effectType": "actionOrderShuffle",
+                "parameters": {},
+                "value": {}
+              },
+              {
+                "effectType": "firstStrike",
+                "parameters": {},
+                "value": {}
+              },
+              {
+                "effectType": "damageDealtPercent",
+                "parameters": {
+                  "damageType": "physical",
+                  "target": "party"
+                },
+                "value": {
+                  "valuePercent": 10
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.priest.protect",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "magical",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65213,
+            "label": "[マスター:僧侶] 保護 味方魔法被ダメ-14%",
+            "value": {
+              "valuePercent": -14
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.priest.blessing",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "magical",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65214,
+            "label": "[マスター:僧侶] 祝福 味方魔法+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.priest.salvation",
+        "effectType": "resurrectionChancePercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65215,
+            "label": "[マスター:僧侶] 救済 蘇生確率+35%",
+            "value": {
+              "valuePercent": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.mage.amplify",
+        "effectType": "spellPowerPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65223,
+            "label": "[マスター:魔法使い] 増幅 魔法威力+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.mage.absorb",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65224,
+            "label": "[マスター:魔法使い] 吸収 MP回復10%+チャージ回復+5%",
+            "effects": [
+              {
+                "effectType": "mpRecoveryPercent",
+                "parameters": {},
+                "value": {
+                  "valuePercent": 10
+                }
+              },
+              {
+                "effectType": "spellChargeRecoveryPercent",
+                "parameters": {},
+                "value": {
+                  "valuePercent": 5
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.mage.destroy",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65225,
+            "label": "[マスター:魔法使い] 破壊 敵魔防-18%+魔法攻撃+10%",
+            "effects": [
+              {
+                "effectType": "statDebuff",
+                "parameters": {
+                  "stat": "magicalDefense",
+                  "target": "enemy"
+                },
+                "value": {
+                  "valuePercent": -18
+                }
+              },
+              {
+                "effectType": "damageDealtPercent",
+                "parameters": {
+                  "damageType": "magical"
+                },
+                "value": {
+                  "valuePercent": 10
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.hunter.precision",
+        "effectType": "criticalRateAdd",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65233,
+            "label": "[マスター:狩人] 精密 必殺率+15",
+            "value": {
+              "additive": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.hunter.pierce",
+        "effectType": "armorPenetrationPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65234,
+            "label": "[マスター:狩人] 貫通 防御無視18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.hunter.volley",
+        "effectType": "attackCountAdditive",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65235,
+            "label": "[マスター:狩人] 一斉射撃 攻撃回数+2",
+            "value": {
+              "additive": 2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.monk.meditate",
+        "effectType": "statPercent",
+        "parameters": {
+          "stat": "magicalHealing"
+        },
+        "variants": [
+          {
+            "id": 65243,
+            "label": "[マスター:修道者] 瞑想 魔法回復+22%",
+            "value": {
+              "valuePercent": 22
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.monk.ward",
+        "effectType": "statusResistancePercent",
+        "parameters": {
+          "statusType": "all"
+        },
+        "variants": [
+          {
+            "id": 65244,
+            "label": "[マスター:修道者] 加護 状態異常耐性+28%",
+            "value": {
+              "valuePercent": 28
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.monk.enlighten",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "all"
+        },
+        "variants": [
+          {
+            "id": 65245,
+            "label": "[マスター:修道者] 悟り 全被ダメ-15%",
+            "value": {
+              "valuePercent": -15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.samurai.iai",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "firstStrike"
+        },
+        "variants": [
+          {
+            "id": 65253,
+            "label": "[マスター:侍] 居合 先制攻撃+18%",
+            "value": {
+              "additive": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.samurai.slash",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 65254,
+            "label": "[マスター:侍] 斬撃 物理攻撃+22%",
+            "value": {
+              "valuePercent": 22
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.samurai.spirit",
+        "effectType": "multi",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65255,
+            "label": "[マスター:侍] 剣気 必殺率+25+必殺威力+15%",
+            "effects": [
+              {
+                "effectType": "criticalRateAdd",
+                "parameters": {},
+                "value": {
+                  "additive": 25
+                }
+              },
+              {
+                "effectType": "criticalDamagePercent",
+                "parameters": {},
+                "value": {
+                  "valuePercent": 15
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "familyId": "master.blademaster.technique",
+        "effectType": "attackCountAdditive",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65263,
+            "label": "[マスター:剣聖] 剣技 攻撃回数+2",
+            "value": {
+              "additive": 2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.blademaster.master",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "counterOnEvade"
+        },
+        "variants": [
+          {
+            "id": 65264,
+            "label": "[マスター:剣聖] 達人 回避時反撃80%",
+            "value": {
+              "additive": 80
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.blademaster.peerless",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 65265,
+            "label": "[マスター:剣聖] 無双 物理攻撃+35%",
+            "value": {
+              "valuePercent": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.spellblade.magicSword",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "magical"
+        },
+        "variants": [
+          {
+            "id": 65273,
+            "label": "[マスター:秘法剣士] 魔剣 魔法攻撃+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.spellblade.bladeMagic",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical"
+        },
+        "variants": [
+          {
+            "id": 65274,
+            "label": "[マスター:秘法剣士] 術剣 物理攻撃+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.spellblade.fusion",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "all"
+        },
+        "variants": [
+          {
+            "id": 65275,
+            "label": "[マスター:秘法剣士] 融合 全攻撃+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.sage.knowledge",
+        "effectType": "spellPowerPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65283,
+            "label": "[マスター:賢者] 知識 魔法威力+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.sage.wisdom",
+        "effectType": "spellPowerPercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65284,
+            "label": "[マスター:賢者] 叡智 全魔法+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.sage.versatile",
+        "effectType": "statPercent",
+        "parameters": {
+          "stat": "all"
+        },
+        "variants": [
+          {
+            "id": 65285,
+            "label": "[マスター:賢者] 万能 全ステ+10%",
+            "value": {
+              "valuePercent": 10
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.ninja.stealth",
+        "effectType": "explorationTimePercent",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65293,
+            "label": "[マスター:忍者] 隠密 探索時間-18%",
+            "value": {
+              "valuePercent": -18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.ninja.shadowClone",
+        "effectType": "procRateAdditive",
+        "parameters": {
+          "procType": "counterOnEvade"
+        },
+        "variants": [
+          {
+            "id": 65294,
+            "label": "[マスター:忍者] 分身 回避時反撃70%",
+            "value": {
+              "additive": 70
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.ninja.deathblow",
+        "effectType": "criticalRateMax",
+        "parameters": {},
+        "variants": [
+          {
+            "id": 65295,
+            "label": "[マスター:忍者] 必殺 必殺率上限+35",
+            "value": {
+              "additive": 35
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.lord.command",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65303,
+            "label": "[マスター:君主] 指揮 味方全体攻撃+15%",
+            "value": {
+              "valuePercent": 15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.lord.rally",
+        "effectType": "attackCountAdditive",
+        "parameters": {
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65304,
+            "label": "[マスター:君主] 号令 味方攻撃回数+2",
+            "value": {
+              "additive": 2
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.lord.control",
+        "effectType": "damageTakenPercent",
+        "parameters": {
+          "damageType": "all",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65305,
+            "label": "[マスター:君主] 統率 味方全体被ダメ-18%",
+            "value": {
+              "valuePercent": -18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.royalline.majesty",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "physical",
+          "target": "party"
+        },
+        "variants": [
+          {
+            "id": 65313,
+            "label": "[マスター:ロイヤルライン] 王威 味方物理+18%",
+            "value": {
+              "valuePercent": 18
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.royalline.aura",
+        "effectType": "statDebuff",
+        "parameters": {
+          "stat": "physicalAttack",
+          "target": "enemy"
+        },
+        "variants": [
+          {
+            "id": 65314,
+            "label": "[マスター:ロイヤルライン] 威光 敵攻撃-15%",
+            "value": {
+              "valuePercent": -15
+            }
+          }
+        ]
+      },
+      {
+        "familyId": "master.royalline.dominion",
+        "effectType": "damageDealtPercent",
+        "parameters": {
+          "damageType": "all"
+        },
+        "variants": [
+          {
+            "id": 65315,
+            "label": "[マスター:ロイヤルライン] 覇道 全攻撃+25%",
+            "value": {
+              "valuePercent": 25
             }
           }
         ]

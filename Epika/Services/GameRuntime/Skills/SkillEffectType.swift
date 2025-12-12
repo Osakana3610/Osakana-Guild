@@ -89,7 +89,23 @@ enum SkillEffectType: String, CaseIterable, Sendable, Hashable {
     case statusResistanceMultiplier
     case statusResistancePercent
     case tacticSpellAmplify
+    case targetingWeight
+    case coverRowsBehind
+    case magicNullifyChancePercent
+    case magicCriticalChancePercent
     case timedBreathPowerAmplify
     case timedBuffTrigger
     case timedMagicPowerAmplify
+    // 種族スキル用
+    case levelComparisonDamageTaken
+    case spellChargeRecoveryChance
+    case enemyActionDebuffChance
+    case autoStatusCureOnAlly
+    case cumulativeHitDamageBonus
+    // 職業スキル用（道化師）
+    case enemySingleActionSkipChance
+    case actionOrderShuffleEnemy
+    case firstStrike
+    // 職業スキル用（暗殺者）
+    case damageDealtMultiplierByTargetHP
 }

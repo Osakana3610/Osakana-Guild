@@ -21,8 +21,10 @@
         "trapRemoval": 0.81
       },
       "passiveSkillIds": [
-        65001,
-        65002
+        507,
+        545,
+        17,
+        642
       ],
       "skillUnlocks": [
         {
@@ -58,8 +60,11 @@
         "trapRemoval": 0.81
       },
       "passiveSkillIds": [
-        65011,
-        65012
+        512,
+        1280,
+        272,
+        324,
+        586
       ],
       "skillUnlocks": [
         {
@@ -95,8 +100,12 @@
         "trapRemoval": 1.94
       },
       "passiveSkillIds": [
-        65021,
-        65022
+        1444,
+        516,
+        545,
+        270,
+        567,
+        277
       ],
       "skillUnlocks": [
         {
@@ -132,8 +141,10 @@
         "trapRemoval": 1.57
       },
       "passiveSkillIds": [
-        65031,
-        65032
+        511,
+        273,
+        277,
+        567
       ],
       "skillUnlocks": [
         {
@@ -169,8 +180,10 @@
         "trapRemoval": 1.02
       },
       "passiveSkillIds": [
-        65041,
-        65042
+        510,
+        511,
+        407,
+        340
       ],
       "skillUnlocks": [
         {
@@ -206,8 +219,13 @@
         "trapRemoval": 0.82
       },
       "passiveSkillIds": [
-        65051,
-        65052
+        1367,
+        1460,
+        504,
+        508,
+        111,
+        757,
+        1029
       ],
       "skillUnlocks": [
         {
@@ -243,8 +261,10 @@
         "trapRemoval": 0.81
       },
       "passiveSkillIds": [
-        65061,
-        65062
+        1360,
+        1458,
+        44,
+        718
       ],
       "skillUnlocks": [
         {
@@ -280,8 +300,11 @@
         "trapRemoval": 1.06
       },
       "passiveSkillIds": [
-        65071,
-        65072
+        509,
+        546,
+        152,
+        624,
+        974
       ],
       "skillUnlocks": [
         {
@@ -317,8 +340,11 @@
         "trapRemoval": 0.84
       },
       "passiveSkillIds": [
-        65081,
-        65082
+        504,
+        406,
+        343,
+        776,
+        970
       ],
       "skillUnlocks": [
         {
@@ -354,8 +380,10 @@
         "trapRemoval": 0.77
       },
       "passiveSkillIds": [
-        65091,
-        65092
+        1448,
+        1289,
+        605,
+        350
       ],
       "skillUnlocks": [
         {
@@ -391,8 +419,12 @@
         "trapRemoval": 0.8
       },
       "passiveSkillIds": [
-        65101,
-        65102
+        1450,
+        510,
+        1281,
+        545,
+        350,
+        700
       ],
       "skillUnlocks": [
         {
@@ -428,8 +460,14 @@
         "trapRemoval": 0.81
       },
       "passiveSkillIds": [
-        65111,
-        65112
+        1358,
+        504,
+        506,
+        1280,
+        545,
+        970,
+        583,
+        716
       ],
       "skillUnlocks": [
         {
@@ -465,8 +503,12 @@
         "trapRemoval": 1.49
       },
       "passiveSkillIds": [
-        65121,
-        65122
+        1360,
+        1367,
+        1462,
+        547,
+        681,
+        349
       ],
       "skillUnlocks": [
         {
@@ -502,8 +544,16 @@
         "trapRemoval": 1.42
       },
       "passiveSkillIds": [
-        65131,
-        65132
+        1452,
+        1456,
+        1443,
+        1282,
+        546,
+        1412,
+        1404,
+        279,
+        349,
+        350
       ],
       "skillUnlocks": [
         {
@@ -539,8 +589,13 @@
         "trapRemoval": 0.82
       },
       "passiveSkillIds": [
-        65141,
-        65142
+        1366,
+        505,
+        1446,
+        546,
+        661,
+        349,
+        374
       ],
       "skillUnlocks": [
         {
@@ -576,8 +631,20 @@
         "trapRemoval": 0.8
       },
       "passiveSkillIds": [
-        65151,
-        65152
+        345,
+        371,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        513,
+        545,
+        738,
+        833
       ],
       "skillUnlocks": [
         {
@@ -591,6 +658,665 @@
         {
           "level": 70,
           "skillId": 65155
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "name": "戦士マスター",
+      "category": "frontline",
+      "growthTendency": "HP高、防御高",
+      "combatCoefficients": {
+        "maxHP": 1.78,
+        "physicalAttack": 1.03,
+        "hitRate": 1.0,
+        "attackCount": 0.89,
+        "criticalRate": 0.83,
+        "physicalDefense": 1.41,
+        "evasionRate": 0.5,
+        "magicalAttack": 0.64,
+        "magicalHealing": 0.79,
+        "magicalDefense": 1.15,
+        "trapRemoval": 0.81
+      },
+      "passiveSkillIds": [
+        507,
+        545,
+        17,
+        642
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65163
+        },
+        {
+          "level": 30,
+          "skillId": 65164
+        },
+        {
+          "level": 70,
+          "skillId": 65165
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "name": "剣士マスター",
+      "category": "frontline",
+      "growthTendency": "攻撃高、命中高",
+      "combatCoefficients": {
+        "maxHP": 1.26,
+        "physicalAttack": 1.19,
+        "hitRate": 1.51,
+        "attackCount": 1.15,
+        "criticalRate": 0.77,
+        "physicalDefense": 1.21,
+        "evasionRate": 1.07,
+        "magicalAttack": 0.66,
+        "magicalHealing": 0.71,
+        "magicalDefense": 0.57,
+        "trapRemoval": 0.81
+      },
+      "passiveSkillIds": [
+        512,
+        1280,
+        272,
+        324,
+        586
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65173
+        },
+        {
+          "level": 30,
+          "skillId": 65174
+        },
+        {
+          "level": 70,
+          "skillId": 65175
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "name": "盗賊マスター",
+      "category": "midline",
+      "growthTendency": "敏捷高、運高",
+      "combatCoefficients": {
+        "maxHP": 0.67,
+        "physicalAttack": 0.83,
+        "hitRate": 1.31,
+        "attackCount": 1.22,
+        "criticalRate": 1.51,
+        "physicalDefense": 0.6,
+        "evasionRate": 1.54,
+        "magicalAttack": 0.68,
+        "magicalHealing": 0.75,
+        "magicalDefense": 0.59,
+        "trapRemoval": 1.94
+      },
+      "passiveSkillIds": [
+        1444,
+        516,
+        545,
+        270,
+        567,
+        277
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65183
+        },
+        {
+          "level": 30,
+          "skillId": 65184
+        },
+        {
+          "level": 70,
+          "skillId": 65185
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "name": "暗殺者マスター",
+      "category": "midline",
+      "growthTendency": "会心特化",
+      "combatCoefficients": {
+        "maxHP": 0.73,
+        "physicalAttack": 0.97,
+        "hitRate": 0.97,
+        "attackCount": 0.91,
+        "criticalRate": 1.01,
+        "physicalDefense": 0.59,
+        "evasionRate": 1.25,
+        "magicalAttack": 0.61,
+        "magicalHealing": 0.76,
+        "magicalDefense": 0.38,
+        "trapRemoval": 1.57
+      },
+      "passiveSkillIds": [
+        511,
+        273,
+        277,
+        567
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65193
+        },
+        {
+          "level": 30,
+          "skillId": 65194
+        },
+        {
+          "level": 70,
+          "skillId": 65195
+        }
+      ]
+    },
+    {
+      "id": 105,
+      "name": "道化師マスター",
+      "category": "backline",
+      "growthTendency": "ランダム効果",
+      "combatCoefficients": {
+        "maxHP": 0.82,
+        "physicalAttack": 0.8,
+        "hitRate": 0.8,
+        "attackCount": 0.83,
+        "criticalRate": 0.51,
+        "physicalDefense": 0.82,
+        "evasionRate": 0.82,
+        "magicalAttack": 0.76,
+        "magicalHealing": 0.82,
+        "magicalDefense": 0.82,
+        "trapRemoval": 1.02
+      },
+      "passiveSkillIds": [
+        510,
+        511,
+        407,
+        340
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65203
+        },
+        {
+          "level": 30,
+          "skillId": 65204
+        },
+        {
+          "level": 70,
+          "skillId": 65205
+        }
+      ]
+    },
+    {
+      "id": 106,
+      "name": "僧侶マスター",
+      "category": "backline",
+      "growthTendency": "精神高、魔法回復量高",
+      "combatCoefficients": {
+        "maxHP": 0.43,
+        "physicalAttack": 0.72,
+        "hitRate": 0.38,
+        "attackCount": 0.93,
+        "criticalRate": 0.82,
+        "physicalDefense": 0.83,
+        "evasionRate": 0.51,
+        "magicalAttack": 1.01,
+        "magicalHealing": 1.99,
+        "magicalDefense": 1.63,
+        "trapRemoval": 0.82
+      },
+      "passiveSkillIds": [
+        1367,
+        1460,
+        504,
+        508,
+        111,
+        757,
+        1029
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65213
+        },
+        {
+          "level": 30,
+          "skillId": 65214
+        },
+        {
+          "level": 70,
+          "skillId": 65215
+        }
+      ]
+    },
+    {
+      "id": 107,
+      "name": "魔法使いマスター",
+      "category": "backline",
+      "growthTendency": "知恵特化",
+      "combatCoefficients": {
+        "maxHP": 0.33,
+        "physicalAttack": 0.33,
+        "hitRate": 0.68,
+        "attackCount": 0.68,
+        "criticalRate": 0.79,
+        "physicalDefense": 0.14,
+        "evasionRate": 1.07,
+        "magicalAttack": 1.78,
+        "magicalHealing": 0.8,
+        "magicalDefense": 1.08,
+        "trapRemoval": 0.81
+      },
+      "passiveSkillIds": [
+        1360,
+        1458,
+        44,
+        718
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65223
+        },
+        {
+          "level": 30,
+          "skillId": 65224
+        },
+        {
+          "level": 70,
+          "skillId": 65225
+        }
+      ]
+    },
+    {
+      "id": 108,
+      "name": "狩人マスター",
+      "category": "midline",
+      "growthTendency": "命中高、敏捷高",
+      "combatCoefficients": {
+        "maxHP": 1.03,
+        "physicalAttack": 1.02,
+        "hitRate": 0.67,
+        "attackCount": 1.59,
+        "criticalRate": 1.6,
+        "physicalDefense": 0.81,
+        "evasionRate": 1.08,
+        "magicalAttack": 0.92,
+        "magicalHealing": 0.69,
+        "magicalDefense": 0.57,
+        "trapRemoval": 1.06
+      },
+      "passiveSkillIds": [
+        509,
+        546,
+        152,
+        624,
+        974
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65233
+        },
+        {
+          "level": 30,
+          "skillId": 65234
+        },
+        {
+          "level": 70,
+          "skillId": 65235
+        }
+      ]
+    },
+    {
+      "id": 109,
+      "name": "修道者マスター",
+      "category": "frontline",
+      "growthTendency": "精神高、体力高",
+      "combatCoefficients": {
+        "maxHP": 0.89,
+        "physicalAttack": 0.85,
+        "hitRate": 0.7,
+        "attackCount": 0.86,
+        "criticalRate": 0.8,
+        "physicalDefense": 1.06,
+        "evasionRate": 1.04,
+        "magicalAttack": 1.12,
+        "magicalHealing": 1.02,
+        "magicalDefense": 1.13,
+        "trapRemoval": 0.84
+      },
+      "passiveSkillIds": [
+        504,
+        406,
+        343,
+        776,
+        970
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65243
+        },
+        {
+          "level": 30,
+          "skillId": 65244
+        },
+        {
+          "level": 70,
+          "skillId": 65245
+        }
+      ]
+    },
+    {
+      "id": 110,
+      "name": "侍マスター",
+      "category": "frontline",
+      "growthTendency": "攻撃高、会心高",
+      "combatCoefficients": {
+        "maxHP": 1.01,
+        "physicalAttack": 2.09,
+        "hitRate": 0.95,
+        "attackCount": 0.15,
+        "criticalRate": 0.82,
+        "physicalDefense": 0.79,
+        "evasionRate": 0.74,
+        "magicalAttack": 0.76,
+        "magicalHealing": 0.78,
+        "magicalDefense": 0.55,
+        "trapRemoval": 0.77
+      },
+      "passiveSkillIds": [
+        1448,
+        1289,
+        605,
+        350
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65253
+        },
+        {
+          "level": 30,
+          "skillId": 65254
+        },
+        {
+          "level": 70,
+          "skillId": 65255
+        }
+      ]
+    },
+    {
+      "id": 111,
+      "name": "剣聖マスター",
+      "category": "frontline",
+      "growthTendency": "バランス成長",
+      "combatCoefficients": {
+        "maxHP": 1.21,
+        "physicalAttack": 0.96,
+        "hitRate": 1.68,
+        "attackCount": 1.17,
+        "criticalRate": 0.82,
+        "physicalDefense": 1.25,
+        "evasionRate": 1.31,
+        "magicalAttack": 0.74,
+        "magicalHealing": 0.73,
+        "magicalDefense": 0.59,
+        "trapRemoval": 0.8
+      },
+      "passiveSkillIds": [
+        1450,
+        510,
+        1281,
+        545,
+        350,
+        700
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65263
+        },
+        {
+          "level": 30,
+          "skillId": 65264
+        },
+        {
+          "level": 70,
+          "skillId": 65265
+        }
+      ]
+    },
+    {
+      "id": 112,
+      "name": "秘法剣士マスター",
+      "category": "midline",
+      "growthTendency": "攻撃・魔法両立",
+      "combatCoefficients": {
+        "maxHP": 1.23,
+        "physicalAttack": 1.03,
+        "hitRate": 1.14,
+        "attackCount": 0.87,
+        "criticalRate": 0.83,
+        "physicalDefense": 1.29,
+        "evasionRate": 1.06,
+        "magicalAttack": 1.36,
+        "magicalHealing": 1.28,
+        "magicalDefense": 1.16,
+        "trapRemoval": 0.81
+      },
+      "passiveSkillIds": [
+        1358,
+        504,
+        506,
+        1280,
+        545,
+        970,
+        583,
+        716
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65273
+        },
+        {
+          "level": 30,
+          "skillId": 65274
+        },
+        {
+          "level": 70,
+          "skillId": 65275
+        }
+      ]
+    },
+    {
+      "id": 113,
+      "name": "賢者マスター",
+      "category": "backline",
+      "growthTendency": "知恵高、全魔法",
+      "combatCoefficients": {
+        "maxHP": 0.9,
+        "physicalAttack": 0.83,
+        "hitRate": 0.9,
+        "attackCount": 0.92,
+        "criticalRate": 0.78,
+        "physicalDefense": 1.02,
+        "evasionRate": 0.81,
+        "magicalAttack": 1.62,
+        "magicalHealing": 1.46,
+        "magicalDefense": 1.74,
+        "trapRemoval": 1.49
+      },
+      "passiveSkillIds": [
+        1360,
+        1367,
+        1462,
+        547,
+        681,
+        349
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65283
+        },
+        {
+          "level": 30,
+          "skillId": 65284
+        },
+        {
+          "level": 70,
+          "skillId": 65285
+        }
+      ]
+    },
+    {
+      "id": 114,
+      "name": "忍者マスター",
+      "category": "midline",
+      "growthTendency": "バランス成長",
+      "combatCoefficients": {
+        "maxHP": 0.78,
+        "physicalAttack": 1.04,
+        "hitRate": 1.37,
+        "attackCount": 1.16,
+        "criticalRate": 1.87,
+        "physicalDefense": 1.01,
+        "evasionRate": 1.89,
+        "magicalAttack": 0.98,
+        "magicalHealing": 0.7,
+        "magicalDefense": 1.11,
+        "trapRemoval": 1.42
+      },
+      "passiveSkillIds": [
+        1452,
+        1456,
+        1443,
+        1282,
+        546,
+        1412,
+        1404,
+        279,
+        349,
+        350
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65293
+        },
+        {
+          "level": 30,
+          "skillId": 65294
+        },
+        {
+          "level": 70,
+          "skillId": 65295
+        }
+      ]
+    },
+    {
+      "id": 115,
+      "name": "君主マスター",
+      "category": "frontline",
+      "growthTendency": "HP高、全体強化",
+      "combatCoefficients": {
+        "maxHP": 1.43,
+        "physicalAttack": 1.08,
+        "hitRate": 1.0,
+        "attackCount": 0.74,
+        "criticalRate": 0.82,
+        "physicalDefense": 1.69,
+        "evasionRate": 0.51,
+        "magicalAttack": 0.5,
+        "magicalHealing": 1.2,
+        "magicalDefense": 1.13,
+        "trapRemoval": 0.82
+      },
+      "passiveSkillIds": [
+        1366,
+        505,
+        1446,
+        546,
+        661,
+        349,
+        374
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65303
+        },
+        {
+          "level": 30,
+          "skillId": 65304
+        },
+        {
+          "level": 70,
+          "skillId": 65305
+        }
+      ]
+    },
+    {
+      "id": 116,
+      "name": "ロイヤルラインマスター",
+      "category": "frontline",
+      "growthTendency": "王族専用スキル",
+      "combatCoefficients": {
+        "maxHP": 0.94,
+        "physicalAttack": 0.85,
+        "hitRate": 0.7,
+        "attackCount": 1.69,
+        "criticalRate": 0.8,
+        "physicalDefense": 1.0,
+        "evasionRate": 1.01,
+        "magicalAttack": 1.19,
+        "magicalHealing": 0.97,
+        "magicalDefense": 1.11,
+        "trapRemoval": 0.8
+      },
+      "passiveSkillIds": [
+        345,
+        371,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        513,
+        545,
+        738,
+        833
+      ],
+      "skillUnlocks": [
+        {
+          "level": 15,
+          "skillId": 65313
+        },
+        {
+          "level": 30,
+          "skillId": 65314
+        },
+        {
+          "level": 70,
+          "skillId": 65315
         }
       ]
     }

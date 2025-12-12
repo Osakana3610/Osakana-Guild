@@ -91,4 +91,35 @@ extension SQLiteMasterDataManager {
             )
         }
     }
+
+    /// 種族のパッシブスキルIDを取得
+    /// - Returns: [raceId: [skillId]]
+    func fetchAllRacePassiveSkills() throws -> [UInt8: [UInt16]] {
+        var result: [UInt8: [UInt16]] = [:]
+        let sql = "SELECT race_id, skill_id FROM race_passive_skills ORDER BY race_id, order_index;"
+        let statement = try prepare(sql)
+        defer { sqlite3_finalize(statement) }
+        while sqlite3_step(statement) == SQLITE_ROW {
+            let raceId = UInt8(sqlite3_column_int(statement, 0))
+            let skillId = UInt16(sqlite3_column_int(statement, 1))
+            result[raceId, default: []].append(skillId)
+        }
+        return result
+    }
+
+    /// 種族のスキル習得レベル情報を取得
+    /// - Returns: [raceId: [(level, skillId)]]
+    func fetchAllRaceSkillUnlocks() throws -> [UInt8: [(level: Int, skillId: UInt16)]] {
+        var result: [UInt8: [(level: Int, skillId: UInt16)]] = [:]
+        let sql = "SELECT race_id, level_requirement, skill_id FROM race_skill_unlocks ORDER BY race_id, level_requirement;"
+        let statement = try prepare(sql)
+        defer { sqlite3_finalize(statement) }
+        while sqlite3_step(statement) == SQLITE_ROW {
+            let raceId = UInt8(sqlite3_column_int(statement, 0))
+            let level = Int(sqlite3_column_int(statement, 1))
+            let skillId = UInt16(sqlite3_column_int(statement, 2))
+            result[raceId, default: []].append((level: level, skillId: skillId))
+        }
+        return result
+    }
 }

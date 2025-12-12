@@ -4,7 +4,12 @@ import Foundation
 extension BattleTurnEngine {
     /// 行動順序を決定
     static func actionOrder(_ context: inout BattleContext) -> [ActorReference] {
-        var entries: [(ActorReference, Int, Double)] = []
+        // 味方にactionOrderShuffleEnemyを持つキャラがいるか確認
+        let shuffleEnemyOrder = context.players.contains { $0.isAlive && $0.skillEffects.combat.actionOrderShuffleEnemy }
+
+        // (ref, speed, tiebreaker, firstStrike)
+        var entries: [(ActorReference, Int, Double, Bool)] = []
+
         for (idx, actor) in context.players.enumerated() where actor.isAlive {
             let speed: Int
             if actor.skillEffects.combat.actionOrderShuffle {
@@ -14,25 +19,35 @@ extension BattleTurnEngine {
                 speed = Int(scaled.rounded(.towardZero))
             }
             let slots = max(1, 1 + actor.skillEffects.combat.nextTurnExtraActions + actor.extraActionsNextTurn)
+            let hasFirstStrike = actor.skillEffects.combat.firstStrike
             for _ in 0..<slots {
-                entries.append((.player(idx), speed, context.random.nextDouble(in: 0.0...1.0)))
+                entries.append((.player(idx), speed, context.random.nextDouble(in: 0.0...1.0), hasFirstStrike))
             }
         }
+
         for (idx, actor) in context.enemies.enumerated() where actor.isAlive {
             let speed: Int
-            if actor.skillEffects.combat.actionOrderShuffle {
+            // 敵は自身のactionOrderShuffle、または味方のactionOrderShuffleEnemyでシャッフル
+            if actor.skillEffects.combat.actionOrderShuffle || shuffleEnemyOrder {
                 speed = context.random.nextInt(in: 0...10_000)
             } else {
                 let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.combat.actionOrderMultiplier)
                 speed = Int(scaled.rounded(.towardZero))
             }
             let slots = max(1, 1 + actor.skillEffects.combat.nextTurnExtraActions + actor.extraActionsNextTurn)
+            // 敵は先制を持たない（味方専用スキル）
             for _ in 0..<slots {
-                entries.append((.enemy(idx), speed, context.random.nextDouble(in: 0.0...1.0)))
+                entries.append((.enemy(idx), speed, context.random.nextDouble(in: 0.0...1.0), false))
             }
         }
+
+        // 先制持ちを先にソート、その後は速度順
         return entries.sorted { lhs, rhs in
+            // firstStrike持ちが先
+            if lhs.3 != rhs.3 { return lhs.3 }
+            // 速度が高い方が先
             if lhs.1 != rhs.1 { return lhs.1 > rhs.1 }
+            // 同速の場合はタイブレーカー
             return lhs.2 < rhs.2
         }.map { $0.0 }
     }

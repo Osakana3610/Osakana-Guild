@@ -120,7 +120,20 @@ extension SkillRuntimeEffectCompiler {
                      .tacticSpellAmplify,
                      .timedBreathPowerAmplify,
                      .timedBuffTrigger,
-                     .timedMagicPowerAmplify:
+                     .timedMagicPowerAmplify,
+                     .targetingWeight,
+                     .coverRowsBehind,
+                     .magicNullifyChancePercent,
+                     .magicCriticalChancePercent,
+                     .levelComparisonDamageTaken,
+                     .spellChargeRecoveryChance,
+                     .enemyActionDebuffChance,
+                     .autoStatusCureOnAlly,
+                     .cumulativeHitDamageBonus,
+                     .enemySingleActionSkipChance,
+                     .actionOrderShuffleEnemy,
+                     .firstStrike,
+                     .damageDealtMultiplierByTargetHP:
                     continue
             }
         }

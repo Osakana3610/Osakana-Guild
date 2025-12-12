@@ -11,7 +11,8 @@ struct DamageDealtPercentHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         let damageType = try payload.requireParam("damageType", skillId: context.skillId, effectIndex: context.effectIndex)
-        let value = try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        var value = payload.value["valuePercent"] ?? 0.0
+        value += payload.scaledValue(from: context.actorStats)
         accumulator.damage.dealtPercentByType[damageType, default: 0.0] += value
     }
 }
@@ -39,7 +40,8 @@ struct DamageTakenPercentHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         let damageType = try payload.requireParam("damageType", skillId: context.skillId, effectIndex: context.effectIndex)
-        let value = try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        var value = payload.value["valuePercent"] ?? 0.0
+        value += payload.scaledValue(from: context.actorStats)
         accumulator.damage.takenPercentByType[damageType, default: 0.0] += value
     }
 }
@@ -83,7 +85,9 @@ struct CriticalDamagePercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        accumulator.damage.criticalDamagePercent += try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        var value = payload.value["valuePercent"] ?? 0.0
+        value += payload.scaledValue(from: context.actorStats)
+        accumulator.damage.criticalDamagePercent += value
     }
 }
 
@@ -131,7 +135,8 @@ struct MartialBonusPercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let value = try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        var value = payload.value["valuePercent"] ?? 0.0
+        value += payload.scaledValue(from: context.actorStats)
         accumulator.damage.martialBonusPercent += value
     }
 }
@@ -182,5 +187,51 @@ struct MinHitScaleHandler: SkillEffectHandler {
     ) throws {
         // Actor.swift では continue（スキップ）
         // 注: dodgeCap 経由で minHitScale が設定されるケースは DodgeCapHandler で処理
+    }
+}
+
+struct MagicNullifyChancePercentHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.magicNullifyChancePercent
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        var value = payload.value["valuePercent"] ?? 0.0
+        value += payload.scaledValue(from: context.actorStats)
+        accumulator.damage.magicNullifyChancePercent = max(accumulator.damage.magicNullifyChancePercent, value)
+    }
+}
+
+struct LevelComparisonDamageTakenHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.levelComparisonDamageTaken
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        var value = payload.value["valuePercent"] ?? 0.0
+        value += payload.scaledValue(from: context.actorStats)
+        accumulator.damage.levelComparisonDamageTakenPercent += value
+    }
+}
+
+// MARK: - Assassin Skills (暗殺者)
+
+struct DamageDealtMultiplierByTargetHPHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.damageDealtMultiplierByTargetHP
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let hpThreshold = try payload.requireValue("hpThresholdPercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        accumulator.damage.hpThresholdMultipliers.append(
+            .init(hpThresholdPercent: hpThreshold, multiplier: multiplier)
+        )
     }
 }

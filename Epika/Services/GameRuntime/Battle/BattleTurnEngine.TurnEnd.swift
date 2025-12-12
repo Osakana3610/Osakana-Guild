@@ -190,7 +190,15 @@ extension BattleTurnEngine {
         guard !definitions.isEmpty else { return }
 
         do {
-            let effects = try SkillRuntimeEffectCompiler.actorEffects(from: definitions)
+            let stats = ActorStats(
+                strength: actor.strength,
+                wisdom: actor.wisdom,
+                spirit: actor.spirit,
+                vitality: actor.vitality,
+                agility: actor.agility,
+                luck: actor.luck
+            )
+            let effects = try SkillRuntimeEffectCompiler.actorEffects(from: definitions, stats: stats)
             actor.skillEffects = effects
 
             for (key, value) in effects.combat.barrierCharges {
@@ -271,14 +279,15 @@ extension BattleTurnEngine {
         var actors: [BattleActor] = side == .player ? context.players : context.enemies
         guard !actors.isEmpty else { return }
 
-        var fired: [BattleActor.SkillEffects.TimedBuffTrigger] = []
+        // 発火したトリガーと所有者のインデックスを記録
+        var fired: [(trigger: BattleActor.SkillEffects.TimedBuffTrigger, ownerIndex: Int)] = []
 
         for index in actors.indices {
             var actor = actors[index]
             var remaining: [BattleActor.SkillEffects.TimedBuffTrigger] = []
             for trigger in actor.skillEffects.status.timedBuffTriggers {
                 if trigger.triggerTurn == context.turn && actor.isAlive {
-                    fired.append(trigger)
+                    fired.append((trigger: trigger, ownerIndex: index))
                 } else {
                     remaining.append(trigger)
                 }
@@ -295,9 +304,21 @@ extension BattleTurnEngine {
 
         guard !fired.isEmpty else { return }
 
-        for trigger in fired {
+        for (trigger, ownerIndex) in fired {
             var refreshedActors: [BattleActor] = side == .player ? context.players : context.enemies
-            for index in refreshedActors.indices where refreshedActors[index].isAlive {
+
+            // スコープに応じて対象を決定
+            let targetIndices: [Int]
+            switch trigger.scope {
+            case .party:
+                targetIndices = refreshedActors.indices.filter { refreshedActors[$0].isAlive }
+            case .`self`:
+                targetIndices = refreshedActors.indices.contains(ownerIndex) && refreshedActors[ownerIndex].isAlive
+                    ? [ownerIndex]
+                    : []
+            }
+
+            for index in targetIndices {
                 var actor = refreshedActors[index]
                 let spellSpecificMods = trigger.modifiers.filter { $0.key.hasPrefix("spellSpecific:") }
                 if !spellSpecificMods.isEmpty {
@@ -325,8 +346,8 @@ extension BattleTurnEngine {
                 context.enemies = refreshedActors
             }
 
-            // バフ発動は全体効果のため、個別actorログは省略
-            context.appendAction(kind: .buffApply, actor: side == .player ? 0 : 1000, value: UInt32(trigger.triggerTurn))
+            let actorIdx = context.actorIndex(for: side, arrayIndex: ownerIndex)
+            context.appendAction(kind: .buffApply, actor: actorIdx, value: UInt32(trigger.triggerTurn))
         }
     }
 
@@ -467,5 +488,71 @@ extension BattleTurnEngine {
             return false
         }
         return true
+    }
+
+    // MARK: - Spell Charge Recovery
+
+    static func applySpellChargeRecovery(_ context: inout BattleContext) {
+        applySpellChargeRecoveryForSide(.player, context: &context)
+        applySpellChargeRecoveryForSide(.enemy, context: &context)
+    }
+
+    private static func applySpellChargeRecoveryForSide(_ side: ActorSide, context: inout BattleContext) {
+        var actors: [BattleActor] = side == .player ? context.players : context.enemies
+        guard !actors.isEmpty else { return }
+
+        for index in actors.indices {
+            var actor = actors[index]
+            guard actor.isAlive else { continue }
+
+            let recoveries = actor.skillEffects.spell.chargeRecoveries
+            guard !recoveries.isEmpty else { continue }
+
+            for recovery in recoveries {
+                let chance = max(0.0, min(100.0, recovery.baseChancePercent))
+                guard chance > 0 else { continue }
+                let probability = chance / 100.0
+                guard context.random.nextBool(probability: probability) else { continue }
+
+                // 回復対象の呪文を取得
+                let targetSpells: [SpellDefinition]
+                if let schoolIndex = recovery.school {
+                    // 特定スクール
+                    if schoolIndex == 0 {
+                        targetSpells = actor.spells.mage
+                    } else {
+                        targetSpells = actor.spells.priest
+                    }
+                } else {
+                    // 全呪文
+                    targetSpells = actor.spells.mage + actor.spells.priest
+                }
+
+                // チャージが最大未満の呪文をフィルタ
+                let recoverableSpells = targetSpells.filter { spell in
+                    guard let state = actor.actionResources.spellChargeState(for: spell.id) else { return false }
+                    return state.current < state.max
+                }
+
+                guard !recoverableSpells.isEmpty else { continue }
+
+                // ランダムに1つ選んで回復
+                let randomIndex = context.random.nextInt(in: 0...(recoverableSpells.count - 1))
+                let targetSpell = recoverableSpells[randomIndex]
+                _ = actor.actionResources.addCharges(forSpellId: targetSpell.id, amount: 1, cap: Int.max)
+
+                // ログ出力（オプション）
+                let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+                context.appendAction(kind: .spellChargeRecover, actor: actorIdx, value: UInt32(targetSpell.id))
+            }
+
+            actors[index] = actor
+        }
+
+        if side == .player {
+            context.players = actors
+        } else {
+            context.enemies = actors
+        }
     }
 }

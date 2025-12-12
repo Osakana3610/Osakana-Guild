@@ -242,6 +242,10 @@ struct BattleLogRenderer {
             return ("\(actorName)は\(heal)回復した！", .heal)
         case .enemySpecialBuff:
             return ("\(actorName)は能力を強化した！", .status)
+
+        // スキル効果
+        case .spellChargeRecover:
+            return ("\(actorName)は魔法のチャージを回復した", .heal)
         }
     }
 }

@@ -106,6 +106,9 @@ enum ActionKind: UInt8, Codable, Sendable {
     case enemySpecialDamage = 121 // "{target}に{value}のダメージ！"
     case enemySpecialHeal = 122   // "{actor}は{value}回復した！"
     case enemySpecialBuff = 123   // "{actor}は{buff}を発動した！"
+
+    // スキル効果
+    case spellChargeRecover = 130 // "{actor}は{spell}のチャージを回復した"
 }
 
 // MARK: - Outcome Values

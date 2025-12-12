@@ -118,7 +118,8 @@ struct ReactionHandler: SkillEffectHandler {
         if let reaction = BattleActor.SkillEffects.Reaction.make(
             from: payload,
             skillName: context.skillName,
-            skillId: context.skillId
+            skillId: context.skillId,
+            stats: context.actorStats
         ) {
             accumulator.combat.reactions.append(reaction)
         }
@@ -169,9 +170,11 @@ struct SpecialAttackHandler: SkillEffectHandler {
     ) throws {
         let identifier = try payload.requireParam("specialAttackId", skillId: context.skillId, effectIndex: context.effectIndex)
         let chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 50
+        let preemptive = payload.stringValues["preemptive"]?.lowercased() == "true"
         if let descriptor = BattleActor.SkillEffects.SpecialAttack(
             kindIdentifier: identifier,
-            chancePercent: chance
+            chancePercent: chance,
+            preemptive: preemptive
         ) {
             accumulator.combat.specialAttacks.append(descriptor)
         }
@@ -243,5 +246,73 @@ struct AttackCountMultiplierHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         // Actor.swift では continue（スキップ）
+    }
+}
+
+struct EnemyActionDebuffChanceHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.enemyActionDebuffChance
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        var baseChance = payload.value["chancePercent"] ?? 0.0
+        baseChance += payload.scaledValue(from: context.actorStats)
+        let reduction = Int((payload.value["reduction"] ?? 1.0).rounded(.towardZero))
+        accumulator.combat.enemyActionDebuffs.append(.init(baseChancePercent: baseChance, reduction: max(1, reduction)))
+    }
+}
+
+struct CumulativeHitDamageBonusHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.cumulativeHitDamageBonus
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let damagePercent = payload.value["damagePercent"] ?? 0.0
+        let hitRatePercent = payload.value["hitRatePercent"] ?? 0.0
+        accumulator.combat.cumulativeHitBonus = .init(damagePercentPerHit: damagePercent, hitRatePercentPerHit: hitRatePercent)
+    }
+}
+
+// MARK: - Jester Skills (道化師)
+
+struct EnemySingleActionSkipChanceHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.enemySingleActionSkipChance
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let chance = try payload.requireValue("chancePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        accumulator.combat.enemySingleActionSkipChancePercent += chance
+    }
+}
+
+struct ActionOrderShuffleEnemyHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.actionOrderShuffleEnemy
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.combat.actionOrderShuffleEnemy = true
+    }
+}
+
+struct FirstStrikeHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.firstStrike
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        accumulator.combat.firstStrike = true
     }
 }
