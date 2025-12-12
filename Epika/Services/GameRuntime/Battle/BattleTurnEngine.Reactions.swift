@@ -138,6 +138,12 @@ extension BattleTurnEngine {
             for index in actorIndices(for: side, context: context) {
                 attemptReactions(on: side, actorIndex: index, event: event, depth: depth, context: &context)
             }
+        case .selfKilledEnemy(let side, let actorIndex, _):
+            attemptReactions(on: side, actorIndex: actorIndex, event: event, depth: depth, context: &context)
+        case .allyMagicAttack(let side, _):
+            for index in actorIndices(for: side, context: context) {
+                attemptReactions(on: side, actorIndex: index, event: event, depth: depth, context: &context)
+            }
         }
     }
 
@@ -158,6 +164,12 @@ extension BattleTurnEngine {
 
             if case .allyDamagedPhysical(_, let defenderIndex, _) = event,
                defenderIndex == actorIndex {
+                continue
+            }
+
+            // 自分の魔法に自分で追撃しない
+            if case .allyMagicAttack(_, let casterIndex) = event,
+               casterIndex == actorIndex {
                 continue
             }
 
@@ -199,7 +211,9 @@ extension BattleTurnEngine {
             guard let targetActor = context.actor(for: resolvedTarget.0, index: resolvedTarget.1),
                   targetActor.isAlive else { continue }
 
-            var chance = max(0.0, reaction.baseChancePercent) * currentPerformer.skillEffects.combat.procChanceMultiplier
+            // statScalingはコンパイル時にbaseChancePercentに計算済み
+            let baseChance = max(0.0, reaction.baseChancePercent)
+            var chance = baseChance * currentPerformer.skillEffects.combat.procChanceMultiplier
             chance *= targetActor.skillEffects.combat.counterAttackEvasionMultiplier
             let cappedChance = max(0, min(100, Int(floor(chance))))
             guard cappedChance > 0 else { continue }
@@ -340,6 +354,14 @@ extension BattleTurnEngine {
             currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
             currentDefender = context.actor(for: defenderSide, index: defenderIndex)
 
+            // 敵を倒した側のリアクション（selfKilledEnemy）
+            let killedRef = BattleContext.reference(for: defenderSide, index: defenderIndex)
+            dispatchReactions(for: .selfKilledEnemy(side: attackerSide, actorIndex: attackerIndex, killedEnemy: killedRef),
+                              depth: reactionDepth,
+                              context: &context)
+            currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
+            currentDefender = context.actor(for: defenderSide, index: defenderIndex)
+
             if attemptInstantResurrectionIfNeeded(of: defenderIndex, side: defenderSide, context: &context) {
                 currentDefender = context.actor(for: defenderSide, index: defenderIndex)
             } else if attemptRescue(of: defenderIndex, side: defenderSide, context: &context) {
@@ -393,6 +415,8 @@ private extension BattleActor.SkillEffects.Reaction.Trigger {
         case (.selfDamagedPhysical, .selfDamagedPhysical): return true
         case (.selfDamagedMagical, .selfDamagedMagical): return true
         case (.allyDamagedPhysical, .allyDamagedPhysical): return true
+        case (.selfKilledEnemy, .selfKilledEnemy): return true
+        case (.allyMagicAttack, .allyMagicAttack): return true
         default: return false
         }
     }
@@ -407,6 +431,10 @@ private extension BattleActor.SkillEffects.Reaction {
         case (_, .selfDamagedPhysical(_, _, let attacker)): return attacker
         case (_, .selfDamagedMagical(_, _, let attacker)): return attacker
         case (_, .allyDamagedPhysical(_, _, let attacker)): return attacker
+        case (_, .selfKilledEnemy(_, _, let killedEnemy)): return killedEnemy
+        case (.randomEnemy, _): return nil  // フォールバックでランダムに選択
+        case (_, .allyMagicAttack): return nil  // フォールバックでランダムに選択
         }
     }
 }
+

@@ -75,6 +75,15 @@ extension BattleTurnEngine {
                                      defender: inout BattleActor,
                                      spellId: UInt8?,
                                      context: inout BattleContext) -> Int {
+        // 魔法無効化判定
+        let nullifyChance = defender.skillEffects.damage.magicNullifyChancePercent
+        if nullifyChance > 0 {
+            let cappedChance = max(0, min(100, Int(nullifyChance.rounded())))
+            if BattleRandomSystem.percentChance(cappedChance, random: &context.random) {
+                return 0  // 魔法無効化成功
+            }
+        }
+
         let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
         let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
 
@@ -85,6 +94,15 @@ extension BattleTurnEngine {
         damage *= spellPowerModifier(for: attacker, spellId: spellId)
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .magical)
         damage *= damageTakenModifier(for: defender, damageType: .magical, spellId: spellId)
+
+        // 必殺魔法（魔法クリティカル）判定
+        let criticalChance = attacker.skillEffects.spell.magicCriticalChancePercent
+        if criticalChance > 0 {
+            let cappedChance = max(0, min(100, Int(criticalChance.rounded())))
+            if BattleRandomSystem.percentChance(cappedChance, random: &context.random) {
+                damage *= attacker.skillEffects.spell.magicCriticalMultiplier
+            }
+        }
 
         // 個別魔法耐性を適用
         if let spellId {

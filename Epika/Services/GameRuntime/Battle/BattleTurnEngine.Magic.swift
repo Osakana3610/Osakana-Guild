@@ -92,6 +92,13 @@ extension BattleTurnEngine {
                                                      killer: killerRef),
                                   depth: 0,
                                   context: &context)
+                // 敵を倒したキャラのリアクション
+                let killedRef = BattleContext.reference(for: targetRef.0, index: targetRef.1)
+                dispatchReactions(for: .selfKilledEnemy(side: side,
+                                                        actorIndex: attackerIndex,
+                                                        killedEnemy: killedRef),
+                                  depth: 0,
+                                  context: &context)
                 if let _ = context.actor(for: targetRef.0, index: targetRef.1) {
                     _ = attemptInstantResurrectionIfNeeded(of: targetRef.1,
                                                           side: targetRef.0,
@@ -124,6 +131,11 @@ extension BattleTurnEngine {
                 context.updateActor(freshTarget, side: targetRef.0, index: targetRef.1)
             }
         }
+
+        // 味方が魔法攻撃したイベントを発火（追撃用）
+        dispatchReactions(for: .allyMagicAttack(side: side, casterIndex: attackerIndex),
+                          depth: 0,
+                          context: &context)
 
         return true
     }
@@ -168,6 +180,13 @@ extension BattleTurnEngine {
                 dispatchReactions(for: .allyDefeated(side: targetRef.0,
                                                      fallenIndex: targetRef.1,
                                                      killer: killerRef),
+                                  depth: 0,
+                                  context: &context)
+                // 敵を倒したキャラのリアクション
+                let killedRef = BattleContext.reference(for: targetRef.0, index: targetRef.1)
+                dispatchReactions(for: .selfKilledEnemy(side: side,
+                                                        actorIndex: attackerIndex,
+                                                        killedEnemy: killedRef),
                                   depth: 0,
                                   context: &context)
                 if let _ = context.actor(for: targetRef.0, index: targetRef.1) {

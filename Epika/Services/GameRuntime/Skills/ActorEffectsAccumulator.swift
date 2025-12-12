@@ -34,7 +34,8 @@ struct ActorEffectsAccumulator {
             penetrationTakenMultiplier: damage.penetrationDamageTakenMultiplier,
             martialBonusPercent: damage.martialBonusPercent,
             martialBonusMultiplier: damage.martialBonusMultiplier,
-            minHitScale: damage.minHitScale
+            minHitScale: damage.minHitScale,
+            magicNullifyChancePercent: damage.magicNullifyChancePercent
         )
 
         let spellGroup = BattleActor.SkillEffects.Spell(
@@ -43,7 +44,9 @@ struct ActorEffectsAccumulator {
             specificTakenMultipliers: spell.spellSpecificTakenMultipliers,
             chargeModifiers: spell.spellChargeModifiers,
             defaultChargeModifier: spell.defaultSpellChargeModifier,
-            breathExtraCharges: spell.breathExtraCharges
+            breathExtraCharges: spell.breathExtraCharges,
+            magicCriticalChancePercent: spell.magicCriticalChancePercent,
+            magicCriticalMultiplier: spell.magicCriticalMultiplier
         )
 
         let combatGroup = BattleActor.SkillEffects.Combat(
@@ -106,7 +109,9 @@ struct ActorEffectsAccumulator {
             magicRunaway: misc.magicRunaway,
             damageRunaway: misc.damageRunaway,
             retreatTurn: misc.retreatTurn,
-            retreatChancePercent: misc.retreatChancePercent
+            retreatChancePercent: misc.retreatChancePercent,
+            targetingWeight: misc.targetingWeight,
+            coverRowsBehind: misc.coverRowsBehind
         )
 
         return BattleActor.SkillEffects(
@@ -135,6 +140,7 @@ struct DamageAccumulator {
     var martialBonusPercent: Double = 0.0
     var martialBonusMultiplier: Double = 1.0
     var minHitScale: Double?
+    var magicNullifyChancePercent: Double = 0.0
 
     func totalMultiplier(for damageType: String) -> Double {
         let percent = dealtPercentByType[damageType] ?? 0.0
@@ -159,6 +165,8 @@ struct SpellAccumulator {
     var defaultSpellChargeModifier: BattleActor.SkillEffects.SpellChargeModifier?
     var spellChargeModifiers: [UInt8: BattleActor.SkillEffects.SpellChargeModifier] = [:]
     var breathExtraCharges: Int = 0
+    var magicCriticalChancePercent: Double = 0.0
+    var magicCriticalMultiplier: Double = 1.5
 }
 
 // MARK: - ActorCombatAccumulator
@@ -231,4 +239,6 @@ struct MiscAccumulator {
     var damageRunaway: BattleActor.SkillEffects.Runaway?
     var retreatTurn: Int?
     var retreatChancePercent: Double?
+    var targetingWeight: Double = 1.0
+    var coverRowsBehind: Bool = false
 }

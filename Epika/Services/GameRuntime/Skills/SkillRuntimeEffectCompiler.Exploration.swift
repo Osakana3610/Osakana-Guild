@@ -108,7 +108,11 @@ extension SkillRuntimeEffectCompiler {
                      .tacticSpellAmplify,
                      .timedBreathPowerAmplify,
                      .timedBuffTrigger,
-                     .timedMagicPowerAmplify:
+                     .timedMagicPowerAmplify,
+                     .targetingWeight,
+                     .coverRowsBehind,
+                     .magicNullifyChancePercent,
+                     .magicCriticalChancePercent:
                     continue
             }
         }

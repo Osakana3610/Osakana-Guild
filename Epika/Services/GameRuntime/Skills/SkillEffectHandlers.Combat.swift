@@ -118,7 +118,8 @@ struct ReactionHandler: SkillEffectHandler {
         if let reaction = BattleActor.SkillEffects.Reaction.make(
             from: payload,
             skillName: context.skillName,
-            skillId: context.skillId
+            skillId: context.skillId,
+            stats: context.actorStats
         ) {
             accumulator.combat.reactions.append(reaction)
         }
@@ -169,9 +170,11 @@ struct SpecialAttackHandler: SkillEffectHandler {
     ) throws {
         let identifier = try payload.requireParam("specialAttackId", skillId: context.skillId, effectIndex: context.effectIndex)
         let chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 50
+        let preemptive = payload.stringValues["preemptive"]?.lowercased() == "true"
         if let descriptor = BattleActor.SkillEffects.SpecialAttack(
             kindIdentifier: identifier,
-            chancePercent: chance
+            chancePercent: chance,
+            preemptive: preemptive
         ) {
             accumulator.combat.specialAttacks.append(descriptor)
         }

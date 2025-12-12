@@ -54,8 +54,90 @@ extension BattleTurnEngine {
         }
 
         guard !pool.isEmpty else { return nil }
-        let pick = context.random.nextInt(in: 0...(pool.count - 1))
-        return referenceToSideIndex(pool[pick])
+
+        // 重み付きランダム選択
+        let selected = selectWeightedTarget(from: pool, context: context, random: &context.random)
+        guard let selectedRef = selected else { return nil }
+        let (targetSide, targetIndex) = referenceToSideIndex(selectedRef)
+
+        // 「かばう」処理：後列が選ばれた場合、前列のかばうキャラが代わりにターゲットになる
+        if !allowFriendlyTargets {
+            if let coverTarget = findCoveringAlly(for: targetSide,
+                                                  targetIndex: targetIndex,
+                                                  context: context,
+                                                  random: &context.random) {
+                return coverTarget
+            }
+        }
+
+        return (targetSide, targetIndex)
+    }
+
+    /// 重み付きランダムターゲット選択
+    private static func selectWeightedTarget(from pool: [ActorReference],
+                                             context: BattleContext,
+                                             random: inout GameRandomSource) -> ActorReference? {
+        guard !pool.isEmpty else { return nil }
+
+        var weights: [Double] = []
+        for ref in pool {
+            let (side, index) = referenceToSideIndex(ref)
+            let actor = context.actor(for: side, index: index)
+            let weight = max(0.01, actor?.skillEffects.misc.targetingWeight ?? 1.0)
+            weights.append(weight)
+        }
+
+        let totalWeight = weights.reduce(0, +)
+        guard totalWeight > 0 else {
+            return pool[random.nextInt(in: 0...(pool.count - 1))]
+        }
+
+        let roll = random.nextDouble(in: 0.0...max(0.0, totalWeight - 0.0001))
+        var cumulative = 0.0
+        for (index, weight) in weights.enumerated() {
+            cumulative += weight
+            if roll < cumulative {
+                return pool[index]
+            }
+        }
+        return pool.last
+    }
+
+    /// 「かばう」対象を探す
+    private static func findCoveringAlly(for targetSide: ActorSide,
+                                         targetIndex: Int,
+                                         context: BattleContext,
+                                         random: inout GameRandomSource) -> (ActorSide, Int)? {
+        guard let target = context.actor(for: targetSide, index: targetIndex) else { return nil }
+        let targetRow = target.formationSlot.row
+
+        // 前列以外（row > 0）の場合のみ「かばう」が発動
+        guard targetRow > 0 else { return nil }
+
+        let allies: [BattleActor] = targetSide == .player ? context.players : context.enemies
+        var coverCandidates: [(Int, Double)] = []  // (index, weight)
+
+        for (index, ally) in allies.enumerated() {
+            guard ally.isAlive else { continue }
+            guard ally.skillEffects.misc.coverRowsBehind else { continue }
+            guard ally.formationSlot.row < targetRow else { continue }  // ターゲットより前列にいる
+            let weight = max(0.01, ally.skillEffects.misc.targetingWeight)
+            coverCandidates.append((index, weight))
+        }
+
+        guard !coverCandidates.isEmpty else { return nil }
+
+        // 複数のかばうキャラがいる場合は重み付きで選択
+        let totalWeight = coverCandidates.reduce(0.0) { $0 + $1.1 }
+        let roll = random.nextDouble(in: 0.0...max(0.0, totalWeight - 0.0001))
+        var cumulative = 0.0
+        for (index, weight) in coverCandidates {
+            cumulative += weight
+            if roll < cumulative {
+                return (targetSide, index)
+            }
+        }
+        return (targetSide, coverCandidates.last!.0)
     }
 
     static func filterAlliedTargets(for attacker: BattleActor,

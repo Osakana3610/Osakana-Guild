@@ -89,6 +89,10 @@ enum SkillEffectType: String, CaseIterable, Sendable, Hashable {
     case statusResistanceMultiplier
     case statusResistancePercent
     case tacticSpellAmplify
+    case targetingWeight
+    case coverRowsBehind
+    case magicNullifyChancePercent
+    case magicCriticalChancePercent
     case timedBreathPowerAmplify
     case timedBuffTrigger
     case timedMagicPowerAmplify
