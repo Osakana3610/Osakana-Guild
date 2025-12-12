@@ -214,7 +214,7 @@ extension Generator {
                 name TEXT NOT NULL,
                 effect TEXT NOT NULL,
                 description TEXT NOT NULL,
-                PRIMARY KEY (race_id, level_requirement),
+                PRIMARY KEY (race_id, level_requirement, skill_id),
                 FOREIGN KEY (race_id) REFERENCES races(id) ON DELETE CASCADE
             );
             """,

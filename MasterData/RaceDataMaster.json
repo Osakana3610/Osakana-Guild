@@ -104,8 +104,12 @@
           "skillId": 64011
         },
         {
-          "level": 99,
+          "level": 50,
           "skillId": 64012
+        },
+        {
+          "level": 99,
+          "skillId": 64013
         }
       ]
     },
@@ -314,8 +318,12 @@
           "skillId": 64081
         },
         {
-          "level": 99,
+          "level": 50,
           "skillId": 64082
+        },
+        {
+          "level": 99,
+          "skillId": 64083
         }
       ]
     },
@@ -406,6 +414,14 @@
         {
           "level": 99,
           "skillId": 64112
+        },
+        {
+          "level": 99,
+          "skillId": 64113
+        },
+        {
+          "level": 99,
+          "skillId": 64114
         }
       ]
     },
@@ -494,8 +510,12 @@
           "skillId": 64141
         },
         {
-          "level": 99,
+          "level": 50,
           "skillId": 64142
+        },
+        {
+          "level": 99,
+          "skillId": 64143
         }
       ]
     },
