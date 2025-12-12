@@ -10,7 +10,9 @@ struct SpellPowerPercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        accumulator.spell.spellPowerPercent += try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        var value = payload.value["valuePercent"] ?? 0.0
+        value += payload.scaledValue(from: context.actorStats)
+        accumulator.spell.spellPowerPercent += value
     }
 }
 
@@ -165,13 +167,32 @@ struct TacticSpellAmplifyHandler: SkillEffectHandler {
         let triggerTurn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
         let key = "spellSpecific:" + spellId
         let triggerId = payload.familyId ?? payload.effectType.rawValue
+        let scopeString = payload.stringValues["scope"] ?? "party"
+        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: scopeString) ?? .party
         accumulator.status.timedBuffTriggers.append(.init(
             id: triggerId,
             displayName: context.skillName,
             triggerTurn: Int(triggerTurn.rounded(.towardZero)),
             modifiers: [key: multiplier],
-            scope: .party,
+            scope: scope,
             category: "spell"
         ))
+    }
+}
+
+struct MagicCriticalChancePercentHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.magicCriticalChancePercent
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        var value = payload.value["valuePercent"] ?? 0.0
+        value += payload.scaledValue(from: context.actorStats)
+        accumulator.spell.magicCriticalChancePercent = max(accumulator.spell.magicCriticalChancePercent, value)
+        if let multiplier = payload.value["multiplier"] {
+            accumulator.spell.magicCriticalMultiplier = max(accumulator.spell.magicCriticalMultiplier, multiplier)
+        }
     }
 }

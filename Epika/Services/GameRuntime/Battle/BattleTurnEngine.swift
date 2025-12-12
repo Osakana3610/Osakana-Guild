@@ -56,6 +56,19 @@ struct BattleTurnEngine {
             context.appendAction(kind: .enemyAppear, actor: actorIdx)
         }
 
+        // 先制攻撃の実行
+        executePreemptiveAttacks(&context)
+
+        // 先制攻撃後の勝敗判定
+        if context.isVictory {
+            context.appendAction(kind: .victory)
+            return context.makeResult(BattleLog.outcomeVictory)
+        }
+        if context.isDefeat {
+            context.appendAction(kind: .defeat)
+            return context.makeResult(BattleLog.outcomeDefeat)
+        }
+
         while context.turn < BattleContext.maxTurns {
             // 勝敗判定
             if context.isVictory {

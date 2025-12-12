@@ -21,8 +21,7 @@
         "trapRemoval": 0.81
       },
       "passiveSkillIds": [
-        65001,
-        65002
+        507, 545, 17, 642
       ],
       "skillUnlocks": [
         {
@@ -58,8 +57,7 @@
         "trapRemoval": 0.81
       },
       "passiveSkillIds": [
-        65011,
-        65012
+        512, 1280, 272, 324, 586
       ],
       "skillUnlocks": [
         {
@@ -95,8 +93,7 @@
         "trapRemoval": 1.94
       },
       "passiveSkillIds": [
-        65021,
-        65022
+        1444, 516, 545, 270, 567, 277
       ],
       "skillUnlocks": [
         {
@@ -132,8 +129,7 @@
         "trapRemoval": 1.57
       },
       "passiveSkillIds": [
-        65031,
-        65032
+        511, 273, 277, 567
       ],
       "skillUnlocks": [
         {
@@ -169,8 +165,7 @@
         "trapRemoval": 1.02
       },
       "passiveSkillIds": [
-        65041,
-        65042
+        510, 511, 407, 340
       ],
       "skillUnlocks": [
         {
@@ -206,8 +201,7 @@
         "trapRemoval": 0.82
       },
       "passiveSkillIds": [
-        65051,
-        65052
+        1367, 1460, 504, 508, 111, 757, 1029
       ],
       "skillUnlocks": [
         {
@@ -243,8 +237,7 @@
         "trapRemoval": 0.81
       },
       "passiveSkillIds": [
-        65061,
-        65062
+        1360, 1458, 44, 718
       ],
       "skillUnlocks": [
         {
@@ -280,8 +273,7 @@
         "trapRemoval": 1.06
       },
       "passiveSkillIds": [
-        65071,
-        65072
+        509, 546, 152, 624, 974
       ],
       "skillUnlocks": [
         {
@@ -317,8 +309,7 @@
         "trapRemoval": 0.84
       },
       "passiveSkillIds": [
-        65081,
-        65082
+        504, 406, 343, 776, 970
       ],
       "skillUnlocks": [
         {
@@ -354,8 +345,7 @@
         "trapRemoval": 0.77
       },
       "passiveSkillIds": [
-        65091,
-        65092
+        1448, 1289, 605, 350
       ],
       "skillUnlocks": [
         {
@@ -391,8 +381,7 @@
         "trapRemoval": 0.8
       },
       "passiveSkillIds": [
-        65101,
-        65102
+        1450, 510, 1281, 545, 350, 700
       ],
       "skillUnlocks": [
         {
@@ -428,8 +417,7 @@
         "trapRemoval": 0.81
       },
       "passiveSkillIds": [
-        65111,
-        65112
+        1358, 504, 506, 1280, 545, 970, 583, 716
       ],
       "skillUnlocks": [
         {
@@ -465,8 +453,7 @@
         "trapRemoval": 1.49
       },
       "passiveSkillIds": [
-        65121,
-        65122
+        1360, 1367, 1462, 547, 681, 349
       ],
       "skillUnlocks": [
         {
@@ -502,8 +489,7 @@
         "trapRemoval": 1.42
       },
       "passiveSkillIds": [
-        65131,
-        65132
+        1452, 1456, 1443, 1282, 546, 1412, 1404, 279, 349, 350
       ],
       "skillUnlocks": [
         {
@@ -539,8 +525,7 @@
         "trapRemoval": 0.82
       },
       "passiveSkillIds": [
-        65141,
-        65142
+        1366, 505, 1446, 546, 661, 349, 374
       ],
       "skillUnlocks": [
         {
@@ -576,8 +561,7 @@
         "trapRemoval": 0.8
       },
       "passiveSkillIds": [
-        65151,
-        65152
+        345, 371, 504, 505, 506, 507, 508, 509, 510, 511, 513, 545, 738, 833
       ],
       "skillUnlocks": [
         {
