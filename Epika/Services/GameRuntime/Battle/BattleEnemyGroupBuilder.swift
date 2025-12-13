@@ -26,7 +26,6 @@ struct BattleEnemyGroupBuilder {
                                         count: count,
                                         skillDefinitions: skillDefinitions,
                                         jobDefinitions: jobDefinitions,
-                                        raceDefinitions: raceDefinitions,
                                         cache: &skillCache,
                                         random: &random)
             let encountered = Array(repeating: EncounteredEnemy(definition: definition, level: baseEnemyLevel ?? 1), count: count)
@@ -44,13 +43,10 @@ struct BattleEnemyGroupBuilder {
         for group in groups {
             for _ in 0..<group.count {
                 guard let slot = BattleContextBuilder.slot(for: slotIndex) else { break }
-                let baseHP = computeEnemyMaxHP(definition: group.definition, level: baseEnemyLevel ?? 1)
                 let levelOverride = baseEnemyLevel ?? 1
-                let snapshot = CombatSnapshotBuilder.makeEnemySnapshot(from: group.definition,
-                                                                       baseHP: baseHP,
-                                                                       levelOverride: levelOverride,
-                                                                       jobDefinitions: jobDefinitions,
-                                                                       raceDefinitions: raceDefinitions)
+                let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: group.definition,
+                                                                           levelOverride: levelOverride,
+                                                                           jobDefinitions: jobDefinitions)
                 var resources = BattleActionResource.makeDefault(for: snapshot,
                                                                 spellLoadout: .empty)
                 let skillEffects = try cachedSkillEffects(for: group.definition,
@@ -117,19 +113,15 @@ struct BattleEnemyGroupBuilder {
                                     count: Int,
                                     skillDefinitions: [UInt16: SkillDefinition],
                                     jobDefinitions: [UInt8: JobDefinition],
-                                    raceDefinitions: [UInt8: RaceDefinition],
                                     cache: inout [UInt16: BattleActor.SkillEffects],
                                     random: inout GameRandomSource) throws -> [BattleActor] {
         var actors: [BattleActor] = []
         for index in 0..<count {
             guard let slot = BattleContextBuilder.slot(for: index) else { break }
             let level = levelOverride ?? 1
-            let hpBase = computeEnemyMaxHP(definition: definition, level: level)
-            let snapshot = CombatSnapshotBuilder.makeEnemySnapshot(from: definition,
-                                                                   baseHP: hpBase,
-                                                                   levelOverride: level,
-                                                                   jobDefinitions: jobDefinitions,
-                                                                   raceDefinitions: raceDefinitions)
+            let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: definition,
+                                                                       levelOverride: level,
+                                                                       jobDefinitions: jobDefinitions)
             var resources = BattleActionResource.makeDefault(for: snapshot,
                                                             spellLoadout: .empty)
             let skillEffects = try cachedSkillEffects(for: definition,
@@ -184,12 +176,5 @@ struct BattleEnemyGroupBuilder {
         let effects = try SkillRuntimeEffectCompiler.actorEffects(from: skills)
         cache[definition.id] = effects
         return effects
-    }
-
-    static func computeEnemyMaxHP(definition: EnemyDefinition, level: Int) -> Int {
-        let vitality = max(1, definition.vitality)
-        let spirit = max(1, definition.spirit)
-        let effectiveLevel = max(1, level)
-        return vitality * 12 + spirit * 6 + effectiveLevel * 8
     }
 }
