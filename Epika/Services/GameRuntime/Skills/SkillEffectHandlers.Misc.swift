@@ -252,8 +252,8 @@ struct TargetingWeightHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
-        accumulator.misc.targetingWeight *= multiplier
+        let weight = payload.value["weight"] ?? payload.value["multiplier"] ?? 1.0
+        accumulator.misc.targetingWeight *= weight
     }
 }
 

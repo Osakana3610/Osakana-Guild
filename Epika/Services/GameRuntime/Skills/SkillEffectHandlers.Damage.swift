@@ -161,7 +161,8 @@ struct AdditionalDamageAdditiveHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // Actor.swift では continue（スキップ）
+        // CombatStatCalculator で処理済み（キャラクターステータス計算時に適用）
+        // ランタイム蓄積は不要
     }
 }
 
@@ -173,7 +174,8 @@ struct AdditionalDamageMultiplierHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // Actor.swift では continue（スキップ）
+        // CombatStatCalculator で処理済み（キャラクターステータス計算時に適用）
+        // ランタイム蓄積は不要
     }
 }
 
@@ -185,8 +187,11 @@ struct MinHitScaleHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // Actor.swift では continue（スキップ）
-        // 注: dodgeCap 経由で minHitScale が設定されるケースは DodgeCapHandler で処理
+        // minHitScale は低い値が優先（命中下限が高くなる=回避しにくい）
+        // DodgeCapHandler と同じロジックで統一
+        if let scale = payload.value["minHitScale"] {
+            accumulator.damage.minHitScale = accumulator.damage.minHitScale.map { min($0, scale) } ?? scale
+        }
     }
 }
 

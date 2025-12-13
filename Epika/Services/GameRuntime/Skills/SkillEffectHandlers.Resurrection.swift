@@ -104,10 +104,15 @@ struct ResurrectionPassiveHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        guard let type = payload.stringValues["type"], type == "betweenFloors" else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) resurrectionPassive のtypeが不正です")
+        let type = payload.stringValues["type"] ?? payload.parameters?["type"] ?? "betweenFloors"
+        switch type {
+        case "betweenFloors":
+            accumulator.resurrection.resurrectionPassiveBetweenFloors = true
+        default:
+            throw RuntimeError.invalidConfiguration(
+                reason: "Skill \(context.skillId)#\(context.effectIndex) resurrectionPassive の type が不正です: \(type)"
+            )
         }
-        accumulator.resurrection.resurrectionPassiveBetweenFloors = true
     }
 }
 
