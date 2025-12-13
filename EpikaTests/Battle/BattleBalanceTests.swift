@@ -235,13 +235,10 @@ final class BattleBalanceTests: XCTestCase {
         for index in 0..<count {
             guard let slot = BattleContextBuilder.slot(for: index) else { break }
 
-            let baseHP = BattleEnemyGroupBuilder.computeEnemyMaxHP(definition: definition, level: level)
-            let snapshot = CombatSnapshotBuilder.makeEnemySnapshot(
+            let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(
                 from: definition,
-                baseHP: baseHP,
                 levelOverride: level,
-                jobDefinitions: jobs,
-                raceDefinitions: races
+                jobDefinitions: jobs
             )
 
             let skillDefs = definition.specialSkillIds.compactMap { skills[$0] }

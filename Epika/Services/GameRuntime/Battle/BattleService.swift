@@ -82,12 +82,9 @@ enum BattleService {
             }
             let slot = BattleFormationSlot.frontLeft
             let fallbackLevel = encounterLevel ?? 1
-            let baseHP = BattleEnemyGroupBuilder.computeEnemyMaxHP(definition: fallbackDefinition, level: fallbackLevel)
-            let snapshot = CombatSnapshotBuilder.makeEnemySnapshot(from: fallbackDefinition,
-                                                                   baseHP: baseHP,
-                                                                   levelOverride: fallbackLevel,
-                                                                   jobDefinitions: jobDictionary,
-                                                                   raceDefinitions: raceDictionary)
+            let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: fallbackDefinition,
+                                                                       levelOverride: fallbackLevel,
+                                                                       jobDefinitions: jobDictionary)
             let resources = BattleActionResource.makeDefault(for: snapshot)
             let fallbackSkillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: fallbackDefinition.specialSkillIds.compactMap { skillDictionary[$0] })
             let jobName: String? = fallbackDefinition.jobId.flatMap { jobDictionary[$0]?.name }
