@@ -580,6 +580,11 @@ struct BattleActor: Sendable {
             let hitRatePercentPerHit: Double // 命中ごとの命中率上昇%
         }
 
+        struct EnemyStatDebuff: Sendable, Hashable {
+            let stat: String       // 対象ステータス（magicalDefense, physicalAttack, hitRate等）
+            let multiplier: Double // 弱体倍率（0.9 = -10%）
+        }
+
         struct Combat: Sendable, Hashable {
             var procChanceMultiplier: Double
             var procRateModifier: ProcRateModifier
@@ -601,6 +606,7 @@ struct BattleActor: Sendable {
             var enemySingleActionSkipChancePercent: Double  // 道化師スキル: 敵単体行動スキップ確率
             var actionOrderShuffleEnemy: Bool  // 道化師スキル: 敵の行動順シャッフル
             var firstStrike: Bool  // 道化師スキル: 先制攻撃
+            var enemyStatDebuffs: [EnemyStatDebuff]  // 敵ステータス弱体化
 
             static let neutral = Combat(
                 procChanceMultiplier: 1.0,
@@ -622,7 +628,8 @@ struct BattleActor: Sendable {
                 cumulativeHitBonus: nil,
                 enemySingleActionSkipChancePercent: 0.0,
                 actionOrderShuffleEnemy: false,
-                firstStrike: false
+                firstStrike: false,
+                enemyStatDebuffs: []
             )
         }
 

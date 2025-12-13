@@ -72,7 +72,8 @@ struct ActorEffectsAccumulator {
             cumulativeHitBonus: combat.cumulativeHitBonus,
             enemySingleActionSkipChancePercent: combat.enemySingleActionSkipChancePercent,
             actionOrderShuffleEnemy: combat.actionOrderShuffleEnemy,
-            firstStrike: combat.firstStrike
+            firstStrike: combat.firstStrike,
+            enemyStatDebuffs: combat.enemyStatDebuffs
         )
 
         let statusGroup = BattleActor.SkillEffects.Status(
@@ -205,6 +206,7 @@ struct ActorCombatAccumulator {
     var enemySingleActionSkipChancePercent: Double = 0.0
     var actionOrderShuffleEnemy: Bool = false
     var firstStrike: Bool = false
+    var enemyStatDebuffs: [BattleActor.SkillEffects.EnemyStatDebuff] = []
 }
 
 // MARK: - StatusAccumulator

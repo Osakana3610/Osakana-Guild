@@ -316,3 +316,21 @@ struct FirstStrikeHandler: SkillEffectHandler {
         accumulator.combat.firstStrike = true
     }
 }
+
+// MARK: - Enemy Stat Debuff
+
+struct StatDebuffHandler: SkillEffectHandler {
+    static let effectType = SkillEffectType.statDebuff
+
+    static func apply(
+        payload: DecodedSkillEffectPayload,
+        to accumulator: inout ActorEffectsAccumulator,
+        context: SkillEffectContext
+    ) throws {
+        let stat = try payload.requireParam("stat", skillId: context.skillId, effectIndex: context.effectIndex)
+        let valuePercent = try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        // valuePercentは負の値（-10等）なので、1.0 + (-10)/100 = 0.9 となる
+        let multiplier = 1.0 + valuePercent / 100.0
+        accumulator.combat.enemyStatDebuffs.append(.init(stat: stat, multiplier: multiplier))
+    }
+}

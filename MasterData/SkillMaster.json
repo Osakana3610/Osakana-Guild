@@ -13464,14 +13464,14 @@
       },
       {
         "familyId": "race.homunculus.additionalDamage",
-        "effectType": "additionalDamagePercent",
+        "effectType": "additionalDamageAdditive",
         "parameters": {},
         "variants": [
           {
             "id": 64113,
             "label": "[種族:魔造生物Lv99] 追加ダメ+15%",
             "value": {
-              "valuePercent": 15
+              "additive": 15
             }
           }
         ]
@@ -13550,7 +13550,7 @@
       },
       {
         "familyId": "race.tengu.evasionBoost",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "evasionRate"
         },
@@ -13559,7 +13559,7 @@
             "id": 64141,
             "label": "[種族:天狗Lv50] 回避+20%",
             "value": {
-              "valuePercent": 20
+              "multiplier": 1.2
             }
           }
         ]
@@ -13780,9 +13780,11 @@
       },
       {
         "familyId": "job.swordsman.counter",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "counter"
+          "procType": "counter",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -13796,9 +13798,11 @@
       },
       {
         "familyId": "job.swordsman.followup",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "pursuit"
+          "procType": "pursuit",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -13828,7 +13832,7 @@
       },
       {
         "familyId": "job.thief.evasion",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "evasionRate"
         },
@@ -13837,14 +13841,14 @@
             "id": 65021,
             "label": "[職業:盗賊] 回避+15%",
             "value": {
-              "valuePercent": 15
+              "multiplier": 1.15
             }
           }
         ]
       },
       {
         "familyId": "job.thief.critRate",
-        "effectType": "criticalRateAdd",
+        "effectType": "criticalRateAdditive",
         "parameters": {},
         "variants": [
           {
@@ -13872,9 +13876,11 @@
       },
       {
         "familyId": "job.thief.doubleAction",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "extraAction"
+          "procType": "extraAction",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -13918,7 +13924,7 @@
       },
       {
         "familyId": "job.assassin.accuracy",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "hitRate"
         },
@@ -13927,7 +13933,7 @@
             "id": 65032,
             "label": "[職業:暗殺者] 命中+10%",
             "value": {
-              "valuePercent": 10
+              "multiplier": 1.1
             }
           }
         ]
@@ -13993,7 +13999,7 @@
       },
       {
         "familyId": "job.jester.allStats",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "all"
         },
@@ -14002,14 +14008,14 @@
             "id": 65041,
             "label": "[職業:道化師] 全ステ+3%",
             "value": {
-              "valuePercent": 3
+              "multiplier": 1.03
             }
           }
         ]
       },
       {
         "familyId": "job.jester.luck",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "luck"
         },
@@ -14018,7 +14024,7 @@
             "id": 65042,
             "label": "[職業:道化師] 運+10%",
             "value": {
-              "valuePercent": 10
+              "multiplier": 1.1
             }
           }
         ]
@@ -14074,7 +14080,7 @@
       },
       {
         "familyId": "job.priest.healBonus",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "magicalHealing"
         },
@@ -14083,7 +14089,7 @@
             "id": 65051,
             "label": "[職業:僧侶] 魔法回復+20%",
             "value": {
-              "valuePercent": 20
+              "multiplier": 1.2
             }
           }
         ]
@@ -14140,14 +14146,14 @@
       },
       {
         "familyId": "job.priest.salvation",
-        "effectType": "resurrectionChancePercent",
+        "effectType": "resurrectionPassive",
         "parameters": {},
         "variants": [
           {
             "id": 65055,
             "label": "[職業:僧侶] 救済 蘇生確率+20%",
             "value": {
-              "valuePercent": 20
+              "hpPercent": 20
             }
           }
         ]
@@ -14170,7 +14176,7 @@
       },
       {
         "familyId": "job.mage.wisdom",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "wisdom"
         },
@@ -14179,7 +14185,7 @@
             "id": 65062,
             "label": "[職業:魔法使い] 知恵+5%",
             "value": {
-              "valuePercent": 5
+              "multiplier": 1.05
             }
           }
         ]
@@ -14200,14 +14206,14 @@
       },
       {
         "familyId": "job.mage.absorb",
-        "effectType": "mpRecoveryPercent",
+        "effectType": "spellChargeRecoveryChance",
         "parameters": {},
         "variants": [
           {
             "id": 65064,
             "label": "[職業:魔法使い] 吸収 魔法使用時MP回復5%",
             "value": {
-              "valuePercent": 5
+              "chancePercent": 5
             }
           }
         ]
@@ -14247,7 +14253,7 @@
       },
       {
         "familyId": "job.hunter.accuracy",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "hitRate"
         },
@@ -14256,14 +14262,14 @@
             "id": 65072,
             "label": "[職業:狩人] 命中+12%",
             "value": {
-              "valuePercent": 12
+              "multiplier": 1.12
             }
           }
         ]
       },
       {
         "familyId": "job.hunter.precision",
-        "effectType": "criticalRateAdd",
+        "effectType": "criticalRateAdditive",
         "parameters": {},
         "variants": [
           {
@@ -14277,14 +14283,14 @@
       },
       {
         "familyId": "job.hunter.pierce",
-        "effectType": "armorPenetrationPercent",
+        "effectType": "additionalDamageAdditive",
         "parameters": {},
         "variants": [
           {
             "id": 65074,
             "label": "[職業:狩人] 貫通 防御無視10%",
             "value": {
-              "valuePercent": 10
+              "additive": 10
             }
           }
         ]
@@ -14321,7 +14327,7 @@
       },
       {
         "familyId": "job.monk.spirit",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "spirit"
         },
@@ -14330,14 +14336,14 @@
             "id": 65082,
             "label": "[職業:修道者] 精神+8%",
             "value": {
-              "valuePercent": 8
+              "multiplier": 1.08
             }
           }
         ]
       },
       {
         "familyId": "job.monk.meditate",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "magicalHealing"
         },
@@ -14346,7 +14352,7 @@
             "id": 65083,
             "label": "[職業:修道者] 瞑想 魔法回復+12%",
             "value": {
-              "valuePercent": 12
+              "multiplier": 1.12
             }
           }
         ]
@@ -14415,9 +14421,11 @@
       },
       {
         "familyId": "job.samurai.iai",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "firstStrike"
+          "procType": "firstStrike",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -14447,7 +14455,7 @@
       },
       {
         "familyId": "job.samurai.spirit",
-        "effectType": "criticalRateAdd",
+        "effectType": "criticalRateAdditive",
         "parameters": {},
         "variants": [
           {
@@ -14477,7 +14485,7 @@
       },
       {
         "familyId": "job.blademaster.accuracy",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "hitRate"
         },
@@ -14486,7 +14494,7 @@
             "id": 65102,
             "label": "[職業:剣聖] 命中+15%",
             "value": {
-              "valuePercent": 15
+              "multiplier": 1.15
             }
           }
         ]
@@ -14507,9 +14515,11 @@
       },
       {
         "familyId": "job.blademaster.master",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "counterOnEvade"
+          "procType": "counterOnEvade",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -14635,7 +14645,7 @@
       },
       {
         "familyId": "job.sage.healBonus",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "magicalHealing"
         },
@@ -14644,7 +14654,7 @@
             "id": 65122,
             "label": "[職業:賢者] 魔法回復+15%",
             "value": {
-              "valuePercent": 15
+              "multiplier": 1.15
             }
           }
         ]
@@ -14679,7 +14689,7 @@
       },
       {
         "familyId": "job.sage.versatile",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "all"
         },
@@ -14688,14 +14698,14 @@
             "id": 65125,
             "label": "[職業:賢者] 万能 全ステ+5%",
             "value": {
-              "valuePercent": 5
+              "multiplier": 1.05
             }
           }
         ]
       },
       {
         "familyId": "job.ninja.evasion",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "evasionRate"
         },
@@ -14704,14 +14714,14 @@
             "id": 65131,
             "label": "[職業:忍者] 回避+20%",
             "value": {
-              "valuePercent": 20
+              "multiplier": 1.2
             }
           }
         ]
       },
       {
         "familyId": "job.ninja.critRate",
-        "effectType": "criticalRateAdd",
+        "effectType": "criticalRateAdditive",
         "parameters": {},
         "variants": [
           {
@@ -14725,23 +14735,25 @@
       },
       {
         "familyId": "job.ninja.stealth",
-        "effectType": "explorationTimePercent",
+        "effectType": "explorationTimeMultiplier",
         "parameters": {},
         "variants": [
           {
             "id": 65133,
             "label": "[職業:忍者] 隠密 探索時間-10%",
             "value": {
-              "valuePercent": -10
+              "multiplier": 0.9
             }
           }
         ]
       },
       {
         "familyId": "job.ninja.shadowClone",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "counterOnEvade"
+          "procType": "counterOnEvade",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -14755,7 +14767,7 @@
       },
       {
         "familyId": "job.ninja.deathblow",
-        "effectType": "criticalRateMax",
+        "effectType": "criticalRateMaxDelta",
         "parameters": {},
         "variants": [
           {
@@ -14786,7 +14798,7 @@
       },
       {
         "familyId": "job.lord.leadership",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "all",
           "target": "party"
@@ -14796,7 +14808,7 @@
             "id": 65142,
             "label": "[職業:君主] リーダーボーナス+5%",
             "value": {
-              "valuePercent": 5
+              "multiplier": 1.05
             }
           }
         ]
@@ -14853,7 +14865,7 @@
       },
       {
         "familyId": "job.royalline.allStats",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "all"
         },
@@ -14862,7 +14874,7 @@
             "id": 65151,
             "label": "[職業:ロイヤルライン] 全ステ+5%",
             "value": {
-              "valuePercent": 5
+              "multiplier": 1.05
             }
           }
         ]
@@ -14999,9 +15011,11 @@
                 }
               },
               {
-                "effectType": "procRateAdditive",
+                "effectType": "procRate",
                 "parameters": {
-                  "procType": "parry"
+                  "procType": "parry",
+                  "stacking": "additive",
+                  "target": "self"
                 },
                 "value": {
                   "additive": 10
@@ -15013,9 +15027,11 @@
       },
       {
         "familyId": "master.swordsman.counter",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "counter"
+          "procType": "counter",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -15029,9 +15045,11 @@
       },
       {
         "familyId": "master.swordsman.followup",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "pursuit"
+          "procType": "pursuit",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -15075,9 +15093,11 @@
       },
       {
         "familyId": "master.thief.doubleAction",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "extraAction"
+          "procType": "extraAction",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -15291,14 +15311,14 @@
       },
       {
         "familyId": "master.priest.salvation",
-        "effectType": "resurrectionChancePercent",
+        "effectType": "resurrectionPassive",
         "parameters": {},
         "variants": [
           {
             "id": 65215,
             "label": "[マスター:僧侶] 救済 蘇生確率+35%",
             "value": {
-              "valuePercent": 35
+              "hpPercent": 35
             }
           }
         ]
@@ -15327,17 +15347,17 @@
             "label": "[マスター:魔法使い] 吸収 MP回復10%+チャージ回復+5%",
             "effects": [
               {
-                "effectType": "mpRecoveryPercent",
+                "effectType": "spellChargeRecoveryChance",
                 "parameters": {},
                 "value": {
-                  "valuePercent": 10
+                  "chancePercent": 10
                 }
               },
               {
-                "effectType": "spellChargeRecoveryPercent",
+                "effectType": "spellChargeRecoveryChance",
                 "parameters": {},
                 "value": {
-                  "valuePercent": 5
+                  "chancePercent": 5
                 }
               }
             ]
@@ -15378,7 +15398,7 @@
       },
       {
         "familyId": "master.hunter.precision",
-        "effectType": "criticalRateAdd",
+        "effectType": "criticalRateAdditive",
         "parameters": {},
         "variants": [
           {
@@ -15392,14 +15412,14 @@
       },
       {
         "familyId": "master.hunter.pierce",
-        "effectType": "armorPenetrationPercent",
+        "effectType": "additionalDamageAdditive",
         "parameters": {},
         "variants": [
           {
             "id": 65234,
             "label": "[マスター:狩人] 貫通 防御無視18%",
             "value": {
-              "valuePercent": 18
+              "additive": 18
             }
           }
         ]
@@ -15420,7 +15440,7 @@
       },
       {
         "familyId": "master.monk.meditate",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "magicalHealing"
         },
@@ -15429,7 +15449,7 @@
             "id": 65243,
             "label": "[マスター:修道者] 瞑想 魔法回復+22%",
             "value": {
-              "valuePercent": 22
+              "multiplier": 1.22
             }
           }
         ]
@@ -15468,9 +15488,11 @@
       },
       {
         "familyId": "master.samurai.iai",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "firstStrike"
+          "procType": "firstStrike",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -15508,7 +15530,7 @@
             "label": "[マスター:侍] 剣気 必殺率+25+必殺威力+15%",
             "effects": [
               {
-                "effectType": "criticalRateAdd",
+                "effectType": "criticalRateAdditive",
                 "parameters": {},
                 "value": {
                   "additive": 25
@@ -15541,9 +15563,11 @@
       },
       {
         "familyId": "master.blademaster.master",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "counterOnEvade"
+          "procType": "counterOnEvade",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -15649,7 +15673,7 @@
       },
       {
         "familyId": "master.sage.versatile",
-        "effectType": "statPercent",
+        "effectType": "statMultiplier",
         "parameters": {
           "stat": "all"
         },
@@ -15658,30 +15682,32 @@
             "id": 65285,
             "label": "[マスター:賢者] 万能 全ステ+10%",
             "value": {
-              "valuePercent": 10
+              "multiplier": 1.1
             }
           }
         ]
       },
       {
         "familyId": "master.ninja.stealth",
-        "effectType": "explorationTimePercent",
+        "effectType": "explorationTimeMultiplier",
         "parameters": {},
         "variants": [
           {
             "id": 65293,
             "label": "[マスター:忍者] 隠密 探索時間-18%",
             "value": {
-              "valuePercent": -18
+              "multiplier": 0.8200000000000001
             }
           }
         ]
       },
       {
         "familyId": "master.ninja.shadowClone",
-        "effectType": "procRateAdditive",
+        "effectType": "procRate",
         "parameters": {
-          "procType": "counterOnEvade"
+          "procType": "counterOnEvade",
+          "stacking": "additive",
+          "target": "self"
         },
         "variants": [
           {
@@ -15695,7 +15721,7 @@
       },
       {
         "familyId": "master.ninja.deathblow",
-        "effectType": "criticalRateMax",
+        "effectType": "criticalRateMaxDelta",
         "parameters": {},
         "variants": [
           {

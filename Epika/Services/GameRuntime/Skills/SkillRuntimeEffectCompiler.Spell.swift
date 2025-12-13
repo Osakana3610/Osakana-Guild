@@ -133,7 +133,8 @@ extension SkillRuntimeEffectCompiler {
                      .enemySingleActionSkipChance,
                      .actionOrderShuffleEnemy,
                      .firstStrike,
-                     .damageDealtMultiplierByTargetHP:
+                     .damageDealtMultiplierByTargetHP,
+                     .statDebuff:
                     continue
             }
         }
