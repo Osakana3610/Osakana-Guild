@@ -432,13 +432,20 @@ struct BattleActor: Sendable {
         struct TimedBuffTrigger: Sendable, Hashable {
             enum Scope: String, Sendable {
                 case party
-                case `self`  // 自分のみ
+                case `self`
+            }
+
+            enum TriggerMode: Sendable, Hashable {
+                case atTurn(Int)   // 特定ターンに発動
+                case everyTurn     // 毎ターン累積
             }
 
             let id: String
             let displayName: String
-            let triggerTurn: Int
-            let modifiers: [String: Double]
+            let triggerMode: TriggerMode
+            let modifiers: [String: Double]        // 発動時に適用する値
+            let perTurnModifiers: [String: Double] // 毎ターン加算する値（everyTurn用）
+            let duration: Int                      // バフ持続ターン
             let scope: Scope
             let category: String
         }

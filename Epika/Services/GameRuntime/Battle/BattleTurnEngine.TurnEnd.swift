@@ -279,19 +279,31 @@ extension BattleTurnEngine {
         var actors: [BattleActor] = side == .player ? context.players : context.enemies
         guard !actors.isEmpty else { return }
 
-        // 発火したトリガーと所有者のインデックスを記録
         var fired: [(trigger: BattleActor.SkillEffects.TimedBuffTrigger, ownerIndex: Int)] = []
 
         for index in actors.indices {
             var actor = actors[index]
             var remaining: [BattleActor.SkillEffects.TimedBuffTrigger] = []
+
             for trigger in actor.skillEffects.status.timedBuffTriggers {
-                if trigger.triggerTurn == context.turn && actor.isAlive {
-                    fired.append((trigger: trigger, ownerIndex: index))
-                } else {
+                guard actor.isAlive else {
                     remaining.append(trigger)
+                    continue
+                }
+
+                switch trigger.triggerMode {
+                case .atTurn(let turn):
+                    if turn == context.turn {
+                        fired.append((trigger: trigger, ownerIndex: index))
+                    } else {
+                        remaining.append(trigger)
+                    }
+                case .everyTurn:
+                    fired.append((trigger: trigger, ownerIndex: index))
+                    remaining.append(trigger) // 毎ターン発動するので残す
                 }
             }
+
             actor.skillEffects.status.timedBuffTriggers = remaining
             actors[index] = actor
         }
@@ -307,7 +319,6 @@ extension BattleTurnEngine {
         for (trigger, ownerIndex) in fired {
             var refreshedActors: [BattleActor] = side == .player ? context.players : context.enemies
 
-            // スコープに応じて対象を決定
             let targetIndices: [Int]
             switch trigger.scope {
             case .party:
@@ -320,23 +331,32 @@ extension BattleTurnEngine {
 
             for index in targetIndices {
                 var actor = refreshedActors[index]
-                let spellSpecificMods = trigger.modifiers.filter { $0.key.hasPrefix("spellSpecific:") }
-                if !spellSpecificMods.isEmpty {
+
+                // atTurn: modifiersを適用（TimedBuffとして）
+                // everyTurn: perTurnModifiersを累積適用
+                switch trigger.triggerMode {
+                case .atTurn:
+                    let spellSpecificMods = trigger.modifiers.filter { $0.key.hasPrefix("spellSpecific:") }
                     for (key, mult) in spellSpecificMods {
                         let spellIdString = String(key.dropFirst("spellSpecific:".count))
                         guard let spellId = UInt8(spellIdString) else { continue }
                         actor.skillEffects.spell.specificMultipliers[spellId, default: 1.0] *= mult
                     }
+
+                    let otherMods = trigger.modifiers.filter { !$0.key.hasPrefix("spellSpecific:") }
+                    if !otherMods.isEmpty {
+                        let buff = TimedBuff(id: trigger.id,
+                                             baseDuration: trigger.duration,
+                                             remainingTurns: trigger.duration,
+                                             statModifiers: otherMods)
+                        upsert(buff: buff, into: &actor.timedBuffs)
+                    }
+
+                case .everyTurn:
+                    // 毎ターン固定値を加算（スナップショットが永続するため自然に累積）
+                    applyPerTurnModifiers(trigger.perTurnModifiers, to: &actor)
                 }
 
-                let otherMods = trigger.modifiers.filter { !$0.key.hasPrefix("spellSpecific:") }
-                if !otherMods.isEmpty {
-                    let buff = TimedBuff(id: trigger.id,
-                                         baseDuration: max(1, trigger.triggerTurn),
-                                         remainingTurns: max(1, trigger.triggerTurn),
-                                         statModifiers: otherMods)
-                    upsert(buff: buff, into: &actor.timedBuffs)
-                }
                 refreshedActors[index] = actor
             }
 
@@ -347,7 +367,38 @@ extension BattleTurnEngine {
             }
 
             let actorIdx = context.actorIndex(for: side, arrayIndex: ownerIndex)
-            context.appendAction(kind: .buffApply, actor: actorIdx, value: UInt32(trigger.triggerTurn))
+            context.appendAction(kind: .buffApply, actor: actorIdx, value: UInt32(context.turn))
+        }
+    }
+
+    private static func applyPerTurnModifiers(_ modifiers: [String: Double], to actor: inout BattleActor) {
+        guard !modifiers.isEmpty else { return }
+
+        // 毎ターン固定値を加算（スナップショットが永続するため自然に累積）
+        for (key, value) in modifiers {
+            switch key {
+            case "hitRatePercent":
+                actor.snapshot.hitRate += Int(value.rounded(.towardZero))
+            case "evasionRatePercent":
+                actor.snapshot.evasionRate += Int(value.rounded(.towardZero))
+            case "attackPercent":
+                let bonus = Int((Double(actor.snapshot.physicalAttack) * value / 100.0).rounded(.towardZero))
+                actor.snapshot.physicalAttack += bonus
+            case "defensePercent":
+                let bonus = Int((Double(actor.snapshot.physicalDefense) * value / 100.0).rounded(.towardZero))
+                actor.snapshot.physicalDefense += bonus
+            case "attackCountPercent":
+                let bonus = Int((Double(actor.snapshot.attackCount) * value / 100.0).rounded(.towardZero))
+                actor.snapshot.attackCount = max(1, actor.snapshot.attackCount + bonus)
+            case "damageDealtPercent":
+                actor.skillEffects.damage.dealt = .init(
+                    physical: actor.skillEffects.damage.dealt.physical * (1.0 + value / 100.0),
+                    magical: actor.skillEffects.damage.dealt.magical * (1.0 + value / 100.0),
+                    breath: actor.skillEffects.damage.dealt.breath * (1.0 + value / 100.0)
+                )
+            default:
+                break
+            }
         }
     }
 

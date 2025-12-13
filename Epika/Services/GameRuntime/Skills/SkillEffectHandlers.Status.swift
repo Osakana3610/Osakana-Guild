@@ -82,7 +82,60 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // Actor.swift では continue（スキップ）
+        let triggerType = payload.parameters?["trigger"] ?? "battleStart"
+        let triggerId = payload.familyId ?? "\(context.skillId)_timedBuff"
+        let scopeString = payload.stringValues["scope"] ?? "self"
+        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: scopeString) ?? .`self`
+        let category = payload.parameters?["buffType"] ?? "general"
+
+        switch triggerType {
+        case "battleStart":
+            // 戦闘開始時に発動（ターン1）、duration分持続
+            let duration = Int(payload.value["duration"] ?? 1)
+            var modifiers: [String: Double] = [:]
+
+            if let v = payload.value["damageDealtPercent"] { modifiers["damageDealtPercent"] = v }
+            if let v = payload.value["hitRatePercent"] { modifiers["hitRatePercent"] = v }
+            if let v = payload.value["evasionRatePercent"] { modifiers["evasionRatePercent"] = v }
+
+            accumulator.status.timedBuffTriggers.append(.init(
+                id: triggerId,
+                displayName: context.skillName,
+                triggerMode: .atTurn(1),
+                modifiers: modifiers,
+                perTurnModifiers: [:],
+                duration: duration,
+                scope: scope,
+                category: category
+            ))
+
+        case "turnElapsed":
+            // 毎ターン累積
+            var perTurnModifiers: [String: Double] = [:]
+
+            if let v = payload.value["hitRatePerTurn"] { perTurnModifiers["hitRatePercent"] = v }
+            if let v = payload.value["evasionRatePerTurn"] { perTurnModifiers["evasionRatePercent"] = v }
+            if let v = payload.value["attackPercentPerTurn"] { perTurnModifiers["attackPercent"] = v }
+            if let v = payload.value["defensePercentPerTurn"] { perTurnModifiers["defensePercent"] = v }
+            if let v = payload.value["attackCountPercentPerTurn"] { perTurnModifiers["attackCountPercent"] = v }
+            if let v = payload.value["damageDealtPercentPerTurn"] { perTurnModifiers["damageDealtPercent"] = v }
+
+            accumulator.status.timedBuffTriggers.append(.init(
+                id: triggerId,
+                displayName: context.skillName,
+                triggerMode: .everyTurn,
+                modifiers: [:],
+                perTurnModifiers: perTurnModifiers,
+                duration: 0,
+                scope: scope,
+                category: category
+            ))
+
+        default:
+            throw RuntimeError.invalidConfiguration(
+                reason: "Skill \(context.skillId)#\(context.effectIndex) timedBuffTrigger の trigger が不正です: \(triggerType)"
+            )
+        }
     }
 }
 
@@ -99,11 +152,14 @@ struct TimedMagicPowerAmplifyHandler: SkillEffectHandler {
         let triggerId = payload.familyId ?? payload.effectType.rawValue
         let scopeString = payload.stringValues["scope"] ?? "party"
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: scopeString) ?? .party
+        let triggerTurn = Int(turn.rounded(.towardZero))
         accumulator.status.timedBuffTriggers.append(.init(
             id: triggerId,
             displayName: context.skillName,
-            triggerTurn: Int(turn.rounded(.towardZero)),
+            triggerMode: .atTurn(triggerTurn),
             modifiers: ["magicalDamageDealtMultiplier": multiplier],
+            perTurnModifiers: [:],
+            duration: triggerTurn,
             scope: scope,
             category: "magic"
         ))
@@ -123,11 +179,14 @@ struct TimedBreathPowerAmplifyHandler: SkillEffectHandler {
         let triggerId = payload.familyId ?? payload.effectType.rawValue
         let scopeString = payload.stringValues["scope"] ?? "party"
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: scopeString) ?? .party
+        let triggerTurn = Int(turn.rounded(.towardZero))
         accumulator.status.timedBuffTriggers.append(.init(
             id: triggerId,
             displayName: context.skillName,
-            triggerTurn: Int(turn.rounded(.towardZero)),
+            triggerMode: .atTurn(triggerTurn),
             modifiers: ["breathDamageDealtMultiplier": multiplier],
+            perTurnModifiers: [:],
+            duration: triggerTurn,
             scope: scope,
             category: "breath"
         ))
