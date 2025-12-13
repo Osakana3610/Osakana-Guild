@@ -28,9 +28,11 @@ extension SkillRuntimeEffectCompiler {
 
         switch payload.effectType {
         case .extraAction:
-            let chance = payload.value["chancePercent"] ?? payload.value["valuePercent"]
-            guard chance != nil else {
-                throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) extraAction にchanceがありません")
+            // chancePercent/valuePercent/count のいずれかがあればOK（countのみの場合は100%発動）
+            let hasChance = payload.value["chancePercent"] != nil || payload.value["valuePercent"] != nil
+            let hasCount = payload.value["count"] != nil || payload.value["actions"] != nil
+            guard hasChance || hasCount else {
+                throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) extraAction にchanceまたはcountがありません")
             }
         case .partyAttackFlag:
             let hasFlag = payload.value["hostileAll"] != nil
@@ -93,8 +95,8 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .criticalDamagePercent: .init(params: [], values: ["valuePercent"]),
     .criticalDamageTakenMultiplier: .init(params: [], values: ["multiplier"]),
     .damageDealtMultiplier: .init(params: ["damageType"], values: ["multiplier"]),
-    .damageDealtMultiplierAgainst: .init(params: ["targetCategory"], values: ["multiplier"]),
-    .damageDealtPercent: .init(params: ["damageType"], values: ["valuePercent"]),
+    .damageDealtMultiplierAgainst: .init(params: [], values: ["multiplier"]),
+    .damageDealtPercent: .init(params: ["damageType"], values: []),  // valuePercent or statScale
     .damageTakenMultiplier: .init(params: ["damageType"], values: ["multiplier"]),
     .damageTakenPercent: .init(params: ["damageType"], values: ["valuePercent"]),
     .degradationRepair: .init(params: [], values: []),
@@ -132,7 +134,7 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .runawayDamage: .init(params: [], values: ["thresholdPercent", "chancePercent"]),
     .runawayMagic: .init(params: [], values: ["thresholdPercent", "chancePercent"]),
     .sacrificeRite: .init(params: [], values: ["everyTurns"]),
-    .specialAttack: .init(params: ["specialAttackId"], values: []),
+    .specialAttack: .init(params: [], values: []),  // specialAttackId or type - validated in handler
     .spellAccess: .init(params: ["spellId"], values: []),
     .spellPowerMultiplier: .init(params: [], values: ["multiplier"]),
     .spellPowerPercent: .init(params: [], values: ["valuePercent"]),
@@ -144,7 +146,7 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .statusResistancePercent: .init(params: ["status"], values: ["valuePercent"]),
     .tacticSpellAmplify: .init(params: ["spellId"], values: ["multiplier", "triggerTurn"]),
     .timedBreathPowerAmplify: .init(params: [], values: ["triggerTurn", "multiplier"]),
-    .timedBuffTrigger: .init(params: [], values: ["triggerTurn"]),
+    .timedBuffTrigger: .init(params: [], values: []),
     .timedMagicPowerAmplify: .init(params: [], values: ["triggerTurn", "multiplier"]),
     // 職業スキル用（道化師）
     .enemySingleActionSkipChance: .init(params: [], values: ["chancePercent"]),

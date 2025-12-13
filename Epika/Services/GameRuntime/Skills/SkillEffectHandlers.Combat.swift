@@ -45,7 +45,8 @@ struct ExtraActionHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let chance = payload.value["chancePercent"] ?? payload.value["valuePercent"] ?? 0.0
+        var chance = payload.value["chancePercent"] ?? payload.value["valuePercent"] ?? 100.0
+        chance += payload.scaledValue(from: context.actorStats)
         let count = Int((payload.value["count"] ?? payload.value["actions"] ?? 1.0).rounded(.towardZero))
         let clampedCount = max(0, count)
         guard chance > 0, clampedCount > 0 else {
@@ -168,9 +169,22 @@ struct SpecialAttackHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let identifier = try payload.requireParam("specialAttackId", skillId: context.skillId, effectIndex: context.effectIndex)
-        let chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 50
-        let preemptive = payload.stringValues["preemptive"]?.lowercased() == "true"
+        // specialAttackId または type パラメータから識別子を取得
+        let identifier = payload.parameters?["specialAttackId"]
+            ?? payload.parameters?["type"]
+            ?? ""
+        guard !identifier.isEmpty else {
+            throw RuntimeError.invalidConfiguration(
+                reason: "Skill \(context.skillId)#\(context.effectIndex) specialAttack の識別子（specialAttackId/type）がありません"
+            )
+        }
+
+        var chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 50
+        chance += Int(payload.scaledValue(from: context.actorStats).rounded(.towardZero))
+
+        let preemptive = payload.parameters?["mode"]?.lowercased() == "preemptive"
+            || payload.stringValues["preemptive"]?.lowercased() == "true"
+
         if let descriptor = BattleActor.SkillEffects.SpecialAttack(
             kindIdentifier: identifier,
             chancePercent: chance,
@@ -233,7 +247,8 @@ struct AttackCountAdditiveHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // Actor.swift では continue（スキップ）
+        // CombatStatCalculator で処理済み（キャラクターステータス計算時に適用）
+        // ランタイム蓄積は不要
     }
 }
 
@@ -245,7 +260,8 @@ struct AttackCountMultiplierHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // Actor.swift では continue（スキップ）
+        // CombatStatCalculator で処理済み（キャラクターステータス計算時に適用）
+        // ランタイム蓄積は不要
     }
 }
 
