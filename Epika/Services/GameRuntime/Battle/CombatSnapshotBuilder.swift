@@ -1,35 +1,22 @@
 import Foundation
 
 struct CombatSnapshotBuilder {
+    /// 敵のCombatスナップショットを生成する。
+    /// 味方と同じ `CombatStatCalculator` を使用して計算する。
     static func makeEnemySnapshot(from definition: EnemyDefinition,
-                                  baseHP: Int,
                                   levelOverride: Int?,
-                                  jobDefinitions: [UInt8: JobDefinition],
-                                  raceDefinitions: [UInt8: RaceDefinition]) -> CharacterValues.Combat {
+                                  jobDefinitions: [UInt8: JobDefinition]) throws -> CharacterValues.Combat {
         let level = max(1, levelOverride ?? 1)
-        let initialCombat = CharacterValues.Combat(maxHP: baseHP,
-                                                   physicalAttack: definition.strength,
-                                                   magicalAttack: definition.wisdom,
-                                                   physicalDefense: definition.vitality,
-                                                   magicalDefense: definition.spirit,
-                                                   hitRate: definition.agility * 2 + definition.luck,
-                                                   evasionRate: definition.agility * 2,
-                                                   criticalRate: max(5, definition.luck / 2),
-                                                   attackCount: max(1, definition.agility / 60 + 1),
-                                                   magicalHealing: definition.spirit,
-                                                   trapRemoval: 0,
-                                                   additionalDamage: 0,
-                                                   breathDamage: 0,
-                                                   isMartialEligible: false)
 
-        let raceDefinition = raceDefinitions[definition.raceId] ?? makeFallbackRaceDefinition(for: definition)
-        let jobDefinition = definition.jobId.flatMap { jobDefinitions[$0] } ?? makeFallbackJobDefinition(for: definition)
+        // 敵独自のbaseStatsからRaceDefinitionを作成
+        let raceDefinition = makeRaceDefinition(for: definition)
+        let jobDefinition = definition.jobId.flatMap { jobDefinitions[$0] } ?? makeJobDefinition(for: definition)
 
         let context = CombatStatCalculator.Context(
             raceId: definition.raceId,
             jobId: definition.jobId ?? 0,
             level: level,
-            currentHP: baseHP,
+            currentHP: 1,  // 計算後に maxHP で上書きされる
             equippedItems: [],
             race: raceDefinition,
             job: jobDefinition,
@@ -38,17 +25,14 @@ struct CombatSnapshotBuilder {
             loadout: RuntimeCharacter.Loadout(items: [], titles: [], superRareTitles: [])
         )
 
-        do {
-            let result = try CombatStatCalculator.calculate(for: context)
-            return normalized(combat: result.combat, fallback: initialCombat)
-        } catch {
-            return initialCombat
-        }
+        let result = try CombatStatCalculator.calculate(for: context)
+        return result.combat
     }
 }
 
 private extension CombatSnapshotBuilder {
-    static func makeFallbackRaceDefinition(for definition: EnemyDefinition) -> RaceDefinition {
+    /// 敵独自のbaseStatsからRaceDefinitionを作成
+    static func makeRaceDefinition(for definition: EnemyDefinition) -> RaceDefinition {
         let baseStats = RaceDefinition.BaseStats(
             strength: definition.strength,
             wisdom: definition.wisdom,
@@ -58,14 +42,15 @@ private extension CombatSnapshotBuilder {
             luck: definition.luck
         )
         return RaceDefinition(id: definition.raceId,
-                              name: "敵種族",
-                              genderCode: 0,  // 敵用
-                              description: "Auto-generated enemy race",
+                              name: definition.name,
+                              genderCode: 0,
+                              description: "",
                               baseStats: baseStats,
                               maxLevel: 200)
     }
 
-    static func makeFallbackJobDefinition(for definition: EnemyDefinition) -> JobDefinition {
+    /// 敵のjobIdに対応するJobDefinitionがない場合のデフォルト（係数0）
+    static func makeJobDefinition(for definition: EnemyDefinition) -> JobDefinition {
         let coefficients = JobDefinition.CombatCoefficients(
             maxHP: 0.0,
             physicalAttack: 0.0,
@@ -82,26 +67,8 @@ private extension CombatSnapshotBuilder {
             breathDamage: 0.0
         )
         return JobDefinition(id: definition.jobId ?? 0,
-                             name: "敵職業",
+                             name: definition.name,
                              combatCoefficients: coefficients,
                              learnedSkillIds: [])
-    }
-
-    static func normalized(combat: CharacterValues.Combat,
-                           fallback: CharacterValues.Combat) -> CharacterValues.Combat {
-        CharacterValues.Combat(maxHP: max(1, combat.maxHP, fallback.maxHP),
-                               physicalAttack: max(1, combat.physicalAttack, fallback.physicalAttack),
-                               magicalAttack: max(1, combat.magicalAttack, fallback.magicalAttack),
-                               physicalDefense: max(1, combat.physicalDefense, fallback.physicalDefense),
-                               magicalDefense: max(1, combat.magicalDefense, fallback.magicalDefense),
-                               hitRate: max(1, combat.hitRate, fallback.hitRate),
-                               evasionRate: max(0, combat.evasionRate, fallback.evasionRate),
-                               criticalRate: max(0, combat.criticalRate, fallback.criticalRate),
-                               attackCount: max(1, combat.attackCount, fallback.attackCount),
-                               magicalHealing: max(0, combat.magicalHealing, fallback.magicalHealing),
-                               trapRemoval: max(0, combat.trapRemoval, fallback.trapRemoval),
-                               additionalDamage: max(0, combat.additionalDamage, fallback.additionalDamage),
-                               breathDamage: max(0, combat.breathDamage, fallback.breathDamage),
-                               isMartialEligible: combat.isMartialEligible || fallback.isMartialEligible)
     }
 }
