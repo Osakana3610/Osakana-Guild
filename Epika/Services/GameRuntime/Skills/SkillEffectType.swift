@@ -108,4 +108,6 @@ enum SkillEffectType: String, CaseIterable, Sendable, Hashable {
     case firstStrike
     // 職業スキル用（暗殺者）
     case damageDealtMultiplierByTargetHP
+    // 職業スキル用（敵ステータス弱体化）
+    case statDebuff
 }

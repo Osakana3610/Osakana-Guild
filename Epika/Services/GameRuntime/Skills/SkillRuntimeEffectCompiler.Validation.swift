@@ -151,7 +151,9 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .actionOrderShuffleEnemy: .init(params: [], values: []),
     .firstStrike: .init(params: [], values: []),
     // 職業スキル用（暗殺者）
-    .damageDealtMultiplierByTargetHP: .init(params: [], values: ["hpThresholdPercent", "multiplier"])
+    .damageDealtMultiplierByTargetHP: .init(params: [], values: ["hpThresholdPercent", "multiplier"]),
+    // 職業スキル用（敵ステータス弱体化）
+    .statDebuff: .init(params: ["stat", "target"], values: ["valuePercent"])
 ]
 
 // MARK: - Decoded Payload

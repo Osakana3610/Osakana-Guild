@@ -125,6 +125,7 @@ enum SkillEffectHandlerRegistry {
             EnemySingleActionSkipChanceHandler.self,
             ActionOrderShuffleEnemyHandler.self,
             FirstStrikeHandler.self,
+            StatDebuffHandler.self,
 
             // MARK: Status Handlers (8)
             StatusResistanceMultiplierHandler.self,
