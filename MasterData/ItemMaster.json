@@ -17,7 +17,8 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        3
+        1111,
+        138
       ]
     },
     {
@@ -37,7 +38,8 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        4
+        1112,
+        139
       ]
     },
     {
@@ -57,7 +59,8 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        5
+        1113,
+        140
       ]
     },
     {
@@ -77,7 +80,8 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        6
+        1114,
+        141
       ]
     },
     {
@@ -97,7 +101,8 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        7
+        1115,
+        142
       ]
     },
     {
@@ -117,7 +122,8 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        8
+        1116,
+        143
       ]
     },
     {
@@ -137,7 +143,8 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        9
+        1117,
+        144
       ]
     },
     {
@@ -157,7 +164,8 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        10
+        1118,
+        145
       ]
     },
     {
@@ -177,7 +185,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        7
+        1113,
+        142,
+        263
       ]
     },
     {
@@ -197,7 +207,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        8
+        1114,
+        143,
+        263
       ]
     },
     {
@@ -217,7 +229,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        9
+        1114,
+        143,
+        263
       ]
     },
     {
@@ -237,7 +251,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        10
+        1115,
+        144,
+        263
       ]
     },
     {
@@ -257,7 +273,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        11
+        1115,
+        144,
+        264
       ]
     },
     {
@@ -277,7 +295,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        12
+        1116,
+        145,
+        264
       ]
     },
     {
@@ -297,7 +317,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        13
+        1116,
+        145,
+        264
       ]
     },
     {
@@ -317,7 +339,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        14
+        1117,
+        146,
+        264
       ]
     },
     {
@@ -337,7 +361,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        15
+        1117,
+        146,
+        264
       ]
     },
     {
@@ -357,7 +383,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        16
+        1118,
+        147,
+        264
       ]
     },
     {
@@ -377,7 +405,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1118,
+        147,
+        265
       ]
     },
     {
@@ -397,7 +427,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1118,
+        147,
+        265
       ]
     },
     {
@@ -417,7 +449,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1119,
+        148,
+        265
       ]
     },
     {
@@ -437,7 +471,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1119,
+        148,
+        266
       ]
     },
     {
@@ -457,7 +493,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1119,
+        148,
+        266
       ]
     },
     {
@@ -477,7 +515,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1120,
+        149,
+        266
       ]
     },
     {
@@ -497,7 +537,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1120,
+        149,
+        267
       ]
     },
     {
@@ -517,7 +559,9 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1120,
+        149,
+        267
       ]
     },
     {
@@ -537,8 +581,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        10,
-        84
+        1115,
+        146,
+        264
       ]
     },
     {
@@ -558,8 +603,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        11,
-        85
+        1116,
+        147,
+        264
       ]
     },
     {
@@ -579,8 +625,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        12,
-        86
+        1116,
+        147,
+        265
       ]
     },
     {
@@ -600,8 +647,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        13,
-        87
+        1117,
+        148,
+        265
       ]
     },
     {
@@ -621,8 +669,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        14,
-        88
+        1117,
+        148,
+        266
       ]
     },
     {
@@ -642,7 +691,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        15
+        1118,
+        149,
+        266
       ]
     },
     {
@@ -662,7 +713,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        16
+        1118,
+        149,
+        267
       ]
     },
     {
@@ -682,7 +735,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1119,
+        150,
+        267
       ]
     },
     {
@@ -702,7 +757,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1119,
+        150,
+        267
       ]
     },
     {
@@ -722,7 +779,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1120,
+        151,
+        268
       ]
     },
     {
@@ -742,7 +801,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1120,
+        151,
+        268
       ]
     },
     {
@@ -762,7 +823,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1120,
+        151,
+        268
       ]
     },
     {
@@ -782,7 +845,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1121,
+        152,
+        269
       ]
     },
     {
@@ -802,7 +867,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1121,
+        152,
+        269
       ]
     },
     {
@@ -822,7 +889,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1121,
+        152,
+        269
       ]
     },
     {
@@ -842,7 +911,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1122,
+        153,
+        270
       ]
     },
     {
@@ -862,7 +933,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1122,
+        153,
+        270
       ]
     },
     {
@@ -882,7 +955,9 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        1122,
+        153,
+        270
       ]
     },
     {
@@ -897,7 +972,9 @@
       },
       "rarity": "格闘",
       "grantedSkillIds": [
-        5
+        1414,
+        1402,
+        1091
       ]
     },
     {
@@ -912,7 +989,9 @@
       },
       "rarity": "格闘",
       "grantedSkillIds": [
-        6
+        1414,
+        1403,
+        1092
       ]
     },
     {
@@ -927,7 +1006,9 @@
       },
       "rarity": "格闘",
       "grantedSkillIds": [
-        7
+        1414,
+        1404,
+        1093
       ]
     },
     {
@@ -942,7 +1023,9 @@
       },
       "rarity": "格闘",
       "grantedSkillIds": [
-        8
+        1414,
+        1405,
+        1094
       ]
     },
     {
@@ -957,7 +1040,9 @@
       },
       "rarity": "格闘",
       "grantedSkillIds": [
-        9
+        1414,
+        1406,
+        1095
       ]
     },
     {
@@ -972,7 +1057,9 @@
       },
       "rarity": "格闘",
       "grantedSkillIds": [
-        10
+        1414,
+        1407,
+        1096
       ]
     },
     {
@@ -987,7 +1074,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        52
+        159,
+        142
       ]
     },
     {
@@ -1002,7 +1090,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        53
+        164,
+        143
       ]
     },
     {
@@ -1017,7 +1106,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        54
+        164,
+        144
       ]
     },
     {
@@ -1032,7 +1122,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        55
+        166,
+        145
       ]
     },
     {
@@ -1047,7 +1138,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        56
+        166,
+        146
       ]
     },
     {
@@ -1062,7 +1154,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        57
+        166,
+        147
       ]
     },
     {
@@ -1077,7 +1170,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        58
+        167,
+        148
       ]
     },
     {
@@ -1092,7 +1186,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        59
+        167,
+        149
       ]
     },
     {
@@ -1107,7 +1202,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        60
+        167,
+        150
       ]
     },
     {
@@ -1122,7 +1218,8 @@
       },
       "rarity": "投刃",
       "grantedSkillIds": [
-        61
+        167,
+        151
       ]
     },
     {
@@ -1284,7 +1381,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        7
+        7,
+        1091
       ]
     },
     {
@@ -1302,7 +1400,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        8
+        8,
+        1091
       ]
     },
     {
@@ -1320,7 +1419,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        9
+        9,
+        1092
       ]
     },
     {
@@ -1338,7 +1438,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        10
+        10,
+        1092
       ]
     },
     {
@@ -1356,7 +1457,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        11
+        11,
+        1093
       ]
     },
     {
@@ -1374,7 +1476,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        12
+        11,
+        1093
       ]
     },
     {
@@ -1392,7 +1495,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        13
+        12,
+        1094
       ]
     },
     {
@@ -1410,7 +1514,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        14
+        12,
+        1094
       ]
     },
     {
@@ -1428,7 +1533,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        15
+        13,
+        1095
       ]
     },
     {
@@ -1446,7 +1552,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        16
+        13,
+        1095
       ]
     },
     {
@@ -1464,7 +1571,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        14,
+        1096
       ]
     },
     {
@@ -1482,7 +1590,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        14,
+        1096
       ]
     },
     {
@@ -1500,7 +1609,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        14,
+        1096
       ]
     },
     {
@@ -1518,7 +1628,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        15,
+        1097
       ]
     },
     {
@@ -1536,7 +1647,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        15,
+        1097
       ]
     },
     {
@@ -1555,7 +1667,7 @@
       "rarity": "Tier2",
       "grantedSkillIds": [
         10,
-        84
+        1093
       ]
     },
     {
@@ -1574,7 +1686,7 @@
       "rarity": "Tier2",
       "grantedSkillIds": [
         11,
-        85
+        1094
       ]
     },
     {
@@ -1592,8 +1704,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        12,
-        86
+        11,
+        1094
       ]
     },
     {
@@ -1611,8 +1723,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        13,
-        87
+        12,
+        1095
       ]
     },
     {
@@ -1630,8 +1742,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        14,
-        88
+        12,
+        1095
       ]
     },
     {
@@ -1649,7 +1761,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        15
+        13,
+        1096
       ]
     },
     {
@@ -1667,7 +1780,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        16
+        13,
+        1096
       ]
     },
     {
@@ -1685,7 +1799,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        14,
+        1097
       ]
     },
     {
@@ -1703,7 +1818,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        14,
+        1097
       ]
     },
     {
@@ -1721,7 +1837,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        15,
+        1098
       ]
     },
     {
@@ -1739,7 +1856,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        15,
+        1098
       ]
     },
     {
@@ -1757,7 +1875,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        16,
+        1099
       ]
     },
     {
@@ -1775,7 +1894,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        16,
+        1099
       ]
     },
     {
@@ -1793,7 +1913,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        17,
+        1100
       ]
     },
     {
@@ -1811,7 +1932,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        17,
+        1100
       ]
     },
     {
@@ -1829,7 +1951,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        17,
+        1100
       ]
     },
     {
@@ -1847,8 +1970,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        13,
-        84
+        14,
+        1096,
+        263
       ]
     },
     {
@@ -1867,7 +1991,8 @@
       "rarity": "Tier3",
       "grantedSkillIds": [
         14,
-        85
+        1097,
+        263
       ]
     },
     {
@@ -1885,8 +2010,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        15,
-        86
+        14,
+        1097,
+        263
       ]
     },
     {
@@ -1904,8 +2030,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        16,
-        87
+        14,
+        1098,
+        263
       ]
     },
     {
@@ -1923,8 +2050,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17,
-        88
+        14,
+        1098,
+        263
       ]
     },
     {
@@ -1942,7 +2070,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        14,
+        1099,
+        263
       ]
     },
     {
@@ -1960,7 +2090,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        14,
+        1099,
+        263
       ]
     },
     {
@@ -1978,7 +2110,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        15,
+        1099,
+        264
       ]
     },
     {
@@ -1996,7 +2130,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        15,
+        1100,
+        264
       ]
     },
     {
@@ -2014,7 +2150,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        15,
+        1100,
+        264
       ]
     },
     {
@@ -2032,7 +2170,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        15,
+        1100,
+        264
       ]
     },
     {
@@ -2050,7 +2190,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        15,
+        1100,
+        264
       ]
     },
     {
@@ -2068,7 +2210,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        15,
+        1101,
+        264
       ]
     },
     {
@@ -2086,7 +2230,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        15,
+        1101,
+        264
       ]
     },
     {
@@ -2104,7 +2250,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        16,
+        1101,
+        265
       ]
     },
     {
@@ -2122,7 +2270,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        16,
+        1101,
+        265
       ]
     },
     {
@@ -2140,7 +2290,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        16,
+        1102,
+        265
       ]
     },
     {
@@ -2158,7 +2310,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        16,
+        1102,
+        265
       ]
     },
     {
@@ -2176,7 +2330,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        16,
+        1102,
+        265
       ]
     },
     {
@@ -2194,7 +2350,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        16,
+        1102,
+        265
       ]
     },
     {
@@ -2212,7 +2370,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        16,
+        1102,
+        265
       ]
     },
     {
@@ -2230,7 +2390,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        17,
+        1102,
+        266
       ]
     },
     {
@@ -2248,7 +2410,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        17,
+        1102,
+        266
       ]
     },
     {
@@ -2266,7 +2430,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        17,
+        1102,
+        266
       ]
     },
     {
@@ -2284,7 +2450,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        17,
+        1102,
+        266
       ]
     },
     {
@@ -2302,7 +2470,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        17,
+        1102,
+        266
       ]
     },
     {
@@ -2320,7 +2490,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        17,
+        1102,
+        266
       ]
     },
     {
@@ -2338,7 +2510,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        17,
+        1102,
+        266
       ]
     },
     {
@@ -2356,8 +2530,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        15,
-        84
+        17,
+        1099,
+        266
       ]
     },
     {
@@ -2375,8 +2550,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        16,
-        85
+        17,
+        1100,
+        266
       ]
     },
     {
@@ -2395,7 +2571,8 @@
       "rarity": "Tier4",
       "grantedSkillIds": [
         17,
-        86
+        1100,
+        266
       ]
     },
     {
@@ -2414,7 +2591,8 @@
       "rarity": "Tier4",
       "grantedSkillIds": [
         17,
-        87
+        1101,
+        266
       ]
     },
     {
@@ -2433,7 +2611,8 @@
       "rarity": "Tier4",
       "grantedSkillIds": [
         17,
-        88
+        1101,
+        266
       ]
     },
     {
@@ -2451,7 +2630,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        18,
+        1101,
+        267
       ]
     },
     {
@@ -2469,7 +2650,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        18,
+        1102,
+        267
       ]
     },
     {
@@ -2487,7 +2670,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        18,
+        1102,
+        267
       ]
     },
     {
@@ -2505,7 +2690,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        18,
+        1102,
+        267
       ]
     },
     {
@@ -2523,7 +2710,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        18,
+        1102,
+        267
       ]
     },
     {
@@ -2541,7 +2730,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        21,
+        1102,
+        268
       ]
     },
     {
@@ -2559,7 +2750,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        21,
+        1102,
+        268
       ]
     },
     {
@@ -2577,7 +2770,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        21,
+        1102,
+        268
       ]
     },
     {
@@ -2595,7 +2790,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        21,
+        1102,
+        268
       ]
     },
     {
@@ -2613,7 +2810,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        21,
+        1102,
+        268
       ]
     },
     {
@@ -2631,7 +2830,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        21,
+        1102,
+        269
       ]
     },
     {
@@ -2649,7 +2850,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        21,
+        1102,
+        269
       ]
     },
     {
@@ -2667,7 +2870,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        21,
+        1102,
+        269
       ]
     },
     {
@@ -2685,7 +2890,9 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        17
+        21,
+        1102,
+        269
       ]
     },
     {
@@ -3292,7 +3499,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        3
+        280
       ]
     },
     {
@@ -3309,7 +3516,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        4
+        281
       ]
     },
     {
@@ -3326,7 +3533,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        5
+        282
       ]
     },
     {
@@ -3343,7 +3550,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        6
+        283
       ]
     },
     {
@@ -3360,7 +3567,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        7
+        284
       ]
     },
     {
@@ -3377,7 +3584,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        8
+        285
       ]
     },
     {
@@ -3394,7 +3601,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        9
+        286
       ]
     },
     {
@@ -3411,7 +3618,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        10
+        287
       ]
     },
     {
@@ -3428,7 +3635,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        7
+        284,
+        263
       ]
     },
     {
@@ -3445,7 +3653,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        8
+        285,
+        263
       ]
     },
     {
@@ -3462,7 +3671,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        9
+        286,
+        264
       ]
     },
     {
@@ -3479,7 +3689,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        10
+        287,
+        264
       ]
     },
     {
@@ -3496,7 +3707,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        11
+        288,
+        265
       ]
     },
     {
@@ -3513,7 +3725,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        12
+        289,
+        265
       ]
     },
     {
@@ -3530,7 +3743,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        13
+        289,
+        266
       ]
     },
     {
@@ -3547,7 +3761,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        14
+        290,
+        266
       ]
     },
     {
@@ -3564,7 +3779,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        15
+        291,
+        267
       ]
     },
     {
@@ -3581,8 +3797,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        10,
-        84
+        287,
+        264
       ]
     },
     {
@@ -3599,8 +3815,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        11,
-        85
+        288,
+        264
       ]
     },
     {
@@ -3617,8 +3833,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        12,
-        86
+        289,
+        265
       ]
     },
     {
@@ -3635,8 +3851,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        13,
-        87
+        290,
+        265
       ]
     },
     {
@@ -3653,8 +3869,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        14,
-        88
+        291,
+        266
       ]
     },
     {
@@ -3671,7 +3887,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        15
+        292,
+        266
       ]
     },
     {
@@ -3688,7 +3905,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        16
+        293,
+        267
       ]
     },
     {
@@ -3705,7 +3923,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        294,
+        267
       ]
     },
     {
@@ -3722,7 +3941,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        294,
+        268
       ]
     },
     {
@@ -3739,7 +3959,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        295,
+        268
       ]
     },
     {
@@ -3756,7 +3977,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        295,
+        269
       ]
     },
     {
@@ -3773,7 +3995,8 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        17
+        296,
+        269
       ]
     },
     {
@@ -3790,8 +4013,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        13,
-        84
+        291,
+        266,
+        1095
       ]
     },
     {
@@ -3808,8 +4032,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        14,
-        85
+        292,
+        267,
+        1096
       ]
     },
     {
@@ -3826,8 +4051,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        15,
-        86
+        293,
+        267,
+        1097
       ]
     },
     {
@@ -3844,8 +4070,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        16,
-        87
+        294,
+        268,
+        1098
       ]
     },
     {
@@ -3862,8 +4089,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17,
-        88
+        295,
+        268,
+        1099
       ]
     },
     {
@@ -3880,7 +4108,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        296,
+        269,
+        1100
       ]
     },
     {
@@ -3897,7 +4127,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        297,
+        269,
+        1101
       ]
     },
     {
@@ -3914,7 +4146,9 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        17
+        297,
+        270,
+        1102
       ]
     },
     {
@@ -3931,8 +4165,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        15,
-        84
+        294,
+        267,
+        1098
       ]
     },
     {
@@ -3949,8 +4184,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        16,
-        85
+        295,
+        268,
+        1099
       ]
     },
     {
@@ -3967,8 +4203,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17,
-        86
+        296,
+        268,
+        1100
       ]
     },
     {
@@ -3985,8 +4222,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17,
-        87
+        297,
+        269,
+        1101
       ]
     },
     {
@@ -4003,8 +4241,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17,
-        88
+        297,
+        269,
+        1101
       ]
     },
     {
@@ -4021,7 +4260,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        298,
+        270,
+        1102
       ]
     },
     {
@@ -4038,7 +4279,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        298,
+        270,
+        1102
       ]
     },
     {
@@ -4055,7 +4298,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        299,
+        271,
+        1102
       ]
     },
     {
@@ -4072,7 +4317,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        299,
+        271,
+        1102
       ]
     },
     {
@@ -4089,7 +4336,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        299,
+        272,
+        1102
       ]
     },
     {
@@ -4106,7 +4355,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        300,
+        272,
+        1102
       ]
     },
     {
@@ -4123,7 +4374,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        300,
+        273,
+        1102
       ]
     },
     {
@@ -4140,7 +4393,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        300,
+        273,
+        1102
       ]
     },
     {
@@ -4157,7 +4412,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        301,
+        273,
+        1102
       ]
     },
     {
@@ -4174,7 +4431,9 @@
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
-        17
+        301,
+        274,
+        1102
       ]
     },
     {
@@ -4193,7 +4452,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        3
+        1111
       ]
     },
     {
@@ -4212,7 +4471,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        4
+        1112
       ]
     },
     {
@@ -4231,7 +4490,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        5
+        1113
       ]
     },
     {
@@ -4250,7 +4509,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        6
+        1114
       ]
     },
     {
@@ -4269,7 +4528,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        7
+        1115
       ]
     },
     {
@@ -4288,7 +4547,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        8
+        1116
       ]
     },
     {
@@ -4307,7 +4566,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        9
+        1117
       ]
     },
     {
@@ -4326,7 +4585,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        10
+        1118
       ]
     },
     {
@@ -4345,7 +4604,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        7
+        1113,
+        140
       ]
     },
     {
@@ -4364,7 +4624,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        8
+        1114,
+        141
       ]
     },
     {
@@ -4383,7 +4644,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        9
+        1115,
+        142
       ]
     },
     {
@@ -4402,7 +4664,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        10
+        1115,
+        143
       ]
     },
     {
@@ -4421,7 +4684,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        11
+        1116,
+        144
       ]
     },
     {
@@ -4440,7 +4704,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        12
+        1116,
+        144
       ]
     },
     {
@@ -4459,7 +4724,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        13
+        1117,
+        145
       ]
     },
     {
@@ -4478,7 +4744,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        14
+        1117,
+        145
       ]
     },
     {
@@ -4497,7 +4764,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        15
+        1118,
+        146
       ]
     },
     {
@@ -4516,7 +4784,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        16
+        1118,
+        146
       ]
     },
     {
@@ -4535,7 +4804,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1119,
+        147
       ]
     },
     {
@@ -4554,7 +4824,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1119,
+        147
       ]
     },
     {
@@ -4573,7 +4844,8 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        17
+        1120,
+        148
       ]
     },
     {
@@ -4588,7 +4860,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        93
+        1114,
+        142
       ]
     },
     {
@@ -4603,7 +4876,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        94
+        1115,
+        143
       ]
     },
     {
@@ -4618,7 +4892,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        100
+        1116,
+        144
       ]
     },
     {
@@ -4633,7 +4908,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        101
+        1117,
+        145
       ]
     },
     {
@@ -4648,7 +4924,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        107
+        1118,
+        146
       ]
     },
     {
@@ -4663,7 +4940,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        108
+        1119,
+        147
       ]
     },
     {
@@ -4678,7 +4956,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        114
+        1120,
+        148
       ]
     },
     {
@@ -4693,7 +4972,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        115
+        1121,
+        149
       ]
     },
     {
@@ -4708,7 +4988,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        121
+        1122,
+        150
       ]
     },
     {
@@ -4723,7 +5004,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        122
+        1122,
+        151
       ]
     },
     {
@@ -4738,7 +5020,8 @@
       },
       "rarity": "特効",
       "grantedSkillIds": [
-        121
+        1122,
+        152
       ]
     },
     {
@@ -4753,7 +5036,8 @@
       },
       "rarity": "連射弓",
       "grantedSkillIds": [
-        52
+        1114,
+        142
       ]
     },
     {
@@ -4768,7 +5052,8 @@
       },
       "rarity": "連射弓",
       "grantedSkillIds": [
-        53
+        1115,
+        143
       ]
     },
     {
@@ -4783,7 +5068,8 @@
       },
       "rarity": "連射弓",
       "grantedSkillIds": [
-        54
+        1116,
+        144
       ]
     },
     {
@@ -4798,7 +5084,8 @@
       },
       "rarity": "連射弓",
       "grantedSkillIds": [
-        55
+        1117,
+        145
       ]
     },
     {
@@ -4813,7 +5100,8 @@
       },
       "rarity": "連射弓",
       "grantedSkillIds": [
-        56
+        1118,
+        146
       ]
     },
     {
@@ -4828,7 +5116,8 @@
       },
       "rarity": "長弓",
       "grantedSkillIds": [
-        6
+        1114,
+        142
       ]
     },
     {
@@ -4843,7 +5132,8 @@
       },
       "rarity": "長弓",
       "grantedSkillIds": [
-        7
+        1115,
+        143
       ]
     },
     {
@@ -4858,7 +5148,8 @@
       },
       "rarity": "長弓",
       "grantedSkillIds": [
-        8
+        1116,
+        144
       ]
     },
     {
@@ -4873,7 +5164,8 @@
       },
       "rarity": "長弓",
       "grantedSkillIds": [
-        9
+        1117,
+        145
       ]
     },
     {
@@ -4888,7 +5180,8 @@
       },
       "rarity": "長弓",
       "grantedSkillIds": [
-        10
+        1118,
+        146
       ]
     },
     {
@@ -4903,7 +5196,8 @@
       },
       "rarity": "長弓",
       "grantedSkillIds": [
-        11
+        1119,
+        147
       ]
     },
     {
@@ -4918,7 +5212,8 @@
       },
       "rarity": "長弓",
       "grantedSkillIds": [
-        12
+        1120,
+        148
       ]
     },
     {
@@ -4933,7 +5228,8 @@
       },
       "rarity": "長弓",
       "grantedSkillIds": [
-        13
+        1121,
+        149
       ]
     },
     {
@@ -4948,7 +5244,8 @@
       },
       "rarity": "銃器",
       "grantedSkillIds": [
-        54
+        1114,
+        142
       ]
     },
     {
@@ -4963,7 +5260,8 @@
       },
       "rarity": "銃器",
       "grantedSkillIds": [
-        55
+        1115,
+        143
       ]
     },
     {
@@ -4978,7 +5276,8 @@
       },
       "rarity": "銃器",
       "grantedSkillIds": [
-        56
+        1116,
+        144
       ]
     },
     {
@@ -4993,7 +5292,8 @@
       },
       "rarity": "銃器",
       "grantedSkillIds": [
-        57
+        1117,
+        145
       ]
     },
     {
@@ -5008,7 +5308,8 @@
       },
       "rarity": "銃器",
       "grantedSkillIds": [
-        58
+        1118,
+        146
       ]
     },
     {
@@ -5023,7 +5324,8 @@
       },
       "rarity": "銃器",
       "grantedSkillIds": [
-        59
+        1119,
+        147
       ]
     },
     {
@@ -5040,7 +5342,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1500
+        938
       ]
     },
     {
@@ -5057,7 +5359,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1501
+        937
       ]
     },
     {
@@ -5074,7 +5376,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        938
+        936
       ]
     },
     {
@@ -5091,7 +5393,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        937
+        935
       ]
     },
     {
@@ -5108,7 +5410,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        936
+        934
       ]
     },
     {
@@ -5125,7 +5427,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        935
+        933
       ]
     },
     {
@@ -5142,7 +5444,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        934
+        932
       ]
     },
     {
@@ -5159,7 +5461,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        933
+        931
       ]
     },
     {
@@ -5278,7 +5580,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        933
+        935
       ]
     },
     {
@@ -5295,7 +5597,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        932
+        934
       ]
     },
     {
@@ -5312,7 +5614,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        931
+        934
       ]
     },
     {
@@ -5329,7 +5631,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        930
+        933
       ]
     },
     {
@@ -5346,7 +5648,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        929
+        933
       ]
     },
     {
@@ -5363,7 +5665,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        928
+        932
       ]
     },
     {
@@ -5380,7 +5682,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        928
+        932
       ]
     },
     {
@@ -5397,7 +5699,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        928
+        931
       ]
     },
     {
@@ -5414,7 +5716,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        928
+        931
       ]
     },
     {
@@ -5431,7 +5733,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        928
+        930
       ]
     },
     {
@@ -5448,7 +5750,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        928
+        930
       ]
     },
     {
@@ -5465,7 +5767,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        930
+        932
       ]
     },
     {
@@ -5482,7 +5784,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        929
+        931
       ]
     },
     {
@@ -5499,7 +5801,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        931
       ]
     },
     {
@@ -5516,7 +5818,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        930
       ]
     },
     {
@@ -5533,7 +5835,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        930
       ]
     },
     {
@@ -5550,7 +5852,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        929
       ]
     },
     {
@@ -5567,7 +5869,7 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        928
+        930
       ]
     },
     {
@@ -5584,7 +5886,7 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        928
+        930
       ]
     },
     {
@@ -5601,7 +5903,7 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        928
+        929
       ]
     },
     {
@@ -5618,7 +5920,7 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        928
+        929
       ]
     },
     {
@@ -5701,7 +6003,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        937
+        934
       ]
     },
     {
@@ -5716,7 +6018,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        936
+        933
       ]
     },
     {
@@ -5731,7 +6033,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        935
+        933
       ]
     },
     {
@@ -5746,7 +6048,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        934
+        932
       ]
     },
     {
@@ -5761,7 +6063,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        933
+        932
       ]
     },
     {
@@ -5776,7 +6078,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        932
+        931
       ]
     },
     {
@@ -5822,7 +6124,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1500
+        936
       ]
     },
     {
@@ -5838,7 +6140,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1501
+        935
       ]
     },
     {
@@ -5854,7 +6156,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        938
+        934
       ]
     },
     {
@@ -5870,7 +6172,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        937
+        933
       ]
     },
     {
@@ -5886,7 +6188,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        936
+        932
       ]
     },
     {
@@ -5902,7 +6204,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        935
+        931
       ]
     },
     {
@@ -5918,7 +6220,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        934
+        930
       ]
     },
     {
@@ -5934,7 +6236,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        933
+        929
       ]
     },
     {
@@ -5950,7 +6252,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        936
+        933
       ]
     },
     {
@@ -5966,7 +6268,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        935
+        932
       ]
     },
     {
@@ -5982,7 +6284,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        934
+        932
       ]
     },
     {
@@ -5998,7 +6300,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        933
+        931
       ]
     },
     {
@@ -6014,7 +6316,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        932
+        931
       ]
     },
     {
@@ -6030,7 +6332,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        931
+        930
       ]
     },
     {
@@ -6078,7 +6380,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        928
+        929
       ]
     },
     {
@@ -6110,7 +6412,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        933
+        931
       ]
     },
     {
@@ -6126,7 +6428,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        932
+        930
       ]
     },
     {
@@ -6142,7 +6444,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        931
+        930
       ]
     },
     {
@@ -6158,7 +6460,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        930
+        929
       ]
     },
     {
@@ -6317,7 +6619,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1500
+        934
       ]
     },
     {
@@ -6332,7 +6634,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1501
+        933
       ]
     },
     {
@@ -6347,7 +6649,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        938
+        932
       ]
     },
     {
@@ -6362,7 +6664,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        937
+        931
       ]
     },
     {
@@ -6377,7 +6679,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        936
+        930
       ]
     },
     {
@@ -6392,7 +6694,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        935
+        929
       ]
     },
     {
@@ -6407,7 +6709,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        934
+        928
       ]
     },
     {
@@ -6422,7 +6724,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        933
+        928
       ]
     },
     {
@@ -6437,7 +6739,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        936
+        931
       ]
     },
     {
@@ -6452,7 +6754,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        935
+        930
       ]
     },
     {
@@ -6467,7 +6769,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        934
+        930
       ]
     },
     {
@@ -6482,7 +6784,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        933
+        929
       ]
     },
     {
@@ -6497,7 +6799,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        932
+        929
       ]
     },
     {
@@ -6512,7 +6814,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        931
+        928
       ]
     },
     {
@@ -6527,7 +6829,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        930
+        928
       ]
     },
     {
@@ -6542,7 +6844,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        929
+        928
       ]
     },
     {
@@ -6649,7 +6951,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1500
+        938
       ]
     },
     {
@@ -6666,7 +6968,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1501
+        937
       ]
     },
     {
@@ -6683,7 +6985,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        938
+        936
       ]
     },
     {
@@ -6700,7 +7002,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        937
+        935
       ]
     },
     {
@@ -6717,7 +7019,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        936
+        934
       ]
     },
     {
@@ -6734,7 +7036,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        935
+        933
       ]
     },
     {
@@ -6751,7 +7053,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        934
+        932
       ]
     },
     {
@@ -6768,7 +7070,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        933
+        931
       ]
     },
     {
@@ -6783,7 +7085,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        936
+        935
       ]
     },
     {
@@ -6798,7 +7100,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        935
+        934
       ]
     },
     {
@@ -6843,7 +7145,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        932
+        933
       ]
     },
     {
@@ -6858,7 +7160,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        931
+        932
       ]
     },
     {
@@ -6873,7 +7175,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        930
+        932
       ]
     },
     {
@@ -6888,7 +7190,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        929
+        931
       ]
     },
     {
@@ -6903,7 +7205,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        928
+        931
       ]
     },
     {
@@ -6918,7 +7220,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        928
+        930
       ]
     },
     {
@@ -6933,7 +7235,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        928
+        930
       ]
     },
     {
@@ -6948,7 +7250,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        928
+        929
       ]
     },
     {
@@ -6963,7 +7265,7 @@
       },
       "rarity": "特殊",
       "grantedSkillIds": [
-        928
+        929
       ]
     },
     {
@@ -7014,7 +7316,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        934
+        935
       ]
     },
     {
@@ -7031,7 +7333,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        933
+        934
       ]
     },
     {
@@ -7048,7 +7350,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        932
+        934
       ]
     },
     {
@@ -7065,7 +7367,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        931
+        933
       ]
     },
     {
@@ -7082,7 +7384,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        930
+        933
       ]
     },
     {
@@ -7099,7 +7401,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        929
+        932
       ]
     },
     {
@@ -7116,7 +7418,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        928
+        932
       ]
     },
     {
@@ -7133,7 +7435,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        928
+        931
       ]
     },
     {
@@ -7235,7 +7537,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        930
+        931
       ]
     },
     {
@@ -7252,7 +7554,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        929
+        930
       ]
     },
     {
@@ -7269,7 +7571,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        929
       ]
     },
     {
@@ -7286,7 +7588,7 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        928
+        930
       ]
     },
     {
@@ -7303,7 +7605,7 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        928
+        929
       ]
     },
     {
@@ -7320,7 +7622,7 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        928
+        929
       ]
     },
     {
@@ -7439,7 +7741,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1500
+        1111
       ]
     },
     {
@@ -7456,7 +7758,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1501
+        1112
       ]
     },
     {
@@ -7473,7 +7775,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        938
+        1113
       ]
     },
     {
@@ -7490,7 +7792,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        937
+        1114
       ]
     },
     {
@@ -7507,7 +7809,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        936
+        1115
       ]
     },
     {
@@ -7524,7 +7826,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        935
+        1116
       ]
     },
     {
@@ -7541,7 +7843,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        934
+        1117
       ]
     },
     {
@@ -7558,7 +7860,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        933
+        1118
       ]
     },
     {
@@ -7575,7 +7877,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        936
+        1113
       ]
     },
     {
@@ -7592,7 +7894,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        935
+        1114
       ]
     },
     {
@@ -7609,7 +7911,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        934
+        1115
       ]
     },
     {
@@ -7626,7 +7928,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        933
+        1116
       ]
     },
     {
@@ -7643,7 +7945,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        932
+        1117
       ]
     },
     {
@@ -7660,7 +7962,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        933
+        1113
       ]
     },
     {
@@ -7677,7 +7979,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        932
+        1114
       ]
     },
     {
@@ -7694,7 +7996,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        931
+        1115
       ]
     },
     {
@@ -7711,7 +8013,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        930
+        1116
       ]
     },
     {
@@ -7728,7 +8030,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        929
+        1117
       ]
     },
     {
@@ -7745,7 +8047,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        928
+        1118
       ]
     },
     {
@@ -7762,7 +8064,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        930
+        1113
       ]
     },
     {
@@ -7779,7 +8081,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        929
+        1114
       ]
     },
     {
@@ -7796,7 +8098,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        1115
       ]
     },
     {
@@ -7813,7 +8115,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        1116
       ]
     },
     {
@@ -7830,7 +8132,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        1117
       ]
     },
     {
@@ -7847,7 +8149,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        1118
       ]
     },
     {
@@ -7864,7 +8166,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        1119
       ]
     },
     {
@@ -7881,7 +8183,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        928
+        1120
       ]
     },
     {
@@ -7896,7 +8198,9 @@
       },
       "rarity": "格闘系",
       "grantedSkillIds": [
-        6
+        1414,
+        1402,
+        1091
       ]
     },
     {
@@ -7911,7 +8215,9 @@
       },
       "rarity": "格闘系",
       "grantedSkillIds": [
-        7
+        1414,
+        1403,
+        1092
       ]
     },
     {
@@ -7926,7 +8232,9 @@
       },
       "rarity": "格闘系",
       "grantedSkillIds": [
-        8
+        1414,
+        1404,
+        1093
       ]
     },
     {
@@ -7941,7 +8249,9 @@
       },
       "rarity": "格闘系",
       "grantedSkillIds": [
-        9
+        1414,
+        1405,
+        1094
       ]
     },
     {
@@ -7956,7 +8266,7 @@
       },
       "rarity": "ブレスレット",
       "grantedSkillIds": [
-        84
+        1113
       ]
     },
     {
@@ -7971,7 +8281,7 @@
       },
       "rarity": "ブレスレット",
       "grantedSkillIds": [
-        85
+        1114
       ]
     },
     {
@@ -7986,7 +8296,7 @@
       },
       "rarity": "ブレスレット",
       "grantedSkillIds": [
-        86
+        1115
       ]
     },
     {
@@ -8001,7 +8311,7 @@
       },
       "rarity": "ブレスレット",
       "grantedSkillIds": [
-        87
+        1116
       ]
     },
     {
@@ -8016,7 +8326,7 @@
       },
       "rarity": "ブレスレット",
       "grantedSkillIds": [
-        88
+        1117
       ]
     },
     {
@@ -8031,7 +8341,7 @@
       },
       "rarity": "ブレスレット",
       "grantedSkillIds": [
-        89
+        1118
       ]
     },
     {
@@ -8047,7 +8357,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1496
+        29
       ]
     },
     {
@@ -8063,7 +8373,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1497
+        30
       ]
     },
     {
@@ -8079,7 +8389,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1498
+        31
       ]
     },
     {
@@ -8095,7 +8405,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1499
+        32
       ]
     },
     {
@@ -8111,7 +8421,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        29
+        33
       ]
     },
     {
@@ -8127,7 +8437,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        30
+        34
       ]
     },
     {
@@ -8143,7 +8453,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        31
+        35
       ]
     },
     {
@@ -8159,7 +8469,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        32
+        36
       ]
     },
     {
@@ -8204,7 +8514,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        33
+        32
       ]
     },
     {
@@ -8219,7 +8529,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        34
+        33
       ]
     },
     {
@@ -8234,7 +8544,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        35
+        33
       ]
     },
     {
@@ -8249,7 +8559,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        36
+        34
       ]
     },
     {
@@ -8264,7 +8574,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        37
+        34
       ]
     },
     {
@@ -8279,7 +8589,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        38
+        35
       ]
     },
     {
@@ -8294,7 +8604,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        39
+        35
       ]
     },
     {
@@ -8309,7 +8619,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        39
+        36
       ]
     },
     {
@@ -8324,7 +8634,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        39
+        36
       ]
     },
     {
@@ -8339,7 +8649,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        39
+        37
       ]
     },
     {
@@ -8354,7 +8664,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        39
+        37
       ]
     },
     {
@@ -8369,7 +8679,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        39
+        38
       ]
     },
     {
@@ -8384,7 +8694,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        39
+        38
       ]
     },
     {
@@ -8460,7 +8770,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        29
+        32
       ]
     },
     {
@@ -8476,7 +8786,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        30
+        33
       ]
     },
     {
@@ -8492,7 +8802,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        31
+        34
       ]
     },
     {
@@ -8508,7 +8818,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        32
+        35
       ]
     },
     {
@@ -8524,7 +8834,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        33
+        36
       ]
     },
     {
@@ -8540,7 +8850,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        34
+        37
       ]
     },
     {
@@ -8556,7 +8866,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        35
+        38
       ]
     },
     {
@@ -8572,7 +8882,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        32
+        34
       ]
     },
     {
@@ -8588,7 +8898,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        33
+        35
       ]
     },
     {
@@ -8604,7 +8914,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        34
+        35
       ]
     },
     {
@@ -8620,7 +8930,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        35
+        36
       ]
     },
     {
@@ -8668,7 +8978,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        38
+        37
       ]
     },
     {
@@ -8684,7 +8994,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        39
+        38
       ]
     },
     {
@@ -8700,7 +9010,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        39
+        38
       ]
     },
     {
@@ -8780,7 +9090,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1496
+        1189
       ]
     },
     {
@@ -8796,7 +9106,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1497
+        1190
       ]
     },
     {
@@ -8812,7 +9122,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1498
+        1191
       ]
     },
     {
@@ -8828,7 +9138,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1499
+        1192
       ]
     },
     {
@@ -8844,7 +9154,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        29
+        1193
       ]
     },
     {
@@ -8860,7 +9170,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        30
+        1194
       ]
     },
     {
@@ -8876,7 +9186,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        31
+        1195
       ]
     },
     {
@@ -8892,7 +9202,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        32
+        1196
       ]
     },
     {
@@ -8907,7 +9217,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        30
+        1191
       ]
     },
     {
@@ -8922,7 +9232,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        31
+        1192
       ]
     },
     {
@@ -8937,7 +9247,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        32
+        1193
       ]
     },
     {
@@ -8952,7 +9262,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        33
+        1193
       ]
     },
     {
@@ -8967,7 +9277,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        34
+        1194
       ]
     },
     {
@@ -8982,7 +9292,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        35
+        1194
       ]
     },
     {
@@ -8997,7 +9307,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        36
+        1195
       ]
     },
     {
@@ -9012,7 +9322,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        37
+        1195
       ]
     },
     {
@@ -9027,7 +9337,7 @@
       },
       "rarity": "強化系",
       "grantedSkillIds": [
-        38
+        1196
       ]
     },
     {
@@ -9043,7 +9353,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        29
+        1192
       ]
     },
     {
@@ -9059,7 +9369,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        30
+        1193
       ]
     },
     {
@@ -9075,7 +9385,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        31
+        1194
       ]
     },
     {
@@ -9091,7 +9401,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        32
+        1195
       ]
     },
     {
@@ -9107,7 +9417,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        33
+        1196
       ]
     },
     {
@@ -9123,7 +9433,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        34
+        1196
       ]
     },
     {
@@ -9139,7 +9449,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        35
+        1196
       ]
     },
     {
@@ -9155,7 +9465,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        32
+        1194
       ]
     },
     {
@@ -9171,7 +9481,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        33
+        1195
       ]
     },
     {
@@ -9187,7 +9497,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        34
+        1195
       ]
     },
     {
@@ -9203,7 +9513,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        35
+        1196
       ]
     },
     {
@@ -9219,7 +9529,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        36
+        1196
       ]
     },
     {
@@ -9235,7 +9545,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        37
+        1196
       ]
     },
     {
@@ -9251,7 +9561,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        38
+        1196
       ]
     },
     {
@@ -9267,7 +9577,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        39
+        1196
       ]
     },
     {
@@ -9283,7 +9593,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        39
+        1196
       ]
     },
     {
@@ -9299,7 +9609,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        39
+        1196
       ]
     },
     {
@@ -9315,7 +9625,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        39
+        1196
       ]
     },
     {
@@ -9330,7 +9640,7 @@
       },
       "rarity": "基礎",
       "grantedSkillIds": [
-        1368
+        29
       ]
     },
     {
@@ -9345,7 +9655,7 @@
       },
       "rarity": "基礎",
       "grantedSkillIds": [
-        1382
+        30
       ]
     },
     {
@@ -9360,7 +9670,7 @@
       },
       "rarity": "基礎",
       "grantedSkillIds": [
-        1369
+        31
       ]
     },
     {
@@ -9375,7 +9685,7 @@
       },
       "rarity": "基礎",
       "grantedSkillIds": [
-        1383
+        32
       ]
     },
     {
@@ -9390,7 +9700,7 @@
       },
       "rarity": "基礎",
       "grantedSkillIds": [
-        1370
+        33
       ]
     },
     {
@@ -9405,7 +9715,7 @@
       },
       "rarity": "基礎",
       "grantedSkillIds": [
-        1384
+        34
       ]
     },
     {
@@ -9420,7 +9730,7 @@
       },
       "rarity": "基礎",
       "grantedSkillIds": [
-        1371
+        35
       ]
     },
     {
@@ -9435,7 +9745,7 @@
       },
       "rarity": "基礎",
       "grantedSkillIds": [
-        1385
+        36
       ]
     },
     {
@@ -9450,7 +9760,7 @@
       },
       "rarity": "呪文書",
       "grantedSkillIds": [
-        1368
+        32
       ]
     },
     {
@@ -9465,7 +9775,7 @@
       },
       "rarity": "呪文書",
       "grantedSkillIds": [
-        1369
+        33
       ]
     },
     {
@@ -9480,7 +9790,7 @@
       },
       "rarity": "呪文書",
       "grantedSkillIds": [
-        1370
+        34
       ]
     },
     {
@@ -9495,7 +9805,7 @@
       },
       "rarity": "呪文書",
       "grantedSkillIds": [
-        1371
+        35
       ]
     },
     {
@@ -9510,7 +9820,7 @@
       },
       "rarity": "呪文書",
       "grantedSkillIds": [
-        1372
+        36
       ]
     },
     {
@@ -9525,7 +9835,7 @@
       },
       "rarity": "呪文書",
       "grantedSkillIds": [
-        1373
+        37
       ]
     },
     {
@@ -9540,7 +9850,7 @@
       },
       "rarity": "呪文書",
       "grantedSkillIds": [
-        1374
+        38
       ]
     },
     {
@@ -9555,7 +9865,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        29
+        33
       ]
     },
     {
@@ -9570,7 +9880,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        30
+        34
       ]
     },
     {
@@ -9585,7 +9895,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        31
+        35
       ]
     },
     {
@@ -9600,7 +9910,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        32
+        36
       ]
     },
     {
@@ -9615,7 +9925,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        32
+        34
       ]
     },
     {
@@ -9630,7 +9940,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        33
+        35
       ]
     },
     {
@@ -9645,7 +9955,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        34
+        36
       ]
     },
     {
@@ -9660,7 +9970,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        35
+        37
       ]
     },
     {
@@ -9675,7 +9985,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        36
+        38
       ]
     },
     {
@@ -9690,7 +10000,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        35
+        36
       ]
     },
     {
@@ -9705,7 +10015,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        36
+        37
       ]
     },
     {
@@ -9720,7 +10030,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        37
+        38
       ]
     },
     {
@@ -9735,7 +10045,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        38
+        39
       ]
     },
     {
@@ -9780,7 +10090,7 @@
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
-        39
+        38
       ]
     },
     {
@@ -9870,7 +10180,7 @@
       },
       "rarity": "魔道教典",
       "grantedSkillIds": [
-        1370
+        34
       ]
     },
     {
@@ -9885,7 +10195,7 @@
       },
       "rarity": "魔道教典",
       "grantedSkillIds": [
-        1371
+        35
       ]
     },
     {
@@ -9900,7 +10210,7 @@
       },
       "rarity": "魔道教典",
       "grantedSkillIds": [
-        1372
+        36
       ]
     },
     {
@@ -9915,7 +10225,7 @@
       },
       "rarity": "魔道教典",
       "grantedSkillIds": [
-        1373
+        37
       ]
     },
     {
@@ -9930,7 +10240,7 @@
       },
       "rarity": "魔道教典",
       "grantedSkillIds": [
-        1374
+        38
       ]
     },
     {
@@ -9945,7 +10255,7 @@
       },
       "rarity": "魔道教典",
       "grantedSkillIds": [
-        1374
+        39
       ]
     },
     {
@@ -9960,7 +10270,7 @@
       },
       "rarity": "魔道教典",
       "grantedSkillIds": [
-        1374
+        39
       ]
     },
     {
@@ -9975,7 +10285,7 @@
       },
       "rarity": "神聖教典",
       "grantedSkillIds": [
-        1382
+        34
       ]
     },
     {
@@ -9990,7 +10300,7 @@
       },
       "rarity": "神聖教典",
       "grantedSkillIds": [
-        1383
+        35
       ]
     },
     {
@@ -10005,7 +10315,7 @@
       },
       "rarity": "神聖教典",
       "grantedSkillIds": [
-        1384
+        36
       ]
     },
     {
@@ -10020,7 +10330,7 @@
       },
       "rarity": "神聖教典",
       "grantedSkillIds": [
-        1385
+        37
       ]
     },
     {
@@ -10035,7 +10345,7 @@
       },
       "rarity": "神聖教典",
       "grantedSkillIds": [
-        1386
+        38
       ]
     },
     {
@@ -10050,7 +10360,7 @@
       },
       "rarity": "神聖教典",
       "grantedSkillIds": [
-        1387
+        39
       ]
     },
     {
@@ -10065,7 +10375,7 @@
       },
       "rarity": "神聖教典",
       "grantedSkillIds": [
-        1388
+        39
       ]
     },
     {
@@ -10080,7 +10390,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1375
+        34
       ]
     },
     {
@@ -10095,7 +10405,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1389
+        35
       ]
     },
     {
@@ -10110,7 +10420,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1376
+        36
       ]
     },
     {
@@ -10125,7 +10435,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1390
+        37
       ]
     },
     {
@@ -10140,7 +10450,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1377
+        38
       ]
     },
     {
@@ -10155,7 +10465,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1391
+        39
       ]
     },
     {
@@ -10170,7 +10480,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1378
+        39
       ]
     },
     {
@@ -10185,7 +10495,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1392
+        39
       ]
     },
     {
@@ -10200,7 +10510,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1379
+        39
       ]
     },
     {
@@ -10215,7 +10525,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1393
+        39
       ]
     },
     {
@@ -10230,7 +10540,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1380
+        39
       ]
     },
     {
@@ -10245,7 +10555,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1394
+        39
       ]
     },
     {
@@ -10260,7 +10570,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1381
+        39
       ]
     },
     {
@@ -10275,7 +10585,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1395
+        39
       ]
     },
     {
@@ -10290,7 +10600,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1381
+        39
       ]
     },
     {
@@ -10305,7 +10615,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1395
+        39
       ]
     },
     {
@@ -10320,7 +10630,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1381
+        39
       ]
     },
     {
@@ -10335,7 +10645,7 @@
       },
       "rarity": "忘却書",
       "grantedSkillIds": [
-        1395
+        39
       ]
     },
     {
@@ -10351,7 +10661,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1502
+        986
       ]
     },
     {
@@ -10367,7 +10677,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        1503
+        985
       ]
     },
     {
@@ -10383,7 +10693,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        986
+        984
       ]
     },
     {
@@ -10399,7 +10709,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        985
+        983
       ]
     },
     {
@@ -10415,7 +10725,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        984
+        982
       ]
     },
     {
@@ -10431,7 +10741,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        983
+        981
       ]
     },
     {
@@ -10447,7 +10757,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        982
+        980
       ]
     },
     {
@@ -10463,7 +10773,7 @@
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
-        981
+        979
       ]
     },
     {
@@ -10511,7 +10821,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        982
+        983
       ]
     },
     {
@@ -10527,7 +10837,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        981
+        982
       ]
     },
     {
@@ -10543,7 +10853,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        980
+        982
       ]
     },
     {
@@ -10559,7 +10869,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        979
+        981
       ]
     },
     {
@@ -10575,7 +10885,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        978
+        981
       ]
     },
     {
@@ -10591,7 +10901,7 @@
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
-        977
+        980
       ]
     },
     {
@@ -10607,7 +10917,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        981
+        982
       ]
     },
     {
@@ -10623,7 +10933,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        980
+        981
       ]
     },
     {
@@ -10639,7 +10949,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        979
+        981
       ]
     },
     {
@@ -10655,7 +10965,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        978
+        980
       ]
     },
     {
@@ -10671,7 +10981,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        977
+        980
       ]
     },
     {
@@ -10687,7 +10997,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        976
+        979
       ]
     },
     {
@@ -10703,7 +11013,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        976
+        979
       ]
     },
     {
@@ -10719,7 +11029,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        976
+        978
       ]
     },
     {
@@ -10735,7 +11045,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        976
+        978
       ]
     },
     {
@@ -10751,7 +11061,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        976
+        977
       ]
     },
     {
@@ -10767,7 +11077,7 @@
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
-        976
+        977
       ]
     },
     {
@@ -10783,7 +11093,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        978
+        980
       ]
     },
     {
@@ -10799,7 +11109,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        977
+        979
       ]
     },
     {
@@ -10815,7 +11125,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        976
+        979
       ]
     },
     {
@@ -10831,7 +11141,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        976
+        978
       ]
     },
     {
@@ -10847,7 +11157,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        976
+        978
       ]
     },
     {
@@ -10863,7 +11173,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        976
+        977
       ]
     },
     {
@@ -10879,7 +11189,7 @@
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
-        976
+        977
       ]
     },
     {
