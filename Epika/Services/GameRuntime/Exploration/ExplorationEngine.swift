@@ -16,6 +16,8 @@ struct ExplorationEngine {
         var eventIndex: Int
         var superRareState: SuperRareDailyState
         var random: GameRandomSource
+        /// 探索中にドロップしたアイテムID（同名制限用）
+        var droppedItemIds: Set<UInt16> = []
     }
 
     struct StepOutcome: Sendable {
@@ -125,6 +127,10 @@ struct ExplorationEngine {
             drops = scripted.drops
             gold = scripted.gold
             totalExperience = scripted.experience
+            // スクリプトイベントのドロップも同名制限に含める
+            for drop in scripted.drops {
+                state.droppedItemIds.insert(drop.item.id)
+            }
 
         case .combat:
             guard let encounterChoice = selectEncounter(from: encounterEvents, random: &state.random) else {
@@ -141,9 +147,11 @@ struct ExplorationEngine {
                                                                  dungeon: preparation.dungeon,
                                                                  floor: floor,
                                                                  party: party,
+                                                                 droppedItemIds: state.droppedItemIds,
                                                                  superRareState: state.superRareState,
                                                                  random: &state.random)
             state.superRareState = combatResult.updatedSuperRareState
+            state.droppedItemIds.formUnion(combatResult.newlyDroppedItemIds)
             drops = combatResult.summary.drops
             totalExperience = combatResult.summary.totalExperience
             experienceByMember = combatResult.summary.experienceByMember

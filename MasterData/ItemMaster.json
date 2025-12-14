@@ -3490,8 +3490,8 @@
       "name": "打刀",
       "description": "刀（ノーマル）1の説明",
       "category": "katana",
-      "basePrice": 2000,
-      "sellValue": 1000,
+      "basePrice": 100,
+      "sellValue": 50,
       "combatBonuses": {
         "physicalAttack": 26,
         "hitRate": 8,
@@ -3507,8 +3507,8 @@
       "name": "太刀",
       "description": "刀（ノーマル）2の説明",
       "category": "katana",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 500,
+      "sellValue": 250,
       "combatBonuses": {
         "physicalAttack": 39,
         "hitRate": 12,
@@ -3524,8 +3524,8 @@
       "name": "脇差",
       "description": "刀（ノーマル）3の説明",
       "category": "katana",
-      "basePrice": 50000,
-      "sellValue": 25000,
+      "basePrice": 2500,
+      "sellValue": 1250,
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
@@ -3541,8 +3541,8 @@
       "name": "短刀",
       "description": "刀（ノーマル）4の説明",
       "category": "katana",
-      "basePrice": 250000,
-      "sellValue": 125000,
+      "basePrice": 12500,
+      "sellValue": 6250,
       "combatBonuses": {
         "physicalAttack": 82,
         "hitRate": 26,
@@ -3558,8 +3558,8 @@
       "name": "野太刀",
       "description": "刀（ノーマル）5の説明",
       "category": "katana",
-      "basePrice": 1000000,
-      "sellValue": 500000,
+      "basePrice": 60000,
+      "sellValue": 30000,
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
@@ -3575,8 +3575,8 @@
       "name": "薙刀",
       "description": "刀（ノーマル）6の説明",
       "category": "katana",
-      "basePrice": 3000000,
-      "sellValue": 1500000,
+      "basePrice": 240000,
+      "sellValue": 120000,
       "combatBonuses": {
         "physicalAttack": 156,
         "hitRate": 52,
@@ -3592,8 +3592,8 @@
       "name": "無銘の刀",
       "description": "刀（ノーマル）7の説明",
       "category": "katana",
-      "basePrice": 6000000,
-      "sellValue": 3000000,
+      "basePrice": 720000,
+      "sellValue": 360000,
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
@@ -3609,8 +3609,8 @@
       "name": "錆びた刀",
       "description": "刀（ノーマル）8の説明",
       "category": "katana",
-      "basePrice": 9000000,
-      "sellValue": 4500000,
+      "basePrice": 1440000,
+      "sellValue": 720000,
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
@@ -6116,8 +6116,8 @@
       "name": "フルプレート",
       "description": "重鎧（ノーマル）1の説明",
       "category": "heavy_armor",
-      "basePrice": 400,
-      "sellValue": 200,
+      "basePrice": 100,
+      "sellValue": 50,
       "combatBonuses": {
         "physicalDefense": 18,
         "evasionRate": -18
@@ -6132,8 +6132,8 @@
       "name": "ゴシックプレート",
       "description": "重鎧（ノーマル）2の説明",
       "category": "heavy_armor",
-      "basePrice": 2000,
-      "sellValue": 1000,
+      "basePrice": 500,
+      "sellValue": 250,
       "combatBonuses": {
         "physicalDefense": 27,
         "evasionRate": -27
@@ -6148,8 +6148,8 @@
       "name": "マクシミリアン鎧",
       "description": "重鎧（ノーマル）3の説明",
       "category": "heavy_armor",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2500,
+      "sellValue": 1250,
       "combatBonuses": {
         "physicalDefense": 36,
         "evasionRate": -36
@@ -6164,8 +6164,8 @@
       "name": "騎士甲冑",
       "description": "重鎧（ノーマル）4の説明",
       "category": "heavy_armor",
-      "basePrice": 50000,
-      "sellValue": 25000,
+      "basePrice": 12500,
+      "sellValue": 6250,
       "combatBonuses": {
         "physicalDefense": 50,
         "evasionRate": -50
@@ -6180,8 +6180,8 @@
       "name": "重装鎧",
       "description": "重鎧（ノーマル）5の説明",
       "category": "heavy_armor",
-      "basePrice": 250000,
-      "sellValue": 125000,
+      "basePrice": 60000,
+      "sellValue": 30000,
       "combatBonuses": {
         "physicalDefense": 65,
         "evasionRate": -65
@@ -6196,8 +6196,8 @@
       "name": "戦闘甲冑",
       "description": "重鎧（ノーマル）6の説明",
       "category": "heavy_armor",
-      "basePrice": 1000000,
-      "sellValue": 500000,
+      "basePrice": 240000,
+      "sellValue": 120000,
       "combatBonuses": {
         "physicalDefense": 86,
         "evasionRate": -86
@@ -6212,8 +6212,8 @@
       "name": "要塞鎧",
       "description": "重鎧（ノーマル）7の説明",
       "category": "heavy_armor",
-      "basePrice": 3000000,
-      "sellValue": 1500000,
+      "basePrice": 720000,
+      "sellValue": 360000,
       "combatBonuses": {
         "physicalDefense": 115,
         "evasionRate": -115
@@ -6228,8 +6228,8 @@
       "name": "城壁の鎧",
       "description": "重鎧（ノーマル）8の説明",
       "category": "heavy_armor",
-      "basePrice": 6000000,
-      "sellValue": 3000000,
+      "basePrice": 1440000,
+      "sellValue": 720000,
       "combatBonuses": {
         "physicalDefense": 144,
         "evasionRate": -144
@@ -6612,8 +6612,8 @@
       "name": "要塞甲冑",
       "description": "超重鎧（ノーマル）1の説明",
       "category": "super_heavy_armor",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 100,
+      "sellValue": 50,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -6627,8 +6627,8 @@
       "name": "城門の鎧",
       "description": "超重鎧（ノーマル）2の説明",
       "category": "super_heavy_armor",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 500,
+      "sellValue": 250,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -6642,8 +6642,8 @@
       "name": "山岳鎧",
       "description": "超重鎧（ノーマル）3の説明",
       "category": "super_heavy_armor",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2500,
+      "sellValue": 1250,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -6657,8 +6657,8 @@
       "name": "大地の鎧",
       "description": "超重鎧（ノーマル）4の説明",
       "category": "super_heavy_armor",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 12500,
+      "sellValue": 6250,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -6672,8 +6672,8 @@
       "name": "鉄壁の鎧",
       "description": "超重鎧（ノーマル）5の説明",
       "category": "super_heavy_armor",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 60000,
+      "sellValue": 30000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -6687,8 +6687,8 @@
       "name": "不動の鎧",
       "description": "超重鎧（ノーマル）6の説明",
       "category": "super_heavy_armor",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 240000,
+      "sellValue": 120000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -6702,8 +6702,8 @@
       "name": "巨人の鎧",
       "description": "超重鎧（ノーマル）7の説明",
       "category": "super_heavy_armor",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 720000,
+      "sellValue": 360000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -6717,8 +6717,8 @@
       "name": "タイタンアーマー",
       "description": "超重鎧（ノーマル）8の説明",
       "category": "super_heavy_armor",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 1440000,
+      "sellValue": 720000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -6942,8 +6942,8 @@
       "name": "バックラー",
       "description": "盾（ノーマル）1の説明",
       "category": "shield",
-      "basePrice": 80,
-      "sellValue": 40,
+      "basePrice": 100,
+      "sellValue": 50,
       "combatBonuses": {
         "physicalDefense": 7,
         "magicalDefense": 7,
@@ -6959,8 +6959,8 @@
       "name": "ラウンドシールド",
       "description": "盾（ノーマル）2の説明",
       "category": "shield",
-      "basePrice": 400,
-      "sellValue": 200,
+      "basePrice": 500,
+      "sellValue": 250,
       "combatBonuses": {
         "physicalDefense": 10,
         "magicalDefense": 10,
@@ -6976,8 +6976,8 @@
       "name": "ウッドシールド",
       "description": "盾（ノーマル）3の説明",
       "category": "shield",
-      "basePrice": 2000,
-      "sellValue": 1000,
+      "basePrice": 2500,
+      "sellValue": 1250,
       "combatBonuses": {
         "physicalDefense": 14,
         "magicalDefense": 14,
@@ -6993,8 +6993,8 @@
       "name": "アイアンシールド",
       "description": "盾（ノーマル）4の説明",
       "category": "shield",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 12500,
+      "sellValue": 6250,
       "combatBonuses": {
         "physicalDefense": 18,
         "magicalDefense": 18,
@@ -7010,8 +7010,8 @@
       "name": "皮盾",
       "description": "盾（ノーマル）5の説明",
       "category": "shield",
-      "basePrice": 50000,
-      "sellValue": 25000,
+      "basePrice": 60000,
+      "sellValue": 30000,
       "combatBonuses": {
         "physicalDefense": 25,
         "magicalDefense": 25,
@@ -7027,8 +7027,8 @@
       "name": "木盾",
       "description": "盾（ノーマル）6の説明",
       "category": "shield",
-      "basePrice": 200000,
-      "sellValue": 100000,
+      "basePrice": 240000,
+      "sellValue": 120000,
       "combatBonuses": {
         "physicalDefense": 32,
         "magicalDefense": 32,
@@ -7044,8 +7044,8 @@
       "name": "鉄盾",
       "description": "盾（ノーマル）7の説明",
       "category": "shield",
-      "basePrice": 600000,
-      "sellValue": 300000,
+      "basePrice": 720000,
+      "sellValue": 360000,
       "combatBonuses": {
         "physicalDefense": 43,
         "magicalDefense": 43,
@@ -7061,8 +7061,8 @@
       "name": "銅盾",
       "description": "盾（ノーマル）8の説明",
       "category": "shield",
-      "basePrice": 1200000,
-      "sellValue": 600000,
+      "basePrice": 1440000,
+      "sellValue": 720000,
       "combatBonuses": {
         "physicalDefense": 54,
         "magicalDefense": 54,
@@ -7732,8 +7732,8 @@
       "name": "革の籠手",
       "description": "小手（ノーマル）1の説明",
       "category": "gauntlet",
-      "basePrice": 2000,
-      "sellValue": 1000,
+      "basePrice": 100,
+      "sellValue": 50,
       "combatBonuses": {
         "hitRate": 9,
         "criticalRate": 2,
@@ -7749,8 +7749,8 @@
       "name": "鉄の籠手",
       "description": "小手（ノーマル）2の説明",
       "category": "gauntlet",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 500,
+      "sellValue": 250,
       "combatBonuses": {
         "hitRate": 18,
         "criticalRate": 2,
@@ -7766,8 +7766,8 @@
       "name": "鋼の籠手",
       "description": "小手（ノーマル）3の説明",
       "category": "gauntlet",
-      "basePrice": 50000,
-      "sellValue": 25000,
+      "basePrice": 2500,
+      "sellValue": 1250,
       "combatBonuses": {
         "hitRate": 27,
         "criticalRate": 2,
@@ -7783,8 +7783,8 @@
       "name": "鎖籠手",
       "description": "小手（ノーマル）4の説明",
       "category": "gauntlet",
-      "basePrice": 250000,
-      "sellValue": 125000,
+      "basePrice": 12500,
+      "sellValue": 6250,
       "combatBonuses": {
         "hitRate": 36,
         "criticalRate": 2,
@@ -7800,8 +7800,8 @@
       "name": "指貫",
       "description": "小手（ノーマル）5の説明",
       "category": "gauntlet",
-      "basePrice": 1250000,
-      "sellValue": 625000,
+      "basePrice": 60000,
+      "sellValue": 30000,
       "combatBonuses": {
         "hitRate": 45,
         "criticalRate": 2,
@@ -7817,8 +7817,8 @@
       "name": "手甲",
       "description": "小手（ノーマル）6の説明",
       "category": "gauntlet",
-      "basePrice": 2500000,
-      "sellValue": 1250000,
+      "basePrice": 240000,
+      "sellValue": 120000,
       "combatBonuses": {
         "hitRate": 54,
         "criticalRate": 2,
@@ -7834,8 +7834,8 @@
       "name": "篭手",
       "description": "小手（ノーマル）7の説明",
       "category": "gauntlet",
-      "basePrice": 5000000,
-      "sellValue": 2500000,
+      "basePrice": 720000,
+      "sellValue": 360000,
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
@@ -7851,8 +7851,8 @@
       "name": "腕当て",
       "description": "小手（ノーマル）8の説明",
       "category": "gauntlet",
-      "basePrice": 10000000,
-      "sellValue": 5000000,
+      "basePrice": 1440000,
+      "sellValue": 720000,
       "combatBonuses": {
         "hitRate": 72,
         "criticalRate": 2,
@@ -8349,8 +8349,8 @@
       "name": "木の杖",
       "description": "ワンド（ノーマル）1の説明",
       "category": "wand",
-      "basePrice": 200,
-      "sellValue": 100,
+      "basePrice": 100,
+      "sellValue": 50,
       "combatBonuses": {
         "magicalAttack": 18,
         "criticalRate": -3
@@ -8365,8 +8365,8 @@
       "name": "樫の杖",
       "description": "ワンド（ノーマル）2の説明",
       "category": "wand",
-      "basePrice": 1000,
-      "sellValue": 500,
+      "basePrice": 500,
+      "sellValue": 250,
       "combatBonuses": {
         "magicalAttack": 27,
         "criticalRate": -3
@@ -8381,8 +8381,8 @@
       "name": "柳の杖",
       "description": "ワンド（ノーマル）3の説明",
       "category": "wand",
-      "basePrice": 5000,
-      "sellValue": 2500,
+      "basePrice": 2500,
+      "sellValue": 1250,
       "combatBonuses": {
         "magicalAttack": 36,
         "criticalRate": -3
@@ -8397,8 +8397,8 @@
       "name": "楓の杖",
       "description": "ワンド（ノーマル）4の説明",
       "category": "wand",
-      "basePrice": 25000,
-      "sellValue": 12500,
+      "basePrice": 12500,
+      "sellValue": 6250,
       "combatBonuses": {
         "magicalAttack": 45,
         "criticalRate": -3
@@ -8413,8 +8413,8 @@
       "name": "魔法の杖",
       "description": "ワンド（ノーマル）5の説明",
       "category": "wand",
-      "basePrice": 125000,
-      "sellValue": 62500,
+      "basePrice": 60000,
+      "sellValue": 30000,
       "combatBonuses": {
         "magicalAttack": 54,
         "criticalRate": -3
@@ -8429,8 +8429,8 @@
       "name": "見習いの杖",
       "description": "ワンド（ノーマル）6の説明",
       "category": "wand",
-      "basePrice": 500000,
-      "sellValue": 250000,
+      "basePrice": 240000,
+      "sellValue": 120000,
       "combatBonuses": {
         "magicalAttack": 72,
         "criticalRate": -3
@@ -8445,8 +8445,8 @@
       "name": "旅の杖",
       "description": "ワンド（ノーマル）7の説明",
       "category": "wand",
-      "basePrice": 1500000,
-      "sellValue": 750000,
+      "basePrice": 720000,
+      "sellValue": 360000,
       "combatBonuses": {
         "magicalAttack": 99,
         "criticalRate": -3
@@ -8461,8 +8461,8 @@
       "name": "学者の杖",
       "description": "ワンド（ノーマル）8の説明",
       "category": "wand",
-      "basePrice": 3000000,
-      "sellValue": 1500000,
+      "basePrice": 1440000,
+      "sellValue": 720000,
       "combatBonuses": {
         "magicalAttack": 122,
         "criticalRate": -3
@@ -9082,8 +9082,8 @@
       "name": "木のロッド",
       "description": "ロッド（ノーマル）1の説明",
       "category": "rod",
-      "basePrice": 200,
-      "sellValue": 100,
+      "basePrice": 100,
+      "sellValue": 50,
       "combatBonuses": {
         "magicalHealing": 18,
         "criticalRate": -2
@@ -9098,8 +9098,8 @@
       "name": "鉄のロッド",
       "description": "ロッド（ノーマル）2の説明",
       "category": "rod",
-      "basePrice": 1000,
-      "sellValue": 500,
+      "basePrice": 500,
+      "sellValue": 250,
       "combatBonuses": {
         "magicalHealing": 27,
         "criticalRate": -2
@@ -9114,8 +9114,8 @@
       "name": "銅のロッド",
       "description": "ロッド（ノーマル）3の説明",
       "category": "rod",
-      "basePrice": 5000,
-      "sellValue": 2500,
+      "basePrice": 2500,
+      "sellValue": 1250,
       "combatBonuses": {
         "magicalHealing": 40,
         "criticalRate": -2
@@ -9130,8 +9130,8 @@
       "name": "真鍮のロッド",
       "description": "ロッド（ノーマル）4の説明",
       "category": "rod",
-      "basePrice": 25000,
-      "sellValue": 12500,
+      "basePrice": 12500,
+      "sellValue": 6250,
       "combatBonuses": {
         "magicalHealing": 54,
         "criticalRate": -2
@@ -9146,8 +9146,8 @@
       "name": "魔法のロッド",
       "description": "ロッド（ノーマル）5の説明",
       "category": "rod",
-      "basePrice": 125000,
-      "sellValue": 62500,
+      "basePrice": 60000,
+      "sellValue": 30000,
       "combatBonuses": {
         "magicalHealing": 108,
         "criticalRate": -2
@@ -9162,8 +9162,8 @@
       "name": "見習いのロッド",
       "description": "ロッド（ノーマル）6の説明",
       "category": "rod",
-      "basePrice": 500000,
-      "sellValue": 250000,
+      "basePrice": 240000,
+      "sellValue": 120000,
       "combatBonuses": {
         "magicalHealing": 162,
         "criticalRate": -2
@@ -9178,8 +9178,8 @@
       "name": "旅のロッド",
       "description": "ロッド（ノーマル）7の説明",
       "category": "rod",
-      "basePrice": 1500000,
-      "sellValue": 750000,
+      "basePrice": 720000,
+      "sellValue": 360000,
       "combatBonuses": {
         "magicalHealing": 216,
         "criticalRate": -2
@@ -9194,8 +9194,8 @@
       "name": "学者のロッド",
       "description": "ロッド（ノーマル）8の説明",
       "category": "rod",
-      "basePrice": 3000000,
-      "sellValue": 1500000,
+      "basePrice": 1440000,
+      "sellValue": 720000,
       "combatBonuses": {
         "magicalHealing": 324,
         "criticalRate": -2
