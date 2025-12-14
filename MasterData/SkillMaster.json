@@ -11975,9 +11975,7 @@
       {
         "familyId": "martialBonusPercent.unarmed",
         "effectType": "martialBonusPercent",
-        "parameters": {
-          "requiresUnarmed": "true"
-        },
+        "parameters": {},
         "variants": [
           {
             "id": 1402,
@@ -12047,9 +12045,7 @@
       {
         "familyId": "martialBonusMultiplier.unarmed",
         "effectType": "martialBonusMultiplier",
-        "parameters": {
-          "requiresUnarmed": "true"
-        },
+        "parameters": {},
         "variants": [
           {
             "id": 1411,
