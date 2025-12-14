@@ -120,8 +120,9 @@ struct EquipmentEditorView: View {
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var equipError: String?
-    @State private var statDeltas: [(label: String, value: Int)] = []
     @State private var cacheVersion: Int = 0
+    @State private var selectedItemForDetail: ItemDefinition?
+    @State private var skillNames: [UInt16: String] = [:]
 
     private var characterService: CharacterProgressService { progressService.character }
     private var inventoryService: InventoryProgressService { progressService.inventory }
@@ -142,7 +143,7 @@ struct EquipmentEditorView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
+        Group {
             if isLoading {
                 ProgressView("読み込み中...")
             } else if let error = loadError {
@@ -176,6 +177,9 @@ struct EquipmentEditorView: View {
                             equipmentCapacity: currentCharacter.equipmentCapacity,
                             onUnequip: { item in
                                 try await performUnequip(item)
+                            },
+                            onDetail: { definition in
+                                selectedItemForDetail = definition
                             }
                         )
                     }
@@ -194,16 +198,23 @@ struct EquipmentEditorView: View {
                 .id(cacheVersion)
                 .avoidBottomGameInfo()
             }
-
-            // 差分プレビュー（左下）
-            EquipmentStatDeltaView(deltas: statDeltas)
-                .padding(.leading, 8)
-                .padding(.bottom, 80) // GameInfoBarの上
         }
         .navigationTitle(character.name)
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await loadData()
+        }
+        .sheet(item: $selectedItemForDetail) { item in
+            NavigationStack {
+                ItemDetailView(item: item, skills: skillNames)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("閉じる") {
+                                selectedItemForDetail = nil
+                            }
+                        }
+                    }
+            }
         }
     }
 
@@ -237,32 +248,29 @@ struct EquipmentEditorView: View {
         let validation = validateEquipment(definition: definition)
 
         return HStack {
-            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
-                .font(.body)
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-
-            Spacer()
-
-            if validation.canEquip {
-                Button {
+            Button {
+                if validation.canEquip {
                     Task { await performEquip(item) }
-                } label: {
-                    Image(systemName: "plus.circle")
-                        .foregroundStyle(.green)
                 }
-                .buttonStyle(.plain)
-            } else {
-                Image(systemName: "xmark.circle")
-                    .foregroundStyle(.gray)
+            } label: {
+                HStack {
+                    displayService.makeStyledDisplayText(for: item, includeSellValue: false)
+                        .font(.body)
+                        .lineLimit(1)
+                    Spacer()
+                }
+                .contentShape(Rectangle())
             }
-        }
-        .frame(height: AppConstants.UI.listRowHeight)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            if let def = definition {
-                showStatPreview(for: def, isEquipping: true)
+            .buttonStyle(.plain)
+            .foregroundStyle(validation.canEquip ? .primary : .secondary)
+
+            Button {
+                selectedItemForDetail = definition
+            } label: {
+                Image(systemName: "info.circle")
+                    .foregroundStyle(.blue)
             }
+            .buttonStyle(.plain)
         }
     }
 
@@ -292,6 +300,10 @@ struct EquipmentEditorView: View {
                 let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(allItemIds))
                 itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
             }
+
+            // スキル名を取得（詳細シート用）
+            let allSkills = try await MasterDataRuntimeService.shared.getAllSkills()
+            skillNames = Dictionary(uniqueKeysWithValues: allSkills.map { ($0.id, $0.name) })
         } catch {
             loadError = error.localizedDescription
         }
@@ -304,47 +316,21 @@ struct EquipmentEditorView: View {
             return (false, "アイテム情報がありません")
         }
 
+        guard let race = currentCharacter.race else {
+            return (false, "キャラクターデータが不完全です")
+        }
+
         let currentCount = currentCharacter.equippedItems.reduce(0) { $0 + $1.quantity }
 
-        // 装備数上限チェック
-        if currentCount >= currentCharacter.equipmentCapacity {
-            return (false, "装備数が上限に達しています")
-        }
+        let result = EquipmentProgressService.validateEquipment(
+            itemDefinition: definition,
+            characterRaceId: race.id,
+            characterGenderCode: race.genderCode,
+            currentEquippedCount: currentCount,
+            equipmentCapacity: currentCharacter.equipmentCapacity
+        )
 
-        // 除外カテゴリチェック
-        if EquipmentProgressService.excludedCategories.contains(definition.category) {
-            return (false, "このアイテムは装備できません")
-        }
-
-        // 種族制限チェック（raceIdで直接判定）
-        if !definition.allowedRaceIds.isEmpty {
-            guard let raceId = currentCharacter.race?.id else {
-                return (false, "種族制限により装備できません")
-            }
-            let canBypass = definition.bypassRaceIds.contains(raceId)
-            let isAllowed = definition.allowedRaceIds.contains(raceId)
-            if !canBypass && !isAllowed {
-                return (false, "種族制限により装備できません")
-            }
-        }
-
-        // 職業制限チェック（Phase 4で allowedJobIds ベースに変更予定）
-        // 現在 allowedJobs はジョブカテゴリ（文字列）を期待しているが、
-        // JobDefinition.category は Phase 2 で削除されたため、一時的にスキップ
-        // TODO: Phase 4 で ItemDefinition.allowedJobIds に変更し、このチェックを有効化
-        // if !definition.allowedJobs.isEmpty { ... }
-
-        // 性別制限チェック（genderCodeで直接判定）
-        if !definition.allowedGenderCodes.isEmpty {
-            guard let genderCode = currentCharacter.race?.genderCode else {
-                return (false, "性別制限により装備できません")
-            }
-            if !definition.allowedGenderCodes.contains(genderCode) {
-                return (false, "性別制限により装備できません")
-            }
-        }
-
-        return (true, nil)
+        return (result.canEquip, result.reason)
     }
 
     @MainActor
@@ -358,8 +344,14 @@ struct EquipmentEditorView: View {
             )
             let runtime = try await characterService.runtimeCharacter(from: snapshot)
             currentCharacter = runtime
-            await loadData() // リフレッシュ
-            clearStatPreview()
+
+            // インベントリキャッシュから装備したアイテムを削除
+            displayService.removeItems(stackKeys: [item.stackKey])
+            subcategorizedItems = displayService.getSubcategorizedItems()
+                .filter { !Self.excludedCategories.contains($0.key.mainCategory) }
+            orderedSubcategories = displayService.getOrderedSubcategories()
+                .filter { !Self.excludedCategories.contains($0.mainCategory) }
+            cacheVersion = displayService.version
         } catch {
             equipError = error.localizedDescription
         }
@@ -376,23 +368,12 @@ struct EquipmentEditorView: View {
         let runtime = try await characterService.runtimeCharacter(from: snapshot)
         currentCharacter = runtime
 
-        await loadData() // リフレッシュ
-        clearStatPreview()
-    }
-
-    private func showStatPreview(for definition: ItemDefinition, isEquipping: Bool) {
-        // 同一ベースIDの重複ペナルティを考慮した差分計算
-        let delta = EquipmentProgressService.calculateStatDelta(
-            adding: isEquipping ? definition : nil,
-            removing: isEquipping ? nil : definition,
-            currentEquippedItems: currentCharacter.equippedItems
-        )
-
-        statDeltas = delta.map { (StatLabelResolver.label(for: $0.key), $0.value) }
-            .sorted { abs($0.1) > abs($1.1) }
-    }
-
-    private func clearStatPreview() {
-        statDeltas = []
+        // インベントリキャッシュを再構築（解除したアイテムが戻るため）
+        try await displayService.reload(inventoryService: inventoryService)
+        subcategorizedItems = displayService.getSubcategorizedItems()
+            .filter { !Self.excludedCategories.contains($0.key.mainCategory) }
+        orderedSubcategories = displayService.getOrderedSubcategories()
+            .filter { !Self.excludedCategories.contains($0.mainCategory) }
+        cacheVersion = displayService.version
     }
 }
