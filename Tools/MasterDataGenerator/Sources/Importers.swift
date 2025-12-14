@@ -2154,3 +2154,40 @@ extension Generator {
         return file.enemySkills.count
     }
 }
+
+// MARK: - Character Name Master
+
+private struct CharacterNameMasterFile: Decodable {
+    struct Name: Decodable {
+        let id: Int
+        let genderCode: Int
+        let name: String
+    }
+
+    let names: [Name]
+}
+
+extension Generator {
+    func importCharacterNameMaster(_ data: Data) throws -> Int {
+        let decoder = JSONDecoder()
+        let file = try decoder.decode(CharacterNameMasterFile.self, from: data)
+
+        try withTransaction {
+            try execute("DELETE FROM character_names;")
+
+            let sql = "INSERT INTO character_names (id, gender_code, name) VALUES (?, ?, ?);"
+            let statement = try prepare(sql)
+            defer { sqlite3_finalize(statement) }
+
+            for entry in file.names {
+                bindInt(statement, index: 1, value: entry.id)
+                bindInt(statement, index: 2, value: entry.genderCode)
+                bindText(statement, index: 3, value: entry.name)
+                try step(statement)
+                reset(statement)
+            }
+        }
+
+        return file.names.count
+    }
+}

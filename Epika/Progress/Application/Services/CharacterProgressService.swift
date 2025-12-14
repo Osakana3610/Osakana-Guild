@@ -176,7 +176,7 @@ actor CharacterProgressService {
     func createCharacter(_ request: CharacterCreationRequest) async throws -> CharacterSnapshot {
         let trimmedName = request.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
-            throw ProgressError.invalidInput(description: "キャラクター名を入力してください")
+            throw ProgressError.invalidInput(description: "キャラクター名が設定されていません")
         }
 
         let context = makeContext()
