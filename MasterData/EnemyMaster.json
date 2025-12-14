@@ -22,9 +22,7 @@
         "luck": 10
       },
       "drops": [
-        55,
-        5,
-        4
+        55
       ],
       "category": "enemy",
       "job": 1,
@@ -58,7 +56,6 @@
       },
       "drops": [
         36,
-        1,
         98
       ],
       "category": "enemy",
@@ -93,7 +90,6 @@
       },
       "drops": [
         34,
-        6,
         94
       ],
       "category": "enemy",
@@ -128,7 +124,6 @@
       },
       "drops": [
         9,
-        6,
         85
       ],
       "category": "enemy",
@@ -417,7 +412,6 @@
         "luck": 11
       },
       "drops": [
-        3,
         15
       ],
       "category": "enemy",
@@ -518,9 +512,7 @@
         "agility": 6,
         "luck": 5
       },
-      "drops": [
-        1
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 1,
       "actionRates": {
@@ -588,8 +580,7 @@
         "luck": 5
       },
       "drops": [
-        94,
-        7
+        94
       ],
       "category": "enemy",
       "job": 14,
@@ -660,7 +651,6 @@
         "luck": 11
       },
       "drops": [
-        2,
         12,
         97
       ],
@@ -871,9 +861,7 @@
         "luck": 7
       },
       "drops": [
-        84,
-        68,
-        2
+        84
       ],
       "category": "enemy",
       "job": 8,
@@ -1151,8 +1139,7 @@
         "luck": 5
       },
       "drops": [
-        78,
-        66
+        78
       ],
       "category": "enemy",
       "job": 1,
@@ -1297,7 +1284,6 @@
         "luck": 10
       },
       "drops": [
-        61,
         95,
         22
       ],
@@ -1366,8 +1352,7 @@
       },
       "drops": [
         90,
-        50,
-        64
+        50
       ],
       "category": "enemy",
       "job": 6,
@@ -1400,9 +1385,7 @@
         "luck": 11
       },
       "drops": [
-        67,
-        60,
-        7
+        60
       ],
       "category": "enemy",
       "job": 7,
@@ -1546,7 +1529,6 @@
       },
       "drops": [
         90,
-        3,
         98
       ],
       "category": "enemy",
@@ -1691,7 +1673,6 @@
         "luck": 11
       },
       "drops": [
-        3,
         96
       ],
       "category": "enemy",
@@ -1826,7 +1807,6 @@
         "luck": 12
       },
       "drops": [
-        2,
         54
       ],
       "category": "enemy",
@@ -1971,7 +1951,6 @@
       },
       "drops": [
         92,
-        63,
         58
       ],
       "category": "enemy",
@@ -2115,9 +2094,7 @@
         "agility": 15,
         "luck": 13
       },
-      "drops": [
-        2
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 16,
       "actionRates": {
@@ -2183,8 +2160,7 @@
       },
       "drops": [
         29,
-        100,
-        67
+        100
       ],
       "category": "enemy",
       "job": 6,
@@ -2250,7 +2226,6 @@
         "luck": 9
       },
       "drops": [
-        5,
         30
       ],
       "category": "enemy",
@@ -2361,7 +2336,6 @@
       },
       "drops": [
         33,
-        4,
         12
       ],
       "category": "enemy",
@@ -2429,7 +2403,6 @@
         "luck": 10
       },
       "drops": [
-        64,
         37,
         85
       ],
@@ -2573,8 +2546,7 @@
       },
       "drops": [
         35,
-        54,
-        62
+        54
       ],
       "category": "enemy",
       "job": 6,
@@ -2607,8 +2579,7 @@
         "luck": 12
       },
       "drops": [
-        44,
-        65
+        44
       ],
       "category": "enemy",
       "job": 3,
@@ -2675,8 +2646,7 @@
         "luck": 12
       },
       "drops": [
-        96,
-        61
+        96
       ],
       "category": "enemy",
       "job": 8,
@@ -2785,7 +2755,6 @@
         "luck": 10
       },
       "drops": [
-        5,
         80,
         9
       ],
@@ -2819,10 +2788,7 @@
         "agility": 14,
         "luck": 13
       },
-      "drops": [
-        4,
-        6
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 3,
       "actionRates": {
@@ -2924,7 +2890,6 @@
         "luck": 11
       },
       "drops": [
-        62,
         14
       ],
       "category": "enemy",
@@ -3388,7 +3353,6 @@
       },
       "drops": [
         54,
-        68,
         15
       ],
       "category": "enemy",
@@ -3422,7 +3386,6 @@
         "luck": 14
       },
       "drops": [
-        67,
         39,
         59
       ],
@@ -3492,7 +3455,6 @@
         "luck": 16
       },
       "drops": [
-        65,
         78
       ],
       "category": "enemy",
@@ -3637,7 +3599,6 @@
         "luck": 13
       },
       "drops": [
-        62,
         29,
         14
       ],
@@ -3818,8 +3779,7 @@
       },
       "drops": [
         86,
-        40,
-        6
+        40
       ],
       "category": "enemy",
       "job": 15,
@@ -3887,9 +3847,7 @@
         "luck": 17
       },
       "drops": [
-        6,
-        56,
-        3
+        56
       ],
       "category": "enemy",
       "job": 6,
@@ -4068,9 +4026,7 @@
         "luck": 11
       },
       "drops": [
-        8,
-        46,
-        65
+        46
       ],
       "category": "enemy",
       "job": 1,
@@ -4104,7 +4060,6 @@
       },
       "drops": [
         77,
-        65,
         50
       ],
       "category": "enemy",
@@ -4429,8 +4384,7 @@
       },
       "drops": [
         18,
-        33,
-        7
+        33
       ],
       "category": "enemy",
       "job": 14,
@@ -4502,7 +4456,6 @@
         "luck": 14
       },
       "drops": [
-        65,
         48
       ],
       "category": "enemy",
@@ -4570,7 +4523,6 @@
         "luck": 13
       },
       "drops": [
-        68,
         55,
         15
       ],
@@ -4644,8 +4596,7 @@
       },
       "drops": [
         47,
-        9,
-        68
+        9
       ],
       "category": "enemy",
       "job": 13,
@@ -4717,7 +4668,6 @@
         "luck": 17
       },
       "drops": [
-        62,
         81,
         24
       ],
@@ -4752,8 +4702,7 @@
         "luck": 12
       },
       "drops": [
-        70,
-        61
+        70
       ],
       "category": "enemy",
       "job": 3,
@@ -4898,8 +4847,7 @@
       },
       "drops": [
         87,
-        21,
-        4
+        21
       ],
       "category": "enemy",
       "job": 15,
@@ -4966,9 +4914,7 @@
         "agility": 15,
         "luck": 13
       },
-      "drops": [
-        4
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 8,
       "actionRates": {
@@ -5000,8 +4946,7 @@
         "luck": 17
       },
       "drops": [
-        89,
-        63
+        89
       ],
       "category": "enemy",
       "job": 2,
@@ -5254,8 +5199,6 @@
         "luck": 18
       },
       "drops": [
-        6,
-        4,
         11
       ],
       "category": "enemy",
@@ -5292,7 +5235,6 @@
         "luck": 14
       },
       "drops": [
-        62,
         32
       ],
       "category": "enemy",
@@ -5441,10 +5383,7 @@
         "agility": 14,
         "luck": 17
       },
-      "drops": [
-        7,
-        7
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 7,
       "actionRates": {
@@ -5479,8 +5418,7 @@
         "luck": 17
       },
       "drops": [
-        47,
-        6
+        47
       ],
       "category": "enemy",
       "job": 7,
@@ -5555,11 +5493,7 @@
         "agility": 23,
         "luck": 16
       },
-      "drops": [
-        6,
-        6,
-        5
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 15,
       "actionRates": {
@@ -5857,8 +5791,7 @@
       },
       "drops": [
         33,
-        96,
-        62
+        96
       ],
       "category": "enemy",
       "job": 6,
@@ -5969,8 +5902,7 @@
       },
       "drops": [
         95,
-        93,
-        5
+        93
       ],
       "category": "enemy",
       "job": 10,
@@ -6008,10 +5940,7 @@
         "agility": 22,
         "luck": 20
       },
-      "drops": [
-        5,
-        2
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 16,
       "actionRates": {
@@ -6118,9 +6047,7 @@
         "agility": 19,
         "luck": 14
       },
-      "drops": [
-        1
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 7,
       "actionRates": {
@@ -6155,7 +6082,6 @@
       },
       "drops": [
         31,
-        8,
         86
       ],
       "category": "enemy",
@@ -6307,7 +6233,6 @@
         "luck": 15
       },
       "drops": [
-        8,
         59
       ],
       "category": "enemy",
@@ -6379,7 +6304,6 @@
         "luck": 18
       },
       "drops": [
-        5,
         37
       ],
       "category": "enemy",
@@ -6493,8 +6417,7 @@
       },
       "drops": [
         98,
-        15,
-        5
+        15
       ],
       "category": "enemy",
       "job": 7,
@@ -6680,8 +6603,7 @@
         "luck": 15
       },
       "drops": [
-        72,
-        68
+        72
       ],
       "category": "enemy",
       "job": 15,
@@ -6715,9 +6637,7 @@
         "agility": 14,
         "luck": 17
       },
-      "drops": [
-        7
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 3,
       "actionRates": {
@@ -6751,8 +6671,7 @@
         "luck": 18
       },
       "drops": [
-        39,
-        2
+        39
       ],
       "category": "enemy",
       "job": 1,
@@ -6938,11 +6857,7 @@
         "agility": 18,
         "luck": 22
       },
-      "drops": [
-        8,
-        68,
-        5
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 1,
       "actionRates": {
@@ -6978,7 +6893,6 @@
         "luck": 17
       },
       "drops": [
-        8,
         80
       ],
       "category": "enemy",
@@ -7014,9 +6928,7 @@
         "luck": 21
       },
       "drops": [
-        37,
-        3,
-        65
+        37
       ],
       "category": "enemy",
       "job": 8,
@@ -7171,8 +7083,7 @@
       },
       "drops": [
         73,
-        85,
-        5
+        85
       ],
       "category": "enemy",
       "job": 1,
@@ -7283,7 +7194,6 @@
         "luck": 20
       },
       "drops": [
-        63,
         30
       ],
       "category": "enemy",
@@ -7438,7 +7348,6 @@
         "luck": 22
       },
       "drops": [
-        67,
         22,
         88
       ],
@@ -7669,8 +7578,7 @@
         "luck": 20
       },
       "drops": [
-        69,
-        65
+        69
       ],
       "category": "enemy",
       "job": 8,
@@ -7824,7 +7732,6 @@
         "luck": 19
       },
       "drops": [
-        61,
         13
       ],
       "category": "enemy",
@@ -8358,7 +8265,6 @@
       },
       "drops": [
         51,
-        63,
         19
       ],
       "category": "enemy",
@@ -8394,8 +8300,7 @@
         "luck": 23
       },
       "drops": [
-        59,
-        63
+        59
       ],
       "category": "enemy",
       "job": 3,
@@ -8544,9 +8449,7 @@
         "agility": 22,
         "luck": 19
       },
-      "drops": [
-        7
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 3,
       "actionRates": {
@@ -8583,8 +8486,7 @@
       },
       "drops": [
         88,
-        57,
-        2
+        57
       ],
       "category": "enemy",
       "job": 1,
@@ -8658,7 +8560,6 @@
         "luck": 18
       },
       "drops": [
-        2,
         79,
         84
       ],
@@ -8771,9 +8672,7 @@
         "agility": 25,
         "luck": 23
       },
-      "drops": [
-        64
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 3,
       "actionRates": {
@@ -8845,7 +8744,6 @@
         "luck": 20
       },
       "drops": [
-        65,
         37
       ],
       "category": "enemy",
@@ -8959,8 +8857,7 @@
         "luck": 20
       },
       "drops": [
-        45,
-        67
+        45
       ],
       "category": "enemy",
       "job": 16,
@@ -8996,8 +8893,7 @@
         "luck": 25
       },
       "drops": [
-        35,
-        68
+        35
       ],
       "category": "enemy",
       "job": 6,
@@ -9104,7 +9000,6 @@
       },
       "drops": [
         87,
-        7,
         23
       ],
       "category": "enemy",
@@ -9517,8 +9412,7 @@
         "luck": 25
       },
       "drops": [
-        16,
-        6
+        16
       ],
       "category": "enemy",
       "job": 7,
@@ -9591,7 +9485,6 @@
         "luck": 21
       },
       "drops": [
-        8,
         12
       ],
       "category": "enemy",
@@ -9666,10 +9559,7 @@
         "agility": 23,
         "luck": 22
       },
-      "drops": [
-        8,
-        61
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 7,
       "actionRates": {
@@ -9774,9 +9664,7 @@
         "agility": 22,
         "luck": 21
       },
-      "drops": [
-        3
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 8,
       "actionRates": {
@@ -9811,10 +9699,7 @@
         "agility": 24,
         "luck": 22
       },
-      "drops": [
-        8,
-        3
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 10,
       "actionRates": {
@@ -10036,8 +9921,7 @@
       },
       "drops": [
         49,
-        13,
-        62
+        13
       ],
       "category": "enemy",
       "job": 10,
@@ -10111,8 +9995,7 @@
         "luck": 20
       },
       "drops": [
-        21,
-        7
+        21
       ],
       "category": "enemy",
       "job": 1,
@@ -10146,9 +10029,7 @@
         "agility": 25,
         "luck": 25
       },
-      "drops": [
-        7
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 3,
       "actionRates": {
@@ -10257,8 +10138,7 @@
         "luck": 20
       },
       "drops": [
-        73,
-        8
+        73
       ],
       "category": "enemy",
       "job": 10,
@@ -10296,7 +10176,6 @@
         "luck": 23
       },
       "drops": [
-        67,
         54
       ],
       "category": "enemy",
@@ -10407,8 +10286,7 @@
       },
       "drops": [
         80,
-        76,
-        67
+        76
       ],
       "category": "enemy",
       "job": 3,
@@ -10598,8 +10476,7 @@
         "luck": 25
       },
       "drops": [
-        91,
-        65
+        91
       ],
       "category": "enemy",
       "job": 7,
@@ -10754,9 +10631,7 @@
         "agility": 31,
         "luck": 27
       },
-      "drops": [
-        61
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 16,
       "actionRates": {
@@ -10983,9 +10858,7 @@
         "agility": 34,
         "luck": 24
       },
-      "drops": [
-        61
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 16,
       "actionRates": {
@@ -11290,9 +11163,7 @@
         "luck": 23
       },
       "drops": [
-        3,
-        76,
-        65
+        76
       ],
       "category": "enemy",
       "job": 6,
@@ -11367,8 +11238,7 @@
       },
       "drops": [
         88,
-        81,
-        2
+        81
       ],
       "category": "enemy",
       "job": 7,
@@ -11486,7 +11356,6 @@
       },
       "drops": [
         86,
-        64,
         20
       ],
       "category": "enemy",
@@ -11676,8 +11545,7 @@
       },
       "drops": [
         94,
-        17,
-        62
+        17
       ],
       "category": "enemy",
       "job": 16,
@@ -11753,9 +11621,7 @@
         "luck": 25
       },
       "drops": [
-        79,
-        7,
-        2
+        79
       ],
       "category": "enemy",
       "job": 6,
@@ -11791,9 +11657,7 @@
         "agility": 23,
         "luck": 29
       },
-      "drops": [
-        65
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 6,
       "actionRates": {
@@ -11869,7 +11733,6 @@
       },
       "drops": [
         39,
-        66,
         72
       ],
       "category": "enemy",
@@ -11908,7 +11771,6 @@
         "luck": 24
       },
       "drops": [
-        61,
         92,
         85
       ],
@@ -11947,7 +11809,6 @@
         "luck": 25
       },
       "drops": [
-        67,
         48,
         90
       ],
@@ -12177,9 +12038,7 @@
         "agility": 25,
         "luck": 28
       },
-      "drops": [
-        65
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 7,
       "actionRates": {
@@ -12215,8 +12074,7 @@
         "luck": 28
       },
       "drops": [
-        55,
-        2
+        55
       ],
       "category": "enemy",
       "job": 5,
@@ -12254,8 +12112,7 @@
       },
       "drops": [
         33,
-        19,
-        8
+        19
       ],
       "category": "enemy",
       "job": 7,
@@ -12408,7 +12265,6 @@
         "luck": 29
       },
       "drops": [
-        1,
         43
       ],
       "category": "enemy",
@@ -12523,7 +12379,6 @@
         "luck": 30
       },
       "drops": [
-        2,
         15,
         86
       ],
@@ -12604,8 +12459,7 @@
       },
       "drops": [
         25,
-        42,
-        66
+        42
       ],
       "category": "enemy",
       "job": 15,
@@ -13194,7 +13048,6 @@
         "luck": 32
       },
       "drops": [
-        6,
         29
       ],
       "category": "enemy",
@@ -13231,10 +13084,7 @@
         "agility": 31,
         "luck": 27
       },
-      "drops": [
-        6,
-        6
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 5,
       "actionRates": {
@@ -13310,8 +13160,7 @@
         "luck": 29
       },
       "drops": [
-        78,
-        1
+        78
       ],
       "category": "enemy",
       "job": 16,
@@ -13540,7 +13389,6 @@
         "luck": 29
       },
       "drops": [
-        65,
         97,
         16
       ],
@@ -13657,7 +13505,6 @@
       },
       "drops": [
         96,
-        1,
         74
       ],
       "category": "enemy",
@@ -13736,7 +13583,6 @@
         "luck": 30
       },
       "drops": [
-        62,
         33,
         40
       ],
@@ -13816,7 +13662,6 @@
         "luck": 31
       },
       "drops": [
-        1,
         12,
         19
       ],
@@ -13895,8 +13740,7 @@
       },
       "drops": [
         37,
-        25,
-        5
+        25
       ],
       "category": "enemy",
       "job": 5,
@@ -14012,9 +13856,7 @@
         "agility": 35,
         "luck": 26
       },
-      "drops": [
-        65
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 16,
       "actionRates": {
@@ -14050,7 +13892,6 @@
         "luck": 32
       },
       "drops": [
-        62,
         99,
         32
       ],
@@ -14130,7 +13971,6 @@
       },
       "drops": [
         23,
-        61,
         41
       ],
       "category": "enemy",
@@ -14208,8 +14048,6 @@
         "luck": 31
       },
       "drops": [
-        6,
-        62,
         48
       ],
       "category": "enemy",
@@ -14250,9 +14088,7 @@
         "luck": 32
       },
       "drops": [
-        17,
-        7,
-        68
+        17
       ],
       "category": "enemy",
       "job": 16,
@@ -14327,7 +14163,6 @@
         "luck": 33
       },
       "drops": [
-        61,
         79
       ],
       "category": "enemy",
@@ -14402,9 +14237,7 @@
         "luck": 30
       },
       "drops": [
-        20,
-        61,
-        2
+        20
       ],
       "category": "enemy",
       "job": 6,
@@ -14443,7 +14276,6 @@
         "luck": 34
       },
       "drops": [
-        7,
         51,
         13
       ],
@@ -14717,9 +14549,7 @@
         "luck": 30
       },
       "drops": [
-        22,
-        4,
-        5
+        22
       ],
       "category": "enemy",
       "job": 16,
@@ -14836,9 +14666,7 @@
         "luck": 35
       },
       "drops": [
-        63,
-        97,
-        62
+        97
       ],
       "category": "enemy",
       "job": 2,
@@ -14959,7 +14787,6 @@
       },
       "drops": [
         80,
-        63,
         25
       ],
       "category": "enemy",
@@ -15072,7 +14899,6 @@
         "luck": 32
       },
       "drops": [
-        2,
         16
       ],
       "category": "enemy",
@@ -15110,9 +14936,7 @@
         "agility": 29,
         "luck": 30
       },
-      "drops": [
-        61
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 2,
       "actionRates": {
@@ -15187,9 +15011,7 @@
         "agility": 35,
         "luck": 29
       },
-      "drops": [
-        2
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 16,
       "actionRates": {
@@ -15380,9 +15202,7 @@
         "agility": 34,
         "luck": 32
       },
-      "drops": [
-        3
-      ],
+      "drops": [],
       "category": "enemy",
       "job": 11,
       "actionRates": {
@@ -15730,8 +15550,7 @@
         "luck": 32
       },
       "drops": [
-        77,
-        3
+        77
       ],
       "category": "enemy",
       "job": 4,
@@ -15769,8 +15588,7 @@
         "luck": 31
       },
       "drops": [
-        71,
-        66
+        71
       ],
       "category": "enemy",
       "job": 4,
@@ -15924,7 +15742,6 @@
         "luck": 31
       },
       "drops": [
-        65,
         90
       ],
       "category": "enemy",
