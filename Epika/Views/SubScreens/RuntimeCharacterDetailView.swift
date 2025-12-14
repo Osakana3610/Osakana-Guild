@@ -36,57 +36,39 @@ struct CharacterDetailContent: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // ヘッダー
-                detailCard {
-                    CharacterHeaderSection(character: character,
-                                           onRename: onRename,
-                                           onAvatarChange: onAvatarChange)
-                }
-
-                detailCard(title: "プロフィール") {
-                    CharacterIdentitySection(character: character)
-                }
-
-                detailCard(title: "レベル / 経験値") {
-                    CharacterLevelSection(character: character)
-                }
-
-                detailCard(title: "基本能力値") {
-                    CharacterBaseStatsSection(character: character)
-                }
-
-                detailCard(title: "戦闘ステータス") {
-                    CharacterCombatStatsSection(character: character)
-                }
-
-                detailCard(title: "行動優先度") {
-                    CharacterActionPreferencesSection(character: character,
-                                                      onActionPreferencesChange: onActionPreferencesChange)
-                }
-
-                detailCard(title: "習得スキル") {
-                    CharacterSkillsSection(character: character)
-                }
+        List {
+            Section {
+                CharacterHeaderSection(character: character,
+                                       onRename: onRename,
+                                       onAvatarChange: onAvatarChange)
             }
-            .padding()
+
+            Section("プロフィール") {
+                CharacterIdentitySection(character: character)
+            }
+
+            Section("レベル / 経験値") {
+                CharacterLevelSection(character: character)
+            }
+
+            Section("基本能力値") {
+                CharacterBaseStatsSection(character: character)
+            }
+
+            Section("戦闘ステータス") {
+                CharacterCombatStatsSection(character: character)
+            }
+
+            Section("行動優先度") {
+                CharacterActionPreferencesSection(character: character,
+                                                  onActionPreferencesChange: onActionPreferencesChange)
+            }
+
+            Section("習得スキル") {
+                CharacterSkillsSection(character: character)
+            }
         }
-        .background(Color(.systemGroupedBackground))
+        .listStyle(.insetGrouped)
         .avoidBottomGameInfo()
-    }
-
-    @ViewBuilder
-    private func detailCard<Content: View>(title: String? = nil, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if let title {
-                Text(title)
-                    .font(.headline)
-            }
-            content()
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
