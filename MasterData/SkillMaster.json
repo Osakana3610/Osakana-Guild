@@ -9035,7 +9035,7 @@
         "variants": [
           {
             "id": 1064,
-            "label": "[x1.5] 殺意・達人",
+            "label": "[x1.5] 反撃適正・中",
             "value": {
               "multiplier": 1.5
             }
@@ -9176,23 +9176,6 @@
         ]
       },
       {
-        "familyId": "procRate.multiplier.bravery",
-        "effectType": "procRate",
-        "parameters": {
-          "target": "bravery",
-          "stacking": "multiply"
-        },
-        "variants": [
-          {
-            "id": 1074,
-            "label": "[x2.0] 勇猛果敢",
-            "value": {
-              "multiplier": 2.0
-            }
-          }
-        ]
-      },
-      {
         "familyId": "procRate.multiplier.reflectionRecovery",
         "effectType": "procRate",
         "parameters": {
@@ -9236,7 +9219,7 @@
         "variants": [
           {
             "id": 1077,
-            "label": "[+8%] 殺意",
+            "label": "[+8%] 反撃意識",
             "value": {
               "addPercent": 8.0
             }
@@ -9253,7 +9236,7 @@
         "variants": [
           {
             "id": 1078,
-            "label": "[+10%] 闘争心",
+            "label": "[+10%] 戦意高揚",
             "value": {
               "addPercent": 10.0
             }
@@ -9270,7 +9253,7 @@
         "variants": [
           {
             "id": 1079,
-            "label": "[+10%] 必殺連撃",
+            "label": "[+10%] 会心追撃",
             "value": {
               "addPercent": 10.0
             }
@@ -14524,7 +14507,7 @@
         "variants": [
           {
             "id": 65104,
-            "label": "[職業:剣聖] 達人 回避時反撃",
+            "label": "[職業:剣聖] 回避反撃",
             "value": {
               "additive": 50
             }
@@ -15572,7 +15555,7 @@
         "variants": [
           {
             "id": 65264,
-            "label": "[マスター:剣聖] 達人 回避時反撃80%",
+            "label": "[マスター:剣聖] 回避反撃80%",
             "value": {
               "additive": 80
             }
