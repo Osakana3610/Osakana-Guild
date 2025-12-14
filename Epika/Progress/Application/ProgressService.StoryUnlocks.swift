@@ -1,45 +1,17 @@
 import Foundation
+import SwiftData
 
-// MARK: - Story & Dungeon Unlocks
+// MARK: - Unlock Target Type
+
 extension ProgressService {
-    @discardableResult
-    func markStoryNodeAsRead(_ nodeId: UInt16) async throws -> StorySnapshot {
-        let snapshot = try await story.markNodeAsRead(nodeId)
-        try await synchronizeStoryAndDungeonUnlocks()
-        return snapshot
+    enum UnlockTarget {
+        case dungeon(UInt16)
     }
+}
 
-    func synchronizeStoryAndDungeonUnlocks() async throws {
-        let storyDefinitions = try await environment.masterDataService.getAllStoryNodes()
-        let dungeonDefinitions = try await environment.masterDataService.getAllDungeons()
+// MARK: - Mania Difficulty Unlock
 
-        let storySnapshot = try await story.currentStorySnapshot()
-        var dungeonSnapshots = try await dungeon.allDungeonSnapshots()
-
-        var didUnlockDifficulty = false
-        for snapshot in dungeonSnapshots {
-            if try await unlockManiaDifficultyIfEligible(for: snapshot) {
-                didUnlockDifficulty = true
-            }
-        }
-
-        if didUnlockDifficulty {
-            dungeonSnapshots = try await dungeon.allDungeonSnapshots()
-        }
-
-        let readStoryIds = storySnapshot.readNodeIds
-        let clearedDungeonIds = Set(dungeonSnapshots.filter { $0.isCleared }.map { $0.dungeonId })
-
-        try await synchronizeStoryUnlocks(definitions: storyDefinitions,
-                                          readStoryIds: readStoryIds,
-                                          clearedDungeonIds: clearedDungeonIds)
-
-        try await synchronizeDungeonUnlocks(definitions: dungeonDefinitions,
-                                            readStoryIds: readStoryIds,
-                                            clearedDungeonIds: clearedDungeonIds)
-        NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
-    }
-
+extension ProgressService {
     @discardableResult
     func unlockManiaDifficultyIfEligible(for snapshot: DungeonSnapshot) async throws -> Bool {
         guard snapshot.isCleared,
@@ -49,29 +21,71 @@ extension ProgressService {
     }
 }
 
-// MARK: - Private Helpers
-private extension ProgressService {
-    enum StoryRequirement {
-        case storyRead(UInt16)
-        case dungeonCleared(UInt16)
-    }
+// MARK: - Story & Dungeon Unlocks (Push型)
 
-    enum DungeonRequirement {
-        case storyRead(UInt16)
-        case dungeonCleared(UInt16)
-        case alwaysUnlocked
-    }
+extension ProgressService {
+    /// ストーリーノードを既読にし、同一トランザクション内で解放対象を処理する
+    @discardableResult
+    func markStoryNodeAsRead(_ nodeId: UInt16) async throws -> StorySnapshot {
+        let context = ModelContext(container)
+        context.autosaveEnabled = false
 
-    func synchronizeStoryUnlocks(definitions: [StoryNodeDefinition],
-                                 readStoryIds: Set<UInt16>,
-                                 clearedDungeonIds: Set<UInt16>) async throws {
-        let sortedDefinitions = definitions.sorted { lhs, rhs in
-            if lhs.chapter != rhs.chapter { return lhs.chapter < rhs.chapter }
-            if lhs.section != rhs.section { return lhs.section < rhs.section }
-            return lhs.id < rhs.id
+        // 1. ストーリー定義を取得（unlocksModulesを含む）
+        let definition = try await environment.masterDataService.getStoryNode(id: nodeId)
+
+        // 2. ストーリーレコードを取得/作成し、既読にする
+        let storyRecord = try ensureStoryRecord(nodeId: nodeId, context: context)
+        guard storyRecord.isUnlocked else {
+            throw ProgressError.storyLocked(nodeId: String(nodeId))
+        }
+        let now = Date()
+        if !storyRecord.isRead {
+            storyRecord.isRead = true
+            storyRecord.updatedAt = now
         }
 
-        for definition in sortedDefinitions {
+        // 3. unlockModuleIdsを処理（Push型解放）
+        for module in definition.unlockModuleIds {
+            if module.isEmpty { continue }
+            let target = try parseUnlockModule(module)
+            switch target {
+            case .dungeon(let dungeonId):
+                let dungeonRecord = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
+                if !dungeonRecord.isUnlocked {
+                    dungeonRecord.isUnlocked = true
+                    dungeonRecord.highestUnlockedDifficulty = max(dungeonRecord.highestUnlockedDifficulty, 1)
+                    dungeonRecord.updatedAt = now
+                }
+            }
+        }
+
+        // 4. 一括保存
+        try context.save()
+
+        // 5. 通知を送信
+        NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+
+        // 6. スナップショットを返す
+        let allNodes = try fetchAllStoryRecords(context: context)
+        return makeStorySnapshot(from: allNodes, updatedAt: now)
+    }
+
+    /// ダンジョンとストーリーの解放状態を同期する（ダンジョンクリア→ストーリー解放）
+    func synchronizeStoryAndDungeonUnlocks() async throws {
+        let context = ModelContext(container)
+        context.autosaveEnabled = false
+
+        let storyDefinitions = try await environment.masterDataService.getAllStoryNodes()
+
+        // クリア済みダンジョンIDを取得
+        let clearedDungeonIds = try fetchClearedDungeonIds(context: context)
+        // 既読ストーリーIDを取得
+        let readStoryIds = try fetchReadStoryIds(context: context)
+
+        var didChange = false
+
+        // ダンジョンクリア→ストーリー解放の処理
+        for definition in storyDefinitions {
             let requirements = definition.unlockRequirements
                 .compactMap { parseStoryRequirement($0) }
 
@@ -88,40 +102,66 @@ private extension ProgressService {
                     }
                 }
             }
+            // 既読なら解放済みとみなす
             if readStoryIds.contains(definition.id) {
                 shouldUnlock = true
             }
-            try await story.setUnlocked(shouldUnlock, nodeId: definition.id)
+
+            let record = try ensureStoryRecord(nodeId: definition.id, context: context)
+            if record.isUnlocked != shouldUnlock {
+                record.isUnlocked = shouldUnlock
+                record.updatedAt = Date()
+                didChange = true
+            }
+        }
+
+        // Mania難易度解放の処理（難易度アップ時にfurthestClearedFloorをリセット）
+        let dungeonSnapshots = try fetchAllDungeonRecords(context: context)
+        for dungeonRecord in dungeonSnapshots {
+            if dungeonRecord.isCleared,
+               dungeonRecord.highestUnlockedDifficulty < UInt8(maniaDifficultyRank) {
+                dungeonRecord.highestUnlockedDifficulty = UInt8(maniaDifficultyRank)
+                dungeonRecord.furthestClearedFloor = 0
+                dungeonRecord.updatedAt = Date()
+                didChange = true
+            }
+        }
+
+        if context.hasChanges {
+            try context.save()
+        }
+
+        if didChange {
+            NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
         }
     }
+}
 
-    func synchronizeDungeonUnlocks(definitions: [DungeonDefinition],
-                                   readStoryIds: Set<UInt16>,
-                                   clearedDungeonIds: Set<UInt16>) async throws {
-        for definition in definitions {
-            let requirements = try definition.unlockConditions.map { try parseDungeonRequirement($0) }
+// MARK: - Parse Functions
 
-            var shouldUnlock: Bool
-            if requirements.isEmpty {
-                shouldUnlock = true
-            } else {
-                shouldUnlock = requirements.allSatisfy { requirement in
-                    switch requirement {
-                    case .alwaysUnlocked:
-                        return true
-                    case .storyRead(let storyId):
-                        return readStoryIds.contains(storyId)
-                    case .dungeonCleared(let dungeonId):
-                        return clearedDungeonIds.contains(dungeonId)
-                    }
-                }
+private extension ProgressService {
+    enum StoryRequirement {
+        case storyRead(UInt16)
+        case dungeonCleared(UInt16)
+    }
+
+    func parseUnlockModule(_ module: String) throws -> UnlockTarget {
+        let trimmed = module.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = trimmed.split(separator: ":", maxSplits: 1)
+        guard parts.count == 2 else {
+            throw ProgressError.invalidUnlockModule(module)
+        }
+        let prefix = String(parts[0]).trimmingCharacters(in: .whitespacesAndNewlines)
+        let idString = String(parts[1]).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        switch prefix {
+        case "dungeon":
+            guard let id = UInt16(idString) else {
+                throw ProgressError.invalidUnlockModule(module)
             }
-
-            if clearedDungeonIds.contains(definition.id) {
-                shouldUnlock = true
-            }
-
-            try await dungeon.setUnlocked(shouldUnlock, dungeonId: definition.id)
+            return .dungeon(id)
+        default:
+            throw ProgressError.invalidUnlockModule(module)
         }
     }
 
@@ -147,28 +187,83 @@ private extension ProgressService {
         return .storyRead(id)
     }
 
-    func parseDungeonRequirement(_ raw: String) throws -> DungeonRequirement {
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty { return .alwaysUnlocked }
-        if trimmed.hasPrefix("storyRead:") {
-            let idString = String(truncatedRequirementValue(trimmed))
-            guard let id = UInt16(idString) else {
-                throw ProgressError.invalidInput(description: "無効なstoryRead ID: \(idString)")
-            }
-            return .storyRead(id)
-        }
-        if trimmed.hasPrefix("dungeonClear:") {
-            let idString = String(truncatedRequirementValue(trimmed))
-            guard let id = UInt16(idString) else {
-                throw ProgressError.invalidInput(description: "無効なdungeonClear ID: \(idString)")
-            }
-            return .dungeonCleared(id)
-        }
-        throw ProgressError.invalidInput(description: "未知のダンジョン解放条件を検出しました: \(trimmed)")
-    }
-
     func truncatedRequirementValue(_ raw: String) -> Substring {
         guard let separatorIndex = raw.firstIndex(of: ":") else { return raw[...] }
         return raw[raw.index(after: separatorIndex)...]
+    }
+}
+
+// MARK: - SwiftData Helpers
+
+private extension ProgressService {
+    func ensureStoryRecord(nodeId: UInt16, context: ModelContext) throws -> StoryNodeProgressRecord {
+        var descriptor = FetchDescriptor<StoryNodeProgressRecord>(
+            predicate: #Predicate { $0.nodeId == nodeId }
+        )
+        descriptor.fetchLimit = 1
+        if let existing = try context.fetch(descriptor).first {
+            return existing
+        }
+        let record = StoryNodeProgressRecord(
+            nodeId: nodeId,
+            isUnlocked: false,
+            isRead: false,
+            isRewardClaimed: false,
+            updatedAt: Date()
+        )
+        context.insert(record)
+        return record
+    }
+
+    func ensureDungeonRecord(dungeonId: UInt16, context: ModelContext) throws -> DungeonRecord {
+        var descriptor = FetchDescriptor<DungeonRecord>(
+            predicate: #Predicate { $0.dungeonId == dungeonId }
+        )
+        descriptor.fetchLimit = 1
+        if let existing = try context.fetch(descriptor).first {
+            return existing
+        }
+        let record = DungeonRecord(
+            dungeonId: dungeonId,
+            isUnlocked: false,
+            highestUnlockedDifficulty: 0,
+            highestClearedDifficulty: nil,
+            furthestClearedFloor: 0,
+            updatedAt: Date()
+        )
+        context.insert(record)
+        return record
+    }
+
+    func fetchAllStoryRecords(context: ModelContext) throws -> [StoryNodeProgressRecord] {
+        let descriptor = FetchDescriptor<StoryNodeProgressRecord>()
+        return try context.fetch(descriptor)
+    }
+
+    func fetchAllDungeonRecords(context: ModelContext) throws -> [DungeonRecord] {
+        let descriptor = FetchDescriptor<DungeonRecord>()
+        return try context.fetch(descriptor)
+    }
+
+    func fetchClearedDungeonIds(context: ModelContext) throws -> Set<UInt16> {
+        let records = try fetchAllDungeonRecords(context: context)
+        return Set(records.filter { $0.isCleared }.map(\.dungeonId))
+    }
+
+    func fetchReadStoryIds(context: ModelContext) throws -> Set<UInt16> {
+        let records = try fetchAllStoryRecords(context: context)
+        return Set(records.filter { $0.isRead }.map(\.nodeId))
+    }
+
+    func makeStorySnapshot(from nodes: [StoryNodeProgressRecord], updatedAt: Date) -> StorySnapshot {
+        let unlocked = Set(nodes.filter { $0.isUnlocked }.map(\.nodeId))
+        let read = Set(nodes.filter { $0.isRead }.map(\.nodeId))
+        let rewarded = Set(nodes.filter { $0.isRewardClaimed }.map(\.nodeId))
+        return StorySnapshot(
+            unlockedNodeIds: unlocked,
+            readNodeIds: read,
+            rewardedNodeIds: rewarded,
+            updatedAt: updatedAt
+        )
     }
 }

@@ -4,6 +4,7 @@ import SwiftData
 
 @MainActor
 final class ProgressService: ObservableObject {
+    let container: ModelContainer
     let gameState: GameStateService
     let environment: ProgressEnvironment
     let character: CharacterProgressService
@@ -51,6 +52,7 @@ final class ProgressService: ObservableObject {
     init(container: ModelContainer,
          environment: ProgressEnvironment = .live,
          cloudKitCleanup: ProgressCloudKitCleanupService = .init()) {
+        self.container = container
         self.environment = environment
         let gameStateService = GameStateService(container: container)
         self.gameState = gameStateService

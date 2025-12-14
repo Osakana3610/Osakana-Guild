@@ -205,6 +205,15 @@ actor MasterDataRuntimeService {
         return try await repository.allStories()
     }
 
+    func getStoryNode(id: UInt16) async throws -> StoryNodeDefinition {
+        try await ensureInitialized()
+        let allNodes = try await repository.allStories()
+        guard let node = allNodes.first(where: { $0.id == id }) else {
+            throw ProgressError.invalidInput(description: "ストーリーノードが見つかりません: \(id)")
+        }
+        return node
+    }
+
     // MARK: - Skills
 
     func getAllSkills() async throws -> [SkillDefinition] {
