@@ -21,30 +21,6 @@ struct PartyDropBonuses: Sendable {
                                           fortune: 0)
 }
 
-/// ドロップ判定時に参照する周辺情報。
-struct DropContext: Sendable {
-    let enemy: EnemyDefinition
-    let partyBonuses: PartyDropBonuses
-    let isRabiTicketActive: Bool
-    let hasTitleTreasure: Bool
-    let dungeonId: UInt16?
-    let floorNumber: Int?
-
-    init(enemy: EnemyDefinition,
-         partyBonuses: PartyDropBonuses,
-         isRabiTicketActive: Bool = false,
-         hasTitleTreasure: Bool = false,
-         dungeonId: UInt16? = nil,
-         floorNumber: Int? = nil) {
-        self.enemy = enemy
-        self.partyBonuses = partyBonuses
-        self.isRabiTicketActive = isRabiTicketActive
-        self.hasTitleTreasure = hasTitleTreasure
-        self.dungeonId = dungeonId
-        self.floorNumber = floorNumber
-    }
-}
-
 /// 1回のドロップ判定結果。
 struct DropRollResult: Sendable {
     let willDrop: Bool
@@ -68,6 +44,8 @@ struct SuperRareSessionState {
 struct DropOutcome: Sendable {
     let results: [ItemDropResult]
     let superRareState: SuperRareDailyState
+    /// 今回の戦闘で新たにドロップしたアイテムID
+    let newlyDroppedItemIds: Set<UInt16>
 }
 
 extension RuntimePartyState {
