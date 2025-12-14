@@ -313,6 +313,21 @@ final class MasterDataImportTests: XCTestCase {
         try assertSQLiteCount("synthesis_recipes", equals: json.recipes.count)
     }
 
+    /// CharacterNameMaster.jsonがSQLiteに正しくインポートされていることを検証
+    func testCharacterNameMasterJSONMatchesSQLite() throws {
+        struct Name: Decodable { let id: Int; let genderCode: Int; let name: String }
+        struct File: Decodable { let names: [Name] }
+
+        let json = try loadJSON(File.self, from: "CharacterNameMaster.json")
+        try assertSQLiteCount("character_names", equals: json.names.count)
+
+        // 各genderCodeに最低1件存在することを確認
+        let genderCodes = Set(json.names.map(\.genderCode))
+        XCTAssertTrue(genderCodes.contains(1), "male names (genderCode=1) が存在しない")
+        XCTAssertTrue(genderCodes.contains(2), "female names (genderCode=2) が存在しない")
+        XCTAssertTrue(genderCodes.contains(3), "genderless names (genderCode=3) が存在しない")
+    }
+
     // MARK: - Helper Methods
 
     private func loadJSON<T: Decodable>(_ type: T.Type, from filename: String) throws -> T {
@@ -415,6 +430,37 @@ final class MasterDataImportTests: XCTestCase {
         for story in stories {
             XCTAssertFalse(story.title.isEmpty, "Story id=\(story.id) の title が空")
         }
+    }
+
+    func testAllCharacterNamesHaveRequiredFields() async throws {
+        let repository = MasterDataRepository()
+        let names = try await repository.allCharacterNames()
+
+        XCTAssertGreaterThan(names.count, 0, "character_names が空")
+
+        for entry in names {
+            XCTAssertFalse(entry.name.isEmpty, "CharacterName id=\(entry.id) の name が空")
+            XCTAssertTrue((1...3).contains(entry.genderCode),
+                          "CharacterName id=\(entry.id) の genderCode が不正: \(entry.genderCode)")
+        }
+
+        // 各genderCodeで取得できることを確認
+        let maleNames = try await repository.characterNames(forGenderCode: 1)
+        let femaleNames = try await repository.characterNames(forGenderCode: 2)
+        let genderlessNames = try await repository.characterNames(forGenderCode: 3)
+
+        XCTAssertGreaterThan(maleNames.count, 0, "male names が空")
+        XCTAssertGreaterThan(femaleNames.count, 0, "female names が空")
+        XCTAssertGreaterThan(genderlessNames.count, 0, "genderless names が空")
+
+        // ランダム取得テスト
+        let randomMale = try await repository.randomCharacterName(forGenderCode: 1)
+        let randomFemale = try await repository.randomCharacterName(forGenderCode: 2)
+        let randomGenderless = try await repository.randomCharacterName(forGenderCode: 3)
+
+        XCTAssertFalse(randomMale.isEmpty, "random male name が空")
+        XCTAssertFalse(randomFemale.isEmpty, "random female name が空")
+        XCTAssertFalse(randomGenderless.isEmpty, "random genderless name が空")
     }
 
     // MARK: - 参照整合性テスト

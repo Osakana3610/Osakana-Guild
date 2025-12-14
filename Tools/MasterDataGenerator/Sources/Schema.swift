@@ -663,6 +663,14 @@ extension Generator {
                 payload_json TEXT NOT NULL,
                 FOREIGN KEY (event_id) REFERENCES exploration_events(id) ON DELETE CASCADE
             );
+            """,
+            // Character Names
+            """
+            CREATE TABLE IF NOT EXISTS character_names (
+                id INTEGER PRIMARY KEY,
+                gender_code INTEGER NOT NULL,
+                name TEXT NOT NULL
+            );
             """
         ]
 
