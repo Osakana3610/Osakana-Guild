@@ -39,34 +39,34 @@ struct CharacterDetailContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 // ヘッダー
-                GroupBox {
+                detailCard {
                     CharacterHeaderSection(character: character,
                                            onRename: onRename,
                                            onAvatarChange: onAvatarChange)
                 }
 
-                GroupBox("プロフィール") {
+                detailCard(title: "プロフィール") {
                     CharacterIdentitySection(character: character)
                 }
 
-                GroupBox("レベル / 経験値") {
+                detailCard(title: "レベル / 経験値") {
                     CharacterLevelSection(character: character)
                 }
 
-                GroupBox("基本能力値") {
+                detailCard(title: "基本能力値") {
                     CharacterBaseStatsSection(character: character)
                 }
 
-                GroupBox("戦闘ステータス") {
+                detailCard(title: "戦闘ステータス") {
                     CharacterCombatStatsSection(character: character)
                 }
 
-                GroupBox("行動優先度") {
+                detailCard(title: "行動優先度") {
                     CharacterActionPreferencesSection(character: character,
                                                       onActionPreferencesChange: onActionPreferencesChange)
                 }
 
-                GroupBox("習得スキル") {
+                detailCard(title: "習得スキル") {
                     CharacterSkillsSection(character: character)
                 }
             }
@@ -74,5 +74,19 @@ struct CharacterDetailContent: View {
         }
         .background(Color(.systemGroupedBackground))
         .avoidBottomGameInfo()
+    }
+
+    @ViewBuilder
+    private func detailCard<Content: View>(title: String? = nil, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if let title {
+                Text(title)
+                    .font(.headline)
+            }
+            content()
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
