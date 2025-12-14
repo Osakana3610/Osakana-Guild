@@ -226,4 +226,21 @@ actor MasterDataRuntimeService {
         try await ensureInitialized()
         return try await repository.allSynthesisRecipes()
     }
+
+    // MARK: - Character Names
+
+    func getAllCharacterNames() async throws -> [CharacterNameDefinition] {
+        try await ensureInitialized()
+        return try await repository.allCharacterNames()
+    }
+
+    func getCharacterNames(forGenderCode genderCode: UInt8) async throws -> [CharacterNameDefinition] {
+        try await ensureInitialized()
+        return try await repository.characterNames(forGenderCode: genderCode)
+    }
+
+    func getRandomCharacterName(forGenderCode genderCode: UInt8) async throws -> String {
+        try await ensureInitialized()
+        return try await repository.randomCharacterName(forGenderCode: genderCode)
+    }
 }

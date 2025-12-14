@@ -33,17 +33,29 @@ struct CharacterCreationView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 24) {
-                            nameSection
                             raceSection
                             jobSection
                             previewSection
-                            createButton
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 24)
                     }
                     .background(Color(.systemGroupedBackground))
                     .avoidBottomGameInfo()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                Task { await createCharacter() }
+                            } label: {
+                                if isSaving {
+                                    ProgressView()
+                                } else {
+                                    Text("求人")
+                                }
+                            }
+                            .disabled(!canCreate || isSaving)
+                        }
+                    }
                 }
             }
             .navigationTitle("キャラクター作成")
@@ -66,19 +78,6 @@ struct CharacterCreationView: View {
     }
 
     // MARK: - Sections
-
-    private var nameSection: some View {
-        creationCard {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("キャラクター名")
-                    .font(.headline)
-                TextField("名前を入力してください", text: $name)
-                    .textFieldStyle(.roundedBorder)
-                    .autocorrectionDisabled(true)
-                    .textInputAutocapitalization(.never)
-            }
-        }
-    }
 
     private var genderSections: [(gender: String, races: [RaceDefinition])] {
         var buckets: [UInt8: [RaceDefinition]] = [:]
@@ -185,9 +184,25 @@ struct CharacterCreationView: View {
                                 size: 80
                             )
                             VStack(alignment: .leading, spacing: 8) {
-                                Text(name.trimmingCharacters(in: .whitespaces).isEmpty ? "名前未設定" : name)
-                                    .font(.title2)
-                                    .foregroundStyle(name.trimmingCharacters(in: .whitespaces).isEmpty ? .secondary : .primary)
+                                HStack {
+                                    Text(name.trimmingCharacters(in: .whitespaces).isEmpty ? "名前未設定" : name)
+                                        .font(.title2)
+                                        .foregroundStyle(name.trimmingCharacters(in: .whitespaces).isEmpty ? .secondary : .primary)
+                                    Button {
+                                        Task { @MainActor in
+                                            do {
+                                                let randomName = try await masterData.getRandomCharacterName(forGenderCode: race.genderCode)
+                                                name = randomName
+                                            } catch {
+                                                creationErrorMessage = "名前の取得に失敗しました: \(error.localizedDescription)"
+                                            }
+                                        }
+                                    } label: {
+                                        Image(systemName: "arrow.clockwise")
+                                            .font(.caption)
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
                                 Text("\(race.name) / \(job.name)")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
@@ -229,25 +244,6 @@ struct CharacterCreationView: View {
         }
     }
 
-    private var createButton: some View {
-        Button {
-            Task { await createCharacter() }
-        } label: {
-            if isSaving {
-                ProgressView()
-                    .padding(.vertical, 8)
-                    .frame(maxWidth: .infinity)
-            } else {
-                Text("キャラクターを登録する")
-                    .fontWeight(.semibold)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-            }
-        }
-        .buttonStyle(.borderedProminent)
-        .disabled(!canCreate || isSaving)
-    }
-
     // MARK: - Helpers
 
     private var canCreate: Bool {
@@ -278,10 +274,30 @@ struct CharacterCreationView: View {
         .background(selectedRace?.id == race.id ? Color.accentColor.opacity(0.2) : Color(.systemGray6))
         .cornerRadius(12)
         .contentShape(Rectangle())
-        .onTapGesture { selectedRace = race }
+        .onTapGesture {
+            selectedRace = race
+            name = ""
+            Task { @MainActor in
+                do {
+                    let randomName = try await masterData.getRandomCharacterName(forGenderCode: race.genderCode)
+                    name = randomName
+                } catch {
+                    creationErrorMessage = "名前の取得に失敗しました: \(error.localizedDescription)"
+                }
+            }
+        }
         .contextMenu {
             Button {
                 selectedRace = race
+                name = ""
+                Task { @MainActor in
+                    do {
+                        let randomName = try await masterData.getRandomCharacterName(forGenderCode: race.genderCode)
+                        name = randomName
+                    } catch {
+                        creationErrorMessage = "名前の取得に失敗しました: \(error.localizedDescription)"
+                    }
+                }
             } label: {
                 Label("この種族を選択", systemImage: "checkmark.circle")
             }
@@ -412,7 +428,7 @@ struct CharacterCreationView: View {
         guard !isSaving, let race = selectedRace, let job = selectedJob else { return }
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            creationErrorMessage = "キャラクター名を入力してください"
+            creationErrorMessage = "キャラクター名が設定されていません。プレビューで再抽選してください。"
             return
         }
 
