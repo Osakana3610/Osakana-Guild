@@ -115,7 +115,8 @@ private struct ItemRowView: View {
     }
 }
 
-private struct ItemDetailView: View {
+/// アイテム詳細ビュー（図鑑・装備画面で共有）
+struct ItemDetailView: View {
     let item: ItemDefinition
     let skills: [UInt16: String]
 
