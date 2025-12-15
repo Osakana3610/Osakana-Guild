@@ -44,7 +44,7 @@ struct GuildView: View {
                         Task { await reload() }
                     }
                 } label: {
-                    GuildActionLabel(title: "新しいキャラクターを登録",
+                    GuildActionLabel(title: "求人を出す",
                                       icon: "person.badge.plus",
                                       tint: .blue)
                 }

@@ -12,7 +12,6 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
     let itemId: UInt16
     let masterDataId: String
     let displayName: String
-    let description: String?
     let quantity: Int
     let category: ItemSaleCategory
     let baseValue: Int

@@ -36,43 +36,39 @@ struct CharacterDetailContent: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // ヘッダー
-                GroupBox {
-                    CharacterHeaderSection(character: character,
-                                           onRename: onRename,
-                                           onAvatarChange: onAvatarChange)
-                }
-
-                GroupBox("プロフィール") {
-                    CharacterIdentitySection(character: character)
-                }
-
-                GroupBox("レベル / 経験値") {
-                    CharacterLevelSection(character: character)
-                }
-
-                GroupBox("基本能力値") {
-                    CharacterBaseStatsSection(character: character)
-                }
-
-                GroupBox("戦闘ステータス") {
-                    CharacterCombatStatsSection(character: character)
-                }
-
-                GroupBox("行動優先度") {
-                    CharacterActionPreferencesSection(character: character,
-                                                      onActionPreferencesChange: onActionPreferencesChange)
-                }
-
-                GroupBox("習得スキル") {
-                    CharacterSkillsSection(character: character)
-                }
+        List {
+            Section {
+                CharacterHeaderSection(character: character,
+                                       onRename: onRename,
+                                       onAvatarChange: onAvatarChange)
             }
-            .padding()
+
+            Section("プロフィール") {
+                CharacterIdentitySection(character: character)
+            }
+
+            Section("レベル / 経験値") {
+                CharacterLevelSection(character: character)
+            }
+
+            Section("基本能力値") {
+                CharacterBaseStatsSection(character: character)
+            }
+
+            Section("戦闘ステータス") {
+                CharacterCombatStatsSection(character: character)
+            }
+
+            Section("行動優先度") {
+                CharacterActionPreferencesSection(character: character,
+                                                  onActionPreferencesChange: onActionPreferencesChange)
+            }
+
+            Section("習得スキル") {
+                CharacterSkillsSection(character: character)
+            }
         }
-        .background(Color(.systemGroupedBackground))
+        .listStyle(.insetGrouped)
         .avoidBottomGameInfo()
     }
 }

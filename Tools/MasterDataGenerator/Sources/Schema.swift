@@ -288,7 +288,8 @@ extension Generator {
                 super_rare_rate_normal REAL,
                 super_rare_rate_good REAL,
                 super_rare_rate_rare REAL,
-                super_rare_rate_gem REAL
+                super_rare_rate_gem REAL,
+                price_multiplier REAL NOT NULL
             );
             """,
             """
@@ -662,6 +663,14 @@ extension Generator {
                 payload_type TEXT NOT NULL,
                 payload_json TEXT NOT NULL,
                 FOREIGN KEY (event_id) REFERENCES exploration_events(id) ON DELETE CASCADE
+            );
+            """,
+            // Character Names
+            """
+            CREATE TABLE IF NOT EXISTS character_names (
+                id INTEGER PRIMARY KEY,
+                gender_code INTEGER NOT NULL,
+                name TEXT NOT NULL
             );
             """
         ]

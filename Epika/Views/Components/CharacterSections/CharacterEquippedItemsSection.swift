@@ -8,6 +8,7 @@ struct CharacterEquippedItemsSection: View {
     let itemDefinitions: [UInt16: ItemDefinition]
     let equipmentCapacity: Int
     let onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)?
+    let onDetail: ((UInt16) -> Void)?
 
     @State private var unequipError: String?
     @State private var isUnequipping = false
@@ -16,12 +17,14 @@ struct CharacterEquippedItemsSection: View {
         equippedItems: [CharacterInput.EquippedItem],
         itemDefinitions: [UInt16: ItemDefinition],
         equipmentCapacity: Int,
-        onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)? = nil
+        onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)? = nil,
+        onDetail: ((UInt16) -> Void)? = nil
     ) {
         self.equippedItems = equippedItems
         self.itemDefinitions = itemDefinitions
         self.equipmentCapacity = equipmentCapacity
         self.onUnequip = onUnequip
+        self.onDetail = onDetail
     }
 
     var body: some View {
@@ -59,22 +62,31 @@ struct CharacterEquippedItemsSection: View {
         let name = definition?.name ?? "不明なアイテム"
 
         HStack {
-            Text("• \(name)")
-            if item.quantity > 1 {
-                Text("x\(item.quantity)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            Button {
+                unequipItem(item)
+            } label: {
+                HStack {
+                    Text("• \(name)")
+                    if item.quantity > 1 {
+                        Text("x\(item.quantity)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .contentShape(Rectangle())
             }
-            Spacer()
-            if onUnequip != nil {
+            .buttonStyle(.plain)
+            .disabled(onUnequip == nil || isUnequipping)
+
+            if onDetail != nil {
                 Button {
-                    unequipItem(item)
+                    onDetail?(item.itemId)
                 } label: {
-                    Image(systemName: "minus.circle")
-                        .foregroundStyle(.red)
+                    Image(systemName: "info.circle")
+                        .foregroundStyle(.blue)
                 }
                 .buttonStyle(.plain)
-                .disabled(isUnequipping)
             }
         }
     }

@@ -132,18 +132,18 @@ struct LightweightItemData: Sendable {
 
     /// 称号を含むフルネーム（自動売却ルール表示用）
     var fullDisplayName: String {
-        var parts: [String] = []
+        var result = ""
         if let superRare = superRareTitleName {
-            parts.append(superRare)
+            result += superRare
         }
         if let normal = normalTitleName {
-            parts.append(normal)
+            result += normal
         }
-        parts.append(name)
+        result += name
         if let gem = gemName {
-            parts.append("(\(gem))")
+            result += "(\(gem))"
         }
-        return parts.joined(separator: " ")
+        return result
     }
 }
 

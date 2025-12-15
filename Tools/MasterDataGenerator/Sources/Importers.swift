@@ -7,7 +7,7 @@ private struct ItemMasterFile: Decodable {
     struct Item: Decodable {
         let id: Int
         let name: String
-        let description: String
+        let description: String?
         let category: String
         let basePrice: Int
         let sellValue: Int
@@ -66,7 +66,7 @@ extension Generator {
             for item in file.items {
                 bindInt(itemStatement, index: 1, value: item.id)
                 bindText(itemStatement, index: 2, value: item.name)
-                bindText(itemStatement, index: 3, value: item.description)
+                bindText(itemStatement, index: 3, value: item.description ?? "")
                 bindText(itemStatement, index: 4, value: item.category)
                 bindInt(itemStatement, index: 5, value: item.basePrice)
                 bindInt(itemStatement, index: 6, value: item.sellValue)
@@ -920,6 +920,7 @@ private struct TitleMasterFile: Decodable {
         let dropProbability: Double?
         let allowWithTitleTreasure: Bool?
         let superRareRates: SuperRareRates?
+        let priceMultiplier: Double
     }
 
     let normalTitles: [Title]
@@ -937,6 +938,7 @@ private struct SuperRareTitleMasterFile: Decodable {
         let id: Int
         let name: String
         let skills: [Int]
+        // reading: ソート用キー（SQLiteにはインポートしない）
     }
 
     let superRareTitles: [Title]
@@ -955,8 +957,9 @@ extension Generator {
                     id, name, description, stat_multiplier, negative_multiplier,
                     drop_rate, plus_correction, minus_correction, judgment_count,
                     drop_probability, allow_with_title_treasure,
-                    super_rare_rate_normal, super_rare_rate_good, super_rare_rate_rare, super_rare_rate_gem
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    super_rare_rate_normal, super_rare_rate_good, super_rare_rate_rare, super_rare_rate_gem,
+                    price_multiplier
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
             let statement = try prepare(sql)
             defer { sqlite3_finalize(statement) }
@@ -977,6 +980,7 @@ extension Generator {
                 bindDouble(statement, index: 13, value: title.superRareRates?.good)
                 bindDouble(statement, index: 14, value: title.superRareRates?.rare)
                 bindDouble(statement, index: 15, value: title.superRareRates?.gem)
+                bindDouble(statement, index: 16, value: title.priceMultiplier)
                 try step(statement)
                 reset(statement)
             }
@@ -2152,5 +2156,42 @@ extension Generator {
         }
 
         return file.enemySkills.count
+    }
+}
+
+// MARK: - Character Name Master
+
+private struct CharacterNameMasterFile: Decodable {
+    struct Name: Decodable {
+        let id: Int
+        let genderCode: Int
+        let name: String
+    }
+
+    let names: [Name]
+}
+
+extension Generator {
+    func importCharacterNameMaster(_ data: Data) throws -> Int {
+        let decoder = JSONDecoder()
+        let file = try decoder.decode(CharacterNameMasterFile.self, from: data)
+
+        try withTransaction {
+            try execute("DELETE FROM character_names;")
+
+            let sql = "INSERT INTO character_names (id, gender_code, name) VALUES (?, ?, ?);"
+            let statement = try prepare(sql)
+            defer { sqlite3_finalize(statement) }
+
+            for entry in file.names {
+                bindInt(statement, index: 1, value: entry.id)
+                bindInt(statement, index: 2, value: entry.genderCode)
+                bindText(statement, index: 3, value: entry.name)
+                try step(statement)
+                reset(statement)
+            }
+        }
+
+        return file.names.count
     }
 }

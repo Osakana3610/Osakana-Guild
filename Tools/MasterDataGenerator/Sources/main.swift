@@ -177,6 +177,7 @@ final class Generator {
             ("StoryMaster", importStoryMaster),
             ("PersonalityMaster", importPersonalityMaster),
             ("ExplorationEventMaster", importExplorationEventMaster),
+            ("CharacterNameMaster", importCharacterNameMaster),
         ]
 
         for (filename, importer) in files {

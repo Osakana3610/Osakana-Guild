@@ -3,23 +3,21 @@ import Foundation
 /// 敵撃破時の戦利品計算を担当するサービス。
 enum DropService {
     static func drops(repository: MasterDataRepository,
-                      for enemy: EnemyDefinition,
+                      for enemies: [EnemyDefinition],
                       party: RuntimePartyState,
                       dungeonId: UInt16? = nil,
+                      chapter: Int,
                       floorNumber: Int? = nil,
+                      droppedItemIds: Set<UInt16> = [],
                       isRabiTicketActive: Bool = false,
                       hasTitleTreasure: Bool = false,
                       enemyTitleId: UInt8? = nil,
                       dailySuperRareState: SuperRareDailyState,
                       random: inout GameRandomSource) async throws -> DropOutcome {
-        guard !enemy.drops.isEmpty else { return DropOutcome(results: [], superRareState: dailySuperRareState) }
+        guard !enemies.isEmpty else {
+            return DropOutcome(results: [], superRareState: dailySuperRareState, newlyDroppedItemIds: [])
+        }
         let partyBonuses = try party.makeDropBonuses()
-        let context = DropContext(enemy: enemy,
-                                  partyBonuses: partyBonuses,
-                                  isRabiTicketActive: isRabiTicketActive,
-                                  hasTitleTreasure: hasTitleTreasure,
-                                  dungeonId: dungeonId,
-                                  floorNumber: floorNumber)
         var superRareState = dailySuperRareState
         var sessionState = SuperRareSessionState()
         let enemyTitleDefinition: TitleDefinition?
@@ -29,54 +27,139 @@ enum DropService {
             enemyTitleDefinition = nil
         }
         var results: [ItemDropResult] = []
+        var newlyDroppedItemIds: Set<UInt16> = []
 
-        for itemId in enemy.drops {
-            guard let item = try await repository.item(withId: itemId) else {
-                throw RuntimeError.masterDataNotFound(entity: "item", identifier: String(itemId))
+        // 1. レアアイテム（敵マスタのdrops配列）を処理
+        for enemy in enemies {
+            for itemId in enemy.drops {
+                // ドロップ済みセットに含まれるアイテムは候補から除外
+                guard !droppedItemIds.contains(itemId) else { continue }
+
+                guard let item = try await repository.item(withId: itemId) else {
+                    throw RuntimeError.masterDataNotFound(entity: "item", identifier: String(itemId))
+                }
+
+                let category = categorize(item: item)
+                let roll = ItemDropRateCalculator.roll(category: category,
+                                                       rareMultiplier: partyBonuses.rareDropMultiplier,
+                                                       isRabiTicketActive: isRabiTicketActive,
+                                                       partyLuck: partyBonuses.averageLuck,
+                                                       random: &random)
+                guard roll.willDrop else { continue }
+
+                let (normalTitleId, superRareTitleId) = try await assignTitles(
+                    category: category,
+                    partyBonuses: partyBonuses,
+                    isRabiTicketActive: isRabiTicketActive,
+                    enemyTitleId: enemyTitleId,
+                    hasTitleTreasure: hasTitleTreasure,
+                    enemyTitleDefinition: enemyTitleDefinition,
+                    repository: repository,
+                    sessionState: &sessionState,
+                    superRareState: &superRareState,
+                    random: &random
+                )
+
+                let result = ItemDropResult(item: item,
+                                            quantity: 1,
+                                            sourceEnemyId: enemy.id,
+                                            normalTitleId: normalTitleId,
+                                            superRareTitleId: superRareTitleId)
+                results.append(result)
+                newlyDroppedItemIds.insert(itemId)
+            }
+        }
+
+        // 2. ノーマルアイテム（敵種族・ダンジョン章から動的生成）を処理
+        let combinedDroppedIds = droppedItemIds.union(newlyDroppedItemIds)
+        let normalCandidates = try await NormalItemDropGenerator.candidates(
+            for: enemies,
+            chapter: chapter,
+            repository: repository,
+            droppedItemIds: combinedDroppedIds,
+            random: &random
+        )
+
+        for candidate in normalCandidates {
+            // 同一戦闘内で既にドロップした場合はスキップ
+            guard !newlyDroppedItemIds.contains(candidate.itemId) else { continue }
+
+            guard let item = try await repository.item(withId: candidate.itemId) else {
+                throw RuntimeError.masterDataNotFound(entity: "item", identifier: String(candidate.itemId))
             }
 
-            let category = categorize(item: item)
-            let roll = ItemDropRateCalculator.roll(category: category,
-                                                   rareMultiplier: context.partyBonuses.rareDropMultiplier,
-                                                   isRabiTicketActive: context.isRabiTicketActive,
-                                                   partyLuck: context.partyBonuses.averageLuck,
+            // ノーマルアイテムは.normalカテゴリで抽選
+            let roll = ItemDropRateCalculator.roll(category: .normal,
+                                                   rareMultiplier: partyBonuses.rareDropMultiplier,
+                                                   isRabiTicketActive: isRabiTicketActive,
+                                                   partyLuck: partyBonuses.averageLuck,
                                                    random: &random)
             guard roll.willDrop else { continue }
 
-            var normalTitleId: UInt8? = nil
-            var superRareTitleId: UInt8? = nil
-
-            if TitleAssignmentEngine.shouldAssignTitle(category: category,
-                                                        partyBonuses: context.partyBonuses,
-                                                        isRabiTicketActive: context.isRabiTicketActive,
-                                                        random: &random) {
-                if let normalTitle = try await TitleAssignmentEngine.determineNormalTitle(repository: repository,
-                                                                                           enemyTitleId: enemyTitleId,
-                                                                                           hasTitleTreasure: context.hasTitleTreasure,
-                                                                                           category: category,
-                                                                                           random: &random) {
-                    normalTitleId = normalTitle.id
-                    let evaluation = try await evaluateSuperRare(for: category,
-                                                                 title: normalTitle,
-                                                                 enemyTitle: enemyTitleDefinition,
-                                                                 repository: repository,
-                                                                 sessionState: &sessionState,
-                                                                 dailyState: &superRareState,
-                                                                 random: &random)
-                    normalTitleId = evaluation.normalTitleId
-                    superRareTitleId = evaluation.superRareTitleId
-                }
-            }
+            let (normalTitleId, superRareTitleId) = try await assignTitles(
+                category: .normal,
+                partyBonuses: partyBonuses,
+                isRabiTicketActive: isRabiTicketActive,
+                enemyTitleId: enemyTitleId,
+                hasTitleTreasure: hasTitleTreasure,
+                enemyTitleDefinition: enemyTitleDefinition,
+                repository: repository,
+                sessionState: &sessionState,
+                superRareState: &superRareState,
+                random: &random
+            )
 
             let result = ItemDropResult(item: item,
                                         quantity: 1,
-                                        sourceEnemyId: enemy.id,
+                                        sourceEnemyId: candidate.sourceEnemyId,
                                         normalTitleId: normalTitleId,
                                         superRareTitleId: superRareTitleId)
             results.append(result)
+            newlyDroppedItemIds.insert(candidate.itemId)
         }
 
-        return DropOutcome(results: results, superRareState: superRareState)
+        return DropOutcome(results: results, superRareState: superRareState, newlyDroppedItemIds: newlyDroppedItemIds)
+    }
+
+    /// 称号付与ロジック（レアアイテム・ノーマルアイテム共通）
+    private static func assignTitles(
+        category: DropItemCategory,
+        partyBonuses: PartyDropBonuses,
+        isRabiTicketActive: Bool,
+        enemyTitleId: UInt8?,
+        hasTitleTreasure: Bool,
+        enemyTitleDefinition: TitleDefinition?,
+        repository: MasterDataRepository,
+        sessionState: inout SuperRareSessionState,
+        superRareState: inout SuperRareDailyState,
+        random: inout GameRandomSource
+    ) async throws -> (normalTitleId: UInt8?, superRareTitleId: UInt8?) {
+        var normalTitleId: UInt8? = nil
+        var superRareTitleId: UInt8? = nil
+
+        if TitleAssignmentEngine.shouldAssignTitle(category: category,
+                                                    partyBonuses: partyBonuses,
+                                                    isRabiTicketActive: isRabiTicketActive,
+                                                    random: &random) {
+            if let normalTitle = try await TitleAssignmentEngine.determineNormalTitle(repository: repository,
+                                                                                       enemyTitleId: enemyTitleId,
+                                                                                       hasTitleTreasure: hasTitleTreasure,
+                                                                                       category: category,
+                                                                                       random: &random) {
+                normalTitleId = normalTitle.id
+                let evaluation = try await evaluateSuperRare(for: category,
+                                                             title: normalTitle,
+                                                             enemyTitle: enemyTitleDefinition,
+                                                             repository: repository,
+                                                             sessionState: &sessionState,
+                                                             dailyState: &superRareState,
+                                                             random: &random)
+                normalTitleId = evaluation.normalTitleId
+                superRareTitleId = evaluation.superRareTitleId
+            }
+        }
+
+        return (normalTitleId, superRareTitleId)
     }
 
     private static func categorize(item: ItemDefinition) -> DropItemCategory {
