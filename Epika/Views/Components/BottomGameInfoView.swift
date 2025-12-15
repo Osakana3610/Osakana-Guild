@@ -24,7 +24,9 @@ struct BottomGameInfoStyleModifier: ViewModifier {
         if #available(iOS 26.0, *) {
             content
                 .foregroundColor(.primary)
-                .glassEffect(.regular.interactive())
+                .contentShape(Rectangle())
+                .onTapGesture { }
+                .glassEffect(.regular)
         } else {
             content
                 .background(Color(.systemGray6))
