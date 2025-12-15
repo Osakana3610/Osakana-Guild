@@ -12,8 +12,7 @@ struct ItemSaleView: View {
     @State private var selectedTotalSellPrice: Int = 0
     @State private var cacheVersion: Int = 0
     @State private var didLoadOnce = false
-    @State private var detailItem: ItemDefinition?
-    @State private var detailSkills: [UInt16: String] = [:]
+    @State private var detailItem: LightweightItemData?
 
     private var totalSellPriceText: String { "\(selectedTotalSellPrice)GP" }
     private var hasSelection: Bool { !selectedDisplayItems.isEmpty }
@@ -40,7 +39,7 @@ struct ItemSaleView: View {
             .onAppear { Task { await loadIfNeeded() } }
             .sheet(item: $detailItem) { item in
                 NavigationStack {
-                    ItemDetailView(item: item, skills: detailSkills)
+                    ItemDetailView(item: item)
                         .toolbar {
                             ToolbarItem(placement: .cancellationAction) {
                                 Button("閉じる") { detailItem = nil }
@@ -143,7 +142,7 @@ struct ItemSaleView: View {
                 Spacer()
 
                 Button {
-                    Task { await showItemDetail(item) }
+                    detailItem = item
                 } label: {
                     Image(systemName: "info.circle")
                         .foregroundColor(.secondary)
@@ -300,23 +299,4 @@ struct ItemSaleView: View {
         }
     }
 
-    @MainActor
-    private func showItemDetail(_ item: LightweightItemData) async {
-        do {
-            let masterData = MasterDataRuntimeService.shared
-            guard let definition = try await masterData.getItemMasterData(id: item.itemId) else {
-                return
-            }
-            if !definition.grantedSkillIds.isEmpty {
-                let allSkills = try await masterData.getAllSkills()
-                detailSkills = Dictionary(uniqueKeysWithValues: allSkills.map { ($0.id, $0.name) })
-            } else {
-                detailSkills = [:]
-            }
-            detailItem = definition
-        } catch {
-            showError = true
-            errorMessage = error.localizedDescription
-        }
-    }
 }

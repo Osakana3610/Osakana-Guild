@@ -121,8 +121,8 @@ struct EquipmentEditorView: View {
     @State private var loadError: String?
     @State private var equipError: String?
     @State private var cacheVersion: Int = 0
-    @State private var selectedItemForDetail: ItemDefinition?
-    @State private var skillNames: [UInt16: String] = [:]
+    @State private var selectedItemForDetail: LightweightItemData?
+    @State private var selectedItemIdForDetail: UInt16?  // 装備中アイテム用（図鑑モード）
 
     private var characterService: CharacterProgressService { progressService.character }
     private var inventoryService: InventoryProgressService { progressService.inventory }
@@ -178,8 +178,8 @@ struct EquipmentEditorView: View {
                             onUnequip: { item in
                                 try await performUnequip(item)
                             },
-                            onDetail: { definition in
-                                selectedItemForDetail = definition
+                            onDetail: { itemId in
+                                selectedItemIdForDetail = itemId
                             }
                         )
                     }
@@ -206,11 +206,23 @@ struct EquipmentEditorView: View {
         }
         .sheet(item: $selectedItemForDetail) { item in
             NavigationStack {
-                ItemDetailView(item: item, skills: skillNames)
+                ItemDetailView(item: item)
                     .toolbar {
                         ToolbarItem(placement: .confirmationAction) {
                             Button("閉じる") {
                                 selectedItemForDetail = nil
+                            }
+                        }
+                    }
+            }
+        }
+        .sheet(item: $selectedItemIdForDetail) { itemId in
+            NavigationStack {
+                ItemDetailView(itemId: itemId)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("閉じる") {
+                                selectedItemIdForDetail = nil
                             }
                         }
                     }
@@ -265,7 +277,7 @@ struct EquipmentEditorView: View {
             .foregroundStyle(validation.canEquip ? .primary : .secondary)
 
             Button {
-                selectedItemForDetail = definition
+                selectedItemForDetail = item
             } label: {
                 Image(systemName: "info.circle")
                     .foregroundStyle(.blue)
@@ -301,9 +313,6 @@ struct EquipmentEditorView: View {
                 itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
             }
 
-            // スキル名を取得（詳細シート用）
-            let allSkills = try await MasterDataRuntimeService.shared.getAllSkills()
-            skillNames = Dictionary(uniqueKeysWithValues: allSkills.map { ($0.id, $0.name) })
         } catch {
             loadError = error.localizedDescription
         }

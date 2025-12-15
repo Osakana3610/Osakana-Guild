@@ -8,7 +8,7 @@ struct CharacterEquippedItemsSection: View {
     let itemDefinitions: [UInt16: ItemDefinition]
     let equipmentCapacity: Int
     let onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)?
-    let onDetail: ((ItemDefinition) -> Void)?
+    let onDetail: ((UInt16) -> Void)?
 
     @State private var unequipError: String?
     @State private var isUnequipping = false
@@ -18,7 +18,7 @@ struct CharacterEquippedItemsSection: View {
         itemDefinitions: [UInt16: ItemDefinition],
         equipmentCapacity: Int,
         onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)? = nil,
-        onDetail: ((ItemDefinition) -> Void)? = nil
+        onDetail: ((UInt16) -> Void)? = nil
     ) {
         self.equippedItems = equippedItems
         self.itemDefinitions = itemDefinitions
@@ -79,9 +79,9 @@ struct CharacterEquippedItemsSection: View {
             .buttonStyle(.plain)
             .disabled(onUnequip == nil || isUnequipping)
 
-            if let definition, onDetail != nil {
+            if onDetail != nil {
                 Button {
-                    onDetail?(definition)
+                    onDetail?(item.itemId)
                 } label: {
                     Image(systemName: "info.circle")
                         .foregroundStyle(.blue)

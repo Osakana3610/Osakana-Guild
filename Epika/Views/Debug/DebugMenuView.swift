@@ -18,6 +18,59 @@ enum ItemCreationType: String, CaseIterable {
     }
 }
 
+/// アイテムカテゴリの定義
+enum ItemCategory: String, CaseIterable, Identifiable {
+    case thin_sword = "thin_sword"
+    case sword = "sword"
+    case katana = "katana"
+    case bow = "bow"
+    case rod = "rod"
+    case wand = "wand"
+    case grimoire = "grimoire"
+    case gauntlet = "gauntlet"
+    case shield = "shield"
+    case armor = "armor"
+    case heavy_armor = "heavy_armor"
+    case super_heavy_armor = "super_heavy_armor"
+    case robe = "robe"
+    case accessory = "accessory"
+    case gem = "gem"
+    case synthesis = "synthesis"
+    case race_specific = "race_specific"
+    case magic_sword = "magic_sword"
+    case advanced_magic_sword = "advanced_magic_sword"
+    case guardian_sword = "guardian_sword"
+    case homunculus = "homunculus"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .thin_sword: return "細剣"
+        case .sword: return "剣"
+        case .katana: return "刀"
+        case .bow: return "弓"
+        case .rod: return "杖"
+        case .wand: return "短杖"
+        case .grimoire: return "魔導書"
+        case .gauntlet: return "籠手"
+        case .shield: return "盾"
+        case .armor: return "鎧"
+        case .heavy_armor: return "重鎧"
+        case .super_heavy_armor: return "超重鎧"
+        case .robe: return "ローブ"
+        case .accessory: return "装飾品"
+        case .gem: return "宝石"
+        case .synthesis: return "合成素材"
+        case .race_specific: return "種族専用"
+        case .magic_sword: return "魔剣"
+        case .advanced_magic_sword: return "上級魔剣"
+        case .guardian_sword: return "守護剣"
+        case .homunculus: return "ホムンクルス"
+        }
+    }
+}
+
 private struct ItemSeed {
     let itemId: UInt16
     let enhancement: ItemSnapshot.Enhancement
@@ -34,6 +87,13 @@ struct DebugMenuView: View {
     @State private var selectedCreationType: ItemCreationType = .basicOnly
     @State private var maxItemLimit: Int = 50_000
     @State private var showCreationSettings = false
+
+    // カテゴリ選択（全選択がデフォルト）
+    @State private var selectedCategories: Set<ItemCategory> = Set(ItemCategory.allCases)
+    // 通常称号選択（0-8）
+    @State private var selectedNormalTitleIds: Set<UInt8> = Set(0...8)
+    // 超レア称号選択（1-100）
+    @State private var selectedSuperRareTitleIds: Set<UInt8> = Set(1...100)
 
     @State private var isPurgingCloudKit = false
     @State private var purgeStatus = ""
@@ -70,8 +130,13 @@ struct DebugMenuView: View {
                 Text("CloudKitとローカルのデータを削除しました。\nアプリを終了して再起動してください。")
             }
             .sheet(isPresented: $showCreationSettings) {
-                ItemCreationSettingsView(selectedType: $selectedCreationType,
-                                         maxLimit: $maxItemLimit)
+                ItemCreationSettingsView(
+                    selectedType: $selectedCreationType,
+                    maxLimit: $maxItemLimit,
+                    selectedCategories: $selectedCategories,
+                    selectedNormalTitleIds: $selectedNormalTitleIds,
+                    selectedSuperRareTitleIds: $selectedSuperRareTitleIds
+                )
             }
         }
     }
@@ -104,7 +169,10 @@ struct DebugMenuView: View {
                 Text("上限: \(maxItemLimit)種類")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Text(selectedCreationType.description)
+                Text("カテゴリ: \(selectedCategories.count)/\(ItemCategory.allCases.count)種")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text("通常称号: \(selectedNormalTitleIds.count)/9種, 超レア: \(selectedSuperRareTitleIds.count)/100種")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -147,47 +215,36 @@ struct DebugMenuView: View {
         }
 
         do {
-            let categoryPriority: [String: Int] = [
-                "thin_sword": 0,
-                "sword": 1,
-                "katana": 2,
-                "bow": 3,
-                "rod": 4,
-                "wand": 5,
-                "grimoire": 6,
-                "gauntlet": 7,
-                "shield": 8,
-                "armor": 9,
-                "heavy_armor": 10,
-                "robe": 11,
-                "mazo_material": 12,
-                "gem": 13,
-                "for_synthesis": 14,
-                "race_specific": 15,
-                "other": 16
-            ]
+            // 選択されたカテゴリのrawValueセット
+            let selectedCategoryRawValues = Set(selectedCategories.map { $0.rawValue })
 
-            let allItems = try await masterDataService.getAllItems().sorted { lhs, rhs in
-                let lhsKey = lhs.category.lowercased()
-                let rhsKey = rhs.category.lowercased()
-                let lhsPriority = categoryPriority[lhsKey] ?? Int.max
-                let rhsPriority = categoryPriority[rhsKey] ?? Int.max
-                if lhsPriority != rhsPriority {
-                    return lhsPriority < rhsPriority
+            // カテゴリ優先順位（選択されたもののみ）
+            let categoryPriority: [String: Int] = Dictionary(
+                uniqueKeysWithValues: ItemCategory.allCases.enumerated().map { ($1.rawValue, $0) }
+            )
+
+            let allItems = try await masterDataService.getAllItems()
+                .filter { selectedCategoryRawValues.contains($0.category) }
+                .sorted { lhs, rhs in
+                    let lhsPriority = categoryPriority[lhs.category] ?? Int.max
+                    let rhsPriority = categoryPriority[rhs.category] ?? Int.max
+                    if lhsPriority != rhsPriority {
+                        return lhsPriority < rhsPriority
+                    }
+                    return lhs.name < rhs.name
                 }
-                return lhs.name < rhs.name
-            }
 
-            // Int ID形式で称号データを取得
-            let normalTitles = try await masterDataService.getAllTitles()
-            let normalOptions: [UInt8] = normalTitles.isEmpty ? [0] : normalTitles.map { $0.id }
+            // 選択された通常称号のみ
+            let normalOptions: [UInt8] = selectedNormalTitleIds.isEmpty
+                ? [0]
+                : selectedNormalTitleIds.sorted()
 
+            // 選択された超レア称号のみ（basicOnly時は空）
             let superRareTitleIds: [UInt8]
             if selectedCreationType == .basicOnly {
                 superRareTitleIds = []
             } else {
-                let superRareTitles = try await masterDataService.getAllSuperRareTitles()
-                superRareTitleIds = superRareTitles.map { $0.id }
+                superRareTitleIds = selectedSuperRareTitleIds.sorted()
             }
 
             let gemItems: [ItemDefinition]
@@ -419,6 +476,9 @@ struct DebugMenuView: View {
 struct ItemCreationSettingsView: View {
     @Binding var selectedType: ItemCreationType
     @Binding var maxLimit: Int
+    @Binding var selectedCategories: Set<ItemCategory>
+    @Binding var selectedNormalTitleIds: Set<UInt8>
+    @Binding var selectedSuperRareTitleIds: Set<UInt8>
 
     @Environment(\.dismiss) private var dismiss
 
@@ -480,6 +540,10 @@ struct ItemCreationSettingsView: View {
                     }
                     .padding(.vertical, 8)
                 }
+
+                categorySelectionSection
+                normalTitleSelectionSection
+                superRareTitleSelectionSection
             }
             .avoidBottomGameInfo()
             .navigationTitle("アイテム作成設定")
@@ -492,6 +556,132 @@ struct ItemCreationSettingsView: View {
                     Button("完了") { dismiss() }
                 }
             }
+        }
+    }
+
+    private var categorySelectionSection: some View {
+        Section {
+            HStack {
+                Text("選択中: \(selectedCategories.count)/\(ItemCategory.allCases.count)")
+                    .font(.subheadline)
+                Spacer()
+                Button(selectedCategories.count == ItemCategory.allCases.count ? "全解除" : "全選択") {
+                    if selectedCategories.count == ItemCategory.allCases.count {
+                        selectedCategories.removeAll()
+                    } else {
+                        selectedCategories = Set(ItemCategory.allCases)
+                    }
+                }
+                .font(.caption)
+            }
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 8)], spacing: 8) {
+                ForEach(ItemCategory.allCases) { category in
+                    Button {
+                        if selectedCategories.contains(category) {
+                            selectedCategories.remove(category)
+                        } else {
+                            selectedCategories.insert(category)
+                        }
+                    } label: {
+                        Text(category.displayName)
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .frame(maxWidth: .infinity)
+                            .background(selectedCategories.contains(category) ? Color.accentColor : Color.gray.opacity(0.3))
+                            .foregroundColor(selectedCategories.contains(category) ? .white : .primary)
+                            .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        } header: {
+            Text("カテゴリ選択")
+        }
+    }
+
+    private var normalTitleSelectionSection: some View {
+        Section {
+            HStack {
+                Text("選択中: \(selectedNormalTitleIds.count)/9")
+                    .font(.subheadline)
+                Spacer()
+                Button(selectedNormalTitleIds.count == 9 ? "全解除" : "全選択") {
+                    if selectedNormalTitleIds.count == 9 {
+                        selectedNormalTitleIds.removeAll()
+                    } else {
+                        selectedNormalTitleIds = Set(0...8)
+                    }
+                }
+                .font(.caption)
+            }
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 50), spacing: 8)], spacing: 8) {
+                ForEach(Array(0...8 as ClosedRange<UInt8>), id: \.self) { id in
+                    Button {
+                        if selectedNormalTitleIds.contains(id) {
+                            selectedNormalTitleIds.remove(id)
+                        } else {
+                            selectedNormalTitleIds.insert(id)
+                        }
+                    } label: {
+                        Text("\(id)")
+                            .font(.caption)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 4)
+                            .frame(maxWidth: .infinity)
+                            .background(selectedNormalTitleIds.contains(id) ? Color.accentColor : Color.gray.opacity(0.3))
+                            .foregroundColor(selectedNormalTitleIds.contains(id) ? .white : .primary)
+                            .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        } header: {
+            Text("通常称号選択")
+        }
+    }
+
+    private var superRareTitleSelectionSection: some View {
+        Section {
+            HStack {
+                Text("選択中: \(selectedSuperRareTitleIds.count)/100")
+                    .font(.subheadline)
+                Spacer()
+                Button(selectedSuperRareTitleIds.count == 100 ? "全解除" : "全選択") {
+                    if selectedSuperRareTitleIds.count == 100 {
+                        selectedSuperRareTitleIds.removeAll()
+                    } else {
+                        selectedSuperRareTitleIds = Set(1...100)
+                    }
+                }
+                .font(.caption)
+            }
+
+            Text("ID範囲で選択:")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            HStack(spacing: 8) {
+                ForEach([("1-25", 1...25), ("26-50", 26...50), ("51-75", 51...75), ("76-100", 76...100)], id: \.0) { label, range in
+                    Button(label) {
+                        let rangeSet = Set(range.map { UInt8($0) })
+                        if rangeSet.isSubset(of: selectedSuperRareTitleIds) {
+                            selectedSuperRareTitleIds.subtract(rangeSet)
+                        } else {
+                            selectedSuperRareTitleIds.formUnion(rangeSet)
+                        }
+                    }
+                    .font(.caption2)
+                    .buttonStyle(.bordered)
+                }
+            }
+        } header: {
+            Text("超レア称号選択")
+        } footer: {
+            Text("超レア称号は「基本＋超レア称号」以上のモード時のみ使用されます")
+                .font(.caption2)
         }
     }
 
