@@ -61,9 +61,7 @@ final class ProgressService: ObservableObject {
         self.dropNotifications = dropNotifications
         let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications] results in
             guard let dropNotifications, !results.isEmpty else { return }
-            await MainActor.run {
-                dropNotifications.publish(results: results)
-            }
+            await dropNotifications.publish(results: results)
         }
         let runtimeService = GameRuntimeService(dropNotifier: dropNotifier)
         self.runtime = ProgressRuntimeService(runtimeService: runtimeService,
