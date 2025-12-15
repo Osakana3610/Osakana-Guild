@@ -205,6 +205,15 @@ actor MasterDataRuntimeService {
         return try await repository.allStories()
     }
 
+    func getStoryNode(id: UInt16) async throws -> StoryNodeDefinition {
+        try await ensureInitialized()
+        let allNodes = try await repository.allStories()
+        guard let node = allNodes.first(where: { $0.id == id }) else {
+            throw ProgressError.invalidInput(description: "ストーリーノードが見つかりません: \(id)")
+        }
+        return node
+    }
+
     // MARK: - Skills
 
     func getAllSkills() async throws -> [SkillDefinition] {
@@ -216,5 +225,22 @@ actor MasterDataRuntimeService {
     func getAllSynthesisRecipes() async throws -> [SynthesisRecipeDefinition] {
         try await ensureInitialized()
         return try await repository.allSynthesisRecipes()
+    }
+
+    // MARK: - Character Names
+
+    func getAllCharacterNames() async throws -> [CharacterNameDefinition] {
+        try await ensureInitialized()
+        return try await repository.allCharacterNames()
+    }
+
+    func getCharacterNames(forGenderCode genderCode: UInt8) async throws -> [CharacterNameDefinition] {
+        try await ensureInitialized()
+        return try await repository.characterNames(forGenderCode: genderCode)
+    }
+
+    func getRandomCharacterName(forGenderCode genderCode: UInt8) async throws -> String {
+        try await ensureInitialized()
+        return try await repository.randomCharacterName(forGenderCode: genderCode)
     }
 }

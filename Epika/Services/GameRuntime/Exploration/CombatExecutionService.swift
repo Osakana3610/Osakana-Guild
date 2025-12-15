@@ -14,6 +14,7 @@ struct CombatExecutionService {
                    dungeon: DungeonDefinition,
                    floor: DungeonFloorDefinition,
                    party: RuntimePartyState,
+                   droppedItemIds: Set<UInt16>,
                    superRareState: SuperRareDailyState,
                    random: inout GameRandomSource) async throws -> CombatExecutionOutcome {
         var battleRandom = random
@@ -35,18 +36,23 @@ struct CombatExecutionService {
 
         let dropResults: [ExplorationDropReward]
         var updatedSuperRareState = superRareState
+        var newlyDroppedItemIds: Set<UInt16> = []
 
         if resolution.result == .victory {
+            // 勝利時は全敵倒されたとみなす
             var dropRandom = random
             let dropOutcome = try await DropService.drops(repository: repository,
-                                                          for: resolution.enemy,
+                                                          for: resolution.enemies,
                                                           party: party,
                                                           dungeonId: dungeon.id,
+                                                          chapter: dungeon.chapter,
                                                           floorNumber: floor.floorNumber,
+                                                          droppedItemIds: droppedItemIds,
                                                           dailySuperRareState: updatedSuperRareState,
                                                           random: &dropRandom)
             random = dropRandom
             updatedSuperRareState = dropOutcome.superRareState
+            newlyDroppedItemIds = dropOutcome.newlyDroppedItemIds
             dropResults = dropOutcome.results.map { result in
                 let difficulty = BattleRewardCalculator.trapDifficulty(for: result.item,
                                                                        dungeon: dungeon,
@@ -59,6 +65,7 @@ struct CombatExecutionService {
                                               superRareTitleId: result.superRareTitleId)
             }
         } else {
+            // 敗北（全滅）または撤退時はドロップなし
             dropResults = []
         }
 
@@ -115,7 +122,8 @@ struct CombatExecutionService {
 
         return CombatExecutionOutcome(summary: summary,
                                        log: logArchive,
-                                       updatedSuperRareState: updatedSuperRareState)
+                                       updatedSuperRareState: updatedSuperRareState,
+                                       newlyDroppedItemIds: newlyDroppedItemIds)
     }
 }
 
@@ -123,4 +131,6 @@ struct CombatExecutionOutcome: Sendable {
     let summary: CombatSummary
     let log: BattleLogArchive
     let updatedSuperRareState: SuperRareDailyState
+    /// 今回の戦闘で新たにドロップしたアイテムID
+    let newlyDroppedItemIds: Set<UInt16>
 }

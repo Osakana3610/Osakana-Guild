@@ -35,6 +35,8 @@ actor MasterDataRepository {
     private var storiesCache: [StoryNodeDefinition]?
     private var synthesisCache: [SynthesisRecipeDefinition]?
     private var shopItemsCache: [MasterShopItem]?
+    private var characterNamesCache: [CharacterNameDefinition]?
+    private var characterNamesByGender: [UInt8: [CharacterNameDefinition]]?
 
     init(manager: SQLiteMasterDataManager = .shared) {
         self.manager = manager
@@ -347,5 +349,33 @@ actor MasterDataRepository {
         return recipes
     }
 
+    func allCharacterNames() async throws -> [CharacterNameDefinition] {
+        if let characterNamesCache { return characterNamesCache }
+        try await ensureInitialized()
+        let names = try await manager.fetchAllCharacterNames()
+        self.characterNamesCache = names
+        var byGender: [UInt8: [CharacterNameDefinition]] = [:]
+        for name in names {
+            byGender[name.genderCode, default: []].append(name)
+        }
+        self.characterNamesByGender = byGender
+        return names
+    }
 
+    func characterNames(forGenderCode genderCode: UInt8) async throws -> [CharacterNameDefinition] {
+        if let byGender = characterNamesByGender, let names = byGender[genderCode], !names.isEmpty {
+            return names
+        }
+        _ = try await allCharacterNames()
+        guard let names = characterNamesByGender?[genderCode], !names.isEmpty else {
+            throw RuntimeError.masterDataNotFound(entity: "characterName", identifier: "genderCode=\(genderCode)")
+        }
+        return names
+    }
+
+    func randomCharacterName(forGenderCode genderCode: UInt8) async throws -> String {
+        let names = try await characterNames(forGenderCode: genderCode)
+        // characterNames(forGenderCode:) は空の場合 throw するため、randomElement() は必ず成功
+        return names.randomElement()!.name
+    }
 }
