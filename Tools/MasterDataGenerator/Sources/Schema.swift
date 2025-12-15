@@ -288,7 +288,8 @@ extension Generator {
                 super_rare_rate_normal REAL,
                 super_rare_rate_good REAL,
                 super_rare_rate_rare REAL,
-                super_rare_rate_gem REAL
+                super_rare_rate_gem REAL,
+                price_multiplier REAL NOT NULL
             );
             """,
             """
