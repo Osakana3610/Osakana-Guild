@@ -69,10 +69,6 @@ struct ArtifactExchangeView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(option.definition.name)
                                     .font(.headline)
-                                Text(option.definition.description)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(2)
                             }
                             Spacer()
                             Button("交換") {

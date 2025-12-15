@@ -69,7 +69,6 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
 
     let id: UInt16
     let name: String
-    let description: String
     let category: String
     let basePrice: Int
     let sellValue: Int
