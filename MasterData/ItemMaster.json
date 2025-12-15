@@ -11261,8 +11261,8 @@
       "name": "ダイヤモンド",
       "description": "宝石（最高級）1の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 32000000,
+      "sellValue": 16000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11276,8 +11276,8 @@
       "name": "ルビー",
       "description": "宝石（最高級）2の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 32000000,
+      "sellValue": 16000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11291,8 +11291,8 @@
       "name": "サファイア",
       "description": "宝石（最高級）3の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 32000000,
+      "sellValue": 16000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11306,8 +11306,8 @@
       "name": "エメラルド",
       "description": "宝石（最高級）4の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 32000000,
+      "sellValue": 16000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11321,8 +11321,8 @@
       "name": "アレキサンドライト",
       "description": "宝石（最高級）5の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 32000000,
+      "sellValue": 16000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11336,8 +11336,8 @@
       "name": "タンザナイト",
       "description": "宝石（最高級）6の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 32000000,
+      "sellValue": 16000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11351,8 +11351,8 @@
       "name": "パール",
       "description": "宝石（高級）1の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 16000000,
+      "sellValue": 8000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11366,8 +11366,8 @@
       "name": "ジェイド",
       "description": "宝石（高級）2の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 16000000,
+      "sellValue": 8000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11381,8 +11381,8 @@
       "name": "オパール",
       "description": "宝石（高級）3の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 16000000,
+      "sellValue": 8000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11396,8 +11396,8 @@
       "name": "デマントイド",
       "description": "宝石（高級）4の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 16000000,
+      "sellValue": 8000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11411,8 +11411,8 @@
       "name": "アクアマリン",
       "description": "宝石（高級）5の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 16000000,
+      "sellValue": 8000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11426,8 +11426,8 @@
       "name": "ツァボライト",
       "description": "宝石（高級）6の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 16000000,
+      "sellValue": 8000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11441,8 +11441,8 @@
       "name": "スピネル",
       "description": "宝石（中級）1の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 8000000,
+      "sellValue": 4000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11456,8 +11456,8 @@
       "name": "トルマリン",
       "description": "宝石（中級）2の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 8000000,
+      "sellValue": 4000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11471,8 +11471,8 @@
       "name": "ペリドット",
       "description": "宝石（中級）3の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 8000000,
+      "sellValue": 4000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11486,8 +11486,8 @@
       "name": "ガーネット",
       "description": "宝石（中級）4の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 8000000,
+      "sellValue": 4000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11501,8 +11501,8 @@
       "name": "トパーズ",
       "description": "宝石（中級）5の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 8000000,
+      "sellValue": 4000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11516,8 +11516,8 @@
       "name": "ムーンストーン",
       "description": "宝石（中級）6の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 8000000,
+      "sellValue": 4000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11531,8 +11531,8 @@
       "name": "アメジスト",
       "description": "宝石（低級）1の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11546,8 +11546,8 @@
       "name": "シトリン",
       "description": "宝石（低級）2の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11561,8 +11561,8 @@
       "name": "ターコイズ",
       "description": "宝石（低級）3の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11576,8 +11576,8 @@
       "name": "ラピスラズリ",
       "description": "宝石（低級）4の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11591,8 +11591,8 @@
       "name": "アンバー",
       "description": "宝石（低級）5の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11606,8 +11606,8 @@
       "name": "コーラル",
       "description": "宝石（低級）6の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11621,8 +11621,8 @@
       "name": "ジルコン",
       "description": "宝石（低級）7の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11636,8 +11636,8 @@
       "name": "クンツァイト",
       "description": "宝石（低級）8の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11651,8 +11651,8 @@
       "name": "モルガナイト",
       "description": "宝石（低級）9の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11666,8 +11666,8 @@
       "name": "クリソプレーズ",
       "description": "宝石（低級）10の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11681,8 +11681,8 @@
       "name": "サードオニキス",
       "description": "宝石（低級）11の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11696,8 +11696,8 @@
       "name": "カイヤナイト",
       "description": "宝石（低級）12の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11711,8 +11711,8 @@
       "name": "プレーナイト",
       "description": "宝石（低級）13の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11726,8 +11726,8 @@
       "name": "セレスタイト",
       "description": "宝石（低級）14の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11741,8 +11741,8 @@
       "name": "アパタイト",
       "description": "宝石（低級）15の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 4000000,
+      "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11756,8 +11756,8 @@
       "name": "クォーツ",
       "description": "宝石（最下級）1の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11771,8 +11771,8 @@
       "name": "ローズクォーツ",
       "description": "宝石（最下級）2の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11786,8 +11786,8 @@
       "name": "スモーキークォーツ",
       "description": "宝石（最下級）3の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11801,8 +11801,8 @@
       "name": "アゲート",
       "description": "宝石（最下級）4の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11816,8 +11816,8 @@
       "name": "カルセドニー",
       "description": "宝石（最下級）5の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11831,8 +11831,8 @@
       "name": "ジャスパー",
       "description": "宝石（最下級）6の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11846,8 +11846,8 @@
       "name": "オニキス",
       "description": "宝石（最下級）7の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11861,8 +11861,8 @@
       "name": "カーネリアン",
       "description": "宝石（最下級）8の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11876,8 +11876,8 @@
       "name": "タイガーアイ",
       "description": "宝石（最下級）9の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11891,8 +11891,8 @@
       "name": "ヘマタイト",
       "description": "宝石（最下級）10の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11906,8 +11906,8 @@
       "name": "オブシディアン",
       "description": "宝石（最下級）11の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11921,8 +11921,8 @@
       "name": "フローライト",
       "description": "宝石（最下級）12の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11936,8 +11936,8 @@
       "name": "アベンチュリン",
       "description": "宝石（最下級）13の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11951,8 +11951,8 @@
       "name": "ブラッドストーン",
       "description": "宝石（最下級）14の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11966,8 +11966,8 @@
       "name": "ソーダライト",
       "description": "宝石（最下級）15の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11981,8 +11981,8 @@
       "name": "ハウライト",
       "description": "宝石（最下級）16の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -11996,8 +11996,8 @@
       "name": "ラブラドライト",
       "description": "宝石（最下級）17の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -12011,8 +12011,8 @@
       "name": "マラカイト",
       "description": "宝石（最下級）18の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -12026,8 +12026,8 @@
       "name": "ロードナイト",
       "description": "宝石（最下級）19の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -12041,8 +12041,8 @@
       "name": "アイオライト",
       "description": "宝石（最下級）20の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -12056,8 +12056,8 @@
       "name": "プレナイト",
       "description": "宝石（最下級）21の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -12071,8 +12071,8 @@
       "name": "サンストーン",
       "description": "宝石（最下級）22の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -12086,8 +12086,8 @@
       "name": "モルダバイト",
       "description": "宝石（最下級）23の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
@@ -12101,8 +12101,8 @@
       "name": "ラリマー",
       "description": "宝石（最下級）24の説明",
       "category": "gem",
-      "basePrice": 10000,
-      "sellValue": 5000,
+      "basePrice": 2000000,
+      "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10
       },
