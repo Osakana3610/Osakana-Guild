@@ -12,6 +12,8 @@ struct ItemSaleView: View {
     @State private var selectedTotalSellPrice: Int = 0
     @State private var cacheVersion: Int = 0
     @State private var didLoadOnce = false
+    @State private var detailItem: ItemDefinition?
+    @State private var detailSkills: [UInt16: String] = [:]
 
     private var totalSellPriceText: String { "\(selectedTotalSellPrice)GP" }
     private var hasSelection: Bool { !selectedDisplayItems.isEmpty }
@@ -36,6 +38,16 @@ struct ItemSaleView: View {
             .navigationTitle("アイテム売却")
             .navigationBarTitleDisplayMode(.large)
             .onAppear { Task { await loadIfNeeded() } }
+            .sheet(item: $detailItem) { item in
+                NavigationStack {
+                    ItemDetailView(item: item, skills: detailSkills)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("閉じる") { detailItem = nil }
+                            }
+                        }
+                }
+            }
         }
     }
 
@@ -116,21 +128,31 @@ struct ItemSaleView: View {
 
     private func buildRow(for item: LightweightItemData) -> some View {
         let isSelected = selectedStackKeys.contains(item.stackKey)
-        return HStack {
-            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .foregroundColor(.primary)
-                .onTapGesture { toggleSelection(item) }
+        return Button {
+            toggleSelection(item)
+        } label: {
+            HStack {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(.primary)
 
-            ItemPreloadService.shared.makeStyledDisplayText(for: item)
-                .font(.body)
-                .foregroundStyle(.primary)
-                .lineLimit(1)
+                ItemPreloadService.shared.makeStyledDisplayText(for: item)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
 
-            Spacer()
+                Spacer()
+
+                Button {
+                    Task { await showItemDetail(item) }
+                } label: {
+                    Image(systemName: "info.circle")
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
         }
+        .buttonStyle(.plain)
         .frame(height: AppConstants.UI.listRowHeight)
-        .contentShape(Rectangle())
-        .onTapGesture { toggleSelection(item) }
         .contextMenu {
             Button {
                 Task { await sellItem(item, quantity: 1) }
@@ -272,6 +294,26 @@ struct ItemSaleView: View {
             selectedStackKeys.remove(item.stackKey)
             selectedDisplayItems.removeAll { $0.stackKey == item.stackKey }
             recalcSelectedTotalSellPrice()
+        } catch {
+            showError = true
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    @MainActor
+    private func showItemDetail(_ item: LightweightItemData) async {
+        do {
+            let masterData = MasterDataRuntimeService.shared
+            guard let definition = try await masterData.getItemMasterData(id: item.itemId) else {
+                return
+            }
+            if !definition.grantedSkillIds.isEmpty {
+                let allSkills = try await masterData.getAllSkills()
+                detailSkills = Dictionary(uniqueKeysWithValues: allSkills.map { ($0.id, $0.name) })
+            } else {
+                detailSkills = [:]
+            }
+            detailItem = definition
         } catch {
             showError = true
             errorMessage = error.localizedDescription
