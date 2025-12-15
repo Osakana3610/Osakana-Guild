@@ -60,6 +60,9 @@ extension ProgressService {
                                                             difficulty: UInt8(runDifficulty),
                                                             furthestFloor: UInt8(artifact.floorCount))
                 }
+                // 帰還時にドロップ報酬を適用
+                let drops = makeItemDropResults(from: artifact.totalDrops)
+                try await applyDropRewards(drops)
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                         difficulty: UInt8(runDifficulty),
@@ -92,25 +95,20 @@ extension ProgressService {
         case .nothing:
             return
         case .scripted:
-            let drops = makeItemDropResults(from: outcome.entry.drops)
             try await applyNonBattleRewards(memberIds: memberIds,
                                             runtimeCharactersById: runtimeCharactersById,
                                             totalExperience: outcome.entry.experienceGained,
-                                            goldBase: outcome.entry.goldGained,
-                                            drops: drops)
+                                            goldBase: outcome.entry.goldGained)
         case .combat(let summary):
-            let drops = makeItemDropResults(from: summary.drops)
             try await applyCombatRewards(memberIds: memberIds,
                                          runtimeCharactersById: runtimeCharactersById,
-                                         summary: summary,
-                                         drops: drops)
+                                         summary: summary)
         }
     }
 
     func applyCombatRewards(memberIds: [UInt8],
                             runtimeCharactersById: [UInt8: RuntimeCharacter],
-                            summary: CombatSummary,
-                            drops: [ItemDropResult]) async throws {
+                            summary: CombatSummary) async throws {
         let participants = uniqueOrdered(memberIds)
         guard !participants.isEmpty else { return }
 
@@ -133,17 +131,12 @@ extension ProgressService {
                 _ = try await gameState.addGold(UInt32(reward))
             }
         }
-
-        if summary.result == .victory {
-            try await applyDropRewards(drops)
-        }
     }
 
     func applyNonBattleRewards(memberIds: [UInt8],
                                runtimeCharactersById: [UInt8: RuntimeCharacter],
                                totalExperience: Int,
-                               goldBase: Int,
-                               drops: [ItemDropResult]) async throws {
+                               goldBase: Int) async throws {
         if totalExperience > 0 {
             let share = distributeFlatExperience(total: totalExperience,
                                                  recipients: memberIds,
@@ -155,9 +148,6 @@ extension ProgressService {
         }
         if goldBase > 0 {
             _ = try await gameState.addGold(UInt32(goldBase))
-        }
-        if !drops.isEmpty {
-            try await applyDropRewards(drops)
         }
     }
 
