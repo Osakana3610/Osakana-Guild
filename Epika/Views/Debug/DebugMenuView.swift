@@ -37,6 +37,7 @@ struct DebugMenuView: View {
 
     @State private var isPurgingCloudKit = false
     @State private var purgeStatus = ""
+    @State private var showPurgeCompleteAlert = false
 
     private let masterDataService = MasterDataRuntimeService.shared
     private var inventoryService: InventoryProgressService { progressService.inventory }
@@ -60,6 +61,13 @@ struct DebugMenuView: View {
                 Button("OK") { }
             } message: {
                 Text(alertMessage)
+            }
+            .alert("データ削除完了", isPresented: $showPurgeCompleteAlert) {
+                Button("アプリを終了") {
+                    exit(0)
+                }
+            } message: {
+                Text("CloudKitとローカルのデータを削除しました。\nアプリを終了して再起動してください。")
             }
             .sheet(isPresented: $showCreationSettings) {
                 ItemCreationSettingsView(selectedType: $selectedCreationType,
@@ -331,21 +339,18 @@ struct DebugMenuView: View {
         }
 
         do {
-            try await progressService.resetAllProgressIncludingCloudKit()
+            try await progressService.purgeAllDataForAppRestart()
             await MainActor.run {
-                alertMessage = "CloudKitとローカルの進行データを初期化しました"
-                showAlert = true
-                purgeStatus = "初期化が完了しました"
+                isPurgingCloudKit = false
+                showPurgeCompleteAlert = true
             }
         } catch {
             await MainActor.run {
-                alertMessage = "進行データの初期化に失敗しました"
-                purgeStatus = error.localizedDescription
+                isPurgingCloudKit = false
+                alertMessage = "進行データの初期化に失敗しました: \(error.localizedDescription)"
                 showAlert = true
             }
         }
-
-        await MainActor.run { isPurgingCloudKit = false }
     }
 
     private func estimateTotalCount(itemCount: Int,
