@@ -61,27 +61,7 @@ final class ProgressService: ObservableObject {
         self.dropNotifications = dropNotifications
         let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications] results in
             guard let dropNotifications, !results.isEmpty else { return }
-            let masterData = MasterDataRuntimeService.shared
-            // 全称号を事前取得（個別取得だとエラーが発生する場合があるため）
-            var normalTitleNames: [UInt8: String] = [:]
-            var superRareTitleNames: [UInt8: String] = [:]
-            do {
-                let allTitles = try await masterData.getAllTitles()
-                for title in allTitles {
-                    normalTitleNames[title.id] = title.name
-                }
-                let allSuperRareTitles = try await masterData.getAllSuperRareTitles()
-                for title in allSuperRareTitles {
-                    superRareTitleNames[title.id] = title.name
-                }
-            } catch {
-                // 称号取得に失敗しても通知自体は行う
-            }
-            await MainActor.run {
-                dropNotifications.publish(results: results,
-                                          normalTitleNames: normalTitleNames,
-                                          superRareTitleNames: superRareTitleNames)
-            }
+            await dropNotifications.publish(results: results)
         }
         let runtimeService = GameRuntimeService(dropNotifier: dropNotifier)
         self.runtime = ProgressRuntimeService(runtimeService: runtimeService,
