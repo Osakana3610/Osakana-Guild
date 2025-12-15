@@ -149,7 +149,6 @@ struct MainTabView: View {
                 }
             }
             .ignoresSafeArea(.keyboard)
-            .allowsHitTesting(false) // タッチイベントを透過
         )
         .overlay(
             VStack(spacing: 0) {
