@@ -31,7 +31,7 @@ extension BattleTurnEngine {
         actor.attackHistory.reset()
         applyStatusTicks(for: side, index: index, actor: &actor, context: &context)
         if actor.skillEffects.misc.autoDegradationRepair {
-            applyDegradationRepairIfAvailable(to: &actor)
+            applyDegradationRepairIfAvailable(to: &actor, context: &context)
         }
         applySpellChargeRegenIfNeeded(for: &actor, context: context)
         updateTimedBuffs(for: side, index: index, actor: &actor, context: &context)
