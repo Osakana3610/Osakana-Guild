@@ -112,6 +112,7 @@ struct ItemDetailView: View {
     @State private var item: ItemDefinition?
     @State private var skillNames: [UInt16: String] = [:]
     @State private var titleDefinition: TitleDefinition?
+    @State private var superRareTitleDefinition: SuperRareTitleDefinition?
     @State private var isLoading = true
     @State private var loadError: String?
 
@@ -162,15 +163,26 @@ struct ItemDetailView: View {
         do {
             let masterData = MasterDataRuntimeService.shared
             item = try await masterData.getItemMasterData(id: itemId)
-            if let item, !item.grantedSkillIds.isEmpty {
-                let skills = try await masterData.getAllSkills()
-                skillNames = Dictionary(uniqueKeysWithValues: skills.map { ($0.id, $0.name) })
-            }
+
             // 称号情報がある場合は称号定義を取得
             if let lw = lightweightItem {
-                let titleId = lw.enhancement.normalTitleId
                 let titles = try await masterData.getAllTitles()
-                titleDefinition = titles.first { $0.id == titleId }
+                titleDefinition = titles.first { $0.id == lw.enhancement.normalTitleId }
+
+                let superRareTitleId = lw.enhancement.superRareTitleId
+                if superRareTitleId > 0 {
+                    superRareTitleDefinition = try await masterData.getSuperRareTitle(id: superRareTitleId)
+                }
+            }
+
+            // スキル名を取得（アイテムのスキル + 超レア称号のスキル）
+            var allSkillIds = item?.grantedSkillIds ?? []
+            if let superRareSkillIds = superRareTitleDefinition?.skillIds {
+                allSkillIds.append(contentsOf: superRareSkillIds)
+            }
+            if !allSkillIds.isEmpty {
+                let skills = try await masterData.getAllSkills()
+                skillNames = Dictionary(uniqueKeysWithValues: skills.map { ($0.id, $0.name) })
             }
         } catch {
             loadError = error.localizedDescription
@@ -206,9 +218,13 @@ struct ItemDetailView: View {
                 }
             }
 
-            if !item.grantedSkillIds.isEmpty {
+            let superRareSkillIds = superRareTitleDefinition?.skillIds ?? []
+            if !item.grantedSkillIds.isEmpty || !superRareSkillIds.isEmpty {
                 Section("付与スキル") {
                     ForEach(item.grantedSkillIds, id: \.self) { skillId in
+                        Text(skillNames[skillId] ?? "スキルID: \(skillId)")
+                    }
+                    ForEach(superRareSkillIds, id: \.self) { skillId in
                         Text(skillNames[skillId] ?? "スキルID: \(skillId)")
                     }
                 }
