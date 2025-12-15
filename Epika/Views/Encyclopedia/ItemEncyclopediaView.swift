@@ -97,17 +97,8 @@ private struct ItemRowView: View {
     let item: ItemDefinition
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(item.name)
-                .font(.body)
-
-            if !item.description.isEmpty {
-                Text(item.description)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
-        }
+        Text(item.name)
+            .font(.body)
     }
 }
 
@@ -190,11 +181,6 @@ struct ItemDetailView: View {
     private func itemContent(_ item: ItemDefinition) -> some View {
         List {
             Section("基本情報") {
-                if !item.description.isEmpty {
-                    Text(item.description)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
                 LabeledContent("カテゴリ", value: ItemSaleCategory(masterCategory: item.category).displayName)
                 if let rarity = lightweightItem?.rarity ?? item.rarity {
                     LabeledContent("レアリティ", value: rarity)

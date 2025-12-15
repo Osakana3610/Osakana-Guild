@@ -66,7 +66,6 @@ actor ItemSynthesisProgressService {
             itemId: snapshot.itemId,
             masterDataId: String(synthesisContext.resultDefinition.id),
             displayName: synthesisContext.resultDefinition.name,
-            description: synthesisContext.resultDefinition.description,
             quantity: Int(snapshot.quantity),
             category: ItemSaleCategory(masterCategory: synthesisContext.resultDefinition.category),
             baseValue: synthesisContext.resultDefinition.basePrice,
