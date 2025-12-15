@@ -920,6 +920,7 @@ private struct TitleMasterFile: Decodable {
         let dropProbability: Double?
         let allowWithTitleTreasure: Bool?
         let superRareRates: SuperRareRates?
+        let priceMultiplier: Double
     }
 
     let normalTitles: [Title]
@@ -955,8 +956,9 @@ extension Generator {
                     id, name, description, stat_multiplier, negative_multiplier,
                     drop_rate, plus_correction, minus_correction, judgment_count,
                     drop_probability, allow_with_title_treasure,
-                    super_rare_rate_normal, super_rare_rate_good, super_rare_rate_rare, super_rare_rate_gem
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    super_rare_rate_normal, super_rare_rate_good, super_rare_rate_rare, super_rare_rate_gem,
+                    price_multiplier
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
             let statement = try prepare(sql)
             defer { sqlite3_finalize(statement) }
@@ -977,6 +979,7 @@ extension Generator {
                 bindDouble(statement, index: 13, value: title.superRareRates?.good)
                 bindDouble(statement, index: 14, value: title.superRareRates?.rare)
                 bindDouble(statement, index: 15, value: title.superRareRates?.gem)
+                bindDouble(statement, index: 16, value: title.priceMultiplier)
                 try step(statement)
                 reset(statement)
             }
