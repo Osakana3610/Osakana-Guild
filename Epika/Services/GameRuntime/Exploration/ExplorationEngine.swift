@@ -37,7 +37,8 @@ struct ExplorationEngine {
                         dungeonId: UInt16,
                         targetFloorNumber: Int,
                         superRareState: SuperRareDailyState,
-                        scheduler: ExplorationEventScheduler) async throws -> (Preparation, RunState) {
+                        scheduler: ExplorationEventScheduler,
+                        seed: UInt64) async throws -> (Preparation, RunState) {
         let bundle = try await provider.dungeonBundle(for: dungeonId)
         let dungeon = bundle.dungeon
         let floors = bundle.floors.sorted { $0.floorNumber < $1.floorNumber }
@@ -62,7 +63,7 @@ struct ExplorationEngine {
         let state = RunState(floorIndex: 0,
                              eventIndex: 0,
                              superRareState: superRareState,
-                             random: GameRandomSource())
+                             random: GameRandomSource(seed: seed))
         return (preparation, state)
     }
 

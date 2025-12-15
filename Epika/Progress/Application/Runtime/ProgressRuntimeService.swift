@@ -40,6 +40,7 @@ final class ProgressRuntimeService {
         return ExplorationRuntimeSession(runId: session.runId,
                                           preparation: session.preparation,
                                           startedAt: session.startedAt,
+                                          seed: session.seed,
                                           explorationInterval: session.explorationInterval,
                                           events: session.events,
                                           runtimePartyState: partyState,
@@ -54,6 +55,7 @@ struct ExplorationRuntimeSession: Sendable {
     let runId: UUID
     let preparation: ExplorationEngine.Preparation
     let startedAt: Date
+    let seed: UInt64
     let explorationInterval: TimeInterval
     let events: AsyncStream<ExplorationEngine.StepOutcome>
     let runtimePartyState: RuntimePartyState

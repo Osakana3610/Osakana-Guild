@@ -1,6 +1,11 @@
 #if DEBUG
 import SwiftUI
 
+enum DropNotificationMode: String, CaseIterable {
+    case bulk = "一気に表示"
+    case sequential = "1つずつ表示"
+}
+
 enum ItemCreationType: String, CaseIterable {
     case basicOnly = "基本アイテムのみ"
     case withSuperRare = "基本＋超レア称号"
@@ -99,6 +104,12 @@ struct DebugMenuView: View {
     @State private var purgeStatus = ""
     @State private var showPurgeCompleteAlert = false
 
+    // ドロップ通知テスト
+    @State private var dropNotificationCount: Int = 5
+    @State private var superRareRate: Double = 0.1
+    @State private var dropNotificationMode: DropNotificationMode = .bulk
+    @State private var isSendingDropNotifications = false
+
     private let masterDataService = MasterDataRuntimeService.shared
     private var inventoryService: InventoryProgressService { progressService.inventory }
     private var gameStateService: GameStateService { progressService.gameState }
@@ -111,7 +122,7 @@ struct DebugMenuView: View {
         NavigationStack {
             Form {
                 itemCreationSection
-                itemCleanupSection
+                dropNotificationTestSection
                 cloudKitSection
             }
             .avoidBottomGameInfo()
@@ -179,12 +190,27 @@ struct DebugMenuView: View {
         }
     }
 
-    private var itemCleanupSection: some View {
-        Section("アイテム削除") {
-            Button("全てのアイテムを削除", role: .destructive) {
-                Task { await deleteAllItems() }
+    private var dropNotificationTestSection: some View {
+        Section("ドロップ通知テスト") {
+            Stepper("通知数: \(dropNotificationCount)", value: $dropNotificationCount, in: 1...20)
+
+            VStack(alignment: .leading) {
+                Text("超レア出現率: \(Int(superRareRate * 100))%")
+                Slider(value: $superRareRate, in: 0...1)
             }
-            .buttonStyle(.bordered)
+
+            Picker("表示モード", selection: $dropNotificationMode) {
+                ForEach(DropNotificationMode.allCases, id: \.self) { mode in
+                    Text(mode.rawValue).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            Button("テスト通知を送信") {
+                Task { await sendTestDropNotifications() }
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(isSendingDropNotifications)
         }
     }
 
@@ -381,13 +407,6 @@ struct DebugMenuView: View {
         await MainActor.run { isCreatingItems = false }
     }
 
-    private func deleteAllItems() async {
-        await MainActor.run {
-            alertMessage = "デバッグ用の全削除機能は無効化しました。\n再インストールで対応してください。"
-            showAlert = true
-        }
-    }
-
     private func purgeCloudKitAndReset() async {
         if isPurgingCloudKit { return }
         await MainActor.run {
@@ -470,6 +489,60 @@ struct DebugMenuView: View {
 
     private func ensureStorageCapacity() async throws {
         _ = try await gameStateService.loadCurrentPlayer()
+    }
+
+    private func sendTestDropNotifications() async {
+        if isSendingDropNotifications { return }
+        await MainActor.run { isSendingDropNotifications = true }
+        defer { Task { @MainActor in isSendingDropNotifications = false } }
+
+        do {
+            let allItems = try await masterDataService.getAllItems()
+            guard !allItems.isEmpty else {
+                debugLog("[DebugMenu] No items found for drop notification test")
+                return
+            }
+
+            let allSuperRareTitles = try await masterDataService.getAllSuperRareTitles()
+            let superRareCount = max(1, allSuperRareTitles.count)
+
+            switch dropNotificationMode {
+            case .bulk:
+                var dropResults: [ItemDropResult] = []
+                for _ in 0..<dropNotificationCount {
+                    dropResults.append(makeRandomDropResult(allItems: allItems, superRareCount: superRareCount))
+                }
+                await progressService.dropNotifications.publish(results: dropResults)
+                debugLog("[DebugMenu] Sent \(dropResults.count) test drop notifications (bulk)")
+
+            case .sequential:
+                for i in 0..<dropNotificationCount {
+                    let result = makeRandomDropResult(allItems: allItems, superRareCount: superRareCount)
+                    await progressService.dropNotifications.publish(results: [result])
+                    debugLog("[DebugMenu] Sent test drop notification \(i + 1)/\(dropNotificationCount)")
+                    if i < dropNotificationCount - 1 {
+                        try await Task.sleep(for: .milliseconds(500))
+                    }
+                }
+            }
+        } catch {
+            debugLog("[DebugMenu] Drop notification test error: \(error)")
+        }
+    }
+
+    private func makeRandomDropResult(allItems: [ItemDefinition], superRareCount: Int) -> ItemDropResult {
+        let randomItem = allItems.randomElement()!
+        let normalTitleId: UInt8 = UInt8.random(in: 0...8)
+        let isSuperRare = Double.random(in: 0...1) < superRareRate
+        let superRareTitleId: UInt8? = isSuperRare ? UInt8.random(in: 1...UInt8(min(100, superRareCount))) : nil
+
+        return ItemDropResult(
+            item: randomItem,
+            quantity: 1,
+            sourceEnemyId: nil,
+            normalTitleId: normalTitleId,
+            superRareTitleId: superRareTitleId
+        )
     }
 }
 

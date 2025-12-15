@@ -22,10 +22,13 @@ actor GameRuntimeService {
                              targetFloorNumber: Int,
                              party: RuntimePartyState,
                              superRareState: SuperRareDailyState) async throws -> ExplorationRunSession {
+        // 決定論的乱数のシードを生成
+        let seed = UInt64.random(in: UInt64.min...UInt64.max)
         let preparationData = try await prepareExplorationRun(dungeonId: dungeonId,
                                                               targetFloorNumber: targetFloorNumber,
                                                               party: party,
-                                                              superRareState: superRareState)
+                                                              superRareState: superRareState,
+                                                              seed: seed)
         let runId = UUID()
         let startedAt = Date()
         let (stream, continuation) = AsyncStream.makeStream(of: ExplorationEngine.StepOutcome.self)
@@ -33,7 +36,6 @@ actor GameRuntimeService {
         var state = preparationData.state
         let preparation = preparationData.preparation
         let interval = preparationData.explorationInterval
-        let sleepNanoseconds: UInt64? = interval > 0 ? UInt64(interval * 1_000_000_000.0) : nil
 
         let task = Task<ExplorationRunArtifact, Error> { [self] in
             var events: [ExplorationEventLogEntry] = []
@@ -87,8 +89,18 @@ actor GameRuntimeService {
                         break
                     }
 
-                    if let sleepNanoseconds {
-                        try await Task.sleep(nanoseconds: sleepNanoseconds)
+                    // 経過時間ベースの待機: 次のイベント予定時刻まで待機
+                    // startedAtから累積イベント数 * interval後に次イベント
+                    // (eventIndexはフロアごとにリセットされるため、累積のevents.countを使用)
+                    if interval > 0 {
+                        let totalEventCount = events.count  // 現在のイベントを含む累積数
+                        let expectedTime = startedAt.addingTimeInterval(TimeInterval(totalEventCount) * interval)
+                        let now = Date()
+                        let waitSeconds = expectedTime.timeIntervalSince(now)
+                        if waitSeconds > 0 {
+                            try await Task.sleep(for: .milliseconds(Int(waitSeconds * 1000)))
+                        }
+                        // waitSeconds <= 0 の場合は既に予定時刻を過ぎているので即座に次へ
                     }
                     continue
                 }
@@ -124,6 +136,7 @@ actor GameRuntimeService {
         return ExplorationRunSession(runId: runId,
                                      preparation: preparation,
                                      startedAt: startedAt,
+                                     seed: seed,
                                      explorationInterval: interval,
                                      events: stream,
                                      waitForCompletion: { [weak self] in
@@ -140,7 +153,8 @@ actor GameRuntimeService {
     func prepareExplorationRun(dungeonId: UInt16,
                                targetFloorNumber: Int,
                                party: RuntimePartyState,
-                               superRareState: SuperRareDailyState) async throws -> ExplorationRunPreparationData {
+                               superRareState: SuperRareDailyState,
+                               seed: UInt64) async throws -> ExplorationRunPreparationData {
         let provider = await makeExplorationProvider()
         let scheduler = await makeEventScheduler()
         let (preparation, state) = try await ExplorationEngine.prepare(provider: provider,
@@ -148,7 +162,8 @@ actor GameRuntimeService {
                                                                        dungeonId: dungeonId,
                                                                        targetFloorNumber: targetFloorNumber,
                                                                        superRareState: superRareState,
-                                                                       scheduler: scheduler)
+                                                                       scheduler: scheduler,
+                                                                       seed: seed)
         let timeScale = try await explorationTimeMultiplier(for: party, dungeon: preparation.dungeon)
         let scaledInterval = max(0.0, Double(preparation.dungeon.explorationTime) * timeScale)
         let interval = TimeInterval(scaledInterval)
@@ -236,6 +251,7 @@ struct ExplorationRunSession: Sendable {
     let runId: UUID
     let preparation: ExplorationEngine.Preparation
     let startedAt: Date
+    let seed: UInt64
     let explorationInterval: TimeInterval
     let events: AsyncStream<ExplorationEngine.StepOutcome>
     let waitForCompletion: @Sendable () async throws -> ExplorationRunArtifact
