@@ -26,13 +26,26 @@ enum RuntimeCharacterFactory {
         let primaryPersonality = try await primaryDef
         let secondaryPersonality = try await secondaryDef
 
-        // 装備からアイテム定義を取得
-        let itemIds = Set(input.equippedItems.map { $0.itemId }).filter { $0 > 0 }
-        let equippedItemDefinitions = try await repository.items(withIds: Array(itemIds))
+        // 装備アイテムの定義を取得（ソケット宝石は含めない）
+        let equippedItemIds = Set(input.equippedItems.map { $0.itemId }).filter { $0 > 0 }
+        let equippedItemDefinitions = try await repository.items(withIds: Array(equippedItemIds))
 
-        // 装備から付与されるスキルIDを収集
-        let grantedSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkillIds }
-        let learnedSkills = try await repository.skills(withIds: grantedSkillIds)
+        // 装備アイテムの超レア称号を取得（ソケット宝石の超レア称号は含めない）
+        let superRareTitleIds = Set(input.equippedItems.map { $0.superRareTitleId }).filter { $0 > 0 }
+        var superRareTitles: [SuperRareTitleDefinition] = []
+        for titleId in superRareTitleIds {
+            if let definition = try await repository.superRareTitle(withId: titleId) {
+                superRareTitles.append(definition)
+            }
+        }
+
+        // 装備から付与されるスキルIDを収集（装備アイテム + 装備の超レア称号）
+        var allSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkillIds }
+        allSkillIds.append(contentsOf: superRareTitles.flatMap { $0.skillIds })
+        let learnedSkills = try await repository.skills(withIds: allSkillIds)
+
+        // Loadout構築
+        let loadout = try await assembleLoadout(repository: repository, from: input.equippedItems)
 
         // 装備スロット計算
         let slotModifiers = try SkillRuntimeEffectCompiler.equipmentSlots(from: learnedSkills)
@@ -41,9 +54,6 @@ enum RuntimeCharacterFactory {
         if usedSlots > allowedSlots {
             throw RuntimeError.invalidConfiguration(reason: "装備枠を超過しています（装備数: \(usedSlots) / 上限: \(allowedSlots)）")
         }
-
-        // Loadout構築
-        let loadout = try await assembleLoadout(repository: repository, from: input.equippedItems)
 
         // スペルブック
         let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)

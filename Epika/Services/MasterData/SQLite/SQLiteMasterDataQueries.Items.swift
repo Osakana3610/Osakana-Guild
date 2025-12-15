@@ -80,7 +80,6 @@ extension SQLiteMasterDataManager {
         struct Builder {
             var id: UInt16
             var name: String
-            var description: String
             var category: String
             var basePrice: Int
             var sellValue: Int
@@ -97,24 +96,21 @@ extension SQLiteMasterDataManager {
         var builders: [UInt16: Builder] = [:]
         var orderedIds: [UInt16] = []
 
-        let itemSQL = "SELECT id, name, description, category, base_price, sell_value, rarity FROM items ORDER BY id;"
+        let itemSQL = "SELECT id, name, category, base_price, sell_value, rarity FROM items ORDER BY id;"
         let itemStatement = try prepare(itemSQL)
         defer { sqlite3_finalize(itemStatement) }
         while sqlite3_step(itemStatement) == SQLITE_ROW {
             guard let nameC = sqlite3_column_text(itemStatement, 1),
-                  let descC = sqlite3_column_text(itemStatement, 2),
-                  let categoryC = sqlite3_column_text(itemStatement, 3) else { continue }
+                  let categoryC = sqlite3_column_text(itemStatement, 2) else { continue }
             let id = UInt16(sqlite3_column_int(itemStatement, 0))
             let name = String(cString: nameC)
-            let description = String(cString: descC)
             let category = String(cString: categoryC)
-            let basePrice = Int(sqlite3_column_int(itemStatement, 4))
-            let sellValue = Int(sqlite3_column_int(itemStatement, 5))
-            let rarityValue = sqlite3_column_text(itemStatement, 6).flatMap { String(cString: $0) }
+            let basePrice = Int(sqlite3_column_int(itemStatement, 3))
+            let sellValue = Int(sqlite3_column_int(itemStatement, 4))
+            let rarityValue = sqlite3_column_text(itemStatement, 5).flatMap { String(cString: $0) }
             builders[id] = Builder(
                 id: id,
                 name: name,
-                description: description,
                 category: category,
                 basePrice: basePrice,
                 sellValue: sellValue,
@@ -183,7 +179,6 @@ extension SQLiteMasterDataManager {
             ItemDefinition(
                 id: builder.id,
                 name: builder.name,
-                description: builder.description,
                 category: builder.category,
                 basePrice: builder.basePrice,
                 sellValue: builder.sellValue,

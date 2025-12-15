@@ -71,6 +71,7 @@ struct CombatStatCalculator {
         }
         try base.apply(equipment: context.equippedItems,
                        definitions: context.loadout.items,
+                       titleDefinitions: context.loadout.titles,
                        equipmentMultipliers: skillEffects.equipmentMultipliers,
                        pandoraBoxStackKeys: context.pandoraBoxStackKeys)
 
@@ -94,6 +95,7 @@ struct CombatStatCalculator {
                                              critical: skillEffects.critical,
                                              equipment: context.equippedItems,
                                              itemDefinitions: context.loadout.items,
+                                             titleDefinitions: context.loadout.titles,
                                              martial: skillEffects.martialBonuses,
                                              growthMultiplier: skillEffects.growthMultiplier,
                                              statConversions: skillEffects.statConversions,
@@ -154,9 +156,11 @@ private struct BaseStatAccumulator {
 
     mutating func apply(equipment: [CharacterValues.EquippedItem],
                         definitions: [ItemDefinition],
+                        titleDefinitions: [TitleDefinition],
                         equipmentMultipliers: [String: Double],
                         pandoraBoxStackKeys: Set<String>) throws {
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+        let titlesById = Dictionary(uniqueKeysWithValues: titleDefinitions.map { ($0.id, $0) })
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else {
                 throw CombatStatCalculator.CalculationError.missingItemDefinition(Int16(item.itemId))
@@ -165,16 +169,29 @@ private struct BaseStatAccumulator {
                 ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
                 ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
+            // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
+            let title = titlesById[item.normalTitleId]
+            let statMultiplier = title?.statMultiplier ?? 1.0
+            let negativeMultiplier = title?.negativeMultiplier ?? 1.0
+            // 超レアがついている場合はさらに2倍
+            let superRareMultiplier: Double = item.superRareTitleId > 0 ? 2.0 : 1.0
             definition.statBonuses.forEachNonZero { stat, value in
-                let scaled = Double(value) * categoryMultiplier * pandoraMultiplier
+                let titleMult = value > 0 ? statMultiplier : negativeMultiplier
+                let scaled = Double(value) * categoryMultiplier * pandoraMultiplier * titleMult * superRareMultiplier
                 assign(stat, delta: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity)
             }
-            // ソケット宝石の基礎ステータス（係数1.0）
+            // ソケット宝石の基礎ステータス（宝石自体の称号倍率を適用）
             if item.socketItemId != 0,
                let gemDefinition = definitionsById[item.socketItemId] {
+                let gemTitle = titlesById[item.socketNormalTitleId]
+                let gemStatMult = gemTitle?.statMultiplier ?? 1.0
+                let gemNegMult = gemTitle?.negativeMultiplier ?? 1.0
+                let gemSuperRareMult: Double = item.socketSuperRareTitleId > 0 ? 2.0 : 1.0
                 gemDefinition.statBonuses.forEachNonZero { stat, value in
+                    let titleMult = value > 0 ? gemStatMult : gemNegMult
+                    let scaled = Double(value) * titleMult * gemSuperRareMult
                     // 宝石ステータスは装備数量に依存しない（1個の宝石が1個の装備に装着）
-                    assign(stat, delta: value)
+                    assign(stat, delta: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)))
                 }
             }
         }
@@ -497,6 +514,7 @@ private struct CombatAccumulator {
     private let criticalParams: SkillEffectAggregator.CriticalParameters
     private let equipment: [CharacterValues.EquippedItem]
     private let itemDefinitions: [ItemDefinition]
+    private let titleDefinitions: [TitleDefinition]
     private let martialBonuses: SkillEffectAggregator.MartialBonuses
     private let growthMultiplier: Double
     private let statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]
@@ -517,6 +535,7 @@ private struct CombatAccumulator {
          critical: SkillEffectAggregator.CriticalParameters,
          equipment: [CharacterValues.EquippedItem],
          itemDefinitions: [ItemDefinition],
+         titleDefinitions: [TitleDefinition],
          martial: SkillEffectAggregator.MartialBonuses,
          growthMultiplier: Double,
          statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]],
@@ -535,6 +554,7 @@ private struct CombatAccumulator {
         self.criticalParams = critical
         self.equipment = equipment
         self.itemDefinitions = itemDefinitions
+        self.titleDefinitions = titleDefinitions
         self.martialBonuses = martial
         self.growthMultiplier = growthMultiplier
         self.statConversions = statConversions
@@ -837,6 +857,7 @@ private struct CombatAccumulator {
 
     private func applyEquipmentCombatBonuses(to combat: inout CharacterValues.Combat) {
         let definitionsById = Dictionary(uniqueKeysWithValues: itemDefinitions.map { ($0.id, $0) })
+        let titlesById = Dictionary(uniqueKeysWithValues: titleDefinitions.map { ($0.id, $0) })
         // attackCountは10倍スケールで保存されているため、合計してから0.1倍して丸める
         var attackCountAccumulator: Double = 0
 
@@ -846,10 +867,17 @@ private struct CombatAccumulator {
                 ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
                 ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
+            // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
+            let title = titlesById[item.normalTitleId]
+            let titleStatMult = title?.statMultiplier ?? 1.0
+            let titleNegMult = title?.negativeMultiplier ?? 1.0
+            // 超レアがついている場合はさらに2倍
+            let superRareMult: Double = item.superRareTitleId > 0 ? 2.0 : 1.0
             definition.combatBonuses.forEachNonZero { statName, value in
                 guard let stat = CombatStatKey(statName) else { return }
                 let statMultiplier = itemStatMultipliers[stat] ?? 1.0
-                let scaled = Double(value) * categoryMultiplier * statMultiplier * pandoraMultiplier
+                let titleMult = value > 0 ? titleStatMult : titleNegMult
+                let scaled = Double(value) * categoryMultiplier * statMultiplier * pandoraMultiplier * titleMult * superRareMult
                 if stat == .attackCount {
                     // attackCountは後でまとめて処理
                     attackCountAccumulator += scaled * Double(item.quantity)
@@ -857,13 +885,18 @@ private struct CombatAccumulator {
                     apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity, to: stat, combat: &combat)
                 }
             }
-            // ソケット宝石の戦闘ステータス（係数: 通常0.5、魔法防御0.25）
+            // ソケット宝石の戦闘ステータス（係数: 通常0.5、魔法防御0.25、宝石自体の称号倍率を適用）
             if item.socketItemId != 0,
                let gemDefinition = definitionsById[item.socketItemId] {
+                let gemTitle = titlesById[item.socketNormalTitleId]
+                let gemStatMult = gemTitle?.statMultiplier ?? 1.0
+                let gemNegMult = gemTitle?.negativeMultiplier ?? 1.0
+                let gemSuperRareMult: Double = item.socketSuperRareTitleId > 0 ? 2.0 : 1.0
                 gemDefinition.combatBonuses.forEachNonZero { statName, value in
                     guard let stat = CombatStatKey(statName) else { return }
                     let gemCoefficient: Double = (stat == .magicalDefense) ? 0.25 : 0.5
-                    let scaled = Double(value) * gemCoefficient
+                    let titleMult = value > 0 ? gemStatMult : gemNegMult
+                    let scaled = Double(value) * gemCoefficient * titleMult * gemSuperRareMult
                     if stat == .attackCount {
                         attackCountAccumulator += scaled
                     } else {

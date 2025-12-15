@@ -20,7 +20,8 @@ extension SQLiteMasterDataManager {
                    super_rare_rate_normal,
                    super_rare_rate_good,
                    super_rare_rate_rare,
-                   super_rare_rate_gem
+                   super_rare_rate_gem,
+                   price_multiplier
             FROM titles;
         """
         let statement = try prepare(sql)
@@ -60,7 +61,8 @@ extension SQLiteMasterDataManager {
                 judgmentCount: sqlite3_column_type(statement, 8) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 8)),
                 dropProbability: dropProbability,
                 allowWithTitleTreasure: allowTreasureValue,
-                superRareRates: superRareRates
+                superRareRates: superRareRates,
+                priceMultiplier: sqlite3_column_double(statement, 15)
             )
             titles.append(definition)
         }

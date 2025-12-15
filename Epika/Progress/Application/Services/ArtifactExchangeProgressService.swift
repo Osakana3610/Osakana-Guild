@@ -80,7 +80,6 @@ actor ArtifactExchangeProgressService {
             itemId: snapshot.itemId,
             masterDataId: String(rewardDefinition.id),
             displayName: rewardDefinition.name,
-            description: rewardDefinition.description,
             quantity: Int(snapshot.quantity),
             category: ItemSaleCategory(masterCategory: rewardDefinition.category),
             baseValue: rewardDefinition.basePrice,

@@ -13,6 +13,7 @@ enum ProgressError: Error {
     case itemDefinitionUnavailable(ids: [String])
     case storyLocked(nodeId: String)
     case dungeonLocked(id: String)
+    case invalidUnlockModule(String)
 }
 
 extension ProgressError: LocalizedError {
@@ -42,6 +43,8 @@ extension ProgressError: LocalizedError {
             return "まだ解放されていないストーリーです。"
         case .dungeonLocked:
             return "まだ解放されていない迷宮です。"
+        case .invalidUnlockModule(let module):
+            return "無効な解放モジュール指定です: \(module)"
         }
     }
 }

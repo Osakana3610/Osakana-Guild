@@ -10,40 +10,58 @@ struct StoryDetailView: View {
     @State private var errorMessage = ""
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                StoryInfoCard(story: story)
-                StoryContentCard(story: story)
+        List {
+            Section {
+                StoryInfoContent(story: story)
+            }
 
-                if !story.rewardSummary.isEmpty {
-                    StoryRewardsCard(story: story)
-                }
+            Section("ストーリー") {
+                Text(story.content)
+                    .font(.body)
+                    .lineSpacing(4)
+            }
 
-                if !story.unlockConditions.isEmpty {
-                    UnlockConditionsCard(story: story)
-                }
-
-                if !story.unlocksModules.isEmpty {
-                    UnlockedModulesCard(story: story)
-                }
-
-                if story.canRead {
-                    Button("ストーリーを読む") {
-                        Task { await markAsRead() }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                }
-
-                if showError {
-                    Text(errorMessage)
-                        .font(.caption)
-                        .foregroundColor(.primary)
+            if !story.rewardSummary.isEmpty {
+                Section("報酬") {
+                    Text(story.rewardSummary)
+                        .font(.body)
                 }
             }
-            .padding()
+
+            if !story.unlockConditions.isEmpty {
+                Section("解放条件") {
+                    ForEach(story.unlockConditions, id: \.self) { condition in
+                        Label(condition, systemImage: "checkmark.circle")
+                    }
+                }
+            }
+
+            if !story.unlocksModules.isEmpty {
+                Section("解放されるコンテンツ") {
+                    ForEach(story.unlocksModules, id: \.self) { module in
+                        Label(module, systemImage: "arrow.right.circle")
+                    }
+                }
+            }
+
+            if story.canRead || showError {
+                Section {
+                    if story.canRead {
+                        Button("ストーリーを読む") {
+                            Task { await markAsRead() }
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+
+                    if showError {
+                        Text(errorMessage)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                }
+            }
         }
-        .background(Color(.systemGroupedBackground))
+        .listStyle(.insetGrouped)
         .avoidBottomGameInfo()
         .navigationTitle(story.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -65,117 +83,21 @@ struct StoryDetailView: View {
     }
 }
 
-struct StoryInfoCard: View {
+private struct StoryInfoContent: View {
     let story: RuntimeStoryNode
 
     var body: some View {
-        GroupBox {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("章\(story.chapterId)・セクション\(story.section)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    StoryStatusBadge(story: story)
-                }
-                Text(story.title)
-                    .font(.title2)
-                    .bold()
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("章\(story.chapterId)・セクション\(story.section)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+                StoryStatusBadge(story: story)
             }
-        }
-    }
-}
-
-struct StoryContentCard: View {
-    let story: RuntimeStoryNode
-
-    var body: some View {
-        GroupBox {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: "book.fill")
-                        .foregroundColor(.primary)
-                    Text("ストーリー")
-                        .font(.headline)
-                }
-
-                Text(story.content)
-                    .font(.body)
-                    .lineSpacing(4)
-            }
-        }
-    }
-}
-
-struct StoryRewardsCard: View {
-    let story: RuntimeStoryNode
-
-    var body: some View {
-        GroupBox {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: "gift.fill")
-                        .foregroundColor(.primary)
-                    Text("報酬")
-                        .font(.headline)
-                }
-
-                Text(story.rewardSummary)
-                    .font(.body)
-                    .foregroundColor(.primary)
-            }
-        }
-    }
-}
-
-struct UnlockConditionsCard: View {
-    let story: RuntimeStoryNode
-
-    var body: some View {
-        GroupBox {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: "key.fill")
-                        .foregroundColor(.primary)
-                    Text("解放条件")
-                        .font(.headline)
-                }
-
-                ForEach(story.unlockConditions, id: \.self) { condition in
-                    HStack {
-                        Image(systemName: "checkmark.circle")
-                            .foregroundColor(.primary)
-                        Text(condition)
-                            .font(.body)
-                    }
-                }
-            }
-        }
-    }
-}
-
-struct UnlockedModulesCard: View {
-    let story: RuntimeStoryNode
-
-    var body: some View {
-        GroupBox {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: "lock.open.fill")
-                        .foregroundColor(.primary)
-                    Text("解放されるコンテンツ")
-                        .font(.headline)
-                }
-
-                ForEach(story.unlocksModules, id: \.self) { module in
-                    HStack {
-                        Image(systemName: "arrow.right.circle")
-                            .foregroundColor(.primary)
-                        Text(module)
-                            .font(.body)
-                    }
-                }
-            }
+            Text(story.title)
+                .font(.title2)
+                .bold()
         }
     }
 }
