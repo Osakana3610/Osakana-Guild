@@ -41,7 +41,8 @@ final class ExplorationProgressService {
                   dungeon: DungeonDefinition,
                   difficulty: Int,
                   targetFloor: Int,
-                  startedAt: Date) async throws -> PersistentIdentifier {
+                  startedAt: Date,
+                  seed: UInt64) async throws -> PersistentIdentifier {
         let context = makeContext()
 
         // 200件パージ
@@ -52,7 +53,8 @@ final class ExplorationProgressService {
             dungeonId: dungeon.id,
             difficulty: UInt8(difficulty),
             targetFloor: UInt8(targetFloor),
-            startedAt: startedAt
+            startedAt: startedAt,
+            seed: seed
         )
         context.insert(runRecord)
         try saveIfNeeded(context)

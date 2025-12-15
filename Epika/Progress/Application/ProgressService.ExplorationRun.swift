@@ -34,7 +34,8 @@ extension ProgressService {
                                                       dungeon: session.preparation.dungeon,
                                                       difficulty: Int(runDifficulty),
                                                       targetFloor: session.preparation.targetFloorNumber,
-                                                      startedAt: session.startedAt)
+                                                      startedAt: session.startedAt,
+                                                      seed: session.seed)
         } catch {
             let originalError = error
             await session.cancel()

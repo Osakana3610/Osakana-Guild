@@ -9,8 +9,6 @@ struct RecentExplorationLogsView: View {
     let party: RuntimeParty
     let runs: [ExplorationSnapshot]
 
-    @State private var showingInProgressDetail = false
-    @State private var activeRunForProgress: ExplorationSnapshot?
     @State private var selectedRunForSummary: ExplorationSnapshot?
     @State private var selectedRunForResultSummary: ExplorationSnapshot?
 
@@ -50,14 +48,6 @@ struct RecentExplorationLogsView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .sheet(isPresented: $showingInProgressDetail, onDismiss: {
-            activeRunForProgress = nil
-        }) {
-            InProgressStatusView(
-                dungeonName: activeRunForProgress?.displayDungeonName ?? "",
-                statusText: progressText(for: activeRunForProgress)
-            )
-        }
         .sheet(item: $selectedRunForSummary) { snapshot in
             ExplorationRunSummaryView(
                 snapshot: snapshot,
@@ -83,37 +73,15 @@ struct RecentExplorationLogsView: View {
         .frame(maxWidth: .infinity, alignment: .center)
     }
 
-    private func progressText(for run: ExplorationSnapshot?) -> String {
-        guard let run else {
-            return "探索状況を取得できませんでした"
-        }
-        let referenceDate: Date
-        let label: String
-        switch run.summary.timing {
-        case .expectedReturn(let expected):
-            referenceDate = expected
-            label = "帰還予定"
-        case .actualReturn(let actual):
-            referenceDate = actual
-            label = "帰還日時"
-        }
-        let timestamp = ExplorationDateFormatters.timestamp.string(from: referenceDate)
-        return "探索進行中...（\(run.activeFloorNumber)F到達・\(label) \(timestamp)）"
-    }
-
     private func handleDetailButton(for run: ExplorationSnapshot) {
-        if run.status == .running {
-            activeRunForProgress = run
-            showingInProgressDetail = true
-            return
-        }
+        // 探索中・完了済み問わず、ログ詳細画面を表示
         selectedRunForSummary = run
     }
 
     private func handleRowTap(for run: ExplorationSnapshot) {
         if run.status == .running {
-            activeRunForProgress = run
-            showingInProgressDetail = true
+            // 探索中はログ詳細画面を表示（完了イベントまで）
+            selectedRunForSummary = run
             return
         }
         selectedRunForResultSummary = run
@@ -157,49 +125,6 @@ private struct ExplorationLogRowView: View {
             .buttonStyle(.plain)
         }
         .padding(.vertical, 6)
-    }
-}
-
-// MARK: - In Progress View
-
-private struct InProgressStatusView: View {
-    let dungeonName: String
-    let statusText: String
-
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("探索進行中")
-                    .font(.title2)
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("迷宮")
-                        .font(.headline)
-                    Text(dungeonName.isEmpty ? "不明な迷宮" : dungeonName)
-                        .font(.body)
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("現在の状況")
-                        .font(.headline)
-                    Text(statusText)
-                        .font(.body)
-                }
-
-                Spacer()
-            }
-            .padding()
-            .navigationTitle("探索状況")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("閉じる") { dismiss() }
-                }
-            }
-        }
     }
 }
 

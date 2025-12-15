@@ -393,13 +393,13 @@ extension BattleTurnEngine {
         defender.degradationPercent = min(100.0, defender.degradationPercent + increment)
     }
 
-    static func applyDegradationRepairIfAvailable(to actor: inout BattleActor) {
+    static func applyDegradationRepairIfAvailable(to actor: inout BattleActor, context: inout BattleContext) {
         let minP = actor.skillEffects.misc.degradationRepairMinPercent
         let maxP = actor.skillEffects.misc.degradationRepairMaxPercent
         guard minP > 0, maxP >= minP else { return }
         let bonus = actor.skillEffects.misc.degradationRepairBonusPercent
         let range = maxP - minP
-        let roll = minP + Double.random(in: 0...range)
+        let roll = minP + context.random.nextDouble(in: 0...range)
         let repaired = roll * (1.0 + bonus / 100.0)
         actor.degradationPercent = max(0.0, actor.degradationPercent - repaired)
     }
