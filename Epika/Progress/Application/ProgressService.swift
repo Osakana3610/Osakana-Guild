@@ -62,19 +62,20 @@ final class ProgressService: ObservableObject {
         let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications] results in
             guard let dropNotifications, !results.isEmpty else { return }
             let masterData = MasterDataRuntimeService.shared
+            // 全称号を事前取得（個別取得だとエラーが発生する場合があるため）
             var normalTitleNames: [UInt8: String] = [:]
             var superRareTitleNames: [UInt8: String] = [:]
-            for result in results {
-                if let normalId = result.normalTitleId, normalTitleNames[normalId] == nil {
-                    if let title = try? await masterData.getTitleMasterData(id: normalId) {
-                        normalTitleNames[normalId] = title.name
-                    }
+            do {
+                let allTitles = try await masterData.getAllTitles()
+                for title in allTitles {
+                    normalTitleNames[title.id] = title.name
                 }
-                if let superRareId = result.superRareTitleId, superRareTitleNames[superRareId] == nil {
-                    if let title = try? await masterData.getSuperRareTitle(id: superRareId) {
-                        superRareTitleNames[superRareId] = title.name
-                    }
+                let allSuperRareTitles = try await masterData.getAllSuperRareTitles()
+                for title in allSuperRareTitles {
+                    superRareTitleNames[title.id] = title.name
                 }
+            } catch {
+                // 称号取得に失敗しても通知自体は行う
             }
             await MainActor.run {
                 dropNotifications.publish(results: results,

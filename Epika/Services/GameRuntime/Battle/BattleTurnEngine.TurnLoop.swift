@@ -308,7 +308,7 @@ extension BattleTurnEngine {
             guard actor.isAlive else { return }
             actor.guardActive = true
             actor.guardBarrierCharges = actor.skillEffects.combat.guardBarrierCharges
-            applyDegradationRepairIfAvailable(to: &actor)
+            applyDegradationRepairIfAvailable(to: &actor, context: &context)
             context.players[actorIndex] = actor
             appendActionLog(for: actor, side: .player, index: actorIndex, category: .defend, context: &context)
         case .enemy:
@@ -317,7 +317,7 @@ extension BattleTurnEngine {
             guard actor.isAlive else { return }
             actor.guardActive = true
             actor.guardBarrierCharges = actor.skillEffects.combat.guardBarrierCharges
-            applyDegradationRepairIfAvailable(to: &actor)
+            applyDegradationRepairIfAvailable(to: &actor, context: &context)
             context.enemies[actorIndex] = actor
             appendActionLog(for: actor, side: .enemy, index: actorIndex, category: .defend, context: &context)
         }
