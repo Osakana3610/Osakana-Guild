@@ -24,6 +24,9 @@ final class ExplorationRunRecord {
     /// 探索開始日時（識別子の一部として使用）
     var startedAt: Date = Date()
 
+    /// 決定論的乱数のシード
+    var seed: UInt64 = 0
+
     /// 探索終了日時
     var endedAt: Date = Date()
 
@@ -46,12 +49,14 @@ final class ExplorationRunRecord {
          dungeonId: UInt16,
          difficulty: UInt8,
          targetFloor: UInt8,
-         startedAt: Date) {
+         startedAt: Date,
+         seed: UInt64) {
         self.partyId = partyId
         self.dungeonId = dungeonId
         self.difficulty = difficulty
         self.targetFloor = targetFloor
         self.startedAt = startedAt
+        self.seed = seed
     }
 
     // MARK: - Events Encoding/Decoding
