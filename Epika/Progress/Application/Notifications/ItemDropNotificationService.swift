@@ -29,14 +29,19 @@ final class ItemDropNotificationService: ObservableObject {
         }
     }
 
-    func publish(results: [ItemDropResult],
-                 normalTitleNames: [UInt8: String],
-                 superRareTitleNames: [UInt8: String]) {
+    func publish(results: [ItemDropResult]) async {
+        let masterData = MasterDataRuntimeService.shared
         let now = Date()
         var newNotifications: [DroppedItemNotification] = []
         for result in results {
-            let normalTitleName = result.normalTitleId.flatMap { normalTitleNames[$0] }
-            let superRareTitleName = result.superRareTitleId.flatMap { superRareTitleNames[$0] }
+            var normalTitleName: String?
+            var superRareTitleName: String?
+            if let normalId = result.normalTitleId {
+                normalTitleName = try? await masterData.getTitleMasterData(id: normalId)?.name
+            }
+            if let superRareId = result.superRareTitleId {
+                superRareTitleName = try? await masterData.getSuperRareTitle(id: superRareId)?.name
+            }
             let count = max(1, result.quantity)
             for _ in 0..<count {
                 newNotifications.append(

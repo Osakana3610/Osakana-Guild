@@ -503,19 +503,7 @@ struct DebugMenuView: View {
                 return
             }
 
-            let allTitles = try await masterDataService.getAllTitles()
             let allSuperRareTitles = try await masterDataService.getAllSuperRareTitles()
-
-            var normalTitleNames: [UInt8: String] = [:]
-            var superRareTitleNames: [UInt8: String] = [:]
-
-            for title in allTitles {
-                normalTitleNames[title.id] = title.name
-            }
-            for superRare in allSuperRareTitles {
-                superRareTitleNames[superRare.id] = superRare.name
-            }
-
             let superRareCount = max(1, allSuperRareTitles.count)
 
             switch dropNotificationMode {
@@ -524,25 +512,13 @@ struct DebugMenuView: View {
                 for _ in 0..<dropNotificationCount {
                     dropResults.append(makeRandomDropResult(allItems: allItems, superRareCount: superRareCount))
                 }
-                await MainActor.run {
-                    progressService.dropNotifications.publish(
-                        results: dropResults,
-                        normalTitleNames: normalTitleNames,
-                        superRareTitleNames: superRareTitleNames
-                    )
-                }
+                await progressService.dropNotifications.publish(results: dropResults)
                 debugLog("[DebugMenu] Sent \(dropResults.count) test drop notifications (bulk)")
 
             case .sequential:
                 for i in 0..<dropNotificationCount {
                     let result = makeRandomDropResult(allItems: allItems, superRareCount: superRareCount)
-                    await MainActor.run {
-                        progressService.dropNotifications.publish(
-                            results: [result],
-                            normalTitleNames: normalTitleNames,
-                            superRareTitleNames: superRareTitleNames
-                        )
-                    }
+                    await progressService.dropNotifications.publish(results: [result])
                     debugLog("[DebugMenu] Sent test drop notification \(i + 1)/\(dropNotificationCount)")
                     if i < dropNotificationCount - 1 {
                         try await Task.sleep(for: .milliseconds(500))
