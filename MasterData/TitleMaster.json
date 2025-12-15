@@ -65,7 +65,7 @@
         "rare": 4096,
         "gem": 8192
       },
-      "priceMultiplier": 4.0
+      "priceMultiplier": 8.0
     },
     {
       "id": 5,
@@ -80,7 +80,7 @@
         "rare": 20480,
         "gem": 40960
       },
-      "priceMultiplier": 8.0
+      "priceMultiplier": 64.0
     },
     {
       "id": 6,
@@ -95,7 +95,7 @@
         "rare": 40960,
         "gem": 81920
       },
-      "priceMultiplier": 16.0
+      "priceMultiplier": 1024.0
     },
     {
       "id": 7,
@@ -110,7 +110,7 @@
         "rare": 102400,
         "gem": 204800
       },
-      "priceMultiplier": 32.0
+      "priceMultiplier": 32768.0
     },
     {
       "id": 8,
@@ -125,7 +125,7 @@
         "rare": 204800,
         "gem": 409600
       },
-      "priceMultiplier": 128.0
+      "priceMultiplier": 2097152.0
     }
   ]
 }

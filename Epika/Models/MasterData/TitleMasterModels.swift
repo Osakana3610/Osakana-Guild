@@ -13,6 +13,7 @@ struct TitleDefinition: Identifiable, Sendable, Hashable {
     let dropProbability: Double?
     let allowWithTitleTreasure: Bool
     let superRareRates: TitleSuperRareRates?
+    let priceMultiplier: Double
 }
 
 struct SuperRareTitleDefinition: Identifiable, Sendable, Hashable {

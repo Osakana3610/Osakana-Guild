@@ -235,6 +235,9 @@ final class ItemPreloadService {
         let definitions = try await masterDataService.getItemMasterData(ids: Array(itemIds))
         let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
 
+        let allTitles = try await masterDataService.getAllTitles()
+        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
+
         var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
         var normalTitleIds: Set<UInt8> = []
         var superRareTitleIds: Set<UInt8> = []
@@ -242,12 +245,18 @@ final class ItemPreloadService {
 
         for snapshot in items {
             guard let definition = definitionMap[snapshot.itemId] else { continue }
+            let sellPrice = try ItemPriceCalculator.sellPrice(
+                baseSellValue: definition.sellValue,
+                normalTitleId: snapshot.enhancements.normalTitleId,
+                hasSuperRare: snapshot.enhancements.superRareTitleId != 0,
+                multiplierMap: priceMultiplierMap
+            )
             let data = LightweightItemData(
                 stackKey: snapshot.stackKey,
                 itemId: snapshot.itemId,
                 name: definition.name,
                 quantity: Int(snapshot.quantity),
-                sellValue: definition.sellValue,
+                sellValue: sellPrice,
                 category: ItemSaleCategory(masterCategory: definition.category),
                 enhancement: snapshot.enhancements,
                 storage: snapshot.storage,
