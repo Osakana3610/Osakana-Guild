@@ -938,6 +938,7 @@ private struct SuperRareTitleMasterFile: Decodable {
         let id: Int
         let name: String
         let skills: [Int]
+        // reading: ソート用キー（SQLiteにはインポートしない）
     }
 
     let superRareTitles: [Title]
