@@ -7,7 +7,7 @@ private struct ItemMasterFile: Decodable {
     struct Item: Decodable {
         let id: Int
         let name: String
-        let description: String
+        let description: String?
         let category: String
         let basePrice: Int
         let sellValue: Int
@@ -66,7 +66,7 @@ extension Generator {
             for item in file.items {
                 bindInt(itemStatement, index: 1, value: item.id)
                 bindText(itemStatement, index: 2, value: item.name)
-                bindText(itemStatement, index: 3, value: item.description)
+                bindText(itemStatement, index: 3, value: item.description ?? "")
                 bindText(itemStatement, index: 4, value: item.category)
                 bindInt(itemStatement, index: 5, value: item.basePrice)
                 bindInt(itemStatement, index: 6, value: item.sellValue)
