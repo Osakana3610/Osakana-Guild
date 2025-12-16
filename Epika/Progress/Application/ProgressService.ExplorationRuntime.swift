@@ -53,7 +53,7 @@ extension ProgressService {
                                                   difficulty: UInt8(runDifficulty),
                                                   totalFloors: UInt8(artifact.floorCount))
                     let snapshot = try await dungeon.ensureDungeonSnapshot(for: artifact.dungeon.id)
-                    _ = try await unlockManiaDifficultyIfEligible(for: snapshot)
+                    _ = try await unlockNextDifficultyIfEligible(for: snapshot, clearedDifficulty: UInt8(runDifficulty))
                     try await synchronizeStoryAndDungeonUnlocks()
                 } else {
                     try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
