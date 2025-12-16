@@ -104,6 +104,7 @@ enum BattleService {
                                    avatarIndex: nil,
                                    isMartialEligible: false,
                                    raceId: fallbackDefinition.raceId,
+                                   enemyMasterIndex: fallbackDefinition.id,
                                    snapshot: snapshot,
                                    currentHP: snapshot.maxHP,
                                    actionRates: BattleActionRates(attack: fallbackDefinition.actionRates.attack,
