@@ -12,16 +12,7 @@ struct RuntimeDungeon: Identifiable, Hashable, Sendable {
 
     var availableDifficultyRanks: [Int] {
         let highest = max(0, highestUnlockedDifficulty)
-        var ranks: [Int] = [0]
-        if highest == 1 {
-            ranks.append(1)
-        } else if highest >= 2 {
-            ranks.append(2)
-            if highest > 2 {
-                ranks.append(contentsOf: (3...highest))
-            }
-        }
-        return ranks
+        return Array(0...highest)
     }
 
     func statusDescription(for difficulty: Int) -> String {
