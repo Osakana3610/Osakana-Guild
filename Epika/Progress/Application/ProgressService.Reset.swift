@@ -2,6 +2,7 @@ import Foundation
 
 // MARK: - Reset
 extension ProgressService {
+    #if DEBUG
     /// CloudKitとローカルストアを完全削除する。
     /// 削除後はアプリ再起動が必要。
     func purgeAllDataForAppRestart() async throws {
@@ -10,6 +11,7 @@ extension ProgressService {
             try ProgressBootstrapper.shared.resetStore()
         }
     }
+    #endif
 
     func resetAllProgress() async throws {
         try await gameState.resetAllProgress()

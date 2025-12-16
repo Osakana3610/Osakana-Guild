@@ -21,13 +21,11 @@ struct SettingsView: View {
                         Label("超レア図鑑", systemImage: "sparkles")
                     }
                 }
-#if DEBUG
                 Section("開発支援") {
                     NavigationLink("デバッグメニュー") {
                         DebugMenuView()
                     }
                 }
-#endif
             }
             .navigationTitle("その他")
             .navigationBarTitleDisplayMode(.large)
