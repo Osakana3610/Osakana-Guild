@@ -63,6 +63,10 @@ extension ProgressService {
                 // 帰還時にドロップ報酬を適用
                 let drops = makeItemDropResults(from: artifact.totalDrops)
                 try await applyDropRewards(drops)
+                // インベントリキャッシュを更新（失敗しても探索完了フローは止めない）
+                Task { @MainActor [inventory] in
+                    try? await ItemPreloadService.shared.reload(inventoryService: inventory)
+                }
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                         difficulty: UInt8(runDifficulty),
@@ -154,8 +158,9 @@ extension ProgressService {
     func applyDropRewards(_ drops: [ItemDropResult]) async throws {
         let autoTradeKeys = try await autoTrade.registeredStackKeys()
         for drop in drops where drop.quantity > 0 {
+            // normalTitleId: nil = 無称号 = ID 2, superRareTitleId: nil = なし = 0
             let superRareTitleId: UInt8 = drop.superRareTitleId ?? 0
-            let normalTitleId: UInt8 = drop.normalTitleId ?? 0
+            let normalTitleId: UInt8 = drop.normalTitleId ?? 2
 
             let enhancement = ItemSnapshot.Enhancement(
                 superRareTitleId: superRareTitleId,
