@@ -245,10 +245,12 @@ struct EncounterDetailView: View {
             }
 
             for participant in archive.enemySnapshots {
+                // actorIdは "(arrayIndex+1)*1000+enemyMasterIndex" 形式で保存されている
                 if let actorIndex = UInt16(participant.actorId) {
                     enemyNames[actorIndex] = participant.name
+                    let enemyId = actorIndex % 1000
                     iconMap[participant.actorId] = CharacterIconInfo(avatarIndex: nil,
-                                                                     enemyId: participant.enemyId,
+                                                                     enemyId: enemyId,
                                                                      displayName: participant.name)
                 }
             }
