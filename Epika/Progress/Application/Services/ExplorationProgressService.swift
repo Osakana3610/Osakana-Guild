@@ -273,7 +273,7 @@ private extension ExplorationProgressService {
 
         let displayDungeonName = DungeonDisplayNameFormatter.displayName(
             for: dungeonDefinition,
-            difficultyRank: Int(run.difficulty)
+            difficultyTitleId: run.difficulty
         )
 
         // パーティメンバー情報取得

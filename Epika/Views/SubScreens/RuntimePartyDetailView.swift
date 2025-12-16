@@ -107,12 +107,12 @@ struct RuntimePartyDetailView: View {
                     .buttonStyle(.plain)
 
                     if let dungeon = activeDungeon {
-                        let displayedDifficulty = min(Int(currentParty.lastSelectedDifficulty), dungeon.highestUnlockedDifficulty)
+                        let displayedDifficulty = min(currentParty.lastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
                         DifficultyPickerMenu(dungeon: dungeon,
                                              currentDifficulty: displayedDifficulty,
                                              onSelect: { await updateDifficultySelection($0) },
                                              rowHeight: listRowHeight)
-                        .disabled(dungeon.availableDifficultyRanks.count <= 1)
+                        .disabled(dungeon.availableDifficulties.count <= 1)
                     }
 
                     TargetFloorPickerMenu(currentFloor: Int(currentParty.targetFloor),
@@ -131,7 +131,7 @@ struct RuntimePartyDetailView: View {
                 DungeonPickerView(
                     dungeons: dungeons,
                     currentSelection: selectedDungeon?.definition.id ?? currentParty.lastSelectedDungeonId,
-                    currentDifficulty: Int(currentParty.lastSelectedDifficulty),
+                    currentDifficulty: currentParty.lastSelectedDifficulty,
                     onSelectDungeon: { dungeon in
                         await updateDungeonSelection(dungeonId: dungeon.definition.id)
                     },
@@ -157,9 +157,8 @@ struct RuntimePartyDetailView: View {
 
     private var selectedDungeonName: String {
         if let dungeon = activeDungeon {
-            let desiredRank = Int(currentParty.lastSelectedDifficulty)
-            let clampedRank = min(desiredRank, dungeon.highestUnlockedDifficulty)
-            return formattedDifficultyLabel(for: dungeon, rank: clampedRank)
+            let clampedDifficulty = min(currentParty.lastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
+            return formattedDifficultyLabel(for: dungeon, difficulty: clampedDifficulty)
         }
         return "未選択"
     }
@@ -223,10 +222,10 @@ struct RuntimePartyDetailView: View {
                     selectedDungeon = nil
                 }
                 if let dungeon = selectedDungeon,
-                   Int(updated.lastSelectedDifficulty) > dungeon.highestUnlockedDifficulty {
+                   updated.lastSelectedDifficulty > dungeon.highestUnlockedDifficulty {
                     do {
                         _ = try await partyService.setLastSelectedDifficulty(persistentIdentifier: updated.persistentIdentifier,
-                                                                              difficulty: UInt8(dungeon.highestUnlockedDifficulty))
+                                                                              difficulty: dungeon.highestUnlockedDifficulty)
                         try await partyState.refresh()
                         if let adjusted = partyState.parties.first(where: { $0.id == updated.id }) {
                             currentParty = adjusted
@@ -270,7 +269,7 @@ struct RuntimePartyDetailView: View {
     private func canStartExploration(for party: RuntimeParty) -> Bool {
         guard let dungeon = activeDungeon else { return false }
         guard dungeon.isUnlocked else { return false }
-        guard Int(party.lastSelectedDifficulty) <= dungeon.highestUnlockedDifficulty else { return false }
+        guard party.lastSelectedDifficulty <= dungeon.highestUnlockedDifficulty else { return false }
         guard !membersOfCurrentParty.isEmpty else { return false }
         return !adventureState.isExploring(partyId: party.id)
     }
@@ -297,10 +296,10 @@ struct RuntimePartyDetailView: View {
         }
     }
 
-    private func updateDifficultySelection(_ difficulty: Int) async -> Bool {
+    private func updateDifficultySelection(_ difficulty: UInt8) async -> Bool {
         do {
             _ = try await partyService.setLastSelectedDifficulty(persistentIdentifier: currentParty.persistentIdentifier,
-                                                                 difficulty: UInt8(difficulty))
+                                                                 difficulty: difficulty)
             await refreshPartySnapshot()
             return true
         } catch {
@@ -309,7 +308,7 @@ struct RuntimePartyDetailView: View {
         }
     }
 
-    private func updateDifficultySelectionFromDungeonPicker(dungeon: RuntimeDungeon, difficulty: Int) async -> Bool {
+    private func updateDifficultySelectionFromDungeonPicker(dungeon: RuntimeDungeon, difficulty: UInt8) async -> Bool {
         let success = await updateDifficultySelection(difficulty)
         return success
     }
@@ -382,8 +381,8 @@ private struct PartyEquipmentListView: View {
 
 private struct DifficultyPickerMenu: View {
     let dungeon: RuntimeDungeon
-    let currentDifficulty: Int
-    let onSelect: (Int) async -> Bool
+    let currentDifficulty: UInt8
+    let onSelect: (UInt8) async -> Bool
     let rowHeight: CGFloat?
 
     var body: some View {
@@ -392,21 +391,21 @@ private struct DifficultyPickerMenu: View {
                 .foregroundColor(.primary)
             Spacer(minLength: 12)
             Menu {
-                ForEach(dungeon.availableDifficultyRanks, id: \.self) { rank in
+                ForEach(dungeon.availableDifficulties, id: \.self) { difficulty in
                     Button {
-                        select(rank)
+                        select(difficulty)
                     } label: {
                         HStack {
-                            if currentDifficulty == rank {
+                            if currentDifficulty == difficulty {
                                 Image(systemName: "checkmark")
                             }
-                            Text(formattedDifficultyLabel(for: dungeon, rank: rank))
+                            Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty))
                         }
                     }
                 }
             } label: {
                 HStack(spacing: 4) {
-                    Text(formattedDifficultyLabel(for: dungeon, rank: currentDifficulty))
+                    Text(formattedDifficultyLabel(for: dungeon, difficulty: currentDifficulty))
                         .foregroundColor(.secondary)
                     Image(systemName: "chevron.up.chevron.down")
                         .foregroundStyle(Color(.tertiaryLabel))
@@ -421,8 +420,8 @@ private struct DifficultyPickerMenu: View {
         .contentShape(Rectangle())
     }
 
-    private func select(_ rank: Int) {
-        Task { _ = await onSelect(rank) }
+    private func select(_ difficulty: UInt8) {
+        Task { _ = await onSelect(difficulty) }
     }
 }
 
@@ -483,9 +482,9 @@ private struct TargetFloorPickerMenu: View {
 private struct DungeonPickerView: View {
     let dungeons: [RuntimeDungeon]
     let currentSelection: UInt16?
-    let currentDifficulty: Int
+    let currentDifficulty: UInt8
     let onSelectDungeon: (RuntimeDungeon) async -> Bool
-    let onSelectDifficulty: (RuntimeDungeon, Int) async -> Bool
+    let onSelectDifficulty: (RuntimeDungeon, UInt8) async -> Bool
     @Environment(\.dismiss) private var dismiss
     @State private var selectedDungeonForDifficulty: RuntimeDungeon?
 
@@ -503,7 +502,7 @@ private struct DungeonPickerView: View {
                             ForEach(groupedDungeons[chapter] ?? [], id: \.id) { dungeon in
                                 Button(action: { handleDungeonTap(dungeon) }) {
                                     HStack(spacing: 8) {
-                                        Text(formattedDifficultyLabel(for: dungeon, rank: dungeon.highestUnlockedDifficulty))
+                                        Text(formattedDifficultyLabel(for: dungeon, difficulty: dungeon.highestUnlockedDifficulty))
                                             .foregroundColor(.primary)
                                             .lineLimit(2)
                                         Spacer()
@@ -525,8 +524,8 @@ private struct DungeonPickerView: View {
                 DifficultyPickerView(
                     dungeon: dungeon,
                     currentDifficulty: currentDifficulty(for: dungeon),
-                    onSelect: { rank in
-                        await selectDifficulty(for: dungeon, rank: rank)
+                    onSelect: { difficulty in
+                        await selectDifficulty(for: dungeon, difficulty: difficulty)
                     }
                 )
                 .onDisappear {
@@ -546,7 +545,7 @@ private struct DungeonPickerView: View {
         "第\(chapter)章"
     }
 
-    private func currentDifficulty(for dungeon: RuntimeDungeon) -> Int {
+    private func currentDifficulty(for dungeon: RuntimeDungeon) -> UInt8 {
         if currentSelection == dungeon.definition.id {
             return currentDifficulty
         }
@@ -564,8 +563,8 @@ private struct DungeonPickerView: View {
         }
     }
 
-    private func selectDifficulty(for dungeon: RuntimeDungeon, rank: Int) async -> Bool {
-        let success = await onSelectDifficulty(dungeon, rank)
+    private func selectDifficulty(for dungeon: RuntimeDungeon, difficulty: UInt8) async -> Bool {
+        let success = await onSelectDifficulty(dungeon, difficulty)
         if success {
             await MainActor.run {
                 selectedDungeonForDifficulty = nil
@@ -578,19 +577,19 @@ private struct DungeonPickerView: View {
 
 private struct DifficultyPickerView: View {
     let dungeon: RuntimeDungeon
-    let currentDifficulty: Int
-    let onSelect: (Int) async -> Bool
+    let currentDifficulty: UInt8
+    let onSelect: (UInt8) async -> Bool
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         List {
-            ForEach(dungeon.availableDifficultyRanks, id: \.self) { rank in
-                Button(action: { choose(rank) }) {
+            ForEach(dungeon.availableDifficulties, id: \.self) { difficulty in
+                Button(action: { choose(difficulty) }) {
                     HStack {
-                        Text(formattedDifficultyLabel(for: dungeon, rank: rank))
+                        Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty))
                             .foregroundColor(.primary)
                         Spacer()
-                        if currentDifficulty == rank {
+                        if currentDifficulty == difficulty {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.primary)
                         }
@@ -603,9 +602,9 @@ private struct DifficultyPickerView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func choose(_ rank: Int) {
+    private func choose(_ difficulty: UInt8) {
         Task {
-            let success = await onSelect(rank)
+            let success = await onSelect(difficulty)
             if success {
                 dismiss()
             }
@@ -668,8 +667,8 @@ private struct PartyNameEditorView: View {
     }
 }
 
-private func formattedDifficultyLabel(for dungeon: RuntimeDungeon, rank: Int) -> String {
-    let name = DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyRank: rank)
-    let status = dungeon.statusDescription(for: rank)
+private func formattedDifficultyLabel(for dungeon: RuntimeDungeon, difficulty: UInt8) -> String {
+    let name = DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyTitleId: difficulty)
+    let status = dungeon.statusDescription(for: difficulty)
     return "\(name)\(status)"
 }
