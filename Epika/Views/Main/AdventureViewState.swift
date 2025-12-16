@@ -5,9 +5,8 @@ import Observation
 @Observable
 final class AdventureViewState {
     private var progressService: ProgressService?
-    private var activeExplorationHandle: ProgressService.ExplorationRunHandle?
-    private var activeExplorationTask: Task<Void, Never>?
-    private var activeExplorationPartyId: UInt8?
+    private var activeExplorationHandles: [UInt8: ProgressService.ExplorationRunHandle] = [:]
+    private var activeExplorationTasks: [UInt8: Task<Void, Never>] = [:]
 
     var selectedPartyIndex: Int = 0
     var isLoading: Bool = false
@@ -174,7 +173,7 @@ final class AdventureViewState {
     }
 
     func startExploration(party: RuntimeParty, dungeon: RuntimeDungeon) async throws {
-        guard activeExplorationTask == nil else {
+        guard activeExplorationTasks[party.id] == nil else {
             throw RuntimeError.explorationAlreadyActive(dungeonId: dungeon.id)
         }
         guard let progressService else {
@@ -184,24 +183,23 @@ final class AdventureViewState {
         let handle = try await progressService.startExplorationRun(for: party.id,
                                                                    dungeonId: dungeon.id,
                                                                    targetFloor: Int(party.targetFloor))
-        activeExplorationHandle = handle
-        activeExplorationPartyId = party.id
-        activeExplorationTask = Task { [weak self] in
+        let partyId = party.id
+        activeExplorationHandles[partyId] = handle
+        activeExplorationTasks[partyId] = Task { [weak self] in
             guard let self else { return }
-            await self.runExplorationStream(handle: handle)
+            await self.runExplorationStream(handle: handle, partyId: partyId)
         }
 
         await loadExplorationProgress()
     }
 
     func cancelExploration(for party: RuntimeParty) async {
-        if let handle = activeExplorationHandle,
-           activeExplorationPartyId == party.id {
-            activeExplorationTask?.cancel()
+        let partyId = party.id
+        if let handle = activeExplorationHandles[partyId] {
+            activeExplorationTasks[partyId]?.cancel()
             await handle.cancel()
-            activeExplorationHandle = nil
-            activeExplorationTask = nil
-            activeExplorationPartyId = nil
+            activeExplorationHandles[partyId] = nil
+            activeExplorationTasks[partyId] = nil
             await loadExplorationProgress()
             return
         }
@@ -210,15 +208,14 @@ final class AdventureViewState {
     }
 
     func isExploring(partyId: UInt8) -> Bool {
-        if activeExplorationPartyId == partyId { return true }
+        if activeExplorationTasks[partyId] != nil { return true }
         return explorationProgress.contains { $0.party.partyId == partyId && $0.status == .running }
     }
 
-    private func runExplorationStream(handle: ProgressService.ExplorationRunHandle) async {
+    private func runExplorationStream(handle: ProgressService.ExplorationRunHandle, partyId: UInt8) async {
         defer {
-            activeExplorationTask = nil
-            activeExplorationHandle = nil
-            activeExplorationPartyId = nil
+            activeExplorationTasks[partyId] = nil
+            activeExplorationHandles[partyId] = nil
         }
 
         do {
