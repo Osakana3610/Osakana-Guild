@@ -86,6 +86,7 @@ struct CombatExecutionService {
                                              characterId: character?.id,
                                              name: character?.displayName ?? actor.displayName,
                                              avatarIndex: avatarIndex,
+                                             enemyId: nil,
                                              level: character?.level ?? actor.level,
                                              maxHP: actor.snapshot.maxHP)
         }
@@ -99,6 +100,7 @@ struct CombatExecutionService {
                                              characterId: nil,
                                              name: actor.displayName,
                                              avatarIndex: nil,
+                                             enemyId: actor.enemyMasterIndex,
                                              level: actor.level,
                                              maxHP: actor.snapshot.maxHP)
         }
