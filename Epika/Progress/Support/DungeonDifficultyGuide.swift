@@ -1,7 +1,8 @@
 import Foundation
 
 enum DungeonDifficultyGuide {
-    static func displayName(for dungeon: RuntimeDungeon, difficultyRank: Int) -> String {
-        DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyRank: difficultyRank)
+    @MainActor
+    static func displayName(for dungeon: RuntimeDungeon, difficultyTitleId: UInt8) -> String {
+        DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyTitleId: difficultyTitleId)
     }
 }

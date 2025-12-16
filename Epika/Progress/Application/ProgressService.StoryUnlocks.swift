@@ -13,14 +13,12 @@ extension ProgressService {
 
 extension ProgressService {
     /// 難易度クリア時に次の難易度を解放する
-    /// - 無称号(0)クリア → 魔性の(1)解放
-    /// - 魔性の(1)クリア → 宿った(2)解放
-    /// - 宿った(2)クリア → 伝説の(3)解放
+    /// - 無称号(2)クリア → 魔性の(4)解放
+    /// - 魔性の(4)クリア → 宿った(5)解放
+    /// - 宿った(5)クリア → 伝説の(6)解放
     @discardableResult
     func unlockNextDifficultyIfEligible(for snapshot: DungeonSnapshot, clearedDifficulty: UInt8) async throws -> Bool {
-        let maxRank = UInt8(DungeonDisplayNameFormatter.maxDifficultyRank)
-        let nextDifficulty = clearedDifficulty + 1
-        guard nextDifficulty <= maxRank,
+        guard let nextDifficulty = DungeonDisplayNameFormatter.nextDifficulty(after: clearedDifficulty),
               snapshot.highestUnlockedDifficulty < nextDifficulty else { return false }
         try await dungeon.unlockDifficulty(dungeonId: snapshot.dungeonId, difficulty: nextDifficulty)
         return true
@@ -59,7 +57,7 @@ extension ProgressService {
                 let dungeonRecord = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
                 if !dungeonRecord.isUnlocked {
                     dungeonRecord.isUnlocked = true
-                    // highestUnlockedDifficulty はデフォルト0（無称号のみ）のまま
+                    dungeonRecord.highestUnlockedDifficulty = DungeonDisplayNameFormatter.initialDifficulty
                     dungeonRecord.updatedAt = now
                 }
             }
@@ -121,19 +119,16 @@ extension ProgressService {
             }
         }
 
-        // 次難易度解放の処理（クリアした難易度 + 1 を解放、furthestClearedFloorをリセット）
-        let maxRank = UInt8(DungeonDisplayNameFormatter.maxDifficultyRank)
+        // 次難易度解放の処理（クリアした難易度の次を解放、furthestClearedFloorをリセット）
         let dungeonSnapshots = try fetchAllDungeonRecords(context: context)
         for dungeonRecord in dungeonSnapshots {
-            guard let clearedDifficulty = dungeonRecord.highestClearedDifficulty else { continue }
-            let nextDifficulty = clearedDifficulty + 1
-            if nextDifficulty <= maxRank,
-               dungeonRecord.highestUnlockedDifficulty < nextDifficulty {
-                dungeonRecord.highestUnlockedDifficulty = nextDifficulty
-                dungeonRecord.furthestClearedFloor = 0
-                dungeonRecord.updatedAt = Date()
-                didChange = true
-            }
+            guard let clearedDifficulty = dungeonRecord.highestClearedDifficulty,
+                  let nextDifficulty = DungeonDisplayNameFormatter.nextDifficulty(after: clearedDifficulty),
+                  dungeonRecord.highestUnlockedDifficulty < nextDifficulty else { continue }
+            dungeonRecord.highestUnlockedDifficulty = nextDifficulty
+            dungeonRecord.furthestClearedFloor = 0
+            dungeonRecord.updatedAt = Date()
+            didChange = true
         }
 
         if context.hasChanges {
