@@ -105,6 +105,10 @@ struct DebugMenuView: View {
     @State private var dropNotificationMode: DropNotificationMode = .bulk
     @State private var isSendingDropNotifications = false
 
+    // データ削除
+    @State private var isResettingData = false
+    @State private var showResetCompleteAlert = false
+
     private let masterDataService = MasterDataRuntimeService.shared
     private var inventoryService: InventoryProgressService { progressService.inventory }
     private var gameStateService: GameStateService { progressService.gameState }
@@ -118,6 +122,7 @@ struct DebugMenuView: View {
             Form {
                 itemCreationSection
                 dropNotificationTestSection
+                dataResetSection
             }
             .avoidBottomGameInfo()
             .navigationTitle("デバッグメニュー")
@@ -126,6 +131,13 @@ struct DebugMenuView: View {
                 Button("OK") { }
             } message: {
                 Text(alertMessage)
+            }
+            .alert("データ削除完了", isPresented: $showResetCompleteAlert) {
+                Button("アプリを終了") {
+                    exit(0)
+                }
+            } message: {
+                Text("進行データを削除しました。\nアプリを終了して再起動してください。")
             }
             .sheet(isPresented: $showCreationSettings) {
                 ItemCreationSettingsView(
@@ -201,6 +213,37 @@ struct DebugMenuView: View {
         }
     }
 
+    private var dataResetSection: some View {
+        Section("データ操作") {
+            if isResettingData {
+                ProgressView()
+            } else {
+                Button("進行データを削除", role: .destructive) {
+                    Task { await resetAllData() }
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+    }
+
+    private func resetAllData() async {
+        if isResettingData { return }
+        await MainActor.run { isResettingData = true }
+
+        do {
+            try await progressService.resetAllProgress()
+            await MainActor.run {
+                isResettingData = false
+                showResetCompleteAlert = true
+            }
+        } catch {
+            await MainActor.run {
+                isResettingData = false
+                alertMessage = "データ削除に失敗しました: \(error.localizedDescription)"
+                showAlert = true
+            }
+        }
+    }
 
     private func createAllItems() async {
         if isCreatingItems { return }
