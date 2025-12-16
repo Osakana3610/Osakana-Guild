@@ -97,7 +97,9 @@ struct EncounterDetailView: View {
         }
 
         for (index, participant) in archive.enemySnapshots.enumerated() {
-            let actorIndex = UInt16(1000 + index)
+            // actorId は CombatExecutionService で BattleContext.actorIndex と同じ計算式で保存されている
+            // 形式: (arrayIndex + 1) * 1000 + enemyMasterIndex
+            guard let actorIndex = UInt16(participant.actorId) else { continue }
             let initialHP = archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP)
             states[participant.actorId] = ParticipantState(
                 id: participant.actorId,
