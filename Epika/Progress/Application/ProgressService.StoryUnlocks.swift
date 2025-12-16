@@ -53,7 +53,7 @@ extension ProgressService {
                 let dungeonRecord = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
                 if !dungeonRecord.isUnlocked {
                     dungeonRecord.isUnlocked = true
-                    dungeonRecord.highestUnlockedDifficulty = max(dungeonRecord.highestUnlockedDifficulty, 1)
+                    // highestUnlockedDifficulty はデフォルト0（無称号のみ）のまま
                     dungeonRecord.updatedAt = now
                 }
             }
