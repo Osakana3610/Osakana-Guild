@@ -24,8 +24,6 @@ final class ProgressService: ObservableObject {
     let gemModification: GemModificationProgressService
     let masterData: MasterDataRuntimeService
 
-    let maniaDifficultyRank = 2
-
     struct ExplorationRunTotals: Sendable {
         let totalExperience: Int
         let totalGold: Int
