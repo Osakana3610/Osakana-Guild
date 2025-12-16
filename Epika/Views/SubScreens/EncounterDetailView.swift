@@ -248,7 +248,6 @@ struct EncounterDetailView: View {
                 // actorIdは "(arrayIndex+1)*1000+enemyMasterIndex" 形式で保存されている
                 if let actorIndex = UInt16(participant.actorId) {
                     enemyNames[actorIndex] = participant.name
-                    // enemyMasterIndex = actorIndex % 1000
                     let enemyId = actorIndex % 1000
                     iconMap[participant.actorId] = CharacterIconInfo(avatarIndex: nil,
                                                                      enemyId: enemyId,
