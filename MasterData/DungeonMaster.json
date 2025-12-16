@@ -111,7 +111,7 @@
           "enemyGroups": [
             {
               "enemyId": 4,
-              "minLevel": -2,
+              "minLevel": 1,
               "maxLevel": 3,
               "weight": 60.0,
               "groupMin": 1,
