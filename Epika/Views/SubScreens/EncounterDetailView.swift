@@ -239,14 +239,20 @@ struct EncounterDetailView: View {
                 }
                 if let avatarIndex = participant.avatarIndex {
                     iconMap[participant.actorId] = CharacterIconInfo(avatarIndex: avatarIndex,
+                                                                     enemyId: nil,
                                                                      displayName: participant.name)
                 }
             }
 
             for participant in archive.enemySnapshots {
-                // actorIdは "suffix*1000+index" 形式で保存されている
+                // actorIdは "(arrayIndex+1)*1000+enemyMasterIndex" 形式で保存されている
                 if let actorIndex = UInt16(participant.actorId) {
                     enemyNames[actorIndex] = participant.name
+                    // enemyMasterIndex = actorIndex % 1000
+                    let enemyId = actorIndex % 1000
+                    iconMap[participant.actorId] = CharacterIconInfo(avatarIndex: nil,
+                                                                     enemyId: enemyId,
+                                                                     displayName: participant.name)
                 }
             }
 
@@ -303,7 +309,8 @@ struct EncounterDetailView: View {
 // MARK: - Supporting Types
 
 struct CharacterIconInfo: Hashable {
-    let avatarIndex: UInt16
+    let avatarIndex: UInt16?
+    let enemyId: UInt16?
     let displayName: String
 }
 
@@ -458,26 +465,40 @@ struct BattleActorIcon: View {
     var body: some View {
         Group {
             if let iconInfo {
-                CharacterImageView(avatarIndex: iconInfo.avatarIndex, size: 55)
+                if let avatarIndex = iconInfo.avatarIndex {
+                    CharacterImageView(avatarIndex: avatarIndex, size: 55)
+                } else if let enemyId = iconInfo.enemyId {
+                    EnemyImageView(enemyId: enemyId, size: 55)
+                } else {
+                    fallbackView
+                }
             } else if actor?.role == .enemy {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 55, height: 55)
-                    .overlay(
-                        Text("敵")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    )
+                fallbackEnemyView
             } else {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.15))
-                    .frame(width: 55, height: 55)
-                    .overlay(
-                        Image(systemName: "person.fill")
-                            .font(.system(size: 20))
-                            .foregroundStyle(.secondary)
-                    )
+                fallbackView
             }
         }
+    }
+
+    private var fallbackView: some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(Color.gray.opacity(0.15))
+            .frame(width: 55, height: 55)
+            .overlay(
+                Image(systemName: "person.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(.secondary)
+            )
+    }
+
+    private var fallbackEnemyView: some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(Color.gray.opacity(0.2))
+            .frame(width: 55, height: 55)
+            .overlay(
+                Image(systemName: "pawprint.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(.secondary)
+            )
     }
 }

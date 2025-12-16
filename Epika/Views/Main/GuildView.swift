@@ -218,7 +218,7 @@ private struct GuildCharacterRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            CharacterImageView(avatarIndex: summary.resolvedAvatarId, size: 32)
+            CharacterImageView(avatarIndex: summary.resolvedAvatarId, size: 55)
             VStack(alignment: .leading, spacing: 4) {
                 Text(summary.name)
                     .font(.headline)
