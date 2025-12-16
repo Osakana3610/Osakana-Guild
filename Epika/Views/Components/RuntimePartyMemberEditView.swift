@@ -268,7 +268,7 @@ struct RuntimeCharacterRowForPartyView: View {
     var body: some View {
         Button(action: onTap) {
             HStack {
-                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 50)
+                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 55)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(character.name)
