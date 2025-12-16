@@ -1,4 +1,3 @@
-#if DEBUG
 import SwiftUI
 
 enum DropNotificationMode: String, CaseIterable {
@@ -100,9 +99,11 @@ struct DebugMenuView: View {
     // 超レア称号選択（1-100）
     @State private var selectedSuperRareTitleIds: Set<UInt8> = Set(1...100)
 
+    #if DEBUG
     @State private var isPurgingCloudKit = false
     @State private var purgeStatus = ""
     @State private var showPurgeCompleteAlert = false
+    #endif
 
     // ドロップ通知テスト
     @State private var dropNotificationCount: Int = 5
@@ -123,7 +124,9 @@ struct DebugMenuView: View {
             Form {
                 itemCreationSection
                 dropNotificationTestSection
+                #if DEBUG
                 cloudKitSection
+                #endif
             }
             .avoidBottomGameInfo()
             .navigationTitle("デバッグメニュー")
@@ -133,6 +136,7 @@ struct DebugMenuView: View {
             } message: {
                 Text(alertMessage)
             }
+            #if DEBUG
             .alert("データ削除完了", isPresented: $showPurgeCompleteAlert) {
                 Button("アプリを終了") {
                     exit(0)
@@ -140,6 +144,7 @@ struct DebugMenuView: View {
             } message: {
                 Text("CloudKitとローカルのデータを削除しました。\nアプリを終了して再起動してください。")
             }
+            #endif
             .sheet(isPresented: $showCreationSettings) {
                 ItemCreationSettingsView(
                     selectedType: $selectedCreationType,
@@ -214,6 +219,7 @@ struct DebugMenuView: View {
         }
     }
 
+    #if DEBUG
     private var cloudKitSection: some View {
         Section("CloudKit操作") {
             if isPurgingCloudKit {
@@ -231,6 +237,7 @@ struct DebugMenuView: View {
             }
         }
     }
+    #endif
 
     private func createAllItems() async {
         if isCreatingItems { return }
@@ -407,6 +414,7 @@ struct DebugMenuView: View {
         await MainActor.run { isCreatingItems = false }
     }
 
+    #if DEBUG
     private func purgeCloudKitAndReset() async {
         if isPurgingCloudKit { return }
         await MainActor.run {
@@ -428,6 +436,7 @@ struct DebugMenuView: View {
             }
         }
     }
+    #endif
 
     private func estimateTotalCount(itemCount: Int,
                                     normalCount: Int,
@@ -759,4 +768,3 @@ struct ItemCreationSettingsView: View {
     }
 
 }
-#endif
