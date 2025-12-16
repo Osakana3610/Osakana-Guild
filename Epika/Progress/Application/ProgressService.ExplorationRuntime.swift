@@ -10,12 +10,59 @@ extension ProgressService {
                                   runDifficulty: Int,
                                   dungeonId: UInt16,
                                   continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
+        await processExplorationStreamCore(
+            runId: session.runId,
+            events: session.events,
+            waitForCompletion: session.waitForCompletion,
+            cancel: session.cancel,
+            recordId: recordId,
+            memberIds: memberIds,
+            runtimeMap: runtimeMap,
+            runDifficulty: runDifficulty,
+            dungeonId: dungeonId,
+            continuation: continuation
+        )
+    }
+
+    func processExplorationStream(session: ExplorationRunSession,
+                                  recordId: PersistentIdentifier,
+                                  memberIds: [UInt8],
+                                  runtimeMap: [UInt8: RuntimeCharacter],
+                                  runDifficulty: Int,
+                                  dungeonId: UInt16,
+                                  continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
+        await processExplorationStreamCore(
+            runId: session.runId,
+            events: session.events,
+            waitForCompletion: session.waitForCompletion,
+            cancel: session.cancel,
+            recordId: recordId,
+            memberIds: memberIds,
+            runtimeMap: runtimeMap,
+            runDifficulty: runDifficulty,
+            dungeonId: dungeonId,
+            continuation: continuation
+        )
+    }
+
+    private func processExplorationStreamCore(
+        runId: UUID,
+        events: AsyncStream<ExplorationEngine.StepOutcome>,
+        waitForCompletion: @escaping @Sendable () async throws -> ExplorationRunArtifact,
+        cancel: @escaping @Sendable () async -> Void,
+        recordId: PersistentIdentifier,
+        memberIds: [UInt8],
+        runtimeMap: [UInt8: RuntimeCharacter],
+        runDifficulty: Int,
+        dungeonId: UInt16,
+        continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation
+    ) async {
         var totalExperience = 0
         var totalGold = 0
         var totalDrops: [ExplorationDropReward] = []
 
         do {
-            for await outcome in session.events {
+            for await outcome in events {
                 totalExperience += outcome.accumulatedExperience
                 totalGold += outcome.accumulatedGold
                 if !outcome.drops.isEmpty {
@@ -25,7 +72,10 @@ extension ProgressService {
                 try await exploration.appendEvent(runId: recordId,
                                                    event: outcome.entry,
                                                    battleLog: outcome.battleLog,
-                                                   occurredAt: outcome.entry.occurredAt)
+                                                   occurredAt: outcome.entry.occurredAt,
+                                                   randomState: outcome.randomState,
+                                                   superRareState: outcome.superRareState,
+                                                   droppedItemIds: outcome.droppedItemIds)
 
                 try await handleExplorationEvent(memberIds: memberIds,
                                                   runtimeCharactersById: runtimeMap,
@@ -34,12 +84,12 @@ extension ProgressService {
                 let totals = ExplorationRunTotals(totalExperience: totalExperience,
                                                   totalGold: totalGold,
                                                   drops: totalDrops)
-                let update = ExplorationRunUpdate(runId: session.runId,
+                let update = ExplorationRunUpdate(runId: runId,
                                                   stage: .step(entry: outcome.entry, totals: totals))
                 continuation.yield(update)
             }
 
-            let artifact = try await session.waitForCompletion()
+            let artifact = try await waitForCompletion()
             try await exploration.finalizeRun(runId: recordId,
                                               endState: artifact.endState,
                                               endedAt: artifact.endedAt,
@@ -72,13 +122,13 @@ extension ProgressService {
                                                         difficulty: UInt8(runDifficulty),
                                                         furthestFloor: UInt8(max(0, floorNumber)))
             }
-            let finalUpdate = ExplorationRunUpdate(runId: session.runId,
+            let finalUpdate = ExplorationRunUpdate(runId: runId,
                                                    stage: .completed(artifact))
             continuation.yield(finalUpdate)
             continuation.finish()
         } catch {
             let originalError = error
-            await session.cancel()
+            await cancel()
             do {
                 try await exploration.cancelRun(runId: recordId)
             } catch is CancellationError {
