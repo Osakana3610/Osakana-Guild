@@ -230,7 +230,7 @@ private extension ProgressService {
         let record = DungeonRecord(
             dungeonId: dungeonId,
             isUnlocked: false,
-            highestUnlockedDifficulty: 0,
+            highestUnlockedDifficulty: DungeonDisplayNameFormatter.initialDifficulty,
             highestClearedDifficulty: nil,
             furthestClearedFloor: 0,
             updatedAt: Date()
