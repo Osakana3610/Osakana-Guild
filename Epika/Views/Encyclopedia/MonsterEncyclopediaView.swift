@@ -192,10 +192,7 @@ private struct EnemyRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "pawprint.fill")
-                .font(.title2)
-                .foregroundColor(.secondary)
-                .frame(width: 40, height: 40)
+            EnemyImageView(enemyId: enemy.id, size: 55)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
@@ -246,6 +243,16 @@ private struct EnemyDetailView: View {
 
     var body: some View {
         List {
+            // ヘッダー画像
+            Section {
+                HStack {
+                    Spacer()
+                    EnemyImageView(enemyId: enemy.id, size: 120)
+                    Spacer()
+                }
+                .listRowBackground(Color.clear)
+            }
+
             // 基本情報
             Section("基本情報") {
                 LabeledContent("名前", value: enemy.name)
