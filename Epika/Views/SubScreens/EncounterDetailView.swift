@@ -54,10 +54,12 @@ struct EncounterDetailView: View {
                                    isFirst: summary.turn == 1,
                                    partyName: party.name,
                                    iconProvider: { participant in
-                                       guard let memberId = participant?.partyMemberId else {
-                                           return nil
+                                       guard let participant else { return nil }
+                                       // プレイヤーはpartyMemberIdで、敵はactorId（id）で検索
+                                       if let memberId = participant.partyMemberId {
+                                           return iconInfo(forMember: memberId)
                                        }
-                                       return iconInfo(forMember: memberId)
+                                       return iconInfo(for: participant.id)
                                    })
                 }
             }
