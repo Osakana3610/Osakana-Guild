@@ -68,11 +68,34 @@ final class AdventureViewState {
     private var masterDataService: MasterDataRuntimeService { .shared }
 
     func loadInitialData() async {
+        // 孤立した探索（.running状態だがアクティブタスクがない）を検出してキャンセル
+        await cancelOrphanedExplorations()
+
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadPartiesIfNeeded() }
             group.addTask { await self.loadDungeons() }
             group.addTask { await self.loadExplorationProgress() }
             group.addTask { await self.loadPlayer() }
+        }
+    }
+
+    /// アプリ再起動後に残っている.running状態の探索をキャンセル
+    private func cancelOrphanedExplorations() async {
+        guard let progressService else { return }
+        do {
+            let allExplorations = try await explorationService.allExplorations()
+            let orphaned = allExplorations.filter { snapshot in
+                snapshot.status == .running && activeExplorationTasks[snapshot.party.partyId] == nil
+            }
+            for snapshot in orphaned {
+                try await progressService.cancelPersistedExplorationRun(
+                    partyId: snapshot.party.partyId,
+                    startedAt: snapshot.startedAt
+                )
+            }
+        } catch {
+            // キャンセル失敗はログのみ、起動を妨げない
+            print("[AdventureViewState] Failed to cancel orphaned explorations: \(error)")
         }
     }
 
@@ -213,11 +236,6 @@ final class AdventureViewState {
     }
 
     private func runExplorationStream(handle: ProgressService.ExplorationRunHandle, partyId: UInt8) async {
-        defer {
-            activeExplorationTasks[partyId] = nil
-            activeExplorationHandles[partyId] = nil
-        }
-
         do {
             for try await update in handle.updates {
                 try Task.checkCancellation()
@@ -230,7 +248,14 @@ final class AdventureViewState {
             }
         }
 
+        // タスク参照をクリアしてからUIを更新（isExploringが正しくfalseを返すように）
+        clearExplorationTask(partyId: partyId)
         await loadExplorationProgress()
+    }
+
+    private func clearExplorationTask(partyId: UInt8) {
+        activeExplorationTasks[partyId] = nil
+        activeExplorationHandles[partyId] = nil
     }
 
     private func processExplorationUpdate(_ update: ProgressService.ExplorationRunUpdate) async {
