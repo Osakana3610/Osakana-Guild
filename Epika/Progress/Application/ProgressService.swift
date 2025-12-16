@@ -21,9 +21,6 @@ final class ProgressService: ObservableObject {
     let runtime: ProgressRuntimeService
     let dropNotifications: ItemDropNotificationService
     let itemPreload: ItemPreloadService
-    #if DEBUG
-    let cloudKitCleanup: ProgressCloudKitCleanupService
-    #endif
     let gemModification: GemModificationProgressService
     let masterData: MasterDataRuntimeService
 
@@ -51,50 +48,6 @@ final class ProgressService: ObservableObject {
         let cancel: @Sendable () async -> Void
     }
 
-    #if DEBUG
-    init(container: ModelContainer,
-         environment: ProgressEnvironment = .live,
-         cloudKitCleanup: ProgressCloudKitCleanupService = .init()) {
-        self.container = container
-        self.environment = environment
-        self.cloudKitCleanup = cloudKitCleanup
-        let gameStateService = GameStateService(container: container)
-        self.gameState = gameStateService
-        let dropNotifications = ItemDropNotificationService()
-        self.dropNotifications = dropNotifications
-        let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications] results in
-            guard let dropNotifications, !results.isEmpty else { return }
-            await dropNotifications.publish(results: results)
-        }
-        let runtimeService = GameRuntimeService(dropNotifier: dropNotifier)
-        self.runtime = ProgressRuntimeService(runtimeService: runtimeService,
-                                              gameStateService: gameStateService)
-
-        self.party = PartyProgressService(container: container)
-        self.inventory = InventoryProgressService(container: container,
-                                                  gameStateService: gameStateService,
-                                                  environment: environment)
-        self.shop = ShopProgressService(container: container,
-                                        environment: environment,
-                                        inventoryService: self.inventory,
-                                        gameStateService: gameStateService)
-        self.character = CharacterProgressService(container: container)
-        self.exploration = ExplorationProgressService(container: container)
-        self.dungeon = DungeonProgressService(container: container)
-        self.story = StoryProgressService(container: container)
-        self.titleInheritance = TitleInheritanceProgressService(inventoryService: self.inventory)
-        self.artifactExchange = ArtifactExchangeProgressService(inventoryService: self.inventory)
-        self.itemSynthesis = ItemSynthesisProgressService(inventoryService: self.inventory,
-                                                          gameStateService: gameStateService)
-        self.autoTrade = AutoTradeProgressService(container: container,
-                                                   gameStateService: gameStateService,
-                                                   environment: environment)
-        self.itemPreload = .shared
-        self.masterData = .shared
-        self.gemModification = GemModificationProgressService(container: container,
-                                                               masterDataService: .shared)
-    }
-    #else
     init(container: ModelContainer,
          environment: ProgressEnvironment = .live) {
         self.container = container
@@ -135,7 +88,6 @@ final class ProgressService: ObservableObject {
         self.gemModification = GemModificationProgressService(container: container,
                                                                masterDataService: .shared)
     }
-    #endif
 }
 
 extension Notification.Name {

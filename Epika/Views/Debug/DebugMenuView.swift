@@ -99,12 +99,6 @@ struct DebugMenuView: View {
     // 超レア称号選択（1-100）
     @State private var selectedSuperRareTitleIds: Set<UInt8> = Set(1...100)
 
-    #if DEBUG
-    @State private var isPurgingCloudKit = false
-    @State private var purgeStatus = ""
-    @State private var showPurgeCompleteAlert = false
-    #endif
-
     // ドロップ通知テスト
     @State private var dropNotificationCount: Int = 5
     @State private var superRareRate: Double = 0.1
@@ -124,9 +118,6 @@ struct DebugMenuView: View {
             Form {
                 itemCreationSection
                 dropNotificationTestSection
-                #if DEBUG
-                cloudKitSection
-                #endif
             }
             .avoidBottomGameInfo()
             .navigationTitle("デバッグメニュー")
@@ -136,15 +127,6 @@ struct DebugMenuView: View {
             } message: {
                 Text(alertMessage)
             }
-            #if DEBUG
-            .alert("データ削除完了", isPresented: $showPurgeCompleteAlert) {
-                Button("アプリを終了") {
-                    exit(0)
-                }
-            } message: {
-                Text("CloudKitとローカルのデータを削除しました。\nアプリを終了して再起動してください。")
-            }
-            #endif
             .sheet(isPresented: $showCreationSettings) {
                 ItemCreationSettingsView(
                     selectedType: $selectedCreationType,
@@ -219,25 +201,6 @@ struct DebugMenuView: View {
         }
     }
 
-    #if DEBUG
-    private var cloudKitSection: some View {
-        Section("CloudKit操作") {
-            if isPurgingCloudKit {
-                VStack(alignment: .leading, spacing: 8) {
-                    ProgressView()
-                    Text(purgeStatus)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                Button("ローカル＋CloudKit進捗を完全消去", role: .destructive) {
-                    Task { await purgeCloudKitAndReset() }
-                }
-                .buttonStyle(.bordered)
-            }
-        }
-    }
-    #endif
 
     private func createAllItems() async {
         if isCreatingItems { return }
@@ -414,29 +377,6 @@ struct DebugMenuView: View {
         await MainActor.run { isCreatingItems = false }
     }
 
-    #if DEBUG
-    private func purgeCloudKitAndReset() async {
-        if isPurgingCloudKit { return }
-        await MainActor.run {
-            isPurgingCloudKit = true
-            purgeStatus = "CloudKitのデータを削除中…"
-        }
-
-        do {
-            try await progressService.purgeAllDataForAppRestart()
-            await MainActor.run {
-                isPurgingCloudKit = false
-                showPurgeCompleteAlert = true
-            }
-        } catch {
-            await MainActor.run {
-                isPurgingCloudKit = false
-                alertMessage = "進行データの初期化に失敗しました: \(error.localizedDescription)"
-                showAlert = true
-            }
-        }
-    }
-    #endif
 
     private func estimateTotalCount(itemCount: Int,
                                     normalCount: Int,
