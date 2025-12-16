@@ -90,14 +90,17 @@ struct CombatExecutionService {
                                              maxHP: actor.snapshot.maxHP)
         }
 
-        let enemySnapshots: [BattleParticipantSnapshot] = resolution.enemyActors.map { actor in
-            BattleParticipantSnapshot(actorId: actor.identifier,
-                                      partyMemberId: nil,
-                                      characterId: nil,
-                                      name: actor.displayName,
-                                      avatarIndex: nil,
-                                      level: actor.level,
-                                      maxHP: actor.snapshot.maxHP)
+        let enemySnapshots: [BattleParticipantSnapshot] = resolution.enemyActors.enumerated().map { (index, actor) in
+            // actorIndex = (arrayIndex + 1) * 1000 + enemyMasterIndex
+            // これは BattleContext.actorIndex の計算方法と一致する必要がある
+            let actorIndex = UInt16(index + 1) * 1000 + (actor.enemyMasterIndex ?? 0)
+            return BattleParticipantSnapshot(actorId: String(actorIndex),
+                                             partyMemberId: nil,
+                                             characterId: nil,
+                                             name: actor.displayName,
+                                             avatarIndex: nil,
+                                             level: actor.level,
+                                             maxHP: actor.snapshot.maxHP)
         }
 
         let logArchive = BattleLogArchive(id: battleLogId,

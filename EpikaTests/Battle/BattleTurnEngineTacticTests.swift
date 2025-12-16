@@ -278,6 +278,110 @@ final class BattleTurnEngineTacticTests: XCTestCase {
         let repaired = result.players.first(where: { $0.identifier == "repairer" })
         XCTAssertTrue((repaired?.degradationPercent ?? 10.0) < 10.0)
     }
+
+    /// 敵が敵を攻撃しないことを確認するテスト（緑苔の洞窟再現）
+    func testEnemiesDoNotAttackEachOther() {
+        // 緑苔の洞窟に出現する敵を再現（コウモリ2体）
+        let players = [
+            BattleTestFactory.actor(
+                id: "player",
+                kind: .player,
+                combat: BattleTestFactory.combat(maxHP: 500, physicalAttack: 30, hitRate: 80),
+                actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
+            )
+        ]
+        let enemies = [
+            BattleTestFactory.actor(
+                id: "bat_0",
+                name: "洞窟コウモリA",
+                kind: .enemy,
+                combat: BattleTestFactory.combat(maxHP: 100, physicalAttack: 20, hitRate: 80),
+                actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
+            ),
+            BattleTestFactory.actor(
+                id: "bat_1",
+                name: "洞窟コウモリB",
+                kind: .enemy,
+                combat: BattleTestFactory.combat(maxHP: 100, physicalAttack: 20, hitRate: 80),
+                actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
+            )
+        ]
+
+        // 複数のシードでテスト（たまに発生するバグを検出）
+        for seed in 0..<100 {
+            var testPlayers = players
+            var testEnemies = enemies
+            // HPをリセット
+            for i in testPlayers.indices { testPlayers[i].currentHP = testPlayers[i].snapshot.maxHP }
+            for i in testEnemies.indices { testEnemies[i].currentHP = testEnemies[i].snapshot.maxHP }
+
+            var random = GameRandomSource(seed: UInt64(seed))
+            let result = BattleTurnEngine.runBattle(players: &testPlayers,
+                                                    enemies: &testEnemies,
+                                                    statusEffects: [:],
+                                                    skillDefinitions: [:],
+                                                    random: &random)
+
+            // 敵のアクションを分析
+            for action in result.battleLog.actions {
+                guard let kind = ActionKind(rawValue: action.kind) else { continue }
+
+                // 敵が行ったダメージアクションを確認
+                let isEnemyActor = action.actor >= 1000
+                let isEnemyTarget = (action.target ?? 0) >= 1000
+
+                // 敵がダメージを与えるアクションで、ターゲットが敵の場合はバグ
+                let damageActions: [ActionKind] = [.physicalDamage, .magicDamage, .breathDamage]
+                if damageActions.contains(kind) && isEnemyActor && isEnemyTarget {
+                    XCTFail("敵が敵を攻撃しています: seed=\(seed), actor=\(action.actor), target=\(action.target ?? 0), kind=\(kind)")
+                }
+            }
+        }
+    }
+
+    /// 敵3体以上での戦闘テスト
+    func testMultipleEnemiesDoNotAttackEachOther() {
+        let players = [
+            BattleTestFactory.actor(
+                id: "player",
+                kind: .player,
+                combat: BattleTestFactory.combat(maxHP: 1000, physicalAttack: 50, hitRate: 90),
+                actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
+            )
+        ]
+        let enemies = [
+            BattleTestFactory.actor(id: "enemy_0", name: "敵A", kind: .enemy,
+                                    combat: BattleTestFactory.combat(maxHP: 80, physicalAttack: 15)),
+            BattleTestFactory.actor(id: "enemy_1", name: "敵B", kind: .enemy,
+                                    combat: BattleTestFactory.combat(maxHP: 80, physicalAttack: 15)),
+            BattleTestFactory.actor(id: "enemy_2", name: "敵C", kind: .enemy,
+                                    combat: BattleTestFactory.combat(maxHP: 80, physicalAttack: 15))
+        ]
+
+        for seed in 0..<100 {
+            var testPlayers = players
+            var testEnemies = enemies
+            for i in testPlayers.indices { testPlayers[i].currentHP = testPlayers[i].snapshot.maxHP }
+            for i in testEnemies.indices { testEnemies[i].currentHP = testEnemies[i].snapshot.maxHP }
+
+            var random = GameRandomSource(seed: UInt64(seed))
+            let result = BattleTurnEngine.runBattle(players: &testPlayers,
+                                                    enemies: &testEnemies,
+                                                    statusEffects: [:],
+                                                    skillDefinitions: [:],
+                                                    random: &random)
+
+            for action in result.battleLog.actions {
+                guard let kind = ActionKind(rawValue: action.kind) else { continue }
+                let isEnemyActor = action.actor >= 1000
+                let isEnemyTarget = (action.target ?? 0) >= 1000
+                let damageActions: [ActionKind] = [.physicalDamage, .magicDamage, .breathDamage]
+                if damageActions.contains(kind) && isEnemyActor && isEnemyTarget {
+                    XCTFail("敵が敵を攻撃: seed=\(seed), actor=\(action.actor), target=\(action.target ?? 0)")
+                }
+            }
+        }
+    }
 }
 
 @MainActor
