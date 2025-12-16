@@ -68,6 +68,7 @@ struct EpikaApp: App {
     @MainActor
     private func initializeSystems() async {
         await initializeSQLiteMasterData()
+        await DungeonDisplayNameFormatter.preloadTitles()
         await requestNotificationPermission()
     }
 
