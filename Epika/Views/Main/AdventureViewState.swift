@@ -68,8 +68,8 @@ final class AdventureViewState {
     private var masterDataService: MasterDataRuntimeService { .shared }
 
     func loadInitialData() async {
-        // 孤立した探索（.running状態だがアクティブタスクがない）を検出してキャンセル
-        await cancelOrphanedExplorations()
+        // 孤立した探索（.running状態だがアクティブタスクがない）を検出して再開
+        await resumeOrphanedExplorations()
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadPartiesIfNeeded() }
@@ -79,23 +79,46 @@ final class AdventureViewState {
         }
     }
 
-    /// アプリ再起動後に残っている.running状態の探索をキャンセル
-    private func cancelOrphanedExplorations() async {
+    /// アプリ再起動後に残っている.running状態の探索を再開
+    private func resumeOrphanedExplorations() async {
         guard let progressService else { return }
+
+        let allExplorations: [ExplorationSnapshot]
         do {
-            let allExplorations = try await explorationService.allExplorations()
-            let orphaned = allExplorations.filter { snapshot in
-                snapshot.status == .running && activeExplorationTasks[snapshot.party.partyId] == nil
-            }
-            for snapshot in orphaned {
-                try await progressService.cancelPersistedExplorationRun(
+            allExplorations = try await explorationService.allExplorations()
+        } catch {
+            present(error: error)
+            return
+        }
+
+        let orphaned = allExplorations.filter { snapshot in
+            snapshot.status == .running && activeExplorationTasks[snapshot.party.partyId] == nil
+        }
+
+        var firstError: Error?
+        for snapshot in orphaned {
+            do {
+                let handle = try await progressService.resumeOrphanedExploration(
                     partyId: snapshot.party.partyId,
                     startedAt: snapshot.startedAt
                 )
+                activeExplorationHandles[snapshot.party.partyId] = handle
+                let partyId = snapshot.party.partyId
+                activeExplorationTasks[partyId] = Task { [weak self] in
+                    guard let self else { return }
+                    await self.runExplorationStream(handle: handle, partyId: partyId)
+                }
+            } catch {
+                // 1件の再開失敗で全体を止めず、残りも試行する
+                if firstError == nil {
+                    firstError = error
+                }
             }
-        } catch {
-            // キャンセル失敗はログのみ、起動を妨げない
-            print("[AdventureViewState] Failed to cancel orphaned explorations: \(error)")
+        }
+
+        // 再開に失敗した探索があればユーザーに通知
+        if let error = firstError {
+            present(error: error)
         }
     }
 

@@ -30,6 +30,10 @@ struct ExplorationEngine {
         let accumulatedGold: Int
         let drops: [ExplorationDropReward]
         let experienceByMember: [UInt8: Int]
+        /// イベント完了後のRNG状態（探索再開用）
+        let randomState: UInt64
+        /// ドロップ済みアイテムID（探索再開用）
+        let droppedItemIds: Set<UInt16>
     }
 
     static func prepare(provider: ExplorationMasterDataProvider,
@@ -180,7 +184,9 @@ struct ExplorationEngine {
                            accumulatedExperience: totalExperience,
                            accumulatedGold: gold,
                            drops: drops,
-                           experienceByMember: experienceByMember)
+                           experienceByMember: experienceByMember,
+                           randomState: state.random.currentState ?? 0,
+                           droppedItemIds: state.droppedItemIds)
     }
 }
 

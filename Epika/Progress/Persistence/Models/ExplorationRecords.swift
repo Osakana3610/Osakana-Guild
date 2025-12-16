@@ -27,6 +27,15 @@ final class ExplorationRunRecord {
     /// 決定論的乱数のシード
     var seed: UInt64 = 0
 
+    /// 最新イベント処理後のRNG状態（0 = まだ保存なし）
+    var randomState: UInt64 = 0
+
+    /// 超レア抽選の日次状態（SuperRareDailyStateをJSONエンコード）
+    var superRareStateData: Data = Data()
+
+    /// ドロップ済みアイテムID（Set<UInt16>をJSONエンコード）
+    var droppedItemIdsData: Data = Data()
+
     /// 探索終了日時
     var endedAt: Date = Date()
 

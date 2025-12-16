@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 final class ProgressRuntimeService {
-    private let runtimeService: GameRuntimeService
+    let runtimeService: GameRuntimeService
     private let gameStateService: GameStateService
 
     init(runtimeService: GameRuntimeService,
