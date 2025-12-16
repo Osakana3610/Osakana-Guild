@@ -1,3 +1,4 @@
+#if DEBUG
 import Foundation
 import CloudKit
 
@@ -62,3 +63,4 @@ private extension ProgressCloudKitCleanupService {
         return ckError.code == .zoneNotFound
     }
 }
+#endif
