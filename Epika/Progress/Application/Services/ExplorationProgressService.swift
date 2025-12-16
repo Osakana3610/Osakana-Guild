@@ -64,7 +64,10 @@ final class ExplorationProgressService {
     func appendEvent(runId: PersistentIdentifier,
                      event: ExplorationEventLogEntry,
                      battleLog: BattleLogArchive?,
-                     occurredAt: Date) async throws {
+                     occurredAt: Date,
+                     randomState: UInt64,
+                     superRareState: SuperRareDailyState,
+                     droppedItemIds: Set<UInt16>) async throws {
         let context = makeContext()
         let runRecord = try fetchRunRecord(runId: runId, context: context)
 
@@ -78,6 +81,11 @@ final class ExplorationProgressService {
         runRecord.totalExp += eventEntry.exp
         runRecord.totalGold += eventEntry.gold
         runRecord.finalFloor = eventEntry.floor
+
+        // RNG状態と探索状態を保存
+        runRecord.randomState = randomState
+        runRecord.superRareStateData = try JSONEncoder().encode(superRareState)
+        runRecord.droppedItemIdsData = try JSONEncoder().encode(Array(droppedItemIds))
 
         try saveIfNeeded(context)
     }
@@ -122,6 +130,16 @@ final class ExplorationProgressService {
         record.endedAt = endedAt
         record.result = ExplorationResult.cancelled.rawValue
         try saveIfNeeded(context)
+    }
+
+    /// Running状態の探索レコードを取得（再開用）
+    func fetchRunningRecord(partyId: UInt8, startedAt: Date) throws -> ExplorationRunRecord? {
+        let context = makeContext()
+        let runningStatus = ExplorationResult.running.rawValue
+        let descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt && $0.result == runningStatus }
+        )
+        return try context.fetch(descriptor).first
     }
 }
 

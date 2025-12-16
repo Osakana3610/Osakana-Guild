@@ -50,11 +50,11 @@ struct RuntimePartyState: Sendable {
         var id: UInt8 { characterId }
         let characterId: UInt8
         let order: Int
-        let character: RuntimeCharacter
+        var character: RuntimeCharacter
     }
 
     let party: PartySnapshot
-    let members: [Member]
+    var members: [Member]
 
     init(party: PartySnapshot, characters: [RuntimeCharacter]) throws {
         self.party = party

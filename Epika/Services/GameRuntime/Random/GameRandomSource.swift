@@ -3,29 +3,54 @@ import Foundation
 /// 乱数を提供するシンプルなユーティリティ。暗号学的強度までは求めないが、
 /// 毎回 `RandomNumberGenerator` を用いてゲーム内のランダム性を供給する。
 /// テストではシード付き初期化子で決定的な乱数列を得られる。
-struct GameRandomSource {
-    private var generator: any RandomNumberGenerator
+struct GameRandomSource: Sendable {
+    private var generator: SendableRandomGenerator
 
-    init() {
-        generator = SystemRandomNumberGenerator()
+    nonisolated init() {
+        generator = .system(SystemRandomNumberGenerator())
     }
 
-    init(seed: UInt64) {
-        generator = SeededRandomNumberGenerator(seed: seed)
+    nonisolated init(seed: UInt64) {
+        generator = .seeded(SeededRandomNumberGenerator(seed: seed))
+    }
+
+    /// 保存されたRNG状態から復元
+    nonisolated init(restoringState state: UInt64) {
+        generator = .seeded(SeededRandomNumberGenerator(restoringState: state))
+    }
+
+    /// 現在のRNG状態を取得（SeededRandomNumberGenerator以外はnil）
+    var currentState: UInt64? {
+        switch generator {
+        case .seeded(let gen): gen.currentState
+        case .system: nil
+        }
     }
 
     mutating func nextDouble(in range: ClosedRange<Double> = 0.0...1.0) -> Double {
-        var mutableGenerator = generator
-        let value = Double.random(in: range, using: &mutableGenerator)
-        generator = mutableGenerator
-        return value
+        switch generator {
+        case .system(var gen):
+            let value = Double.random(in: range, using: &gen)
+            generator = .system(gen)
+            return value
+        case .seeded(var gen):
+            let value = Double.random(in: range, using: &gen)
+            generator = .seeded(gen)
+            return value
+        }
     }
 
     mutating func nextInt(in range: ClosedRange<Int>) -> Int {
-        var mutableGenerator = generator
-        let value = Int.random(in: range, using: &mutableGenerator)
-        generator = mutableGenerator
-        return value
+        switch generator {
+        case .system(var gen):
+            let value = Int.random(in: range, using: &gen)
+            generator = .system(gen)
+            return value
+        case .seeded(var gen):
+            let value = Int.random(in: range, using: &gen)
+            generator = .seeded(gen)
+            return value
+        }
     }
 
     mutating func nextBool(probability: Double) -> Bool {
@@ -60,13 +85,27 @@ struct GameRandomSource {
     }
 }
 
-private struct SeededRandomNumberGenerator: RandomNumberGenerator {
-    private var state: UInt64
+/// Sendable対応のRandomGenerator wrapper
+private enum SendableRandomGenerator: Sendable {
+    case system(SystemRandomNumberGenerator)
+    case seeded(SeededRandomNumberGenerator)
+}
 
-    init(seed: UInt64) {
+private struct SeededRandomNumberGenerator: RandomNumberGenerator, Sendable {
+    private(set) var state: UInt64
+
+    nonisolated init(seed: UInt64) {
         // 0は避ける
         state = seed == 0 ? 0xCAFE_F00D : seed
     }
+
+    /// 保存された状態から復元
+    nonisolated init(restoringState state: UInt64) {
+        self.state = state == 0 ? 0xCAFE_F00D : state
+    }
+
+    /// 外部から現在の状態を取得
+    var currentState: UInt64 { state }
 
     mutating func next() -> UInt64 {
         // SplitMix64
