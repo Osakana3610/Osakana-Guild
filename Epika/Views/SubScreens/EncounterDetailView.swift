@@ -83,11 +83,12 @@ struct EncounterDetailView: View {
             // initialHPとBattleActionはpartyMemberIdをキーに使用
             guard let memberId = participant.partyMemberId else { continue }
             let actorIndex = UInt16(memberId)
-            let initialHP = archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP)
+            let initialHP = Int(archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP))
             states[participant.actorId] = ParticipantState(
                 id: participant.actorId,
                 name: participant.name,
-                currentHP: Int(initialHP),
+                currentHP: initialHP,
+                previousHP: initialHP,
                 maxHP: participant.maxHP,
                 level: participant.level,
                 jobName: nil,
@@ -102,11 +103,12 @@ struct EncounterDetailView: View {
             // actorId は CombatExecutionService で BattleContext.actorIndex と同じ計算式で保存されている
             // 形式: (arrayIndex + 1) * 1000 + enemyMasterIndex
             guard let actorIndex = UInt16(participant.actorId) else { continue }
-            let initialHP = archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP)
+            let initialHP = Int(archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP))
             states[participant.actorId] = ParticipantState(
                 id: participant.actorId,
                 name: participant.name,
-                currentHP: Int(initialHP),
+                currentHP: initialHP,
+                previousHP: initialHP,
                 maxHP: participant.maxHP,
                 level: participant.level,
                 jobName: nil,
@@ -131,79 +133,186 @@ struct EncounterDetailView: View {
 
         var result: [TurnSummary] = []
         var stateMap = states
+        var previousTurnStartStates = states  // 前ターン開始時の状態
         let sortedTurns = grouped.keys.sorted().filter { $0 > 0 }
 
         for turn in sortedTurns {
-            let partyStates = stateMap.values
+            // ターン開始時の状態を記録
+            let turnStartStates = stateMap
+
+            // HP概要用：currentHP=ターン開始時、previousHP=前ターン開始時
+            var summaryStates: [String: ParticipantState] = [:]
+            for (id, var state) in turnStartStates {
+                state.previousHP = previousTurnStartStates[id]?.currentHP ?? state.currentHP
+                summaryStates[id] = state
+            }
+
+            // フィルタ後のアクション
+            let actions = (grouped[turn] ?? []).filter(shouldDisplayAction)
+
+            // アクションごとのHP変動を計算
+            let rawActions = rawActionsByTurn[turn] ?? []
+            let (actionHPChanges, _) = computeActionHPChanges(
+                rawActions: rawActions,
+                filteredActions: actions,
+                stateMap: &stateMap,
+                indexToId: indexToId
+            )
+
+            let partyStates = summaryStates.values
                 .filter { $0.role == .player }
                 .sorted { $0.order < $1.order }
-            let enemyStates = stateMap.values
+            let enemyStates = summaryStates.values
                 .filter { $0.role == .enemy }
                 .sorted { $0.order < $1.order }
 
-            let actions = (grouped[turn] ?? []).filter(shouldDisplayAction)
             result.append(TurnSummary(id: turn,
                                       turn: turn,
                                       party: partyStates,
                                       enemies: enemyStates,
-                                      participants: stateMap,
-                                      actions: actions))
+                                      participants: summaryStates,
+                                      actions: actions,
+                                      actionHPChanges: actionHPChanges))
 
-            // 生アクションからHPを更新
-            applyHPChanges(from: rawActionsByTurn[turn] ?? [], stateMap: &stateMap, indexToId: indexToId)
+            // 次ターン用に前ターン開始時の状態を更新
+            previousTurnStartStates = turnStartStates
         }
 
         return result
     }
 
-    private func applyHPChanges(from actions: [BattleAction], stateMap: inout [String: ParticipantState], indexToId: [UInt16: String]) {
-        for action in actions {
+    /// アクションごとのHP変動を計算し、stateMapを更新する
+    /// - Returns: (actionHPChanges, 更新後のstateMap)
+    private func computeActionHPChanges(
+        rawActions: [BattleAction],
+        filteredActions: [BattleLogEntry],
+        stateMap: inout [String: ParticipantState],
+        indexToId: [UInt16: String]
+    ) -> ([Int: ActionHPChange], [String: ParticipantState]) {
+        var actionHPChanges: [Int: ActionHPChange] = [:]
+
+        // filteredActionsとrawActionsの対応を取るため、rawActionsを順に処理
+        // filteredActionsのインデックスを追跡
+        var filteredIndex = 0
+
+        for action in rawActions {
             guard let kind = ActionKind(rawValue: action.kind) else { continue }
             let value = Int(action.value ?? 0)
 
+            // HP変動があるアクションかどうか
+            let isHPChange: Bool
+            var affectedId: String?
+            var beforeHP: Int?
+            var afterHP: Int?
+            var maxHP: Int?
+            var targetName: String?
+
             switch kind {
             // ダメージ（ターゲットのHPを減らす）
-            case .physicalDamage, .magicDamage, .breathDamage, .statusTick:
+            case .physicalDamage, .magicDamage, .breathDamage, .statusTick,
+                 .enemySpecialDamage:
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
+                    beforeHP = state.currentHP
                     state.currentHP = max(0, state.currentHP - value)
+                    afterHP = state.currentHP
+                    maxHP = state.maxHP
+                    targetName = state.name
                     stateMap[targetId] = state
+                    affectedId = targetId
+                    isHPChange = true
+                } else {
+                    isHPChange = false
                 }
             // 自傷ダメージ
             case .damageSelf:
                 if let actorId = indexToId[action.actor],
                    var state = stateMap[actorId] {
+                    beforeHP = state.currentHP
                     state.currentHP = max(0, state.currentHP - value)
+                    afterHP = state.currentHP
+                    maxHP = state.maxHP
+                    targetName = state.name
                     stateMap[actorId] = state
+                    affectedId = actorId
+                    isHPChange = true
+                } else {
+                    isHPChange = false
                 }
             // 回復（ターゲットのHPを増やす）
             case .magicHeal, .healParty:
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
+                    beforeHP = state.currentHP
                     state.currentHP = min(state.maxHP, state.currentHP + value)
+                    afterHP = state.currentHP
+                    maxHP = state.maxHP
+                    targetName = state.name
                     stateMap[targetId] = state
+                    affectedId = targetId
+                    isHPChange = true
+                } else {
+                    isHPChange = false
                 }
             // 自己回復
-            case .healAbsorb, .healVampire, .healSelf:
+            case .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
                 if let actorId = indexToId[action.actor],
                    var state = stateMap[actorId] {
+                    beforeHP = state.currentHP
                     state.currentHP = min(state.maxHP, state.currentHP + value)
+                    afterHP = state.currentHP
+                    maxHP = state.maxHP
+                    targetName = state.name
                     stateMap[actorId] = state
+                    affectedId = actorId
+                    isHPChange = true
+                } else {
+                    isHPChange = false
                 }
             // 戦闘不能
             case .physicalKill:
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
+                    beforeHP = state.currentHP
                     state.currentHP = 0
+                    afterHP = 0
+                    maxHP = state.maxHP
+                    targetName = state.name
                     stateMap[targetId] = state
+                    affectedId = targetId
+                    isHPChange = true
+                } else {
+                    isHPChange = false
                 }
             default:
-                break
+                isHPChange = false
+            }
+
+            // filteredActionsとの対応を見つける
+            if isHPChange,
+               let affectedId,
+               let beforeHP, let afterHP, let maxHP, let targetName,
+               filteredIndex < filteredActions.count {
+                // filteredActionsのtargetIdと一致するか確認
+                let entry = filteredActions[filteredIndex]
+                let entryTargetId = entry.targetId ?? entry.actorId
+                if entryTargetId == affectedId {
+                    actionHPChanges[filteredIndex] = ActionHPChange(
+                        targetId: affectedId,
+                        targetName: targetName,
+                        beforeHP: beforeHP,
+                        afterHP: afterHP,
+                        maxHP: maxHP
+                    )
+                    filteredIndex += 1
+                }
             }
         }
+
+        return (actionHPChanges, stateMap)
     }
 
     private func shouldDisplayAction(_ entry: BattleLogEntry) -> Bool {
@@ -322,6 +431,16 @@ struct TurnSummary: Identifiable {
     let enemies: [ParticipantState]
     let participants: [String: ParticipantState]
     let actions: [BattleLogEntry]
+    let actionHPChanges: [Int: ActionHPChange]  // アクションindex → HP変動情報
+}
+
+/// アクション実行時のHP変動情報
+struct ActionHPChange {
+    let targetId: String
+    let targetName: String
+    let beforeHP: Int
+    let afterHP: Int
+    let maxHP: Int
 }
 
 struct ParticipantState: Identifiable {
@@ -333,6 +452,7 @@ struct ParticipantState: Identifiable {
     let id: String
     let name: String
     var currentHP: Int
+    var previousHP: Int  // 前ターンのHP（変動表示用）
     let maxHP: Int
     let level: Int?
     let jobName: String?
@@ -371,11 +491,12 @@ struct BattleTurnView: View {
             .padding(.vertical, 4)
 
             // 各アクションを個別の行として表示
-            ForEach(Array(summary.actions.enumerated()), id: \.offset) { _, entry in
+            ForEach(Array(summary.actions.enumerated()), id: \.offset) { index, entry in
                 let participant = summary.participants[entry.actorId ?? ""]
                 BattleActionRowView(entry: entry,
                                     actor: participant,
-                                    iconInfo: iconProvider(participant))
+                                    iconInfo: iconProvider(participant),
+                                    hpChange: summary.actionHPChanges[index])
             }
         } header: {
             Text("\(summary.turn)ターン目")
@@ -392,7 +513,7 @@ struct ParticipantSummaryView: View {
     let role: ParticipantState.Role
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 4) {
             if let title, !title.isEmpty {
                 Text(title)
                     .font(.caption)
@@ -405,25 +526,43 @@ struct ParticipantSummaryView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(participants) { participant in
-                    Text(formatParticipantLine(participant, role: role))
-                        .font(.caption)
-                        .foregroundStyle(.primary)
+                    ParticipantHPRow(participant: participant, role: role)
                 }
             }
         }
     }
+}
 
-    private func formatParticipantLine(_ p: ParticipantState, role: ParticipantState.Role) -> String {
-        var parts: [String] = []
-        parts.append("( \(p.currentHP) /\(p.maxHP) )")
-        parts.append(p.name)
-        if role == .player, let job = p.jobName, !job.isEmpty {
-            parts.append(job)
+struct ParticipantHPRow: View {
+    let participant: ParticipantState
+    let role: ParticipantState.Role
+
+    var body: some View {
+        HStack(spacing: 8) {
+            // 名前
+            Text(formatName())
+                .font(.caption)
+                .foregroundStyle(.primary)
+                .frame(minWidth: 60, alignment: .leading)
+
+            // HPバー
+            HPBarView(
+                currentHP: participant.currentHP,
+                previousHP: participant.previousHP,
+                maxHP: participant.maxHP,
+                height: 14,
+                showNumbers: true
+            )
+            .frame(maxWidth: 120)
         }
-        if let level = p.level {
-            parts.append("Lv\(level)")
+    }
+
+    private func formatName() -> String {
+        var name = participant.name
+        if let level = participant.level {
+            name += " Lv\(level)"
         }
-        return parts.joined(separator: " ")
+        return name
     }
 }
 
@@ -431,6 +570,7 @@ struct BattleActionRowView: View {
     let entry: BattleLogEntry
     let actor: ParticipantState?
     let iconInfo: CharacterIconInfo?
+    let hpChange: ActionHPChange?
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -451,6 +591,23 @@ struct BattleActionRowView: View {
                     .font(.subheadline)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
+
+                // HP変動がある場合はHPバーを表示
+                if let hpChange {
+                    HStack(spacing: 4) {
+                        Text(hpChange.targetName)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        HPBarView(
+                            currentHP: hpChange.afterHP,
+                            previousHP: hpChange.beforeHP,
+                            maxHP: hpChange.maxHP,
+                            height: 12,
+                            showNumbers: true
+                        )
+                        .frame(maxWidth: 100)
+                    }
+                }
             }
 
             Spacer()
