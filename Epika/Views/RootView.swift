@@ -16,9 +16,10 @@ struct RootView: View {
     var body: some View {
         MainTabView()
             .environment(\.modelContext, modelContext)
+            .environment(\.masterData, appServices.masterDataCache)
             .environment(partyViewState)
-            .environmentObject(appServices)
-            .environmentObject(appServices.dropNotifications)
+            .environment(appServices)
+            .environment(appServices.dropNotifications)
     }
 }
 
@@ -36,9 +37,10 @@ private struct PreviewRootView: View {
             if let container, let appServices {
                 RootView(appServices: appServices)
                     .modelContainer(container)
+                    .environment(\.masterData, appServices.masterDataCache)
                     .environment(PartyViewState(appServices: appServices))
-                    .environmentObject(appServices)
-                    .environmentObject(appServices.dropNotifications)
+                    .environment(appServices)
+                    .environment(appServices.dropNotifications)
             } else if let errorMessage {
                 Text("プレビュー初期化に失敗しました: \(errorMessage)")
             } else {

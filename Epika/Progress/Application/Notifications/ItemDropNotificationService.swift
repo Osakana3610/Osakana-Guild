@@ -1,10 +1,11 @@
 import Foundation
-import Combine
+import Observation
 
 @MainActor
-final class ItemDropNotificationService: ObservableObject {
+@Observable
+final class ItemDropNotificationService {
     private let masterDataCache: MasterDataCache
-    @Published private(set) var droppedItems: [DroppedItemNotification] = []
+    private(set) var droppedItems: [DroppedItemNotification] = []
 
     init(masterDataCache: MasterDataCache) {
         self.masterDataCache = masterDataCache

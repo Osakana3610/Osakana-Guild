@@ -1,10 +1,10 @@
 import Foundation
-import Combine
 import SwiftData
-import SwiftUI
+import Observation
 
 @MainActor
-final class AppServices: ObservableObject {
+@Observable
+final class AppServices {
     let container: ModelContainer
     let masterDataCache: MasterDataCache
     let gameState: GameStateService

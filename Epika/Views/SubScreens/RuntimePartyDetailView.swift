@@ -7,7 +7,7 @@ struct RuntimePartyDetailView: View {
 
     @Environment(PartyViewState.self) private var partyState
     @Environment(AdventureViewState.self) private var adventureState
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
 
     @State private var allCharacters: [RuntimeCharacter] = []
     @State private var errorMessage: String?
@@ -380,7 +380,7 @@ private struct PartyEquipmentListView: View {
 // MARK: - Inline Selection Menus
 
 private struct DifficultyPickerMenu: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     let dungeon: RuntimeDungeon
     let currentDifficulty: UInt8
     let onSelect: (UInt8) async -> Bool
@@ -481,7 +481,7 @@ private struct TargetFloorPickerMenu: View {
 // MARK: - Sheet Components
 
 private struct DungeonPickerView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     let dungeons: [RuntimeDungeon]
     let currentSelection: UInt16?
     let currentDifficulty: UInt8
@@ -582,7 +582,7 @@ private struct DifficultyPickerView: View {
     let currentDifficulty: UInt8
     let onSelect: (UInt8) async -> Bool
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
 
     var body: some View {
         List {
@@ -619,7 +619,7 @@ private struct PartyNameEditorView: View {
     let party: RuntimeParty
     let onComplete: () async -> Void
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var name: String = ""
     @State private var showError = false
     @State private var errorMessage = ""

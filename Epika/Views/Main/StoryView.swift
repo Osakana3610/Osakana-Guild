@@ -62,7 +62,7 @@ final class StoryViewModel {
 }
 
 struct StoryView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var viewModel = StoryViewModel()
     @State private var didLoadOnce = false
 

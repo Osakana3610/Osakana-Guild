@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SuperRareTitleEncyclopediaView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var titles: [SuperRareTitleDefinition] = []
     @State private var skillDefinitions: [UInt16: SkillDefinition] = [:]
     @State private var isLoading = true

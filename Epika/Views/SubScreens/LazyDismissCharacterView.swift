@@ -5,7 +5,7 @@ struct LazyDismissCharacterView: View {
     let onComplete: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
 
     @State private var fullCharacters: [RuntimeCharacter] = []
     @State private var selectedCharacter: RuntimeCharacter?

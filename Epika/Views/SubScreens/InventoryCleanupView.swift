@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 在庫整理画面（99個超過のプレイヤー売却品を5個に減らしてキャット・チケット獲得）
 struct InventoryCleanupView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var candidates: [ShopProgressService.ShopItem] = []
     @State private var player: PlayerSnapshot?
     @State private var isLoading = false

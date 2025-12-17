@@ -109,7 +109,7 @@ struct EquipmentStatsView: View {
 }
 
 private struct TaskView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     let equipment: RuntimeEquipment
     @State private var deltas: [(String, Int)] = []
 

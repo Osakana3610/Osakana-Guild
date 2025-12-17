@@ -81,7 +81,7 @@ private struct ItemSeed {
 }
 
 struct DebugMenuView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var isCreatingItems = false
     @State private var creationProgress: Double = 0.0
     @State private var statusMessage = ""

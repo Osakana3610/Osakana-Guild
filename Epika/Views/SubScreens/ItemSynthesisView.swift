@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ItemSynthesisView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var parentItems: [RuntimeEquipment] = []
     @State private var childItems: [RuntimeEquipment] = []
     @State private var selectedParent: RuntimeEquipment?

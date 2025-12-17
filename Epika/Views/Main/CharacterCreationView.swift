@@ -447,7 +447,7 @@ struct StatGrid: View {
 }
 
 struct RaceDetailSheet: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     let race: RaceDefinition
 
     @Environment(\.dismiss) private var dismiss
@@ -568,7 +568,7 @@ struct RaceDetailSheet: View {
 }
 
 struct JobDetailSheet: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     let job: JobDefinition
     let genderCode: UInt8?
 

@@ -186,3 +186,18 @@ struct MasterDataCache: Sendable {
         self.storyNodesById = Dictionary(uniqueKeysWithValues: allStoryNodes.map { ($0.id, $0) })
     }
 }
+
+// MARK: - SwiftUI Environment
+
+private struct MasterDataCacheKey: EnvironmentKey {
+    static var defaultValue: MasterDataCache {
+        fatalError("MasterDataCache not provided in environment")
+    }
+}
+
+extension EnvironmentValues {
+    var masterData: MasterDataCache {
+        get { self[MasterDataCacheKey.self] }
+        set { self[MasterDataCacheKey.self] = newValue }
+    }
+}

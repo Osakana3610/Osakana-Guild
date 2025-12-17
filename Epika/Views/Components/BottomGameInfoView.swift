@@ -36,7 +36,7 @@ struct BottomGameInfoStyleModifier: ViewModifier {
 }
 
 struct BottomGameInfoView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @Environment(\.sizeCategory) private var sizeCategory
     @State private var currentTime = Date()
     @State private var catTicketCount: Int = 0

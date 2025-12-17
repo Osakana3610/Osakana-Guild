@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TitleInheritanceView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var targetItems: [RuntimeEquipment] = []
     @State private var sourceItems: [RuntimeEquipment] = []
     @State private var selectedTarget: RuntimeEquipment?

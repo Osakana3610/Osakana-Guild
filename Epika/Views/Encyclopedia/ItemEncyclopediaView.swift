@@ -5,7 +5,7 @@ extension UInt16: @retroactive Identifiable {
 }
 
 struct ItemEncyclopediaView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var items: [ItemDefinition] = []
     @State private var isLoading = true
 
@@ -101,7 +101,7 @@ private struct ItemRowView: View {
 
 /// アイテム詳細ビュー（図鑑・装備・売却画面で共有）
 struct ItemDetailView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
 
     /// 図鑑用: itemIdのみ
     let itemId: UInt16

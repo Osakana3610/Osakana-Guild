@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct GemModificationView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
 
     @State private var gems: [LightweightItemData] = []
     @State private var allItems: [LightweightItemData] = []

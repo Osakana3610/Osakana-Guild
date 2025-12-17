@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ArtifactExchangeView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var availableOptions: [ArtifactExchangeProgressService.ArtifactOption] = []
     @State private var playerArtifacts: [RuntimeEquipment] = []
     @State private var selectedOption: ArtifactExchangeProgressService.ArtifactOption?

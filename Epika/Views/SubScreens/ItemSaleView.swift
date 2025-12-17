@@ -2,7 +2,7 @@ import SwiftUI
 
 /// アイテム売却画面（Runtimeサービス準拠）
 struct ItemSaleView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var player: PlayerSnapshot?
     @State private var isLoading = false
     @State private var showError = false

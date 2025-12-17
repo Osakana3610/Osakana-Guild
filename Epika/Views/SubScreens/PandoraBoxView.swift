@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PandoraBoxView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
 
     @State private var pandoraItems: [LightweightItemData] = []
     @State private var availableItems: [LightweightItemData] = []

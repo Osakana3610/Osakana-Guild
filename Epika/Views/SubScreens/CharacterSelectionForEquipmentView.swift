@@ -3,7 +3,7 @@ import SwiftUI
 /// 装備変更画面
 /// キャラクター選択 → 装備編集の2段階UI
 struct CharacterSelectionForEquipmentView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var characters: [RuntimeCharacter] = []
     @State private var loadError: String?
     @State private var isLoading = true
@@ -44,7 +44,7 @@ struct CharacterSelectionForEquipmentView: View {
             ForEach(characters) { character in
                 NavigationLink {
                     EquipmentEditorView(character: character)
-                        .environmentObject(appServices)
+                        .environment(appServices)
                 } label: {
                     CharacterRowForEquipment(character: character)
                 }
@@ -112,7 +112,7 @@ private struct CharacterRowForEquipment: View {
 struct EquipmentEditorView: View {
     let character: RuntimeCharacter
 
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var currentCharacter: RuntimeCharacter
     @State private var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
     @State private var orderedSubcategories: [ItemDisplaySubcategory] = []

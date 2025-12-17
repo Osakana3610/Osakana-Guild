@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 自動売却ルールの一覧と管理画面
 struct AutoTradeView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var rules: [AutoTradeProgressService.Rule] = []
     @State private var ruleDisplayNames: [String: String] = [:]
     @State private var isLoading = false

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ItemPurchaseView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var shopItems: [ShopProgressService.ShopItem] = []
     @State private var player: PlayerSnapshot?
     @State private var showError = false

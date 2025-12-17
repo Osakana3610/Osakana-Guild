@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MonsterEncyclopediaView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var dungeons: [DungeonDefinition] = []
     @State private var enemies: [EnemyDefinition] = []
     @State private var enemyRaces: [UInt8: String] = [:]

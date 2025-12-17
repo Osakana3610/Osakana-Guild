@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct GuildView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var characterState = CharacterViewState()
     @State private var maxCharacterSlots: Int = AppConstants.Progress.defaultCharacterSlotCount
     @State private var isLoading = false

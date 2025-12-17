@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AdventureView: View {
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @Environment(PartyViewState.self) private var partyState
     @State private var adventureState = AdventureViewState()
     @State private var characterState = CharacterViewState()

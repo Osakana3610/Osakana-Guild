@@ -4,7 +4,7 @@ struct StoryDetailView: View {
     let story: RuntimeStoryNode
     let onUpdate: () -> Void
 
-    @EnvironmentObject private var appServices: AppServices
+    @Environment(AppServices.self) private var appServices
     @State private var isProcessing = false
     @State private var showError = false
     @State private var errorMessage = ""
