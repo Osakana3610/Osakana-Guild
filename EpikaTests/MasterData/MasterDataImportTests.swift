@@ -11,6 +11,16 @@ final class MasterDataImportTests: XCTestCase {
     private static var jsonURL: URL { URL(fileURLWithPath: masterDataPath) }
     private static var sqliteURL: URL { URL(fileURLWithPath: "\(masterDataPath)/MasterData.sqlite") }
 
+    // MARK: - Cached Data
+
+    private var cache: MasterDataCache!
+
+    override func setUp() async throws {
+        try await super.setUp()
+        let manager = SQLiteMasterDataManager()
+        cache = try await MasterDataLoader.load(manager: manager)
+    }
+
     // MARK: - JSON↔SQLite整合性検証
 
     /// ItemMaster.jsonの全フィールドがSQLiteに正しくインポートされていることを検証
@@ -360,56 +370,41 @@ final class MasterDataImportTests: XCTestCase {
     // MARK: - 既存テスト（必須フィールド検証）
 
     func testAllItemsHaveRequiredFields() async throws {
-        let repository = MasterDataRepository()
-        let items = try await repository.allItems()
-
-        for item in items {
+        for item in cache.allItems {
             XCTAssertFalse(item.name.isEmpty, "Item id=\(item.id) の name が空")
             XCTAssertGreaterThan(item.id, 0, "Item の id が 0 以下")
         }
     }
 
     func testAllSkillsHaveRequiredFields() async throws {
-        let repository = MasterDataRepository()
-        let skills = try await repository.allSkills()
-
-        for skill in skills {
+        for skill in cache.allSkills {
             XCTAssertFalse(skill.name.isEmpty, "Skill id=\(skill.id) の name が空")
             XCTAssertGreaterThan(skill.id, 0, "Skill の id が 0 以下")
         }
     }
 
     func testAllJobsHaveRequiredFields() async throws {
-        let repository = MasterDataRepository()
-        let jobs = try await repository.allJobs()
-
-        for job in jobs {
+        for job in cache.allJobs {
             XCTAssertFalse(job.name.isEmpty, "Job id=\(job.id) の name が空")
         }
     }
 
     func testAllRacesHaveRequiredFields() async throws {
-        let repository = MasterDataRepository()
-        let races = try await repository.allRaces()
-
-        for race in races {
+        for race in cache.allRaces {
             XCTAssertFalse(race.name.isEmpty, "Race id=\(race.id) の name が空")
         }
     }
 
     func testAllEnemiesHaveRequiredFields() async throws {
-        let repository = MasterDataRepository()
-        let enemies = try await repository.allEnemies()
-
-        for enemy in enemies {
+        for enemy in cache.allEnemies {
             XCTAssertFalse(enemy.name.isEmpty, "Enemy id=\(enemy.id) の name が空")
             XCTAssertGreaterThan(enemy.vitality, 0, "Enemy id=\(enemy.id) の vitality が 0 以下")
         }
     }
 
     func testAllDungeonsHaveRequiredFields() async throws {
-        let repository = MasterDataRepository()
-        let (dungeons, _, floors) = try await repository.allDungeons()
+        let dungeons = cache.allDungeons
+        let floors = cache.allDungeonFloors
 
         for dungeon in dungeons {
             XCTAssertFalse(dungeon.name.isEmpty, "Dungeon id=\(dungeon.id) の name が空")
@@ -424,17 +419,13 @@ final class MasterDataImportTests: XCTestCase {
     }
 
     func testAllStoriesHaveRequiredFields() async throws {
-        let repository = MasterDataRepository()
-        let stories = try await repository.allStories()
-
-        for story in stories {
+        for story in cache.allStoryNodes {
             XCTAssertFalse(story.title.isEmpty, "Story id=\(story.id) の title が空")
         }
     }
 
     func testAllCharacterNamesHaveRequiredFields() async throws {
-        let repository = MasterDataRepository()
-        let names = try await repository.allCharacterNames()
+        let names = cache.allCharacterNames
 
         XCTAssertGreaterThan(names.count, 0, "character_names が空")
 
@@ -445,18 +436,18 @@ final class MasterDataImportTests: XCTestCase {
         }
 
         // 各genderCodeで取得できることを確認
-        let maleNames = try await repository.characterNames(forGenderCode: 1)
-        let femaleNames = try await repository.characterNames(forGenderCode: 2)
-        let genderlessNames = try await repository.characterNames(forGenderCode: 3)
+        let maleNames = cache.characterNames(forGenderCode: 1)
+        let femaleNames = cache.characterNames(forGenderCode: 2)
+        let genderlessNames = cache.characterNames(forGenderCode: 3)
 
         XCTAssertGreaterThan(maleNames.count, 0, "male names が空")
         XCTAssertGreaterThan(femaleNames.count, 0, "female names が空")
         XCTAssertGreaterThan(genderlessNames.count, 0, "genderless names が空")
 
         // ランダム取得テスト
-        let randomMale = try await repository.randomCharacterName(forGenderCode: 1)
-        let randomFemale = try await repository.randomCharacterName(forGenderCode: 2)
-        let randomGenderless = try await repository.randomCharacterName(forGenderCode: 3)
+        let randomMale = cache.randomCharacterName(forGenderCode: 1)
+        let randomFemale = cache.randomCharacterName(forGenderCode: 2)
+        let randomGenderless = cache.randomCharacterName(forGenderCode: 3)
 
         XCTAssertFalse(randomMale.isEmpty, "random male name が空")
         XCTAssertFalse(randomFemale.isEmpty, "random female name が空")
@@ -466,13 +457,10 @@ final class MasterDataImportTests: XCTestCase {
     // MARK: - 参照整合性テスト
 
     func testEncounterEnemyIdsExistInEnemyMaster() async throws {
-        let repository = MasterDataRepository()
-
-        let enemies = try await repository.allEnemies()
-        let validEnemyIds = Set(enemies.map(\.id))
+        let validEnemyIds = Set(cache.allEnemies.map(\.id))
         XCTAssertFalse(validEnemyIds.isEmpty, "EnemyMaster が空です")
 
-        let (_, encounterTables, _) = try await repository.allDungeons()
+        let encounterTables = cache.allEncounterTables
 
         var invalidReferences: [(tableId: String, eventIndex: Int, enemyId: UInt16)] = []
 

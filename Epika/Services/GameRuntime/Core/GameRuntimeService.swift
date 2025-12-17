@@ -4,15 +4,12 @@ import Foundation
 /// 探索/戦闘/ドロップの各サービスを束ねる。
 actor GameRuntimeService {
     private let masterData: MasterDataCache
-    private let repository: MasterDataRepository
     private let dropNotifier: @Sendable ([ItemDropResult]) async -> Void
     private var activeRuns: [UUID: ActiveExplorationRun] = [:]
 
     init(masterData: MasterDataCache,
-         repository: MasterDataRepository,
          dropNotifier: @escaping @Sendable ([ItemDropResult]) async -> Void = { _ in }) {
         self.masterData = masterData
-        self.repository = repository
         self.dropNotifier = dropNotifier
     }
 
@@ -58,7 +55,7 @@ actor GameRuntimeService {
 
                 if let outcome = try await ExplorationEngine.nextEvent(preparation: preparation,
                                                                         state: &state,
-                                                                        repository: repository,
+                                                                        masterData: masterData,
                                                                         party: party) {
                     events.append(outcome.entry)
                     if let battleLog = outcome.battleLog {
@@ -158,10 +155,9 @@ actor GameRuntimeService {
                                party: RuntimePartyState,
                                superRareState: SuperRareDailyState,
                                seed: UInt64) async throws -> ExplorationRunPreparationData {
-        let provider = await makeExplorationProvider()
-        let scheduler = await makeEventScheduler()
+        let provider = makeExplorationProvider()
+        let scheduler = makeEventScheduler()
         let (preparation, state) = try await ExplorationEngine.prepare(provider: provider,
-                                                                       repository: repository,
                                                                        dungeonId: dungeonId,
                                                                        targetFloorNumber: targetFloorNumber,
                                                                        superRareState: superRareState,
@@ -244,8 +240,8 @@ actor GameRuntimeService {
         startFloor: Int,
         startEventIndex: Int
     ) async throws -> ExplorationRunSession {
-        let provider = await makeExplorationProvider()
-        let scheduler = await makeEventScheduler()
+        let provider = makeExplorationProvider()
+        let scheduler = makeEventScheduler()
 
         // preparationのみ取得（stateは手動で構築）
         let bundle = try await provider.dungeonBundle(for: dungeonId)
@@ -307,7 +303,7 @@ actor GameRuntimeService {
 
                 if let outcome = try await ExplorationEngine.nextEvent(preparation: preparation,
                                                                         state: &state,
-                                                                        repository: repository,
+                                                                        masterData: masterData,
                                                                         party: party) {
                     events.append(outcome.entry)
                     if let battleLog = outcome.battleLog {
@@ -411,12 +407,12 @@ actor GameRuntimeService {
         return map
     }
 
-    private func makeExplorationProvider() async -> MasterDataRepositoryExplorationProvider {
-        await MainActor.run { MasterDataRepositoryExplorationProvider(repository: repository) }
+    private func makeExplorationProvider() -> MasterDataCacheExplorationProvider {
+        MasterDataCacheExplorationProvider(masterData: masterData)
     }
 
-    private func makeEventScheduler() async -> ExplorationEventScheduler {
-        await MainActor.run { ExplorationEventScheduler() }
+    private func makeEventScheduler() -> ExplorationEventScheduler {
+        ExplorationEventScheduler()
     }
 
     private func explorationTimeMultiplier(for party: RuntimePartyState,

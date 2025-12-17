@@ -78,8 +78,7 @@ struct EpikaApp: App {
             let bootstrap = try await ProgressBootstrapper.shared.boot()
             sharedModelContainer = bootstrap.container
             appServices = AppServices(container: bootstrap.container,
-                                       masterDataCache: cache,
-                                       masterDataManager: manager)
+                                       masterDataCache: cache)
         } catch {
             initializationError = "データベース初期化に失敗しました: \(error.localizedDescription)"
         }

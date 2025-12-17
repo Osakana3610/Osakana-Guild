@@ -73,7 +73,7 @@ final class BattleBalanceTests: XCTestCase {
 
     // MARK: - Cached Data
 
-    private var repository: MasterDataRepository!
+    private var cache: MasterDataCache!
     private var dungeons: [DungeonDefinition] = []
     private var floors: [DungeonFloorDefinition] = []
     private var encounterTables: [String: EncounterTableDefinition] = [:]
@@ -90,37 +90,30 @@ final class BattleBalanceTests: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        repository = MasterDataRepository()
+        let manager = SQLiteMasterDataManager()
+        cache = try await MasterDataLoader.load(manager: manager)
 
         // マスターデータを読み込む
-        let (loadedDungeons, loadedTables, loadedFloors) = try await repository.allDungeons()
-        dungeons = loadedDungeons.sorted { $0.id < $1.id }
-        floors = loadedFloors
-        encounterTables = Dictionary(uniqueKeysWithValues: loadedTables.map { ($0.id, $0) })
+        dungeons = cache.allDungeons.sorted { $0.id < $1.id }
+        floors = cache.allDungeonFloors
+        encounterTables = Dictionary(uniqueKeysWithValues: cache.allEncounterTables.map { ($0.id, $0) })
 
-        let enemyList = try await repository.allEnemies()
-        enemies = Dictionary(uniqueKeysWithValues: enemyList.map { ($0.id, $0) })
+        enemies = Dictionary(uniqueKeysWithValues: cache.allEnemies.map { ($0.id, $0) })
 
-        let skillList = try await repository.allSkills()
-        skills = Dictionary(uniqueKeysWithValues: skillList.map { ($0.id, $0) })
+        skills = Dictionary(uniqueKeysWithValues: cache.allSkills.map { ($0.id, $0) })
 
-        let enemySkillList = try await repository.allEnemySkills()
-        enemySkills = Dictionary(uniqueKeysWithValues: enemySkillList.map { ($0.id, $0) })
+        enemySkills = Dictionary(uniqueKeysWithValues: cache.allEnemySkills.map { ($0.id, $0) })
 
-        let jobList = try await repository.allJobs()
-        jobs = Dictionary(uniqueKeysWithValues: jobList.map { ($0.id, $0) })
+        jobs = Dictionary(uniqueKeysWithValues: cache.allJobs.map { ($0.id, $0) })
 
-        let raceList = try await repository.allRaces()
-        races = Dictionary(uniqueKeysWithValues: raceList.map { ($0.id, $0) })
+        races = Dictionary(uniqueKeysWithValues: cache.allRaces.map { ($0.id, $0) })
 
-        let statusList = try await repository.allStatusEffects()
-        statusEffects = Dictionary(uniqueKeysWithValues: statusList.map { ($0.id, $0) })
+        statusEffects = Dictionary(uniqueKeysWithValues: cache.allStatusEffects.map { ($0.id, $0) })
 
-        let itemList = try await repository.allItems()
-        items = Dictionary(uniqueKeysWithValues: itemList.map { ($0.id, $0) })
+        items = Dictionary(uniqueKeysWithValues: cache.allItems.map { ($0.id, $0) })
 
         // 種族パッシブスキルを取得
-        racePassiveSkills = try await SQLiteMasterDataManager.shared.fetchAllRacePassiveSkills()
+        racePassiveSkills = cache.racePassiveSkills
 
         // 出力ディレクトリを作成
         try FileManager.default.createDirectory(atPath: Self.outputDirectory,

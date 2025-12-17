@@ -18,7 +18,7 @@ final class DamageComparisonTests: XCTestCase {
 
     // MARK: - Cached Data
 
-    private var repository: MasterDataRepository!
+    private var cache: MasterDataCache!
     private var skills: [UInt16: SkillDefinition] = [:]
     private var jobs: [UInt8: JobDefinition] = [:]
     private var races: [UInt8: RaceDefinition] = [:]
@@ -34,13 +34,14 @@ final class DamageComparisonTests: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        repository = MasterDataRepository()
+        let manager = SQLiteMasterDataManager()
+        cache = try await MasterDataLoader.load(manager: manager)
 
-        skills = Dictionary(uniqueKeysWithValues: (try await repository.allSkills()).map { ($0.id, $0) })
-        jobs = Dictionary(uniqueKeysWithValues: (try await repository.allJobs()).map { ($0.id, $0) })
-        races = Dictionary(uniqueKeysWithValues: (try await repository.allRaces()).map { ($0.id, $0) })
-        items = Dictionary(uniqueKeysWithValues: (try await repository.allItems()).map { ($0.id, $0) })
-        racePassiveSkills = try await SQLiteMasterDataManager.shared.fetchAllRacePassiveSkills()
+        skills = Dictionary(uniqueKeysWithValues: cache.allSkills.map { ($0.id, $0) })
+        jobs = Dictionary(uniqueKeysWithValues: cache.allJobs.map { ($0.id, $0) })
+        races = Dictionary(uniqueKeysWithValues: cache.allRaces.map { ($0.id, $0) })
+        items = Dictionary(uniqueKeysWithValues: cache.allItems.map { ($0.id, $0) })
+        racePassiveSkills = cache.racePassiveSkills
     }
 
     // MARK: - Main Test

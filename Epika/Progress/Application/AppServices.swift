@@ -46,7 +46,7 @@ final class AppServices: ObservableObject {
         let cancel: @Sendable () async -> Void
     }
 
-    init(container: ModelContainer, masterDataCache: MasterDataCache, masterDataManager: SQLiteMasterDataManager) {
+    init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
         self.masterDataCache = masterDataCache
         let gameStateService = GameStateService(container: container)
@@ -59,8 +59,7 @@ final class AppServices: ObservableObject {
                 dropNotifications.publish(results: results)
             }
         }
-        let repository = MasterDataRepository(manager: masterDataManager)
-        let runtimeService = GameRuntimeService(masterData: masterDataCache, repository: repository, dropNotifier: dropNotifier)
+        let runtimeService = GameRuntimeService(masterData: masterDataCache, dropNotifier: dropNotifier)
         self.runtime = ProgressRuntimeService(runtimeService: runtimeService,
                                               gameStateService: gameStateService)
 

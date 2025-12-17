@@ -1,10 +1,10 @@
 import Foundation
 
 struct CombatExecutionService {
-    private let repository: MasterDataRepository
+    private let masterData: MasterDataCache
 
-    init(repository: MasterDataRepository) {
-        self.repository = repository
+    init(masterData: MasterDataCache) {
+        self.masterData = masterData
     }
 
     func runCombat(enemyId: UInt16,
@@ -16,17 +16,17 @@ struct CombatExecutionService {
                    party: RuntimePartyState,
                    droppedItemIds: Set<UInt16>,
                    superRareState: SuperRareDailyState,
-                   random: inout GameRandomSource) async throws -> CombatExecutionOutcome {
+                   random: inout GameRandomSource) throws -> CombatExecutionOutcome {
         var battleRandom = random
-        let resolution = try await BattleService.resolveBattle(repository: repository,
-                                                               party: party,
-                                                               dungeon: dungeon,
-                                                               floor: floor,
-                                                               encounterEnemyId: enemyId,
-                                                               encounterLevel: enemyLevel,
-                                                               encounterGroupMin: groupMin,
-                                                               encounterGroupMax: groupMax,
-                                                               random: &battleRandom)
+        let resolution = try BattleService.resolveBattle(masterData: masterData,
+                                                         party: party,
+                                                         dungeon: dungeon,
+                                                         floor: floor,
+                                                         encounterEnemyId: enemyId,
+                                                         encounterLevel: enemyLevel,
+                                                         encounterGroupMin: groupMin,
+                                                         encounterGroupMax: groupMax,
+                                                         random: &battleRandom)
         random = battleRandom
 
         let rewards = try BattleRewardCalculator.calculateRewards(party: party,
@@ -41,15 +41,15 @@ struct CombatExecutionService {
         if resolution.result == .victory {
             // 勝利時は全敵倒されたとみなす
             var dropRandom = random
-            let dropOutcome = try await DropService.drops(repository: repository,
-                                                          for: resolution.enemies,
-                                                          party: party,
-                                                          dungeonId: dungeon.id,
-                                                          chapter: dungeon.chapter,
-                                                          floorNumber: floor.floorNumber,
-                                                          droppedItemIds: droppedItemIds,
-                                                          dailySuperRareState: updatedSuperRareState,
-                                                          random: &dropRandom)
+            let dropOutcome = try DropService.drops(masterData: masterData,
+                                                    for: resolution.enemies,
+                                                    party: party,
+                                                    dungeonId: dungeon.id,
+                                                    chapter: dungeon.chapter,
+                                                    floorNumber: floor.floorNumber,
+                                                    droppedItemIds: droppedItemIds,
+                                                    dailySuperRareState: updatedSuperRareState,
+                                                    random: &dropRandom)
             random = dropRandom
             updatedSuperRareState = dropOutcome.superRareState
             newlyDroppedItemIds = dropOutcome.newlyDroppedItemIds

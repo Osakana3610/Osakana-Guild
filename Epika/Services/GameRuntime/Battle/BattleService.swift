@@ -19,7 +19,7 @@ enum BattleService {
         let enemyActors: [BattleActor]
     }
 
-    static func resolveBattle(repository: MasterDataRepository,
+    static func resolveBattle(masterData: MasterDataCache,
                               party: RuntimePartyState,
                               dungeon: DungeonDefinition,
                               floor: DungeonFloorDefinition,
@@ -27,14 +27,13 @@ enum BattleService {
                               encounterLevel: Int?,
                               encounterGroupMin: Int?,
                               encounterGroupMax: Int?,
-                              random: inout GameRandomSource) async throws -> Resolution {
-        let skillDefinitions = try await repository.allSkills()
-        let skillDictionary = Dictionary(uniqueKeysWithValues: skillDefinitions.map { ($0.id, $0) })
+                              random: inout GameRandomSource) throws -> Resolution {
+        let skillDictionary = Dictionary(uniqueKeysWithValues: masterData.allSkills.map { ($0.id, $0) })
 
         let players = try BattleContextBuilder.makePlayerActors(from: party)
         guard !players.isEmpty else {
             guard let enemyId = encounterEnemyId,
-                  let enemyDefinition = try await repository.enemy(withId: enemyId) else {
+                  let enemyDefinition = masterData.enemy(enemyId) else {
                 throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: String(encounterEnemyId ?? 0))
             }
             return Resolution(result: .defeat,
@@ -49,16 +48,11 @@ enum BattleService {
                               enemyActors: [])
         }
 
-        let enemyDefinitions = try await repository.allEnemies()
-        let enemyDictionary = Dictionary(uniqueKeysWithValues: enemyDefinitions.map { ($0.id, $0) })
-        let statusEffects = try await repository.allStatusEffects()
-        let statusDefinitions = Dictionary(uniqueKeysWithValues: statusEffects.map { ($0.id, $0) })
-        let jobDefinitions = try await repository.allJobs()
-        let jobDictionary = Dictionary(uniqueKeysWithValues: jobDefinitions.map { ($0.id, $0) })
-        let raceDefinitions = try await repository.allRaces()
-        let raceDictionary = Dictionary(uniqueKeysWithValues: raceDefinitions.map { ($0.id, $0) })
-        let enemySkillDefinitions = try await repository.allEnemySkills()
-        let enemySkillDictionary = Dictionary(uniqueKeysWithValues: enemySkillDefinitions.map { ($0.id, $0) })
+        let enemyDictionary = Dictionary(uniqueKeysWithValues: masterData.allEnemies.map { ($0.id, $0) })
+        let statusDefinitions = Dictionary(uniqueKeysWithValues: masterData.allStatusEffects.map { ($0.id, $0) })
+        let jobDictionary = Dictionary(uniqueKeysWithValues: masterData.allJobs.map { ($0.id, $0) })
+        let raceDictionary = Dictionary(uniqueKeysWithValues: masterData.allRaces.map { ($0.id, $0) })
+        let enemySkillDictionary = Dictionary(uniqueKeysWithValues: masterData.allEnemySkills.map { ($0.id, $0) })
 
         var localRandom = random
         let enemyResult = try BattleEnemyGroupBuilder.makeEnemies(baseEnemyId: encounterEnemyId,
