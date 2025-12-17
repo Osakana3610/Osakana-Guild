@@ -5,14 +5,14 @@ import SwiftData
 /// 宝石を装備アイテムにソケットとして装着する機能を提供
 actor GemModificationProgressService {
     private let container: ModelContainer
-    private let masterDataService: MasterDataRuntimeService
+    private let masterDataCache: MasterDataCache
 
     /// ソケット装着不可カテゴリ
     private static let nonSocketableCategories: Set<String> = ["mazo_material", "for_synthesis"]
 
-    init(container: ModelContainer, masterDataService: MasterDataRuntimeService) {
+    init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
-        self.masterDataService = masterDataService
+        self.masterDataCache = masterDataCache
     }
 
     // MARK: - Public API
@@ -33,7 +33,7 @@ actor GemModificationProgressService {
         guard !records.isEmpty else { return [] }
 
         let itemIds = Array(Set(records.map { $0.itemId }))
-        let definitions = try await masterDataService.getItemMasterData(ids: itemIds)
+        let definitions = masterDataCache.items(itemIds)
         let gemIds = Set(definitions.filter { $0.category.lowercased().contains("gem") }.map { $0.id })
 
         return records
@@ -57,7 +57,7 @@ actor GemModificationProgressService {
         guard !records.isEmpty else { return [] }
 
         let itemIds = Array(Set(records.map { $0.itemId }))
-        let definitions = try await masterDataService.getItemMasterData(ids: itemIds)
+        let definitions = masterDataCache.items(itemIds)
 
         // 宝石・合成用アイテムを除外
         let socketableIds = Set(definitions
@@ -126,15 +126,13 @@ actor GemModificationProgressService {
         }
 
         // 宝石のカテゴリ確認
-        let gemDefinitions = try await masterDataService.getItemMasterData(ids: [gemRecord.itemId])
-        guard let gemDefinition = gemDefinitions.first,
+        guard let gemDefinition = masterDataCache.item(gemRecord.itemId),
               gemDefinition.category.lowercased().contains("gem") else {
             throw ProgressError.invalidInput(description: "選択したアイテムは宝石ではありません")
         }
 
         // 対象アイテムがソケット装着可能か確認
-        let targetDefinitions = try await masterDataService.getItemMasterData(ids: [targetRecord.itemId])
-        guard let targetDefinition = targetDefinitions.first else {
+        guard let targetDefinition = masterDataCache.item(targetRecord.itemId) else {
             throw ProgressError.invalidInput(description: "対象アイテムの定義が見つかりません")
         }
         if targetDefinition.category.lowercased().contains("gem") {

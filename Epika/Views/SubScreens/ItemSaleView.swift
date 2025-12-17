@@ -17,10 +17,10 @@ struct ItemSaleView: View {
     private var totalSellPriceText: String { "\(selectedTotalSellPrice)GP" }
     private var hasSelection: Bool { !selectedDisplayItems.isEmpty }
     private var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] {
-        ItemPreloadService.shared.getSubcategorizedItems()
+        appServices.itemPreload.getSubcategorizedItems()
     }
     private var orderedSubcategories: [ItemDisplaySubcategory] {
-        ItemPreloadService.shared.getOrderedSubcategories()
+        appServices.itemPreload.getOrderedSubcategories()
     }
 
     var body: some View {
@@ -134,7 +134,7 @@ struct ItemSaleView: View {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(.primary)
 
-                ItemPreloadService.shared.makeStyledDisplayText(for: item)
+                appServices.itemPreload.makeStyledDisplayText(for: item)
                     .font(.body)
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -198,7 +198,7 @@ struct ItemSaleView: View {
             player = try await appServices.gameState.loadCurrentPlayer()
 
             // プリロードが完了していなければ待機
-            let service = ItemPreloadService.shared
+            let service = appServices.itemPreload
             if !service.loaded {
                 service.startPreload(inventoryService: appServices.inventory)
                 try await service.waitForPreload()
@@ -223,7 +223,7 @@ struct ItemSaleView: View {
         do {
             let stackKeys = selectedDisplayItems.map { $0.stackKey }
             _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
-            let service = ItemPreloadService.shared
+            let service = appServices.itemPreload
             service.removeItems(stackKeys: Set(stackKeys))
             cacheVersion = service.version
             selectedStackKeys.removeAll()
@@ -257,7 +257,7 @@ struct ItemSaleView: View {
     private func sellItem(_ item: LightweightItemData, quantity: Int) async {
         do {
             _ = try await appServices.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
-            let service = ItemPreloadService.shared
+            let service = appServices.itemPreload
             let newQuantity = try service.decrementQuantity(stackKey: item.stackKey, by: quantity)
             cacheVersion = service.version
 
@@ -287,7 +287,7 @@ struct ItemSaleView: View {
                 itemId: item.itemId
             )
             _ = try await appServices.sellItemsToShop(stackKeys: [item.stackKey])
-            let service = ItemPreloadService.shared
+            let service = appServices.itemPreload
             service.removeItems(stackKeys: [item.stackKey])
             cacheVersion = service.version
             selectedStackKeys.remove(item.stackKey)

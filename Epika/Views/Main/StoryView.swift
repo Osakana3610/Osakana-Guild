@@ -8,8 +8,6 @@ final class StoryViewModel {
     var isLoading: Bool = false
     var error: Error?
 
-    private let masterDataService = MasterDataRuntimeService.shared
-
     func load(using appServices: AppServices) async {
         if isLoading { return }
         isLoading = true
@@ -18,9 +16,8 @@ final class StoryViewModel {
 
         do {
             try await appServices.synchronizeStoryAndDungeonUnlocks()
-            async let definitionsTask = masterDataService.getAllStoryNodes()
-            async let snapshotTask = appServices.story.currentStorySnapshot()
-            let (definitions, snapshot) = try await (definitionsTask, snapshotTask)
+            let definitions = appServices.masterDataCache.allStoryNodes
+            let snapshot = try await appServices.story.currentStorySnapshot()
             let unlocked = snapshot.unlockedNodeIds
             let read = snapshot.readNodeIds
             let rewarded = snapshot.rewardedNodeIds

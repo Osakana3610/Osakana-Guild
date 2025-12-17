@@ -17,14 +17,10 @@ actor AutoTradeProgressService {
 
     private let container: ModelContainer
     private let gameStateService: GameStateService
-    private let environment: ProgressEnvironment
 
-    init(container: ModelContainer,
-         gameStateService: GameStateService,
-         environment: ProgressEnvironment) {
+    init(container: ModelContainer, gameStateService: GameStateService) {
         self.container = container
         self.gameStateService = gameStateService
-        self.environment = environment
     }
 
     // MARK: - Public API

@@ -15,7 +15,7 @@ struct GemModificationView: View {
 
     private var gemService: GemModificationProgressService { appServices.gemModification }
     private var inventoryService: InventoryProgressService { appServices.inventory }
-    private var displayService: ItemPreloadService { ItemPreloadService.shared }
+    private var displayService: ItemPreloadService { appServices.itemPreload }
 
     var body: some View {
         NavigationStack {

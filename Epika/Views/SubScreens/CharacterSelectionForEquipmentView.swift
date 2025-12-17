@@ -126,7 +126,7 @@ struct EquipmentEditorView: View {
 
     private var characterService: CharacterProgressService { appServices.character }
     private var inventoryService: InventoryProgressService { appServices.inventory }
-    private var displayService: ItemPreloadService { ItemPreloadService.shared }
+    private var displayService: ItemPreloadService { appServices.itemPreload }
 
     /// 装備画面で除外するメインカテゴリ（合成素材・魔造素材）
     private static let excludedCategories: Set<ItemSaleCategory> = [.forSynthesis, .mazoMaterial]
@@ -308,9 +308,11 @@ struct EquipmentEditorView: View {
             let availableIds = subcategorizedItems.values.flatMap { $0.map { $0.itemId } }
             let allItemIds = Set(availableIds)
                 .union(Set(currentCharacter.equippedItems.map { $0.itemId }))
-            if !allItemIds.isEmpty {
-                let definitions = try await MasterDataRuntimeService.shared.getItemMasterData(ids: Array(allItemIds))
-                itemDefinitions = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+            let masterData = appServices.masterDataCache
+            for id in allItemIds {
+                if let def = masterData.item(id) {
+                    itemDefinitions[id] = def
+                }
             }
 
         } catch {

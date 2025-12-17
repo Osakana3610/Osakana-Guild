@@ -11,7 +11,7 @@ struct PandoraBoxView: View {
 
     private var inventoryService: InventoryProgressService { appServices.inventory }
     private var gameStateService: GameStateService { appServices.gameState }
-    private var displayService: ItemPreloadService { ItemPreloadService.shared }
+    private var displayService: ItemPreloadService { appServices.itemPreload }
 
     private let maxPandoraSlots = 5
 

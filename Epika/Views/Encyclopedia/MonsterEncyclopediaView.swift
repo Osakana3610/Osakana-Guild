@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MonsterEncyclopediaView: View {
+    @EnvironmentObject private var appServices: AppServices
     @State private var dungeons: [DungeonDefinition] = []
     @State private var enemies: [EnemyDefinition] = []
     @State private var enemyRaces: [UInt8: String] = [:]
@@ -77,63 +78,49 @@ struct MonsterEncyclopediaView: View {
     }
 
     private func loadData() async {
-        do {
-            let service = MasterDataRuntimeService.shared
-            async let dungeonsTask = service.getAllDungeonsWithEncounters()
-            async let enemiesTask = service.getAllEnemies()
-            async let jobsTask = service.getAllJobs()
-            async let skillsTask = service.getAllEnemySkills()
-            async let spellsTask = service.getAllSpells()
-            async let itemsTask = service.getAllItems()
+        let masterData = appServices.masterDataCache
 
-            let ((loadedDungeons, encounterTables, floors), loadedEnemies, loadedJobs, loadedSkills, loadedSpells, loadedItems) =
-                try await (dungeonsTask, enemiesTask, jobsTask, skillsTask, spellsTask, itemsTask)
+        dungeons = masterData.allDungeons.sorted { $0.id < $1.id }
+        enemies = masterData.allEnemies
+        jobs = Dictionary(uniqueKeysWithValues: masterData.allJobs.map { ($0.id, $0.name) })
+        enemySkills = Dictionary(uniqueKeysWithValues: masterData.allEnemySkills.map { ($0.id, $0) })
+        spells = Dictionary(uniqueKeysWithValues: masterData.allSpells.map { ($0.id, $0.name) })
+        items = Dictionary(uniqueKeysWithValues: masterData.allItems.map { ($0.id, $0.name) })
 
-            dungeons = loadedDungeons.sorted { $0.id < $1.id }
-            enemies = loadedEnemies
-            jobs = Dictionary(uniqueKeysWithValues: loadedJobs.map { ($0.id, $0.name) })
-            enemySkills = Dictionary(uniqueKeysWithValues: loadedSkills.map { ($0.id, $0) })
-            spells = Dictionary(uniqueKeysWithValues: loadedSpells.map { ($0.id, $0.name) })
-            items = Dictionary(uniqueKeysWithValues: loadedItems.map { ($0.id, $0.name) })
+        // Enemy races
+        enemyRaces = [
+            1: "人型",
+            2: "魔物",
+            3: "不死",
+            4: "竜族",
+            5: "神魔"
+        ]
 
-            // Enemy races
-            enemyRaces = [
-                1: "人型",
-                2: "魔物",
-                3: "不死",
-                4: "竜族",
-                5: "神魔"
-            ]
+        // Build dungeon → enemy mapping and enemy → level mapping
+        let tableMap = Dictionary(uniqueKeysWithValues: masterData.allEncounterTables.map { ($0.id, $0) })
+        var mapping: [UInt16: Set<UInt16>] = [:]
+        var levelMap: [UInt16: Int] = [:]
 
-            // Build dungeon → enemy mapping and enemy → level mapping
-            let tableMap = Dictionary(uniqueKeysWithValues: encounterTables.map { ($0.id, $0) })
-            var mapping: [UInt16: Set<UInt16>] = [:]
-            var levelMap: [UInt16: Int] = [:]
+        for floor in masterData.allDungeonFloors {
+            guard let dungeonId = floor.dungeonId,
+                  let table = tableMap[floor.encounterTableId] else { continue }
 
-            for floor in floors {
-                guard let dungeonId = floor.dungeonId,
-                      let table = tableMap[floor.encounterTableId] else { continue }
-
-                var enemySet = mapping[dungeonId] ?? Set<UInt16>()
-                for event in table.events {
-                    if let enemyId = event.enemyId {
-                        enemySet.insert(enemyId)
-                        // Store the level (prefer higher level if already exists)
-                        if let level = event.level {
-                            levelMap[enemyId] = max(levelMap[enemyId] ?? 0, level)
-                        }
+            var enemySet = mapping[dungeonId] ?? Set<UInt16>()
+            for event in table.events {
+                if let enemyId = event.enemyId {
+                    enemySet.insert(enemyId)
+                    // Store the level (prefer higher level if already exists)
+                    if let level = event.level {
+                        levelMap[enemyId] = max(levelMap[enemyId] ?? 0, level)
                     }
                 }
-                mapping[dungeonId] = enemySet
             }
-            dungeonEnemyMap = mapping
-            enemyLevelMap = levelMap
-
-            isLoading = false
-        } catch {
-            print("Failed to load monster encyclopedia data: \(error)")
-            isLoading = false
+            mapping[dungeonId] = enemySet
         }
+        dungeonEnemyMap = mapping
+        enemyLevelMap = levelMap
+
+        isLoading = false
     }
 }
 

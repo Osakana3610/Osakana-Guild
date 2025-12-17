@@ -4,7 +4,7 @@ import SwiftData
 @MainActor
 final class ExplorationProgressService {
     private let container: ModelContainer
-    private let masterData: MasterDataRuntimeService
+    private let masterDataCache: MasterDataCache
 
     /// 探索レコードの最大保持件数
     private static let maxRecordCount = 200
@@ -13,10 +13,9 @@ final class ExplorationProgressService {
     private static let jsonEncoder = JSONEncoder()
     private static let jsonDecoder = JSONDecoder()
 
-    init(container: ModelContainer,
-         masterData: MasterDataRuntimeService = .shared) {
+    init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
-        self.masterData = masterData
+        self.masterDataCache = masterDataCache
     }
 
     private enum ExplorationSnapshotBuildError: Error {
@@ -290,13 +289,14 @@ private extension ExplorationProgressService {
         let eventRecords = run.events.sorted { $0.occurredAt < $1.occurredAt }
 
         // ダンジョン情報取得
-        guard let dungeonDefinition = try await masterData.getDungeonDefinition(id: run.dungeonId) else {
+        guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
             throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
         }
 
         let displayDungeonName = DungeonDisplayNameFormatter.displayName(
             for: dungeonDefinition,
-            difficultyTitleId: run.difficulty
+            difficultyTitleId: run.difficulty,
+            masterData: masterDataCache
         )
 
         // パーティメンバー情報取得
@@ -323,7 +323,7 @@ private extension ExplorationProgressService {
             let drops = try Self.jsonDecoder.decode([DropEntry].self, from: eventRecord.dropsData)
             for drop in drops {
                 if drop.itemId > 0 {
-                    if let item = try await masterData.getItemMasterData(id: drop.itemId) {
+                    if let item = masterDataCache.item(drop.itemId) {
                         rewards.itemDrops[item.name, default: 0] += Int(drop.quantity)
                     }
                 }
@@ -378,7 +378,7 @@ private extension ExplorationProgressService {
             kind = .enemyEncounter
             if let enemyId = eventRecord.enemyId {
                 referenceId = String(enemyId)
-                if let enemy = try await masterData.getEnemyDefinition(id: enemyId) {
+                if let enemy = masterDataCache.enemy(enemyId) {
                     let result = battleResultString(eventRecord.battleResult ?? 0)
                     // battleLogDataからターン数を取得
                     var turns = 0
@@ -399,7 +399,7 @@ private extension ExplorationProgressService {
         case .scripted:
             kind = .scriptedEvent
             if let eventId = eventRecord.scriptedEventId {
-                if let eventDef = try await masterData.getExplorationEventDefinition(id: eventId) {
+                if let eventDef = masterDataCache.explorationEvent(eventId) {
                     referenceId = eventDef.name
                 } else {
                     referenceId = String(eventId)
@@ -420,7 +420,7 @@ private extension ExplorationProgressService {
             var dropStrings: [String] = []
             for drop in drops {
                 if drop.itemId > 0,
-                   let item = try await masterData.getItemMasterData(id: drop.itemId) {
+                   let item = masterDataCache.item(drop.itemId) {
                     dropStrings.append("\(item.name)x\(drop.quantity)")
                 }
             }

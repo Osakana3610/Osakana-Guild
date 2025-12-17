@@ -63,8 +63,9 @@ struct EpikaApp: App {
 
         // 1. MasterDataを先にロード（SHA-256検証 + SQLiteからプリロード）
         let cache: MasterDataCache
+        let manager: SQLiteMasterDataManager
         do {
-            let manager = SQLiteMasterDataManager()
+            manager = SQLiteMasterDataManager()
             cache = try await MasterDataLoader.load(manager: manager)
             masterDataCache = cache
         } catch {
@@ -76,7 +77,9 @@ struct EpikaApp: App {
         do {
             let bootstrap = try await ProgressBootstrapper.shared.boot()
             sharedModelContainer = bootstrap.container
-            appServices = AppServices(container: bootstrap.container, masterDataCache: cache)
+            appServices = AppServices(container: bootstrap.container,
+                                       masterDataCache: cache,
+                                       masterDataManager: manager)
         } catch {
             initializationError = "データベース初期化に失敗しました: \(error.localizedDescription)"
         }
@@ -84,7 +87,6 @@ struct EpikaApp: App {
 
     @MainActor
     private func initializeSystems() async {
-        await DungeonDisplayNameFormatter.preloadTitles()
         await requestNotificationPermission()
     }
 

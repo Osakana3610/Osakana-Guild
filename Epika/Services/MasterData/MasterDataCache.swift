@@ -59,47 +59,49 @@ struct MasterDataCache: Sendable {
     private let personalitySkillsById: [String: PersonalitySkillDefinition]
     private let personalityBattleEffectsById: [String: PersonalityBattleEffect]
     private let characterNamesByGender: [UInt8: [CharacterNameDefinition]]
+    private let storyNodesById: [UInt16: StoryNodeDefinition]
 
-    // MARK: - 単一ID取得（同期）
+    // MARK: - 単一ID取得（同期、nonisolated）
 
-    func item(_ id: UInt16) -> ItemDefinition? { itemsById[id] }
-    func job(_ id: UInt8) -> JobDefinition? { jobsById[id] }
-    func race(_ id: UInt8) -> RaceDefinition? { racesById[id] }
-    func skill(_ id: UInt16) -> SkillDefinition? { skillsById[id] }
-    func spell(_ id: UInt8) -> SpellDefinition? { spellsById[id] }
-    func enemy(_ id: UInt16) -> EnemyDefinition? { enemiesById[id] }
-    func enemySkill(_ id: UInt16) -> EnemySkillDefinition? { enemySkillsById[id] }
-    func title(_ id: UInt8) -> TitleDefinition? { titlesById[id] }
-    func superRareTitle(_ id: UInt8) -> SuperRareTitleDefinition? { superRareTitlesById[id] }
-    func statusEffect(_ id: UInt8) -> StatusEffectDefinition? { statusEffectsById[id] }
-    func dungeon(_ id: UInt16) -> DungeonDefinition? { dungeonsById[id] }
-    func explorationEvent(_ id: UInt8) -> ExplorationEventDefinition? { explorationEventsById[id] }
-    func personalityPrimary(_ id: UInt8) -> PersonalityPrimaryDefinition? { personalityPrimaryById[id] }
-    func personalitySecondary(_ id: UInt8) -> PersonalitySecondaryDefinition? { personalitySecondaryById[id] }
-    func personalitySkill(_ id: String) -> PersonalitySkillDefinition? { personalitySkillsById[id] }
-    func personalityBattleEffect(_ id: String) -> PersonalityBattleEffect? { personalityBattleEffectsById[id] }
+    nonisolated func item(_ id: UInt16) -> ItemDefinition? { itemsById[id] }
+    nonisolated func job(_ id: UInt8) -> JobDefinition? { jobsById[id] }
+    nonisolated func race(_ id: UInt8) -> RaceDefinition? { racesById[id] }
+    nonisolated func skill(_ id: UInt16) -> SkillDefinition? { skillsById[id] }
+    nonisolated func spell(_ id: UInt8) -> SpellDefinition? { spellsById[id] }
+    nonisolated func enemy(_ id: UInt16) -> EnemyDefinition? { enemiesById[id] }
+    nonisolated func enemySkill(_ id: UInt16) -> EnemySkillDefinition? { enemySkillsById[id] }
+    nonisolated func title(_ id: UInt8) -> TitleDefinition? { titlesById[id] }
+    nonisolated func superRareTitle(_ id: UInt8) -> SuperRareTitleDefinition? { superRareTitlesById[id] }
+    nonisolated func statusEffect(_ id: UInt8) -> StatusEffectDefinition? { statusEffectsById[id] }
+    nonisolated func dungeon(_ id: UInt16) -> DungeonDefinition? { dungeonsById[id] }
+    nonisolated func explorationEvent(_ id: UInt8) -> ExplorationEventDefinition? { explorationEventsById[id] }
+    nonisolated func personalityPrimary(_ id: UInt8) -> PersonalityPrimaryDefinition? { personalityPrimaryById[id] }
+    nonisolated func personalitySecondary(_ id: UInt8) -> PersonalitySecondaryDefinition? { personalitySecondaryById[id] }
+    nonisolated func personalitySkill(_ id: String) -> PersonalitySkillDefinition? { personalitySkillsById[id] }
+    nonisolated func personalityBattleEffect(_ id: String) -> PersonalityBattleEffect? { personalityBattleEffectsById[id] }
+    nonisolated func storyNode(_ id: UInt16) -> StoryNodeDefinition? { storyNodesById[id] }
 
-    // MARK: - 複数ID取得（同期）
+    // MARK: - 複数ID取得（同期、nonisolated）
 
-    func items(_ ids: [UInt16]) -> [ItemDefinition] {
+    nonisolated func items(_ ids: [UInt16]) -> [ItemDefinition] {
         ids.map { itemsById[$0]! }
     }
 
-    func skills(_ ids: [UInt16]) -> [SkillDefinition] {
+    nonisolated func skills(_ ids: [UInt16]) -> [SkillDefinition] {
         ids.map { skillsById[$0]! }
     }
 
-    func spells(_ ids: [UInt8]) -> [SpellDefinition] {
+    nonisolated func spells(_ ids: [UInt8]) -> [SpellDefinition] {
         ids.map { spellsById[$0]! }
     }
 
-    // MARK: - フィルタ取得（同期）
+    // MARK: - フィルタ取得（同期、nonisolated）
 
-    func characterNames(forGenderCode genderCode: UInt8) -> [CharacterNameDefinition] {
+    nonisolated func characterNames(forGenderCode genderCode: UInt8) -> [CharacterNameDefinition] {
         characterNamesByGender[genderCode]!
     }
 
-    func randomCharacterName(forGenderCode genderCode: UInt8) -> String {
+    nonisolated func randomCharacterName(forGenderCode genderCode: UInt8) -> String {
         characterNames(forGenderCode: genderCode).randomElement()!.name
     }
 
@@ -181,6 +183,7 @@ struct MasterDataCache: Sendable {
         self.personalitySkillsById = Dictionary(uniqueKeysWithValues: allPersonalitySkills.map { ($0.id, $0) })
         self.personalityBattleEffectsById = Dictionary(uniqueKeysWithValues: allPersonalityBattleEffects.map { ($0.id, $0) })
         self.characterNamesByGender = Dictionary(grouping: allCharacterNames, by: { $0.genderCode })
+        self.storyNodesById = Dictionary(uniqueKeysWithValues: allStoryNodes.map { ($0.id, $0) })
     }
 }
 

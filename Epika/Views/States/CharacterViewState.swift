@@ -44,8 +44,6 @@ final class CharacterViewState {
 
     }
 
-    private let masterDataService = MasterDataRuntimeService.shared
-
     var allCharacters: [RuntimeCharacter] = []
     var summaries: [CharacterSummary] = []
     var isLoadingAll: Bool = false
@@ -78,11 +76,9 @@ final class CharacterViewState {
             return
         }
 
-        async let jobsTask = masterDataService.getAllJobs()
-        async let racesTask = masterDataService.getAllRaces()
-        let (jobs, races) = try await (jobsTask, racesTask)
-        let jobMap = Dictionary(uniqueKeysWithValues: jobs.map { ($0.id, $0) })
-        let raceMap = Dictionary(uniqueKeysWithValues: races.map { ($0.id, $0) })
+        let masterData = appServices.masterDataCache
+        let jobMap = Dictionary(uniqueKeysWithValues: masterData.allJobs.map { ($0.id, $0) })
+        let raceMap = Dictionary(uniqueKeysWithValues: masterData.allRaces.map { ($0.id, $0) })
 
         summaries = snapshots.map { snapshot in
             CharacterSummary(snapshot: snapshot,

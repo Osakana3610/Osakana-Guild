@@ -10,10 +10,11 @@ actor TitleInheritanceProgressService {
     }
 
     private let inventoryService: InventoryProgressService
-    private let masterDataService = MasterDataRuntimeService.shared
+    private let masterDataCache: MasterDataCache
 
-    init(inventoryService: InventoryProgressService) {
+    init(inventoryService: InventoryProgressService, masterDataCache: MasterDataCache) {
         self.inventoryService = inventoryService
+        self.masterDataCache = masterDataCache
     }
 
     func availableTargetItems() async throws -> [RuntimeEquipment] {
@@ -27,8 +28,8 @@ actor TitleInheritanceProgressService {
 
     func preview(targetStackKey: String, sourceStackKey: String) async throws -> TitleInheritancePreview {
         let inheritance = try await resolveContext(targetStackKey: targetStackKey, sourceStackKey: sourceStackKey)
-        let currentTitle = try await titleDisplayName(for: inheritance.target.enhancement)
-        let sourceTitle = try await titleDisplayName(for: inheritance.source.enhancement)
+        let currentTitle = try titleDisplayName(for: inheritance.target.enhancement)
+        let sourceTitle = try titleDisplayName(for: inheritance.source.enhancement)
         let resultEnhancement = ItemSnapshot.Enhancement(
             superRareTitleId: inheritance.source.enhancement.superRareTitleId,
             normalTitleId: inheritance.source.enhancement.normalTitleId,
@@ -81,17 +82,17 @@ private extension TitleInheritanceProgressService {
         return (target, source)
     }
 
-    nonisolated func titleDisplayName(for enhancement: ItemSnapshot.Enhancement) async throws -> String {
+    nonisolated func titleDisplayName(for enhancement: ItemSnapshot.Enhancement) throws -> String {
         // 超レア称号があればその名前を返す
         if enhancement.superRareTitleId != 0 {
-            if let definition = try await masterDataService.getSuperRareTitle(id: enhancement.superRareTitleId) {
+            if let definition = masterDataCache.superRareTitle(enhancement.superRareTitleId) {
                 return definition.name
             } else {
                 throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.superRareTitleId)])
             }
         }
         // 通常称号は必ず存在する（rank 0〜8、無称号も rank=2 の称号で name=""）
-        if let definition = try await masterDataService.getTitleMasterData(id: enhancement.normalTitleId) {
+        if let definition = masterDataCache.title(enhancement.normalTitleId) {
             return definition.name
         } else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(enhancement.normalTitleId)])

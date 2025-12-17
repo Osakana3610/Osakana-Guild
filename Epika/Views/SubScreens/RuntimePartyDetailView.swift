@@ -158,7 +158,7 @@ struct RuntimePartyDetailView: View {
     private var selectedDungeonName: String {
         if let dungeon = activeDungeon {
             let clampedDifficulty = min(currentParty.lastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
-            return formattedDifficultyLabel(for: dungeon, difficulty: clampedDifficulty)
+            return formattedDifficultyLabel(for: dungeon, difficulty: clampedDifficulty, masterData: appServices.masterDataCache)
         }
         return "未選択"
     }
@@ -380,6 +380,7 @@ private struct PartyEquipmentListView: View {
 // MARK: - Inline Selection Menus
 
 private struct DifficultyPickerMenu: View {
+    @EnvironmentObject private var appServices: AppServices
     let dungeon: RuntimeDungeon
     let currentDifficulty: UInt8
     let onSelect: (UInt8) async -> Bool
@@ -399,13 +400,13 @@ private struct DifficultyPickerMenu: View {
                             if currentDifficulty == difficulty {
                                 Image(systemName: "checkmark")
                             }
-                            Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty))
+                            Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty, masterData: appServices.masterDataCache))
                         }
                     }
                 }
             } label: {
                 HStack(spacing: 4) {
-                    Text(formattedDifficultyLabel(for: dungeon, difficulty: currentDifficulty))
+                    Text(formattedDifficultyLabel(for: dungeon, difficulty: currentDifficulty, masterData: appServices.masterDataCache))
                         .foregroundColor(.secondary)
                     Image(systemName: "chevron.up.chevron.down")
                         .foregroundStyle(Color(.tertiaryLabel))
@@ -480,6 +481,7 @@ private struct TargetFloorPickerMenu: View {
 // MARK: - Sheet Components
 
 private struct DungeonPickerView: View {
+    @EnvironmentObject private var appServices: AppServices
     let dungeons: [RuntimeDungeon]
     let currentSelection: UInt16?
     let currentDifficulty: UInt8
@@ -502,7 +504,7 @@ private struct DungeonPickerView: View {
                             ForEach(groupedDungeons[chapter] ?? [], id: \.id) { dungeon in
                                 Button(action: { handleDungeonTap(dungeon) }) {
                                     HStack(spacing: 8) {
-                                        Text(formattedDifficultyLabel(for: dungeon, difficulty: dungeon.highestUnlockedDifficulty))
+                                        Text(formattedDifficultyLabel(for: dungeon, difficulty: dungeon.highestUnlockedDifficulty, masterData: appServices.masterDataCache))
                                             .foregroundColor(.primary)
                                             .lineLimit(2)
                                         Spacer()
@@ -580,13 +582,14 @@ private struct DifficultyPickerView: View {
     let currentDifficulty: UInt8
     let onSelect: (UInt8) async -> Bool
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var appServices: AppServices
 
     var body: some View {
         List {
             ForEach(dungeon.availableDifficulties, id: \.self) { difficulty in
                 Button(action: { choose(difficulty) }) {
                     HStack {
-                        Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty))
+                        Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty, masterData: appServices.masterDataCache))
                             .foregroundColor(.primary)
                         Spacer()
                         if currentDifficulty == difficulty {
@@ -667,8 +670,8 @@ private struct PartyNameEditorView: View {
     }
 }
 
-private func formattedDifficultyLabel(for dungeon: RuntimeDungeon, difficulty: UInt8) -> String {
-    let name = DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyTitleId: difficulty)
+private func formattedDifficultyLabel(for dungeon: RuntimeDungeon, difficulty: UInt8, masterData: MasterDataCache) -> String {
+    let name = DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyTitleId: difficulty, masterData: masterData)
     let status = dungeon.statusDescription(for: difficulty)
     return "\(name)\(status)"
 }

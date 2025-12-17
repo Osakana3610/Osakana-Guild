@@ -56,7 +56,9 @@ private struct PreviewRootView: View {
                 self.masterDataCache = cache
 
                 let bootstrap = try await ProgressBootstrapper.shared.boot()
-                let service = AppServices(container: bootstrap.container, masterDataCache: cache)
+                let service = AppServices(container: bootstrap.container,
+                                          masterDataCache: cache,
+                                          masterDataManager: manager)
                 self.appServices = service
                 self.container = bootstrap.container
             } catch {

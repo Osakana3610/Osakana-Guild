@@ -26,8 +26,6 @@ final class AdventureViewState {
         self.partyState = partyState
     }
 
-    private var masterDataService: MasterDataRuntimeService { .shared }
-
     func loadInitialData(using appServices: AppServices) async {
         // 孤立した探索（.running状態だがアクティブタスクがない）を検出して再開
         await resumeOrphanedExplorations(using: appServices)
@@ -105,9 +103,8 @@ final class AdventureViewState {
     func reloadDungeonList(using appServices: AppServices) async {
         do {
             let dungeonService = appServices.dungeon
-            async let definitionTask = masterDataService.getAllDungeons()
-            async let progressTask = dungeonService.allDungeonSnapshots()
-            let (definitions, progressSnapshots) = try await (definitionTask, progressTask)
+            let definitions = appServices.masterDataCache.allDungeons
+            let progressSnapshots = try await dungeonService.allDungeonSnapshots()
             var progressCache = Dictionary(progressSnapshots.map { ($0.dungeonId, $0) },
                                            uniquingKeysWith: { _, latest in latest })
             var built: [RuntimeDungeon] = []

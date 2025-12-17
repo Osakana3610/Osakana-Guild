@@ -35,7 +35,9 @@ extension AppServices {
         context.autosaveEnabled = false
 
         // 1. ストーリー定義を取得（unlocksModulesを含む）
-        let definition = try await environment.masterDataService.getStoryNode(id: nodeId)
+        guard let definition = masterDataCache.storyNode(nodeId) else {
+            throw ProgressError.invalidInput(description: "ストーリーノードが見つかりません: \(nodeId)")
+        }
 
         // 2. ストーリーレコードを取得/作成し、既読にする
         let storyRecord = try ensureStoryRecord(nodeId: nodeId, context: context)
@@ -79,7 +81,7 @@ extension AppServices {
         let context = ModelContext(container)
         context.autosaveEnabled = false
 
-        let storyDefinitions = try await environment.masterDataService.getAllStoryNodes()
+        let storyDefinitions = masterDataCache.allStoryNodes
 
         // クリア済みダンジョンIDを取得
         let clearedDungeonIds = try fetchClearedDungeonIds(context: context)

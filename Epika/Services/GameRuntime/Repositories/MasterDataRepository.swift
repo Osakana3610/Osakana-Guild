@@ -38,7 +38,7 @@ actor MasterDataRepository {
     private var characterNamesCache: [CharacterNameDefinition]?
     private var characterNamesByGender: [UInt8: [CharacterNameDefinition]]?
 
-    init(manager: SQLiteMasterDataManager = .shared) {
+    init(manager: SQLiteMasterDataManager) {
         self.manager = manager
     }
 

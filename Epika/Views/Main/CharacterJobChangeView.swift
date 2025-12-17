@@ -15,9 +15,8 @@ struct CharacterJobChangeView: View {
     @State private var errorMessage: String?
     @State private var didLoadOnce = false
 
-    private let masterData = MasterDataRuntimeService.shared
-
     private var characterService: CharacterProgressService { appServices.character }
+    private var masterData: MasterDataCache { appServices.masterDataCache }
 
     /// 転職可能なキャラクター（未転職のみ）
     private var eligibleCharacters: [RuntimeCharacter] {
@@ -126,7 +125,7 @@ struct CharacterJobChangeView: View {
                 runtime.append(character)
             }
             characters = runtime.sorted { $0.id < $1.id }
-            jobs = try await masterData.getAllJobs().sorted { $0.id < $1.id }
+            jobs = masterData.allJobs.sorted { $0.id < $1.id }
             if selectedCharacterId == nil {
                 selectedCharacterId = eligibleCharacters.first?.id
             }

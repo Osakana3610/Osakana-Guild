@@ -3,12 +3,15 @@ import Foundation
 /// ランタイム系サービスのエントリーポイント。マスターデータの読み出しと
 /// 探索/戦闘/ドロップの各サービスを束ねる。
 actor GameRuntimeService {
+    private let masterData: MasterDataCache
     private let repository: MasterDataRepository
     private let dropNotifier: @Sendable ([ItemDropResult]) async -> Void
     private var activeRuns: [UUID: ActiveExplorationRun] = [:]
 
-    init(repository: MasterDataRepository = MasterDataRepository(),
+    init(masterData: MasterDataCache,
+         repository: MasterDataRepository,
          dropNotifier: @escaping @Sendable ([ItemDropResult]) async -> Void = { _ in }) {
+        self.masterData = masterData
         self.repository = repository
         self.dropNotifier = dropNotifier
     }
@@ -173,26 +176,32 @@ actor GameRuntimeService {
     }
 
     func runtimeCharacter(from input: CharacterInput) async throws -> RuntimeCharacter {
-        try await RuntimeCharacterFactory.make(from: input, repository: repository)
+        try await MainActor.run {
+            try RuntimeCharacterFactory.make(from: input, masterData: masterData)
+        }
     }
 
     func runtimePartyState(party: PartySnapshot, characters: [CharacterInput]) async throws -> RuntimePartyState {
-        try await PartyAssembler.assembleState(repository: repository,
-                                               party: party,
-                                               characters: characters)
+        try await MainActor.run {
+            try PartyAssembler.assembleState(masterData: masterData,
+                                             party: party,
+                                             characters: characters)
+        }
     }
 
-    func raceDefinition(withId raceId: UInt8) async throws -> RaceDefinition? {
-        try await repository.race(withId: raceId)
+    func raceDefinition(withId raceId: UInt8) -> RaceDefinition? {
+        masterData.race(raceId)
     }
 
     func recalculateCombatStats(for input: CharacterInput,
                                    pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
-        let runtimeCharacter = try await RuntimeCharacterFactory.make(
-            from: input,
-            repository: repository,
-            pandoraBoxStackKeys: pandoraBoxStackKeys
-        )
+        let runtimeCharacter = try await MainActor.run {
+            try RuntimeCharacterFactory.make(
+                from: input,
+                masterData: masterData,
+                pandoraBoxStackKeys: pandoraBoxStackKeys
+            )
+        }
         return CombatStatCalculator.Result(
             attributes: runtimeCharacter.attributes,
             hitPoints: CharacterValues.HitPoints(current: runtimeCharacter.currentHP, maximum: runtimeCharacter.maxHP),
