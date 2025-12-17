@@ -8,34 +8,18 @@ final class StoryViewModel {
     var isLoading: Bool = false
     var error: Error?
 
-    private var progressService: ProgressService?
     private let masterDataService = MasterDataRuntimeService.shared
 
-    func configureIfNeeded(with progressService: ProgressService) {
-        if self.progressService == nil {
-            self.progressService = progressService
-        }
-    }
-
-    private var storyService: StoryProgressService {
-        guard let progressService else {
-            fatalError("StoryViewModel requires ProgressService configuration before use")
-        }
-        return progressService.story
-    }
-
-    func load() async {
+    func load(using progressService: ProgressService) async {
         if isLoading { return }
         isLoading = true
         defer { isLoading = false }
         error = nil
 
         do {
-            if let progressService {
-                try await progressService.synchronizeStoryAndDungeonUnlocks()
-            }
+            try await progressService.synchronizeStoryAndDungeonUnlocks()
             async let definitionsTask = masterDataService.getAllStoryNodes()
-            async let snapshotTask = storyService.currentStorySnapshot()
+            async let snapshotTask = progressService.story.currentStorySnapshot()
             let (definitions, snapshot) = try await (definitionsTask, snapshotTask)
             let unlocked = snapshot.unlockedNodeIds
             let read = snapshot.readNodeIds
@@ -101,16 +85,15 @@ struct StoryView: View {
             .navigationTitle("物語")
             .navigationBarTitleDisplayMode(.large)
             .onAppear {
-                viewModel.configureIfNeeded(with: progressService)
                 if !didLoadOnce {
                     Task {
-                        await viewModel.load()
+                        await viewModel.load(using: progressService)
                         didLoadOnce = true
                     }
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .progressUnlocksDidChange)) { _ in
-                Task { await viewModel.load() }
+                Task { await viewModel.load(using: progressService) }
             }
         }
     }
@@ -130,7 +113,7 @@ struct StoryView: View {
         .navigationDestination(for: UInt16.self) { nodeId in
             if let node = viewModel.nodes.first(where: { $0.id == nodeId }) {
                 StoryDetailView(story: node) {
-                    Task { await viewModel.load() }
+                    Task { await viewModel.load(using: progressService) }
                 }
             } else {
                 Text("ストーリーが見つかりません")
@@ -176,7 +159,7 @@ struct StoryView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
             Button("再試行") {
-                Task { await viewModel.load() }
+                Task { await viewModel.load(using: progressService) }
             }
             .buttonStyle(.borderedProminent)
         }

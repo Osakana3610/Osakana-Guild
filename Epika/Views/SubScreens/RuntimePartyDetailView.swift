@@ -243,7 +243,7 @@ struct RuntimePartyDetailView: View {
 
     private func handlePrimaryAction(isExploring: Bool, canDepart: Bool) {
         if isExploring {
-            Task { await adventureState.cancelExploration(for: currentParty) }
+            Task { await adventureState.cancelExploration(for: currentParty, using: progressService) }
             return
         }
 
@@ -260,7 +260,7 @@ struct RuntimePartyDetailView: View {
             return
         }
         do {
-            try await adventureState.startExploration(party: currentParty, dungeon: dungeon)
+            try await adventureState.startExploration(party: currentParty, dungeon: dungeon, using: progressService)
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
         }

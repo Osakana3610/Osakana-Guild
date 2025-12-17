@@ -30,7 +30,7 @@ struct GuildView: View {
             .navigationTitle("ギルド")
             .navigationBarTitleDisplayMode(.large)
             .onAppear {
-                characterState.configureIfNeeded(with: progressService)
+                characterState.startObservingChanges(using: progressService)
                 Task { await loadOnce() }
             }
         }
@@ -169,8 +169,8 @@ struct GuildView: View {
         isLoading = true
         errorMessage = nil
         do {
-            async let summariesTask: Void = characterState.loadCharacterSummaries()
-            async let allCharactersTask: Void = characterState.loadAllCharacters()
+            async let summariesTask: Void = characterState.loadCharacterSummaries(using: progressService)
+            async let allCharactersTask: Void = characterState.loadAllCharacters(using: progressService)
             _ = try await progressService.gameState.loadCurrentPlayer()
             try await summariesTask
             try await allCharactersTask
