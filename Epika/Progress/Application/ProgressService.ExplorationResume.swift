@@ -24,7 +24,7 @@ extension ProgressService {
         let randomState = record.randomState
         let superRareState = try decodeSuperRareState(from: record.superRareStateData)
         let droppedItemIds = try decodeDroppedItemIds(from: record.droppedItemIdsData)
-        let events = try record.decodeEvents()
+        let eventRecords = record.events.sorted { $0.occurredAt < $1.occurredAt }
 
         // 3. パーティ情報を取得
         guard let partySnapshot = try await party.partySnapshot(id: partyId) else {
@@ -33,7 +33,7 @@ extension ProgressService {
         let characters = try await character.characters(withIds: partySnapshot.memberCharacterIds)
 
         // 4. 最後の戦闘ログからHP復元
-        let partyHP = try restorePartyHP(from: events)
+        let partyHP = try restorePartyHP(from: eventRecords)
 
         // 5. ダンジョン情報を取得
         guard let dungeonDef = try await masterData.getDungeonDefinition(id: record.dungeonId) else {
@@ -41,11 +41,11 @@ extension ProgressService {
         }
 
         // 6. 開始フロアとイベントインデックスを計算
-        let lastFloor = events.last?.floor ?? 0
+        let lastFloor = eventRecords.last?.floor ?? 0
         let eventsPerFloor = dungeonDef.eventsPerFloor > 0 ? dungeonDef.eventsPerFloor : 1
         // フロアインデックスは0ベース、イベントインデックスはeventsPerFloorでリセット
         let floorIndex = Int(lastFloor) - 1  // フロア番号は1ベースなので-1
-        let eventIndex = events.count % eventsPerFloor
+        let eventIndex = eventRecords.count % eventsPerFloor
 
         // 7. RNG状態を復元してセッション開始
         let characterInputs = characters.map { CharacterInput(from: $0) }
@@ -135,9 +135,9 @@ extension ProgressService {
         return UInt32(year * 10000 + month * 100 + day)
     }
 
-    private func restorePartyHP(from events: [EventEntry]) throws -> [UInt8: Int] {
+    private func restorePartyHP(from eventRecords: [ExplorationEventRecord]) throws -> [UInt8: Int] {
         // 戦闘ログを持つ最後のイベントを探す
-        guard let lastBattleEvent = events.last(where: { $0.battleLogData != nil }),
+        guard let lastBattleEvent = eventRecords.last(where: { $0.battleLogData != nil }),
               let battleLogData = lastBattleEvent.battleLogData else {
             // 戦闘なし = 全員フルHP（空辞書を返し、呼び出し側でmaxHPを使う）
             return [:]

@@ -11,6 +11,7 @@ enum ProgressModelSchema {
             StoryNodeProgressRecord.self,
             DungeonRecord.self,
             ExplorationRunRecord.self,
+            ExplorationEventRecord.self,
             ShopStockRecord.self,
             AutoTradeRuleRecord.self
         ]
