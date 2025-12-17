@@ -133,11 +133,9 @@ struct DebugMenuView: View {
                 Text(alertMessage)
             }
             .alert("データ削除完了", isPresented: $showResetCompleteAlert) {
-                Button("アプリを終了") {
-                    exit(0)
-                }
+                Button("OK") { }
             } message: {
-                Text("進行データを削除しました。\nアプリを終了して再起動してください。")
+                Text("進行データを削除しました。\nアプリを再起動してください。")
             }
             .sheet(isPresented: $showCreationSettings) {
                 ItemCreationSettingsView(

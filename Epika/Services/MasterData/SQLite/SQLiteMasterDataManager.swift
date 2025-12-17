@@ -131,6 +131,12 @@ actor SQLiteMasterDataManager {
         }
     }
 
+    func optionalString(_ statement: OpaquePointer, column: Int32) -> String? {
+        guard sqlite3_column_type(statement, column) != SQLITE_NULL,
+              let text = sqlite3_column_text(statement, column) else { return nil }
+        return String(cString: text)
+    }
+
     func step(_ statement: OpaquePointer) throws {
         let result = sqlite3_step(statement)
         if result != SQLITE_DONE {

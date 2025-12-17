@@ -140,6 +140,9 @@ enum NormalItemDropGenerator {
             }
         }
         // ここに到達することは論理的にないが、コンパイラ警告回避のため最後のカテゴリを返す
-        return weights.last!.category
+        guard let last = weights.last else {
+            throw GeneratorError.zeroCategoryWeight(raceId: raceId)
+        }
+        return last.category
     }
 }
