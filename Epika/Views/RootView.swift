@@ -16,7 +16,6 @@ struct RootView: View {
     var body: some View {
         MainTabView()
             .environment(\.modelContext, modelContext)
-            .environment(\.masterData, appServices.masterDataCache)
             .environment(partyViewState)
             .environment(appServices)
             .environment(appServices.dropNotifications)
@@ -37,7 +36,6 @@ private struct PreviewRootView: View {
             if let container, let appServices {
                 RootView(appServices: appServices)
                     .modelContainer(container)
-                    .environment(\.masterData, appServices.masterDataCache)
                     .environment(PartyViewState(appServices: appServices))
                     .environment(appServices)
                     .environment(appServices.dropNotifications)
