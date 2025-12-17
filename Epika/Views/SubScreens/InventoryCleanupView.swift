@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 在庫整理画面（99個超過のプレイヤー売却品を5個に減らしてキャット・チケット獲得）
 struct InventoryCleanupView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var candidates: [ShopProgressService.ShopItem] = []
     @State private var player: PlayerSnapshot?
     @State private var isLoading = false
@@ -98,8 +98,8 @@ struct InventoryCleanupView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            candidates = try await progressService.shop.loadCleanupCandidates()
-            player = try await progressService.gameState.currentPlayer()
+            candidates = try await appServices.shop.loadCleanupCandidates()
+            player = try await appServices.gameState.currentPlayer()
             showError = false
         } catch {
             showError = true
@@ -110,12 +110,12 @@ struct InventoryCleanupView: View {
     @MainActor
     private func cleanupItem(_ item: ShopProgressService.ShopItem) async {
         do {
-            let result = try await progressService.cleanupStockAndAutoSell(itemId: item.id)
+            let result = try await appServices.cleanupStockAndAutoSell(itemId: item.id)
             // キャット・チケットはcleanupStockAndAutoSell内で加算済み
             // 自動売却でゴールドも獲得
             _ = result // 結果をログ表示等で使う場合はここで
-            player = try await progressService.gameState.currentPlayer()
-            candidates = try await progressService.shop.loadCleanupCandidates()
+            player = try await appServices.gameState.currentPlayer()
+            candidates = try await appServices.shop.loadCleanupCandidates()
         } catch {
             showError = true
             errorMessage = error.localizedDescription

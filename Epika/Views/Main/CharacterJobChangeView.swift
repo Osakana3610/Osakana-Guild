@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CharacterJobChangeView: View {
-    let progressService: ProgressService
+    let appServices: AppServices
     let onComplete: () -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -17,7 +17,7 @@ struct CharacterJobChangeView: View {
 
     private let masterData = MasterDataRuntimeService.shared
 
-    private var characterService: CharacterProgressService { progressService.character }
+    private var characterService: CharacterProgressService { appServices.character }
 
     /// 転職可能なキャラクター（未転職のみ）
     private var eligibleCharacters: [RuntimeCharacter] {

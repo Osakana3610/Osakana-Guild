@@ -81,7 +81,7 @@ private struct ItemSeed {
 }
 
 struct DebugMenuView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var isCreatingItems = false
     @State private var creationProgress: Double = 0.0
     @State private var statusMessage = ""
@@ -110,8 +110,8 @@ struct DebugMenuView: View {
     @State private var showResetCompleteAlert = false
 
     private let masterDataService = MasterDataRuntimeService.shared
-    private var inventoryService: InventoryProgressService { progressService.inventory }
-    private var gameStateService: GameStateService { progressService.gameState }
+    private var inventoryService: InventoryProgressService { appServices.inventory }
+    private var gameStateService: GameStateService { appServices.gameState }
 
     private func debugLog(_ message: @autoclosure () -> String) {
         print(message())
@@ -229,7 +229,7 @@ struct DebugMenuView: View {
         await MainActor.run { isResettingData = true }
 
         do {
-            try await progressService.resetAllProgress()
+            try await appServices.resetAllProgress()
             await MainActor.run {
                 isResettingData = false
                 showResetCompleteAlert = true
@@ -502,13 +502,13 @@ struct DebugMenuView: View {
                 for _ in 0..<dropNotificationCount {
                     dropResults.append(makeRandomDropResult(allItems: allItems, superRareCount: superRareCount))
                 }
-                await progressService.dropNotifications.publish(results: dropResults)
+                await appServices.dropNotifications.publish(results: dropResults)
                 debugLog("[DebugMenu] Sent \(dropResults.count) test drop notifications (bulk)")
 
             case .sequential:
                 for i in 0..<dropNotificationCount {
                     let result = makeRandomDropResult(allItems: allItems, superRareCount: superRareCount)
-                    await progressService.dropNotifications.publish(results: [result])
+                    await appServices.dropNotifications.publish(results: [result])
                     debugLog("[DebugMenu] Sent test drop notification \(i + 1)/\(dropNotificationCount)")
                     if i < dropNotificationCount - 1 {
                         try await Task.sleep(for: .milliseconds(500))

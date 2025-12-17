@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ArtifactExchangeView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var availableOptions: [ArtifactExchangeProgressService.ArtifactOption] = []
     @State private var playerArtifacts: [RuntimeEquipment] = []
     @State private var selectedOption: ArtifactExchangeProgressService.ArtifactOption?
@@ -13,7 +13,7 @@ struct ArtifactExchangeView: View {
     @State private var showGemWarning = false
     @State private var pendingExchange: (option: ArtifactExchangeProgressService.ArtifactOption, artifact: RuntimeEquipment)?
 
-    private var exchangeService: ArtifactExchangeProgressService { progressService.artifactExchange }
+    private var exchangeService: ArtifactExchangeProgressService { appServices.artifactExchange }
 
     var body: some View {
         NavigationStack {

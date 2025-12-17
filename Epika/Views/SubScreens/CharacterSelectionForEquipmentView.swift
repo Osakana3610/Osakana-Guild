@@ -3,12 +3,12 @@ import SwiftUI
 /// 装備変更画面
 /// キャラクター選択 → 装備編集の2段階UI
 struct CharacterSelectionForEquipmentView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var characters: [RuntimeCharacter] = []
     @State private var loadError: String?
     @State private var isLoading = true
 
-    private var characterService: CharacterProgressService { progressService.character }
+    private var characterService: CharacterProgressService { appServices.character }
 
     var body: some View {
         NavigationStack {
@@ -44,7 +44,7 @@ struct CharacterSelectionForEquipmentView: View {
             ForEach(characters) { character in
                 NavigationLink {
                     EquipmentEditorView(character: character)
-                        .environmentObject(progressService)
+                        .environmentObject(appServices)
                 } label: {
                     CharacterRowForEquipment(character: character)
                 }
@@ -112,7 +112,7 @@ private struct CharacterRowForEquipment: View {
 struct EquipmentEditorView: View {
     let character: RuntimeCharacter
 
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var currentCharacter: RuntimeCharacter
     @State private var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
     @State private var orderedSubcategories: [ItemDisplaySubcategory] = []
@@ -124,8 +124,8 @@ struct EquipmentEditorView: View {
     @State private var selectedItemForDetail: LightweightItemData?
     @State private var selectedItemIdForDetail: UInt16?  // 装備中アイテム用（図鑑モード）
 
-    private var characterService: CharacterProgressService { progressService.character }
-    private var inventoryService: InventoryProgressService { progressService.inventory }
+    private var characterService: CharacterProgressService { appServices.character }
+    private var inventoryService: InventoryProgressService { appServices.inventory }
     private var displayService: ItemPreloadService { ItemPreloadService.shared }
 
     /// 装備画面で除外するメインカテゴリ（合成素材・魔造素材）

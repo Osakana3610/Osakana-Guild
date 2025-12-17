@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 // MARK: - Exploration Stream Processing & Rewards
-extension ProgressService {
+extension AppServices {
     func processExplorationStream(session: ExplorationRuntimeSession,
                                   recordId: PersistentIdentifier,
                                   memberIds: [UInt8],

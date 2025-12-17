@@ -10,16 +10,16 @@ final class StoryViewModel {
 
     private let masterDataService = MasterDataRuntimeService.shared
 
-    func load(using progressService: ProgressService) async {
+    func load(using appServices: AppServices) async {
         if isLoading { return }
         isLoading = true
         defer { isLoading = false }
         error = nil
 
         do {
-            try await progressService.synchronizeStoryAndDungeonUnlocks()
+            try await appServices.synchronizeStoryAndDungeonUnlocks()
             async let definitionsTask = masterDataService.getAllStoryNodes()
-            async let snapshotTask = progressService.story.currentStorySnapshot()
+            async let snapshotTask = appServices.story.currentStorySnapshot()
             let (definitions, snapshot) = try await (definitionsTask, snapshotTask)
             let unlocked = snapshot.unlockedNodeIds
             let read = snapshot.readNodeIds
@@ -65,7 +65,7 @@ final class StoryViewModel {
 }
 
 struct StoryView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var viewModel = StoryViewModel()
     @State private var didLoadOnce = false
 
@@ -87,13 +87,13 @@ struct StoryView: View {
             .onAppear {
                 if !didLoadOnce {
                     Task {
-                        await viewModel.load(using: progressService)
+                        await viewModel.load(using: appServices)
                         didLoadOnce = true
                     }
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .progressUnlocksDidChange)) { _ in
-                Task { await viewModel.load(using: progressService) }
+                Task { await viewModel.load(using: appServices) }
             }
         }
     }
@@ -113,7 +113,7 @@ struct StoryView: View {
         .navigationDestination(for: UInt16.self) { nodeId in
             if let node = viewModel.nodes.first(where: { $0.id == nodeId }) {
                 StoryDetailView(story: node) {
-                    Task { await viewModel.load(using: progressService) }
+                    Task { await viewModel.load(using: appServices) }
                 }
             } else {
                 Text("ストーリーが見つかりません")
@@ -159,7 +159,7 @@ struct StoryView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
             Button("再試行") {
-                Task { await viewModel.load(using: progressService) }
+                Task { await viewModel.load(using: appServices) }
             }
             .buttonStyle(.borderedProminent)
         }

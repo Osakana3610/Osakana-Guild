@@ -2,7 +2,7 @@ import SwiftUI
 
 /// アイテム売却画面（Runtimeサービス準拠）
 struct ItemSaleView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var player: PlayerSnapshot?
     @State private var isLoading = false
     @State private var showError = false
@@ -195,12 +195,12 @@ struct ItemSaleView: View {
         #endif
 
         do {
-            player = try await progressService.gameState.loadCurrentPlayer()
+            player = try await appServices.gameState.loadCurrentPlayer()
 
             // プリロードが完了していなければ待機
             let service = ItemPreloadService.shared
             if !service.loaded {
-                service.startPreload(inventoryService: progressService.inventory)
+                service.startPreload(inventoryService: appServices.inventory)
                 try await service.waitForPreload()
             }
             cacheVersion = service.version
@@ -222,7 +222,7 @@ struct ItemSaleView: View {
         guard !selectedDisplayItems.isEmpty else { return }
         do {
             let stackKeys = selectedDisplayItems.map { $0.stackKey }
-            _ = try await progressService.sellItemsToShop(stackKeys: stackKeys)
+            _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
             let service = ItemPreloadService.shared
             service.removeItems(stackKeys: Set(stackKeys))
             cacheVersion = service.version
@@ -256,7 +256,7 @@ struct ItemSaleView: View {
     @MainActor
     private func sellItem(_ item: LightweightItemData, quantity: Int) async {
         do {
-            _ = try await progressService.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
+            _ = try await appServices.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
             let service = ItemPreloadService.shared
             let newQuantity = try service.decrementQuantity(stackKey: item.stackKey, by: quantity)
             cacheVersion = service.version
@@ -281,12 +281,12 @@ struct ItemSaleView: View {
     @MainActor
     private func addToAutoTrade(_ item: LightweightItemData) async {
         do {
-            _ = try await progressService.autoTrade.addRule(
+            _ = try await appServices.autoTrade.addRule(
                 superRareTitleId: item.enhancement.superRareTitleId,
                 normalTitleId: item.enhancement.normalTitleId,
                 itemId: item.itemId
             )
-            _ = try await progressService.sellItemsToShop(stackKeys: [item.stackKey])
+            _ = try await appServices.sellItemsToShop(stackKeys: [item.stackKey])
             let service = ItemPreloadService.shared
             service.removeItems(stackKeys: [item.stackKey])
             cacheVersion = service.version

@@ -5,7 +5,7 @@ struct LazyDismissCharacterView: View {
     let onComplete: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
 
     @State private var fullCharacters: [RuntimeCharacter] = []
     @State private var selectedCharacter: RuntimeCharacter?
@@ -15,7 +15,7 @@ struct LazyDismissCharacterView: View {
     @State private var showError = false
     @State private var errorMessage = ""
 
-    private var characterService: CharacterProgressService { progressService.character }
+    private var characterService: CharacterProgressService { appServices.character }
 
     var body: some View {
         NavigationStack {

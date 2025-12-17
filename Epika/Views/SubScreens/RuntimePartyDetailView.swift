@@ -7,7 +7,7 @@ struct RuntimePartyDetailView: View {
 
     @Environment(PartyViewState.self) private var partyState
     @Environment(AdventureViewState.self) private var adventureState
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
 
     @State private var allCharacters: [RuntimeCharacter] = []
     @State private var errorMessage: String?
@@ -143,7 +143,7 @@ struct RuntimePartyDetailView: View {
         }
     }
 
-    private var partyService: PartyProgressService { progressService.party }
+    private var partyService: PartyProgressService { appServices.party }
 
     private var membersOfCurrentParty: [RuntimeCharacter] {
         currentParty.memberIds.compactMap { memberId in
@@ -193,7 +193,7 @@ struct RuntimePartyDetailView: View {
 
     @MainActor
     private func loadAllCharacters() async throws {
-        let snapshots = try await progressService.character.allCharacters()
+        let snapshots = try await appServices.character.allCharacters()
         guard !snapshots.isEmpty else {
             allCharacters = []
             return
@@ -203,7 +203,7 @@ struct RuntimePartyDetailView: View {
         runtimeCharacters.reserveCapacity(snapshots.count)
 
         for snapshot in snapshots {
-            let runtimeCharacter = try await progressService.character.runtimeCharacter(from: snapshot)
+            let runtimeCharacter = try await appServices.character.runtimeCharacter(from: snapshot)
             runtimeCharacters.append(runtimeCharacter)
         }
 
@@ -243,7 +243,7 @@ struct RuntimePartyDetailView: View {
 
     private func handlePrimaryAction(isExploring: Bool, canDepart: Bool) {
         if isExploring {
-            Task { await adventureState.cancelExploration(for: currentParty, using: progressService) }
+            Task { await adventureState.cancelExploration(for: currentParty, using: appServices) }
             return
         }
 
@@ -260,7 +260,7 @@ struct RuntimePartyDetailView: View {
             return
         }
         do {
-            try await adventureState.startExploration(party: currentParty, dungeon: dungeon, using: progressService)
+            try await adventureState.startExploration(party: currentParty, dungeon: dungeon, using: appServices)
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
         }
@@ -616,12 +616,12 @@ private struct PartyNameEditorView: View {
     let party: RuntimeParty
     let onComplete: () async -> Void
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var name: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
 
-    private var partyService: PartyProgressService { progressService.party }
+    private var partyService: PartyProgressService { appServices.party }
 
     var body: some View {
         NavigationStack {

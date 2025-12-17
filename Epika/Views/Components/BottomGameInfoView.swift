@@ -36,7 +36,7 @@ struct BottomGameInfoStyleModifier: ViewModifier {
 }
 
 struct BottomGameInfoView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @Environment(\.sizeCategory) private var sizeCategory
     @State private var currentTime = Date()
     @State private var catTicketCount: Int = 0
@@ -108,11 +108,11 @@ struct BottomGameInfoView: View {
     private func loadPlayerData() {
         Task { @MainActor in
             do {
-                let player = try await progressService.gameState.currentPlayer()
+                let player = try await appServices.gameState.currentPlayer()
                 apply(player)
             } catch ProgressError.playerNotFound {
                 do {
-                    let player = try await progressService.gameState.loadCurrentPlayer()
+                    let player = try await appServices.gameState.loadCurrentPlayer()
                     apply(player)
                 } catch {
                     clearPlayer()

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AdventureView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @Environment(PartyViewState.self) private var partyState
     @State private var adventureState = AdventureViewState()
     @State private var characterState = CharacterViewState()
@@ -49,7 +49,7 @@ struct AdventureView: View {
             }
             .onAppear { Task { await loadOnce() } }
             .onReceive(NotificationCenter.default.publisher(for: .progressUnlocksDidChange)) { _ in
-                Task { await adventureState.reloadDungeonList(using: progressService) }
+                Task { await adventureState.reloadDungeonList(using: appServices) }
             }
             .sheet(item: $partyDetailContext, onDismiss: { Task { await reload() } }) { context in
                 NavigationStack {
@@ -78,7 +78,7 @@ struct AdventureView: View {
             }
         }
         .onAppear {
-            characterState.startObservingChanges(using: progressService)
+            characterState.startObservingChanges(using: appServices)
         }
     }
 
@@ -109,7 +109,7 @@ struct AdventureView: View {
                 canStartExploration: canStartExploration(for: party),
                 onPrimaryAction: {
                     if adventureState.isExploring(partyId: party.id) {
-                        Task { await adventureState.cancelExploration(for: party, using: progressService) }
+                        Task { await adventureState.cancelExploration(for: party, using: appServices) }
                     } else {
                         selectParty(party)
                         handleDeparture(for: party)
@@ -180,10 +180,10 @@ struct AdventureView: View {
         adventureState.setPartyState(partyState)
         do {
             try await partyState.loadAllParties()
-            try await characterState.loadAllCharacters(using: progressService)
-            try await characterState.loadCharacterSummaries(using: progressService)
-            await adventureState.loadInitialData(using: progressService)
-            await adventureState.ensurePartySlots(using: progressService)
+            try await characterState.loadAllCharacters(using: appServices)
+            try await characterState.loadCharacterSummaries(using: appServices)
+            await adventureState.loadInitialData(using: appServices)
+            await adventureState.ensurePartySlots(using: appServices)
             try await partyState.loadAllParties()
             if !parties.isEmpty {
                 adventureState.selectParty(at: min(adventureState.selectedPartyIndex, parties.count - 1))
@@ -201,9 +201,9 @@ struct AdventureView: View {
         errorMessage = nil
         do {
             try await partyState.refresh()
-            try await characterState.loadAllCharacters(using: progressService)
-            try await characterState.loadCharacterSummaries(using: progressService)
-            await adventureState.refreshAll(using: progressService)
+            try await characterState.loadAllCharacters(using: appServices)
+            try await characterState.loadCharacterSummaries(using: appServices)
+            await adventureState.refreshAll(using: appServices)
             try await partyState.loadAllParties()
             if !parties.isEmpty {
                 adventureState.selectParty(at: min(adventureState.selectedPartyIndex, parties.count - 1))
@@ -240,7 +240,7 @@ struct AdventureView: View {
             return false
         }
         do {
-            try await adventureState.startExploration(party: party, dungeon: dungeon, using: progressService)
+            try await adventureState.startExploration(party: party, dungeon: dungeon, using: appServices)
             return true
         } catch {
             errorMessage = error.localizedDescription

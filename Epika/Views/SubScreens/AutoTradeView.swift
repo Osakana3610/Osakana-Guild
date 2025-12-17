@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 自動売却ルールの一覧と管理画面
 struct AutoTradeView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var rules: [AutoTradeProgressService.Rule] = []
     @State private var ruleDisplayNames: [String: String] = [:]
     @State private var isLoading = false
@@ -78,7 +78,7 @@ struct AutoTradeView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            rules = try await progressService.autoTrade.allRules()
+            rules = try await appServices.autoTrade.allRules()
             await loadDisplayNames()
             showError = false
         } catch {
@@ -154,7 +154,7 @@ struct AutoTradeView: View {
     @MainActor
     private func removeRule(_ rule: AutoTradeProgressService.Rule) async {
         do {
-            try await progressService.autoTrade.removeRule(stackKey: rule.stackKey)
+            try await appServices.autoTrade.removeRule(stackKey: rule.stackKey)
             rules.removeAll { $0.id == rule.id }
             ruleDisplayNames.removeValue(forKey: rule.stackKey)
         } catch {

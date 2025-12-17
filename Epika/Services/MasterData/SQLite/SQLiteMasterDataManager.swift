@@ -3,6 +3,8 @@ import SQLite3
 import CryptoKit
 
 actor SQLiteMasterDataManager {
+    /// 後方互換性のため残しているが、新規コードでは使用禁止。
+    /// MasterDataLoaderでインスタンスを生成してDIすること。
     static let shared = SQLiteMasterDataManager()
 
     private static let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
@@ -13,7 +15,7 @@ actor SQLiteMasterDataManager {
     private let databaseFileName = "master_data.db"
     private let schemaVersion: Int32 = 1
 
-    private init() {}
+    init() {}
 
     func initialize(databaseURL: URL? = nil) async throws {
         guard !isInitialized else { return }

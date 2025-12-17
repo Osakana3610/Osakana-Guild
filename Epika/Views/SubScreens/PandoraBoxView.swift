@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PandoraBoxView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
 
     @State private var pandoraItems: [LightweightItemData] = []
     @State private var availableItems: [LightweightItemData] = []
@@ -9,8 +9,8 @@ struct PandoraBoxView: View {
     @State private var loadError: String?
     @State private var showingItemPicker = false
 
-    private var inventoryService: InventoryProgressService { progressService.inventory }
-    private var gameStateService: GameStateService { progressService.gameState }
+    private var inventoryService: InventoryProgressService { appServices.inventory }
+    private var gameStateService: GameStateService { appServices.gameState }
     private var displayService: ItemPreloadService { ItemPreloadService.shared }
 
     private let maxPandoraSlots = 5

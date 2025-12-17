@@ -1,10 +1,12 @@
 import Foundation
 import Combine
 import SwiftData
+import SwiftUI
 
 @MainActor
-final class ProgressService: ObservableObject {
+final class AppServices: ObservableObject {
     let container: ModelContainer
+    let masterDataCache: MasterDataCache
     let gameState: GameStateService
     let environment: ProgressEnvironment
     let character: CharacterProgressService
@@ -22,7 +24,6 @@ final class ProgressService: ObservableObject {
     let dropNotifications: ItemDropNotificationService
     let itemPreload: ItemPreloadService
     let gemModification: GemModificationProgressService
-    let masterData: MasterDataRuntimeService
 
     struct ExplorationRunTotals: Sendable {
         let totalExperience: Int
@@ -47,8 +48,10 @@ final class ProgressService: ObservableObject {
     }
 
     init(container: ModelContainer,
+         masterDataCache: MasterDataCache,
          environment: ProgressEnvironment = .live) {
         self.container = container
+        self.masterDataCache = masterDataCache
         self.environment = environment
         let gameStateService = GameStateService(container: container)
         self.gameState = gameStateService
@@ -82,9 +85,23 @@ final class ProgressService: ObservableObject {
                                                    gameStateService: gameStateService,
                                                    environment: environment)
         self.itemPreload = .shared
-        self.masterData = .shared
         self.gemModification = GemModificationProgressService(container: container,
                                                                masterDataService: .shared)
+    }
+}
+
+// MARK: - SwiftUI Environment
+
+private struct AppServicesKey: EnvironmentKey {
+    @MainActor static var defaultValue: AppServices {
+        fatalError("AppServices not provided in environment. Ensure .environment(\\.appServices, services) is set in EpikaApp.")
+    }
+}
+
+extension EnvironmentValues {
+    var appServices: AppServices {
+        get { self[AppServicesKey.self] }
+        set { self[AppServicesKey.self] = newValue }
     }
 }
 

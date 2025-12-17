@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CharacterCreationView: View {
-    let progressService: ProgressService
+    let appServices: AppServices
     let onComplete: () -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -19,7 +19,7 @@ struct CharacterCreationView: View {
     @State private var jobDetailToShow: JobDefinition?
 
     private let masterData = MasterDataRuntimeService.shared
-    private var characterService: CharacterProgressService { progressService.character }
+    private var characterService: CharacterProgressService { appServices.character }
     var body: some View {
         NavigationStack {
             Group {

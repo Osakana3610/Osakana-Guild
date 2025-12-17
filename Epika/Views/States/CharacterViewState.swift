@@ -55,24 +55,24 @@ final class CharacterViewState {
         characterChangeTask?.cancel()
     }
 
-    func startObservingChanges(using progressService: ProgressService) {
+    func startObservingChanges(using appServices: AppServices) {
         guard characterChangeTask == nil else { return }
-        characterChangeTask = Task { [weak self, progressService] in
+        characterChangeTask = Task { [weak self, appServices] in
             let center = NotificationCenter.default
             for await _ in center.notifications(named: .characterProgressDidChange) {
                 if Task.isCancelled { break }
                 guard let self else { break }
-                await self.reloadAfterCharacterProgressChange(using: progressService)
+                await self.reloadAfterCharacterProgressChange(using: appServices)
             }
         }
     }
 
-    func loadCharacterSummaries(using progressService: ProgressService) async throws {
+    func loadCharacterSummaries(using appServices: AppServices) async throws {
         if isLoadingSummaries { return }
         isLoadingSummaries = true
         defer { isLoadingSummaries = false }
 
-        let snapshots = try await progressService.character.allCharacters()
+        let snapshots = try await appServices.character.allCharacters()
         if snapshots.isEmpty {
             summaries = []
             return
@@ -92,12 +92,12 @@ final class CharacterViewState {
         .sorted { $0.createdAt < $1.createdAt }
     }
 
-    func loadAllCharacters(using progressService: ProgressService) async throws {
+    func loadAllCharacters(using appServices: AppServices) async throws {
         if isLoadingAll { return }
         isLoadingAll = true
         defer { isLoadingAll = false }
 
-        let characterService = progressService.character
+        let characterService = appServices.character
         let snapshots = try await characterService.allCharacters()
         var buffer: [RuntimeCharacter] = []
         for snapshot in snapshots {
@@ -110,10 +110,10 @@ final class CharacterViewState {
     }
 
     @MainActor
-    private func reloadAfterCharacterProgressChange(using progressService: ProgressService) async {
+    private func reloadAfterCharacterProgressChange(using appServices: AppServices) async {
         do {
-            try await loadAllCharacters(using: progressService)
-            try await loadCharacterSummaries(using: progressService)
+            try await loadAllCharacters(using: appServices)
+            try await loadCharacterSummaries(using: appServices)
         } catch {
             assertionFailure("キャラクターデータの再読み込みに失敗しました: \(error)")
         }

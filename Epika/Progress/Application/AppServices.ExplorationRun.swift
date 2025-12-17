@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 // MARK: - Exploration Run Management
-extension ProgressService {
+extension AppServices {
     func startExplorationRun(for partyId: UInt8,
                               dungeonId: UInt16,
                               targetFloor: Int) async throws -> ExplorationRunHandle {

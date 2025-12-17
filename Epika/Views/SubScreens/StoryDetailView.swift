@@ -4,7 +4,7 @@ struct StoryDetailView: View {
     let story: RuntimeStoryNode
     let onUpdate: () -> Void
 
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
     @State private var isProcessing = false
     @State private var showError = false
     @State private var errorMessage = ""
@@ -72,7 +72,7 @@ struct StoryDetailView: View {
     private func markAsRead() async {
         do {
             isProcessing = true
-            _ = try await progressService.markStoryNodeAsRead(story.id)
+            _ = try await appServices.markStoryNodeAsRead(story.id)
             showError = false
             onUpdate()
         } catch {

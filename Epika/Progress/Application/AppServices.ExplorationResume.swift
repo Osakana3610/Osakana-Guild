@@ -12,7 +12,7 @@ enum ExplorationResumeError: Error {
     case dungeonNotFound
 }
 
-extension ProgressService {
+extension AppServices {
     /// 孤立した探索を再開
     func resumeOrphanedExploration(partyId: UInt8, startedAt: Date) async throws -> ExplorationRunHandle {
         // 1. 探索レコードを取得
@@ -36,7 +36,7 @@ extension ProgressService {
         let partyHP = try restorePartyHP(from: eventRecords)
 
         // 5. ダンジョン情報を取得
-        guard let dungeonDef = try await masterData.getDungeonDefinition(id: record.dungeonId) else {
+        guard let dungeonDef = masterDataCache.dungeon(record.dungeonId) else {
             throw ExplorationResumeError.dungeonNotFound
         }
 

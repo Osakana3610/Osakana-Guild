@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - Item Sale with Shop Stock
-extension ProgressService {
+extension AppServices {
     /// 在庫整理結果
     struct CleanupResult: Sendable {
         let tickets: Int         // 獲得キャット・チケット

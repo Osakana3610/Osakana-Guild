@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct GemModificationView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @EnvironmentObject private var appServices: AppServices
 
     @State private var gems: [LightweightItemData] = []
     @State private var allItems: [LightweightItemData] = []
@@ -13,8 +13,8 @@ struct GemModificationView: View {
     @State private var showConfirmation = false
     @State private var targetItem: LightweightItemData?
 
-    private var gemService: GemModificationProgressService { progressService.gemModification }
-    private var inventoryService: InventoryProgressService { progressService.inventory }
+    private var gemService: GemModificationProgressService { appServices.gemModification }
+    private var inventoryService: InventoryProgressService { appServices.inventory }
     private var displayService: ItemPreloadService { ItemPreloadService.shared }
 
     var body: some View {
