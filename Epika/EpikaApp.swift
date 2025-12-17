@@ -29,7 +29,7 @@ struct EpikaApp: App {
                     if let error = initializationError {
                         StartupErrorView(message: error)
                     } else if let container = sharedModelContainer, let progressService {
-                        ContentView(progressService: progressService)
+                        RootView(progressService: progressService)
                             .modelContainer(container)
                             .task { await initializeSystems() }
                     } else {
