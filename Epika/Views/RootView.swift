@@ -29,16 +29,13 @@ struct RootView: View {
 private struct PreviewRootView: View {
     @State private var container: ModelContainer?
     @State private var appServices: AppServices?
-    @State private var masterDataCache: MasterDataCache?
     @State private var errorMessage: String?
 
     var body: some View {
         Group {
-            if let container, let appServices, let masterDataCache {
+            if let container, let appServices {
                 RootView(appServices: appServices)
                     .modelContainer(container)
-                    .environment(\.masterData, masterDataCache)
-                    .environment(\.appServices, appServices)
                     .environment(PartyViewState(appServices: appServices))
                     .environmentObject(appServices)
                     .environmentObject(appServices.dropNotifications)
@@ -53,8 +50,6 @@ private struct PreviewRootView: View {
             do {
                 let manager = SQLiteMasterDataManager()
                 let cache = try await MasterDataLoader.load(manager: manager)
-                self.masterDataCache = cache
-
                 let bootstrap = try await ProgressBootstrapper.shared.boot()
                 let service = AppServices(container: bootstrap.container,
                                           masterDataCache: cache)

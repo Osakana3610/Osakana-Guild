@@ -89,21 +89,6 @@ final class AppServices: ObservableObject {
     }
 }
 
-// MARK: - SwiftUI Environment
-
-private struct AppServicesKey: EnvironmentKey {
-    @MainActor static var defaultValue: AppServices {
-        fatalError("AppServices not provided in environment. Ensure .environment(\\.appServices, services) is set in EpikaApp.")
-    }
-}
-
-extension EnvironmentValues {
-    var appServices: AppServices {
-        get { self[AppServicesKey.self] }
-        set { self[AppServicesKey.self] = newValue }
-    }
-}
-
 extension Notification.Name {
     static let progressUnlocksDidChange = Notification.Name("ProgressUnlocksDidChange")
     static let characterProgressDidChange = Notification.Name("CharacterProgressDidChange")

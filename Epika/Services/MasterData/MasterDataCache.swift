@@ -186,18 +186,3 @@ struct MasterDataCache: Sendable {
         self.storyNodesById = Dictionary(uniqueKeysWithValues: allStoryNodes.map { ($0.id, $0) })
     }
 }
-
-// MARK: - SwiftUI Environment
-
-private struct MasterDataKey: EnvironmentKey {
-    static var defaultValue: MasterDataCache {
-        fatalError("MasterDataCache not provided in environment. Ensure .environment(\\.masterData, cache) is set in EpikaApp.")
-    }
-}
-
-extension EnvironmentValues {
-    var masterData: MasterDataCache {
-        get { self[MasterDataKey.self] }
-        set { self[MasterDataKey.self] = newValue }
-    }
-}

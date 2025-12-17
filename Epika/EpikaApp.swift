@@ -13,7 +13,6 @@ struct EpikaApp: App {
     private let isRunningTests: Bool = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     @State private var sharedModelContainer: ModelContainer?
     @State private var appServices: AppServices?
-    @State private var masterDataCache: MasterDataCache?
     @State private var initializationError: String?
     @State private var didBoot = false
 
@@ -30,12 +29,9 @@ struct EpikaApp: App {
                     if let error = initializationError {
                         StartupErrorView(message: error)
                     } else if let container = sharedModelContainer,
-                              let appServices,
-                              let masterDataCache {
+                              let appServices {
                         RootView(appServices: appServices)
                             .modelContainer(container)
-                            .environment(\.masterData, masterDataCache)
-                            .environment(\.appServices, appServices)
                             .task { await initializeSystems() }
                     } else {
                         ProgressView()
@@ -67,7 +63,6 @@ struct EpikaApp: App {
         do {
             manager = SQLiteMasterDataManager()
             cache = try await MasterDataLoader.load(manager: manager)
-            masterDataCache = cache
         } catch {
             initializationError = "マスターデータ初期化に失敗しました: \(error.localizedDescription)"
             return
