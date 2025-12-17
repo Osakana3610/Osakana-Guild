@@ -14,7 +14,7 @@ struct EnemyImageView: View {
     }
 
     var body: some View {
-        let imageName = "Characters/Enemies/\(enemyId)"
+        let imageName = "Enemies/\(enemyId)"
 
         if UIImage(named: imageName) != nil {
             Image(imageName)

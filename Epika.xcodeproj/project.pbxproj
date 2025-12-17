@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		07A1994969F446429DA66E64 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CF83C67A78994703BBDDB6F8 /* AppIntents.framework */; };
 		B004091A2E3023B700D5C0E4 /* NTPClient in Frameworks */ = {isa = PBXBuildFile; productRef = B00409192E3023B700D5C0E4 /* NTPClient */; };
 /* End PBXBuildFile section */
 
@@ -32,25 +31,11 @@
 		B0E9F1D52E254D650010C564 /* Epika.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Epika.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0E9F1E92E254D660010C564 /* EpikaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EpikaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0E9F1F32E254D660010C564 /* EpikaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EpikaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		CF83C67A78994703BBDDB6F8 /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		B0E9F1FB2E254D660010C564 /* Exceptions for "Epika" folder in "Epika" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = B0E9F1D42E254D650010C564 /* Epika */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B0E9F1D72E254D650010C564 /* Epika */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				B0E9F1FB2E254D660010C564 /* Exceptions for "Epika" folder in "Epika" target */,
-			);
 			path = Epika;
 			sourceTree = "<group>";
 		};
@@ -71,7 +56,6 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				B004091A2E3023B700D5C0E4 /* NTPClient in Frameworks */,
-				07A1994969F446429DA66E64 /* AppIntents.framework in Frameworks */,
 			);
 		};
 		B0E9F1E62E254D660010C564 /* Frameworks */ = {
@@ -90,7 +74,6 @@
 		B0E9F1CC2E254D650010C564 = {
 			isa = PBXGroup;
 			children = (
-				CF83C67A78994703BBDDB6F8 /* AppIntents.framework */,
 				B0E9F1D72E254D650010C564 /* Epika */,
 				B0E9F1EC2E254D660010C564 /* EpikaTests */,
 				B0E9F1F62E254D660010C564 /* EpikaUITests */,
@@ -293,6 +276,7 @@
 				"",
 				"",
 				"",
+				"",
 			);
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -334,7 +318,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Osakana;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = Epika/Epika.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 070;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -344,7 +327,6 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_APP_INTENTS_METADATA = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Epika/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "おさかなギルド";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.role-playing-games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -374,7 +356,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Osakana;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = Epika/Epika.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 070;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -384,7 +365,6 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_APP_INTENTS_METADATA = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Epika/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "おさかなギルド";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.role-playing-games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
