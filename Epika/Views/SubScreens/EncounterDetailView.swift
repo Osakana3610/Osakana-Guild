@@ -189,23 +189,12 @@ struct EncounterDetailView: View {
         stateMap: inout [String: ParticipantState],
         indexToId: [UInt16: String]
     ) -> ([Int: ActionHPChange], [String: ParticipantState]) {
-        var actionHPChanges: [Int: ActionHPChange] = [:]
-
-        // filteredActionsとrawActionsの対応を取るため、rawActionsを順に処理
-        // filteredActionsのインデックスを追跡
-        var filteredIndex = 0
+        // まずrawActionsからstateMapを更新し、各targetIdごとのHP変動を記録
+        var hpChangesByTargetId: [String: (beforeHP: Int, afterHP: Int, maxHP: Int, name: String)] = [:]
 
         for action in rawActions {
             guard let kind = ActionKind(rawValue: action.kind) else { continue }
             let value = Int(action.value ?? 0)
-
-            // HP変動があるアクションかどうか
-            let isHPChange: Bool
-            var affectedId: String?
-            var beforeHP: Int?
-            var afterHP: Int?
-            var maxHP: Int?
-            var targetName: String?
 
             switch kind {
             // ダメージ（ターゲットのHPを減らす）
@@ -214,102 +203,71 @@ struct EncounterDetailView: View {
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
-                    beforeHP = state.currentHP
+                    let beforeHP = hpChangesByTargetId[targetId]?.beforeHP ?? state.currentHP
                     state.currentHP = max(0, state.currentHP - value)
-                    afterHP = state.currentHP
-                    maxHP = state.maxHP
-                    targetName = state.name
+                    hpChangesByTargetId[targetId] = (beforeHP, state.currentHP, state.maxHP, state.name)
                     stateMap[targetId] = state
-                    affectedId = targetId
-                    isHPChange = true
-                } else {
-                    isHPChange = false
                 }
             // 自傷ダメージ
             case .damageSelf:
                 if let actorId = indexToId[action.actor],
                    var state = stateMap[actorId] {
-                    beforeHP = state.currentHP
+                    let beforeHP = hpChangesByTargetId[actorId]?.beforeHP ?? state.currentHP
                     state.currentHP = max(0, state.currentHP - value)
-                    afterHP = state.currentHP
-                    maxHP = state.maxHP
-                    targetName = state.name
+                    hpChangesByTargetId[actorId] = (beforeHP, state.currentHP, state.maxHP, state.name)
                     stateMap[actorId] = state
-                    affectedId = actorId
-                    isHPChange = true
-                } else {
-                    isHPChange = false
                 }
             // 回復（ターゲットのHPを増やす）
             case .magicHeal, .healParty:
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
-                    beforeHP = state.currentHP
+                    let beforeHP = hpChangesByTargetId[targetId]?.beforeHP ?? state.currentHP
                     state.currentHP = min(state.maxHP, state.currentHP + value)
-                    afterHP = state.currentHP
-                    maxHP = state.maxHP
-                    targetName = state.name
+                    hpChangesByTargetId[targetId] = (beforeHP, state.currentHP, state.maxHP, state.name)
                     stateMap[targetId] = state
-                    affectedId = targetId
-                    isHPChange = true
-                } else {
-                    isHPChange = false
                 }
             // 自己回復
             case .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
                 if let actorId = indexToId[action.actor],
                    var state = stateMap[actorId] {
-                    beforeHP = state.currentHP
+                    let beforeHP = hpChangesByTargetId[actorId]?.beforeHP ?? state.currentHP
                     state.currentHP = min(state.maxHP, state.currentHP + value)
-                    afterHP = state.currentHP
-                    maxHP = state.maxHP
-                    targetName = state.name
+                    hpChangesByTargetId[actorId] = (beforeHP, state.currentHP, state.maxHP, state.name)
                     stateMap[actorId] = state
-                    affectedId = actorId
-                    isHPChange = true
-                } else {
-                    isHPChange = false
                 }
             // 戦闘不能
             case .physicalKill:
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
-                    beforeHP = state.currentHP
+                    let beforeHP = hpChangesByTargetId[targetId]?.beforeHP ?? state.currentHP
                     state.currentHP = 0
-                    afterHP = 0
-                    maxHP = state.maxHP
-                    targetName = state.name
+                    hpChangesByTargetId[targetId] = (beforeHP, 0, state.maxHP, state.name)
                     stateMap[targetId] = state
-                    affectedId = targetId
-                    isHPChange = true
-                } else {
-                    isHPChange = false
                 }
             default:
-                isHPChange = false
+                break
             }
+        }
 
-            // filteredActionsとの対応を見つける
-            if isHPChange,
-               let affectedId,
-               let beforeHP, let afterHP, let maxHP, let targetName,
-               filteredIndex < filteredActions.count {
-                // filteredActionsのtargetIdと一致するか確認
-                let entry = filteredActions[filteredIndex]
-                let entryTargetId = entry.targetId ?? entry.actorId
-                if entryTargetId == affectedId {
-                    actionHPChanges[filteredIndex] = ActionHPChange(
-                        targetId: affectedId,
-                        targetName: targetName,
-                        beforeHP: beforeHP,
-                        afterHP: afterHP,
-                        maxHP: maxHP
-                    )
-                    filteredIndex += 1
-                }
-            }
+        // filteredActionsのうち、damage/healタイプのエントリにHP変動を対応付け
+        var actionHPChanges: [Int: ActionHPChange] = [:]
+        for (index, entry) in filteredActions.enumerated() {
+            // damage または heal タイプのエントリのみ対象
+            guard entry.type == .damage || entry.type == .heal else { continue }
+
+            // targetIdを取得（ダメージ/回復の対象）
+            guard let targetId = entry.targetId,
+                  let change = hpChangesByTargetId[targetId] else { continue }
+
+            actionHPChanges[index] = ActionHPChange(
+                targetId: targetId,
+                targetName: change.name,
+                beforeHP: change.beforeHP,
+                afterHP: change.afterHP,
+                maxHP: change.maxHP
+            )
         }
 
         return (actionHPChanges, stateMap)
@@ -549,9 +507,7 @@ struct ParticipantHPRow: View {
             HPBarView(
                 currentHP: participant.currentHP,
                 previousHP: participant.previousHP,
-                maxHP: participant.maxHP,
-                height: 14,
-                showNumbers: true
+                maxHP: participant.maxHP
             )
             .frame(maxWidth: 120)
         }
@@ -601,9 +557,7 @@ struct BattleActionRowView: View {
                         HPBarView(
                             currentHP: hpChange.afterHP,
                             previousHP: hpChange.beforeHP,
-                            maxHP: hpChange.maxHP,
-                            height: 12,
-                            showNumbers: true
+                            maxHP: hpChange.maxHP
                         )
                         .frame(maxWidth: 100)
                     }
