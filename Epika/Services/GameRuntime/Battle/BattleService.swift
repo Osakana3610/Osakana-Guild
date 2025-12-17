@@ -144,7 +144,7 @@ enum BattleService {
             .filter { $0.isAlive }
             .compactMap { $0.partyMemberId }
 
-        let enemyDefinition = encounteredEnemies.first?.definition ?? enemyDictionary[encounterEnemyId ?? 0] ?? enemyDefinitions.first!
+        let enemyDefinition = encounteredEnemies.first!.definition
 
         let result: BattleResult
         switch battleResult.outcome {
