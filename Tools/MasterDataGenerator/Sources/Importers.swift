@@ -155,11 +155,11 @@ private struct SkillEntry {
     struct Effect {
         let index: Int
         let kind: String
-        let value: Double?
-        let valuePercent: Double?
-        let statType: String?
-        let damageType: String?
-        let payloadJSON: String
+        let familyId: String
+        let parameters: [String: String]
+        let numericValues: [String: Double]
+        let stringValues: [String: String]
+        let stringArrayValues: [String: [String]]
     }
 
     let id: Int
@@ -167,7 +167,6 @@ private struct SkillEntry {
     let description: String
     let type: String
     let category: String
-    let acquisitionJSON: String
     let effects: [Effect]
 }
 
@@ -448,56 +447,30 @@ extension Generator {
                                                                statScale: variant.statScale)]
                     }
 
-                    let acquisitionJSON = try encodeJSONObject([:], context: "Skill \(variant.id) の acquisitionConditions")
                     let label = variant.label ?? String(variant.id)
                     var effects: [SkillEntry.Effect] = []
 
                     for (index, payload) in effectPayloads.enumerated() {
-                        var payloadDictionary: [String: Any] = [
-                            "familyId": payload.familyId,
-                            "effectType": payload.effectType,
-                            "value": payload.numericValues
-                        ]
-                        if let parameters = payload.parameters {
-                            payloadDictionary["parameters"] = parameters
+                        // Merge parameters with stringValues (both are string params)
+                        var allParameters = payload.parameters ?? [:]
+                        for (key, value) in payload.stringValues {
+                            allParameters[key] = value
                         }
-                        if !payload.stringValues.isEmpty {
-                            payloadDictionary["stringValues"] = payload.stringValues
-                        }
-                        if !payload.stringArrayValues.isEmpty {
-                            payloadDictionary["stringArrayValues"] = payload.stringArrayValues
-                        }
+
+                        // Add statScale parameters if present
+                        var allNumericValues = payload.numericValues
                         if let statScale = payload.statScale {
-                            // scaledValue()が参照するキー形式に変換
-                            var params = (payloadDictionary["parameters"] as? [String: String]) ?? [:]
-                            params["scalingStat"] = statScale.stat
-                            payloadDictionary["parameters"] = params
-
-                            var values = (payloadDictionary["value"] as? [String: Double]) ?? [:]
-                            values["scalingCoefficient"] = statScale.percent
-                            payloadDictionary["value"] = values
+                            allParameters["scalingStat"] = statScale.stat
+                            allNumericValues["scalingCoefficient"] = statScale.percent
                         }
-                        let payloadJSON = try encodeJSONObject(payloadDictionary, context: "Skill \(variant.id) の payload")
-
-                        let effectValue = payload.numericValues["multiplier"]
-                            ?? payload.numericValues["additive"]
-                            ?? payload.numericValues["points"]
-                            ?? payload.numericValues["cap"]
-                            ?? payload.numericValues["deltaPercent"]
-                            ?? payload.numericValues["maxPercent"]
-                            ?? payload.numericValues["valuePerUnit"]
-                            ?? payload.numericValues["valuePerCount"]
-                        let valuePercent = payload.numericValues["valuePercent"]
-                        let statType = payload.parameters?["stat"] ?? payload.parameters?["targetStat"]
-                        let damageType = payload.parameters?["damageType"]
 
                         effects.append(SkillEntry.Effect(index: index,
                                                          kind: payload.effectType,
-                                                         value: effectValue,
-                                                         valuePercent: valuePercent,
-                                                         statType: statType,
-                                                         damageType: damageType,
-                                                         payloadJSON: payloadJSON))
+                                                         familyId: payload.familyId,
+                                                         parameters: allParameters,
+                                                         numericValues: allNumericValues,
+                                                         stringValues: [:],  // Already merged into parameters
+                                                         stringArrayValues: payload.stringArrayValues))
                     }
 
                     entries.append(SkillEntry(id: variant.id,
@@ -505,7 +478,6 @@ extension Generator {
                                               description: label,
                                               type: "passive",
                                               category: categoryKey,
-                                              acquisitionJSON: acquisitionJSON,
                                               effects: effects))
                 }
             }
@@ -514,23 +486,44 @@ extension Generator {
         entries.sort { $0.id < $1.id }
 
         try withTransaction {
+            try execute("DELETE FROM skill_effect_array_values;")
+            try execute("DELETE FROM skill_effect_values;")
+            try execute("DELETE FROM skill_effect_params;")
             try execute("DELETE FROM skill_effects;")
             try execute("DELETE FROM skills;")
 
             let insertSkillSQL = """
-                INSERT INTO skills (id, name, description, type, category, acquisition_conditions_json)
-                VALUES (?, ?, ?, ?, ?, ?);
+                INSERT INTO skills (id, name, description, type, category)
+                VALUES (?, ?, ?, ?, ?);
             """
             let insertEffectSQL = """
-                INSERT INTO skill_effects (skill_id, effect_index, kind, value, value_percent, stat_type, damage_type, payload_json)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO skill_effects (skill_id, effect_index, kind, family_id)
+                VALUES (?, ?, ?, ?);
+            """
+            let insertParamSQL = """
+                INSERT INTO skill_effect_params (skill_id, effect_index, param_type, int_value)
+                VALUES (?, ?, ?, ?);
+            """
+            let insertValueSQL = """
+                INSERT INTO skill_effect_values (skill_id, effect_index, value_type, value)
+                VALUES (?, ?, ?, ?);
+            """
+            let insertArraySQL = """
+                INSERT INTO skill_effect_array_values (skill_id, effect_index, array_type, element_index, int_value)
+                VALUES (?, ?, ?, ?, ?);
             """
 
             let skillStatement = try prepare(insertSkillSQL)
             let effectStatement = try prepare(insertEffectSQL)
+            let paramStatement = try prepare(insertParamSQL)
+            let valueStatement = try prepare(insertValueSQL)
+            let arrayStatement = try prepare(insertArraySQL)
             defer {
                 sqlite3_finalize(skillStatement)
                 sqlite3_finalize(effectStatement)
+                sqlite3_finalize(paramStatement)
+                sqlite3_finalize(valueStatement)
+                sqlite3_finalize(arrayStatement)
             }
 
             for entry in entries {
@@ -539,7 +532,6 @@ extension Generator {
                 bindText(skillStatement, index: 3, value: entry.description)
                 bindInt(skillStatement, index: 4, value: EnumMappings.skillType[entry.type] ?? 0)
                 bindInt(skillStatement, index: 5, value: EnumMappings.skillCategory[entry.category] ?? 0)
-                bindText(skillStatement, index: 6, value: entry.acquisitionJSON)
                 try step(skillStatement)
                 reset(skillStatement)
 
@@ -547,21 +539,106 @@ extension Generator {
                     guard let kindInt = EnumMappings.skillEffectType[effect.kind] else {
                         throw GeneratorError.executionFailed("Skill \(entry.id) effect \(effect.index): unknown kind '\(effect.kind)'")
                     }
+
+                    // Insert skill_effects
+                    let familyIdInt = EnumMappings.skillEffectFamily[effect.familyId]
                     bindInt(effectStatement, index: 1, value: entry.id)
                     bindInt(effectStatement, index: 2, value: effect.index)
                     bindInt(effectStatement, index: 3, value: kindInt)
-                    bindDouble(effectStatement, index: 4, value: effect.value)
-                    bindDouble(effectStatement, index: 5, value: effect.valuePercent)
-                    bindInt(effectStatement, index: 6, value: effect.statType.flatMap { EnumMappings.baseStat[$0] ?? EnumMappings.combatStat[$0] })
-                    bindInt(effectStatement, index: 7, value: effect.damageType.flatMap { EnumMappings.damageType[$0] })
-                    bindText(effectStatement, index: 8, value: effect.payloadJSON)
+                    bindInt(effectStatement, index: 4, value: familyIdInt)
                     try step(effectStatement)
                     reset(effectStatement)
+
+                    // Insert skill_effect_params
+                    for (paramKey, paramValue) in effect.parameters {
+                        guard let paramTypeInt = EnumMappings.skillEffectParamType[paramKey] else {
+                            throw GeneratorError.executionFailed("Skill \(entry.id) effect \(effect.index): unknown param type '\(paramKey)'")
+                        }
+                        // Convert param value to int using appropriate mapping
+                        let intValue = resolveParamValue(paramKey: paramKey, paramValue: paramValue)
+                        bindInt(paramStatement, index: 1, value: entry.id)
+                        bindInt(paramStatement, index: 2, value: effect.index)
+                        bindInt(paramStatement, index: 3, value: paramTypeInt)
+                        bindInt(paramStatement, index: 4, value: intValue)
+                        try step(paramStatement)
+                        reset(paramStatement)
+                    }
+
+                    // Insert skill_effect_values
+                    for (valueKey, valueNum) in effect.numericValues {
+                        guard let valueTypeInt = EnumMappings.skillEffectValueType[valueKey] else {
+                            throw GeneratorError.executionFailed("Skill \(entry.id) effect \(effect.index): unknown value type '\(valueKey)'")
+                        }
+                        bindInt(valueStatement, index: 1, value: entry.id)
+                        bindInt(valueStatement, index: 2, value: effect.index)
+                        bindInt(valueStatement, index: 3, value: valueTypeInt)
+                        bindDouble(valueStatement, index: 4, value: valueNum)
+                        try step(valueStatement)
+                        reset(valueStatement)
+                    }
+
+                    // Insert skill_effect_array_values
+                    for (arrayKey, arrayValues) in effect.stringArrayValues {
+                        guard let arrayTypeInt = EnumMappings.skillEffectArrayType[arrayKey] else {
+                            throw GeneratorError.executionFailed("Skill \(entry.id) effect \(effect.index): unknown array type '\(arrayKey)'")
+                        }
+                        for (elementIndex, elementValue) in arrayValues.enumerated() {
+                            // Array values are typically IDs (integers stored as strings)
+                            let intValue = Int(elementValue) ?? 0
+                            bindInt(arrayStatement, index: 1, value: entry.id)
+                            bindInt(arrayStatement, index: 2, value: effect.index)
+                            bindInt(arrayStatement, index: 3, value: arrayTypeInt)
+                            bindInt(arrayStatement, index: 4, value: elementIndex)
+                            bindInt(arrayStatement, index: 5, value: intValue)
+                            try step(arrayStatement)
+                            reset(arrayStatement)
+                        }
+                    }
                 }
             }
         }
 
         return entries.count
+    }
+
+    /// Resolve a parameter string value to an integer based on its type
+    private func resolveParamValue(paramKey: String, paramValue: String) -> Int {
+        switch paramKey {
+        case "damageType":
+            return EnumMappings.damageType[paramValue] ?? 0
+        case "stat", "targetStat", "sourceStat", "scalingStat", "statType":
+            return EnumMappings.baseStat[paramValue] ?? EnumMappings.combatStat[paramValue] ?? 0
+        case "school":
+            return EnumMappings.spellSchool[paramValue] ?? 0
+        case "buffType":
+            return EnumMappings.spellBuffType[paramValue] ?? 0
+        case "equipmentCategory", "equipmentType":
+            return EnumMappings.itemCategory[paramValue] ?? 0
+        case "status", "statusId", "statusType", "targetStatus":
+            // Status IDs are integers stored as strings
+            return Int(paramValue) ?? 0
+        case "spellId", "specialAttackId", "targetId":
+            // IDs are integers stored as strings
+            return Int(paramValue) ?? 0
+        case "trigger", "procType", "action", "mode", "stacking", "type", "variant", "profile", "condition", "preference":
+            // These are string identifiers that need custom mappings - store hash or 0 for now
+            // TODO: Add specific mappings for these if needed
+            return paramValue.hashValue & 0x7FFFFFFF  // Ensure positive
+        case "requiresAllyBehind", "requiresMartial":
+            // Boolean values
+            return paramValue == "true" ? 1 : 0
+        case "from", "to":
+            return EnumMappings.baseStat[paramValue] ?? EnumMappings.combatStat[paramValue] ?? 0
+        case "farApt", "nearApt":
+            // Aptitude values - store as-is if numeric
+            return Int(paramValue) ?? 0
+        case "dungeonName", "hpScale":
+            // String values that might not have mappings
+            return paramValue.hashValue & 0x7FFFFFFF
+        default:
+            // Try to parse as integer, otherwise use hash
+            return Int(paramValue) ?? (paramValue.hashValue & 0x7FFFFFFF)
+        }
     }
 
     private func encodeJSONObject(_ value: Any, context: String) throws -> String {
@@ -1642,18 +1719,10 @@ extension Generator {
 // MARK: - Personality Master
 
 private struct PersonalityPrimaryEntry {
-    struct Effect {
-        let index: Int
-        let type: String
-        let value: Double?
-        let payloadJSON: String
-    }
-
     let id: Int
     let name: String
     let kind: String
     let description: String
-    let effects: [Effect]
 }
 
 private struct PersonalitySecondaryEntry {
@@ -1730,18 +1799,8 @@ extension Generator {
                   let description = dictionary["description"] as? String else {
                 throw GeneratorError.executionFailed("personality1 セクションに不足項目があります")
             }
-
-            let effectsArray = dictionary["effects"] as? [[String: Any]] ?? []
-            let effects = try effectsArray.enumerated().map { index, effect -> PersonalityPrimaryEntry.Effect in
-                guard let type = effect["type"] as? String else {
-                    throw GeneratorError.executionFailed("personality1[\(id)] の effect \(index) に type がありません")
-                }
-                let value = toDouble(effect["value"])
-                let payload = try encodeJSONValue(effect)
-                return PersonalityPrimaryEntry.Effect(index: index, type: type, value: value, payloadJSON: payload)
-            }
-
-            return PersonalityPrimaryEntry(id: id, name: name, kind: kind, description: description, effects: effects)
+            // Note: effects parsing removed (personality_primary_effects table was always empty)
+            return PersonalityPrimaryEntry(id: id, name: name, kind: kind, description: description)
         }
 
         let secondaries = try secondaryList.map { dictionary -> PersonalitySecondaryEntry in
@@ -1786,14 +1845,9 @@ extension Generator {
             try execute("DELETE FROM personality_skills;")
             try execute("DELETE FROM personality_secondary_stat_bonuses;")
             try execute("DELETE FROM personality_secondary;")
-            try execute("DELETE FROM personality_primary_effects;")
             try execute("DELETE FROM personality_primary;")
 
             let insertPrimarySQL = "INSERT INTO personality_primary (id, name, kind, description) VALUES (?, ?, ?, ?);"
-            let insertPrimaryEffectSQL = """
-                INSERT INTO personality_primary_effects (personality_id, order_index, effect_type, value, payload_json)
-                VALUES (?, ?, ?, ?, ?);
-            """
             let insertSecondarySQL = "INSERT INTO personality_secondary (id, name, positive_skill_id, negative_skill_id) VALUES (?, ?, ?, ?);"
             let insertSecondaryStatSQL = "INSERT INTO personality_secondary_stat_bonuses (personality_id, stat, value) VALUES (?, ?, ?);"
             let insertSkillSQL = "INSERT INTO personality_skills (id, name, kind, description) VALUES (?, ?, ?, ?);"
@@ -1802,7 +1856,6 @@ extension Generator {
             let insertBattleEffectSQL = "INSERT INTO personality_battle_effects (category, payload_json) VALUES (?, ?);"
 
             let primaryStatement = try prepare(insertPrimarySQL)
-            let primaryEffectStatement = try prepare(insertPrimaryEffectSQL)
             let secondaryStatement = try prepare(insertSecondarySQL)
             let secondaryStatStatement = try prepare(insertSecondaryStatSQL)
             let skillStatement = try prepare(insertSkillSQL)
@@ -1811,7 +1864,6 @@ extension Generator {
             let battleEffectStatement = try prepare(insertBattleEffectSQL)
             defer {
                 sqlite3_finalize(primaryStatement)
-                sqlite3_finalize(primaryEffectStatement)
                 sqlite3_finalize(secondaryStatement)
                 sqlite3_finalize(secondaryStatStatement)
                 sqlite3_finalize(skillStatement)
@@ -1836,19 +1888,7 @@ extension Generator {
                 bindText(primaryStatement, index: 4, value: entry.description)
                 try step(primaryStatement)
                 reset(primaryStatement)
-
-                for effect in entry.effects {
-                    guard let effectTypeInt = EnumMappings.skillEffectType[effect.type] else {
-                        throw GeneratorError.executionFailed("PersonalityPrimary \(entry.id): unknown effect type '\(effect.type)'")
-                    }
-                    bindInt(primaryEffectStatement, index: 1, value: entry.id)
-                    bindInt(primaryEffectStatement, index: 2, value: effect.index)
-                    bindInt(primaryEffectStatement, index: 3, value: effectTypeInt)
-                    bindDouble(primaryEffectStatement, index: 4, value: effect.value)
-                    bindText(primaryEffectStatement, index: 5, value: effect.payloadJSON)
-                    try step(primaryEffectStatement)
-                    reset(primaryEffectStatement)
-                }
+                // Note: personality_primary_effects table removed (was always empty)
             }
 
             for entry in secondaries {
