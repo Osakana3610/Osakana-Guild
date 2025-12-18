@@ -4,15 +4,18 @@ import SwiftData
 @MainActor
 final class ExplorationProgressService {
     private let container: ModelContainer
-    private let masterData: MasterDataRuntimeService
+    private let masterDataCache: MasterDataCache
 
     /// 探索レコードの最大保持件数
     private static let maxRecordCount = 200
 
-    init(container: ModelContainer,
-         masterData: MasterDataRuntimeService = .shared) {
+    /// JSONEncoder/Decoder再利用（パフォーマンス最適化）
+    private static let jsonEncoder = JSONEncoder()
+    private static let jsonDecoder = JSONDecoder()
+
+    init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
-        self.masterData = masterData
+        self.masterDataCache = masterDataCache
     }
 
     private enum ExplorationSnapshotBuildError: Error {
@@ -71,21 +74,20 @@ final class ExplorationProgressService {
         let context = makeContext()
         let runRecord = try fetchRunRecord(runId: runId, context: context)
 
-        // EventEntryを構築
-        let eventEntry = try await buildEventEntry(from: event, battleLog: battleLog, occurredAt: occurredAt)
-
-        // eventsDataに追加
-        try runRecord.appendEvent(eventEntry)
+        // ExplorationEventRecordを構築してINSERT（O(1)）
+        let eventRecord = try await buildEventRecord(from: event, battleLog: battleLog, occurredAt: occurredAt)
+        eventRecord.run = runRecord
+        context.insert(eventRecord)
 
         // 累計を更新
-        runRecord.totalExp += eventEntry.exp
-        runRecord.totalGold += eventEntry.gold
-        runRecord.finalFloor = eventEntry.floor
+        runRecord.totalExp += eventRecord.exp
+        runRecord.totalGold += eventRecord.gold
+        runRecord.finalFloor = eventRecord.floor
 
         // RNG状態と探索状態を保存
         runRecord.randomState = randomState
-        runRecord.superRareStateData = try JSONEncoder().encode(superRareState)
-        runRecord.droppedItemIdsData = try JSONEncoder().encode(Array(droppedItemIds))
+        runRecord.superRareStateData = try Self.jsonEncoder.encode(superRareState)
+        runRecord.droppedItemIdsData = try Self.jsonEncoder.encode(Array(droppedItemIds).sorted())
 
         try saveIfNeeded(context)
     }
@@ -185,11 +187,11 @@ private extension ExplorationProgressService {
         }
     }
 
-    // MARK: - Event Entry Building
+    // MARK: - Event Record Building
 
-    func buildEventEntry(from event: ExplorationEventLogEntry,
-                         battleLog: BattleLogArchive?,
-                         occurredAt: Date) async throws -> EventEntry {
+    func buildEventRecord(from event: ExplorationEventLogEntry,
+                          battleLog: BattleLogArchive?,
+                          occurredAt: Date) async throws -> ExplorationEventRecord {
         let kind: UInt8
         var enemyId: UInt16?
         var battleResult: UInt8?
@@ -207,7 +209,7 @@ private extension ExplorationProgressService {
                 battleResult = battleResultValue(log.result)
                 // 現時点ではBattleLogArchiveを丸ごと保存。
                 // 後続タスクでCompactLogEntry形式に変換予定（ストレージ50%削減見込み）
-                battleLogData = try JSONEncoder().encode(log)
+                battleLogData = try Self.jsonEncoder.encode(log)
             }
 
         case .scripted(let summary):
@@ -216,8 +218,9 @@ private extension ExplorationProgressService {
         }
 
         let drops = await buildDropEntries(from: event.drops)
+        let dropsData = try Self.jsonEncoder.encode(drops)
 
-        return EventEntry(
+        return ExplorationEventRecord(
             floor: UInt8(event.floorNumber),
             kind: kind,
             enemyId: enemyId,
@@ -226,7 +229,7 @@ private extension ExplorationProgressService {
             scriptedEventId: scriptedEventId,
             exp: UInt32(event.experienceGained),
             gold: UInt32(event.goldGained),
-            drops: drops,
+            dropsData: dropsData,
             occurredAt: occurredAt
         )
     }
@@ -282,16 +285,18 @@ private extension ExplorationProgressService {
 
     func makeSnapshot(for run: ExplorationRunRecord,
                       context: ModelContext) async throws -> ExplorationSnapshot {
-        let events = try run.decodeEvents()
+        // FetchDescriptorでsortBy指定してイベントを取得
+        let eventRecords = run.events.sorted { $0.occurredAt < $1.occurredAt }
 
         // ダンジョン情報取得
-        guard let dungeonDefinition = try await masterData.getDungeonDefinition(id: run.dungeonId) else {
+        guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
             throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
         }
 
         let displayDungeonName = DungeonDisplayNameFormatter.displayName(
             for: dungeonDefinition,
-            difficultyTitleId: run.difficulty
+            difficultyTitleId: run.difficulty,
+            masterData: masterDataCache
         )
 
         // パーティメンバー情報取得
@@ -302,10 +307,10 @@ private extension ExplorationProgressService {
 
         // EncounterLogs構築
         var encounterLogs: [ExplorationSnapshot.EncounterLog] = []
-        encounterLogs.reserveCapacity(events.count)
+        encounterLogs.reserveCapacity(eventRecords.count)
 
-        for (index, event) in events.enumerated() {
-            let log = try await buildEncounterLog(from: event, index: index)
+        for (index, eventRecord) in eventRecords.enumerated() {
+            let log = try await buildEncounterLog(from: eventRecord, index: index)
             encounterLogs.append(log)
         }
 
@@ -314,10 +319,11 @@ private extension ExplorationProgressService {
         rewards.experience = Int(run.totalExp)
         rewards.gold = Int(run.totalGold)
 
-        for event in events {
-            for drop in event.drops {
+        for eventRecord in eventRecords {
+            let drops = try Self.jsonDecoder.decode([DropEntry].self, from: eventRecord.dropsData)
+            for drop in drops {
                 if drop.itemId > 0 {
-                    if let item = try await masterData.getItemMasterData(id: drop.itemId) {
+                    if let item = masterDataCache.item(drop.itemId) {
                         rewards.itemDrops[item.name, default: 0] += Int(drop.quantity)
                     }
                 }
@@ -359,25 +365,25 @@ private extension ExplorationProgressService {
         )
     }
 
-    func buildEncounterLog(from event: EventEntry, index: Int) async throws -> ExplorationSnapshot.EncounterLog {
+    func buildEncounterLog(from eventRecord: ExplorationEventRecord, index: Int) async throws -> ExplorationSnapshot.EncounterLog {
         let kind: ExplorationSnapshot.EncounterLog.Kind
         var referenceId: String?
         var combatSummary: ExplorationSnapshot.EncounterLog.CombatSummary?
 
-        switch EventKind(rawValue: event.kind) {
+        switch EventKind(rawValue: eventRecord.kind) {
         case .nothing, .none:
             kind = .nothing
 
         case .combat:
             kind = .enemyEncounter
-            if let enemyId = event.enemyId {
+            if let enemyId = eventRecord.enemyId {
                 referenceId = String(enemyId)
-                if let enemy = try await masterData.getEnemyDefinition(id: enemyId) {
-                    let result = battleResultString(event.battleResult ?? 0)
+                if let enemy = masterDataCache.enemy(enemyId) {
+                    let result = battleResultString(eventRecord.battleResult ?? 0)
                     // battleLogDataからターン数を取得
                     var turns = 0
-                    if let logData = event.battleLogData {
-                        let archive = try JSONDecoder().decode(BattleLogArchive.self, from: logData)
+                    if let logData = eventRecord.battleLogData {
+                        let archive = try Self.jsonDecoder.decode(BattleLogArchive.self, from: logData)
                         turns = archive.turns
                     }
                     combatSummary = ExplorationSnapshot.EncounterLog.CombatSummary(
@@ -385,15 +391,15 @@ private extension ExplorationProgressService {
                         enemyName: enemy.name,
                         result: result,
                         turns: turns,
-                        battleLogData: event.battleLogData
+                        battleLogData: eventRecord.battleLogData
                     )
                 }
             }
 
         case .scripted:
             kind = .scriptedEvent
-            if let eventId = event.scriptedEventId {
-                if let eventDef = try await masterData.getExplorationEventDefinition(id: eventId) {
+            if let eventId = eventRecord.scriptedEventId {
+                if let eventDef = masterDataCache.explorationEvent(eventId) {
                     referenceId = eventDef.name
                 } else {
                     referenceId = String(eventId)
@@ -403,17 +409,18 @@ private extension ExplorationProgressService {
 
         // Context構造体を構築
         var context = ExplorationSnapshot.EncounterLog.Context()
-        if event.exp > 0 {
-            context.exp = "\(event.exp)"
+        if eventRecord.exp > 0 {
+            context.exp = "\(eventRecord.exp)"
         }
-        if event.gold > 0 {
-            context.gold = "\(event.gold)"
+        if eventRecord.gold > 0 {
+            context.gold = "\(eventRecord.gold)"
         }
-        if !event.drops.isEmpty {
+        let drops = try Self.jsonDecoder.decode([DropEntry].self, from: eventRecord.dropsData)
+        if !drops.isEmpty {
             var dropStrings: [String] = []
-            for drop in event.drops {
+            for drop in drops {
                 if drop.itemId > 0,
-                   let item = try await masterData.getItemMasterData(id: drop.itemId) {
+                   let item = masterDataCache.item(drop.itemId) {
                     dropStrings.append("\(item.name)x\(drop.quantity)")
                 }
             }
@@ -424,13 +431,13 @@ private extension ExplorationProgressService {
 
         return ExplorationSnapshot.EncounterLog(
             id: UUID(),  // 新構造ではUUIDは識別子として使わない
-            floorNumber: Int(event.floor),
+            floorNumber: Int(eventRecord.floor),
             eventIndex: index,
             kind: kind,
             referenceId: referenceId,
-            occurredAt: event.occurredAt,
+            occurredAt: eventRecord.occurredAt,
             context: context,
-            metadata: ProgressMetadata(createdAt: event.occurredAt, updatedAt: event.occurredAt),
+            metadata: ProgressMetadata(createdAt: eventRecord.occurredAt, updatedAt: eventRecord.occurredAt),
             combatSummary: combatSummary
         )
     }

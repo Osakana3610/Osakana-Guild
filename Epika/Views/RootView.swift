@@ -5,20 +5,20 @@ import SwiftData
 struct RootView: View {
     @Environment(\.modelContext) private var modelContext
 
-    private let progressService: ProgressService
+    private let appServices: AppServices
     @State private var partyViewState: PartyViewState
 
-    init(progressService: ProgressService) {
-        self.progressService = progressService
-        _partyViewState = State(initialValue: PartyViewState(progressService: progressService))
+    init(appServices: AppServices) {
+        self.appServices = appServices
+        _partyViewState = State(initialValue: PartyViewState(appServices: appServices))
     }
 
     var body: some View {
         MainTabView()
             .environment(\.modelContext, modelContext)
             .environment(partyViewState)
-            .environmentObject(progressService)
-            .environmentObject(progressService.dropNotifications)
+            .environment(appServices)
+            .environment(appServices.dropNotifications)
     }
 }
 
@@ -28,17 +28,17 @@ struct RootView: View {
 
 private struct PreviewRootView: View {
     @State private var container: ModelContainer?
-    @State private var progressService: ProgressService?
+    @State private var appServices: AppServices?
     @State private var errorMessage: String?
 
     var body: some View {
         Group {
-            if let container, let progressService {
-                RootView(progressService: progressService)
+            if let container, let appServices {
+                RootView(appServices: appServices)
                     .modelContainer(container)
-                    .environment(PartyViewState(progressService: progressService))
-                    .environmentObject(progressService)
-                    .environmentObject(progressService.dropNotifications)
+                    .environment(PartyViewState(appServices: appServices))
+                    .environment(appServices)
+                    .environment(appServices.dropNotifications)
             } else if let errorMessage {
                 Text("プレビュー初期化に失敗しました: \(errorMessage)")
             } else {
@@ -48,9 +48,12 @@ private struct PreviewRootView: View {
         .task {
             guard container == nil, errorMessage == nil else { return }
             do {
+                let manager = SQLiteMasterDataManager()
+                let cache = try await MasterDataLoader.load(manager: manager)
                 let bootstrap = try await ProgressBootstrapper.shared.boot()
-                let service = ProgressService(container: bootstrap.container)
-                self.progressService = service
+                let service = AppServices(container: bootstrap.container,
+                                          masterDataCache: cache)
+                self.appServices = service
                 self.container = bootstrap.container
             } catch {
                 errorMessage = error.localizedDescription

@@ -1,12 +1,13 @@
 import Foundation
-import Combine
 import SwiftData
+import Observation
 
 @MainActor
-final class ProgressService: ObservableObject {
+@Observable
+final class AppServices {
     let container: ModelContainer
+    let masterDataCache: MasterDataCache
     let gameState: GameStateService
-    let environment: ProgressEnvironment
     let character: CharacterProgressService
     let party: PartyProgressService
     let inventory: InventoryProgressService
@@ -22,7 +23,6 @@ final class ProgressService: ObservableObject {
     let dropNotifications: ItemDropNotificationService
     let itemPreload: ItemPreloadService
     let gemModification: GemModificationProgressService
-    let masterData: MasterDataRuntimeService
 
     struct ExplorationRunTotals: Sendable {
         let totalExperience: Int
@@ -46,45 +46,46 @@ final class ProgressService: ObservableObject {
         let cancel: @Sendable () async -> Void
     }
 
-    init(container: ModelContainer,
-         environment: ProgressEnvironment = .live) {
+    init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
-        self.environment = environment
+        self.masterDataCache = masterDataCache
         let gameStateService = GameStateService(container: container)
         self.gameState = gameStateService
-        let dropNotifications = ItemDropNotificationService()
+        let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)
         self.dropNotifications = dropNotifications
         let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications] results in
             guard let dropNotifications, !results.isEmpty else { return }
-            await dropNotifications.publish(results: results)
+            await MainActor.run {
+                dropNotifications.publish(results: results)
+            }
         }
-        let runtimeService = GameRuntimeService(dropNotifier: dropNotifier)
+        let runtimeService = GameRuntimeService(masterData: masterDataCache, dropNotifier: dropNotifier)
         self.runtime = ProgressRuntimeService(runtimeService: runtimeService,
                                               gameStateService: gameStateService)
 
         self.party = PartyProgressService(container: container)
         self.inventory = InventoryProgressService(container: container,
                                                   gameStateService: gameStateService,
-                                                  environment: environment)
+                                                  masterDataCache: masterDataCache)
         self.shop = ShopProgressService(container: container,
-                                        environment: environment,
+                                        masterDataCache: masterDataCache,
                                         inventoryService: self.inventory,
                                         gameStateService: gameStateService)
-        self.character = CharacterProgressService(container: container)
-        self.exploration = ExplorationProgressService(container: container)
+        self.character = CharacterProgressService(container: container, masterData: masterDataCache)
+        self.exploration = ExplorationProgressService(container: container, masterDataCache: masterDataCache)
         self.dungeon = DungeonProgressService(container: container)
         self.story = StoryProgressService(container: container)
-        self.titleInheritance = TitleInheritanceProgressService(inventoryService: self.inventory)
-        self.artifactExchange = ArtifactExchangeProgressService(inventoryService: self.inventory)
+        self.titleInheritance = TitleInheritanceProgressService(inventoryService: self.inventory,
+                                                                  masterDataCache: masterDataCache)
+        self.artifactExchange = ArtifactExchangeProgressService(inventoryService: self.inventory,
+                                                                  masterDataCache: masterDataCache)
         self.itemSynthesis = ItemSynthesisProgressService(inventoryService: self.inventory,
-                                                          gameStateService: gameStateService)
-        self.autoTrade = AutoTradeProgressService(container: container,
-                                                   gameStateService: gameStateService,
-                                                   environment: environment)
-        self.itemPreload = .shared
-        self.masterData = .shared
+                                                          gameStateService: gameStateService,
+                                                          masterDataCache: masterDataCache)
+        self.autoTrade = AutoTradeProgressService(container: container, gameStateService: gameStateService)
+        self.itemPreload = ItemPreloadService(masterDataCache: masterDataCache)
         self.gemModification = GemModificationProgressService(container: container,
-                                                               masterDataService: .shared)
+                                                               masterDataCache: masterDataCache)
     }
 }
 

@@ -1,19 +1,6 @@
 import Foundation
 
-// MARK: - Event Entry
-
-struct EventEntry: Codable, Sendable {
-    var floor: UInt8
-    var kind: UInt8  // EventKind.rawValue
-    var enemyId: UInt16?
-    var battleResult: UInt8?  // BattleResult.rawValue
-    var battleLogData: Data?  // BattleLogArchive（将来はCompactLogEntry配列に変換予定）
-    var scriptedEventId: UInt8?
-    var exp: UInt32
-    var gold: UInt32
-    var drops: [DropEntry]
-    var occurredAt: Date  // イベント発生時刻
-}
+// MARK: - Drop Entry
 
 struct DropEntry: Codable, Sendable {
     var superRareTitleId: UInt8   // 超レア称号ID（0=なし）

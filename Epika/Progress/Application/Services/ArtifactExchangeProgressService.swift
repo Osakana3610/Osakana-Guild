@@ -15,7 +15,7 @@ actor ArtifactExchangeProgressService {
     }
 
     private let inventoryService: InventoryProgressService
-    private let masterDataService = MasterDataRuntimeService.shared
+    private let masterDataCache: MasterDataCache
 
     private struct ExchangeRule: Sendable, Hashable {
         let requiredItemId: UInt16
@@ -24,14 +24,15 @@ actor ArtifactExchangeProgressService {
 
     private let exchangeRules: [ExchangeRule] = []
 
-    init(inventoryService: InventoryProgressService) {
+    init(inventoryService: InventoryProgressService, masterDataCache: MasterDataCache) {
         self.inventoryService = inventoryService
+        self.masterDataCache = masterDataCache
     }
 
     func availableArtifacts() async throws -> [ArtifactOption] {
         guard !exchangeRules.isEmpty else { return [] }
         let rewardIds = Set(exchangeRules.map { $0.rewardItemId })
-        let definitions = try await masterDataService.getItemMasterData(ids: Array(rewardIds))
+        let definitions = masterDataCache.items(Array(rewardIds))
         let map = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         return exchangeRules.compactMap { rule in
             guard let definition = map[rule.rewardItemId] else { return nil }
@@ -58,7 +59,7 @@ actor ArtifactExchangeProgressService {
         guard offering.itemId == rule.requiredItemId else {
             throw ProgressError.invalidInput(description: "交換条件を満たしていません")
         }
-        guard let rewardDefinition = try await masterDataService.getItemMasterData(id: rule.rewardItemId) else {
+        guard let rewardDefinition = masterDataCache.item(rule.rewardItemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(rule.rewardItemId)])
         }
 

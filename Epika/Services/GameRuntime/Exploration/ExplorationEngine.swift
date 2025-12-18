@@ -37,7 +37,6 @@ struct ExplorationEngine {
     }
 
     static func prepare(provider: ExplorationMasterDataProvider,
-                        repository: MasterDataRepository,
                         dungeonId: UInt16,
                         targetFloorNumber: Int,
                         superRareState: SuperRareDailyState,
@@ -73,7 +72,7 @@ struct ExplorationEngine {
 
     static func nextEvent(preparation: Preparation,
                           state: inout RunState,
-                          repository: MasterDataRepository,
+                          masterData: MasterDataCache,
                           party: RuntimePartyState) async throws -> StepOutcome? {
         guard state.floorIndex < preparation.targetFloorNumber else {
             return nil
@@ -115,11 +114,11 @@ struct ExplorationEngine {
             guard hasScripted else {
                 throw RuntimeError.invalidConfiguration(reason: "Scripted event selected but no candidates for floor \(floor.floorNumber)")
             }
-            let scripted = try await resolveScriptedEvent(for: preparation.dungeon,
-                                                          floor: floor,
-                                                          candidates: scriptedCandidates,
-                                                          repository: repository,
-                                                          random: &state.random)
+            let scripted = try resolveScriptedEvent(for: preparation.dungeon,
+                                                    floor: floor,
+                                                    candidates: scriptedCandidates,
+                                                    masterData: masterData,
+                                                    random: &state.random)
             entry = ExplorationEventLogEntry(floorNumber: floor.floorNumber,
                                              eventIndex: state.eventIndex,
                                              occurredAt: occurredAt,
@@ -144,8 +143,8 @@ struct ExplorationEngine {
             guard let enemyId = encounterChoice.enemyId else {
                 throw RuntimeError.invalidConfiguration(reason: "Encounter event \(encounterChoice.eventType) missing enemyId")
             }
-            let combatService = CombatExecutionService(repository: repository)
-            let combatResult = try await combatService.runCombat(enemyId: enemyId,
+            let combatService = CombatExecutionService(masterData: masterData)
+            let combatResult = try combatService.runCombat(enemyId: enemyId,
                                                                  enemyLevel: encounterChoice.level,
                                                                  groupMin: encounterChoice.groupMin,
                                                                  groupMax: encounterChoice.groupMax,
@@ -247,21 +246,21 @@ private extension ExplorationEngine {
     static func resolveScriptedEvent(for dungeon: DungeonDefinition,
                                      floor: DungeonFloorDefinition,
                                      candidates: [ExplorationEventDefinition],
-                                     repository: MasterDataRepository,
-                                     random: inout GameRandomSource) async throws -> (summary: ScriptedEventSummary,
-                                                                                       experience: Int,
-                                                                                       gold: Int,
-                                                                                       drops: [ExplorationDropReward],
-                                                                                       statusEffects: [StatusEffectDefinition]) {
+                                     masterData: MasterDataCache,
+                                     random: inout GameRandomSource) throws -> (summary: ScriptedEventSummary,
+                                                                                 experience: Int,
+                                                                                 gold: Int,
+                                                                                 drops: [ExplorationDropReward],
+                                                                                 statusEffects: [StatusEffectDefinition]) {
         guard let selected = selectScriptedEvent(from: candidates,
                                                  dungeon: dungeon,
                                                  random: &random) else {
             throw RuntimeError.invalidConfiguration(reason: "Scripted event candidates are empty after weighting")
         }
-        let rewards = try await parseScriptedRewards(repository: repository,
-                                                     from: selected,
-                                                     dungeon: dungeon,
-                                                     floor: floor)
+        let rewards = try parseScriptedRewards(masterData: masterData,
+                                               from: selected,
+                                               dungeon: dungeon,
+                                               floor: floor)
         let summary = ScriptedEventSummary(eventId: selected.id,
                                            name: selected.name,
                                            description: selected.description,
@@ -303,13 +302,13 @@ private extension ExplorationEngine {
         return 1.0
     }
 
-    static func parseScriptedRewards(repository: MasterDataRepository,
+    static func parseScriptedRewards(masterData: MasterDataCache,
                                      from event: ExplorationEventDefinition,
                                      dungeon: DungeonDefinition,
-                                     floor: DungeonFloorDefinition) async throws -> (experience: Int,
-                                                                                       gold: Int,
-                                                                                       drops: [ExplorationDropReward],
-                                                                                       statusEffects: [StatusEffectDefinition]) {
+                                     floor: DungeonFloorDefinition) throws -> (experience: Int,
+                                                                                gold: Int,
+                                                                                drops: [ExplorationDropReward],
+                                                                                statusEffects: [StatusEffectDefinition]) {
         guard let payloadString = event.payloadJSON,
               let payloadData = payloadString.data(using: .utf8) else {
             return (0, 0, [], [])
@@ -324,10 +323,8 @@ private extension ExplorationEngine {
 
         var dropRewards: [ExplorationDropReward] = []
         if let dropIds = json["items"] as? [String], !dropIds.isEmpty {
-            let items = try await repository.allItems()
-            let itemMap = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
             dropRewards = try dropIds.map { identifierString in
-                guard let itemId = UInt16(identifierString), let item = itemMap[itemId] else {
+                guard let itemId = UInt16(identifierString), let item = masterData.item(itemId) else {
                     throw RuntimeError.masterDataNotFound(entity: "item", identifier: identifierString)
                 }
                 let difficulty = BattleRewardCalculator.trapDifficulty(for: item,
@@ -344,10 +341,8 @@ private extension ExplorationEngine {
 
         var statusEffects: [StatusEffectDefinition] = []
         if let effectIds = json["statusEffects"] as? [String], !effectIds.isEmpty {
-            let allEffects = try await repository.allStatusEffects()
-            let map = Dictionary(uniqueKeysWithValues: allEffects.map { ($0.id, $0) })
             statusEffects = try effectIds.map { identifierString in
-                guard let effectId = UInt8(identifierString), let definition = map[effectId] else {
+                guard let effectId = UInt8(identifierString), let definition = masterData.statusEffect(effectId) else {
                     throw RuntimeError.masterDataNotFound(entity: "statusEffect", identifier: identifierString)
                 }
                 return definition

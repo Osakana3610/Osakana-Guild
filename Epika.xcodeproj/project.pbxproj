@@ -277,6 +277,10 @@
 				"",
 				"",
 				"",
+				"",
+				"",
+				"",
+				"",
 			);
 		};
 /* End PBXShellScriptBuildPhase section */

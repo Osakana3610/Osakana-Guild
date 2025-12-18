@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 // MARK: - Exploration Stream Processing & Rewards
-extension ProgressService {
+extension AppServices {
     func processExplorationStream(session: ExplorationRuntimeSession,
                                   recordId: PersistentIdentifier,
                                   memberIds: [UInt8],
@@ -114,8 +114,8 @@ extension ProgressService {
                 let drops = makeItemDropResults(from: artifact.totalDrops)
                 try await applyDropRewards(drops)
                 // インベントリキャッシュを更新（失敗しても探索完了フローは止めない）
-                Task { @MainActor [inventory] in
-                    try? await ItemPreloadService.shared.reload(inventoryService: inventory)
+                Task { @MainActor [itemPreload, inventory] in
+                    try? await itemPreload.reload(inventoryService: inventory)
                 }
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,

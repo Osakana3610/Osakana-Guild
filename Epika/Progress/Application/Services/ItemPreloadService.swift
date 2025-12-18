@@ -5,7 +5,7 @@ import SwiftUI
 /// アプリ起動時にバックグラウンドでデータをロードし、画面表示を即座に行う。
 @MainActor
 final class ItemPreloadService {
-    static let shared = ItemPreloadService()
+    private let masterDataCache: MasterDataCache
 
     private var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
     private var orderedCategories: [ItemSaleCategory] = []
@@ -15,7 +15,9 @@ final class ItemPreloadService {
     private var isLoaded = false
     private var preloadTask: Task<Void, Error>?
 
-    private init() {}
+    init(masterDataCache: MasterDataCache) {
+        self.masterDataCache = masterDataCache
+    }
 
     // MARK: - Public API
 
@@ -231,11 +233,10 @@ final class ItemPreloadService {
             return
         }
 
-        let masterDataService = MasterDataRuntimeService.shared
-        let definitions = try await masterDataService.getItemMasterData(ids: Array(itemIds))
+        let definitions = masterDataCache.items(Array(itemIds))
         let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
 
-        let allTitles = try await masterDataService.getAllTitles()
+        let allTitles = masterDataCache.allTitles
         let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
 
         var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
@@ -277,14 +278,12 @@ final class ItemPreloadService {
             }
         }
 
-        let titleNames = try await resolveTitleNames(
+        let titleNames = resolveTitleNames(
             normalIds: normalTitleIds,
-            superRareIds: superRareTitleIds,
-            masterDataService: masterDataService
+            superRareIds: superRareTitleIds
         )
-        let gemDisplayNames = try await resolveGemNames(
-            socketItemIds: socketItemIds,
-            masterDataService: masterDataService
+        let gemDisplayNames = resolveGemNames(
+            socketItemIds: socketItemIds
         )
 
         for key in grouped.keys {
@@ -350,23 +349,22 @@ final class ItemPreloadService {
 
     private func resolveTitleNames(
         normalIds: Set<UInt8>,
-        superRareIds: Set<UInt8>,
-        masterDataService: MasterDataRuntimeService
-    ) async throws -> (normal: [UInt8: String], superRare: [UInt8: String]) {
+        superRareIds: Set<UInt8>
+    ) -> (normal: [UInt8: String], superRare: [UInt8: String]) {
         guard !(normalIds.isEmpty && superRareIds.isEmpty) else {
             return ([:], [:])
         }
 
         var normal: [UInt8: String] = [:]
         for id in normalIds {
-            if let definition = try await masterDataService.getTitleMasterData(id: id) {
+            if let definition = masterDataCache.title(id) {
                 normal[id] = definition.name
             }
         }
 
         var superRare: [UInt8: String] = [:]
         for id in superRareIds {
-            if let definition = try await masterDataService.getSuperRareTitle(id: id) {
+            if let definition = masterDataCache.superRareTitle(id) {
                 superRare[id] = definition.name
             }
         }
@@ -375,13 +373,12 @@ final class ItemPreloadService {
     }
 
     private func resolveGemNames(
-        socketItemIds: Set<UInt16>,
-        masterDataService: MasterDataRuntimeService
-    ) async throws -> [UInt16: String] {
+        socketItemIds: Set<UInt16>
+    ) -> [UInt16: String] {
         guard !socketItemIds.isEmpty else { return [:] }
         var names: [UInt16: String] = [:]
         for itemId in socketItemIds {
-            if let definition = try await masterDataService.getItemMasterData(id: itemId) {
+            if let definition = masterDataCache.item(itemId) {
                 names[itemId] = definition.name
             }
         }

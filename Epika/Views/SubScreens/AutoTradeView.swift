@@ -2,14 +2,12 @@ import SwiftUI
 
 /// 自動売却ルールの一覧と管理画面
 struct AutoTradeView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @Environment(AppServices.self) private var appServices
     @State private var rules: [AutoTradeProgressService.Rule] = []
     @State private var ruleDisplayNames: [String: String] = [:]
     @State private var isLoading = false
     @State private var showError = false
     @State private var errorMessage = ""
-
-    private let masterDataService = MasterDataRuntimeService.shared
 
     var body: some View {
         NavigationStack {
@@ -78,8 +76,8 @@ struct AutoTradeView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            rules = try await progressService.autoTrade.allRules()
-            await loadDisplayNames()
+            rules = try await appServices.autoTrade.allRules()
+            loadDisplayNames()
             showError = false
         } catch {
             showError = true
@@ -88,7 +86,9 @@ struct AutoTradeView: View {
     }
 
     @MainActor
-    private func loadDisplayNames() async {
+    private func loadDisplayNames() {
+        let masterData = appServices.masterDataCache
+
         // Collect all item IDs and title IDs
         let itemIds = Set(rules.map { $0.itemId })
         let superRareTitleIds = Set(rules.map { $0.superRareTitleId }).filter { $0 > 0 }
@@ -96,38 +96,23 @@ struct AutoTradeView: View {
 
         // Load item definitions
         var itemNames: [UInt16: String] = [:]
-        if !itemIds.isEmpty {
-            do {
-                let items = try await masterDataService.getItemMasterData(ids: Array(itemIds))
-                for item in items {
-                    itemNames[item.id] = item.name
-                }
-            } catch {
-                // Ignore errors, use fallback names
+        for id in itemIds {
+            if let item = masterData.item(id) {
+                itemNames[id] = item.name
             }
         }
 
         // Load title definitions
         var superRareTitleNames: [UInt8: String] = [:]
         var normalTitleNames: [UInt8: String] = [:]
-        if !superRareTitleIds.isEmpty {
-            do {
-                let superRareTitles = try await masterDataService.getAllSuperRareTitles()
-                for title in superRareTitles {
-                    superRareTitleNames[title.id] = title.name
-                }
-            } catch {
-                // Ignore errors, use fallback names
+        for id in superRareTitleIds {
+            if let title = masterData.superRareTitle(id) {
+                superRareTitleNames[id] = title.name
             }
         }
-        if !normalTitleIds.isEmpty {
-            do {
-                let normalTitles = try await masterDataService.getAllTitles()
-                for title in normalTitles {
-                    normalTitleNames[title.id] = title.name
-                }
-            } catch {
-                // Ignore errors, use fallback names
+        for id in normalTitleIds {
+            if let title = masterData.title(id) {
+                normalTitleNames[id] = title.name
             }
         }
 
@@ -154,7 +139,7 @@ struct AutoTradeView: View {
     @MainActor
     private func removeRule(_ rule: AutoTradeProgressService.Rule) async {
         do {
-            try await progressService.autoTrade.removeRule(stackKey: rule.stackKey)
+            try await appServices.autoTrade.removeRule(stackKey: rule.stackKey)
             rules.removeAll { $0.id == rule.id }
             ruleDisplayNames.removeValue(forKey: rule.stackKey)
         } catch {

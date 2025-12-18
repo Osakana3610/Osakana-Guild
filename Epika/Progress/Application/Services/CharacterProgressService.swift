@@ -15,11 +15,11 @@ actor CharacterProgressService {
     }
 
     private let container: ModelContainer
-    private let masterData: MasterDataRuntimeService
+    private let masterData: MasterDataCache
     private var raceLevelCache: [UInt8: Int] = [:]
     private var raceMaxExperienceCache: [UInt8: Int] = [:]
 
-    init(container: ModelContainer, masterData: MasterDataRuntimeService = .shared) {
+    init(container: ModelContainer, masterData: MasterDataCache) {
         self.container = container
         self.masterData = masterData
     }
@@ -78,11 +78,13 @@ actor CharacterProgressService {
     func runtimeCharacter(from snapshot: CharacterSnapshot) async throws -> RuntimeCharacter {
         let input = makeInput(from: snapshot)
         let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: makeContext())
-        return try await RuntimeCharacterFactory.make(
-            from: input,
-            repository: masterData.repository,
-            pandoraBoxStackKeys: pandoraStackKeys
-        )
+        return try await MainActor.run {
+            try RuntimeCharacterFactory.make(
+                from: input,
+                masterData: masterData,
+                pandoraBoxStackKeys: pandoraStackKeys
+            )
+        }
     }
 
     /// CharacterSnapshotからCharacterInputへ変換
@@ -185,7 +187,7 @@ actor CharacterProgressService {
         let newId = try allocateCharacterId(context: context)
 
         // 種族のgenderCodeを取得してavatarIdを計算（職業画像: genderCode * 100 + jobId）
-        let race = try await masterData.repository.race(withId: request.raceId)
+        let race = masterData.race(request.raceId)
         let avatarId: UInt16 = if let race {
             UInt16(race.genderCode) * 100 + UInt16(request.jobId)
         } else {
@@ -337,7 +339,7 @@ actor CharacterProgressService {
         record.experience = 0
 
         // avatarIdを再計算（職業画像: genderCode * 100 + jobId）
-        let race = try await masterData.repository.race(withId: record.raceId)
+        let race = masterData.race(record.raceId)
         if let race {
             record.avatarId = UInt16(race.genderCode) * 100 + UInt16(newJobId)
         }
@@ -522,7 +524,7 @@ actor CharacterProgressService {
 
 private extension CharacterProgressService {
     func resolveLevel(for experience: Int, raceId: UInt8) async throws -> Int {
-        let maxLevel = try await raceMaxLevel(for: raceId)
+        let maxLevel = try raceMaxLevel(for: raceId)
         do {
             return try await MainActor.run {
                 try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
@@ -536,11 +538,11 @@ private extension CharacterProgressService {
         }
     }
 
-    func raceMaxLevel(for raceId: UInt8) async throws -> Int {
+    func raceMaxLevel(for raceId: UInt8) throws -> Int {
         if let cached = raceLevelCache[raceId] {
             return cached
         }
-        guard let definition = try await masterData.getRaceDefinition(id: raceId) else {
+        guard let definition = masterData.race(raceId) else {
             throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
         }
         let resolved = definition.maxLevel
@@ -558,7 +560,7 @@ private extension CharacterProgressService {
         if let cached = raceMaxExperienceCache[raceId] {
             return cached
         }
-        let maxLevel = try await raceMaxLevel(for: raceId)
+        let maxLevel = try raceMaxLevel(for: raceId)
         let maximumExperience = try await MainActor.run {
             try CharacterExperienceTable.totalExperience(toReach: maxLevel)
         }
@@ -588,11 +590,13 @@ private extension CharacterProgressService {
 
         // RuntimeCharacterFactory で計算済み RuntimeCharacter を取得
         let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
-        let runtimeCharacter = try await RuntimeCharacterFactory.make(
-            from: input,
-            repository: masterData.repository,
-            pandoraBoxStackKeys: pandoraStackKeys
-        )
+        let runtimeCharacter = try await MainActor.run {
+            try RuntimeCharacterFactory.make(
+                from: input,
+                masterData: masterData,
+                pandoraBoxStackKeys: pandoraStackKeys
+            )
+        }
 
         // RuntimeCharacter から CharacterSnapshot を構築
         let now = Date()

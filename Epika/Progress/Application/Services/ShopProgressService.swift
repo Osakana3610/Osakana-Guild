@@ -25,29 +25,35 @@ actor ShopProgressService {
     }
 
     private let container: ModelContainer
-    private let environment: ProgressEnvironment
+    private let masterDataCache: MasterDataCache
     private let inventoryService: InventoryProgressService
     private let gameStateService: GameStateService
     private let unlimitedSentinel: UInt16? = nil
 
     init(container: ModelContainer,
-         environment: ProgressEnvironment,
+         masterDataCache: MasterDataCache,
          inventoryService: InventoryProgressService,
          gameStateService: GameStateService) {
         self.container = container
-        self.environment = environment
+        self.masterDataCache = masterDataCache
         self.inventoryService = inventoryService
         self.gameStateService = gameStateService
     }
 
     func loadItems() async throws -> [ShopItem] {
-        let masterItems = try await environment.masterDataService.getShopItems()
+        let masterItems = masterDataCache.allShopItems
         let snapshot = try await loadShopSnapshot(masterItems: masterItems)
         let itemIds = snapshot.stocks.map { $0.itemId }
         let uniqueIds = Array(Set(itemIds))
-        let definitions = try await environment.masterDataService.getItemMasterData(ids: uniqueIds)
-        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
-        let missing = Set(itemIds.filter { definitionMap[$0] == nil })
+        var definitionMap: [UInt16: ItemDefinition] = [:]
+        var missing: [UInt16] = []
+        for id in uniqueIds {
+            if let def = masterDataCache.item(id) {
+                definitionMap[id] = def
+            } else {
+                missing.append(id)
+            }
+        }
         if !missing.isEmpty {
             throw ProgressError.itemDefinitionUnavailable(ids: missing.map { String($0) }.sorted())
         }
@@ -80,8 +86,7 @@ actor ShopProgressService {
             throw ProgressError.invalidInput(description: "数量は1以上である必要があります")
         }
 
-        let definitions = try await environment.masterDataService.getItemMasterData(ids: [itemId])
-        guard let definition = definitions.first else {
+        guard let definition = masterDataCache.item(itemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(itemId)])
         }
 
@@ -135,8 +140,7 @@ actor ShopProgressService {
             return 0
         }
 
-        let definitions = try await environment.masterDataService.getItemMasterData(ids: [stock.itemId])
-        guard let definition = definitions.first else {
+        guard let definition = masterDataCache.item(stock.itemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(stock.itemId)])
         }
 

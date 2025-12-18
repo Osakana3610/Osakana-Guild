@@ -4,7 +4,7 @@ struct RuntimePartyMemberEditView: View {
     var party: RuntimeParty
     let allCharacters: [RuntimeCharacter]
     @Environment(PartyViewState.self) private var partyState
-    @EnvironmentObject private var progressService: ProgressService
+    @Environment(AppServices.self) private var appServices
     @State private var currentMemberIds: [UInt8?] = Array(repeating: nil, count: Self.maxSlots)
     @State private var selectedSlotIndex: Int? = nil
     @State private var searchText = ""
@@ -24,7 +24,7 @@ struct RuntimePartyMemberEditView: View {
         }
     }
 
-    private var partyService: PartyProgressService { progressService.party }
+    private var partyService: PartyProgressService { appServices.party }
 
     private func character(for id: UInt8?) -> RuntimeCharacter? {
         guard let id else { return nil }

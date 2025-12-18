@@ -6,46 +6,35 @@ enum RuntimeCharacterFactory {
 
     static func make(
         from input: CharacterInput,
-        repository: MasterDataRepository,
+        masterData: MasterDataCache,
         pandoraBoxStackKeys: Set<String> = []
-    ) async throws -> RuntimeCharacter {
+    ) throws -> RuntimeCharacter {
 
         // マスターデータ取得
-        async let raceDef = repository.race(withId: input.raceId)
-        async let jobDef = repository.job(withId: input.jobId)
-        async let primaryDef = repository.personalityPrimary(withId: input.primaryPersonalityId)
-        async let secondaryDef = repository.personalitySecondary(withId: input.secondaryPersonalityId)
-        async let spellDefinitions = repository.allSpells()
-
-        guard let race = try await raceDef else {
+        guard let race = masterData.race(input.raceId) else {
             throw RuntimeError.invalidConfiguration(reason: "種族ID \(input.raceId) のマスターデータが見つかりません")
         }
-        guard let job = try await jobDef else {
+        guard let job = masterData.job(input.jobId) else {
             throw RuntimeError.invalidConfiguration(reason: "職業ID \(input.jobId) のマスターデータが見つかりません")
         }
-        let primaryPersonality = try await primaryDef
-        let secondaryPersonality = try await secondaryDef
+        let primaryPersonality = masterData.personalityPrimary(input.primaryPersonalityId)
+        let secondaryPersonality = masterData.personalitySecondary(input.secondaryPersonalityId)
 
         // 装備アイテムの定義を取得（ソケット宝石は含めない）
         let equippedItemIds = Set(input.equippedItems.map { $0.itemId }).filter { $0 > 0 }
-        let equippedItemDefinitions = try await repository.items(withIds: Array(equippedItemIds))
+        let equippedItemDefinitions = equippedItemIds.compactMap { masterData.item($0) }
 
         // 装備アイテムの超レア称号を取得（ソケット宝石の超レア称号は含めない）
         let superRareTitleIds = Set(input.equippedItems.map { $0.superRareTitleId }).filter { $0 > 0 }
-        var superRareTitles: [SuperRareTitleDefinition] = []
-        for titleId in superRareTitleIds {
-            if let definition = try await repository.superRareTitle(withId: titleId) {
-                superRareTitles.append(definition)
-            }
-        }
+        let superRareTitles = superRareTitleIds.compactMap { masterData.superRareTitle($0) }
 
         // 装備から付与されるスキルIDを収集（装備アイテム + 装備の超レア称号）
         var allSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkillIds }
         allSkillIds.append(contentsOf: superRareTitles.flatMap { $0.skillIds })
-        let learnedSkills = try await repository.skills(withIds: allSkillIds)
+        let learnedSkills = allSkillIds.compactMap { masterData.skill($0) }
 
         // Loadout構築
-        let loadout = try await assembleLoadout(repository: repository, from: input.equippedItems)
+        let loadout = assembleLoadout(masterData: masterData, from: input.equippedItems)
 
         // 装備スロット計算
         let slotModifiers = try SkillRuntimeEffectCompiler.equipmentSlots(from: learnedSkills)
@@ -57,8 +46,7 @@ enum RuntimeCharacterFactory {
 
         // スペルブック
         let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
-        let spells = try await spellDefinitions
-        let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(from: spellbook, definitions: spells)
+        let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(from: spellbook, definitions: masterData.allSpells)
 
         // 装備を CharacterValues.EquippedItem に変換
         let equippedItemsValues = input.equippedItems.map { item in
@@ -147,36 +135,26 @@ enum RuntimeCharacterFactory {
     // MARK: - Private
 
     private static func assembleLoadout(
-        repository: MasterDataRepository,
+        masterData: MasterDataCache,
         from equippedItems: [CharacterInput.EquippedItem]
-    ) async throws -> RuntimeCharacter.Loadout {
+    ) -> RuntimeCharacter.Loadout {
         // アイテムIDを収集（装備とソケット宝石）
         var itemIds = Set(equippedItems.map { $0.itemId })
         let socketItemIds = Set(equippedItems.map { $0.socketItemId }).filter { $0 > 0 }
         itemIds.formUnion(socketItemIds)
-        let items = try await repository.items(withIds: Array(itemIds.filter { $0 > 0 }))
+        let items = itemIds.filter { $0 > 0 }.compactMap { masterData.item($0) }
 
         // 通常称号IDを収集（装備とソケット宝石）
         var normalTitleIds = Set(equippedItems.map { $0.normalTitleId })
         let socketNormalTitleIds = Set(equippedItems.map { $0.socketNormalTitleId })
         normalTitleIds.formUnion(socketNormalTitleIds)
-        var titles: [TitleDefinition] = []
-        for titleId in normalTitleIds where titleId > 0 {
-            if let definition = try await repository.title(withId: titleId) {
-                titles.append(definition)
-            }
-        }
+        let titles = normalTitleIds.filter { $0 > 0 }.compactMap { masterData.title($0) }
 
         // 超レア称号IDを収集（装備とソケット宝石）
         var superRareTitleIds = Set(equippedItems.map { $0.superRareTitleId })
         let socketSuperRareTitleIds = Set(equippedItems.map { $0.socketSuperRareTitleId })
         superRareTitleIds.formUnion(socketSuperRareTitleIds)
-        var superRareTitles: [SuperRareTitleDefinition] = []
-        for titleId in superRareTitleIds where titleId > 0 {
-            if let definition = try await repository.superRareTitle(withId: titleId) {
-                superRareTitles.append(definition)
-            }
-        }
+        let superRareTitles = superRareTitleIds.filter { $0 > 0 }.compactMap { masterData.superRareTitle($0) }
 
         return RuntimeCharacter.Loadout(
             items: items,

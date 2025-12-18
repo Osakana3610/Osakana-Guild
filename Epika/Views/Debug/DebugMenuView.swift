@@ -81,7 +81,7 @@ private struct ItemSeed {
 }
 
 struct DebugMenuView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @Environment(AppServices.self) private var appServices
     @State private var isCreatingItems = false
     @State private var creationProgress: Double = 0.0
     @State private var statusMessage = ""
@@ -109,9 +109,9 @@ struct DebugMenuView: View {
     @State private var isResettingData = false
     @State private var showResetCompleteAlert = false
 
-    private let masterDataService = MasterDataRuntimeService.shared
-    private var inventoryService: InventoryProgressService { progressService.inventory }
-    private var gameStateService: GameStateService { progressService.gameState }
+    private var masterData: MasterDataCache { appServices.masterDataCache }
+    private var inventoryService: InventoryProgressService { appServices.inventory }
+    private var gameStateService: GameStateService { appServices.gameState }
 
     private func debugLog(_ message: @autoclosure () -> String) {
         print(message())
@@ -133,11 +133,9 @@ struct DebugMenuView: View {
                 Text(alertMessage)
             }
             .alert("データ削除完了", isPresented: $showResetCompleteAlert) {
-                Button("アプリを終了") {
-                    exit(0)
-                }
+                Button("OK") { }
             } message: {
-                Text("進行データを削除しました。\nアプリを終了して再起動してください。")
+                Text("進行データを削除しました。\nアプリを再起動してください。")
             }
             .sheet(isPresented: $showCreationSettings) {
                 ItemCreationSettingsView(
@@ -231,7 +229,7 @@ struct DebugMenuView: View {
         await MainActor.run { isResettingData = true }
 
         do {
-            try await progressService.resetAllProgress()
+            try await appServices.resetAllProgress()
             await MainActor.run {
                 isResettingData = false
                 showResetCompleteAlert = true
@@ -262,7 +260,7 @@ struct DebugMenuView: View {
                 uniqueKeysWithValues: ItemCategory.allCases.enumerated().map { ($1.rawValue, $0) }
             )
 
-            let allItems = try await masterDataService.getAllItems()
+            let allItems = masterData.allItems
                 .filter { selectedCategoryRawValues.contains($0.category) }
                 .sorted { lhs, rhs in
                     let lhsPriority = categoryPriority[lhs.category] ?? Int.max
@@ -489,13 +487,13 @@ struct DebugMenuView: View {
         defer { Task { @MainActor in isSendingDropNotifications = false } }
 
         do {
-            let allItems = try await masterDataService.getAllItems()
+            let allItems = masterData.allItems
             guard !allItems.isEmpty else {
                 debugLog("[DebugMenu] No items found for drop notification test")
                 return
             }
 
-            let allSuperRareTitles = try await masterDataService.getAllSuperRareTitles()
+            let allSuperRareTitles = masterData.allSuperRareTitles
             let superRareCount = max(1, allSuperRareTitles.count)
 
             switch dropNotificationMode {
@@ -504,13 +502,13 @@ struct DebugMenuView: View {
                 for _ in 0..<dropNotificationCount {
                     dropResults.append(makeRandomDropResult(allItems: allItems, superRareCount: superRareCount))
                 }
-                await progressService.dropNotifications.publish(results: dropResults)
+                appServices.dropNotifications.publish(results: dropResults)
                 debugLog("[DebugMenu] Sent \(dropResults.count) test drop notifications (bulk)")
 
             case .sequential:
                 for i in 0..<dropNotificationCount {
                     let result = makeRandomDropResult(allItems: allItems, superRareCount: superRareCount)
-                    await progressService.dropNotifications.publish(results: [result])
+                    appServices.dropNotifications.publish(results: [result])
                     debugLog("[DebugMenu] Sent test drop notification \(i + 1)/\(dropNotificationCount)")
                     if i < dropNotificationCount - 1 {
                         try await Task.sleep(for: .milliseconds(500))

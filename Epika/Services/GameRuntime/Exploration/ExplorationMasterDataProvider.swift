@@ -11,20 +11,19 @@ protocol ExplorationMasterDataProvider: Sendable {
     func explorationEvents() async throws -> [ExplorationEventDefinition]
 }
 
-struct MasterDataRepositoryExplorationProvider: ExplorationMasterDataProvider {
-    private let repository: MasterDataRepository
+struct MasterDataCacheExplorationProvider: ExplorationMasterDataProvider, Sendable {
+    private let masterData: MasterDataCache
 
-    init(repository: MasterDataRepository) {
-        self.repository = repository
+    nonisolated init(masterData: MasterDataCache) {
+        self.masterData = masterData
     }
 
     func dungeonBundle(for dungeonId: UInt16) async throws -> ExplorationDungeonBundle {
-        let (dungeons, encounterTables, floors) = try await repository.allDungeons()
-        guard let dungeon = dungeons.first(where: { $0.id == dungeonId }) else {
+        guard let dungeon = masterData.dungeon(dungeonId) else {
             throw RuntimeError.masterDataNotFound(entity: "dungeon", identifier: String(dungeonId))
         }
 
-        let relevantFloors = floors
+        let relevantFloors = masterData.allDungeonFloors
             .filter { $0.dungeonId == dungeonId }
             .sorted { $0.floorNumber < $1.floorNumber }
 
@@ -32,13 +31,13 @@ struct MasterDataRepositoryExplorationProvider: ExplorationMasterDataProvider {
             throw RuntimeError.invalidConfiguration(reason: "Dungeon \(dungeonId) does not define any floors")
         }
 
-        let tablesById = Dictionary(uniqueKeysWithValues: encounterTables.map { ($0.id, $0) })
+        let tablesById = Dictionary(uniqueKeysWithValues: masterData.allEncounterTables.map { ($0.id, $0) })
         return ExplorationDungeonBundle(dungeon: dungeon,
                                         floors: relevantFloors,
                                         encounterTablesById: tablesById)
     }
 
     func explorationEvents() async throws -> [ExplorationEventDefinition] {
-        try await repository.allExplorationEvents()
+        masterData.allExplorationEvents
     }
 }
