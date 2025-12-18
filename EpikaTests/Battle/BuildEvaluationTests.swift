@@ -7,7 +7,7 @@ final class BuildEvaluationTests: XCTestCase {
 
     // MARK: - Cached Data
 
-    private var repository: MasterDataRepository!
+    private var cache: MasterDataCache!
     private var races: [UInt8: RaceDefinition] = [:]
     private var jobs: [UInt8: JobDefinition] = [:]
     private var skills: [UInt16: SkillDefinition] = [:]
@@ -18,22 +18,19 @@ final class BuildEvaluationTests: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        repository = MasterDataRepository()
+        let manager = SQLiteMasterDataManager()
+        cache = try await MasterDataLoader.load(manager: manager)
 
-        let raceList = try await repository.allRaces()
-        races = Dictionary(uniqueKeysWithValues: raceList.map { ($0.id, $0) })
+        races = Dictionary(uniqueKeysWithValues: cache.allRaces.map { ($0.id, $0) })
 
-        let jobList = try await repository.allJobs()
-        jobs = Dictionary(uniqueKeysWithValues: jobList.map { ($0.id, $0) })
+        jobs = Dictionary(uniqueKeysWithValues: cache.allJobs.map { ($0.id, $0) })
 
-        let skillList = try await repository.allSkills()
-        skills = Dictionary(uniqueKeysWithValues: skillList.map { ($0.id, $0) })
+        skills = Dictionary(uniqueKeysWithValues: cache.allSkills.map { ($0.id, $0) })
 
-        racePassiveSkills = try await SQLiteMasterDataManager.shared.fetchAllRacePassiveSkills()
+        racePassiveSkills = cache.racePassiveSkills
 
         // レベル解放スキルも取得（全スキルIDのみ抽出）
-        let unlocks = try await SQLiteMasterDataManager.shared.fetchAllRaceSkillUnlocks()
-        raceSkillUnlocks = unlocks.mapValues { $0.map { $0.skillId } }
+        raceSkillUnlocks = cache.raceSkillUnlocks.mapValues { $0.map { UInt16($0.skillId) } }
     }
 
     // MARK: - Main Test

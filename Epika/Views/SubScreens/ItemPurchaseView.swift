@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ItemPurchaseView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @Environment(AppServices.self) private var appServices
     @State private var shopItems: [ShopProgressService.ShopItem] = []
     @State private var player: PlayerSnapshot?
     @State private var showError = false
@@ -10,7 +10,7 @@ struct ItemPurchaseView: View {
     @State private var showPurchaseAlert = false
     @State private var isLoading = false
 
-    private var shopService: ShopProgressService { progressService.shop }
+    private var shopService: ShopProgressService { appServices.shop }
 
     var playerGold: Int { Int(player?.gold ?? 0) }
 
@@ -66,7 +66,7 @@ struct ItemPurchaseView: View {
         defer { isLoading = false }
         do {
             shopItems = try await shopService.loadItems()
-            player = try await progressService.gameState.loadCurrentPlayer()
+            player = try await appServices.gameState.loadCurrentPlayer()
         } catch {
             showError = true
             errorMessage = error.localizedDescription

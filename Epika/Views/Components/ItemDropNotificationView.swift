@@ -34,7 +34,7 @@ struct GlassEffectModifier: ViewModifier {
 }
 
 struct ItemDropNotificationView: View {
-    @EnvironmentObject private var dropService: ItemDropNotificationService
+    @Environment(ItemDropNotificationService.self) private var dropService
 
     var body: some View {
         contentView

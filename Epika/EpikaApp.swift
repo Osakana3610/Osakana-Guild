@@ -12,7 +12,7 @@ import SwiftData
 struct EpikaApp: App {
     private let isRunningTests: Bool = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     @State private var sharedModelContainer: ModelContainer?
-    @State private var progressService: ProgressService?
+    @State private var appServices: AppServices?
     @State private var initializationError: String?
     @State private var didBoot = false
 
@@ -28,8 +28,9 @@ struct EpikaApp: App {
                 Group {
                     if let error = initializationError {
                         StartupErrorView(message: error)
-                    } else if let container = sharedModelContainer, let progressService {
-                        RootView(progressService: progressService)
+                    } else if let container = sharedModelContainer,
+                              let appServices {
+                        RootView(appServices: appServices)
                             .modelContainer(container)
                             .task { await initializeSystems() }
                     } else {
@@ -56,10 +57,23 @@ struct EpikaApp: App {
             return
         }
 
+        // 1. MasterDataを先にロード（SHA-256検証 + SQLiteからプリロード）
+        let cache: MasterDataCache
+        let manager: SQLiteMasterDataManager
+        do {
+            manager = SQLiteMasterDataManager()
+            cache = try await MasterDataLoader.load(manager: manager)
+        } catch {
+            initializationError = "マスターデータ初期化に失敗しました: \(error.localizedDescription)"
+            return
+        }
+
+        // 2. SwiftDataコンテナ初期化
         do {
             let bootstrap = try await ProgressBootstrapper.shared.boot()
             sharedModelContainer = bootstrap.container
-            progressService = ProgressService(container: bootstrap.container)
+            appServices = AppServices(container: bootstrap.container,
+                                       masterDataCache: cache)
         } catch {
             initializationError = "データベース初期化に失敗しました: \(error.localizedDescription)"
         }
@@ -67,18 +81,7 @@ struct EpikaApp: App {
 
     @MainActor
     private func initializeSystems() async {
-        await initializeSQLiteMasterData()
-        await DungeonDisplayNameFormatter.preloadTitles()
         await requestNotificationPermission()
-    }
-
-    @MainActor
-    private func initializeSQLiteMasterData() async {
-        do {
-            try await MasterDataRuntimeService.shared.initializeSQLite()
-        } catch {
-            initializationError = "マスターデータ初期化に失敗しました: \(error.localizedDescription)"
-        }
     }
 
     @MainActor

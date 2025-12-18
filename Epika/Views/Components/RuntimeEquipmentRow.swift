@@ -109,6 +109,7 @@ struct EquipmentStatsView: View {
 }
 
 private struct TaskView: View {
+    @Environment(AppServices.self) private var appServices
     let equipment: RuntimeEquipment
     @State private var deltas: [(String, Int)] = []
 
@@ -121,12 +122,12 @@ private struct TaskView: View {
                 }
             }
             .task {
-                self.deltas = ItemPreloadService.shared.getCombatDeltaDisplay(for: equipment)
+                self.deltas = appServices.itemPreload.getCombatDeltaDisplay(for: equipment)
             }
         } else {
             // 初回ロード
             HStack {}.task {
-                self.deltas = ItemPreloadService.shared.getCombatDeltaDisplay(for: equipment)
+                self.deltas = appServices.itemPreload.getCombatDeltaDisplay(for: equipment)
             }
         }
     }

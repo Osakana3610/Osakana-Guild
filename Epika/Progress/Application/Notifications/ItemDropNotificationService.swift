@@ -1,9 +1,15 @@
 import Foundation
-import Combine
+import Observation
 
 @MainActor
-final class ItemDropNotificationService: ObservableObject {
-    @Published private(set) var droppedItems: [DroppedItemNotification] = []
+@Observable
+final class ItemDropNotificationService {
+    private let masterDataCache: MasterDataCache
+    private(set) var droppedItems: [DroppedItemNotification] = []
+
+    init(masterDataCache: MasterDataCache) {
+        self.masterDataCache = masterDataCache
+    }
 
     struct DroppedItemNotification: Identifiable, Hashable, Sendable {
         let id: UUID
@@ -29,18 +35,17 @@ final class ItemDropNotificationService: ObservableObject {
         }
     }
 
-    func publish(results: [ItemDropResult]) async {
-        let masterData = MasterDataRuntimeService.shared
+    func publish(results: [ItemDropResult]) {
         let now = Date()
         var newNotifications: [DroppedItemNotification] = []
         for result in results {
             var normalTitleName: String?
             var superRareTitleName: String?
             if let normalId = result.normalTitleId {
-                normalTitleName = try? await masterData.getTitleMasterData(id: normalId)?.name
+                normalTitleName = masterDataCache.title(normalId)?.name
             }
             if let superRareId = result.superRareTitleId {
-                superRareTitleName = try? await masterData.getSuperRareTitle(id: superRareId)?.name
+                superRareTitleName = masterDataCache.superRareTitle(superRareId)?.name
             }
             let count = max(1, result.quantity)
             for _ in 0..<count {

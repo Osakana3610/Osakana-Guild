@@ -4,8 +4,7 @@ import Observation
 @MainActor
 @Observable
 final class AdventureViewState {
-    private var progressService: ProgressService?
-    private var activeExplorationHandles: [UInt8: ProgressService.ExplorationRunHandle] = [:]
+    private var activeExplorationHandles: [UInt8: AppServices.ExplorationRunHandle] = [:]
     private var activeExplorationTasks: [UInt8: Task<Void, Never>] = [:]
 
     var selectedPartyIndex: Int = 0
@@ -23,69 +22,27 @@ final class AdventureViewState {
 
     var partyState: PartyViewState?
 
-    init(progressService: ProgressService? = nil) {
-        self.progressService = progressService
-    }
-
-    func configureIfNeeded(with progressService: ProgressService) {
-        if self.progressService == nil {
-            self.progressService = progressService
-        }
-    }
-
     func setPartyState(_ partyState: PartyViewState) {
         self.partyState = partyState
     }
 
-    private var partyService: PartyProgressService {
-        guard let progressService else {
-            fatalError("AdventureViewState is not configured with ProgressService")
-        }
-        return progressService.party
-    }
-
-    private var gameStateService: GameStateService {
-        guard let progressService else {
-            fatalError("AdventureViewState is not configured with ProgressService")
-        }
-        return progressService.gameState
-    }
-
-    private var explorationService: ExplorationProgressService {
-        guard let progressService else {
-            fatalError("AdventureViewState is not configured with ProgressService")
-        }
-        return progressService.exploration
-    }
-
-    private var dungeonService: DungeonProgressService {
-        guard let progressService else {
-            fatalError("AdventureViewState is not configured with ProgressService")
-        }
-        return progressService.dungeon
-    }
-
-    private var masterDataService: MasterDataRuntimeService { .shared }
-
-    func loadInitialData() async {
+    func loadInitialData(using appServices: AppServices) async {
         // 孤立した探索（.running状態だがアクティブタスクがない）を検出して再開
-        await resumeOrphanedExplorations()
+        await resumeOrphanedExplorations(using: appServices)
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadPartiesIfNeeded() }
-            group.addTask { await self.loadDungeons() }
-            group.addTask { await self.loadExplorationProgress() }
-            group.addTask { await self.loadPlayer() }
+            group.addTask { await self.loadDungeons(using: appServices) }
+            group.addTask { await self.loadExplorationProgress(using: appServices) }
+            group.addTask { await self.loadPlayer(using: appServices) }
         }
     }
 
     /// アプリ再起動後に残っている.running状態の探索を再開
-    private func resumeOrphanedExplorations() async {
-        guard let progressService else { return }
-
+    private func resumeOrphanedExplorations(using appServices: AppServices) async {
         let allExplorations: [ExplorationSnapshot]
         do {
-            allExplorations = try await explorationService.allExplorations()
+            allExplorations = try await appServices.exploration.allExplorations()
         } catch {
             present(error: error)
             return
@@ -98,15 +55,15 @@ final class AdventureViewState {
         var firstError: Error?
         for snapshot in orphaned {
             do {
-                let handle = try await progressService.resumeOrphanedExploration(
+                let handle = try await appServices.resumeOrphanedExploration(
                     partyId: snapshot.party.partyId,
                     startedAt: snapshot.startedAt
                 )
                 activeExplorationHandles[snapshot.party.partyId] = handle
                 let partyId = snapshot.party.partyId
-                activeExplorationTasks[partyId] = Task { [weak self] in
+                activeExplorationTasks[partyId] = Task { [weak self, appServices] in
                     guard let self else { return }
-                    await self.runExplorationStream(handle: handle, partyId: partyId)
+                    await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
                 }
             } catch {
                 // 1件の再開失敗で全体を止めず、残りも試行する
@@ -132,30 +89,28 @@ final class AdventureViewState {
         }
     }
 
-    func loadDungeons() async {
+    func loadDungeons(using appServices: AppServices) async {
         do {
-            if let progressService {
-                try await progressService.synchronizeStoryAndDungeonUnlocks()
-            }
+            try await appServices.synchronizeStoryAndDungeonUnlocks()
         } catch {
             present(error: error)
             return
         }
-        await reloadDungeonList()
+        await reloadDungeonList(using: appServices)
     }
 
     /// 同期せずにダンジョンリストを再読み込み（通知ハンドラ用、無限ループ防止）
-    func reloadDungeonList() async {
+    func reloadDungeonList(using appServices: AppServices) async {
         do {
-            async let definitionTask = masterDataService.getAllDungeons()
-            async let progressTask = dungeonService.allDungeonSnapshots()
-            let (definitions, progressSnapshots) = try await (definitionTask, progressTask)
+            let dungeonService = appServices.dungeon
+            let definitions = appServices.masterDataCache.allDungeons
+            let progressSnapshots = try await dungeonService.allDungeonSnapshots()
             var progressCache = Dictionary(progressSnapshots.map { ($0.dungeonId, $0) },
                                            uniquingKeysWith: { _, latest in latest })
             var built: [RuntimeDungeon] = []
             built.reserveCapacity(definitions.count)
             for definition in definitions {
-                let snapshot = try await resolveDungeonProgress(id: definition.id, cache: &progressCache)
+                let snapshot = try await resolveDungeonProgress(id: definition.id, cache: &progressCache, using: appServices)
                 built.append(RuntimeDungeon(definition: definition, progress: snapshot))
             }
             runtimeDungeons = built
@@ -176,17 +131,17 @@ final class AdventureViewState {
         }
     }
 
-    func loadExplorationProgress() async {
+    func loadExplorationProgress(using appServices: AppServices) async {
         do {
-            explorationProgress = try await explorationService.allExplorations()
+            explorationProgress = try await appServices.exploration.allExplorations()
         } catch {
             present(error: error)
         }
     }
 
-    func loadPlayer() async {
+    func loadPlayer(using appServices: AppServices) async {
         do {
-            playerProgress = try await gameStateService.loadCurrentPlayer()
+            playerProgress = try await appServices.gameState.loadCurrentPlayer()
         } catch {
             present(error: error)
         }
@@ -198,59 +153,56 @@ final class AdventureViewState {
         showPartyDetail = false
     }
 
-    func refreshAll() async {
-        await loadDungeons()
-        await loadExplorationProgress()
+    func refreshAll(using appServices: AppServices) async {
+        await loadDungeons(using: appServices)
+        await loadExplorationProgress(using: appServices)
         await loadPartiesIfNeeded()
-        await loadPlayer()
-        await ensurePartySlots()
+        await loadPlayer(using: appServices)
+        await ensurePartySlots(using: appServices)
     }
 
-    func ensurePartySlots() async {
+    func ensurePartySlots(using appServices: AppServices) async {
         guard let partyState else { return }
         do {
-            let profile = try await gameStateService.loadCurrentPlayer()
+            let profile = try await appServices.gameState.loadCurrentPlayer()
             playerProgress = profile
-            _ = try await partyService.ensurePartySlots(atLeast: Int(profile.partySlots))
+            _ = try await appServices.party.ensurePartySlots(atLeast: Int(profile.partySlots))
             try await partyState.refresh()
         } catch {
             present(error: error)
         }
     }
 
-    func startExploration(party: RuntimeParty, dungeon: RuntimeDungeon) async throws {
+    func startExploration(party: RuntimeParty, dungeon: RuntimeDungeon, using appServices: AppServices) async throws {
         guard activeExplorationTasks[party.id] == nil else {
             throw RuntimeError.explorationAlreadyActive(dungeonId: dungeon.id)
         }
-        guard let progressService else {
-            throw RuntimeError.missingProgressData(reason: "ProgressService が未設定です")
-        }
 
-        let handle = try await progressService.startExplorationRun(for: party.id,
+        let handle = try await appServices.startExplorationRun(for: party.id,
                                                                    dungeonId: dungeon.id,
                                                                    targetFloor: Int(party.targetFloor))
         let partyId = party.id
         activeExplorationHandles[partyId] = handle
-        activeExplorationTasks[partyId] = Task { [weak self] in
+        activeExplorationTasks[partyId] = Task { [weak self, appServices] in
             guard let self else { return }
-            await self.runExplorationStream(handle: handle, partyId: partyId)
+            await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
         }
 
-        await loadExplorationProgress()
+        await loadExplorationProgress(using: appServices)
     }
 
-    func cancelExploration(for party: RuntimeParty) async {
+    func cancelExploration(for party: RuntimeParty, using appServices: AppServices) async {
         let partyId = party.id
         if let handle = activeExplorationHandles[partyId] {
             activeExplorationTasks[partyId]?.cancel()
             await handle.cancel()
             activeExplorationHandles[partyId] = nil
             activeExplorationTasks[partyId] = nil
-            await loadExplorationProgress()
+            await loadExplorationProgress(using: appServices)
             return
         }
 
-        await cancelPersistedExploration(for: party)
+        await cancelPersistedExploration(for: party, using: appServices)
     }
 
     func isExploring(partyId: UInt8) -> Bool {
@@ -258,11 +210,11 @@ final class AdventureViewState {
         return explorationProgress.contains { $0.party.partyId == partyId && $0.status == .running }
     }
 
-    private func runExplorationStream(handle: ProgressService.ExplorationRunHandle, partyId: UInt8) async {
+    private func runExplorationStream(handle: AppServices.ExplorationRunHandle, partyId: UInt8, using appServices: AppServices) async {
         do {
             for try await update in handle.updates {
                 try Task.checkCancellation()
-                await processExplorationUpdate(update)
+                await processExplorationUpdate(update, using: appServices)
             }
         } catch {
             await handle.cancel()
@@ -273,7 +225,7 @@ final class AdventureViewState {
 
         // タスク参照をクリアしてからUIを更新（isExploringが正しくfalseを返すように）
         clearExplorationTask(partyId: partyId)
-        await loadExplorationProgress()
+        await loadExplorationProgress(using: appServices)
     }
 
     private func clearExplorationTask(partyId: UInt8) {
@@ -281,35 +233,35 @@ final class AdventureViewState {
         activeExplorationHandles[partyId] = nil
     }
 
-    private func processExplorationUpdate(_ update: ProgressService.ExplorationRunUpdate) async {
+    private func processExplorationUpdate(_ update: AppServices.ExplorationRunUpdate, using appServices: AppServices) async {
         switch update.stage {
         case .step:
-            await loadExplorationProgress()
+            await loadExplorationProgress(using: appServices)
         case .completed:
-            await loadExplorationProgress()
-            await loadDungeons()
+            await loadExplorationProgress(using: appServices)
+            await loadDungeons(using: appServices)
         }
     }
 
-    private func cancelPersistedExploration(for party: RuntimeParty) async {
-        guard let progressService else { return }
+    private func cancelPersistedExploration(for party: RuntimeParty, using appServices: AppServices) async {
         guard let running = explorationProgress.first(where: { $0.party.partyId == party.id && $0.status == .running }) else {
             return
         }
         do {
-            try await progressService.cancelPersistedExplorationRun(partyId: running.party.partyId, startedAt: running.startedAt)
-            await loadExplorationProgress()
+            try await appServices.cancelPersistedExplorationRun(partyId: running.party.partyId, startedAt: running.startedAt)
+            await loadExplorationProgress(using: appServices)
         } catch {
             present(error: error)
         }
     }
 
     private func resolveDungeonProgress(id: UInt16,
-                                        cache: inout [UInt16: DungeonSnapshot]) async throws -> DungeonSnapshot {
+                                        cache: inout [UInt16: DungeonSnapshot],
+                                        using appServices: AppServices) async throws -> DungeonSnapshot {
         if let cached = cache[id] {
             return cached
         }
-        let ensured = try await dungeonService.ensureDungeonSnapshot(for: id)
+        let ensured = try await appServices.dungeon.ensureDungeonSnapshot(for: id)
         cache[id] = ensured
         return ensured
     }

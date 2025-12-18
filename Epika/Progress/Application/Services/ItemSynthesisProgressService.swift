@@ -9,16 +9,18 @@ actor ItemSynthesisProgressService {
 
     private let inventoryService: InventoryProgressService
     private let gameStateService: GameStateService
-    private let masterDataService = MasterDataRuntimeService.shared
+    private let masterDataCache: MasterDataCache
 
     init(inventoryService: InventoryProgressService,
-         gameStateService: GameStateService) {
+         gameStateService: GameStateService,
+         masterDataCache: MasterDataCache) {
         self.inventoryService = inventoryService
         self.gameStateService = gameStateService
+        self.masterDataCache = masterDataCache
     }
 
     func availableParentItems() async throws -> [RuntimeEquipment] {
-        let recipes = try await loadRecipes()
+        let recipes = loadRecipes()
         let parentIds = Set(recipes.map { $0.parentItemId })
         guard !parentIds.isEmpty else { return [] }
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
@@ -26,7 +28,7 @@ actor ItemSynthesisProgressService {
     }
 
     func availableChildItems(forParent parent: RuntimeEquipment) async throws -> [RuntimeEquipment] {
-        let recipes = try await loadRecipes()
+        let recipes = loadRecipes()
         let childIds = Set(recipes.filter { $0.parentItemId == parent.itemId }.map { $0.childItemId })
         guard !childIds.isEmpty else { return [] }
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
@@ -83,8 +85,8 @@ actor ItemSynthesisProgressService {
         )
     }
 
-    private func loadRecipes() async throws -> [SynthesisRecipeDefinition] {
-        try await masterDataService.getAllSynthesisRecipes()
+    private func loadRecipes() -> [SynthesisRecipeDefinition] {
+        masterDataCache.allSynthesisRecipes
     }
 
     private func resolveContext(
@@ -106,12 +108,12 @@ actor ItemSynthesisProgressService {
             throw ProgressError.invalidInput(description: "子アイテムが見つかりません")
         }
 
-        let recipes = try await loadRecipes()
+        let recipes = loadRecipes()
         guard let recipe = recipes.first(where: { $0.parentItemId == parent.itemId && $0.childItemId == child.itemId }) else {
             throw ProgressError.invalidInput(description: "指定の組み合わせは合成レシピに存在しません")
         }
 
-        guard let resultDefinition = try await masterDataService.getItemMasterData(id: recipe.resultItemId) else {
+        guard let resultDefinition = masterDataCache.item(recipe.resultItemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(recipe.resultItemId)])
         }
 

@@ -4,17 +4,17 @@ import Observation
 @MainActor
 @Observable
 final class PartyViewState {
-    private let progressService: ProgressService
+    private let appServices: AppServices
 
     var parties: [RuntimeParty] = []
     var isLoading: Bool = false
     private var ongoingLoad: Task<Void, Error>? = nil
 
-    init(progressService: ProgressService) {
-        self.progressService = progressService
+    init(appServices: AppServices) {
+        self.appServices = appServices
     }
 
-    private var partyService: PartyProgressService { progressService.party }
+    private var partyService: PartyProgressService { appServices.party }
 
     func loadAllParties() async throws {
         if let task = ongoingLoad {

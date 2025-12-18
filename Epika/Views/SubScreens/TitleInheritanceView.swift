@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TitleInheritanceView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @Environment(AppServices.self) private var appServices
     @State private var targetItems: [RuntimeEquipment] = []
     @State private var sourceItems: [RuntimeEquipment] = []
     @State private var selectedTarget: RuntimeEquipment?
@@ -15,7 +15,7 @@ struct TitleInheritanceView: View {
     @State private var showTargetPicker = false
     @State private var showSourcePicker = false
 
-    private var titleService: TitleInheritanceProgressService { progressService.titleInheritance }
+    private var titleService: TitleInheritanceProgressService { appServices.titleInheritance }
 
     var body: some View {
         NavigationStack {

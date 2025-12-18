@@ -194,8 +194,8 @@ enum SkillEffectHandlerRegistry {
         ]
 
         for handler in allHandlers {
-            precondition(dict[handler.effectType] == nil,
-                         "Duplicate handler for \(handler.effectType)")
+            assert(dict[handler.effectType] == nil,
+                   "Duplicate handler for \(handler.effectType)")
             dict[handler.effectType] = handler
         }
 

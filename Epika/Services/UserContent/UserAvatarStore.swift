@@ -93,35 +93,26 @@ private extension UserAvatarStore {
 
     static func preparePNGData(from data: Data, maxDimension: CGFloat) throws -> Data {
         let sourceOptions: [CFString: Any] = [kCGImageSourceShouldCache: false]
-        guard let source = CGImageSourceCreateWithData(data as CFData, sourceOptions as CFDictionary),
-              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+        guard let source = CGImageSourceCreateWithData(data as CFData, sourceOptions as CFDictionary) else {
             throw AvatarStoreError.unsupportedImage
         }
 
-        let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
-        let orientation = properties.flatMap { Self.orientation(from: $0) } ?? CGImagePropertyOrientation.up
-        let processed = try preprocess(image: cgImage,
-                                       orientation: orientation,
-                                       maxDimension: maxDimension)
+        // 読み込み時点で縮小（メモリ効率化：原寸展開を避ける）
+        let thumbnailOptions: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxDimension,
+            kCGImageSourceCreateThumbnailWithTransform: true
+        ]
+        guard let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, thumbnailOptions as CFDictionary) else {
+            throw AvatarStoreError.unsupportedImage
+        }
+
+        let processed = try applyMonoEffect(to: cgImage)
         return try pngData(from: processed)
     }
 
-    static func preprocess(image: CGImage,
-                           orientation: CGImagePropertyOrientation,
-                           maxDimension: CGFloat) throws -> CGImage {
-        var ciImage = CIImage(cgImage: image).oriented(orientation)
-
-        let extent = ciImage.extent.integral
-        let maxSide = max(extent.width, extent.height)
-        if maxSide > maxDimension {
-            let scaleFilter = CIFilter.lanczosScaleTransform()
-            scaleFilter.inputImage = ciImage
-            scaleFilter.scale = Float(maxDimension / maxSide)
-            scaleFilter.aspectRatio = 1.0
-            if let output = scaleFilter.outputImage {
-                ciImage = output
-            }
-        }
+    static func applyMonoEffect(to image: CGImage) throws -> CGImage {
+        var ciImage = CIImage(cgImage: image)
 
         let monoFilter = CIFilter.photoEffectMono()
         monoFilter.inputImage = ciImage

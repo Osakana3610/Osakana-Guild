@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ItemSynthesisView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @Environment(AppServices.self) private var appServices
     @State private var parentItems: [RuntimeEquipment] = []
     @State private var childItems: [RuntimeEquipment] = []
     @State private var selectedParent: RuntimeEquipment?
@@ -15,7 +15,7 @@ struct ItemSynthesisView: View {
     @State private var showParentPicker = false
     @State private var showChildPicker = false
 
-    private var synthesisService: ItemSynthesisProgressService { progressService.itemSynthesis }
+    private var synthesisService: ItemSynthesisProgressService { appServices.itemSynthesis }
 
     var body: some View {
         NavigationStack {
