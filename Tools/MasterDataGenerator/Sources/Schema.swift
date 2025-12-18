@@ -92,8 +92,7 @@ extension Generator {
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,
                 type INTEGER NOT NULL,
-                category INTEGER NOT NULL,
-                acquisition_conditions_json TEXT NOT NULL
+                category INTEGER NOT NULL
             );
             """,
             """
@@ -101,13 +100,40 @@ extension Generator {
                 skill_id INTEGER NOT NULL,
                 effect_index INTEGER NOT NULL,
                 kind INTEGER NOT NULL,
-                value REAL,
-                value_percent REAL,
-                stat_type INTEGER,
-                damage_type INTEGER,
-                payload_json TEXT,
+                family_id INTEGER,
                 PRIMARY KEY (skill_id, effect_index),
                 FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS skill_effect_params (
+                skill_id INTEGER NOT NULL,
+                effect_index INTEGER NOT NULL,
+                param_type INTEGER NOT NULL,
+                int_value INTEGER NOT NULL,
+                PRIMARY KEY (skill_id, effect_index, param_type),
+                FOREIGN KEY (skill_id, effect_index) REFERENCES skill_effects(skill_id, effect_index) ON DELETE CASCADE
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS skill_effect_values (
+                skill_id INTEGER NOT NULL,
+                effect_index INTEGER NOT NULL,
+                value_type INTEGER NOT NULL,
+                value REAL NOT NULL,
+                PRIMARY KEY (skill_id, effect_index, value_type),
+                FOREIGN KEY (skill_id, effect_index) REFERENCES skill_effects(skill_id, effect_index) ON DELETE CASCADE
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS skill_effect_array_values (
+                skill_id INTEGER NOT NULL,
+                effect_index INTEGER NOT NULL,
+                array_type INTEGER NOT NULL,
+                element_index INTEGER NOT NULL,
+                int_value INTEGER NOT NULL,
+                PRIMARY KEY (skill_id, effect_index, array_type, element_index),
+                FOREIGN KEY (skill_id, effect_index) REFERENCES skill_effects(skill_id, effect_index) ON DELETE CASCADE
             );
             """,
             """
@@ -568,17 +594,6 @@ extension Generator {
                 name TEXT NOT NULL,
                 kind INTEGER NOT NULL,
                 description TEXT NOT NULL
-            );
-            """,
-            """
-            CREATE TABLE IF NOT EXISTS personality_primary_effects (
-                personality_id INTEGER NOT NULL,
-                order_index INTEGER NOT NULL,
-                effect_type INTEGER NOT NULL,
-                value REAL,
-                payload_json TEXT,
-                PRIMARY KEY (personality_id, order_index),
-                FOREIGN KEY (personality_id) REFERENCES personality_primary(id) ON DELETE CASCADE
             );
             """,
             """
