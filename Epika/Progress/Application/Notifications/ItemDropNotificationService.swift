@@ -7,6 +7,8 @@ final class ItemDropNotificationService {
     private let masterDataCache: MasterDataCache
     private(set) var droppedItems: [DroppedItemNotification] = []
 
+    private let maxNotificationCount = 20
+
     init(masterDataCache: MasterDataCache) {
         self.masterDataCache = masterDataCache
     }
@@ -63,6 +65,11 @@ final class ItemDropNotificationService {
             }
         }
         droppedItems.append(contentsOf: newNotifications)
+
+        // 最大件数を超えた場合、古いもの（先頭）から削除
+        if droppedItems.count > maxNotificationCount {
+            droppedItems.removeFirst(droppedItems.count - maxNotificationCount)
+        }
     }
 
     func clear() {
