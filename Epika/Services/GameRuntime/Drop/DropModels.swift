@@ -1,11 +1,30 @@
 import Foundation
 
 /// 旧ランタイムで使用していたドロップカテゴリを非決定論向けに再定義。
-enum DropItemCategory: String, Sendable {
-    case normal
-    case good
-    case rare
-    case gem
+enum DropItemCategory: UInt8, Sendable {
+    case normal = 1
+    case good = 2
+    case rare = 3
+    case gem = 4
+
+    nonisolated init?(identifier: String) {
+        switch identifier {
+        case "normal": self = .normal
+        case "good": self = .good
+        case "rare": self = .rare
+        case "gem": self = .gem
+        default: return nil
+        }
+    }
+
+    nonisolated var identifier: String {
+        switch self {
+        case .normal: return "normal"
+        case .good: return "good"
+        case .rare: return "rare"
+        case .gem: return "gem"
+        }
+    }
 }
 
 /// パーティのドロップ系補正値を集計したもの。

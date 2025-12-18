@@ -166,7 +166,7 @@ private struct BaseStatAccumulator {
                 throw CombatStatCalculator.CalculationError.missingItemDefinition(Int16(item.itemId))
             }
             let categoryMultiplier = equipmentMultipliers[definition.category]
-                ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
+                ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).identifier]
                 ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
@@ -756,7 +756,7 @@ private struct CombatAccumulator {
             var addition: Double = 0.0
             for conversion in conversions {
                 guard let sourceValue = result[conversion.source] else {
-                    throw RuntimeError.invalidConfiguration(reason: "Stat conversion の元となる \(conversion.source.rawValue) の値が未確定です")
+                    throw RuntimeError.invalidConfiguration(reason: "Stat conversion の元となる \(conversion.source.identifier) の値が未確定です")
                 }
                 addition += sourceValue * conversion.ratio
             }
@@ -864,7 +864,7 @@ private struct CombatAccumulator {
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
             let categoryMultiplier = equipmentMultipliers[definition.category]
-                ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).rawValue]
+                ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).identifier]
                 ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
@@ -951,20 +951,20 @@ private struct CombatAccumulator {
 
 /// 戦闘ステータスの計算式は CombatFormulas.swift に分離
 
-private enum CombatStatKey: String, CaseIterable {
-    case maxHP
-    case physicalAttack
-    case magicalAttack
-    case physicalDefense
-    case magicalDefense
-    case hitRate
-    case evasionRate
-    case criticalRate
-    case attackCount
-    case magicalHealing
-    case trapRemoval
-    case additionalDamage
-    case breathDamage
+private enum CombatStatKey: UInt8, CaseIterable {
+    case maxHP = 1
+    case physicalAttack = 2
+    case magicalAttack = 3
+    case physicalDefense = 4
+    case magicalDefense = 5
+    case hitRate = 6
+    case evasionRate = 7
+    case criticalRate = 8
+    case attackCount = 9
+    case magicalHealing = 10
+    case trapRemoval = 11
+    case additionalDamage = 12
+    case breathDamage = 13
 
     init?(_ raw: String?) {
         guard let raw else { return nil }
@@ -983,6 +983,24 @@ private enum CombatStatKey: String, CaseIterable {
         case "additionalDamage": self = .additionalDamage
         case "breathDamage": self = .breathDamage
         default: return nil
+        }
+    }
+
+    var identifier: String {
+        switch self {
+        case .maxHP: return "maxHP"
+        case .physicalAttack: return "physicalAttack"
+        case .magicalAttack: return "magicalAttack"
+        case .physicalDefense: return "physicalDefense"
+        case .magicalDefense: return "magicalDefense"
+        case .hitRate: return "hitRate"
+        case .evasionRate: return "evasionRate"
+        case .criticalRate: return "criticalRate"
+        case .attackCount: return "attackCount"
+        case .magicalHealing: return "magicalHealing"
+        case .trapRemoval: return "trapRemoval"
+        case .additionalDamage: return "additionalDamage"
+        case .breathDamage: return "breathDamage"
         }
     }
 }

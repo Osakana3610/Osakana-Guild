@@ -15,7 +15,7 @@ final class InventoryItemRecord {
 
     // その他
     var quantity: UInt16 = 0
-    var storageRawValue: String = ItemStorage.playerItem.rawValue
+    var storageRawValue: UInt8 = ItemStorage.playerItem.rawValue
 
     var storage: ItemStorage {
         get { ItemStorage(rawValue: storageRawValue) ?? .unknown }

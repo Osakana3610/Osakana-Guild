@@ -46,9 +46,9 @@ extension BattleActor.SkillEffects.Reaction {
                      stats: ActorStats?) -> BattleActor.SkillEffects.Reaction? {
         guard payload.effectType == .reaction else { return nil }
         guard let triggerRaw = payload.parameters?["trigger"],
-              let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: triggerRaw) else { return nil }
+              let trigger = BattleActor.SkillEffects.Reaction.Trigger(identifier: triggerRaw) else { return nil }
         guard (payload.parameters?["action"] ?? "") == "counterAttack" else { return nil }
-        let target = BattleActor.SkillEffects.Reaction.Target(rawValue: payload.parameters?["target"] ?? "") ?? .attacker
+        let target = BattleActor.SkillEffects.Reaction.Target(identifier: payload.parameters?["target"] ?? "") ?? .attacker
         let requiresMartial = (payload.parameters?["requiresMartial"]?.lowercased() == "true")
         let damageIdentifier = payload.parameters?["damageType"] ?? "physical"
         let damageType = BattleDamageType(identifier: damageIdentifier) ?? .physical
@@ -78,7 +78,7 @@ extension BattleActor.SkillEffects.RowProfile {
     mutating func applyParameters(_ parameters: [String: String]?) {
         guard let parameters else { return }
         if let baseRaw = parameters["profile"],
-           let parsedBase = Base(rawValue: baseRaw) {
+           let parsedBase = Base(identifier: baseRaw) {
             base = parsedBase
         }
         if let near = parameters["nearApt"], near.lowercased() == "true" {
