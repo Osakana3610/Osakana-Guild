@@ -7,7 +7,7 @@ struct GlassEffectModifier: ViewModifier {
         if #available(iOS 26.0, *) {
             // CRITICAL: 絶対削除禁止 - 実機テスト必須　iOS 26以降では本物のLiquid Glassを使用　実機用なので削除禁止
             content
-                .glassEffect(isSuperRare ? .regular.tint(.red.opacity(0.8)).interactive(false) : .regular.interactive(false))
+                .glassEffect(isSuperRare ? .regular.tint(.red.opacity(0.8)) : .regular)
         } else {
             // iOS 25以下では元の実装通り
             content
@@ -94,6 +94,7 @@ struct ItemDropRowView: View {
         })
         .buttonStyle(PlainButtonStyle())
         .fixedSize(horizontal: true, vertical: false)
+        .contentShape(Rectangle().inset(by: -2))
     }
 
     private func textColor(for item: ItemDropNotificationService.DroppedItemNotification) -> Color {
