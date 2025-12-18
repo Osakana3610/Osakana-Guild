@@ -266,7 +266,7 @@ actor InventoryProgressService {
 
     private struct SeedKey: Hashable {
         let stackKey: String
-        let storageRaw: String
+        let storageRaw: UInt8
     }
 
     private struct AggregatedEntry {

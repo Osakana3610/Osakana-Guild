@@ -64,7 +64,22 @@ extension ItemSnapshot: Hashable {
     }
 }
 
-enum ItemStorage: String, Codable, Sendable {
-    case playerItem
-    case unknown
+enum ItemStorage: UInt8, Codable, Sendable {
+    case playerItem = 1
+    case unknown = 2
+
+    nonisolated init?(identifier: String) {
+        switch identifier {
+        case "playerItem": self = .playerItem
+        case "unknown": self = .unknown
+        default: return nil
+        }
+    }
+
+    nonisolated var identifier: String {
+        switch self {
+        case .playerItem: return "playerItem"
+        case .unknown: return "unknown"
+        }
+    }
 }

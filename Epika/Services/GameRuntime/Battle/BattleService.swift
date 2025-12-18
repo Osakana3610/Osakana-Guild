@@ -1,10 +1,27 @@
 import Foundation
 
 enum BattleService {
-    enum BattleResult: String, Sendable, Codable {
-        case victory
-        case defeat
-        case retreat
+    enum BattleResult: UInt8, Sendable, Codable {
+        case victory = 1
+        case defeat = 2
+        case retreat = 3
+
+        nonisolated init?(identifier: String) {
+            switch identifier {
+            case "victory": self = .victory
+            case "defeat": self = .defeat
+            case "retreat": self = .retreat
+            default: return nil
+            }
+        }
+
+        nonisolated var identifier: String {
+            switch self {
+            case .victory: return "victory"
+            case .defeat: return "defeat"
+            case .retreat: return "retreat"
+            }
+        }
     }
 
     struct Resolution: Sendable {

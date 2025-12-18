@@ -1,11 +1,30 @@
 import Foundation
 
 struct ExplorationSnapshot: Sendable, Hashable {
-    enum Status: String, Sendable, Hashable {
-        case running
-        case completed
-        case cancelled
-        case defeated
+    enum Status: UInt8, Sendable, Hashable {
+        case running = 1
+        case completed = 2
+        case cancelled = 3
+        case defeated = 4
+
+        nonisolated init?(identifier: String) {
+            switch identifier {
+            case "running": self = .running
+            case "completed": self = .completed
+            case "cancelled": self = .cancelled
+            case "defeated": self = .defeated
+            default: return nil
+            }
+        }
+
+        nonisolated var identifier: String {
+            switch self {
+            case .running: return "running"
+            case .completed: return "completed"
+            case .cancelled: return "cancelled"
+            case .defeated: return "defeated"
+            }
+        }
     }
 
     /// 探索報酬（経験値・ゴールド・アイテムドロップ）
@@ -22,10 +41,27 @@ struct ExplorationSnapshot: Sendable, Hashable {
     }
 
     struct EncounterLog: Sendable, Hashable {
-        enum Kind: String, Sendable {
-            case nothing
-            case enemyEncounter
-            case scriptedEvent
+        enum Kind: UInt8, Sendable {
+            case nothing = 1
+            case enemyEncounter = 2
+            case scriptedEvent = 3
+
+            nonisolated init?(identifier: String) {
+                switch identifier {
+                case "nothing": self = .nothing
+                case "enemyEncounter": self = .enemyEncounter
+                case "scriptedEvent": self = .scriptedEvent
+                default: return nil
+                }
+            }
+
+            nonisolated var identifier: String {
+                switch self {
+                case .nothing: return "nothing"
+                case .enemyEncounter: return "enemyEncounter"
+                case .scriptedEvent: return "scriptedEvent"
+                }
+            }
         }
 
         struct CombatSummary: Sendable, Hashable {

@@ -25,20 +25,57 @@ struct JobDefinition: Identifiable, Sendable, Hashable {
 }
 
 /// 戦闘係数の表示用enum
-enum CombatStat: String, CaseIterable {
-    case maxHP
-    case physicalAttack
-    case magicalAttack
-    case physicalDefense
-    case magicalDefense
-    case hitRate
-    case evasionRate
-    case criticalRate
-    case attackCount
-    case magicalHealing
-    case trapRemoval
-    case additionalDamage
-    case breathDamage
+enum CombatStat: UInt8, CaseIterable, Sendable {
+    case maxHP = 10
+    case physicalAttack = 11
+    case physicalDefense = 12
+    case magicalAttack = 13
+    case magicalDefense = 14
+    case magicalHealing = 15
+    case hitRate = 16
+    case evasionRate = 17
+    case criticalRate = 18
+    case attackCount = 19
+    case additionalDamage = 20
+    case trapRemoval = 21
+    case breathDamage = 22
+
+    nonisolated init?(identifier: String) {
+        switch identifier {
+        case "maxHP": self = .maxHP
+        case "physicalAttack": self = .physicalAttack
+        case "physicalDefense": self = .physicalDefense
+        case "magicalAttack": self = .magicalAttack
+        case "magicalDefense": self = .magicalDefense
+        case "magicalHealing": self = .magicalHealing
+        case "hitRate": self = .hitRate
+        case "evasionRate": self = .evasionRate
+        case "criticalRate": self = .criticalRate
+        case "attackCount": self = .attackCount
+        case "additionalDamage": self = .additionalDamage
+        case "trapRemoval": self = .trapRemoval
+        case "breathDamage": self = .breathDamage
+        default: return nil
+        }
+    }
+
+    nonisolated var identifier: String {
+        switch self {
+        case .maxHP: return "maxHP"
+        case .physicalAttack: return "physicalAttack"
+        case .physicalDefense: return "physicalDefense"
+        case .magicalAttack: return "magicalAttack"
+        case .magicalDefense: return "magicalDefense"
+        case .magicalHealing: return "magicalHealing"
+        case .hitRate: return "hitRate"
+        case .evasionRate: return "evasionRate"
+        case .criticalRate: return "criticalRate"
+        case .attackCount: return "attackCount"
+        case .additionalDamage: return "additionalDamage"
+        case .trapRemoval: return "trapRemoval"
+        case .breathDamage: return "breathDamage"
+        }
+    }
 
     var displayName: String {
         switch self {
