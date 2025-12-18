@@ -24,7 +24,7 @@ extension SkillRuntimeEffectCompiler {
                     }
                 case .spellTierUnlock:
                     let schoolRaw = try payload.requireParam("school", skillId: skill.id, effectIndex: effect.index)
-                    guard let schoolIndex = SpellDefinition.School(rawValue: schoolRaw)?.index else { continue }
+                    guard let schoolIndex = SpellDefinition.School(identifier: schoolRaw)?.index else { continue }
                     let tierValue = try payload.requireValue("tier", skillId: skill.id, effectIndex: effect.index)
                     let tier = max(0, Int(tierValue.rounded(.towardZero)))
                     guard tier > 0 else { continue }

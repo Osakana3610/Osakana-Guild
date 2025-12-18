@@ -131,18 +131,21 @@ extension SQLiteMasterDataManager {
 
         var skills: [EnemySkillDefinition] = []
         while sqlite3_step(statement) == SQLITE_ROW {
-            guard let nameC = sqlite3_column_text(statement, 1),
-                  let typeC = sqlite3_column_text(statement, 2),
-                  let targetingC = sqlite3_column_text(statement, 3) else { continue }
+            guard let nameC = sqlite3_column_text(statement, 1) else { continue }
 
-            let typeStr = String(cString: typeC)
-            let targetingStr = String(cString: targetingC)
+            let typeRaw = UInt8(sqlite3_column_int(statement, 2))
+            let targetingRaw = UInt8(sqlite3_column_int(statement, 3))
+            let id = UInt16(sqlite3_column_int(statement, 0))
 
-            guard let type = EnemySkillDefinition.SkillType(rawValue: typeStr),
-                  let targeting = EnemySkillDefinition.Targeting(rawValue: targetingStr) else { continue }
+            guard let type = EnemySkillDefinition.SkillType(rawValue: typeRaw) else {
+                throw SQLiteMasterDataError.executionFailed("未知の EnemySkill type \(typeRaw) (id=\(id))")
+            }
+            guard let targeting = EnemySkillDefinition.Targeting(rawValue: targetingRaw) else {
+                throw SQLiteMasterDataError.executionFailed("未知の EnemySkill targeting \(targetingRaw) (id=\(id))")
+            }
 
             let skill = EnemySkillDefinition(
-                id: UInt16(sqlite3_column_int(statement, 0)),
+                id: id,
                 name: String(cString: nameC),
                 type: type,
                 targeting: targeting,

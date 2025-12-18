@@ -100,7 +100,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS skill_effects (
                 skill_id INTEGER NOT NULL,
                 effect_index INTEGER NOT NULL,
-                kind TEXT NOT NULL,
+                kind INTEGER NOT NULL,
                 value REAL,
                 value_percent REAL,
                 stat_type TEXT,
@@ -114,10 +114,10 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS spells (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
-                school TEXT NOT NULL,
+                school INTEGER NOT NULL,
                 tier INTEGER NOT NULL,
-                category TEXT NOT NULL,
-                targeting TEXT NOT NULL,
+                category INTEGER NOT NULL,
+                targeting INTEGER NOT NULL,
                 max_targets_base INTEGER,
                 extra_targets_per_levels REAL,
                 hits_per_cast INTEGER,
@@ -132,7 +132,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS spell_buffs (
                 spell_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                type TEXT NOT NULL,
+                type INTEGER NOT NULL,
                 multiplier REAL NOT NULL,
                 PRIMARY KEY (spell_id, order_index),
                 FOREIGN KEY (spell_id) REFERENCES spells(id) ON DELETE CASCADE
@@ -409,8 +409,8 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS enemy_special_skills (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
-                type TEXT NOT NULL,
-                targeting TEXT NOT NULL,
+                type INTEGER NOT NULL,
+                targeting INTEGER NOT NULL,
                 chance_percent INTEGER NOT NULL,
                 uses_per_battle INTEGER NOT NULL,
                 multiplier REAL,
