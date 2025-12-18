@@ -137,7 +137,8 @@ extension BattleTurnEngine {
                 return (targetSide, index)
             }
         }
-        return (targetSide, coverCandidates.last!.0)
+        guard let last = coverCandidates.last else { return nil }
+        return (targetSide, last.0)
     }
 
     static func filterAlliedTargets(for attacker: BattleActor,

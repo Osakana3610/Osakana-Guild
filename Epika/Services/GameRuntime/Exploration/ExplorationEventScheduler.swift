@@ -1,13 +1,13 @@
 import Foundation
 
-struct ExplorationEventScheduler {
+struct ExplorationEventScheduler: Sendable {
     enum Category: Sendable {
         case nothing
         case scripted
         case combat
     }
 
-    private struct WeightConfig {
+    private struct WeightConfig: Sendable {
         let nothing: Double
         let scripted: Double
         let combat: Double
@@ -15,9 +15,9 @@ struct ExplorationEventScheduler {
 
     private let weights: WeightConfig
 
-    init(nothing: Double = 0.6,
-         scripted: Double = 0.1,
-         combat: Double = 0.3) {
+    nonisolated init(nothing: Double = 0.6,
+                     scripted: Double = 0.1,
+                     combat: Double = 0.3) {
         self.weights = WeightConfig(nothing: nothing,
                                     scripted: scripted,
                                     combat: combat)

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CharacterCreationView: View {
-    let progressService: ProgressService
+    let appServices: AppServices
     let onComplete: () -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -18,8 +18,8 @@ struct CharacterCreationView: View {
     @State private var raceDetailToShow: RaceDefinition?
     @State private var jobDetailToShow: JobDefinition?
 
-    private let masterData = MasterDataRuntimeService.shared
-    private var characterService: CharacterProgressService { progressService.character }
+    private var characterService: CharacterProgressService { appServices.character }
+    private var masterData: MasterDataCache { appServices.masterDataCache }
     var body: some View {
         NavigationStack {
             Group {
@@ -189,14 +189,7 @@ struct CharacterCreationView: View {
                                         .font(.title2)
                                         .foregroundStyle(name.trimmingCharacters(in: .whitespaces).isEmpty ? .secondary : .primary)
                                     Button {
-                                        Task { @MainActor in
-                                            do {
-                                                let randomName = try await masterData.getRandomCharacterName(forGenderCode: race.genderCode)
-                                                name = randomName
-                                            } catch {
-                                                creationErrorMessage = "名前の取得に失敗しました: \(error.localizedDescription)"
-                                            }
-                                        }
+                                        name = masterData.randomCharacterName(forGenderCode: race.genderCode)
                                     } label: {
                                         Image(systemName: "arrow.clockwise")
                                             .font(.caption)
@@ -276,28 +269,12 @@ struct CharacterCreationView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             selectedRace = race
-            name = ""
-            Task { @MainActor in
-                do {
-                    let randomName = try await masterData.getRandomCharacterName(forGenderCode: race.genderCode)
-                    name = randomName
-                } catch {
-                    creationErrorMessage = "名前の取得に失敗しました: \(error.localizedDescription)"
-                }
-            }
+            name = masterData.randomCharacterName(forGenderCode: race.genderCode)
         }
         .contextMenu {
             Button {
                 selectedRace = race
-                name = ""
-                Task { @MainActor in
-                    do {
-                        let randomName = try await masterData.getRandomCharacterName(forGenderCode: race.genderCode)
-                        name = randomName
-                    } catch {
-                        creationErrorMessage = "名前の取得に失敗しました: \(error.localizedDescription)"
-                    }
-                }
+                name = masterData.randomCharacterName(forGenderCode: race.genderCode)
             } label: {
                 Label("この種族を選択", systemImage: "checkmark.circle")
             }
@@ -410,16 +387,9 @@ struct CharacterCreationView: View {
         if isLoading { return }
         isLoading = true
         loadErrorMessage = nil
-        do {
-            async let racesTask = masterData.getAllRaces()
-            async let jobsTask = masterData.getAllJobs()
-            let (raceResults, jobResults) = try await (racesTask, jobsTask)
-            races = raceResults
-            // マスター職業（ID 101-116）は転職画面でのみ表示
-            jobs = jobResults.filter { $0.id < 101 || $0.id > 116 }
-        } catch {
-            loadErrorMessage = error.localizedDescription
-        }
+        races = masterData.allRaces
+        // マスター職業（ID 101-116）は転職画面でのみ表示
+        jobs = masterData.allJobs.filter { $0.id < 101 || $0.id > 116 }
         isLoading = false
     }
 
@@ -477,6 +447,7 @@ struct StatGrid: View {
 }
 
 struct RaceDetailSheet: View {
+    @Environment(AppServices.self) private var appServices
     let race: RaceDefinition
 
     @Environment(\.dismiss) private var dismiss
@@ -485,7 +456,7 @@ struct RaceDetailSheet: View {
     @State private var skillUnlocks: [(level: Int, skillId: UInt16)] = []
     @State private var isLoading = true
 
-    private let masterData = MasterDataRuntimeService.shared
+    private var masterData: MasterDataCache { appServices.masterDataCache }
 
     var body: some View {
         NavigationStack {
@@ -585,28 +556,19 @@ struct RaceDetailSheet: View {
 
     @MainActor
     private func loadData() async {
-        do {
-            async let skillsTask = masterData.getAllSkills()
-            async let passiveTask = masterData.getRacePassiveSkills()
-            async let unlocksTask = masterData.getRaceSkillUnlocks()
-
-            let (allSkills, allPassive, allUnlocks) = try await (skillsTask, passiveTask, unlocksTask)
-
-            var skillMap: [UInt16: SkillDefinition] = [:]
-            for skill in allSkills {
-                skillMap[skill.id] = skill
-            }
-            skills = skillMap
-            passiveSkillIds = allPassive[race.id] ?? []
-            skillUnlocks = allUnlocks[race.id] ?? []
-        } catch {
-            // 取得失敗時は空のまま
+        var skillMap: [UInt16: SkillDefinition] = [:]
+        for skill in masterData.allSkills {
+            skillMap[skill.id] = skill
         }
+        skills = skillMap
+        passiveSkillIds = masterData.racePassiveSkills[race.id] ?? []
+        skillUnlocks = masterData.raceSkillUnlocks[race.id] ?? []
         isLoading = false
     }
 }
 
 struct JobDetailSheet: View {
+    @Environment(AppServices.self) private var appServices
     let job: JobDefinition
     let genderCode: UInt8?
 
@@ -617,7 +579,7 @@ struct JobDetailSheet: View {
     @State private var growthTendency: String?
     @State private var isLoading = true
 
-    private let masterData = MasterDataRuntimeService.shared
+    private var masterData: MasterDataCache { appServices.masterDataCache }
 
     var body: some View {
         NavigationStack {
@@ -709,26 +671,16 @@ struct JobDetailSheet: View {
 
     @MainActor
     private func loadData() async {
-        do {
-            async let skillsTask = masterData.getAllSkills()
-            async let unlocksTask = masterData.getJobSkillUnlocks()
-            async let metadataTask = masterData.getJobMetadata()
+        var skillMap: [UInt16: SkillDefinition] = [:]
+        for skill in masterData.allSkills {
+            skillMap[skill.id] = skill
+        }
+        skills = skillMap
+        skillUnlocks = masterData.jobSkillUnlocks[job.id] ?? []
 
-            let (allSkills, allUnlocks, allMetadata) = try await (skillsTask, unlocksTask, metadataTask)
-
-            var skillMap: [UInt16: SkillDefinition] = [:]
-            for skill in allSkills {
-                skillMap[skill.id] = skill
-            }
-            skills = skillMap
-            skillUnlocks = allUnlocks[job.id] ?? []
-
-            if let metadata = allMetadata[job.id] {
-                category = metadata.category
-                growthTendency = metadata.growthTendency
-            }
-        } catch {
-            // 取得失敗時は空のまま
+        if let metadata = masterData.jobMetadata[job.id] {
+            category = metadata.category
+            growthTendency = metadata.growthTendency
         }
         isLoading = false
     }

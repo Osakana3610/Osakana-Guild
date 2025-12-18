@@ -3,13 +3,13 @@ import Foundation
 /// ランタイム系サービスのエントリーポイント。マスターデータの読み出しと
 /// 探索/戦闘/ドロップの各サービスを束ねる。
 actor GameRuntimeService {
-    private let repository: MasterDataRepository
+    private let masterData: MasterDataCache
     private let dropNotifier: @Sendable ([ItemDropResult]) async -> Void
     private var activeRuns: [UUID: ActiveExplorationRun] = [:]
 
-    init(repository: MasterDataRepository = MasterDataRepository(),
+    init(masterData: MasterDataCache,
          dropNotifier: @escaping @Sendable ([ItemDropResult]) async -> Void = { _ in }) {
-        self.repository = repository
+        self.masterData = masterData
         self.dropNotifier = dropNotifier
     }
 
@@ -55,7 +55,7 @@ actor GameRuntimeService {
 
                 if let outcome = try await ExplorationEngine.nextEvent(preparation: preparation,
                                                                         state: &state,
-                                                                        repository: repository,
+                                                                        masterData: masterData,
                                                                         party: party) {
                     events.append(outcome.entry)
                     if let battleLog = outcome.battleLog {
@@ -155,10 +155,9 @@ actor GameRuntimeService {
                                party: RuntimePartyState,
                                superRareState: SuperRareDailyState,
                                seed: UInt64) async throws -> ExplorationRunPreparationData {
-        let provider = await makeExplorationProvider()
-        let scheduler = await makeEventScheduler()
+        let provider = makeExplorationProvider()
+        let scheduler = makeEventScheduler()
         let (preparation, state) = try await ExplorationEngine.prepare(provider: provider,
-                                                                       repository: repository,
                                                                        dungeonId: dungeonId,
                                                                        targetFloorNumber: targetFloorNumber,
                                                                        superRareState: superRareState,
@@ -173,26 +172,32 @@ actor GameRuntimeService {
     }
 
     func runtimeCharacter(from input: CharacterInput) async throws -> RuntimeCharacter {
-        try await RuntimeCharacterFactory.make(from: input, repository: repository)
+        try await MainActor.run {
+            try RuntimeCharacterFactory.make(from: input, masterData: masterData)
+        }
     }
 
     func runtimePartyState(party: PartySnapshot, characters: [CharacterInput]) async throws -> RuntimePartyState {
-        try await PartyAssembler.assembleState(repository: repository,
-                                               party: party,
-                                               characters: characters)
+        try await MainActor.run {
+            try PartyAssembler.assembleState(masterData: masterData,
+                                             party: party,
+                                             characters: characters)
+        }
     }
 
-    func raceDefinition(withId raceId: UInt8) async throws -> RaceDefinition? {
-        try await repository.race(withId: raceId)
+    func raceDefinition(withId raceId: UInt8) -> RaceDefinition? {
+        masterData.race(raceId)
     }
 
     func recalculateCombatStats(for input: CharacterInput,
                                    pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
-        let runtimeCharacter = try await RuntimeCharacterFactory.make(
-            from: input,
-            repository: repository,
-            pandoraBoxStackKeys: pandoraBoxStackKeys
-        )
+        let runtimeCharacter = try await MainActor.run {
+            try RuntimeCharacterFactory.make(
+                from: input,
+                masterData: masterData,
+                pandoraBoxStackKeys: pandoraBoxStackKeys
+            )
+        }
         return CombatStatCalculator.Result(
             attributes: runtimeCharacter.attributes,
             hitPoints: CharacterValues.HitPoints(current: runtimeCharacter.currentHP, maximum: runtimeCharacter.maxHP),
@@ -235,8 +240,8 @@ actor GameRuntimeService {
         startFloor: Int,
         startEventIndex: Int
     ) async throws -> ExplorationRunSession {
-        let provider = await makeExplorationProvider()
-        let scheduler = await makeEventScheduler()
+        let provider = makeExplorationProvider()
+        let scheduler = makeEventScheduler()
 
         // preparationのみ取得（stateは手動で構築）
         let bundle = try await provider.dungeonBundle(for: dungeonId)
@@ -298,7 +303,7 @@ actor GameRuntimeService {
 
                 if let outcome = try await ExplorationEngine.nextEvent(preparation: preparation,
                                                                         state: &state,
-                                                                        repository: repository,
+                                                                        masterData: masterData,
                                                                         party: party) {
                     events.append(outcome.entry)
                     if let battleLog = outcome.battleLog {
@@ -402,12 +407,12 @@ actor GameRuntimeService {
         return map
     }
 
-    private func makeExplorationProvider() async -> MasterDataRepositoryExplorationProvider {
-        await MainActor.run { MasterDataRepositoryExplorationProvider(repository: repository) }
+    private func makeExplorationProvider() -> MasterDataCacheExplorationProvider {
+        MasterDataCacheExplorationProvider(masterData: masterData)
     }
 
-    private func makeEventScheduler() async -> ExplorationEventScheduler {
-        await MainActor.run { ExplorationEventScheduler() }
+    private func makeEventScheduler() -> ExplorationEventScheduler {
+        ExplorationEventScheduler()
     }
 
     private func explorationTimeMultiplier(for party: RuntimePartyState,

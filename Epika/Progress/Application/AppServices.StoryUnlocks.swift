@@ -3,7 +3,7 @@ import SwiftData
 
 // MARK: - Unlock Target Type
 
-extension ProgressService {
+extension AppServices {
     enum UnlockTarget {
         case dungeon(UInt16)
     }
@@ -11,7 +11,7 @@ extension ProgressService {
 
 // MARK: - Next Difficulty Unlock
 
-extension ProgressService {
+extension AppServices {
     /// 難易度クリア時に次の難易度を解放する
     /// - 無称号(2)クリア → 魔性の(4)解放
     /// - 魔性の(4)クリア → 宿った(5)解放
@@ -27,7 +27,7 @@ extension ProgressService {
 
 // MARK: - Story & Dungeon Unlocks (Push型)
 
-extension ProgressService {
+extension AppServices {
     /// ストーリーノードを既読にし、同一トランザクション内で解放対象を処理する
     @discardableResult
     func markStoryNodeAsRead(_ nodeId: UInt16) async throws -> StorySnapshot {
@@ -35,7 +35,9 @@ extension ProgressService {
         context.autosaveEnabled = false
 
         // 1. ストーリー定義を取得（unlocksModulesを含む）
-        let definition = try await environment.masterDataService.getStoryNode(id: nodeId)
+        guard let definition = masterDataCache.storyNode(nodeId) else {
+            throw ProgressError.invalidInput(description: "ストーリーノードが見つかりません: \(nodeId)")
+        }
 
         // 2. ストーリーレコードを取得/作成し、既読にする
         let storyRecord = try ensureStoryRecord(nodeId: nodeId, context: context)
@@ -79,7 +81,7 @@ extension ProgressService {
         let context = ModelContext(container)
         context.autosaveEnabled = false
 
-        let storyDefinitions = try await environment.masterDataService.getAllStoryNodes()
+        let storyDefinitions = masterDataCache.allStoryNodes
 
         // クリア済みダンジョンIDを取得
         let clearedDungeonIds = try fetchClearedDungeonIds(context: context)
@@ -143,7 +145,7 @@ extension ProgressService {
 
 // MARK: - Parse Functions
 
-private extension ProgressService {
+private extension AppServices {
     enum StoryRequirement {
         case storyRead(UInt16)
         case dungeonCleared(UInt16)
@@ -199,7 +201,7 @@ private extension ProgressService {
 
 // MARK: - SwiftData Helpers
 
-private extension ProgressService {
+private extension AppServices {
     func ensureStoryRecord(nodeId: UInt16, context: ModelContext) throws -> StoryNodeProgressRecord {
         var descriptor = FetchDescriptor<StoryNodeProgressRecord>(
             predicate: #Predicate { $0.nodeId == nodeId }

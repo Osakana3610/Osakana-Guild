@@ -1,12 +1,55 @@
 import Foundation
 import SwiftData
 
-/// 探索実行レコード
+// MARK: - ExplorationEventRecord
+
+/// 探索イベントレコード
 ///
-/// 以前は4つの@Model（ExplorationRunRecord, ExplorationEventRecord,
-/// ExplorationEventDropRecord, ExplorationBattleLogRecord）で構成されていたが、
-/// ストレージ効率化のため1レコードに統合。
-/// イベント情報はEventEntry配列をエンコードしてeventsDataに格納。
+/// 各探索イベント（戦闘、スクリプトイベント等）を個別レコードとして保存。
+/// ExplorationRunRecordと1対多のリレーションを持つ。
+@Model
+final class ExplorationEventRecord {
+    var floor: UInt8 = 0
+    var kind: UInt8 = 0  // EventKind.rawValue
+    var enemyId: UInt16?
+    var battleResult: UInt8?
+    var battleLogData: Data?
+    var scriptedEventId: UInt8?
+    var exp: UInt32 = 0
+    var gold: UInt32 = 0
+    /// [DropEntry]をJSONエンコード（1イベントあたり0〜数件なので許容）
+    var dropsData: Data = Data()
+    var occurredAt: Date = Date()
+
+    /// 親への参照
+    var run: ExplorationRunRecord?
+
+    init(floor: UInt8,
+         kind: UInt8,
+         enemyId: UInt16?,
+         battleResult: UInt8?,
+         battleLogData: Data?,
+         scriptedEventId: UInt8?,
+         exp: UInt32,
+         gold: UInt32,
+         dropsData: Data,
+         occurredAt: Date) {
+        self.floor = floor
+        self.kind = kind
+        self.enemyId = enemyId
+        self.battleResult = battleResult
+        self.battleLogData = battleLogData
+        self.scriptedEventId = scriptedEventId
+        self.exp = exp
+        self.gold = gold
+        self.dropsData = dropsData
+        self.occurredAt = occurredAt
+    }
+}
+
+// MARK: - ExplorationRunRecord
+
+/// 探索実行レコード
 @Model
 final class ExplorationRunRecord {
     /// パーティID
@@ -51,8 +94,9 @@ final class ExplorationRunRecord {
     /// 獲得ゴールド合計
     var totalGold: UInt32 = 0
 
-    /// イベント情報（EventEntry配列をJSONエンコード）
-    var eventsData: Data = Data()
+    /// イベントレコード（正規化されたリレーション）
+    @Relationship(deleteRule: .cascade, inverse: \ExplorationEventRecord.run)
+    var events: [ExplorationEventRecord] = []
 
     init(partyId: UInt8,
          dungeonId: UInt16,
@@ -66,26 +110,6 @@ final class ExplorationRunRecord {
         self.targetFloor = targetFloor
         self.startedAt = startedAt
         self.seed = seed
-    }
-
-    // MARK: - Events Encoding/Decoding
-
-    /// eventsDataをデコードしてEventEntry配列を取得
-    func decodeEvents() throws -> [EventEntry] {
-        guard !eventsData.isEmpty else { return [] }
-        return try JSONDecoder().decode([EventEntry].self, from: eventsData)
-    }
-
-    /// EventEntry配列をエンコードしてeventsDataに保存
-    func encodeEvents(_ events: [EventEntry]) throws {
-        eventsData = try JSONEncoder().encode(events)
-    }
-
-    /// イベントを追加
-    func appendEvent(_ event: EventEntry) throws {
-        var events = try decodeEvents()
-        events.append(event)
-        try encodeEvents(events)
     }
 }
 

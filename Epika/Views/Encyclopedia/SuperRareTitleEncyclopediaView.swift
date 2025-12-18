@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SuperRareTitleEncyclopediaView: View {
+    @Environment(AppServices.self) private var appServices
     @State private var titles: [SuperRareTitleDefinition] = []
     @State private var skillDefinitions: [UInt16: SkillDefinition] = [:]
     @State private var isLoading = true
@@ -23,17 +24,10 @@ struct SuperRareTitleEncyclopediaView: View {
     }
 
     private func loadData() async {
-        do {
-            async let titlesTask = MasterDataRuntimeService.shared.getAllSuperRareTitles()
-            async let skillsTask = MasterDataRuntimeService.shared.getAllSkills()
-            let (loadedTitles, loadedSkills) = try await (titlesTask, skillsTask)
-            titles = loadedTitles
-            skillDefinitions = Dictionary(uniqueKeysWithValues: loadedSkills.map { ($0.id, $0) })
-            isLoading = false
-        } catch {
-            print("Failed to load super rare title encyclopedia data: \(error)")
-            isLoading = false
-        }
+        let masterData = appServices.masterDataCache
+        titles = masterData.allSuperRareTitles
+        skillDefinitions = Dictionary(uniqueKeysWithValues: masterData.allSkills.map { ($0.id, $0) })
+        isLoading = false
     }
 }
 

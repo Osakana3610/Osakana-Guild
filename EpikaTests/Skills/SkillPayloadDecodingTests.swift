@@ -4,8 +4,9 @@ import XCTest
 @MainActor
 final class SkillPayloadDecodingTests: XCTestCase {
     func testAllSQLiteSkillPayloadsDecode() async throws {
-        let repository = MasterDataRepository()
-        let skills = try await repository.allSkills()
+        let manager = SQLiteMasterDataManager()
+        let cache = try await MasterDataLoader.load(manager: manager)
+        let skills = cache.allSkills
 
         var failures: [String] = []
         var samples: [String] = []

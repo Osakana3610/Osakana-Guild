@@ -17,16 +17,16 @@ struct TitleAssignmentEngine {
         return threshold < luckRandom
     }
 
-    static func determineNormalTitle(repository: MasterDataRepository,
+    static func determineNormalTitle(masterData: MasterDataCache,
                                      enemyTitleId: UInt8?,
                                      hasTitleTreasure: Bool,
                                      category: DropItemCategory,
-                                     random: inout GameRandomSource) async throws -> TitleDefinition? {
-        let candidates = try await normalTitleCandidates(repository: repository,
-                                                         hasTitleTreasure: hasTitleTreasure)
+                                     random: inout GameRandomSource) -> TitleDefinition? {
+        let candidates = normalTitleCandidates(masterData: masterData,
+                                               hasTitleTreasure: hasTitleTreasure)
         guard !candidates.isEmpty else { return nil }
 
-        let judgmentCount = try await judgmentCountForEnemyTitle(repository: repository, titleId: enemyTitleId)
+        let judgmentCount = judgmentCountForEnemyTitle(masterData: masterData, titleId: enemyTitleId)
         var bestTitle: TitleDefinition?
         for _ in 0..<max(1, judgmentCount) {
             if let rolled = rollNormalTitle(from: candidates, random: &random) {
@@ -50,18 +50,17 @@ struct TitleAssignmentEngine {
         random.nextBool(probability: 0.12)
     }
 
-    static func selectSuperRareTitle(repository: MasterDataRepository,
-                                     random: inout GameRandomSource) async throws -> UInt8? {
-        let titles = try await repository.allSuperRareTitles()
+    static func selectSuperRareTitle(masterData: MasterDataCache,
+                                     random: inout GameRandomSource) -> UInt8? {
+        let titles = masterData.allSuperRareTitles
         guard !titles.isEmpty else { return nil }
         let index = random.nextInt(in: 0...(titles.count - 1))
         return titles[index].id
     }
 
-    private static func normalTitleCandidates(repository: MasterDataRepository,
-                                              hasTitleTreasure: Bool) async throws -> [TitleDefinition] {
-        let titles = try await repository.allTitles()
-        return titles.filter { definition in
+    private static func normalTitleCandidates(masterData: MasterDataCache,
+                                              hasTitleTreasure: Bool) -> [TitleDefinition] {
+        masterData.allTitles.filter { definition in
             guard let probability = definition.dropProbability, probability > 0 else { return false }
             if !definition.allowWithTitleTreasure && hasTitleTreasure {
                 return false
@@ -94,10 +93,10 @@ struct TitleAssignmentEngine {
         Int(title.id)
     }
 
-    private static func judgmentCountForEnemyTitle(repository: MasterDataRepository,
-                                                    titleId: UInt8?) async throws -> Int {
+    private static func judgmentCountForEnemyTitle(masterData: MasterDataCache,
+                                                    titleId: UInt8?) -> Int {
         guard let titleId else { return 1 }
-        if let definition = try await repository.title(withId: titleId),
+        if let definition = masterData.title(titleId),
            let multiplier = definition.statMultiplier {
             let squared = multiplier * multiplier
             return max(1, Int(squared.rounded()))

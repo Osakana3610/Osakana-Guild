@@ -5,6 +5,7 @@ extension UInt16: @retroactive Identifiable {
 }
 
 struct ItemEncyclopediaView: View {
+    @Environment(AppServices.self) private var appServices
     @State private var items: [ItemDefinition] = []
     @State private var isLoading = true
 
@@ -50,11 +51,7 @@ struct ItemEncyclopediaView: View {
     }
 
     private func loadData() async {
-        do {
-            items = try await MasterDataRuntimeService.shared.getAllItems()
-        } catch {
-            print("Failed to load item encyclopedia data: \(error)")
-        }
+        items = appServices.masterDataCache.allItems
         isLoading = false
     }
 }
@@ -104,6 +101,8 @@ private struct ItemRowView: View {
 
 /// アイテム詳細ビュー（図鑑・装備・売却画面で共有）
 struct ItemDetailView: View {
+    @Environment(AppServices.self) private var appServices
+
     /// 図鑑用: itemIdのみ
     let itemId: UInt16
     /// 売却/装備画面用: 称号情報込みのデータ（オプション）
@@ -160,32 +159,25 @@ struct ItemDetailView: View {
     private func loadData() async {
         isLoading = true
         loadError = nil
-        do {
-            let masterData = MasterDataRuntimeService.shared
-            item = try await masterData.getItemMasterData(id: itemId)
+        let masterData = appServices.masterDataCache
+        item = masterData.item(itemId)
 
-            // 称号情報がある場合は称号定義を取得
-            if let lw = lightweightItem {
-                let titles = try await masterData.getAllTitles()
-                titleDefinition = titles.first { $0.id == lw.enhancement.normalTitleId }
+        // 称号情報がある場合は称号定義を取得
+        if let lw = lightweightItem {
+            titleDefinition = masterData.title(lw.enhancement.normalTitleId)
+            let superRareTitleId = lw.enhancement.superRareTitleId
+            if superRareTitleId > 0 {
+                superRareTitleDefinition = masterData.superRareTitle(superRareTitleId)
+            }
+        }
 
-                let superRareTitleId = lw.enhancement.superRareTitleId
-                if superRareTitleId > 0 {
-                    superRareTitleDefinition = try await masterData.getSuperRareTitle(id: superRareTitleId)
-                }
-            }
-
-            // スキル名を取得（アイテムのスキル + 超レア称号のスキル）
-            var allSkillIds = item?.grantedSkillIds ?? []
-            if let superRareSkillIds = superRareTitleDefinition?.skillIds {
-                allSkillIds.append(contentsOf: superRareSkillIds)
-            }
-            if !allSkillIds.isEmpty {
-                let skills = try await masterData.getAllSkills()
-                skillNames = Dictionary(uniqueKeysWithValues: skills.map { ($0.id, $0.name) })
-            }
-        } catch {
-            loadError = error.localizedDescription
+        // スキル名を取得（アイテムのスキル + 超レア称号のスキル）
+        var allSkillIds = item?.grantedSkillIds ?? []
+        if let superRareSkillIds = superRareTitleDefinition?.skillIds {
+            allSkillIds.append(contentsOf: superRareSkillIds)
+        }
+        if !allSkillIds.isEmpty {
+            skillNames = Dictionary(uniqueKeysWithValues: masterData.allSkills.map { ($0.id, $0.name) })
         }
         isLoading = false
     }

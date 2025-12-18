@@ -7,7 +7,7 @@ struct RuntimePartyDetailView: View {
 
     @Environment(PartyViewState.self) private var partyState
     @Environment(AdventureViewState.self) private var adventureState
-    @EnvironmentObject private var progressService: ProgressService
+    @Environment(AppServices.self) private var appServices
 
     @State private var allCharacters: [RuntimeCharacter] = []
     @State private var errorMessage: String?
@@ -143,7 +143,7 @@ struct RuntimePartyDetailView: View {
         }
     }
 
-    private var partyService: PartyProgressService { progressService.party }
+    private var partyService: PartyProgressService { appServices.party }
 
     private var membersOfCurrentParty: [RuntimeCharacter] {
         currentParty.memberIds.compactMap { memberId in
@@ -158,7 +158,7 @@ struct RuntimePartyDetailView: View {
     private var selectedDungeonName: String {
         if let dungeon = activeDungeon {
             let clampedDifficulty = min(currentParty.lastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
-            return formattedDifficultyLabel(for: dungeon, difficulty: clampedDifficulty)
+            return formattedDifficultyLabel(for: dungeon, difficulty: clampedDifficulty, masterData: appServices.masterDataCache)
         }
         return "未選択"
     }
@@ -193,7 +193,7 @@ struct RuntimePartyDetailView: View {
 
     @MainActor
     private func loadAllCharacters() async throws {
-        let snapshots = try await progressService.character.allCharacters()
+        let snapshots = try await appServices.character.allCharacters()
         guard !snapshots.isEmpty else {
             allCharacters = []
             return
@@ -203,7 +203,7 @@ struct RuntimePartyDetailView: View {
         runtimeCharacters.reserveCapacity(snapshots.count)
 
         for snapshot in snapshots {
-            let runtimeCharacter = try await progressService.character.runtimeCharacter(from: snapshot)
+            let runtimeCharacter = try await appServices.character.runtimeCharacter(from: snapshot)
             runtimeCharacters.append(runtimeCharacter)
         }
 
@@ -243,7 +243,7 @@ struct RuntimePartyDetailView: View {
 
     private func handlePrimaryAction(isExploring: Bool, canDepart: Bool) {
         if isExploring {
-            Task { await adventureState.cancelExploration(for: currentParty) }
+            Task { await adventureState.cancelExploration(for: currentParty, using: appServices) }
             return
         }
 
@@ -260,7 +260,7 @@ struct RuntimePartyDetailView: View {
             return
         }
         do {
-            try await adventureState.startExploration(party: currentParty, dungeon: dungeon)
+            try await adventureState.startExploration(party: currentParty, dungeon: dungeon, using: appServices)
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
         }
@@ -380,6 +380,7 @@ private struct PartyEquipmentListView: View {
 // MARK: - Inline Selection Menus
 
 private struct DifficultyPickerMenu: View {
+    @Environment(AppServices.self) private var appServices
     let dungeon: RuntimeDungeon
     let currentDifficulty: UInt8
     let onSelect: (UInt8) async -> Bool
@@ -399,13 +400,13 @@ private struct DifficultyPickerMenu: View {
                             if currentDifficulty == difficulty {
                                 Image(systemName: "checkmark")
                             }
-                            Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty))
+                            Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty, masterData: appServices.masterDataCache))
                         }
                     }
                 }
             } label: {
                 HStack(spacing: 4) {
-                    Text(formattedDifficultyLabel(for: dungeon, difficulty: currentDifficulty))
+                    Text(formattedDifficultyLabel(for: dungeon, difficulty: currentDifficulty, masterData: appServices.masterDataCache))
                         .foregroundColor(.secondary)
                     Image(systemName: "chevron.up.chevron.down")
                         .foregroundStyle(Color(.tertiaryLabel))
@@ -480,6 +481,7 @@ private struct TargetFloorPickerMenu: View {
 // MARK: - Sheet Components
 
 private struct DungeonPickerView: View {
+    @Environment(AppServices.self) private var appServices
     let dungeons: [RuntimeDungeon]
     let currentSelection: UInt16?
     let currentDifficulty: UInt8
@@ -502,7 +504,7 @@ private struct DungeonPickerView: View {
                             ForEach(groupedDungeons[chapter] ?? [], id: \.id) { dungeon in
                                 Button(action: { handleDungeonTap(dungeon) }) {
                                     HStack(spacing: 8) {
-                                        Text(formattedDifficultyLabel(for: dungeon, difficulty: dungeon.highestUnlockedDifficulty))
+                                        Text(formattedDifficultyLabel(for: dungeon, difficulty: dungeon.highestUnlockedDifficulty, masterData: appServices.masterDataCache))
                                             .foregroundColor(.primary)
                                             .lineLimit(2)
                                         Spacer()
@@ -580,13 +582,14 @@ private struct DifficultyPickerView: View {
     let currentDifficulty: UInt8
     let onSelect: (UInt8) async -> Bool
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppServices.self) private var appServices
 
     var body: some View {
         List {
             ForEach(dungeon.availableDifficulties, id: \.self) { difficulty in
                 Button(action: { choose(difficulty) }) {
                     HStack {
-                        Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty))
+                        Text(formattedDifficultyLabel(for: dungeon, difficulty: difficulty, masterData: appServices.masterDataCache))
                             .foregroundColor(.primary)
                         Spacer()
                         if currentDifficulty == difficulty {
@@ -616,12 +619,12 @@ private struct PartyNameEditorView: View {
     let party: RuntimeParty
     let onComplete: () async -> Void
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var progressService: ProgressService
+    @Environment(AppServices.self) private var appServices
     @State private var name: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
 
-    private var partyService: PartyProgressService { progressService.party }
+    private var partyService: PartyProgressService { appServices.party }
 
     var body: some View {
         NavigationStack {
@@ -667,8 +670,8 @@ private struct PartyNameEditorView: View {
     }
 }
 
-private func formattedDifficultyLabel(for dungeon: RuntimeDungeon, difficulty: UInt8) -> String {
-    let name = DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyTitleId: difficulty)
+private func formattedDifficultyLabel(for dungeon: RuntimeDungeon, difficulty: UInt8, masterData: MasterDataCache) -> String {
+    let name = DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyTitleId: difficulty, masterData: masterData)
     let status = dungeon.statusDescription(for: difficulty)
     return "\(name)\(status)"
 }

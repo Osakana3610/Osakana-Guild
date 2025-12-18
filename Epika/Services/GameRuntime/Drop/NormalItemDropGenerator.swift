@@ -58,26 +58,25 @@ enum NormalItemDropGenerator {
     /// - Parameters:
     ///   - enemies: 倒した敵のリスト
     ///   - chapter: ダンジョンの章（1-9）
-    ///   - repository: マスターデータリポジトリ
+    ///   - masterData: マスターデータキャッシュ
     ///   - droppedItemIds: 既にドロップ済みのアイテムID
     ///   - random: 乱数生成器
     /// - Returns: ノーマルアイテム候補のリスト（アイテムIDと元の敵ID）
     static func candidates(
         for enemies: [EnemyDefinition],
         chapter: Int,
-        repository: MasterDataRepository,
+        masterData: MasterDataCache,
         droppedItemIds: Set<UInt16>,
         random: inout GameRandomSource
-    ) async throws -> [(itemId: UInt16, sourceEnemyId: UInt16)] {
+    ) throws -> [(itemId: UInt16, sourceEnemyId: UInt16)] {
         guard !enemies.isEmpty else { return [] }
 
         guard let sellValueLimit = sellValueThresholds[chapter] else {
             throw RuntimeError.invalidConfiguration(reason: "Invalid chapter \(chapter) for normal item drop (expected 1-9)")
         }
 
-        // ノーマルアイテム一覧を取得してキャッシュ
-        let allItems = try await repository.allItems()
-        let normalItems = allItems.filter { $0.rarity == "ノーマル" }
+        // ノーマルアイテム一覧を取得
+        let normalItems = masterData.allItems.filter { $0.rarity == "ノーマル" }
 
         // カテゴリ→アイテムのマップを構築（売値上限でフィルタ）
         var itemsByCategory: [String: [ItemDefinition]] = [:]
@@ -140,6 +139,9 @@ enum NormalItemDropGenerator {
             }
         }
         // ここに到達することは論理的にないが、コンパイラ警告回避のため最後のカテゴリを返す
-        return weights.last!.category
+        guard let last = weights.last else {
+            throw GeneratorError.zeroCategoryWeight(raceId: raceId)
+        }
+        return last.category
     }
 }

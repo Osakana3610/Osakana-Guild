@@ -2,7 +2,7 @@ import Foundation
 
 /// 敵撃破時の戦利品計算を担当するサービス。
 enum DropService {
-    static func drops(repository: MasterDataRepository,
+    static func drops(masterData: MasterDataCache,
                       for enemies: [EnemyDefinition],
                       party: RuntimePartyState,
                       dungeonId: UInt16? = nil,
@@ -13,7 +13,7 @@ enum DropService {
                       hasTitleTreasure: Bool = false,
                       enemyTitleId: UInt8? = nil,
                       dailySuperRareState: SuperRareDailyState,
-                      random: inout GameRandomSource) async throws -> DropOutcome {
+                      random: inout GameRandomSource) throws -> DropOutcome {
         guard !enemies.isEmpty else {
             return DropOutcome(results: [], superRareState: dailySuperRareState, newlyDroppedItemIds: [])
         }
@@ -22,7 +22,7 @@ enum DropService {
         var sessionState = SuperRareSessionState()
         let enemyTitleDefinition: TitleDefinition?
         if let enemyTitleId {
-            enemyTitleDefinition = try await repository.title(withId: enemyTitleId)
+            enemyTitleDefinition = masterData.title(enemyTitleId)
         } else {
             enemyTitleDefinition = nil
         }
@@ -35,7 +35,7 @@ enum DropService {
                 // ドロップ済みセットに含まれるアイテムは候補から除外
                 guard !droppedItemIds.contains(itemId) else { continue }
 
-                guard let item = try await repository.item(withId: itemId) else {
+                guard let item = masterData.item(itemId) else {
                     throw RuntimeError.masterDataNotFound(entity: "item", identifier: String(itemId))
                 }
 
@@ -47,14 +47,14 @@ enum DropService {
                                                        random: &random)
                 guard roll.willDrop else { continue }
 
-                let (normalTitleId, superRareTitleId) = try await assignTitles(
+                let (normalTitleId, superRareTitleId) = assignTitles(
                     category: category,
                     partyBonuses: partyBonuses,
                     isRabiTicketActive: isRabiTicketActive,
                     enemyTitleId: enemyTitleId,
                     hasTitleTreasure: hasTitleTreasure,
                     enemyTitleDefinition: enemyTitleDefinition,
-                    repository: repository,
+                    masterData: masterData,
                     sessionState: &sessionState,
                     superRareState: &superRareState,
                     random: &random
@@ -72,10 +72,10 @@ enum DropService {
 
         // 2. ノーマルアイテム（敵種族・ダンジョン章から動的生成）を処理
         let combinedDroppedIds = droppedItemIds.union(newlyDroppedItemIds)
-        let normalCandidates = try await NormalItemDropGenerator.candidates(
+        let normalCandidates = try NormalItemDropGenerator.candidates(
             for: enemies,
             chapter: chapter,
-            repository: repository,
+            masterData: masterData,
             droppedItemIds: combinedDroppedIds,
             random: &random
         )
@@ -84,7 +84,7 @@ enum DropService {
             // 同一戦闘内で既にドロップした場合はスキップ
             guard !newlyDroppedItemIds.contains(candidate.itemId) else { continue }
 
-            guard let item = try await repository.item(withId: candidate.itemId) else {
+            guard let item = masterData.item(candidate.itemId) else {
                 throw RuntimeError.masterDataNotFound(entity: "item", identifier: String(candidate.itemId))
             }
 
@@ -96,14 +96,14 @@ enum DropService {
                                                    random: &random)
             guard roll.willDrop else { continue }
 
-            let (normalTitleId, superRareTitleId) = try await assignTitles(
+            let (normalTitleId, superRareTitleId) = assignTitles(
                 category: .normal,
                 partyBonuses: partyBonuses,
                 isRabiTicketActive: isRabiTicketActive,
                 enemyTitleId: enemyTitleId,
                 hasTitleTreasure: hasTitleTreasure,
                 enemyTitleDefinition: enemyTitleDefinition,
-                repository: repository,
+                masterData: masterData,
                 sessionState: &sessionState,
                 superRareState: &superRareState,
                 random: &random
@@ -129,11 +129,11 @@ enum DropService {
         enemyTitleId: UInt8?,
         hasTitleTreasure: Bool,
         enemyTitleDefinition: TitleDefinition?,
-        repository: MasterDataRepository,
+        masterData: MasterDataCache,
         sessionState: inout SuperRareSessionState,
         superRareState: inout SuperRareDailyState,
         random: inout GameRandomSource
-    ) async throws -> (normalTitleId: UInt8?, superRareTitleId: UInt8?) {
+    ) -> (normalTitleId: UInt8?, superRareTitleId: UInt8?) {
         var normalTitleId: UInt8? = nil
         var superRareTitleId: UInt8? = nil
 
@@ -141,19 +141,19 @@ enum DropService {
                                                     partyBonuses: partyBonuses,
                                                     isRabiTicketActive: isRabiTicketActive,
                                                     random: &random) {
-            if let normalTitle = try await TitleAssignmentEngine.determineNormalTitle(repository: repository,
-                                                                                       enemyTitleId: enemyTitleId,
-                                                                                       hasTitleTreasure: hasTitleTreasure,
-                                                                                       category: category,
-                                                                                       random: &random) {
+            if let normalTitle = TitleAssignmentEngine.determineNormalTitle(masterData: masterData,
+                                                                             enemyTitleId: enemyTitleId,
+                                                                             hasTitleTreasure: hasTitleTreasure,
+                                                                             category: category,
+                                                                             random: &random) {
                 normalTitleId = normalTitle.id
-                let evaluation = try await evaluateSuperRare(for: category,
-                                                             title: normalTitle,
-                                                             enemyTitle: enemyTitleDefinition,
-                                                             repository: repository,
-                                                             sessionState: &sessionState,
-                                                             dailyState: &superRareState,
-                                                             random: &random)
+                let evaluation = evaluateSuperRare(for: category,
+                                                   title: normalTitle,
+                                                   enemyTitle: enemyTitleDefinition,
+                                                   masterData: masterData,
+                                                   sessionState: &sessionState,
+                                                   dailyState: &superRareState,
+                                                   random: &random)
                 normalTitleId = evaluation.normalTitleId
                 superRareTitleId = evaluation.superRareTitleId
             }
@@ -185,10 +185,10 @@ enum DropService {
     private static func evaluateSuperRare(for category: DropItemCategory,
                                           title: TitleDefinition,
                                           enemyTitle: TitleDefinition?,
-                                          repository: MasterDataRepository,
+                                          masterData: MasterDataCache,
                                           sessionState: inout SuperRareSessionState,
                                           dailyState: inout SuperRareDailyState,
-                                          random: inout GameRandomSource) async throws -> (normalTitleId: UInt8?, superRareTitleId: UInt8?) {
+                                          random: inout GameRandomSource) -> (normalTitleId: UInt8?, superRareTitleId: UInt8?) {
         guard let rates = title.superRareRates else {
             return (title.id, nil)
         }
@@ -221,8 +221,8 @@ enum DropService {
             return (title.id, nil)
         }
 
-        let superRareTitleId = try await TitleAssignmentEngine.selectSuperRareTitle(repository: repository,
-                                                                                     random: &random)
+        let superRareTitleId = TitleAssignmentEngine.selectSuperRareTitle(masterData: masterData,
+                                                                           random: &random)
         guard let superRareTitleId else {
             return (title.id, nil)
         }

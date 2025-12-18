@@ -4,7 +4,7 @@ import SwiftData
 actor InventoryProgressService {
     private let container: ModelContainer
     private let gameStateService: GameStateService
-    private let environment: ProgressEnvironment
+    private let masterDataCache: MasterDataCache
     private let maxStackSize: UInt16 = 99
 
     struct BatchSeed: Sendable {
@@ -26,10 +26,10 @@ actor InventoryProgressService {
 
     init(container: ModelContainer,
          gameStateService: GameStateService,
-         environment: ProgressEnvironment) {
+         masterDataCache: MasterDataCache) {
         self.container = container
         self.gameStateService = gameStateService
-        self.environment = environment
+        self.masterDataCache = masterDataCache
     }
 
     // MARK: - Public API
@@ -69,9 +69,15 @@ actor InventoryProgressService {
         if snapshots.isEmpty { return [] }
 
         let masterIndices = Array(Set(snapshots.map { $0.itemId }))
-        let definitions = try await environment.masterDataService.getItemMasterData(ids: masterIndices)
-        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
-        let missing = masterIndices.filter { definitionMap[$0] == nil }
+        var definitionMap: [UInt16: ItemDefinition] = [:]
+        var missing: [UInt16] = []
+        for id in masterIndices {
+            if let def = masterDataCache.item(id) {
+                definitionMap[id] = def
+            } else {
+                missing.append(id)
+            }
+        }
         if !missing.isEmpty {
             let missingIds = missing.map { String($0) }
             throw ProgressError.itemDefinitionUnavailable(ids: missingIds)
@@ -317,9 +323,15 @@ actor InventoryProgressService {
             return try await gameStateService.currentPlayer()
         }
         let masterIndices = Array(Set(records.map { $0.itemId }))
-        let definitions = try await environment.masterDataService.getItemMasterData(ids: masterIndices)
-        let priceMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0.sellValue) })
-        let missing = masterIndices.filter { priceMap[$0] == nil }
+        var priceMap: [UInt16: Int] = [:]
+        var missing: [UInt16] = []
+        for id in masterIndices {
+            if let def = masterDataCache.item(id) {
+                priceMap[id] = def.sellValue
+            } else {
+                missing.append(id)
+            }
+        }
         if !missing.isEmpty {
             throw ProgressError.itemDefinitionUnavailable(ids: missing.map { String($0) })
         }
@@ -473,8 +485,7 @@ actor InventoryProgressService {
 
         try context.save()
 
-        let definitions = try await environment.masterDataService.getItemMasterData(ids: [targetRecord.itemId])
-        guard let definition = definitions.first else {
+        guard let definition = masterDataCache.item(targetRecord.itemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.itemId)])
         }
         let snapshot = makeSnapshot(targetRecord)

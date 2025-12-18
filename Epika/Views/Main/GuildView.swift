@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct GuildView: View {
-    @EnvironmentObject private var progressService: ProgressService
+    @Environment(AppServices.self) private var appServices
     @State private var characterState = CharacterViewState()
     @State private var maxCharacterSlots: Int = AppConstants.Progress.defaultCharacterSlotCount
     @State private var isLoading = false
@@ -30,7 +30,7 @@ struct GuildView: View {
             .navigationTitle("ギルド")
             .navigationBarTitleDisplayMode(.large)
             .onAppear {
-                characterState.configureIfNeeded(with: progressService)
+                characterState.startObservingChanges(using: appServices)
                 Task { await loadOnce() }
             }
         }
@@ -40,7 +40,7 @@ struct GuildView: View {
         List {
             Section("ギルド機能") {
                 NavigationLink {
-                    CharacterCreationView(progressService: progressService) {
+                    CharacterCreationView(appServices: appServices) {
                         Task { await reload() }
                     }
                 } label: {
@@ -50,7 +50,7 @@ struct GuildView: View {
                 }
 
                 NavigationLink {
-                    CharacterReviveView(progressService: progressService) {
+                    CharacterReviveView(appServices: appServices) {
                         Task { await reload() }
                     }
                 } label: {
@@ -61,7 +61,7 @@ struct GuildView: View {
                 }
 
                 NavigationLink {
-                    CharacterJobChangeView(progressService: progressService) {
+                    CharacterJobChangeView(appServices: appServices) {
                         Task { await reload() }
                     }
                 } label: {
@@ -79,7 +79,7 @@ struct GuildView: View {
                 }
 
                 NavigationLink {
-                    PartySlotExpansionView(progressService: progressService) {
+                    PartySlotExpansionView(appServices: appServices) {
                         Task { await reload() }
                     }
                 } label: {
@@ -99,7 +99,7 @@ struct GuildView: View {
                         NavigationLink {
                             LazyRuntimeCharacterDetailView(characterId: summary.id,
                                                             summary: summary,
-                                                            progressService: progressService)
+                                                            appServices: appServices)
                         } label: {
                             GuildCharacterRow(summary: summary)
                         }
@@ -169,9 +169,9 @@ struct GuildView: View {
         isLoading = true
         errorMessage = nil
         do {
-            async let summariesTask: Void = characterState.loadCharacterSummaries()
-            async let allCharactersTask: Void = characterState.loadAllCharacters()
-            _ = try await progressService.gameState.loadCurrentPlayer()
+            async let summariesTask: Void = characterState.loadCharacterSummaries(using: appServices)
+            async let allCharactersTask: Void = characterState.loadAllCharacters(using: appServices)
+            _ = try await appServices.gameState.loadCurrentPlayer()
             try await summariesTask
             try await allCharactersTask
             maxCharacterSlots = AppConstants.Progress.defaultCharacterSlotCount
@@ -250,13 +250,13 @@ private struct GuildCharacterRow: View {
 private struct LazyRuntimeCharacterDetailView: View {
     let characterId: UInt8
     let summary: CharacterViewState.CharacterSummary
-    let progressService: ProgressService
+    let appServices: AppServices
 
     @State private var runtimeCharacter: RuntimeCharacter?
     @State private var errorMessage: String?
     @State private var isLoading = false
 
-    private var characterService: CharacterProgressService { progressService.character }
+    private var characterService: CharacterProgressService { appServices.character }
 
     var body: some View {
         Group {
