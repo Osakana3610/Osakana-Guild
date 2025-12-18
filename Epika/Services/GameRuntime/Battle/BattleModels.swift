@@ -61,19 +61,36 @@ struct BattleActionResource: Sendable, Hashable {
         var max: Int
     }
 
-    private var storage: [String: Int]
+    private var storage: [UInt8: Int]
     private var spellCharges: [UInt8: SpellChargeState]
 
-    init(initialValues: [String: Int] = [:],
+    init(initialValues: [UInt8: Int] = [:],
          spellCharges: [UInt8: SpellChargeState] = [:]) {
         self.storage = initialValues
         self.spellCharges = spellCharges
     }
 
-    enum Key: String {
-        case priestMagic
-        case mageMagic
-        case breath
+    enum Key: UInt8, Sendable {
+        case priestMagic = 1
+        case mageMagic = 2
+        case breath = 3
+
+        nonisolated init?(identifier: String) {
+            switch identifier {
+            case "priestMagic": self = .priestMagic
+            case "mageMagic": self = .mageMagic
+            case "breath": self = .breath
+            default: return nil
+            }
+        }
+
+        nonisolated var identifier: String {
+            switch self {
+            case .priestMagic: return "priestMagic"
+            case .mageMagic: return "mageMagic"
+            case .breath: return "breath"
+            }
+        }
     }
 
     func charges(for key: Key) -> Int {
@@ -157,7 +174,7 @@ struct BattleActionResource: Sendable, Hashable {
 
     static func makeDefault(for snapshot: CharacterValues.Combat,
                             spellLoadout: SkillRuntimeEffects.SpellLoadout = .empty) -> BattleActionResource {
-        var values: [String: Int] = [:]
+        var values: [UInt8: Int] = [:]
         if snapshot.breathDamage > 0 {
             values[Key.breath.rawValue] = 1
         }
@@ -366,22 +383,68 @@ struct BattleActor: Sendable {
         }
 
         struct Reaction: Sendable, Hashable {
-            enum Trigger: String, Sendable {
-                case allyDefeated
-                case selfEvadePhysical
-                case selfDamagedPhysical
-                case selfDamagedMagical
-                case allyDamagedPhysical
-                case selfKilledEnemy      // 敵を倒した時
-                case allyMagicAttack      // 味方が魔法攻撃した時
-                case selfAttackNoKill     // 攻撃したが敵を倒せなかった時
-                case selfMagicAttack      // 自分が魔法攻撃した時
+            enum Trigger: UInt8, Sendable {
+                case allyDefeated = 1
+                case selfEvadePhysical = 2
+                case selfDamagedPhysical = 3
+                case selfDamagedMagical = 4
+                case allyDamagedPhysical = 5
+                case selfKilledEnemy = 6      // 敵を倒した時
+                case allyMagicAttack = 7      // 味方が魔法攻撃した時
+                case selfAttackNoKill = 8     // 攻撃したが敵を倒せなかった時
+                case selfMagicAttack = 9      // 自分が魔法攻撃した時
+
+                nonisolated init?(identifier: String) {
+                    switch identifier {
+                    case "allyDefeated": self = .allyDefeated
+                    case "selfEvadePhysical": self = .selfEvadePhysical
+                    case "selfDamagedPhysical": self = .selfDamagedPhysical
+                    case "selfDamagedMagical": self = .selfDamagedMagical
+                    case "allyDamagedPhysical": self = .allyDamagedPhysical
+                    case "selfKilledEnemy": self = .selfKilledEnemy
+                    case "allyMagicAttack": self = .allyMagicAttack
+                    case "selfAttackNoKill": self = .selfAttackNoKill
+                    case "selfMagicAttack": self = .selfMagicAttack
+                    default: return nil
+                    }
+                }
+
+                nonisolated var identifier: String {
+                    switch self {
+                    case .allyDefeated: return "allyDefeated"
+                    case .selfEvadePhysical: return "selfEvadePhysical"
+                    case .selfDamagedPhysical: return "selfDamagedPhysical"
+                    case .selfDamagedMagical: return "selfDamagedMagical"
+                    case .allyDamagedPhysical: return "allyDamagedPhysical"
+                    case .selfKilledEnemy: return "selfKilledEnemy"
+                    case .allyMagicAttack: return "allyMagicAttack"
+                    case .selfAttackNoKill: return "selfAttackNoKill"
+                    case .selfMagicAttack: return "selfMagicAttack"
+                    }
+                }
             }
 
-            enum Target: String, Sendable {
-                case attacker
-                case killer
-                case randomEnemy          // ランダムな敵
+            enum Target: UInt8, Sendable {
+                case attacker = 1
+                case killer = 2
+                case randomEnemy = 3          // ランダムな敵
+
+                nonisolated init?(identifier: String) {
+                    switch identifier {
+                    case "attacker": self = .attacker
+                    case "killer": self = .killer
+                    case "randomEnemy": self = .randomEnemy
+                    default: return nil
+                    }
+                }
+
+                nonisolated var identifier: String {
+                    switch self {
+                    case .attacker: return "attacker"
+                    case .killer: return "killer"
+                    case .randomEnemy: return "randomEnemy"
+                    }
+                }
             }
 
             let identifier: String
@@ -398,12 +461,33 @@ struct BattleActor: Sendable {
         }
 
         struct SpecialAttack: Sendable, Hashable {
-            enum Kind: String, Sendable {
-                case specialA
-                case specialB
-                case specialC
-                case specialD
-                case specialE
+            enum Kind: UInt8, Sendable {
+                case specialA = 1
+                case specialB = 2
+                case specialC = 3
+                case specialD = 4
+                case specialE = 5
+
+                nonisolated init?(identifier: String) {
+                    switch identifier {
+                    case "specialA": self = .specialA
+                    case "specialB": self = .specialB
+                    case "specialC": self = .specialC
+                    case "specialD": self = .specialD
+                    case "specialE": self = .specialE
+                    default: return nil
+                    }
+                }
+
+                nonisolated var identifier: String {
+                    switch self {
+                    case .specialA: return "specialA"
+                    case .specialB: return "specialB"
+                    case .specialC: return "specialC"
+                    case .specialD: return "specialD"
+                    case .specialE: return "specialE"
+                    }
+                }
             }
 
             let kind: Kind
@@ -411,7 +495,7 @@ struct BattleActor: Sendable {
             let preemptive: Bool  // 先制攻撃フラグ
 
             init?(kindIdentifier: String, chancePercent: Int, preemptive: Bool = false) {
-                guard let parsed = Kind(rawValue: kindIdentifier) else { return nil }
+                guard let parsed = Kind(identifier: kindIdentifier) else { return nil }
                 self.init(kind: parsed, chancePercent: chancePercent, preemptive: preemptive)
             }
 
@@ -430,9 +514,24 @@ struct BattleActor: Sendable {
         }
 
         struct TimedBuffTrigger: Sendable, Hashable {
-            enum Scope: String, Sendable {
-                case party
-                case `self`
+            enum Scope: UInt8, Sendable {
+                case party = 1
+                case `self` = 2
+
+                nonisolated init?(identifier: String) {
+                    switch identifier {
+                    case "party": self = .party
+                    case "self": self = .`self`
+                    default: return nil
+                    }
+                }
+
+                nonisolated var identifier: String {
+                    switch self {
+                    case .party: return "party"
+                    case .`self`: return "self"
+                    }
+                }
             }
 
             enum TriggerMode: Sendable, Hashable {
@@ -467,9 +566,24 @@ struct BattleActor: Sendable {
         }
 
         struct ResurrectionActive: Sendable, Hashable {
-            enum HPScale: String, Sendable {
-                case magicalHealing
-                case maxHP5Percent
+            enum HPScale: UInt8, Sendable {
+                case magicalHealing = 1
+                case maxHP5Percent = 2
+
+                nonisolated init?(identifier: String) {
+                    switch identifier {
+                    case "magicalHealing": self = .magicalHealing
+                    case "maxHP5Percent": self = .maxHP5Percent
+                    default: return nil
+                    }
+                }
+
+                nonisolated var identifier: String {
+                    switch self {
+                    case .magicalHealing: return "magicalHealing"
+                    case .maxHP5Percent: return "maxHP5Percent"
+                    }
+                }
             }
 
             let chancePercent: Int
@@ -489,11 +603,30 @@ struct BattleActor: Sendable {
         }
 
         struct RowProfile: Sendable, Hashable {
-            enum Base: String, Sendable {
-                case melee
-                case ranged
-                case mixed
-                case balanced
+            enum Base: UInt8, Sendable {
+                case melee = 1
+                case ranged = 2
+                case mixed = 3
+                case balanced = 4
+
+                nonisolated init?(identifier: String) {
+                    switch identifier {
+                    case "melee": self = .melee
+                    case "ranged": self = .ranged
+                    case "mixed": self = .mixed
+                    case "balanced": self = .balanced
+                    default: return nil
+                    }
+                }
+
+                nonisolated var identifier: String {
+                    switch self {
+                    case .melee: return "melee"
+                    case .ranged: return "ranged"
+                    case .mixed: return "mixed"
+                    case .balanced: return "balanced"
+                    }
+                }
             }
 
             var base: Base = .melee

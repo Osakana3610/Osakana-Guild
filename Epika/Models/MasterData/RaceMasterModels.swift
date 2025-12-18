@@ -29,8 +29,36 @@ struct RaceDefinition: Identifiable, Sendable, Hashable {
 }
 
 /// 基礎ステータスの列挙（表示用）
-enum BaseStat: String, CaseIterable, Sendable {
-    case strength, wisdom, spirit, vitality, agility, luck
+enum BaseStat: UInt8, CaseIterable, Sendable {
+    case strength = 1
+    case wisdom = 2
+    case spirit = 3
+    case vitality = 4
+    case agility = 5
+    case luck = 6
+
+    nonisolated init?(identifier: String) {
+        switch identifier {
+        case "strength": self = .strength
+        case "wisdom": self = .wisdom
+        case "spirit": self = .spirit
+        case "vitality": self = .vitality
+        case "agility": self = .agility
+        case "luck": self = .luck
+        default: return nil
+        }
+    }
+
+    nonisolated var identifier: String {
+        switch self {
+        case .strength: return "strength"
+        case .wisdom: return "wisdom"
+        case .spirit: return "spirit"
+        case .vitality: return "vitality"
+        case .agility: return "agility"
+        case .luck: return "luck"
+        }
+    }
 
     var displayName: String {
         switch self {

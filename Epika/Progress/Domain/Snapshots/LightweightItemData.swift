@@ -18,31 +18,90 @@ struct ItemDisplaySubcategory: Hashable, Sendable {
 
 // MARK: - Item Sale Category
 
-enum ItemSaleCategory: String, CaseIterable, Sendable {
-    case thinSword = "thin_sword"
-    case sword = "sword"
-    case magicSword = "magic_sword"
-    case advancedMagicSword = "advanced_magic_sword"
-    case guardianSword = "guardian_sword"
-    case katana = "katana"
-    case bow = "bow"
-    case armor = "armor"
-    case heavyArmor = "heavy_armor"
-    case superHeavyArmor = "super_heavy_armor"
-    case shield = "shield"
-    case gauntlet = "gauntlet"
-    case accessory = "accessory"
-    case wand = "wand"
-    case rod = "rod"
-    case grimoire = "grimoire"
-    case robe = "robe"
-    case gem = "gem"
-    case homunculus = "homunculus"
-    case synthesis = "synthesis"
-    case other = "other"
-    case raceSpecific = "race_specific"
-    case forSynthesis = "for_synthesis"
-    case mazoMaterial = "mazo_material"
+enum ItemSaleCategory: UInt8, CaseIterable, Sendable {
+    case thinSword = 1
+    case sword = 2
+    case magicSword = 3
+    case advancedMagicSword = 4
+    case guardianSword = 5
+    case katana = 6
+    case bow = 7
+    case armor = 8
+    case heavyArmor = 9
+    case superHeavyArmor = 10
+    case shield = 11
+    case gauntlet = 12
+    case accessory = 13
+    case wand = 14
+    case rod = 15
+    case grimoire = 16
+    case robe = 17
+    case gem = 18
+    case homunculus = 19
+    case synthesis = 20
+    case other = 21
+    case raceSpecific = 22
+    case forSynthesis = 23
+    case mazoMaterial = 24
+
+    nonisolated init?(identifier: String) {
+        switch identifier {
+        case "thin_sword": self = .thinSword
+        case "sword": self = .sword
+        case "magic_sword": self = .magicSword
+        case "advanced_magic_sword": self = .advancedMagicSword
+        case "guardian_sword": self = .guardianSword
+        case "katana": self = .katana
+        case "bow": self = .bow
+        case "armor": self = .armor
+        case "heavy_armor": self = .heavyArmor
+        case "super_heavy_armor": self = .superHeavyArmor
+        case "shield": self = .shield
+        case "gauntlet": self = .gauntlet
+        case "accessory": self = .accessory
+        case "wand": self = .wand
+        case "rod": self = .rod
+        case "grimoire": self = .grimoire
+        case "robe": self = .robe
+        case "gem": self = .gem
+        case "homunculus": self = .homunculus
+        case "synthesis": self = .synthesis
+        case "other": self = .other
+        case "race_specific": self = .raceSpecific
+        case "for_synthesis": self = .forSynthesis
+        case "mazo_material": self = .mazoMaterial
+        default: return nil
+        }
+    }
+
+    nonisolated var identifier: String {
+        switch self {
+        case .thinSword: return "thin_sword"
+        case .sword: return "sword"
+        case .magicSword: return "magic_sword"
+        case .advancedMagicSword: return "advanced_magic_sword"
+        case .guardianSword: return "guardian_sword"
+        case .katana: return "katana"
+        case .bow: return "bow"
+        case .armor: return "armor"
+        case .heavyArmor: return "heavy_armor"
+        case .superHeavyArmor: return "super_heavy_armor"
+        case .shield: return "shield"
+        case .gauntlet: return "gauntlet"
+        case .accessory: return "accessory"
+        case .wand: return "wand"
+        case .rod: return "rod"
+        case .grimoire: return "grimoire"
+        case .robe: return "robe"
+        case .gem: return "gem"
+        case .homunculus: return "homunculus"
+        case .synthesis: return "synthesis"
+        case .other: return "other"
+        case .raceSpecific: return "race_specific"
+        case .forSynthesis: return "for_synthesis"
+        case .mazoMaterial: return "mazo_material"
+        }
+    }
 
     var displayName: String {
         switch self {
@@ -101,7 +160,7 @@ enum ItemSaleCategory: String, CaseIterable, Sendable {
     }
 
     nonisolated init(masterCategory: String) {
-        self = ItemSaleCategory(rawValue: masterCategory.lowercased()) ?? .other
+        self = ItemSaleCategory(identifier: masterCategory.lowercased()) ?? .other
     }
 }
 

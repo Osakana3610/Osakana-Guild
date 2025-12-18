@@ -32,7 +32,7 @@ struct ResurrectionActiveHandler: SkillEffectHandler {
         }
         let chance = Int((try payload.requireValue("chancePercent", skillId: context.skillId, effectIndex: context.effectIndex)).rounded(.towardZero))
         let hpScaleRaw = payload.stringValues["hpScale"] ?? payload.value["hpScale"].map { _ in "magicalHealing" }
-        let hpScale = BattleActor.SkillEffects.ResurrectionActive.HPScale(rawValue: hpScaleRaw ?? "magicalHealing") ?? .magicalHealing
+        let hpScale = BattleActor.SkillEffects.ResurrectionActive.HPScale(identifier: hpScaleRaw ?? "magicalHealing") ?? .magicalHealing
         let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
         accumulator.resurrection.resurrectionActives.append(.init(
             chancePercent: max(0, chance),
