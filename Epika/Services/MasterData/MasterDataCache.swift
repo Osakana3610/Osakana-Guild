@@ -102,7 +102,9 @@ struct MasterDataCache: Sendable {
     }
 
     nonisolated func randomCharacterName(forGenderCode genderCode: UInt8) -> String {
-        characterNames(forGenderCode: genderCode).randomElement()!.name
+        let names = characterNames(forGenderCode: genderCode)
+        assert(!names.isEmpty, "Character names for gender code \(genderCode) is empty")
+        return names.randomElement()?.name ?? "名無し"
     }
 
     // MARK: - イニシャライザ
