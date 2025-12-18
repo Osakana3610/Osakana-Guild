@@ -166,7 +166,7 @@ struct TacticSpellAmplifyHandler: SkillEffectHandler {
         let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
         let triggerTurn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
         let key = "spellSpecific:" + spellId
-        let triggerId = payload.familyId ?? payload.effectType.rawValue
+        let triggerId = payload.familyId ?? payload.effectType.identifier
         let scopeString = payload.stringValues["scope"] ?? "party"
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: scopeString) ?? .party
         let turn = Int(triggerTurn.rounded(.towardZero))

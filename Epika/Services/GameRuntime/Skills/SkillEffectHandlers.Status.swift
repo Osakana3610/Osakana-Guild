@@ -149,7 +149,7 @@ struct TimedMagicPowerAmplifyHandler: SkillEffectHandler {
     ) throws {
         let turn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
         let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
-        let triggerId = payload.familyId ?? payload.effectType.rawValue
+        let triggerId = payload.familyId ?? payload.effectType.identifier
         let scopeString = payload.stringValues["scope"] ?? "party"
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: scopeString) ?? .party
         let triggerTurn = Int(turn.rounded(.towardZero))
@@ -176,7 +176,7 @@ struct TimedBreathPowerAmplifyHandler: SkillEffectHandler {
     ) throws {
         let turn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
         let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
-        let triggerId = payload.familyId ?? payload.effectType.rawValue
+        let triggerId = payload.familyId ?? payload.effectType.identifier
         let scopeString = payload.stringValues["scope"] ?? "party"
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: scopeString) ?? .party
         let triggerTurn = Int(turn.rounded(.towardZero))

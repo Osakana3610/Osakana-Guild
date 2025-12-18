@@ -26,7 +26,7 @@ extension SkillRuntimeEffectCompiler {
 
                 guard let handler = SkillEffectHandlerRegistry.handler(for: payload.effectType) else {
                     throw RuntimeError.invalidConfiguration(
-                        reason: "Skill \(skill.id)#\(effect.index) の effectType \(payload.effectType.rawValue) に対応するハンドラがありません"
+                        reason: "Skill \(skill.id)#\(effect.index) の effectType \(payload.effectType.identifier) に対応するハンドラがありません"
                     )
                 }
 

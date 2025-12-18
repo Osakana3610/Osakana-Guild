@@ -16,12 +16,12 @@ extension SkillRuntimeEffectCompiler {
         if let requirements = requiredFields[payload.effectType] {
             for key in requirements.params {
                 guard let value = payload.parameters?[key], !value.isEmpty else {
-                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType.rawValue) の必須パラメータ \(key) が不足しています")
+                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType.identifier) の必須パラメータ \(key) が不足しています")
                 }
             }
             for key in requirements.values {
                 guard payload.value[key] != nil else {
-                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType.rawValue) の必須値 \(key) が不足しています")
+                    throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType.identifier) の必須値 \(key) が不足しています")
                 }
             }
         }
@@ -169,21 +169,21 @@ struct DecodedSkillEffectPayload: Sendable, Hashable {
 
     func requireParam(_ key: String, skillId: UInt16, effectIndex: Int) throws -> String {
         guard let value = parameters?[key], !value.isEmpty else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.rawValue) の必須パラメータ \(key) がありません")
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.identifier) の必須パラメータ \(key) がありません")
         }
         return value
     }
 
     func requireValue(_ key: String, skillId: UInt16, effectIndex: Int) throws -> Double {
         guard let value = self.value[key] else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.rawValue) の必須値 \(key) がありません")
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.identifier) の必須値 \(key) がありません")
         }
         return value
     }
 
     func requireStringArray(_ key: String, skillId: UInt16, effectIndex: Int) throws -> [String] {
         guard let array = self.stringArrayValues[key] else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.rawValue) の必須配列 \(key) がありません")
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.identifier) の必須配列 \(key) がありません")
         }
         return array
     }
@@ -201,7 +201,7 @@ enum SkillEffectPayloadDecoder {
         guard !resolvedEffectType.isEmpty else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(fallbackEffectType) の effectType が不正です")
         }
-        guard let effectType = SkillEffectType(rawValue: resolvedEffectType) else {
+        guard let effectType = SkillEffectType(identifier: resolvedEffectType) else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(fallbackEffectType) の effectType \(resolvedEffectType) は未対応です")
         }
 

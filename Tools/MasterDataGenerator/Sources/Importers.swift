@@ -541,9 +541,12 @@ extension Generator {
                 reset(skillStatement)
 
                 for effect in entry.effects {
+                    guard let kindInt = EnumMappings.skillEffectType[effect.kind] else {
+                        throw GeneratorError.executionFailed("Skill \(entry.id) effect \(effect.index): unknown kind '\(effect.kind)'")
+                    }
                     bindInt(effectStatement, index: 1, value: entry.id)
                     bindInt(effectStatement, index: 2, value: effect.index)
-                    bindText(effectStatement, index: 3, value: effect.kind)
+                    bindInt(effectStatement, index: 3, value: kindInt)
                     bindDouble(effectStatement, index: 4, value: effect.value)
                     bindDouble(effectStatement, index: 5, value: effect.valuePercent)
                     bindText(effectStatement, index: 6, value: effect.statType)
@@ -646,12 +649,22 @@ extension Generator {
             }
 
             for spell in root.spells {
+                guard let schoolInt = EnumMappings.spellSchool[spell.school] else {
+                    throw GeneratorError.executionFailed("Spell \(spell.id): unknown school '\(spell.school)'")
+                }
+                guard let categoryInt = EnumMappings.spellCategory[spell.category] else {
+                    throw GeneratorError.executionFailed("Spell \(spell.id): unknown category '\(spell.category)'")
+                }
+                guard let targetingInt = EnumMappings.spellTargeting[spell.targeting] else {
+                    throw GeneratorError.executionFailed("Spell \(spell.id): unknown targeting '\(spell.targeting)'")
+                }
+
                 bindInt(spellStatement, index: 1, value: spell.id)
                 bindText(spellStatement, index: 2, value: spell.name)
-                bindText(spellStatement, index: 3, value: spell.school)
+                bindInt(spellStatement, index: 3, value: schoolInt)
                 bindInt(spellStatement, index: 4, value: spell.tier)
-                bindText(spellStatement, index: 5, value: spell.category)
-                bindText(spellStatement, index: 6, value: spell.targeting)
+                bindInt(spellStatement, index: 5, value: categoryInt)
+                bindInt(spellStatement, index: 6, value: targetingInt)
                 bindInt(spellStatement, index: 7, value: spell.maxTargetsBase)
                 bindDouble(spellStatement, index: 8, value: spell.extraTargetsPerLevels)
                 bindInt(spellStatement, index: 9, value: spell.hitsPerCast)
@@ -665,9 +678,12 @@ extension Generator {
 
                 if let buffs = spell.buffs {
                     for (index, buff) in buffs.enumerated() {
+                        guard let buffTypeInt = EnumMappings.spellBuffType[buff.type] else {
+                            throw GeneratorError.executionFailed("Spell \(spell.id): unknown buff type '\(buff.type)'")
+                        }
                         bindInt(buffStatement, index: 1, value: spell.id)
                         bindInt(buffStatement, index: 2, value: index)
-                        bindText(buffStatement, index: 3, value: buff.type)
+                        bindInt(buffStatement, index: 3, value: buffTypeInt)
                         bindDouble(buffStatement, index: 4, value: buff.multiplier)
                         try step(buffStatement)
                         reset(buffStatement)
@@ -2135,10 +2151,17 @@ extension Generator {
             defer { sqlite3_finalize(statement) }
 
             for skill in file.enemySkills {
+                guard let typeInt = EnumMappings.enemySkillType[skill.type] else {
+                    throw GeneratorError.executionFailed("EnemySkill \(skill.id): unknown type '\(skill.type)'")
+                }
+                guard let targetingInt = EnumMappings.enemySkillTargeting[skill.targeting] else {
+                    throw GeneratorError.executionFailed("EnemySkill \(skill.id): unknown targeting '\(skill.targeting)'")
+                }
+
                 bindInt(statement, index: 1, value: skill.id)
                 bindText(statement, index: 2, value: skill.name)
-                bindText(statement, index: 3, value: skill.type)
-                bindText(statement, index: 4, value: skill.targeting)
+                bindInt(statement, index: 3, value: typeInt)
+                bindInt(statement, index: 4, value: targetingInt)
                 bindInt(statement, index: 5, value: skill.chancePercent)
                 bindInt(statement, index: 6, value: skill.usesPerBattle)
                 bindDouble(statement, index: 7, value: skill.multiplier)

@@ -34,7 +34,10 @@ extension SQLiteMasterDataManager {
             let skillId = UInt16(sqlite3_column_int(effectStatement, 0))
             guard let skill = skills[skillId] else { continue }
             let index = Int(sqlite3_column_int(effectStatement, 1))
-            guard let kindC = sqlite3_column_text(effectStatement, 2) else { continue }
+            let kindRaw = UInt8(sqlite3_column_int(effectStatement, 2))
+            guard let kindEnum = SkillEffectType(rawValue: kindRaw) else {
+                throw SQLiteMasterDataError.executionFailed("未知の SkillEffect kind \(kindRaw) (skill_id=\(skillId), index=\(index))")
+            }
             let value = sqlite3_column_type(effectStatement, 3) == SQLITE_NULL ? nil : Double(sqlite3_column_double(effectStatement, 3))
             let valuePercent = sqlite3_column_type(effectStatement, 4) == SQLITE_NULL ? nil : Double(sqlite3_column_double(effectStatement, 4))
             let statType = sqlite3_column_text(effectStatement, 5).flatMap { String(cString: $0) }
@@ -42,7 +45,7 @@ extension SQLiteMasterDataManager {
             guard let payloadC = sqlite3_column_text(effectStatement, 7) else { continue }
             var effects = skill.effects
             effects.append(.init(index: index,
-                                 kind: String(cString: kindC),
+                                 kind: kindEnum.identifier,
                                  value: value,
                                  valuePercent: valuePercent,
                                  statType: statType,
