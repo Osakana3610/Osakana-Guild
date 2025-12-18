@@ -57,7 +57,20 @@ enum EnumMappings {
         "lightning": 4,
         "holy": 5,
         "dark": 6,
-        "breath": 7
+        "breath": 7,
+        "light": 8,
+        "earth": 9,
+        "wind": 10,
+        "poison": 11,
+        "death": 12,
+        "charm": 13,
+        "magical": 14,
+        "critical": 15,
+        "piercing": 16,
+        "spell.0": 17,
+        "spell.2": 18,
+        "spell.3": 19,
+        "spell.6": 20
     ]
 
     // MARK: - Gender
@@ -187,6 +200,7 @@ enum EnumMappings {
     // MARK: - Enemy Category
 
     static let enemyCategory: [String: Int] = [
+        "enemy": 0,       // generic enemy category
         "beast": 1,
         "demon": 2,
         "undead": 3,
@@ -212,7 +226,9 @@ enum EnumMappings {
 
     static let encounterEventType: [String: Int] = [
         "normal": 1,
+        "enemy_encounter": 1,    // alias for import
         "boss": 2,
+        "boss_encounter": 2,     // alias for import
         "scripted": 3,
         "guaranteed": 4
     ]
@@ -241,7 +257,10 @@ enum EnumMappings {
     static let personalityKind: [String: Int] = [
         "positive": 1,
         "negative": 2,
-        "neutral": 3
+        "neutral": 3,
+        "equipment": 4,
+        "magic": 5,
+        "special": 6
     ]
 
     // MARK: - Exploration Event Type
@@ -251,7 +270,11 @@ enum EnumMappings {
         "treasure": 2,
         "encounter": 3,
         "rest": 4,
-        "special": 5
+        "special": 5,
+        "battle": 6,
+        "merchant": 7,
+        "narrative": 8,
+        "resource": 9
     ]
 
     // MARK: - Exploration Event Tag
@@ -260,7 +283,12 @@ enum EnumMappings {
         "common": 1,
         "rare": 2,
         "dangerous": 3,
-        "beneficial": 4
+        "beneficial": 4,
+        "any": 5,
+        "forest": 6,
+        "desert": 7,
+        "magic_tower": 8,
+        "ancient_ruins": 9
     ]
 
     // MARK: - Exploration Event Context
@@ -270,7 +298,12 @@ enum EnumMappings {
         "early_floor": 2,
         "mid_floor": 3,
         "late_floor": 4,
-        "boss_floor": 5
+        "boss_floor": 5,
+        "default": 6,
+        "tag:forest": 7,
+        "tag:desert": 8,
+        "tag:magic_tower": 9,
+        "tag:ancient_ruins": 10
     ]
 
     // MARK: - Exploration Payload Type
@@ -320,7 +353,10 @@ enum EnumMappings {
         "physicalDamageDealt": 1,
         "physicalDamageTaken": 2,
         "magicalDamageTaken": 3,
-        "breathDamageTaken": 4
+        "breathDamageTaken": 4,
+        "physicalAttack": 5,
+        "magicalAttack": 6,
+        "physicalDefense": 7
     ]
 
     // MARK: - EnemySkillDefinition

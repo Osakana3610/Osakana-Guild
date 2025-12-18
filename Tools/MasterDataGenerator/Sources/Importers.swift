@@ -67,17 +67,17 @@ extension Generator {
                 bindInt(itemStatement, index: 1, value: item.id)
                 bindText(itemStatement, index: 2, value: item.name)
                 bindText(itemStatement, index: 3, value: item.description ?? "")
-                bindText(itemStatement, index: 4, value: item.category)
+                bindInt(itemStatement, index: 4, value: EnumMappings.itemCategory[item.category] ?? 0)
                 bindInt(itemStatement, index: 5, value: item.basePrice)
                 bindInt(itemStatement, index: 6, value: item.sellValue)
-                bindText(itemStatement, index: 7, value: item.rarity)
+                bindInt(itemStatement, index: 7, value: item.rarity.flatMap { EnumMappings.itemRarity[$0] })
                 try step(itemStatement)
                 reset(itemStatement)
 
                 if let statBonuses = item.statBonuses {
                     for (stat, value) in statBonuses.sorted(by: { $0.key < $1.key }) {
                         bindInt(statStatement, index: 1, value: item.id)
-                        bindText(statStatement, index: 2, value: stat)
+                        bindInt(statStatement, index: 2, value: EnumMappings.baseStat[stat] ?? 0)
                         bindInt(statStatement, index: 3, value: value)
                         try step(statStatement)
                         reset(statStatement)
@@ -87,7 +87,7 @@ extension Generator {
                 if let combatBonuses = item.combatBonuses {
                     for (stat, value) in combatBonuses.sorted(by: { $0.key < $1.key }) {
                         bindInt(combatStatement, index: 1, value: item.id)
-                        bindText(combatStatement, index: 2, value: stat)
+                        bindInt(combatStatement, index: 2, value: EnumMappings.combatStat[stat] ?? 0)
                         bindInt(combatStatement, index: 3, value: value)
                         try step(combatStatement)
                         reset(combatStatement)
@@ -96,8 +96,9 @@ extension Generator {
 
                 if let races = item.allowedRaces {
                     for race in races {
+                        guard let raceId = Int(race) else { continue }
                         bindInt(raceStatement, index: 1, value: item.id)
-                        bindText(raceStatement, index: 2, value: race)
+                        bindInt(raceStatement, index: 2, value: raceId)
                         try step(raceStatement)
                         reset(raceStatement)
                     }
@@ -105,8 +106,9 @@ extension Generator {
 
                 if let jobs = item.allowedJobs {
                     for job in jobs {
+                        guard let jobId = Int(job) else { continue }
                         bindInt(jobStatement, index: 1, value: item.id)
-                        bindText(jobStatement, index: 2, value: job)
+                        bindInt(jobStatement, index: 2, value: jobId)
                         try step(jobStatement)
                         reset(jobStatement)
                     }
@@ -115,7 +117,7 @@ extension Generator {
                 if let genders = item.allowedGenders {
                     for gender in genders {
                         bindInt(genderStatement, index: 1, value: item.id)
-                        bindText(genderStatement, index: 2, value: gender)
+                        bindInt(genderStatement, index: 2, value: EnumMappings.gender[gender] ?? 0)
                         try step(genderStatement)
                         reset(genderStatement)
                     }
@@ -123,8 +125,9 @@ extension Generator {
 
                 if let bypass = item.bypassRaceRestriction {
                     for race in bypass {
+                        guard let raceId = Int(race) else { continue }
                         bindInt(bypassStatement, index: 1, value: item.id)
-                        bindText(bypassStatement, index: 2, value: race)
+                        bindInt(bypassStatement, index: 2, value: raceId)
                         try step(bypassStatement)
                         reset(bypassStatement)
                     }
@@ -534,8 +537,8 @@ extension Generator {
                 bindInt(skillStatement, index: 1, value: entry.id)
                 bindText(skillStatement, index: 2, value: entry.name)
                 bindText(skillStatement, index: 3, value: entry.description)
-                bindText(skillStatement, index: 4, value: entry.type)
-                bindText(skillStatement, index: 5, value: entry.category)
+                bindInt(skillStatement, index: 4, value: EnumMappings.skillType[entry.type] ?? 0)
+                bindInt(skillStatement, index: 5, value: EnumMappings.skillCategory[entry.category] ?? 0)
                 bindText(skillStatement, index: 6, value: entry.acquisitionJSON)
                 try step(skillStatement)
                 reset(skillStatement)
@@ -549,8 +552,8 @@ extension Generator {
                     bindInt(effectStatement, index: 3, value: kindInt)
                     bindDouble(effectStatement, index: 4, value: effect.value)
                     bindDouble(effectStatement, index: 5, value: effect.valuePercent)
-                    bindText(effectStatement, index: 6, value: effect.statType)
-                    bindText(effectStatement, index: 7, value: effect.damageType)
+                    bindInt(effectStatement, index: 6, value: effect.statType.flatMap { EnumMappings.baseStat[$0] ?? EnumMappings.combatStat[$0] })
+                    bindInt(effectStatement, index: 7, value: effect.damageType.flatMap { EnumMappings.damageType[$0] })
                     bindText(effectStatement, index: 8, value: effect.payloadJSON)
                     try step(effectStatement)
                     reset(effectStatement)
@@ -669,9 +672,9 @@ extension Generator {
                 bindDouble(spellStatement, index: 8, value: spell.extraTargetsPerLevels)
                 bindInt(spellStatement, index: 9, value: spell.hitsPerCast)
                 bindDouble(spellStatement, index: 10, value: spell.basePowerMultiplier)
-                bindText(spellStatement, index: 11, value: spell.statusId)
+                bindInt(spellStatement, index: 11, value: spell.statusId.flatMap { Int($0) })
                 bindDouble(spellStatement, index: 12, value: spell.healMultiplier)
-                bindText(spellStatement, index: 13, value: spell.castCondition)
+                bindInt(spellStatement, index: 13, value: spell.castCondition.flatMap { EnumMappings.spellCastCondition[$0] })
                 bindText(spellStatement, index: 14, value: spell.description)
                 try step(spellStatement)
                 reset(spellStatement)
@@ -749,14 +752,14 @@ extension Generator {
             for job in file.jobs {
                 bindInt(jobStatement, index: 1, value: job.id)
                 bindText(jobStatement, index: 2, value: job.name)
-                bindText(jobStatement, index: 3, value: job.category)
-                bindText(jobStatement, index: 4, value: job.growthTendency)
+                bindInt(jobStatement, index: 3, value: EnumMappings.jobCategory[job.category] ?? 0)
+                bindInt(jobStatement, index: 4, value: job.growthTendency.flatMap { EnumMappings.jobGrowthTendency[$0] })
                 try step(jobStatement)
                 reset(jobStatement)
 
                 for (stat, value) in job.combatCoefficients.sorted(by: { $0.key < $1.key }) {
                     bindInt(coefficientStatement, index: 1, value: job.id)
-                    bindText(coefficientStatement, index: 2, value: stat)
+                    bindInt(coefficientStatement, index: 2, value: EnumMappings.combatStat[stat] ?? 0)
                     bindDouble(coefficientStatement, index: 3, value: value)
                     try step(coefficientStatement)
                     reset(coefficientStatement)
@@ -853,22 +856,23 @@ extension Generator {
                 sqlite3_finalize(skillUnlockStatement)
             }
 
-            var categoryCaps: [String: Int] = [:]
-            var memberships: [(category: String, raceId: Int)] = []
+            var categoryCaps: [Int: Int] = [:]
+            var memberships: [(category: Int, raceId: Int)] = []
 
             for race in file.raceData {
+                let categoryInt = EnumMappings.raceCategory[race.category] ?? 0
                 bindInt(raceStatement, index: 1, value: race.id)
                 bindText(raceStatement, index: 2, value: race.name)
-                bindText(raceStatement, index: 3, value: race.gender)
+                bindInt(raceStatement, index: 3, value: EnumMappings.gender[race.gender] ?? 0)
                 bindInt(raceStatement, index: 4, value: race.genderCode)
-                bindText(raceStatement, index: 5, value: race.category)
+                bindInt(raceStatement, index: 5, value: categoryInt)
                 bindText(raceStatement, index: 6, value: race.description)
                 try step(raceStatement)
                 reset(raceStatement)
 
                 for (stat, value) in race.baseStats.sorted(by: { $0.key < $1.key }) {
                     bindInt(statStatement, index: 1, value: race.id)
-                    bindText(statStatement, index: 2, value: stat)
+                    bindInt(statStatement, index: 2, value: EnumMappings.baseStat[stat] ?? 0)
                     bindInt(statStatement, index: 3, value: value)
                     try step(statStatement)
                     reset(statStatement)
@@ -896,20 +900,20 @@ extension Generator {
                     }
                 }
 
-                let currentCap = categoryCaps[race.category] ?? race.maxLevel
-                categoryCaps[race.category] = max(currentCap, race.maxLevel)
-                memberships.append((category: race.category, raceId: race.id))
+                let currentCap = categoryCaps[categoryInt] ?? race.maxLevel
+                categoryCaps[categoryInt] = max(currentCap, race.maxLevel)
+                memberships.append((category: categoryInt, raceId: race.id))
             }
 
             for (category, maxLevel) in categoryCaps.sorted(by: { $0.key < $1.key }) {
-                bindText(categoryStatement, index: 1, value: category)
+                bindInt(categoryStatement, index: 1, value: category)
                 bindInt(categoryStatement, index: 2, value: maxLevel)
                 try step(categoryStatement)
                 reset(categoryStatement)
             }
 
             for membership in memberships {
-                bindText(membershipStatement, index: 1, value: membership.category)
+                bindInt(membershipStatement, index: 1, value: membership.category)
                 bindInt(membershipStatement, index: 2, value: membership.raceId)
                 try step(membershipStatement)
                 reset(membershipStatement)
@@ -1091,7 +1095,7 @@ extension Generator {
                 bindInt(effectStatement, index: 1, value: effect.id)
                 bindText(effectStatement, index: 2, value: effect.name)
                 bindText(effectStatement, index: 3, value: effect.description)
-                bindText(effectStatement, index: 4, value: effect.category)
+                bindInt(effectStatement, index: 4, value: EnumMappings.statusEffectCategory[effect.category] ?? 0)
                 bindInt(effectStatement, index: 5, value: effect.durationTurns)
                 bindInt(effectStatement, index: 6, value: effect.tickDamagePercent)
                 bindBool(effectStatement, index: 7, value: effect.actionLocked)
@@ -1104,7 +1108,7 @@ extension Generator {
                     for (index, tag) in tags.enumerated() {
                         bindInt(tagStatement, index: 1, value: effect.id)
                         bindInt(tagStatement, index: 2, value: index)
-                        bindText(tagStatement, index: 3, value: tag)
+                        bindInt(tagStatement, index: 3, value: EnumMappings.statusEffectTag[tag] ?? 0)
                         try step(tagStatement)
                         reset(tagStatement)
                     }
@@ -1113,7 +1117,7 @@ extension Generator {
                 if let modifiers = effect.statModifiers {
                     for (stat, value) in modifiers.sorted(by: { $0.key < $1.key }) {
                         bindInt(modifierStatement, index: 1, value: effect.id)
-                        bindText(modifierStatement, index: 2, value: stat)
+                        bindInt(modifierStatement, index: 2, value: EnumMappings.combatStat[stat] ?? 0)
                         bindDouble(modifierStatement, index: 3, value: value)
                         try step(modifierStatement)
                         reset(modifierStatement)
@@ -1188,10 +1192,13 @@ extension Generator {
             }
 
             for enemy in file.enemyTemplates {
+                guard let categoryInt = EnumMappings.enemyCategory[enemy.category] else {
+                    throw GeneratorError.executionFailed("Enemy \(enemy.id): unknown category '\(enemy.category)'")
+                }
                 bindInt(enemyStatement, index: 1, value: enemy.id)
                 bindText(enemyStatement, index: 2, value: enemy.baseName)
                 bindInt(enemyStatement, index: 3, value: enemy.race)
-                bindText(enemyStatement, index: 4, value: enemy.category)
+                bindInt(enemyStatement, index: 4, value: categoryInt)
                 bindInt(enemyStatement, index: 5, value: enemy.job)
                 bindInt(enemyStatement, index: 6, value: enemy.baseExperience)
                 bindBool(enemyStatement, index: 7, value: enemy.isBoss)
@@ -1218,8 +1225,11 @@ extension Generator {
                 reset(statsStatement)
 
                 for (element, value) in enemy.resistances.sorted(by: { $0.key < $1.key }) {
+                    guard let elementInt = EnumMappings.element[element] else {
+                        throw GeneratorError.executionFailed("Enemy \(enemy.id): unknown resistance element '\(element)'")
+                    }
                     bindInt(resistanceStatement, index: 1, value: enemy.id)
-                    bindText(resistanceStatement, index: 2, value: element)
+                    bindInt(resistanceStatement, index: 2, value: elementInt)
                     bindDouble(resistanceStatement, index: 3, value: value)
                     try step(resistanceStatement)
                     reset(resistanceStatement)
@@ -1339,21 +1349,29 @@ extension Generator {
                 sqlite3_finalize(floorStatement)
             }
 
-            var generatedTableIds: Set<String> = []
+            var nextTableId = 1
+            var nextFloorId = 1
 
-            func insertEncounterTable(id: String, name: String) throws {
-                bindText(tableStatement, index: 1, value: id)
+            func insertEncounterTable(name: String) throws -> Int {
+                let tableId = nextTableId
+                nextTableId += 1
+                bindInt(tableStatement, index: 1, value: tableId)
                 bindText(tableStatement, index: 2, value: name)
                 try step(tableStatement)
                 reset(tableStatement)
+                return tableId
             }
 
-            func insertEncounterEvents(tableId: String, groups: [DungeonMasterFile.FloorEnemyMapping.EnemyGroup]) throws {
+            func insertEncounterEvents(tableId: Int, groups: [DungeonMasterFile.FloorEnemyMapping.EnemyGroup]) throws {
                 for (index, group) in groups.enumerated() {
-                    bindText(eventStatement, index: 1, value: tableId)
-                    bindInt(eventStatement, index: 2, value: index)
                     let isBoss = groups.count == 1
-                    bindText(eventStatement, index: 3, value: isBoss ? "boss_encounter" : "enemy_encounter")
+                    let eventTypeString = isBoss ? "boss_encounter" : "enemy_encounter"
+                    guard let eventTypeInt = EnumMappings.encounterEventType[eventTypeString] else {
+                        throw GeneratorError.executionFailed("Unknown event type '\(eventTypeString)'")
+                    }
+                    bindInt(eventStatement, index: 1, value: tableId)
+                    bindInt(eventStatement, index: 2, value: index)
+                    bindInt(eventStatement, index: 3, value: eventTypeInt)
                     bindInt(eventStatement, index: 4, value: group.enemyId)
                     bindDouble(eventStatement, index: 5, value: group.weight)
                     bindInt(eventStatement, index: 6, value: group.groupMin)
@@ -1364,17 +1382,6 @@ extension Generator {
                     try step(eventStatement)
                     reset(eventStatement)
                 }
-            }
-
-            func nextEncounterTableId(base: Int, floorNumber: Int) -> String {
-                var candidate = "\(base)_floor_\(floorNumber)"
-                var suffix = 0
-                while generatedTableIds.contains(candidate) {
-                    suffix += 1
-                    candidate = "\(base)_floor_\(floorNumber)_\(suffix)"
-                }
-                generatedTableIds.insert(candidate)
-                return candidate
             }
 
             for dungeon in file.dungeons {
@@ -1403,9 +1410,12 @@ extension Generator {
 
                 if let weights = dungeon.encounterWeights {
                     for (index, weight) in weights.enumerated() {
+                        guard let enemyIdInt = Int(weight.enemyId) else {
+                            throw GeneratorError.executionFailed("Dungeon \(dungeon.id): invalid enemyId '\(weight.enemyId)'")
+                        }
                         bindInt(weightStatement, index: 1, value: dungeon.id)
                         bindInt(weightStatement, index: 2, value: index)
-                        bindText(weightStatement, index: 3, value: weight.enemyId)
+                        bindInt(weightStatement, index: 3, value: enemyIdInt)
                         bindDouble(weightStatement, index: 4, value: weight.weight)
                         try step(weightStatement)
                         reset(weightStatement)
@@ -1430,17 +1440,17 @@ extension Generator {
                 }
 
                 for floorNumber in 1...floorCount {
-                    let tableId = nextEncounterTableId(base: dungeon.id, floorNumber: floorNumber)
                     let tableName = "\(dungeon.name) 第\(floorNumber)階エンカウント"
-                    try insertEncounterTable(id: tableId, name: tableName)
+                    let tableId = try insertEncounterTable(name: tableName)
                     try insertEncounterEvents(tableId: tableId, groups: groupsByFloor[floorNumber] ?? [])
 
-                    let floorId = "\(dungeon.id)_floor_\(floorNumber)"
-                    bindText(floorStatement, index: 1, value: floorId)
+                    let floorId = nextFloorId
+                    nextFloorId += 1
+                    bindInt(floorStatement, index: 1, value: floorId)
                     bindInt(floorStatement, index: 2, value: dungeon.id)
                     bindText(floorStatement, index: 3, value: "第\(floorNumber)階")
                     bindInt(floorStatement, index: 4, value: floorNumber)
-                    bindText(floorStatement, index: 5, value: tableId)
+                    bindInt(floorStatement, index: 5, value: tableId)
                     bindText(floorStatement, index: 6, value: "\(dungeon.name) 第\(floorNumber)階")
                     try step(floorStatement)
                     reset(floorStatement)
@@ -1810,18 +1820,30 @@ extension Generator {
                 sqlite3_finalize(battleEffectStatement)
             }
 
+            // Build skill ID mapping (string → integer)
+            var skillIdMapping: [String: Int] = [:]
+            for (index, skill) in skills.enumerated() {
+                skillIdMapping[skill.id] = index + 1
+            }
+
             for entry in primaries {
+                guard let kindInt = EnumMappings.personalityKind[entry.kind] else {
+                    throw GeneratorError.executionFailed("PersonalityPrimary \(entry.id): unknown kind '\(entry.kind)'")
+                }
                 bindInt(primaryStatement, index: 1, value: entry.id)
                 bindText(primaryStatement, index: 2, value: entry.name)
-                bindText(primaryStatement, index: 3, value: entry.kind)
+                bindInt(primaryStatement, index: 3, value: kindInt)
                 bindText(primaryStatement, index: 4, value: entry.description)
                 try step(primaryStatement)
                 reset(primaryStatement)
 
                 for effect in entry.effects {
+                    guard let effectTypeInt = EnumMappings.skillEffectType[effect.type] else {
+                        throw GeneratorError.executionFailed("PersonalityPrimary \(entry.id): unknown effect type '\(effect.type)'")
+                    }
                     bindInt(primaryEffectStatement, index: 1, value: entry.id)
                     bindInt(primaryEffectStatement, index: 2, value: effect.index)
-                    bindText(primaryEffectStatement, index: 3, value: effect.type)
+                    bindInt(primaryEffectStatement, index: 3, value: effectTypeInt)
                     bindDouble(primaryEffectStatement, index: 4, value: effect.value)
                     bindText(primaryEffectStatement, index: 5, value: effect.payloadJSON)
                     try step(primaryEffectStatement)
@@ -1830,16 +1852,25 @@ extension Generator {
             }
 
             for entry in secondaries {
+                guard let positiveSkillId = skillIdMapping[entry.positiveSkill] else {
+                    throw GeneratorError.executionFailed("PersonalitySecondary \(entry.id): unknown positiveSkill '\(entry.positiveSkill)'")
+                }
+                guard let negativeSkillId = skillIdMapping[entry.negativeSkill] else {
+                    throw GeneratorError.executionFailed("PersonalitySecondary \(entry.id): unknown negativeSkill '\(entry.negativeSkill)'")
+                }
                 bindInt(secondaryStatement, index: 1, value: entry.id)
                 bindText(secondaryStatement, index: 2, value: entry.name)
-                bindText(secondaryStatement, index: 3, value: entry.positiveSkill)
-                bindText(secondaryStatement, index: 4, value: entry.negativeSkill)
+                bindInt(secondaryStatement, index: 3, value: positiveSkillId)
+                bindInt(secondaryStatement, index: 4, value: negativeSkillId)
                 try step(secondaryStatement)
                 reset(secondaryStatement)
 
                 for (stat, value) in entry.statBonuses.sorted(by: { $0.key < $1.key }) {
+                    guard let statInt = EnumMappings.baseStat[stat] else {
+                        throw GeneratorError.executionFailed("PersonalitySecondary \(entry.id): unknown stat '\(stat)'")
+                    }
                     bindInt(secondaryStatStatement, index: 1, value: entry.id)
-                    bindText(secondaryStatStatement, index: 2, value: stat)
+                    bindInt(secondaryStatStatement, index: 2, value: statInt)
                     bindInt(secondaryStatStatement, index: 3, value: value)
                     try step(secondaryStatStatement)
                     reset(secondaryStatStatement)
@@ -1847,15 +1878,21 @@ extension Generator {
             }
 
             for entry in skills {
-                bindText(skillStatement, index: 1, value: entry.id)
+                guard let skillId = skillIdMapping[entry.id] else {
+                    throw GeneratorError.executionFailed("PersonalitySkill: missing mapping for '\(entry.id)'")
+                }
+                guard let kindInt = EnumMappings.personalityKind[entry.kind] else {
+                    throw GeneratorError.executionFailed("PersonalitySkill \(entry.id): unknown kind '\(entry.kind)'")
+                }
+                bindInt(skillStatement, index: 1, value: skillId)
                 bindText(skillStatement, index: 2, value: entry.name)
-                bindText(skillStatement, index: 3, value: entry.kind)
+                bindInt(skillStatement, index: 3, value: kindInt)
                 bindText(skillStatement, index: 4, value: entry.description)
                 try step(skillStatement)
                 reset(skillStatement)
 
                 for (index, effectId) in entry.eventEffects.enumerated() {
-                    bindText(skillEventStatement, index: 1, value: entry.id)
+                    bindInt(skillEventStatement, index: 1, value: skillId)
                     bindInt(skillEventStatement, index: 2, value: index)
                     bindText(skillEventStatement, index: 3, value: effectId)
                     try step(skillEventStatement)
@@ -1864,14 +1901,22 @@ extension Generator {
             }
 
             for pair in cancellations where pair.count == 2 {
-                bindText(cancellationStatement, index: 1, value: pair[0])
-                bindText(cancellationStatement, index: 2, value: pair[1])
+                guard let positiveId = skillIdMapping[pair[0]] else {
+                    throw GeneratorError.executionFailed("PersonalityCancellation: unknown positiveSkill '\(pair[0])'")
+                }
+                guard let negativeId = skillIdMapping[pair[1]] else {
+                    throw GeneratorError.executionFailed("PersonalityCancellation: unknown negativeSkill '\(pair[1])'")
+                }
+                bindInt(cancellationStatement, index: 1, value: positiveId)
+                bindInt(cancellationStatement, index: 2, value: negativeId)
                 try step(cancellationStatement)
                 reset(cancellationStatement)
             }
 
-            for (category, payloadJSON) in battleEffectEntries {
-                bindText(battleEffectStatement, index: 1, value: category)
+            for (index, (category, payloadJSON)) in battleEffectEntries.enumerated() {
+                // Use index as category ID since original categories are strings
+                let _ = category // Keep for reference but use integer ID
+                bindInt(battleEffectStatement, index: 1, value: index + 1)
                 bindText(battleEffectStatement, index: 2, value: payloadJSON)
                 try step(battleEffectStatement)
                 reset(battleEffectStatement)
@@ -2018,8 +2063,11 @@ extension Generator {
             }
 
             for entry in entries {
+                guard let typeInt = EnumMappings.explorationEventType[entry.type] else {
+                    throw GeneratorError.executionFailed("ExplorationEvent \(entry.id): unknown type '\(entry.type)'")
+                }
                 bindInt(eventStatement, index: 1, value: entry.id)
-                bindText(eventStatement, index: 2, value: entry.type)
+                bindInt(eventStatement, index: 2, value: typeInt)
                 bindText(eventStatement, index: 3, value: entry.name)
                 bindText(eventStatement, index: 4, value: entry.description)
                 bindInt(eventStatement, index: 5, value: entry.floorMin)
@@ -2028,16 +2076,22 @@ extension Generator {
                 reset(eventStatement)
 
                 for (index, tag) in entry.dungeonTags.enumerated() {
+                    guard let tagInt = EnumMappings.explorationEventTag[tag] else {
+                        throw GeneratorError.executionFailed("ExplorationEvent \(entry.id): unknown tag '\(tag)'")
+                    }
                     bindInt(tagStatement, index: 1, value: entry.id)
                     bindInt(tagStatement, index: 2, value: index)
-                    bindText(tagStatement, index: 3, value: tag)
+                    bindInt(tagStatement, index: 3, value: tagInt)
                     try step(tagStatement)
                     reset(tagStatement)
                 }
 
                 for weight in entry.weights {
+                    guard let contextInt = EnumMappings.explorationEventContext[weight.context] else {
+                        throw GeneratorError.executionFailed("ExplorationEvent \(entry.id): unknown context '\(weight.context)'")
+                    }
                     bindInt(weightStatement, index: 1, value: entry.id)
-                    bindText(weightStatement, index: 2, value: weight.context)
+                    bindInt(weightStatement, index: 2, value: contextInt)
                     bindDouble(weightStatement, index: 3, value: weight.value)
                     try step(weightStatement)
                     reset(weightStatement)
@@ -2045,7 +2099,7 @@ extension Generator {
 
                 if let payloadJSON = entry.payloadJSON {
                     bindInt(payloadStatement, index: 1, value: entry.id)
-                    bindText(payloadStatement, index: 2, value: entry.type)
+                    bindInt(payloadStatement, index: 2, value: typeInt)
                     bindText(payloadStatement, index: 3, value: payloadJSON)
                     try step(payloadStatement)
                     reset(payloadStatement)
@@ -2095,8 +2149,11 @@ extension Generator {
                 reset(raceStatement)
 
                 for (element, value) in race.baseResistances.sorted(by: { $0.key < $1.key }) {
+                    guard let elementInt = EnumMappings.element[element] else {
+                        throw GeneratorError.executionFailed("EnemyRace \(race.id): unknown resistance element '\(element)'")
+                    }
                     bindInt(resistanceStatement, index: 1, value: race.id)
-                    bindText(resistanceStatement, index: 2, value: element)
+                    bindInt(resistanceStatement, index: 2, value: elementInt)
                     bindDouble(resistanceStatement, index: 3, value: value)
                     try step(resistanceStatement)
                     reset(resistanceStatement)
@@ -2158,6 +2215,26 @@ extension Generator {
                     throw GeneratorError.executionFailed("EnemySkill \(skill.id): unknown targeting '\(skill.targeting)'")
                 }
 
+                let elementInt: Int?
+                if let element = skill.element {
+                    guard let mapped = EnumMappings.element[element] else {
+                        throw GeneratorError.executionFailed("EnemySkill \(skill.id): unknown element '\(element)'")
+                    }
+                    elementInt = mapped
+                } else {
+                    elementInt = nil
+                }
+
+                let buffTypeInt: Int?
+                if let buffType = skill.buffType {
+                    guard let mapped = EnumMappings.spellBuffType[buffType] else {
+                        throw GeneratorError.executionFailed("EnemySkill \(skill.id): unknown buffType '\(buffType)'")
+                    }
+                    buffTypeInt = mapped
+                } else {
+                    buffTypeInt = nil
+                }
+
                 bindInt(statement, index: 1, value: skill.id)
                 bindText(statement, index: 2, value: skill.name)
                 bindInt(statement, index: 3, value: typeInt)
@@ -2167,11 +2244,11 @@ extension Generator {
                 bindDouble(statement, index: 7, value: skill.multiplier)
                 bindInt(statement, index: 8, value: skill.hitCount)
                 bindBool(statement, index: 9, value: skill.ignoreDefense ?? false)
-                bindText(statement, index: 10, value: skill.element)
+                bindInt(statement, index: 10, value: elementInt)
                 bindInt(statement, index: 11, value: skill.statusId)
                 bindInt(statement, index: 12, value: skill.statusChance)
                 bindInt(statement, index: 13, value: skill.healPercent)
-                bindText(statement, index: 14, value: skill.buffType)
+                bindInt(statement, index: 14, value: buffTypeInt)
                 bindDouble(statement, index: 15, value: skill.buffMultiplier)
                 try step(statement)
                 reset(statement)
