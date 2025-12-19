@@ -92,13 +92,15 @@ struct ExplorationSnapshot: Sendable, Hashable {
     }
 
     struct Summary: Sendable, Hashable {
-        enum Timing: Sendable, Hashable {
-            case expectedReturn(Date)
-            case actualReturn(Date)
+        /// iOS 17のAttributeGraphバグ回避のため、associated valueを持たないenumに変更
+        enum TimingKind: UInt8, Sendable, Hashable {
+            case expected = 1
+            case actual = 2
         }
 
         var floorNumber: Int
-        var timing: Timing
+        var timingKind: TimingKind
+        var timingDate: Date
         var body: String
     }
 
@@ -142,13 +144,15 @@ extension ExplorationSnapshot {
                             startedAt: Date,
                             lastUpdatedAt: Date,
                             logs: [EncounterLog]) -> Summary {
-        let timing: Summary.Timing
+        let timingKind: Summary.TimingKind
+        let timingDate: Date
         switch status {
         case .running:
-            let reference = expectedReturnAt ?? startedAt
-            timing = .expectedReturn(reference)
+            timingKind = .expected
+            timingDate = expectedReturnAt ?? startedAt
         case .completed, .defeated, .cancelled:
-            timing = .actualReturn(lastUpdatedAt)
+            timingKind = .actual
+            timingDate = lastUpdatedAt
         }
 
         let body: String
@@ -166,7 +170,8 @@ extension ExplorationSnapshot {
         }
 
         return Summary(floorNumber: activeFloorNumber,
-                       timing: timing,
+                       timingKind: timingKind,
+                       timingDate: timingDate,
                        body: body)
     }
 
