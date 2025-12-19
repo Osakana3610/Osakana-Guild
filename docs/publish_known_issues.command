@@ -150,7 +150,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </head>
 <body>
     <h1>既知の問題</h1>
-    <p>おさかなギルドで現在確認されている問題と、その対応状況をお知らせします。</p>
+    <p>おさかなギルドで現在確認されている問題と、対応状況です。このページにない場合は<a href="itms-beta://beta.itunes.apple.com/v1/app/6756705558">こちら</a>からフィードバックを送信してください（iOSのみ）。</p>
     <h2>対応中の問題 <span class="issue-count">({open_count}件)</span></h2>
     {open_issues_html}
     <h2 class="resolved-section">解決済みの問題 <span class="issue-count">({resolved_count}件)</span></h2>

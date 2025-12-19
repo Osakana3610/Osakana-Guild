@@ -380,7 +380,7 @@ extension BattleTurnEngine {
     private static func computeEnemySkillMagicalDamage(attacker: BattleActor,
                                                        defender: BattleActor,
                                                        multiplier: Double,
-                                                       element: String?,
+                                                       element: UInt8?,
                                                        context: inout BattleContext) -> Int {
         let baseAttack = Double(attacker.snapshot.magicalAttack)
         let baseDefense = Double(defender.snapshot.magicalDefense)
@@ -393,7 +393,7 @@ extension BattleTurnEngine {
     private static func computeEnemySkillBreathDamage(attacker: BattleActor,
                                                       defender: BattleActor,
                                                       multiplier: Double,
-                                                      element: String?,
+                                                      element: UInt8?,
                                                       context: inout BattleContext) -> Int {
         let baseBreath = Double(attacker.snapshot.breathDamage)
         let rawDamage = max(1.0, baseBreath * multiplier)
@@ -455,19 +455,31 @@ extension BattleTurnEngine {
         }
     }
 
-    private static func applyEnemyBuff(buffType: String, multiplier: Double, to actor: inout BattleActor) {
-        switch buffType {
-        case "attack":
+    private static func applyEnemyBuff(buffType: UInt8, multiplier: Double, to actor: inout BattleActor) {
+        guard let type = SpellBuffType(rawValue: buffType) else { return }
+        switch type {
+        case .physicalDamageDealt, .combat, .damage:
+            // 与ダメージ倍率は戦闘効果として後で適用されるため、ここでは物理攻撃力を上げる
             actor.snapshot.physicalAttack = Int(Double(actor.snapshot.physicalAttack) * multiplier)
-        case "defense":
+        case .physicalDamageTaken:
+            // 被物理ダメージ減少 = 防御力上昇
             actor.snapshot.physicalDefense = Int(Double(actor.snapshot.physicalDefense) * multiplier)
-        case "magic":
+        case .magicalDamageTaken:
+            // 被魔法ダメージ減少 = 魔法防御力上昇
+            actor.snapshot.magicalDefense = Int(Double(actor.snapshot.magicalDefense) * multiplier)
+        case .breathDamageTaken:
+            // ブレス耐性は直接ステータスにないのでスキップ
+            break
+        case .physicalAttack:
+            actor.snapshot.physicalAttack = Int(Double(actor.snapshot.physicalAttack) * multiplier)
+        case .magicalAttack:
             actor.snapshot.magicalAttack = Int(Double(actor.snapshot.magicalAttack) * multiplier)
-        case "speed":
-            // agilityは直接変更できないのでスキップ
-            break
-        default:
-            break
+        case .physicalDefense:
+            actor.snapshot.physicalDefense = Int(Double(actor.snapshot.physicalDefense) * multiplier)
+        case .accuracy:
+            actor.snapshot.hitRate = Int(Double(actor.snapshot.hitRate) * multiplier)
+        case .attackCount:
+            actor.snapshot.attackCount = Int(Double(actor.snapshot.attackCount) * multiplier)
         }
     }
 }

@@ -17,7 +17,7 @@ extension SQLiteMasterDataManager {
             let basePowerMultiplier: Double?
             let statusId: UInt8?
             let healMultiplier: Double?
-            let castCondition: String?
+            let castCondition: UInt8?
             let description: String
             var buffs: [SpellDefinition.Buff] = []
         }
@@ -80,7 +80,7 @@ extension SQLiteMasterDataManager {
                 basePowerMultiplier: optionalDouble(spellStatement, 9),
                 statusId: sqlite3_column_type(spellStatement, 10) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 10)),
                 healMultiplier: optionalDouble(spellStatement, 11),
-                castCondition: optionalText(spellStatement, 12),
+                castCondition: sqlite3_column_type(spellStatement, 12) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 12)),
                 description: String(cString: descriptionC)
             )
             builders[id] = builder

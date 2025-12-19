@@ -125,6 +125,31 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
         let multiplier: Double
     }
 
+    enum CastCondition: UInt8, Sendable, Hashable {
+        case none = 1
+        case lowHP = 2
+        case allyDead = 3
+        case enemyCount = 4
+
+        var identifier: String {
+            switch self {
+            case .none: return "none"
+            case .lowHP: return "low_hp"
+            case .allyDead: return "ally_dead"
+            case .enemyCount: return "enemy_count"
+            }
+        }
+
+        var displayName: String {
+            switch self {
+            case .none: return "条件なし"
+            case .lowHP: return "HP低下時"
+            case .allyDead: return "味方死亡時"
+            case .enemyCount: return "敵数条件"
+            }
+        }
+    }
+
     let id: UInt8
     let name: String
     let school: School
@@ -138,6 +163,6 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
     let statusId: UInt8?
     let buffs: [Buff]
     let healMultiplier: Double?
-    let castCondition: String?
+    let castCondition: UInt8?
     let description: String
 }

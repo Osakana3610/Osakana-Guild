@@ -9,12 +9,11 @@ extension SQLiteMasterDataManager {
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
-            guard let typeC = sqlite3_column_text(baseStatement, 1),
-                  let nameC = sqlite3_column_text(baseStatement, 2),
+            guard let nameC = sqlite3_column_text(baseStatement, 2),
                   let descC = sqlite3_column_text(baseStatement, 3) else { continue }
             let definition = ExplorationEventDefinition(
                 id: UInt8(sqlite3_column_int(baseStatement, 0)),
-                type: String(cString: typeC),
+                type: UInt8(sqlite3_column_int(baseStatement, 1)),
                 name: String(cString: nameC),
                 description: String(cString: descC),
                 floorMin: Int(sqlite3_column_int(baseStatement, 4)),
@@ -81,7 +80,6 @@ extension SQLiteMasterDataManager {
         while sqlite3_step(payloadStatement) == SQLITE_ROW {
             let eventId = UInt8(sqlite3_column_int(payloadStatement, 0))
             guard let event = eventMap[eventId],
-                  let typeC = sqlite3_column_text(payloadStatement, 1),
                   let jsonC = sqlite3_column_text(payloadStatement, 2) else { continue }
             eventMap[event.id] = ExplorationEventDefinition(
                 id: event.id,
@@ -92,7 +90,7 @@ extension SQLiteMasterDataManager {
                 floorMax: event.floorMax,
                 tags: event.tags,
                 weights: event.weights,
-                payloadType: String(cString: typeC),
+                payloadType: UInt8(sqlite3_column_int(payloadStatement, 1)),
                 payloadJSON: String(cString: jsonC)
             )
         }
