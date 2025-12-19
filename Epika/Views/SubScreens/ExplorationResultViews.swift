@@ -60,21 +60,13 @@ struct ExplorationRunResultSummaryView: View {
     }
 
     private var returnInfo: (label: String, value: String)? {
-        switch snapshot.summary.timing {
-        case .expectedReturn(let expected):
-            return ("帰還予定", ExplorationDateFormatters.timestamp.string(from: expected))
-        case .actualReturn(let actual):
-            return ("帰還日時", ExplorationDateFormatters.timestamp.string(from: actual))
-        }
+        let label = snapshot.summary.timingKind == .expected ? "帰還予定" : "帰還日時"
+        let value = ExplorationDateFormatters.timestamp.string(from: snapshot.summary.timingDate)
+        return (label, value)
     }
 
     private var actualReturnDate: Date? {
-        switch snapshot.summary.timing {
-        case .expectedReturn:
-            return nil
-        case .actualReturn(let date):
-            return date
-        }
+        snapshot.summary.timingKind == .actual ? snapshot.summary.timingDate : nil
     }
 
     private var itemRows: [(name: String, count: String)] {
@@ -199,17 +191,8 @@ struct FinalExplorationSummaryRowView: View {
 }
 
 func formatSummaryHeader(_ summary: ExplorationSnapshot.Summary) -> String {
-    let date: Date
-    let label: String
-    switch summary.timing {
-    case .expectedReturn(let expected):
-        date = expected
-        label = "帰還予定"
-    case .actualReturn(let actual):
-        date = actual
-        label = "帰還日時"
-    }
-    let timestamp = ExplorationDateFormatters.short.string(from: date)
+    let label = summary.timingKind == .expected ? "帰還予定" : "帰還日時"
+    let timestamp = ExplorationDateFormatters.short.string(from: summary.timingDate)
     return "[\(summary.floorNumber)F] \(label) \(timestamp)"
 }
 
