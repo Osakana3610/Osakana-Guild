@@ -64,10 +64,13 @@ extension ItemSnapshot: Hashable {
     }
 }
 
+/// アイテムの保管場所
+/// - Note: 0 は「未初期化」を表す予約値。新しいケースは 1 以上で追加すること。
 enum ItemStorage: UInt8, Codable, Sendable {
     case playerItem = 1
     case unknown = 2
 
+    /// 文字列識別子からの変換（Migration 0.7.5→0.7.6用、0.7.7で削除）
     nonisolated init?(identifier: String) {
         switch identifier {
         case "playerItem": self = .playerItem
@@ -76,6 +79,7 @@ enum ItemStorage: UInt8, Codable, Sendable {
         }
     }
 
+    /// 文字列識別子（Migration 0.7.5→0.7.6用、0.7.7で削除）
     nonisolated var identifier: String {
         switch self {
         case .playerItem: return "playerItem"
