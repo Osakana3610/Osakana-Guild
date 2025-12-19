@@ -184,6 +184,8 @@ struct RuntimePartyDetailView: View {
     private func refreshData() async {
         errorMessage = nil
         do {
+            // パーティメンバーのHP全回復（HP > 0 のキャラクターのみ）
+            try await appServices.character.healToFull(characterIds: currentParty.memberIds)
             try await loadAllCharacters()
             await refreshPartySnapshot()
         } catch {
