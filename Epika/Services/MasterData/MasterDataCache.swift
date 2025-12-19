@@ -57,7 +57,7 @@ struct MasterDataCache: Sendable {
     private let personalityPrimaryById: [UInt8: PersonalityPrimaryDefinition]
     private let personalitySecondaryById: [UInt8: PersonalitySecondaryDefinition]
     private let personalitySkillsById: [UInt8: PersonalitySkillDefinition]
-    private let personalityBattleEffectsById: [String: PersonalityBattleEffect]
+    private let personalityBattleEffectsById: [UInt8: PersonalityBattleEffect]
     private let characterNamesByGender: [UInt8: [CharacterNameDefinition]]
     private let storyNodesById: [UInt16: StoryNodeDefinition]
 
@@ -78,7 +78,7 @@ struct MasterDataCache: Sendable {
     nonisolated func personalityPrimary(_ id: UInt8) -> PersonalityPrimaryDefinition? { personalityPrimaryById[id] }
     nonisolated func personalitySecondary(_ id: UInt8) -> PersonalitySecondaryDefinition? { personalitySecondaryById[id] }
     nonisolated func personalitySkill(_ id: UInt8) -> PersonalitySkillDefinition? { personalitySkillsById[id] }
-    nonisolated func personalityBattleEffect(_ id: String) -> PersonalityBattleEffect? { personalityBattleEffectsById[id] }
+    nonisolated func personalityBattleEffect(_ id: UInt8) -> PersonalityBattleEffect? { personalityBattleEffectsById[id] }
     nonisolated func storyNode(_ id: UInt16) -> StoryNodeDefinition? { storyNodesById[id] }
 
     // MARK: - 複数ID取得（同期、nonisolated）

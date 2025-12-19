@@ -82,14 +82,13 @@ extension SQLiteMasterDataManager {
             )
         }
 
-        var tables: [String: EncounterTableDefinition] = [:]
+        var tables: [UInt16: EncounterTableDefinition] = [:]
         let tableSQL = "SELECT id, name FROM encounter_tables;"
         let tableStatement = try prepare(tableSQL)
         defer { sqlite3_finalize(tableStatement) }
         while sqlite3_step(tableStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(tableStatement, 0),
-                  let nameC = sqlite3_column_text(tableStatement, 1) else { continue }
-            let id = String(cString: idC)
+            guard let nameC = sqlite3_column_text(tableStatement, 1) else { continue }
+            let id = UInt16(sqlite3_column_int(tableStatement, 0))
             tables[id] = EncounterTableDefinition(id: id, name: String(cString: nameC), events: [])
         }
 
@@ -97,8 +96,7 @@ extension SQLiteMasterDataManager {
         let eventStatement = try prepare(eventSQL)
         defer { sqlite3_finalize(eventStatement) }
         while sqlite3_step(eventStatement) == SQLITE_ROW {
-            guard let tableIdC = sqlite3_column_text(eventStatement, 0) else { continue }
-            let tableId = String(cString: tableIdC)
+            let tableId = UInt16(sqlite3_column_int(eventStatement, 0))
             guard let table = tables[tableId] else { continue }
             var events = table.events
             let enemyId: UInt16? = sqlite3_column_type(eventStatement, 2) == SQLITE_NULL ? nil : UInt16(sqlite3_column_int(eventStatement, 2))
@@ -117,17 +115,17 @@ extension SQLiteMasterDataManager {
         let floorStatement = try prepare(floorSQL)
         defer { sqlite3_finalize(floorStatement) }
         while sqlite3_step(floorStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(floorStatement, 0),
-                  let nameC = sqlite3_column_text(floorStatement, 2),
-                  let encounterTableIdC = sqlite3_column_text(floorStatement, 4),
+            guard let nameC = sqlite3_column_text(floorStatement, 2),
                   let descC = sqlite3_column_text(floorStatement, 5) else { continue }
+            let id = UInt16(sqlite3_column_int(floorStatement, 0))
             let dungeonId: UInt16? = sqlite3_column_type(floorStatement, 1) == SQLITE_NULL ? nil : UInt16(sqlite3_column_int(floorStatement, 1))
+            let encounterTableId = UInt16(sqlite3_column_int(floorStatement, 4))
             floors.append(DungeonFloorDefinition(
-                id: String(cString: idC),
+                id: id,
                 dungeonId: dungeonId,
                 name: String(cString: nameC),
                 floorNumber: Int(sqlite3_column_int(floorStatement, 3)),
-                encounterTableId: String(cString: encounterTableIdC),
+                encounterTableId: encounterTableId,
                 description: String(cString: descC),
                 specialEventIds: []
             ))
@@ -138,8 +136,8 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(floorEventStatement) }
         var floorMap = Dictionary(uniqueKeysWithValues: floors.map { ($0.id, $0) })
         while sqlite3_step(floorEventStatement) == SQLITE_ROW {
-            guard let floorIdC = sqlite3_column_text(floorEventStatement, 0),
-                  let floor = floorMap[String(cString: floorIdC)],
+            let floorId = UInt16(sqlite3_column_int(floorEventStatement, 0))
+            guard let floor = floorMap[floorId],
                   let eventC = sqlite3_column_text(floorEventStatement, 1) else { continue }
             var eventIds = floor.specialEventIds
             eventIds.append(String(cString: eventC))

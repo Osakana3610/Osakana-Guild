@@ -3,7 +3,7 @@ import Foundation
 struct ExplorationDungeonBundle: Sendable {
     let dungeon: DungeonDefinition
     let floors: [DungeonFloorDefinition]
-    let encounterTablesById: [String: EncounterTableDefinition]
+    let encounterTablesById: [UInt16: EncounterTableDefinition]
 }
 
 protocol ExplorationMasterDataProvider: Sendable {
