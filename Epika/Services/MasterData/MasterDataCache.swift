@@ -36,7 +36,7 @@ struct MasterDataCache: Sendable {
     // MARK: - Job/Race拡張データ
 
     let jobSkillUnlocks: [UInt8: [(level: Int, skillId: UInt16)]]
-    let jobMetadata: [UInt8: (category: String, growthTendency: String?)]
+    let jobMetadata: [UInt8: (category: UInt8, growthTendency: UInt8?)]
     let racePassiveSkills: [UInt8: [UInt16]]
     let raceSkillUnlocks: [UInt8: [(level: Int, skillId: UInt16)]]
 
@@ -134,7 +134,7 @@ struct MasterDataCache: Sendable {
         allPersonalityCancellations: [PersonalityCancellation],
         allPersonalityBattleEffects: [PersonalityBattleEffect],
         jobSkillUnlocks: [UInt8: [(level: Int, skillId: UInt16)]],
-        jobMetadata: [UInt8: (category: String, growthTendency: String?)],
+        jobMetadata: [UInt8: (category: UInt8, growthTendency: UInt8?)],
         racePassiveSkills: [UInt8: [UInt16]],
         raceSkillUnlocks: [UInt8: [(level: Int, skillId: UInt16)]]
     ) {

@@ -27,16 +27,16 @@ extension SQLiteMasterDataManager {
             effects[id] = definition
         }
 
-        // tagsを単純な文字列配列として読み込み
+        // tagsをUInt8配列として読み込み
         let tagSQL = "SELECT effect_id, tag FROM status_effect_tags ORDER BY effect_id, order_index;"
         let tagStatement = try prepare(tagSQL)
         defer { sqlite3_finalize(tagStatement) }
         while sqlite3_step(tagStatement) == SQLITE_ROW {
             let effectId = UInt8(sqlite3_column_int(tagStatement, 0))
-            guard let effect = effects[effectId],
-                  let tagC = sqlite3_column_text(tagStatement, 1) else { continue }
+            guard let effect = effects[effectId] else { continue }
+            let tag = UInt8(sqlite3_column_int(tagStatement, 1))
             var tags = effect.tags
-            tags.append(String(cString: tagC))
+            tags.append(tag)
             effects[effect.id] = StatusEffectDefinition(
                 id: effect.id,
                 name: effect.name,
@@ -51,16 +51,16 @@ extension SQLiteMasterDataManager {
             )
         }
 
-        // statModifiersを辞書形式で読み込み
+        // statModifiersを辞書形式で読み込み（キーはCombatStatのrawValue）
         let modifierSQL = "SELECT effect_id, stat, value FROM status_effect_stat_modifiers;"
         let modifierStatement = try prepare(modifierSQL)
         defer { sqlite3_finalize(modifierStatement) }
         while sqlite3_step(modifierStatement) == SQLITE_ROW {
             let effectId = UInt8(sqlite3_column_int(modifierStatement, 0))
-            guard let effect = effects[effectId],
-                  let statC = sqlite3_column_text(modifierStatement, 1) else { continue }
+            guard let effect = effects[effectId] else { continue }
+            let stat = UInt8(sqlite3_column_int(modifierStatement, 1))
             var modifiers = effect.statModifiers
-            modifiers[String(cString: statC)] = sqlite3_column_double(modifierStatement, 2)
+            modifiers[stat] = sqlite3_column_double(modifierStatement, 2)
             effects[effect.id] = StatusEffectDefinition(
                 id: effect.id,
                 name: effect.name,
