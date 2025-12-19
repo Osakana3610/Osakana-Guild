@@ -310,4 +310,10 @@ echo ""
 echo "GitHub Pages URL:"
 echo "  https://osakana3610.github.io/Osakana-Guild/known-issues.html"
 echo ""
-read -p "Enterキーで終了..."
+echo "3秒後にウィンドウを閉じます..."
+sleep 3
+
+# このターミナルウィンドウを閉じる
+TTY_NAME=$(tty | sed 's|/dev/||')
+osascript -e "tell application \"Terminal\" to close (first window whose tty contains \"$TTY_NAME\")" &>/dev/null &
+exit 0
