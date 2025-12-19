@@ -96,7 +96,7 @@
 <body>
     <h1>既知の問題</h1>
     <p>おさかなギルドで現在確認されている問題と、対応状況です。このページにない場合は<a href="itms-beta://beta.itunes.apple.com/v1/app/6756705558">こちら</a>からフィードバックを送信してください（iOSのみ）。</p>
-    <h2>対応中の問題 <span class="issue-count">(2件)</span></h2>
+    <h2>対応中の問題 <span class="issue-count">(3件)</span></h2>
     
     <div class="issue">
         <div class="issue-header">
@@ -153,10 +153,45 @@
         </div>
     </div>
 
+
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">FB0003</span>
+            <span class="issue-title">iOS 17で冒険タブのパーティをタップするとアプリがクラッシュする</span>
+            <div class="issue-meta">
+                <span class="category">冒険タブ</span>
+                <span class="status" style="background-color: #9b59b6">修正中</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-20</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">冒険タブでパーティをタップするとアプリがクラッシュする。現時点での回避策はありません。</div>
+            </div>
+            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">iSO 17のバグにより、現在の実装だとクラッシュします。iOS 18以上では発生しないか発生確率が極端に下がるのを確認済みです。</div></div>
+            <div class="issue-section"><div class="issue-section-title">回避策</div><div class="issue-section-content">なし</div></div>
+            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">調査中。修正版を本日中に審査に出します。</div></div>
+            
+        </div>
+    </div>
+
     <h2 class="resolved-section">解決済みの問題 <span class="issue-count">(0件)</span></h2>
     <div class="resolved-section">
     <div class="no-issues">解決済みの問題はありません</div>
     </div>
+
+    <h2>クラッシュログの送信</h2>
+    <p>クラッシュが発生した場合は、以下の手順で.ipsファイルをお送りください。</p>
+    <ol>
+        <li>iPhoneの「設定」アプリを開く</li>
+        <li>「プライバシーとセキュリティ」→「解析と改善」→「解析データ」を開く</li>
+        <li>「Epika-2025」から始まる項目を探してタップ</li>
+        <li>右上の共有ボタンから「"ファイル"に保存」を選択</li>
+        <li><a href="https://www.dropbox.com/request/JfZeC2k4nHxYt4GSjoVS">こちら</a>からアップロード</li>
+    </ol>
+
     <p class="updated">最終更新日: 2025年12月20日</p>
     <script>
         document.querySelectorAll('.issue-header').forEach(header => {
