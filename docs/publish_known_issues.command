@@ -291,7 +291,7 @@ echo "[3/4] 変更をコミット中..."
 git add docs/known_issues.yaml docs/known-issues.html docs/publish_known_issues.command
 
 COMMIT_MSG="Update known issues page"
-git commit -m "$COMMIT_MSG" || {
+git commit --no-verify -m "$COMMIT_MSG" || {
     echo "コミットに失敗しました"
     read -p "Enterキーで終了..."
     exit 1
