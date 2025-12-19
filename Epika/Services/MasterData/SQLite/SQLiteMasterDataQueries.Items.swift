@@ -100,13 +100,15 @@ extension SQLiteMasterDataManager {
         let itemStatement = try prepare(itemSQL)
         defer { sqlite3_finalize(itemStatement) }
         while sqlite3_step(itemStatement) == SQLITE_ROW {
-            guard let nameC = sqlite3_column_text(itemStatement, 1),
-                  let categoryC = sqlite3_column_text(itemStatement, 2) else { continue }
+            guard let nameC = sqlite3_column_text(itemStatement, 1) else { continue }
             let id = UInt16(sqlite3_column_int(itemStatement, 0))
             let name = String(cString: nameC)
-            let category = String(cString: categoryC)
+            // categoryはInt→ItemSaleCategory→identifierに変換（正規化後はInt）
+            let categoryInt = UInt8(sqlite3_column_int(itemStatement, 2))
+            let category = ItemSaleCategory(rawValue: categoryInt)?.identifier ?? "other"
             let basePrice = Int(sqlite3_column_int(itemStatement, 3))
             let sellValue = Int(sqlite3_column_int(itemStatement, 4))
+            // rarityはNULLの場合が多い（現状未使用）
             let rarityValue = sqlite3_column_text(itemStatement, 5).flatMap { String(cString: $0) }
             builders[id] = Builder(
                 id: id,
