@@ -25,19 +25,20 @@ struct JobDefinition: Identifiable, Sendable, Hashable {
 }
 
 /// 戦闘係数の表示用enum
+/// rawValueはEnumMappings.combatStatと一致させること
 enum CombatStat: UInt8, CaseIterable, Sendable {
     case maxHP = 10
     case physicalAttack = 11
-    case physicalDefense = 12
-    case magicalAttack = 13
+    case magicalAttack = 12
+    case physicalDefense = 13
     case magicalDefense = 14
-    case magicalHealing = 15
-    case hitRate = 16
-    case evasionRate = 17
-    case criticalRate = 18
-    case attackCount = 19
-    case additionalDamage = 20
-    case trapRemoval = 21
+    case hitRate = 15
+    case evasionRate = 16
+    case criticalRate = 17
+    case attackCount = 18
+    case magicalHealing = 19
+    case trapRemoval = 20
+    case additionalDamage = 21
     case breathDamage = 22
 
     nonisolated init?(identifier: String) {
