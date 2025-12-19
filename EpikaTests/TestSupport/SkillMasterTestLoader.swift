@@ -17,9 +17,9 @@ enum SkillMasterTestLoader {
 private struct VariantEffectPayload {
     let familyId: String
     let effectType: String
-    let parameters: [String: String]?
-    let stringArrayValues: [String: [String]]?
-    let value: [String: Any]
+    let parameters: [String: String]
+    let stringArrayValues: [String: [String]]
+    let value: [String: Double]
 }
 
 private extension SkillMasterTestLoader {
@@ -32,8 +32,8 @@ private extension SkillMasterTestLoader {
         return object
     }
 
-    static func convertToStringDict(_ dict: [String: Any]?) -> [String: String]? {
-        guard let dict else { return nil }
+    static func convertToStringDict(_ dict: [String: Any]?) -> [String: String] {
+        guard let dict else { return [:] }
         return dict.reduce(into: [String: String]()) { result, pair in
             if let strValue = pair.value as? String {
                 result[pair.key] = strValue
@@ -45,14 +45,40 @@ private extension SkillMasterTestLoader {
         }
     }
 
-    static func convertToStringArrayDict(_ dict: [String: Any]?) -> [String: [String]]? {
-        guard let dict else { return nil }
+    static func convertToStringArrayDict(_ dict: [String: Any]?) -> [String: [String]] {
+        guard let dict else { return [:] }
         return dict.reduce(into: [String: [String]]()) { result, pair in
             if let array = pair.value as? [String] {
                 result[pair.key] = array
             } else if let intArray = pair.value as? [Int] {
                 result[pair.key] = intArray.map { String($0) }
             }
+        }
+    }
+
+    static func convertToDoubleDict(_ dict: [String: Any]?) -> [String: Double] {
+        guard let dict else { return [:] }
+        return dict.reduce(into: [String: Double]()) { result, pair in
+            if let number = pair.value as? NSNumber {
+                result[pair.key] = number.doubleValue
+            }
+        }
+    }
+
+    static func convertToIntArrayDict(_ dict: [String: [String]]) -> [String: [Int]] {
+        return dict.reduce(into: [String: [Int]]()) { result, pair in
+            result[pair.key] = pair.value.compactMap { Int($0) }
+        }
+    }
+
+    static func categoryToEnum(_ key: String) -> SkillCategory {
+        switch key {
+        case "attack": return .combat
+        case "defense": return .defense
+        case "status": return .support
+        case "reaction": return .special
+        case "resurrection": return .special
+        default: return .combat
         }
     }
 
@@ -86,35 +112,18 @@ private extension SkillMasterTestLoader {
                     effects.reserveCapacity(effectPayloads.count)
 
                     for (index, payload) in effectPayloads.enumerated() {
-                        let payloadDictionary: [String: Any] = {
-                            var base: [String: Any] = [
-                                "familyId": payload.familyId,
-                                "effectType": payload.effectType,
-                                "value": payload.value
-                            ]
-                            if let parameters = payload.parameters {
-                                base["parameters"] = parameters
-                            }
-                            if let stringArrayValues = payload.stringArrayValues {
-                                base["stringArrayValues"] = stringArrayValues
-                            }
-                            return base
-                        }()
-
-                        let payloadJSON = try encodeJSONObject(payloadDictionary)
-                        let effectValue = numericValue(in: payload.value,
-                                                       keys: ["multiplier", "additive", "points", "cap", "deltaPercent", "maxPercent", "valuePerUnit", "valuePerCount"])
-                        let statType = payload.parameters?["stat"] ?? payload.parameters?["targetStat"]
-                        let damageType = payload.parameters?["damageType"]
+                        guard let skillEffectType = SkillEffectType(identifier: payload.effectType) else {
+                            continue
+                        }
+                        let familyIdInt = UInt16(payload.familyId) ?? UInt16(payload.familyId.hashValue & 0xFFFF)
 
                         let effect = SkillDefinition.Effect(
                             index: index,
-                            kind: payload.effectType,
-                            value: effectValue,
-                            valuePercent: numericValue(in: payload.value, keys: ["valuePercent"]),
-                            statType: statType,
-                            damageType: damageType,
-                            payloadJSON: payloadJSON
+                            effectType: skillEffectType,
+                            familyId: familyIdInt,
+                            parameters: payload.parameters,
+                            values: payload.value,
+                            arrayValues: convertToIntArrayDict(payload.stringArrayValues)
                         )
                         effects.append(effect)
                     }
@@ -122,9 +131,8 @@ private extension SkillMasterTestLoader {
                     results.append(SkillDefinition(id: variantId,
                                                    name: label,
                                                    description: label,
-                                                   type: "passive",
-                                                   category: categoryKey,
-                                                   acquisitionConditionsJSON: "{}",
+                                                   type: .passive,
+                                                   category: categoryToEnum(categoryKey),
                                                    effects: effects))
                 }
             }
@@ -137,15 +145,13 @@ private extension SkillMasterTestLoader {
     static func payloads(for variant: [String: Any],
                          familyId: String,
                          familyEffectType: String,
-                         defaultParameters: [String: String]?,
-                         defaultStringArrayValues: [String: [String]]?) throws -> [VariantEffectPayload] {
-        let mergeParameters: ([String: String]?, [String: String]?) -> [String: String]? = { base, overrides in
-            if let base, let overrides { return base.merging(overrides) { _, new in new } }
-            return overrides ?? base
+                         defaultParameters: [String: String],
+                         defaultStringArrayValues: [String: [String]]) throws -> [VariantEffectPayload] {
+        let mergeParameters: ([String: String], [String: String]) -> [String: String] = { base, overrides in
+            return base.merging(overrides) { _, new in new }
         }
-        let mergeStringArrayValues: ([String: [String]]?, [String: [String]]?) -> [String: [String]]? = { base, overrides in
-            if let base, let overrides { return base.merging(overrides) { _, new in new } }
-            return overrides ?? base
+        let mergeStringArrayValues: ([String: [String]], [String: [String]]) -> [String: [String]] = { base, overrides in
+            return base.merging(overrides) { _, new in new }
         }
 
         let variantParameters = mergeParameters(defaultParameters, convertToStringDict(variant["parameters"] as? [String: Any]))
@@ -156,7 +162,7 @@ private extension SkillMasterTestLoader {
                 let effectType = (effect["effectType"] as? String) ?? familyEffectType
                 let parameters = mergeParameters(variantParameters, convertToStringDict(effect["parameters"] as? [String: Any]))
                 let stringArrayValues = mergeStringArrayValues(variantStringArrayValues, convertToStringArrayDict(effect["stringArrayValues"] as? [String: Any]))
-                let values = effect["value"] as? [String: Any] ?? [:]
+                let values = convertToDoubleDict(effect["value"] as? [String: Any])
                 return VariantEffectPayload(familyId: familyId,
                                             effectType: effectType,
                                             parameters: parameters,
@@ -165,50 +171,12 @@ private extension SkillMasterTestLoader {
             }
         }
 
-        guard let value = variant["value"] as? [String: Any] else {
-            guard let id = variant["id"] as? Int else {
-                throw RuntimeError.invalidConfiguration(reason: "Skill variant の id 取得に失敗しました")
-            }
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(id) の value が不足しています")
-        }
+        let values = convertToDoubleDict(variant["value"] as? [String: Any])
         return [VariantEffectPayload(familyId: familyId,
                                      effectType: familyEffectType,
                                      parameters: variantParameters,
                                      stringArrayValues: variantStringArrayValues,
-                                     value: value)]
-    }
-
-    static func encodeJSONObject(_ value: Any) throws -> String {
-        if JSONSerialization.isValidJSONObject(value) {
-            let data = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys])
-            guard let json = String(data: data, encoding: .utf8) else {
-                throw RuntimeError.invalidConfiguration(reason: "JSONエンコードに失敗しました")
-            }
-            return json
-        }
-        if let string = value as? String {
-            let data = try JSONEncoder().encode(string)
-            guard let json = String(data: data, encoding: .utf8) else {
-                throw RuntimeError.invalidConfiguration(reason: "JSONエンコードに失敗しました")
-            }
-            return json
-        }
-        if let number = value as? NSNumber {
-            return number.stringValue
-        }
-        if value is NSNull {
-            return "null"
-        }
-        throw RuntimeError.invalidConfiguration(reason: "JSONエンコードに失敗しました")
-    }
-
-    static func numericValue(in payload: [String: Any], keys: [String]) -> Double? {
-        for key in keys {
-            if let number = payload[key] as? NSNumber {
-                return number.doubleValue
-            }
-        }
-        return nil
+                                     value: values)]
     }
 
     static var projectRoot: URL {

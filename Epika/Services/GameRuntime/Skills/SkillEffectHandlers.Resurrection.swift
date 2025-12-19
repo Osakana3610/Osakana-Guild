@@ -31,7 +31,7 @@ struct ResurrectionActiveHandler: SkillEffectHandler {
             accumulator.resurrection.rescueModifiers.ignoreActionCost = true
         }
         let chance = Int((try payload.requireValue("chancePercent", skillId: context.skillId, effectIndex: context.effectIndex)).rounded(.towardZero))
-        let hpScaleRaw = payload.stringValues["hpScale"] ?? payload.value["hpScale"].map { _ in "magicalHealing" }
+        let hpScaleRaw = payload.parameters["hpScale"] ?? payload.value["hpScale"].map { _ in "magicalHealing" }
         let hpScale = BattleActor.SkillEffects.ResurrectionActive.HPScale(identifier: hpScaleRaw ?? "magicalHealing") ?? .magicalHealing
         let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
         accumulator.resurrection.resurrectionActives.append(.init(
@@ -104,7 +104,7 @@ struct ResurrectionPassiveHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let type = payload.stringValues["type"] ?? payload.parameters?["type"] ?? "betweenFloors"
+        let type = payload.parameters["type"] ?? "betweenFloors"
         switch type {
         case "betweenFloors":
             accumulator.resurrection.resurrectionPassiveBetweenFloors = true

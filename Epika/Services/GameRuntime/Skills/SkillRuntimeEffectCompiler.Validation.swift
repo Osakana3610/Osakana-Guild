@@ -2,12 +2,14 @@ import Foundation
 
 // MARK: - Payload Decoding & Validation
 extension SkillRuntimeEffectCompiler {
-    static func decodePayload(from effect: SkillDefinition.Effect, skillId: UInt16) throws -> DecodedSkillEffectPayload? {
-        do {
-            return try SkillEffectPayloadDecoder.decode(effect: effect, fallbackEffectType: effect.kind)
-        } catch {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId) の payload を解析できません: \(error)")
-        }
+    static func decodePayload(from effect: SkillDefinition.Effect, skillId: UInt16) throws -> DecodedSkillEffectPayload {
+        return DecodedSkillEffectPayload(
+            familyId: effect.familyId,
+            effectType: effect.effectType,
+            parameters: effect.parameters,
+            value: effect.values,
+            stringArrayValues: effect.arrayValues.mapValues { $0.map { String($0) } }
+        )
     }
 
     static func validatePayload(_ payload: DecodedSkillEffectPayload,
@@ -15,7 +17,7 @@ extension SkillRuntimeEffectCompiler {
                                 effectIndex: Int) throws {
         if let requirements = requiredFields[payload.effectType] {
             for key in requirements.params {
-                guard let value = payload.parameters?[key], !value.isEmpty else {
+                guard let value = payload.parameters[key], !value.isEmpty else {
                     throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType.identifier) の必須パラメータ \(key) が不足しています")
                 }
             }
@@ -160,15 +162,14 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
 
 // MARK: - Decoded Payload
 struct DecodedSkillEffectPayload: Sendable, Hashable {
-    let familyId: String?
+    let familyId: UInt16?
     let effectType: SkillEffectType
-    let parameters: [String: String]?
+    let parameters: [String: String]
     let value: [String: Double]
-    let stringValues: [String: String]
     let stringArrayValues: [String: [String]]
 
     func requireParam(_ key: String, skillId: UInt16, effectIndex: Int) throws -> String {
-        guard let value = parameters?[key], !value.isEmpty else {
+        guard let value = parameters[key], !value.isEmpty else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.identifier) の必須パラメータ \(key) がありません")
         }
         return value
@@ -189,48 +190,3 @@ struct DecodedSkillEffectPayload: Sendable, Hashable {
     }
 }
 
-// MARK: - Payload Decoder
-enum SkillEffectPayloadDecoder {
-    static func decode(effect: SkillDefinition.Effect, fallbackEffectType: String) throws -> DecodedSkillEffectPayload? {
-        guard !effect.payloadJSON.isEmpty,
-              let data = effect.payloadJSON.data(using: .utf8) else {
-            return nil
-        }
-        let raw = try decoder.decode(RawPayload.self, from: data)
-        let resolvedEffectType = (raw.effectType ?? raw.type ?? fallbackEffectType).trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !resolvedEffectType.isEmpty else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(fallbackEffectType) の effectType が不正です")
-        }
-        guard let effectType = SkillEffectType(identifier: resolvedEffectType) else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(fallbackEffectType) の effectType \(resolvedEffectType) は未対応です")
-        }
-
-        let values = SkillEffectPayloadValues.from(rawValues: raw.value,
-                                                   stringValues: raw.stringValues,
-                                                   stringArrayValues: raw.stringArrayValues)
-        return DecodedSkillEffectPayload(
-            familyId: raw.familyId,
-            effectType: effectType,
-            parameters: raw.parameters,
-            value: values.numericValues,
-            stringValues: values.stringValues,
-            stringArrayValues: values.stringArrayValues
-        )
-    }
-
-    private static let decoder: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return decoder
-    }()
-
-    private struct RawPayload: Decodable {
-        let familyId: String?
-        let effectType: String?
-        let type: String?
-        let parameters: [String: String]?
-        let value: [String: SkillEffectFlexibleValue]?
-        let stringValues: [String: String]?
-        let stringArrayValues: [String: [String]]?
-    }
-}

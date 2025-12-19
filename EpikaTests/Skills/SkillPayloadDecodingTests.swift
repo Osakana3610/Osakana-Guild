@@ -3,7 +3,7 @@ import XCTest
 
 @MainActor
 final class SkillPayloadDecodingTests: XCTestCase {
-    func testAllSQLiteSkillPayloadsDecode() async throws {
+    func testAllSQLiteSkillEffectsAreValid() async throws {
         let manager = SQLiteMasterDataManager()
         let cache = try await MasterDataLoader.load(manager: manager)
         let skills = cache.allSkills
@@ -12,11 +12,11 @@ final class SkillPayloadDecodingTests: XCTestCase {
         var samples: [String] = []
         for skill in skills {
             for effect in skill.effects {
-                guard !effect.payloadJSON.isEmpty else { continue }
                 do {
-                    _ = try SkillEffectPayloadDecoder.decode(effect: effect, fallbackEffectType: effect.kind)
+                    let payload = try SkillRuntimeEffectCompiler.decodePayload(from: effect, skillId: skill.id)
+                    try SkillRuntimeEffectCompiler.validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 } catch {
-                    let message = "\(skill.id)#\(effect.index): \(error)"
+                    let message = "\(skill.id)#\(effect.index) (\(effect.effectType.identifier)): \(error)"
                     failures.append(message)
                     if samples.count < 10 {
                         samples.append(message)
@@ -26,7 +26,26 @@ final class SkillPayloadDecodingTests: XCTestCase {
         }
 
         if !failures.isEmpty {
-            XCTFail("Payload decode failures (\(failures.count)):\n" + samples.joined(separator: "\n"))
+            XCTFail("Skill effect validation failures (\(failures.count)):\n" + samples.joined(separator: "\n"))
+        }
+    }
+
+    func testAllSkillEffectTypesAreRegistered() async throws {
+        let manager = SQLiteMasterDataManager()
+        let cache = try await MasterDataLoader.load(manager: manager)
+        let skills = cache.allSkills
+
+        var unregisteredTypes: Set<String> = []
+        for skill in skills {
+            for effect in skill.effects {
+                if SkillEffectHandlerRegistry.handler(for: effect.effectType) == nil {
+                    unregisteredTypes.insert(effect.effectType.identifier)
+                }
+            }
+        }
+
+        if !unregisteredTypes.isEmpty {
+            XCTFail("Unregistered effect types: \(unregisteredTypes.sorted().joined(separator: ", "))")
         }
     }
 }
