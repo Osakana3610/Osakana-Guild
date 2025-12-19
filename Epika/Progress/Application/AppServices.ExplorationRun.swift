@@ -11,6 +11,9 @@ extension AppServices {
         guard var partySnapshot = try await party.partySnapshot(id: partyId) else {
             throw ProgressError.partyNotFound
         }
+
+        // 出撃前にパーティメンバーのHP全回復（HP > 0 のキャラクターのみ）
+        try await character.healToFull(characterIds: partySnapshot.memberCharacterIds)
         let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId)
         guard dungeonSnapshot.isUnlocked else {
             throw ProgressError.dungeonLocked(id: String(dungeonId))
