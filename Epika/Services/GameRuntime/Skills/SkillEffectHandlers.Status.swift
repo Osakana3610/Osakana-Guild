@@ -10,9 +10,11 @@ struct StatusResistanceMultiplierHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let statusIdString = try payload.requireParam("status", skillId: context.skillId, effectIndex: context.effectIndex)
-        guard let statusId = UInt8(statusIdString) else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistanceMultiplier の status が無効です: \(statusIdString)")
+        // 両方のパラメータ名をサポート: statusType (JSON) と status (DB)
+        let statusIdString = payload.parameters["statusType"] ?? payload.parameters["status"]
+        guard let statusIdString,
+              let statusId = UInt8(statusIdString) else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistanceMultiplier の statusType/status が無効です")
         }
         let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
         var entry = accumulator.status.statusResistances[statusId] ?? .neutral
@@ -29,9 +31,11 @@ struct StatusResistancePercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let statusIdString = try payload.requireParam("status", skillId: context.skillId, effectIndex: context.effectIndex)
-        guard let statusId = UInt8(statusIdString) else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistancePercent の status が無効です: \(statusIdString)")
+        // 両方のパラメータ名をサポート: statusType (JSON) と status (DB)
+        let statusIdString = payload.parameters["statusType"] ?? payload.parameters["status"]
+        guard let statusIdString,
+              let statusId = UInt8(statusIdString) else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistancePercent の statusType/status が無効です")
         }
         let value = try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
         var entry = accumulator.status.statusResistances[statusId] ?? .neutral
