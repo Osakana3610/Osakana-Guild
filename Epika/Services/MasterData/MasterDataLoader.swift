@@ -30,7 +30,7 @@ enum MasterDataLoader {
     ///
     /// 注意: このプレースホルダはPhase 1で実際のハッシュ値に置換必須。
     /// フォールバック禁止方針のため、TODOのままビルドを通してはならない。
-    static let expectedFileHash = "54eefa019e20b05caa3121839e77a9e2cdedf3d7de9d8e302308dd283fd8e541"
+    static let expectedFileHash = "b19b1f50daf677dedc0b85a07e126e5246a7bc9366ca0a12c05258a88e242eb1"
 
     /// SQLiteからMasterDataCacheをロード
     ///

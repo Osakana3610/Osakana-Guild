@@ -26,25 +26,8 @@ extension SQLiteMasterDataManager {
             )
         }
 
-        let primaryEffectSQL = "SELECT personality_id, effect_type, value, payload_json FROM personality_primary_effects ORDER BY personality_id, order_index;"
-        let primaryEffectStatement = try prepare(primaryEffectSQL)
-        defer { sqlite3_finalize(primaryEffectStatement) }
-        while sqlite3_step(primaryEffectStatement) == SQLITE_ROW {
-            let id = UInt8(sqlite3_column_int(primaryEffectStatement, 0))
-            guard let definition = primary[id],
-                  let typeC = sqlite3_column_text(primaryEffectStatement, 1),
-                  let payloadC = sqlite3_column_text(primaryEffectStatement, 3) else { continue }
-            var effects = definition.effects
-            effects.append(.init(effectType: String(cString: typeC),
-                                 value: sqlite3_column_type(primaryEffectStatement, 2) == SQLITE_NULL ? nil : sqlite3_column_double(primaryEffectStatement, 2),
-                                 payloadJSON: String(cString: payloadC)))
-            primary[definition.id] = PersonalityPrimaryDefinition(
-                id: definition.id,
-                name: definition.name,
-                description: definition.description,
-                effects: effects
-            )
-        }
+        // Note: personality_primary_effects テーブルは常に空だったため削除済み
+        // effects は PersonalityPrimaryDefinition 初期化時に [] が設定される
 
         var secondary: [UInt8: PersonalitySecondaryDefinition] = [:]
         let secondarySQL = "SELECT id, name, positive_skill_id, negative_skill_id FROM personality_secondary ORDER BY id;"

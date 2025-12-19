@@ -12,12 +12,22 @@ extension SkillRuntimeEffectCompiler {
         )
     }
 
+    /// 代替パラメータ名のマッピング（キー: 主要名, 値: 代替名のリスト）
+    private static let parameterAliases: [String: [String]] = [
+        "statusType": ["status"],
+        "equipmentType": ["equipmentCategory"]
+    ]
+
     static func validatePayload(_ payload: DecodedSkillEffectPayload,
                                 skillId: UInt16,
                                 effectIndex: Int) throws {
         if let requirements = requiredFields[payload.effectType] {
             for key in requirements.params {
-                guard let value = payload.parameters[key], !value.isEmpty else {
+                // 代替パラメータ名もチェック
+                let alternativeKeys = parameterAliases[key] ?? []
+                let hasValue = payload.parameters[key]?.isEmpty == false
+                    || alternativeKeys.contains { payload.parameters[$0]?.isEmpty == false }
+                guard hasValue else {
                     throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(payload.effectType.identifier) の必須パラメータ \(key) が不足しています")
                 }
             }
@@ -107,7 +117,7 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .endOfTurnSelfHPPercent: .init(params: [], values: ["valuePercent"]),
     .equipmentSlotAdditive: .init(params: [], values: []),
     .equipmentSlotMultiplier: .init(params: [], values: []),
-    .equipmentStatMultiplier: .init(params: ["equipmentCategory"], values: ["multiplier"]),
+    .equipmentStatMultiplier: .init(params: ["equipmentType"], values: ["multiplier"]),
     .itemStatMultiplier: .init(params: ["statType"], values: ["multiplier"]),
     .explorationTimeMultiplier: .init(params: [], values: ["multiplier"]),
     .martialBonusMultiplier: .init(params: [], values: ["multiplier"]),
@@ -144,8 +154,8 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .spellSpecificTakenMultiplier: .init(params: ["spellId"], values: ["multiplier"]),
     .spellTierUnlock: .init(params: ["school"], values: ["tier"]),
     .statusInflict: .init(params: ["statusId"], values: ["baseChancePercent"]),
-    .statusResistanceMultiplier: .init(params: ["status"], values: ["multiplier"]),
-    .statusResistancePercent: .init(params: ["status"], values: ["valuePercent"]),
+    .statusResistanceMultiplier: .init(params: ["statusType"], values: ["multiplier"]),
+    .statusResistancePercent: .init(params: ["statusType"], values: ["valuePercent"]),
     .tacticSpellAmplify: .init(params: ["spellId"], values: ["multiplier", "triggerTurn"]),
     .timedBreathPowerAmplify: .init(params: [], values: ["triggerTurn", "multiplier"]),
     .timedBuffTrigger: .init(params: [], values: []),
