@@ -35,7 +35,6 @@ struct CharacterCreationView: View {
                         VStack(spacing: 24) {
                             raceSection
                             jobSection
-                            previewSection
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 24)
@@ -58,7 +57,7 @@ struct CharacterCreationView: View {
                     }
                 }
             }
-            .navigationTitle("キャラクター作成")
+            .navigationTitle("酒場")
             .navigationBarTitleDisplayMode(.inline)
             .task { await loadMasterData() }
             .alert("エラー", isPresented: Binding(get: { creationErrorMessage != nil }, set: { value in
@@ -170,73 +169,6 @@ struct CharacterCreationView: View {
         }
     }
 
-    private var previewSection: some View {
-        Group {
-            if let race = selectedRace, let job = selectedJob {
-                creationCard {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("キャラクタープレビュー")
-                            .font(.headline)
-
-                        HStack(alignment: .top, spacing: 16) {
-                            CharacterImageView(
-                                avatarIndex: UInt16(race.genderCode) * 100 + UInt16(job.id),
-                                size: 80
-                            )
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text(name.trimmingCharacters(in: .whitespaces).isEmpty ? "名前未設定" : name)
-                                        .font(.title2)
-                                        .foregroundStyle(name.trimmingCharacters(in: .whitespaces).isEmpty ? .secondary : .primary)
-                                    Button {
-                                        name = masterData.randomCharacterName(forGenderCode: race.genderCode)
-                                    } label: {
-                                        Image(systemName: "arrow.clockwise")
-                                            .font(.caption)
-                                    }
-                                    .buttonStyle(.bordered)
-                                }
-                                Text("\(race.name) / \(job.name)")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                        }
-
-                        Divider()
-
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("基本能力値")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            StatGrid(rows: previewStats(for: race))
-                        }
-
-                        if !jobCoefficients(for: job).isEmpty {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("職業補正")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                StatGrid(rows: jobCoefficients(for: job))
-                            }
-                        }
-
-                        if !job.learnedSkillIds.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("習得スキル")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                Text("習得スキル数: \(job.learnedSkillIds.count)件")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     // MARK: - Helpers
 
     private var canCreate: Bool {
@@ -316,19 +248,15 @@ struct CharacterCreationView: View {
     }
 
     private func selectedRaceSummary(_ race: RaceDefinition) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top, spacing: 12) {
-                CharacterImageView(avatarIndex: UInt16(race.id), size: 56)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(race.name)
-                        .font(.headline)
-                    Text(raceDescription(race))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+        HStack(alignment: .top, spacing: 12) {
+            CharacterImageView(avatarIndex: UInt16(race.id), size: 56)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(race.name)
+                    .font(.headline)
+                Text(raceDescription(race))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            Divider()
-            StatGrid(rows: previewStats(for: race))
         }
     }
 
@@ -348,12 +276,6 @@ struct CharacterCreationView: View {
                 Divider()
                 StatGrid(rows: jobCoefficients(for: job))
             }
-        }
-    }
-
-    private func previewStats(for race: RaceDefinition) -> [StatRow] {
-        BaseStat.allCases.map { stat in
-            StatRow(label: stat.displayName, value: "\(stat.value(from: race.baseStats))")
         }
     }
 
@@ -398,7 +320,7 @@ struct CharacterCreationView: View {
         guard !isSaving, let race = selectedRace, let job = selectedJob else { return }
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            creationErrorMessage = "キャラクター名が設定されていません。プレビューで再抽選してください。"
+            creationErrorMessage = "求人に失敗しました。種族を選び直してください。"
             return
         }
 
