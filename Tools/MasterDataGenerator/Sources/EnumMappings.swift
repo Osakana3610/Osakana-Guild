@@ -34,8 +34,10 @@ enum EnumMappings {
         "magicalHealing": 19,
         "magicHealing": 19,      // alias
         "trapRemoval": 20,
+        "trapDisarm": 20,        // alias for trapRemoval
         "additionalDamage": 21,
-        "breathDamage": 22
+        "breathDamage": 22,
+        "all": 99                // special: all stats
     ]
 
     // MARK: - Damage Types
@@ -45,7 +47,8 @@ enum EnumMappings {
         "magical": 2,
         "breath": 3,
         "penetration": 4,
-        "healing": 5
+        "healing": 5,
+        "all": 99           // special: all damage types
     ]
 
     // MARK: - Elements (耐性/弱点用)
@@ -107,7 +110,8 @@ enum EnumMappings {
         "other": 21,
         "race_specific": 22,
         "for_synthesis": 23,
-        "mazo_material": 24
+        "mazo_material": 24,
+        "dagger": 25
     ]
 
     // MARK: - Item Rarity
@@ -356,7 +360,11 @@ enum EnumMappings {
         "breathDamageTaken": 4,
         "physicalAttack": 5,
         "magicalAttack": 6,
-        "physicalDefense": 7
+        "physicalDefense": 7,
+        "accuracy": 8,
+        "attackCount": 9,
+        "combat": 10,
+        "damage": 11
     ]
 
     // MARK: - EnemySkillDefinition
@@ -1002,5 +1010,143 @@ enum EnumMappings {
         "grantSkillIds": 1,
         "removeSkillIds": 2,
         "targetRaceIds": 3
+    ]
+
+    // MARK: - Skill Effect Param Value Mappings
+
+    /// trigger パラメータの値
+    static let triggerType: [String: Int] = [
+        "afterTurn8": 1,
+        "allyDamagedPhysical": 2,
+        "allyDefeated": 3,
+        "allyMagicAttack": 4,
+        "battleStart": 5,
+        "selfAttackNoKill": 6,
+        "selfDamagedMagical": 7,
+        "selfDamagedPhysical": 8,
+        "selfEvadePhysical": 9,
+        "selfKilledEnemy": 10,
+        "selfMagicAttack": 11,
+        "turnElapsed": 12,
+        "turnStart": 13
+    ]
+
+    /// mode パラメータの値
+    static let effectModeType: [String: Int] = [
+        "preemptive": 1
+    ]
+
+    /// action パラメータの値
+    static let effectActionType: [String: Int] = [
+        "breathCounter": 1,
+        "counterAttack": 2,
+        "extraAttack": 3,
+        "forget": 4,
+        "learn": 5,
+        "magicCounter": 6,
+        "partyHeal": 7,
+        "physicalCounter": 8,
+        "physicalPursuit": 9
+    ]
+
+    /// stacking パラメータの値
+    static let stackingType: [String: Int] = [
+        "add": 1,
+        "additive": 2,
+        "multiply": 3
+    ]
+
+    /// type パラメータの値（エフェクト用）
+    static let effectVariantType: [String: Int] = [
+        "betweenFloors": 1,
+        "breath": 2,
+        "cold": 3,
+        "fire": 4,
+        "thunder": 5
+    ]
+
+    /// profile パラメータの値
+    static let profileType: [String: Int] = [
+        "balanced": 1,
+        "melee": 2,
+        "mixed": 3,
+        "ranged": 4
+    ]
+
+    /// condition パラメータの値
+    static let conditionType: [String: Int] = [
+        "allyHPBelow50": 1
+    ]
+
+    /// preference パラメータの値
+    static let preferenceType: [String: Int] = [
+        "backRow": 1
+    ]
+
+    /// procType パラメータの値
+    static let procTypeValue: [String: Int] = [
+        "counter": 1,
+        "counterOnEvade": 2,
+        "extraAction": 3,
+        "firstStrike": 4,
+        "parry": 5,
+        "pursuit": 6
+    ]
+
+    /// dungeonName パラメータの値
+    static let dungeonNameValue: [String: Int] = [
+        "バベルの塔": 1
+    ]
+
+    /// hpScale パラメータの値
+    static let hpScaleType: [String: Int] = [
+        "magicalHealing": 1
+    ]
+
+    /// target パラメータの値
+    static let targetType: [String: Int] = [
+        "ally": 1,
+        "attacker": 2,
+        "breathCounter": 3,
+        "counter": 4,
+        "crisisEvasion": 5,
+        "criticalCombo": 6,
+        "enemy": 7,
+        "fightingSpirit": 8,
+        "instantResurrection": 9,
+        "killer": 10,
+        "magicCounter": 11,
+        "magicSupport": 12,
+        "manaDecomposition": 13,
+        "party": 14,
+        "pursuit": 15,
+        "reattack": 16,
+        "reflectionRecovery": 17,
+        "self": 18
+    ]
+
+    /// targetId パラメータの値（種族識別子）
+    static let targetIdValue: [String: Int] = [
+        "human": 1,
+        "special_a": 2,
+        "special_b": 3,
+        "special_c": 4,
+        "vampire": 5
+    ]
+
+    /// specialAttackId パラメータの値
+    static let specialAttackIdValue: [String: Int] = [
+        "specialA": 1,
+        "specialB": 2,
+        "specialC": 3,
+        "specialD": 4,
+        "specialE": 5
+    ]
+
+    /// statusType / targetStatus パラメータの文字列値
+    static let statusTypeValue: [String: Int] = [
+        "all": 1,
+        "instantDeath": 2,
+        "resurrection.active": 3
     ]
 }

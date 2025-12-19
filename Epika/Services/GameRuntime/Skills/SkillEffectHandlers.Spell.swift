@@ -70,7 +70,7 @@ struct SpellChargesHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let targetSpellIdString = payload.parameters?["spellId"]
+        let targetSpellIdString = payload.parameters["spellId"]
         let targetSpellId = targetSpellIdString.flatMap { UInt8($0) }
         var modifier = targetSpellId.flatMap { accumulator.spell.spellChargeModifiers[$0] }
             ?? accumulator.spell.defaultSpellChargeModifier
@@ -166,8 +166,8 @@ struct TacticSpellAmplifyHandler: SkillEffectHandler {
         let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
         let triggerTurn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
         let key = "spellSpecific:" + spellId
-        let triggerId = payload.familyId ?? payload.effectType.identifier
-        let scopeString = payload.stringValues["scope"] ?? "party"
+        let triggerId = payload.familyId.map { String($0) } ?? payload.effectType.identifier
+        let scopeString = payload.parameters["scope"] ?? "party"
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(identifier: scopeString) ?? .party
         let turn = Int(triggerTurn.rounded(.towardZero))
         accumulator.status.timedBuffTriggers.append(.init(
@@ -210,7 +210,7 @@ struct SpellChargeRecoveryChanceHandler: SkillEffectHandler {
     ) throws {
         var baseChance = payload.value["chancePercent"] ?? 0.0
         baseChance += payload.scaledValue(from: context.actorStats)
-        let schoolString = payload.stringValues["school"]
+        let schoolString = payload.parameters["school"]
         let school: UInt8? = schoolString.flatMap { UInt8($0) }
         accumulator.spell.chargeRecoveries.append(.init(baseChancePercent: baseChance, school: school))
     }

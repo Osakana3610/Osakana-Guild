@@ -54,7 +54,7 @@ struct ActorStats: Sendable {
 extension DecodedSkillEffectPayload {
     /// statScalingが指定されている場合、ステータス値×係数を返す
     func scaledValue(from stats: ActorStats?) -> Double {
-        guard let scalingStat = parameters?["scalingStat"],
+        guard let scalingStat = parameters["scalingStat"],
               let coefficient = value["scalingCoefficient"],
               let stats = stats else {
             return 0.0
