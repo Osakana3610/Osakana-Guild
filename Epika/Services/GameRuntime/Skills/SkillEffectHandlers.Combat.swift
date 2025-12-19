@@ -170,8 +170,8 @@ struct SpecialAttackHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         // specialAttackId または type パラメータから識別子を取得
-        let identifier = payload.parameters?["specialAttackId"]
-            ?? payload.parameters?["type"]
+        let identifier = payload.parameters["specialAttackId"]
+            ?? payload.parameters["type"]
             ?? ""
         guard !identifier.isEmpty else {
             throw RuntimeError.invalidConfiguration(
@@ -182,8 +182,8 @@ struct SpecialAttackHandler: SkillEffectHandler {
         var chance = payload.value["chancePercent"].map { Int($0.rounded(.towardZero)) } ?? 50
         chance += Int(payload.scaledValue(from: context.actorStats).rounded(.towardZero))
 
-        let preemptive = payload.parameters?["mode"]?.lowercased() == "preemptive"
-            || payload.stringValues["preemptive"]?.lowercased() == "true"
+        let preemptive = payload.parameters["mode"]?.lowercased() == "preemptive"
+            || payload.parameters["preemptive"]?.lowercased() == "true"
 
         if let descriptor = BattleActor.SkillEffects.SpecialAttack(
             kindIdentifier: identifier,

@@ -555,7 +555,7 @@ extension Generator {
                             throw GeneratorError.executionFailed("Skill \(entry.id) effect \(effect.index): unknown param type '\(paramKey)'")
                         }
                         // Convert param value to int using appropriate mapping
-                        let intValue = resolveParamValue(paramKey: paramKey, paramValue: paramValue)
+                        let intValue = try resolveParamValue(paramKey: paramKey, paramValue: paramValue)
                         bindInt(paramStatement, index: 1, value: entry.id)
                         bindInt(paramStatement, index: 2, value: effect.index)
                         bindInt(paramStatement, index: 3, value: paramTypeInt)
@@ -602,42 +602,144 @@ extension Generator {
     }
 
     /// Resolve a parameter string value to an integer based on its type
-    private func resolveParamValue(paramKey: String, paramValue: String) -> Int {
+    private func resolveParamValue(paramKey: String, paramValue: String) throws -> Int {
         switch paramKey {
         case "damageType":
-            return EnumMappings.damageType[paramValue] ?? 0
+            guard let value = EnumMappings.damageType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown damageType '\(paramValue)'")
+            }
+            return value
         case "stat", "targetStat", "sourceStat", "scalingStat", "statType":
-            return EnumMappings.baseStat[paramValue] ?? EnumMappings.combatStat[paramValue] ?? 0
+            if let value = EnumMappings.baseStat[paramValue] { return value }
+            if let value = EnumMappings.combatStat[paramValue] { return value }
+            throw GeneratorError.executionFailed("unknown stat '\(paramValue)'")
         case "school":
-            return EnumMappings.spellSchool[paramValue] ?? 0
+            guard let value = EnumMappings.spellSchool[paramValue] else {
+                throw GeneratorError.executionFailed("unknown school '\(paramValue)'")
+            }
+            return value
         case "buffType":
-            return EnumMappings.spellBuffType[paramValue] ?? 0
+            guard let value = EnumMappings.spellBuffType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown buffType '\(paramValue)'")
+            }
+            return value
         case "equipmentCategory", "equipmentType":
-            return EnumMappings.itemCategory[paramValue] ?? 0
-        case "status", "statusId", "statusType", "targetStatus":
+            guard let value = EnumMappings.itemCategory[paramValue] else {
+                throw GeneratorError.executionFailed("unknown equipmentCategory/Type '\(paramValue)'")
+            }
+            return value
+        case "status", "statusId":
             // Status IDs are integers stored as strings
-            return Int(paramValue) ?? 0
-        case "spellId", "specialAttackId", "targetId":
+            guard let value = Int(paramValue) else {
+                throw GeneratorError.executionFailed("invalid status ID '\(paramValue)'")
+            }
+            return value
+        case "statusType", "targetStatus":
+            // Can be integer ID or string identifier
+            if let intValue = Int(paramValue) {
+                return intValue
+            }
+            guard let value = EnumMappings.statusTypeValue[paramValue] else {
+                throw GeneratorError.executionFailed("unknown statusType/targetStatus '\(paramValue)'")
+            }
+            return value
+        case "spellId":
             // IDs are integers stored as strings
-            return Int(paramValue) ?? 0
-        case "trigger", "procType", "action", "mode", "stacking", "type", "variant", "profile", "condition", "preference":
-            // These are string identifiers that need custom mappings - store hash or 0 for now
-            // TODO: Add specific mappings for these if needed
-            return paramValue.hashValue & 0x7FFFFFFF  // Ensure positive
-        case "requiresAllyBehind", "requiresMartial":
+            guard let value = Int(paramValue) else {
+                throw GeneratorError.executionFailed("invalid spellId '\(paramValue)'")
+            }
+            return value
+        case "specialAttackId":
+            // specialAttackId can be a string identifier or an integer ID
+            if let intValue = Int(paramValue) {
+                return intValue
+            }
+            guard let value = EnumMappings.specialAttackIdValue[paramValue] else {
+                throw GeneratorError.executionFailed("unknown specialAttackId '\(paramValue)'")
+            }
+            return value
+        case "targetId":
+            // targetId can be a race identifier or an integer ID
+            if let intValue = Int(paramValue) {
+                return intValue
+            }
+            guard let value = EnumMappings.targetIdValue[paramValue] else {
+                throw GeneratorError.executionFailed("unknown targetId '\(paramValue)'")
+            }
+            return value
+        case "trigger":
+            guard let value = EnumMappings.triggerType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown trigger '\(paramValue)'")
+            }
+            return value
+        case "procType":
+            guard let value = EnumMappings.procTypeValue[paramValue] else {
+                throw GeneratorError.executionFailed("unknown procType '\(paramValue)'")
+            }
+            return value
+        case "action":
+            guard let value = EnumMappings.effectActionType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown action '\(paramValue)'")
+            }
+            return value
+        case "mode":
+            guard let value = EnumMappings.effectModeType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown mode '\(paramValue)'")
+            }
+            return value
+        case "stacking":
+            guard let value = EnumMappings.stackingType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown stacking '\(paramValue)'")
+            }
+            return value
+        case "type", "variant":
+            guard let value = EnumMappings.effectVariantType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown type/variant '\(paramValue)'")
+            }
+            return value
+        case "profile":
+            guard let value = EnumMappings.profileType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown profile '\(paramValue)'")
+            }
+            return value
+        case "condition":
+            guard let value = EnumMappings.conditionType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown condition '\(paramValue)'")
+            }
+            return value
+        case "preference":
+            guard let value = EnumMappings.preferenceType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown preference '\(paramValue)'")
+            }
+            return value
+        case "target":
+            guard let value = EnumMappings.targetType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown target '\(paramValue)'")
+            }
+            return value
+        case "requiresAllyBehind", "requiresMartial", "farApt", "nearApt":
             // Boolean values
             return paramValue == "true" ? 1 : 0
         case "from", "to":
-            return EnumMappings.baseStat[paramValue] ?? EnumMappings.combatStat[paramValue] ?? 0
-        case "farApt", "nearApt":
-            // Aptitude values - store as-is if numeric
-            return Int(paramValue) ?? 0
-        case "dungeonName", "hpScale":
-            // String values that might not have mappings
-            return paramValue.hashValue & 0x7FFFFFFF
+            if let value = EnumMappings.baseStat[paramValue] { return value }
+            if let value = EnumMappings.combatStat[paramValue] { return value }
+            throw GeneratorError.executionFailed("unknown stat for \(paramKey): '\(paramValue)'")
+        case "dungeonName":
+            guard let value = EnumMappings.dungeonNameValue[paramValue] else {
+                throw GeneratorError.executionFailed("unknown dungeonName '\(paramValue)'")
+            }
+            return value
+        case "hpScale":
+            guard let value = EnumMappings.hpScaleType[paramValue] else {
+                throw GeneratorError.executionFailed("unknown hpScale '\(paramValue)'")
+            }
+            return value
         default:
-            // Try to parse as integer, otherwise use hash
-            return Int(paramValue) ?? (paramValue.hashValue & 0x7FFFFFFF)
+            // Try to parse as integer
+            guard let value = Int(paramValue) else {
+                throw GeneratorError.executionFailed("unknown param '\(paramKey)' with value '\(paramValue)'")
+            }
+            return value
         }
     }
 

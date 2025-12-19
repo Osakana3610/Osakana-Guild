@@ -14,7 +14,7 @@ extension SkillRuntimeEffectCompiler {
 
         for skill in skills {
             for effect in skill.effects {
-                guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
+                let payload = try decodePayload(from: effect, skillId: skill.id)
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
 
                 let context = SkillEffectContext(
@@ -45,12 +45,12 @@ extension BattleActor.SkillEffects.Reaction {
                      skillId: UInt16,
                      stats: ActorStats?) -> BattleActor.SkillEffects.Reaction? {
         guard payload.effectType == .reaction else { return nil }
-        guard let triggerRaw = payload.parameters?["trigger"],
+        guard let triggerRaw = payload.parameters["trigger"],
               let trigger = BattleActor.SkillEffects.Reaction.Trigger(identifier: triggerRaw) else { return nil }
-        guard (payload.parameters?["action"] ?? "") == "counterAttack" else { return nil }
-        let target = BattleActor.SkillEffects.Reaction.Target(identifier: payload.parameters?["target"] ?? "") ?? .attacker
-        let requiresMartial = (payload.parameters?["requiresMartial"]?.lowercased() == "true")
-        let damageIdentifier = payload.parameters?["damageType"] ?? "physical"
+        guard (payload.parameters["action"] ?? "") == "counterAttack" else { return nil }
+        let target = BattleActor.SkillEffects.Reaction.Target(identifier: payload.parameters["target"] ?? "") ?? .attacker
+        let requiresMartial = (payload.parameters["requiresMartial"]?.lowercased() == "true")
+        let damageIdentifier = payload.parameters["damageType"] ?? "physical"
         let damageType = BattleDamageType(identifier: damageIdentifier) ?? .physical
         var baseChance = payload.value["baseChancePercent"] ?? 100.0
         // statScalingをコンパイル時に計算してbaseChanceに加算
@@ -58,7 +58,7 @@ extension BattleActor.SkillEffects.Reaction {
         let attackCountMultiplier = payload.value["attackCountMultiplier"] ?? 0.3
         let criticalRateMultiplier = payload.value["criticalRateMultiplier"] ?? 0.5
         let accuracyMultiplier = payload.value["accuracyMultiplier"] ?? 1.0
-        let requiresAllyBehind = (payload.parameters?["requiresAllyBehind"]?.lowercased() == "true")
+        let requiresAllyBehind = (payload.parameters["requiresAllyBehind"]?.lowercased() == "true")
 
         return BattleActor.SkillEffects.Reaction(identifier: String(skillId),
                                                  displayName: skillName,

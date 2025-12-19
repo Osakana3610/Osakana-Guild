@@ -82,11 +82,11 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let triggerType = payload.parameters?["trigger"] ?? "battleStart"
-        let triggerId = payload.familyId ?? "\(context.skillId)_timedBuff"
-        let scopeString = payload.stringValues["scope"] ?? "self"
+        let triggerType = payload.parameters["trigger"] ?? "battleStart"
+        let triggerId = payload.familyId.map { String($0) } ?? "\(context.skillId)_timedBuff"
+        let scopeString = payload.parameters["scope"] ?? "self"
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(identifier: scopeString) ?? .`self`
-        let category = payload.parameters?["buffType"] ?? "general"
+        let category = payload.parameters["buffType"] ?? "general"
 
         switch triggerType {
         case "battleStart":
@@ -149,8 +149,8 @@ struct TimedMagicPowerAmplifyHandler: SkillEffectHandler {
     ) throws {
         let turn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
         let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
-        let triggerId = payload.familyId ?? payload.effectType.identifier
-        let scopeString = payload.stringValues["scope"] ?? "party"
+        let triggerId = payload.familyId.map { String($0) } ?? payload.effectType.identifier
+        let scopeString = payload.parameters["scope"] ?? "party"
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(identifier: scopeString) ?? .party
         let triggerTurn = Int(turn.rounded(.towardZero))
         accumulator.status.timedBuffTriggers.append(.init(
@@ -176,8 +176,8 @@ struct TimedBreathPowerAmplifyHandler: SkillEffectHandler {
     ) throws {
         let turn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
         let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
-        let triggerId = payload.familyId ?? payload.effectType.identifier
-        let scopeString = payload.stringValues["scope"] ?? "party"
+        let triggerId = payload.familyId.map { String($0) } ?? payload.effectType.identifier
+        let scopeString = payload.parameters["scope"] ?? "party"
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(identifier: scopeString) ?? .party
         let triggerTurn = Int(turn.rounded(.towardZero))
         accumulator.status.timedBuffTriggers.append(.init(

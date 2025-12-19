@@ -4,12 +4,9 @@ import XCTest
 @MainActor
 final class SkillRuntimeEffectCompilerTests: XCTestCase {
     func testTacticSkillsCompileFromMaster() throws {
-        // 全スキル定義を読み込み、戦術系スキルをコンパイル
-        // 注: スキルIDがInt化されたため、文字列IDによるフィルタリングは不可
         let allDefinitions = try SkillMasterTestLoader.loadAllDefinitions()
         XCTAssertGreaterThan(allDefinitions.count, 0, "スキル定義が読み込まれていること")
 
-        // 戦術系スキルをフィルタ（effect kindで判定）
         let tacticEffectKinds = Set([
             "spellCharges", "breathVariant", "antiHealing", "specialAttack",
             "sacrificeRite", "autoDegradationRepair", "parry", "shieldBlock",
@@ -18,11 +15,12 @@ final class SkillRuntimeEffectCompilerTests: XCTestCase {
         ])
 
         let tacticDefinitions = allDefinitions.filter { def in
-            def.effects.contains { tacticEffectKinds.contains($0.kind) }
+            def.effects.contains { (effect: SkillDefinition.Effect) in
+                tacticEffectKinds.contains(effect.effectType.identifier)
+            }
         }
 
         guard !tacticDefinitions.isEmpty else {
-            // 戦術スキルがない場合はスキップ
             return
         }
 
@@ -34,31 +32,26 @@ final class SkillRuntimeEffectCompilerTests: XCTestCase {
             return
         }
 
-        // 特殊攻撃がコンパイルされていることを確認
         if !effects.combat.specialAttacks.isEmpty {
             let specialKinds = Set(effects.combat.specialAttacks.map(\.kind))
             XCTAssertFalse(specialKinds.isEmpty)
         }
 
-        // ブレスが有効な場合
         if effects.spell.breathExtraCharges > 0 {
             XCTAssertGreaterThan(effects.spell.breathExtraCharges, 0)
         }
     }
 
-    /// 全スキル定義のコンパイルテスト
-    /// NOTE: damageDealtMultiplierAgainstはSQLite経由で正常動作。テストローダーのstringArrayValues処理に課題あり
     func testAllSkillsCompileWithoutError() throws {
-        // 全スキル定義が例外なくコンパイルできることを確認
         let allDefinitions = try SkillMasterTestLoader.loadAllDefinitions()
         XCTAssertGreaterThan(allDefinitions.count, 0)
 
-        // damageDealtMultiplierAgainstスキルを除外（テストローダーのstringArrayValues処理課題）
         let filteredDefinitions = allDefinitions.filter { def in
-            !def.effects.contains { $0.kind == "damageDealtMultiplierAgainst" }
+            !def.effects.contains { (effect: SkillDefinition.Effect) in
+                effect.effectType.identifier == "damageDealtMultiplierAgainst"
+            }
         }
 
-        // 例外が発生しないことを確認
         do {
             _ = try SkillRuntimeEffectCompiler.actorEffects(from: filteredDefinitions)
         } catch {

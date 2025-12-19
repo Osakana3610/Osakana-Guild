@@ -334,12 +334,7 @@ private struct SkillEffectAggregator {
 
         for skill in skills {
             for effect in skill.effects {
-                let payload: Payload
-                do {
-                    payload = try SkillEffectAggregator.payload(from: effect)
-                } catch {
-                    throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): \(error)")
-                }
+                let payload = SkillEffectAggregator.payload(from: effect)
                 switch payload.effectType {
                 case .additionalDamageAdditive:
                     if let value = payload.value["additive"] {
@@ -350,12 +345,12 @@ private struct SkillEffectAggregator {
                         passives.multiply(stat: .additionalDamage, value: value)
                     }
                 case .statAdditive:
-                    if let statKey = CombatStatKey(payload.parameters?["stat"]),
+                    if let statKey = CombatStatKey(payload.parameters["stat"]),
                        let additive = payload.value["additive"] {
                         additives.add(stat: statKey, value: additive)
                     }
                 case .statMultiplier:
-                    if let statKey = CombatStatKey(payload.parameters?["stat"]),
+                    if let statKey = CombatStatKey(payload.parameters["stat"]),
                        let multiplier = payload.value["multiplier"] {
                         passives.multiply(stat: statKey, value: multiplier)
                     }
@@ -372,12 +367,12 @@ private struct SkillEffectAggregator {
                         passives.multiply(stat: .attackCount, value: multiplier)
                     }
                 case .equipmentStatMultiplier:
-                    if let category = payload.parameters?["equipmentCategory"],
+                    if let category = payload.parameters["equipmentCategory"],
                        let multiplier = payload.value["multiplier"] {
                         equipmentMultipliers[category, default: 1.0] *= multiplier
                     }
                 case .itemStatMultiplier:
-                    guard let statTypeRaw = payload.parameters?["statType"] else {
+                    guard let statTypeRaw = payload.parameters["statType"] else {
                         throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): missing statType")
                     }
                     guard let statKey = CombatStatKey(statTypeRaw) else {
@@ -388,14 +383,14 @@ private struct SkillEffectAggregator {
                     }
                     itemStatMultipliers[statKey, default: 1.0] *= multiplier
                 case .statConversionPercent:
-                    guard let sourceKey = CombatStatKey(payload.parameters?["sourceStat"]),
-                          let targetKey = CombatStatKey(payload.parameters?["targetStat"]),
+                    guard let sourceKey = CombatStatKey(payload.parameters["sourceStat"]),
+                          let targetKey = CombatStatKey(payload.parameters["targetStat"]),
                           let percent = payload.value["valuePercent"] else { continue }
                     let entry = StatConversion(source: sourceKey, ratio: percent / 100.0)
                     conversions[targetKey, default: []].append(entry)
                 case .statConversionLinear:
-                    guard let sourceKey = CombatStatKey(payload.parameters?["sourceStat"]),
-                          let targetKey = CombatStatKey(payload.parameters?["targetStat"]),
+                    guard let sourceKey = CombatStatKey(payload.parameters["sourceStat"]),
+                          let targetKey = CombatStatKey(payload.parameters["targetStat"]),
                           let ratio = payload.value["valuePerUnit"] ?? payload.value["valuePerCount"] else { continue }
                     let entry = StatConversion(source: sourceKey, ratio: ratio)
                     conversions[targetKey, default: []].append(entry)
@@ -440,17 +435,17 @@ private struct SkillEffectAggregator {
                         martial.multiplier *= multiplier
                     }
                 case .talentStat:
-                    if let statKey = CombatStatKey(payload.parameters?["stat"]) {
+                    if let statKey = CombatStatKey(payload.parameters["stat"]) {
                         let multiplier = payload.value["multiplier"] ?? 1.5
                         talents.applyTalent(stat: statKey, value: multiplier)
                     }
                 case .incompetenceStat:
-                    if let statKey = CombatStatKey(payload.parameters?["stat"]) {
+                    if let statKey = CombatStatKey(payload.parameters["stat"]) {
                         let multiplier = payload.value["multiplier"] ?? 0.5
                         talents.applyIncompetence(stat: statKey, value: multiplier)
                     }
                 case .statFixedToOne:
-                    if let statKey = CombatStatKey(payload.parameters?["stat"]) {
+                    if let statKey = CombatStatKey(payload.parameters["stat"]) {
                         forcedToOne.insert(statKey)
                     }
                 default:
@@ -484,18 +479,15 @@ private struct SkillEffectAggregator {
 }
 
 private extension SkillEffectAggregator {
-    static func payload(from effect: SkillDefinition.Effect) throws -> Payload {
-        guard let decoded = try SkillEffectPayloadDecoder.decode(effect: effect, fallbackEffectType: effect.kind) else {
-            throw CombatStatCalculator.CalculationError.invalidSkillPayload(effect.kind)
-        }
-        return Payload(effectType: decoded.effectType,
-                       parameters: decoded.parameters,
-                       value: decoded.value)
+    static func payload(from effect: SkillDefinition.Effect) -> Payload {
+        return Payload(effectType: effect.effectType,
+                       parameters: effect.parameters,
+                       value: effect.values)
     }
 
     struct Payload {
         let effectType: SkillEffectType
-        let parameters: [String: String]?
+        let parameters: [String: String]
         let value: [String: Double]
     }
 }

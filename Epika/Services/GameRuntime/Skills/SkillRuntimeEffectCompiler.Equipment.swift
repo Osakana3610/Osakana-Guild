@@ -9,7 +9,7 @@ extension SkillRuntimeEffectCompiler {
 
         for skill in skills {
             for effect in skill.effects {
-                guard let payload = try decodePayload(from: effect, skillId: skill.id) else { continue }
+                let payload = try decodePayload(from: effect, skillId: skill.id)
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case .equipmentSlotAdditive:
