@@ -10,7 +10,7 @@ struct ItemEncyclopediaView: View {
     @State private var isLoading = true
 
     private var itemsByCategory: [ItemSaleCategory: [ItemDefinition]] {
-        Dictionary(grouping: items) { ItemSaleCategory(masterCategory: $0.category) }
+        Dictionary(grouping: items) { ItemSaleCategory(rawValue: $0.category) ?? .other }
     }
 
     private var sortedCategories: [ItemSaleCategory] {
@@ -60,11 +60,11 @@ private struct ItemCategoryListView: View {
     let category: ItemSaleCategory
     let items: [ItemDefinition]
 
-    private var itemsByRarity: [String: [ItemDefinition]] {
-        Dictionary(grouping: items) { $0.rarity ?? "ノーマル" }
+    private var itemsByRarity: [UInt8: [ItemDefinition]] {
+        Dictionary(grouping: items) { $0.rarity ?? ItemRarity.normal.rawValue }
     }
 
-    private var sortedRarities: [String] {
+    private var sortedRarities: [UInt8] {
         let byRarity = itemsByRarity
         return byRarity.keys.sorted {
             (byRarity[$0]?.first?.id ?? .max) < (byRarity[$1]?.first?.id ?? .max)
@@ -74,7 +74,7 @@ private struct ItemCategoryListView: View {
     var body: some View {
         List {
             ForEach(sortedRarities, id: \.self) { rarity in
-                Section(rarity) {
+                Section(ItemRarity(rawValue: rarity)?.displayName ?? "Unknown") {
                     ForEach(itemsByRarity[rarity] ?? [], id: \.id) { item in
                         NavigationLink {
                             ItemDetailView(itemId: item.id)
@@ -185,9 +185,10 @@ struct ItemDetailView: View {
     private func itemContent(_ item: ItemDefinition) -> some View {
         List {
             Section("基本情報") {
-                LabeledContent("カテゴリ", value: ItemSaleCategory(masterCategory: item.category).displayName)
-                if let rarity = lightweightItem?.rarity ?? item.rarity {
-                    LabeledContent("レアリティ", value: rarity)
+                LabeledContent("カテゴリ", value: (ItemSaleCategory(rawValue: item.category) ?? .other).displayName)
+                if let rarityValue = lightweightItem?.rarity ?? item.rarity,
+                   let rarity = ItemRarity(rawValue: rarityValue) {
+                    LabeledContent("レアリティ", value: rarity.displayName)
                 }
                 // 称号情報がある場合は計算済み売値、なければベース価格
                 if let lw = lightweightItem {

@@ -82,7 +82,7 @@ actor ArtifactExchangeProgressService {
             masterDataId: String(rewardDefinition.id),
             displayName: rewardDefinition.name,
             quantity: Int(snapshot.quantity),
-            category: ItemSaleCategory(masterCategory: rewardDefinition.category),
+            category: ItemSaleCategory(rawValue: rewardDefinition.category) ?? .other,
             baseValue: rewardDefinition.basePrice,
             sellValue: rewardDefinition.sellValue,
             enhancement: .init(

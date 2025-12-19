@@ -17,7 +17,7 @@ struct RuntimeEquipment: Identifiable, Sendable, Hashable {
     let baseValue: Int
     let sellValue: Int
     let enhancement: ItemSnapshot.Enhancement
-    let rarity: String?
+    let rarity: UInt8?
     let statBonuses: ItemDefinition.StatBonuses
     let combatBonuses: ItemDefinition.CombatBonuses
 }

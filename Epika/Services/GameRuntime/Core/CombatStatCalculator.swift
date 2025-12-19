@@ -165,9 +165,8 @@ private struct BaseStatAccumulator {
             guard let definition = definitionsById[item.itemId] else {
                 throw CombatStatCalculator.CalculationError.missingItemDefinition(Int16(item.itemId))
             }
-            let categoryMultiplier = equipmentMultipliers[definition.category]
-                ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).identifier]
-                ?? 1.0
+            let categoryIdentifier = ItemSaleCategory(rawValue: definition.category)?.identifier ?? ""
+            let categoryMultiplier = equipmentMultipliers[categoryIdentifier] ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
             let title = titlesById[item.normalTitleId]
@@ -855,9 +854,8 @@ private struct CombatAccumulator {
 
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
-            let categoryMultiplier = equipmentMultipliers[definition.category]
-                ?? equipmentMultipliers[ItemSaleCategory(masterCategory: definition.category).identifier]
-                ?? 1.0
+            let categoryIdentifier = ItemSaleCategory(rawValue: definition.category)?.identifier ?? ""
+            let categoryMultiplier = equipmentMultipliers[categoryIdentifier] ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
             let title = titlesById[item.normalTitleId]

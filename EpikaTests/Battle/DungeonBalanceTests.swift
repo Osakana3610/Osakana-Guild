@@ -296,14 +296,14 @@ final class DungeonBalanceTests: XCTestCase {
 
     private func setupEquipmentByGrade() {
         // 各カテゴリのアイテムを価格順にソート
-        let katanas = items.values.filter { $0.category == "katana" }.sorted { $0.basePrice < $1.basePrice }
-        let thinSwords = items.values.filter { $0.category == "thin_sword" }.sorted { $0.basePrice < $1.basePrice }
-        let rods = items.values.filter { $0.category == "rod" }.sorted { $0.basePrice < $1.basePrice }
-        let wands = items.values.filter { $0.category == "wand" }.sorted { $0.basePrice < $1.basePrice }
-        let armors = items.values.filter { $0.category == "armor" }.sorted { $0.basePrice < $1.basePrice }
-        let heavyArmors = items.values.filter { $0.category == "heavy_armor" }.sorted { $0.basePrice < $1.basePrice }
-        let robes = items.values.filter { $0.category == "robe" }.sorted { $0.basePrice < $1.basePrice }
-        let shields = items.values.filter { $0.category == "shield" }.sorted { $0.basePrice < $1.basePrice }
+        let katanas = items.values.filter { $0.category == ItemSaleCategory.katana.rawValue }.sorted { $0.basePrice < $1.basePrice }
+        let thinSwords = items.values.filter { $0.category == ItemSaleCategory.thinSword.rawValue }.sorted { $0.basePrice < $1.basePrice }
+        let rods = items.values.filter { $0.category == ItemSaleCategory.rod.rawValue }.sorted { $0.basePrice < $1.basePrice }
+        let wands = items.values.filter { $0.category == ItemSaleCategory.wand.rawValue }.sorted { $0.basePrice < $1.basePrice }
+        let armors = items.values.filter { $0.category == ItemSaleCategory.armor.rawValue }.sorted { $0.basePrice < $1.basePrice }
+        let heavyArmors = items.values.filter { $0.category == ItemSaleCategory.heavyArmor.rawValue }.sorted { $0.basePrice < $1.basePrice }
+        let robes = items.values.filter { $0.category == ItemSaleCategory.robe.rawValue }.sorted { $0.basePrice < $1.basePrice }
+        let shields = items.values.filter { $0.category == ItemSaleCategory.shield.rawValue }.sorted { $0.basePrice < $1.basePrice }
 
         // グレードごとにアイテムを選択（配列の位置で選択）
         func selectItem(_ array: [ItemDefinition], at percentile: Double) -> UInt16 {

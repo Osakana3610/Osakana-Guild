@@ -4,7 +4,10 @@ import Foundation
 /// 装備制限のバリデーションとステータス計算を担当（純粋関数のみ）
 enum EquipmentProgressService {
     /// 装備除外カテゴリ（装備候補に表示しない）
-    static let excludedCategories: Set<String> = ["mazo_material", "for_synthesis"]
+    static let excludedCategories: Set<UInt8> = [
+        ItemSaleCategory.mazoMaterial.rawValue,
+        ItemSaleCategory.forSynthesis.rawValue
+    ]
 
     /// 同一ベースID重複ペナルティの開始数
     static let duplicatePenaltyThreshold = 3
