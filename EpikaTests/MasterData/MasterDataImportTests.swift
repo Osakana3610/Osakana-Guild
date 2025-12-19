@@ -367,6 +367,62 @@ final class MasterDataImportTests: XCTestCase {
         XCTAssertEqual(actual, expected, "\(table) の件数がJSONと不一致 (JSON: \(expected), SQLite: \(actual))", file: file, line: line)
     }
 
+    // MARK: - MasterDataLoader 統合テスト
+
+    /// MasterDataLoaderがアプリ起動と同じ手順で正常にデータを読み込めることを検証
+    /// このテストが失敗する場合、アプリ起動時も同じエラーが発生する
+    func testMasterDataLoaderLoadSucceeds() async throws {
+        // cache は setUp() で既に読み込まれているが、明示的に新規読み込みをテスト
+        let manager = SQLiteMasterDataManager()
+        let newCache = try await MasterDataLoader.load(manager: manager)
+
+        // 主要データが読み込まれていることを確認
+        XCTAssertGreaterThan(newCache.allItems.count, 0, "items が空")
+        XCTAssertGreaterThan(newCache.allJobs.count, 0, "jobs が空")
+        XCTAssertGreaterThan(newCache.allRaces.count, 0, "races が空")
+        XCTAssertGreaterThan(newCache.allSkills.count, 0, "skills が空")
+        XCTAssertGreaterThan(newCache.allEnemies.count, 0, "enemies が空")
+        XCTAssertGreaterThan(newCache.allDungeons.count, 0, "dungeons が空")
+    }
+
+    /// 全スキルエフェクトがSkillRuntimeEffectCompilerでコンパイルできることを検証
+    func testAllSkillEffectsCompileSuccessfully() async throws {
+        var failures: [(skillId: UInt16, effectIndex: Int, error: String)] = []
+
+        for skill in cache.allSkills {
+            for effect in skill.effects {
+                do {
+                    let payload = try SkillRuntimeEffectCompiler.decodePayload(from: effect, skillId: skill.id)
+                    try SkillRuntimeEffectCompiler.validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
+                } catch {
+                    failures.append((skill.id, effect.index, "\(error)"))
+                }
+            }
+        }
+
+        if !failures.isEmpty {
+            let details = failures.prefix(10).map { "Skill \($0.skillId)#\($0.effectIndex): \($0.error)" }
+            XCTFail("スキルエフェクトコンパイル失敗 (\(failures.count)件):\n\(details.joined(separator: "\n"))")
+        }
+    }
+
+    /// 全スキルエフェクトタイプがハンドラに登録されていることを検証
+    func testAllSkillEffectTypesHaveHandlers() async throws {
+        var unregisteredTypes: Set<String> = []
+
+        for skill in cache.allSkills {
+            for effect in skill.effects {
+                if SkillEffectHandlerRegistry.handler(for: effect.effectType) == nil {
+                    unregisteredTypes.insert(effect.effectType.identifier)
+                }
+            }
+        }
+
+        if !unregisteredTypes.isEmpty {
+            XCTFail("未登録のエフェクトタイプ: \(unregisteredTypes.sorted().joined(separator: ", "))")
+        }
+    }
+
     // MARK: - 既存テスト（必須フィールド検証）
 
     func testAllItemsHaveRequiredFields() async throws {
