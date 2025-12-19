@@ -18,6 +18,14 @@ enum EncounterEventType: UInt8, Sendable, Hashable {
     }
 }
 
+// MARK: - UnlockCondition
+
+struct UnlockCondition: Sendable, Hashable {
+    /// 0 = storyRead, 1 = dungeonClear
+    let type: UInt8
+    let value: UInt16
+}
+
 // MARK: - DungeonDefinition
 
 struct DungeonDefinition: Identifiable, Sendable, Hashable {
@@ -53,7 +61,7 @@ struct DungeonDefinition: Identifiable, Sendable, Hashable {
     let eventsPerFloor: Int
     let floorCount: Int
     let storyText: String?
-    let unlockConditions: [String]
+    let unlockConditions: [UnlockCondition]
     let encounterWeights: [EncounterWeight]
     let enemyGroupConfig: EnemyGroupConfig?
 }

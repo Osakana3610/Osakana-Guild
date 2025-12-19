@@ -23,25 +23,25 @@ struct PersonalitySecondaryDefinition: Identifiable, Sendable, Hashable {
 
     let id: UInt8
     let name: String
-    let positiveSkillId: String
-    let negativeSkillId: String
+    let positiveSkillId: UInt8
+    let negativeSkillId: UInt8
     let statBonuses: [StatBonus]
 }
 
 struct PersonalitySkillDefinition: Identifiable, Sendable {
     struct EventEffect: Sendable, Hashable {
-        let effectId: String
+        let effectId: UInt8
     }
 
-    let id: String
+    let id: UInt8
     let name: String
     let description: String
     let eventEffects: [EventEffect]
 }
 
 struct PersonalityCancellation: Sendable, Hashable {
-    let positiveSkillId: String
-    let negativeSkillId: String
+    let positiveSkillId: UInt8
+    let negativeSkillId: UInt8
 }
 
 struct PersonalityBattleEffect: Identifiable, Sendable {
