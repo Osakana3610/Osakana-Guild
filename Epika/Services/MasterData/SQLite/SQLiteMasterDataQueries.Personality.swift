@@ -34,15 +34,15 @@ extension SQLiteMasterDataManager {
         let secondaryStatement = try prepare(secondarySQL)
         defer { sqlite3_finalize(secondaryStatement) }
         while sqlite3_step(secondaryStatement) == SQLITE_ROW {
-            guard let nameC = sqlite3_column_text(secondaryStatement, 1),
-                  let positiveC = sqlite3_column_text(secondaryStatement, 2),
-                  let negativeC = sqlite3_column_text(secondaryStatement, 3) else { continue }
+            guard let nameC = sqlite3_column_text(secondaryStatement, 1) else { continue }
             let id = UInt8(sqlite3_column_int(secondaryStatement, 0))
+            let positiveSkillId = UInt8(sqlite3_column_int(secondaryStatement, 2))
+            let negativeSkillId = UInt8(sqlite3_column_int(secondaryStatement, 3))
             secondary[id] = PersonalitySecondaryDefinition(
                 id: id,
                 name: String(cString: nameC),
-                positiveSkillId: String(cString: positiveC),
-                negativeSkillId: String(cString: negativeC),
+                positiveSkillId: positiveSkillId,
+                negativeSkillId: negativeSkillId,
                 statBonuses: []
             )
         }
@@ -64,15 +64,14 @@ extension SQLiteMasterDataManager {
             )
         }
 
-        var skills: [String: PersonalitySkillDefinition] = [:]
+        var skills: [UInt8: PersonalitySkillDefinition] = [:]
         let skillSQL = "SELECT id, name, description FROM personality_skills;"
         let skillStatement = try prepare(skillSQL)
         defer { sqlite3_finalize(skillStatement) }
         while sqlite3_step(skillStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(skillStatement, 0),
-                  let nameC = sqlite3_column_text(skillStatement, 1),
+            guard let nameC = sqlite3_column_text(skillStatement, 1),
                   let descriptionC = sqlite3_column_text(skillStatement, 2) else { continue }
-            let id = String(cString: idC)
+            let id = UInt8(sqlite3_column_int(skillStatement, 0))
             skills[id] = PersonalitySkillDefinition(
                 id: id,
                 name: String(cString: nameC),
@@ -85,11 +84,11 @@ extension SQLiteMasterDataManager {
         let skillEffectStatement = try prepare(skillEffectSQL)
         defer { sqlite3_finalize(skillEffectStatement) }
         while sqlite3_step(skillEffectStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(skillEffectStatement, 0),
-                  let definition = skills[String(cString: idC)],
-                  let effectC = sqlite3_column_text(skillEffectStatement, 1) else { continue }
+            let skillId = UInt8(sqlite3_column_int(skillEffectStatement, 0))
+            guard let definition = skills[skillId] else { continue }
+            let effectId = UInt8(sqlite3_column_int(skillEffectStatement, 1))
             var effects = definition.eventEffects
-            effects.append(.init(effectId: String(cString: effectC)))
+            effects.append(.init(effectId: effectId))
             skills[definition.id] = PersonalitySkillDefinition(
                 id: definition.id,
                 name: definition.name,
@@ -103,9 +102,9 @@ extension SQLiteMasterDataManager {
         let cancelStatement = try prepare(cancelSQL)
         defer { sqlite3_finalize(cancelStatement) }
         while sqlite3_step(cancelStatement) == SQLITE_ROW {
-            guard let positiveC = sqlite3_column_text(cancelStatement, 0),
-                  let negativeC = sqlite3_column_text(cancelStatement, 1) else { continue }
-            cancellations.append(.init(positiveSkillId: String(cString: positiveC), negativeSkillId: String(cString: negativeC)))
+            let positiveId = UInt8(sqlite3_column_int(cancelStatement, 0))
+            let negativeId = UInt8(sqlite3_column_int(cancelStatement, 1))
+            cancellations.append(.init(positiveSkillId: positiveId, negativeSkillId: negativeId))
         }
 
         var battleEffects: [PersonalityBattleEffect] = []
@@ -113,9 +112,9 @@ extension SQLiteMasterDataManager {
         let battleStatement = try prepare(battleSQL)
         defer { sqlite3_finalize(battleStatement) }
         while sqlite3_step(battleStatement) == SQLITE_ROW {
-            guard let idC = sqlite3_column_text(battleStatement, 0),
-                  let payloadC = sqlite3_column_text(battleStatement, 1) else { continue }
-            battleEffects.append(.init(id: String(cString: idC), payloadJSON: String(cString: payloadC)))
+            guard let payloadC = sqlite3_column_text(battleStatement, 1) else { continue }
+            let categoryId = String(sqlite3_column_int(battleStatement, 0))
+            battleEffects.append(.init(id: categoryId, payloadJSON: String(cString: payloadC)))
         }
 
         return (

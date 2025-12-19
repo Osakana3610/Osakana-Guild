@@ -1201,4 +1201,59 @@ enum EnumMappings {
         "instantDeath": 2,
         "resurrection.active": 3
     ]
+
+    // MARK: - Unlock Condition Type (dungeon_unlock_conditions, story_unlock_requirements)
+
+    static let unlockConditionType: [String: Int] = [
+        "storyRead": 0,
+        "dungeonClear": 1
+    ]
+
+    // MARK: - Story Reward Type (story_rewards)
+
+    static let storyRewardType: [String: Int] = [
+        "gold": 0,
+        "exp": 1
+    ]
+
+    // MARK: - Story Module Type (story_unlock_modules)
+
+    static let storyModuleType: [String: Int] = [
+        "dungeon": 0
+    ]
+
+    // MARK: - Personality Event Effect ID (personality_skill_event_effects)
+
+    static let personalityEventEffectId: [String: Int] = [
+        "oasis_safe": 1,
+        "oasis_drink": 2,
+        "goddess_fountain_honest": 3,
+        "goddess_fountain_lie": 4,
+        "succubus_resist": 5,
+        "succubus_charmed": 6,
+        "pitfall_safe": 7,
+        "pitfall_fall": 8,
+        "blacksmith_accept": 9,
+        "blacksmith_refuse": 10,
+        "rusty_chest_open": 11,
+        "rusty_chest_fail": 12,
+        "friendly_monster_attack": 13,
+        "friendly_monster_peaceful": 14,
+        "gambler_refuse": 15,
+        "gambler_accept": 16,
+        "flower_protect": 17,
+        "flower_step": 18,
+        "mechanical_box_open": 19,
+        "mechanical_box_fail": 20,
+        "sphinx_correct": 21,
+        "sphinx_wrong": 22,
+        "enemy_horde_detected": 23,
+        "enemy_horde_avoid": 24,
+        "magic_trap_disarm": 25,
+        "magic_trap_fail": 26,
+        "merchant_success": 27,
+        "merchant_fail": 28,
+        "mushroom_avoid": 29,
+        "mushroom_eat": 30
+    ]
 }

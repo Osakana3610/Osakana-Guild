@@ -56,7 +56,7 @@ struct MasterDataCache: Sendable {
     private let explorationEventsById: [UInt8: ExplorationEventDefinition]
     private let personalityPrimaryById: [UInt8: PersonalityPrimaryDefinition]
     private let personalitySecondaryById: [UInt8: PersonalitySecondaryDefinition]
-    private let personalitySkillsById: [String: PersonalitySkillDefinition]
+    private let personalitySkillsById: [UInt8: PersonalitySkillDefinition]
     private let personalityBattleEffectsById: [String: PersonalityBattleEffect]
     private let characterNamesByGender: [UInt8: [CharacterNameDefinition]]
     private let storyNodesById: [UInt16: StoryNodeDefinition]
@@ -77,7 +77,7 @@ struct MasterDataCache: Sendable {
     nonisolated func explorationEvent(_ id: UInt8) -> ExplorationEventDefinition? { explorationEventsById[id] }
     nonisolated func personalityPrimary(_ id: UInt8) -> PersonalityPrimaryDefinition? { personalityPrimaryById[id] }
     nonisolated func personalitySecondary(_ id: UInt8) -> PersonalitySecondaryDefinition? { personalitySecondaryById[id] }
-    nonisolated func personalitySkill(_ id: String) -> PersonalitySkillDefinition? { personalitySkillsById[id] }
+    nonisolated func personalitySkill(_ id: UInt8) -> PersonalitySkillDefinition? { personalitySkillsById[id] }
     nonisolated func personalityBattleEffect(_ id: String) -> PersonalityBattleEffect? { personalityBattleEffectsById[id] }
     nonisolated func storyNode(_ id: UInt16) -> StoryNodeDefinition? { storyNodesById[id] }
 

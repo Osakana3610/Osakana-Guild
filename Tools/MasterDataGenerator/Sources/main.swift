@@ -9,6 +9,8 @@ struct MasterDataGenerator {
     static let defaultOutput = "Epika/Generated/master_data.db"
 
     static func main() throws {
+        setbuf(stdout, nil)  // Disable stdout buffering
+        setbuf(stderr, nil)  // Disable stderr buffering
         let arguments = CommandLine.arguments
 
         let inputDir: String
@@ -157,7 +159,9 @@ final class Generator {
 
     private func importAll() throws {
         // スキーマ検証を先に実行
+        print("[MasterDataGenerator] Validating schemas...")
         try validateSchemas()
+        print("[MasterDataGenerator] Schema validation done")
 
         let files: [(String, (Data) throws -> Int)] = [
             ("ItemMaster", importItemMaster),
@@ -181,10 +185,16 @@ final class Generator {
         ]
 
         for (filename, importer) in files {
+            print("[MasterDataGenerator] Starting import: \(filename)")
             let url = inputDirectory.appendingPathComponent("\(filename).json")
             let data = try Data(contentsOf: url)
-            let count = try importer(data)
-            print("[MasterDataGenerator] Imported \(filename): \(count) rows")
+            do {
+                let count = try importer(data)
+                print("[MasterDataGenerator] Imported \(filename): \(count) rows")
+            } catch {
+                print("[MasterDataGenerator] FAILED to import \(filename): \(error)")
+                throw error
+            }
         }
     }
 
