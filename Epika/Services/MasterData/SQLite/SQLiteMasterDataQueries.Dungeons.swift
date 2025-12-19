@@ -29,15 +29,16 @@ extension SQLiteMasterDataManager {
             )
         }
 
-        let unlockSQL = "SELECT dungeon_id, condition FROM dungeon_unlock_conditions ORDER BY dungeon_id, order_index;"
+        let unlockSQL = "SELECT dungeon_id, condition_type, condition_value FROM dungeon_unlock_conditions ORDER BY dungeon_id, order_index;"
         let unlockStatement = try prepare(unlockSQL)
         defer { sqlite3_finalize(unlockStatement) }
         while sqlite3_step(unlockStatement) == SQLITE_ROW {
             let dungeonId = UInt16(sqlite3_column_int(unlockStatement, 0))
-            guard let dungeon = dungeons[dungeonId],
-                  let condC = sqlite3_column_text(unlockStatement, 1) else { continue }
+            guard let dungeon = dungeons[dungeonId] else { continue }
+            let conditionType = UInt8(sqlite3_column_int(unlockStatement, 1))
+            let conditionValue = UInt16(sqlite3_column_int(unlockStatement, 2))
             var conditions = dungeon.unlockConditions
-            conditions.append(String(cString: condC))
+            conditions.append(UnlockCondition(type: conditionType, value: conditionValue))
             dungeons[dungeon.id] = DungeonDefinition(
                 id: dungeon.id,
                 name: dungeon.name,

@@ -50,18 +50,19 @@ extension AppServices {
             storyRecord.updatedAt = now
         }
 
-        // 3. unlockModuleIdsを処理（Push型解放）
-        for module in definition.unlockModuleIds {
-            if module.isEmpty { continue }
-            let target = try parseUnlockModule(module)
-            switch target {
-            case .dungeon(let dungeonId):
+        // 3. unlockModulesを処理（Push型解放）
+        for module in definition.unlockModules {
+            switch module.type {
+            case 0: // dungeon
+                let dungeonId = UInt16(module.value)
                 let dungeonRecord = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
                 if !dungeonRecord.isUnlocked {
                     dungeonRecord.isUnlocked = true
                     dungeonRecord.highestUnlockedDifficulty = DungeonDisplayNameFormatter.initialDifficulty
                     dungeonRecord.updatedAt = now
                 }
+            default:
+                break
             }
         }
 
@@ -93,18 +94,19 @@ extension AppServices {
         // ダンジョンクリア→ストーリー解放の処理
         for definition in storyDefinitions {
             let requirements = definition.unlockRequirements
-                .compactMap { parseStoryRequirement($0) }
 
             var shouldUnlock: Bool
             if requirements.isEmpty {
                 shouldUnlock = true
             } else {
-                shouldUnlock = requirements.allSatisfy { requirement in
-                    switch requirement {
-                    case .storyRead(let storyId):
-                        return readStoryIds.contains(storyId)
-                    case .dungeonCleared(let dungeonId):
-                        return clearedDungeonIds.contains(dungeonId)
+                shouldUnlock = requirements.allSatisfy { condition in
+                    switch condition.type {
+                    case 0: // storyRead
+                        return readStoryIds.contains(UInt16(condition.value))
+                    case 1: // dungeonClear
+                        return clearedDungeonIds.contains(UInt16(condition.value))
+                    default:
+                        return false
                     }
                 }
             }
@@ -143,61 +145,6 @@ extension AppServices {
     }
 }
 
-// MARK: - Parse Functions
-
-private extension AppServices {
-    enum StoryRequirement {
-        case storyRead(UInt16)
-        case dungeonCleared(UInt16)
-    }
-
-    func parseUnlockModule(_ module: String) throws -> UnlockTarget {
-        let trimmed = module.trimmingCharacters(in: .whitespacesAndNewlines)
-        let parts = trimmed.split(separator: ":", maxSplits: 1)
-        guard parts.count == 2 else {
-            throw ProgressError.invalidUnlockModule(module)
-        }
-        let prefix = String(parts[0]).trimmingCharacters(in: .whitespacesAndNewlines)
-        let idString = String(parts[1]).trimmingCharacters(in: .whitespacesAndNewlines)
-
-        switch prefix {
-        case "dungeon":
-            guard let id = UInt16(idString) else {
-                throw ProgressError.invalidUnlockModule(module)
-            }
-            return .dungeon(id)
-        default:
-            throw ProgressError.invalidUnlockModule(module)
-        }
-    }
-
-    func parseStoryRequirement(_ raw: String) -> StoryRequirement? {
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty { return nil }
-        if trimmed.hasPrefix("dungeonClear:") {
-            let idString = String(truncatedRequirementValue(trimmed))
-            guard let id = UInt16(idString) else { return nil }
-            return .dungeonCleared(id)
-        }
-        if trimmed.hasPrefix("story:") {
-            let idString = String(truncatedRequirementValue(trimmed))
-            guard let id = UInt16(idString) else { return nil }
-            return .storyRead(id)
-        }
-        if trimmed.hasPrefix("storyRead:") {
-            let idString = String(truncatedRequirementValue(trimmed))
-            guard let id = UInt16(idString) else { return nil }
-            return .storyRead(id)
-        }
-        guard let id = UInt16(trimmed) else { return nil }
-        return .storyRead(id)
-    }
-
-    func truncatedRequirementValue(_ raw: String) -> Substring {
-        guard let separatorIndex = raw.firstIndex(of: ":") else { return raw[...] }
-        return raw[raw.index(after: separatorIndex)...]
-    }
-}
 
 // MARK: - SwiftData Helpers
 

@@ -469,7 +469,8 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS dungeon_unlock_conditions (
                 dungeon_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                condition TEXT NOT NULL,
+                condition_type INTEGER NOT NULL,
+                condition_value INTEGER NOT NULL,
                 PRIMARY KEY (dungeon_id, order_index),
                 FOREIGN KEY (dungeon_id) REFERENCES dungeons(id) ON DELETE CASCADE
             );
@@ -544,10 +545,10 @@ extension Generator {
             """,
             """
             CREATE TABLE IF NOT EXISTS synthesis_recipes (
-                id TEXT PRIMARY KEY,
-                parent_item_id TEXT NOT NULL,
-                child_item_id TEXT NOT NULL,
-                result_item_id TEXT NOT NULL
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                parent_item_id INTEGER NOT NULL,
+                child_item_id INTEGER NOT NULL,
+                result_item_id INTEGER NOT NULL
             );
             """,
             // Stories
@@ -564,7 +565,8 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS story_unlock_requirements (
                 story_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                requirement TEXT NOT NULL,
+                requirement_type INTEGER NOT NULL,
+                requirement_value INTEGER NOT NULL,
                 PRIMARY KEY (story_id, order_index),
                 FOREIGN KEY (story_id) REFERENCES story_nodes(id) ON DELETE CASCADE
             );
@@ -573,7 +575,8 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS story_rewards (
                 story_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                reward TEXT NOT NULL,
+                reward_type INTEGER NOT NULL,
+                reward_value INTEGER NOT NULL,
                 PRIMARY KEY (story_id, order_index),
                 FOREIGN KEY (story_id) REFERENCES story_nodes(id) ON DELETE CASCADE
             );
@@ -582,7 +585,8 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS story_unlock_modules (
                 story_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                module_id TEXT NOT NULL,
+                module_type INTEGER NOT NULL,
+                module_value INTEGER NOT NULL,
                 PRIMARY KEY (story_id, order_index),
                 FOREIGN KEY (story_id) REFERENCES story_nodes(id) ON DELETE CASCADE
             );
@@ -625,7 +629,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS personality_skill_event_effects (
                 skill_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
-                effect_id TEXT NOT NULL,
+                effect_id INTEGER NOT NULL,
                 PRIMARY KEY (skill_id, order_index),
                 FOREIGN KEY (skill_id) REFERENCES personality_skills(id) ON DELETE CASCADE
             );

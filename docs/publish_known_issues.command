@@ -157,6 +157,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="resolved-section">
     {resolved_issues_html}
     </div>
+
+    <h2>クラッシュログの送信</h2>
+    <p>クラッシュが発生した場合は、以下の手順で.ipsファイルをお送りください。</p>
+    <ol>
+        <li>iPhoneの「設定」アプリを開く</li>
+        <li>「プライバシーとセキュリティ」→「解析と改善」→「解析データ」を開く</li>
+        <li>「Epika-2025」から始まる項目を探してタップ</li>
+        <li>右上の共有ボタンから「"ファイル"に保存」を選択</li>
+        <li><a href="https://www.dropbox.com/request/JfZeC2k4nHxYt4GSjoVS">こちら</a>からアップロード</li>
+    </ol>
+
     <p class="updated">最終更新日: {last_updated}</p>
     <script>
         document.querySelectorAll('.issue-header').forEach(header => {{

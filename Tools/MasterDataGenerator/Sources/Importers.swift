@@ -1501,7 +1501,7 @@ extension Generator {
                 INSERT INTO dungeons (id, name, chapter, stage, description, recommended_level, exploration_time, events_per_floor, floor_count, story_text)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
-            let insertUnlockSQL = "INSERT INTO dungeon_unlock_conditions (dungeon_id, order_index, condition) VALUES (?, ?, ?);"
+            let insertUnlockSQL = "INSERT INTO dungeon_unlock_conditions (dungeon_id, order_index, condition_type, condition_value) VALUES (?, ?, ?, ?);"
             let insertWeightSQL = "INSERT INTO dungeon_encounter_weights (dungeon_id, order_index, enemy_id, weight) VALUES (?, ?, ?, ?);"
             let insertEncounterTableSQL = "INSERT INTO encounter_tables (id, name) VALUES (?, ?);"
             let insertEncounterEventSQL = """
@@ -1580,9 +1580,16 @@ extension Generator {
                 reset(dungeonStatement)
 
                 for (index, condition) in dungeon.unlockConditions.enumerated() {
+                    let parts = condition.split(separator: ":")
+                    guard parts.count == 2,
+                          let conditionType = EnumMappings.unlockConditionType[String(parts[0])],
+                          let conditionValue = Int(parts[1]) else {
+                        throw GeneratorError.executionFailed("Dungeon \(dungeon.id): invalid unlock condition '\(condition)'")
+                    }
                     bindInt(unlockStatement, index: 1, value: dungeon.id)
                     bindInt(unlockStatement, index: 2, value: index)
-                    bindText(unlockStatement, index: 3, value: condition)
+                    bindInt(unlockStatement, index: 3, value: conditionType)
+                    bindInt(unlockStatement, index: 4, value: conditionValue)
                     try step(unlockStatement)
                     reset(unlockStatement)
                 }
@@ -1701,34 +1708,22 @@ extension Generator {
             try execute("DELETE FROM synthesis_metadata;")
 
             let insertMetadataSQL = "INSERT INTO synthesis_metadata (id, version, last_updated) VALUES (1, ?, ?);"
-            let insertRecipeSQL = """
-                INSERT INTO synthesis_recipes (id, parent_item_id, child_item_id, result_item_id)
-                VALUES (?, ?, ?, ?);
-            """
 
             let metadataStatement = try prepare(insertMetadataSQL)
-            let recipeStatement = try prepare(insertRecipeSQL)
             defer {
                 sqlite3_finalize(metadataStatement)
-                sqlite3_finalize(recipeStatement)
             }
 
             bindText(metadataStatement, index: 1, value: file.version)
             bindText(metadataStatement, index: 2, value: file.lastUpdated)
             try step(metadataStatement)
 
-            for recipe in file.recipes {
-                let identifier = "\(recipe.parentItemId)__\(recipe.childItemId)__\(recipe.resultItemId)"
-                bindText(recipeStatement, index: 1, value: identifier)
-                bindText(recipeStatement, index: 2, value: recipe.parentItemId)
-                bindText(recipeStatement, index: 3, value: recipe.childItemId)
-                bindText(recipeStatement, index: 4, value: recipe.resultItemId)
-                try step(recipeStatement)
-                reset(recipeStatement)
-            }
+            // NOTE: Recipe data skipped - JSONのアイテム名("sword_basic"等)がItemMasterのitem_idと対応していないため
+            // JSONソースをitem_idベースに修正するまでスキップ
+            print("[MasterDataGenerator] WARNING: synthesis_recipes data skipped - requires JSON to use item_id instead of item names")
         }
 
-        return file.recipes.count
+        return 0  // メタデータのみインポート、レシピは0件
     }
 }
 
@@ -1764,9 +1759,9 @@ extension Generator {
                 INSERT INTO story_nodes (id, title, content, chapter, section)
                 VALUES (?, ?, ?, ?, ?);
             """
-            let insertRequirementSQL = "INSERT INTO story_unlock_requirements (story_id, order_index, requirement) VALUES (?, ?, ?);"
-            let insertRewardSQL = "INSERT INTO story_rewards (story_id, order_index, reward) VALUES (?, ?, ?);"
-            let insertModuleSQL = "INSERT INTO story_unlock_modules (story_id, order_index, module_id) VALUES (?, ?, ?);"
+            let insertRequirementSQL = "INSERT INTO story_unlock_requirements (story_id, order_index, requirement_type, requirement_value) VALUES (?, ?, ?, ?);"
+            let insertRewardSQL = "INSERT INTO story_rewards (story_id, order_index, reward_type, reward_value) VALUES (?, ?, ?, ?);"
+            let insertModuleSQL = "INSERT INTO story_unlock_modules (story_id, order_index, module_type, module_value) VALUES (?, ?, ?, ?);"
 
             let storyStatement = try prepare(insertStorySQL)
             let requirementStatement = try prepare(insertRequirementSQL)
@@ -1789,25 +1784,49 @@ extension Generator {
                 reset(storyStatement)
 
                 for (index, condition) in story.unlockRequirements.enumerated() {
+                    // Format: "dungeonClear:1"
+                    let parts = condition.split(separator: ":")
+                    guard parts.count == 2,
+                          let reqType = EnumMappings.unlockConditionType[String(parts[0])],
+                          let reqValue = Int(parts[1]) else {
+                        throw GeneratorError.executionFailed("Story \(story.id): invalid unlock requirement '\(condition)'")
+                    }
                     bindInt(requirementStatement, index: 1, value: story.id)
                     bindInt(requirementStatement, index: 2, value: index)
-                    bindText(requirementStatement, index: 3, value: condition)
+                    bindInt(requirementStatement, index: 3, value: reqType)
+                    bindInt(requirementStatement, index: 4, value: reqValue)
                     try step(requirementStatement)
                     reset(requirementStatement)
                 }
 
                 for (index, reward) in story.rewards.enumerated() {
+                    // Format: "gold_150" or "exp_75"
+                    let parts = reward.split(separator: "_")
+                    guard parts.count == 2,
+                          let rewardType = EnumMappings.storyRewardType[String(parts[0])],
+                          let rewardValue = Int(parts[1]) else {
+                        throw GeneratorError.executionFailed("Story \(story.id): invalid reward '\(reward)'")
+                    }
                     bindInt(rewardStatement, index: 1, value: story.id)
                     bindInt(rewardStatement, index: 2, value: index)
-                    bindText(rewardStatement, index: 3, value: reward)
+                    bindInt(rewardStatement, index: 3, value: rewardType)
+                    bindInt(rewardStatement, index: 4, value: rewardValue)
                     try step(rewardStatement)
                     reset(rewardStatement)
                 }
 
                 for (index, module) in story.unlocksModules.enumerated() {
+                    // Format: "dungeon:1"
+                    let parts = module.split(separator: ":")
+                    guard parts.count == 2,
+                          let moduleType = EnumMappings.storyModuleType[String(parts[0])],
+                          let moduleValue = Int(parts[1]) else {
+                        throw GeneratorError.executionFailed("Story \(story.id): invalid unlock module '\(module)'")
+                    }
                     bindInt(moduleStatement, index: 1, value: story.id)
                     bindInt(moduleStatement, index: 2, value: index)
-                    bindText(moduleStatement, index: 3, value: module)
+                    bindInt(moduleStatement, index: 3, value: moduleType)
+                    bindInt(moduleStatement, index: 4, value: moduleValue)
                     try step(moduleStatement)
                     reset(moduleStatement)
                 }
@@ -2034,9 +2053,12 @@ extension Generator {
                 reset(skillStatement)
 
                 for (index, effectId) in entry.eventEffects.enumerated() {
+                    guard let effectIdInt = EnumMappings.personalityEventEffectId[effectId] else {
+                        throw GeneratorError.executionFailed("PersonalitySkill \(entry.id): unknown event effect '\(effectId)'")
+                    }
                     bindInt(skillEventStatement, index: 1, value: skillId)
                     bindInt(skillEventStatement, index: 2, value: index)
-                    bindText(skillEventStatement, index: 3, value: effectId)
+                    bindInt(skillEventStatement, index: 3, value: effectIdInt)
                     try step(skillEventStatement)
                     reset(skillEventStatement)
                 }
