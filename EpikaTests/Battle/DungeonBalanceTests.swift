@@ -234,7 +234,7 @@ final class DungeonBalanceTests: XCTestCase {
     private var cache: MasterDataCache!
     private var dungeons: [DungeonDefinition] = []
     private var floors: [DungeonFloorDefinition] = []
-    private var encounterTables: [String: EncounterTableDefinition] = [:]
+    private var encounterTables: [UInt16: EncounterTableDefinition] = [:]
     private var enemies: [UInt16: EnemyDefinition] = [:]
     private var skills: [UInt16: SkillDefinition] = [:]
     private var enemySkills: [UInt16: EnemySkillDefinition] = [:]

@@ -45,6 +45,6 @@ struct PersonalityCancellation: Sendable, Hashable {
 }
 
 struct PersonalityBattleEffect: Identifiable, Sendable {
-    let id: String
+    let id: UInt8
     let payloadJSON: String
 }

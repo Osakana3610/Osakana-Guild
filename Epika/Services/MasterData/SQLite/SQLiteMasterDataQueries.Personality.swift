@@ -113,7 +113,7 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(battleStatement) }
         while sqlite3_step(battleStatement) == SQLITE_ROW {
             guard let payloadC = sqlite3_column_text(battleStatement, 1) else { continue }
-            let categoryId = String(sqlite3_column_int(battleStatement, 0))
+            let categoryId = UInt8(sqlite3_column_int(battleStatement, 0))
             battleEffects.append(.init(id: categoryId, payloadJSON: String(cString: payloadC)))
         }
 

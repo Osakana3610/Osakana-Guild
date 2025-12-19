@@ -7,7 +7,7 @@ struct ExplorationEngine {
         let eventsPerFloor: Int
         let targetFloorNumber: Int
         let scriptEventsByFloor: [Int: [ExplorationEventDefinition]]
-        let encounterTablesById: [String: EncounterTableDefinition]
+        let encounterTablesById: [UInt16: EncounterTableDefinition]
         let scheduler: ExplorationEventScheduler
     }
 
@@ -212,7 +212,7 @@ private extension ExplorationEngine {
     }
 
     static func encounterEventsForFloor(_ floor: DungeonFloorDefinition,
-                                        tables: [String: EncounterTableDefinition]) -> [EncounterTableDefinition.Event] {
+                                        tables: [UInt16: EncounterTableDefinition]) -> [EncounterTableDefinition.Event] {
         guard let table = tables[floor.encounterTableId] else { return [] }
         return table.events.filter { event in
             guard event.enemyId != nil else { return false }
