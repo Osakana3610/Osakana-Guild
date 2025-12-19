@@ -19,22 +19,21 @@ extension SQLiteMasterDataManager {
             var additionalDamage: Double = 0.0
             var breathDamage: Double = 0.0
 
-            mutating func set(stat: String, value: Double) {
+            mutating func set(stat: CombatStat, value: Double) {
                 switch stat {
-                case "maxHP": maxHP = value
-                case "physicalAttack", "attack": physicalAttack = value
-                case "magicalAttack", "magicAttack": magicalAttack = value
-                case "physicalDefense", "defense": physicalDefense = value
-                case "magicalDefense", "magicDefense": magicalDefense = value
-                case "hitRate": hitRate = value
-                case "evasionRate": evasionRate = value
-                case "criticalRate": criticalRate = value
-                case "attackCount": attackCount = value
-                case "magicalHealing", "magicHealing": magicalHealing = value
-                case "trapRemoval": trapRemoval = value
-                case "additionalDamage": additionalDamage = value
-                case "breathDamage": breathDamage = value
-                default: break
+                case .maxHP: maxHP = value
+                case .physicalAttack: physicalAttack = value
+                case .magicalAttack: magicalAttack = value
+                case .physicalDefense: physicalDefense = value
+                case .magicalDefense: magicalDefense = value
+                case .hitRate: hitRate = value
+                case .evasionRate: evasionRate = value
+                case .criticalRate: criticalRate = value
+                case .attackCount: attackCount = value
+                case .magicalHealing: magicalHealing = value
+                case .trapRemoval: trapRemoval = value
+                case .additionalDamage: additionalDamage = value
+                case .breathDamage: breathDamage = value
                 }
             }
 
@@ -84,9 +83,10 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(coefficientStatement) }
         while sqlite3_step(coefficientStatement) == SQLITE_ROW {
             let jobId = UInt8(sqlite3_column_int(coefficientStatement, 0))
-            guard var builder = builders[jobId],
-                  let statC = sqlite3_column_text(coefficientStatement, 1) else { continue }
-            builder.coefficients.set(stat: String(cString: statC), value: sqlite3_column_double(coefficientStatement, 2))
+            guard var builder = builders[jobId] else { continue }
+            let statRaw = UInt8(sqlite3_column_int(coefficientStatement, 1))
+            guard let stat = CombatStat(rawValue: statRaw) else { continue }
+            builder.coefficients.set(stat: stat, value: sqlite3_column_double(coefficientStatement, 2))
             builders[builder.id] = builder
         }
 
