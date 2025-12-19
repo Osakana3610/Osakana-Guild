@@ -5,12 +5,13 @@ import Foundation
 /// アイテム表示用のサブカテゴリ（メインカテゴリ + レアリティ/サブタイプ）
 struct ItemDisplaySubcategory: Hashable, Sendable {
     let mainCategory: ItemSaleCategory
-    let subcategory: String?
+    let subcategory: UInt8?
 
     /// 表示名（例: "細剣（ノーマル）", "剣（Tier1）", "護剣"）
     var displayName: String {
-        if let sub = subcategory {
-            return "\(mainCategory.displayName)（\(sub)）"
+        if let sub = subcategory,
+           let rarity = ItemRarity(rawValue: sub) {
+            return "\(mainCategory.displayName)（\(rarity.displayName)）"
         }
         return mainCategory.displayName
     }
@@ -158,11 +159,113 @@ enum ItemSaleCategory: UInt8, CaseIterable, Sendable {
             return "cube.transparent"
         }
     }
+}
 
-    nonisolated init(masterCategory: String) {
-        self = ItemSaleCategory(identifier: masterCategory.lowercased()) ?? .other
+// MARK: - Item Rarity
+
+enum ItemRarity: UInt8, CaseIterable, Sendable {
+    case normal = 1
+    case tier1 = 2
+    case tier2 = 3
+    case tier3 = 4
+    case tier4 = 5
+    case tier4Axe = 6
+    case extra = 7
+    case hp1 = 8
+    case hp2 = 9
+    case bracelet = 10
+    case breathType = 11
+    case chapter1 = 12
+    case chapter2 = 13
+    case chapter3 = 14
+    case chapter4 = 15
+    case chapter5 = 16
+    case chapter6 = 17
+    case chapter7 = 18
+    case fist = 19
+    case fistType = 20
+    case obtainType = 21
+    case basic = 22
+    case enhanceType = 23
+    case premium = 24
+    case lowest = 25
+    case highest = 26
+    case ring1 = 27
+    case ring2 = 28
+    case ring3 = 29
+    case spellbook = 30
+    case firearm = 31
+    case staff = 32
+    case holyScripture = 33
+    case priestType = 34
+    case intermediate = 35
+    case longbow = 36
+    case low = 37
+    case throwingBlade = 38
+    case slayer = 39
+    case special = 40
+    case support1 = 41
+    case support2 = 42
+    case forgetBook = 43
+    case magicScripture = 44
+    case mageType = 45
+    case rapidBow = 46
+    case trapDisarm = 47
+
+    var displayName: String {
+        switch self {
+        case .normal: return "ノーマル"
+        case .tier1: return "Tier1"
+        case .tier2: return "Tier2"
+        case .tier3: return "Tier3"
+        case .tier4: return "Tier4"
+        case .tier4Axe: return "Tier4・斧系"
+        case .extra: return "エクストラ"
+        case .hp1: return "HP1"
+        case .hp2: return "HP2"
+        case .bracelet: return "ブレスレット"
+        case .breathType: return "ブレス系"
+        case .chapter1: return "一章"
+        case .chapter2: return "二章"
+        case .chapter3: return "三章"
+        case .chapter4: return "四章"
+        case .chapter5: return "五章"
+        case .chapter6: return "六章"
+        case .chapter7: return "七章"
+        case .fist: return "格闘"
+        case .fistType: return "格闘系"
+        case .obtainType: return "獲得系"
+        case .basic: return "基礎"
+        case .enhanceType: return "強化系"
+        case .premium: return "高級"
+        case .lowest: return "最下級"
+        case .highest: return "最高級"
+        case .ring1: return "指輪1"
+        case .ring2: return "指輪2"
+        case .ring3: return "指輪3"
+        case .spellbook: return "呪文書"
+        case .firearm: return "銃器"
+        case .staff: return "杖"
+        case .holyScripture: return "神聖教典"
+        case .priestType: return "僧侶系"
+        case .intermediate: return "中級"
+        case .longbow: return "長弓"
+        case .low: return "低級"
+        case .throwingBlade: return "投刃"
+        case .slayer: return "特効"
+        case .special: return "特殊"
+        case .support1: return "補助1"
+        case .support2: return "補助2"
+        case .forgetBook: return "忘却書"
+        case .magicScripture: return "魔道教典"
+        case .mageType: return "魔法使い系"
+        case .rapidBow: return "連射弓"
+        case .trapDisarm: return "罠解除"
+        }
     }
 }
+
+// MARK: - Lightweight Item Data
 
 struct LightweightItemData: Sendable {
     /// スタック識別キー
@@ -174,7 +277,7 @@ struct LightweightItemData: Sendable {
     var category: ItemSaleCategory
     var enhancement: ItemSnapshot.Enhancement
     var storage: ItemStorage
-    var rarity: String?
+    var rarity: UInt8?
     var normalTitleName: String?
     var superRareTitleName: String?
     var gemName: String?

@@ -69,10 +69,10 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
 
     let id: UInt16
     let name: String
-    let category: String
+    let category: UInt8
     let basePrice: Int
     let sellValue: Int
-    let rarity: String?
+    let rarity: UInt8?
     let statBonuses: StatBonuses
     let combatBonuses: CombatBonuses
     let allowedRaceIds: [UInt8]       // カテゴリではなくraceId

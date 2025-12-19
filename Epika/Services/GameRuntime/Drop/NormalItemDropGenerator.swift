@@ -1,6 +1,6 @@
 import Foundation
 
-/// 敵種族・ダンジョン章に基づいてノーマルアイテム（rarity="ノーマル"）の候補を生成する。
+/// 敵種族・ダンジョン章に基づいてノーマルアイテム（rarity=1）の候補を生成する。
 enum NormalItemDropGenerator {
     /// 章ごとの売値上限（ランク上限に対応）
     /// 下限は常に0なので、高い章でも低ランクアイテムがドロップする
@@ -18,39 +18,39 @@ enum NormalItemDropGenerator {
 
     /// 種族ごとのカテゴリ重み（ノーマルアイテムがある12カテゴリのみ）
     /// 魔道書（grimoire）にはノーマルアイテムがないため除外
-    static let raceCategoryWeights: [UInt8: [(category: String, weight: Int)]] = [
+    static let raceCategoryWeights: [UInt8: [(category: UInt8, weight: Int)]] = [
         1: [  // 人型
-            ("sword", 30),
-            ("armor", 25),
-            ("shield", 20),
-            ("bow", 15),
-            ("thin_sword", 10)
+            (ItemSaleCategory.sword.rawValue, 30),
+            (ItemSaleCategory.armor.rawValue, 25),
+            (ItemSaleCategory.shield.rawValue, 20),
+            (ItemSaleCategory.bow.rawValue, 15),
+            (ItemSaleCategory.thinSword.rawValue, 10)
         ],
         2: [  // 魔物
-            ("gauntlet", 30),
-            ("thin_sword", 25),
-            ("armor", 20),
-            ("katana", 15),
-            ("shield", 10)
+            (ItemSaleCategory.gauntlet.rawValue, 30),
+            (ItemSaleCategory.thinSword.rawValue, 25),
+            (ItemSaleCategory.armor.rawValue, 20),
+            (ItemSaleCategory.katana.rawValue, 15),
+            (ItemSaleCategory.shield.rawValue, 10)
         ],
         3: [  // 不死
-            ("thin_sword", 35),
-            ("robe", 30),
-            ("wand", 20),
-            ("rod", 15)
+            (ItemSaleCategory.thinSword.rawValue, 35),
+            (ItemSaleCategory.robe.rawValue, 30),
+            (ItemSaleCategory.wand.rawValue, 20),
+            (ItemSaleCategory.rod.rawValue, 15)
         ],
         4: [  // 竜族
-            ("katana", 30),
-            ("heavy_armor", 25),
-            ("super_heavy_armor", 20),
-            ("sword", 15),
-            ("shield", 10)
+            (ItemSaleCategory.katana.rawValue, 30),
+            (ItemSaleCategory.heavyArmor.rawValue, 25),
+            (ItemSaleCategory.superHeavyArmor.rawValue, 20),
+            (ItemSaleCategory.sword.rawValue, 15),
+            (ItemSaleCategory.shield.rawValue, 10)
         ],
         5: [  // 神魔
-            ("wand", 35),
-            ("rod", 30),
-            ("robe", 20),
-            ("thin_sword", 15)
+            (ItemSaleCategory.wand.rawValue, 35),
+            (ItemSaleCategory.rod.rawValue, 30),
+            (ItemSaleCategory.robe.rawValue, 20),
+            (ItemSaleCategory.thinSword.rawValue, 15)
         ]
     ]
 
@@ -76,10 +76,10 @@ enum NormalItemDropGenerator {
         }
 
         // ノーマルアイテム一覧を取得
-        let normalItems = masterData.allItems.filter { $0.rarity == "ノーマル" }
+        let normalItems = masterData.allItems.filter { $0.rarity == ItemRarity.normal.rawValue }
 
         // カテゴリ→アイテムのマップを構築（売値上限でフィルタ）
-        var itemsByCategory: [String: [ItemDefinition]] = [:]
+        var itemsByCategory: [UInt8: [ItemDefinition]] = [:]
         for item in normalItems {
             guard item.sellValue <= sellValueLimit else { continue }
             itemsByCategory[item.category, default: []].append(item)
@@ -121,10 +121,10 @@ enum NormalItemDropGenerator {
 
     /// 重み付きでカテゴリを選択
     private static func selectCategory(
-        from weights: [(category: String, weight: Int)],
+        from weights: [(category: UInt8, weight: Int)],
         raceId: UInt8,
         random: inout GameRandomSource
-    ) throws -> String {
+    ) throws -> UInt8 {
         let totalWeight = weights.reduce(0) { $0 + $1.weight }
         guard totalWeight > 0 else {
             throw GeneratorError.zeroCategoryWeight(raceId: raceId)

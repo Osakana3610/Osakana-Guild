@@ -258,7 +258,7 @@ final class ItemPreloadService {
                 name: definition.name,
                 quantity: Int(snapshot.quantity),
                 sellValue: sellPrice,
-                category: ItemSaleCategory(masterCategory: definition.category),
+                category: ItemSaleCategory(rawValue: definition.category) ?? .other,
                 enhancement: snapshot.enhancements,
                 storage: snapshot.storage,
                 rarity: definition.rarity,
