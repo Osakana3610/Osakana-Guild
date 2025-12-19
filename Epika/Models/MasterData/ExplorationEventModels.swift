@@ -32,7 +32,7 @@ enum ExplorationEventType: UInt8, Sendable, Hashable {
 
 struct ExplorationEventDefinition: Identifiable, Sendable {
     struct Weight: Sendable, Hashable {
-        let context: String
+        let context: UInt8
         let weight: Double
     }
 
@@ -42,7 +42,7 @@ struct ExplorationEventDefinition: Identifiable, Sendable {
     let description: String
     let floorMin: Int
     let floorMax: Int
-    let tags: [String]
+    let tags: [UInt8]
     let weights: [Weight]
     let payloadType: UInt8?
     let payloadJSON: String?

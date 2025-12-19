@@ -12,15 +12,14 @@ extension SQLiteMasterDataManager {
             var agility: Int = 0
             var luck: Int = 0
 
-            mutating func apply(stat: String, value: Int) {
+            mutating func apply(stat: BaseStat, value: Int) {
                 switch stat {
-                case "strength": strength = value
-                case "wisdom": wisdom = value
-                case "spirit": spirit = value
-                case "vitality": vitality = value
-                case "agility": agility = value
-                case "luck": luck = value
-                default: break
+                case .strength: strength = value
+                case .wisdom: wisdom = value
+                case .spirit: spirit = value
+                case .vitality: vitality = value
+                case .agility: agility = value
+                case .luck: luck = value
                 }
             }
 
@@ -47,22 +46,21 @@ extension SQLiteMasterDataManager {
             var additionalDamage: Int = 0
             var breathDamage: Int = 0
 
-            mutating func apply(stat: String, value: Int) {
+            mutating func apply(stat: CombatStat, value: Int) {
                 switch stat {
-                case "maxHP": maxHP = value
-                case "physicalAttack": physicalAttack = value
-                case "magicalAttack": magicalAttack = value
-                case "physicalDefense": physicalDefense = value
-                case "magicalDefense": magicalDefense = value
-                case "hitRate": hitRate = value
-                case "evasionRate": evasionRate = value
-                case "criticalRate": criticalRate = value
-                case "attackCount": attackCount = value
-                case "magicalHealing": magicalHealing = value
-                case "trapRemoval": trapRemoval = value
-                case "additionalDamage": additionalDamage = value
-                case "breathDamage": breathDamage = value
-                default: break
+                case .maxHP: maxHP = value
+                case .physicalAttack: physicalAttack = value
+                case .magicalAttack: magicalAttack = value
+                case .physicalDefense: physicalDefense = value
+                case .magicalDefense: magicalDefense = value
+                case .hitRate: hitRate = value
+                case .evasionRate: evasionRate = value
+                case .criticalRate: criticalRate = value
+                case .attackCount: attackCount = value
+                case .magicalHealing: magicalHealing = value
+                case .trapRemoval: trapRemoval = value
+                case .additionalDamage: additionalDamage = value
+                case .breathDamage: breathDamage = value
                 }
             }
 
@@ -87,7 +85,7 @@ extension SQLiteMasterDataManager {
             var statBonuses = StatBonusesBuilder()
             var combatBonuses = CombatBonusesBuilder()
             var allowedRaceIds: Set<UInt8> = []
-            var allowedJobs: Set<String> = []
+            var allowedJobIds: Set<UInt8> = []
             var allowedGenderCodes: Set<UInt8> = []
             var bypassRaceIds: Set<UInt8> = []
             var grantedSkillIds: [UInt16] = []
@@ -133,15 +131,15 @@ extension SQLiteMasterDataManager {
         }
 
         try applyPairs(sql: "SELECT item_id, stat, value FROM item_stat_bonuses;") { builder, statement in
-            guard let statC = sqlite3_column_text(statement, 1) else { return }
-            let stat = String(cString: statC)
+            let statRaw = UInt8(sqlite3_column_int(statement, 1))
+            guard let stat = BaseStat(rawValue: statRaw) else { return }
             let value = Int(sqlite3_column_int(statement, 2))
             builder.statBonuses.apply(stat: stat, value: value)
         }
 
         try applyPairs(sql: "SELECT item_id, stat, value FROM item_combat_bonuses;") { builder, statement in
-            guard let statC = sqlite3_column_text(statement, 1) else { return }
-            let stat = String(cString: statC)
+            let statRaw = UInt8(sqlite3_column_int(statement, 1))
+            guard let stat = CombatStat(rawValue: statRaw) else { return }
             let value = Int(sqlite3_column_int(statement, 2))
             builder.combatBonuses.apply(stat: stat, value: value)
         }
@@ -152,8 +150,8 @@ extension SQLiteMasterDataManager {
         }
 
         try applyPairs(sql: "SELECT item_id, job_id FROM item_allowed_jobs;") { builder, statement in
-            guard let jobC = sqlite3_column_text(statement, 1) else { return }
-            builder.allowedJobs.insert(String(cString: jobC))
+            let jobId = UInt8(sqlite3_column_int(statement, 1))
+            builder.allowedJobIds.insert(jobId)
         }
 
         try applyPairs(sql: "SELECT item_id, gender FROM item_allowed_genders;") { builder, statement in
@@ -188,7 +186,7 @@ extension SQLiteMasterDataManager {
                 statBonuses: builder.statBonuses.build(),
                 combatBonuses: builder.combatBonuses.build(),
                 allowedRaceIds: Array(builder.allowedRaceIds).sorted(),
-                allowedJobs: Array(builder.allowedJobs).sorted(),
+                allowedJobIds: Array(builder.allowedJobIds).sorted(),
                 allowedGenderCodes: Array(builder.allowedGenderCodes).sorted(),
                 bypassRaceIds: Array(builder.bypassRaceIds).sorted(),
                 grantedSkillIds: builder.grantedSkillIds  // ORDER BY order_index でソート済み

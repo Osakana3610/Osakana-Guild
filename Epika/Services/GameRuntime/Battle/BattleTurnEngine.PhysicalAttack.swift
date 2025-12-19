@@ -11,7 +11,7 @@ extension BattleTurnEngine {
             return false
         }
 
-        let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker, context: context)
+        let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, context: context)
             || attacker.skillEffects.misc.partyHostileAll
             || !attacker.skillEffects.misc.partyHostileTargets.isEmpty
         guard let target = selectOffensiveTarget(attackerSide: side,

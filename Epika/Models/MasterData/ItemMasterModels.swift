@@ -76,7 +76,7 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
     let statBonuses: StatBonuses
     let combatBonuses: CombatBonuses
     let allowedRaceIds: [UInt8]       // カテゴリではなくraceId
-    let allowedJobs: [String]          // Phase 2でjobIdに変更予定
+    let allowedJobIds: [UInt8]        // 装備可能な職業ID
     let allowedGenderCodes: [UInt8]   // 1=male, 2=female
     let bypassRaceIds: [UInt8]        // カテゴリではなくraceId
     let grantedSkillIds: [UInt16]     // orderIndex削除、単純なスキルID配列

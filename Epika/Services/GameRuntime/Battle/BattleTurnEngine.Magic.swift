@@ -57,7 +57,7 @@ extension BattleTurnEngine {
 
         appendActionLog(for: attacker, side: side, index: attackerIndex, category: .mageMagic, context: &context)
 
-        let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker, context: context)
+        let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, context: context)
         let targetCount = statusTargetCount(for: attacker, spell: spell)
         let targets = selectStatusTargets(attackerSide: side,
                                           context: &context,
@@ -157,7 +157,7 @@ extension BattleTurnEngine {
 
         appendActionLog(for: attacker, side: side, index: attackerIndex, category: .breath, context: &context)
 
-        let allowFriendlyTargets = hasStatus(tag: "confusion", in: attacker, context: context)
+        let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, context: context)
         let targets = selectStatusTargets(attackerSide: side,
                                           context: &context,
                                           allowFriendlyTargets: allowFriendlyTargets,

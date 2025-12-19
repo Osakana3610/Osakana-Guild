@@ -497,8 +497,8 @@ struct JobDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var skills: [UInt16: SkillDefinition] = [:]
     @State private var skillUnlocks: [(level: Int, skillId: UInt16)] = []
-    @State private var category: String?
-    @State private var growthTendency: String?
+    @State private var category: UInt8?
+    @State private var growthTendency: UInt8?
     @State private var isLoading = true
 
     private var masterData: MasterDataCache { appServices.masterDataCache }
@@ -523,9 +523,9 @@ struct JobDetailSheet: View {
                     .listRowBackground(Color.clear)
                 }
 
-                if let growthTendency, !growthTendency.isEmpty {
+                if let growthTendency {
                     Section("成長傾向") {
-                        Text(growthTendency)
+                        Text(localizedGrowthTendency(growthTendency))
                             .font(.body)
                     }
                 }
@@ -582,12 +582,25 @@ struct JobDetailSheet: View {
         }
     }
 
-    private func localizedCategory(_ category: String) -> String {
+    // EnumMappings.jobCategory: frontline=1, midline=2, backline=3
+    private func localizedCategory(_ category: UInt8) -> String {
         switch category {
-        case "frontline": return "前衛"
-        case "midline": return "中衛"
-        case "backline": return "後衛"
-        default: return category
+        case 1: return "前衛"
+        case 2: return "中衛"
+        case 3: return "後衛"
+        default: return "不明"
+        }
+    }
+
+    // EnumMappings.jobGrowthTendency: balanced=1, physical=2, magical=3, defensive=4, agile=5
+    private func localizedGrowthTendency(_ tendency: UInt8) -> String {
+        switch tendency {
+        case 1: return "バランス型"
+        case 2: return "物理型"
+        case 3: return "魔法型"
+        case 4: return "防御型"
+        case 5: return "俊敏型"
+        default: return "不明"
         }
     }
 

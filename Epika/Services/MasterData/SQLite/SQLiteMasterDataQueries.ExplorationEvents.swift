@@ -33,10 +33,10 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(tagStatement) }
         while sqlite3_step(tagStatement) == SQLITE_ROW {
             let eventId = UInt8(sqlite3_column_int(tagStatement, 0))
-            guard let event = eventMap[eventId],
-                  let tagC = sqlite3_column_text(tagStatement, 1) else { continue }
+            guard let event = eventMap[eventId] else { continue }
+            let tag = UInt8(sqlite3_column_int(tagStatement, 1))
             var tags = event.tags
-            tags.append(String(cString: tagC))
+            tags.append(tag)
             eventMap[event.id] = ExplorationEventDefinition(
                 id: event.id,
                 type: event.type,
@@ -56,10 +56,10 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(weightStatement) }
         while sqlite3_step(weightStatement) == SQLITE_ROW {
             let eventId = UInt8(sqlite3_column_int(weightStatement, 0))
-            guard let event = eventMap[eventId],
-                  let contextC = sqlite3_column_text(weightStatement, 1) else { continue }
+            guard let event = eventMap[eventId] else { continue }
+            let context = UInt8(sqlite3_column_int(weightStatement, 1))
             var weights = event.weights
-            weights.append(.init(context: String(cString: contextC), weight: sqlite3_column_double(weightStatement, 2)))
+            weights.append(.init(context: context, weight: sqlite3_column_double(weightStatement, 2)))
             eventMap[event.id] = ExplorationEventDefinition(
                 id: event.id,
                 type: event.type,
