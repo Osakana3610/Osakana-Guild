@@ -287,19 +287,22 @@ private extension ExplorationEngine {
         return candidates.last
     }
 
+    // EnumMappings.explorationEventContext:
+    // "any": 1, "early_floor": 2, "mid_floor": 3, "late_floor": 4, "boss_floor": 5, "default": 6
+    private static let contextDefault: UInt8 = 6
+    private static let contextAny: UInt8 = 1
+
     static func weight(for event: ExplorationEventDefinition,
                        dungeon: DungeonDefinition) -> Double {
-        if let direct = event.weights.first(where: { $0.context == String(dungeon.id) }) {
-            return max(direct.weight, 0.0)
+        // "any" コンテキストを優先
+        if let anyEntry = event.weights.first(where: { $0.context == contextAny }) {
+            return max(anyEntry.weight, 0.0)
         }
-        if let tagMatch = event.tags.first(where: { tag in dungeon.description.contains(tag) }) {
-            if let weightEntry = event.weights.first(where: { $0.context == tagMatch }) {
-                return max(weightEntry.weight, 0.0)
-            }
-        }
-        if let defaultEntry = event.weights.first(where: { $0.context.lowercased() == "default" }) {
+        // "default" コンテキストにフォールバック
+        if let defaultEntry = event.weights.first(where: { $0.context == contextDefault }) {
             return max(defaultEntry.weight, 0.0)
         }
+        // 重みエントリがなければ1.0
         return 1.0
     }
 

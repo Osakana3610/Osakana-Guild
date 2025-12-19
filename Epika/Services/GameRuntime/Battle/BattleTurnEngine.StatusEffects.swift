@@ -4,6 +4,8 @@ import Foundation
 extension BattleTurnEngine {
     // 既知のステータスID定数（Definition層で確定後に更新）
     static let confusionStatusId: UInt8 = 1
+    // EnumMappings.statusEffectTag: confusion=3
+    static let statusTagConfusion: UInt8 = 3
 
     static func statusApplicationChancePercent(basePercent: Double,
                                                statusId: UInt8,
@@ -17,14 +19,19 @@ extension BattleTurnEngine {
         return max(0.0, scaled * additiveScale)
     }
 
+    // EnumMappings.statusEffectTag: sleep=4, petrify=10
+    private static let statusTagSleep: UInt8 = 4
+    private static let statusTagPetrify: UInt8 = 10
+
     static func statusBarrierAdjustment(statusId: UInt8,
                                         target: inout BattleActor,
                                         context: BattleContext) -> Double {
         // statusIdに対応する定義を取得してタグで判定
         guard let definition = context.statusDefinitions[statusId] else { return 1.0 }
-        let hasSleepTag = definition.tags.contains("sleep") || definition.tags.contains("petrify")
+        let hasSleepTag = definition.tags.contains(statusTagSleep) || definition.tags.contains(statusTagPetrify)
         guard hasSleepTag else { return 1.0 }
-        let damageType: BattleDamageType = definition.tags.contains("breath") ? .breath : .magical
+        // 注: breath tagはstatusEffectTagには存在しないため、常にmagicalとして扱う
+        let damageType: BattleDamageType = .magical
         return applyBarrierIfAvailable(for: damageType, defender: &target)
     }
 
@@ -70,7 +77,7 @@ extension BattleTurnEngine {
         return true
     }
 
-    static func hasStatus(tag: String, in actor: BattleActor, context: BattleContext) -> Bool {
+    static func hasStatus(tag: UInt8, in actor: BattleActor, context: BattleContext) -> Bool {
         actor.statusEffects.contains { effect in
             guard let definition = context.statusDefinition(for: effect) else { return false }
             return definition.tags.contains(tag)
@@ -99,7 +106,7 @@ extension BattleTurnEngine {
         let scaled = chance * actor.skillEffects.combat.procChanceMultiplier
         let capped = max(0, min(100, Int(scaled.rounded(.towardZero))))
         guard BattleRandomSystem.percentChance(capped, random: &context.random) else { return false }
-        let alreadyConfused = hasStatus(tag: "confusion", in: actor, context: context)
+        let alreadyConfused = hasStatus(tag: statusTagConfusion, in: actor, context: context)
         if !alreadyConfused {
             let applied = AppliedStatusEffect(id: confusionStatusId, remainingTurns: 3, source: actor.identifier, stackValue: 0.0)
             actor.statusEffects.append(applied)

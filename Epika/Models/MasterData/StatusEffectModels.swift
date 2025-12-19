@@ -9,6 +9,6 @@ struct StatusEffectDefinition: Identifiable, Sendable, Hashable {
     let actionLocked: Bool?
     let applyMessage: String?
     let expireMessage: String?
-    let tags: [String]
-    let statModifiers: [String: Double]
+    let tags: [UInt8]
+    let statModifiers: [UInt8: Double]
 }

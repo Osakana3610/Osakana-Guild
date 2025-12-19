@@ -17,7 +17,7 @@ extension SQLiteMasterDataManager {
             var vitality: Int
             var agility: Int
             var luck: Int
-            var resistances: [String: Double] = [:]
+            var resistances: [UInt8: Double] = [:]
             var specialSkillIds: [UInt16] = []
             var drops: [UInt16] = []
             var actionRates: EnemyDefinition.ActionRates = .init(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
@@ -54,9 +54,9 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(resistanceStatement) }
         while sqlite3_step(resistanceStatement) == SQLITE_ROW {
             let id = UInt16(sqlite3_column_int(resistanceStatement, 0))
-            guard var builder = builders[id],
-                  let elementC = sqlite3_column_text(resistanceStatement, 1) else { continue }
-            builder.resistances[String(cString: elementC)] = sqlite3_column_double(resistanceStatement, 2)
+            guard var builder = builders[id] else { continue }
+            let element = UInt8(sqlite3_column_int(resistanceStatement, 1))
+            builder.resistances[element] = sqlite3_column_double(resistanceStatement, 2)
             builders[builder.id] = builder
         }
 
@@ -82,19 +82,22 @@ extension SQLiteMasterDataManager {
             builders[builder.id] = builder
         }
 
+        // Element enum values (from EnumMappings.element)
+        // physical=1, breath=7, critical=15, piercing=16, spell.0=17, spell.2=18, spell.3=19, spell.6=20
         return builders.values.sorted { $0.name < $1.name }.map { builder in
-            // 個別魔法耐性を抽出（"spell.X"形式のキーから）
+            // 個別魔法耐性を抽出（element 17-20 → spellId 0,2,3,6）
             var spellResistances: [UInt8: Double] = [:]
-            for (key, value) in builder.resistances {
-                if key.hasPrefix("spell."), let spellId = UInt8(key.dropFirst(6)) {
+            let spellElementMap: [UInt8: UInt8] = [17: 0, 18: 2, 19: 3, 20: 6]
+            for (element, spellId) in spellElementMap {
+                if let value = builder.resistances[element] {
                     spellResistances[spellId] = value
                 }
             }
             let resistances = EnemyDefinition.Resistances(
-                physical: builder.resistances["physical"] ?? 1.0,
-                piercing: builder.resistances["piercing"] ?? 1.0,
-                critical: builder.resistances["critical"] ?? 1.0,
-                breath: builder.resistances["breath"] ?? 1.0,
+                physical: builder.resistances[1] ?? 1.0,   // physical=1
+                piercing: builder.resistances[16] ?? 1.0,  // piercing=16
+                critical: builder.resistances[15] ?? 1.0,  // critical=15
+                breath: builder.resistances[7] ?? 1.0,     // breath=7
                 spells: spellResistances
             )
             return EnemyDefinition(
