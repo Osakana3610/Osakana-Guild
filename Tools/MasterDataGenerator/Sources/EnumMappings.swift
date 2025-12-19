@@ -139,7 +139,14 @@ enum EnumMappings {
         "magic": 2,
         "support": 3,
         "defense": 4,
-        "special": 5
+        "special": 5,
+        // JSON構造のカテゴリキーをマッピング
+        "attack": 1,      // attack -> combat
+        "status": 3,      // status -> support
+        "reaction": 4,    // reaction -> defense
+        "resurrection": 5, // resurrection -> special
+        "race": 5,        // race -> special
+        "job": 5          // job -> special
     ]
 
     // MARK: - Job Category (row position)
