@@ -295,6 +295,39 @@ actor CharacterProgressService {
         notifyCharacterProgressDidChange()
     }
 
+    /// HP > 0 のキャラクターを全回復する
+    /// - Parameter characterIds: 対象キャラクターID配列
+    func healToFull(characterIds: [UInt8]) async throws {
+        guard !characterIds.isEmpty else { return }
+        let context = makeContext()
+        let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { characterIds.contains($0.id) })
+        let records = try context.fetch(descriptor)
+
+        var modified = false
+        for record in records {
+            // HP > 0 のキャラクターのみ回復（HP 0 は蘇生経路を使う）
+            guard record.currentHP > 0 else { continue }
+
+            // maxHPを計算
+            let input = try loadInput(record, context: context)
+            let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
+            let runtimeCharacter = try await MainActor.run {
+                try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxStackKeys: pandoraStackKeys)
+            }
+            let maxHP = UInt32(runtimeCharacter.maxHP)
+
+            if record.currentHP < maxHP {
+                record.currentHP = maxHP
+                modified = true
+            }
+        }
+
+        if modified {
+            try context.save()
+            notifyCharacterProgressDidChange()
+        }
+    }
+
     // MARK: - Job Change
 
     /// 転職処理（1回のみ可能、レベル・経験値はリセット）
