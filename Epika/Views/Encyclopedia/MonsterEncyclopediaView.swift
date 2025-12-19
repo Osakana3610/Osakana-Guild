@@ -406,8 +406,9 @@ private struct EnemySkillRow: View {
         if skill.ignoreDefense {
             parts.append("防御無視")
         }
-        if let element = skill.element {
-            parts.append(localizedElement(element))
+        if let elementRaw = skill.element,
+           let element = Element(rawValue: elementRaw) {
+            parts.append("\(element.displayName)属性")
         }
         if let statusChance = skill.statusChance, statusChance > 0 {
             parts.append("付与率\(statusChance)%")
@@ -415,24 +416,13 @@ private struct EnemySkillRow: View {
         if let healPercent = skill.healPercent {
             parts.append("回復\(healPercent)%")
         }
-        if let buffType = skill.buffType, let buffMultiplier = skill.buffMultiplier {
-            parts.append("\(buffType) x\(String(format: "%.1f", buffMultiplier))")
+        if let buffTypeRaw = skill.buffType,
+           let buffType = SpellBuffType(rawValue: buffTypeRaw),
+           let buffMultiplier = skill.buffMultiplier {
+            parts.append("\(buffType.displayName) x\(String(format: "%.1f", buffMultiplier))")
         }
 
         return parts.isEmpty ? "" : parts.joined(separator: " / ")
-    }
-
-    private func localizedElement(_ element: String) -> String {
-        switch element {
-        case "fire": return "炎属性"
-        case "ice": return "氷属性"
-        case "wind": return "風属性"
-        case "earth": return "地属性"
-        case "light": return "光属性"
-        case "dark": return "闇属性"
-        case "holy": return "聖属性"
-        default: return element
-        }
     }
 
     var body: some View {

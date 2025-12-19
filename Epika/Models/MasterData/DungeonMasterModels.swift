@@ -1,5 +1,25 @@
 import Foundation
 
+// MARK: - EncounterEventType
+
+enum EncounterEventType: UInt8, Sendable, Hashable {
+    case enemyEncounter = 1
+    case bossEncounter = 2
+    case scripted = 3
+    case guaranteed = 4
+
+    var identifier: String {
+        switch self {
+        case .enemyEncounter: return "enemy_encounter"
+        case .bossEncounter: return "boss_encounter"
+        case .scripted: return "scripted"
+        case .guaranteed: return "guaranteed"
+        }
+    }
+}
+
+// MARK: - DungeonDefinition
+
 struct DungeonDefinition: Identifiable, Sendable, Hashable {
     struct EncounterWeight: Sendable, Hashable {
         let enemyId: UInt16
@@ -40,7 +60,7 @@ struct DungeonDefinition: Identifiable, Sendable, Hashable {
 
 struct EncounterTableDefinition: Identifiable, Sendable, Hashable {
     struct Event: Sendable, Hashable {
-        let eventType: String
+        let eventType: UInt8
         let enemyId: UInt16?
         let spawnRate: Double?
         let groupMin: Int?
