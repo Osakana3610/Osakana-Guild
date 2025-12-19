@@ -105,9 +105,7 @@ struct DebugMenuView: View {
     @State private var dropNotificationMode: DropNotificationMode = .bulk
     @State private var isSendingDropNotifications = false
 
-    // データ削除
-    @State private var isResettingData = false
-    @State private var showResetCompleteAlert = false
+    // データ削除（別画面に移動したため削除）
 
     private var masterData: MasterDataCache { appServices.masterDataCache }
     private var inventoryService: InventoryProgressService { appServices.inventory }
@@ -131,11 +129,6 @@ struct DebugMenuView: View {
                 Button("OK") { }
             } message: {
                 Text(alertMessage)
-            }
-            .alert("データ削除完了", isPresented: $showResetCompleteAlert) {
-                Button("OK") { }
-            } message: {
-                Text("進行データを削除しました。\nアプリを再起動してください。")
             }
             .sheet(isPresented: $showCreationSettings) {
                 ItemCreationSettingsView(
@@ -213,32 +206,14 @@ struct DebugMenuView: View {
 
     private var dataResetSection: some View {
         Section("データ操作") {
-            if isResettingData {
-                ProgressView()
-            } else {
-                Button("進行データを削除", role: .destructive) {
-                    Task { await resetAllData() }
+            NavigationLink {
+                DangerousOperationsView()
+            } label: {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                    Text("危険な操作")
                 }
-                .buttonStyle(.bordered)
-            }
-        }
-    }
-
-    private func resetAllData() async {
-        if isResettingData { return }
-        await MainActor.run { isResettingData = true }
-
-        do {
-            try await appServices.resetAllProgress()
-            await MainActor.run {
-                isResettingData = false
-                showResetCompleteAlert = true
-            }
-        } catch {
-            await MainActor.run {
-                isResettingData = false
-                alertMessage = "データ削除に失敗しました: \(error.localizedDescription)"
-                showAlert = true
             }
         }
     }
@@ -750,4 +725,99 @@ struct ItemCreationSettingsView: View {
         }
     }
 
+}
+
+// MARK: - 危険な操作画面
+
+struct DangerousOperationsView: View {
+    @Environment(AppServices.self) private var appServices
+    @State private var isResettingData = false
+    @State private var showResetConfirmAlert = false
+    @State private var showResetCompleteAlert = false
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
+
+    var body: some View {
+        Form {
+            Section {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.title)
+                            .foregroundStyle(.red)
+                        Text("警告")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.red)
+                    }
+
+                    Text("この操作は取り消せません。\n全ての進行データ（キャラクター、アイテム、進行状況など）が完全に削除されます。")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 8)
+            }
+
+            Section {
+                if isResettingData {
+                    HStack {
+                        ProgressView()
+                        Text("削除中...")
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    Button(role: .destructive) {
+                        showResetConfirmAlert = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "trash.fill")
+                            Text("進行データを完全に削除")
+                        }
+                    }
+                }
+            } footer: {
+                Text("削除後はアプリの再起動が必要です")
+                    .font(.caption2)
+            }
+        }
+        .navigationTitle("危険な操作")
+        .navigationBarTitleDisplayMode(.inline)
+        .alert("本当に削除しますか？", isPresented: $showResetConfirmAlert) {
+            Button("キャンセル", role: .cancel) { }
+            Button("削除する", role: .destructive) {
+                Task { await resetAllData() }
+            }
+        } message: {
+            Text("全ての進行データが完全に削除されます。\nこの操作は取り消せません。")
+        }
+        .alert("データ削除完了", isPresented: $showResetCompleteAlert) {
+            Button("OK") { }
+        } message: {
+            Text("進行データを削除しました。\nアプリを再起動してください。")
+        }
+        .alert("エラー", isPresented: $showErrorAlert) {
+            Button("OK") { }
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    private func resetAllData() async {
+        if isResettingData { return }
+        await MainActor.run { isResettingData = true }
+
+        do {
+            try await appServices.resetAllProgress()
+            await MainActor.run {
+                isResettingData = false
+                showResetCompleteAlert = true
+            }
+        } catch {
+            await MainActor.run {
+                isResettingData = false
+                errorMessage = "データ削除に失敗しました: \(error.localizedDescription)"
+                showErrorAlert = true
+            }
+        }
+    }
 }
