@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>既知の問題 - おさかなギルド</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+            background-color: #fafafa;
+        }
+        h1 {
+            color: #1a1a1a;
+            border-bottom: 2px solid #4a90d9;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 40px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .issue-count {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: normal;
+        }
+        .issue {
+            background: #fff;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            margin: 16px 0;
+            overflow: hidden;
+        }
+        .issue-header {
+            padding: 16px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .issue-header:hover {
+            background: #f6f8fa;
+        }
+        .issue-id {
+            font-family: monospace;
+            font-size: 0.85em;
+            color: #666;
+            background: #f1f3f4;
+            padding: 2px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .issue-title {
+            flex: 1;
+            font-weight: 600;
+            color: #24292e;
+        }
+        .issue-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .status {
+            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 500;
+        }
+        .category {
+            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: #e1e4e8;
+            color: #586069;
+        }
+        .toggle-icon {
+            color: #666;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        .issue.open .toggle-icon {
+            transform: rotate(90deg);
+        }
+        .issue-body {
+            display: none;
+            padding: 0 20px 20px 20px;
+            border-top: 1px solid #e1e4e8;
+        }
+        .issue.open .issue-body {
+            display: block;
+        }
+        .issue-section {
+            margin-top: 16px;
+        }
+        .issue-section-title {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #586069;
+            margin-bottom: 4px;
+        }
+        .issue-section-content {
+            white-space: pre-wrap;
+            font-size: 0.95em;
+            color: #24292e;
+            background: #f6f8fa;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .date {
+            font-size: 0.85em;
+            color: #666;
+        }
+        .resolved-section .issue {
+            opacity: 0.8;
+        }
+        .resolved-section .issue-title {
+            text-decoration: line-through;
+            color: #586069;
+        }
+        .no-issues {
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+        }
+        .updated {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        @media (max-width: 600px) {
+            .issue-header {
+                flex-wrap: wrap;
+            }
+            .issue-meta {
+                width: 100%;
+                margin-top: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>既知の問題</h1>
+    <p>おさかなギルドで現在確認されている問題と、その対応状況をお知らせします。</p>
+
+    <h2>対応中の問題 <span class="issue-count">(1件)</span></h2>
+    
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">KI-0001</span>
+            <span class="issue-title">掘り出し物画面を開くとパンドラボックスの画面になる</span>
+            <div class="issue-meta">
+                <span class="category">基地</span>
+                <span class="status" style="background-color: #f39c12">調査中</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-19</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">基地の「掘り出し物」メニューを選択すると、パンドラボックスの画面が
+表示されてしまう問題。</div>
+            </div>
+            
+            <div class="issue-section">
+                <div class="issue-section-title">詳細</div>
+                <div class="issue-section-content">【再現手順】
+1. 基地画面を開く
+2. 「掘り出し物」を選択
+
+【期待動作】
+掘り出し物の画面が表示される
+
+【実際の動作】
+パンドラボックスの画面が表示される</div>
+            </div>
+        
+            
+            
+            
+        </div>
+    </div>
+
+
+    <h2 class="resolved-section">解決済みの問題 <span class="issue-count">(0件)</span></h2>
+    <div class="resolved-section">
+    <div class="no-issues">解決済みの問題はありません</div>
+    </div>
+
+    <p class="updated">最終更新日: 2025年12月19日</p>
+
+    <script>
+        document.querySelectorAll('.issue-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.parentElement.classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>
