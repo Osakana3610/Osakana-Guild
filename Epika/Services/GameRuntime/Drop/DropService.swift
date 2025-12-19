@@ -163,11 +163,10 @@ enum DropService {
     }
 
     private static func categorize(item: ItemDefinition) -> DropItemCategory {
-        let itemCategory = item.category.lowercased()
-        switch itemCategory {
-        case "gem", "mazo_material":
+        switch item.category {
+        case ItemSaleCategory.gem.rawValue, ItemSaleCategory.mazoMaterial.rawValue:
             return .gem
-        case "race_specific", "grimoire":
+        case ItemSaleCategory.raceSpecific.rawValue, ItemSaleCategory.grimoire.rawValue:
             return .rare
         default:
             break

@@ -1,62 +1,6 @@
 import Foundation
 import SQLite3
 
-// MARK: - Item Rarity Int→String逆変換（EnumMappings.itemRarityと同期）
-private enum ItemRarityMapping: Sendable {
-    nonisolated static func string(from value: Int) -> String? {
-        switch value {
-        case 1: return "ノーマル"
-        case 2: return "Tier1"
-        case 3: return "Tier2"
-        case 4: return "Tier3"
-        case 5: return "Tier4"
-        case 6: return "Tier4・斧系"
-        case 7: return "エクストラ"
-        case 8: return "HP1"
-        case 9: return "HP2"
-        case 10: return "ブレスレット"
-        case 11: return "ブレス系"
-        case 12: return "一章"
-        case 13: return "二章"
-        case 14: return "三章"
-        case 15: return "四章"
-        case 16: return "五章"
-        case 17: return "六章"
-        case 18: return "七章"
-        case 19: return "格闘"
-        case 20: return "格闘系"
-        case 21: return "獲得系"
-        case 22: return "基礎"
-        case 23: return "強化系"
-        case 24: return "高級"
-        case 25: return "最下級"
-        case 26: return "最高級"
-        case 27: return "指輪1"
-        case 28: return "指輪2"
-        case 29: return "指輪3"
-        case 30: return "呪文書"
-        case 31: return "銃器"
-        case 32: return "杖"
-        case 33: return "神聖教典"
-        case 34: return "僧侶系"
-        case 35: return "中級"
-        case 36: return "長弓"
-        case 37: return "低級"
-        case 38: return "投刃"
-        case 39: return "特効"
-        case 40: return "特殊"
-        case 41: return "補助1"
-        case 42: return "補助2"
-        case 43: return "忘却書"
-        case 44: return "魔道教典"
-        case 45: return "魔法使い系"
-        case 46: return "連射弓"
-        case 47: return "罠解除"
-        default: return nil
-        }
-    }
-}
-
 // MARK: - Items
 extension SQLiteMasterDataManager {
     func fetchAllItems() throws -> [ItemDefinition] {
@@ -136,10 +80,10 @@ extension SQLiteMasterDataManager {
         struct Builder {
             var id: UInt16
             var name: String
-            var category: String
+            var category: UInt8
             var basePrice: Int
             var sellValue: Int
-            var rarity: String?
+            var rarity: UInt8?
             var statBonuses = StatBonusesBuilder()
             var combatBonuses = CombatBonusesBuilder()
             var allowedRaceIds: Set<UInt8> = []
@@ -159,17 +103,13 @@ extension SQLiteMasterDataManager {
             guard let nameC = sqlite3_column_text(itemStatement, 1) else { continue }
             let id = UInt16(sqlite3_column_int(itemStatement, 0))
             let name = String(cString: nameC)
-            // categoryはInt→ItemSaleCategory→identifierに変換（正規化後はInt）
-            let categoryInt = UInt8(sqlite3_column_int(itemStatement, 2))
-            let category = ItemSaleCategory(rawValue: categoryInt)?.identifier ?? "other"
+            let category = UInt8(sqlite3_column_int(itemStatement, 2))
             let basePrice = Int(sqlite3_column_int(itemStatement, 3))
             let sellValue = Int(sqlite3_column_int(itemStatement, 4))
-            // rarityはInt→文字列に変換（NULLの場合はnil）
-            let rarityValue: String? = {
-                guard sqlite3_column_type(itemStatement, 5) != SQLITE_NULL else { return nil }
-                let rarityInt = Int(sqlite3_column_int(itemStatement, 5))
-                return ItemRarityMapping.string(from: rarityInt)
-            }()
+            // rarityはUInt8としてそのまま取得（NULLの場合はnil）
+            let rarityValue: UInt8? = sqlite3_column_type(itemStatement, 5) != SQLITE_NULL
+                ? UInt8(sqlite3_column_int(itemStatement, 5))
+                : nil
             builders[id] = Builder(
                 id: id,
                 name: name,

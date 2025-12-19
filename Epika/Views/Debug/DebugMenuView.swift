@@ -261,10 +261,12 @@ struct DebugMenuView: View {
             )
 
             let allItems = masterData.allItems
-                .filter { selectedCategoryRawValues.contains($0.category) }
+                .filter { selectedCategoryRawValues.contains(ItemSaleCategory(rawValue: $0.category)?.identifier ?? "") }
                 .sorted { lhs, rhs in
-                    let lhsPriority = categoryPriority[lhs.category] ?? Int.max
-                    let rhsPriority = categoryPriority[rhs.category] ?? Int.max
+                    let lhsId = ItemSaleCategory(rawValue: lhs.category)?.identifier ?? ""
+                    let rhsId = ItemSaleCategory(rawValue: rhs.category)?.identifier ?? ""
+                    let lhsPriority = categoryPriority[lhsId] ?? Int.max
+                    let rhsPriority = categoryPriority[rhsId] ?? Int.max
                     if lhsPriority != rhsPriority {
                         return lhsPriority < rhsPriority
                     }
@@ -286,7 +288,7 @@ struct DebugMenuView: View {
 
             let gemItems: [ItemDefinition]
             if selectedCreationType == .withGemModification {
-                gemItems = allItems.filter { $0.category.lowercased().contains("gem") }
+                gemItems = allItems.filter { $0.category == ItemSaleCategory.gem.rawValue }
             } else {
                 gemItems = []
             }

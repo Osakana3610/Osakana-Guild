@@ -8,7 +8,10 @@ actor GemModificationProgressService {
     private let masterDataCache: MasterDataCache
 
     /// ソケット装着不可カテゴリ
-    private static let nonSocketableCategories: Set<String> = ["mazo_material", "for_synthesis"]
+    private static let nonSocketableCategories: Set<UInt8> = [
+        ItemSaleCategory.mazoMaterial.rawValue,
+        ItemSaleCategory.forSynthesis.rawValue
+    ]
 
     init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
@@ -36,7 +39,7 @@ actor GemModificationProgressService {
 
         let itemIds = Array(Set(records.map { $0.itemId }))
         let definitions = masterDataCache.items(itemIds)
-        let gemIds = Set(definitions.filter { $0.category.lowercased().contains("gem") }.map { $0.id })
+        let gemIds = Set(definitions.filter { $0.category == ItemSaleCategory.gem.rawValue }.map { $0.id })
 
         return records
             .filter { gemIds.contains($0.itemId) }
@@ -65,7 +68,7 @@ actor GemModificationProgressService {
 
         // 宝石・合成用アイテムを除外
         let socketableIds = Set(definitions
-            .filter { !$0.category.lowercased().contains("gem") }
+            .filter { $0.category != ItemSaleCategory.gem.rawValue }
             .filter { !Self.nonSocketableCategories.contains($0.category) }
             .map { $0.id })
 
@@ -131,7 +134,7 @@ actor GemModificationProgressService {
 
         // 宝石のカテゴリ確認
         guard let gemDefinition = masterDataCache.item(gemRecord.itemId),
-              gemDefinition.category.lowercased().contains("gem") else {
+              gemDefinition.category == ItemSaleCategory.gem.rawValue else {
             throw ProgressError.invalidInput(description: "選択したアイテムは宝石ではありません")
         }
 
@@ -139,7 +142,7 @@ actor GemModificationProgressService {
         guard let targetDefinition = masterDataCache.item(targetRecord.itemId) else {
             throw ProgressError.invalidInput(description: "対象アイテムの定義が見つかりません")
         }
-        if targetDefinition.category.lowercased().contains("gem") {
+        if targetDefinition.category == ItemSaleCategory.gem.rawValue {
             throw ProgressError.invalidInput(description: "宝石に宝石改造を施すことはできません")
         }
         if Self.nonSocketableCategories.contains(targetDefinition.category) {

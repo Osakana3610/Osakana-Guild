@@ -18,7 +18,7 @@ final class ItemDropNotificationService {
         let itemId: UInt16
         let itemName: String
         let quantity: Int
-        let rarity: String?
+        let rarity: UInt8?
         let isSuperRare: Bool
         let timestamp: Date
         let normalTitleName: String?

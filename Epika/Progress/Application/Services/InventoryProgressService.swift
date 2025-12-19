@@ -93,7 +93,7 @@ actor InventoryProgressService {
                 masterDataId: String(definition.id),
                 displayName: definition.name,
                 quantity: Int(snapshot.quantity),
-                category: ItemSaleCategory(masterCategory: definition.category),
+                category: ItemSaleCategory(rawValue: definition.category) ?? .other,
                 baseValue: definition.basePrice,
                 sellValue: definition.sellValue,
                 enhancement: .init(
@@ -497,7 +497,7 @@ actor InventoryProgressService {
             masterDataId: String(definition.id),
             displayName: definition.name,
             quantity: Int(snapshot.quantity),
-            category: ItemSaleCategory(masterCategory: definition.category),
+            category: ItemSaleCategory(rawValue: definition.category) ?? .other,
             baseValue: definition.basePrice,
             sellValue: definition.sellValue,
             enhancement: .init(
