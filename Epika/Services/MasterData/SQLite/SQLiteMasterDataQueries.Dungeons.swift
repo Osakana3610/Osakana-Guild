@@ -96,13 +96,12 @@ extension SQLiteMasterDataManager {
         let eventStatement = try prepare(eventSQL)
         defer { sqlite3_finalize(eventStatement) }
         while sqlite3_step(eventStatement) == SQLITE_ROW {
-            guard let tableIdC = sqlite3_column_text(eventStatement, 0),
-                  let typeC = sqlite3_column_text(eventStatement, 1) else { continue }
+            guard let tableIdC = sqlite3_column_text(eventStatement, 0) else { continue }
             let tableId = String(cString: tableIdC)
             guard let table = tables[tableId] else { continue }
             var events = table.events
             let enemyId: UInt16? = sqlite3_column_type(eventStatement, 2) == SQLITE_NULL ? nil : UInt16(sqlite3_column_int(eventStatement, 2))
-            events.append(.init(eventType: String(cString: typeC),
+            events.append(.init(eventType: UInt8(sqlite3_column_int(eventStatement, 1)),
                                 enemyId: enemyId,
                                 spawnRate: sqlite3_column_type(eventStatement, 3) == SQLITE_NULL ? nil : sqlite3_column_double(eventStatement, 3),
                                 groupMin: sqlite3_column_type(eventStatement, 4) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 4)),

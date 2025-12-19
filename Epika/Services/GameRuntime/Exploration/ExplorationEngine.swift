@@ -216,10 +216,11 @@ private extension ExplorationEngine {
         guard let table = tables[floor.encounterTableId] else { return [] }
         return table.events.filter { event in
             guard event.enemyId != nil else { return false }
-            switch event.eventType {
-            case "enemy_encounter", "boss_encounter":
+            guard let eventType = EncounterEventType(rawValue: event.eventType) else { return false }
+            switch eventType {
+            case .enemyEncounter, .bossEncounter:
                 return true
-            default:
+            case .scripted, .guaranteed:
                 return false
             }
         }

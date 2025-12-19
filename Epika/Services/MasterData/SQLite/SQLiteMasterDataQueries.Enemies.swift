@@ -154,11 +154,11 @@ extension SQLiteMasterDataManager {
                 multiplier: sqlite3_column_type(statement, 6) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 6),
                 hitCount: sqlite3_column_type(statement, 7) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 7)),
                 ignoreDefense: sqlite3_column_int(statement, 8) == 1,
-                element: optionalString(statement, column: 9),
+                element: sqlite3_column_type(statement, 9) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 9)),
                 statusId: sqlite3_column_type(statement, 10) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 10)),
                 statusChance: sqlite3_column_type(statement, 11) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 11)),
                 healPercent: sqlite3_column_type(statement, 12) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 12)),
-                buffType: optionalString(statement, column: 13),
+                buffType: sqlite3_column_type(statement, 13) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 13)),
                 buffMultiplier: sqlite3_column_type(statement, 14) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 14)
             )
             skills.append(skill)

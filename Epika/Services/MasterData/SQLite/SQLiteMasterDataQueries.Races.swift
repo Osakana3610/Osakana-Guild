@@ -43,18 +43,17 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(statStatement) }
         while sqlite3_step(statStatement) == SQLITE_ROW {
             let id = UInt8(sqlite3_column_int(statStatement, 0))
-            guard var builder = builders[id],
-                  let statC = sqlite3_column_text(statStatement, 1) else { continue }
-            let stat = String(cString: statC)
+            guard var builder = builders[id] else { continue }
+            let statRaw = UInt8(sqlite3_column_int(statStatement, 1))
             let value = Int(sqlite3_column_int(statStatement, 2))
+            guard let stat = BaseStat(rawValue: statRaw) else { continue }
             switch stat {
-            case "strength": builder.strength = value
-            case "wisdom": builder.wisdom = value
-            case "spirit": builder.spirit = value
-            case "vitality": builder.vitality = value
-            case "agility": builder.agility = value
-            case "luck": builder.luck = value
-            default: break
+            case .strength: builder.strength = value
+            case .wisdom: builder.wisdom = value
+            case .spirit: builder.spirit = value
+            case .vitality: builder.vitality = value
+            case .agility: builder.agility = value
+            case .luck: builder.luck = value
             }
             builders[builder.id] = builder
         }

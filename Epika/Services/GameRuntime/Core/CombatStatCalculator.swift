@@ -150,7 +150,8 @@ private struct BaseStatAccumulator {
 
     mutating func apply(personality: PersonalitySecondaryDefinition) {
         for bonus in personality.statBonuses {
-            assign(bonus.stat, delta: bonus.value)
+            guard let stat = BaseStat(rawValue: bonus.stat) else { continue }
+            assign(stat, delta: bonus.value)
         }
     }
 
@@ -226,6 +227,17 @@ private struct BaseStatAccumulator {
         case "agility": agility += delta
         case "luck": luck += delta
         default: break
+        }
+    }
+
+    private mutating func assign(_ stat: BaseStat, delta: Int) {
+        switch stat {
+        case .strength: strength += delta
+        case .wisdom: wisdom += delta
+        case .spirit: spirit += delta
+        case .vitality: vitality += delta
+        case .agility: agility += delta
+        case .luck: luck += delta
         }
     }
 }

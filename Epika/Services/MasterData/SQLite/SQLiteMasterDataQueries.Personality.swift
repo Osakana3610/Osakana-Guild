@@ -52,10 +52,9 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(secondaryStatStatement) }
         while sqlite3_step(secondaryStatStatement) == SQLITE_ROW {
             let id = UInt8(sqlite3_column_int(secondaryStatStatement, 0))
-            guard let definition = secondary[id],
-                  let statC = sqlite3_column_text(secondaryStatStatement, 1) else { continue }
+            guard let definition = secondary[id] else { continue }
             var bonuses = definition.statBonuses
-            bonuses.append(.init(stat: String(cString: statC), value: Int(sqlite3_column_int(secondaryStatStatement, 2))))
+            bonuses.append(.init(stat: UInt8(sqlite3_column_int(secondaryStatStatement, 1)), value: Int(sqlite3_column_int(secondaryStatStatement, 2))))
             secondary[definition.id] = PersonalitySecondaryDefinition(
                 id: definition.id,
                 name: definition.name,

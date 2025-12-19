@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - PersonalityPrimaryDefinition
+
 struct PersonalityPrimaryDefinition: Identifiable, Sendable, Hashable {
     struct Effect: Sendable, Hashable {
         let effectType: String
@@ -15,7 +17,7 @@ struct PersonalityPrimaryDefinition: Identifiable, Sendable, Hashable {
 
 struct PersonalitySecondaryDefinition: Identifiable, Sendable, Hashable {
     struct StatBonus: Sendable, Hashable {
-        let stat: String
+        let stat: UInt8
         let value: Int
     }
 
