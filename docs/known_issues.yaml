@@ -5,7 +5,7 @@
 # HTMLを生成してGitHubにプッシュできます。
 #
 # 【IDの採番規則】
-#   KI-XXXX (Known Issue) 形式で連番
+#   FBXXXX (Known Issue) 形式で連番
 #
 # 【ステータス】
 #   investigating - 調査中
@@ -24,7 +24,7 @@ last_updated: "2025-12-19"
 # 既知の問題（Open）
 # ==============================================================================
 issues:
-  - id: "KI-0001"
+  - id: "FB0001"
     title: "掘り出し物画面を開くとパンドラボックスの画面になる"
     category: "商店"
     status: "investigating"
@@ -49,7 +49,7 @@ issues:
 # 解決済みの問題（Closed）
 # ==============================================================================
 resolved:
-  # - id: "KI-0000"
+  # - id: "FB0000"
   #   title: "サンプル：解決済みの問題"
   #   category: "カテゴリ"
   #   status: "fixed"
