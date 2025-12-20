@@ -1,3 +1,34 @@
+// ==============================================================================
+// BattleTurnEngine.PhysicalAttack.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 物理攻撃の実行と結果適用
+//   - 特殊攻撃の処理（5種類の特殊攻撃タイプ）
+//   - 格闘戦と追撃処理
+//   - 吸血衝動の処理
+//   - 先制攻撃の実行
+//
+// 【本体との関係】
+//   - BattleTurnEngineの拡張ファイル
+//   - 物理攻撃に特化した機能を提供
+//
+// 【主要機能】
+//   - executePhysicalAttack: 物理攻撃の実行
+//   - performAttack: 攻撃処理の実行
+//   - performSpecialAttack: 特殊攻撃の実行
+//   - performAntiHealingAttack: 反回復攻撃の実行
+//   - executeFollowUpSequence: 格闘追撃シーケンス
+//   - executePreemptiveAttacks: 先制攻撃の実行
+//   - handleVampiricImpulse: 吸血衝動の処理
+//
+// 【使用箇所】
+//   - BattleTurnEngine.TurnLoop（行動実行時）
+//   - BattleTurnEngine.Reactions（反撃処理）
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Physical Attack
