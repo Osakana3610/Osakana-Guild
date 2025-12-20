@@ -55,11 +55,11 @@ resolved:
     status: "fixed"
     reported_date: "2025-12-20"
     resolved_date: "2025-12-21"
-    resolved_version: "0.7.7"
+    resolved_version: "0.7.70"
     description: |
       デバッグメニューからデータ消去を実行しても確認アラートが表示されない。
     resolution: |
-      0.7.7にて修正済み。アラート表示処理の修正により解決。
+      0.7.70にて修正済み。アラート表示処理の修正により解決。
 
   - id: "FB0003"
     title: "iOS 17で冒険タブのパーティをタップするとアプリがクラッシュする"
@@ -67,13 +67,13 @@ resolved:
     status: "fixed"
     reported_date: "2025-12-20"
     resolved_date: "2025-12-21"
-    resolved_version: "0.7.7"
+    resolved_version: "0.7.70"
     description: |
       冒険タブでパーティをタップするとアプリがクラッシュする。
     details: |
       iOS 17のAttributeGraphのバグにより、Swift 6.2のApproachable Concurrency設定との組み合わせでクラッシュが発生。
     resolution: |
-      0.7.7にて修正済み。Swift Concurrency設定を調整し、NavigationStackの二重ネスト問題を修正。サポート対象をiOS 17.1以降に維持。
+      0.7.70にて修正済み。Swift Concurrency設定を調整し、NavigationStackの二重ネスト問題を修正。サポート対象をiOS 17.1以降に維持。
 
   - id: "FB0004"
     title: "アイテムを複数装備した状態で転職するとキャラクターのデッドロックが発生する"
@@ -81,8 +81,8 @@ resolved:
     status: "fixed"
     reported_date: "2025-12-20"
     resolved_date: "2025-12-21"
-    resolved_version: "0.7.7"
+    resolved_version: "0.7.70"
     description: |
       転職時の装備可能数の変動により、キャラクターが所持できるアイテム数を超え、チェックによりエラーが発生。
     resolution: |
-      0.7.7にて修正済み。転職時に装備を全てインベントリに戻す処理を追加。デバッグメニューに復旧用の全装備解除機能も追加。
+      0.7.70にて修正済み。転職時に装備を全てインベントリに戻す処理を追加。デバッグメニューに復旧用の全装備解除機能も追加。
