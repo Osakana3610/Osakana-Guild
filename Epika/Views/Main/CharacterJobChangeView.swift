@@ -8,6 +8,7 @@ struct CharacterJobChangeView: View {
 
     @State private var characters: [RuntimeCharacter] = []
     @State private var jobs: [JobDefinition] = []
+    @State private var exploringCharacterIds: Set<UInt8> = []
     @State private var selectedCharacterId: UInt8?
     @State private var selectedJobIndex: UInt8?
     @State private var isLoading = false
@@ -18,9 +19,9 @@ struct CharacterJobChangeView: View {
     private var characterService: CharacterProgressService { appServices.character }
     private var masterData: MasterDataCache { appServices.masterDataCache }
 
-    /// 転職可能なキャラクター（未転職のみ）
+    /// 転職可能なキャラクター（未転職かつ探索中でない）
     private var eligibleCharacters: [RuntimeCharacter] {
-        characters.filter { $0.previousJobId == 0 }
+        characters.filter { $0.previousJobId == 0 && !exploringCharacterIds.contains($0.id) }
     }
 
     /// 選択中のキャラクター
@@ -118,6 +119,15 @@ struct CharacterJobChangeView: View {
         isLoading = true
         defer { isLoading = false }
         do {
+            // 探索中のキャラクターIDを取得
+            let explorations = try await appServices.exploration.allExplorations()
+            let runningExplorations = explorations.filter { $0.status == .running }
+            var exploringIds = Set<UInt8>()
+            for exploration in runningExplorations {
+                exploringIds.formUnion(exploration.party.memberCharacterIds)
+            }
+            exploringCharacterIds = exploringIds
+
             let progresses = try await characterService.allCharacters()
             var runtime: [RuntimeCharacter] = []
             for progress in progresses {

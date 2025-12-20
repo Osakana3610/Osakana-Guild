@@ -343,6 +343,11 @@ actor CharacterProgressService {
             throw ProgressError.characterNotFound
         }
 
+        // 探索中のキャラクターは転職不可
+        if try isCharacterExploring(characterId: characterId, context: context) {
+            throw ProgressError.invalidInput(description: "探索中のキャラクターは転職できません")
+        }
+
         // 転職は1回のみ
         if record.previousJobId != 0 {
             throw ProgressError.invalidInput(description: "このキャラクターは既に転職済みです")
@@ -364,6 +369,9 @@ actor CharacterProgressService {
         if record.jobId == newJobId {
             throw ProgressError.invalidInput(description: "現在と同じ職業には転職できません")
         }
+
+        // 装備を全てインベントリに戻す（レベルが1にリセットされるため）
+        try unequipAllItems(characterId: characterId, context: context)
 
         // 転職実行
         record.previousJobId = record.jobId
@@ -734,6 +742,82 @@ private extension CharacterProgressService {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         for record in try context.fetch(equipmentDescriptor) {
             context.delete(record)
+        }
+    }
+
+    /// キャラクターが探索中かどうかをチェック
+    func isCharacterExploring(characterId: UInt8, context: ModelContext) throws -> Bool {
+        // running状態の探索を取得
+        let runningStatus = ExplorationResult.running.rawValue
+        let runningDescriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.result == runningStatus }
+        )
+        let runningExplorations = try context.fetch(runningDescriptor)
+        guard !runningExplorations.isEmpty else { return false }
+
+        // 探索中のパーティIDを取得
+        let exploringPartyIds = Set(runningExplorations.map(\.partyId))
+
+        // パーティレコードを取得して、キャラクターが所属しているかチェック
+        let partyDescriptor = FetchDescriptor<PartyRecord>()
+        let parties = try context.fetch(partyDescriptor)
+        for party in parties {
+            if exploringPartyIds.contains(party.id) && party.memberCharacterIds.contains(characterId) {
+                return true
+            }
+        }
+        return false
+    }
+
+    /// キャラクターの装備を全てインベントリに戻す
+    func unequipAllItems(characterId: UInt8, context: ModelContext) throws {
+        let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(
+            predicate: #Predicate { $0.characterId == characterId }
+        )
+        let allEquipment = try context.fetch(equipmentDescriptor)
+        guard !allEquipment.isEmpty else { return }
+
+        let storage = ItemStorage.playerItem
+
+        // インベントリを取得
+        let storageTypeValue = storage.rawValue
+        let storageRawString = storage.identifier
+        let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageType == storageTypeValue || $0.storageRawValue == storageRawString
+        }))
+
+        // stackKeyでグループ化
+        var groupedEquipment: [String: [CharacterEquipmentRecord]] = [:]
+        for equip in allEquipment {
+            groupedEquipment[equip.stackKey, default: []].append(equip)
+        }
+
+        // 各グループをインベントリに戻す
+        for (stackKey, equipments) in groupedEquipment {
+            let quantity = equipments.count
+
+            if let existingInventory = allInventory.first(where: { $0.stackKey == stackKey }) {
+                // 既存スタックに追加
+                existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
+            } else if let firstEquip = equipments.first {
+                // 新規インベントリレコード作成
+                let inventoryRecord = InventoryItemRecord(
+                    superRareTitleId: firstEquip.superRareTitleId,
+                    normalTitleId: firstEquip.normalTitleId,
+                    itemId: firstEquip.itemId,
+                    socketSuperRareTitleId: firstEquip.socketSuperRareTitleId,
+                    socketNormalTitleId: firstEquip.socketNormalTitleId,
+                    socketItemId: firstEquip.socketItemId,
+                    quantity: UInt16(quantity),
+                    storage: storage
+                )
+                context.insert(inventoryRecord)
+            }
+
+            // 装備レコードを削除
+            for equip in equipments {
+                context.delete(equip)
+            }
         }
     }
 
