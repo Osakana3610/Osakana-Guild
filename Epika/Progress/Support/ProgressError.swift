@@ -1,3 +1,33 @@
+// ==============================================================================
+// ProgressError.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - Progress層のドメインエラー定義
+//   - ユーザー向けローカライズエラーメッセージ
+//
+// 【エラー種別】
+//   - invalidInput: 無効な入力
+//   - characterNotFound: キャラクター未発見
+//   - partyNotFound: パーティ未発見
+//   - playerNotFound: プレイヤーデータ未発見
+//   - explorationNotFound: 探索記録未発見
+//   - shopNotFound: ショップ未発見
+//   - shopStockNotFound: ショップ在庫未発見
+//   - insufficientFunds: 所持金不足
+//   - insufficientStock: 在庫不足
+//   - itemDefinitionUnavailable: アイテム定義なし
+//   - storyLocked: ストーリー未解放
+//   - dungeonLocked: ダンジョン未解放
+//   - invalidUnlockModule: 無効な解放モジュール
+//
+// 【使用箇所】
+//   - Progress層の各Serviceでthrow
+//   - UI層でエラーメッセージ表示
+//
+// ==============================================================================
+
 import Foundation
 
 enum ProgressError: Error {

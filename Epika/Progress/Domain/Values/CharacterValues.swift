@@ -1,3 +1,39 @@
+// ==============================================================================
+// CharacterValues.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - キャラクター関連値型の名前空間
+//   - CharacterSnapshot/RuntimeCharacterで共有される構造体の定義
+//
+// 【データ構造】
+//   - CoreAttributes: 基礎ステータス（STR/WIS/SPI/VIT/AGI/LUK）
+//   - HitPoints: HP情報（current/maximum）
+//   - Combat: 戦闘ステータス
+//     - maxHP, physicalAttack, magicalAttack
+//     - physicalDefense, magicalDefense
+//     - hitRate, evasionRate, criticalRate
+//     - attackCount, magicalHealing, trapRemoval
+//     - additionalDamage, breathDamage, isMartialEligible
+//   - Personality: 性格設定（primary/secondary ID、0=なし）
+//   - LearnedSkill: 習得スキル情報
+//   - EquippedItem: 装備アイテム情報（称号・ソケット含む）
+//   - AchievementCounters: 実績カウンター（戦闘数・勝利数・敗北数）
+//   - ActionPreferences: 行動設定（攻撃/僧侶魔法/魔法使い魔法/ブレス）
+//   - JobHistoryEntry: 転職履歴エントリ
+//
+// 【設計意図】
+//   - enumとして定義（インスタンス化不可、名前空間として使用）
+//   - すべての内部型はSendable/Hashable準拠
+//
+// 【使用箇所】
+//   - CharacterSnapshot: 値型の型エイリアス元
+//   - RuntimeCharacter: ランタイムキャラクター
+//   - CharacterInput: 変換用中間型
+//
+// ==============================================================================
+
 import Foundation
 
 /// CharacterSnapshotとRuntimeCharacterで共有される値型の名前空間。

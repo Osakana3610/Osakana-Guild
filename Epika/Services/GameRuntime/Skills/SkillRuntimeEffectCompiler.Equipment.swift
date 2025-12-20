@@ -1,3 +1,21 @@
+// ==============================================================================
+// SkillRuntimeEffectCompiler.Equipment.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキル定義から装備スロット情報を抽出
+//   - equipmentSlotAdditive と equipmentSlotMultiplier を処理
+//
+// 【公開API】
+//   - equipmentSlots(from:): スキル定義配列から EquipmentSlots を構築
+//
+// 【本体ファイルとの関係】
+//   - SkillRuntimeEffectCompiler.swift で定義された enum を拡張
+//   - SkillRuntimeEffects.EquipmentSlots を戻り値として使用
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Equipment Slots Compilation

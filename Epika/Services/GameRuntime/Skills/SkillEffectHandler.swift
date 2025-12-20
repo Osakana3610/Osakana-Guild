@@ -1,3 +1,25 @@
+// ==============================================================================
+// SkillEffectHandler.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキルエフェクトを処理するハンドラのプロトコル定義
+//   - SkillEffectType から対応ハンドラを取得するレジストリ管理
+//   - スキルエフェクトコンテキスト（ActorStats含む）の提供
+//
+// 【公開API】
+//   - SkillEffectHandler: 各ハンドラが実装すべきプロトコル
+//   - SkillEffectHandlerRegistry: ハンドラレジストリ（型辞書ベース）
+//   - SkillEffectContext: ハンドラに渡すスキル情報のコンテキスト
+//   - ActorStats: コンパイル時に参照可能なアクターステータス
+//
+// 【使用箇所】
+//   - SkillEffectHandlers.*.swift で各種ハンドラを実装
+//   - SkillRuntimeEffectCompiler.Actor.actorEffects(from:stats:) でハンドラ取得・実行
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - SkillEffectHandler Protocol

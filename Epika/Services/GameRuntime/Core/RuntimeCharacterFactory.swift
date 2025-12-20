@@ -1,3 +1,40 @@
+// ==============================================================================
+// RuntimeCharacterFactory.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - CharacterInputからRuntimeCharacterを生成
+//   - マスターデータ取得と戦闘ステータス計算の統合
+//
+// 【公開API】
+//   - make(from:masterData:pandoraBoxStackKeys:) → RuntimeCharacter
+//     @MainActor - キャラクター生成
+//
+// 【生成フロー】
+//   1. マスターデータ取得（種族/職業/性格）
+//   2. 装備からスキルID収集
+//   3. Loadout構築（アイテム/称号定義）
+//   4. 装備スロット計算・検証
+//   5. スペルブック構築
+//   6. CombatStatCalculatorで戦闘ステータス計算
+//   7. RuntimeCharacter生成
+//
+// 【装備処理】
+//   - ソケット宝石のアイテム/称号も含めて収集
+//   - スキルは装備アイテム+超レア称号から取得
+//
+// 【補助機能】
+//   - EquipmentSlotCalculator: レベルベースの装備可能数計算
+//     - baseCapacity: 基本値（√(1.5×レベル+0.3)-0.5)/0.7
+//     - capacity: スキル修正込み
+//
+// 【使用箇所】
+//   - GameRuntimeService: runtimeCharacter API
+//   - PartyAssembler: パーティメンバー生成
+//
+// ==============================================================================
+
 import Foundation
 
 /// CharacterInputからRuntimeCharacterを生成するファクトリ。

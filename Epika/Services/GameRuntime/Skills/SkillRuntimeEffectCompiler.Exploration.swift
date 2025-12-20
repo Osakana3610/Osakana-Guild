@@ -1,3 +1,21 @@
+// ==============================================================================
+// SkillRuntimeEffectCompiler.Exploration.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキル定義から探索モディファイア情報を抽出
+//   - explorationTimeMultiplier を処理してダンジョン別の時間倍率を管理
+//
+// 【公開API】
+//   - explorationModifiers(from:): スキル定義配列から ExplorationModifiers を構築
+//
+// 【本体ファイルとの関係】
+//   - SkillRuntimeEffectCompiler.swift で定義された enum を拡張
+//   - SkillRuntimeEffects.ExplorationModifiers を戻り値として使用
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Exploration Modifiers Compilation

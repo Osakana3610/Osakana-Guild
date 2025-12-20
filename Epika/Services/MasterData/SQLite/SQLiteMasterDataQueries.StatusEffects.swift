@@ -1,3 +1,20 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.StatusEffects.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 状態異常定義の取得クエリを提供
+//   - status_effects, tags, stat_modifiers テーブルを結合して構築
+//
+// 【公開API】
+//   - fetchAllStatusEffects() -> [StatusEffectDefinition]
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 

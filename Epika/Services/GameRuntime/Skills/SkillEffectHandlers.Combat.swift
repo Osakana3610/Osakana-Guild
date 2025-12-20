@@ -1,3 +1,41 @@
+// ==============================================================================
+// SkillEffectHandlers.Combat.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 戦闘関連のスキルエフェクトハンドラ実装
+//   - Proc・追加行動・リアクション・バリア・特殊攻撃などの処理
+//
+// 【公開API】
+//   - ProcMultiplierHandler: Proc発動率の倍率調整
+//   - ProcRateHandler: 特定Procの発動率調整（加算・乗算）
+//   - ExtraActionHandler: 追加行動の付与
+//   - ReactionNextTurnHandler: 次ターン追加行動
+//   - ActionOrderMultiplierHandler: 行動順序の倍率調整
+//   - ActionOrderShuffleHandler: 行動順序のシャッフル
+//   - CounterAttackEvasionMultiplierHandler: 反撃回避率の倍率調整
+//   - ReactionHandler: リアクション（反撃等）の設定
+//   - ParryHandler: パリィ能力の付与
+//   - ShieldBlockHandler: シールドブロック能力の付与
+//   - SpecialAttackHandler: 特殊攻撃の付与
+//   - BarrierHandler: バリア（ダメージ無効化）の付与
+//   - BarrierOnGuardHandler: 防御時バリアの付与
+//   - AttackCountAdditiveHandler: 攻撃回数加算（パススルー）
+//   - AttackCountMultiplierHandler: 攻撃回数倍率（パススルー）
+//   - EnemyActionDebuffChanceHandler: 敵の行動回数減少
+//   - CumulativeHitDamageBonusHandler: 累積ヒットボーナス
+//   - EnemySingleActionSkipChanceHandler: 敵の行動スキップ（道化師）
+//   - ActionOrderShuffleEnemyHandler: 敵の行動順序シャッフル（道化師）
+//   - FirstStrikeHandler: 先制攻撃（天狗）
+//   - StatDebuffHandler: 敵のステータス弱体化
+//
+// 【本体ファイルとの関係】
+//   - SkillEffectHandler.swift で定義されたプロトコルを実装
+//   - SkillEffectHandlerRegistry に登録される
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Combat Handlers (15)

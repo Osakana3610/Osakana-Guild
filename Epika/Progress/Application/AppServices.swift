@@ -1,3 +1,42 @@
+// ==============================================================================
+// AppServices.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 全サービスへのアクセスを提供するファサード
+//   - サービス間の依存関係を管理・注入
+//   - @Observable によるUI更新トリガー
+//
+// 【保持するサービス】
+//   - gameState: ゴールド・ゲーム状態管理
+//   - character: キャラクターCRUD・装備・転職
+//   - party: パーティ編成
+//   - inventory: インベントリ管理
+//   - shop: 商店機能
+//   - exploration: 探索進行永続化
+//   - dungeon: ダンジョン進行状態
+//   - story: ストーリー進行
+//   - titleInheritance: 称号継承
+//   - artifactExchange: 遺物交換
+//   - itemSynthesis: アイテム合成
+//   - autoTrade: 自動売却
+//   - runtime: ゲームランタイムへのブリッジ
+//   - dropNotifications: ドロップ通知
+//   - itemPreload: アイテム表示用キャッシュ
+//   - gemModification: 宝石改造
+//
+// 【補助型】
+//   - ExplorationRunTotals: 探索累計（経験値/ゴールド/ドロップ）
+//   - ExplorationRunUpdate: 探索更新イベント
+//   - ExplorationRunHandle: 探索セッションハンドル
+//
+// 【通知】
+//   - .progressUnlocksDidChange: 解放状態変更通知
+//   - .characterProgressDidChange: キャラクター変更通知
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 import Observation

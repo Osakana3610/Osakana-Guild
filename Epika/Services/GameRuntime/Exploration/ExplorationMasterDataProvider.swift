@@ -1,3 +1,21 @@
+// ==============================================================================
+// ExplorationMasterDataProvider.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 探索で必要なマスターデータの取得インターフェース定義
+//   - MasterDataCacheからの探索データ取得実装
+//
+// 【公開API】
+//   - ExplorationMasterDataProvider: ダンジョンバンドルと探索イベントの取得プロトコル
+//   - MasterDataCacheExplorationProvider: MasterDataCacheを使った実装
+//
+// 【使用箇所】
+//   - ExplorationEngine（探索準備時のデータ取得）
+//
+// ==============================================================================
+
 import Foundation
 
 struct ExplorationDungeonBundle: Sendable {

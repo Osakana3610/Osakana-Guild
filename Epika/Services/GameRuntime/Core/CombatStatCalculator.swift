@@ -1,3 +1,46 @@
+// ==============================================================================
+// CombatStatCalculator.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - キャラクター戦闘ステータスの計算
+//   - 種族・職業・装備・スキル効果の統合
+//
+// 【データ構造】
+//   - CombatStatCalculator: 計算ロジック（static）
+//   - Context: 計算入力（種族/職業/レベル/装備/スキル等）
+//   - Result: 計算結果（attributes/hitPoints/combat）
+//
+// 【計算フロー】
+//   1. SkillEffectAggregatorでスキル効果を集約
+//   2. BaseStatAccumulatorで基礎ステータス計算
+//      - 種族基礎値 + レベルボーナス + 性格 + 装備
+//   3. CombatAccumulatorで戦闘ステータス計算
+//      - 職業係数・タレント・パッシブ・追加値を適用
+//   4. 21以上ボーナス・クランプ処理
+//
+// 【スキル効果の集約】
+//   - TalentModifiers: タレント/インコンペテンス乗算
+//   - PassiveMultipliers: パッシブ乗算
+//   - AdditiveBonuses: 加算ボーナス
+//   - CriticalParameters: クリティカル関連
+//   - MartialBonuses: 格闘ボーナス
+//   - StatConversions: ステータス変換
+//
+// 【装備効果】
+//   - 称号倍率（statMultiplier/negativeMultiplier）
+//   - 超レア倍率（×2）
+//   - カテゴリ倍率（スキル効果）
+//   - パンドラボックス倍率（×1.5）
+//   - ソケット宝石（係数0.5、魔防0.25）
+//
+// 【使用箇所】
+//   - RuntimeCharacterFactory: RuntimeCharacter生成
+//   - GameRuntimeService: 再計算API
+//
+// ==============================================================================
+
 import Foundation
 
 struct CombatStatCalculator {

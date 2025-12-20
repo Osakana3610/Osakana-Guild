@@ -1,3 +1,30 @@
+// ==============================================================================
+// SkillEffectHandlers.Spell.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 呪文関連のスキルエフェクトハンドラ実装
+//   - 呪文威力・チャージ・習得・魔法クリティカルなどの処理
+//
+// 【公開API】
+//   - SpellPowerPercentHandler: 呪文威力のパーセント増減
+//   - SpellPowerMultiplierHandler: 呪文威力の倍率調整
+//   - SpellSpecificMultiplierHandler: 特定呪文の威力倍率
+//   - SpellSpecificTakenMultiplierHandler: 特定呪文の被ダメージ倍率
+//   - SpellChargesHandler: 呪文チャージ数の調整
+//   - SpellAccessHandler: 呪文の習得・忘却（Actor.swiftではスキップ）
+//   - SpellTierUnlockHandler: 呪文ティアの解放（Actor.swiftではスキップ）
+//   - TacticSpellAmplifyHandler: タクティク呪文増幅
+//   - MagicCriticalChancePercentHandler: 魔法クリティカル率
+//   - SpellChargeRecoveryChanceHandler: 呪文チャージ回復率
+//
+// 【本体ファイルとの関係】
+//   - SkillEffectHandler.swift で定義されたプロトコルを実装
+//   - SkillEffectHandlerRegistry に登録される
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Spell Handlers (8)

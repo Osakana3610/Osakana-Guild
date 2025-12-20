@@ -1,3 +1,36 @@
+// ==============================================================================
+// BattleModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 戦闘関連の値型・列挙型定義
+//   - アクター・行動・ダメージの表現
+//
+// 【データ構造】
+//   - BattleDamageType: ダメージ種別（physical/magical/breath）
+//   - BattleActionRates: 行動確率（attack/priestMagic/mageMagic/breath）
+//   - BattleActorKind: アクター種別（player/enemy）
+//   - BattleFormationSlot: 陣形位置（6スロット）
+//   - BattleActor: 戦闘アクター情報
+//     - characterId/identifier, displayName, actorKind
+//     - currentHP, maxHP, combat stats
+//     - skills, spellbook, statusEffects
+//   - BattleAction: 行動情報（未使用）
+//   - BattleActorStatus: 状態異常（effect, remainingTurns）
+//
+// 【陣形】
+//   - frontLeft/Right (row 0)
+//   - middleLeft/Right (row 1)
+//   - backLeft/Right (row 2)
+//
+// 【使用箇所】
+//   - BattleContext: アクター管理
+//   - BattleTurnEngine: ターン処理
+//   - CombatSnapshotBuilder: スナップショット生成
+//
+// ==============================================================================
+
 import Foundation
 
 enum BattleDamageType: UInt8, Sendable {

@@ -1,3 +1,30 @@
+// ==============================================================================
+// AppServices.StoryUnlocks.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ストーリー・ダンジョンの解放状態管理
+//   - 難易度解放処理
+//   - 解放条件の評価と同期
+//
+// 【公開API】
+//   - markStoryNodeAsRead(_:) → StorySnapshot
+//     ストーリーを既読にし、関連モジュール（ダンジョン等）を解放
+//   - synchronizeStoryAndDungeonUnlocks()
+//     ダンジョンクリア→ストーリー解放、難易度解放を同期
+//   - unlockNextDifficultyIfEligible(for:clearedDifficulty:) → Bool
+//     次の難易度を解放（無称号→魔性の→宿った→伝説の）
+//
+// 【解放フロー】
+//   - Push型: ストーリー既読 → unlockModulesでダンジョン解放
+//   - Pull型: ダンジョンクリア → unlockRequirementsを満たすストーリー解放
+//
+// 【補助型】
+//   - UnlockTarget: 解放対象（現在はdungeonのみ）
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

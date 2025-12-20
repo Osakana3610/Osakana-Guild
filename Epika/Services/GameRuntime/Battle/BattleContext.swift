@@ -1,3 +1,40 @@
+// ==============================================================================
+// BattleContext.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 戦闘実行時のコンテキスト管理
+//   - 参照データ・可変状態の保持
+//
+// 【データ構造】
+//   - BattleContext: 戦闘コンテキスト
+//     参照データ（不変）:
+//       - statusDefinitions, skillDefinitions, enemySkillDefinitions
+//     戦闘状態（可変）:
+//       - players, enemies: 味方・敵アクター
+//       - actions: 行動リスト
+//       - initialHP: 初期HP記録
+//       - turn: 現在ターン
+//       - random: 乱数生成器
+//       - enemySkillUsage: 敵専用技使用回数
+//
+// 【定数】
+//   - maxTurns: 20（最大ターン数）
+//   - martialAccuracyMultiplier: 1.6（格闘命中率倍率）
+//
+// 【公開API】
+//   - buildInitialHP(): 初期HP記録
+//   - allActors → [BattleActor]: 全アクター
+//   - allLivingActors → [BattleActor]: 生存アクター
+//   - actorIndex(for:arrayIndex:) → UInt16: アクターインデックス
+//
+// 【使用箇所】
+//   - BattleTurnEngine: ターン処理
+//   - BattleContextBuilder: コンテキスト構築
+//
+// ==============================================================================
+
 import Foundation
 
 /// 戦闘実行時のコンテキスト。戦闘ごとにインスタンスを生成し、並行実行時のデータ競合を防ぐ。

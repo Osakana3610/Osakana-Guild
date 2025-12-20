@@ -1,3 +1,27 @@
+// ==============================================================================
+// ActorEffectsAccumulator.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキルエフェクトを蓄積し、最終的に BattleActor.SkillEffects を構築
+//   - ダメージ・呪文・戦闘・ステータス・復活・その他の各種Accumulatorを管理
+//
+// 【データ構造】
+//   - ActorEffectsAccumulator: 全カテゴリのアキュムレータを統合
+//   - DamageAccumulator: ダメージ関連の効果蓄積
+//   - SpellAccumulator: 呪文関連の効果蓄積
+//   - ActorCombatAccumulator: 戦闘関連の効果蓄積
+//   - StatusAccumulator: ステータス効果の蓄積
+//   - ResurrectionAccumulator: 復活関連の効果蓄積
+//   - MiscAccumulator: その他の効果蓄積
+//
+// 【使用箇所】
+//   - SkillRuntimeEffectCompiler.Actor.actorEffects(from:stats:)
+//   - 各種 SkillEffectHandler の apply メソッド
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - ActorEffectsAccumulator

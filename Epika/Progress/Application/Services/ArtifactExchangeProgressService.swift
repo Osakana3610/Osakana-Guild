@@ -1,3 +1,25 @@
+// ==============================================================================
+// ArtifactExchangeProgressService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 神器（アーティファクト）交換機能
+//   - 特定アイテムを別のアイテムに交換
+//
+// 【公開API】
+//   - availableArtifacts() → [ArtifactOption]
+//     交換可能な神器リストを取得
+//   - playerArtifacts() → [RuntimeEquipment]
+//     プレイヤー所持の神器を取得
+//   - exchange(givingItemStackKey:desiredItemId:) → RuntimeEquipment
+//     神器交換を実行
+//
+// 【補助型】
+//   - ArtifactOption: 交換先の神器オプション
+//
+// ==============================================================================
+
 import Foundation
 
 actor ArtifactExchangeProgressService {

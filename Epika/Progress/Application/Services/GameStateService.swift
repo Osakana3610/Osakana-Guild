@@ -1,3 +1,30 @@
+// ==============================================================================
+// GameStateService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - プレイヤー資産（ゴールド・キャット・チケット）の管理
+//   - ゲーム状態のリセット
+//   - 超レア日次状態の管理
+//   - 日次処理の追跡
+//
+// 【公開API】
+//   - currentPlayer() → PlayerSnapshot - 現在のプレイヤー情報
+//   - loadCurrentPlayer() → PlayerSnapshot - DB再読み込み
+//   - addGold(_:) → PlayerSnapshot - ゴールド加算
+//   - subtractGold(_:) → PlayerSnapshot - ゴールド減算
+//   - addCatTickets(_:) → PlayerSnapshot - チケット加算
+//   - resetAllProgress() - 全データリセット
+//   - loadSuperRareDailyState() → SuperRareDailyState
+//   - updateSuperRareDailyState(_:)
+//
+// 【データ管理】
+//   - GameStateRecordを単一レコードとして管理
+//   - 存在しない場合は自動作成
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

@@ -1,3 +1,28 @@
+// ==============================================================================
+// ItemSynthesisProgressService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - アイテム合成機能
+//   - 合成レシピの評価とアイテム変換
+//
+// 【公開API】
+//   - availableParentItems() → [RuntimeEquipment] - 親素材候補
+//   - availableChildItems(forParent:) → [RuntimeEquipment] - 子素材候補
+//   - preview(parentStackKey:childStackKey:) → SynthesisPreview - 合成結果プレビュー
+//   - synthesize(parentStackKey:childStackKey:) → RuntimeEquipment - 合成実行
+//
+// 【合成フロー】
+//   1. 親アイテムと子アイテムを選択
+//   2. レシピに基づいて結果アイテムを決定
+//   3. コストを支払い、素材を消費して結果を生成
+//
+// 【補助型】
+//   - SynthesisPreview: 合成結果プレビュー（resultDefinition, cost）
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

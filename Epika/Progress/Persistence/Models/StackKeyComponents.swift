@@ -1,3 +1,34 @@
+// ==============================================================================
+// StackKeyComponents.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - stackKey文字列のパース・生成
+//   - アイテム識別用6要素コンポーネントの管理
+//
+// 【データ構造】
+//   - StackKeyComponents: stackKeyの分解結果
+//     - superRareTitleId, normalTitleId, itemId: アイテム本体
+//     - socketSuperRareTitleId, socketNormalTitleId, socketItemId: ソケット
+//
+// 【stackKeyフォーマット】
+//   - "超レアID|通常ID|アイテムID|S超レアID|S通常ID|S宝石ID"
+//   - 例: "0|2|100|0|0|0"
+//
+// 【公開API】
+//   - init?(stackKey:) - stackKey文字列からパース
+//   - init(各コンポーネント) - コンポーネントから生成
+//   - stackKey → String - stackKey文字列を生成
+//   - makeStackKey(静的) - コンポーネントからstackKey生成
+//
+// 【使用箇所】
+//   - InventoryProgressService: スタック識別
+//   - PandoraBoxItem: stackKey変換
+//   - 装備・ドロップ処理全般
+//
+// ==============================================================================
+
 import Foundation
 
 /// stackKey文字列をパースした結果

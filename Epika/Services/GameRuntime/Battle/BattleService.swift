@@ -1,3 +1,34 @@
+// ==============================================================================
+// BattleService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 戦闘の実行と結果の管理
+//   - 戦闘前準備から結果解決までの統合API
+//
+// 【データ構造】
+//   - BattleResult: 戦闘結果（victory/defeat/retreat）
+//   - Resolution: 戦闘解決結果
+//     - result, survivingAllyIds, turns, battleLog
+//     - enemy/enemies, encounteredEnemies
+//     - playerActors, enemyActors
+//
+// 【公開API】
+//   - resolveBattle(...) → Resolution @MainActor
+//     - 敵グループ生成→BattleContext構築→ターンエンジン実行
+//
+// 【戦闘フロー】
+//   1. BattleEnemyGroupBuilder.build: 敵グループ生成
+//   2. BattleContextBuilder.build: コンテキスト構築
+//   3. BattleTurnEngine.runBattle: ターン処理実行
+//   4. Resolution生成
+//
+// 【使用箇所】
+//   - CombatExecutionService: 探索中の戦闘実行
+//
+// ==============================================================================
+
 import Foundation
 
 enum BattleService {

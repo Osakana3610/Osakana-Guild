@@ -1,3 +1,35 @@
+// ==============================================================================
+// ProgressRuntimeService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - Progress層とGameRuntime層のブリッジ
+//   - 探索セッションの開始・キャンセル
+//   - 超レア状態の永続化
+//
+// 【公開API】
+//   - runtimeService: GameRuntimeService（読み取り専用）
+//   - cancelExploration(runId:) - 探索をキャンセル
+//   - startExplorationRun() → ExplorationRuntimeSession
+//     パーティ・キャラクター情報からランタイムセッションを開始
+//
+// 【セッション開始フロー】
+//   1. CharacterSnapshotをCharacterInputに変換
+//   2. RuntimePartyStateを生成
+//   3. 超レア日次状態を読み込み
+//   4. GameRuntimeServiceでセッション開始
+//   5. 完了時に超レア状態を永続化
+//
+// 【補助型】
+//   - ExplorationRuntimeSession: 探索セッション情報
+//     - runId, preparation, startedAt, seed
+//     - events: AsyncStream<StepOutcome>
+//     - runtimePartyState, runtimeCharacters
+//     - waitForCompletion, cancel
+//
+// ==============================================================================
+
 import Foundation
 
 @MainActor

@@ -1,3 +1,31 @@
+// ==============================================================================
+// ItemPreloadService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - アイテム表示データのプリロードとキャッシュ
+//   - カテゴリ別・サブカテゴリ別のアイテムグルーピング
+//   - 装備・売却画面での即座な表示を実現
+//
+// 【公開API】
+//   - startPreload(inventoryService:) - プリロード開始
+//   - waitForPreload() - プリロード完了待機
+//   - loaded: Bool - ロード完了状態
+//   - version: Int - キャッシュバージョン（変更検知用）
+//   - getCategorizedItems() → [ItemSaleCategory: [LightweightItemData]]
+//   - getSubcategorizedItems() → [ItemDisplaySubcategory: [LightweightItemData]]
+//   - getOrderedSubcategories() → [ItemDisplaySubcategory]
+//   - reload(inventoryService:) - キャッシュ再構築
+//   - decrementQuantity(stackKey:by:) - 数量減算（キャッシュ上のみ）
+//   - makeStyledDisplayText(for:includeSellValue:) → Text
+//
+// 【キャッシュ管理】
+//   - インベントリ変更時にreloadで再構築
+//   - decrementQuantityでローカルキャッシュを即時更新
+//
+// ==============================================================================
+
 import Foundation
 import SwiftUI
 

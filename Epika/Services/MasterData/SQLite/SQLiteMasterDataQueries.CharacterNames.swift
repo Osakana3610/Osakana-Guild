@@ -1,3 +1,20 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.CharacterNames.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - キャラクター名候補の取得クエリを提供
+//   - character_namesテーブルから性別コード別の名前リストを取得
+//
+// 【公開API】
+//   - fetchAllCharacterNames() -> [CharacterNameDefinition]
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 

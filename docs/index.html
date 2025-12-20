@@ -52,11 +52,13 @@
         .stats {
             display: flex;
             flex-wrap: wrap;
-            gap: 24px;
+            justify-content: space-between;
             margin: 24px 0;
         }
         .stat {
             text-align: center;
+            flex: 1;
+            min-width: 120px;
         }
         .stat-number {
             font-size: 1.8em;
@@ -126,8 +128,16 @@
             <div class="stat-label">ダンジョン</div>
         </div>
         <div class="stat">
-            <div class="stat-number">49</div>
+            <div class="stat-number">18</div>
+            <div class="stat-label">種族</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">16</div>
             <div class="stat-label">職業</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">288</div>
+            <div class="stat-label">ビルドの組み合わせ</div>
         </div>
     </div>
 

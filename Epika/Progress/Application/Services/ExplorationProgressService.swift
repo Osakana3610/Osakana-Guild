@@ -1,3 +1,31 @@
+// ==============================================================================
+// ExplorationProgressService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 探索履歴の永続化
+//   - 探索レコードの作成・更新・終了処理
+//
+// 【公開API】
+//   - allExplorations() → [ExplorationSnapshot] - 全探索履歴
+//   - beginRun(...) → PersistentIdentifier - 探索開始、レコード作成
+//   - appendEvent(...) - イベント追加、乱数状態保存
+//   - finalizeRun(...) - 探索終了処理
+//   - cancelRun(...) - 探索キャンセル
+//   - fetchRunningRecord(...) → ExplorationRunRecord? - 実行中レコード取得
+//
+// 【データ管理】
+//   - 最大200件を保持（超過時は古いものから削除）
+//   - JSONEncoder/Decoder再利用でパフォーマンス最適化
+//
+// 【使用箇所】
+//   - AppServices.ExplorationRun: 探索開始時のレコード作成
+//   - AppServices.ExplorationRuntime: イベント追加・終了処理
+//   - RecentExplorationLogsView: 履歴表示
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

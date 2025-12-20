@@ -1,3 +1,27 @@
+// ==============================================================================
+// SkillEffectHandlers.Resurrection.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 復活関連のスキルエフェクトハンドラ実装
+//   - 救出能力・自動復活・強制復活・ネクロマンサーなどの処理
+//
+// 【公開API】
+//   - ResurrectionSaveHandler: 救出能力（resurrectionSave）
+//   - ResurrectionActiveHandler: アクティブ復活（resurrectionActive）
+//   - ResurrectionBuffHandler: 強制復活バフ（resurrectionBuff）
+//   - ResurrectionVitalizeHandler: 復活時の状態調整（resurrectionVitalize）
+//   - ResurrectionSummonHandler: ネクロマンサー召喚（resurrectionSummon）
+//   - ResurrectionPassiveHandler: パッシブ復活（resurrectionPassive）
+//   - SacrificeRiteHandler: 生贄儀式（sacrificeRite）
+//
+// 【本体ファイルとの関係】
+//   - SkillEffectHandler.swift で定義されたプロトコルを実装
+//   - SkillEffectHandlerRegistry に登録される
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Resurrection Handlers (7)
