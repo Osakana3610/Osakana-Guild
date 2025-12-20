@@ -1,3 +1,30 @@
+// ==============================================================================
+// AutoTradeProgressService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 自動売却ルールの管理
+//   - 登録されたアイテムをドロップ時に自動で売却
+//
+// 【公開API】
+//   - allRules() → [Rule] - 全ルールを取得
+//   - addRule(...) → Rule - ルールを追加
+//   - removeRule(id:) - ルールを削除
+//   - registeredStackKeys() → Set<String> - 登録済みキーのセット
+//
+// 【データ構造】
+//   - Rule: 自動売却ルール
+//     - stackKey（id）: 称号+アイテムIDの組み合わせ
+//     - superRareTitleId, normalTitleId, itemId
+//     - socket系フィールド（宝石装着時用）
+//
+// 【使用箇所】
+//   - AppServices.ExplorationRuntime: ドロップ時の自動売却判定
+//   - AutoTradeView: ルール管理UI
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

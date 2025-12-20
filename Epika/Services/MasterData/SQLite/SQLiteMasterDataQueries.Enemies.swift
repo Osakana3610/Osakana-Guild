@@ -1,3 +1,21 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.Enemies.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 敵データと敵専用スキルの取得クエリを提供
+//   - 敵の基本情報、ステータス、耐性、スキル、ドロップアイテムを結合
+//
+// 【公開API】
+//   - fetchAllEnemies() -> [EnemyDefinition]
+//   - fetchAllEnemySkills() -> [EnemySkillDefinition]
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 

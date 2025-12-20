@@ -1,3 +1,26 @@
+// ==============================================================================
+// PartyProgressService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - パーティ編成の永続化
+//   - パーティスロットの管理
+//
+// 【公開API】
+//   - allParties() → [PartySnapshot] - 全パーティ取得
+//   - partySnapshot(id:) → PartySnapshot? - 指定パーティ取得
+//   - ensurePartySlots(atLeast:) → [PartySnapshot] - スロット数確保
+//   - setMemberCharacterIds(...) → PartySnapshot - メンバー設定
+//   - setLastSelectedDungeon(...) → PartySnapshot - 選択ダンジョン設定
+//   - setLastSelectedDifficulty(...) → PartySnapshot - 選択難易度設定
+//   - setTargetFloor(...) → PartySnapshot - 目標フロア設定
+//
+// 【デフォルト設定】
+//   - パーティ名: "PARTY1", "PARTY2", ...
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

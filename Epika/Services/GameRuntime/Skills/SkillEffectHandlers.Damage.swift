@@ -1,3 +1,37 @@
+// ==============================================================================
+// SkillEffectHandlers.Damage.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ダメージ関連のスキルエフェクトハンドラ実装
+//   - 与ダメージ・被ダメージ・クリティカル・武術・特殊ダメージの処理
+//
+// 【公開API】
+//   - DamageDealtPercentHandler: 与ダメージのパーセント増減
+//   - DamageDealtMultiplierHandler: 与ダメージの倍率調整
+//   - DamageTakenPercentHandler: 被ダメージのパーセント増減
+//   - DamageTakenMultiplierHandler: 被ダメージの倍率調整
+//   - DamageDealtMultiplierAgainstHandler: 特定種族への与ダメージ倍率
+//   - CriticalDamagePercentHandler: クリティカルダメージのパーセント増減
+//   - CriticalDamageMultiplierHandler: クリティカルダメージの倍率調整
+//   - CriticalDamageTakenMultiplierHandler: クリティカル被ダメージ倍率
+//   - PenetrationDamageTakenMultiplierHandler: 貫通ダメージ被ダメージ倍率
+//   - MartialBonusPercentHandler: 武術ボーナスのパーセント増減
+//   - MartialBonusMultiplierHandler: 武術ボーナスの倍率調整
+//   - AdditionalDamageAdditiveHandler: 追加ダメージ加算（パススルー）
+//   - AdditionalDamageMultiplierHandler: 追加ダメージ倍率（パススルー）
+//   - MinHitScaleHandler: 最低命中率の設定
+//   - MagicNullifyChancePercentHandler: 魔法無効化確率
+//   - LevelComparisonDamageTakenHandler: レベル差による被ダメージ調整
+//   - DamageDealtMultiplierByTargetHPHandler: 対象HP閾値による与ダメージ倍率（暗殺者）
+//
+// 【本体ファイルとの関係】
+//   - SkillEffectHandler.swift で定義されたプロトコルを実装
+//   - SkillEffectHandlerRegistry に登録される
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Damage Handlers (14)

@@ -1,3 +1,25 @@
+// ==============================================================================
+// RuntimeError.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ランタイム層のエラー定義
+//   - ユーザー向けローカライズエラーメッセージ
+//
+// 【エラー種別】
+//   - masterDataNotFound: マスターデータ未発見（entity/identifier）
+//   - invalidConfiguration: 設定エラー（装備枠超過、循環依存等）
+//   - explorationAlreadyActive: 探索が既に進行中
+//   - missingProgressData: 進行データ欠落
+//
+// 【使用箇所】
+//   - RuntimeCharacterFactory: キャラクター生成エラー
+//   - GameRuntimeService: 探索エラー
+//   - CombatStatCalculator: 計算エラー
+//
+// ==============================================================================
+
 import Foundation
 
 enum RuntimeError: Error, LocalizedError {

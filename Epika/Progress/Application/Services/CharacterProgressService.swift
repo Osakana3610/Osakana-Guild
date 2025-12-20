@@ -1,3 +1,42 @@
+// ==============================================================================
+// CharacterProgressService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - キャラクターCRUD操作
+//   - 装備管理（装着・解除）
+//   - 転職処理
+//   - 戦闘結果適用（経験値・HP）
+//   - RuntimeCharacter生成
+//
+// 【公開API - 読み取り】
+//   - allCharacters() → [CharacterSnapshot]
+//   - character(withId:) → CharacterSnapshot?
+//   - characters(withIds:) → [CharacterSnapshot]
+//   - runtimeCharacter(from:) → RuntimeCharacter
+//
+// 【公開API - 書き込み】
+//   - createCharacter(request:) → CharacterSnapshot
+//   - deleteCharacter(id:)
+//   - changeJob(characterId:newJobId:) → CharacterSnapshot
+//   - equipItem(characterId:inventoryItemStackKey:) → CharacterSnapshot
+//   - unequipItem(characterId:equipmentStackKey:) → CharacterSnapshot
+//   - unequipAllItems(characterId:) → CharacterSnapshot
+//   - applyBattleResults(_:) - 経験値・HP変更を一括適用
+//   - healToFull(characterIds:) - HP全回復
+//   - reviveCharacter(id:) → CharacterSnapshot
+//
+// 【補助型】
+//   - CharacterCreationRequest: 作成リクエスト
+//   - BattleResultUpdate: 戦闘結果更新
+//
+// 【キャッシュ】
+//   - raceLevelCache: 種族別最大レベル
+//   - raceMaxExperienceCache: 種族別最大経験値
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

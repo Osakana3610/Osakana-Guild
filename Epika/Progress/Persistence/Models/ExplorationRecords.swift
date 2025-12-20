@@ -1,3 +1,48 @@
+// ==============================================================================
+// ExplorationRecords.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 探索セッションのSwiftData永続化モデル
+//   - 探索実行・イベント履歴の保存
+//
+// 【データ構造】
+//   - ExplorationRunRecord (@Model): 探索実行レコード
+//     - partyId: パーティID
+//     - dungeonId: ダンジョンID
+//     - difficulty: 難易度
+//     - targetFloor: 目標階層
+//     - startedAt: 開始日時
+//     - seed: 乱数シード
+//     - randomState: RNG状態（中断復帰用）
+//     - superRareStateData: 超レア日次状態（JSON）
+//     - droppedItemIdsData: ドロップ済みアイテムID（JSON）
+//     - endedAt: 終了日時
+//     - result: 結果（0=running, 1=completed, 2=defeated, 3=cancelled）
+//     - finalFloor: 到達階層
+//     - totalExp, totalGold: 獲得経験値・ゴールド
+//     - events: イベントレコード（1対多リレーション）
+//
+//   - ExplorationEventRecord (@Model): 探索イベントレコード
+//     - floor: 階層
+//     - kind: イベント種別
+//     - enemyId, battleResult, battleLogData: 戦闘情報
+//     - scriptedEventId: スクリプトイベントID
+//     - exp, gold, dropsData: 報酬情報
+//     - occurredAt: 発生日時
+//     - run: 親レコードへの参照
+//
+// 【導出プロパティ】
+//   - explorationResult → ExplorationResult: 結果enum
+//   - isFinished → Bool: 終了済みか
+//
+// 【使用箇所】
+//   - ExplorationProgressService: 探索履歴の永続化
+//   - ProgressRuntimeService: 探索再開時の状態復元
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

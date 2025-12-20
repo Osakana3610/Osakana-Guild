@@ -1,3 +1,28 @@
+// ==============================================================================
+// ExplorationModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 探索システムで使用するモデル型の定義
+//
+// 【データ構造】
+//   - ExplorationDropReward: 探索で得たドロップ報酬
+//   - BattleParticipantSnapshot: 戦闘参加者のスナップショット
+//   - BattleLogArchive: 戦闘ログのアーカイブ
+//   - CombatSummary: 戦闘結果のサマリ
+//   - ScriptedEventSummary: スクリプトイベントのサマリ
+//   - ExplorationEventLogEntry: 探索イベントのログエントリ
+//   - ExplorationEndState: 探索終了時の状態（完了/全滅）
+//   - ExplorationRunArtifact: 探索実行の最終成果物
+//
+// 【使用箇所】
+//   - ExplorationEngine（探索イベント処理）
+//   - CombatExecutionService（戦闘結果の構築）
+//   - ExplorationService（探索結果の保存）
+//
+// ==============================================================================
+
 import Foundation
 
 struct ExplorationDropReward: Sendable {

@@ -1,3 +1,35 @@
+// ==============================================================================
+// JobMasterModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 職業（ジョブ）のマスタデータ型定義
+//   - 戦闘ステータス係数の定義とアクセサ
+//
+// 【データ構造】
+//   - JobDefinition: 職業定義
+//     - id: 職業ID（1〜16: 基本職、101〜116: マスター職）
+//     - name: 職業名
+//     - combatCoefficients: 戦闘ステータス係数
+//     - learnedSkillIds: 習得スキルID配列
+//   - JobDefinition.CombatCoefficients: 戦闘係数（Double）
+//     - maxHP, physicalAttack, magicalAttack, physicalDefense, magicalDefense
+//     - hitRate, evasionRate, criticalRate, attackCount
+//     - magicalHealing, trapRemoval, additionalDamage, breathDamage
+//   - CombatStat: 戦闘ステータス列挙型
+//     - rawValue: EnumMappings.combatStatと一致
+//     - identifier: DB/JSON用文字列
+//     - displayName: UI表示用
+//     - value(from:): 係数から値を取得
+//
+// 【使用箇所】
+//   - CombatStatCalculator: ステータス計算時の係数適用
+//   - CharacterJobChangeView: 転職先の係数表示
+//   - RuntimeCharacterFactory: キャラクター生成時のステータス計算
+//
+// ==============================================================================
+
 import Foundation
 
 /// SQLite `jobs` 系テーブルのドメイン定義

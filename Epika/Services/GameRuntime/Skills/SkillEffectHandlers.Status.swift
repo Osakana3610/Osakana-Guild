@@ -1,3 +1,28 @@
+// ==============================================================================
+// SkillEffectHandlers.Status.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ステータス効果関連のスキルエフェクトハンドラ実装
+//   - 状態異常耐性・付与・バフトリガーなどの処理
+//
+// 【公開API】
+//   - StatusResistanceMultiplierHandler: 状態異常耐性倍率
+//   - StatusResistancePercentHandler: 状態異常耐性パーセント
+//   - StatusInflictHandler: 状態異常付与
+//   - BerserkHandler: バーサーク発動率
+//   - TimedBuffTriggerHandler: 時限バフトリガー（戦闘開始時・ターン経過時）
+//   - TimedMagicPowerAmplifyHandler: 時限魔法威力増幅
+//   - TimedBreathPowerAmplifyHandler: 時限ブレス威力増幅
+//   - AutoStatusCureOnAllyHandler: 味方の状態異常自動治癒（エルフ）
+//
+// 【本体ファイルとの関係】
+//   - SkillEffectHandler.swift で定義されたプロトコルを実装
+//   - SkillEffectHandlerRegistry に登録される
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Status Handlers (7)

@@ -1,3 +1,34 @@
+// ==============================================================================
+// DungeonMasterModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ダンジョン・フロア・エンカウントテーブルのマスタデータ型定義
+//
+// 【データ構造】
+//   - EncounterEventType: エンカウント種別（通常/ボス/スクリプト/確定）
+//   - UnlockCondition: 解放条件（ストーリー読了/ダンジョンクリア）
+//   - DungeonDefinition: ダンジョン定義
+//     - 基本情報: id, name, chapter, stage, description
+//     - 探索設定: recommendedLevel, explorationTime, eventsPerFloor, floorCount
+//     - 敵出現設定: encounterWeights, enemyGroupConfig
+//     - 解放条件: unlockConditions
+//   - DungeonDefinition.EnemyGroupConfig: 敵グループ構成設定
+//     - 出現数範囲, グループ数上限, 混在比率
+//     - normalPool, floorPools, midBossPool, bossPool
+//   - EncounterTableDefinition: エンカウントテーブル
+//     - 各イベントの出現率・敵構成を定義
+//   - DungeonFloorDefinition: フロア定義
+//     - floorNumber, encounterTableId, specialEventIds
+//
+// 【使用箇所】
+//   - ExplorationEngine: 探索処理でのエンカウント決定
+//   - BattleEnemyGroupBuilder: 敵グループ生成
+//   - DungeonProgressService: ダンジョン進行状態管理
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - EncounterEventType

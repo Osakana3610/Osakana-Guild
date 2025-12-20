@@ -1,3 +1,23 @@
+// ==============================================================================
+// ExplorationResultViews.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 探索結果のサマリーと履歴表示用のView群を提供
+//
+// 【View構成】
+//   - ExplorationRunResultSummaryView: 探索結果の総合サマリー表示
+//   - SimplifiedEventSummaryRowView: イベント・戦闘の簡易サマリー行
+//   - FinalExplorationSummaryRowView: 探索完了時の最終サマリー行
+//   - ExplorationDateFormatters: 日時フォーマッター群
+//
+// 【使用箇所】
+//   - RecentExplorationLogsViewから参照
+//   - パーティ画面での探索結果表示
+//
+// ==============================================================================
+
 import SwiftUI
 
 struct ExplorationRunResultSummaryView: View {

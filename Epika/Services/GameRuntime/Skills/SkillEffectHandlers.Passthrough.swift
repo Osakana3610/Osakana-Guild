@@ -1,3 +1,45 @@
+// ==============================================================================
+// SkillEffectHandlers.Passthrough.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - Actor.swift では処理しないが、レジストリ登録は必要なハンドラ
+//   - これらは他のCompiler（Equipment, Exploration, Reward, Spell等）で処理される
+//
+// 【公開API】
+//   - CriticalRateAdditiveHandler: クリティカル率加算
+//   - CriticalRateCapHandler: クリティカル率上限
+//   - CriticalRateMaxAbsoluteHandler: クリティカル率絶対最大値
+//   - CriticalRateMaxDeltaHandler: クリティカル率最大値増分
+//   - EquipmentSlotAdditiveHandler: 装備スロット加算
+//   - EquipmentSlotMultiplierHandler: 装備スロット倍率
+//   - ExplorationTimeMultiplierHandler: 探索時間倍率
+//   - GrowthMultiplierHandler: 成長倍率
+//   - IncompetenceStatHandler: ステータス不適性
+//   - ItemStatMultiplierHandler: アイテムステータス倍率
+//   - RewardExperienceMultiplierHandler: 経験値報酬倍率
+//   - RewardExperiencePercentHandler: 経験値報酬パーセント
+//   - RewardGoldMultiplierHandler: ゴールド報酬倍率
+//   - RewardGoldPercentHandler: ゴールド報酬パーセント
+//   - RewardItemMultiplierHandler: アイテム報酬倍率
+//   - RewardItemPercentHandler: アイテム報酬パーセント
+//   - RewardTitleMultiplierHandler: 称号報酬倍率
+//   - RewardTitlePercentHandler: 称号報酬パーセント
+//   - StatAdditiveHandler: ステータス加算
+//   - StatConversionLinearHandler: ステータス線形変換
+//   - StatConversionPercentHandler: ステータスパーセント変換
+//   - StatFixedToOneHandler: ステータス固定値1
+//   - StatMultiplierHandler: ステータス倍率
+//   - TalentStatHandler: 才能ステータス
+//
+// 【本体ファイルとの関係】
+//   - SkillEffectHandler.swift で定義されたプロトコルを実装
+//   - SkillEffectHandlerRegistry に登録される
+//   - 実際の処理は対応するCompilerで行われる
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Passthrough Handlers

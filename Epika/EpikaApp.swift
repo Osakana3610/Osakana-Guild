@@ -1,9 +1,37 @@
+// ==============================================================================
+// EpikaApp.swift
+// Epika
+// ==============================================================================
 //
-//  EpikaApp.swift
-//  Epika
+// 【責務】
+//   - アプリケーションのエントリーポイント (@main)
+//   - 起動シーケンスの制御（MasterData → SwiftData → 通知権限の順序保証）
+//   - ModelContainer と AppServices のライフサイクル管理
+//   - 起動時エラーのユーザー表示
 //
-//  Created by Osakana3610 on 2025/07/14.
+// 【起動シーケンス】
+//   1. prepareApplicationSupportDirectory() でディレクトリ作成
+//   2. SQLiteMasterDataManager + MasterDataLoader でマスタデータをプリロード
+//   3. ProgressBootstrapper で SwiftData コンテナを初期化
+//   4. AppServices を生成し RootView に注入
+//   5. initializeSystems() で通知権限をリクエスト
 //
+// 【状態管理】
+//   - sharedModelContainer: SwiftData のコンテナ（初期化成功後に設定）
+//   - appServices: 全サービスへのアクセスを提供するファサード
+//   - initializationError: 起動失敗時のエラーメッセージ
+//   - didBoot: 二重起動防止フラグ
+//
+// 【エラーハンドリング】
+//   - ディレクトリ作成失敗 → StartupErrorView 表示
+//   - マスタデータ読込失敗 → StartupErrorView 表示
+//   - SwiftData初期化失敗 → StartupErrorView 表示
+//   - 通知権限失敗 → StartupErrorView 表示
+//
+// 【補助型】
+//   - StartupErrorView: 起動エラー表示用の簡易ビュー
+//
+// ==============================================================================
 
 import SwiftUI
 import SwiftData

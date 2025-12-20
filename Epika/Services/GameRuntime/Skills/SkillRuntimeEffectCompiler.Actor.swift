@@ -1,3 +1,25 @@
+// ==============================================================================
+// SkillRuntimeEffectCompiler.Actor.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキル定義から BattleActor.SkillEffects を構築
+//   - ActorEffectsAccumulator を使用して各種エフェクトを蓄積
+//   - アクターのステータス（ActorStats）を用いた statScaling 計算をサポート
+//
+// 【公開API】
+//   - actorEffects(from:stats:): スキル定義配列から SkillEffects を構築
+//   - BattleActor.SkillEffects.Reaction.make(from:skillName:skillId:stats:)
+//   - BattleActor.SkillEffects.RowProfile.applyParameters(_:)
+//
+// 【本体ファイルとの関係】
+//   - SkillRuntimeEffectCompiler.swift で定義された enum を拡張
+//   - ActorEffectsAccumulator を使用してエフェクトを蓄積
+//   - SkillEffectHandlerRegistry からハンドラを取得して実行
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Actor Effects Compilation

@@ -1,3 +1,34 @@
+// ==============================================================================
+// DungeonDisplayNameFormatter.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ダンジョン表示名のフォーマット
+//   - 難易度システムの定義・管理
+//
+// 【難易度システム】
+//   - difficultyTitleIds: [2, 4, 5, 6]（NormalTitle IDを使用）
+//     - 2: 無称号 (×1.0)
+//     - 4: 魔性の (×1.74)
+//     - 5: 宿った (×2.30)
+//     - 6: 伝説の (×3.03)
+//   - initialDifficulty: 2（無称号）
+//   - maxDifficulty: 6（伝説の）
+//
+// 【公開API】
+//   - nextDifficulty(after:) → UInt8?: 次の難易度
+//   - displayName(for:difficultyTitleId:masterData:) → String: 表示名
+//   - difficultyPrefix(for:masterData:) → String?: 難易度プレフィックス
+//   - statMultiplier(for:masterData:) → Double: 敵ステータス倍率
+//
+// 【使用箇所】
+//   - RuntimeDungeon: 難易度リスト取得
+//   - AdventureView: 難易度選択UI
+//   - BattleEnemyGroupConfigService: 敵レベル計算
+//
+// ==============================================================================
+
 import Foundation
 
 enum DungeonDisplayNameFormatter {

@@ -1,3 +1,33 @@
+// ==============================================================================
+// EnemySkillMasterModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 敵スキル（特殊技）・属性・バフ種別のマスタデータ型定義
+//
+// 【データ構造】
+//   - Element: ダメージ属性（物理/火/氷/雷/聖/闘/ブレス/光/土/風/毒/即死/魅了/魔法/クリティカル/貫通/呪文系）
+//     - identifier: DB格納用文字列
+//     - displayName: UI表示用
+//   - SpellBuffType: バフ効果種別（与ダメージ/被ダメージ/攻撃力/防御力/命中/攻撃回数等）
+//     - 敵スキル・呪文で共通使用
+//   - EnemySkillDefinition: 敵の特殊技
+//     - SkillType: 物理/魔法/ブレス/回復/バフ/状態異常
+//     - Targeting: 単体/全体/ランダム/自分/味方全体
+//     - ダメージ系: multiplier, hitCount, ignoreDefense, element
+//     - 状態異常系: statusId, statusChance
+//     - 回復系: healPercent
+//     - バフ系: buffType, buffMultiplier
+//     - 共通: chancePercent（使用確率）, usesPerBattle（使用回数制限）
+//
+// 【使用箇所】
+//   - BattleTurnEngine.EnemySpecialSkill: 敵特殊技の実行
+//   - BattleTurnEngine.Damage: ダメージ計算時の属性参照
+//   - BattleTurnEngine.StatusEffects: 状態異常付与
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Element (属性)

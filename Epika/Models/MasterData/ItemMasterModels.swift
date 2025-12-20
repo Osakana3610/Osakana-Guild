@@ -1,3 +1,34 @@
+// ==============================================================================
+// ItemMasterModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ゲーム内アイテムのマスタデータ型定義
+//
+// 【データ構造】
+//   - ItemDefinition: アイテム完全定義
+//     - 基本情報: id, name, category, rarity
+//     - 価格: basePrice（購入価格）, sellValue（売却価格）
+//     - 装備制限: allowedRaceIds, allowedJobIds, allowedGenderCodes, bypassRaceIds
+//     - 付与スキル: grantedSkillIds
+//   - ItemDefinition.StatBonuses: 基礎能力値ボーナス
+//     - strength, wisdom, spirit, vitality, agility, luck
+//     - forEachNonZero(): 非ゼロ値のみを列挙するユーティリティ
+//   - ItemDefinition.CombatBonuses: 戦闘ステータスボーナス
+//     - maxHP, physicalAttack, magicalAttack, physicalDefense, magicalDefense
+//     - hitRate, evasionRate, criticalRate, attackCount
+//     - magicalHealing, trapRemoval, additionalDamage, breathDamage
+//     - forEachNonZero(): 非ゼロ値のみを列挙するユーティリティ
+//
+// 【使用箇所】
+//   - EquipmentProgressService: 装備可否判定
+//   - RuntimeCharacterFactory: キャラクターステータス計算
+//   - ItemPreloadService: アイテム表示・売却処理
+//   - ItemEncyclopediaView: 図鑑表示
+//
+// ==============================================================================
+
 import Foundation
 
 /// SQLite `items` および関連テーブルを表すアイテム定義

@@ -1,3 +1,29 @@
+// ==============================================================================
+// DungeonRecords.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ダンジョン進行状態のSwiftData永続化モデル
+//   - 解放・クリア・到達階層の保存
+//
+// 【データ構造】
+//   - DungeonRecord (@Model): ダンジョン進行情報
+//     - dungeonId: ダンジョンID（一意キー）
+//     - isUnlocked: 解放済みか
+//     - highestUnlockedDifficulty: 解放済み最高難易度
+//     - highestClearedDifficulty: クリア済み最高難易度（nil=未クリア）
+//     - furthestClearedFloor: 到達最高階層
+//     - updatedAt: 更新日時
+//
+// 【導出プロパティ】
+//   - isCleared → Bool: クリア済みか
+//
+// 【使用箇所】
+//   - DungeonProgressService: ダンジョン進行の永続化
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

@@ -1,3 +1,45 @@
+// ==============================================================================
+// RuntimeCharacterModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ランタイムキャラクターの型定義
+//   - ゲームロジックで使用する完全なキャラクター表現
+//
+// 【データ構造】
+//   - RuntimeCharacter: キャラクター完全表現
+//     永続化データ:
+//       - id, displayName, raceId, jobId, previousJobId, avatarId
+//       - level, experience, currentHP
+//       - equippedItems, primaryPersonalityId, secondaryPersonalityId
+//       - actionRateAttack/PriestMagic/MageMagic/Breath
+//       - updatedAt
+//     計算結果:
+//       - attributes (CoreAttributes): 基礎ステータス
+//       - maxHP, combat (Combat): 戦闘ステータス
+//       - equipmentCapacity: 装備可能数
+//     マスターデータ:
+//       - race, job, personalityPrimary/Secondary
+//       - learnedSkills, loadout
+//       - spellbook, spellLoadout
+//
+//   - Loadout: 装備関連マスターデータのキャッシュ
+//     - items, titles, superRareTitles
+//
+// 【導出プロパティ】
+//   - name, isAlive, raceName, jobName
+//   - resolvedAvatarId: 有効なアバターID
+//   - isMartialEligible: 格闘ボーナス適用可否
+//   - actionPreferences, hitPoints: 互換用
+//
+// 【使用箇所】
+//   - BattleContext: 戦闘中のキャラクター状態
+//   - RuntimePartyState: パーティメンバー
+//   - UI層: キャラクター表示
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - 新RuntimeCharacter（フラット化）

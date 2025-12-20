@@ -1,3 +1,36 @@
+// ==============================================================================
+// SpellMasterModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 呪文（魔法）のマスタデータ型定義
+//
+// 【データ構造】
+//   - SpellDefinition: 呪文定義
+//     - 基本情報: id, name, description, tier（呪文レベル）
+//     - 分類: school（魔法使い/僧侶）, category（ダメージ/回復/バフ/状態異常/浄化）
+//     - ターゲット: targeting（単体敵/ランダム敵/ランダム敵重複なし/単体味方/パーティ全体）
+//     - ダメージ系: basePowerMultiplier, hitsPerCast
+//     - 回復系: healMultiplier
+//     - バフ系: buffs
+//     - 状態異常系: statusId
+//     - ターゲット数: maxTargetsBase, extraTargetsPerLevels
+//     - 詠唱条件: castCondition
+//   - SpellDefinition.School: 魔法系統（mage/priest）
+//   - SpellDefinition.Category: 呪文カテゴリ
+//   - SpellDefinition.Targeting: ターゲット種別
+//   - SpellDefinition.Buff: バフ効果（type, multiplier）
+//   - SpellDefinition.Buff.BuffType: バフ種別（与物理ダメージ/被物理ダメージ/被魔法ダメージ/被ブレスダメージ）
+//   - SpellDefinition.CastCondition: 詠唱条件（none/lowHP/allyDead/enemyCount）
+//
+// 【使用箇所】
+//   - BattleTurnEngine.Magic: 呪文詠唱・効果処理
+//   - SkillRuntimeEffectCompiler.Spell: 呪文スキルのコンパイル
+//   - CharacterSkillsSection: 習得呪文表示
+//
+// ==============================================================================
+
 import Foundation
 
 struct SpellDefinition: Identifiable, Sendable, Hashable {

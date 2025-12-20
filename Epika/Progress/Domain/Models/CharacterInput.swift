@@ -1,3 +1,32 @@
+// ==============================================================================
+// CharacterInput.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - Progress層からRuntime層へのキャラクターデータ受け渡し
+//   - CharacterSnapshot → CharacterInput 変換
+//
+// 【データ構造】
+//   - CharacterInput: キャラクター入力データ
+//     - 基本情報: id, displayName, raceId, jobId, previousJobId, avatarId
+//     - レベル・経験値: level, experience
+//     - 状態: currentHP
+//     - 性格: primaryPersonalityId, secondaryPersonalityId
+//     - 行動設定: actionRateAttack/PriestMagic/MageMagic/Breath
+//     - 装備: equippedItems
+//   - EquippedItem: 装備中アイテム
+//     - 称号: superRareTitleId, normalTitleId
+//     - アイテム: itemId, quantity
+//     - ソケット: socketSuperRareTitleId, socketNormalTitleId, socketItemId
+//     - stackKey: スタック識別キー
+//
+// 【使用箇所】
+//   - RuntimeCharacterFactory: RuntimeCharacter生成の入力
+//   - ProgressRuntimeService: 探索開始時のデータ変換
+//
+// ==============================================================================
+
 import Foundation
 
 /// CharacterRecordからRuntimeCharacterへの変換用中間データ。

@@ -1,3 +1,23 @@
+// ==============================================================================
+// SkillEffectPayloadEnums.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキルエフェクトのパラメータ・値・配列タイプの定義
+//   - DBスキーマ（skill_effect_parameters, skill_effect_values, skill_effect_arrays）との対応
+//
+// 【データ構造】
+//   - SkillEffectParamType: パラメータタイプ（42種類、UInt8）
+//   - SkillEffectValueType: 数値タイプ（65種類、UInt8）
+//   - SkillEffectArrayType: 配列タイプ（3種類、UInt8）
+//
+// 【使用箇所】
+//   - ペイロードのデコード・バリデーション
+//   - 文字列識別子との相互変換
+//
+// ==============================================================================
+
 import Foundation
 
 /// スキルエフェクトのパラメータタイプ（skill_effect_parameters.param_type）

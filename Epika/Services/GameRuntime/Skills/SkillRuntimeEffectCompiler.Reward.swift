@@ -1,3 +1,21 @@
+// ==============================================================================
+// SkillRuntimeEffectCompiler.Reward.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキル定義から報酬コンポーネント情報を抽出
+//   - 経験値・ゴールド・アイテム・称号の倍率とボーナスを処理
+//
+// 【公開API】
+//   - rewardComponents(from:): スキル定義配列から RewardComponents を構築
+//
+// 【本体ファイルとの関係】
+//   - SkillRuntimeEffectCompiler.swift で定義された enum を拡張
+//   - SkillRuntimeEffects.RewardComponents を戻り値として使用
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Reward Components Compilation

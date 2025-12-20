@@ -1,3 +1,46 @@
+// ==============================================================================
+// LightweightItemData.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - UI表示用の軽量アイテムデータ
+//   - アイテムカテゴリ・レアリティの分類
+//
+// 【データ構造】
+//   - LightweightItemData: 表示最適化されたアイテム情報
+//     - stackKey, itemId, name, quantity, sellValue
+//     - category (ItemSaleCategory): 売却カテゴリ
+//     - enhancement (Enhancement): 称号・ソケット情報
+//     - storage (ItemStorage): 保管場所
+//     - rarity: レアリティ
+//     - normalTitleName, superRareTitleName, gemName: 表示名
+//
+//   - ItemSaleCategory: 売却用カテゴリ分類（24種）
+//     - 武器: thinSword/sword/magicSword/katana/bow 等
+//     - 防具: armor/heavyArmor/shield/gauntlet 等
+//     - 魔法: wand/rod/grimoire/robe
+//     - その他: gem/homunculus/synthesis/other 等
+//
+//   - ItemRarity: アイテムレアリティ（47種）
+//     - 基本: normal/tier1〜4/extra
+//     - 章別: chapter1〜7
+//     - 装備別: ring1〜3/staff/longbow 等
+//
+//   - ItemDisplaySubcategory: カテゴリ+レアリティのサブ分類
+//
+// 【導出プロパティ】
+//   - autoTradeKey → String: 自動売却ルール用キー
+//   - hasGemModification → Bool: 宝石改造の有無
+//   - fullDisplayName → String: 称号含むフルネーム
+//
+// 【使用箇所】
+//   - ItemPreloadService: アイテム表示データのプリロード
+//   - InventoryCleanupView, ItemSaleView: 売却画面
+//   - AutoTradeView: 自動売却ルール設定
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Item Display Subcategory

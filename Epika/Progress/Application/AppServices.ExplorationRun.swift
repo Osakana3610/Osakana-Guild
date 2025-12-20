@@ -1,3 +1,30 @@
+// ==============================================================================
+// AppServices.ExplorationRun.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 探索セッションの開始・キャンセル
+//   - パーティ出撃準備（HP全回復、難易度チェック）
+//
+// 【公開API】
+//   - startExplorationRun(for:dungeonId:targetFloor:) → ExplorationRunHandle
+//     探索を開始し、AsyncThrowingStreamでイベントを配信
+//   - cancelExplorationRun(runId:)
+//     実行中の探索をキャンセル
+//   - cancelPersistedExplorationRun(partyId:startedAt:)
+//     永続化された探索レコードをキャンセル
+//
+// 【開始フロー】
+//   1. ストーリー・ダンジョン解放を同期
+//   2. パーティメンバーのHP全回復
+//   3. ダンジョン解放・難易度チェック
+//   4. ランタイムセッション開始
+//   5. 永続化レコード作成
+//   6. AsyncThrowingStreamでイベント配信開始
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

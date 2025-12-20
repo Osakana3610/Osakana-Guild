@@ -1,3 +1,38 @@
+// ==============================================================================
+// SkillEffectHandlers.Misc.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - その他の雑多なスキルエフェクトハンドラ実装
+//   - 列プロファイル・回復・敵対設定・装備補正・逃走など
+//
+// 【公開API】
+//   - RowProfileHandler: 列プロファイル（近接・遠隔適性）の設定
+//   - EndOfTurnHealingHandler: ターン終了時の回復
+//   - EndOfTurnSelfHPPercentHandler: ターン終了時の自己HP増減
+//   - PartyAttackFlagHandler: パーティ攻撃フラグ（敵対・吸血等）
+//   - PartyAttackTargetHandler: パーティ攻撃対象（敵対・保護）
+//   - AntiHealingHandler: 回復無効化
+//   - BreathVariantHandler: ブレス追加チャージ
+//   - EquipmentStatMultiplierHandler: 装備種別ステータス倍率
+//   - DodgeCapHandler: 回避上限・最低命中率の設定
+//   - AbsorptionHandler: ダメージ吸収
+//   - DegradationRepairHandler: 劣化修復
+//   - DegradationRepairBoostHandler: 劣化修復ブースト
+//   - AutoDegradationRepairHandler: 自動劣化修復
+//   - RunawayMagicHandler: 魔法逃走
+//   - RunawayDamageHandler: ダメージ逃走
+//   - RetreatAtTurnHandler: 特定ターンでの撤退
+//   - TargetingWeightHandler: ターゲット優先度
+//   - CoverRowsBehindHandler: 後列カバー（巨人）
+//
+// 【本体ファイルとの関係】
+//   - SkillEffectHandler.swift で定義されたプロトコルを実装
+//   - SkillEffectHandlerRegistry に登録される
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Misc Handlers

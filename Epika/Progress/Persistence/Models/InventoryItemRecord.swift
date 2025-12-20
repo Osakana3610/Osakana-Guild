@@ -1,3 +1,37 @@
+// ==============================================================================
+// InventoryItemRecord.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - インベントリアイテムのSwiftData永続化モデル
+//   - アイテムスタック（称号・ソケット・数量）の保存
+//
+// 【データ構造】
+//   - InventoryItemRecord (@Model): インベントリアイテム
+//     - superRareTitleId: 超レア称号ID（0=なし）
+//     - normalTitleId: 通常称号rank
+//     - itemId: アイテムID
+//     - socketSuperRareTitleId, socketNormalTitleId, socketItemId: ソケット宝石
+//     - quantity: 数量
+//     - storageType: 保管場所（UInt8）
+//     - storageRawValue: 旧カラム（マイグレーション用）
+//
+// 【導出プロパティ】
+//   - stackKey → String: スタック識別キー（6要素）
+//   - autoTradeKey → String: 自動売却ルール用キー（ソケット除外）
+//   - hasSocket → Bool: 宝石改造の有無
+//   - storage → ItemStorage: 保管場所enum
+//
+// 【マイグレーション】
+//   - 0.7.5→0.7.6: storageRawValue(String) → storageType(UInt8)
+//   - 0.7.7でstorageRawValue削除予定
+//
+// 【使用箇所】
+//   - InventoryProgressService: インベントリの永続化
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 
