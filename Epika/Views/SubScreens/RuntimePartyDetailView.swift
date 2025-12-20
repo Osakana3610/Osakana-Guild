@@ -24,7 +24,7 @@
 import SwiftUI
 
 struct RuntimePartyDetailView: View {
-    @State private var currentParty: RuntimeParty
+    @State private var currentParty: PartySnapshot
     @Binding private var selectedDungeon: RuntimeDungeon?
     let dungeons: [RuntimeDungeon]
 
@@ -36,7 +36,7 @@ struct RuntimePartyDetailView: View {
     @State private var errorMessage: String?
     @State private var showDungeonPicker = false
 
-    init(party: RuntimeParty, selectedDungeon: Binding<RuntimeDungeon?>, dungeons: [RuntimeDungeon]) {
+    init(party: PartySnapshot, selectedDungeon: Binding<RuntimeDungeon?>, dungeons: [RuntimeDungeon]) {
         _currentParty = State(initialValue: party)
         _selectedDungeon = selectedDungeon
         self.dungeons = dungeons
@@ -291,7 +291,7 @@ struct RuntimePartyDetailView: View {
         }
     }
 
-    private func canStartExploration(for party: RuntimeParty) -> Bool {
+    private func canStartExploration(for party: PartySnapshot) -> Bool {
         guard let dungeon = activeDungeon else { return false }
         guard dungeon.isUnlocked else { return false }
         guard party.lastSelectedDifficulty <= dungeon.highestUnlockedDifficulty else { return false }
@@ -641,7 +641,7 @@ private struct DifficultyPickerView: View {
 }
 
 private struct PartyNameEditorView: View {
-    let party: RuntimeParty
+    let party: PartySnapshot
     let onComplete: () async -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(AppServices.self) private var appServices

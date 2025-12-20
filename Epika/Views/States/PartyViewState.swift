@@ -25,7 +25,7 @@ import Observation
 final class PartyViewState {
     private let appServices: AppServices
 
-    var parties: [RuntimeParty] = []
+    var parties: [PartySnapshot] = []
     var isLoading: Bool = false
     private var ongoingLoad: Task<Void, Error>? = nil
 
@@ -58,7 +58,7 @@ final class PartyViewState {
         try await loadAllParties()
     }
 
-    func updatePartyMembers(party: RuntimeParty, memberIds: [UInt8]) async throws {
+    func updatePartyMembers(party: PartySnapshot, memberIds: [UInt8]) async throws {
         _ = try await partyService.updatePartyMembers(persistentIdentifier: party.persistentIdentifier, memberIds: memberIds)
         try await refresh()
     }

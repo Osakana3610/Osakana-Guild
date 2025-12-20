@@ -23,7 +23,7 @@ import SwiftUI
 
 /// パーティメンバーを最大6枠のグリッドで表示する。
 struct PartyCharacterSilhouettesView: View {
-    let party: RuntimeParty
+    let party: PartySnapshot
     let characters: [RuntimeCharacter]
 
     private var orderedMembers: [RuntimeCharacter] {

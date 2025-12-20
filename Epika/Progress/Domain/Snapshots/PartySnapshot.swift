@@ -19,13 +19,12 @@
 //     - updatedAt: 更新日時
 //
 // 【互換エイリアス】
-//   - memberIds → [UInt8]: RuntimePartyProgress互換
-//   - name → String: RuntimeParty互換（displayNameのエイリアス）
+//   - memberIds → [UInt8]: memberCharacterIdsのエイリアス
+//   - name → String: displayNameのエイリアス
 //
 // 【使用箇所】
 //   - PartyProgressService: パーティ編成の永続化
 //   - ProgressRuntimeService: 探索開始時のパーティ取得
-//   - RuntimeParty: 型エイリアス（PartySnapshot = RuntimeParty）
 //
 // ==============================================================================
 
@@ -42,9 +41,9 @@ struct PartySnapshot: Identifiable, Sendable, Hashable {
     var memberCharacterIds: [UInt8]            // 順序=配列index
     var updatedAt: Date
 
-    /// RuntimePartyProgress互換のプロパティ名
+    /// memberCharacterIdsのエイリアス
     var memberIds: [UInt8] { memberCharacterIds }
 
-    /// RuntimeParty互換のプロパティ名（displayNameのエイリアス）
+    /// displayNameのエイリアス
     var name: String { displayName }
 }

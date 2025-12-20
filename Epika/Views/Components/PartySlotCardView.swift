@@ -23,7 +23,7 @@
 import SwiftUI
 
 struct PartySlotCardView<Footer: View>: View {
-    let party: RuntimeParty
+    let party: PartySnapshot
     let members: [RuntimeCharacter]
     let bonuses: PartySlotBonuses
     let isExploring: Bool
@@ -31,7 +31,7 @@ struct PartySlotCardView<Footer: View>: View {
     let onPrimaryAction: () -> Void
     let onMembersTap: (() -> Void)?
     private let footerBuilder: (() -> Footer)?
-    init(party: RuntimeParty,
+    init(party: PartySnapshot,
          members: [RuntimeCharacter],
          bonuses: PartySlotBonuses,
          isExploring: Bool,
@@ -49,7 +49,7 @@ struct PartySlotCardView<Footer: View>: View {
         self.footerBuilder = footer
     }
 
-    init(party: RuntimeParty,
+    init(party: PartySnapshot,
          members: [RuntimeCharacter],
          bonuses: PartySlotBonuses,
          isExploring: Bool,
