@@ -732,13 +732,18 @@ struct ItemCreationSettingsView: View {
 struct DangerousOperationsView: View {
     @Environment(AppServices.self) private var appServices
     @State private var isResettingData = false
+    @State private var isUnequippingAll = false
     @State private var showResetConfirmAlert = false
     @State private var showResetCompleteAlert = false
+    @State private var showUnequipCompleteAlert = false
+    @State private var unequipResultMessage = ""
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
 
     var body: some View {
         Form {
+            equipmentRecoverySection
+
             Section {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
@@ -799,6 +804,81 @@ struct DangerousOperationsView: View {
             Button("OK") { }
         } message: {
             Text(errorMessage)
+        }
+        .alert("装備解除完了", isPresented: $showUnequipCompleteAlert) {
+            Button("OK") { }
+        } message: {
+            Text(unequipResultMessage)
+        }
+    }
+
+    private var equipmentRecoverySection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("装備バグ復旧")
+                    .font(.headline)
+                Text("全キャラクターの装備を外してインベントリに戻します。転職バグで装備が外せなくなった場合の復旧用です。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.vertical, 4)
+
+            if isUnequippingAll {
+                HStack {
+                    ProgressView()
+                    Text("処理中...")
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                Button {
+                    Task { await unequipAllCharacters() }
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.uturn.backward.circle")
+                        Text("全キャラクターの装備を外す")
+                    }
+                }
+            }
+        } header: {
+            Text("復旧操作")
+        }
+    }
+
+    private func unequipAllCharacters() async {
+        if isUnequippingAll { return }
+        await MainActor.run { isUnequippingAll = true }
+
+        do {
+            let characters = try await appServices.character.allCharacters()
+            var unequippedCount = 0
+            var totalItemCount = 0
+
+            for character in characters {
+                let equipped = try await appServices.character.equippedItems(characterId: character.id)
+                if !equipped.isEmpty {
+                    for item in equipped {
+                        _ = try await appServices.character.unequipItem(
+                            characterId: character.id,
+                            equipmentStackKey: item.stackKey,
+                            quantity: item.quantity
+                        )
+                        totalItemCount += item.quantity
+                    }
+                    unequippedCount += 1
+                }
+            }
+
+            await MainActor.run {
+                isUnequippingAll = false
+                unequipResultMessage = "\(unequippedCount)人のキャラクターから\(totalItemCount)個の装備を外しました"
+                showUnequipCompleteAlert = true
+            }
+        } catch {
+            await MainActor.run {
+                isUnequippingAll = false
+                errorMessage = "装備解除に失敗しました: \(error.localizedDescription)"
+                showErrorAlert = true
+            }
         }
     }
 
