@@ -96,7 +96,7 @@
 <body>
     <h1>既知の問題</h1>
     <p>おさかなギルドで現在確認されている問題と、対応状況です。このページにない場合は<a href="itms-beta://beta.itunes.apple.com/v1/app/6756705558">こちら</a>からフィードバックを送信してください（iOSのみ）。</p>
-    <h2>対応中の問題 <span class="issue-count">(4件)</span></h2>
+    <h2>対応中の問題 <span class="issue-count">(1件)</span></h2>
     
     <div class="issue">
         <div class="issue-header">
@@ -129,7 +129,9 @@
         </div>
     </div>
 
-
+    <h2 class="resolved-section">解決済みの問題 <span class="issue-count">(3件)</span></h2>
+    <div class="resolved-section">
+    
     <div class="issue">
         <div class="issue-header">
             <span class="toggle-icon">&#9654;</span>
@@ -137,18 +139,18 @@
             <span class="issue-title">デバッグメニューのデータ消去でアラートが表示されない</span>
             <div class="issue-meta">
                 <span class="category">デバッグ</span>
-                <span class="status" style="background-color: #9b59b6">修正中</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
             </div>
         </div>
         <div class="issue-body">
-            <div class="date">報告日: 2025-12-20</div>
+            <div class="date">報告日: 2025-12-20 / 解決日: 2025-12-21</div>
             <div class="issue-section">
                 <div class="issue-section-title">概要</div>
                 <div class="issue-section-content">デバッグメニューからデータ消去を実行しても確認アラートが表示されない。</div>
             </div>
             
             
-            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">修正済み、審査中</div></div>
+            
             
         </div>
     </div>
@@ -161,18 +163,18 @@
             <span class="issue-title">iOS 17で冒険タブのパーティをタップするとアプリがクラッシュする</span>
             <div class="issue-meta">
                 <span class="category">冒険タブ</span>
-                <span class="status" style="background-color: #9b59b6">修正中</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
             </div>
         </div>
         <div class="issue-body">
-            <div class="date">報告日: 2025-12-20</div>
+            <div class="date">報告日: 2025-12-20 / 解決日: 2025-12-21</div>
             <div class="issue-section">
                 <div class="issue-section-title">概要</div>
                 <div class="issue-section-content">冒険タブでパーティをタップするとアプリがクラッシュする。現時点での回避策はありません。</div>
             </div>
-            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">iSO 17のバグにより、現在の実装だとクラッシュします。iOS 18以上では発生しないか発生確率が極端に下がるのを確認済みです。</div></div>
-            <div class="issue-section"><div class="issue-section-title">回避策</div><div class="issue-section-content">なし</div></div>
-            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">Xcode、Swiftの問題の可能性があるためAppleに問い合わせ中です。一時的にサポートバージョンをiOS 18.0以降に変更しました。続報があり次第、更新します。</div></div>
+            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">iOS 17のバグにより、現在の実装だとクラッシュします。iOS 18以上では発生しないか発生確率が極端に下がるのを確認済みです。</div></div>
+            
+            
             
         </div>
     </div>
@@ -185,25 +187,22 @@
             <span class="issue-title">アイテムを複数装備した状態で転職するとキャラクターのデッドロックが発生する</span>
             <div class="issue-meta">
                 <span class="category">装備</span>
-                <span class="status" style="background-color: #9b59b6">修正中</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
             </div>
         </div>
         <div class="issue-body">
-            <div class="date">報告日: 2025-12-20</div>
+            <div class="date">報告日: 2025-12-20 / 解決日: 2025-12-21</div>
             <div class="issue-section">
                 <div class="issue-section-title">概要</div>
                 <div class="issue-section-content">転職時の装備可能数の変動により、キャラクターが所持できるアイテム数を超え、チェックによりエラーが発生しています。</div>
             </div>
             
-            <div class="issue-section"><div class="issue-section-title">回避策</div><div class="issue-section-content">なし</div></div>
-            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">現在修正中。12/21までに修正し、審査に出します。</div></div>
+            
+            
             
         </div>
     </div>
 
-    <h2 class="resolved-section">解決済みの問題 <span class="issue-count">(0件)</span></h2>
-    <div class="resolved-section">
-    <div class="no-issues">解決済みの問題はありません</div>
     </div>
 
     <h2>クラッシュログの送信</h2>
@@ -216,7 +215,7 @@
         <li><a href="https://www.dropbox.com/request/JfZeC2k4nHxYt4GSjoVS">こちら</a>からアップロード</li>
     </ol>
 
-    <p class="updated">最終更新日: 2025年12月20日</p>
+    <p class="updated">最終更新日: 2025年12月21日</p>
     <script>
         document.querySelectorAll('.issue-header').forEach(header => {
             header.addEventListener('click', () => {
