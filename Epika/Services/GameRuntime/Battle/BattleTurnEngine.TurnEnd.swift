@@ -1,3 +1,36 @@
+// ==============================================================================
+// BattleTurnEngine.TurnEnd.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ターン終了時の処理全般
+//   - 状態異常のティック処理
+//   - 自動蘇生とネクロマンサー
+//   - 救助処理
+//   - 時限バフの管理
+//   - 呪文チャージの自動回復
+//
+// 【本体との関係】
+//   - BattleTurnEngineの拡張ファイル
+//   - ターン終了処理に特化した機能を提供
+//
+// 【主要機能】
+//   - endOfTurn: ターン終了処理のエントリポイント
+//   - processEndOfTurn: 個別Actorのターン終了処理
+//   - applyEndOfTurnPartyHealing: パーティ全体回復
+//   - applyNecromancerIfNeeded: ネクロマンサー蘇生
+//   - applyEndOfTurnResurrectionIfNeeded: 自動蘇生
+//   - attemptRescue: 救助処理
+//   - applyTimedBuffTriggers: 時限バフの発動
+//   - updateTimedBuffs: 時限バフの更新
+//   - applySpellChargeRecovery: 呪文チャージ回復
+//
+// 【使用箇所】
+//   - BattleTurnEngine.TurnLoop（ターン終了時）
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Turn End Processing
