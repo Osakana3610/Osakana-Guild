@@ -23,7 +23,7 @@
 import SwiftUI
 
 struct RuntimePartyMemberEditView: View {
-    var party: RuntimeParty
+    var party: PartySnapshot
     let allCharacters: [RuntimeCharacter]
     @Environment(PartyViewState.self) private var partyState
     @Environment(AppServices.self) private var appServices

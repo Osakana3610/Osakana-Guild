@@ -194,7 +194,7 @@ final class AdventureViewState {
         }
     }
 
-    func startExploration(party: RuntimeParty, dungeon: RuntimeDungeon, using appServices: AppServices) async throws {
+    func startExploration(party: PartySnapshot, dungeon: RuntimeDungeon, using appServices: AppServices) async throws {
         guard activeExplorationTasks[party.id] == nil else {
             throw RuntimeError.explorationAlreadyActive(dungeonId: dungeon.id)
         }
@@ -212,7 +212,7 @@ final class AdventureViewState {
         await loadExplorationProgress(using: appServices)
     }
 
-    func cancelExploration(for party: RuntimeParty, using appServices: AppServices) async {
+    func cancelExploration(for party: PartySnapshot, using appServices: AppServices) async {
         let partyId = party.id
         if let handle = activeExplorationHandles[partyId] {
             activeExplorationTasks[partyId]?.cancel()
@@ -264,7 +264,7 @@ final class AdventureViewState {
         }
     }
 
-    private func cancelPersistedExploration(for party: RuntimeParty, using appServices: AppServices) async {
+    private func cancelPersistedExploration(for party: PartySnapshot, using appServices: AppServices) async {
         guard let running = explorationProgress.first(where: { $0.party.partyId == party.id && $0.status == .running }) else {
             return
         }

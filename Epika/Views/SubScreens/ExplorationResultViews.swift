@@ -22,7 +22,7 @@ import SwiftUI
 
 struct ExplorationRunResultSummaryView: View {
     let snapshot: ExplorationSnapshot
-    let party: RuntimeParty
+    let party: PartySnapshot
 
     @Environment(\.dismiss) private var dismiss
 

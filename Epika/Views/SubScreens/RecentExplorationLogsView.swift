@@ -25,7 +25,7 @@ extension ExplorationSnapshot.EncounterLog: Identifiable {}
 extension CharacterSnapshot: Identifiable {}
 
 struct RecentExplorationLogsView: View {
-    let party: RuntimeParty
+    let party: PartySnapshot
     let runs: [ExplorationSnapshot]
 
     @State private var selectedRunForSummary: ExplorationSnapshot?
@@ -151,7 +151,7 @@ private struct ExplorationLogRowView: View {
 
 private struct ExplorationRunSummaryView: View {
     let snapshot: ExplorationSnapshot
-    let party: RuntimeParty
+    let party: PartySnapshot
 
     @Environment(\.dismiss) private var dismiss
     @State private var selectedEncounter: ExplorationSnapshot.EncounterLog?
