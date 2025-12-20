@@ -868,6 +868,9 @@ struct DangerousOperationsView: View {
                 }
             }
 
+            // インベントリキャッシュをリロード
+            try await appServices.itemPreload.reload(inventoryService: appServices.inventory)
+
             await MainActor.run {
                 isUnequippingAll = false
                 unequipResultMessage = "\(unequippedCount)人のキャラクターから\(totalItemCount)個の装備を外しました"
