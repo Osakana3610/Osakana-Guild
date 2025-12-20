@@ -1,6 +1,7 @@
 import Foundation
 
 struct BattleContextBuilder {
+    @MainActor
     static func makePlayerActors(from party: RuntimePartyState) throws -> [BattleActor] {
         let members = party.members
             .filter { $0.character.hitPoints.maximum > 0 }
