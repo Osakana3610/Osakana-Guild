@@ -7,6 +7,7 @@ extension SkillRuntimeEffectCompiler {
     ///   - skills: コンパイル対象のスキル定義配列
     ///   - stats: アクターのステータス（statScaling計算用、nilの場合はスケーリングなし）
     /// - Returns: 構築された SkillEffects
+    @MainActor
     static func actorEffects(from skills: [SkillDefinition], stats: ActorStats? = nil) throws -> BattleActor.SkillEffects {
         guard !skills.isEmpty else { return .neutral }
 

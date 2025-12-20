@@ -36,6 +36,7 @@ enum BattleService {
         let enemyActors: [BattleActor]
     }
 
+    @MainActor
     static func resolveBattle(masterData: MasterDataCache,
                               party: RuntimePartyState,
                               dungeon: DungeonDefinition,

@@ -52,29 +52,25 @@ struct AdventureView: View {
                 Task { await adventureState.reloadDungeonList(using: appServices) }
             }
             .sheet(item: $partyDetailContext, onDismiss: { Task { await reload() } }) { context in
-                NavigationStack {
-                    RuntimePartyDetailView(
-                        party: context.party,
-                        selectedDungeon: Binding(
-                            get: { partyDetailContext?.selectedDungeon },
-                            set: { newValue in
-                                if var current = partyDetailContext {
-                                    current.selectedDungeon = newValue
-                                    partyDetailContext = current
-                                }
+                RuntimePartyDetailView(
+                    party: context.party,
+                    selectedDungeon: Binding(
+                        get: { partyDetailContext?.selectedDungeon },
+                        set: { newValue in
+                            if var current = partyDetailContext {
+                                current.selectedDungeon = newValue
+                                partyDetailContext = current
                             }
-                        ),
-                        dungeons: adventureState.runtimeDungeons
-                    )
-                    .environment(adventureState)
-                }
+                        }
+                    ),
+                    dungeons: adventureState.runtimeDungeons
+                )
+                .environment(adventureState)
             }
             .sheet(item: $logsContext) { party in
-                NavigationStack {
-                    let runs = adventureState.explorationProgress
-                        .filter { $0.party.partyId == party.id }
-                    RecentExplorationLogsView(party: party, runs: runs)
-                }
+                let runs = adventureState.explorationProgress
+                    .filter { $0.party.partyId == party.id }
+                RecentExplorationLogsView(party: party, runs: runs)
             }
         }
         .onAppear {

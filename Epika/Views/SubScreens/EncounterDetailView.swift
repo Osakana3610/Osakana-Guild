@@ -16,16 +16,14 @@ struct EncounterDetailView: View {
     @State private var actorIcons: [String: CharacterIconInfo] = [:]
 
     var body: some View {
-        NavigationStack {
-            List {
-                battleSection
-            }
-            .avoidBottomGameInfo()
-            .navigationTitle(encounter.kind == .enemyEncounter ? "戦いの記録" : "\(encounter.floorNumber)F・イベント")
-            .navigationBarTitleDisplayMode(.inline)
-            .task {
-                await loadBattleLogIfNeeded()
-            }
+        List {
+            battleSection
+        }
+        .avoidBottomGameInfo()
+        .navigationTitle(encounter.kind == .enemyEncounter ? "戦いの記録" : "\(encounter.floorNumber)F・イベント")
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+            await loadBattleLogIfNeeded()
         }
     }
 

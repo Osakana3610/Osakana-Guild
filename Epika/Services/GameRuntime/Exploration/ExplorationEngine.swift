@@ -70,6 +70,7 @@ struct ExplorationEngine {
         return (preparation, state)
     }
 
+    @MainActor
     static func nextEvent(preparation: Preparation,
                           state: inout RunState,
                           masterData: MasterDataCache,

@@ -2,6 +2,7 @@ import Foundation
 
 /// 戦闘ターン処理エンジン
 /// 戦闘ごとにBattleContextを生成し、並行実行時のデータ競合を防ぐ
+@MainActor
 struct BattleTurnEngine {
     struct Result {
         let outcome: UInt8
