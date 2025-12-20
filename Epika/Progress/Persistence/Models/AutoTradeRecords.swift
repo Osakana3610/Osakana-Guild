@@ -1,3 +1,28 @@
+// ==============================================================================
+// AutoTradeRecords.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 自動売却ルールのSwiftData永続化モデル
+//   - アイテム構成要素（称号・ソケット含む）の保存
+//
+// 【データ構造】
+//   - AutoTradeRuleRecord (@Model): 自動売却ルール
+//     - superRareTitleId: 超レア称号ID
+//     - normalTitleId: 通常称号rank
+//     - itemId: アイテムID
+//     - socketSuperRareTitleId, socketNormalTitleId, socketItemId: ソケット情報
+//     - updatedAt: 更新日時
+//
+// 【導出プロパティ】
+//   - stackKey → String: スタック識別キー（インベントリと同形式）
+//
+// 【使用箇所】
+//   - AutoTradeProgressService: 自動売却ルールの永続化
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

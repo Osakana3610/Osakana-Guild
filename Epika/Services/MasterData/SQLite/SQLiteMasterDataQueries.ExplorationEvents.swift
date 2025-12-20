@@ -1,3 +1,20 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.ExplorationEvents.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 探索イベントの取得クエリを提供
+//   - イベント基本情報、タグ、重み、ペイロードを結合して構築
+//
+// 【公開API】
+//   - fetchAllExplorationEvents() -> [ExplorationEventDefinition]
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 

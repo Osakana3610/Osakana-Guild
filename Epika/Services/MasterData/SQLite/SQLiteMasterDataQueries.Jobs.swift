@@ -1,3 +1,21 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.Jobs.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 職業定義、戦闘係数、スキル習得条件、メタデータの取得クエリを提供
+//
+// 【公開API】
+//   - fetchAllJobs() -> [JobDefinition]
+//   - fetchAllJobSkillUnlocks() -> [jobId: [(level, skillId)]]
+//   - fetchAllJobMetadata() -> [jobId: (category, growthTendency)]
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 

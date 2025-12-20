@@ -1,3 +1,27 @@
+// ==============================================================================
+// ExplorationLogModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 探索ログの永続化用データ構造
+//   - ドロップ・戦闘結果・イベントログのCodable型
+//
+// 【データ構造】
+//   - DropEntry: ドロップアイテムエントリ（Codable）
+//     - superRareTitleId, normalTitleId, itemId, quantity
+//   - EventKind: イベント種別（nothing/combat/scripted）
+//   - BattleResult: 戦闘結果（victory/defeat/retreat）
+//   - ExplorationEventLogEntry: イベントログエントリ
+//     - floor, occurredAt, kind, goldGained, experienceGained
+//     - enemyGroupDescription, drops, battleResult
+//
+// 【変換】
+//   - EventKind ↔ ExplorationSnapshot.EncounterLog.Kind
+//   - BattleResult ↔ BattleService.BattleResult
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Drop Entry

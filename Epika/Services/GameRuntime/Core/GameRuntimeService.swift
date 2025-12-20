@@ -1,3 +1,45 @@
+// ==============================================================================
+// GameRuntimeService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ランタイム系サービスのエントリーポイント
+//   - 探索セッションの開始・再開・キャンセル管理
+//   - キャラクター・パーティのランタイム生成
+//
+// 【データ構造】
+//   - GameRuntimeService (actor): ランタイムサービス本体
+//   - ActiveExplorationRun: アクティブ探索のTask/Continuation管理
+//   - ExplorationRunSession: 探索セッション（stream/completion/cancel）
+//   - ExplorationRunPreparationData: 探索準備データ
+//
+// 【公開API】
+//   - startExplorationRun(...) → ExplorationRunSession: 探索開始
+//   - resumeExplorationRun(...) → ExplorationRunSession: 探索再開
+//   - cancelExploration(runId:): 探索キャンセル
+//   - prepareExplorationRun(...) → ExplorationRunPreparationData: 準備のみ
+//   - runtimeCharacter(from:) → RuntimeCharacter: キャラクター生成
+//   - runtimePartyState(party:characters:) → RuntimePartyState: パーティ生成
+//   - recalculateCombatStats(for:) → Result: ステータス再計算
+//   - raceDefinition(withId:) → RaceDefinition?: 種族取得
+//
+// 【探索実行フロー】
+//   1. preparation生成（ダンジョン/フロア/エンカウント情報）
+//   2. イベントループ開始（ExplorationEngine.nextEvent）
+//   3. ドロップ通知・経験値/ゴールド累計
+//   4. 終了時にartifact生成
+//
+// 【探索再開】
+//   - RNG状態・超レア状態・ドロップ済みアイテムを復元
+//   - 開始フロア/イベントインデックスから継続
+//
+// 【使用箇所】
+//   - ProgressRuntimeService: Progress層とのブリッジ
+//   - AppServices.ExplorationRun: 探索セッション管理
+//
+// ==============================================================================
+
 import Foundation
 
 /// ランタイム系サービスのエントリーポイント。マスターデータの読み出しと

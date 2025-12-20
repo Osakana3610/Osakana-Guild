@@ -1,3 +1,34 @@
+// ==============================================================================
+// GameStateRecords.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ゲーム状態のSwiftData永続化モデル
+//   - プレイヤー資産・日次処理状態・パンドラボックスの保存
+//
+// 【データ構造】
+//   - GameStateRecord (@Model): ゲーム状態（シングルトン）
+//     - schemaVersion: スキーマバージョン
+//     - updatedAt: 更新日時
+//     - lastDailyProcessedDate: 日次処理実行日（YYYYMMDD）
+//     - superRareLastTriggeredDate: 超レア発生日（YYYYMMDD）
+//     - gold: 所持金
+//     - catTickets: 猫チケット
+//     - partySlots: 解放済みパーティスロット数
+//     - pandoraBoxStackKeys: パンドラボックス内アイテム（stackKey配列）
+//
+//   - PandoraBoxItem (Codable): パンドラボックスアイテム構成要素
+//   - PlayerWallet (Codable): プレイヤー財布（gold/catTickets）
+//
+// 【ユーティリティ】
+//   - JSTDateUtility: JST日付変換（today, dateAsInt, date(from:)）
+//
+// 【使用箇所】
+//   - GameStateService: プレイヤー資産・日次処理の管理
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

@@ -1,3 +1,38 @@
+// ==============================================================================
+// CharacterRecords.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - キャラクターデータのSwiftData永続化モデル
+//   - キャラクター基本情報・装備の保存
+//
+// 【データ構造】
+//   - CharacterRecord (@Model): キャラクター基本情報
+//     - id: キャラクターID（1〜200、再利用可能）
+//     - displayName: 表示名
+//     - raceId: 種族ID（18種）
+//     - jobId: 職業ID（16種）
+//     - previousJobId: 前職ID（0=なし、転職は1回のみ）
+//     - avatarId: アバターID（0=デフォルト、101〜316=職業、400+=カスタム）
+//     - level: レベル（最大200）
+//     - experience: 経験値（数億まで対応）
+//     - currentHP: 現在HP（20万超対応）
+//     - primaryPersonalityId, secondaryPersonalityId: 性格ID（0=なし）
+//     - actionRateAttack/PriestMagic/MageMagic/Breath: 行動設定（0-100）
+//     - updatedAt: 更新日時
+//
+//   - CharacterEquipmentRecord (@Model): 装備アイテム情報
+//     - characterId: 所有キャラクターID
+//     - superRareTitleId, normalTitleId, itemId: アイテム本体
+//     - socketSuperRareTitleId, socketNormalTitleId, socketItemId: ソケット宝石
+//     - updatedAt: 更新日時
+//
+// 【使用箇所】
+//   - CharacterProgressService: キャラクターCRUD
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

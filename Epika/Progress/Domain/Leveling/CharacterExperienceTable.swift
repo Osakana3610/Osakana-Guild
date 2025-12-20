@@ -1,3 +1,28 @@
+// ==============================================================================
+// CharacterExperienceTable.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 経験値テーブルの管理
+//   - レベル→必要経験値の計算
+//   - 経験値→レベルの逆算
+//
+// 【公開API】
+//   - experienceDelta(for level:) → Int - 指定レベルに必要な経験値差分
+//   - cumulativeExperience(atLevel:) → Int - 累積経験値
+//   - level(for experience:maxLevel:) → Int - 経験値からレベルを計算
+//   - maxExperience(forMaxLevel:) → Int - 最大レベルまでの累積経験値
+//
+// 【計算方式】
+//   - Lv1-100: baseExperienceDeltas配列（事前計算済み）
+//   - Lv101以上: 多項式近似（lowerSegment/upperSegmentCoefficients）
+//
+// 【エラー】
+//   - CharacterExperienceError: 無効なレベル/経験値/オーバーフロー
+//
+// ==============================================================================
+
 import Foundation
 
 enum CharacterExperienceError: Error {

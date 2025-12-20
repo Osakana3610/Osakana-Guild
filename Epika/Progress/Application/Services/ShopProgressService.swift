@@ -1,3 +1,29 @@
+// ==============================================================================
+// ShopProgressService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 商店機能（購入・在庫管理）
+//   - プレイヤー売却アイテムの在庫追加
+//   - 在庫整理（キャット・チケット獲得）
+//
+// 【公開API】
+//   - loadItems() → [ShopItem] - 商店アイテム一覧
+//   - purchase(itemId:quantity:) - アイテム購入
+//   - addPlayerSoldItem(itemId:quantity:) → SoldResult - 売却アイテムを在庫に追加
+//   - cleanupStock(itemId:) → Int - 在庫整理、チケット獲得
+//
+// 【データ構造】
+//   - ShopItem: 商店アイテム（definition, price, stockQuantity, isPlayerSold）
+//   - SoldResult: 売却結果（added, gold, overflow）
+//
+// 【在庫管理】
+//   - マスタ定義アイテム + プレイヤー売却アイテム
+//   - 売却アイテムは上限あり（超過分はinventoryに残る）
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

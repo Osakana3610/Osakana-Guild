@@ -1,3 +1,40 @@
+// ==============================================================================
+// CombatFormulas.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 戦闘ステータス計算式の定義
+//   - レベル依存・ステータス依存の係数計算
+//
+// 【係数定義】
+//   - maxHPCoefficient: 10.0
+//   - physicalAttack/Defense/magicalAttack/DefenseCoefficient: 1.0
+//   - hitRateCoefficient: 2.0, hitRateBaseBonus: 50.0
+//   - evasionRateCoefficient: 1.0
+//   - criticalRateCoefficient: 0.16
+//   - magicalHealingCoefficient: 2.0
+//   - trapRemovalCoefficient: 0.5
+//   - additionalDamageScale: 0.32
+//   - attackCountCoefficient/LevelCoefficient: 0.025
+//   - breathDamageCoefficient: 1.0
+//
+// 【公開API】
+//   - levelDependentValue(raceId:level:) → Double: レベル成長値
+//   - statBonusMultiplier(value:) → Double: 21以上ボーナス倍率
+//   - resistancePercent(value:) → Double: 21以上耐性減少
+//   - strengthDependency(value:) → Double: 追加ダメージ用
+//   - agilityDependency(value:) → Double: 攻撃回数用
+//   - additionalDamageGrowth(...) → Double: 追加ダメージ成長
+//   - evasionLimit(value:) → Double: 回避上限
+//   - finalAttackCount(...) → Int: 最終攻撃回数
+//
+// 【使用箇所】
+//   - CombatStatCalculator: キャラクターステータス計算
+//   - BattleTurnEngine: 戦闘中のダメージ計算
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Combat Formulas

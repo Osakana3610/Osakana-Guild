@@ -1,3 +1,30 @@
+// ==============================================================================
+// ItemDropNotificationService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - アイテムドロップ通知の管理
+//   - ドロップ結果をUI表示用に変換・保持
+//
+// 【公開API】
+//   - droppedItems: [DroppedItemNotification] - 現在の通知リスト
+//   - publish(results:) - ドロップ結果を通知に変換して追加
+//   - clear() - 全通知をクリア
+//
+// 【通知管理】
+//   - 最大20件を保持（超過時は古いものから削除）
+//   - 1アイテム1通知（quantity分の通知を生成）
+//
+// 【補助型】
+//   - DroppedItemNotification: 通知データ
+//     - itemId, itemName, quantity, rarity
+//     - isSuperRare: 超レア称号の有無
+//     - normalTitleName/superRareTitleName: 称号名
+//     - displayText: 表示用テキスト（称号+アイテム名）
+//
+// ==============================================================================
+
 import Foundation
 import Observation
 

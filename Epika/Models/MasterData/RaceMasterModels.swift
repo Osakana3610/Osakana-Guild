@@ -1,3 +1,36 @@
+// ==============================================================================
+// RaceMasterModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - キャラクター種族のマスタデータ型定義
+//   - 基礎ステータスの列挙型定義
+//
+// 【データ構造】
+//   - RaceDefinition: 種族定義
+//     - id: 種族ID
+//     - name: 種族名
+//     - genderCode: 性別コード（1=男性, 2=女性）
+//     - description: 説明文
+//     - baseStats: 基礎能力値（BaseStats）
+//     - maxLevel: 最大レベル
+//     - genderDisplayName: 性別表示名（計算プロパティ）
+//   - RaceDefinition.BaseStats: 基礎能力値
+//     - strength, wisdom, spirit, vitality, agility, luck
+//   - BaseStat: 基礎ステータス列挙型
+//     - rawValue: DB用数値
+//     - identifier: JSON/DB用文字列
+//     - displayName: UI表示用（力/知恵/精神/体力/敏捷/運）
+//     - value(from:): BaseStatsから値を取得
+//
+// 【使用箇所】
+//   - CharacterCreationView: 種族選択・ステータス表示
+//   - CombatStatCalculator: ステータス計算のベース値
+//   - EquipmentProgressService: 装備制限の種族チェック
+//
+// ==============================================================================
+
 import Foundation
 
 /// SQLite `races` 系テーブルの論理モデル

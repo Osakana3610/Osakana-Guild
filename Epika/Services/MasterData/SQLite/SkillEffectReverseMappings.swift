@@ -1,3 +1,25 @@
+// ==============================================================================
+// SkillEffectReverseMappings.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - SQLiteのスキルエフェクトテーブルに格納された整数値を文字列に逆変換
+//   - param_type, value_type, array_type のマッピング定義を提供
+//   - パラメータ値の型に応じた適切な文字列変換ロジック
+//
+// 【データ構造】
+//   - Sendable structで全てのマッピングをstatic letで定義
+//   - paramType: INT → String key（例: 1 → "action"）
+//   - valueType: INT → String key（例: 1 → "accuracyMultiplier"）
+//   - arrayType: INT → String key（例: 1 → "grantSkillIds"）
+//   - 各種enumマッピング（damageType, baseStat, combatStat等）
+//
+// 【使用箇所】
+//   - SQLiteMasterDataQueries.Skills.swift（fetchAllSkillsメソッド）
+//
+// ==============================================================================
+
 import Foundation
 
 /// skill_effect_params, skill_effect_values, skill_effect_array_values テーブルの

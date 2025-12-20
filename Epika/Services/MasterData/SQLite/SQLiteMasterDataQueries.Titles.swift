@@ -1,3 +1,20 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.Titles.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 通常称号と超レア称号の取得クエリを提供
+//
+// 【公開API】
+//   - fetchAllTitles() -> [TitleDefinition]
+//   - fetchAllSuperRareTitles() -> [SuperRareTitleDefinition]
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 

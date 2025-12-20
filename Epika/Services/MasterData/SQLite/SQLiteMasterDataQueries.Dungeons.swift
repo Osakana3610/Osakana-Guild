@@ -1,3 +1,20 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.Dungeons.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ダンジョン、エンカウントテーブル、フロア情報の取得クエリを提供
+//   - 複数テーブル（dungeons, encounter_tables, dungeon_floors等）を結合して構築
+//
+// 【公開API】
+//   - fetchAllDungeons() -> (dungeons, encounterTables, dungeonFloors)
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 

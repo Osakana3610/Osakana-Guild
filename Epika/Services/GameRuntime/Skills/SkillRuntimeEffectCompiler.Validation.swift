@@ -1,3 +1,30 @@
+// ==============================================================================
+// SkillRuntimeEffectCompiler.Validation.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキルエフェクトペイロードのデコード・バリデーション処理
+//   - 必須フィールドのチェックと代替パラメータ名のサポート
+//
+// 【公開API】
+//   - decodePayload(from:skillId:): SkillDefinition.Effect から DecodedSkillEffectPayload を構築
+//   - validatePayload(_:skillId:effectIndex:): ペイロードの必須フィールドをバリデーション
+//
+// 【データ構造】
+//   - DecodedSkillEffectPayload: デコード済みペイロード
+//     - requireParam(_:skillId:effectIndex:): 必須パラメータを取得
+//     - requireValue(_:skillId:effectIndex:): 必須値を取得
+//     - requireStringArray(_:skillId:effectIndex:): 必須配列を取得
+//   - SkillEffectValidationRequirement: バリデーション要件
+//   - requiredFields: エフェクトタイプ別の必須フィールド定義
+//
+// 【本体ファイルとの関係】
+//   - SkillRuntimeEffectCompiler.swift で定義された enum を拡張
+//   - 全てのCompiler拡張から共通で使用される
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Payload Decoding & Validation

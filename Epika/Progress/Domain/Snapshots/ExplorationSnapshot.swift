@@ -1,3 +1,45 @@
+// ==============================================================================
+// ExplorationSnapshot.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 探索セッションのイミュータブルスナップショット
+//   - 探索状態・報酬・エンカウントログの表現
+//
+// 【データ構造】
+//   - ExplorationSnapshot: 探索セッション全情報
+//     - dungeonId, displayDungeonName, activeFloorNumber
+//     - party (PartySummary): 参加パーティ情報
+//     - startedAt, lastUpdatedAt, expectedReturnAt
+//     - encounterLogs: エンカウント履歴
+//     - rewards (Rewards): 獲得経験値・ゴールド・ドロップ
+//     - summary (Summary): 表示用サマリー
+//     - status (Status): 進行状態
+//     - metadata (ProgressMetadata): 作成・更新日時
+//
+//   - Status: running/completed/cancelled/defeated
+//   - Rewards: experience, gold, itemDrops
+//   - PartySummary: partyId, memberCharacterIds, inventorySnapshotId
+//   - EncounterLog: フロアごとのイベント記録
+//     - Kind: nothing/enemyEncounter/scriptedEvent
+//     - CombatSummary: 戦闘結果詳細
+//     - Context: 表示用付加情報（exp/gold/drops/effects）
+//   - Summary: 探索進行サマリー（タイミング・本文）
+//
+// 【ヘルパーメソッド】
+//   - resultMessage(for:) → String: 終了ステータスのメッセージ
+//   - makeSummary(...) → Summary: サマリー生成
+//   - eventTitle(for:status:) → String: イベント表示タイトル
+//   - localizedCombatResult(_:) → String: 戦闘結果のローカライズ
+//
+// 【使用箇所】
+//   - ExplorationProgressService: 探索履歴の永続化・取得
+//   - AdventureView: 探索状態の表示
+//   - RecentExplorationLogsView: 過去の探索履歴表示
+//
+// ==============================================================================
+
 import Foundation
 
 struct ExplorationSnapshot: Sendable, Hashable {

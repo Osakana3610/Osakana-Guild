@@ -1,3 +1,40 @@
+// ==============================================================================
+// RuntimeStoryNode.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ストーリーノード定義と進行状態の統合ビュー
+//   - UI表示用のランタイムストーリー情報
+//
+// 【データ構造】
+//   - RuntimeStoryNode: 定義+進行の複合型
+//     - definition (StoryNodeDefinition): マスターデータ定義
+//     - isUnlocked: 解放済みか
+//     - isCompleted: 読了済みか
+//     - isRewardClaimed: 報酬受取済みか
+//
+// 【導出プロパティ】
+//   - id → UInt16: ストーリーID
+//   - title, content → String: タイトル・本文
+//   - chapterId → String: 章ID
+//   - section → Int: セクション番号
+//   - unlockRequirements → [UnlockCondition]: 解放条件
+//   - unlockModules → [StoryModule]: 解放されるモジュール
+//   - canRead → Bool: 読める状態か（未読かつ解放済み）
+//
+// 【表示用プロパティ】
+//   - unlockConditions → [String]: 解放条件の表示テキスト
+//   - unlocksModules → [String]: 解放モジュールの表示テキスト
+//   - rewardSummary → String: 報酬サマリー
+//
+// 【使用箇所】
+//   - StoryView: ストーリー一覧表示
+//   - StoryDetailView: ストーリー詳細・読了
+//   - StoryProgressService: ストーリー進行管理
+//
+// ==============================================================================
+
 import Foundation
 
 struct RuntimeStoryNode: Identifiable, Hashable, Sendable {

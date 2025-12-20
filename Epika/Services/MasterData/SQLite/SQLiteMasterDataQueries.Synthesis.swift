@@ -1,3 +1,19 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.Synthesis.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 合成レシピの取得クエリを提供
+//
+// 【公開API】
+//   - fetchAllSynthesisRecipes() -> [SynthesisRecipeDefinition]
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 

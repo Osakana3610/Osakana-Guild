@@ -1,3 +1,22 @@
+// ==============================================================================
+// SkillRuntimeEffectCompiler.Spell.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキル定義から呪文帳（Spellbook）と呪文ロードアウト（SpellLoadout）を構築
+//   - spellAccess（習得・忘却）と spellTierUnlock（ティア解放）を処理
+//
+// 【公開API】
+//   - spellbook(from:): スキル定義配列から Spellbook を構築
+//   - spellLoadout(from:definitions:): Spellbook と SpellDefinition 配列から SpellLoadout を構築
+//
+// 【本体ファイルとの関係】
+//   - SkillRuntimeEffectCompiler.swift で定義された enum を拡張
+//   - SkillRuntimeEffects.Spellbook と SpellLoadout を戻り値として使用
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Spellbook & Spell Loadout Compilation

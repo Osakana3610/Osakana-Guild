@@ -1,3 +1,28 @@
+// ==============================================================================
+// TitleInheritanceProgressService.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 称号継承機能
+//   - あるアイテムの称号を別のアイテムに移す
+//
+// 【公開API】
+//   - availableTargetItems() → [RuntimeEquipment] - 継承先候補
+//   - availableSourceItems(for:) → [RuntimeEquipment] - 継承元候補
+//   - preview(targetStackKey:sourceStackKey:) → TitleInheritancePreview
+//   - inherit(targetStackKey:sourceStackKey:) → RuntimeEquipment
+//
+// 【継承ルール】
+//   - 同一カテゴリのアイテム間でのみ継承可能
+//   - 継承元の称号（通常+超レア）が継承先に移る
+//   - ソケット宝石の称号は継承されない
+//
+// 【補助型】
+//   - TitleInheritancePreview: 継承結果プレビュー
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

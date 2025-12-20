@@ -1,3 +1,42 @@
+// ==============================================================================
+// SkillMasterModels.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキル（アクティブ/パッシブ/リアクション）のマスタデータ型定義
+//
+// 【データ構造】
+//   - SkillType: スキル種別
+//     - passive: 常時発動（ステータス補正等）
+//     - active: 能動発動（攻撃/回復等）
+//     - reaction: 反応発動（カウンター/回避等）
+//   - SkillCategory: スキルカテゴリ
+//     - combat: 戦闘系
+//     - magic: 魔法系
+//     - support: 支援系
+//     - defense: 防御系
+//     - special: 特殊系
+//   - SkillDefinition: スキル定義
+//     - id, name, description
+//     - type: SkillType
+//     - category: SkillCategory
+//     - effects: 効果リスト
+//   - SkillDefinition.Effect: スキル効果
+//     - index: 効果順序
+//     - effectType: SkillEffectType（別ファイルで定義）
+//     - familyId: 効果ファミリーID
+//     - parameters: パラメータ辞書
+//     - values: 数値辞書
+//     - arrayValues: 配列辞書
+//
+// 【使用箇所】
+//   - SkillRuntimeEffects: スキル効果のコンパイル・適用
+//   - RuntimeCharacterFactory: キャラクタースキル効果の集計
+//   - BattleTurnEngine: 戦闘中のスキル発動
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Skill Type

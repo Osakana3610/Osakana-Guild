@@ -1,3 +1,41 @@
+// ==============================================================================
+// ProgressBootstrapper.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - SwiftData ModelContainerの初期化
+//   - 進行データストアのライフサイクル管理
+//   - マイグレーション処理
+//
+// 【データ構造】
+//   - ProgressBootstrapper (@MainActor): ブートストラッパー
+//   - BootstrapResult: 初期化結果（container）
+//
+// 【公開API】
+//   - shared: シングルトンインスタンス
+//   - boot(cloudKitEnabled:) async throws → BootstrapResult
+//   - resetStore() throws: ストア削除・リセット
+//
+// 【初期化フロー】
+//   1. キャッシュ済みコンテナがあれば再利用
+//   2. Transformer登録
+//   3. ModelContainer生成（失敗時はストア削除して再試行）
+//   4. マイグレーション実行
+//   5. コンテナをキャッシュ
+//
+// 【マイグレーション】
+//   - 0.7.5→0.7.6: InventoryのstorageRawValue→storageType変換
+//
+// 【ストアパス】
+//   - ~/Library/Application Support/Epika/Progress.store
+//
+// 【使用箇所】
+//   - EpikaApp: アプリ起動時のストア初期化
+//   - AppServices.Reset: ゲームリセット
+//
+// ==============================================================================
+
 import Foundation
 import SwiftData
 

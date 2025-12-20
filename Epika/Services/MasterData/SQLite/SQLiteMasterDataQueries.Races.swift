@@ -1,3 +1,21 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.Races.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 種族定義、基本ステータス、パッシブスキル、スキル習得条件の取得クエリを提供
+//
+// 【公開API】
+//   - fetchAllRaces() -> [RaceDefinition]
+//   - fetchAllRacePassiveSkills() -> [raceId: [skillId]]
+//   - fetchAllRaceSkillUnlocks() -> [raceId: [(level, skillId)]]
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 

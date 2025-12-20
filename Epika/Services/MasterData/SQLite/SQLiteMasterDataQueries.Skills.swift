@@ -1,3 +1,21 @@
+// ==============================================================================
+// SQLiteMasterDataQueries.Skills.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - スキル定義とエフェクトの取得クエリを提供
+//   - 複雑なマルチテーブル結合（skills, skill_effects, params, values, array_values）
+//   - SkillEffectReverseMappingsを使用して整数値を文字列に変換
+//
+// 【公開API】
+//   - fetchAllSkills() -> [SkillDefinition]
+//
+// 【使用箇所】
+//   - MasterDataLoader.load(manager:)
+//
+// ==============================================================================
+
 import Foundation
 import SQLite3
 
