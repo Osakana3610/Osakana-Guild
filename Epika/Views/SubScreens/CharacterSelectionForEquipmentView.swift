@@ -356,8 +356,8 @@ struct EquipmentEditorView: View {
             let runtime = try await characterService.runtimeCharacter(from: snapshot)
             currentCharacter = runtime
 
-            // インベントリキャッシュから装備したアイテムを削除
-            displayService.removeItems(stackKeys: [item.stackKey])
+            // インベントリキャッシュから装備した分を減らす（1個）
+            _ = try? displayService.decrementQuantity(stackKey: item.stackKey, by: 1)
             subcategorizedItems = displayService.getSubcategorizedItems()
                 .filter { !Self.excludedCategories.contains($0.key.mainCategory) }
             orderedSubcategories = displayService.getOrderedSubcategories()
