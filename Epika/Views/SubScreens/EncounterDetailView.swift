@@ -22,7 +22,7 @@ import SwiftData
 
 struct EncounterDetailView: View {
     let snapshot: ExplorationSnapshot
-    let party: RuntimeParty
+    let party: PartySnapshot
     let encounter: ExplorationSnapshot.EncounterLog
 
     @Environment(\.modelContext) private var modelContext
