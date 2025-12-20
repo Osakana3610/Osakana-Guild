@@ -1,3 +1,35 @@
+// ==============================================================================
+// BattleTurnEngine.Reactions.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 反撃と反応スキルの処理
+//   - 受け流し、盾ブロックの判定
+//   - ダメージ吸収と呪文チャージ回復
+//   - 攻撃結果の適用とリアクション連鎖
+//   - 暴走処理
+//
+// 【本体との関係】
+//   - BattleTurnEngineの拡張ファイル
+//   - リアクションシステムに特化した機能を提供
+//
+// 【主要機能】
+//   - shouldTriggerParry: 受け流し判定
+//   - shouldTriggerShieldBlock: 盾ブロック判定
+//   - applyAbsorptionIfNeeded: ダメージ吸収処理
+//   - applySpellChargeGainOnPhysicalHit: 物理ヒット時の呪文チャージ回復
+//   - attemptRunawayIfNeeded: 暴走判定
+//   - dispatchReactions: リアクションイベントの発火
+//   - attemptReactions: リアクションの試行
+//   - executeReactionAttack: 反撃攻撃の実行
+//   - applyAttackOutcome: 攻撃結果の適用
+//
+// 【使用箇所】
+//   - BattleTurnEngine各拡張ファイル（攻撃処理後の結果適用）
+//
+// ==============================================================================
+
 import Foundation
 
 // MARK: - Reactions & Counter Attacks
