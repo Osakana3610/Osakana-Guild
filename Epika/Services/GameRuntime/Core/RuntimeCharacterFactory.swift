@@ -4,6 +4,7 @@ import Foundation
 /// マスターデータ取得と戦闘ステータス計算を行う。
 enum RuntimeCharacterFactory {
 
+    @MainActor
     static func make(
         from input: CharacterInput,
         masterData: MasterDataCache,

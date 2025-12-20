@@ -67,6 +67,7 @@ extension DecodedSkillEffectPayload {
 
 /// SkillEffectType からハンドラを取得するレジストリ
 /// 静的イミュータブル辞書として起動時に一度だけ構築される
+@MainActor
 enum SkillEffectHandlerRegistry {
     /// 全ハンドラの辞書（遅延初期化）
     static let handlers: [SkillEffectType: any SkillEffectHandler.Type] = {

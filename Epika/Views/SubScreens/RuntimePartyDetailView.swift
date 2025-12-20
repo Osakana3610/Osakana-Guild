@@ -629,33 +629,28 @@ private struct PartyNameEditorView: View {
     private var partyService: PartyProgressService { appServices.party }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("パーティ名") {
-                    TextField("パーティ名を入力", text: $name)
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
-                }
+        Form {
+            Section("パーティ名") {
+                TextField("パーティ名を入力", text: $name)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
             }
-            .avoidBottomGameInfo()
-            .navigationTitle("パーティ名変更")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { Task { await save() } }
-                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || name == party.name)
-                }
-            }
-            .alert("エラー", isPresented: $showError) {
-                Button("OK", role: .cancel) { showError = false }
-            } message: {
-                Text(errorMessage)
-            }
-            .onAppear { name = party.name }
         }
+        .avoidBottomGameInfo()
+        .navigationTitle("パーティ名変更")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("保存") { Task { await save() } }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || name == party.name)
+            }
+        }
+        .alert("エラー", isPresented: $showError) {
+            Button("OK", role: .cancel) { showError = false }
+        } message: {
+            Text(errorMessage)
+        }
+        .onAppear { name = party.name }
     }
 
     private func save() async {
