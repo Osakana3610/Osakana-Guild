@@ -38,58 +38,56 @@ struct ItemSynthesisView: View {
     private var synthesisService: ItemSynthesisProgressService { appServices.itemSynthesis }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if showError {
-                    ErrorView(message: errorMessage) {
-                        Task { await loadParentItems() }
-                    }
-                } else {
-                    buildContent()
+        Group {
+            if showError {
+                ErrorView(message: errorMessage) {
+                    Task { await loadParentItems() }
+                }
+            } else {
+                buildContent()
+            }
+        }
+        .navigationTitle("アイテム合成")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await loadParentItems() }
+        .sheet(isPresented: $showResult) {
+            if let result = synthesisResult {
+                SynthesisResultView(result: result) {
+                    await loadParentItems()
                 }
             }
-            .navigationTitle("アイテム合成")
-            .navigationBarTitleDisplayMode(.inline)
-            .task { await loadParentItems() }
-            .sheet(isPresented: $showResult) {
-                if let result = synthesisResult {
-                    SynthesisResultView(result: result) {
-                        await loadParentItems()
+        }
+        .sheet(isPresented: $showParentPicker) {
+            ItemPickerView(
+                title: "親アイテム選択",
+                items: parentItems,
+                selectedItem: Binding(
+                    get: { selectedParent },
+                    set: { newValue in
+                        selectedParent = newValue
+                        selectedChild = nil
+                        preview = nil
+                        if let item = newValue {
+                            Task { await loadChildItems(for: item) }
+                        } else {
+                            childItems = []
+                        }
                     }
-                }
-            }
-            .sheet(isPresented: $showParentPicker) {
-                ItemPickerView(
-                    title: "親アイテム選択",
-                    items: parentItems,
-                    selectedItem: Binding(
-                        get: { selectedParent },
-                        set: { newValue in
-                            selectedParent = newValue
-                            selectedChild = nil
-                            preview = nil
-                            if let item = newValue {
-                                Task { await loadChildItems(for: item) }
-                            } else {
-                                childItems = []
-                            }
-                        }
-                    )
                 )
-            }
-            .sheet(isPresented: $showChildPicker) {
-                ItemPickerView(
-                    title: "子アイテム選択",
-                    items: childItems,
-                    selectedItem: Binding(
-                        get: { selectedChild },
-                        set: { newValue in
-                            selectedChild = newValue
-                            Task { await updatePreview() }
-                        }
-                    )
+            )
+        }
+        .sheet(isPresented: $showChildPicker) {
+            ItemPickerView(
+                title: "子アイテム選択",
+                items: childItems,
+                selectedItem: Binding(
+                    get: { selectedChild },
+                    set: { newValue in
+                        selectedChild = newValue
+                        Task { await updatePreview() }
+                    }
                 )
-            }
+            )
         }
     }
 

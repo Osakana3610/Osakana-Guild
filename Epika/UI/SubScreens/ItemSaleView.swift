@@ -45,28 +45,26 @@ struct ItemSaleView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                if showError {
-                    ErrorView(message: errorMessage) {
-                        Task { await loadSaleData() }
-                    }
-                } else {
-                    buildContent()
+        VStack {
+            if showError {
+                ErrorView(message: errorMessage) {
+                    Task { await loadSaleData() }
                 }
+            } else {
+                buildContent()
             }
-            .navigationTitle("アイテム売却")
-            .navigationBarTitleDisplayMode(.large)
-            .onAppear { Task { await loadIfNeeded() } }
-            .sheet(item: $detailItem) { item in
-                NavigationStack {
-                    ItemDetailView(item: item)
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                Button("閉じる") { detailItem = nil }
-                            }
+        }
+        .navigationTitle("アイテム売却")
+        .navigationBarTitleDisplayMode(.large)
+        .onAppear { Task { await loadIfNeeded() } }
+        .sheet(item: $detailItem) { item in
+            NavigationStack {
+                ItemDetailView(item: item)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("閉じる") { detailItem = nil }
                         }
-                }
+                    }
             }
         }
     }
