@@ -141,7 +141,6 @@ struct EquipmentEditorView: View {
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var equipError: String?
-    @State private var cacheVersion: Int = 0
     @State private var selectedItemForDetail: LightweightItemData?
     @State private var selectedItemIdForDetail: UInt16?  // 装備中アイテム用（図鑑モード）
 
@@ -216,7 +215,6 @@ struct EquipmentEditorView: View {
                             .foregroundStyle(.red)
                     }
                 }
-                .id(cacheVersion)
                 .avoidBottomGameInfo()
             }
         }
@@ -323,7 +321,6 @@ struct EquipmentEditorView: View {
             subcategorizedItems = allSubcategorized.filter { !Self.excludedCategories.contains($0.key.mainCategory) }
             orderedSubcategories = displayService.getOrderedSubcategories()
                 .filter { !Self.excludedCategories.contains($0.mainCategory) }
-            cacheVersion = displayService.version
 
             // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
             let availableIds = subcategorizedItems.values.flatMap { $0.map { $0.itemId } }
@@ -379,11 +376,7 @@ struct EquipmentEditorView: View {
 
             // インベントリキャッシュから装備した分を減らす（1個）
             _ = try? displayService.decrementQuantity(stackKey: item.stackKey, by: 1)
-            subcategorizedItems = displayService.getSubcategorizedItems()
-                .filter { !Self.excludedCategories.contains($0.key.mainCategory) }
-            orderedSubcategories = displayService.getOrderedSubcategories()
-                .filter { !Self.excludedCategories.contains($0.mainCategory) }
-            cacheVersion = displayService.version
+            refreshSubcategorizedItems()
         } catch {
             equipError = error.localizedDescription
         }
@@ -400,12 +393,67 @@ struct EquipmentEditorView: View {
         let runtime = try await characterService.runtimeCharacter(from: snapshot)
         currentCharacter = runtime
 
-        // インベントリキャッシュを再構築（解除したアイテムが戻るため）
-        try await displayService.reload(inventoryService: inventoryService)
+        // キャッシュに同じstackKeyがあれば数量を増やす、なければ新規追加
+        updateCacheForUnequippedItem(item)
+    }
+
+    /// 解除したアイテムをキャッシュに反映
+    private func updateCacheForUnequippedItem(_ item: CharacterInput.EquippedItem) {
+        // 既存アイテムがあれば数量を増やす
+        displayService.incrementQuantity(stackKey: item.stackKey, by: 1)
+
+        // incrementQuantityは既存アイテムがない場合何もしないので、
+        // キャッシュを確認して存在しなければ新規追加
+        let allItems = displayService.getAllItems()
+        if allItems.contains(where: { $0.stackKey == item.stackKey }) {
+            // 既に存在する（incrementで更新済み）
+            refreshSubcategorizedItems()
+            return
+        }
+
+        // 新規追加: LightweightItemDataを構築
+        guard let definition = itemDefinitions[item.itemId] else { return }
+        let masterData = appServices.masterDataCache
+
+        let superRareTitleName: String? = item.superRareTitleId > 0
+            ? masterData.superRareTitle(item.superRareTitleId)?.name
+            : nil
+        let normalTitleName: String? = masterData.title(item.normalTitleId)?.name
+
+        let gemName: String? = item.socketItemId > 0
+            ? masterData.item(item.socketItemId)?.name
+            : nil
+
+        let lightweightItem = LightweightItemData(
+            stackKey: item.stackKey,
+            itemId: item.itemId,
+            name: definition.name,
+            quantity: 1,
+            sellValue: definition.sellValue,
+            category: ItemSaleCategory(rawValue: definition.category) ?? .other,
+            enhancement: ItemSnapshot.Enhancement(
+                superRareTitleId: item.superRareTitleId,
+                normalTitleId: item.normalTitleId,
+                socketSuperRareTitleId: item.socketSuperRareTitleId,
+                socketNormalTitleId: item.socketNormalTitleId,
+                socketItemId: item.socketItemId
+            ),
+            storage: .playerItem,
+            rarity: definition.rarity,
+            normalTitleName: normalTitleName,
+            superRareTitleName: superRareTitleName,
+            gemName: gemName
+        )
+
+        displayService.addItem(lightweightItem)
+        refreshSubcategorizedItems()
+    }
+
+    /// サブカテゴリ表示を更新
+    private func refreshSubcategorizedItems() {
         subcategorizedItems = displayService.getSubcategorizedItems()
             .filter { !Self.excludedCategories.contains($0.key.mainCategory) }
         orderedSubcategories = displayService.getOrderedSubcategories()
             .filter { !Self.excludedCategories.contains($0.mainCategory) }
-        cacheVersion = displayService.version
     }
 }
