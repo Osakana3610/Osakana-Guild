@@ -45,18 +45,6 @@ issues:
     fix_plan: |
       掘り出し物機能の完成時に修正予定。商店は0.8.0にて基本機能を完成させる予定です。
 
-  - id: "FB0005"
-    title: "装備によって攻撃回数が増えない"
-    category: "戦闘"
-    status: "investigating"
-    reported_date: "2025-12-21"
-    description: |
-      攻撃回数が増加する装備を装着しても、戦闘時の攻撃回数が増えない。
-    details: ""
-    workaround: ""
-    fix_plan: |
-      12/22に審査提出予定
-
   - id: "FB0008"
     title: "魔法使い魔法・僧侶魔法が発動しない"
     category: "戦闘"
@@ -146,3 +134,15 @@ resolved:
       迷宮の称号を変更しても、敵の強さが変化しない。
     resolution: |
       0.7.70にて修正済み（審査中）。難易度の称号statMultiplierを敵レベルに乗算するよう修正。
+
+  - id: "FB0005"
+    title: "装備によって攻撃回数が増えない"
+    category: "戦闘"
+    status: "fixed"
+    reported_date: "2025-12-21"
+    resolved_date: "2025-12-21"
+    resolved_version: "0.7.70 (0772)"
+    description: |
+      攻撃回数が増加する装備を装着しても、戦闘時の攻撃回数が増えない。
+    resolution: |
+      0.7.70にて修正済み。
