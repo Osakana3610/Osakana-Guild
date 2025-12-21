@@ -763,13 +763,13 @@ private struct CombatAccumulator {
         }
 
         let convertedAttackCountValue = resolvedValue(.attackCount)
-        let attackCount: Int
+        let attackCount: Double
         if abs(convertedAttackCountValue - Double(baseAttackCount)) < 0.0001 {
-            attackCount = baseAttackCount
+            attackCount = Double(baseAttackCount)
         } else {
-            attackCount = max(1, Int(convertedAttackCountValue.rounded()))
+            attackCount = max(1, convertedAttackCountValue)
         }
-        let finalAttackCount = forcedToOne.contains(.attackCount) ? 1 : attackCount
+        let finalAttackCount = forcedToOne.contains(.attackCount) ? 1.0 : attackCount
 
         var combat = CharacterValues.Combat(maxHP: Int(maxHP.rounded(.towardZero)),
                                               physicalAttack: Int(physicalAttack.rounded(.towardZero)),
@@ -787,6 +787,9 @@ private struct CombatAccumulator {
                                               isMartialEligible: shouldApplyMartialBonuses)
 
         applyEquipmentCombatBonuses(to: &combat)
+
+        // 攻撃回数は最低1を保証
+        combat.attackCount = max(1.0, combat.attackCount)
 
         return combat
     }
@@ -904,8 +907,6 @@ private struct CombatAccumulator {
     private func applyEquipmentCombatBonuses(to combat: inout CharacterValues.Combat) {
         let definitionsById = Dictionary(uniqueKeysWithValues: itemDefinitions.map { ($0.id, $0) })
         let titlesById = Dictionary(uniqueKeysWithValues: titleDefinitions.map { ($0.id, $0) })
-        // attackCountは10倍スケールで保存されているため、合計してから0.1倍して丸める
-        var attackCountAccumulator: Double = 0
 
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
@@ -918,17 +919,20 @@ private struct CombatAccumulator {
             let titleNegMult = title?.negativeMultiplier ?? 1.0
             // 超レアがついている場合はさらに2倍
             let superRareMult: Double = item.superRareTitleId > 0 ? 2.0 : 1.0
+            // attackCount以外の戦闘ボーナス
             definition.combatBonuses.forEachNonZero { statName, value in
                 guard let stat = CombatStatKey(statName) else { return }
                 let statMultiplier = itemStatMultipliers[stat] ?? 1.0
                 let titleMult = value > 0 ? titleStatMult : titleNegMult
                 let scaled = Double(value) * categoryMultiplier * statMultiplier * pandoraMultiplier * titleMult * superRareMult
-                if stat == .attackCount {
-                    // attackCountは後でまとめて処理
-                    attackCountAccumulator += scaled * Double(item.quantity)
-                } else {
-                    apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity, to: stat, combat: &combat)
-                }
+                apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity, to: stat, combat: &combat)
+            }
+            // attackCount（Double）
+            if definition.combatBonuses.attackCount != 0 {
+                let atkTitleMult = definition.combatBonuses.attackCount > 0 ? titleStatMult : titleNegMult
+                let atkStatMultiplier = itemStatMultipliers[.attackCount] ?? 1.0
+                let scaledAtk = definition.combatBonuses.attackCount * categoryMultiplier * atkStatMultiplier * pandoraMultiplier * atkTitleMult * superRareMult
+                combat.attackCount += scaledAtk * Double(item.quantity)
             }
             // ソケット宝石の戦闘ステータス（係数: 通常0.5、魔法防御0.25、宝石自体の称号倍率を適用）
             if item.socketItemId != 0,
@@ -942,18 +946,17 @@ private struct CombatAccumulator {
                     let gemCoefficient: Double = (stat == .magicalDefense) ? 0.25 : 0.5
                     let titleMult = value > 0 ? gemStatMult : gemNegMult
                     let scaled = Double(value) * gemCoefficient * titleMult * gemSuperRareMult
-                    if stat == .attackCount {
-                        attackCountAccumulator += scaled
-                    } else {
-                        apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)), to: stat, combat: &combat)
-                    }
+                    apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)), to: stat, combat: &combat)
+                }
+                // ソケット宝石のattackCount
+                if gemDefinition.combatBonuses.attackCount != 0 {
+                    let gemAtkTitleMult = gemDefinition.combatBonuses.attackCount > 0 ? gemStatMult : gemNegMult
+                    let gemAtkCoefficient: Double = 0.5
+                    let scaledGemAtk = gemDefinition.combatBonuses.attackCount * gemAtkCoefficient * gemAtkTitleMult * gemSuperRareMult
+                    combat.attackCount += scaledGemAtk
                 }
             }
         }
-
-        // attackCountを0.1倍（10倍スケール → 実数）してから丸めて適用
-        let scaledAttackCount = attackCountAccumulator * 0.1
-        combat.attackCount += Int(scaledAttackCount.rounded(FloatingPointRoundingRule.towardZero))
     }
 
     private var shouldApplyMartialBonuses: Bool {
@@ -983,7 +986,7 @@ private struct CombatAccumulator {
         case .hitRate: combat.hitRate += bonus
         case .evasionRate: combat.evasionRate += bonus
         case .criticalRate: combat.criticalRate += bonus
-        case .attackCount: combat.attackCount += bonus
+        case .attackCount: combat.attackCount += Double(bonus)
         case .magicalHealing: combat.magicalHealing += bonus
         case .trapRemoval: combat.trapRemoval += bonus
         case .additionalDamage: combat.additionalDamage += bonus

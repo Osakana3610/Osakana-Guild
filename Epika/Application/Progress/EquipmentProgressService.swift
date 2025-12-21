@@ -127,6 +127,7 @@ enum EquipmentProgressService {
         currentEquippedItems: [CharacterInput.EquippedItem]
     ) -> [String: Int] {
         var delta: [String: Int] = [:]
+        var attackCountDelta: Double = 0
 
         // 現在の重複カウント
         let currentCounts = countItemsByItemId(equippedItems: currentEquippedItems)
@@ -144,6 +145,10 @@ enum EquipmentProgressService {
                 let adjustedValue = Int(Double(value) * multiplier)
                 delta[stat, default: 0] += adjustedValue
             }
+            // attackCount（Double）
+            if addItem.combatBonuses.attackCount != 0 {
+                attackCountDelta += addItem.combatBonuses.attackCount * multiplier
+            }
         }
 
         // 削除するアイテムの効果を計算（逆符号）
@@ -159,6 +164,15 @@ enum EquipmentProgressService {
                 let adjustedValue = Int(Double(value) * multiplier)
                 delta[stat, default: 0] -= adjustedValue
             }
+            // attackCount（Double）
+            if removeItem.combatBonuses.attackCount != 0 {
+                attackCountDelta -= removeItem.combatBonuses.attackCount * multiplier
+            }
+        }
+
+        // attackCountは10倍スケールでIntに変換（UI表示時に0.1倍される）
+        if attackCountDelta != 0 {
+            delta["attackCount"] = Int((attackCountDelta * 10).rounded())
         }
 
         // 0の差分は除外

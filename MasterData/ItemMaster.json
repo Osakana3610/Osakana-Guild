@@ -10,7 +10,7 @@
         "physicalAttack": 4,
         "hitRate": 14,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 5
       },
@@ -30,7 +30,7 @@
         "physicalAttack": 4,
         "hitRate": 21,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 6
       },
@@ -50,7 +50,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -70,7 +70,7 @@
         "physicalAttack": 4,
         "hitRate": 42,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 8
       },
@@ -90,7 +90,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -110,7 +110,7 @@
         "physicalAttack": 4,
         "hitRate": 84,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 10
       },
@@ -130,7 +130,7 @@
         "physicalAttack": 4,
         "hitRate": 112,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 11
       },
@@ -150,7 +150,7 @@
         "physicalAttack": 4,
         "hitRate": 168,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 12
       },
@@ -170,7 +170,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -191,7 +191,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -212,7 +212,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -233,7 +233,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -254,7 +254,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -275,7 +275,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -296,7 +296,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -317,7 +317,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -338,7 +338,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -359,7 +359,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -380,7 +380,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -401,7 +401,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -422,7 +422,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -443,7 +443,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -464,7 +464,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -485,7 +485,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -506,7 +506,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -527,7 +527,7 @@
         "physicalAttack": 4,
         "hitRate": 28,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 7
       },
@@ -548,7 +548,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -569,7 +569,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -590,7 +590,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -611,7 +611,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -632,7 +632,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -653,7 +653,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -674,7 +674,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -695,7 +695,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -716,7 +716,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -737,7 +737,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -758,7 +758,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -779,7 +779,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -800,7 +800,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -821,7 +821,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -842,7 +842,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -863,7 +863,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -884,7 +884,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -905,7 +905,7 @@
         "physicalAttack": 4,
         "hitRate": 56,
         "criticalRate": 3,
-        "attackCount": 3,
+        "attackCount": 0.3,
         "evasionRate": 6,
         "additionalDamage": 9
       },
@@ -1171,7 +1171,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 8,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 5
       },
       "rarity": "ノーマル",
@@ -1188,7 +1188,7 @@
       "combatBonuses": {
         "physicalAttack": 21,
         "hitRate": 12,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 7
       },
       "rarity": "ノーマル",
@@ -1205,7 +1205,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "ノーマル",
@@ -1222,7 +1222,7 @@
       "combatBonuses": {
         "physicalAttack": 42,
         "hitRate": 24,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 14
       },
       "rarity": "ノーマル",
@@ -1239,7 +1239,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "ノーマル",
@@ -1256,7 +1256,7 @@
       "combatBonuses": {
         "physicalAttack": 84,
         "hitRate": 48,
-        "attackCount": -4,
+        "attackCount": -0.4,
         "physicalDefense": 28
       },
       "rarity": "ノーマル",
@@ -1273,7 +1273,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "ノーマル",
@@ -1290,7 +1290,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "ノーマル",
@@ -1307,7 +1307,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1325,7 +1325,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1343,7 +1343,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1361,7 +1361,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1379,7 +1379,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1397,7 +1397,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1415,7 +1415,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1433,7 +1433,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1451,7 +1451,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1469,7 +1469,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1487,7 +1487,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1505,7 +1505,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1523,7 +1523,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1541,7 +1541,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1559,7 +1559,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 16,
-        "attackCount": -2,
+        "attackCount": -0.2,
         "physicalDefense": 10
       },
       "rarity": "Tier1",
@@ -1577,7 +1577,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1595,7 +1595,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1613,7 +1613,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1631,7 +1631,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1649,7 +1649,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1667,7 +1667,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1685,7 +1685,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1703,7 +1703,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1721,7 +1721,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1739,7 +1739,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1757,7 +1757,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1775,7 +1775,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1793,7 +1793,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1811,7 +1811,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1829,7 +1829,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1847,7 +1847,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 32,
-        "attackCount": -3,
+        "attackCount": -0.3,
         "physicalDefense": 18
       },
       "rarity": "Tier2",
@@ -1865,7 +1865,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -1884,7 +1884,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -1903,7 +1903,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -1922,7 +1922,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -1941,7 +1941,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -1960,7 +1960,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -1979,7 +1979,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -1998,7 +1998,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2017,7 +2017,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2036,7 +2036,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2055,7 +2055,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2074,7 +2074,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2093,7 +2093,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2112,7 +2112,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2131,7 +2131,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2150,7 +2150,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2169,7 +2169,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2188,7 +2188,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2207,7 +2207,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2226,7 +2226,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2245,7 +2245,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2264,7 +2264,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2283,7 +2283,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2302,7 +2302,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2321,7 +2321,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2340,7 +2340,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2359,7 +2359,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2378,7 +2378,7 @@
       "combatBonuses": {
         "physicalAttack": 112,
         "hitRate": 64,
-        "attackCount": -5,
+        "attackCount": -0.5,
         "physicalDefense": 40
       },
       "rarity": "Tier3",
@@ -2397,7 +2397,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2416,7 +2416,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2435,7 +2435,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2454,7 +2454,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2473,7 +2473,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2492,7 +2492,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2511,7 +2511,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2530,7 +2530,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2549,7 +2549,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2568,7 +2568,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2587,7 +2587,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2606,7 +2606,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2625,7 +2625,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2644,7 +2644,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2663,7 +2663,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2682,7 +2682,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2701,7 +2701,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2720,7 +2720,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -2739,7 +2739,7 @@
       "combatBonuses": {
         "physicalAttack": 168,
         "hitRate": 96,
-        "attackCount": -7,
+        "attackCount": -0.7,
         "physicalDefense": 56
       },
       "rarity": "Tier4",
@@ -3309,7 +3309,7 @@
       "combatBonuses": {
         "physicalAttack": 26,
         "hitRate": 8,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -3325,7 +3325,7 @@
       "combatBonuses": {
         "physicalAttack": 39,
         "hitRate": 12,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -3341,7 +3341,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -3357,7 +3357,7 @@
       "combatBonuses": {
         "physicalAttack": 82,
         "hitRate": 26,
-        "attackCount": -22
+        "attackCount": -2.2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -3373,7 +3373,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -3389,7 +3389,7 @@
       "combatBonuses": {
         "physicalAttack": 156,
         "hitRate": 52,
-        "attackCount": -32
+        "attackCount": -3.2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -3405,7 +3405,7 @@
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
-        "attackCount": -42
+        "attackCount": -4.2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -3421,7 +3421,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -3437,7 +3437,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -3454,7 +3454,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -3471,7 +3471,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -3488,7 +3488,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -3505,7 +3505,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -3522,7 +3522,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -3539,7 +3539,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -3556,7 +3556,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -3573,7 +3573,7 @@
       "combatBonuses": {
         "physicalAttack": 52,
         "hitRate": 16,
-        "attackCount": -16
+        "attackCount": -1.6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -3590,7 +3590,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3607,7 +3607,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3624,7 +3624,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3641,7 +3641,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3658,7 +3658,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3675,7 +3675,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3692,7 +3692,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3709,7 +3709,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3726,7 +3726,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3743,7 +3743,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3760,7 +3760,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3777,7 +3777,7 @@
       "combatBonuses": {
         "physicalAttack": 140,
         "hitRate": 35,
-        "attackCount": -28
+        "attackCount": -2.8
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -3794,7 +3794,7 @@
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
-        "attackCount": -42
+        "attackCount": -4.2
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -3812,7 +3812,7 @@
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
-        "attackCount": -42
+        "attackCount": -4.2
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -3830,7 +3830,7 @@
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
-        "attackCount": -42
+        "attackCount": -4.2
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -3848,7 +3848,7 @@
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
-        "attackCount": -42
+        "attackCount": -4.2
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -3866,7 +3866,7 @@
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
-        "attackCount": -42
+        "attackCount": -4.2
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -3884,7 +3884,7 @@
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
-        "attackCount": -42
+        "attackCount": -4.2
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -3902,7 +3902,7 @@
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
-        "attackCount": -42
+        "attackCount": -4.2
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -3920,7 +3920,7 @@
       "combatBonuses": {
         "physicalAttack": 210,
         "hitRate": 70,
-        "attackCount": -42
+        "attackCount": -4.2
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -3938,7 +3938,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -3956,7 +3956,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -3974,7 +3974,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -3992,7 +3992,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4010,7 +4010,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4028,7 +4028,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4046,7 +4046,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4064,7 +4064,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4082,7 +4082,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4100,7 +4100,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4118,7 +4118,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4136,7 +4136,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4154,7 +4154,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4172,7 +4172,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4190,7 +4190,7 @@
       "combatBonuses": {
         "physicalAttack": 315,
         "hitRate": 105,
-        "attackCount": -64
+        "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
       "grantedSkillIds": [
@@ -4208,7 +4208,7 @@
       "combatBonuses": {
         "physicalAttack": 7,
         "hitRate": 18,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 2
       },
@@ -4226,7 +4226,7 @@
       "combatBonuses": {
         "physicalAttack": 10,
         "hitRate": 25,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 3
       },
@@ -4244,7 +4244,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4262,7 +4262,7 @@
       "combatBonuses": {
         "physicalAttack": 21,
         "hitRate": 42,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 5
       },
@@ -4280,7 +4280,7 @@
       "combatBonuses": {
         "physicalAttack": 28,
         "hitRate": 52,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 6
       },
@@ -4298,7 +4298,7 @@
       "combatBonuses": {
         "physicalAttack": 42,
         "hitRate": 74,
-        "attackCount": 1,
+        "attackCount": 0.1,
         "evasionRate": 3,
         "additionalDamage": 7
       },
@@ -4316,7 +4316,7 @@
       "combatBonuses": {
         "physicalAttack": 56,
         "hitRate": 98,
-        "attackCount": 0,
+        "attackCount": 0.0,
         "evasionRate": 3,
         "additionalDamage": 8
       },
@@ -4334,7 +4334,7 @@
       "combatBonuses": {
         "physicalAttack": 84,
         "hitRate": 147,
-        "attackCount": -1,
+        "attackCount": -0.1,
         "evasionRate": 3,
         "additionalDamage": 9
       },
@@ -4352,7 +4352,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4371,7 +4371,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4390,7 +4390,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4409,7 +4409,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4428,7 +4428,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4447,7 +4447,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4466,7 +4466,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4485,7 +4485,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4504,7 +4504,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4523,7 +4523,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4542,7 +4542,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4561,7 +4561,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -4580,7 +4580,7 @@
       "combatBonuses": {
         "physicalAttack": 14,
         "hitRate": 32,
-        "attackCount": 2,
+        "attackCount": 0.2,
         "evasionRate": 3,
         "additionalDamage": 4
       },
@@ -7300,7 +7300,7 @@
       "combatBonuses": {
         "hitRate": 9,
         "criticalRate": 2,
-        "attackCount": 7
+        "attackCount": 0.7
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7316,7 +7316,7 @@
       "combatBonuses": {
         "hitRate": 18,
         "criticalRate": 2,
-        "attackCount": 4
+        "attackCount": 0.4
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7332,7 +7332,7 @@
       "combatBonuses": {
         "hitRate": 27,
         "criticalRate": 2,
-        "attackCount": 4
+        "attackCount": 0.4
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7348,7 +7348,7 @@
       "combatBonuses": {
         "hitRate": 36,
         "criticalRate": 2,
-        "attackCount": 4
+        "attackCount": 0.4
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7364,7 +7364,7 @@
       "combatBonuses": {
         "hitRate": 45,
         "criticalRate": 2,
-        "attackCount": 3
+        "attackCount": 0.3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7380,7 +7380,7 @@
       "combatBonuses": {
         "hitRate": 54,
         "criticalRate": 2,
-        "attackCount": 2
+        "attackCount": 0.2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7396,7 +7396,7 @@
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7412,7 +7412,7 @@
       "combatBonuses": {
         "hitRate": 72,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7428,7 +7428,7 @@
       "combatBonuses": {
         "hitRate": 27,
         "criticalRate": 2,
-        "attackCount": 4
+        "attackCount": 0.4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -7444,7 +7444,7 @@
       "combatBonuses": {
         "hitRate": 27,
         "criticalRate": 2,
-        "attackCount": 4
+        "attackCount": 0.4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -7460,7 +7460,7 @@
       "combatBonuses": {
         "hitRate": 27,
         "criticalRate": 2,
-        "attackCount": 4
+        "attackCount": 0.4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -7476,7 +7476,7 @@
       "combatBonuses": {
         "hitRate": 27,
         "criticalRate": 2,
-        "attackCount": 4
+        "attackCount": 0.4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -7492,7 +7492,7 @@
       "combatBonuses": {
         "hitRate": 27,
         "criticalRate": 2,
-        "attackCount": 4
+        "attackCount": 0.4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -7508,7 +7508,7 @@
       "combatBonuses": {
         "hitRate": 45,
         "criticalRate": 2,
-        "attackCount": 3
+        "attackCount": 0.3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7524,7 +7524,7 @@
       "combatBonuses": {
         "hitRate": 45,
         "criticalRate": 2,
-        "attackCount": 3
+        "attackCount": 0.3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7540,7 +7540,7 @@
       "combatBonuses": {
         "hitRate": 45,
         "criticalRate": 2,
-        "attackCount": 3
+        "attackCount": 0.3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7556,7 +7556,7 @@
       "combatBonuses": {
         "hitRate": 45,
         "criticalRate": 2,
-        "attackCount": 3
+        "attackCount": 0.3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7572,7 +7572,7 @@
       "combatBonuses": {
         "hitRate": 45,
         "criticalRate": 2,
-        "attackCount": 3
+        "attackCount": 0.3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7588,7 +7588,7 @@
       "combatBonuses": {
         "hitRate": 45,
         "criticalRate": 2,
-        "attackCount": 3
+        "attackCount": 0.3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7604,7 +7604,7 @@
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7620,7 +7620,7 @@
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7636,7 +7636,7 @@
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7652,7 +7652,7 @@
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7668,7 +7668,7 @@
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7684,7 +7684,7 @@
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7700,7 +7700,7 @@
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7716,7 +7716,7 @@
       "combatBonuses": {
         "hitRate": 63,
         "criticalRate": 2,
-        "attackCount": 1
+        "attackCount": 0.1
       },
       "rarity": "Tier3",
       "grantedSkillIds": [

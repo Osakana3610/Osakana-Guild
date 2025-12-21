@@ -380,7 +380,7 @@ final class BattleBalanceTests: XCTestCase {
                 hitRate: max(1, hitRate),
                 evasionRate: max(0, evasion),
                 criticalRate: max(0, critical),
-                attackCount: max(1, atkCount),
+                attackCount: Double(max(1, atkCount)),
                 magicalHealing: max(0, magHeal),
                 trapRemoval: 0,
                 additionalDamage: 0,
