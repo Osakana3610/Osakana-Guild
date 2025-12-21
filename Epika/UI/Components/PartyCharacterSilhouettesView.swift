@@ -46,42 +46,20 @@ struct PartyCharacterSilhouettesView: View {
                 .padding(.vertical, 8)
                 .frame(maxWidth: .infinity, alignment: .center)
             } else {
-                HStack(alignment: .top, spacing: 0) {
-                    ForEach(0..<6, id: \.self) { index in
-                        Group {
-                            if index < orderedMembers.count {
-                                let member = orderedMembers[index]
-                                VStack(spacing: 2) {
-                                    CharacterImageView(avatarIndex: member.resolvedAvatarId, size: 55)
-                                    VStack(spacing: 1) {
-                                        Text("Lv.\(member.level)")
-                                            .font(.caption2)
-                                            .foregroundStyle(.primary)
-                                        Text("HP\(member.currentHP)")
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                .frame(width: 48)
-                                .id("member_\(member.id)")
-                            } else {
-                                VStack(spacing: 2) {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color(.systemGray5))
-                                        .frame(width: 43, height: 53)
-                                    VStack(spacing: 1) {
-                                        Text("- / -")
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                .frame(width: 48)
-                                .id("empty_\(index)")
+                HStack(alignment: .top, spacing: 8) {
+                    ForEach(orderedMembers, id: \.id) { member in
+                        VStack(spacing: 2) {
+                            CharacterImageView(avatarIndex: member.resolvedAvatarId, size: 55)
+                            VStack(spacing: 1) {
+                                Text("Lv.\(member.level)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.primary)
+                                Text("HP\(member.currentHP)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
                             }
                         }
-                        if index < 5 {
-                            Spacer(minLength: 0)
-                        }
+                        .frame(width: 48)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
