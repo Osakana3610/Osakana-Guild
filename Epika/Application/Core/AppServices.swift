@@ -47,6 +47,10 @@ final class AppServices {
     let container: ModelContainer
     let masterDataCache: MasterDataCache
     let gameState: GameStateService
+
+    // MARK: - Observable Player State
+    var playerGold: UInt32 = 0
+    var playerCatTickets: UInt16 = 0
     let character: CharacterProgressService
     let party: PartyProgressService
     let inventory: InventoryProgressService
@@ -125,6 +129,24 @@ final class AppServices {
         self.itemPreload = ItemPreloadService(masterDataCache: masterDataCache)
         self.gemModification = GemModificationProgressService(container: container,
                                                                masterDataCache: masterDataCache)
+    }
+
+    // MARK: - Player State Updates
+
+    /// PlayerSnapshotからObservable状態を更新
+    func applyPlayerSnapshot(_ snapshot: PlayerSnapshot) {
+        playerGold = snapshot.gold
+        playerCatTickets = snapshot.catTickets
+    }
+
+    /// 現在のプレイヤー状態をロードしてObservable状態を更新
+    func reloadPlayerState() async {
+        do {
+            let snapshot = try await gameState.currentPlayer()
+            applyPlayerSnapshot(snapshot)
+        } catch {
+            // プレイヤーが存在しない場合は初期値のまま
+        }
     }
 }
 

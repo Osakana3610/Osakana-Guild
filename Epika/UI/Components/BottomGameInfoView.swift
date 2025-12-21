@@ -11,7 +11,8 @@
 //   - 2行構成: 上段にキャット・チケット/プレミアム情報、下段に時刻/ゴールド
 //   - iOS 26以降はglassEffect、それ以前はsystemGray6背景
 //   - Dynamic Type対応（表示名を動的に短縮）
-//   - Timer駆動で1秒ごとに時刻更新、1分ごとにプレイヤーデータ更新
+//   - Timer駆動で1秒ごとに時刻更新
+//   - ゴールド/チケットはAppServicesの@Observableプロパティを参照（即時反映）
 //
 // 【使用箇所】
 //   - アプリ全体の主要画面下部
@@ -60,12 +61,8 @@ struct BottomGameInfoView: View {
     @Environment(AppServices.self) private var appServices
     @Environment(\.sizeCategory) private var sizeCategory
     @State private var currentTime = Date()
-    @State private var catTicketCount: Int = 0
-    @State private var goldAmount: Int = 0
-    @State private var currentPlayer: PlayerSnapshot?
 
     private let secondsTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-    private let minuteTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     private var catTicketDisplayName: String {
         sizeCategory > .large ? "キャット" : "キャット・チケット"
@@ -83,7 +80,7 @@ struct BottomGameInfoView: View {
                         .font(.subheadline)
                         .foregroundColor(.primary)
 
-                    Text("\(catTicketCount)枚")
+                    Text("\(appServices.playerCatTickets)枚")
                         .font(.subheadline.bold())
                         .foregroundColor(.primary)
                 }
@@ -111,7 +108,7 @@ struct BottomGameInfoView: View {
                 Spacer()
 
                 HStack(spacing: 2) {
-                    Text("\(formatGold(goldAmount))GP")
+                    Text("\(formatGold(Int(appServices.playerGold)))GP")
                         .font(.footnote)
                         .foregroundColor(.primary)
                 }
@@ -121,41 +118,8 @@ struct BottomGameInfoView: View {
         }
         .padding(.vertical, 6)
         .modifier(BottomGameInfoStyleModifier())
-        .onAppear { loadPlayerData() }
+        .task { await appServices.reloadPlayerState() }
         .onReceive(secondsTimer) { _ in currentTime = Date() }
-        .onReceive(minuteTimer) { _ in loadPlayerData() }
-    }
-
-    private func loadPlayerData() {
-        Task { @MainActor in
-            do {
-                let player = try await appServices.gameState.currentPlayer()
-                apply(player)
-            } catch ProgressError.playerNotFound {
-                do {
-                    let player = try await appServices.gameState.loadCurrentPlayer()
-                    apply(player)
-                } catch {
-                    clearPlayer()
-                }
-            } catch {
-                clearPlayer()
-            }
-        }
-    }
-
-    @MainActor
-    private func apply(_ snapshot: PlayerSnapshot) {
-        currentPlayer = snapshot
-        catTicketCount = Int(snapshot.catTickets)
-        goldAmount = Int(snapshot.gold)
-    }
-
-    @MainActor
-    private func clearPlayer() {
-        currentPlayer = nil
-        catTicketCount = 0
-        goldAmount = 0
     }
 
     private func formatCurrentTime(_ date: Date) -> String {

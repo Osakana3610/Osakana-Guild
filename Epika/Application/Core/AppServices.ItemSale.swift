@@ -46,11 +46,15 @@ extension AppServices {
         // 1. 在庫整理でキャット・チケット獲得
         let tickets = try await shop.cleanupStock(itemId: itemId)
         if tickets > 0 {
-            _ = try await gameState.addCatTickets(UInt16(tickets))
+            let snapshot = try await gameState.addCatTickets(UInt16(tickets))
+            applyPlayerSnapshot(snapshot)
         }
 
         // 2. インベントリ内の自動売却対象を売却
         let autoSellGold = try await sellAutoTradeItemsFromInventory()
+
+        // 3. プレイヤー状態を更新
+        await reloadPlayerState()
 
         return CleanupResult(tickets: tickets, autoSellGold: autoSellGold)
     }
@@ -126,10 +130,14 @@ extension AppServices {
         }
 
         // ゴールドを加算
+        let snapshot: PlayerSnapshot
         if totalGold > 0 {
-            return try await gameState.addGold(UInt32(totalGold))
+            snapshot = try await gameState.addGold(UInt32(totalGold))
+        } else {
+            snapshot = try await gameState.currentPlayer()
         }
-        return try await gameState.currentPlayer()
+        applyPlayerSnapshot(snapshot)
+        return snapshot
     }
 
     /// 単一アイテムを指定数量売却してショップ在庫に追加する
@@ -165,10 +173,14 @@ extension AppServices {
         }
 
         // ゴールドを加算
+        let snapshot: PlayerSnapshot
         if result.gold > 0 {
-            return try await gameState.addGold(UInt32(result.gold))
+            snapshot = try await gameState.addGold(UInt32(result.gold))
+        } else {
+            snapshot = try await gameState.currentPlayer()
         }
-        return try await gameState.currentPlayer()
+        applyPlayerSnapshot(snapshot)
+        return snapshot
     }
 
     // MARK: - Private Helpers
