@@ -116,9 +116,18 @@ actor GameStateService {
 
     func addGold(_ amount: UInt32) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
-            wallet.gold &+= amount
+            let newGold = UInt64(wallet.gold) + UInt64(amount)
+            wallet.gold = UInt32(min(newGold, UInt64(AppConstants.Progress.maximumGold)))
         }
     }
+
+    #if DEBUG
+    func setGold(_ amount: UInt32) async throws -> PlayerSnapshot {
+        return try await mutateWallet { wallet in
+            wallet.gold = min(amount, AppConstants.Progress.maximumGold)
+        }
+    }
+    #endif
 
     func spendGold(_ amount: UInt32) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
@@ -133,9 +142,18 @@ actor GameStateService {
 
     func addCatTickets(_ amount: UInt16) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
-            wallet.catTickets &+= amount
+            let newTickets = UInt32(wallet.catTickets) + UInt32(amount)
+            wallet.catTickets = UInt16(min(newTickets, UInt32(AppConstants.Progress.maximumCatTickets)))
         }
     }
+
+    #if DEBUG
+    func setCatTickets(_ amount: UInt16) async throws -> PlayerSnapshot {
+        return try await mutateWallet { wallet in
+            wallet.catTickets = min(amount, AppConstants.Progress.maximumCatTickets)
+        }
+    }
+    #endif
 
     // MARK: - Pandora Box
 
@@ -195,6 +213,19 @@ private extension GameStateService {
         var descriptor = FetchDescriptor<GameStateRecord>()
         descriptor.fetchLimit = 1
         if let existing = try context.fetch(descriptor).first {
+            // 上限を超えていたら切り詰める
+            var needsSave = false
+            if existing.gold > AppConstants.Progress.maximumGold {
+                existing.gold = AppConstants.Progress.maximumGold
+                needsSave = true
+            }
+            if existing.catTickets > AppConstants.Progress.maximumCatTickets {
+                existing.catTickets = AppConstants.Progress.maximumCatTickets
+                needsSave = true
+            }
+            if needsSave {
+                existing.updatedAt = Date()
+            }
             return existing
         }
         let record = GameStateRecord(gold: initialGold)
@@ -216,8 +247,9 @@ private extension GameStateService {
         let record = try ensureGameState(context: context)
         var wallet = PlayerWallet(gold: record.gold, catTickets: record.catTickets)
         try mutate(&wallet)
-        record.gold = wallet.gold
-        record.catTickets = wallet.catTickets
+        // 上限を適用
+        record.gold = min(wallet.gold, AppConstants.Progress.maximumGold)
+        record.catTickets = min(wallet.catTickets, AppConstants.Progress.maximumCatTickets)
         record.updatedAt = Date()
         try saveIfNeeded(context)
         return Self.snapshot(from: record)

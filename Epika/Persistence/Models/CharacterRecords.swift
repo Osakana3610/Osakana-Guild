@@ -16,7 +16,7 @@
 //     - previousJobId: 前職ID（0=なし、転職は1回のみ）
 //     - avatarId: アバターID（0=デフォルト、101〜316=職業、400+=カスタム）
 //     - level: レベル（最大200）
-//     - experience: 経験値（数億まで対応）
+//     - experience: 経験値（Lv200で数百億に達するためUInt64）
 //     - currentHP: 現在HP（20万超対応）
 //     - primaryPersonalityId, secondaryPersonalityId: 性格ID（0=なし）
 //     - actionRateAttack/PriestMagic/MageMagic/Breath: 行動設定（0-100）
@@ -45,7 +45,8 @@ final class CharacterRecord {
     var previousJobId: UInt8 = 0               // 前職（0=なし、転職は1回のみ）
     var avatarId: UInt16 = 0                   // 0=デフォルト（種族画像）、101〜316=職業、400+=カスタム
     var level: UInt8 = 1                       // 最大200
-    var experience: UInt32 = 0                 // 数億まで
+    // [軽量マイグレーション] UInt32→UInt64 (Lv200対応) - 将来削除予定のコメント
+    var experience: UInt64 = 0
     var currentHP: UInt32 = 0                  // 20万超の可能性
     var primaryPersonalityId: UInt8 = 0        // 0 = なし
     var secondaryPersonalityId: UInt8 = 0      // 0 = なし
@@ -63,7 +64,7 @@ final class CharacterRecord {
          previousJobId: UInt8 = 0,
          avatarId: UInt16 = 0,
          level: UInt8 = 1,
-         experience: UInt32 = 0,
+         experience: UInt64 = 0,
          currentHP: UInt32 = 0,
          primaryPersonalityId: UInt8 = 0,
          secondaryPersonalityId: UInt8 = 0,

@@ -127,14 +127,16 @@ struct BottomGameInfoView: View {
     }
 
     private func formatGold(_ amount: Int) -> String {
-        if amount >= 100_000_000 {
-            return String(format: "%.0f,%03d,%03d",
-                          Double(amount) / 1_000_000,
+        if amount >= 10_000_000 {
+            // 8〜9桁: XX,XXX,XXX
+            return String(format: "%d,%03d,%03d",
+                          amount / 1_000_000,
                           (amount / 1000) % 1000,
                           amount % 1000)
         } else if amount >= 1_000_000 {
-            return String(format: "%.0f,%03d,%03d",
-                          Double(amount) / 1_000_000,
+            // 7桁: X,XXX,XXX
+            return String(format: "%d,%03d,%03d",
+                          amount / 1_000_000,
                           (amount / 1000) % 1000,
                           amount % 1000)
         } else if amount >= 1000 {
