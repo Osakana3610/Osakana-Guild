@@ -13,16 +13,17 @@
 //
 // 【生成フロー】
 //   1. マスターデータ取得（種族/職業/性格）
-//   2. 装備からスキルID収集
+//   2. スキルID収集（職業 + 装備）
 //   3. Loadout構築（アイテム/称号定義）
 //   4. 装備スロット計算・検証
 //   5. スペルブック構築
 //   6. CombatStatCalculatorで戦闘ステータス計算
 //   7. RuntimeCharacter生成
 //
-// 【装備処理】
-//   - ソケット宝石のアイテム/称号も含めて収集
-//   - スキルは装備アイテム+超レア称号から取得
+// 【スキル収集】
+//   - 前職のスキル（転職済みの場合）
+//   - 現職のスキル
+//   - 装備アイテム + 超レア称号から付与されるスキル
 //
 // 【補助機能】
 //   - EquipmentSlotCalculator: レベルベースの装備可能数計算
@@ -66,9 +67,24 @@ enum RuntimeCharacterFactory {
         let superRareTitleIds = Set(input.equippedItems.map { $0.superRareTitleId }).filter { $0 > 0 }
         let superRareTitles = superRareTitleIds.compactMap { masterData.superRareTitle($0) }
 
-        // 装備から付与されるスキルIDを収集（装備アイテム + 装備の超レア称号）
-        var allSkillIds = equippedItemDefinitions.flatMap { $0.grantedSkillIds }
+        // スキルIDを収集（職業 + 装備）
+        var allSkillIds: [UInt16] = []
+
+        // 前職のスキル（previousJobId > 0 の場合のみ）
+        if input.previousJobId > 0 {
+            guard let previousJob = masterData.job(input.previousJobId) else {
+                throw RuntimeError.invalidConfiguration(reason: "前職ID \(input.previousJobId) のマスターデータが見つかりません")
+            }
+            allSkillIds.append(contentsOf: previousJob.learnedSkillIds)
+        }
+
+        // 現職のスキル
+        allSkillIds.append(contentsOf: job.learnedSkillIds)
+
+        // 装備から付与されるスキル（装備アイテム + 装備の超レア称号）
+        allSkillIds.append(contentsOf: equippedItemDefinitions.flatMap { $0.grantedSkillIds })
         allSkillIds.append(contentsOf: superRareTitles.flatMap { $0.skillIds })
+
         let learnedSkills = allSkillIds.compactMap { masterData.skill($0) }
 
         // Loadout構築

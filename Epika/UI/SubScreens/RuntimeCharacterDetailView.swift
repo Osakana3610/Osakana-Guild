@@ -89,6 +89,14 @@ struct CharacterDetailContent: View {
                                                   onActionPreferencesChange: onActionPreferencesChange)
             }
 
+            Section("魔法使い魔法") {
+                CharacterMageSpellsSection(character: character)
+            }
+
+            Section("僧侶魔法") {
+                CharacterPriestSpellsSection(character: character)
+            }
+
             Section("習得スキル") {
                 CharacterSkillsSection(character: character)
             }
