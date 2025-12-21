@@ -121,13 +121,12 @@ actor GameStateService {
         }
     }
 
-    #if DEBUG
+    /// ベータテスト用：所持金を直接設定
     func setGold(_ amount: UInt32) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
             wallet.gold = min(amount, AppConstants.Progress.maximumGold)
         }
     }
-    #endif
 
     func spendGold(_ amount: UInt32) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
@@ -147,13 +146,12 @@ actor GameStateService {
         }
     }
 
-    #if DEBUG
+    /// ベータテスト用：チケットを直接設定
     func setCatTickets(_ amount: UInt16) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
             wallet.catTickets = min(amount, AppConstants.Progress.maximumCatTickets)
         }
     }
-    #endif
 
     // MARK: - Pandora Box
 
