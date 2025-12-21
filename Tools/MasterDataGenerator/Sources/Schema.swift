@@ -142,6 +142,7 @@ extension Generator {
                 name TEXT NOT NULL,
                 school INTEGER NOT NULL,
                 tier INTEGER NOT NULL,
+                unlock_level INTEGER NOT NULL,
                 category INTEGER NOT NULL,
                 targeting INTEGER NOT NULL,
                 max_targets_base INTEGER,

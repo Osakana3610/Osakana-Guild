@@ -42,7 +42,10 @@ extension BattleTurnEngine {
         guard caster.actionResources.consume(spellId: spell.id) else { return false }
 
         context.updateActor(caster, side: side, index: casterIndex)
-        appendActionLog(for: caster, side: side, index: casterIndex, category: .priestMagic, context: &context)
+
+        // 呪文名付きログを追加
+        let casterIdx = context.actorIndex(for: side, arrayIndex: casterIndex)
+        context.appendAction(kind: .priestMagic, actor: casterIdx, skillIndex: UInt16(spell.id))
 
         performPriestMagic(casterSide: side,
                            casterIndex: casterIndex,
@@ -82,7 +85,9 @@ extension BattleTurnEngine {
 
         context.updateActor(attacker, side: side, index: attackerIndex)
 
-        appendActionLog(for: attacker, side: side, index: attackerIndex, category: .mageMagic, context: &context)
+        // 魔法名付きログを追加
+        let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
+        context.appendAction(kind: .mageMagic, actor: attackerIdx, skillIndex: UInt16(spell.id))
 
         let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, context: context)
         let targetCount = statusTargetCount(for: attacker, spell: spell)
