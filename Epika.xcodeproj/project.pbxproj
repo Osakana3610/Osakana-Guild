@@ -246,7 +246,7 @@
 			);
 			name = "Generate MasterData SQLite";
 			outputPaths = (
-				"$(SRCROOT)/Epika/Generated/master_data.db",
+				"$(SRCROOT)/Tools/MasterDataGenerator/output/master_data.db",
 			);
 			shellPath = /bin/bash;
 			shellScript = (

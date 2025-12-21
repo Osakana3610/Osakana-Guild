@@ -49,8 +49,7 @@ xcodebuild-*.log
 periphery*.json
 xcodebuild*.log
 CLAUDE.md
-# MasterData (auto-generated at build time)
-Epika/Generated/master_data.db
+# MasterData (auto-generated at build time, output in Tools/MasterDataGenerator/output/)
 
 # MasterDataGenerator build artifacts
 Tools/MasterDataGenerator/.build/
