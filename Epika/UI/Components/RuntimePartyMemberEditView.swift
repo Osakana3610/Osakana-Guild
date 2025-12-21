@@ -27,8 +27,7 @@ struct RuntimePartyMemberEditView: View {
     let allCharacters: [RuntimeCharacter]
     @Environment(PartyViewState.self) private var partyState
     @Environment(AppServices.self) private var appServices
-    @State private var currentMemberIds: [UInt8?] = Array(repeating: nil, count: Self.maxSlots)
-    @State private var selectedSlotIndex: Int? = nil
+    @State private var currentMemberIds: [UInt8] = []
     @State private var searchText = ""
     @State private var characterIdsInOtherParties = Set<UInt8>()
     @State private var showError = false
@@ -41,33 +40,31 @@ struct RuntimePartyMemberEditView: View {
         }
         return filtered.filter { character in
             character.isAlive &&
-            !currentMemberIds.contains(where: { $0 == character.id }) &&
+            !currentMemberIds.contains(character.id) &&
             !characterIdsInOtherParties.contains(character.id)
         }
     }
 
     private var partyService: PartyProgressService { appServices.party }
 
-    private func character(for id: UInt8?) -> RuntimeCharacter? {
-        guard let id else { return nil }
-        return allCharacters.first { $0.id == id }
+    private func character(for id: UInt8) -> RuntimeCharacter? {
+        allCharacters.first { $0.id == id }
     }
 
     var body: some View {
         List {
             Section {
-                ForEach(Array(currentMemberIds.enumerated()), id: \.offset) { index, memberId in
-                    let member = character(for: memberId)
-                    PartyMemberListRow(
-                        character: member,
-                        slotIndex: index,
-                        isSelected: selectedSlotIndex == index,
-                        onTap: { handleSlotTap(index: index) }
-                    )
+                ForEach(currentMemberIds, id: \.self) { memberId in
+                    if let member = character(for: memberId) {
+                        PartyMemberRow(
+                            character: member,
+                            onRemove: { removeCharacter(id: memberId) }
+                        )
+                    }
                 }
                 .onMove(perform: moveMembers)
             } header: {
-                Text("パーティメンバー (最大6名)")
+                Text("パーティメンバー (\(currentMemberIds.count)/\(Self.maxSlots))")
             }
 
             Section {
@@ -121,7 +118,7 @@ struct RuntimePartyMemberEditView: View {
     // MARK: - Initialisation
 
     private func initialise() async {
-        await MainActor.run { currentMemberIds = Self.initialSlots(from: party.memberIds) }
+        await MainActor.run { currentMemberIds = party.memberIds }
         await loadCharactersInOtherParties()
     }
 
@@ -144,28 +141,14 @@ struct RuntimePartyMemberEditView: View {
         persistMembers()
     }
 
-    private func handleSlotTap(index: Int) {
-        if selectedSlotIndex == index {
-            removeCharacter(at: index)
-        } else {
-            selectedSlotIndex = index
-        }
-    }
-
     private func addCharacter(_ character: RuntimeCharacter) {
-        if let selectedIndex = selectedSlotIndex {
-            currentMemberIds[selectedIndex] = character.id
-            selectedSlotIndex = nil
-        } else if let emptyIndex = currentMemberIds.firstIndex(where: { $0 == nil }) {
-            currentMemberIds[emptyIndex] = character.id
-        }
+        guard currentMemberIds.count < Self.maxSlots else { return }
+        currentMemberIds.append(character.id)
         persistMembers()
     }
 
-    private func removeCharacter(at index: Int) {
-        guard currentMemberIds.indices.contains(index) else { return }
-        currentMemberIds[index] = nil
-        selectedSlotIndex = nil
+    private func removeCharacter(id: UInt8) {
+        currentMemberIds.removeAll { $0 == id }
         persistMembers()
     }
 
@@ -174,8 +157,7 @@ struct RuntimePartyMemberEditView: View {
             guard !isSaving else { return }
             isSaving = true
             do {
-                let memberIds = currentMemberIds.compactMap { $0 }
-                try await partyState.updatePartyMembers(party: party, memberIds: memberIds)
+                try await partyState.updatePartyMembers(party: party, memberIds: currentMemberIds)
                 await loadCharactersInOtherParties()
             } catch {
                 await MainActor.run {
@@ -190,69 +172,37 @@ struct RuntimePartyMemberEditView: View {
 
 private extension RuntimePartyMemberEditView {
     static let maxSlots = 6
-
-    static func initialSlots(from members: [UInt8]) -> [UInt8?] {
-        var slots = Array<UInt8?>(repeating: nil, count: maxSlots)
-        for (index, id) in members.enumerated() where index < slots.count {
-            slots[index] = id
-        }
-        return slots
-    }
 }
 
 // MARK: - Supporting Views
 
-private struct PartyMemberListRow: View {
-    let character: RuntimeCharacter?
-    let slotIndex: Int
-    let isSelected: Bool
-    let onTap: () -> Void
+private struct PartyMemberRow: View {
+    let character: RuntimeCharacter
+    let onRemove: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                if let character {
-                    CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 55)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(character.name)
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                        HStack(spacing: 8) {
-                            Text("Lv.\(character.level)")
-                            Text(character.raceName)
-                            Text(character.jobName)
-                        }
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("HP")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Text("\(character.currentHP)/\(character.maxHP)")
-                            .font(.caption)
-                            .foregroundStyle(.primary)
-                    }
-                } else {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray4))
-                        .frame(width: 55, height: 55)
-                        .overlay(
-                            Image(systemName: isSelected ? "checkmark.circle.fill" : "plus")
-                                .foregroundStyle(isSelected ? .blue : .secondary)
-                        )
-                    Text("空きスロット")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Spacer()
+        HStack(spacing: 12) {
+            CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 44)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(character.name)
+                    .font(.subheadline)
+                    .foregroundStyle(.primary)
+                HStack(spacing: 6) {
+                    Text("Lv.\(character.level)")
+                    Text(character.jobName)
                 }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
-            .padding(.vertical, 4)
-            .contentShape(Rectangle())
+            Spacer()
+            Button(action: onRemove) {
+                Image(systemName: "minus.circle.fill")
+                    .foregroundStyle(.red)
+                    .font(.title3)
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
-        .listRowBackground(isSelected ? Color.blue.opacity(0.1) : Color(.systemBackground))
+        .padding(.vertical, 2)
     }
 }
 
