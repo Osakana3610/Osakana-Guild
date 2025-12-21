@@ -6,11 +6,13 @@
 // 【責務】
 //   - 開発用デバッグ機能の提供
 //   - アイテム大量生成機能
+//   - キャラクター大量生成機能
 //   - ドロップ通知テスト機能
 //   - データリセット・復旧機能
 //
 // 【View構成】
 //   - アイテム作成セクション（種類・上限・カテゴリ・称号選択）
+//   - キャラクター作成セクション（種族・職業・レベル・作成数）
 //   - ドロップ通知テストセクション（通知数・超レア率・表示モード）
 //   - データ操作セクション（危険な操作画面への遷移）
 //
@@ -121,6 +123,17 @@ struct DebugMenuView: View {
     // 超レア称号選択（1-100）
     @State private var selectedSuperRareTitleIds: Set<UInt8> = Set(1...100)
 
+    // キャラクター作成
+    @State private var isCreatingCharacters = false
+    @State private var characterCreationProgress: Double = 0.0
+    @State private var characterStatusMessage = ""
+    @State private var showCharacterCreationSettings = false
+    @State private var characterCount: Int = 10
+    @State private var characterLevel: Int = 50
+    @State private var selectedRaceId: UInt8? = nil  // nil = ランダム
+    @State private var selectedJobId: UInt8? = nil   // nil = ランダム
+    @State private var selectedPreviousJobId: UInt8? = nil  // nil = なし、0 = ランダム
+
     // ドロップ通知テスト
     @State private var dropNotificationCount: Int = 5
     @State private var superRareRate: Double = 0.1
@@ -132,6 +145,7 @@ struct DebugMenuView: View {
     private var masterData: MasterDataCache { appServices.masterDataCache }
     private var inventoryService: InventoryProgressService { appServices.inventory }
     private var gameStateService: GameStateService { appServices.gameState }
+    private var characterService: CharacterProgressService { appServices.character }
 
     private func debugLog(_ message: @autoclosure () -> String) {
         print(message())
@@ -140,12 +154,14 @@ struct DebugMenuView: View {
     var body: some View {
         NavigationStack {
             Form {
+                resourceSection
                 itemCreationSection
+                characterCreationSection
                 dropNotificationTestSection
                 dataResetSection
             }
             .avoidBottomGameInfo()
-            .navigationTitle("デバッグメニュー")
+            .navigationTitle("ベータテスト用機能")
             .navigationBarTitleDisplayMode(.inline)
             .alert("完了", isPresented: $showAlert) {
                 Button("OK") { }
@@ -159,6 +175,16 @@ struct DebugMenuView: View {
                     selectedCategories: $selectedCategories,
                     selectedNormalTitleIds: $selectedNormalTitleIds,
                     selectedSuperRareTitleIds: $selectedSuperRareTitleIds
+                )
+            }
+            .sheet(isPresented: $showCharacterCreationSettings) {
+                CharacterCreationDebugSettingsView(
+                    masterData: masterData,
+                    count: $characterCount,
+                    level: $characterLevel,
+                    selectedRaceId: $selectedRaceId,
+                    selectedJobId: $selectedJobId,
+                    selectedPreviousJobId: $selectedPreviousJobId
                 )
             }
         }
@@ -202,6 +228,61 @@ struct DebugMenuView: View {
         }
     }
 
+    private var characterCreationSection: some View {
+        Section("キャラクター作成") {
+            if isCreatingCharacters {
+                VStack(alignment: .leading, spacing: 8) {
+                    ProgressView(value: characterCreationProgress)
+                    Text(characterStatusMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                VStack(spacing: 12) {
+                    Button("キャラクター作成設定") { showCharacterCreationSettings = true }
+                        .buttonStyle(.bordered)
+
+                    Button("キャラクターを作成開始") {
+                        Task { await createCharacters() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("作成数: \(characterCount)体, Lv.\(characterLevel)")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                Text("種族: \(raceDisplayName), 職業: \(jobDisplayName)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text("転職後: \(previousJobDisplayName)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var raceDisplayName: String {
+        if let raceId = selectedRaceId {
+            return masterData.race(raceId)?.name ?? "ID:\(raceId)"
+        }
+        return "ランダム"
+    }
+
+    private var jobDisplayName: String {
+        if let jobId = selectedJobId {
+            return masterData.job(jobId)?.name ?? "ID:\(jobId)"
+        }
+        return "ランダム"
+    }
+
+    private var previousJobDisplayName: String {
+        guard let prevJobId = selectedPreviousJobId else { return "なし" }
+        if prevJobId == 0 { return "ランダム" }
+        return masterData.job(prevJobId)?.name ?? "ID:\(prevJobId)"
+    }
+
     private var dropNotificationTestSection: some View {
         Section("ドロップ通知テスト") {
             Stepper("通知数: \(dropNotificationCount)", value: $dropNotificationCount, in: 1...20)
@@ -226,6 +307,17 @@ struct DebugMenuView: View {
         }
     }
 
+    private var resourceSection: some View {
+        Section("リソース") {
+            Button("所持金を最大にする") {
+                Task { await setMaxGold() }
+            }
+            Button("チケットを最大にする") {
+                Task { await setMaxTickets() }
+            }
+        }
+    }
+
     private var dataResetSection: some View {
         Section("データ操作") {
             NavigationLink {
@@ -237,6 +329,32 @@ struct DebugMenuView: View {
                     Text("危険な操作")
                 }
             }
+        }
+    }
+
+    private func setMaxGold() async {
+        do {
+            let maxGold = AppConstants.Progress.maximumGold
+            let snapshot = try await gameStateService.setGold(maxGold)
+            appServices.applyPlayerSnapshot(snapshot)
+            alertMessage = "所持金を最大（\(maxGold.formatted())GP）にしました"
+            showAlert = true
+        } catch {
+            alertMessage = "エラー: \(error.localizedDescription)"
+            showAlert = true
+        }
+    }
+
+    private func setMaxTickets() async {
+        do {
+            let maxTickets = AppConstants.Progress.maximumCatTickets
+            let snapshot = try await gameStateService.setCatTickets(maxTickets)
+            appServices.applyPlayerSnapshot(snapshot)
+            alertMessage = "チケットを最大（\(maxTickets.formatted())枚）にしました"
+            showAlert = true
+        } catch {
+            alertMessage = "エラー: \(error.localizedDescription)"
+            showAlert = true
         }
     }
 
@@ -478,6 +596,100 @@ struct DebugMenuView: View {
 
     private func ensureStorageCapacity() async throws {
         _ = try await gameStateService.loadCurrentPlayer()
+    }
+
+    private func createCharacters() async {
+        if isCreatingCharacters { return }
+        await MainActor.run {
+            isCreatingCharacters = true
+            characterCreationProgress = 0.0
+            characterStatusMessage = "キャラクター作成準備中..."
+        }
+
+        do {
+            let allRaces = masterData.allRaces
+            let allJobs = masterData.allJobs.filter { $0.id <= 16 }  // 基本職のみ
+
+            guard !allRaces.isEmpty, !allJobs.isEmpty else {
+                throw ProgressError.invalidInput(description: "種族または職業のマスターデータがありません")
+            }
+
+            var requests: [CharacterProgressService.DebugCharacterCreationRequest] = []
+
+            for i in 0..<characterCount {
+                // 種族決定
+                let raceId: UInt8
+                if let selected = selectedRaceId {
+                    raceId = selected
+                } else {
+                    raceId = allRaces.randomElement()!.id
+                }
+
+                // 職業決定（転職後の職業が指定されている場合は前職になる）
+                let baseJobId: UInt8
+                if let selected = selectedJobId {
+                    baseJobId = selected
+                } else {
+                    baseJobId = allJobs.randomElement()!.id
+                }
+
+                // 転職後職業決定
+                let jobId: UInt8
+                let previousJobId: UInt8
+                if let selected = selectedPreviousJobId {
+                    if selected == 0 {
+                        // ランダム（baseJob以外を現職に）
+                        let candidates = allJobs.filter { $0.id != baseJobId }
+                        jobId = candidates.randomElement()?.id ?? baseJobId
+                        previousJobId = baseJobId
+                    } else {
+                        // 指定された職業を現職に、baseJobを前職に
+                        jobId = selected
+                        previousJobId = baseJobId
+                    }
+                } else {
+                    // 転職なし
+                    jobId = baseJobId
+                    previousJobId = 0
+                }
+
+                let name = "デバッグ\(i + 1)"
+                requests.append(.init(
+                    displayName: name,
+                    raceId: raceId,
+                    jobId: jobId,
+                    previousJobId: previousJobId,
+                    level: characterLevel
+                ))
+            }
+
+            await MainActor.run {
+                characterStatusMessage = "キャラクターを作成中..."
+            }
+
+            let createdCount = try await characterService.createCharactersBatch(requests) { current, total in
+                await MainActor.run {
+                    characterCreationProgress = Double(current) / Double(total)
+                    characterStatusMessage = "作成中: \(current)/\(total)"
+                }
+            }
+
+            await MainActor.run {
+                characterCreationProgress = 1.0
+                characterStatusMessage = "完了"
+                alertMessage = "キャラクター作成が完了しました (\(createdCount)体)"
+                showAlert = true
+            }
+        } catch {
+            debugLog("[DebugMenu] character creation error=\(error)")
+            await MainActor.run {
+                characterStatusMessage = "エラー: \(error.localizedDescription)"
+                alertMessage = "キャラクター作成に失敗しました"
+                showAlert = true
+            }
+        }
+
+        await MainActor.run { isCreatingCharacters = false }
     }
 
     private func sendTestDropNotifications() async {
@@ -971,6 +1183,219 @@ struct DangerousOperationsView: View {
                 errorMessage = "データ削除に失敗しました: \(error.localizedDescription)"
                 showErrorAlert = true
             }
+        }
+    }
+}
+
+// MARK: - キャラクター作成設定画面
+
+struct CharacterCreationDebugSettingsView: View {
+    let masterData: MasterDataCache
+
+    @Binding var count: Int
+    @Binding var level: Int
+    @Binding var selectedRaceId: UInt8?
+    @Binding var selectedJobId: UInt8?
+    @Binding var selectedPreviousJobId: UInt8?
+
+    @Environment(\.dismiss) private var dismiss
+
+    private let countPresets = [1, 5, 10, 50, 100, 200]
+    private let levelPresets = [1, 10, 25, 50, 100, 200]
+
+    var body: some View {
+        NavigationView {
+            Form {
+                countSection
+                levelSection
+                raceSection
+                jobSection
+                previousJobSection
+            }
+            .avoidBottomGameInfo()
+            .navigationTitle("キャラクター作成設定")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("キャンセル") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完了") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private var countSection: some View {
+        Section("作成数") {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("現在: \(count)体")
+                    .font(.headline)
+
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                    ForEach(countPresets, id: \.self) { preset in
+                        Button("\(preset)") {
+                            count = preset
+                        }
+                        .buttonStyle(.bordered)
+                        .foregroundColor(.primary)
+                        .background(count == preset ? Color.accentColor : Color.clear)
+                        .cornerRadius(8)
+                    }
+                }
+
+                Stepper("細かく調整: \(count)", value: $count, in: 1...200)
+            }
+            .padding(.vertical, 8)
+        }
+    }
+
+    private var levelSection: some View {
+        Section("レベル") {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("現在: Lv.\(level)")
+                    .font(.headline)
+
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                    ForEach(levelPresets, id: \.self) { preset in
+                        Button("Lv.\(preset)") {
+                            level = preset
+                        }
+                        .buttonStyle(.bordered)
+                        .foregroundColor(.primary)
+                        .background(level == preset ? Color.accentColor : Color.clear)
+                        .cornerRadius(8)
+                    }
+                }
+
+                Stepper("細かく調整: Lv.\(level)", value: $level, in: 1...200)
+            }
+            .padding(.vertical, 8)
+        }
+    }
+
+    private var raceSection: some View {
+        Section {
+            Button {
+                selectedRaceId = nil
+            } label: {
+                HStack {
+                    Text("ランダム")
+                    Spacer()
+                    if selectedRaceId == nil {
+                        Image(systemName: "checkmark")
+                            .foregroundColor(.accentColor)
+                    }
+                }
+            }
+            .foregroundColor(.primary)
+
+            ForEach(masterData.allRaces, id: \.id) { race in
+                Button {
+                    selectedRaceId = race.id
+                } label: {
+                    HStack {
+                        Text(race.name)
+                        Spacer()
+                        if selectedRaceId == race.id {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+                .foregroundColor(.primary)
+            }
+        } header: {
+            Text("種族")
+        }
+    }
+
+    private var jobSection: some View {
+        Section {
+            Button {
+                selectedJobId = nil
+            } label: {
+                HStack {
+                    Text("ランダム")
+                    Spacer()
+                    if selectedJobId == nil {
+                        Image(systemName: "checkmark")
+                            .foregroundColor(.accentColor)
+                    }
+                }
+            }
+            .foregroundColor(.primary)
+
+            ForEach(masterData.allJobs.filter { $0.id <= 16 }, id: \.id) { job in
+                Button {
+                    selectedJobId = job.id
+                } label: {
+                    HStack {
+                        Text(job.name)
+                        Spacer()
+                        if selectedJobId == job.id {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+                .foregroundColor(.primary)
+            }
+        } header: {
+            Text("職業")
+        }
+    }
+
+    private var previousJobSection: some View {
+        Section {
+            Button {
+                selectedPreviousJobId = nil
+            } label: {
+                HStack {
+                    Text("なし（転職しない）")
+                    Spacer()
+                    if selectedPreviousJobId == nil {
+                        Image(systemName: "checkmark")
+                            .foregroundColor(.accentColor)
+                    }
+                }
+            }
+            .foregroundColor(.primary)
+
+            Button {
+                selectedPreviousJobId = 0
+            } label: {
+                HStack {
+                    Text("ランダム")
+                    Spacer()
+                    if selectedPreviousJobId == 0 {
+                        Image(systemName: "checkmark")
+                            .foregroundColor(.accentColor)
+                    }
+                }
+            }
+            .foregroundColor(.primary)
+
+            ForEach(masterData.allJobs.filter { $0.id <= 16 }, id: \.id) { job in
+                Button {
+                    selectedPreviousJobId = job.id
+                } label: {
+                    HStack {
+                        Text(job.name)
+                        Spacer()
+                        if selectedPreviousJobId == job.id {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+                .foregroundColor(.primary)
+            }
+        } header: {
+            Text("転職後の職業（前職）")
+        } footer: {
+            Text("「転職後の職業」は現在の職業の前に就いていた職業です。転職済みキャラクターを作成する場合に設定してください。")
+                .font(.caption2)
         }
     }
 }

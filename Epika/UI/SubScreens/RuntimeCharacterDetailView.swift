@@ -14,8 +14,10 @@
 //     - レベル・経験値
 //     - 基本能力値
 //     - 戦闘ステータス
-//     - 行動優先度設定
 //     - 習得スキル一覧
+//     - 魔法使い魔法
+//     - 僧侶魔法
+//     - 行動優先度設定
 //
 // 【使用箇所】
 //   - キャラクター一覧からシート表示
@@ -84,9 +86,8 @@ struct CharacterDetailContent: View {
                 CharacterCombatStatsSection(character: character)
             }
 
-            Section("行動優先度") {
-                CharacterActionPreferencesSection(character: character,
-                                                  onActionPreferencesChange: onActionPreferencesChange)
+            Section("習得スキル") {
+                CharacterSkillsSection(character: character)
             }
 
             Section("魔法使い魔法") {
@@ -97,8 +98,9 @@ struct CharacterDetailContent: View {
                 CharacterPriestSpellsSection(character: character)
             }
 
-            Section("習得スキル") {
-                CharacterSkillsSection(character: character)
+            Section("行動優先度") {
+                CharacterActionPreferencesSection(character: character,
+                                                  onActionPreferencesChange: onActionPreferencesChange)
             }
         }
         .listStyle(.insetGrouped)
