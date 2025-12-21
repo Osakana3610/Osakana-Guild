@@ -57,30 +57,6 @@ issues:
     fix_plan: |
       12/22に審査提出予定
 
-  - id: "FB0006"
-    title: "ボスが道中で出現する場合がある"
-    category: "ダンジョン"
-    status: "investigating"
-    reported_date: "2025-12-21"
-    description: |
-      ダンジョン最深部で出現するはずのボスが、道中のフロアで出現してしまうことがある。
-    details: ""
-    workaround: ""
-    fix_plan: |
-      12/22に審査提出予定
-
-  - id: "FB0007"
-    title: "迷宮の称号を変えても敵が強くならない"
-    category: "ダンジョン"
-    status: "investigating"
-    reported_date: "2025-12-21"
-    description: |
-      迷宮の称号を変更しても、敵の強さが変化しない。
-    details: ""
-    workaround: ""
-    fix_plan: |
-      12/22に審査提出予定
-
   - id: "FB0008"
     title: "魔法使い魔法・僧侶魔法が発動しない"
     category: "戦闘"
@@ -146,3 +122,27 @@ resolved:
       転職時の装備可能数の変動により、キャラクターが所持できるアイテム数を超え、チェックによりエラーが発生。
     resolution: |
       0.7.70にて修正済み。転職時に装備を全てインベントリに戻す処理を追加。デバッグメニューに復旧用の全装備解除機能も追加。
+
+  - id: "FB0006"
+    title: "ボスが道中で出現する場合がある"
+    category: "ダンジョン"
+    status: "fixed"
+    reported_date: "2025-12-21"
+    resolved_date: "2025-12-21"
+    resolved_version: "0.7.70 (0772)"
+    description: |
+      ダンジョン最深部で出現するはずのボスが、道中のフロアで出現してしまうことがある。
+    resolution: |
+      0.7.70にて修正済み（審査中）。ボスエンカウントはボスフロア（最終フロア）でのみ出現するよう修正。
+
+  - id: "FB0007"
+    title: "迷宮の称号を変えても敵が強くならない"
+    category: "ダンジョン"
+    status: "fixed"
+    reported_date: "2025-12-21"
+    resolved_date: "2025-12-21"
+    resolved_version: "0.7.70 (0772)"
+    description: |
+      迷宮の称号を変更しても、敵の強さが変化しない。
+    resolution: |
+      0.7.70にて修正済み（審査中）。難易度の称号statMultiplierを敵レベルに乗算するよう修正。

@@ -46,20 +46,31 @@ struct PartyCharacterSilhouettesView: View {
                 .padding(.vertical, 8)
                 .frame(maxWidth: .infinity, alignment: .center)
             } else {
-                HStack(alignment: .top, spacing: 8) {
-                    ForEach(orderedMembers, id: \.id) { member in
-                        VStack(spacing: 2) {
-                            CharacterImageView(avatarIndex: member.resolvedAvatarId, size: 55)
-                            VStack(spacing: 1) {
-                                Text("Lv.\(member.level)")
-                                    .font(.caption2)
-                                    .foregroundStyle(.primary)
-                                Text("HP\(member.currentHP)")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                HStack(alignment: .top, spacing: 0) {
+                    ForEach(0..<6, id: \.self) { index in
+                        Group {
+                            if index < orderedMembers.count {
+                                let member = orderedMembers[index]
+                                VStack(spacing: 2) {
+                                    CharacterImageView(avatarIndex: member.resolvedAvatarId, size: 55)
+                                    VStack(spacing: 1) {
+                                        Text("Lv.\(member.level)")
+                                            .font(.caption2)
+                                            .foregroundStyle(.primary)
+                                        Text("HP\(member.currentHP)")
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                .frame(width: 48)
+                            } else {
+                                Spacer()
+                                    .frame(width: 48)
                             }
                         }
-                        .frame(width: 48)
+                        if index < 5 {
+                            Spacer(minLength: 0)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
