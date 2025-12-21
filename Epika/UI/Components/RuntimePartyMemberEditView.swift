@@ -28,6 +28,7 @@ struct RuntimePartyMemberEditView: View {
     @Environment(PartyViewState.self) private var partyState
     @Environment(AppServices.self) private var appServices
     @State private var currentMemberIds: [UInt8] = []
+    @State private var selectedMemberId: UInt8?
     @State private var searchText = ""
     @State private var characterIdsInOtherParties = Set<UInt8>()
     @State private var showError = false
@@ -46,6 +47,7 @@ struct RuntimePartyMemberEditView: View {
     }
 
     private var partyService: PartyProgressService { appServices.party }
+    private var emptySlotCount: Int { Self.maxSlots - currentMemberIds.count }
 
     private func character(for id: UInt8) -> RuntimeCharacter? {
         allCharacters.first { $0.id == id }
@@ -58,11 +60,18 @@ struct RuntimePartyMemberEditView: View {
                     if let member = character(for: memberId) {
                         PartyMemberRow(
                             character: member,
-                            onRemove: { removeCharacter(id: memberId) }
+                            isSelected: selectedMemberId == memberId,
+                            onTap: { handleMemberTap(id: memberId) }
                         )
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     }
                 }
                 .onMove(perform: moveMembers)
+                ForEach(0..<emptySlotCount, id: \.self) { _ in
+                    EmptySlotRow()
+                        .moveDisabled(true)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                }
             } header: {
                 Text("パーティメンバー (\(currentMemberIds.count)/\(Self.maxSlots))")
             }
@@ -77,9 +86,10 @@ struct RuntimePartyMemberEditView: View {
                         .padding()
                 } else {
                     ForEach(availableCharacters, id: \.id) { character in
-                        RuntimeCharacterRowForPartyView(character: character) {
+                        AvailableCharacterRow(character: character) {
                             addCharacter(character)
                         }
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     }
                 }
             } header: {
@@ -138,27 +148,36 @@ struct RuntimePartyMemberEditView: View {
 
     private func moveMembers(from source: IndexSet, to destination: Int) {
         currentMemberIds.move(fromOffsets: source, toOffset: destination)
-        persistMembers()
+        persistMembers(reloadOtherParties: false)
+    }
+
+    private func handleMemberTap(id: UInt8) {
+        if selectedMemberId == id {
+            // 2回目のタップで削除
+            currentMemberIds.removeAll { $0 == id }
+            selectedMemberId = nil
+            persistMembers(reloadOtherParties: true)
+        } else {
+            selectedMemberId = id
+        }
     }
 
     private func addCharacter(_ character: RuntimeCharacter) {
         guard currentMemberIds.count < Self.maxSlots else { return }
         currentMemberIds.append(character.id)
-        persistMembers()
+        selectedMemberId = nil
+        persistMembers(reloadOtherParties: true)
     }
 
-    private func removeCharacter(id: UInt8) {
-        currentMemberIds.removeAll { $0 == id }
-        persistMembers()
-    }
-
-    private func persistMembers() {
+    private func persistMembers(reloadOtherParties: Bool) {
         Task {
             guard !isSaving else { return }
             isSaving = true
             do {
                 try await partyState.updatePartyMembers(party: party, memberIds: currentMemberIds)
-                await loadCharactersInOtherParties()
+                if reloadOtherParties {
+                    await loadCharactersInOtherParties()
+                }
             } catch {
                 await MainActor.run {
                     errorMessage = error.localizedDescription
@@ -178,138 +197,91 @@ private extension RuntimePartyMemberEditView {
 
 private struct PartyMemberRow: View {
     let character: RuntimeCharacter
-    let onRemove: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 44)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(character.name)
-                    .font(.subheadline)
-                    .foregroundStyle(.primary)
-                HStack(spacing: 6) {
-                    Text("Lv.\(character.level)")
-                    Text(character.jobName)
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Button(action: onRemove) {
-                Image(systemName: "minus.circle.fill")
-                    .foregroundStyle(.red)
-                    .font(.title3)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.vertical, 2)
-    }
-}
-
-struct RuntimePartyMemberSlotView: View {
-    let character: RuntimeCharacter?
-    let slotIndex: Int
     let isSelected: Bool
-    let onSlotTap: () -> Void
+    let onTap: () -> Void
 
     var body: some View {
-        VStack(spacing: 4) {
-            if let character = character {
-                Text("Lv\(character.level)")
-                    .font(.caption)
-                    .foregroundColor(.primary)
-
-                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 55)
-
-                Text("HP\(character.currentHP)")
-                    .font(.caption)
-                    .foregroundColor(character.currentHP == character.maxHP ? .primary : .secondary)
-
-                Text(character.name)
+        Button(action: onTap) {
+            HStack(spacing: 8) {
+                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 50)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(character.name)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                    HStack(spacing: 4) {
+                        Text("Lv.\(character.level)")
+                        Text(character.jobName)
+                    }
                     .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-
+                    .foregroundStyle(.secondary)
+                }
+                Spacer()
                 if isSelected {
                     Text("再タップで削除")
                         .font(.caption2)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.red)
+                } else {
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text("HP")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text("\(character.currentHP)/\(character.maxHP)")
+                            .font(.caption2)
+                            .foregroundStyle(.primary)
+                    }
                 }
-            } else {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemGray4))
-                    .frame(width: 50, height: 60)
-                    .overlay(
-                        Image(systemName: isSelected ? "checkmark.circle.fill" : "plus")
-                            .foregroundColor(isSelected ? .primary : .secondary)
-                    )
-
-                Text("---")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                Text("スロット\(slotIndex)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
             }
+            .contentShape(Rectangle())
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .background(isSelected ? Color.blue.opacity(0.1) : Color(.systemBackground))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected ? Color.blue : Color(.systemGray4), lineWidth: isSelected ? 2 : 1)
-        )
-        .contentShape(Rectangle())
-        .onTapGesture { onSlotTap() }
-        .animation(.easeInOut(duration: 0.2), value: isSelected)
+        .buttonStyle(.plain)
+        .listRowBackground(isSelected ? Color.red.opacity(0.1) : Color(.systemBackground))
     }
 }
 
-struct RuntimeCharacterRowForPartyView: View {
+private struct EmptySlotRow: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Spacer()
+                .frame(width: 50, height: 50)
+        }
+    }
+}
+
+private struct AvailableCharacterRow: View {
     let character: RuntimeCharacter
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            HStack {
-                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 55)
-
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 50)
+                VStack(alignment: .leading, spacing: 2) {
                     Text(character.name)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-
-                    HStack {
-                        Text(character.raceName)
-                        Text("•")
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                    HStack(spacing: 4) {
+                        Text("Lv.\(character.level)")
                         Text(character.jobName)
                     }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                    HStack {
-                        Text("Lv.\(character.level)")
-                            .font(.caption)
-                            .foregroundColor(.primary)
-
-                        Spacer()
-
-                        Text("HP: \(character.currentHP)/\(character.maxHP)")
-                            .font(.caption)
-                            .foregroundColor(character.currentHP == character.maxHP ? .primary : .secondary)
-                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                 }
-
                 Spacer()
-
-                Image(systemName: "plus.circle")
-                    .foregroundColor(.primary)
-                    .font(.title2)
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text("HP")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text("\(character.currentHP)/\(character.maxHP)")
+                        .font(.caption2)
+                        .foregroundStyle(.primary)
+                }
+                Image(systemName: "plus.circle.fill")
+                    .foregroundStyle(.blue)
+                    .font(.title3)
             }
-            .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
 }
+

@@ -127,6 +127,7 @@ struct GuildView: View {
                         } label: {
                             GuildCharacterRow(summary: summary)
                         }
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     }
                     .onMove(perform: moveAliveCharacters)
                 }
@@ -137,6 +138,7 @@ struct GuildView: View {
                     ForEach(fallenSummaries) { summary in
                         GuildCharacterRow(summary: summary)
                             .opacity(0.6)
+                            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     }
                 }
             }
@@ -260,31 +262,30 @@ private struct GuildCharacterRow: View {
     let summary: CharacterViewState.CharacterSummary
 
     var body: some View {
-        HStack(spacing: 12) {
-            CharacterImageView(avatarIndex: summary.resolvedAvatarId, size: 55)
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: 8) {
+            CharacterImageView(avatarIndex: summary.resolvedAvatarId, size: 50)
+            VStack(alignment: .leading, spacing: 2) {
                 Text(summary.name)
-                    .font(.headline)
+                    .font(.subheadline)
                     .foregroundStyle(summary.isAlive ? .primary : .secondary)
-                HStack(spacing: 8) {
+                HStack(spacing: 4) {
                     Text("Lv.\(summary.level)")
                     Text(summary.raceName)
                     Text(summary.jobName)
                 }
-                .font(.caption)
+                .font(.caption2)
                 .foregroundStyle(.secondary)
             }
             Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
+            VStack(alignment: .trailing, spacing: 1) {
                 Text("HP")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                 Text("\(summary.currentHP)/\(summary.maxHP)")
-                    .font(.caption)
-                    .foregroundColor(summary.isAlive ? .primary : .secondary)
+                    .font(.caption2)
+                    .foregroundStyle(summary.isAlive ? .primary : .secondary)
             }
         }
-        .padding(.vertical, 4)
     }
 }
 
