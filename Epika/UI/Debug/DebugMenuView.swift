@@ -20,6 +20,7 @@
 // ==============================================================================
 
 import SwiftUI
+import SwiftData
 
 enum DropNotificationMode: String, CaseIterable {
     case bulk = "一気に表示"
@@ -865,29 +866,77 @@ struct DangerousOperationsView: View {
         }
     }
 
+    /// 装備バグ復旧用：全キャラクターの装備を直接DBから解除
+    /// 通常のunequipItemはRuntimeCharacterFactory経由で装備枠チェックが入るため、
+    /// 装備枠を超過した状態では使用できない。この処理は直接DBを操作してバイパスする。
     private func unequipAllCharacters() async {
         if isUnequippingAll { return }
         await MainActor.run { isUnequippingAll = true }
 
         do {
-            let characters = try await appServices.character.allCharacters()
-            var unequippedCount = 0
-            var totalItemCount = 0
+            let context = ModelContext(appServices.container)
+            context.autosaveEnabled = false
 
-            for character in characters {
-                let equipped = try await appServices.character.equippedItems(characterId: character.id)
-                if !equipped.isEmpty {
-                    for item in equipped {
-                        _ = try await appServices.character.unequipItem(
-                            characterId: character.id,
-                            equipmentStackKey: item.stackKey,
-                            quantity: item.quantity
-                        )
-                        totalItemCount += item.quantity
-                    }
-                    unequippedCount += 1
+            // 全キャラクターの装備を取得
+            let allEquipment = try context.fetch(FetchDescriptor<CharacterEquipmentRecord>())
+            guard !allEquipment.isEmpty else {
+                await MainActor.run {
+                    isUnequippingAll = false
+                    unequipResultMessage = "解除する装備がありませんでした"
+                    showUnequipCompleteAlert = true
+                }
+                return
+            }
+
+            // インベントリを取得
+            let storage = ItemStorage.playerItem
+            let storageTypeValue = storage.rawValue
+            let storageRawString = storage.identifier
+            let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.storageType == storageTypeValue || $0.storageRawValue == storageRawString
+            }))
+
+            // stackKeyでグループ化
+            var groupedEquipment: [String: [CharacterEquipmentRecord]] = [:]
+            for equip in allEquipment {
+                groupedEquipment[equip.stackKey, default: []].append(equip)
+            }
+
+            // 装備を持っていたキャラクター数をカウント
+            let characterIds = Set(allEquipment.map(\.characterId))
+            let unequippedCount = characterIds.count
+            let totalItemCount = allEquipment.count
+
+            // 各グループをインベントリに戻す
+            for (stackKey, equipments) in groupedEquipment {
+                let quantity = equipments.count
+
+                if let existingInventory = allInventory.first(where: { $0.stackKey == stackKey }) {
+                    existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
+                } else if let firstEquip = equipments.first {
+                    let inventoryRecord = InventoryItemRecord(
+                        superRareTitleId: firstEquip.superRareTitleId,
+                        normalTitleId: firstEquip.normalTitleId,
+                        itemId: firstEquip.itemId,
+                        socketSuperRareTitleId: firstEquip.socketSuperRareTitleId,
+                        socketNormalTitleId: firstEquip.socketNormalTitleId,
+                        socketItemId: firstEquip.socketItemId,
+                        quantity: UInt16(quantity),
+                        storage: storage
+                    )
+                    context.insert(inventoryRecord)
+                }
+
+                // 装備レコードを削除
+                for equip in equipments {
+                    context.delete(equip)
                 }
             }
+
+            try context.save()
+
+            // 通知を送信
+            NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
 
             // インベントリキャッシュをリロード
             try await appServices.itemPreload.reload(inventoryService: appServices.inventory)
