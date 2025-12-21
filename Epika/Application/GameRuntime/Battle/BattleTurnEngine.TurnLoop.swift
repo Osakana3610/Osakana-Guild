@@ -220,23 +220,23 @@ extension BattleTurnEngine {
             return .defend
         }
 
-        let totalWeight = candidates.reduce(0) { $0 + max(0, $1.weight) }
-        guard totalWeight > 0 else {
-            if canPerformPhysical(actor: actor, opponents: opponents) {
-                return .physicalAttack
-            }
-            return .defend
-        }
-
-        let roll = context.random.nextInt(in: 1...totalWeight)
-        var cumulative = 0
+        // 順番に抽選（ブレス > 僧侶魔法 > 魔法使い魔法 > 物理攻撃）
+        // 各カテゴリの重み%で抽選し、当たればその行動を選択
+        // 100%なら必ず選択される
         for candidate in candidates {
-            cumulative += max(0, candidate.weight)
-            if roll <= cumulative {
+            let weight = max(0, min(100, candidate.weight))
+            if weight >= 100 {
                 return candidate.category
             }
+            if weight > 0 {
+                let roll = context.random.nextInt(in: 1...100)
+                if roll <= weight {
+                    return candidate.category
+                }
+            }
         }
 
+        // すべて外れた場合はデフォルトで物理攻撃
         if canPerformPhysical(actor: actor, opponents: opponents) {
             return .physicalAttack
         }

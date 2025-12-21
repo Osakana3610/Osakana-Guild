@@ -26,6 +26,7 @@ extension SQLiteMasterDataManager {
             let name: String
             let school: SpellDefinition.School
             let tier: Int
+            let unlockLevel: Int
             let category: SpellDefinition.Category
             let targeting: SpellDefinition.Targeting
             let maxTargetsBase: Int?
@@ -55,7 +56,7 @@ extension SQLiteMasterDataManager {
         var builders: [UInt8: Builder] = [:]
         var order: [UInt8] = []
         let spellSQL = """
-            SELECT id, name, school, tier, category, targeting,
+            SELECT id, name, school, tier, unlock_level, category, targeting,
                    max_targets_base, extra_targets_per_levels,
                    hits_per_cast, base_power_multiplier,
                    status_id, heal_multiplier, cast_condition,
@@ -66,13 +67,13 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(spellStatement) }
         while sqlite3_step(spellStatement) == SQLITE_ROW {
             guard let nameC = sqlite3_column_text(spellStatement, 1),
-                  let descriptionC = sqlite3_column_text(spellStatement, 13) else {
+                  let descriptionC = sqlite3_column_text(spellStatement, 14) else {
                 continue
             }
             let id = UInt8(sqlite3_column_int(spellStatement, 0))
             let schoolRaw = UInt8(sqlite3_column_int(spellStatement, 2))
-            let categoryRaw = UInt8(sqlite3_column_int(spellStatement, 4))
-            let targetingRaw = UInt8(sqlite3_column_int(spellStatement, 5))
+            let categoryRaw = UInt8(sqlite3_column_int(spellStatement, 5))
+            let targetingRaw = UInt8(sqlite3_column_int(spellStatement, 6))
 
             guard let school = SpellDefinition.School(rawValue: schoolRaw) else {
                 throw SQLiteMasterDataError.executionFailed("未知の Spell school \(schoolRaw) (id=\(id))")
@@ -89,15 +90,16 @@ extension SQLiteMasterDataManager {
                 name: String(cString: nameC),
                 school: school,
                 tier: Int(sqlite3_column_int(spellStatement, 3)),
+                unlockLevel: Int(sqlite3_column_int(spellStatement, 4)),
                 category: category,
                 targeting: targeting,
-                maxTargetsBase: optionalInt(spellStatement, 6),
-                extraTargetsPerLevels: optionalDouble(spellStatement, 7),
-                hitsPerCast: optionalInt(spellStatement, 8),
-                basePowerMultiplier: optionalDouble(spellStatement, 9),
-                statusId: sqlite3_column_type(spellStatement, 10) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 10)),
-                healMultiplier: optionalDouble(spellStatement, 11),
-                castCondition: sqlite3_column_type(spellStatement, 12) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 12)),
+                maxTargetsBase: optionalInt(spellStatement, 7),
+                extraTargetsPerLevels: optionalDouble(spellStatement, 8),
+                hitsPerCast: optionalInt(spellStatement, 9),
+                basePowerMultiplier: optionalDouble(spellStatement, 10),
+                statusId: sqlite3_column_type(spellStatement, 11) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 11)),
+                healMultiplier: optionalDouble(spellStatement, 12),
+                castCondition: sqlite3_column_type(spellStatement, 13) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 13)),
                 description: String(cString: descriptionC)
             )
             builders[id] = builder
@@ -135,6 +137,7 @@ extension SQLiteMasterDataManager {
                     name: builder.name,
                     school: builder.school,
                     tier: builder.tier,
+                    unlockLevel: builder.unlockLevel,
                     category: builder.category,
                     targeting: builder.targeting,
                     maxTargetsBase: builder.maxTargetsBase,
