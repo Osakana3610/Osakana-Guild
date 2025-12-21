@@ -68,8 +68,8 @@ def main() -> int:
         key = window_key(ts)
         by_day.setdefault(key, []).append(subj)
 
-    os.makedirs('Documents/Working', exist_ok=True)
-    path = 'Documents/Working/日報.md'
+    os.makedirs('Working', exist_ok=True)
+    path = 'Working/日報.md'
     with open(path, 'w', encoding='utf-8') as f:
         for day, subjects in by_day.items():
             f.write(f"{day}\n")
