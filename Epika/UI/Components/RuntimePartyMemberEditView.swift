@@ -54,19 +54,67 @@ struct RuntimePartyMemberEditView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            partyMemberSection
-            Divider()
-            searchSection
-            availableCharacterSection
+        List {
+            Section {
+                ForEach(Array(currentMemberIds.enumerated()), id: \.offset) { index, memberId in
+                    let member = character(for: memberId)
+                    PartyMemberListRow(
+                        character: member,
+                        slotIndex: index,
+                        isSelected: selectedSlotIndex == index,
+                        onTap: { handleSlotTap(index: index) }
+                    )
+                }
+                .onMove(perform: moveMembers)
+            } header: {
+                Text("パーティメンバー (最大6名)")
+            }
+
+            Section {
+                searchField
+                if availableCharacters.isEmpty {
+                    Text(searchText.isEmpty ? "利用可能なキャラクターがありません" : "検索結果がありません")
+                        .foregroundStyle(.secondary)
+                        .italic()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                } else {
+                    ForEach(availableCharacters, id: \.id) { character in
+                        RuntimeCharacterRowForPartyView(character: character) {
+                            addCharacter(character)
+                        }
+                    }
+                }
+            } header: {
+                Text("控え")
+            }
         }
+        .listStyle(.insetGrouped)
+        .environment(\.editMode, .constant(.active))
         .navigationTitle("メンバー編集")
         .navigationBarTitleDisplayMode(.inline)
+        .avoidBottomGameInfo()
         .task { await initialise() }
         .alert("エラー", isPresented: $showError) {
             Button("OK", role: .cancel) { showError = false }
         } message: {
             Text(errorMessage)
+        }
+    }
+
+    private var searchField: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("キャラクター名で検索", text: $searchText)
+                .textFieldStyle(.plain)
+                .autocorrectionDisabled(true)
+                .textInputAutocapitalization(.never)
+            if !searchText.isEmpty {
+                Button("クリア") { searchText = "" }
+                    .font(.caption)
+                    .foregroundStyle(.primary)
+            }
         }
     }
 
@@ -89,83 +137,12 @@ struct RuntimePartyMemberEditView: View {
         }
     }
 
-    // MARK: - Sections
-
-    private var partyMemberSection: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text("パーティメンバー (最大6名)")
-                    .font(.headline)
-                Spacer()
-            }
-            .padding(.horizontal)
-            .padding(.top, 16)
-            .padding(.bottom, 8)
-
-            List {
-                ForEach(Array(currentMemberIds.enumerated()), id: \.offset) { index, memberId in
-                    let member = character(for: memberId)
-                    PartyMemberListRow(
-                        character: member,
-                        slotIndex: index,
-                        isSelected: selectedSlotIndex == index,
-                        onTap: { handleSlotTap(index: index) }
-                    )
-                }
-                .onMove(perform: moveMembers)
-            }
-            .listStyle(.plain)
-            .environment(\.editMode, .constant(.active))
-            .frame(height: 320)
-        }
-    }
+    // MARK: - Actions
 
     private func moveMembers(from source: IndexSet, to destination: Int) {
         currentMemberIds.move(fromOffsets: source, toOffset: destination)
         persistMembers()
     }
-
-    private var searchSection: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-
-            TextField("キャラクター名で検索", text: $searchText)
-                .textFieldStyle(.plain)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-
-            if !searchText.isEmpty {
-                Button("クリア") { searchText = "" }
-                    .font(.caption)
-                    .foregroundColor(.primary)
-            }
-        }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
-    }
-
-    private var availableCharacterSection: some View {
-        List {
-            if availableCharacters.isEmpty {
-                Text(searchText.isEmpty ? "利用可能なキャラクターがありません" : "検索結果がありません")
-                    .foregroundColor(.secondary)
-                    .italic()
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
-            } else {
-                ForEach(availableCharacters, id: \.id) { character in
-                    RuntimeCharacterRowForPartyView(character: character) {
-                        addCharacter(character)
-                    }
-                }
-            }
-        }
-        .listStyle(.plain)
-        .avoidBottomGameInfo()
-    }
-
-    // MARK: - Actions
 
     private func handleSlotTap(index: Int) {
         if selectedSlotIndex == index {
