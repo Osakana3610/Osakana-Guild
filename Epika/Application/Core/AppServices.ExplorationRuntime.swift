@@ -141,8 +141,9 @@ extension AppServices {
                 // 帰還時にドロップ報酬を適用
                 let drops = makeItemDropResults(from: artifact.totalDrops)
                 try await applyDropRewards(drops)
-                // インベントリキャッシュを更新（失敗しても探索完了フローは止めない）
-                Task { @MainActor [itemPreload, inventory] in
+                // プレイヤー状態とインベントリキャッシュを更新（失敗しても探索完了フローは止めない）
+                Task { @MainActor [weak self, itemPreload, inventory] in
+                    await self?.reloadPlayerState()
                     try? await itemPreload.reload(inventoryService: inventory)
                 }
             case .defeated(let floorNumber, _, _):
