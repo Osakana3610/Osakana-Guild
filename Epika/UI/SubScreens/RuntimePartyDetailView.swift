@@ -370,6 +370,7 @@ private struct PartySkillsListView: View {
 
 private struct PartyEquipmentListView: View {
     let characters: [RuntimeCharacter]
+    @Environment(AppServices.self) private var appServices
 
     var body: some View {
         List {
@@ -377,21 +378,26 @@ private struct PartyEquipmentListView: View {
                 Text("メンバーがいません").foregroundColor(.secondary)
             } else {
                 ForEach(characters, id: \.id) { character in
-                    Section(character.name) {
-                        let equipment = character.equippedItems
-                        if equipment.isEmpty {
-                            Text("装備なし").foregroundColor(.secondary)
-                        } else {
-                            let itemsById = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.id, $0) })
-                            ForEach(equipment, id: \.stackKey) { entry in
-                                let itemName = itemsById[entry.itemId]?.name ?? "不明なアイテム"
-                                if entry.superRareTitleId > 0 || entry.normalTitleId > 0 {
-                                    Text("\(itemName) x\(entry.quantity) (称号付き)")
+                    Section {
+                        NavigationLink {
+                            EquipmentEditorView(character: character)
+                                .environment(appServices)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                let equipment = character.equippedItems
+                                if equipment.isEmpty {
+                                    Text("装備なし").foregroundColor(.secondary)
                                 } else {
-                                    Text("\(itemName) x\(entry.quantity)")
+                                    let itemsById = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.id, $0) })
+                                    ForEach(equipment, id: \.stackKey) { entry in
+                                        Text("• \(itemDisplayName(entry: entry, itemsById: itemsById))")
+                                    }
                                 }
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                    } header: {
+                        Text(character.name)
                     }
                 }
             }
@@ -399,6 +405,23 @@ private struct PartyEquipmentListView: View {
         .avoidBottomGameInfo()
         .navigationTitle("装備一覧")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func itemDisplayName(entry: CharacterInput.EquippedItem, itemsById: [UInt16: ItemDefinition]) -> String {
+        let masterData = appServices.masterDataCache
+        var result = ""
+        if entry.superRareTitleId > 0,
+           let superRareTitle = masterData.superRareTitle(entry.superRareTitleId) {
+            result += superRareTitle.name
+        }
+        if let normalTitle = masterData.title(entry.normalTitleId) {
+            result += normalTitle.name
+        }
+        result += itemsById[entry.itemId]?.name ?? "不明なアイテム"
+        if entry.quantity > 1 {
+            result += " x\(entry.quantity)"
+        }
+        return result
     }
 }
 
