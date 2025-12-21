@@ -52,6 +52,7 @@ struct CharacterSnapshot: Sendable, Hashable {
     var personality: Personality
     var equippedItems: [EquippedItem]
     var actionPreferences: ActionPreferences
+    var displayOrder: UInt8
     var createdAt: Date
     var updatedAt: Date
 }
