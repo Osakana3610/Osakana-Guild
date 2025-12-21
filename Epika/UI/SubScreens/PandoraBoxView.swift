@@ -35,38 +35,36 @@ struct PandoraBoxView: View {
     private let maxPandoraSlots = 5
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if isLoading {
-                    ProgressView("読み込み中...")
-                } else if let error = loadError {
-                    ContentUnavailableView {
-                        Label("エラー", systemImage: "exclamationmark.triangle")
-                    } description: {
-                        Text(error)
-                    }
-                } else {
-                    mainContent
+        Group {
+            if isLoading {
+                ProgressView("読み込み中...")
+            } else if let error = loadError {
+                ContentUnavailableView {
+                    Label("エラー", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(error)
                 }
+            } else {
+                mainContent
             }
-            .navigationTitle("パンドラボックス")
-            .navigationBarTitleDisplayMode(.inline)
-            .task {
-                await loadData()
-            }
-            .sheet(isPresented: $showingItemPicker) {
-                ItemPickerSheet(
-                    availableItems: availableItems.filter { item in
-                        !pandoraItems.contains { $0.stackKey == item.stackKey }
-                    },
-                    displayService: displayService,
-                    onSelect: { item in
-                        Task {
-                            await addToPandoraBox(item: item)
-                        }
+        }
+        .navigationTitle("パンドラボックス")
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+            await loadData()
+        }
+        .sheet(isPresented: $showingItemPicker) {
+            ItemPickerSheet(
+                availableItems: availableItems.filter { item in
+                    !pandoraItems.contains { $0.stackKey == item.stackKey }
+                },
+                displayService: displayService,
+                onSelect: { item in
+                    Task {
+                        await addToPandoraBox(item: item)
                     }
-                )
-            }
+                }
+            )
         }
     }
 

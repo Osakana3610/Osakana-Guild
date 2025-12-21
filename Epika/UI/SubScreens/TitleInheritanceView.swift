@@ -38,54 +38,52 @@ struct TitleInheritanceView: View {
     private var titleService: TitleInheritanceProgressService { appServices.titleInheritance }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if showError {
-                    ErrorView(message: errorMessage) {
-                        Task { await loadTargets() }
-                    }
-                } else {
-                    buildContent()
+        Group {
+            if showError {
+                ErrorView(message: errorMessage) {
+                    Task { await loadTargets() }
+                }
+            } else {
+                buildContent()
+            }
+        }
+        .navigationTitle("称号継承")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await loadTargets() }
+        .sheet(isPresented: $showResult) {
+            if let item = resultItem {
+                TitleInheritanceResultView(item: item) {
+                    await loadTargets()
                 }
             }
-            .navigationTitle("称号継承")
-            .navigationBarTitleDisplayMode(.inline)
-            .task { await loadTargets() }
-            .sheet(isPresented: $showResult) {
-                if let item = resultItem {
-                    TitleInheritanceResultView(item: item) {
-                        await loadTargets()
+        }
+        .sheet(isPresented: $showTargetPicker) {
+            ItemPickerView(
+                title: "対象アイテム選択",
+                items: targetItems,
+                selectedItem: Binding(
+                    get: { selectedTarget },
+                    set: { newValue in
+                        selectedTarget = newValue
+                        selectedSource = nil
+                        preview = nil
+                        Task { await loadSources() }
                     }
-                }
-            }
-            .sheet(isPresented: $showTargetPicker) {
-                ItemPickerView(
-                    title: "対象アイテム選択",
-                    items: targetItems,
-                    selectedItem: Binding(
-                        get: { selectedTarget },
-                        set: { newValue in
-                            selectedTarget = newValue
-                            selectedSource = nil
-                            preview = nil
-                            Task { await loadSources() }
-                        }
-                    )
                 )
-            }
-            .sheet(isPresented: $showSourcePicker) {
-                ItemPickerView(
-                    title: "提供アイテム選択",
-                    items: sourceItems,
-                    selectedItem: Binding(
-                        get: { selectedSource },
-                        set: { newValue in
-                            selectedSource = newValue
-                            Task { await updatePreview() }
-                        }
-                    )
+            )
+        }
+        .sheet(isPresented: $showSourcePicker) {
+            ItemPickerView(
+                title: "提供アイテム選択",
+                items: sourceItems,
+                selectedItem: Binding(
+                    get: { selectedSource },
+                    set: { newValue in
+                        selectedSource = newValue
+                        Task { await updatePreview() }
+                    }
                 )
-            }
+            )
         }
     }
 

@@ -35,43 +35,41 @@ struct ArtifactExchangeView: View {
     private var exchangeService: ArtifactExchangeProgressService { appServices.artifactExchange }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if showError {
-                    ErrorView(message: errorMessage) {
-                        Task { await loadArtifacts() }
-                    }
-                } else {
-                    buildContent()
+        Group {
+            if showError {
+                ErrorView(message: errorMessage) {
+                    Task { await loadArtifacts() }
+                }
+            } else {
+                buildContent()
+            }
+        }
+        .navigationTitle("神器交換")
+        .navigationBarTitleDisplayMode(.large)
+        .task { await loadArtifacts() }
+        .sheet(isPresented: $showArtifactPicker) {
+            ItemPickerView(
+                title: "提供する神器を選択",
+                items: playerArtifacts,
+                selectedItem: $selectedPlayerArtifact
+            ) {
+                if let option = selectedOption, let artifact = selectedPlayerArtifact {
+                    Task { await tryPerformExchange(option: option, artifact: artifact) }
                 }
             }
-            .navigationTitle("神器交換")
-            .navigationBarTitleDisplayMode(.large)
-            .task { await loadArtifacts() }
-            .sheet(isPresented: $showArtifactPicker) {
-                ItemPickerView(
-                    title: "提供する神器を選択",
-                    items: playerArtifacts,
-                    selectedItem: $selectedPlayerArtifact
-                ) {
-                    if let option = selectedOption, let artifact = selectedPlayerArtifact {
-                        Task { await tryPerformExchange(option: option, artifact: artifact) }
-                    }
-                }
+        }
+        .alert("宝石改造が施されています", isPresented: $showGemWarning) {
+            Button("キャンセル", role: .cancel) {
+                pendingExchange = nil
             }
-            .alert("宝石改造が施されています", isPresented: $showGemWarning) {
-                Button("キャンセル", role: .cancel) {
-                    pendingExchange = nil
+            Button("交換する", role: .destructive) {
+                if let exchange = pendingExchange {
+                    Task { await performExchange(option: exchange.option, artifact: exchange.artifact) }
                 }
-                Button("交換する", role: .destructive) {
-                    if let exchange = pendingExchange {
-                        Task { await performExchange(option: exchange.option, artifact: exchange.artifact) }
-                    }
-                    pendingExchange = nil
-                }
-            } message: {
-                Text("この神器には宝石改造が施されています。交換すると宝石は失われます。")
+                pendingExchange = nil
             }
+        } message: {
+            Text("この神器には宝石改造が施されています。交換すると宝石は失われます。")
         }
     }
 

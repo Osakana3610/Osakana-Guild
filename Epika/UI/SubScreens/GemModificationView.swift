@@ -37,60 +37,58 @@ struct GemModificationView: View {
     private var displayService: ItemPreloadService { appServices.itemPreload }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if isLoading {
-                    ProgressView("読み込み中...")
-                } else if let error = loadError {
-                    ContentUnavailableView {
-                        Label("エラー", systemImage: "exclamationmark.triangle")
-                    } description: {
-                        Text(error)
+        Group {
+            if isLoading {
+                ProgressView("読み込み中...")
+            } else if let error = loadError {
+                ContentUnavailableView {
+                    Label("エラー", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(error)
+                }
+            } else {
+                mainContent
+            }
+        }
+        .navigationTitle("宝石改造")
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+            await loadData()
+        }
+        .sheet(isPresented: Binding(
+            get: { selectedGem != nil },
+            set: { if !$0 { selectedGem = nil } }
+        )) {
+            if let gem = selectedGem {
+                SocketableItemsSheet(
+                    gem: gem,
+                    socketableItems: socketableItems,
+                    isLoading: isLoadingTargets,
+                    displayService: displayService,
+                    onSelect: { target in
+                        targetItem = target
+                        showConfirmation = true
+                    },
+                    onDismiss: {
+                        selectedGem = nil
                     }
-                } else {
-                    mainContent
+                )
+            }
+        }
+        .alert("宝石改造", isPresented: $showConfirmation) {
+            Button("改造する", role: .destructive) {
+                Task {
+                    await attachGem()
                 }
             }
-            .navigationTitle("宝石改造")
-            .navigationBarTitleDisplayMode(.inline)
-            .task {
-                await loadData()
+            Button("キャンセル", role: .cancel) {
+                targetItem = nil
             }
-            .sheet(isPresented: Binding(
-                get: { selectedGem != nil },
-                set: { if !$0 { selectedGem = nil } }
-            )) {
-                if let gem = selectedGem {
-                    SocketableItemsSheet(
-                        gem: gem,
-                        socketableItems: socketableItems,
-                        isLoading: isLoadingTargets,
-                        displayService: displayService,
-                        onSelect: { target in
-                            targetItem = target
-                            showConfirmation = true
-                        },
-                        onDismiss: {
-                            selectedGem = nil
-                        }
-                    )
-                }
-            }
-            .alert("宝石改造", isPresented: $showConfirmation) {
-                Button("改造する", role: .destructive) {
-                    Task {
-                        await attachGem()
-                    }
-                }
-                Button("キャンセル", role: .cancel) {
-                    targetItem = nil
-                }
-            } message: {
-                if let gem = selectedGem, let target = targetItem {
-                    Text("\(target.name)に\(gem.name)で宝石改造を施しますか？\n（宝石は消費されます）")
-                } else {
-                    Text("宝石改造を施しますか？")
-                }
+        } message: {
+            if let gem = selectedGem, let target = targetItem {
+                Text("\(target.name)に\(gem.name)で宝石改造を施しますか？\n（宝石は消費されます）")
+            } else {
+                Text("宝石改造を施しますか？")
             }
         }
     }
