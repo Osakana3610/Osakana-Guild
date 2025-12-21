@@ -5,14 +5,16 @@
 //
 // 【責務】
 //   - 商店からアイテムを購入する機能を提供
+//   - サブカテゴリ別アイテム一覧表示
 //
 // 【View構成】
-//   - 商品一覧の表示（ShopListItemRow）
+//   - ItemPurchaseView: メイン購入画面
+//     - buildSubcategorySection: カテゴリ別セクション
+//     - buildRow: アイテム行（購入・詳細）
 //   - 購入数量選択アラート（1個/10個）
-//   - 所持ゴールドと価格の比較表示
 //
 // 【使用箇所】
-//   - アイテム関連画面からナビゲーション
+//   - ShopView: ショップ画面から遷移
 //
 // ==============================================================================
 
@@ -27,10 +29,31 @@ struct ItemPurchaseView: View {
     @State private var selectedItem: ShopProgressService.ShopItem?
     @State private var showPurchaseAlert = false
     @State private var isLoading = false
+    @State private var detailItem: ShopProgressService.ShopItem?
+    @State private var purchaseErrorMessage: String?
 
     private var shopService: ShopProgressService { appServices.shop }
+    private var playerGold: Int { Int(player?.gold ?? 0) }
 
-    var playerGold: Int { Int(player?.gold ?? 0) }
+    /// カテゴリ別にグループ化した商品
+    private var subcategorizedItems: [ItemDisplaySubcategory: [ShopProgressService.ShopItem]] {
+        Dictionary(grouping: shopItems) { item in
+            ItemDisplaySubcategory(
+                mainCategory: ItemSaleCategory(rawValue: item.definition.category) ?? .other,
+                subcategory: item.definition.rarity
+            )
+        }
+    }
+
+    /// 表示順にソートしたカテゴリ一覧
+    private var orderedSubcategories: [ItemDisplaySubcategory] {
+        subcategorizedItems.keys.sorted { lhs, rhs in
+            if lhs.mainCategory.rawValue != rhs.mainCategory.rawValue {
+                return lhs.mainCategory.rawValue < rhs.mainCategory.rawValue
+            }
+            return (lhs.subcategory ?? 0) < (rhs.subcategory ?? 0)
+        }
+    }
 
     var body: some View {
         Group {
@@ -52,26 +75,87 @@ struct ItemPurchaseView: View {
         } message: {
             Text(purchaseAlertMessage)
         }
+        .sheet(item: $detailItem) { item in
+            NavigationStack {
+                ItemDetailView(itemId: item.definition.id)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("閉じる") { detailItem = nil }
+                        }
+                    }
+            }
+        }
+        .alert("購入できません", isPresented: .init(
+            get: { purchaseErrorMessage != nil },
+            set: { if !$0 { purchaseErrorMessage = nil } }
+        )) {
+            Button("OK") { purchaseErrorMessage = nil }
+        } message: {
+            Text(purchaseErrorMessage ?? "")
+        }
     }
 
     private func buildContent() -> some View {
         List {
-            Section("商品") {
-                if shopItems.isEmpty {
-                    Text("商品がありません")
-                        .foregroundColor(.secondary)
-                } else {
-                    ForEach(shopItems) { item in
-                        ShopListItemRow(
-                            item: item,
-                            playerGold: playerGold,
-                            onTap: { selectedItem = item; showPurchaseAlert = true }
-                        )
-                    }
-                }
+            ForEach(orderedSubcategories, id: \.self) { subcategory in
+                buildSubcategorySection(for: subcategory)
             }
         }
         .avoidBottomGameInfo()
+    }
+
+    @ViewBuilder
+    private func buildSubcategorySection(for subcategory: ItemDisplaySubcategory) -> some View {
+        let items = subcategorizedItems[subcategory] ?? []
+        if items.isEmpty {
+            EmptyView()
+        } else {
+            Section {
+                ForEach(items) { item in
+                    buildRow(for: item)
+                }
+            } header: {
+                HStack {
+                    Text(subcategory.displayName)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    Spacer()
+                    Text("\(items.count)個")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .headerProminence(.increased)
+        }
+    }
+
+    private func buildRow(for item: ShopProgressService.ShopItem) -> some View {
+        Button {
+            selectedItem = item
+            showPurchaseAlert = true
+        } label: {
+            HStack {
+                Text("\(item.price)GP")
+                if let quantity = item.stockQuantity {
+                    Text("x\(quantity)")
+                }
+                Text(item.definition.name)
+                Spacer()
+
+                Button {
+                    detailItem = item
+                } label: {
+                    Image(systemName: "info.circle")
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            .font(.body)
+            .foregroundStyle(.primary)
+            .lineLimit(1)
+        }
+        .buttonStyle(.plain)
+        .frame(height: AppConstants.UI.listRowHeight)
     }
 
     @MainActor
@@ -97,8 +181,7 @@ struct ItemPurchaseView: View {
             selectedItem = nil
             await loadShopData()
         } catch {
-            showError = true
-            errorMessage = error.localizedDescription
+            purchaseErrorMessage = error.localizedDescription
         }
     }
 
@@ -111,39 +194,5 @@ struct ItemPurchaseView: View {
         let single = item.price
         let ten = item.price * 10
         return "価格：\(single)GP\n10個：\(ten)GP"
-    }
-}
-
-private struct ShopListItemRow: View {
-    let item: ShopProgressService.ShopItem
-    let playerGold: Int
-    let onTap: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.definition.name)
-                    .font(.headline)
-                if let quantity = item.stockQuantity {
-                    Text("在庫: \(quantity)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            Spacer()
-
-            Text("\(item.price)GP")
-                .font(.body)
-                .foregroundColor(playerGold >= item.price ? .primary : .secondary)
-
-            Button(action: onTap) {
-                Image(systemName: "cart.fill")
-            }
-            .buttonStyle(.plain)
-            .foregroundColor(.primary)
-        }
-        .contentShape(Rectangle())
-        .onTapGesture { onTap() }
     }
 }
