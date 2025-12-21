@@ -62,12 +62,14 @@ actor GameRuntimeService {
 
     func startExplorationRun(dungeonId: UInt16,
                              targetFloorNumber: Int,
+                             difficultyTitleId: UInt8,
                              party: RuntimePartyState,
                              superRareState: SuperRareDailyState) async throws -> ExplorationRunSession {
         // 決定論的乱数のシードを生成
         let seed = UInt64.random(in: UInt64.min...UInt64.max)
         let preparationData = try await prepareExplorationRun(dungeonId: dungeonId,
                                                               targetFloorNumber: targetFloorNumber,
+                                                              difficultyTitleId: difficultyTitleId,
                                                               party: party,
                                                               superRareState: superRareState,
                                                               seed: seed)
@@ -194,14 +196,22 @@ actor GameRuntimeService {
 
     func prepareExplorationRun(dungeonId: UInt16,
                                targetFloorNumber: Int,
+                               difficultyTitleId: UInt8,
                                party: RuntimePartyState,
                                superRareState: SuperRareDailyState,
                                seed: UInt64) async throws -> ExplorationRunPreparationData {
         let provider = makeExplorationProvider()
         let scheduler = makeEventScheduler()
+        // 難易度の称号からstatMultiplierを取得（無称号=id:2は1.0倍）
+        guard let titleDefinition = masterData.title(difficultyTitleId) else {
+            throw RuntimeError.masterDataNotFound(entity: "title", identifier: String(difficultyTitleId))
+        }
+        let enemyLevelMultiplier = titleDefinition.statMultiplier ?? 1.0
         let (preparation, state) = try await ExplorationEngine.prepare(provider: provider,
                                                                        dungeonId: dungeonId,
                                                                        targetFloorNumber: targetFloorNumber,
+                                                                       difficultyTitleId: difficultyTitleId,
+                                                                       enemyLevelMultiplier: enemyLevelMultiplier,
                                                                        superRareState: superRareState,
                                                                        scheduler: scheduler,
                                                                        seed: seed)
@@ -275,6 +285,7 @@ actor GameRuntimeService {
     func resumeExplorationRun(
         dungeonId: UInt16,
         targetFloorNumber: Int,
+        difficultyTitleId: UInt8,
         party: RuntimePartyState,
         restoringRandomState: UInt64,
         superRareState: SuperRareDailyState,
@@ -299,6 +310,12 @@ actor GameRuntimeService {
         let scriptEvents = try await provider.explorationEvents()
         let scriptEventsByFloor = organizeScriptedEvents(scriptEvents, floorCount: targetFloor)
 
+        // 難易度の称号からstatMultiplierを取得
+        guard let titleDefinition = masterData.title(difficultyTitleId) else {
+            throw RuntimeError.masterDataNotFound(entity: "title", identifier: String(difficultyTitleId))
+        }
+        let enemyLevelMultiplier = titleDefinition.statMultiplier ?? 1.0
+
         let preparation = ExplorationEngine.Preparation(
             dungeon: dungeon,
             floors: Array(floors.prefix(targetFloor)),
@@ -306,7 +323,9 @@ actor GameRuntimeService {
             targetFloorNumber: targetFloor,
             scriptEventsByFloor: scriptEventsByFloor,
             encounterTablesById: bundle.encounterTablesById,
-            scheduler: scheduler
+            scheduler: scheduler,
+            difficultyTitleId: difficultyTitleId,
+            enemyLevelMultiplier: enemyLevelMultiplier
         )
 
         // RNG状態を復元してstateを構築

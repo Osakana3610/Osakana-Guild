@@ -28,6 +28,10 @@ struct ExplorationEngine {
         let scriptEventsByFloor: [Int: [ExplorationEventDefinition]]
         let encounterTablesById: [UInt16: EncounterTableDefinition]
         let scheduler: ExplorationEventScheduler
+        /// 選択された難易度の称号ID（敵レベル補正用）
+        let difficultyTitleId: UInt8
+        /// 難易度による敵レベル倍率（TitleDefinition.statMultiplier）
+        let enemyLevelMultiplier: Double
     }
 
     struct RunState: Sendable {
@@ -58,6 +62,8 @@ struct ExplorationEngine {
     static func prepare(provider: ExplorationMasterDataProvider,
                         dungeonId: UInt16,
                         targetFloorNumber: Int,
+                        difficultyTitleId: UInt8,
+                        enemyLevelMultiplier: Double,
                         superRareState: SuperRareDailyState,
                         scheduler: ExplorationEventScheduler,
                         seed: UInt64) async throws -> (Preparation, RunState) {
@@ -81,7 +87,9 @@ struct ExplorationEngine {
                                       targetFloorNumber: targetFloor,
                                       scriptEventsByFloor: scriptEventsByFloor,
                                       encounterTablesById: bundle.encounterTablesById,
-                                      scheduler: scheduler)
+                                      scheduler: scheduler,
+                                      difficultyTitleId: difficultyTitleId,
+                                      enemyLevelMultiplier: enemyLevelMultiplier)
         let state = RunState(floorIndex: 0,
                              eventIndex: 0,
                              superRareState: superRareState,
@@ -100,7 +108,8 @@ struct ExplorationEngine {
 
         let floor = preparation.floors[state.floorIndex]
         let scriptedCandidates = preparation.scriptEventsByFloor[floor.floorNumber] ?? []
-        let encounterEvents = encounterEventsForFloor(floor, tables: preparation.encounterTablesById)
+        let isBossFloor = (state.floorIndex == preparation.targetFloorNumber - 1)
+        let encounterEvents = encounterEventsForFloor(floor, tables: preparation.encounterTablesById, isBossFloor: isBossFloor)
         let hasScripted = !scriptedCandidates.isEmpty
         let hasCombat = !encounterEvents.isEmpty
 
@@ -163,9 +172,12 @@ struct ExplorationEngine {
             guard let enemyId = encounterChoice.enemyId else {
                 throw RuntimeError.invalidConfiguration(reason: "Encounter event \(encounterChoice.eventType) missing enemyId")
             }
+            // 敵レベルに難易度の倍率を適用
+            let baseLevel = encounterChoice.level ?? 1
+            let adjustedLevel = max(1, Int(Double(baseLevel) * preparation.enemyLevelMultiplier))
             let combatService = CombatExecutionService(masterData: masterData)
             let combatResult = try combatService.runCombat(enemyId: enemyId,
-                                                                 enemyLevel: encounterChoice.level,
+                                                                 enemyLevel: adjustedLevel,
                                                                  groupMin: encounterChoice.groupMin,
                                                                  groupMax: encounterChoice.groupMax,
                                                                  dungeon: preparation.dungeon,
@@ -232,14 +244,18 @@ private extension ExplorationEngine {
     }
 
     static func encounterEventsForFloor(_ floor: DungeonFloorDefinition,
-                                        tables: [UInt16: EncounterTableDefinition]) -> [EncounterTableDefinition.Event] {
+                                        tables: [UInt16: EncounterTableDefinition],
+                                        isBossFloor: Bool) -> [EncounterTableDefinition.Event] {
         guard let table = tables[floor.encounterTableId] else { return [] }
         return table.events.filter { event in
             guard event.enemyId != nil else { return false }
             guard let eventType = EncounterEventType(rawValue: event.eventType) else { return false }
             switch eventType {
-            case .enemyEncounter, .bossEncounter:
+            case .enemyEncounter:
                 return true
+            case .bossEncounter:
+                // ボスはボスフロア（最後のフロア）でのみ出現
+                return isBossFloor
             case .scripted, .guaranteed:
                 return false
             }

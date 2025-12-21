@@ -58,6 +58,7 @@ final class ProgressRuntimeService {
         let superRareState = try await gameStateService.loadSuperRareDailyState()
         let session = try await runtimeService.startExplorationRun(dungeonId: dungeonId,
                                                                    targetFloorNumber: targetFloorNumber,
+                                                                   difficultyTitleId: party.lastSelectedDifficulty,
                                                                    party: partyState,
                                                                    superRareState: superRareState)
 
