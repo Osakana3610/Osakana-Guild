@@ -281,6 +281,7 @@ struct PartySlotExpansionView: View {
             do {
                 let updatedParties = try await appServices.party.ensurePartySlots(atLeast: previousSlots + 1)
                 let updatedPlayer = try await appServices.gameState.currentPlayer()
+                appServices.applyPlayerSnapshot(updatedPlayer)
                 playerSnapshot = updatedPlayer
                 partySnapshots = updatedParties
                 successMessage = "ギルド改造完了！パーティスロットが\(previousSlots)から\(updatedParties.count)に増えました！"
