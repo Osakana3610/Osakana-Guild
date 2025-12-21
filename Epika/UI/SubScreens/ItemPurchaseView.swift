@@ -179,8 +179,26 @@ struct ItemPurchaseView: View {
         do {
             let snapshot = try await shopService.purchase(itemId: item.id, quantity: quantity)
             appServices.applyPlayerSnapshot(snapshot)
+            // 在庫を即時更新
+            if let index = shopItems.firstIndex(where: { $0.id == item.id }) {
+                let oldItem = shopItems[index]
+                if let oldStock = oldItem.stockQuantity {
+                    let newStock = oldStock > UInt16(quantity) ? oldStock - UInt16(quantity) : 0
+                    if newStock == 0 {
+                        shopItems.remove(at: index)
+                    } else {
+                        shopItems[index] = ShopProgressService.ShopItem(
+                            id: oldItem.id,
+                            definition: oldItem.definition,
+                            price: oldItem.price,
+                            stockQuantity: newStock,
+                            isPlayerSold: oldItem.isPlayerSold,
+                            updatedAt: Date()
+                        )
+                    }
+                }
+            }
             selectedItem = nil
-            await loadShopData()
         } catch {
             purchaseErrorMessage = error.localizedDescription
         }
