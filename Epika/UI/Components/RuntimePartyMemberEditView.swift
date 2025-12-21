@@ -93,31 +93,36 @@ struct RuntimePartyMemberEditView: View {
 
     private var partyMemberSection: some View {
         VStack(spacing: 0) {
-            Text("パーティメンバー (最大6名)")
-                .font(.headline)
-                .padding(.horizontal)
-                .padding(.top, 16)
-                .padding(.bottom, 8)
-
-            VStack(spacing: 12) {
-                ForEach(0..<2, id: \.self) { row in
-                    HStack(spacing: 16) {
-                        ForEach(0..<3, id: \.self) { col in
-                            let index = row * 3 + col
-                            let member = character(for: currentMemberIds[index])
-                            RuntimePartyMemberSlotView(
-                                character: member,
-                                slotIndex: index,
-                                isSelected: selectedSlotIndex == index,
-                                onSlotTap: { handleSlotTap(index: index) }
-                            )
-                        }
-                    }
-                }
+            HStack {
+                Text("パーティメンバー (最大6名)")
+                    .font(.headline)
+                Spacer()
             }
             .padding(.horizontal)
-            .padding(.bottom, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+
+            List {
+                ForEach(Array(currentMemberIds.enumerated()), id: \.offset) { index, memberId in
+                    let member = character(for: memberId)
+                    PartyMemberListRow(
+                        character: member,
+                        slotIndex: index,
+                        isSelected: selectedSlotIndex == index,
+                        onTap: { handleSlotTap(index: index) }
+                    )
+                }
+                .onMove(perform: moveMembers)
+            }
+            .listStyle(.plain)
+            .environment(\.editMode, .constant(.active))
+            .frame(height: 320)
         }
+    }
+
+    private func moveMembers(from source: IndexSet, to destination: Int) {
+        currentMemberIds.move(fromOffsets: source, toOffset: destination)
+        persistMembers()
     }
 
     private var searchSection: some View {
@@ -218,7 +223,61 @@ private extension RuntimePartyMemberEditView {
     }
 }
 
-// MARK: - Supporting Views remain unchanged below
+// MARK: - Supporting Views
+
+private struct PartyMemberListRow: View {
+    let character: RuntimeCharacter?
+    let slotIndex: Int
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                if let character {
+                    CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 55)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(character.name)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                        HStack(spacing: 8) {
+                            Text("Lv.\(character.level)")
+                            Text(character.raceName)
+                            Text(character.jobName)
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("HP")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text("\(character.currentHP)/\(character.maxHP)")
+                            .font(.caption)
+                            .foregroundStyle(.primary)
+                    }
+                } else {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(.systemGray4))
+                        .frame(width: 55, height: 55)
+                        .overlay(
+                            Image(systemName: isSelected ? "checkmark.circle.fill" : "plus")
+                                .foregroundStyle(isSelected ? .blue : .secondary)
+                        )
+                    Text("空きスロット")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .listRowBackground(isSelected ? Color.blue.opacity(0.1) : Color(.systemBackground))
+    }
+}
 
 struct RuntimePartyMemberSlotView: View {
     let character: RuntimeCharacter?
