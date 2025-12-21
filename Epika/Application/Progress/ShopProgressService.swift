@@ -260,14 +260,10 @@ private extension ShopProgressService {
         var existing = Dictionary(uniqueKeysWithValues: try context.fetch(descriptor).map { ($0.itemId, $0) })
 
         for entry in masterItems.sorted(by: { $0.orderIndex < $1.orderIndex }) {
-            if let stock = existing.removeValue(forKey: entry.itemId) {
-                let desiredRemaining: UInt16? = entry.quantity.map { UInt16($0) }
-                if stock.remaining != desiredRemaining {
-                    stock.remaining = desiredRemaining
-                    stock.updatedAt = timestamp
-                    changed = true
-                }
+            if existing.removeValue(forKey: entry.itemId) != nil {
+                // 既存レコードがある場合は在庫を維持（購入による減少を保持）
             } else {
+                // 新規アイテムのみマスターデータの値で初期化
                 let remaining: UInt16? = entry.quantity.map { UInt16($0) }
                 let stock = ShopStockRecord(itemId: entry.itemId,
                                             remaining: remaining,
