@@ -786,6 +786,7 @@ private struct SpellEntry: Decodable {
     let name: String
     let school: String
     let tier: Int
+    let unlockLevel: Int
     let category: String
     let targeting: String
     let maxTargetsBase: Int?
@@ -811,12 +812,12 @@ extension Generator {
 
             let insertSpellSQL = """
                 INSERT INTO spells (
-                    id, name, school, tier, category, targeting,
+                    id, name, school, tier, unlock_level, category, targeting,
                     max_targets_base, extra_targets_per_levels,
                     hits_per_cast, base_power_multiplier,
                     status_id, heal_multiplier, cast_condition,
                     description
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
             let insertBuffSQL = """
                 INSERT INTO spell_buffs (spell_id, order_index, type, multiplier)
@@ -845,16 +846,17 @@ extension Generator {
                 bindText(spellStatement, index: 2, value: spell.name)
                 bindInt(spellStatement, index: 3, value: schoolInt)
                 bindInt(spellStatement, index: 4, value: spell.tier)
-                bindInt(spellStatement, index: 5, value: categoryInt)
-                bindInt(spellStatement, index: 6, value: targetingInt)
-                bindInt(spellStatement, index: 7, value: spell.maxTargetsBase)
-                bindDouble(spellStatement, index: 8, value: spell.extraTargetsPerLevels)
-                bindInt(spellStatement, index: 9, value: spell.hitsPerCast)
-                bindDouble(spellStatement, index: 10, value: spell.basePowerMultiplier)
-                bindInt(spellStatement, index: 11, value: spell.statusId.flatMap { Int($0) })
-                bindDouble(spellStatement, index: 12, value: spell.healMultiplier)
-                bindInt(spellStatement, index: 13, value: spell.castCondition.flatMap { EnumMappings.spellCastCondition[$0] })
-                bindText(spellStatement, index: 14, value: spell.description)
+                bindInt(spellStatement, index: 5, value: spell.unlockLevel)
+                bindInt(spellStatement, index: 6, value: categoryInt)
+                bindInt(spellStatement, index: 7, value: targetingInt)
+                bindInt(spellStatement, index: 8, value: spell.maxTargetsBase)
+                bindDouble(spellStatement, index: 9, value: spell.extraTargetsPerLevels)
+                bindInt(spellStatement, index: 10, value: spell.hitsPerCast)
+                bindDouble(spellStatement, index: 11, value: spell.basePowerMultiplier)
+                bindInt(spellStatement, index: 12, value: spell.statusId.flatMap { Int($0) })
+                bindDouble(spellStatement, index: 13, value: spell.healMultiplier)
+                bindInt(spellStatement, index: 14, value: spell.castCondition.flatMap { EnumMappings.spellCastCondition[$0] })
+                bindText(spellStatement, index: 15, value: spell.description)
                 try step(spellStatement)
                 reset(spellStatement)
 

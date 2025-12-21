@@ -165,7 +165,8 @@ extension SkillRuntimeEffectCompiler {
     }
 
     static func spellLoadout(from spellbook: SkillRuntimeEffects.Spellbook,
-                             definitions: [SpellDefinition]) -> SkillRuntimeEffects.SpellLoadout {
+                             definitions: [SpellDefinition],
+                             characterLevel: Int) -> SkillRuntimeEffects.SpellLoadout {
         guard !definitions.isEmpty else { return SkillRuntimeEffects.emptySpellLoadout }
 
         var unlocks: [SpellDefinition.School: Int] = [:]
@@ -182,8 +183,10 @@ extension SkillRuntimeEffectCompiler {
         var allowedIds: Set<UInt8> = []
         for definition in definitions {
             guard !spellbook.forgottenSpellIds.contains(definition.id) else { continue }
+            // 呪文解放条件: ティア解放スキルを持っている AND レベル条件を満たす
             if let unlockedTier = unlocks[definition.school],
-               definition.tier <= unlockedTier {
+               definition.tier <= unlockedTier,
+               characterLevel >= definition.unlockLevel {
                 allowedIds.insert(definition.id)
             }
         }

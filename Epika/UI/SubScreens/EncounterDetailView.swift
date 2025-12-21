@@ -26,6 +26,7 @@ struct EncounterDetailView: View {
     let encounter: ExplorationSnapshot.EncounterLog
 
     @Environment(\.modelContext) private var modelContext
+    @Environment(AppServices.self) private var appServices
 
     @State private var battleLogArchive: BattleLogArchive?
     @State private var battleLogEntries: [BattleLogEntry] = []
@@ -176,6 +177,9 @@ struct EncounterDetailView: View {
                 indexToId: indexToId
             )
 
+            // エントリをグループ化
+            let groupedActions = groupEntries(actions, actionHPChanges: actionHPChanges, participants: summaryStates)
+
             let partyStates = summaryStates.values
                 .filter { $0.role == .player }
                 .sorted { $0.order < $1.order }
@@ -188,8 +192,7 @@ struct EncounterDetailView: View {
                                       party: partyStates,
                                       enemies: enemyStates,
                                       participants: summaryStates,
-                                      actions: actions,
-                                      actionHPChanges: actionHPChanges))
+                                      groupedActions: groupedActions))
 
             // 次ターン用に前ターン開始時の状態を更新
             previousTurnStartStates = turnStartStates
@@ -301,6 +304,90 @@ struct EncounterDetailView: View {
         return true
     }
 
+    /// エントリをアクション単位でグループ化
+    /// アクション宣言（攻撃、魔法等）と、それに続く結果（ダメージ、回復等）をまとめる
+    private func groupEntries(
+        _ entries: [BattleLogEntry],
+        actionHPChanges: [Int: ActionHPChange],
+        participants: [String: ParticipantState]
+    ) -> [GroupedBattleAction] {
+        var groups: [GroupedBattleAction] = []
+        var currentPrimary: BattleLogEntry?
+        var currentResults: [BattleLogEntry] = []
+        var currentHPChanges: [ActionHPChange] = []
+        var groupId = 0
+
+        func finishGroup() {
+            guard let primary = currentPrimary else {
+                // アクション宣言なしの場合、各結果を個別グループとして追加
+                for result in currentResults {
+                    groups.append(GroupedBattleAction(
+                        id: groupId,
+                        primaryEntry: result,
+                        results: [],
+                        hpChanges: []
+                    ))
+                    groupId += 1
+                }
+                currentResults = []
+                currentHPChanges = []
+                return
+            }
+            groups.append(GroupedBattleAction(
+                id: groupId,
+                primaryEntry: primary,
+                results: currentResults,
+                hpChanges: currentHPChanges
+            ))
+            groupId += 1
+            currentPrimary = nil
+            currentResults = []
+            currentHPChanges = []
+        }
+
+        for (index, entry) in entries.enumerated() {
+            let isActionDeclaration = entry.type == .action || entry.type == .guard
+            // ダメージ、回復、ミス、敗北は結果としてグループに含める
+            let isResult = entry.type == .damage || entry.type == .heal || entry.type == .miss || entry.type == .defeat
+            // 勝利、撤退、システムはグループを終了して単独表示
+            let isStandalone = entry.type == .victory || entry.type == .retreat || entry.type == .system
+
+            if isActionDeclaration {
+                // 前のグループを確定
+                finishGroup()
+                currentPrimary = entry
+            } else if isResult {
+                // 結果をグループに追加（敗北含む）
+                // ただしdefeatはHP変動を持たないのでスキップ
+                if entry.type != .defeat {
+                    currentResults.append(entry)
+                    if let hpChange = actionHPChanges[index] {
+                        currentHPChanges.append(hpChange)
+                    }
+                }
+                // defeatは表示しない（HP 0/maxで十分わかる）
+            } else if isStandalone {
+                // 勝利・撤退・システムは単独表示
+                finishGroup()
+                groups.append(GroupedBattleAction(
+                    id: groupId,
+                    primaryEntry: entry,
+                    results: [],
+                    hpChanges: []
+                ))
+                groupId += 1
+            } else {
+                // status等はそのままグループに追加
+                currentResults.append(entry)
+            }
+        }
+
+        // 最後のグループを確定
+        finishGroup()
+
+        return groups
+    }
+
     @MainActor
     private func loadBattleLogIfNeeded() async {
         guard encounter.combatSummary?.battleLogData != nil else { return }
@@ -341,11 +428,18 @@ struct EncounterDetailView: View {
                 }
             }
 
+            // 呪文名マップを構築
+            var spellNames: [UInt8: String] = [:]
+            for spell in appServices.masterDataCache.allSpells {
+                spellNames[spell.id] = spell.name
+            }
+
             // BattleLogRenderer で変換
             battleLogEntries = BattleLogRenderer.render(
                 battleLog: archive.battleLog,
                 allyNames: allyNames,
-                enemyNames: enemyNames
+                enemyNames: enemyNames,
+                spellNames: spellNames
             )
 
             actorIdentifierToMemberId = memberMap
@@ -405,8 +499,7 @@ struct TurnSummary: Identifiable {
     let party: [ParticipantState]
     let enemies: [ParticipantState]
     let participants: [String: ParticipantState]
-    let actions: [BattleLogEntry]
-    let actionHPChanges: [Int: ActionHPChange]  // アクションindex → HP変動情報
+    let groupedActions: [GroupedBattleAction]
 }
 
 /// アクション実行時のHP変動情報
@@ -416,6 +509,14 @@ struct ActionHPChange {
     let beforeHP: Int
     let afterHP: Int
     let maxHP: Int
+}
+
+/// グループ化されたバトルアクション（アクション宣言 + 結果をまとめる）
+struct GroupedBattleAction: Identifiable {
+    let id: Int  // グループの一意識別子
+    let primaryEntry: BattleLogEntry  // アクション宣言（攻撃、魔法等）
+    let results: [BattleLogEntry]  // ダメージ、回復等の結果
+    let hpChanges: [ActionHPChange]  // HP変動情報
 }
 
 struct ParticipantState: Identifiable {
@@ -465,13 +566,12 @@ struct BattleTurnView: View {
             }
             .padding(.vertical, 4)
 
-            // 各アクションを個別の行として表示
-            ForEach(Array(summary.actions.enumerated()), id: \.offset) { index, entry in
-                let participant = summary.participants[entry.actorId ?? ""]
-                BattleActionRowView(entry: entry,
-                                    actor: participant,
-                                    iconInfo: iconProvider(participant),
-                                    hpChange: summary.actionHPChanges[index])
+            // 各アクショングループを行として表示
+            ForEach(summary.groupedActions) { group in
+                let participant = summary.participants[group.primaryEntry.actorId ?? ""]
+                GroupedActionRowView(group: group,
+                                     actor: participant,
+                                     iconInfo: iconProvider(participant))
             }
         } header: {
             Text("\(summary.turn)ターン目")
@@ -539,17 +639,18 @@ struct ParticipantHPRow: View {
     }
 }
 
-struct BattleActionRowView: View {
-    let entry: BattleLogEntry
+/// グループ化されたアクションの表示（アクション宣言 + 複数のHP変動を1行で表示）
+struct GroupedActionRowView: View {
+    let group: GroupedBattleAction
     let actor: ParticipantState?
     let iconInfo: CharacterIconInfo?
-    let hpChange: ActionHPChange?
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             BattleActorIcon(actor: actor, iconInfo: iconInfo)
 
             VStack(alignment: .leading, spacing: 4) {
+                // アクター名
                 if let name = actor?.name, !name.isEmpty {
                     Text(name)
                         .font(.caption)
@@ -560,23 +661,33 @@ struct BattleActionRowView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Text(entry.message)
+                // アクションメッセージ
+                Text(group.primaryEntry.message)
                     .font(.subheadline)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                // HP変動がある場合はHPバーを表示
-                if let hpChange {
-                    HStack(spacing: 4) {
-                        Text(hpChange.targetName)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                // 各結果（ダメージ/回復等）とHP変動を表示
+                ForEach(Array(zip(group.results, group.hpChanges).enumerated()), id: \.offset) { _, pair in
+                    let (result, hpChange) = pair
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(result.message)
+                            .font(.caption)
+                            .foregroundStyle(.primary)
                         HPBarView(
                             currentHP: hpChange.afterHP,
                             previousHP: hpChange.beforeHP,
                             maxHP: hpChange.maxHP
                         )
-                        .frame(maxWidth: 100)
+                        .frame(maxWidth: 120)
+                    }
+                }
+                // HP変動がない結果（ミス等）を表示
+                if group.results.count > group.hpChanges.count {
+                    ForEach(Array(group.results.dropFirst(group.hpChanges.count).enumerated()), id: \.offset) { _, result in
+                        Text(result.message)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }

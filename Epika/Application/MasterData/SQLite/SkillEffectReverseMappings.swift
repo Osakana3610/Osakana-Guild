@@ -187,11 +187,8 @@ struct SkillEffectReverseMappings: Sendable {
 
     /// spellSchool: INT → String
     nonisolated static let spellSchool: [Int: String] = [
-        1: "fire",
-        2: "ice",
-        3: "lightning",
-        4: "holy",
-        5: "dark"
+        1: "mage",
+        2: "priest"
     ]
 
     /// spellBuffType: INT → String

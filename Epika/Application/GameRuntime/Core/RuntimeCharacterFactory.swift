@@ -100,7 +100,11 @@ enum RuntimeCharacterFactory {
 
         // スペルブック
         let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
-        let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(from: spellbook, definitions: masterData.allSpells)
+        let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(
+            from: spellbook,
+            definitions: masterData.allSpells,
+            characterLevel: Int(input.level)
+        )
 
         // 装備を CharacterValues.EquippedItem に変換
         let equippedItemsValues = input.equippedItems.map { item in

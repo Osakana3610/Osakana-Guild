@@ -26,11 +26,13 @@ struct BattleLogRenderer {
     ///   - battleLog: 数値形式の戦闘ログ
     ///   - allyNames: characterId → 表示名
     ///   - enemyNames: actorIndex → 表示名（敵）
+    ///   - spellNames: spellId → 魔法名
     /// - Returns: 表示用のBattleLogEntry配列
     static func render(
         battleLog: BattleLog,
         allyNames: [UInt8: String],
-        enemyNames: [UInt16: String]
+        enemyNames: [UInt16: String],
+        spellNames: [UInt8: String] = [:]
     ) -> [BattleLogEntry] {
         var entries: [BattleLogEntry] = []
 
@@ -45,6 +47,13 @@ struct BattleLogRenderer {
                 targetName = nil
             }
 
+            let spellName: String?
+            if let skillIndex = action.skillIndex {
+                spellName = spellNames[UInt8(skillIndex)]
+            } else {
+                spellName = nil
+            }
+
             let entry = makeEntry(
                 turn: Int(action.turn),
                 kind: kind,
@@ -52,7 +61,8 @@ struct BattleLogRenderer {
                 targetName: targetName,
                 value: action.value.map { Int($0) },
                 actorId: String(action.actor),
-                targetId: action.target.map { String($0) }
+                targetId: action.target.map { String($0) },
+                spellName: spellName
             )
 
             if let entry = entry {
@@ -84,13 +94,15 @@ struct BattleLogRenderer {
         targetName: String?,
         value: Int?,
         actorId: String,
-        targetId: String?
+        targetId: String?,
+        spellName: String?
     ) -> BattleLogEntry? {
         let (message, type) = messageAndType(
             kind: kind,
             actorName: actorName,
             targetName: targetName,
-            value: value
+            value: value,
+            spellName: spellName
         )
 
         guard !message.isEmpty else { return nil }
@@ -108,7 +120,8 @@ struct BattleLogRenderer {
         kind: ActionKind,
         actorName: String,
         targetName: String?,
-        value: Int?
+        value: Int?,
+        spellName: String?
     ) -> (String, BattleLogEntry.LogType) {
         switch kind {
         // 行動選択
@@ -117,9 +130,11 @@ struct BattleLogRenderer {
         case .physicalAttack:
             return ("\(actorName)の攻撃！", .action)
         case .priestMagic:
-            return ("\(actorName)は回復魔法を唱えた！", .action)
+            let spell = spellName ?? "回復魔法"
+            return ("\(actorName)は\(spell)を唱えた！", .action)
         case .mageMagic:
-            return ("\(actorName)は攻撃魔法を唱えた！", .action)
+            let spell = spellName ?? "攻撃魔法"
+            return ("\(actorName)は\(spell)を唱えた！", .action)
         case .breath:
             return ("\(actorName)はブレスを吐いた！", .action)
 

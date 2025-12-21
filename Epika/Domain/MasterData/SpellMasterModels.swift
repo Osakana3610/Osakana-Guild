@@ -55,8 +55,8 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
 
         nonisolated init?(identifier: String) {
             switch identifier {
-            case "mage": self = .mage
-            case "priest": self = .priest
+            case "mage", "1": self = .mage
+            case "priest", "2": self = .priest
             default: return nil
             }
         }
@@ -187,6 +187,7 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
     let name: String
     let school: School
     let tier: Int
+    let unlockLevel: Int
     let category: Category
     let targeting: Targeting
     let maxTargetsBase: Int?
