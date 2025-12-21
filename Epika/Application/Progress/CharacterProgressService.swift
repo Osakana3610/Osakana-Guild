@@ -74,7 +74,7 @@ actor CharacterProgressService {
     func allCharacters() async throws -> [CharacterSnapshot] {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>()
-        descriptor.sortBy = [SortDescriptor(\CharacterRecord.id, order: .forward)]
+        descriptor.sortBy = [SortDescriptor(\CharacterRecord.displayOrder, order: .forward)]
         let records = try context.fetch(descriptor)
         return try await makeSnapshots(records, context: context)
     }
@@ -225,6 +225,9 @@ actor CharacterProgressService {
         // ID採番: 1〜200で最小の未使用IDを割り当てる
         let newId = try allocateCharacterId(context: context)
 
+        // displayOrder採番: 既存の最大値+1
+        let newDisplayOrder = try allocateDisplayOrder(context: context)
+
         // 種族のgenderCodeを取得してavatarIdを計算（職業画像: genderCode * 100 + jobId）
         let race = masterData.race(request.raceId)
         let avatarId: UInt16 = if let race {
@@ -249,6 +252,7 @@ actor CharacterProgressService {
             actionRateMageMagic: 75,
             actionRateBreath: 50
         )
+        record.displayOrder = newDisplayOrder
         context.insert(record)
         try context.save()
 
@@ -441,6 +445,52 @@ actor CharacterProgressService {
         context.delete(record)
         try context.save()
         notifyCharacterProgressDidChange()
+    }
+
+    // MARK: - Display Order
+
+    /// キャラクターの表示順序を更新
+    /// - Parameter orderedIds: 新しい順序でのキャラクターID配列
+    func reorderCharacters(orderedIds: [UInt8]) async throws {
+        guard !orderedIds.isEmpty else { return }
+        let context = makeContext()
+        let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { orderedIds.contains($0.id) })
+        let records = try context.fetch(descriptor)
+        let recordMap = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
+
+        // 指定されたIDがすべて存在するか確認
+        let missingIds = orderedIds.filter { recordMap[$0] == nil }
+        if !missingIds.isEmpty {
+            let idList = missingIds.map { String($0) }.joined(separator: ", ")
+            throw ProgressError.invalidInput(description: "指定されたキャラクターが見つかりません (ID: \(idList))")
+        }
+
+        for (index, id) in orderedIds.enumerated() {
+            let record = recordMap[id]!
+            record.displayOrder = UInt8(index + 1)
+        }
+
+        try context.save()
+        notifyCharacterProgressDidChange()
+    }
+
+    /// displayOrder未設定のキャラクターにID順で順序を設定（起動時マイグレーション用）
+    func migrateDisplayOrderIfNeeded() async throws {
+        let context = makeContext()
+        var descriptor = FetchDescriptor<CharacterRecord>()
+        descriptor.sortBy = [SortDescriptor(\CharacterRecord.id, order: .forward)]
+        let records = try context.fetch(descriptor)
+
+        // displayOrder = 0 のレコードがなければ何もしない
+        let unorderedRecords = records.filter { $0.displayOrder == 0 }
+        guard !unorderedRecords.isEmpty else { return }
+
+        // 全レコードにID順で順序を設定
+        for (index, record) in records.enumerated() {
+            record.displayOrder = UInt8(index + 1)
+        }
+
+        try context.save()
     }
 
     // MARK: - Equipment Management
@@ -759,6 +809,7 @@ private extension CharacterProgressService {
             personality: personality,
             equippedItems: equippedItems,
             actionPreferences: actionPreferences,
+            displayOrder: record.displayOrder,
             createdAt: now,
             updatedAt: now
         )
@@ -867,6 +918,13 @@ private extension CharacterProgressService {
             throw ProgressError.invalidInput(description: "キャラクター数が上限（200体）に達しています")
         }
         return id
+    }
+
+    /// 既存の最大displayOrder+1を割り当てる
+    func allocateDisplayOrder(context: ModelContext) throws -> UInt8 {
+        let records = try context.fetch(FetchDescriptor<CharacterRecord>())
+        let maxOrder = records.map(\.displayOrder).max() ?? 0
+        return maxOrder + 1
     }
 
     func removeFromParties(characterId: UInt8, context: ModelContext) throws {

@@ -100,8 +100,11 @@ struct EpikaApp: App {
         do {
             let bootstrap = try await ProgressBootstrapper.shared.boot()
             sharedModelContainer = bootstrap.container
-            appServices = AppServices(container: bootstrap.container,
-                                       masterDataCache: cache)
+            let services = AppServices(container: bootstrap.container,
+                                        masterDataCache: cache)
+            // 3. キャラクター表示順序のマイグレーション
+            try await services.character.migrateDisplayOrderIfNeeded()
+            appServices = services
         } catch {
             initializationError = "データベース初期化に失敗しました: \(error.localizedDescription)"
         }

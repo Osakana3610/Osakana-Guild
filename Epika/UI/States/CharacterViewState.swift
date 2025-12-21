@@ -33,7 +33,7 @@ final class CharacterViewState {
         let jobName: String
         let raceName: String
         let isAlive: Bool
-        let createdAt: Date
+        let displayOrder: UInt8
         let jobId: UInt8
         let raceId: UInt8
         let gender: String
@@ -53,7 +53,7 @@ final class CharacterViewState {
             self.jobName = job?.name ?? "職業\(snapshot.jobId)"
             self.raceName = race?.name ?? "種族\(snapshot.raceId)"
             self.isAlive = snapshot.hitPoints.current > 0
-            self.createdAt = snapshot.createdAt
+            self.displayOrder = snapshot.displayOrder
             self.jobId = snapshot.jobId
             self.raceId = snapshot.raceId
             self.gender = race?.genderDisplayName ?? "不明"
@@ -105,7 +105,7 @@ final class CharacterViewState {
                              job: jobMap[snapshot.jobId],
                              race: raceMap[snapshot.raceId])
         }
-        .sorted { $0.createdAt < $1.createdAt }
+        .sorted { $0.displayOrder < $1.displayOrder }
     }
 
     func loadAllCharacters(using appServices: AppServices) async throws {
@@ -120,9 +120,8 @@ final class CharacterViewState {
             let character = try await characterService.runtimeCharacter(from: snapshot)
             buffer.append(character)
         }
-        allCharacters = buffer.sorted { lhs, rhs in
-            lhs.id < rhs.id
-        }
+        // allCharacters()が既にdisplayOrder順で返すので、その順序を維持
+        allCharacters = buffer
     }
 
     @MainActor
