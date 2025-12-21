@@ -54,16 +54,14 @@ struct RuntimePartyMemberEditView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                partyMemberSection
-                Divider()
-                searchSection
-                availableCharacterSection
-            }
-            .navigationTitle("メンバー編集")
-            .navigationBarTitleDisplayMode(.inline)
+        VStack(spacing: 0) {
+            partyMemberSection
+            Divider()
+            searchSection
+            availableCharacterSection
         }
+        .navigationTitle("メンバー編集")
+        .navigationBarTitleDisplayMode(.inline)
         .task { await initialise() }
         .alert("エラー", isPresented: $showError) {
             Button("OK", role: .cancel) { showError = false }

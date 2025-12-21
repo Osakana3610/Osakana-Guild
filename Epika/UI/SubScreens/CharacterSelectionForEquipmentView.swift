@@ -34,31 +34,29 @@ struct CharacterSelectionForEquipmentView: View {
     private var characterService: CharacterProgressService { appServices.character }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if isLoading {
-                    ProgressView("読み込み中...")
-                } else if let error = loadError {
-                    ContentUnavailableView {
-                        Label("エラー", systemImage: "exclamationmark.triangle")
-                    } description: {
-                        Text(error)
-                    }
-                } else if characters.isEmpty {
-                    ContentUnavailableView {
-                        Label("キャラクターがいません", systemImage: "person.slash")
-                    } description: {
-                        Text("ギルドにキャラクターを作成してください")
-                    }
-                } else {
-                    characterList
+        Group {
+            if isLoading {
+                ProgressView("読み込み中...")
+            } else if let error = loadError {
+                ContentUnavailableView {
+                    Label("エラー", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(error)
                 }
+            } else if characters.isEmpty {
+                ContentUnavailableView {
+                    Label("キャラクターがいません", systemImage: "person.slash")
+                } description: {
+                    Text("ギルドにキャラクターを作成してください")
+                }
+            } else {
+                characterList
             }
-            .navigationTitle("アイテムを装備")
-            .navigationBarTitleDisplayMode(.inline)
-            .task {
-                await loadCharacters()
-            }
+        }
+        .navigationTitle("アイテムを装備")
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+            await loadCharacters()
         }
     }
 

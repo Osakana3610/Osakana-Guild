@@ -33,26 +33,24 @@ struct ItemPurchaseView: View {
     var playerGold: Int { Int(player?.gold ?? 0) }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if showError {
-                    ErrorView(message: errorMessage) {
-                        Task { await loadShopData() }
-                    }
-                } else {
-                    buildContent()
+        Group {
+            if showError {
+                ErrorView(message: errorMessage) {
+                    Task { await loadShopData() }
                 }
+            } else {
+                buildContent()
             }
-            .navigationTitle("アイテム購入")
-            .navigationBarTitleDisplayMode(.inline)
-            .task { await loadShopData() }
-            .alert(purchaseAlertTitle, isPresented: $showPurchaseAlert) {
-                Button("1個買う") { Task { await confirmPurchase(quantity: 1) } }
-                Button("10個買う") { Task { await confirmPurchase(quantity: 10) } }
-                Button("キャンセル", role: .cancel) { selectedItem = nil }
-            } message: {
-                Text(purchaseAlertMessage)
-            }
+        }
+        .navigationTitle("アイテム購入")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await loadShopData() }
+        .alert(purchaseAlertTitle, isPresented: $showPurchaseAlert) {
+            Button("1個買う") { Task { await confirmPurchase(quantity: 1) } }
+            Button("10個買う") { Task { await confirmPurchase(quantity: 10) } }
+            Button("キャンセル", role: .cancel) { selectedItem = nil }
+        } message: {
+            Text(purchaseAlertMessage)
         }
     }
 

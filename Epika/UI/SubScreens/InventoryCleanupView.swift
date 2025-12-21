@@ -31,24 +31,22 @@ struct InventoryCleanupView: View {
     @State private var errorMessage = ""
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if showError {
-                    ErrorView(message: errorMessage) {
-                        Task { await loadCandidates() }
-                    }
-                } else if candidates.isEmpty && !isLoading {
-                    emptyState
-                } else {
-                    candidateList
+        Group {
+            if showError {
+                ErrorView(message: errorMessage) {
+                    Task { await loadCandidates() }
                 }
+            } else if candidates.isEmpty && !isLoading {
+                emptyState
+            } else {
+                candidateList
             }
-            .listStyle(.insetGrouped)
-            .avoidBottomGameInfo()
-            .navigationTitle("在庫整理")
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear { Task { await loadCandidates() } }
         }
+        .listStyle(.insetGrouped)
+        .avoidBottomGameInfo()
+        .navigationTitle("在庫整理")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { Task { await loadCandidates() } }
     }
 
     private var emptyState: some View {

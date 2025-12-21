@@ -30,24 +30,22 @@ struct AutoTradeView: View {
     @State private var errorMessage = ""
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if showError {
-                    ErrorView(message: errorMessage) {
-                        Task { await loadRules() }
-                    }
-                } else if rules.isEmpty && !isLoading {
-                    emptyState
-                } else {
-                    ruleList
+        Group {
+            if showError {
+                ErrorView(message: errorMessage) {
+                    Task { await loadRules() }
                 }
+            } else if rules.isEmpty && !isLoading {
+                emptyState
+            } else {
+                ruleList
             }
-            .listStyle(.insetGrouped)
-            .avoidBottomGameInfo()
-            .navigationTitle("自動売却")
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear { Task { await loadRules() } }
         }
+        .listStyle(.insetGrouped)
+        .avoidBottomGameInfo()
+        .navigationTitle("自動売却")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { Task { await loadRules() } }
     }
 
     private var emptyState: some View {
