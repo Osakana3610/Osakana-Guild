@@ -223,9 +223,12 @@ actor ShopProgressService {
         stockRecord.updatedAt = Date()
         try saveIfNeeded(context)
 
+        // ショップ購入品は無称号（normalTitleId = 2）
+        let noTitleEnhancement = ItemSnapshot.Enhancement(normalTitleId: 2)
         _ = try await inventoryService.addItem(itemId: target.definition.id,
                                                quantity: quantity,
-                                               storage: .playerItem)
+                                               storage: .playerItem,
+                                               enhancements: noTitleEnhancement)
         return playerSnapshot
     }
 }
