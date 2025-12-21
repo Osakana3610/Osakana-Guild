@@ -31,16 +31,14 @@ MasterData.sqlite
 # Agents
 AGENTS.md
 .agent/
+.claude/
 agent_docs/
 
-# Project docs
-Documents/
+# Working files (not published)
+Working/
 
 # Local agent workspace
 .serena/
-
-# Local scripts
-Scripts/
 
 # Local git hooks (untracked)
 .githooks/
