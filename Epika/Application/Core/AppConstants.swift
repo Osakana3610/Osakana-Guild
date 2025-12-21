@@ -12,6 +12,8 @@
 //     - listRowHeight: リスト行高さ
 //
 //   - AppConstants.Progress: 進行データ関連定数
+//     - maximumGold: 所持金上限（99,999,999）
+//     - maximumCatTickets: チケット上限（999）
 //     - defaultPartySlotCount: 初期パーティスロット数（1）
 //     - maximumPartySlotsWithGold: ゴールド購入可能最大スロット（7）
 //     - defaultCharacterSlotCount: キャラクタースロット上限（200）
@@ -31,6 +33,8 @@ enum AppConstants {
     }
 
     enum Progress {
+        nonisolated static let maximumGold: UInt32 = 99_999_999
+        nonisolated static let maximumCatTickets: UInt16 = 999
         nonisolated static let defaultPartySlotCount = 1
         nonisolated static let maximumPartySlotsWithGold = 7
         nonisolated static let defaultCharacterSlotCount = 200

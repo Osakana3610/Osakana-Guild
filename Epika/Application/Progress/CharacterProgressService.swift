@@ -18,6 +18,7 @@
 //
 // 【公開API - 書き込み】
 //   - createCharacter(request:) → CharacterSnapshot
+//   - createCharactersBatch(requests:) - デバッグ用バッチ作成
 //   - deleteCharacter(id:)
 //   - changeJob(characterId:newJobId:) → CharacterSnapshot
 //   - equipItem(characterId:inventoryItemStackKey:) → CharacterSnapshot
@@ -45,6 +46,15 @@ actor CharacterProgressService {
         var displayName: String
         var raceId: UInt8
         var jobId: UInt8
+    }
+
+    /// デバッグ用バッチ作成リクエスト
+    struct DebugCharacterCreationRequest: Sendable {
+        var displayName: String
+        var raceId: UInt8
+        var jobId: UInt8
+        var previousJobId: UInt8
+        var level: Int
     }
 
     struct BattleResultUpdate: Sendable {
@@ -265,6 +275,120 @@ actor CharacterProgressService {
         return snapshot
     }
 
+    /// デバッグ用: 複数キャラクターを一括作成
+    /// - Parameter requests: 作成リクエスト配列
+    /// - Parameter onProgress: 進捗コールバック (current, total)
+    /// - Returns: 作成されたキャラクター数
+    func createCharactersBatch(
+        _ requests: [DebugCharacterCreationRequest],
+        onProgress: (@Sendable (Int, Int) async -> Void)? = nil
+    ) async throws -> Int {
+        guard !requests.isEmpty else { return 0 }
+        let context = makeContext()
+
+        // 使用可能なIDを確保
+        let occupied = Set(try context.fetch(FetchDescriptor<CharacterRecord>()).map(\.id))
+        let availableCount = (1...200).filter { !occupied.contains(UInt8($0)) }.count
+        if availableCount < requests.count {
+            throw ProgressError.invalidInput(
+                description: "キャラクター数が上限に達しています（空き: \(availableCount), 要求: \(requests.count)）"
+            )
+        }
+        let availableIds = (1...200).lazy.map(UInt8.init).filter { !occupied.contains($0) }
+        var idIterator = availableIds.makeIterator()
+
+        // 現在の最大displayOrderを取得（UInt8なので255を超えないようにクランプ）
+        let existingRecords = try context.fetch(FetchDescriptor<CharacterRecord>())
+        let maxDisplayOrder = existingRecords.map { Int($0.displayOrder) }.max() ?? 0
+        var displayOrder = min(maxDisplayOrder + 1, 255)
+
+        var createdIds: [UInt8] = []
+        let total = requests.count
+
+        for request in requests {
+            guard let newId = idIterator.next() else {
+                throw ProgressError.invalidInput(description: "キャラクターIDの割り当てに失敗しました")
+            }
+
+            // 種族・職業の存在チェック
+            guard let race = masterData.race(request.raceId) else {
+                throw ProgressError.invalidInput(description: "種族ID \(request.raceId) のマスターデータが見つかりません")
+            }
+            guard masterData.job(request.jobId) != nil else {
+                throw ProgressError.invalidInput(description: "職業ID \(request.jobId) のマスターデータが見つかりません")
+            }
+
+            // 前職の存在チェック（0以外の場合）
+            if request.previousJobId > 0 {
+                guard masterData.job(request.previousJobId) != nil else {
+                    throw ProgressError.invalidInput(description: "前職ID \(request.previousJobId) のマスターデータが見つかりません")
+                }
+            }
+
+            // レベルの入力検証（1未満はエラー、種族最大超過はクランプ）
+            if request.level < 1 {
+                throw ProgressError.invalidInput(description: "レベルは1以上である必要があります（入力: \(request.level)）")
+            }
+            let effectiveLevel = min(request.level, min(race.maxLevel, 255))
+
+            let avatarId = UInt16(race.genderCode) * 100 + UInt16(request.jobId)
+
+            // 指定レベルに必要な経験値を計算
+            let experience: UInt64
+            if effectiveLevel > 1 {
+                let rawExperience = try await MainActor.run {
+                    try CharacterExperienceTable.totalExperience(toReach: effectiveLevel)
+                }
+                experience = UInt64(rawExperience)
+            } else {
+                experience = 0
+            }
+
+            let record = CharacterRecord(
+                id: newId,
+                displayName: request.displayName,
+                raceId: request.raceId,
+                jobId: request.jobId,
+                previousJobId: request.previousJobId,
+                avatarId: avatarId,
+                level: UInt8(effectiveLevel),
+                experience: experience,
+                currentHP: 0,
+                primaryPersonalityId: 0,
+                secondaryPersonalityId: 0,
+                actionRateAttack: 100,
+                actionRatePriestMagic: 75,
+                actionRateMageMagic: 75,
+                actionRateBreath: 50
+            )
+            record.displayOrder = UInt8(displayOrder)
+            if displayOrder < 255 { displayOrder += 1 }
+            context.insert(record)
+
+            createdIds.append(newId)
+            await onProgress?(createdIds.count, total)
+        }
+
+        try context.save()
+
+        // HP設定（新規作成分のみmaxHPで初期化）
+        let createdIdSet = Set(createdIds)
+        let allRecords = try context.fetch(FetchDescriptor<CharacterRecord>())
+        // デバッグ用バッチ作成ではGameStateがない可能性があるため、エラー時は空セットを使用
+        let pandoraStackKeys = (try? fetchPandoraBoxStackKeys(context: context)) ?? []
+        for record in allRecords where createdIdSet.contains(record.id) {
+            let input = try loadInput(record, context: context)
+            let runtimeCharacter = try await MainActor.run {
+                try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxStackKeys: pandoraStackKeys)
+            }
+            record.currentHP = UInt32(runtimeCharacter.maxHP)
+        }
+        try context.save()
+
+        notifyCharacterProgressDidChange()
+        return createdIds.count
+    }
+
     // MARK: - Update
 
     func updateCharacter(id: UInt8,
@@ -311,7 +435,7 @@ actor CharacterProgressService {
                 let updatedExperience = max(0, Int(addition.partialValue))
 
                 let cappedExperience = try await clampExperience(updatedExperience, raceId: record.raceId)
-                record.experience = UInt32(cappedExperience)
+                record.experience = UInt64(cappedExperience)
                 let computedLevel = try await resolveLevel(for: cappedExperience, raceId: record.raceId)
                 if computedLevel != Int(previousLevel) {
                     record.level = UInt8(computedLevel)
@@ -819,7 +943,7 @@ private extension CharacterProgressService {
         record.displayName = snapshot.displayName
         record.avatarId = snapshot.avatarId
         record.level = UInt8(snapshot.level)
-        record.experience = UInt32(snapshot.experience)
+        record.experience = UInt64(snapshot.experience)
         record.currentHP = UInt32(snapshot.hitPoints.current)
         record.actionRateAttack = UInt8(snapshot.actionPreferences.attack)
         record.actionRatePriestMagic = UInt8(snapshot.actionPreferences.priestMagic)
