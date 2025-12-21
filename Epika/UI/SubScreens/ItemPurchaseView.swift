@@ -177,7 +177,8 @@ struct ItemPurchaseView: View {
     private func confirmPurchase(quantity: Int) async {
         guard let item = selectedItem else { return }
         do {
-            _ = try await shopService.purchase(itemId: item.id, quantity: quantity)
+            let snapshot = try await shopService.purchase(itemId: item.id, quantity: quantity)
+            appServices.applyPlayerSnapshot(snapshot)
             selectedItem = nil
             await loadShopData()
         } catch {
