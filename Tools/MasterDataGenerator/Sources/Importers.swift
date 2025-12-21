@@ -16,7 +16,7 @@ private struct ItemMasterFile: Decodable {
         let allowedJobs: [String]?
         let allowedGenders: [String]?
         let bypassRaceRestriction: [String]?
-        let combatBonuses: [String: Int]?
+        let combatBonuses: [String: Double]?
         let grantedSkillIds: [Int]?
         let rarity: String?
     }
@@ -88,7 +88,7 @@ extension Generator {
                     for (stat, value) in combatBonuses.sorted(by: { $0.key < $1.key }) {
                         bindInt(combatStatement, index: 1, value: item.id)
                         bindInt(combatStatement, index: 2, value: EnumMappings.combatStat[stat] ?? 0)
-                        bindInt(combatStatement, index: 3, value: value)
+                        bindDouble(combatStatement, index: 3, value: value)
                         try step(combatStatement)
                         reset(combatStatement)
                     }

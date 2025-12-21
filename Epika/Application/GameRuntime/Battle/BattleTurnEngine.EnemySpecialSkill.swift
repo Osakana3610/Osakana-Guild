@@ -504,7 +504,7 @@ extension BattleTurnEngine {
         case .accuracy:
             actor.snapshot.hitRate = Int(Double(actor.snapshot.hitRate) * multiplier)
         case .attackCount:
-            actor.snapshot.attackCount = Int(Double(actor.snapshot.attackCount) * multiplier)
+            actor.snapshot.attackCount = actor.snapshot.attackCount * multiplier
         }
     }
 }

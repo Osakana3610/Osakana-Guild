@@ -62,7 +62,7 @@ enum CharacterValues {
         var hitRate: Int
         var evasionRate: Int
         var criticalRate: Int
-        var attackCount: Int
+        var attackCount: Double
         var magicalHealing: Int
         var trapRemoval: Int
         var additionalDamage: Int

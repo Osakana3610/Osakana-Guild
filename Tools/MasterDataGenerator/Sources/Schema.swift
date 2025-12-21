@@ -39,7 +39,7 @@ extension Generator {
             CREATE TABLE IF NOT EXISTS item_combat_bonuses (
                 item_id INTEGER NOT NULL,
                 stat INTEGER NOT NULL,
-                value INTEGER NOT NULL,
+                value REAL NOT NULL,
                 PRIMARY KEY (item_id, stat),
                 FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
             );
