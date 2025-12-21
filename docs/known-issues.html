@@ -135,56 +135,6 @@
     <div class="issue">
         <div class="issue-header">
             <span class="toggle-icon">&#9654;</span>
-            <span class="issue-id">FB0009</span>
-            <span class="issue-title">ブレスを習得していないキャラがブレスを発動する</span>
-            <div class="issue-meta">
-                <span class="category">戦闘</span>
-                <span class="status" style="background-color: #27ae60">修正済み</span>
-            </div>
-        </div>
-        <div class="issue-body">
-            <div class="date">報告日: 2025-12-21 / 解決日: 2025-12-22</div>
-            <div class="issue-section">
-                <div class="issue-section-title">概要</div>
-                <div class="issue-section-content">ブレススキルを習得していないキャラクターがブレス攻撃を発動してしまう。</div>
-            </div>
-            
-            
-            
-            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">BattleActionResource.makeDefaultでbreathDamage &gt; 0の場合に自動でブレスチャージを付与していたのを削除。
-breathVariantスキルを習得したキャラのみがブレスを使用できるよう修正。</div></div>
-        </div>
-    </div>
-
-
-    <div class="issue">
-        <div class="issue-header">
-            <span class="toggle-icon">&#9654;</span>
-            <span class="issue-id">FB0008</span>
-            <span class="issue-title">魔法使い魔法・僧侶魔法が発動しない</span>
-            <div class="issue-meta">
-                <span class="category">戦闘</span>
-                <span class="status" style="background-color: #27ae60">修正済み</span>
-            </div>
-        </div>
-        <div class="issue-body">
-            <div class="date">報告日: 2025-12-21 / 解決日: 2025-12-21</div>
-            <div class="issue-section">
-                <div class="issue-section-title">概要</div>
-                <div class="issue-section-content">魔法使い魔法や僧侶魔法を習得していても、戦闘中に発動しない。</div>
-            </div>
-            
-            
-            
-            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">行動選択ロジックが重み付きランダムになっており、100%設定でも確実に発動しなかった。
-また、spellSchoolのマッピングが逆になっていた問題も修正。</div></div>
-        </div>
-    </div>
-
-
-    <div class="issue">
-        <div class="issue-header">
-            <span class="toggle-icon">&#9654;</span>
             <span class="issue-id">FB0002</span>
             <span class="issue-title">デバッグメニューのデータ消去でアラートが表示されない</span>
             <div class="issue-meta">
@@ -257,6 +207,30 @@ breathVariantスキルを習得したキャラのみがブレスを使用でき�
     <div class="issue">
         <div class="issue-header">
             <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">FB0005</span>
+            <span class="issue-title">装備によって攻撃回数が増えない</span>
+            <div class="issue-meta">
+                <span class="category">戦闘</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-21 / 解決日: 2025-12-21</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">攻撃回数が増加する装備を装着しても、戦闘時の攻撃回数が増えない。</div>
+            </div>
+            
+            
+            
+            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">0.7.70にて修正済み。</div></div>
+        </div>
+    </div>
+
+
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
             <span class="issue-id">FB0006</span>
             <span class="issue-title">ボスが道中で出現する場合がある</span>
             <div class="issue-meta">
@@ -305,8 +279,8 @@ breathVariantスキルを習得したキャラのみがブレスを使用でき�
     <div class="issue">
         <div class="issue-header">
             <span class="toggle-icon">&#9654;</span>
-            <span class="issue-id">FB0005</span>
-            <span class="issue-title">装備によって攻撃回数が増えない</span>
+            <span class="issue-id">FB0008</span>
+            <span class="issue-title">魔法使い魔法・僧侶魔法が発動しない</span>
             <div class="issue-meta">
                 <span class="category">戦闘</span>
                 <span class="status" style="background-color: #27ae60">修正済み</span>
@@ -316,12 +290,38 @@ breathVariantスキルを習得したキャラのみがブレスを使用でき�
             <div class="date">報告日: 2025-12-21 / 解決日: 2025-12-21</div>
             <div class="issue-section">
                 <div class="issue-section-title">概要</div>
-                <div class="issue-section-content">攻撃回数が増加する装備を装着しても、戦闘時の攻撃回数が増えない。</div>
+                <div class="issue-section-content">魔法使い魔法や僧侶魔法を習得していても、戦闘中に発動しない。</div>
             </div>
             
             
             
-            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">0.7.70にて修正済み。</div></div>
+            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">行動選択ロジックが重み付きランダムになっており、100%設定でも確実に発動しなかった。
+また、spellSchoolのマッピングが逆になっていた問題も修正。</div></div>
+        </div>
+    </div>
+
+
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">FB0009</span>
+            <span class="issue-title">ブレスを習得していないキャラがブレスを発動する</span>
+            <div class="issue-meta">
+                <span class="category">戦闘</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-21 / 解決日: 2025-12-22</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">ブレススキルを習得していないキャラクターがブレス攻撃を発動してしまう。</div>
+            </div>
+            
+            
+            
+            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">BattleActionResource.makeDefaultでbreathDamage &gt; 0の場合に自動でブレスチャージを付与していたのを削除。
+breathVariantスキルを習得したキャラのみがブレスを使用できるよう修正。</div></div>
         </div>
     </div>
 
