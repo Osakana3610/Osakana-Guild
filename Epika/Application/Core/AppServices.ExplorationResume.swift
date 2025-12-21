@@ -85,6 +85,7 @@ extension AppServices {
         let session = try await runtime.runtimeService.resumeExplorationRun(
             dungeonId: record.dungeonId,
             targetFloorNumber: Int(record.targetFloor),
+            difficultyTitleId: UInt8(record.difficulty),
             party: adjustedPartyState,
             restoringRandomState: randomState,
             superRareState: superRareState,
