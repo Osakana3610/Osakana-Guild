@@ -40,7 +40,7 @@ struct CharacterCombatStatsSection: View {
             CombatStatRow(label: "命中", value: stats.hitRate)
             CombatStatRow(label: "回避", value: stats.evasionRate)
             CombatStatRow(label: "クリティカル", value: stats.criticalRate)
-            CombatStatRow(label: "攻撃回数", value: stats.attackCount)
+            CombatStatRowDouble(label: "攻撃回数", value: stats.attackCount)
             CombatStatRow(label: "魔法治療", value: stats.magicalHealing)
             CombatStatRow(label: "罠解除", value: stats.trapRemoval)
             CombatStatRow(label: "追加ダメージ", value: stats.additionalDamage)
@@ -59,6 +59,22 @@ struct CombatStatRow: View {
                 .font(.subheadline)
             Spacer()
             Text("\(value)")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+struct CombatStatRowDouble: View {
+    let label: String
+    let value: Double
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(.subheadline)
+            Spacer()
+            Text(String(format: "%.1f", value))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }

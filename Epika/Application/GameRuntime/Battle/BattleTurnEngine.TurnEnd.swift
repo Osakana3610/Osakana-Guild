@@ -421,8 +421,8 @@ extension BattleTurnEngine {
                 let bonus = Int((Double(actor.snapshot.physicalDefense) * value / 100.0).rounded(.towardZero))
                 actor.snapshot.physicalDefense += bonus
             case "attackCountPercent":
-                let bonus = Int((Double(actor.snapshot.attackCount) * value / 100.0).rounded(.towardZero))
-                actor.snapshot.attackCount = max(1, actor.snapshot.attackCount + bonus)
+                let bonus = actor.snapshot.attackCount * value / 100.0
+                actor.snapshot.attackCount = max(1.0, actor.snapshot.attackCount + bonus)
             case "damageDealtPercent":
                 actor.skillEffects.damage.dealt = .init(
                     physical: actor.skillEffects.damage.dealt.physical * (1.0 + value / 100.0),

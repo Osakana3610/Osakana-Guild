@@ -57,27 +57,27 @@ extension SQLiteMasterDataManager {
             var hitRate: Int = 0
             var evasionRate: Int = 0
             var criticalRate: Int = 0
-            var attackCount: Int = 0
+            var attackCount: Double = 0
             var magicalHealing: Int = 0
             var trapRemoval: Int = 0
             var additionalDamage: Int = 0
             var breathDamage: Int = 0
 
-            mutating func apply(stat: CombatStat, value: Int) {
+            mutating func apply(stat: CombatStat, intValue: Int, doubleValue: Double) {
                 switch stat {
-                case .maxHP: maxHP = value
-                case .physicalAttack: physicalAttack = value
-                case .magicalAttack: magicalAttack = value
-                case .physicalDefense: physicalDefense = value
-                case .magicalDefense: magicalDefense = value
-                case .hitRate: hitRate = value
-                case .evasionRate: evasionRate = value
-                case .criticalRate: criticalRate = value
-                case .attackCount: attackCount = value
-                case .magicalHealing: magicalHealing = value
-                case .trapRemoval: trapRemoval = value
-                case .additionalDamage: additionalDamage = value
-                case .breathDamage: breathDamage = value
+                case .maxHP: maxHP = intValue
+                case .physicalAttack: physicalAttack = intValue
+                case .magicalAttack: magicalAttack = intValue
+                case .physicalDefense: physicalDefense = intValue
+                case .magicalDefense: magicalDefense = intValue
+                case .hitRate: hitRate = intValue
+                case .evasionRate: evasionRate = intValue
+                case .criticalRate: criticalRate = intValue
+                case .attackCount: attackCount = doubleValue
+                case .magicalHealing: magicalHealing = intValue
+                case .trapRemoval: trapRemoval = intValue
+                case .additionalDamage: additionalDamage = intValue
+                case .breathDamage: breathDamage = intValue
                 }
             }
 
@@ -157,8 +157,9 @@ extension SQLiteMasterDataManager {
         try applyPairs(sql: "SELECT item_id, stat, value FROM item_combat_bonuses;") { builder, statement in
             let statRaw = UInt8(sqlite3_column_int(statement, 1))
             guard let stat = CombatStat(rawValue: statRaw) else { return }
-            let value = Int(sqlite3_column_int(statement, 2))
-            builder.combatBonuses.apply(stat: stat, value: value)
+            let intValue = Int(sqlite3_column_int(statement, 2))
+            let doubleValue = sqlite3_column_double(statement, 2)
+            builder.combatBonuses.apply(stat: stat, intValue: intValue, doubleValue: doubleValue)
         }
 
         try applyPairs(sql: "SELECT item_id, race_id FROM item_allowed_races;") { builder, statement in

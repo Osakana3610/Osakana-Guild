@@ -66,7 +66,7 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
         let hitRate: Int
         let evasionRate: Int
         let criticalRate: Int
-        let attackCount: Int
+        let attackCount: Double
         let magicalHealing: Int
         let trapRemoval: Int
         let additionalDamage: Int
@@ -79,7 +79,7 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
             magicalHealing: 0, trapRemoval: 0, additionalDamage: 0, breathDamage: 0
         )
 
-        /// 非ゼロの値のみを列挙（stat名文字列と値のペア）
+        /// 非ゼロの値のみを列挙（stat名文字列と値のペア、attackCount除く）
         @inline(__always)
         nonisolated func forEachNonZero(_ body: (_ stat: String, _ value: Int) -> Void) {
             if maxHP != 0 { body("maxHP", maxHP) }
@@ -90,7 +90,6 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
             if hitRate != 0 { body("hitRate", hitRate) }
             if evasionRate != 0 { body("evasionRate", evasionRate) }
             if criticalRate != 0 { body("criticalRate", criticalRate) }
-            if attackCount != 0 { body("attackCount", attackCount) }
             if magicalHealing != 0 { body("magicalHealing", magicalHealing) }
             if trapRemoval != 0 { body("trapRemoval", trapRemoval) }
             if additionalDamage != 0 { body("additionalDamage", additionalDamage) }

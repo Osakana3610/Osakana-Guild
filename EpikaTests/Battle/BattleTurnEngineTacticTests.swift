@@ -394,7 +394,7 @@ private enum BattleTestFactory {
                        hitRate: Int = 80,
                        evasion: Int = 5,
                        critical: Int = 0,
-                       attackCount: Int = 1,
+                       attackCount: Double = 1,
                        magicalHealing: Int = 0,
                        additionalDamage: Int = 0,
                        breathDamage: Int = 0) -> CharacterValues.Combat {

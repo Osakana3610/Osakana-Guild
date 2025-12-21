@@ -282,7 +282,7 @@ struct ItemDetailView: View {
         if c.hitRate != 0 { LabeledContent("命中", value: formatBonus(applyTitleMultiplier(c.hitRate))) }
         if c.evasionRate != 0 { LabeledContent("回避", value: formatBonus(applyTitleMultiplier(c.evasionRate))) }
         if c.criticalRate != 0 { LabeledContent("クリティカル", value: formatBonus(applyTitleMultiplier(c.criticalRate))) }
-        if c.attackCount != 0 { LabeledContent("攻撃回数", value: formatBonus(applyTitleMultiplier(c.attackCount))) }
+        if c.attackCount != 0 { LabeledContent("攻撃回数", value: formatBonusDouble(applyTitleMultiplierDouble(c.attackCount))) }
         if c.magicalHealing != 0 { LabeledContent("魔法回復", value: formatBonus(applyTitleMultiplier(c.magicalHealing))) }
         if c.trapRemoval != 0 { LabeledContent("罠解除", value: formatBonus(applyTitleMultiplier(c.trapRemoval))) }
         if c.additionalDamage != 0 { LabeledContent("追加ダメージ", value: formatBonus(applyTitleMultiplier(c.additionalDamage))) }
@@ -298,7 +298,19 @@ struct ItemDetailView: View {
         return Int((Double(value) * multiplier * superRareMultiplier).rounded(.towardZero))
     }
 
+    private func applyTitleMultiplierDouble(_ value: Double) -> Double {
+        guard let title = titleDefinition else { return value }
+        let multiplier = value > 0 ? (title.statMultiplier ?? 1.0) : (title.negativeMultiplier ?? 1.0)
+        let superRareMultiplier: Double = (lightweightItem?.enhancement.superRareTitleId ?? 0) > 0 ? 2.0 : 1.0
+        return value * multiplier * superRareMultiplier
+    }
+
     private func formatBonus(_ value: Int) -> String {
         value > 0 ? "+\(value)" : "\(value)"
+    }
+
+    private func formatBonusDouble(_ value: Double) -> String {
+        let formatted = String(format: "%.1f", value)
+        return value > 0 ? "+\(formatted)" : formatted
     }
 }
