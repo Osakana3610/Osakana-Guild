@@ -8,9 +8,8 @@
 //   - 各行動カテゴリの抽選重み（0〜100%）を設定
 //
 // 【View構成】
-//   - 編集モード: 4つのスライダー + 保存ボタン
+//   - 編集モード: 4つのスライダー（ドラッグ終了時に自動保存）
 //     - ブレスダメージ0の場合はブレススライダーを無効化
-//     - 変更検知で保存ボタンを有効化
 //   - 読み取り専用モード: LabeledContentで各重みを表示
 //   - 行動抽選順序の説明テキスト
 //
@@ -33,7 +32,6 @@ struct CharacterActionPreferencesSection: View {
     @State private var actionPreferenceMage: Double
     @State private var actionPreferenceBreath: Double
     @State private var actionPreferenceError: String?
-    @State private var isUpdatingActionPreferences = false
 
     init(character: RuntimeCharacter,
          onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)? = nil) {
@@ -55,12 +53,20 @@ struct CharacterActionPreferencesSection: View {
             }
         }
         .onChange(of: character.actionPreferences) { _, newValue in
-            actionPreferenceAttack = Double(newValue.attack)
-            actionPreferencePriest = Double(newValue.priestMagic)
-            actionPreferenceMage = Double(newValue.mageMagic)
-            actionPreferenceBreath = Double(newValue.breath)
+            // 値が同じならスキップ（自分で保存した直後など）
+            let newAttack = Double(newValue.attack)
+            let newPriest = Double(newValue.priestMagic)
+            let newMage = Double(newValue.mageMagic)
+            let newBreath = Double(newValue.breath)
+            guard actionPreferenceAttack != newAttack ||
+                  actionPreferencePriest != newPriest ||
+                  actionPreferenceMage != newMage ||
+                  actionPreferenceBreath != newBreath else { return }
+            actionPreferenceAttack = newAttack
+            actionPreferencePriest = newPriest
+            actionPreferenceMage = newMage
+            actionPreferenceBreath = newBreath
             actionPreferenceError = nil
-            isUpdatingActionPreferences = false
         }
     }
 
@@ -71,41 +77,22 @@ struct CharacterActionPreferencesSection: View {
                 .foregroundStyle(.secondary)
 
             actionSliderRow(label: "ブレス",
-                            description: "ブレス行動の抽選重み。ブレスダメージを持たない場合は調整できません。",
                             value: breathSliderBinding,
                             isDisabled: !canEditBreathRate)
 
             actionSliderRow(label: "僧侶魔法",
-                            description: "回復・支援魔法の抽選重み。",
                             value: priestSliderBinding)
 
             actionSliderRow(label: "魔法使い魔法",
-                            description: "攻撃魔法の抽選重み。",
                             value: mageSliderBinding)
 
             actionSliderRow(label: "物理攻撃",
-                            description: "通常攻撃／格闘攻撃の抽選重み。",
                             value: attackSliderBinding)
 
             if let error = actionPreferenceError {
                 Text(error)
                     .font(.caption)
                     .foregroundStyle(.red)
-            }
-
-            HStack {
-                Button("設定を保存") {
-                    saveActionPreferences()
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(!actionPreferencesDirty || isUpdatingActionPreferences)
-
-                if isUpdatingActionPreferences {
-                    ProgressView()
-                        .controlSize(.small)
-                        .padding(.leading, 8)
-                }
-                Spacer()
             }
         }
     }
@@ -189,7 +176,6 @@ private extension CharacterActionPreferencesSection {
     }
 
     func actionSliderRow(label: String,
-                         description: String,
                          value: Binding<Double>,
                          isDisabled: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -201,23 +187,19 @@ private extension CharacterActionPreferencesSection {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Slider(value: value, in: 0...100, step: 1)
-                .tint(.accentColor)
-                .disabled(isDisabled || isUpdatingActionPreferences)
-            Text(description)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            Slider(value: value, in: 0...100, step: 1) { isEditing in
+                if !isEditing {
+                    saveActionPreferences()
+                }
+            }
+            .tint(.accentColor)
+            .disabled(isDisabled)
         }
     }
 
     func saveActionPreferences() {
         guard let onActionPreferencesChange else { return }
-        guard actionPreferencesDirty else {
-            actionPreferenceError = nil
-            return
-        }
-        actionPreferenceError = nil
-        isUpdatingActionPreferences = true
+        guard actionPreferencesDirty else { return }
         let newPreferences = editedActionPreferences
         Task {
             do {
@@ -226,9 +208,6 @@ private extension CharacterActionPreferencesSection {
                 await MainActor.run {
                     actionPreferenceError = error.localizedDescription
                 }
-            }
-            await MainActor.run {
-                isUpdatingActionPreferences = false
             }
         }
     }
