@@ -53,6 +53,7 @@ final class CharacterRecord {
     var actionRatePriestMagic: UInt8 = 75
     var actionRateMageMagic: UInt8 = 75
     var actionRateBreath: UInt8 = 50
+    var displayOrder: UInt8 = 0                 // 表示順序（0=未設定、1〜=順序）
     var updatedAt: Date = Date()
 
     init(id: UInt8,

@@ -50,6 +50,9 @@ struct GuildView: View {
             }
             .navigationTitle("ギルド")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                EditButton()
+            }
             .onAppear {
                 characterState.startObservingChanges(using: appServices)
                 Task { await loadOnce() }
@@ -125,6 +128,7 @@ struct GuildView: View {
                             GuildCharacterRow(summary: summary)
                         }
                     }
+                    .onMove(perform: moveAliveCharacters)
                 }
             }
 
@@ -205,6 +209,24 @@ struct GuildView: View {
     @MainActor
     private func reload() async {
         await loadData()
+    }
+
+    private func moveAliveCharacters(from source: IndexSet, to destination: Int) {
+        // aliveSummariesの並び順を更新
+        var aliveIds = aliveSummaries.map(\.id)
+        aliveIds.move(fromOffsets: source, toOffset: destination)
+
+        // 戦線離脱キャラクターはaliveの後に配置
+        let fallenIds = fallenSummaries.map(\.id)
+        let orderedIds = aliveIds + fallenIds
+
+        Task {
+            do {
+                try await appServices.character.reorderCharacters(orderedIds: orderedIds)
+            } catch {
+                errorMessage = "並び替えに失敗しました: \(error.localizedDescription)"
+            }
+        }
     }
 }
 
