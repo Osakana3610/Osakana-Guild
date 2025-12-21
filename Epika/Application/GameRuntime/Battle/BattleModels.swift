@@ -207,11 +207,8 @@ struct BattleActionResource: Sendable, Hashable {
 
     static func makeDefault(for snapshot: CharacterValues.Combat,
                             spellLoadout: SkillRuntimeEffects.SpellLoadout = .empty) -> BattleActionResource {
-        var values: [UInt8: Int] = [:]
-        if snapshot.breathDamage > 0 {
-            values[Key.breath.rawValue] = 1
-        }
-        var resource = BattleActionResource(initialValues: values)
+        // ブレスチャージはスキル（breathVariant）で付与されるため、ここではデフォルト設定しない
+        var resource = BattleActionResource(initialValues: [:])
         resource.initializeSpellCharges(from: spellLoadout)
         return resource
     }
