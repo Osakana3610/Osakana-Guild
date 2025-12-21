@@ -114,11 +114,17 @@ actor InventoryProgressService {
             guard let definition = definitionMap[snapshot.itemId] else {
                 return nil
             }
+            // 称号を含めた表示名を生成
+            let displayName = buildDisplayName(
+                baseName: definition.name,
+                superRareTitleId: snapshot.enhancements.superRareTitleId,
+                normalTitleId: snapshot.enhancements.normalTitleId
+            )
             return RuntimeEquipment(
                 id: snapshot.stackKey,
                 itemId: snapshot.itemId,
                 masterDataId: String(definition.id),
-                displayName: definition.name,
+                displayName: displayName,
                 quantity: Int(snapshot.quantity),
                 category: ItemSaleCategory(rawValue: definition.category) ?? .other,
                 baseValue: definition.basePrice,
@@ -518,11 +524,17 @@ actor InventoryProgressService {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.itemId)])
         }
         let snapshot = makeSnapshot(targetRecord)
+        // 称号を含めた表示名を生成
+        let displayName = buildDisplayName(
+            baseName: definition.name,
+            superRareTitleId: snapshot.enhancements.superRareTitleId,
+            normalTitleId: snapshot.enhancements.normalTitleId
+        )
         return RuntimeEquipment(
             id: snapshot.stackKey,
             itemId: snapshot.itemId,
             masterDataId: String(definition.id),
-            displayName: definition.name,
+            displayName: displayName,
             quantity: Int(snapshot.quantity),
             category: ItemSaleCategory(rawValue: definition.category) ?? .other,
             baseValue: definition.basePrice,
@@ -654,5 +666,28 @@ actor InventoryProgressService {
         record.quantity = clampedCurrent + UInt16(addable)
 
         return amount - addable
+    }
+
+    /// 称号を含めた表示名を生成
+    /// - Parameters:
+    ///   - baseName: アイテムのベース名
+    ///   - superRareTitleId: 超レア称号ID（0=なし）
+    ///   - normalTitleId: 通常称号ID（0=最低な, 2=無称号）
+    /// - Returns: 「超レア称号名 + 通常称号名 + アイテム名」形式の表示名
+    private func buildDisplayName(baseName: String,
+                                  superRareTitleId: UInt8,
+                                  normalTitleId: UInt8) -> String {
+        var result = ""
+        // 超レア称号
+        if superRareTitleId > 0,
+           let superRareTitle = masterDataCache.superRareTitle(superRareTitleId) {
+            result += superRareTitle.name
+        }
+        // 通常称号（無称号=2は空文字列なので影響なし）
+        if let normalTitle = masterDataCache.title(normalTitleId) {
+            result += normalTitle.name
+        }
+        result += baseName
+        return result
     }
 }

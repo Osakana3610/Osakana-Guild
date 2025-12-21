@@ -24,6 +24,8 @@ import SwiftUI
 /// CharacterSectionType: equippedItems
 @MainActor
 struct CharacterEquippedItemsSection: View {
+    @Environment(AppServices.self) private var appServices
+
     let equippedItems: [CharacterInput.EquippedItem]
     let itemDefinitions: [UInt16: ItemDefinition]
     let equipmentCapacity: Int
@@ -79,14 +81,17 @@ struct CharacterEquippedItemsSection: View {
     @ViewBuilder
     private func equippedItemRow(_ item: CharacterInput.EquippedItem) -> some View {
         let definition = itemDefinitions[item.itemId]
-        let name = definition?.name ?? "不明なアイテム"
+        let displayName = buildDisplayName(for: item, baseName: definition?.name)
+
+        let hasSuperRare = item.superRareTitleId > 0
 
         HStack {
             Button {
                 unequipItem(item)
             } label: {
                 HStack {
-                    Text("• \(name)")
+                    Text("• \(displayName)")
+                        .fontWeight(hasSuperRare ? .bold : .regular)
                     if item.quantity > 1 {
                         Text("x\(item.quantity)")
                             .font(.caption)
@@ -109,6 +114,23 @@ struct CharacterEquippedItemsSection: View {
                 .buttonStyle(.plain)
             }
         }
+    }
+
+    /// 称号を含めた表示名を生成
+    private func buildDisplayName(for item: CharacterInput.EquippedItem, baseName: String?) -> String {
+        var result = ""
+        let masterData = appServices.masterDataCache
+        // 超レア称号
+        if item.superRareTitleId > 0,
+           let superRareTitle = masterData.superRareTitle(item.superRareTitleId) {
+            result += superRareTitle.name
+        }
+        // 通常称号（無称号=2は空文字列なので影響なし）
+        if let normalTitle = masterData.title(item.normalTitleId) {
+            result += normalTitle.name
+        }
+        result += baseName ?? "不明なアイテム"
+        return result
     }
 
     private func unequipItem(_ item: CharacterInput.EquippedItem) {
