@@ -103,26 +103,19 @@ struct LazyDismissCharacterView: View {
         List {
             ForEach(fullCharacters) { character in
                 HStack {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(character.name)
-                            .font(.headline)
-                        HStack {
-                            Text("Lv.\(character.level)")
+                            .font(.body)
+                            .foregroundStyle(character.isAlive ? .primary : .secondary)
+                        HStack(spacing: 4) {
                             Text(character.raceName)
-                            Text(character.jobName)
+                            Text("Lv.\(character.level)")
                         }
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                        if character.isAlive {
-                            Text("HP: \(character.currentHP)/\(character.maxHP)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        } else {
-                            Text("死亡")
-                                .font(.caption)
-                                .foregroundColor(.primary)
-                        }
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        Text(character.jobName)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
 
                     Spacer()

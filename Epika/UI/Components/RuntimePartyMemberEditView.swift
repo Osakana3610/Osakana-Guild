@@ -206,29 +206,23 @@ private struct PartyMemberRow: View {
                 CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 50)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(character.name)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundStyle(.primary)
                     HStack(spacing: 4) {
+                        Text(character.raceName)
                         Text("Lv.\(character.level)")
-                        Text(character.jobName)
                     }
-                    .font(.caption2)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    Text(character.jobName)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
                 Spacer()
                 if isSelected {
                     Text("再タップで削除")
                         .font(.caption2)
                         .foregroundStyle(.red)
-                } else {
-                    VStack(alignment: .trailing, spacing: 1) {
-                        Text("HP")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Text("\(character.currentHP)/\(character.maxHP)")
-                            .font(.caption2)
-                            .foregroundStyle(.primary)
-                    }
                 }
             }
             .contentShape(Rectangle())
@@ -257,24 +251,19 @@ private struct AvailableCharacterRow: View {
                 CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 50)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(character.name)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundStyle(.primary)
                     HStack(spacing: 4) {
+                        Text(character.raceName)
                         Text("Lv.\(character.level)")
-                        Text(character.jobName)
                     }
-                    .font(.caption2)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    Text(character.jobName)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
                 Spacer()
-                VStack(alignment: .trailing, spacing: 1) {
-                    Text("HP")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    Text("\(character.currentHP)/\(character.maxHP)")
-                        .font(.caption2)
-                        .foregroundStyle(.primary)
-                }
                 Image(systemName: "plus.circle.fill")
                     .foregroundStyle(.blue)
                     .font(.title3)
