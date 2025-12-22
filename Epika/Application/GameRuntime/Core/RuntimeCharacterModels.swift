@@ -78,6 +78,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     // === マスターデータ ===
     let race: RaceDefinition?
     let job: JobDefinition?
+    let previousJob: JobDefinition?
     let personalityPrimary: PersonalityPrimaryDefinition?
     let personalitySecondary: PersonalitySecondaryDefinition?
     let learnedSkills: [SkillDefinition]
@@ -89,7 +90,13 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     var name: String { displayName }
     var isAlive: Bool { currentHP > 0 }
     var raceName: String { race?.name ?? "種族\(raceId)" }
-    var jobName: String { job?.name ?? "職業\(jobId)" }
+    var jobName: String {
+        let currentJobName = job?.name ?? "職業\(jobId)"
+        if let previousJobName = previousJob?.name {
+            return "\(currentJobName)（\(previousJobName)）"
+        }
+        return currentJobName
+    }
 
     var resolvedAvatarId: UInt16 {
         avatarId == 0 ? UInt16(raceId) : avatarId

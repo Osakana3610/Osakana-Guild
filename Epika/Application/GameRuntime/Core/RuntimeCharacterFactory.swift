@@ -67,14 +67,22 @@ enum RuntimeCharacterFactory {
         let superRareTitleIds = Set(input.equippedItems.map { $0.superRareTitleId }).filter { $0 > 0 }
         let superRareTitles = superRareTitleIds.compactMap { masterData.superRareTitle($0) }
 
+        // 前職のマスターデータ取得（転職済みの場合のみ）
+        let previousJob: JobDefinition?
+        if input.previousJobId > 0 {
+            guard let pJob = masterData.job(input.previousJobId) else {
+                throw RuntimeError.invalidConfiguration(reason: "前職ID \(input.previousJobId) のマスターデータが見つかりません")
+            }
+            previousJob = pJob
+        } else {
+            previousJob = nil
+        }
+
         // スキルIDを収集（職業 + 装備）
         var allSkillIds: [UInt16] = []
 
-        // 前職のスキル（previousJobId > 0 の場合のみ）
-        if input.previousJobId > 0 {
-            guard let previousJob = masterData.job(input.previousJobId) else {
-                throw RuntimeError.invalidConfiguration(reason: "前職ID \(input.previousJobId) のマスターデータが見つかりません")
-            }
+        // 前職のスキル（転職済みの場合のみ）
+        if let previousJob {
             allSkillIds.append(contentsOf: previousJob.learnedSkillIds)
         }
 
@@ -181,6 +189,7 @@ enum RuntimeCharacterFactory {
             equipmentCapacity: allowedSlots,
             race: race,
             job: job,
+            previousJob: previousJob,
             personalityPrimary: primaryPersonality,
             personalitySecondary: secondaryPersonality,
             learnedSkills: learnedSkills,
