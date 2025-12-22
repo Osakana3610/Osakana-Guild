@@ -8,9 +8,8 @@
 //   - 装備から付与されたスキルのリスト表示
 //
 // 【View構成】
-//   - スキルリスト: 各スキル名を箇条書き（• スキル名）
+//   - スキルリスト: 各スキル名を箇条書き（• スキル名）、ID順でソート
 //   - スキルなしの場合: 「スキルなし」テキスト
-//   - learnedSkillsは装備由来のスキルのみ含む（新構造）
 //
 // 【使用箇所】
 //   - キャラクター詳細画面（CharacterSectionType.ownedSkills）
@@ -26,7 +25,7 @@ struct CharacterSkillsSection: View {
     let character: RuntimeCharacter
 
     var body: some View {
-        let skills = character.learnedSkills
+        let skills = character.learnedSkills.sorted { $0.id < $1.id }
         Group {
             if skills.isEmpty {
                 Text("スキルなし")
