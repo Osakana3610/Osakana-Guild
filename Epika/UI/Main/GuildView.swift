@@ -271,22 +271,16 @@ private struct GuildCharacterRow: View {
                     .font(.subheadline)
                     .foregroundStyle(summary.isAlive ? .primary : .secondary)
                 HStack(spacing: 4) {
-                    Text("Lv.\(summary.level)")
                     Text(summary.raceName)
-                    Text(summary.jobName)
+                    Text("Lv.\(summary.level)")
                 }
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 1) {
-                Text("HP")
+                Text(summary.jobName)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Text("\(summary.currentHP)/\(summary.maxHP)")
-                    .font(.caption2)
-                    .foregroundStyle(summary.isAlive ? .primary : .secondary)
             }
+            Spacer()
         }
     }
 }
