@@ -51,7 +51,8 @@ final class CharacterViewState {
             self.name = snapshot.displayName
             self.level = snapshot.level
             let currentJobName = job?.name ?? "職業\(snapshot.jobId)"
-            if let previousJobName = previousJob?.name {
+            // マスター職（ID 100以上）は前職表示不要
+            if snapshot.jobId < 100, let previousJobName = previousJob?.name {
                 self.jobName = "\(currentJobName)（\(previousJobName)）"
             } else {
                 self.jobName = currentJobName
