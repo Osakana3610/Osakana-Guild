@@ -35,7 +35,7 @@ enum DropService {
         guard !enemies.isEmpty else {
             return DropOutcome(results: [], superRareState: dailySuperRareState, newlyDroppedItemIds: [])
         }
-        let partyBonuses = try party.makeDropBonuses()
+        let partyBonuses = party.makeDropBonuses()
         var superRareState = dailySuperRareState
         var sessionState = SuperRareSessionState()
         let enemyTitleDefinition: TitleDefinition?
