@@ -92,7 +92,8 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     var raceName: String { race?.name ?? "種族\(raceId)" }
     var jobName: String {
         let currentJobName = job?.name ?? "職業\(jobId)"
-        if let previousJobName = previousJob?.name {
+        // マスター職（ID 100以上）は前職表示不要
+        if jobId < 100, let previousJobName = previousJob?.name {
             return "\(currentJobName)（\(previousJobName)）"
         }
         return currentJobName
