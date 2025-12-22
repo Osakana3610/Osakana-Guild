@@ -14,6 +14,8 @@
 //     - レベル・経験値
 //     - 基本能力値
 //     - 戦闘ステータス
+//     - 種族スキル
+//     - 職業スキル
 //     - 習得スキル一覧
 //     - 魔法使い魔法
 //     - 僧侶魔法
@@ -51,6 +53,7 @@ struct CharacterDetailContent: View {
     let onRename: ((String) async throws -> Void)?
     let onAvatarChange: ((UInt16) async throws -> Void)?
     let onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)?
+    @Environment(AppServices.self) private var appServices
 
     init(character: RuntimeCharacter,
          onRename: ((String) async throws -> Void)? = nil,
@@ -60,6 +63,37 @@ struct CharacterDetailContent: View {
         self.onRename = onRename
         self.onAvatarChange = onAvatarChange
         self.onActionPreferencesChange = onActionPreferencesChange
+    }
+
+    private var raceSkillUnlocks: [(level: Int, skill: SkillDefinition)] {
+        let masterData = appServices.masterDataCache
+        let unlocks = masterData.raceSkillUnlocks[character.raceId] ?? []
+        return unlocks.compactMap { unlock in
+            guard let skill = masterData.skill(unlock.skillId) else { return nil }
+            return (level: unlock.level, skill: skill)
+        }
+    }
+
+    private var jobSkillUnlocks: [(level: Int, skill: SkillDefinition)] {
+        let masterData = appServices.masterDataCache
+        var allUnlocks: [(level: Int, skill: SkillDefinition)] = []
+        // 現職のレベル習得スキル
+        if let unlocks = masterData.jobSkillUnlocks[character.jobId] {
+            for unlock in unlocks {
+                if let skill = masterData.skill(unlock.skillId) {
+                    allUnlocks.append((level: unlock.level, skill: skill))
+                }
+            }
+        }
+        // 前職のレベル習得スキル（転職済みの場合）
+        if let unlocks = masterData.jobSkillUnlocks[character.previousJobId], character.previousJobId > 0 {
+            for unlock in unlocks {
+                if let skill = masterData.skill(unlock.skillId) {
+                    allUnlocks.append((level: unlock.level, skill: skill))
+                }
+            }
+        }
+        return allUnlocks.sorted { $0.level < $1.level }
     }
 
     var body: some View {
@@ -84,6 +118,14 @@ struct CharacterDetailContent: View {
 
             Section("戦闘ステータス") {
                 CharacterCombatStatsSection(character: character)
+            }
+
+            Section("種族スキル") {
+                CharacterRaceSkillsSection(skillUnlocks: raceSkillUnlocks)
+            }
+
+            Section("職業スキル") {
+                CharacterJobSkillsSection(skillUnlocks: jobSkillUnlocks)
             }
 
             Section("習得スキル") {
