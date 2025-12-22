@@ -397,6 +397,7 @@ struct RaceDetailSheet: View {
     @State private var passiveSkillIds: [UInt16] = []
     @State private var skillUnlocks: [(level: Int, skillId: UInt16)] = []
     @State private var isLoading = true
+    @State private var selectedSkill: SkillDefinition?
 
     private var masterData: MasterDataCache { appServices.masterDataCache }
 
@@ -449,8 +450,13 @@ struct RaceDetailSheet: View {
                         if isLoading {
                             ProgressView()
                         } else {
-                            ForEach(passiveSkillIds, id: \.self) { skillId in
-                                skillRow(skillId: skillId)
+                            VStack(alignment: .leading, spacing: 4) {
+                                ForEach(passiveSkillIds, id: \.self) { skillId in
+                                    if let skill = skills[skillId] {
+                                        Text("• \(skill.name)")
+                                            .onTapGesture { selectedSkill = skill }
+                                    }
+                                }
                             }
                         }
                     }
@@ -461,13 +467,12 @@ struct RaceDetailSheet: View {
                         if isLoading {
                             ProgressView()
                         } else {
-                            ForEach(skillUnlocks, id: \.skillId) { unlock in
-                                HStack {
-                                    Text("Lv.\(unlock.level)")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .frame(width: 50, alignment: .leading)
-                                    skillRow(skillId: unlock.skillId)
+                            VStack(alignment: .leading, spacing: 4) {
+                                ForEach(skillUnlocks, id: \.skillId) { unlock in
+                                    if let skill = skills[unlock.skillId] {
+                                        Text("Lv.\(unlock.level): \(skill.name)")
+                                            .onTapGesture { selectedSkill = skill }
+                                    }
                                 }
                             }
                         }
@@ -482,17 +487,13 @@ struct RaceDetailSheet: View {
                 }
             }
             .task { await loadData() }
-        }
-    }
-
-    @ViewBuilder
-    private func skillRow(skillId: UInt16) -> some View {
-        if let skill = skills[skillId] {
-            Text(skill.name)
-                .font(.body)
-        } else {
-            Text("スキルID: \(skillId)")
-                .foregroundStyle(.secondary)
+            .alert(item: $selectedSkill) { skill in
+                Alert(
+                    title: Text(skill.name),
+                    message: Text(skill.description),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
 
@@ -520,6 +521,7 @@ struct JobDetailSheet: View {
     @State private var category: UInt8?
     @State private var growthTendency: UInt8?
     @State private var isLoading = true
+    @State private var selectedSkill: SkillDefinition?
 
     private var masterData: MasterDataCache { appServices.masterDataCache }
 
@@ -555,8 +557,13 @@ struct JobDetailSheet: View {
                         if isLoading {
                             ProgressView()
                         } else {
-                            ForEach(job.learnedSkillIds, id: \.self) { skillId in
-                                skillRow(skillId: skillId)
+                            VStack(alignment: .leading, spacing: 4) {
+                                ForEach(job.learnedSkillIds, id: \.self) { skillId in
+                                    if let skill = skills[skillId] {
+                                        Text("• \(skill.name)")
+                                            .onTapGesture { selectedSkill = skill }
+                                    }
+                                }
                             }
                         }
                     }
@@ -567,13 +574,12 @@ struct JobDetailSheet: View {
                         if isLoading {
                             ProgressView()
                         } else {
-                            ForEach(skillUnlocks, id: \.skillId) { unlock in
-                                HStack {
-                                    Text("Lv.\(unlock.level)")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .frame(width: 50, alignment: .leading)
-                                    skillRow(skillId: unlock.skillId)
+                            VStack(alignment: .leading, spacing: 4) {
+                                ForEach(skillUnlocks, id: \.skillId) { unlock in
+                                    if let skill = skills[unlock.skillId] {
+                                        Text("Lv.\(unlock.level): \(skill.name)")
+                                            .onTapGesture { selectedSkill = skill }
+                                    }
                                 }
                             }
                         }
@@ -588,17 +594,13 @@ struct JobDetailSheet: View {
                 }
             }
             .task { await loadData() }
-        }
-    }
-
-    @ViewBuilder
-    private func skillRow(skillId: UInt16) -> some View {
-        if let skill = skills[skillId] {
-            Text(skill.name)
-                .font(.body)
-        } else {
-            Text("スキルID: \(skillId)")
-                .foregroundStyle(.secondary)
+            .alert(item: $selectedSkill) { skill in
+                Alert(
+                    title: Text(skill.name),
+                    message: Text(skill.description),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
 
