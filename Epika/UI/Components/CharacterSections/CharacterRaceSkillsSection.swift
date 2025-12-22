@@ -8,6 +8,7 @@
 //
 // 【View構成】
 //   - スキルリスト: レベルとスキル名を表示（Lv.X: スキル名）
+//   - 未解放スキルはグレー表示
 //   - スキルなしの場合: 「スキルなし」テキスト
 //
 // 【使用箇所】
@@ -21,6 +22,7 @@ import SwiftUI
 @MainActor
 struct CharacterRaceSkillsSection: View {
     let skillUnlocks: [(level: Int, skill: SkillDefinition)]
+    let characterLevel: Int
 
     var body: some View {
         Group {
@@ -31,7 +33,9 @@ struct CharacterRaceSkillsSection: View {
             } else {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(skillUnlocks, id: \.skill.id) { unlock in
+                        let isUnlocked = characterLevel >= unlock.level
                         Text("Lv.\(unlock.level): \(unlock.skill.name)")
+                            .foregroundColor(isUnlocked ? .primary : .secondary)
                     }
                 }
             }

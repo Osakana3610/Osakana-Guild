@@ -85,8 +85,9 @@ struct CharacterDetailContent: View {
                 }
             }
         }
-        // 前職のレベル習得スキル（転職済みの場合）
-        if let unlocks = masterData.jobSkillUnlocks[character.previousJobId], character.previousJobId > 0 {
+        // 前職のレベル習得スキル（転職済みかつマスター職でない場合のみ）
+        let isMasterJob = character.jobId >= 100
+        if !isMasterJob, let unlocks = masterData.jobSkillUnlocks[character.previousJobId], character.previousJobId > 0 {
             for unlock in unlocks {
                 if let skill = masterData.skill(unlock.skillId) {
                     allUnlocks.append((level: unlock.level, skill: skill))
@@ -121,11 +122,11 @@ struct CharacterDetailContent: View {
             }
 
             Section("種族スキル") {
-                CharacterRaceSkillsSection(skillUnlocks: raceSkillUnlocks)
+                CharacterRaceSkillsSection(skillUnlocks: raceSkillUnlocks, characterLevel: character.level)
             }
 
             Section("職業スキル") {
-                CharacterJobSkillsSection(skillUnlocks: jobSkillUnlocks)
+                CharacterJobSkillsSection(skillUnlocks: jobSkillUnlocks, characterLevel: character.level)
             }
 
             Section("習得スキル") {

@@ -21,8 +21,9 @@
 //   7. RuntimeCharacter生成
 //
 // 【スキル収集】
-//   - 前職のスキル（転職済みの場合）
-//   - 現職のスキル
+//   - パッシブスキル: 前職 + 現職（転職しても引き継ぐ）
+//   - レベル習得スキル: 現職のみ（レベル条件を満たしたもの）
+//   - 種族レベル習得スキル（レベル条件を満たしたもの）
 //   - 装備アイテム + 超レア称号から付与されるスキル
 //
 // 【補助機能】
@@ -78,16 +79,28 @@ enum RuntimeCharacterFactory {
             previousJob = nil
         }
 
-        // スキルIDを収集（職業 + 装備）
+        // スキルIDを収集
         var allSkillIds: [UInt16] = []
 
-        // 前職のスキル（転職済みの場合のみ）
+        // パッシブスキル: 前職から引き継ぐ（転職済みの場合のみ）
         if let previousJob {
             allSkillIds.append(contentsOf: previousJob.learnedSkillIds)
         }
 
-        // 現職のスキル
+        // パッシブスキル: 現職
         allSkillIds.append(contentsOf: job.learnedSkillIds)
+
+        // レベル習得スキル: 現職のみ（レベル条件を満たしたもの）
+        let jobUnlocks = masterData.jobSkillUnlocks[input.jobId] ?? []
+        for unlock in jobUnlocks where input.level >= unlock.level {
+            allSkillIds.append(unlock.skillId)
+        }
+
+        // 種族レベル習得スキル（レベル条件を満たしたもの）
+        let raceUnlocks = masterData.raceSkillUnlocks[input.raceId] ?? []
+        for unlock in raceUnlocks where input.level >= unlock.level {
+            allSkillIds.append(unlock.skillId)
+        }
 
         // 装備から付与されるスキル（装備アイテム + 装備の超レア称号）
         allSkillIds.append(contentsOf: equippedItemDefinitions.flatMap { $0.grantedSkillIds })
