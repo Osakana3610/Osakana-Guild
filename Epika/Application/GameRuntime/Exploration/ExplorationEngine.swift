@@ -108,14 +108,28 @@ struct ExplorationEngine {
 
         let floor = preparation.floors[state.floorIndex]
         let scriptedCandidates = preparation.scriptEventsByFloor[floor.floorNumber] ?? []
-        let isBossFloor = (state.floorIndex == preparation.targetFloorNumber - 1)
-        let encounterEvents = encounterEventsForFloor(floor, tables: preparation.encounterTablesById, isBossFloor: isBossFloor)
         let hasScripted = !scriptedCandidates.isEmpty
-        let hasCombat = !encounterEvents.isEmpty
+        let isBossFloor = (state.floorIndex == preparation.targetFloorNumber - 1)
+        let isFinalEvent = isBossFloor && (state.eventIndex == preparation.eventsPerFloor - 1)
 
-        let category = try preparation.scheduler.nextCategory(hasScriptedEvents: hasScripted,
+        // ボス敵と通常敵を分けて取得
+        let bossEvents = bossEncounterEventsForFloor(floor, tables: preparation.encounterTablesById)
+        let normalEvents = normalEncounterEventsForFloor(floor, tables: preparation.encounterTablesById)
+        let hasBoss = !bossEvents.isEmpty
+
+        // 最終フロアの最後のイベントでボスがいる場合は強制ボス戦
+        let encounterEvents: [EncounterTableDefinition.Event]
+        let category: ExplorationEventScheduler.Category
+        if isFinalEvent && hasBoss {
+            encounterEvents = bossEvents
+            category = .combat
+        } else {
+            encounterEvents = normalEvents
+            let hasCombat = !encounterEvents.isEmpty
+            category = try preparation.scheduler.nextCategory(hasScriptedEvents: hasScripted,
                                                               hasCombatEvents: hasCombat,
                                                               random: &state.random)
+        }
         let occurredAt = Date()
 
         var entry: ExplorationEventLogEntry
@@ -243,22 +257,25 @@ private extension ExplorationEngine {
         return map
     }
 
-    static func encounterEventsForFloor(_ floor: DungeonFloorDefinition,
-                                        tables: [UInt16: EncounterTableDefinition],
-                                        isBossFloor: Bool) -> [EncounterTableDefinition.Event] {
+    /// 通常敵のエンカウントイベントを取得（ボス敵を除く）
+    static func normalEncounterEventsForFloor(_ floor: DungeonFloorDefinition,
+                                              tables: [UInt16: EncounterTableDefinition]) -> [EncounterTableDefinition.Event] {
         guard let table = tables[floor.encounterTableId] else { return [] }
         return table.events.filter { event in
             guard event.enemyId != nil else { return false }
             guard let eventType = EncounterEventType(rawValue: event.eventType) else { return false }
-            switch eventType {
-            case .enemyEncounter:
-                return true
-            case .bossEncounter:
-                // ボスはボスフロア（最後のフロア）でのみ出現
-                return isBossFloor
-            case .scripted, .guaranteed:
-                return false
-            }
+            return eventType == .enemyEncounter
+        }
+    }
+
+    /// ボス敵のエンカウントイベントを取得
+    static func bossEncounterEventsForFloor(_ floor: DungeonFloorDefinition,
+                                            tables: [UInt16: EncounterTableDefinition]) -> [EncounterTableDefinition.Event] {
+        guard let table = tables[floor.encounterTableId] else { return [] }
+        return table.events.filter { event in
+            guard event.enemyId != nil else { return false }
+            guard let eventType = EncounterEventType(rawValue: event.eventType) else { return false }
+            return eventType == .bossEncounter
         }
     }
 

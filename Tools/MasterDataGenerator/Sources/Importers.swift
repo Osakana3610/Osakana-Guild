@@ -1490,6 +1490,14 @@ extension Generator {
         let decoder = JSONDecoder()
         let file = try decoder.decode(DungeonMasterFile.self, from: data)
 
+        // 敵マスタからボスフラグをプリロード
+        var bossEnemyIds: Set<Int> = []
+        let bossQuery = try prepare("SELECT id FROM enemies WHERE is_boss = 1;")
+        defer { sqlite3_finalize(bossQuery) }
+        while sqlite3_step(bossQuery) == SQLITE_ROW {
+            bossEnemyIds.insert(Int(sqlite3_column_int(bossQuery, 0)))
+        }
+
         try withTransaction {
             try execute("DELETE FROM dungeon_floor_special_events;")
             try execute("DELETE FROM dungeon_floors;")
@@ -1545,7 +1553,8 @@ extension Generator {
 
             func insertEncounterEvents(tableId: Int, groups: [DungeonMasterFile.FloorEnemyMapping.EnemyGroup]) throws {
                 for (index, group) in groups.enumerated() {
-                    let isBoss = groups.count == 1
+                    // 敵マスタの is_boss フラグを参照してイベントタイプを決定
+                    let isBoss = bossEnemyIds.contains(group.enemyId)
                     let eventTypeString = isBoss ? "boss_encounter" : "enemy_encounter"
                     guard let eventTypeInt = EnumMappings.encounterEventType[eventTypeString] else {
                         throw GeneratorError.executionFailed("Unknown event type '\(eventTypeString)'")
