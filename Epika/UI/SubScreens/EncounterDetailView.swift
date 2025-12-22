@@ -209,12 +209,23 @@ struct EncounterDetailView: View {
         stateMap: inout [String: ParticipantState],
         indexToId: [UInt16: String]
     ) -> ([Int: ActionHPChange], [String: ParticipantState]) {
-        // まずrawActionsからstateMapを更新し、各targetIdごとのHP変動を記録
-        var hpChangesByTargetId: [String: (beforeHP: Int, afterHP: Int, maxHP: Int, name: String)] = [:]
+        var actionHPChanges: [Int: ActionHPChange] = [:]
+
+        // rawActionsとfilteredActionsの対応を追跡するためのインデックス
+        var filteredIndex = 0
 
         for action in rawActions {
             guard let kind = ActionKind(rawValue: action.kind) else { continue }
             let value = Int(action.value ?? 0)
+
+            // このrawActionに対応するfilteredActionを探す
+            let matchingFilteredIndex = findMatchingFilteredIndex(
+                action: action,
+                kind: kind,
+                filteredActions: filteredActions,
+                startFrom: filteredIndex,
+                indexToId: indexToId
+            )
 
             switch kind {
             // ダメージ（ターゲットのHPを減らす）
@@ -223,74 +234,149 @@ struct EncounterDetailView: View {
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
-                    let beforeHP = hpChangesByTargetId[targetId]?.beforeHP ?? state.currentHP
+                    let beforeHP = state.currentHP
                     state.currentHP = max(0, state.currentHP - value)
-                    hpChangesByTargetId[targetId] = (beforeHP, state.currentHP, state.maxHP, state.name)
                     stateMap[targetId] = state
+
+                    if let idx = matchingFilteredIndex {
+                        actionHPChanges[idx] = ActionHPChange(
+                            targetId: targetId,
+                            targetName: state.name,
+                            beforeHP: beforeHP,
+                            afterHP: state.currentHP,
+                            maxHP: state.maxHP
+                        )
+                        filteredIndex = idx + 1
+                    }
                 }
             // 自傷ダメージ
             case .damageSelf:
                 if let actorId = indexToId[action.actor],
                    var state = stateMap[actorId] {
-                    let beforeHP = hpChangesByTargetId[actorId]?.beforeHP ?? state.currentHP
+                    let beforeHP = state.currentHP
                     state.currentHP = max(0, state.currentHP - value)
-                    hpChangesByTargetId[actorId] = (beforeHP, state.currentHP, state.maxHP, state.name)
                     stateMap[actorId] = state
+
+                    if let idx = matchingFilteredIndex {
+                        actionHPChanges[idx] = ActionHPChange(
+                            targetId: actorId,
+                            targetName: state.name,
+                            beforeHP: beforeHP,
+                            afterHP: state.currentHP,
+                            maxHP: state.maxHP
+                        )
+                        filteredIndex = idx + 1
+                    }
                 }
             // 回復（ターゲットのHPを増やす）
             case .magicHeal, .healParty:
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
-                    let beforeHP = hpChangesByTargetId[targetId]?.beforeHP ?? state.currentHP
+                    let beforeHP = state.currentHP
                     state.currentHP = min(state.maxHP, state.currentHP + value)
-                    hpChangesByTargetId[targetId] = (beforeHP, state.currentHP, state.maxHP, state.name)
                     stateMap[targetId] = state
+
+                    if let idx = matchingFilteredIndex {
+                        actionHPChanges[idx] = ActionHPChange(
+                            targetId: targetId,
+                            targetName: state.name,
+                            beforeHP: beforeHP,
+                            afterHP: state.currentHP,
+                            maxHP: state.maxHP
+                        )
+                        filteredIndex = idx + 1
+                    }
                 }
             // 自己回復
             case .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
                 if let actorId = indexToId[action.actor],
                    var state = stateMap[actorId] {
-                    let beforeHP = hpChangesByTargetId[actorId]?.beforeHP ?? state.currentHP
+                    let beforeHP = state.currentHP
                     state.currentHP = min(state.maxHP, state.currentHP + value)
-                    hpChangesByTargetId[actorId] = (beforeHP, state.currentHP, state.maxHP, state.name)
                     stateMap[actorId] = state
+
+                    if let idx = matchingFilteredIndex {
+                        actionHPChanges[idx] = ActionHPChange(
+                            targetId: actorId,
+                            targetName: state.name,
+                            beforeHP: beforeHP,
+                            afterHP: state.currentHP,
+                            maxHP: state.maxHP
+                        )
+                        filteredIndex = idx + 1
+                    }
                 }
             // 戦闘不能
             case .physicalKill:
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
-                    let beforeHP = hpChangesByTargetId[targetId]?.beforeHP ?? state.currentHP
+                    let beforeHP = state.currentHP
                     state.currentHP = 0
-                    hpChangesByTargetId[targetId] = (beforeHP, 0, state.maxHP, state.name)
                     stateMap[targetId] = state
+
+                    if let idx = matchingFilteredIndex {
+                        actionHPChanges[idx] = ActionHPChange(
+                            targetId: targetId,
+                            targetName: state.name,
+                            beforeHP: beforeHP,
+                            afterHP: 0,
+                            maxHP: state.maxHP
+                        )
+                        filteredIndex = idx + 1
+                    }
                 }
             default:
                 break
             }
         }
 
-        // filteredActionsのうち、damage/healタイプのエントリにHP変動を対応付け
-        var actionHPChanges: [Int: ActionHPChange] = [:]
-        for (index, entry) in filteredActions.enumerated() {
-            // damage または heal タイプのエントリのみ対象
-            guard entry.type == .damage || entry.type == .heal else { continue }
+        return (actionHPChanges, stateMap)
+    }
 
-            // targetIdを取得（ダメージ/回復の対象）
-            guard let targetId = entry.targetId,
-                  let change = hpChangesByTargetId[targetId] else { continue }
-
-            actionHPChanges[index] = ActionHPChange(
-                targetId: targetId,
-                targetName: change.name,
-                beforeHP: change.beforeHP,
-                afterHP: change.afterHP,
-                maxHP: change.maxHP
-            )
+    /// rawActionに対応するfilteredActionのインデックスを探す
+    private func findMatchingFilteredIndex(
+        action: BattleAction,
+        kind: ActionKind,
+        filteredActions: [BattleLogEntry],
+        startFrom: Int,
+        indexToId: [UInt16: String]
+    ) -> Int? {
+        // damage/healタイプのみ対応
+        let expectedType: BattleLogEntry.LogType
+        switch kind {
+        case .physicalDamage, .magicDamage, .breathDamage, .statusTick,
+             .enemySpecialDamage, .damageSelf:
+            expectedType = .damage
+        case .magicHeal, .healParty, .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
+            expectedType = .heal
+        case .physicalKill:
+            expectedType = .defeat
+        default:
+            return nil
         }
 
-        return (actionHPChanges, stateMap)
+        // 対象のIDを特定
+        let targetIndex: UInt16
+        switch kind {
+        case .damageSelf, .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
+            targetIndex = action.actor
+        default:
+            guard let target = action.target else { return nil }
+            targetIndex = target
+        }
+        let targetId = String(targetIndex)
+
+        // startFromから順に探す
+        for idx in startFrom..<filteredActions.count {
+            let entry = filteredActions[idx]
+            if entry.type == expectedType && entry.targetId == targetId {
+                return idx
+            }
+        }
+
+        return nil
     }
 
     private func shouldDisplayAction(_ entry: BattleLogEntry) -> Bool {
@@ -320,12 +406,14 @@ struct EncounterDetailView: View {
         func finishGroup() {
             guard let primary = currentPrimary else {
                 // アクション宣言なしの場合、各結果を個別グループとして追加
-                for result in currentResults {
+                for (idx, result) in currentResults.enumerated() {
+                    // 対応するHPChangeがあれば含める
+                    let hpChangeForResult = idx < currentHPChanges.count ? [currentHPChanges[idx]] : []
                     groups.append(GroupedBattleAction(
                         id: groupId,
                         primaryEntry: result,
                         results: [],
-                        hpChanges: []
+                        hpChanges: hpChangeForResult
                     ))
                     groupId += 1
                 }
@@ -356,7 +444,22 @@ struct EncounterDetailView: View {
                 // 前のグループを確定
                 finishGroup()
                 currentPrimary = entry
-            } else if isResult {
+                } else if isResult {
+                // actorIdが現在のprimaryと異なる場合は、別のキャラクターのアクション結果なので
+                // 前のグループを確定して個別グループとして追加
+                let belongsToCurrentGroup: Bool
+                if let primary = currentPrimary {
+                    // primaryと同じactorIdの結果のみグループに含める
+                    belongsToCurrentGroup = entry.actorId == primary.actorId
+                } else {
+                    belongsToCurrentGroup = false
+                }
+
+                if !belongsToCurrentGroup && currentPrimary != nil {
+                    // 前のグループを確定
+                    finishGroup()
+                }
+
                 // 結果をグループに追加（敗北含む）
                 // ただしdefeatはHP変動を持たないのでスキップ
                 if entry.type != .defeat {
@@ -666,6 +769,18 @@ struct GroupedActionRowView: View {
                     .font(.subheadline)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
+
+                // primaryEntry自体がダメージ/回復の場合（アクション宣言なし）、HPバーを表示
+                if group.results.isEmpty && !group.hpChanges.isEmpty {
+                    ForEach(group.hpChanges.indices, id: \.self) { idx in
+                        HPBarView(
+                            currentHP: group.hpChanges[idx].afterHP,
+                            previousHP: group.hpChanges[idx].beforeHP,
+                            maxHP: group.hpChanges[idx].maxHP
+                        )
+                        .frame(maxWidth: 120)
+                    }
+                }
 
                 // 各結果（ダメージ/回復等）とHP変動を表示
                 ForEach(Array(zip(group.results, group.hpChanges).enumerated()), id: \.offset) { _, pair in

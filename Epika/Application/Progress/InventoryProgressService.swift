@@ -226,11 +226,9 @@ actor InventoryProgressService {
                 let stackKeySet = Set(entries.map { $0.key.stackKey })
                 // Fetch all records for this storage, then filter in memory
                 // (SwiftData #Predicate cannot use computed properties like stackKey)
-                // MARK: Migration 0.7.5→0.7.6 - OR条件（0.7.7で storageType == storageTypeValue のみに変更）
                 let storageTypeValue = storage.rawValue
-                let storageRawString = storage.identifier
                 let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-                    $0.storageType == storageTypeValue || $0.storageRawValue == storageRawString
+                    $0.storageType == storageTypeValue
                 })
                 let allRecords = try context.fetch(descriptor)
                 let existingRecords = allRecords.filter { stackKeySet.contains($0.stackKey) }
@@ -561,11 +559,9 @@ actor InventoryProgressService {
     }
 
     private func fetchDescriptor(for storage: ItemStorage) -> FetchDescriptor<InventoryItemRecord> {
-        // MARK: Migration 0.7.5→0.7.6 - OR条件（0.7.7で storageType == storageTypeValue のみに変更）
         let storageTypeValue = storage.rawValue
-        let storageRawString = storage.identifier
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue || $0.storageRawValue == storageRawString
+            $0.storageType == storageTypeValue
         })
         // Index順でソート（超レア称号 → 通常称号 → アイテム → ソケット）
         descriptor.sortBy = [
@@ -610,9 +606,7 @@ actor InventoryProgressService {
         let socketSuperRare = socketSuperRareTitleId
         let socketNormal = socketNormalTitleId
         let socketMaster = socketItemId
-        // MARK: Migration 0.7.5→0.7.6 - OR条件（0.7.7で storageType == storageTypeValue のみに変更）
         let storageTypeValue = storage.rawValue
-        let storageRawString = storage.identifier
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.superRareTitleId == superRare &&
             $0.normalTitleId == normal &&
@@ -620,7 +614,7 @@ actor InventoryProgressService {
             $0.socketSuperRareTitleId == socketSuperRare &&
             $0.socketNormalTitleId == socketNormal &&
             $0.socketItemId == socketMaster &&
-            ($0.storageType == storageTypeValue || $0.storageRawValue == storageRawString)
+            $0.storageType == storageTypeValue
         })
         descriptor.fetchLimit = 1
         if let existing = try context.fetch(descriptor).first {

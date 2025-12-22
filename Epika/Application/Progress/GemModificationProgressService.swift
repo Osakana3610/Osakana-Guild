@@ -45,11 +45,9 @@ actor GemModificationProgressService {
     /// 宝石一覧を取得
     func getGems() async throws -> [ItemSnapshot] {
         let context = makeContext()
-        // MARK: Migration 0.7.5→0.7.6 - OR条件（0.7.7で storageType == storageTypeValue のみに変更）
         let storageTypeValue = ItemStorage.playerItem.rawValue
-        let storageRawString = ItemStorage.playerItem.identifier
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue || $0.storageRawValue == storageRawString
+            $0.storageType == storageTypeValue
         })
         descriptor.sortBy = [
             SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),
@@ -71,11 +69,9 @@ actor GemModificationProgressService {
     /// 指定した宝石をソケットとして装着可能なアイテム一覧を取得
     func getSocketableItems(for _: String) async throws -> [ItemSnapshot] {
         let context = makeContext()
-        // MARK: Migration 0.7.5→0.7.6 - OR条件（0.7.7で storageType == storageTypeValue のみに変更）
         let storageTypeValue = ItemStorage.playerItem.rawValue
-        let storageRawString = ItemStorage.playerItem.identifier
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            ($0.storageType == storageTypeValue || $0.storageRawValue == storageRawString) && $0.socketItemId == 0
+            $0.storageType == storageTypeValue && $0.socketItemId == 0
         })
         descriptor.sortBy = [
             SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),

@@ -187,6 +187,8 @@ struct GuildView: View {
     @MainActor
     private func loadOnce() async {
         if didLoadOnce { return }
+        // 初回のみ: 既存キャラクターにdisplayOrderを設定（EpikaApp起動時だとリリースビルドでハングするためここで実行）
+        try? await appServices.character.migrateDisplayOrderIfNeeded()
         await loadData()
         didLoadOnce = true
     }

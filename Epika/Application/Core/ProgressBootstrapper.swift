@@ -6,7 +6,6 @@
 // 【責務】
 //   - SwiftData ModelContainerの初期化
 //   - 進行データストアのライフサイクル管理
-//   - マイグレーション処理
 //
 // 【データ構造】
 //   - ProgressBootstrapper (@MainActor): ブートストラッパー
@@ -21,11 +20,7 @@
 //   1. キャッシュ済みコンテナがあれば再利用
 //   2. Transformer登録
 //   3. ModelContainer生成（失敗時はストア削除して再試行）
-//   4. マイグレーション実行
-//   5. コンテナをキャッシュ
-//
-// 【マイグレーション】
-//   - 0.7.5→0.7.6: InventoryのstorageRawValue→storageType変換
+//   4. コンテナをキャッシュ
 //
 // 【ストアパス】
 //   - ~/Library/Application Support/Epika/Progress.store
@@ -96,8 +91,6 @@ final class ProgressBootstrapper {
             print("[ProgressStore][DEBUG] ModelContainer initialized after reset")
 #endif
         }
-        // MARK: Migration 0.7.5→0.7.6 - 起動時正規化（0.7.7で削除）
-        try await migrateInventoryStorageIfNeeded(container: container)
 
         cachedContainer = container
 #if DEBUG
@@ -105,42 +98,6 @@ final class ProgressBootstrapper {
 #endif
         return BootstrapResult(container: container)
     }
-
-    // MARK: - Migration 0.7.5→0.7.6 (Remove in 0.7.7)
-
-    /// 旧形式（storageRawValue: String）のインベントリレコードを新形式（storageType: UInt8）に変換
-    private func migrateInventoryStorageIfNeeded(container: ModelContainer) async throws {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-
-        // 旧形式のレコードを検索: storageType == 0 かつ storageRawValue が空でない
-        let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == 0 && $0.storageRawValue != ""
-        })
-        let oldRecords = try context.fetch(descriptor)
-        guard !oldRecords.isEmpty else {
-#if DEBUG
-            print("[Migration 0.7.5→0.7.6] No old inventory records to migrate")
-#endif
-            return
-        }
-
-#if DEBUG
-        print("[Migration 0.7.5→0.7.6] Found \(oldRecords.count) inventory records to migrate")
-#endif
-
-        for record in oldRecords {
-            // getter→setterで変換: 旧カラムから読み取り、新カラムに書き込み
-            record.storage = record.storage
-        }
-
-        try context.save()
-#if DEBUG
-        print("[Migration 0.7.5→0.7.6] Migrated \(oldRecords.count) inventory records")
-#endif
-    }
-
-    // MARK: - End Migration 0.7.5→0.7.6
 
     func resetStore() throws {
         cachedContainer = nil

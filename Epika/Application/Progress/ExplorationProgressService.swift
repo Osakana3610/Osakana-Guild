@@ -245,10 +245,7 @@ private extension ExplorationProgressService {
             scriptedEventId = summary.eventId
         }
 
-        let drops = await buildDropEntries(from: event.drops)
-        let dropsData = try Self.jsonEncoder.encode(drops)
-
-        return ExplorationEventRecord(
+        let eventRecord = ExplorationEventRecord(
             floor: UInt8(event.floorNumber),
             kind: kind,
             enemyId: enemyId,
@@ -257,41 +254,21 @@ private extension ExplorationProgressService {
             scriptedEventId: scriptedEventId,
             exp: UInt32(event.experienceGained),
             gold: UInt32(event.goldGained),
-            dropsData: dropsData,
             occurredAt: occurredAt
         )
-    }
 
-    func buildDropEntries(from drops: [ExplorationDropReward]) async -> [DropEntry] {
-        var entries: [DropEntry] = []
-        entries.reserveCapacity(drops.count)
-
-        for drop in drops {
-            // 称号IDからidへ変換。IDが無効な場合は0（称号なし）
-            // ゲーム内で生成されたドロップなので、通常は有効なIDのみ
-            let superRareTitleId: UInt8
-            if let superRareId = drop.superRareTitleId {
-                superRareTitleId = superRareId
-            } else {
-                superRareTitleId = 0
-            }
-
-            let normalTitleId: UInt8
-            if let normalId = drop.normalTitleId {
-                normalTitleId = normalId
-            } else {
-                normalTitleId = 0
-            }
-
-            entries.append(DropEntry(
-                superRareTitleId: superRareTitleId,
-                normalTitleId: normalTitleId,
+        // ドロップレコードを作成してリレーションに追加
+        for drop in event.drops {
+            let dropRecord = ExplorationDropRecord(
+                superRareTitleId: drop.superRareTitleId,
+                normalTitleId: drop.normalTitleId,
                 itemId: drop.item.id,
                 quantity: UInt16(drop.quantity)
-            ))
+            )
+            eventRecord.drops.append(dropRecord)
         }
 
-        return entries
+        return eventRecord
     }
 
     func battleResultValue(_ result: BattleService.BattleResult) -> UInt8 {
@@ -348,8 +325,7 @@ private extension ExplorationProgressService {
         rewards.gold = Int(run.totalGold)
 
         for eventRecord in eventRecords {
-            let drops = try Self.jsonDecoder.decode([DropEntry].self, from: eventRecord.dropsData)
-            for drop in drops {
+            for drop in eventRecord.drops {
                 if drop.itemId > 0 {
                     if let item = masterDataCache.item(drop.itemId) {
                         rewards.itemDrops[item.name, default: 0] += Int(drop.quantity)
@@ -443,10 +419,9 @@ private extension ExplorationProgressService {
         if eventRecord.gold > 0 {
             context.gold = "\(eventRecord.gold)"
         }
-        let drops = try Self.jsonDecoder.decode([DropEntry].self, from: eventRecord.dropsData)
-        if !drops.isEmpty {
+        if !eventRecord.drops.isEmpty {
             var dropStrings: [String] = []
-            for drop in drops {
+            for drop in eventRecord.drops {
                 if drop.itemId > 0,
                    let item = masterDataCache.item(drop.itemId) {
                     dropStrings.append("\(item.name)x\(drop.quantity)")
