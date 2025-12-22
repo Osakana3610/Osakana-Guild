@@ -93,7 +93,9 @@ enum RuntimeCharacterFactory {
         allSkillIds.append(contentsOf: equippedItemDefinitions.flatMap { $0.grantedSkillIds })
         allSkillIds.append(contentsOf: superRareTitles.flatMap { $0.skillIds })
 
-        let learnedSkills = allSkillIds.compactMap { masterData.skill($0) }
+        // 重複除去してからスキル定義に変換
+        let uniqueSkillIds = Set(allSkillIds)
+        let learnedSkills = uniqueSkillIds.compactMap { masterData.skill($0) }
 
         // Loadout構築
         let loadout = assembleLoadout(masterData: masterData, from: input.equippedItems)
