@@ -27,12 +27,38 @@ import SwiftUI
 @MainActor
 struct CharacterIdentitySection: View {
     let character: RuntimeCharacter
+    @State private var showRaceDetail = false
+    @State private var selectedJob: JobDefinition?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            LabeledContent("種族", value: character.raceName)
-            LabeledContent("職業", value: character.jobName)
+            LabeledContent("種族") {
+                Text(character.raceName)
+                    .onTapGesture { showRaceDetail = true }
+            }
+            if let currentJob = character.job {
+                LabeledContent("職業") {
+                    Text(currentJob.name)
+                        .onTapGesture { selectedJob = currentJob }
+                }
+                if let previousJob = character.previousJob {
+                    LabeledContent("前職") {
+                        Text(previousJob.name)
+                            .onTapGesture { selectedJob = previousJob }
+                    }
+                }
+            } else {
+                LabeledContent("職業", value: character.jobName)
+            }
             LabeledContent("性別", value: character.race?.genderDisplayName ?? "不明")
+        }
+        .sheet(isPresented: $showRaceDetail) {
+            if let race = character.race {
+                RaceDetailSheet(race: race)
+            }
+        }
+        .sheet(item: $selectedJob) { job in
+            JobDetailSheet(job: job, genderCode: character.race?.genderCode)
         }
     }
 }
