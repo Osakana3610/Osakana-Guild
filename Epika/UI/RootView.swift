@@ -37,6 +37,7 @@ struct RootView: View {
             .environment(partyViewState)
             .environment(appServices)
             .environment(appServices.dropNotifications)
+            .environment(appServices.statChangeNotifications)
     }
 }
 
@@ -57,6 +58,7 @@ private struct PreviewRootView: View {
                     .environment(PartyViewState(appServices: appServices))
                     .environment(appServices)
                     .environment(appServices.dropNotifications)
+                    .environment(appServices.statChangeNotifications)
             } else if let errorMessage {
                 Text("プレビュー初期化に失敗しました: \(errorMessage)")
             } else {
