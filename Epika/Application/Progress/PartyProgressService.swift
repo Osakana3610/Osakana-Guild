@@ -59,7 +59,7 @@ actor PartyProgressService {
                                          displayName: nameProvider(index),
                                          lastSelectedDungeonId: nil,
                                          lastSelectedDifficulty: 0,
-                                         targetFloor: 1,
+                                         targetFloor: 0,
                                          memberCharacterIds: [],
                                          updatedAt: now)
                 context.insert(record)
@@ -118,9 +118,6 @@ actor PartyProgressService {
     }
 
     func setTargetFloor(persistentIdentifier: PersistentIdentifier, floor: UInt8) async throws -> PartySnapshot {
-        guard floor >= 1 else {
-            throw ProgressError.invalidInput(description: "目標階層は1以上である必要があります")
-        }
         let context = makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.targetFloor = floor

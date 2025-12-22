@@ -31,7 +31,7 @@ final class PartyRecord {
     var displayName: String = ""
     var lastSelectedDungeonId: UInt16?        // nil=未選択
     var lastSelectedDifficulty: UInt8 = 0
-    var targetFloor: UInt8 = 1
+    var targetFloor: UInt8 = 0
     var memberCharacterIds: [UInt8] = []      // メンバー（順序=配列index）
     var updatedAt: Date = Date()
 
@@ -39,7 +39,7 @@ final class PartyRecord {
          displayName: String = "",
          lastSelectedDungeonId: UInt16? = nil,
          lastSelectedDifficulty: UInt8 = 0,
-         targetFloor: UInt8 = 1,
+         targetFloor: UInt8 = 0,
          memberCharacterIds: [UInt8] = [],
          updatedAt: Date = Date()) {
         self.id = id

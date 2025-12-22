@@ -494,13 +494,13 @@ private struct TargetFloorPickerMenu: View {
                             if currentFloor == floor {
                                 Image(systemName: "checkmark")
                             }
-                            Text("\(floor)階")
+                            Text(floorDisplayName(floor))
                         }
                     }
                 }
             } label: {
                 HStack(spacing: 4) {
-                    Text("\(currentFloor)階")
+                    Text(floorDisplayName(currentFloor))
                         .foregroundColor(.secondary)
                     Image(systemName: "chevron.up.chevron.down")
                         .foregroundStyle(Color(.tertiaryLabel))
@@ -517,7 +517,11 @@ private struct TargetFloorPickerMenu: View {
 
     private var floorRange: [Int] {
         let upperBound = max(1, maxFloor)
-        return Array(1...upperBound)
+        return [0] + Array(1...upperBound)
+    }
+
+    private func floorDisplayName(_ floor: Int) -> String {
+        floor == 0 ? "どこまでも進む" : "\(floor)階"
     }
 
     private func select(_ floor: Int) {
