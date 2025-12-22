@@ -493,13 +493,17 @@ struct EncounterDetailView: View {
 
     @MainActor
     private func loadBattleLogIfNeeded() async {
-        guard encounter.combatSummary?.battleLogData != nil else { return }
+        guard encounter.combatSummary?.battleLogId != nil else { return }
         guard battleLogEntries.isEmpty, !isLoadingBattleLog, battleLogError == nil else { return }
 
         isLoadingBattleLog = true
         battleLogError = nil
         do {
-            let archive = try fetchBattleLogArchive()
+            guard let archive = try fetchBattleLogArchive() else {
+                battleLogError = EncounterDetailError.battleLogNotAvailable.errorDescription
+                isLoadingBattleLog = false
+                return
+            }
             battleLogArchive = archive
 
             // 名前マップを構築
@@ -553,11 +557,75 @@ struct EncounterDetailView: View {
         isLoadingBattleLog = false
     }
 
-    private func fetchBattleLogArchive() throws -> BattleLogArchive {
-        guard let data = encounter.combatSummary?.battleLogData else {
-            throw EncounterDetailError.battleLogNotAvailable
+    private func fetchBattleLogArchive() throws -> BattleLogArchive? {
+        guard let id = encounter.combatSummary?.battleLogId,
+              let record = modelContext.model(for: id) as? BattleLogRecord else {
+            return nil
         }
-        return try JSONDecoder().decode(BattleLogArchive.self, from: data)
+        return restoreBattleLogArchive(from: record)
+    }
+
+    private func restoreBattleLogArchive(from record: BattleLogRecord) -> BattleLogArchive {
+        // initialHP復元
+        var initialHP: [UInt16: UInt32] = [:]
+        for hp in record.initialHPs {
+            initialHP[hp.actorIndex] = hp.hp
+        }
+
+        // actions復元
+        let actions = record.actions.sorted { $0.sortOrder < $1.sortOrder }.map { a in
+            BattleAction(
+                turn: a.turn,
+                kind: a.kind,
+                actor: a.actor,
+                target: a.target == 0 ? nil : a.target,
+                value: a.value == 0 ? nil : a.value,
+                skillIndex: a.skillIndex == 0 ? nil : a.skillIndex,
+                extra: a.extra == 0 ? nil : a.extra
+            )
+        }
+
+        let battleLog = BattleLog(
+            initialHP: initialHP,
+            actions: actions,
+            outcome: record.outcome,
+            turns: record.turns
+        )
+
+        // participants復元
+        let playerSnapshots = record.participants.filter { $0.isPlayer }.map { p in
+            BattleParticipantSnapshot(
+                actorId: p.actorId,
+                partyMemberId: p.partyMemberId == 0 ? nil : p.partyMemberId,
+                characterId: p.characterId == 0 ? nil : p.characterId,
+                name: p.name,
+                avatarIndex: p.avatarIndex == 0 ? nil : p.avatarIndex,
+                level: p.level == 0 ? nil : Int(p.level),
+                maxHP: Int(p.maxHP)
+            )
+        }
+        let enemySnapshots = record.participants.filter { !$0.isPlayer }.map { p in
+            BattleParticipantSnapshot(
+                actorId: p.actorId,
+                partyMemberId: p.partyMemberId == 0 ? nil : p.partyMemberId,
+                characterId: p.characterId == 0 ? nil : p.characterId,
+                name: p.name,
+                avatarIndex: p.avatarIndex == 0 ? nil : p.avatarIndex,
+                level: p.level == 0 ? nil : Int(p.level),
+                maxHP: Int(p.maxHP)
+            )
+        }
+
+        return BattleLogArchive(
+            enemyId: record.enemyId,
+            enemyName: record.enemyName,
+            result: BattleService.BattleResult(rawValue: record.result) ?? .victory,
+            turns: Int(record.turns),
+            timestamp: record.timestamp,
+            battleLog: battleLog,
+            playerSnapshots: playerSnapshots,
+            enemySnapshots: enemySnapshots
+        )
     }
 
     enum EncounterDetailError: LocalizedError {

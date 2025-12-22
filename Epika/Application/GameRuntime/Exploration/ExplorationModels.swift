@@ -58,8 +58,7 @@ struct BattleParticipantSnapshot: Codable, Sendable {
     let maxHP: Int
 }
 
-struct BattleLogArchive: Codable, Sendable {
-    let id: UUID
+struct BattleLogArchive: Sendable {
     let enemyId: UInt16
     let enemyName: String
     let result: BattleService.BattleResult
@@ -79,7 +78,6 @@ struct CombatSummary: Sendable {
     let totalExperience: Int
     let goldEarned: Int
     let drops: [ExplorationDropReward]
-    let battleLogId: UUID
 }
 
 struct ScriptedEventSummary: Sendable {
