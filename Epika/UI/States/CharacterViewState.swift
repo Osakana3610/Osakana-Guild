@@ -46,11 +46,16 @@ final class CharacterViewState {
             avatarId == 0 ? UInt16(raceId) : avatarId
         }
 
-        init(snapshot: CharacterSnapshot, job: JobDefinition?, race: RaceDefinition?) {
+        init(snapshot: CharacterSnapshot, job: JobDefinition?, previousJob: JobDefinition?, race: RaceDefinition?) {
             self.id = snapshot.id
             self.name = snapshot.displayName
             self.level = snapshot.level
-            self.jobName = job?.name ?? "職業\(snapshot.jobId)"
+            let currentJobName = job?.name ?? "職業\(snapshot.jobId)"
+            if let previousJobName = previousJob?.name {
+                self.jobName = "\(currentJobName)（\(previousJobName)）"
+            } else {
+                self.jobName = currentJobName
+            }
             self.raceName = race?.name ?? "種族\(snapshot.raceId)"
             self.isAlive = snapshot.hitPoints.current > 0
             self.displayOrder = snapshot.displayOrder
@@ -103,6 +108,7 @@ final class CharacterViewState {
         summaries = snapshots.map { snapshot in
             CharacterSummary(snapshot: snapshot,
                              job: jobMap[snapshot.jobId],
+                             previousJob: jobMap[snapshot.previousJobId],
                              race: raceMap[snapshot.raceId])
         }
         .sorted { $0.displayOrder < $1.displayOrder }
