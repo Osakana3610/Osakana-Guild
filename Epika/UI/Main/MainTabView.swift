@@ -6,7 +6,7 @@
 // 【責務】
 //   - アプリのメインタブバー構成
 //   - 各タブ（物語・ギルド・冒険・商店・その他）の管理
-//   - BottomGameInfoView と ItemDropNotificationView の配置制御
+//   - BottomGameInfoView と通知Viewの配置制御（アイテムドロップ、ステータス変動）
 //
 // 【View構成】
 //   - TabView による5つのタブ管理
@@ -175,7 +175,10 @@ struct MainTabView: View {
                 Spacer()
 
                 HStack {
-                    ItemDropNotificationView()
+                    VStack(alignment: .leading, spacing: 4) {
+                        ItemDropNotificationView()
+                        StatChangeNotificationView()
+                    }
                     Spacer()
                 }
                 .padding(.horizontal, calculatedHorizontalPadding - 1)
