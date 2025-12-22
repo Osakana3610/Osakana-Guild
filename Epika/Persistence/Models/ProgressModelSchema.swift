@@ -40,6 +40,11 @@ enum ProgressModelSchema {
             DungeonRecord.self,
             ExplorationRunRecord.self,
             ExplorationEventRecord.self,
+            ExplorationDropRecord.self,
+            BattleLogRecord.self,
+            BattleLogInitialHPRecord.self,
+            BattleLogActionRecord.self,
+            BattleLogParticipantRecord.self,
             ShopStockRecord.self,
             AutoTradeRuleRecord.self
         ]

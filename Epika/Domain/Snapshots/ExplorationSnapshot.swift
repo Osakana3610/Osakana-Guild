@@ -41,6 +41,7 @@
 // ==============================================================================
 
 import Foundation
+import SwiftData
 
 struct ExplorationSnapshot: Sendable, Hashable {
     enum Status: UInt8, Sendable, Hashable {
@@ -111,7 +112,7 @@ struct ExplorationSnapshot: Sendable, Hashable {
             var enemyName: String
             var result: String
             var turns: Int
-            var battleLogData: Data?
+            var battleLogId: PersistentIdentifier?
         }
 
         /// イベントの付加情報（表示用）

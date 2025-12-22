@@ -88,8 +88,6 @@ struct CombatExecutionService {
             dropResults = []
         }
 
-        let battleLogId = UUID()
-
         let partyMembersById = Dictionary(uniqueKeysWithValues: party.members.map { ($0.id, $0.character) })
 
         // survivingAllyIds (partyMemberId) から characterId を取得
@@ -122,8 +120,7 @@ struct CombatExecutionService {
                                              maxHP: actor.snapshot.maxHP)
         }
 
-        let logArchive = BattleLogArchive(id: battleLogId,
-                                          enemyId: resolution.enemy.id,
+        let logArchive = BattleLogArchive(enemyId: resolution.enemy.id,
                                           enemyName: resolution.enemy.name,
                                           result: resolution.result,
                                           turns: resolution.turns,
@@ -139,8 +136,7 @@ struct CombatExecutionService {
                                     experienceByMember: rewards.experienceByMember,
                                     totalExperience: rewards.totalExperience,
                                     goldEarned: rewards.gold,
-                                    drops: dropResults,
-                                    battleLogId: battleLogId)
+                                    drops: dropResults)
 
         return CombatExecutionOutcome(summary: summary,
                                        log: logArchive,

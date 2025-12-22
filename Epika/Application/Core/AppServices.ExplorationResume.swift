@@ -48,8 +48,11 @@ extension AppServices {
 
         // 2. 保存された状態を復元
         let randomState = record.randomState
-        let superRareState = try decodeSuperRareState(from: record.superRareStateData)
-        let droppedItemIds = try decodeDroppedItemIds(from: record.droppedItemIdsData)
+        let superRareState = SuperRareDailyState(
+            jstDate: record.superRareJstDate,
+            hasTriggered: record.superRareHasTriggered
+        )
+        let droppedItemIds = ExplorationProgressService.decodeItemIds(record.droppedItemIdsData)
         let eventRecords = record.events.sorted { $0.occurredAt < $1.occurredAt }
 
         // 3. パーティ情報を取得
@@ -59,7 +62,7 @@ extension AppServices {
         let characters = try await character.characters(withIds: partySnapshot.memberCharacterIds)
 
         // 4. 最後の戦闘ログからHP復元
-        let partyHP = try restorePartyHP(from: eventRecords)
+        let partyHP = restorePartyHP(from: eventRecords)
 
         // 5. ダンジョン情報を取得
         guard let dungeonDef = masterDataCache.dungeon(record.dungeonId) else {
@@ -130,68 +133,30 @@ extension AppServices {
 
     // MARK: - Private Helpers
 
-    private func decodeSuperRareState(from data: Data) throws -> SuperRareDailyState {
-        if data.isEmpty {
-            return SuperRareDailyState(jstDate: currentJSTDate(), hasTriggered: false)
-        }
-        do {
-            return try JSONDecoder().decode(SuperRareDailyState.self, from: data)
-        } catch {
-            throw ExplorationResumeError.corruptedSuperRareState(reason: error.localizedDescription)
-        }
-    }
-
-    private func decodeDroppedItemIds(from data: Data) throws -> Set<UInt16> {
-        if data.isEmpty { return [] }
-        do {
-            let array = try JSONDecoder().decode([UInt16].self, from: data)
-            return Set(array)
-        } catch {
-            throw ExplorationResumeError.corruptedDroppedItemIds(reason: error.localizedDescription)
-        }
-    }
-
-    private func currentJSTDate() -> UInt32 {
-        let jst = TimeZone(identifier: "Asia/Tokyo")!
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = jst
-        let components = calendar.dateComponents([.year, .month, .day], from: Date())
-        let year = components.year ?? 2024
-        let month = components.month ?? 1
-        let day = components.day ?? 1
-        return UInt32(year * 10000 + month * 100 + day)
-    }
-
-    private func restorePartyHP(from eventRecords: [ExplorationEventRecord]) throws -> [UInt8: Int] {
+    private func restorePartyHP(from eventRecords: [ExplorationEventRecord]) -> [UInt8: Int] {
         // 戦闘ログを持つ最後のイベントを探す
-        guard let lastBattleEvent = eventRecords.last(where: { $0.battleLogData != nil }),
-              let battleLogData = lastBattleEvent.battleLogData else {
+        guard let lastBattleEvent = eventRecords.last(where: { $0.battleLog != nil }),
+              let logRecord = lastBattleEvent.battleLog else {
             // 戦闘なし = 全員フルHP（空辞書を返し、呼び出し側でmaxHPを使う）
             return [:]
         }
 
-        let archive: BattleLogArchive
-        do {
-            archive = try JSONDecoder().decode(BattleLogArchive.self, from: battleLogData)
-        } catch {
-            throw ExplorationResumeError.battleLogDecodeFailed(reason: error.localizedDescription)
-        }
-
-        let battleLog = archive.battleLog
         var hp: [UInt16: Int] = [:]
 
         // 1. 初期HP設定
-        for (actorIndex, initialHP) in battleLog.initialHP {
-            hp[actorIndex] = Int(initialHP)
+        for hpRecord in logRecord.initialHPs {
+            hp[hpRecord.actorIndex] = Int(hpRecord.hp)
         }
 
         // 2. actionsを順に処理
-        for action in battleLog.actions {
-            let kind = ActionKind(rawValue: action.kind)
-            let value = Int(action.value ?? 0)
+        let sortedActions = logRecord.actions.sorted { $0.sortOrder < $1.sortOrder }
+        for actionRecord in sortedActions {
+            let kind = ActionKind(rawValue: actionRecord.kind)
+            let value = Int(actionRecord.value)
 
             // target系処理
-            if let target = action.target {
+            let target = actionRecord.target
+            if target != 0 {
                 switch kind {
                 // ダメージ
                 case .physicalDamage, .magicDamage, .breathDamage, .statusTick, .enemySpecialDamage:
@@ -201,10 +166,11 @@ extension AppServices {
                     hp[target, default: 0] += value
                 // 蘇生（maxHPの25%で復活）
                 case .resurrection, .necromancer, .rescue:
-                    if let snapshot = archive.playerSnapshots.first(where: {
-                        UInt16($0.partyMemberId ?? $0.characterId ?? 0) == target
+                    let playerParticipants = logRecord.participants.filter { $0.isPlayer }
+                    if let snapshot = playerParticipants.first(where: {
+                        UInt16($0.partyMemberId != 0 ? $0.partyMemberId : $0.characterId) == target
                     }) {
-                        hp[target] = snapshot.maxHP / 4
+                        hp[target] = Int(snapshot.maxHP) / 4
                     }
                 default:
                     break
@@ -214,9 +180,9 @@ extension AppServices {
             // actor系処理
             switch kind {
             case .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
-                hp[action.actor, default: 0] += value
+                hp[actionRecord.actor, default: 0] += value
             case .damageSelf:
-                hp[action.actor, default: 0] -= value
+                hp[actionRecord.actor, default: 0] -= value
             default:
                 break
             }
@@ -224,11 +190,13 @@ extension AppServices {
 
         // 3. characterId → HPに変換、クランプ
         var result: [UInt8: Int] = [:]
-        for snapshot in archive.playerSnapshots {
-            guard let characterId = snapshot.characterId else { continue }
-            let actorIndex = UInt16(snapshot.partyMemberId ?? characterId)
+        let playerParticipants = logRecord.participants.filter { $0.isPlayer }
+        for snapshot in playerParticipants {
+            let characterId = snapshot.characterId
+            guard characterId != 0 else { continue }
+            let actorIndex = UInt16(snapshot.partyMemberId != 0 ? snapshot.partyMemberId : characterId)
             let currentHP = hp[actorIndex] ?? 0
-            result[characterId] = max(0, min(currentHP, snapshot.maxHP))
+            result[characterId] = max(0, min(currentHP, Int(snapshot.maxHP)))
         }
         return result
     }
