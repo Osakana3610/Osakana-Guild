@@ -24,17 +24,6 @@ last_updated: "2025-12-21"
 # 既知の問題（Open）
 # ==============================================================================
 issues:
-  - id: "FB0011"
-    title: "iOS 18でドロップ通知の背景が暗く読みにくい"
-    category: "UI"
-    status: "confirmed"
-    reported_date: "2025-12-22"
-    description: |
-      iOS 18でアイテムのドロップ通知の背景が暗くなり、ドロップ内容が極端に読みにくい。
-    workaround: ""
-    fix_plan: |
-      12/23までに修正版を審査に提出予定。
-
   - id: "FB0001"
     title: "掘り出し物画面を開くとパンドラボックスの画面になる"
     category: "商店"
@@ -60,18 +49,6 @@ issues:
 # 解決済みの問題（Closed）
 # ==============================================================================
 resolved:
-  - id: "FB0010"
-    title: "探索ログが表示されなくなる"
-    category: "探索"
-    status: "fixed"
-    reported_date: "2025-12-22"
-    resolved_date: "2025-12-22"
-    resolved_version: "0.7.81"
-    description: |
-      探索ログが表示されなくなる問題。
-    resolution: |
-      0.7.81にて修正済み。探索データの正規化処理と、ベータテスト用機能に探索ログ削除機能を追加。
-
   - id: "FB0002"
     title: "デバッグメニューのデータ消去でアラートが表示されない"
     category: "デバッグ"
@@ -171,3 +148,26 @@ resolved:
     resolution: |
       BattleActionResource.makeDefaultでbreathDamage > 0の場合に自動でブレスチャージを付与していたのを削除。
       breathVariantスキルを習得したキャラのみがブレスを使用できるよう修正。
+
+  - id: "FB0010"
+    title: "探索ログが表示されなくなる"
+    category: "探索"
+    status: "fixed"
+    reported_date: "2025-12-22"
+    resolved_date: "2025-12-22"
+    resolved_version: "0.7.81"
+    description: |
+      探索ログが表示されなくなる問題。
+    resolution: |
+      0.7.81にて修正済み。探索データの正規化処理と、ベータテスト用機能に探索ログ削除機能を追加。
+
+  - id: "FB0011"
+    title: "iOS 18でドロップ通知の背景が暗く読みにくい"
+    category: "UI"
+    status: "fixed"
+    reported_date: "2025-12-22"
+    resolved_date: "2025-12-22"
+    description: |
+      iOS 18でアイテムのドロップ通知の背景が暗くなり、ドロップ内容が極端に読みにくい。
+    resolution: |
+      修正済み。12/23までに修正を公開予定。背景にシステムカラーとブラー効果を適用し視認性を改善。

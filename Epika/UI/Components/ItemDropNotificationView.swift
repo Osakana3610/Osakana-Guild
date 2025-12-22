@@ -32,26 +32,25 @@ struct GlassEffectModifier: ViewModifier {
             content
                 .glassEffect(isSuperRare ? .regular.tint(.red.opacity(0.8)) : .regular)
         } else {
-            // iOS 25以下では元の実装通り
+            // iOS 25以下ではブラー + 色オーバーレイ + 影で視認性確保
             content
                 .background(
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(backgroundColors)
-                )
-                .background(
-                    // ブラー効果で可読性向上
-                    RoundedRectangle(cornerRadius: 6)
                         .fill(.ultraThinMaterial)
-                        .opacity(0.3)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(backgroundColors.opacity(0.7))
+                        )
+                        .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
                 )
         }
     }
 
     private var backgroundColors: Color {
         if isSuperRare {
-            return Color(white: 0.85) // 明るいグレー（元の実装）
+            return Color.red
         } else {
-            return Color(white: 0.15) // 濃いグレー（元の実装）
+            return Color(.systemBackground)
         }
     }
 }
