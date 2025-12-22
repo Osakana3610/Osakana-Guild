@@ -134,6 +134,7 @@ struct EquipmentEditorView: View {
     let character: RuntimeCharacter
 
     @Environment(AppServices.self) private var appServices
+    @Environment(StatChangeNotificationService.self) private var statChangeService
     @State private var currentCharacter: RuntimeCharacter
     @State private var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
     @State private var orderedSubcategories: [ItemDisplaySubcategory] = []
@@ -365,6 +366,7 @@ struct EquipmentEditorView: View {
     @MainActor
     private func performEquip(_ item: LightweightItemData) async {
         equipError = nil
+        let oldCharacter = currentCharacter
 
         do {
             let snapshot = try await characterService.equipItem(
@@ -373,6 +375,12 @@ struct EquipmentEditorView: View {
             )
             let runtime = try await characterService.runtimeCharacter(from: snapshot)
             currentCharacter = runtime
+
+            // ステータス変動を通知
+            let changes = calculateStatChanges(old: oldCharacter, new: runtime)
+            if !changes.isEmpty {
+                statChangeService.publish(changes)
+            }
 
             // インベントリキャッシュから装備した分を減らす（1個）
             _ = try? displayService.decrementQuantity(stackKey: item.stackKey, by: 1)
@@ -385,6 +393,7 @@ struct EquipmentEditorView: View {
     @MainActor
     private func performUnequip(_ item: CharacterInput.EquippedItem) async throws {
         equipError = nil
+        let oldCharacter = currentCharacter
 
         let snapshot = try await characterService.unequipItem(
             characterId: currentCharacter.id,
@@ -392,6 +401,12 @@ struct EquipmentEditorView: View {
         )
         let runtime = try await characterService.runtimeCharacter(from: snapshot)
         currentCharacter = runtime
+
+        // ステータス変動を通知
+        let changes = calculateStatChanges(old: oldCharacter, new: runtime)
+        if !changes.isEmpty {
+            statChangeService.publish(changes)
+        }
 
         // キャッシュに同じstackKeyがあれば数量を増やす、なければ新規追加
         updateCacheForUnequippedItem(item)
@@ -455,5 +470,66 @@ struct EquipmentEditorView: View {
             .filter { !Self.excludedCategories.contains($0.key.mainCategory) }
         orderedSubcategories = displayService.getOrderedSubcategories()
             .filter { !Self.excludedCategories.contains($0.mainCategory) }
+    }
+
+    /// 装備変更前後のステータス差分を計算
+    private func calculateStatChanges(
+        old: RuntimeCharacter,
+        new: RuntimeCharacter
+    ) -> [StatChangeNotificationService.StatChangeNotification] {
+        typealias Notification = StatChangeNotificationService.StatChangeNotification
+        typealias StatKind = StatChangeNotificationService.StatKind
+        var changes: [Notification] = []
+
+        // ヘルパー関数（Int用）
+        func addIfChanged(_ kind: StatKind, oldVal: Int, newVal: Int) {
+            if oldVal != newVal {
+                let delta = newVal - oldVal
+                let sign = delta >= 0 ? "+" : ""
+                changes.append(Notification(
+                    kind: kind,
+                    newValue: "\(newVal)",
+                    delta: "\(sign)\(delta)"
+                ))
+            }
+        }
+
+        // ヘルパー関数（Double用、小数点1桁）
+        func addIfChangedDouble(_ kind: StatKind, oldVal: Double, newVal: Double) {
+            if oldVal != newVal {
+                let delta = newVal - oldVal
+                let sign = delta >= 0 ? "+" : ""
+                changes.append(Notification(
+                    kind: kind,
+                    newValue: String(format: "%.1f", newVal),
+                    delta: String(format: "%@%.1f", sign, delta)
+                ))
+            }
+        }
+
+        // 基本能力値
+        addIfChanged(.strength, oldVal: old.attributes.strength, newVal: new.attributes.strength)
+        addIfChanged(.wisdom, oldVal: old.attributes.wisdom, newVal: new.attributes.wisdom)
+        addIfChanged(.spirit, oldVal: old.attributes.spirit, newVal: new.attributes.spirit)
+        addIfChanged(.vitality, oldVal: old.attributes.vitality, newVal: new.attributes.vitality)
+        addIfChanged(.agility, oldVal: old.attributes.agility, newVal: new.attributes.agility)
+        addIfChanged(.luck, oldVal: old.attributes.luck, newVal: new.attributes.luck)
+
+        // 戦闘ステータス
+        addIfChanged(.maxHP, oldVal: old.combat.maxHP, newVal: new.combat.maxHP)
+        addIfChanged(.physicalAttack, oldVal: old.combat.physicalAttack, newVal: new.combat.physicalAttack)
+        addIfChanged(.magicalAttack, oldVal: old.combat.magicalAttack, newVal: new.combat.magicalAttack)
+        addIfChanged(.physicalDefense, oldVal: old.combat.physicalDefense, newVal: new.combat.physicalDefense)
+        addIfChanged(.magicalDefense, oldVal: old.combat.magicalDefense, newVal: new.combat.magicalDefense)
+        addIfChanged(.hitRate, oldVal: old.combat.hitRate, newVal: new.combat.hitRate)
+        addIfChanged(.evasionRate, oldVal: old.combat.evasionRate, newVal: new.combat.evasionRate)
+        addIfChanged(.criticalRate, oldVal: old.combat.criticalRate, newVal: new.combat.criticalRate)
+        addIfChangedDouble(.attackCount, oldVal: old.combat.attackCount, newVal: new.combat.attackCount)
+        addIfChanged(.magicalHealing, oldVal: old.combat.magicalHealing, newVal: new.combat.magicalHealing)
+        addIfChanged(.trapRemoval, oldVal: old.combat.trapRemoval, newVal: new.combat.trapRemoval)
+        addIfChanged(.additionalDamage, oldVal: old.combat.additionalDamage, newVal: new.combat.additionalDamage)
+        addIfChanged(.breathDamage, oldVal: old.combat.breathDamage, newVal: new.combat.breathDamage)
+
+        return changes
     }
 }

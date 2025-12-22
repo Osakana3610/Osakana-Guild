@@ -23,6 +23,7 @@
 //   - autoTrade: 自動売却
 //   - runtime: ゲームランタイムへのブリッジ
 //   - dropNotifications: ドロップ通知
+//   - statChangeNotifications: ステータス変動通知
 //   - itemPreload: アイテム表示用キャッシュ
 //   - gemModification: 宝石改造
 //
@@ -64,6 +65,7 @@ final class AppServices {
     let autoTrade: AutoTradeProgressService
     let runtime: ProgressRuntimeService
     let dropNotifications: ItemDropNotificationService
+    let statChangeNotifications: StatChangeNotificationService
     let itemPreload: ItemPreloadService
     let gemModification: GemModificationProgressService
 
@@ -96,6 +98,7 @@ final class AppServices {
         self.gameState = gameStateService
         let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)
         self.dropNotifications = dropNotifications
+        self.statChangeNotifications = StatChangeNotificationService()
         let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications] results in
             guard let dropNotifications, !results.isEmpty else { return }
             await MainActor.run {
