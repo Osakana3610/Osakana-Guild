@@ -154,7 +154,6 @@ struct DebugMenuView: View {
     var body: some View {
         NavigationStack {
             Form {
-                resourceSection
                 itemCreationSection
                 characterCreationSection
                 dropNotificationTestSection
@@ -307,17 +306,6 @@ struct DebugMenuView: View {
         }
     }
 
-    private var resourceSection: some View {
-        Section("リソース") {
-            Button("所持金を最大にする") {
-                Task { await setMaxGold() }
-            }
-            Button("チケットを最大にする") {
-                Task { await setMaxTickets() }
-            }
-        }
-    }
-
     private var dataResetSection: some View {
         Section("データ操作") {
             NavigationLink {
@@ -329,32 +317,6 @@ struct DebugMenuView: View {
                     Text("危険な操作")
                 }
             }
-        }
-    }
-
-    private func setMaxGold() async {
-        do {
-            let maxGold = AppConstants.Progress.maximumGold
-            let snapshot = try await gameStateService.setGold(maxGold)
-            appServices.applyPlayerSnapshot(snapshot)
-            alertMessage = "所持金を最大（\(maxGold.formatted())GP）にしました"
-            showAlert = true
-        } catch {
-            alertMessage = "エラー: \(error.localizedDescription)"
-            showAlert = true
-        }
-    }
-
-    private func setMaxTickets() async {
-        do {
-            let maxTickets = AppConstants.Progress.maximumCatTickets
-            let snapshot = try await gameStateService.setCatTickets(maxTickets)
-            appServices.applyPlayerSnapshot(snapshot)
-            alertMessage = "チケットを最大（\(maxTickets.formatted())枚）にしました"
-            showAlert = true
-        } catch {
-            alertMessage = "エラー: \(error.localizedDescription)"
-            showAlert = true
         }
     }
 
