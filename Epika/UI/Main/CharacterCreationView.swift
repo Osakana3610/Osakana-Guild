@@ -19,6 +19,16 @@
 // ==============================================================================
 
 import SwiftUI
+import TipKit
+
+struct CharacterCreationTip: Tip {
+    var title: Text {
+        Text("詳細を確認")
+    }
+    var message: Text? {
+        Text("長押しで種族や職業の詳細を確認できます")
+    }
+}
 
 struct CharacterCreationView: View {
     let appServices: AppServices
@@ -146,16 +156,7 @@ struct CharacterCreationView: View {
                             if index > 0 {
                                 Divider()
                             }
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(genderTitle(for: section.gender))
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 12) {
-                                    ForEach(section.races, id: \.id) { race in
-                                        raceTile(for: race)
-                                    }
-                                }
-                            }
+                            genderSectionView(section: section, showTip: index == 0)
                         }
                     }
                 }
@@ -194,6 +195,25 @@ struct CharacterCreationView: View {
     private var canCreate: Bool {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         return !trimmed.isEmpty && selectedRace != nil && selectedJob != nil
+    }
+
+    @ViewBuilder
+    private func genderSectionView(section: (gender: String, races: [RaceDefinition]), showTip: Bool) -> some View {
+        let content = VStack(alignment: .leading, spacing: 8) {
+            Text(genderTitle(for: section.gender))
+                .font(.subheadline)
+                .fontWeight(.medium)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 12) {
+                ForEach(section.races, id: \.id) { race in
+                    raceTile(for: race)
+                }
+            }
+        }
+        if showTip {
+            content.popoverTip(CharacterCreationTip())
+        } else {
+            content
+        }
     }
 
     private func genderTitle(for gender: String) -> String {

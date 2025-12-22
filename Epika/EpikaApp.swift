@@ -35,6 +35,7 @@
 
 import SwiftUI
 import SwiftData
+import TipKit
 
 @main
 struct EpikaApp: App {
@@ -111,6 +112,7 @@ struct EpikaApp: App {
     @MainActor
     private func initializeSystems() async {
         await requestNotificationPermission()
+        try? Tips.configure()
     }
 
     @MainActor
