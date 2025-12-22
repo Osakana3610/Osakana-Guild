@@ -128,10 +128,14 @@ final class ExplorationProgressService {
         let context = makeContext()
         let runRecord = try fetchRunRecord(runId: runId, context: context)
 
-        // ExplorationEventRecordを構築してINSERT（O(1)）
-        let eventRecord = try await buildEventRecord(from: event, battleLog: battleLog, occurredAt: occurredAt)
+        // iOS 17のSwiftDataバグ対策: contextへの挿入後にリレーションを設定
+        // @Relationship(inverse:)付きのto-manyリレーションは挿入前にアクセスするとクラッシュする
+        let eventRecord = buildBaseEventRecord(from: event, occurredAt: occurredAt)
         eventRecord.run = runRecord
         context.insert(eventRecord)
+
+        // context挿入後にリレーションを設定
+        try await populateEventRecordRelationships(eventRecord: eventRecord, from: event, battleLog: battleLog, context: context)
 
         // 累計を更新
         runRecord.totalExp += eventRecord.exp
@@ -244,12 +248,14 @@ private extension ExplorationProgressService {
 
     // MARK: - Event Record Building
 
-    func buildEventRecord(from event: ExplorationEventLogEntry,
-                          battleLog: BattleLogArchive?,
-                          occurredAt: Date) async throws -> ExplorationEventRecord {
+    /// EventRecordの基本フィールドだけを構築（リレーションは除く）
+    /// iOS 17のSwiftDataバグ対策: @Relationship(inverse:)付きのto-manyリレーションは
+    /// contextに挿入する前にアクセスするとクラッシュするため、リレーション設定は分離
+    func buildBaseEventRecord(from event: ExplorationEventLogEntry,
+                              occurredAt: Date) -> ExplorationEventRecord {
         let kind: UInt8
         var enemyId: UInt16?
-        var battleResult: UInt8?
+        let battleResult: UInt8? = nil  // battleLogがある場合はpopulateEventRecordRelationshipsで設定
         var scriptedEventId: UInt8?
 
         switch event.kind {
@@ -259,16 +265,13 @@ private extension ExplorationProgressService {
         case .combat(let summary):
             kind = EventKind.combat.rawValue
             enemyId = summary.enemy.id
-            if let log = battleLog {
-                battleResult = battleResultValue(log.result)
-            }
 
         case .scripted(let summary):
             kind = EventKind.scripted.rawValue
             scriptedEventId = summary.eventId
         }
 
-        let eventRecord = ExplorationEventRecord(
+        return ExplorationEventRecord(
             floor: UInt8(event.floorNumber),
             kind: kind,
             enemyId: enemyId,
@@ -278,7 +281,13 @@ private extension ExplorationProgressService {
             gold: UInt32(event.goldGained),
             occurredAt: occurredAt
         )
+    }
 
+    /// contextに挿入済みのEventRecordにリレーションを設定
+    func populateEventRecordRelationships(eventRecord: ExplorationEventRecord,
+                                          from event: ExplorationEventLogEntry,
+                                          battleLog: BattleLogArchive?,
+                                          context: ModelContext) async throws {
         // ドロップレコードを作成してリレーションに追加
         for drop in event.drops {
             let dropRecord = ExplorationDropRecord(
@@ -287,11 +296,15 @@ private extension ExplorationProgressService {
                 itemId: drop.item.id,
                 quantity: UInt16(drop.quantity)
             )
-            eventRecord.drops.append(dropRecord)
+            dropRecord.event = eventRecord
+            context.insert(dropRecord)
         }
 
         // 戦闘ログレコードを作成してリレーションに追加
         if let archive = battleLog {
+            // battleResultを設定
+            eventRecord.battleResult = battleResultValue(archive.result)
+
             let logRecord = BattleLogRecord()
             logRecord.enemyId = archive.enemyId
             logRecord.enemyName = archive.enemyName
@@ -299,12 +312,14 @@ private extension ExplorationProgressService {
             logRecord.turns = UInt8(archive.turns)
             logRecord.timestamp = archive.timestamp
             logRecord.outcome = archive.battleLog.outcome
+            logRecord.event = eventRecord
+            context.insert(logRecord)
 
             // initialHP
             for (actorIndex, hp) in archive.battleLog.initialHP {
                 let hpRecord = BattleLogInitialHPRecord(actorIndex: actorIndex, hp: hp)
                 hpRecord.battleLog = logRecord
-                logRecord.initialHPs.append(hpRecord)
+                context.insert(hpRecord)
             }
 
             // actions
@@ -319,7 +334,7 @@ private extension ExplorationProgressService {
                 actionRecord.skillIndex = action.skillIndex ?? 0
                 actionRecord.extra = action.extra ?? 0
                 actionRecord.battleLog = logRecord
-                logRecord.actions.append(actionRecord)
+                context.insert(actionRecord)
             }
 
             // participants
@@ -334,7 +349,7 @@ private extension ExplorationProgressService {
                 pRecord.level = UInt16(snapshot.level ?? 0)
                 pRecord.maxHP = UInt32(snapshot.maxHP)
                 pRecord.battleLog = logRecord
-                logRecord.participants.append(pRecord)
+                context.insert(pRecord)
             }
             for snapshot in archive.enemySnapshots {
                 let pRecord = BattleLogParticipantRecord()
@@ -347,13 +362,9 @@ private extension ExplorationProgressService {
                 pRecord.level = UInt16(snapshot.level ?? 0)
                 pRecord.maxHP = UInt32(snapshot.maxHP)
                 pRecord.battleLog = logRecord
-                logRecord.participants.append(pRecord)
+                context.insert(pRecord)
             }
-
-            eventRecord.battleLog = logRecord
         }
-
-        return eventRecord
     }
 
     func battleResultValue(_ result: BattleService.BattleResult) -> UInt8 {
