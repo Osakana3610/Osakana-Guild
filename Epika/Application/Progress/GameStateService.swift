@@ -121,13 +121,6 @@ actor GameStateService {
         }
     }
 
-    /// ベータテスト用：所持金を直接設定
-    func setGold(_ amount: UInt32) async throws -> PlayerSnapshot {
-        return try await mutateWallet { wallet in
-            wallet.gold = min(amount, AppConstants.Progress.maximumGold)
-        }
-    }
-
     func spendGold(_ amount: UInt32) async throws -> PlayerSnapshot {
         return try await mutateWallet { wallet in
             guard wallet.gold >= amount else {
@@ -143,13 +136,6 @@ actor GameStateService {
         return try await mutateWallet { wallet in
             let newTickets = UInt32(wallet.catTickets) + UInt32(amount)
             wallet.catTickets = UInt16(min(newTickets, UInt32(AppConstants.Progress.maximumCatTickets)))
-        }
-    }
-
-    /// ベータテスト用：チケットを直接設定
-    func setCatTickets(_ amount: UInt16) async throws -> PlayerSnapshot {
-        return try await mutateWallet { wallet in
-            wallet.catTickets = min(amount, AppConstants.Progress.maximumCatTickets)
         }
     }
 
