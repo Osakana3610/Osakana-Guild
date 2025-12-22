@@ -651,8 +651,17 @@ actor CharacterProgressService {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let currentEquipment = try context.fetch(equipmentDescriptor)
 
-        // 装備可能数はレベルベースで計算（スキル修正は後で適用可能）
-        let equipmentCapacity = EquipmentSlotCalculator.baseCapacity(forLevel: Int(characterRecord.level))
+        // 装備可能数をスキル修正込みで計算
+        let input = try loadInput(characterRecord, context: context)
+        let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
+        let runtimeCharacter = try await MainActor.run {
+            try RuntimeCharacterFactory.make(
+                from: input,
+                masterData: masterData,
+                pandoraBoxStackKeys: pandoraStackKeys
+            )
+        }
+        let equipmentCapacity = runtimeCharacter.equipmentCapacity
         if currentEquipment.count + quantity > equipmentCapacity {
             throw ProgressError.invalidInput(description: "装備数が上限(\(equipmentCapacity)個)を超えます")
         }
