@@ -29,6 +29,16 @@
 
 import Foundation
 import SwiftUI
+import TipKit
+
+struct CharacterDetailTip: Tip {
+    var title: Text {
+        Text("詳細を表示")
+    }
+    var message: Text? {
+        Text("種族・職業・スキルをタップすると詳細を確認できます")
+    }
+}
 
 struct RuntimeCharacterDetailSheetView: View {
     let character: RuntimeCharacter

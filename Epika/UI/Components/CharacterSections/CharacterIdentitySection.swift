@@ -20,6 +20,7 @@
 // ==============================================================================
 
 import SwiftUI
+import TipKit
 
 /// キャラクターのプロフィール情報（種族、職業、性別）を表示するセクション
 /// CharacterSectionType: race, job
@@ -36,6 +37,7 @@ struct CharacterIdentitySection: View {
                 Text(character.raceName)
                     .onTapGesture { showRaceDetail = true }
             }
+            .popoverTip(CharacterDetailTip())
             if let currentJob = character.job {
                 LabeledContent("職業") {
                     Text(currentJob.name)
