@@ -76,25 +76,12 @@ struct CharacterDetailContent: View {
 
     private var jobSkillUnlocks: [(level: Int, skill: SkillDefinition)] {
         let masterData = appServices.masterDataCache
-        var allUnlocks: [(level: Int, skill: SkillDefinition)] = []
-        // 現職のレベル習得スキル
-        if let unlocks = masterData.jobSkillUnlocks[character.jobId] {
-            for unlock in unlocks {
-                if let skill = masterData.skill(unlock.skillId) {
-                    allUnlocks.append((level: unlock.level, skill: skill))
-                }
-            }
+        // レベル習得スキルは現職のみ（転職したら前職のは失う）
+        let unlocks = masterData.jobSkillUnlocks[character.jobId] ?? []
+        return unlocks.compactMap { unlock in
+            guard let skill = masterData.skill(unlock.skillId) else { return nil }
+            return (level: unlock.level, skill: skill)
         }
-        // 前職のレベル習得スキル（転職済みかつマスター職でない場合のみ）
-        let isMasterJob = character.jobId >= 100
-        if !isMasterJob, let unlocks = masterData.jobSkillUnlocks[character.previousJobId], character.previousJobId > 0 {
-            for unlock in unlocks {
-                if let skill = masterData.skill(unlock.skillId) {
-                    allUnlocks.append((level: unlock.level, skill: skill))
-                }
-            }
-        }
-        return allUnlocks.sorted { $0.level < $1.level }
     }
 
     var body: some View {
