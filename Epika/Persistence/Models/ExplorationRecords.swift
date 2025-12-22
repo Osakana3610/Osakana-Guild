@@ -46,6 +46,28 @@
 import Foundation
 import SwiftData
 
+// MARK: - ExplorationDropRecord
+
+/// 探索ドロップレコード
+///
+/// 各ドロップアイテムを個別レコードとして保存。
+/// ExplorationEventRecordと1対多のリレーションを持つ。
+@Model
+final class ExplorationDropRecord {
+    var superRareTitleId: UInt8?
+    var normalTitleId: UInt8?
+    var itemId: UInt16 = 0
+    var quantity: UInt16 = 0
+    var event: ExplorationEventRecord?
+
+    init(superRareTitleId: UInt8?, normalTitleId: UInt8?, itemId: UInt16, quantity: UInt16) {
+        self.superRareTitleId = superRareTitleId
+        self.normalTitleId = normalTitleId
+        self.itemId = itemId
+        self.quantity = quantity
+    }
+}
+
 // MARK: - ExplorationEventRecord
 
 /// 探索イベントレコード
@@ -62,12 +84,14 @@ final class ExplorationEventRecord {
     var scriptedEventId: UInt8?
     var exp: UInt32 = 0
     var gold: UInt32 = 0
-    /// [DropEntry]をJSONエンコード（1イベントあたり0〜数件なので許容）
-    var dropsData: Data = Data()
     var occurredAt: Date = Date()
 
     /// 親への参照
     var run: ExplorationRunRecord?
+
+    /// ドロップアイテム（正規化されたリレーション）
+    @Relationship(deleteRule: .cascade, inverse: \ExplorationDropRecord.event)
+    var drops: [ExplorationDropRecord] = []
 
     init(floor: UInt8,
          kind: UInt8,
@@ -77,7 +101,6 @@ final class ExplorationEventRecord {
          scriptedEventId: UInt8?,
          exp: UInt32,
          gold: UInt32,
-         dropsData: Data,
          occurredAt: Date) {
         self.floor = floor
         self.kind = kind
@@ -87,7 +110,6 @@ final class ExplorationEventRecord {
         self.scriptedEventId = scriptedEventId
         self.exp = exp
         self.gold = gold
-        self.dropsData = dropsData
         self.occurredAt = occurredAt
     }
 }

@@ -17,7 +17,7 @@
 //   - データ操作セクション（危険な操作画面への遷移）
 //
 // 【使用箇所】
-//   - SettingsView（デバッグメニュー）
+//   - SettingsView（ベータテスト用機能）
 //
 // ==============================================================================
 
@@ -935,6 +935,10 @@ struct DangerousOperationsView: View {
     @State private var unequipResultMessage = ""
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
+    @State private var isPurgingExplorationLogs = false
+    @State private var showPurgeExplorationLogsConfirmAlert = false
+    @State private var showPurgeExplorationLogsCompleteAlert = false
+    @State private var purgeExplorationLogsResultMessage = ""
 
     var body: some View {
         Form {
@@ -1006,6 +1010,19 @@ struct DangerousOperationsView: View {
         } message: {
             Text(unequipResultMessage)
         }
+        .alert("探索ログを削除しますか？", isPresented: $showPurgeExplorationLogsConfirmAlert) {
+            Button("キャンセル", role: .cancel) { }
+            Button("削除する", role: .destructive) {
+                Task { await purgeExplorationLogs() }
+            }
+        } message: {
+            Text("全ての探索履歴が削除されます。キャラクターやアイテムなどの進行データには影響しません。")
+        }
+        .alert("探索ログ削除完了", isPresented: $showPurgeExplorationLogsCompleteAlert) {
+            Button("OK") { }
+        } message: {
+            Text(purgeExplorationLogsResultMessage)
+        }
     }
 
     private var equipmentRecoverySection: some View {
@@ -1032,6 +1049,32 @@ struct DangerousOperationsView: View {
                     HStack {
                         Image(systemName: "arrow.uturn.backward.circle")
                         Text("全キャラクターの装備を外す")
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("探索ログ削除")
+                    .font(.headline)
+                Text("全ての探索履歴を削除します。冒険タブでログが表示されない問題の復旧用です。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.vertical, 4)
+
+            if isPurgingExplorationLogs {
+                HStack {
+                    ProgressView()
+                    Text("削除中...")
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                Button {
+                    showPurgeExplorationLogsConfirmAlert = true
+                } label: {
+                    HStack {
+                        Image(systemName: "trash.circle")
+                        Text("探索ログを削除")
                     }
                 }
             }
@@ -1065,9 +1108,8 @@ struct DangerousOperationsView: View {
             // インベントリを取得
             let storage = ItemStorage.playerItem
             let storageTypeValue = storage.rawValue
-            let storageRawString = storage.identifier
             let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-                $0.storageType == storageTypeValue || $0.storageRawValue == storageRawString
+                $0.storageType == storageTypeValue
             }))
 
             // stackKeyでグループ化
@@ -1124,6 +1166,45 @@ struct DangerousOperationsView: View {
             await MainActor.run {
                 isUnequippingAll = false
                 errorMessage = "装備解除に失敗しました: \(error.localizedDescription)"
+                showErrorAlert = true
+            }
+        }
+    }
+
+    /// 探索ログ削除：ExplorationRunRecordとExplorationEventRecordを明示的に全削除
+    private func purgeExplorationLogs() async {
+        if isPurgingExplorationLogs { return }
+        await MainActor.run { isPurgingExplorationLogs = true }
+
+        do {
+            let context = ModelContext(appServices.container)
+            context.autosaveEnabled = false
+
+            // ExplorationEventRecordを先に全取得・削除（cascade削除に頼らない）
+            let allEvents = try context.fetch(FetchDescriptor<ExplorationEventRecord>())
+            let eventCount = allEvents.count
+            for event in allEvents {
+                context.delete(event)
+            }
+
+            // ExplorationRunRecordを全取得・削除
+            let allRuns = try context.fetch(FetchDescriptor<ExplorationRunRecord>())
+            let runCount = allRuns.count
+            for run in allRuns {
+                context.delete(run)
+            }
+
+            try context.save()
+
+            await MainActor.run {
+                isPurgingExplorationLogs = false
+                purgeExplorationLogsResultMessage = "探索ログを削除しました（\(runCount)件の探索、\(eventCount)件のイベント）"
+                showPurgeExplorationLogsCompleteAlert = true
+            }
+        } catch {
+            await MainActor.run {
+                isPurgingExplorationLogs = false
+                errorMessage = "探索ログの削除に失敗しました: \(error.localizedDescription)"
                 showErrorAlert = true
             }
         }

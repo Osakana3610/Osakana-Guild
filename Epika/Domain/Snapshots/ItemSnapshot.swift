@@ -105,21 +105,4 @@ extension ItemSnapshot: Hashable {
 enum ItemStorage: UInt8, Codable, Sendable {
     case playerItem = 1
     case unknown = 2
-
-    /// 文字列識別子からの変換（Migration 0.7.5→0.7.6用、0.7.7で削除）
-    nonisolated init?(identifier: String) {
-        switch identifier {
-        case "playerItem": self = .playerItem
-        case "unknown": self = .unknown
-        default: return nil
-        }
-    }
-
-    /// 文字列識別子（Migration 0.7.5→0.7.6用、0.7.7で削除）
-    nonisolated var identifier: String {
-        switch self {
-        case .playerItem: return "playerItem"
-        case .unknown: return "unknown"
-        }
-    }
 }

@@ -635,11 +635,9 @@ actor CharacterProgressService {
         }
 
         // インベントリアイテムの取得（stackKeyでマッチング）
-        // MARK: Migration 0.7.5→0.7.6 - OR条件（0.7.7で storageType == storageTypeValue のみに変更）
         let storageTypeValue = ItemStorage.playerItem.rawValue
-        let storageRawString = ItemStorage.playerItem.identifier
         let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue || $0.storageRawValue == storageRawString
+            $0.storageType == storageTypeValue
         }))
         guard let inventoryRecord = allInventory.first(where: { $0.stackKey == inventoryItemStackKey }) else {
             throw ProgressError.invalidInput(description: "アイテムが見つかりません")
@@ -712,11 +710,9 @@ actor CharacterProgressService {
         let storage = ItemStorage.playerItem
 
         // インベントリに戻す（同じstackKeyのアイテムを探す）
-        // MARK: Migration 0.7.5→0.7.6 - OR条件（0.7.7で storageType == storageTypeValue のみに変更）
         let storageTypeValue = storage.rawValue
-        let storageRawString = storage.identifier
         let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue || $0.storageRawValue == storageRawString
+            $0.storageType == storageTypeValue
         }))
 
         if let existingInventory = allInventory.first(where: { $0.stackKey == equipmentStackKey }) {
@@ -995,9 +991,8 @@ private extension CharacterProgressService {
 
         // インベントリを取得
         let storageTypeValue = storage.rawValue
-        let storageRawString = storage.identifier
         let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue || $0.storageRawValue == storageRawString
+            $0.storageType == storageTypeValue
         }))
 
         // stackKeyでグループ化
