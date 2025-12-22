@@ -53,15 +53,61 @@ enum DropItemCategory: UInt8, Sendable {
 
 /// パーティのドロップ系補正値を集計したもの。
 struct PartyDropBonuses: Sendable {
+    let goldMultiplier: Double
     let rareDropMultiplier: Double
     let titleGrantRateMultiplier: Double
     let averageLuck: Double
     let fortune: Int
 
-    static let neutral = PartyDropBonuses(rareDropMultiplier: 1.0,
+    static let neutral = PartyDropBonuses(goldMultiplier: 1.0,
+                                          rareDropMultiplier: 1.0,
                                           titleGrantRateMultiplier: 1.0,
                                           averageLuck: 0.0,
                                           fortune: 0)
+
+    /// RuntimeCharacter配列からボーナスを計算する。
+    init(members: [RuntimeCharacter]) {
+        guard !members.isEmpty else {
+            self = .neutral
+            return
+        }
+
+        var luckSum = 0
+        var spiritSum = 0
+        for member in members {
+            luckSum += member.attributes.luck
+            spiritSum += member.attributes.spirit
+        }
+
+        let count = Double(members.count)
+        let averageLuck = Double(luckSum) / count
+
+        // 旧仕様準拠: Luck合計でゴールド倍率を底上げ
+        let goldBase = 1.0 + Double(luckSum) * 0.001
+        // 旧仕様準拠: (Luck + Spirit) 合計でレア倍率を底上げ
+        let rareBase = 1.0 + (Double(luckSum + spiritSum) * 0.0005)
+        // 旧仕様準拠: 平均Luckに比例して称号付与率を上げる
+        let titleBase = 1.0 + (averageLuck * 0.002)
+
+        // 報酬系スキルはパーティ全体でID単位の重複無効
+        let allSkills = members.flatMap { $0.learnedSkills }
+        let uniqueSkills = Array(Dictionary(allSkills.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values)
+        let rewardComponents = (try? SkillRuntimeEffectCompiler.rewardComponents(from: uniqueSkills)) ?? .neutral
+
+        self.goldMultiplier = goldBase * rewardComponents.goldScale()
+        self.rareDropMultiplier = rareBase * rewardComponents.itemDropScale()
+        self.titleGrantRateMultiplier = titleBase * rewardComponents.titleScale()
+        self.averageLuck = averageLuck
+        self.fortune = Int(averageLuck.rounded())
+    }
+
+    private init(goldMultiplier: Double, rareDropMultiplier: Double, titleGrantRateMultiplier: Double, averageLuck: Double, fortune: Int) {
+        self.goldMultiplier = goldMultiplier
+        self.rareDropMultiplier = rareDropMultiplier
+        self.titleGrantRateMultiplier = titleGrantRateMultiplier
+        self.averageLuck = averageLuck
+        self.fortune = fortune
+    }
 }
 
 /// 1回のドロップ判定結果。
@@ -93,38 +139,7 @@ struct DropOutcome: Sendable {
 
 extension RuntimePartyState {
     /// パーティメンバーのステータスからドロップ倍率を集計する。
-    func makeDropBonuses() throws -> PartyDropBonuses {
-        guard !members.isEmpty else { return .neutral }
-
-        var luckSum = 0
-        var spiritSum = 0
-        for member in members {
-            let attributes = member.character.attributes
-            luckSum += attributes.luck
-            spiritSum += attributes.spirit
-        }
-
-        let count = Double(members.count)
-        let averageLuck = Double(luckSum) / count
-
-        // 旧仕様準拠: (Luck + Spirit) 合計でレア倍率を底上げ
-        let rareMultiplier = 1.0 + (Double(luckSum + spiritSum) * 0.0005)
-        // 旧仕様準拠: 平均Luckに比例して称号付与率を上げる
-        let titleMultiplier = 1.0 + (averageLuck * 0.002)
-        let fortune = Int(averageLuck.rounded())
-
-        var aggregation = SkillRuntimeEffects.RewardComponents.neutral
-        for member in members {
-            let components = try SkillRuntimeEffectCompiler.rewardComponents(from: member.character.learnedSkills)
-            aggregation.merge(components)
-        }
-
-        let dropScale = aggregation.itemDropScale()
-        let titleScale = aggregation.titleScale()
-
-        return PartyDropBonuses(rareDropMultiplier: rareMultiplier * dropScale,
-                                titleGrantRateMultiplier: titleMultiplier * titleScale,
-                                averageLuck: averageLuck,
-                                fortune: fortune)
+    func makeDropBonuses() -> PartyDropBonuses {
+        PartyDropBonuses(members: members.map(\.character))
     }
 }

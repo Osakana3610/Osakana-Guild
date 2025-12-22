@@ -112,7 +112,7 @@ struct AdventureView: View {
     @ViewBuilder
     private func partySection(for party: PartySnapshot, index: Int) -> some View {
         let members = runtimeMembers(for: party)
-        let bonuses = PartySlotBonuses(members: members)
+        let bonuses = PartyDropBonuses(members: members)
         let runs = adventureState.explorationProgress
             .filter { $0.party.partyId == party.id }
 

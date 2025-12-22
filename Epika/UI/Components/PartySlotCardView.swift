@@ -25,7 +25,7 @@ import SwiftUI
 struct PartySlotCardView<Footer: View>: View {
     let party: PartySnapshot
     let members: [RuntimeCharacter]
-    let bonuses: PartySlotBonuses
+    let bonuses: PartyDropBonuses
     let isExploring: Bool
     let canStartExploration: Bool
     let onPrimaryAction: () -> Void
@@ -33,7 +33,7 @@ struct PartySlotCardView<Footer: View>: View {
     private let footerBuilder: (() -> Footer)?
     init(party: PartySnapshot,
          members: [RuntimeCharacter],
-         bonuses: PartySlotBonuses,
+         bonuses: PartyDropBonuses,
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
@@ -51,7 +51,7 @@ struct PartySlotCardView<Footer: View>: View {
 
     init(party: PartySnapshot,
          members: [RuntimeCharacter],
-         bonuses: PartySlotBonuses,
+         bonuses: PartyDropBonuses,
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
@@ -97,8 +97,8 @@ struct PartySlotCardView<Footer: View>: View {
         HStack {
             HStack(spacing: 12) {
                 Text("GP \(formatMultiplier(bonuses.goldMultiplier))倍")
-                Text("レア \(formatMultiplier(bonuses.rareMultiplier))倍")
-                Text("称号 \(formatMultiplier(bonuses.titleMultiplier))倍")
+                Text("レア \(formatMultiplier(bonuses.rareDropMultiplier))倍")
+                Text("称号 \(formatMultiplier(bonuses.titleGrantRateMultiplier))倍")
                 Text("運勢 \(bonuses.fortune)")
             }
             .font(.caption)

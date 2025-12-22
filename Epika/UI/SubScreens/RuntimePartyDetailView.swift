@@ -49,7 +49,7 @@ struct RuntimePartyDetailView: View {
                     PartySlotCardView(
                         party: currentParty,
                         members: membersOfCurrentParty,
-                        bonuses: PartySlotBonuses(members: membersOfCurrentParty),
+                        bonuses: PartyDropBonuses(members: membersOfCurrentParty),
                         isExploring: adventureState.isExploring(partyId: currentParty.id),
                         canStartExploration: canStartExploration(for: currentParty),
                         onPrimaryAction: {
