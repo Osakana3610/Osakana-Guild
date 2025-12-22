@@ -5,41 +5,30 @@
 //
 // 【責務】
 //   - 探索セッションのSwiftData永続化モデル
-//   - 探索実行・イベント履歴の保存
+//   - 探索実行・イベント履歴・戦闘ログの保存
 //
 // 【データ構造】
 //   - ExplorationRunRecord (@Model): 探索実行レコード
-//     - partyId: パーティID
-//     - dungeonId: ダンジョンID
-//     - difficulty: 難易度
-//     - targetFloor: 目標階層
-//     - startedAt: 開始日時
-//     - seed: 乱数シード
+//     - partyId, dungeonId, difficulty, targetFloor, startedAt, seed
 //     - randomState: RNG状態（中断復帰用）
-//     - superRareStateData: 超レア日次状態（JSON）
-//     - droppedItemIdsData: ドロップ済みアイテムID（JSON）
-//     - endedAt: 終了日時
-//     - result: 結果（0=running, 1=completed, 2=defeated, 3=cancelled）
-//     - finalFloor: 到達階層
-//     - totalExp, totalGold: 獲得経験値・ゴールド
+//     - superRareJstDate, superRareHasTriggered: 超レア日次状態（スカラ）
+//     - droppedItemIdsData: ドロップ済みアイテムID（バイナリ）
+//     - endedAt, result, finalFloor, totalExp, totalGold
 //     - events: イベントレコード（1対多リレーション）
 //
 //   - ExplorationEventRecord (@Model): 探索イベントレコード
-//     - floor: 階層
-//     - kind: イベント種別
-//     - enemyId, battleResult, battleLogData: 戦闘情報
-//     - scriptedEventId: スクリプトイベントID
-//     - exp, gold, dropsData: 報酬情報
-//     - occurredAt: 発生日時
-//     - run: 親レコードへの参照
+//     - floor, kind, enemyId, battleResult, scriptedEventId
+//     - exp, gold, occurredAt, run
+//     - drops: ドロップレコード（1対多リレーション）
+//     - battleLog: 戦闘ログレコード（1対1リレーション）
 //
-// 【導出プロパティ】
-//   - explorationResult → ExplorationResult: 結果enum
-//   - isFinished → Bool: 終了済みか
+//   - ExplorationDropRecord (@Model): ドロップレコード
+//   - BattleLogRecord (@Model): 戦闘ログレコード
+//   - BattleLogInitialHPRecord, BattleLogActionRecord, BattleLogParticipantRecord
 //
 // 【使用箇所】
 //   - ExplorationProgressService: 探索履歴の永続化
-//   - ProgressRuntimeService: 探索再開時の状態復元
+//   - AppServices.ExplorationResume: 探索再開時の状態復元
 //
 // ==============================================================================
 
@@ -68,6 +57,86 @@ final class ExplorationDropRecord {
     }
 }
 
+// MARK: - BattleLogRecord
+
+/// 戦闘ログレコード
+///
+/// BattleLogArchiveを正規化したSwiftDataモデル。
+/// JSONではなくリレーションで全データを保持。
+@Model
+final class BattleLogRecord {
+    var enemyId: UInt16 = 0
+    var enemyName: String = ""
+    var result: UInt8 = 0  // 0=victory, 1=defeat, 2=retreat
+    var turns: UInt8 = 0
+    var timestamp: Date = Date()
+    var outcome: UInt8 = 0  // BattleLog.outcome
+
+    var event: ExplorationEventRecord?
+
+    @Relationship(deleteRule: .cascade, inverse: \BattleLogInitialHPRecord.battleLog)
+    var initialHPs: [BattleLogInitialHPRecord] = []
+
+    @Relationship(deleteRule: .cascade, inverse: \BattleLogActionRecord.battleLog)
+    var actions: [BattleLogActionRecord] = []
+
+    @Relationship(deleteRule: .cascade, inverse: \BattleLogParticipantRecord.battleLog)
+    var participants: [BattleLogParticipantRecord] = []
+
+    init() {}
+}
+
+// MARK: - BattleLogInitialHPRecord
+
+/// 戦闘開始時HPレコード
+@Model
+final class BattleLogInitialHPRecord {
+    var actorIndex: UInt16 = 0
+    var hp: UInt32 = 0
+    var battleLog: BattleLogRecord?
+
+    init(actorIndex: UInt16, hp: UInt32) {
+        self.actorIndex = actorIndex
+        self.hp = hp
+    }
+}
+
+// MARK: - BattleLogActionRecord
+
+/// 戦闘アクションレコード
+@Model
+final class BattleLogActionRecord {
+    var sortOrder: UInt16 = 0
+    var turn: UInt8 = 0
+    var kind: UInt8 = 0
+    var actor: UInt16 = 0
+    var target: UInt16 = 0  // 0 = nil
+    var value: UInt32 = 0   // 0 = nil
+    var skillIndex: UInt16 = 0  // 0 = nil
+    var extra: UInt16 = 0   // 0 = nil
+    var battleLog: BattleLogRecord?
+
+    init() {}
+}
+
+// MARK: - BattleLogParticipantRecord
+
+/// 戦闘参加者レコード
+@Model
+final class BattleLogParticipantRecord {
+    var isPlayer: Bool = true
+    var actorId: String = ""
+    var partyMemberId: UInt8 = 0  // 0 = nil
+    var characterId: UInt8 = 0    // 0 = nil
+    var name: String = ""
+    var avatarIndex: UInt16 = 0   // 0 = nil
+    var level: UInt16 = 0         // 0 = nil
+    var maxHP: UInt32 = 0
+    var battleLog: BattleLogRecord?
+
+    init() {}
+}
+
 // MARK: - ExplorationEventRecord
 
 /// 探索イベントレコード
@@ -80,7 +149,6 @@ final class ExplorationEventRecord {
     var kind: UInt8 = 0  // EventKind.rawValue
     var enemyId: UInt16?
     var battleResult: UInt8?
-    var battleLogData: Data?
     var scriptedEventId: UInt8?
     var exp: UInt32 = 0
     var gold: UInt32 = 0
@@ -93,11 +161,14 @@ final class ExplorationEventRecord {
     @Relationship(deleteRule: .cascade, inverse: \ExplorationDropRecord.event)
     var drops: [ExplorationDropRecord] = []
 
+    /// 戦闘ログ（正規化されたリレーション）
+    @Relationship(deleteRule: .cascade, inverse: \BattleLogRecord.event)
+    var battleLog: BattleLogRecord?
+
     init(floor: UInt8,
          kind: UInt8,
          enemyId: UInt16?,
          battleResult: UInt8?,
-         battleLogData: Data?,
          scriptedEventId: UInt8?,
          exp: UInt32,
          gold: UInt32,
@@ -106,7 +177,6 @@ final class ExplorationEventRecord {
         self.kind = kind
         self.enemyId = enemyId
         self.battleResult = battleResult
-        self.battleLogData = battleLogData
         self.scriptedEventId = scriptedEventId
         self.exp = exp
         self.gold = gold
@@ -140,10 +210,13 @@ final class ExplorationRunRecord {
     /// 最新イベント処理後のRNG状態（0 = まだ保存なし）
     var randomState: UInt64 = 0
 
-    /// 超レア抽選の日次状態（SuperRareDailyStateをJSONエンコード）
-    var superRareStateData: Data = Data()
+    /// 超レア抽選の日次状態：JST日付（YYYYMMDD形式）
+    var superRareJstDate: UInt32 = 0
 
-    /// ドロップ済みアイテムID（Set<UInt16>をJSONエンコード）
+    /// 超レア抽選の日次状態：発動済みフラグ
+    var superRareHasTriggered: Bool = false
+
+    /// ドロップ済みアイテムID（バイナリフォーマット：2バイト件数 + 各2バイトID）
     var droppedItemIdsData: Data = Data()
 
     /// 探索終了日時

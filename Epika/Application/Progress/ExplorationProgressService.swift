@@ -14,10 +14,11 @@
 //   - finalizeRun(...) - 探索終了処理
 //   - cancelRun(...) - 探索キャンセル
 //   - fetchRunningRecord(...) → ExplorationRunRecord? - 実行中レコード取得
+//   - encodeItemIds/decodeItemIds - バイナリフォーマットヘルパー
 //
 // 【データ管理】
 //   - 最大200件を保持（超過時は古いものから削除）
-//   - JSONEncoder/Decoder再利用でパフォーマンス最適化
+//   - スカラフィールドとリレーションで永続化（JSONは使用しない）
 //
 // 【使用箇所】
 //   - AppServices.ExplorationRun: 探索開始時のレコード作成
@@ -37,13 +38,38 @@ final class ExplorationProgressService {
     /// 探索レコードの最大保持件数
     private static let maxRecordCount = 200
 
-    /// JSONEncoder/Decoder再利用（パフォーマンス最適化）
-    private static let jsonEncoder = JSONEncoder()
-    private static let jsonDecoder = JSONDecoder()
-
     init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
         self.masterDataCache = masterDataCache
+    }
+
+    // MARK: - Binary Format Helpers
+
+    /// Set<UInt16>をバイナリフォーマットにエンコード
+    /// フォーマット: 2バイト件数 + 各2バイトID（昇順ソート済み）
+    static func encodeItemIds(_ ids: Set<UInt16>) -> Data {
+        let sorted = ids.sorted()
+        var data = Data(capacity: 2 + sorted.count * 2)
+        var count = UInt16(sorted.count)
+        withUnsafeBytes(of: &count) { data.append(contentsOf: $0) }
+        for var id in sorted {
+            withUnsafeBytes(of: &id) { data.append(contentsOf: $0) }
+        }
+        return data
+    }
+
+    /// バイナリフォーマットからSet<UInt16>をデコード
+    static func decodeItemIds(_ data: Data) -> Set<UInt16> {
+        guard data.count >= 2 else { return [] }
+        let count = data.withUnsafeBytes { $0.load(as: UInt16.self) }
+        guard data.count >= 2 + Int(count) * 2 else { return [] }
+        var result = Set<UInt16>()
+        for i in 0..<Int(count) {
+            let offset = 2 + i * 2
+            let id = data.withUnsafeBytes { $0.load(fromByteOffset: offset, as: UInt16.self) }
+            result.insert(id)
+        }
+        return result
     }
 
     private enum ExplorationSnapshotBuildError: Error {
@@ -114,8 +140,9 @@ final class ExplorationProgressService {
 
         // RNG状態と探索状態を保存
         runRecord.randomState = randomState
-        runRecord.superRareStateData = try Self.jsonEncoder.encode(superRareState)
-        runRecord.droppedItemIdsData = try Self.jsonEncoder.encode(Array(droppedItemIds).sorted())
+        runRecord.superRareJstDate = superRareState.jstDate
+        runRecord.superRareHasTriggered = superRareState.hasTriggered
+        runRecord.droppedItemIdsData = Self.encodeItemIds(droppedItemIds)
 
         try saveIfNeeded(context)
     }
@@ -223,7 +250,6 @@ private extension ExplorationProgressService {
         let kind: UInt8
         var enemyId: UInt16?
         var battleResult: UInt8?
-        var battleLogData: Data?
         var scriptedEventId: UInt8?
 
         switch event.kind {
@@ -235,9 +261,6 @@ private extension ExplorationProgressService {
             enemyId = summary.enemy.id
             if let log = battleLog {
                 battleResult = battleResultValue(log.result)
-                // 現時点ではBattleLogArchiveを丸ごと保存。
-                // 後続タスクでCompactLogEntry形式に変換予定（ストレージ50%削減見込み）
-                battleLogData = try Self.jsonEncoder.encode(log)
             }
 
         case .scripted(let summary):
@@ -250,7 +273,6 @@ private extension ExplorationProgressService {
             kind: kind,
             enemyId: enemyId,
             battleResult: battleResult,
-            battleLogData: battleLogData,
             scriptedEventId: scriptedEventId,
             exp: UInt32(event.experienceGained),
             gold: UInt32(event.goldGained),
@@ -266,6 +288,69 @@ private extension ExplorationProgressService {
                 quantity: UInt16(drop.quantity)
             )
             eventRecord.drops.append(dropRecord)
+        }
+
+        // 戦闘ログレコードを作成してリレーションに追加
+        if let archive = battleLog {
+            let logRecord = BattleLogRecord()
+            logRecord.enemyId = archive.enemyId
+            logRecord.enemyName = archive.enemyName
+            logRecord.result = battleResultValue(archive.result)
+            logRecord.turns = UInt8(archive.turns)
+            logRecord.timestamp = archive.timestamp
+            logRecord.outcome = archive.battleLog.outcome
+
+            // initialHP
+            for (actorIndex, hp) in archive.battleLog.initialHP {
+                let hpRecord = BattleLogInitialHPRecord(actorIndex: actorIndex, hp: hp)
+                hpRecord.battleLog = logRecord
+                logRecord.initialHPs.append(hpRecord)
+            }
+
+            // actions
+            for (index, action) in archive.battleLog.actions.enumerated() {
+                let actionRecord = BattleLogActionRecord()
+                actionRecord.sortOrder = UInt16(index)
+                actionRecord.turn = action.turn
+                actionRecord.kind = action.kind
+                actionRecord.actor = action.actor
+                actionRecord.target = action.target ?? 0
+                actionRecord.value = action.value ?? 0
+                actionRecord.skillIndex = action.skillIndex ?? 0
+                actionRecord.extra = action.extra ?? 0
+                actionRecord.battleLog = logRecord
+                logRecord.actions.append(actionRecord)
+            }
+
+            // participants
+            for snapshot in archive.playerSnapshots {
+                let pRecord = BattleLogParticipantRecord()
+                pRecord.isPlayer = true
+                pRecord.actorId = snapshot.actorId
+                pRecord.partyMemberId = snapshot.partyMemberId ?? 0
+                pRecord.characterId = snapshot.characterId ?? 0
+                pRecord.name = snapshot.name
+                pRecord.avatarIndex = snapshot.avatarIndex ?? 0
+                pRecord.level = UInt16(snapshot.level ?? 0)
+                pRecord.maxHP = UInt32(snapshot.maxHP)
+                pRecord.battleLog = logRecord
+                logRecord.participants.append(pRecord)
+            }
+            for snapshot in archive.enemySnapshots {
+                let pRecord = BattleLogParticipantRecord()
+                pRecord.isPlayer = false
+                pRecord.actorId = snapshot.actorId
+                pRecord.partyMemberId = snapshot.partyMemberId ?? 0
+                pRecord.characterId = snapshot.characterId ?? 0
+                pRecord.name = snapshot.name
+                pRecord.avatarIndex = snapshot.avatarIndex ?? 0
+                pRecord.level = UInt16(snapshot.level ?? 0)
+                pRecord.maxHP = UInt32(snapshot.maxHP)
+                pRecord.battleLog = logRecord
+                logRecord.participants.append(pRecord)
+            }
+
+            eventRecord.battleLog = logRecord
         }
 
         return eventRecord
@@ -384,18 +469,14 @@ private extension ExplorationProgressService {
                 referenceId = String(enemyId)
                 if let enemy = masterDataCache.enemy(enemyId) {
                     let result = battleResultString(eventRecord.battleResult ?? 0)
-                    // battleLogDataからターン数を取得
-                    var turns = 0
-                    if let logData = eventRecord.battleLogData {
-                        let archive = try Self.jsonDecoder.decode(BattleLogArchive.self, from: logData)
-                        turns = archive.turns
-                    }
+                    // battleLogリレーションからターン数を取得
+                    let turns = Int(eventRecord.battleLog?.turns ?? 0)
                     combatSummary = ExplorationSnapshot.EncounterLog.CombatSummary(
                         enemyId: enemyId,
                         enemyName: enemy.name,
                         result: result,
                         turns: turns,
-                        battleLogData: eventRecord.battleLogData
+                        battleLogId: eventRecord.battleLog?.persistentModelID
                     )
                 }
             }
