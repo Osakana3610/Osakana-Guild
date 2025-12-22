@@ -57,11 +57,11 @@ enum EquipmentProgressService {
         currentEquippedCount: Int,
         equipmentCapacity: Int
     ) -> EquipmentValidationResult {
-        // 装備数上限チェック
+        // 装備数上限チェック（メッセージは表示しない - UIで装備数/上限が見えるため）
         if currentEquippedCount >= equipmentCapacity {
             return EquipmentValidationResult(
                 canEquip: false,
-                reason: "装備数が上限(\(equipmentCapacity)個)に達しています"
+                reason: nil
             )
         }
 
