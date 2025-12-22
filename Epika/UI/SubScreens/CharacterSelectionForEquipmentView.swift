@@ -158,6 +158,24 @@ struct EquipmentEditorView: View {
         return "\(count)/\(currentCharacter.equipmentCapacity)"
     }
 
+    private var raceSkillUnlocks: [(level: Int, skill: SkillDefinition)] {
+        let masterData = appServices.masterDataCache
+        let unlocks = masterData.raceSkillUnlocks[currentCharacter.raceId] ?? []
+        return unlocks.compactMap { unlock in
+            guard let skill = masterData.skill(unlock.skillId) else { return nil }
+            return (level: unlock.level, skill: skill)
+        }
+    }
+
+    private var jobSkillUnlocks: [(level: Int, skill: SkillDefinition)] {
+        let masterData = appServices.masterDataCache
+        let unlocks = masterData.jobSkillUnlocks[currentCharacter.jobId] ?? []
+        return unlocks.compactMap { unlock in
+            guard let skill = masterData.skill(unlock.skillId) else { return nil }
+            return (level: unlock.level, skill: skill)
+        }
+    }
+
     init(character: RuntimeCharacter) {
         self.character = character
         _currentCharacter = State(initialValue: character)
@@ -175,22 +193,46 @@ struct EquipmentEditorView: View {
                 }
             } else {
                 List {
-                    // キャラクターヘッダー
                     Section {
                         CharacterHeaderSection(character: currentCharacter)
                     }
 
-                    // 基本能力値
+                    Section("プロフィール") {
+                        CharacterIdentitySection(character: currentCharacter)
+                    }
+
+                    Section("レベル / 経験値") {
+                        CharacterLevelSection(character: currentCharacter)
+                    }
+
                     Section("基本能力値") {
                         CharacterBaseStatsSection(character: currentCharacter)
                     }
 
-                    // 戦闘ステータス
                     Section("戦闘ステータス") {
                         CharacterCombatStatsSection(character: currentCharacter)
                     }
 
-                    // 装備中アイテム
+                    Section("種族スキル") {
+                        CharacterRaceSkillsSection(skillUnlocks: raceSkillUnlocks, characterLevel: currentCharacter.level)
+                    }
+
+                    Section("職業スキル") {
+                        CharacterJobSkillsSection(skillUnlocks: jobSkillUnlocks, characterLevel: currentCharacter.level)
+                    }
+
+                    Section("習得スキル") {
+                        CharacterSkillsSection(character: currentCharacter)
+                    }
+
+                    Section("魔法使い魔法") {
+                        CharacterMageSpellsSection(character: currentCharacter)
+                    }
+
+                    Section("僧侶魔法") {
+                        CharacterPriestSpellsSection(character: currentCharacter)
+                    }
+
                     Section("装備中 (\(equippedItemsSummary))") {
                         CharacterEquippedItemsSection(
                             equippedItems: currentCharacter.equippedItems,
@@ -205,9 +247,13 @@ struct EquipmentEditorView: View {
                         )
                     }
 
-                    // 装備候補セクション（売却画面と同じSection構造）
                     ForEach(orderedSubcategories, id: \.self) { subcategory in
                         buildSubcategorySection(for: subcategory)
+                    }
+
+                    Section("行動優先度") {
+                        CharacterActionPreferencesSection(character: currentCharacter,
+                                                          onActionPreferencesChange: nil)
                     }
 
                     if let error = equipError {
