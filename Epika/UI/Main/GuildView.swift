@@ -268,16 +268,16 @@ private struct GuildCharacterRow: View {
             CharacterImageView(avatarIndex: summary.resolvedAvatarId, size: 50)
             VStack(alignment: .leading, spacing: 2) {
                 Text(summary.name)
-                    .font(.subheadline)
+                    .font(.body)
                     .foregroundStyle(summary.isAlive ? .primary : .secondary)
                 HStack(spacing: 4) {
                     Text(summary.raceName)
                     Text("Lv.\(summary.level)")
                 }
-                .font(.caption2)
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
                 Text(summary.jobName)
-                    .font(.caption2)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             Spacer()
