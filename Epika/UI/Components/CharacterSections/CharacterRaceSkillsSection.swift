@@ -23,6 +23,7 @@ import SwiftUI
 struct CharacterRaceSkillsSection: View {
     let skillUnlocks: [(level: Int, skill: SkillDefinition)]
     let characterLevel: Int
+    @State private var selectedSkill: SkillDefinition?
 
     var body: some View {
         Group {
@@ -36,9 +37,19 @@ struct CharacterRaceSkillsSection: View {
                         let isUnlocked = characterLevel >= unlock.level
                         Text("Lv.\(unlock.level): \(unlock.skill.name)")
                             .foregroundColor(isUnlocked ? .primary : .secondary)
+                            .onTapGesture {
+                                selectedSkill = unlock.skill
+                            }
                     }
                 }
             }
+        }
+        .alert(item: $selectedSkill) { skill in
+            Alert(
+                title: Text(skill.name),
+                message: Text(skill.description),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 }

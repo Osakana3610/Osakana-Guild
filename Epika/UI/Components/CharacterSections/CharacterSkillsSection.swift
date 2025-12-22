@@ -23,6 +23,7 @@ import SwiftUI
 @MainActor
 struct CharacterSkillsSection: View {
     let character: RuntimeCharacter
+    @State private var selectedSkill: SkillDefinition?
 
     var body: some View {
         let skills = character.learnedSkills.sorted { $0.id < $1.id }
@@ -35,9 +36,19 @@ struct CharacterSkillsSection: View {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(skills, id: \.id) { skill in
                         Text("• \(skill.name)")
+                            .onTapGesture {
+                                selectedSkill = skill
+                            }
                     }
                 }
             }
+        }
+        .alert(item: $selectedSkill) { skill in
+            Alert(
+                title: Text(skill.name),
+                message: Text(skill.description),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 }
