@@ -91,7 +91,7 @@ struct ActorEffectsAccumulator {
             shieldBlockBonusPercent: combat.shieldBlockBonusPercent,
             barrierCharges: combat.barrierCharges,
             guardBarrierCharges: combat.guardBarrierCharges,
-            specialAttacks: combat.specialAttacks,
+            specialAttacks: .init(from: combat.specialAttacks),
             enemyActionDebuffs: combat.enemyActionDebuffs,
             cumulativeHitBonus: combat.cumulativeHitBonus,
             enemySingleActionSkipChancePercent: combat.enemySingleActionSkipChancePercent,

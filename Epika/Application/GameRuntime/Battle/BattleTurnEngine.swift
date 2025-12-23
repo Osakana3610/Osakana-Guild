@@ -8,7 +8,7 @@
 //   - 勝敗判定・ターン終了処理
 //
 // 【データ構造】
-//   - BattleTurnEngine (@MainActor): ターンエンジン本体
+//   - BattleTurnEngine (nonisolated): ターンエンジン本体
 //   - Result: 戦闘結果（outcome, battleLog, players, enemies）
 //
 // 【公開API】
@@ -43,7 +43,7 @@ import Foundation
 
 /// 戦闘ターン処理エンジン
 /// 戦闘ごとにBattleContextを生成し、並行実行時のデータ競合を防ぐ
-@MainActor
+/// nonisolated - 計算処理のためMainActorに縛られない
 struct BattleTurnEngine {
     struct Result {
         let outcome: UInt8
@@ -177,13 +177,8 @@ struct BattleTurnEngine {
 
     /// 味方のスキルによる敵行動回数減少
     private static func applyEnemyActionDebuffs(_ context: inout BattleContext) {
-        // 味方のenemyActionDebuffsを収集
-        var debuffs: [(chancePercent: Double, reduction: Int)] = []
-        for player in context.players where player.isAlive {
-            for debuff in player.skillEffects.combat.enemyActionDebuffs {
-                debuffs.append((debuff.baseChancePercent, debuff.reduction))
-            }
-        }
+        // 戦闘開始時にキャッシュ済みの敵行動減少スキル一覧を使用
+        let debuffs = context.cached.enemyActionDebuffs
         guard !debuffs.isEmpty else { return }
 
         // 各敵に対して発動判定

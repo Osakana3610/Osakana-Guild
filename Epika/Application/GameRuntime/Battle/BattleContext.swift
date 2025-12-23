@@ -44,6 +44,23 @@ struct BattleContext {
     let skillDefinitions: [UInt16: SkillDefinition]
     let enemySkillDefinitions: [UInt16: EnemySkillDefinition]
 
+    /// 戦闘開始時に計算してキャッシュするフラグ・インデックス
+    struct CachedFlags: Sendable {
+        /// 味方に敵行動順シャッフルスキル保有者がいるか
+        let hasShuffleEnemyOrderSkill: Bool
+        /// 供儀スキルを持つ味方のインデックスリスト
+        let playerSacrificeIndices: [Int]
+        /// 供儀スキルを持つ敵のインデックスリスト
+        let enemySacrificeIndices: [Int]
+        /// 味方の敵行動減少スキルの一覧
+        let enemyActionDebuffs: [(chancePercent: Double, reduction: Int)]
+        /// 救助スキルを持つ味方のインデックスリスト（陣形順ソート済み）
+        let playerRescueCandidateIndices: [Int]
+        /// 救助スキルを持つ敵のインデックスリスト（陣形順ソート済み）
+        let enemyRescueCandidateIndices: [Int]
+    }
+    let cached: CachedFlags
+
     // MARK: - 戦闘状態（可変）
     var players: [BattleActor]
     var enemies: [BattleActor]
@@ -75,6 +92,63 @@ struct BattleContext {
         self.initialHP = [:]
         self.turn = 0
         self.enemySkillUsage = [:]
+        // 戦闘開始時キャッシュを計算
+        self.cached = Self.buildCachedFlags(players: players, enemies: enemies)
+    }
+
+    /// 戦闘開始時キャッシュを構築
+    private static func buildCachedFlags(players: [BattleActor], enemies: [BattleActor]) -> CachedFlags {
+        // 敵行動順シャッフルスキル保有者チェック
+        let hasShuffleEnemyOrderSkill = players.contains { $0.skillEffects.combat.actionOrderShuffleEnemy }
+
+        // 供儀スキル保有者のインデックス
+        let playerSacrificeIndices = players.enumerated()
+            .filter { $0.element.skillEffects.resurrection.sacrificeInterval != nil }
+            .map { $0.offset }
+        let enemySacrificeIndices = enemies.enumerated()
+            .filter { $0.element.skillEffects.resurrection.sacrificeInterval != nil }
+            .map { $0.offset }
+
+        // 敵行動減少スキル一覧
+        var enemyActionDebuffs: [(chancePercent: Double, reduction: Int)] = []
+        for player in players {
+            for debuff in player.skillEffects.combat.enemyActionDebuffs {
+                enemyActionDebuffs.append((debuff.baseChancePercent, debuff.reduction))
+            }
+        }
+
+        // 救助スキル保有者（陣形順ソート）
+        let playerRescueCandidateIndices = players.enumerated()
+            .filter { !$0.element.skillEffects.resurrection.rescueCapabilities.isEmpty }
+            .sorted { lhs, rhs in
+                let leftSlot = lhs.element.formationSlot
+                let rightSlot = rhs.element.formationSlot
+                if leftSlot == rightSlot {
+                    return lhs.offset < rhs.offset
+                }
+                return leftSlot < rightSlot
+            }
+            .map { $0.offset }
+        let enemyRescueCandidateIndices = enemies.enumerated()
+            .filter { !$0.element.skillEffects.resurrection.rescueCapabilities.isEmpty }
+            .sorted { lhs, rhs in
+                let leftSlot = lhs.element.formationSlot
+                let rightSlot = rhs.element.formationSlot
+                if leftSlot == rightSlot {
+                    return lhs.offset < rhs.offset
+                }
+                return leftSlot < rightSlot
+            }
+            .map { $0.offset }
+
+        return CachedFlags(
+            hasShuffleEnemyOrderSkill: hasShuffleEnemyOrderSkill,
+            playerSacrificeIndices: playerSacrificeIndices,
+            enemySacrificeIndices: enemySacrificeIndices,
+            enemyActionDebuffs: enemyActionDebuffs,
+            playerRescueCandidateIndices: playerRescueCandidateIndices,
+            enemyRescueCandidateIndices: enemyRescueCandidateIndices
+        )
     }
 
     // MARK: - 初期HP記録

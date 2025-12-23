@@ -37,8 +37,8 @@ import Foundation
 extension BattleTurnEngine {
     /// 行動順序を決定
     static func actionOrder(_ context: inout BattleContext) -> [ActorReference] {
-        // 味方にactionOrderShuffleEnemyを持つキャラがいるか確認
-        let shuffleEnemyOrder = context.players.contains { $0.isAlive && $0.skillEffects.combat.actionOrderShuffleEnemy }
+        // 戦闘開始時にキャッシュ済み
+        let shuffleEnemyOrder = context.cached.hasShuffleEnemyOrderSkill
 
         // (ref, speed, tiebreaker, firstStrike)
         var entries: [(ActorReference, Int, Double, Bool)] = []
@@ -411,24 +411,24 @@ extension BattleTurnEngine {
                       let interval = actor.skillEffects.resurrection.sacrificeInterval,
                       interval > 0,
                       turn % interval == 0 else { continue }
-                let candidates = group.enumerated()
-                    .filter { $0.element.isAlive }
-                    .filter { $0.offset != index }
-                    .filter { ($0.element.level ?? 0) < (actor.level ?? 0) }
+                // 候補を1ループで収集
+                var candidates: [Int] = []
+                for (offset, element) in group.enumerated() {
+                    guard element.isAlive,
+                          offset != index,
+                          (element.level ?? 0) < (actor.level ?? 0) else { continue }
+                    candidates.append(offset)
+                }
                 guard !candidates.isEmpty else { continue }
-                let upper = candidates.count - 1
-                guard upper >= 0 else { return nil }
-                let choice = candidates[random.nextInt(in: 0...upper)].offset
+                let choice = candidates[random.nextInt(in: 0...(candidates.count - 1))]
                 return choice
             }
             return nil
         }
 
-        let playerSacrificeIndices = context.players.enumerated().filter { $0.element.skillEffects.resurrection.sacrificeInterval != nil }.map { $0.offset }
-        let enemySacrificeIndices = context.enemies.enumerated().filter { $0.element.skillEffects.resurrection.sacrificeInterval != nil }.map { $0.offset }
-
+        // 戦闘開始時にキャッシュ済みのインデックスを使用
         let playerTarget = pickTarget(from: context.players,
-                                      sacrifices: playerSacrificeIndices,
+                                      sacrifices: context.cached.playerSacrificeIndices,
                                       random: &context.random,
                                       turn: context.turn)
         if let target = playerTarget {
@@ -437,7 +437,7 @@ extension BattleTurnEngine {
         }
 
         let enemyTarget = pickTarget(from: context.enemies,
-                                     sacrifices: enemySacrificeIndices,
+                                     sacrifices: context.cached.enemySacrificeIndices,
                                      random: &context.random,
                                      turn: context.turn)
         if let target = enemyTarget {
