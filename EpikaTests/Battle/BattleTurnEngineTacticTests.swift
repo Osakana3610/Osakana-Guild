@@ -382,6 +382,146 @@ final class BattleTurnEngineTacticTests: XCTestCase {
             }
         }
     }
+
+    /// FB0013: 敵の行動回数が正しいことを確認
+    /// 2体の敵（スキルなし）と5体の味方で戦闘し、各敵が1ターンに1回だけ行動することを検証
+    func testEnemyActionCountPerTurn() {
+        // 5体の味方
+        let players = (0..<5).map { i in
+            BattleTestFactory.actor(
+                id: "player_\(i)",
+                name: "味方\(i)",
+                kind: .player,
+                combat: BattleTestFactory.combat(maxHP: 200, physicalAttack: 10, hitRate: 80)
+            )
+        }
+
+        // 2体の敵（スキルなし = nextTurnExtraActions = 0）
+        let enemies = (0..<2).map { i in
+            BattleTestFactory.actor(
+                id: "enemy_\(i)",
+                name: "敵\(i)",
+                kind: .enemy,
+                combat: BattleTestFactory.combat(maxHP: 500, physicalAttack: 5, hitRate: 50)
+            )
+        }
+
+        // 複数のシードでテスト
+        for seed in 1...20 {
+            var testPlayers = players
+            var testEnemies = enemies
+            // HPをリセット
+            for i in testPlayers.indices { testPlayers[i].currentHP = testPlayers[i].snapshot.maxHP }
+            for i in testEnemies.indices { testEnemies[i].currentHP = testEnemies[i].snapshot.maxHP }
+
+            var random = GameRandomSource(seed: UInt64(seed))
+            let result = BattleTurnEngine.runBattle(
+                players: &testPlayers,
+                enemies: &testEnemies,
+                statusEffects: [:],
+                skillDefinitions: [:],
+                random: &random
+            )
+
+            // 各ターンごとの敵の行動回数をカウント
+            var enemyActionsPerTurn: [Int: [UInt16: Int]] = [:]  // [turn: [actorId: count]]
+
+            for action in result.battleLog.actions {
+                let turn = Int(action.turn)
+                let actor = action.actor
+
+                // 敵のアクターIDは1000以上
+                guard actor >= 1000 else { continue }
+
+                // 攻撃アクション（physicalAttack）のみカウント
+                guard action.kind == ActionKind.physicalAttack.rawValue else { continue }
+
+                if enemyActionsPerTurn[turn] == nil {
+                    enemyActionsPerTurn[turn] = [:]
+                }
+                enemyActionsPerTurn[turn]![actor, default: 0] += 1
+            }
+
+            // 検証: 各ターン、各敵は1回だけ行動するべき
+            for (turn, actorCounts) in enemyActionsPerTurn {
+                for (actorId, count) in actorCounts {
+                    if count > 1 {
+                        XCTFail("seed=\(seed), turn=\(turn): 敵(actorId=\(actorId))が\(count)回行動（期待値: 1回）")
+                    }
+                }
+            }
+        }
+    }
+
+    /// FB0013-2: 全行動を数えて敵が味方の数だけ行動していないか検証
+    func testTotalEnemyActionsNotEqualToPlayerCount() {
+        // 様々な味方の数でテスト
+        for playerCount in [3, 4, 5, 6] {
+            let players = (0..<playerCount).map { i in
+                BattleTestFactory.actor(
+                    id: "player_\(i)",
+                    name: "味方\(i)",
+                    kind: .player,
+                    combat: BattleTestFactory.combat(maxHP: 300, physicalAttack: 5, hitRate: 80)
+                )
+            }
+
+            let enemyCount = 2
+            let enemies = (0..<enemyCount).map { i in
+                BattleTestFactory.actor(
+                    id: "enemy_\(i)",
+                    name: "敵\(i)",
+                    kind: .enemy,
+                    combat: BattleTestFactory.combat(maxHP: 800, physicalAttack: 5, hitRate: 50)
+                )
+            }
+
+            for seed in 1...10 {
+                var testPlayers = players
+                var testEnemies = enemies
+                for i in testPlayers.indices { testPlayers[i].currentHP = testPlayers[i].snapshot.maxHP }
+                for i in testEnemies.indices { testEnemies[i].currentHP = testEnemies[i].snapshot.maxHP }
+
+                var random = GameRandomSource(seed: UInt64(seed))
+                let result = BattleTurnEngine.runBattle(
+                    players: &testPlayers,
+                    enemies: &testEnemies,
+                    statusEffects: [:],
+                    skillDefinitions: [:],
+                    random: &random
+                )
+
+                // 各ターンの敵の合計行動回数をカウント
+                var enemyActionsPerTurn: [Int: Int] = [:]  // [turn: totalEnemyActions]
+                var aliveEnemiesPerTurn: [Int: Int] = [:]  // [turn: aliveEnemyCount]
+
+                for action in result.battleLog.actions {
+                    let turn = Int(action.turn)
+                    guard action.actor >= 1000 else { continue }
+                    guard action.kind == ActionKind.physicalAttack.rawValue else { continue }
+                    enemyActionsPerTurn[turn, default: 0] += 1
+                }
+
+                // 敵の生存数を追跡（簡易版: 最初のターンは全員生存と仮定）
+                for turn in enemyActionsPerTurn.keys {
+                    aliveEnemiesPerTurn[turn] = enemyCount  // 簡易版
+                }
+
+                // 検証: 各ターンの敵の合計行動回数 <= 生存している敵の数
+                for (turn, totalActions) in enemyActionsPerTurn {
+                    let aliveEnemies = aliveEnemiesPerTurn[turn] ?? enemyCount
+                    if totalActions > aliveEnemies {
+                        // 敵の行動回数が味方の数と一致していないか確認
+                        if totalActions == playerCount {
+                            XCTFail("playerCount=\(playerCount), seed=\(seed), turn=\(turn): 敵の合計行動回数(\(totalActions))が味方の数と一致！ (敵数=\(aliveEnemies))")
+                        } else {
+                            XCTFail("playerCount=\(playerCount), seed=\(seed), turn=\(turn): 敵の合計行動回数(\(totalActions))が敵の数(\(aliveEnemies))を超過")
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @MainActor

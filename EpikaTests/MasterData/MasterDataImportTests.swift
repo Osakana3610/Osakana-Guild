@@ -518,7 +518,7 @@ final class MasterDataImportTests: XCTestCase {
 
         let encounterTables = cache.allEncounterTables
 
-        var invalidReferences: [(tableId: String, eventIndex: Int, enemyId: UInt16)] = []
+        var invalidReferences: [(tableId: UInt16, eventIndex: Int, enemyId: UInt16)] = []
 
         for table in encounterTables {
             for (index, event) in table.events.enumerated() {
