@@ -67,7 +67,9 @@ extension BattleTurnEngine {
                 let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.combat.actionOrderMultiplier)
                 speed = Int(scaled.rounded(.towardZero))
             }
-            let slots = max(1, 1 + actor.skillEffects.combat.nextTurnExtraActions + actor.extraActionsNextTurn)
+            let nextExtra = actor.skillEffects.combat.nextTurnExtraActions
+            let extraNext = actor.extraActionsNextTurn
+            let slots = max(1, 1 + nextExtra + extraNext)
             // 敵は先制を持たない（味方専用スキル）
             for _ in 0..<slots {
                 entries.append((.enemy(idx), speed, context.random.nextDouble(in: 0.0...1.0), false))
