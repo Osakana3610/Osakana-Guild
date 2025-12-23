@@ -154,6 +154,18 @@ final class AdventureViewState {
         }
     }
 
+    /// 指定パーティの探索進捗だけを更新（全取得を避けるため）
+    private func updateExplorationProgress(forPartyId partyId: UInt8, using appServices: AppServices) async {
+        do {
+            let recentRuns = try await appServices.exploration.recentExplorations(forPartyId: partyId, limit: 2)
+            // 該当パーティの古いエントリを削除して新しいのに差し替え
+            explorationProgress.removeAll { $0.party.partyId == partyId }
+            explorationProgress.append(contentsOf: recentRuns)
+        } catch {
+            present(error: error)
+        }
+    }
+
     func loadPlayer(using appServices: AppServices) async {
         do {
             playerProgress = try await appServices.gameState.loadCurrentPlayer()
@@ -202,8 +214,8 @@ final class AdventureViewState {
             guard let self else { return }
             await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
         }
-
-        await loadExplorationProgress(using: appServices)
+        // 該当パーティの最新2件だけ取得（進行中ログの表示用）
+        await updateExplorationProgress(forPartyId: partyId, using: appServices)
     }
 
     func cancelExploration(for party: PartySnapshot, using appServices: AppServices) async {
@@ -213,7 +225,7 @@ final class AdventureViewState {
             await handle.cancel()
             activeExplorationHandles[partyId] = nil
             activeExplorationTasks[partyId] = nil
-            await loadExplorationProgress(using: appServices)
+            await updateExplorationProgress(forPartyId: partyId, using: appServices)
             return
         }
 
@@ -227,9 +239,10 @@ final class AdventureViewState {
 
     private func runExplorationStream(handle: AppServices.ExplorationRunHandle, partyId: UInt8, using appServices: AppServices) async {
         do {
-            for try await update in handle.updates {
+            for try await _ in handle.updates {
                 try Task.checkCancellation()
-                await processExplorationUpdate(update, using: appServices)
+                // 該当パーティの最新2件だけ取得してログ表示を更新
+                await updateExplorationProgress(forPartyId: partyId, using: appServices)
             }
         } catch {
             await handle.cancel()
@@ -240,21 +253,13 @@ final class AdventureViewState {
 
         // タスク参照をクリアしてからUIを更新（isExploringが正しくfalseを返すように）
         clearExplorationTask(partyId: partyId)
-        await loadExplorationProgress(using: appServices)
+        // 帰還時も該当パーティの最新2件だけ取得
+        await updateExplorationProgress(forPartyId: partyId, using: appServices)
     }
 
     private func clearExplorationTask(partyId: UInt8) {
         activeExplorationTasks[partyId] = nil
         activeExplorationHandles[partyId] = nil
-    }
-
-    private func processExplorationUpdate(_ update: AppServices.ExplorationRunUpdate, using appServices: AppServices) async {
-        switch update.stage {
-        case .step:
-            await loadExplorationProgress(using: appServices)
-        case .completed:
-            await loadExplorationProgress(using: appServices)
-        }
     }
 
     private func cancelPersistedExploration(for party: PartySnapshot, using appServices: AppServices) async {
@@ -263,7 +268,7 @@ final class AdventureViewState {
         }
         do {
             try await appServices.cancelPersistedExplorationRun(partyId: running.party.partyId, startedAt: running.startedAt)
-            await loadExplorationProgress(using: appServices)
+            await updateExplorationProgress(forPartyId: party.id, using: appServices)
         } catch {
             present(error: error)
         }

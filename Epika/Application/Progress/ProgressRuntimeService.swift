@@ -32,8 +32,7 @@
 
 import Foundation
 
-@MainActor
-final class ProgressRuntimeService {
+actor ProgressRuntimeService {
     let runtimeService: GameRuntimeService
     private let gameStateService: GameStateService
 
