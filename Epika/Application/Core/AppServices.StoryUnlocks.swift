@@ -6,19 +6,15 @@
 // 【責務】
 //   - ストーリー・ダンジョンの解放状態管理
 //   - 難易度解放処理
-//   - 解放条件の評価と同期
 //
 // 【公開API】
 //   - markStoryNodeAsRead(_:) → StorySnapshot
 //     ストーリーを既読にし、関連モジュール（ダンジョン等）を解放
-//   - synchronizeStoryAndDungeonUnlocks()
-//     ダンジョンクリア→ストーリー解放、難易度解放を同期
 //   - unlockNextDifficultyIfEligible(for:clearedDifficulty:) → Bool
 //     次の難易度を解放（無称号→魔性の→宿った→伝説の）
 //
 // 【解放フロー】
-//   - Push型: ストーリー既読 → unlockModulesでダンジョン解放
-//   - Pull型: ダンジョンクリア → unlockRequirementsを満たすストーリー解放
+//   - ストーリー既読 → unlockModulesでダンジョン解放
 //
 // 【補助型】
 //   - UnlockTarget: 解放対象（現在はdungeonのみ）
@@ -103,73 +99,6 @@ extension AppServices {
         let allNodes = try fetchAllStoryRecords(context: context)
         return makeStorySnapshot(from: allNodes, updatedAt: now)
     }
-
-    /// ダンジョンとストーリーの解放状態を同期する（ダンジョンクリア→ストーリー解放）
-    func synchronizeStoryAndDungeonUnlocks() async throws {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-
-        let storyDefinitions = masterDataCache.allStoryNodes
-
-        // クリア済みダンジョンIDを取得
-        let clearedDungeonIds = try fetchClearedDungeonIds(context: context)
-        // 既読ストーリーIDを取得
-        let readStoryIds = try fetchReadStoryIds(context: context)
-
-        var didChange = false
-
-        // ダンジョンクリア→ストーリー解放の処理
-        for definition in storyDefinitions {
-            let requirements = definition.unlockRequirements
-
-            var shouldUnlock: Bool
-            if requirements.isEmpty {
-                shouldUnlock = true
-            } else {
-                shouldUnlock = requirements.allSatisfy { condition in
-                    switch condition.type {
-                    case 0: // storyRead
-                        return readStoryIds.contains(UInt16(condition.value))
-                    case 1: // dungeonClear
-                        return clearedDungeonIds.contains(UInt16(condition.value))
-                    default:
-                        return false
-                    }
-                }
-            }
-            // 既読なら解放済みとみなす
-            if readStoryIds.contains(definition.id) {
-                shouldUnlock = true
-            }
-
-            let record = try ensureStoryRecord(nodeId: definition.id, context: context)
-            if record.isUnlocked != shouldUnlock {
-                record.isUnlocked = shouldUnlock
-                record.updatedAt = Date()
-                didChange = true
-            }
-        }
-
-        // 次難易度解放の処理（クリアした難易度の次を解放、furthestClearedFloorをリセット）
-        let dungeonSnapshots = try fetchAllDungeonRecords(context: context)
-        for dungeonRecord in dungeonSnapshots {
-            guard let clearedDifficulty = dungeonRecord.highestClearedDifficulty,
-                  let nextDifficulty = DungeonDisplayNameFormatter.nextDifficulty(after: clearedDifficulty),
-                  dungeonRecord.highestUnlockedDifficulty < nextDifficulty else { continue }
-            dungeonRecord.highestUnlockedDifficulty = nextDifficulty
-            dungeonRecord.furthestClearedFloor = 0
-            dungeonRecord.updatedAt = Date()
-            didChange = true
-        }
-
-        if context.hasChanges {
-            try context.save()
-        }
-
-        if didChange {
-            NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
-        }
-    }
 }
 
 
@@ -223,16 +152,6 @@ private extension AppServices {
     func fetchAllDungeonRecords(context: ModelContext) throws -> [DungeonRecord] {
         let descriptor = FetchDescriptor<DungeonRecord>()
         return try context.fetch(descriptor)
-    }
-
-    func fetchClearedDungeonIds(context: ModelContext) throws -> Set<UInt16> {
-        let records = try fetchAllDungeonRecords(context: context)
-        return Set(records.filter { $0.isCleared }.map(\.dungeonId))
-    }
-
-    func fetchReadStoryIds(context: ModelContext) throws -> Set<UInt16> {
-        let records = try fetchAllStoryRecords(context: context)
-        return Set(records.filter { $0.isRead }.map(\.nodeId))
     }
 
     func makeStorySnapshot(from nodes: [StoryNodeProgressRecord], updatedAt: Date) -> StorySnapshot {
