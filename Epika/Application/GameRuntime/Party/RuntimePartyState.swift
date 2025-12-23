@@ -30,9 +30,14 @@ struct RuntimePartyState: Sendable {
 
     let party: PartySnapshot
     var members: [Member]
+    /// 探索時間モディファイア（事前計算）
+    let explorationModifiers: SkillRuntimeEffects.ExplorationModifiers
 
-    init(party: PartySnapshot, characters: [RuntimeCharacter]) throws {
+    init(party: PartySnapshot,
+         characters: [RuntimeCharacter],
+         explorationModifiers: SkillRuntimeEffects.ExplorationModifiers = .neutral) throws {
         self.party = party
+        self.explorationModifiers = explorationModifiers
         let characterMap = Dictionary(uniqueKeysWithValues: characters.map { ($0.id, $0) })
         var mappedMembers: [Member] = []
         for (order, characterId) in party.memberIds.enumerated() {
@@ -44,5 +49,10 @@ struct RuntimePartyState: Sendable {
                                         character: character))
         }
         self.members = mappedMembers
+    }
+
+    /// 指定ダンジョンに対する探索時間倍率を取得
+    func explorationTimeMultiplier(forDungeon dungeon: DungeonDefinition) -> Double {
+        max(0.0, explorationModifiers.multiplier(forDungeonId: dungeon.id, dungeonName: dungeon.name))
     }
 }

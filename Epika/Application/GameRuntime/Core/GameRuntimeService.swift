@@ -97,10 +97,10 @@ actor GameRuntimeService {
             while true {
                 try Task.checkCancellation()
 
-                if let outcome = try await ExplorationEngine.nextEvent(preparation: preparation,
-                                                                        state: &state,
-                                                                        masterData: masterData,
-                                                                        party: party) {
+                if let outcome = try ExplorationEngine.nextEvent(preparation: preparation,
+                                                                  state: &state,
+                                                                  masterData: masterData,
+                                                                  party: party) {
                     events.append(outcome.entry)
                     if let battleLog = outcome.battleLog {
                         battleLogs.append(battleLog)
@@ -113,9 +113,7 @@ actor GameRuntimeService {
                         experienceByMember[memberId, default: 0] += value
                     }
 
-                    let dropResults = await MainActor.run {
-                        makeItemDropResults(from: outcome.entry.drops)
-                    }
+                    let dropResults = makeItemDropResults(from: outcome.entry.drops)
                     if !dropResults.isEmpty {
                         await dropNotifier(dropResults)
                     }
@@ -215,7 +213,7 @@ actor GameRuntimeService {
                                                                        superRareState: superRareState,
                                                                        scheduler: scheduler,
                                                                        seed: seed)
-        let timeScale = try await explorationTimeMultiplier(for: party, dungeon: preparation.dungeon)
+        let timeScale = party.explorationTimeMultiplier(forDungeon: preparation.dungeon)
         let scaledInterval = max(0.0, Double(preparation.dungeon.explorationTime) * timeScale)
         let interval = TimeInterval(scaledInterval)
         return ExplorationRunPreparationData(preparation: preparation,
@@ -338,7 +336,7 @@ actor GameRuntimeService {
             droppedItemIds: droppedItemIds
         )
 
-        let timeScale = try await explorationTimeMultiplier(for: party, dungeon: dungeon)
+        let timeScale = party.explorationTimeMultiplier(forDungeon: dungeon)
         let scaledInterval = max(0.0, Double(dungeon.explorationTime) * timeScale)
         let interval = TimeInterval(scaledInterval)
 
@@ -362,10 +360,10 @@ actor GameRuntimeService {
             while true {
                 try Task.checkCancellation()
 
-                if let outcome = try await ExplorationEngine.nextEvent(preparation: preparation,
-                                                                        state: &state,
-                                                                        masterData: masterData,
-                                                                        party: party) {
+                if let outcome = try ExplorationEngine.nextEvent(preparation: preparation,
+                                                                  state: &state,
+                                                                  masterData: masterData,
+                                                                  party: party) {
                     events.append(outcome.entry)
                     if let battleLog = outcome.battleLog {
                         battleLogs.append(battleLog)
@@ -378,9 +376,7 @@ actor GameRuntimeService {
                         experienceByMember[memberId, default: 0] += value
                     }
 
-                    let dropResults = await MainActor.run {
-                        makeItemDropResults(from: outcome.entry.drops)
-                    }
+                    let dropResults = makeItemDropResults(from: outcome.entry.drops)
                     if !dropResults.isEmpty {
                         await dropNotifier(dropResults)
                     }
@@ -474,20 +470,6 @@ actor GameRuntimeService {
 
     private func makeEventScheduler() -> ExplorationEventScheduler {
         ExplorationEventScheduler()
-    }
-
-    private func explorationTimeMultiplier(for party: RuntimePartyState,
-                                           dungeon: DungeonDefinition) async throws -> Double {
-        let skillSets = party.members.map { $0.character.learnedSkills }
-        return try await MainActor.run {
-            var combined = SkillRuntimeEffects.ExplorationModifiers.neutral
-            for skills in skillSets {
-                let modifiers = try SkillRuntimeEffectCompiler.explorationModifiers(from: skills)
-                combined.merge(modifiers)
-            }
-            let value = combined.multiplier(forDungeonId: dungeon.id, dungeonName: dungeon.name)
-            return max(0.0, value)
-        }
     }
 }
 

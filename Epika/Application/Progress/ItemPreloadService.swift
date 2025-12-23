@@ -185,6 +185,83 @@ final class ItemPreloadService {
         }
     }
 
+    /// ドロップアイテムをキャッシュに追加する（帰還時の差分更新用）
+    /// - Parameters:
+    ///   - snapshots: 追加されたアイテムのスナップショット
+    ///   - definitions: アイテムIDからDefinitionへのマップ
+    func addDroppedItems(_ snapshots: [ItemSnapshot], definitions: [UInt16: ItemDefinition]) {
+        guard !snapshots.isEmpty else { return }
+
+        // 既存のstackKeyを収集
+        var existingStackKeys = Set<String>()
+        for items in categorizedItems.values {
+            for item in items {
+                existingStackKeys.insert(item.stackKey)
+            }
+        }
+
+        // 称号名解決用のデータ収集
+        var normalTitleIds = Set<UInt8>()
+        var superRareTitleIds = Set<UInt8>()
+        var socketItemIds = Set<UInt16>()
+        for snapshot in snapshots where !existingStackKeys.contains(snapshot.stackKey) {
+            normalTitleIds.insert(snapshot.enhancements.normalTitleId)
+            if snapshot.enhancements.superRareTitleId != 0 {
+                superRareTitleIds.insert(snapshot.enhancements.superRareTitleId)
+            }
+            if snapshot.enhancements.socketItemId != 0 {
+                socketItemIds.insert(snapshot.enhancements.socketItemId)
+            }
+        }
+
+        // 称号名を一括解決
+        let titleNames = resolveTitleNames(normalIds: normalTitleIds, superRareIds: superRareTitleIds)
+        let gemNames = resolveGemNames(socketItemIds: socketItemIds)
+
+        // 価格倍率マップを構築
+        let allTitles = masterDataCache.allTitles
+        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
+
+        // 各スナップショットを処理
+        for snapshot in snapshots {
+            if existingStackKeys.contains(snapshot.stackKey) {
+                // 既存アイテム: 数量を増加
+                incrementQuantity(stackKey: snapshot.stackKey, by: Int(snapshot.quantity))
+            } else {
+                // 新規アイテム: LightweightItemDataを構築して追加
+                guard let definition = definitions[snapshot.itemId] else { continue }
+
+                let sellPrice = (try? ItemPriceCalculator.sellPrice(
+                    baseSellValue: definition.sellValue,
+                    normalTitleId: snapshot.enhancements.normalTitleId,
+                    hasSuperRare: snapshot.enhancements.superRareTitleId != 0,
+                    multiplierMap: priceMultiplierMap
+                )) ?? definition.sellValue
+
+                let data = LightweightItemData(
+                    stackKey: snapshot.stackKey,
+                    itemId: snapshot.itemId,
+                    name: definition.name,
+                    quantity: Int(snapshot.quantity),
+                    sellValue: sellPrice,
+                    category: ItemSaleCategory(rawValue: definition.category) ?? .other,
+                    enhancement: snapshot.enhancements,
+                    storage: snapshot.storage,
+                    rarity: definition.rarity,
+                    normalTitleName: titleNames.normal[snapshot.enhancements.normalTitleId],
+                    superRareTitleName: snapshot.enhancements.superRareTitleId != 0
+                        ? titleNames.superRare[snapshot.enhancements.superRareTitleId]
+                        : nil,
+                    gemName: snapshot.enhancements.socketItemId != 0
+                        ? gemNames[snapshot.enhancements.socketItemId]
+                        : nil
+                )
+                addItem(data)
+                existingStackKeys.insert(snapshot.stackKey)
+            }
+        }
+    }
+
     /// カテゴリ・サブカテゴリの順序を再構築（各グループ内の最小itemIdでソート）
     private func rebuildOrderedSubcategories() {
         orderedCategories = categorizedItems.keys

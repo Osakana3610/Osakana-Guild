@@ -50,6 +50,12 @@ actor ShopProgressService {
         let overflow: Int   // 上限超過で追加できなかった数量
     }
 
+    /// バッチ売却結果
+    struct BatchSoldResult: Sendable {
+        let totalGold: Int
+        let overflows: [(itemId: UInt16, quantity: Int)]
+    }
+
     private let container: ModelContainer
     private let masterDataCache: MasterDataCache
     private let inventoryService: InventoryProgressService
@@ -148,6 +154,83 @@ actor ShopProgressService {
         let overflow = quantity - actuallyAdded
         let gold = definition.sellValue * actuallyAdded
         return SoldResult(added: actuallyAdded, gold: gold, overflow: overflow)
+    }
+
+    /// プレイヤーが複数アイテムを一括売却した際にショップ在庫に追加する（バッチ処理）
+    /// - Parameter items: アイテムIDと数量のペア配列
+    /// - Returns: バッチ売却結果（合計ゴールド、上限超過アイテム）
+    func addPlayerSoldItemsBatch(_ items: [(itemId: UInt16, quantity: Int)]) async throws -> BatchSoldResult {
+        guard !items.isEmpty else {
+            return BatchSoldResult(totalGold: 0, overflows: [])
+        }
+
+        // アイテム定義を一括取得
+        let uniqueItemIds = Set(items.map { $0.itemId })
+        var definitionMap: [UInt16: ItemDefinition] = [:]
+        var missing: [UInt16] = []
+        for id in uniqueItemIds {
+            if let def = masterDataCache.item(id) {
+                definitionMap[id] = def
+            } else {
+                missing.append(id)
+            }
+        }
+        if !missing.isEmpty {
+            throw ProgressError.itemDefinitionUnavailable(ids: missing.map { String($0) }.sorted())
+        }
+
+        // 同一アイテムIDの数量を集約
+        var aggregated: [UInt16: Int] = [:]
+        for item in items where item.quantity > 0 {
+            aggregated[item.itemId, default: 0] += item.quantity
+        }
+
+        let context = makeContext()
+        let now = Date()
+
+        // 既存在庫を一括取得
+        let itemIdArray = Array(aggregated.keys)
+        let descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate {
+            $0.isPlayerSold == true
+        })
+        let allPlayerSoldStocks = try context.fetch(descriptor)
+        var stockMap: [UInt16: ShopStockRecord] = [:]
+        for stock in allPlayerSoldStocks where itemIdArray.contains(stock.itemId) {
+            stockMap[stock.itemId] = stock
+        }
+
+        var totalGold = 0
+        var overflows: [(itemId: UInt16, quantity: Int)] = []
+
+        for (itemId, quantity) in aggregated {
+            guard let definition = definitionMap[itemId] else { continue }
+
+            var actuallyAdded = quantity
+            if let stock = stockMap[itemId] {
+                let previousRemaining = stock.remaining ?? 0
+                let newRemaining = min(previousRemaining + UInt16(quantity), Self.stockInternalLimit)
+                stock.remaining = newRemaining
+                actuallyAdded = Int(newRemaining - previousRemaining)
+                stock.updatedAt = now
+            } else {
+                actuallyAdded = min(quantity, Int(Self.stockInternalLimit))
+                let stock = ShopStockRecord(itemId: itemId,
+                                            remaining: UInt16(actuallyAdded),
+                                            isPlayerSold: true,
+                                            updatedAt: now)
+                context.insert(stock)
+                stockMap[itemId] = stock
+            }
+
+            let overflow = quantity - actuallyAdded
+            if overflow > 0 {
+                overflows.append((itemId: itemId, quantity: overflow))
+            }
+            totalGold += definition.sellValue * actuallyAdded
+        }
+
+        try saveIfNeeded(context)
+        return BatchSoldResult(totalGold: totalGold, overflows: overflows)
     }
 
     /// 在庫整理：指定アイテムの在庫を目標数量まで減らし、減少分に応じたキャット・チケットを返す

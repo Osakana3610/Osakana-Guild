@@ -16,12 +16,11 @@
 //     永続化された探索レコードをキャンセル
 //
 // 【開始フロー】
-//   1. ストーリー・ダンジョン解放を同期
-//   2. パーティメンバーのHP全回復
-//   3. ダンジョン解放・難易度チェック
-//   4. ランタイムセッション開始
-//   5. 永続化レコード作成
-//   6. AsyncThrowingStreamでイベント配信開始
+//   1. パーティメンバーのHP全回復
+//   2. ダンジョン解放・難易度チェック
+//   3. ランタイムセッション開始
+//   4. 永続化レコード作成
+//   5. AsyncThrowingStreamでイベント配信開始
 //
 // ==============================================================================
 
@@ -33,8 +32,6 @@ extension AppServices {
     func startExplorationRun(for partyId: UInt8,
                               dungeonId: UInt16,
                               targetFloor: Int) async throws -> ExplorationRunHandle {
-        try await synchronizeStoryAndDungeonUnlocks()
-
         guard var partySnapshot = try await party.partySnapshot(id: partyId) else {
             throw ProgressError.partyNotFound
         }
