@@ -97,11 +97,10 @@ struct ExplorationEngine {
         return (preparation, state)
     }
 
-    @MainActor
     static func nextEvent(preparation: Preparation,
                           state: inout RunState,
                           masterData: MasterDataCache,
-                          party: RuntimePartyState) async throws -> StepOutcome? {
+                          party: RuntimePartyState) throws -> StepOutcome? {
         guard state.floorIndex < preparation.targetFloorNumber else {
             return nil
         }

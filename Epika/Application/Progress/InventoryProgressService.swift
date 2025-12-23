@@ -196,6 +196,52 @@ actor InventoryProgressService {
         return makeSnapshot(record)
     }
 
+    /// バッチ追加してスナップショットを返す（ドロップ報酬用）
+    func addItemsBatchReturningSnapshots(_ seeds: [BatchSeed]) async throws -> [ItemSnapshot] {
+        guard !seeds.isEmpty else { return [] }
+
+        let context = makeContext()
+        let aggregated = aggregate(seeds)
+        var snapshots: [ItemSnapshot] = []
+
+        for (storage, entries) in aggregated {
+            let stackKeySet = Set(entries.map { $0.key.stackKey })
+            let storageTypeValue = storage.rawValue
+            let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.storageType == storageTypeValue
+            })
+            let allRecords = try context.fetch(descriptor)
+            let existingRecords = allRecords.filter { stackKeySet.contains($0.stackKey) }
+            let recordMap = Dictionary(uniqueKeysWithValues: existingRecords.map { ($0.stackKey, $0) })
+
+            for entry in entries {
+                let record: InventoryItemRecord
+                if let existing = recordMap[entry.key.stackKey] {
+                    _ = applyIncrement(to: existing, amount: entry.totalQuantity)
+                    record = existing
+                } else {
+                    let newRecord = InventoryItemRecord(
+                        superRareTitleId: entry.seed.enhancements.superRareTitleId,
+                        normalTitleId: entry.seed.enhancements.normalTitleId,
+                        itemId: entry.seed.itemId,
+                        socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
+                        socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
+                        socketItemId: entry.seed.enhancements.socketItemId,
+                        quantity: 0,
+                        storage: storage
+                    )
+                    _ = applyIncrement(to: newRecord, amount: entry.totalQuantity)
+                    context.insert(newRecord)
+                    record = newRecord
+                }
+                snapshots.append(makeSnapshot(record))
+            }
+        }
+
+        try context.save()
+        return snapshots
+    }
+
     func addItems(_ seeds: [BatchSeed], chunkSize: Int = 1_000) async throws {
         guard !seeds.isEmpty else { return }
         guard chunkSize > 0 else {
