@@ -35,9 +35,30 @@ struct BattleLogRenderer {
         spellNames: [UInt8: String] = [:]
     ) -> [BattleLogEntry] {
         var entries: [BattleLogEntry] = []
+        let actions = battleLog.actions
+        var index = 0
 
-        for action in battleLog.actions {
-            guard let kind = ActionKind(rawValue: action.kind) else { continue }
+        while index < actions.count {
+            let action = actions[index]
+            guard let kind = ActionKind(rawValue: action.kind) else {
+                index += 1
+                continue
+            }
+
+            // 物理ダメージ・回避の連続をグループ化
+            if kind == .physicalDamage || kind == .physicalEvade {
+                let (entry, consumed) = consolidatePhysicalDamage(
+                    actions: actions,
+                    startIndex: index,
+                    allyNames: allyNames,
+                    enemyNames: enemyNames
+                )
+                if let entry = entry {
+                    entries.append(entry)
+                }
+                index += consumed
+                continue
+            }
 
             let actorName = resolveName(index: action.actor, allyNames: allyNames, enemyNames: enemyNames)
             let targetName: String?
@@ -68,9 +89,79 @@ struct BattleLogRenderer {
             if let entry = entry {
                 entries.append(entry)
             }
+            index += 1
         }
 
         return entries
+    }
+
+    /// 連続する物理ダメージ・回避アクションをグループ化
+    private static func consolidatePhysicalDamage(
+        actions: [BattleAction],
+        startIndex: Int,
+        allyNames: [UInt8: String],
+        enemyNames: [UInt16: String]
+    ) -> (BattleLogEntry?, Int) {
+        let firstAction = actions[startIndex]
+        let actor = firstAction.actor
+        let target = firstAction.target
+        let turn = firstAction.turn
+
+        var totalDamage = 0
+        var hitCount = 0
+        var evadeCount = 0
+        var consumed = 0
+
+        for i in startIndex..<actions.count {
+            let action = actions[i]
+            let isDamage = action.kind == ActionKind.physicalDamage.rawValue
+            let isEvade = action.kind == ActionKind.physicalEvade.rawValue
+            guard (isDamage || isEvade),
+                  action.actor == actor,
+                  action.target == target,
+                  action.turn == turn else {
+                break
+            }
+            if isDamage {
+                totalDamage += Int(action.value ?? 0)
+                hitCount += 1
+            } else {
+                evadeCount += 1
+            }
+            consumed += 1
+        }
+
+        let actorName = resolveName(index: actor, allyNames: allyNames, enemyNames: enemyNames)
+        let targetName = target.map { resolveName(index: $0, allyNames: allyNames, enemyNames: enemyNames) } ?? "対象"
+
+        let message: String
+        let logType: BattleLogEntry.LogType
+
+        if hitCount == 0 && evadeCount > 0 {
+            message = "\(actorName)の攻撃！\(targetName)は攻撃をかわした！"
+            logType = .miss
+        } else if hitCount == 1 && evadeCount == 0 {
+            message = "\(actorName)の攻撃！\(targetName)に\(totalDamage)のダメージ！"
+            logType = .damage
+        } else {
+            let totalAttempts = hitCount + evadeCount
+            if evadeCount > 0 {
+                message = "\(actorName)の攻撃！\(hitCount)/\(totalAttempts)回ヒット！\(targetName)に\(totalDamage)のダメージ！"
+            } else {
+                message = "\(actorName)の攻撃！\(hitCount)回ヒット！\(targetName)に\(totalDamage)のダメージ！"
+            }
+            logType = .damage
+        }
+
+        let entry = BattleLogEntry(
+            turn: Int(turn),
+            message: message,
+            type: logType,
+            actorId: String(actor),
+            targetId: target.map { String($0) }
+        )
+
+        return (entry, consumed)
     }
 
     private static func resolveName(
@@ -154,10 +245,10 @@ struct BattleLogRenderer {
         case .physicalDamage:
             let target = targetName ?? "対象"
             let dmg = value ?? 0
-            return ("\(target)に\(dmg)のダメージ！", .damage)
+            return ("\(actorName)の攻撃！\(target)に\(dmg)のダメージ！", .damage)
         case .physicalEvade:
             let target = targetName ?? "対象"
-            return ("\(target)は攻撃をかわした！", .miss)
+            return ("\(actorName)の攻撃！\(target)は攻撃をかわした！", .miss)
         case .physicalParry:
             return ("\(actorName)の受け流し！", .action)
         case .physicalBlock:
