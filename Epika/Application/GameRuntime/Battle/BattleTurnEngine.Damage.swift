@@ -33,6 +33,14 @@ import Foundation
 extension BattleTurnEngine {
     static let criticalDefenseRetainedFactor: Double = 0.5
 
+    // MARK: - Modifier Key Constants (avoid string concatenation per hit)
+    private static let physicalDamageDealtKey = "physicalDamageDealtMultiplier"
+    private static let physicalDamageTakenKey = "physicalDamageTakenMultiplier"
+    private static let magicalDamageDealtKey = "magicalDamageDealtMultiplier"
+    private static let magicalDamageTakenKey = "magicalDamageTakenMultiplier"
+    private static let breathDamageDealtKey = "breathDamageDealtMultiplier"
+    private static let breathDamageTakenKey = "breathDamageTakenMultiplier"
+
     static func computeHitChance(attacker: BattleActor,
                                  defender: BattleActor,
                                  hitIndex: Int,
@@ -277,7 +285,7 @@ extension BattleTurnEngine {
     static func damageDealtModifier(for attacker: BattleActor,
                                     against defender: BattleActor,
                                     damageType: BattleDamageType) -> Double {
-        let key = modifierKey(for: damageType, suffix: "DamageDealtMultiplier")
+        let key = modifierDealtKey(for: damageType)
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
         let raceMultiplier = attacker.skillEffects.damage.dealtAgainst.value(for: defender.raceId)
 
@@ -294,7 +302,7 @@ extension BattleTurnEngine {
     }
 
     static func antiHealingDamageDealtModifier(for attacker: BattleActor) -> Double {
-        let key = modifierKey(for: .magical, suffix: "DamageDealtMultiplier")
+        let key = modifierDealtKey(for: .magical)
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
         return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: .magical)
     }
@@ -303,7 +311,7 @@ extension BattleTurnEngine {
                                     damageType: BattleDamageType,
                                     spellId: UInt8? = nil,
                                     attacker: BattleActor? = nil) -> Double {
-        let key = modifierKey(for: damageType, suffix: "DamageTakenMultiplier")
+        let key = modifierTakenKey(for: damageType)
         let buffMultiplier = aggregateModifier(from: defender.timedBuffs, key: key)
         var result = buffMultiplier * defender.skillEffects.damage.taken.value(for: damageType)
         if let spellId {
@@ -430,11 +438,19 @@ extension BattleTurnEngine {
         actor.degradationPercent = max(0.0, actor.degradationPercent - repaired)
     }
 
-    static func modifierKey(for damageType: BattleDamageType, suffix: String) -> String {
+    static func modifierDealtKey(for damageType: BattleDamageType) -> String {
         switch damageType {
-        case .physical: return "physical\(suffix)"
-        case .magical: return "magical\(suffix)"
-        case .breath: return "breath\(suffix)"
+        case .physical: return physicalDamageDealtKey
+        case .magical: return magicalDamageDealtKey
+        case .breath: return breathDamageDealtKey
+        }
+    }
+
+    static func modifierTakenKey(for damageType: BattleDamageType) -> String {
+        switch damageType {
+        case .physical: return physicalDamageTakenKey
+        case .magical: return magicalDamageTakenKey
+        case .breath: return breathDamageTakenKey
         }
     }
 

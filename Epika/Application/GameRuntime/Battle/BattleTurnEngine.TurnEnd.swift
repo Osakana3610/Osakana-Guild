@@ -484,21 +484,15 @@ extension BattleTurnEngine {
         guard let fallen = context.actor(for: side, index: fallenIndex) else { return false }
         guard !fallen.isAlive else { return true }
 
-        let allies: [BattleActor] = side == .player ? context.players : context.enemies
-        let candidateIndices = allies.enumerated()
-            .filter { $0.element.isAlive && !$0.element.skillEffects.resurrection.rescueCapabilities.isEmpty }
-            .sorted { (lhs: EnumeratedSequence<[BattleActor]>.Element, rhs: EnumeratedSequence<[BattleActor]>.Element) in
-                let leftSlot = lhs.element.formationSlot
-                let rightSlot = rhs.element.formationSlot
-                if leftSlot == rightSlot {
-                    return lhs.offset < rhs.offset
-                }
-                return leftSlot < rightSlot
-            }
-            .map { $0.offset }
+        // 戦闘開始時にキャッシュ済みの救助候補インデックスを使用（陣形順ソート済み）
+        let cachedCandidateIndices: [Int] = side == .player
+            ? context.cached.playerRescueCandidateIndices
+            : context.cached.enemyRescueCandidateIndices
 
-        for candidateIndex in candidateIndices {
-            guard var rescuer = context.actor(for: side, index: candidateIndex) else { continue }
+        for candidateIndex in cachedCandidateIndices {
+            // 生存チェックは毎回必要（戦闘中に死亡する可能性があるため）
+            guard var rescuer = context.actor(for: side, index: candidateIndex),
+                  rescuer.isAlive else { continue }
             guard canAttemptRescue(rescuer, turn: context.turn) else { continue }
 
             let capabilities = availableRescueCapabilities(for: rescuer)

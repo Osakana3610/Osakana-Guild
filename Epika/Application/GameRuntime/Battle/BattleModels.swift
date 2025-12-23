@@ -468,6 +468,40 @@ struct BattleActor: Sendable {
             }
         }
 
+        /// 特殊攻撃を先制・通常に分類済みで保持する構造体
+        struct SpecialAttacks: Sendable, Hashable {
+            let preemptive: [SpecialAttack]
+            let normal: [SpecialAttack]
+
+            static let empty = SpecialAttacks(preemptive: [], normal: [])
+
+            /// 両方の配列が空かどうか
+            var isEmpty: Bool { preemptive.isEmpty && normal.isEmpty }
+
+            /// 全ての特殊攻撃を取得（テスト・検証用）
+            var all: [SpecialAttack] { preemptive + normal }
+
+            /// 配列から分類して構築
+            init(from attacks: [SpecialAttack]) {
+                var preemptive: [SpecialAttack] = []
+                var normal: [SpecialAttack] = []
+                for attack in attacks {
+                    if attack.preemptive {
+                        preemptive.append(attack)
+                    } else {
+                        normal.append(attack)
+                    }
+                }
+                self.preemptive = preemptive
+                self.normal = normal
+            }
+
+            private init(preemptive: [SpecialAttack], normal: [SpecialAttack]) {
+                self.preemptive = preemptive
+                self.normal = normal
+            }
+        }
+
         struct StatusResistance: Sendable, Hashable {
             var multiplier: Double
             var additivePercent: Double
@@ -702,7 +736,7 @@ struct BattleActor: Sendable {
             var shieldBlockBonusPercent: Double
             var barrierCharges: [UInt8: Int]
             var guardBarrierCharges: [UInt8: Int]
-            var specialAttacks: [SpecialAttack]
+            var specialAttacks: SpecialAttacks
             var enemyActionDebuffs: [EnemyActionDebuff]  // 敵行動回数減少
             var cumulativeHitBonus: CumulativeHitBonus?  // 命中累積ボーナス
             var enemySingleActionSkipChancePercent: Double  // 道化師スキル: 敵単体行動スキップ確率
@@ -725,7 +759,7 @@ struct BattleActor: Sendable {
                 shieldBlockBonusPercent: 0.0,
                 barrierCharges: [:],
                 guardBarrierCharges: [:],
-                specialAttacks: [],
+                specialAttacks: .empty,
                 enemyActionDebuffs: [],
                 cumulativeHitBonus: nil,
                 enemySingleActionSkipChancePercent: 0.0,

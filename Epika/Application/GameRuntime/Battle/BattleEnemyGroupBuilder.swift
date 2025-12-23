@@ -27,8 +27,9 @@ struct BattleEnemyGroupBuilder {
         let level: Int
     }
 
-    @MainActor
-    static func makeEnemies(baseEnemyId: UInt16?,
+    /// 敵グループを生成
+    /// nonisolated - 計算処理のためMainActorに縛られない
+    nonisolated static func makeEnemies(baseEnemyId: UInt16?,
                             baseEnemyLevel: Int?,
                             groupMin: Int?,
                             groupMax: Int?,
@@ -131,8 +132,7 @@ struct BattleEnemyGroupBuilder {
         return random.nextInt(in: lower...upper)
     }
 
-    @MainActor
-    private static func makeActors(for definition: EnemyDefinition,
+    nonisolated private static func makeActors(for definition: EnemyDefinition,
                                     levelOverride: Int?,
                                     count: Int,
                                     skillDefinitions: [UInt16: SkillDefinition],
@@ -191,8 +191,7 @@ struct BattleEnemyGroupBuilder {
         return actors
     }
 
-    @MainActor
-    private static func cachedSkillEffects(for definition: EnemyDefinition,
+    nonisolated private static func cachedSkillEffects(for definition: EnemyDefinition,
                                            cache: inout [UInt16: BattleActor.SkillEffects],
                                            skillDefinitions: [UInt16: SkillDefinition]) throws -> BattleActor.SkillEffects {
         if let cached = cache[definition.id] {

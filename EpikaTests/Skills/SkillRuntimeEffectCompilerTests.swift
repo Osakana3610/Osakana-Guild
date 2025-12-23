@@ -33,7 +33,7 @@ final class SkillRuntimeEffectCompilerTests: XCTestCase {
         }
 
         if !effects.combat.specialAttacks.isEmpty {
-            let specialKinds = Set(effects.combat.specialAttacks.map(\.kind))
+            let specialKinds = Set(effects.combat.specialAttacks.all.map(\.kind))
             XCTAssertFalse(specialKinds.isEmpty)
         }
 
