@@ -35,7 +35,6 @@ final class StoryViewModel {
         error = nil
 
         do {
-            try await appServices.synchronizeStoryAndDungeonUnlocks()
             let definitions = appServices.masterDataCache.allStoryNodes
             let snapshot = try await appServices.story.currentStorySnapshot()
             let unlocked = snapshot.unlockedNodeIds

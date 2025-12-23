@@ -127,16 +127,11 @@ extension AppServices {
             case .completed:
                 let dungeonFloorCount = max(1, artifact.dungeon.floorCount)
                 if artifact.floorCount >= dungeonFloorCount {
-                    let isFirstClear = try await dungeon.markCleared(dungeonId: artifact.dungeon.id,
-                                                                     difficulty: UInt8(runDifficulty),
-                                                                     totalFloors: UInt8(artifact.floorCount))
+                    try await dungeon.markCleared(dungeonId: artifact.dungeon.id,
+                                                  difficulty: UInt8(runDifficulty),
+                                                  totalFloors: UInt8(artifact.floorCount))
                     let snapshot = try await dungeon.ensureDungeonSnapshot(for: artifact.dungeon.id)
                     _ = try await unlockNextDifficultyIfEligible(for: snapshot, clearedDifficulty: UInt8(runDifficulty))
-                    // 初クリア＆無称号の場合のみストーリー解放を同期
-                    // （ストーリー解放条件は初クリア時にのみ満たされるため）
-                    if isFirstClear && runDifficulty == Int(DungeonDisplayNameFormatter.initialDifficulty) {
-                        try await synchronizeStoryAndDungeonUnlocks()
-                    }
                 } else {
                     try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                             difficulty: UInt8(runDifficulty),
