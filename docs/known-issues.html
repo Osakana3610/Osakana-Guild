@@ -96,7 +96,7 @@
 <body>
     <h1>既知の問題</h1>
     <p>おさかなギルドで現在確認されている問題と、対応状況です。このページにない場合は<a href="itms-beta://beta.itunes.apple.com/v1/app/6756705558">こちら</a>からフィードバックを送信してください（iOSのみ）。</p>
-    <h2>対応中の問題 <span class="issue-count">(8件)</span></h2>
+    <h2>対応中の問題 <span class="issue-count">(5件)</span></h2>
     
     <div class="issue">
         <div class="issue-header">
@@ -133,30 +133,6 @@
     <div class="issue">
         <div class="issue-header">
             <span class="toggle-icon">&#9654;</span>
-            <span class="issue-id">FB0013</span>
-            <span class="issue-title">キャラが複数回攻撃をすることがある</span>
-            <div class="issue-meta">
-                <span class="category">戦闘</span>
-                <span class="status" style="background-color: #f39c12">調査中</span>
-            </div>
-        </div>
-        <div class="issue-body">
-            <div class="date">報告日: 2025-12-23</div>
-            <div class="issue-section">
-                <div class="issue-section-title">概要</div>
-                <div class="issue-section-content">キャラクターが1ターンに複数回攻撃を行うことがある。</div>
-            </div>
-            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">攻撃回数の定義が間違っており、回数分行動してしまっている。</div></div>
-            
-            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">12/24までに修正予定。</div></div>
-            
-        </div>
-    </div>
-
-
-    <div class="issue">
-        <div class="issue-header">
-            <span class="toggle-icon">&#9654;</span>
             <span class="issue-id">FB0014</span>
             <span class="issue-title">獲得系アイテムが全て経験値に関するスキルしか持っていない</span>
             <div class="issue-meta">
@@ -173,54 +149,6 @@
             <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">スキルを正しく割り当てていないため。</div></div>
             
             <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">0.9.xの間に正しいスキルを割り当て予定。</div></div>
-            
-        </div>
-    </div>
-
-
-    <div class="issue">
-        <div class="issue-header">
-            <span class="toggle-icon">&#9654;</span>
-            <span class="issue-id">FB0015</span>
-            <span class="issue-title">ギルドを最大まで拡張するとギルド情報の取得に失敗する</span>
-            <div class="issue-meta">
-                <span class="category">ギルド</span>
-                <span class="status" style="background-color: #f39c12">調査中</span>
-            </div>
-        </div>
-        <div class="issue-body">
-            <div class="date">報告日: 2025-12-23</div>
-            <div class="issue-section">
-                <div class="issue-section-title">概要</div>
-                <div class="issue-section-content">ギルドを最大まで拡張すると、ギルドタブで「ギルド情報の取得に失敗しました」エラーが表示される。</div>
-            </div>
-            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">戦士スキル（Skill 65014）のprocRate stackingデータが不正なため、ギルド情報の読み込みに失敗している。</div></div>
-            
-            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">12/25までに修正予定。</div></div>
-            
-        </div>
-    </div>
-
-
-    <div class="issue">
-        <div class="issue-header">
-            <span class="toggle-icon">&#9654;</span>
-            <span class="issue-id">FB0016</span>
-            <span class="issue-title">探索中に問題がないのに帰還してしまう</span>
-            <div class="issue-meta">
-                <span class="category">探索</span>
-                <span class="status" style="background-color: #f39c12">調査中</span>
-            </div>
-        </div>
-        <div class="issue-body">
-            <div class="date">報告日: 2025-12-23</div>
-            <div class="issue-section">
-                <div class="issue-section-title">概要</div>
-                <div class="issue-section-content">パーティに問題がない状態（HP満タン、戦闘可能）なのに、探索中に帰還してしまう。</div>
-            </div>
-            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">FB0015と同じ原因（戦士スキルのデータ不整合）により、データ読み込み時にエラーが発生し帰還処理が実行されている可能性がある。</div></div>
-            
-            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">12/25までに修正予定。</div></div>
             
         </div>
     </div>
@@ -297,7 +225,7 @@
         </div>
     </div>
 
-    <h2 class="resolved-section">解決済みの問題 <span class="issue-count">(11件)</span></h2>
+    <h2 class="resolved-section">解決済みの問題 <span class="issue-count">(14件)</span></h2>
     <div class="resolved-section">
     
     <div class="issue">
@@ -562,6 +490,80 @@ breathVariantスキルを習得したキャラのみがブレスを使用でき�
             
             
             <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">UI表示のみの問題。実際のドロップ計算には反映されていた。</div></div>
+        </div>
+    </div>
+
+
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">FB0013</span>
+            <span class="issue-title">敵キャラが複数回攻撃をすることがある</span>
+            <div class="issue-meta">
+                <span class="category">戦闘</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-23 / 解決日: 2025-12-23</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">敵キャラクターが1ターンに複数回攻撃を行うことがある。</div>
+            </div>
+            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">physicalEvadeアクションのactor/targetが逆に記録されていた。
+味方が敵を攻撃して敵が回避した場合に「敵の攻撃！味方は攻撃をかわした！」と表示され、
+敵が何度も攻撃しているように見えていた。</div></div>
+            
+            
+            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">physicalEvadeのactor/targetをphysicalDamageと同様にactor=攻撃側、target=防御側に統一。</div></div>
+        </div>
+    </div>
+
+
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">FB0015</span>
+            <span class="issue-title">ギルドを最大まで拡張するとギルド情報の取得に失敗する</span>
+            <div class="issue-meta">
+                <span class="category">ギルド</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-23 / 解決日: 2025-12-23</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">ギルドを最大まで拡張すると、ギルドタブで「ギルド情報の取得に失敗しました」エラーが表示される。</div>
+            </div>
+            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">戦士スキル（Skill 65014）のprocRate stackingデータが不正なため、ギルド情報の読み込みに失敗していた。</div></div>
+            
+            
+            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">マスターデータとコードの不一致の修正により改善。</div></div>
+        </div>
+    </div>
+
+
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">FB0016</span>
+            <span class="issue-title">探索中に問題がないのに帰還してしまう</span>
+            <div class="issue-meta">
+                <span class="category">探索</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-23 / 解決日: 2025-12-23</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">パーティに問題がない状態（HP満タン、戦闘可能）なのに、探索中に帰還してしまう。</div>
+            </div>
+            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">FB0015と同じ原因（戦士スキルのデータ不整合）により、データ読み込み時にエラーが発生し帰還処理が実行されていた。</div></div>
+            
+            
+            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">マスターデータとコードの不一致の修正により改善。</div></div>
         </div>
     </div>
 
