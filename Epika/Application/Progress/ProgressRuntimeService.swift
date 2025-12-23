@@ -53,7 +53,7 @@ final class ProgressRuntimeService {
                               targetFloorNumber: Int) async throws -> ExplorationRuntimeSession {
         let characterInputs = characters.map { CharacterInput(from: $0) }
         let partyState = try await runtimeService.runtimePartyState(party: party,
-                                                                   characters: characterInputs)
+                                                                    characters: characterInputs)
         let runtimeCharacters = partyState.members.map { $0.character }
         let superRareState = try await gameStateService.loadSuperRareDailyState()
         let session = try await runtimeService.startExplorationRun(dungeonId: dungeonId,

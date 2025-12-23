@@ -9,7 +9,7 @@
 //
 // 【公開API】
 //   - make(from:masterData:pandoraBoxStackKeys:) → RuntimeCharacter
-//     @MainActor - キャラクター生成
+//     nonisolated - キャラクター生成（純粋計算）
 //
 // 【生成フロー】
 //   1. マスターデータ取得（種族/職業/性格）
@@ -43,7 +43,6 @@ import Foundation
 /// マスターデータ取得と戦闘ステータス計算を行う。
 enum RuntimeCharacterFactory {
 
-    @MainActor
     static func make(
         from input: CharacterInput,
         masterData: MasterDataCache,

@@ -124,16 +124,14 @@ actor CharacterProgressService {
         return try await makeSnapshots(ordered, context: context)
     }
 
-    func runtimeCharacter(from snapshot: CharacterSnapshot) async throws -> RuntimeCharacter {
+    func runtimeCharacter(from snapshot: CharacterSnapshot) throws -> RuntimeCharacter {
         let input = makeInput(from: snapshot)
         let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: makeContext())
-        return try await MainActor.run {
-            try RuntimeCharacterFactory.make(
-                from: input,
-                masterData: masterData,
-                pandoraBoxStackKeys: pandoraStackKeys
-            )
-        }
+        return try RuntimeCharacterFactory.make(
+            from: input,
+            masterData: masterData,
+            pandoraBoxStackKeys: pandoraStackKeys
+        )
     }
 
     /// CharacterSnapshotからCharacterInputへ変換

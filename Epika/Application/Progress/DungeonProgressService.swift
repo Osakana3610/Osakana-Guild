@@ -57,10 +57,16 @@ actor DungeonProgressService {
         try saveIfNeeded(context)
     }
 
-    func markCleared(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws {
+    /// ダンジョンをクリア済みとしてマーク
+    /// - Returns: 初クリアの場合は`true`
+    @discardableResult
+    func markCleared(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws -> Bool {
         let context = makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         let now = Date()
+
+        // 初クリアかどうかを判定（highestClearedDifficultyがnilの場合）
+        let isFirstClear = record.highestClearedDifficulty == nil
 
         // クリアした難易度を更新
         if let current = record.highestClearedDifficulty {
@@ -74,6 +80,7 @@ actor DungeonProgressService {
         record.furthestClearedFloor = max(record.furthestClearedFloor, totalFloors)
         record.updatedAt = now
         try saveIfNeeded(context)
+        return isFirstClear
     }
 
     func unlockDifficulty(dungeonId: UInt16, difficulty: UInt8) async throws {
