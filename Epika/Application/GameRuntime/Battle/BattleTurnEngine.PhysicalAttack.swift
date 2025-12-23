@@ -377,7 +377,7 @@ extension BattleTurnEngine {
                                                               context: &context)
             if !forceHit && !BattleRandomSystem.probability(hitChance, random: &context.random) {
                 defenderEvaded = true
-                context.appendAction(kind: .physicalEvade, actor: defenderIdx, target: attackerIdx)
+                context.appendAction(kind: .physicalEvade, actor: attackerIdx, target: defenderIdx)
                 continue
             }
 
@@ -458,7 +458,7 @@ extension BattleTurnEngine {
                                          accuracyMultiplier: 1.0,
                                          context: &context)
         if !BattleRandomSystem.probability(hitChance, random: &context.random) {
-            context.appendAction(kind: .physicalEvade, actor: defenderIdx, target: attackerIdx)
+            context.appendAction(kind: .physicalEvade, actor: attackerIdx, target: defenderIdx)
             return AttackResult(attacker: attackerCopy,
                                 defender: defenderCopy,
                                 totalDamage: 0,
