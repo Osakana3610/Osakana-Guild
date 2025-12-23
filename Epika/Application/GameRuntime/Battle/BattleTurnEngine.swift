@@ -131,8 +131,8 @@ struct BattleTurnEngine {
             applyTimedBuffTriggers(&context)
             applySpellChargeRecovery(&context)
 
-            let order = actionOrder(&context)
             prepareTurnActions(&context, sacrificeTargets: sacrificeTargets)
+            let order = actionOrder(&context)
 
             for reference in order {
                 executeAction(reference, context: &context, sacrificeTargets: sacrificeTargets)
