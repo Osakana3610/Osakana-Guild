@@ -210,42 +210,62 @@ struct EncounterDetailView: View {
         indexToId: [UInt16: String]
     ) -> ([Int: ActionHPChange], [String: ParticipantState]) {
         var actionHPChanges: [Int: ActionHPChange] = [:]
-
-        // rawActionsとfilteredActionsの対応を追跡するためのインデックス
         var filteredIndex = 0
 
-        // 物理ダメージ統合用の追跡変数
-        var physicalDamageAccumulator: (
-            startIndex: Int,
-            filteredIdx: Int,
-            targetId: String,
-            beforeHP: Int
-        )? = nil
+        // 物理攻撃統合用: (filteredIdx, actor, target, beforeHP)
+        var physAccum: (idx: Int, actor: UInt16, target: UInt16, beforeHP: Int)? = nil
 
-        func flushPhysicalDamage() {
-            guard let acc = physicalDamageAccumulator,
-                  let state = stateMap[acc.targetId] else {
-                physicalDamageAccumulator = nil
+        func flush() {
+            guard let acc = physAccum,
+                  let targetId = indexToId[acc.target],
+                  let state = stateMap[targetId] else {
+                physAccum = nil
                 return
             }
-            actionHPChanges[acc.filteredIdx] = ActionHPChange(
-                targetId: acc.targetId,
+            actionHPChanges[acc.idx] = ActionHPChange(
+                targetId: targetId,
                 targetName: state.name,
                 beforeHP: acc.beforeHP,
                 afterHP: state.currentHP,
                 maxHP: state.maxHP
             )
-            physicalDamageAccumulator = nil
+            physAccum = nil
         }
 
-        for (rawIndex, action) in rawActions.enumerated() {
+        for action in rawActions {
             guard let kind = ActionKind(rawValue: action.kind) else { continue }
             let value = Int(action.value ?? 0)
 
-            // 物理ダメージ・回避以外が来たら、累積中のデータをフラッシュ
-            if kind != .physicalDamage && kind != .physicalEvade {
-                flushPhysicalDamage()
+            // 物理攻撃/回避の場合
+            if kind == .physicalDamage || kind == .physicalEvade {
+                guard let target = action.target else { continue }
+
+                // actor/targetが変わったらフラッシュ
+                if let acc = physAccum, (acc.actor != action.actor || acc.target != target) {
+                    flush()
+                }
+
+                // 新しい統合の開始
+                if physAccum == nil {
+                    let matchIdx = findPhysicalFilteredIndex(actor: action.actor, target: target,
+                                                            filteredActions: filteredActions,
+                                                            startFrom: filteredIndex)
+                    if let idx = matchIdx, let targetId = indexToId[target], let state = stateMap[targetId] {
+                        physAccum = (idx, action.actor, target, state.currentHP)
+                        filteredIndex = idx + 1
+                    }
+                }
+
+                // HP更新（ダメージの場合のみ）
+                if kind == .physicalDamage, let targetId = indexToId[target], var state = stateMap[targetId] {
+                    state.currentHP = max(0, state.currentHP - value)
+                    stateMap[targetId] = state
+                }
+                continue
             }
+
+            // 物理以外が来たらフラッシュ
+            flush()
 
             // このrawActionに対応するfilteredActionを探す
             let matchingFilteredIndex = findMatchingFilteredIndex(
@@ -257,34 +277,7 @@ struct EncounterDetailView: View {
             )
 
             switch kind {
-            // 物理ダメージ（統合対応）
-            case .physicalDamage:
-                if let target = action.target,
-                   let targetId = indexToId[target],
-                   var state = stateMap[targetId] {
-                    // 統合の最初のアクションかどうか判定
-                    if physicalDamageAccumulator == nil, let idx = matchingFilteredIndex {
-                        physicalDamageAccumulator = (rawIndex, idx, targetId, state.currentHP)
-                        filteredIndex = idx + 1
-                    }
-                    state.currentHP = max(0, state.currentHP - value)
-                    stateMap[targetId] = state
-                }
-
-            // 物理回避（統合対応、HP変動なし）
-            case .physicalEvade:
-                if let target = action.target,
-                   let targetId = indexToId[target] {
-                    // 統合の最初のアクションかどうか判定
-                    if physicalDamageAccumulator == nil, let idx = matchingFilteredIndex {
-                        if let state = stateMap[targetId] {
-                            physicalDamageAccumulator = (rawIndex, idx, targetId, state.currentHP)
-                        }
-                        filteredIndex = idx + 1
-                    }
-                }
-
-            // その他のダメージ（ターゲットのHPを減らす）
+            // ダメージ（ターゲットのHPを減らす）
             case .magicDamage, .breathDamage, .statusTick, .enemySpecialDamage:
                 if let target = action.target,
                    let targetId = indexToId[target],
@@ -388,9 +381,32 @@ struct EncounterDetailView: View {
         }
 
         // ループ終了時に残っている物理ダメージをフラッシュ
-        flushPhysicalDamage()
+        flush()
 
         return (actionHPChanges, stateMap)
+    }
+
+    /// 物理攻撃に対応するfilteredActionのインデックスを探す
+    private func findPhysicalFilteredIndex(
+        actor: UInt16,
+        target: UInt16,
+        filteredActions: [BattleLogEntry],
+        startFrom: Int
+    ) -> Int? {
+        let actorId = String(actor)
+        let targetId = String(target)
+
+        for idx in startFrom..<filteredActions.count {
+            let entry = filteredActions[idx]
+            // damageまたはmiss（回避）タイプで、actor/targetが一致するものを探す
+            if (entry.type == .damage || entry.type == .miss),
+               entry.actorId == actorId,
+               entry.targetId == targetId {
+                return idx
+            }
+        }
+
+        return nil
     }
 
     /// rawActionに対応するfilteredActionのインデックスを探す
