@@ -71,32 +71,6 @@ issues:
     fix_plan: |
       0.9.xの間に正しいスキルを割り当て予定。
 
-  - id: "FB0015"
-    title: "ギルドを最大まで拡張するとギルド情報の取得に失敗する"
-    category: "ギルド"
-    status: "investigating"
-    reported_date: "2025-12-23"
-    description: |
-      ギルドを最大まで拡張すると、ギルドタブで「ギルド情報の取得に失敗しました」エラーが表示される。
-    details: |
-      戦士スキル（Skill 65014）のprocRate stackingデータが不正なため、ギルド情報の読み込みに失敗している。
-    workaround: ""
-    fix_plan: |
-      12/25までに修正予定。
-
-  - id: "FB0016"
-    title: "探索中に問題がないのに帰還してしまう"
-    category: "探索"
-    status: "investigating"
-    reported_date: "2025-12-23"
-    description: |
-      パーティに問題がない状態（HP満タン、戦闘可能）なのに、探索中に帰還してしまう。
-    details: |
-      FB0015と同じ原因（戦士スキルのデータ不整合）により、データ読み込み時にエラーが発生し帰還処理が実行されている可能性がある。
-    workaround: ""
-    fix_plan: |
-      12/25までに修正予定。
-
   - id: "FB0017"
     title: "魔法を使った次のターンに使える魔法があるのに物理攻撃をしている"
     category: "戦闘"
@@ -273,3 +247,31 @@ resolved:
       パーティのレア倍率表示にパーティメンバーのスキル効果が反映されていない。
     resolution: |
       UI表示のみの問題。実際のドロップ計算には反映されていた。
+
+  - id: "FB0015"
+    title: "ギルドを最大まで拡張するとギルド情報の取得に失敗する"
+    category: "ギルド"
+    status: "fixed"
+    reported_date: "2025-12-23"
+    resolved_date: "2025-12-23"
+    resolved_version: "0.7.82 (2)"
+    description: |
+      ギルドを最大まで拡張すると、ギルドタブで「ギルド情報の取得に失敗しました」エラーが表示される。
+    details: |
+      戦士スキル（Skill 65014）のprocRate stackingデータが不正なため、ギルド情報の読み込みに失敗していた。
+    resolution: |
+      マスターデータとコードの不一致の修正により改善。
+
+  - id: "FB0016"
+    title: "探索中に問題がないのに帰還してしまう"
+    category: "探索"
+    status: "fixed"
+    reported_date: "2025-12-23"
+    resolved_date: "2025-12-23"
+    resolved_version: "0.7.82 (2)"
+    description: |
+      パーティに問題がない状態（HP満タン、戦闘可能）なのに、探索中に帰還してしまう。
+    details: |
+      FB0015と同じ原因（戦士スキルのデータ不整合）により、データ読み込み時にエラーが発生し帰還処理が実行されていた。
+    resolution: |
+      マスターデータとコードの不一致の修正により改善。
