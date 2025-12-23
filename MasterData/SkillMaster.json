@@ -13761,16 +13761,15 @@
         "familyId": "job.swordsman.counter",
         "effectType": "procRate",
         "parameters": {
-          "procType": "counter",
-          "stacking": "additive",
-          "target": "self"
+          "target": "counter",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65013,
             "label": "[職業:剣士] 反撃 被ダメ時10%反撃",
             "value": {
-              "additive": 10
+              "addPercent": 10
             }
           }
         ]
@@ -13779,16 +13778,15 @@
         "familyId": "job.swordsman.followup",
         "effectType": "procRate",
         "parameters": {
-          "procType": "pursuit",
-          "stacking": "additive",
-          "target": "self"
+          "target": "pursuit",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65014,
             "label": "[職業:剣士] 追撃 味方魔法後追撃",
             "value": {
-              "additive": 20
+              "addPercent": 20
             }
           }
         ]
@@ -13857,16 +13855,15 @@
         "familyId": "job.thief.doubleAction",
         "effectType": "procRate",
         "parameters": {
-          "procType": "extraAction",
-          "stacking": "additive",
-          "target": "self"
+          "target": "extraAction",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65024,
             "label": "[職業:盗賊] 連続行動 20%で2回行動",
             "value": {
-              "additive": 20
+              "addPercent": 20
             }
           }
         ]
@@ -14402,16 +14399,15 @@
         "familyId": "job.samurai.iai",
         "effectType": "procRate",
         "parameters": {
-          "procType": "firstStrike",
-          "stacking": "additive",
-          "target": "self"
+          "target": "firstStrike",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65093,
             "label": "[職業:侍] 居合 先制攻撃+10%",
             "value": {
-              "additive": 10
+              "addPercent": 10
             }
           }
         ]
@@ -14496,16 +14492,15 @@
         "familyId": "job.blademaster.master",
         "effectType": "procRate",
         "parameters": {
-          "procType": "counterOnEvade",
-          "stacking": "additive",
-          "target": "self"
+          "target": "counterOnEvade",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65104,
             "label": "[職業:剣聖] 回避反撃",
             "value": {
-              "additive": 50
+              "addPercent": 50
             }
           }
         ]
@@ -14730,16 +14725,15 @@
         "familyId": "job.ninja.shadowClone",
         "effectType": "procRate",
         "parameters": {
-          "procType": "counterOnEvade",
-          "stacking": "additive",
-          "target": "self"
+          "target": "counterOnEvade",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65134,
             "label": "[職業:忍者] 分身 回避時反撃",
             "value": {
-              "additive": 40
+              "addPercent": 40
             }
           }
         ]
@@ -14992,12 +14986,11 @@
               {
                 "effectType": "procRate",
                 "parameters": {
-                  "procType": "parry",
-                  "stacking": "additive",
-                  "target": "self"
+                  "target": "parry",
+                  "stacking": "add"
                 },
                 "value": {
-                  "additive": 10
+                  "addPercent": 10
                 }
               }
             ]
@@ -15008,16 +15001,15 @@
         "familyId": "master.swordsman.counter",
         "effectType": "procRate",
         "parameters": {
-          "procType": "counter",
-          "stacking": "additive",
-          "target": "self"
+          "target": "counter",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65173,
             "label": "[マスター:剣士] 反撃 被ダメ時18%反撃",
             "value": {
-              "additive": 18
+              "addPercent": 18
             }
           }
         ]
@@ -15026,16 +15018,15 @@
         "familyId": "master.swordsman.followup",
         "effectType": "procRate",
         "parameters": {
-          "procType": "pursuit",
-          "stacking": "additive",
-          "target": "self"
+          "target": "pursuit",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65174,
             "label": "[マスター:剣士] 追撃 味方魔法後追撃35%",
             "value": {
-              "additive": 35
+              "addPercent": 35
             }
           }
         ]
@@ -15074,16 +15065,15 @@
         "familyId": "master.thief.doubleAction",
         "effectType": "procRate",
         "parameters": {
-          "procType": "extraAction",
-          "stacking": "additive",
-          "target": "self"
+          "target": "extraAction",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65184,
             "label": "[マスター:盗賊] 連続行動 35%で2回行動",
             "value": {
-              "additive": 35
+              "addPercent": 35
             }
           }
         ]
@@ -15469,16 +15459,15 @@
         "familyId": "master.samurai.iai",
         "effectType": "procRate",
         "parameters": {
-          "procType": "firstStrike",
-          "stacking": "additive",
-          "target": "self"
+          "target": "firstStrike",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65253,
             "label": "[マスター:侍] 居合 先制攻撃+18%",
             "value": {
-              "additive": 18
+              "addPercent": 18
             }
           }
         ]
@@ -15544,16 +15533,15 @@
         "familyId": "master.blademaster.master",
         "effectType": "procRate",
         "parameters": {
-          "procType": "counterOnEvade",
-          "stacking": "additive",
-          "target": "self"
+          "target": "counterOnEvade",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65264,
             "label": "[マスター:剣聖] 回避反撃80%",
             "value": {
-              "additive": 80
+              "addPercent": 80
             }
           }
         ]
@@ -15684,16 +15672,15 @@
         "familyId": "master.ninja.shadowClone",
         "effectType": "procRate",
         "parameters": {
-          "procType": "counterOnEvade",
-          "stacking": "additive",
-          "target": "self"
+          "target": "counterOnEvade",
+          "stacking": "add"
         },
         "variants": [
           {
             "id": 65294,
             "label": "[マスター:忍者] 分身 回避時反撃70%",
             "value": {
-              "additive": 70
+              "addPercent": 70
             }
           }
         ]
