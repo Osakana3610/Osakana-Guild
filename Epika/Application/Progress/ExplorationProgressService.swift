@@ -38,9 +38,17 @@ final class ExplorationProgressService {
     /// 探索レコードの最大保持件数
     private static let maxRecordCount = 200
 
+    /// 探索履歴のキャッシュ
+    private var cachedExplorations: [ExplorationSnapshot]?
+
     init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
         self.masterDataCache = masterDataCache
+    }
+
+    /// キャッシュを無効化する
+    func invalidateCache() {
+        cachedExplorations = nil
     }
 
     // MARK: - Binary Format Helpers
@@ -82,6 +90,15 @@ final class ExplorationProgressService {
     // MARK: - Public API
 
     func allExplorations() async throws -> [ExplorationSnapshot] {
+        if let cached = cachedExplorations {
+            return cached
+        }
+        let fetched = try await fetchAllExplorations()
+        cachedExplorations = fetched
+        return fetched
+    }
+
+    private func fetchAllExplorations() async throws -> [ExplorationSnapshot] {
         let context = makeContext()
         let descriptor = FetchDescriptor<ExplorationRunRecord>(sortBy: [SortDescriptor(\.endedAt, order: .reverse)])
         let runs = try context.fetch(descriptor)
@@ -115,6 +132,7 @@ final class ExplorationProgressService {
         )
         context.insert(runRecord)
         try saveIfNeeded(context)
+        invalidateCache()  // パージや新規レコードでキャッシュが古くなる可能性
         return runRecord.persistentModelID
     }
 
@@ -168,6 +186,7 @@ final class ExplorationProgressService {
         }
 
         try saveIfNeeded(context)
+        invalidateCache()
     }
 
     func cancelRun(runId: PersistentIdentifier,
@@ -177,6 +196,7 @@ final class ExplorationProgressService {
         runRecord.endedAt = endedAt
         runRecord.result = ExplorationResult.cancelled.rawValue
         try saveIfNeeded(context)
+        invalidateCache()
     }
 
     /// partyIdとstartedAtで特定のRunをキャンセル
@@ -191,6 +211,7 @@ final class ExplorationProgressService {
         record.endedAt = endedAt
         record.result = ExplorationResult.cancelled.rawValue
         try saveIfNeeded(context)
+        invalidateCache()
     }
 
     /// Running状態の探索レコードを取得（再開用）

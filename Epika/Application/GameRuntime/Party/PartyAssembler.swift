@@ -31,6 +31,16 @@ enum PartyAssembler {
             )
             assembled.append(runtimeCharacter)
         }
-        return try RuntimePartyState(party: party, characters: assembled)
+
+        // 探索時間モディファイアを事前計算
+        var explorationModifiers = SkillRuntimeEffects.ExplorationModifiers.neutral
+        for character in assembled {
+            let modifiers = try SkillRuntimeEffectCompiler.explorationModifiers(from: character.learnedSkills)
+            explorationModifiers.merge(modifiers)
+        }
+
+        return try RuntimePartyState(party: party,
+                                     characters: assembled,
+                                     explorationModifiers: explorationModifiers)
     }
 }

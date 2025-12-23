@@ -140,11 +140,11 @@ extension AppServices {
                 }
                 // 帰還時にドロップ報酬を適用
                 let drops = makeItemDropResults(from: artifact.totalDrops)
-                try await applyDropRewards(drops)
+                let dropResult = try await applyDropRewards(drops)
                 // プレイヤー状態とインベントリキャッシュを更新（失敗しても探索完了フローは止めない）
-                Task { @MainActor [weak self, itemPreload, inventory] in
+                Task { @MainActor [weak self, itemPreload] in
                     await self?.reloadPlayerState()
-                    try? await itemPreload.reload(inventoryService: inventory)
+                    itemPreload.addDroppedItems(dropResult.addedSnapshots, definitions: dropResult.definitions)
                 }
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
@@ -234,10 +234,26 @@ extension AppServices {
         }
     }
 
-    func applyDropRewards(_ drops: [ItemDropResult]) async throws {
+    /// ドロップ報酬適用結果
+    struct DropRewardsResult: Sendable {
+        let addedSnapshots: [ItemSnapshot]
+        let definitions: [UInt16: ItemDefinition]
+    }
+
+    func applyDropRewards(_ drops: [ItemDropResult]) async throws -> DropRewardsResult {
+        guard !drops.isEmpty else {
+            return DropRewardsResult(addedSnapshots: [], definitions: [:])
+        }
+
         let autoTradeKeys = try await autoTrade.registeredStackKeys()
+
+        // ドロップを自動売却対象とインベントリ対象に分類
+        var autoSellItems: [(itemId: UInt16, quantity: Int)] = []
+        var autoSellEnhancements: [UInt16: ItemSnapshot.Enhancement] = [:]
+        var inventorySeeds: [InventoryProgressService.BatchSeed] = []
+        var itemIds = Set<UInt16>()
+
         for drop in drops where drop.quantity > 0 {
-            // normalTitleId: nil = 無称号 = ID 2, superRareTitleId: nil = なし = 0
             let superRareTitleId: UInt8 = drop.superRareTitleId ?? 0
             let normalTitleId: UInt8 = drop.normalTitleId ?? 2
 
@@ -248,28 +264,54 @@ extension AppServices {
                 socketNormalTitleId: 0,
                 socketItemId: 0
             )
-            // 自動売却キーはソケットを除外した3要素形式
             let autoTradeKey = "\(superRareTitleId)|\(normalTitleId)|\(drop.item.id)"
+
             if autoTradeKeys.contains(autoTradeKey) {
-                // 自動売却：ショップ在庫に追加してゴールド取得
-                let result = try await shop.addPlayerSoldItem(itemId: drop.item.id, quantity: drop.quantity)
-                if result.gold > 0 {
-                    _ = try await gameState.addGold(UInt32(result.gold))
-                }
-                // 上限超過分はインベントリに一時保管
-                if result.overflow > 0 {
-                    _ = try await inventory.addItem(itemId: drop.item.id,
-                                                    quantity: result.overflow,
-                                                    storage: .playerItem,
-                                                    enhancements: enhancement)
-                }
+                autoSellItems.append((itemId: drop.item.id, quantity: drop.quantity))
+                // オーバーフロー時の enhancement を保存（後から見つかったものを優先）
+                autoSellEnhancements[drop.item.id] = enhancement
             } else {
-                _ = try await inventory.addItem(itemId: drop.item.id,
-                                                quantity: drop.quantity,
-                                                storage: .playerItem,
-                                                enhancements: enhancement)
+                inventorySeeds.append(.init(itemId: drop.item.id,
+                                            quantity: drop.quantity,
+                                            storage: .playerItem,
+                                            enhancements: enhancement))
+                itemIds.insert(drop.item.id)
             }
         }
+
+        // 自動売却をバッチ処理
+        if !autoSellItems.isEmpty {
+            let sellResult = try await shop.addPlayerSoldItemsBatch(autoSellItems)
+            if sellResult.totalGold > 0 {
+                _ = try await gameState.addGold(UInt32(sellResult.totalGold))
+            }
+            // オーバーフロー分をインベントリに追加
+            for (itemId, overflowQty) in sellResult.overflows where overflowQty > 0 {
+                if let enhancement = autoSellEnhancements[itemId] {
+                    inventorySeeds.append(.init(itemId: itemId,
+                                                quantity: overflowQty,
+                                                storage: .playerItem,
+                                                enhancements: enhancement))
+                    itemIds.insert(itemId)
+                }
+            }
+        }
+
+        // インベントリ追加をバッチ処理
+        var addedSnapshots: [ItemSnapshot] = []
+        if !inventorySeeds.isEmpty {
+            addedSnapshots = try await inventory.addItemsBatchReturningSnapshots(inventorySeeds)
+        }
+
+        // 定義を収集（キャッシュ更新用）
+        var definitions: [UInt16: ItemDefinition] = [:]
+        for id in itemIds {
+            if let def = masterDataCache.item(id) {
+                definitions[id] = def
+            }
+        }
+
+        return DropRewardsResult(addedSnapshots: addedSnapshots, definitions: definitions)
     }
 
     func distributeFlatExperience(total: Int,

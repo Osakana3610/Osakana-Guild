@@ -25,7 +25,6 @@ struct CombatExecutionService {
         self.masterData = masterData
     }
 
-    @MainActor
     func runCombat(enemyId: UInt16,
                    enemyLevel: Int?,
                    groupMin: Int?,
