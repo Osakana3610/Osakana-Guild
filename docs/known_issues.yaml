@@ -45,19 +45,6 @@ issues:
     fix_plan: |
       掘り出し物機能の完成時に修正予定。商店は0.8.0にて基本機能を完成させる予定です。
 
-  - id: "FB0013"
-    title: "キャラが複数回攻撃をすることがある"
-    category: "戦闘"
-    status: "investigating"
-    reported_date: "2025-12-23"
-    description: |
-      キャラクターが1ターンに複数回攻撃を行うことがある。
-    details: |
-      攻撃回数の定義が間違っており、回数分行動してしまっている。
-    workaround: ""
-    fix_plan: |
-      12/24までに修正予定。
-
   - id: "FB0014"
     title: "獲得系アイテムが全て経験値に関するスキルしか持っていない"
     category: "マスターデータ"
@@ -247,6 +234,22 @@ resolved:
       パーティのレア倍率表示にパーティメンバーのスキル効果が反映されていない。
     resolution: |
       UI表示のみの問題。実際のドロップ計算には反映されていた。
+
+  - id: "FB0013"
+    title: "敵キャラが複数回攻撃をすることがある"
+    category: "戦闘"
+    status: "fixed"
+    reported_date: "2025-12-23"
+    resolved_date: "2025-12-23"
+    resolved_version: "0.7.82 (2)"
+    description: |
+      敵キャラクターが1ターンに複数回攻撃を行うことがある。
+    details: |
+      physicalEvadeアクションのactor/targetが逆に記録されていた。
+      味方が敵を攻撃して敵が回避した場合に「敵の攻撃！味方は攻撃をかわした！」と表示され、
+      敵が何度も攻撃しているように見えていた。
+    resolution: |
+      physicalEvadeのactor/targetをphysicalDamageと同様にactor=攻撃側、target=防御側に統一。
 
   - id: "FB0015"
     title: "ギルドを最大まで拡張するとギルド情報の取得に失敗する"
