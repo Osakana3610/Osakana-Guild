@@ -38,14 +38,14 @@ struct ActorEffectsAccumulator {
     /// 蓄積した値から BattleActor.SkillEffects を構築
     func build() -> BattleActor.SkillEffects {
         let dealt = BattleActor.SkillEffects.DamageMultipliers(
-            physical: damage.totalMultiplier(for: "physical"),
-            magical: damage.totalMultiplier(for: "magical"),
-            breath: damage.totalMultiplier(for: "breath")
+            physical: damage.totalMultiplier(for: BattleDamageType.physical.rawValue),
+            magical: damage.totalMultiplier(for: BattleDamageType.magical.rawValue),
+            breath: damage.totalMultiplier(for: BattleDamageType.breath.rawValue)
         )
         let taken = BattleActor.SkillEffects.DamageMultipliers(
-            physical: damage.totalTakenMultiplier(for: "physical"),
-            magical: damage.totalTakenMultiplier(for: "magical"),
-            breath: damage.totalTakenMultiplier(for: "breath")
+            physical: damage.totalTakenMultiplier(for: BattleDamageType.physical.rawValue),
+            magical: damage.totalTakenMultiplier(for: BattleDamageType.magical.rawValue),
+            breath: damage.totalTakenMultiplier(for: BattleDamageType.breath.rawValue)
         )
 
         let damageGroup = BattleActor.SkillEffects.Damage(
@@ -162,10 +162,28 @@ struct ActorEffectsAccumulator {
 // MARK: - DamageAccumulator
 
 struct DamageAccumulator {
-    var dealtPercentByType: [String: Double] = ["physical": 0.0, "magical": 0.0, "breath": 0.0]
-    var dealtMultiplierByType: [String: Double] = ["physical": 1.0, "magical": 1.0, "breath": 1.0]
-    var takenPercentByType: [String: Double] = ["physical": 0.0, "magical": 0.0, "breath": 0.0]
-    var takenMultiplierByType: [String: Double] = ["physical": 1.0, "magical": 1.0, "breath": 1.0]
+    /// damageType (Int) -> percent 加算値
+    /// BattleDamageType.rawValue: physical=1, magical=2, breath=3
+    var dealtPercentByType: [Int: Double] = [
+        Int(BattleDamageType.physical.rawValue): 0.0,
+        Int(BattleDamageType.magical.rawValue): 0.0,
+        Int(BattleDamageType.breath.rawValue): 0.0
+    ]
+    var dealtMultiplierByType: [Int: Double] = [
+        Int(BattleDamageType.physical.rawValue): 1.0,
+        Int(BattleDamageType.magical.rawValue): 1.0,
+        Int(BattleDamageType.breath.rawValue): 1.0
+    ]
+    var takenPercentByType: [Int: Double] = [
+        Int(BattleDamageType.physical.rawValue): 0.0,
+        Int(BattleDamageType.magical.rawValue): 0.0,
+        Int(BattleDamageType.breath.rawValue): 0.0
+    ]
+    var takenMultiplierByType: [Int: Double] = [
+        Int(BattleDamageType.physical.rawValue): 1.0,
+        Int(BattleDamageType.magical.rawValue): 1.0,
+        Int(BattleDamageType.breath.rawValue): 1.0
+    ]
     var targetMultipliers: [UInt8: Double] = [:]
     var criticalDamagePercent: Double = 0.0
     var criticalDamageMultiplier: Double = 1.0
@@ -178,15 +196,17 @@ struct DamageAccumulator {
     var levelComparisonDamageTakenPercent: Double = 0.0
     var hpThresholdMultipliers: [BattleActor.SkillEffects.HPThresholdMultiplier] = []
 
-    func totalMultiplier(for damageType: String) -> Double {
-        let percent = dealtPercentByType[damageType] ?? 0.0
-        let multiplier = dealtMultiplierByType[damageType] ?? 1.0
+    func totalMultiplier(for damageType: UInt8) -> Double {
+        let key = Int(damageType)
+        let percent = dealtPercentByType[key] ?? 0.0
+        let multiplier = dealtMultiplierByType[key] ?? 1.0
         return max(0.0, 1.0 + percent / 100.0) * multiplier
     }
 
-    func totalTakenMultiplier(for damageType: String) -> Double {
-        let percent = takenPercentByType[damageType] ?? 0.0
-        let multiplier = takenMultiplierByType[damageType] ?? 1.0
+    func totalTakenMultiplier(for damageType: UInt8) -> Double {
+        let key = Int(damageType)
+        let percent = takenPercentByType[key] ?? 0.0
+        let multiplier = takenMultiplierByType[key] ?? 1.0
         return max(0.0, 1.0 + percent / 100.0) * multiplier
     }
 }
@@ -210,8 +230,10 @@ struct SpellAccumulator {
 
 struct ActorCombatAccumulator {
     var procChanceMultiplier: Double = 1.0
-    var procRateMultipliers: [String: Double] = [:]
-    var procRateAdditives: [String: Double] = [:]
+    /// procType (Int) -> multiplier
+    var procRateMultipliers: [Int: Double] = [:]
+    /// procType (Int) -> additive
+    var procRateAdditives: [Int: Double] = [:]
     var extraActions: [BattleActor.SkillEffects.ExtraAction] = []
     var nextTurnExtraActions: Int = 0
     var actionOrderMultiplier: Double = 1.0
@@ -271,9 +293,12 @@ struct MiscAccumulator {
     var vampiricImpulse: Bool = false
     var vampiricSuppression: Bool = false
     var antiHealingEnabled: Bool = false
-    var partyHostileTargets: Set<String> = []
-    var partyProtectedTargets: Set<String> = []
-    var equipmentStatMultipliers: [String: Double] = [:]
+    /// targetId (Int) の敵対対象
+    var partyHostileTargets: Set<Int> = []
+    /// targetId (Int) の保護対象
+    var partyProtectedTargets: Set<Int> = []
+    /// equipmentCategory (Int) -> multiplier
+    var equipmentStatMultipliers: [Int: Double] = [:]
     let degradationPercent: Double = 0.0
     var degradationRepairMinPercent: Double = 0.0
     var degradationRepairMaxPercent: Double = 0.0

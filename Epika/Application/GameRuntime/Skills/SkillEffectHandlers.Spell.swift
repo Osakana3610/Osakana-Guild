@@ -37,7 +37,7 @@ struct SpellPowerPercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        var value = payload.value["valuePercent"] ?? 0.0
+        var value = payload.value[.valuePercent] ?? 0.0
         value += payload.scaledValue(from: context.actorStats)
         accumulator.spell.spellPowerPercent += value
     }
@@ -51,7 +51,7 @@ struct SpellPowerMultiplierHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        accumulator.spell.spellPowerMultiplier *= try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        accumulator.spell.spellPowerMultiplier *= try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
     }
 }
 
@@ -63,11 +63,9 @@ struct SpellSpecificMultiplierHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let spellIdString = try payload.requireParam("spellId", skillId: context.skillId, effectIndex: context.effectIndex)
-        guard let spellId = UInt8(spellIdString) else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) spellSpecificMultiplier の spellId が無効です: \(spellIdString)")
-        }
-        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        let spellIdRaw = try payload.requireParam(.spellId, skillId: context.skillId, effectIndex: context.effectIndex)
+        let spellId = UInt8(spellIdRaw)
+        let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
         accumulator.spell.spellSpecificMultipliers[spellId, default: 1.0] *= multiplier
     }
 }
@@ -80,11 +78,9 @@ struct SpellSpecificTakenMultiplierHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let spellIdString = try payload.requireParam("spellId", skillId: context.skillId, effectIndex: context.effectIndex)
-        guard let spellId = UInt8(spellIdString) else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) spellSpecificTakenMultiplier の spellId が無効です: \(spellIdString)")
-        }
-        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        let spellIdRaw = try payload.requireParam(.spellId, skillId: context.skillId, effectIndex: context.effectIndex)
+        let spellId = UInt8(spellIdRaw)
+        let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
         accumulator.spell.spellSpecificTakenMultipliers[spellId, default: 1.0] *= multiplier
     }
 }
@@ -97,13 +93,12 @@ struct SpellChargesHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let targetSpellIdString = payload.parameters["spellId"]
-        let targetSpellId = targetSpellIdString.flatMap { UInt8($0) }
+        let targetSpellId = payload.parameters[.spellId].map { UInt8($0) }
         var modifier = targetSpellId.flatMap { accumulator.spell.spellChargeModifiers[$0] }
             ?? accumulator.spell.defaultSpellChargeModifier
             ?? BattleActor.SkillEffects.SpellChargeModifier()
 
-        if let maxCharges = payload.value["maxCharges"] {
+        if let maxCharges = payload.value[.maxCharges] {
             let value = Int(maxCharges.rounded(.towardZero))
             if value > 0 {
                 if let current = modifier.maxOverride {
@@ -113,7 +108,7 @@ struct SpellChargesHandler: SkillEffectHandler {
                 }
             }
         }
-        if let initial = payload.value["initialCharges"] {
+        if let initial = payload.value[.initialCharges] {
             let value = Int(initial.rounded(.towardZero))
             if value > 0 {
                 if let current = modifier.initialOverride {
@@ -123,24 +118,24 @@ struct SpellChargesHandler: SkillEffectHandler {
                 }
             }
         }
-        if let bonus = payload.value["initialBonus"] {
+        if let bonus = payload.value[.initialBonus] {
             let value = Int(bonus.rounded(.towardZero))
             if value != 0 {
                 modifier.initialBonus += value
             }
         }
-        if let every = payload.value["regenEveryTurns"],
-           let amount = payload.value["regenAmount"],
-           let cap = payload.value["regenCap"] {
+        if let every = payload.value[.regenEveryTurns],
+           let amount = payload.value[.regenAmount],
+           let cap = payload.value[.regenCap] {
             let regen = BattleActor.SkillEffects.SpellChargeRegen(
                 every: Int(every),
                 amount: Int(amount),
                 cap: Int(cap),
-                maxTriggers: payload.value["maxTriggers"].map { Int($0) }
+                maxTriggers: payload.value[.maxTriggers].map { Int($0) }
             )
             modifier.regen = regen
         }
-        if let gain = payload.value["gainOnPhysicalHit"], gain > 0 {
+        if let gain = payload.value[.gainOnPhysicalHit], gain > 0 {
             let value = Int(gain.rounded(.towardZero))
             if value > 0 {
                 modifier.gainOnPhysicalHit = (modifier.gainOnPhysicalHit ?? 0) + value
@@ -189,13 +184,14 @@ struct TacticSpellAmplifyHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let spellId = try payload.requireParam("spellId", skillId: context.skillId, effectIndex: context.effectIndex)
-        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
-        let triggerTurn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
-        let key = "spellSpecific:" + spellId
+        let spellIdRaw = try payload.requireParam(.spellId, skillId: context.skillId, effectIndex: context.effectIndex)
+        let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
+        let triggerTurn = try payload.requireValue(.triggerTurn, skillId: context.skillId, effectIndex: context.effectIndex)
+        let key = "spellSpecific:\(spellIdRaw)"
         let triggerId = payload.familyId.map { String($0) } ?? payload.effectType.identifier
-        let scopeString = payload.parameters["scope"] ?? "party"
-        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(identifier: scopeString) ?? .party
+        // scope: 1=party, 2=self (TimedBuffScope)
+        let scopeRaw = payload.parameters[.target] ?? Int(TimedBuffScope.party.rawValue)
+        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: UInt8(scopeRaw)) ?? .party
         let turn = Int(triggerTurn.rounded(.towardZero))
         accumulator.status.timedBuffTriggers.append(.init(
             id: triggerId,
@@ -218,10 +214,10 @@ struct MagicCriticalChancePercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        var value = payload.value["valuePercent"] ?? 0.0
+        var value = payload.value[.valuePercent] ?? 0.0
         value += payload.scaledValue(from: context.actorStats)
         accumulator.spell.magicCriticalChancePercent = max(accumulator.spell.magicCriticalChancePercent, value)
-        if let multiplier = payload.value["multiplier"] {
+        if let multiplier = payload.value[.multiplier] {
             accumulator.spell.magicCriticalMultiplier = max(accumulator.spell.magicCriticalMultiplier, multiplier)
         }
     }
@@ -235,10 +231,9 @@ struct SpellChargeRecoveryChanceHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        var baseChance = payload.value["chancePercent"] ?? 0.0
+        var baseChance = payload.value[.chancePercent] ?? 0.0
         baseChance += payload.scaledValue(from: context.actorStats)
-        let schoolString = payload.parameters["school"]
-        let school: UInt8? = schoolString.flatMap { UInt8($0) }
+        let school: UInt8? = payload.parameters[.school].map { UInt8($0) }
         accumulator.spell.chargeRecoveries.append(.init(baseChancePercent: baseChance, school: school))
     }
 }

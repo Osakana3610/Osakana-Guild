@@ -33,20 +33,7 @@
 
 import Foundation
 
-enum BattleDamageType: UInt8, Sendable {
-    case physical = 0
-    case magical = 1
-    case breath = 2
-
-    init?(identifier: String) {
-        switch identifier {
-        case "physical": self = .physical
-        case "magical": self = .magical
-        case "breath": self = .breath
-        default: return nil
-        }
-    }
-}
+// BattleDamageType は Domain/Enums/BattleEnums.swift に移動
 
 struct BattleActionRates: Sendable, Hashable {
     var attack: Int
@@ -71,19 +58,17 @@ enum BattleActorKind: Sendable {
     case enemy
 }
 
-enum BattleFormationSlot: Int, Sendable, CaseIterable {
-    case frontLeft = 0
-    case frontRight = 1
-    case middleLeft = 2
-    case middleRight = 3
-    case backLeft = 4
-    case backRight = 5
+/// 陣形スロット（1〜6の整数）
+typealias BattleFormationSlot = Int
 
-    var row: Int {
+extension Int {
+    /// 陣形スロットの列インデックス（0=前列, 1=中列, 2=後列）
+    var formationRow: Int {
         switch self {
-        case .frontLeft, .frontRight: return 0
-        case .middleLeft, .middleRight: return 1
-        case .backLeft, .backRight: return 2
+        case 1, 2: return 0  // 前列
+        case 3, 4: return 1  // 中列
+        case 5, 6: return 2  // 後列
+        default: return 0    // 範囲外は前列扱い
         }
     }
 }
@@ -395,12 +380,12 @@ struct BattleActor: Sendable {
         }
 
         struct ProcRateModifier: Sendable, Hashable {
-            var multipliers: [String: Double]
-            var additives: [String: Double]
+            var multipliers: [Int: Double]
+            var additives: [Int: Double]
 
             static let neutral = ProcRateModifier(multipliers: [:], additives: [:])
 
-            func adjustedChance(base: Double, target: String) -> Double {
+            func adjustedChance(base: Double, target: Int) -> Double {
                 let added = additives[target, default: 0.0]
                 let multiplied = multipliers[target, default: 1.0]
                 return (base + added) * multiplied
@@ -413,60 +398,38 @@ struct BattleActor: Sendable {
         }
 
         struct Reaction: Sendable, Hashable {
+            /// リアクショントリガー（rawValueはEnumMappings.triggerTypeに準拠）
             enum Trigger: UInt8, Sendable {
-                case allyDefeated = 1
-                case selfEvadePhysical = 2
-                case selfDamagedPhysical = 3
-                case selfDamagedMagical = 4
-                case allyDamagedPhysical = 5
-                case selfKilledEnemy = 6      // 敵を倒した時
-                case allyMagicAttack = 7      // 味方が魔法攻撃した時
-                case selfAttackNoKill = 8     // 攻撃したが敵を倒せなかった時
-                case selfMagicAttack = 9      // 自分が魔法攻撃した時
-
-                nonisolated init?(identifier: String) {
-                    switch identifier {
-                    case "allyDefeated": self = .allyDefeated
-                    case "selfEvadePhysical": self = .selfEvadePhysical
-                    case "selfDamagedPhysical": self = .selfDamagedPhysical
-                    case "selfDamagedMagical": self = .selfDamagedMagical
-                    case "allyDamagedPhysical": self = .allyDamagedPhysical
-                    case "selfKilledEnemy": self = .selfKilledEnemy
-                    case "allyMagicAttack": self = .allyMagicAttack
-                    case "selfAttackNoKill": self = .selfAttackNoKill
-                    case "selfMagicAttack": self = .selfMagicAttack
-                    default: return nil
-                    }
-                }
+                case allyDamagedPhysical = 2
+                case allyDefeated = 3
+                case allyMagicAttack = 4
+                case selfAttackNoKill = 6
+                case selfDamagedMagical = 7
+                case selfDamagedPhysical = 8
+                case selfEvadePhysical = 9
+                case selfKilledEnemy = 10
+                case selfMagicAttack = 11
 
                 nonisolated var identifier: String {
                     switch self {
-                    case .allyDefeated: return "allyDefeated"
-                    case .selfEvadePhysical: return "selfEvadePhysical"
-                    case .selfDamagedPhysical: return "selfDamagedPhysical"
-                    case .selfDamagedMagical: return "selfDamagedMagical"
                     case .allyDamagedPhysical: return "allyDamagedPhysical"
-                    case .selfKilledEnemy: return "selfKilledEnemy"
+                    case .allyDefeated: return "allyDefeated"
                     case .allyMagicAttack: return "allyMagicAttack"
                     case .selfAttackNoKill: return "selfAttackNoKill"
+                    case .selfDamagedMagical: return "selfDamagedMagical"
+                    case .selfDamagedPhysical: return "selfDamagedPhysical"
+                    case .selfEvadePhysical: return "selfEvadePhysical"
+                    case .selfKilledEnemy: return "selfKilledEnemy"
                     case .selfMagicAttack: return "selfMagicAttack"
                     }
                 }
             }
 
+            /// リアクションターゲット（rawValueはEnumMappings.targetTypeに準拠）
             enum Target: UInt8, Sendable {
-                case attacker = 1
-                case killer = 2
-                case randomEnemy = 3          // ランダムな敵
-
-                nonisolated init?(identifier: String) {
-                    switch identifier {
-                    case "attacker": self = .attacker
-                    case "killer": self = .killer
-                    case "randomEnemy": self = .randomEnemy
-                    default: return nil
-                    }
-                }
+                case attacker = 2
+                case killer = 13
+                case randomEnemy = 255        // コード専用（フォールバック用）
 
                 nonisolated var identifier: String {
                     switch self {
@@ -491,43 +454,12 @@ struct BattleActor: Sendable {
         }
 
         struct SpecialAttack: Sendable, Hashable {
-            enum Kind: UInt8, Sendable {
-                case specialA = 1
-                case specialB = 2
-                case specialC = 3
-                case specialD = 4
-                case specialE = 5
-
-                nonisolated init?(identifier: String) {
-                    switch identifier {
-                    case "specialA": self = .specialA
-                    case "specialB": self = .specialB
-                    case "specialC": self = .specialC
-                    case "specialD": self = .specialD
-                    case "specialE": self = .specialE
-                    default: return nil
-                    }
-                }
-
-                nonisolated var identifier: String {
-                    switch self {
-                    case .specialA: return "specialA"
-                    case .specialB: return "specialB"
-                    case .specialC: return "specialC"
-                    case .specialD: return "specialD"
-                    case .specialE: return "specialE"
-                    }
-                }
-            }
+            /// SpecialAttackKind (SkillEffectEnums.swift) への参照
+            typealias Kind = SpecialAttackKind
 
             let kind: Kind
             let chancePercent: Int
             let preemptive: Bool  // 先制攻撃フラグ
-
-            init?(kindIdentifier: String, chancePercent: Int, preemptive: Bool = false) {
-                guard let parsed = Kind(identifier: kindIdentifier) else { return nil }
-                self.init(kind: parsed, chancePercent: chancePercent, preemptive: preemptive)
-            }
 
             init(kind: Kind, chancePercent: Int, preemptive: Bool = false) {
                 self.kind = kind
@@ -751,7 +683,7 @@ struct BattleActor: Sendable {
         }
 
         struct EnemyStatDebuff: Sendable, Hashable {
-            let stat: String       // 対象ステータス（magicalDefense, physicalAttack, hitRate等）
+            let stat: Int          // 対象ステータスID（EnumMappings.statType参照）
             let multiplier: Double // 弱体倍率（0.9 = -10%）
         }
 
@@ -860,14 +792,14 @@ struct BattleActor: Sendable {
             var vampiricImpulse: Bool
             var vampiricSuppression: Bool
             var antiHealingEnabled: Bool
-            var equipmentStatMultipliers: [String: Double]
+            var equipmentStatMultipliers: [Int: Double]
             var degradationPercent: Double
             var degradationRepairMinPercent: Double
             var degradationRepairMaxPercent: Double
             var degradationRepairBonusPercent: Double
             var autoDegradationRepair: Bool
-            var partyHostileTargets: Set<String>
-            var partyProtectedTargets: Set<String>
+            var partyHostileTargets: Set<Int>
+            var partyProtectedTargets: Set<Int>
             var magicRunaway: Runaway?
             var damageRunaway: Runaway?
             var retreatTurn: Int?
@@ -962,8 +894,8 @@ struct BattleActor: Sendable {
     var spellbook: SkillRuntimeEffects.Spellbook
     var spells: SkillRuntimeEffects.SpellLoadout
     var degradationPercent: Double
-    var partyHostileTargets: Set<String>
-        var partyProtectedTargets: Set<String>
+    var partyHostileTargets: Set<Int>
+        var partyProtectedTargets: Set<Int>
         var spellChargeRegenUsage: [UInt8: Int]
         var rescueActionCapacity: Int
         var rescueActionsUsed: Int
@@ -1016,8 +948,8 @@ struct BattleActor: Sendable {
          spellbook: SkillRuntimeEffects.Spellbook = .empty,
          spells: SkillRuntimeEffects.SpellLoadout = .empty,
          degradationPercent: Double = 0.0,
-         partyHostileTargets: Set<String> = [],
-         partyProtectedTargets: Set<String> = [],
+         partyHostileTargets: Set<Int> = [],
+         partyProtectedTargets: Set<Int> = [],
          spellChargeRegenUsage: [UInt8: Int] = [:],
          rescueActionCapacity: Int = 1,
          rescueActionsUsed: Int = 0,
@@ -1088,6 +1020,6 @@ struct BattleActor: Sendable {
     }
 
     var isAlive: Bool { currentHP > 0 }
-    var rowIndex: Int { formationSlot.row }
+    var rowIndex: Int { formationSlot.formationRow }
 }
 

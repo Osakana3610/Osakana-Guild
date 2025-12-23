@@ -31,14 +31,12 @@ extension SkillRuntimeEffectCompiler {
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case .equipmentSlotAdditive:
-                    let raw = payload.value["add"] ?? payload.value["value"] ?? payload.value["slots"]
-                    if let value = raw {
-                        let intValue = Int(value.rounded(.towardZero))
+                    if let value = payload.value[.add] {
+                        let intValue = Int(value.rounded(FloatingPointRoundingRule.towardZero))
                         result.additive &+= max(0, intValue)
                     }
                 case .equipmentSlotMultiplier:
-                    let raw = payload.value["multiplier"] ?? payload.value["value"]
-                    if let multiplier = raw {
+                    if let multiplier = payload.value[.multiplier] {
                         result.multiplier *= multiplier
                     }
                 case .absorption,

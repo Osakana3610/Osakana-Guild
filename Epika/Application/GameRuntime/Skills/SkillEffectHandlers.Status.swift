@@ -35,13 +35,13 @@ struct StatusResistanceMultiplierHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // 両方のパラメータ名をサポート: statusType (JSON) と status (DB)
-        let statusIdString = payload.parameters["statusType"] ?? payload.parameters["status"]
-        guard let statusIdString,
-              let statusId = UInt8(statusIdString) else {
+        // 両方のパラメータ名をサポート: statusType と status
+        let statusIdRaw = payload.parameters[.statusType] ?? payload.parameters[.status]
+        guard let statusIdRaw else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistanceMultiplier の statusType/status が無効です")
         }
-        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        let statusId = UInt8(statusIdRaw)
+        let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
         var entry = accumulator.status.statusResistances[statusId] ?? .neutral
         entry.multiplier *= multiplier
         accumulator.status.statusResistances[statusId] = entry
@@ -56,13 +56,13 @@ struct StatusResistancePercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // 両方のパラメータ名をサポート: statusType (JSON) と status (DB)
-        let statusIdString = payload.parameters["statusType"] ?? payload.parameters["status"]
-        guard let statusIdString,
-              let statusId = UInt8(statusIdString) else {
+        // 両方のパラメータ名をサポート: statusType と status
+        let statusIdRaw = payload.parameters[.statusType] ?? payload.parameters[.status]
+        guard let statusIdRaw else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistancePercent の statusType/status が無効です")
         }
-        let value = try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        let statusId = UInt8(statusIdRaw)
+        let value = try payload.requireValue(.valuePercent, skillId: context.skillId, effectIndex: context.effectIndex)
         var entry = accumulator.status.statusResistances[statusId] ?? .neutral
         entry.additivePercent += value
         accumulator.status.statusResistances[statusId] = entry
@@ -77,11 +77,9 @@ struct StatusInflictHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let statusIdString = try payload.requireParam("statusId", skillId: context.skillId, effectIndex: context.effectIndex)
-        guard let statusId = UInt8(statusIdString) else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) statusInflict の statusId が無効です: \(statusIdString)")
-        }
-        let base = try payload.requireValue("baseChancePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        let statusIdRaw = try payload.requireParam(.statusId, skillId: context.skillId, effectIndex: context.effectIndex)
+        let statusId = UInt8(statusIdRaw)
+        let base = try payload.requireValue(.baseChancePercent, skillId: context.skillId, effectIndex: context.effectIndex)
         accumulator.status.statusInflictions.append(.init(statusId: statusId, baseChancePercent: base))
     }
 }
@@ -94,7 +92,7 @@ struct BerserkHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let chance = try payload.requireValue("chancePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        let chance = try payload.requireValue(.chancePercent, skillId: context.skillId, effectIndex: context.effectIndex)
         if let current = accumulator.status.berserkChancePercent {
             accumulator.status.berserkChancePercent = max(current, chance)
         } else {
@@ -111,21 +109,24 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let triggerType = payload.parameters["trigger"] ?? "battleStart"
+        // trigger: 5=battleStart, 12=turnElapsed (EnumMappings.triggerType)
+        let triggerRaw = payload.parameters[.trigger] ?? Int(ReactionTrigger.battleStart.rawValue)
         let triggerId = payload.familyId.map { String($0) } ?? "\(context.skillId)_timedBuff"
-        let scopeString = payload.parameters["scope"] ?? "self"
-        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(identifier: scopeString) ?? .`self`
-        let category = payload.parameters["buffType"] ?? "general"
+        // scope: 1=party, 2=self (TimedBuffScope)
+        let scopeRaw = payload.parameters[.target] ?? Int(TimedBuffScope.`self`.rawValue)
+        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: UInt8(scopeRaw)) ?? .`self`
+        // buffType は将来的にenumにマップ可能、現状はカテゴリ文字列で維持
+        _ = payload.parameters[.buffType] ?? 0  // 現在未使用だが将来的に使用予定
+        let category = "general"  // カテゴリは文字列のまま維持
 
-        switch triggerType {
-        case "battleStart":
+        switch triggerRaw {
+        case Int(ReactionTrigger.battleStart.rawValue):
             // 戦闘開始時に発動（ターン1）、duration分持続
-            let duration = Int(payload.value["duration"] ?? 1)
+            let duration = Int(payload.value[.duration] ?? 1)
             var modifiers: [String: Double] = [:]
 
-            if let v = payload.value["damageDealtPercent"] { modifiers["damageDealtPercent"] = v }
-            if let v = payload.value["hitRatePercent"] { modifiers["hitRatePercent"] = v }
-            if let v = payload.value["evasionRatePercent"] { modifiers["evasionRatePercent"] = v }
+            if let v = payload.value[.damageDealtPercent] { modifiers["damageDealtPercent"] = v }
+            if let v = payload.value[.hitRatePercent] { modifiers["hitRatePercent"] = v }
 
             accumulator.status.timedBuffTriggers.append(.init(
                 id: triggerId,
@@ -138,16 +139,15 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
                 category: category
             ))
 
-        case "turnElapsed":
+        case Int(ReactionTrigger.turnElapsed.rawValue):
             // 毎ターン累積
             var perTurnModifiers: [String: Double] = [:]
 
-            if let v = payload.value["hitRatePerTurn"] { perTurnModifiers["hitRatePercent"] = v }
-            if let v = payload.value["evasionRatePerTurn"] { perTurnModifiers["evasionRatePercent"] = v }
-            if let v = payload.value["attackPercentPerTurn"] { perTurnModifiers["attackPercent"] = v }
-            if let v = payload.value["defensePercentPerTurn"] { perTurnModifiers["defensePercent"] = v }
-            if let v = payload.value["attackCountPercentPerTurn"] { perTurnModifiers["attackCountPercent"] = v }
-            if let v = payload.value["damageDealtPercentPerTurn"] { perTurnModifiers["damageDealtPercent"] = v }
+            if let v = payload.value[.hitRatePerTurn] { perTurnModifiers["hitRatePercent"] = v }
+            if let v = payload.value[.evasionRatePerTurn] { perTurnModifiers["evasionRatePercent"] = v }
+            if let v = payload.value[.attackPercentPerTurn] { perTurnModifiers["attackPercent"] = v }
+            if let v = payload.value[.defensePercentPerTurn] { perTurnModifiers["defensePercent"] = v }
+            if let v = payload.value[.attackCountPercentPerTurn] { perTurnModifiers["attackCountPercent"] = v }
 
             accumulator.status.timedBuffTriggers.append(.init(
                 id: triggerId,
@@ -162,7 +162,7 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
 
         default:
             throw RuntimeError.invalidConfiguration(
-                reason: "Skill \(context.skillId)#\(context.effectIndex) timedBuffTrigger の trigger が不正です: \(triggerType)"
+                reason: "Skill \(context.skillId)#\(context.effectIndex) timedBuffTrigger の trigger が不正です: \(triggerRaw)"
             )
         }
     }
@@ -176,11 +176,12 @@ struct TimedMagicPowerAmplifyHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let turn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
-        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        let turn = try payload.requireValue(.triggerTurn, skillId: context.skillId, effectIndex: context.effectIndex)
+        let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
         let triggerId = payload.familyId.map { String($0) } ?? payload.effectType.identifier
-        let scopeString = payload.parameters["scope"] ?? "party"
-        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(identifier: scopeString) ?? .party
+        // scope: 1=party, 2=self (TimedBuffScope)
+        let scopeRaw = payload.parameters[.target] ?? Int(TimedBuffScope.party.rawValue)
+        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: UInt8(scopeRaw)) ?? .party
         let triggerTurn = Int(turn.rounded(.towardZero))
         accumulator.status.timedBuffTriggers.append(.init(
             id: triggerId,
@@ -203,11 +204,12 @@ struct TimedBreathPowerAmplifyHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let turn = try payload.requireValue("triggerTurn", skillId: context.skillId, effectIndex: context.effectIndex)
-        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        let turn = try payload.requireValue(.triggerTurn, skillId: context.skillId, effectIndex: context.effectIndex)
+        let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
         let triggerId = payload.familyId.map { String($0) } ?? payload.effectType.identifier
-        let scopeString = payload.parameters["scope"] ?? "party"
-        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(identifier: scopeString) ?? .party
+        // scope: 1=party, 2=self (TimedBuffScope)
+        let scopeRaw = payload.parameters[.target] ?? Int(TimedBuffScope.party.rawValue)
+        let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: UInt8(scopeRaw)) ?? .party
         let triggerTurn = Int(turn.rounded(.towardZero))
         accumulator.status.timedBuffTriggers.append(.init(
             id: triggerId,

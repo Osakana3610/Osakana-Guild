@@ -123,7 +123,7 @@ enum BattleService {
                   let fallbackDefinition = enemyDictionary[enemyId] else {
                 throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: String(encounterEnemyId ?? 0))
             }
-            let slot = BattleFormationSlot.frontLeft
+            let slot: BattleFormationSlot = 1  // frontLeft
             let fallbackLevel = encounterLevel ?? 1
             let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: fallbackDefinition,
                                                                        levelOverride: fallbackLevel,

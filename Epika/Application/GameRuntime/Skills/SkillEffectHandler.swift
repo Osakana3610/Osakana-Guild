@@ -59,14 +59,16 @@ struct ActorStats: Sendable {
     let agility: Int
     let luck: Int
 
-    func value(for stat: String) -> Int {
-        switch stat {
-        case "strength": return strength
-        case "wisdom": return wisdom
-        case "spirit": return spirit
-        case "vitality": return vitality
-        case "agility": return agility
-        case "luck": return luck
+    /// EnumMappings.baseStat のrawValueでステータス値を取得
+    /// strength=1, wisdom=2, spirit=3, vitality=4, agility=5, luck=6
+    func value(for statRawValue: Int) -> Int {
+        switch statRawValue {
+        case 1: return strength
+        case 2: return wisdom
+        case 3: return spirit
+        case 4: return vitality
+        case 5: return agility
+        case 6: return luck
         default: return 0
         }
     }
@@ -76,12 +78,12 @@ struct ActorStats: Sendable {
 extension DecodedSkillEffectPayload {
     /// statScalingが指定されている場合、ステータス値×係数を返す
     func scaledValue(from stats: ActorStats?) -> Double {
-        guard let scalingStat = parameters["scalingStat"],
-              let coefficient = value["scalingCoefficient"],
+        guard let scalingStatInt = parameters[.scalingStat],
+              let coefficient = value[.scalingCoefficient],
               let stats = stats else {
             return 0.0
         }
-        return Double(stats.value(for: scalingStat)) * coefficient
+        return Double(stats.value(for: scalingStatInt)) * coefficient
     }
 }
 
