@@ -59,46 +59,44 @@ struct HPBarView: View {
 
             ZStack(alignment: .leading) {
                 // 背景（グレー）- 最大HP
-                RoundedRectangle(cornerRadius: barHeight / 2)
-                    .fill(Color(.systemGray4))
-                    .frame(height: barHeight)
+                Color(.systemGray4)
 
                 if isDamage {
                     // ダメージ時: 赤（前のHP位置まで） + グレー（現在HP）
                     // 赤部分（減少分）
                     if previousRatio > 0 {
-                        RoundedRectangle(cornerRadius: barHeight / 2)
+                        Rectangle()
                             .fill(Color(.systemRed).opacity(0.7))
-                            .frame(width: width * previousRatio, height: barHeight)
+                            .frame(width: width * previousRatio)
                     }
 
                     // グレー部分（現在HP）- 不透明
                     if currentRatio > 0 {
-                        RoundedRectangle(cornerRadius: barHeight / 2)
+                        Rectangle()
                             .fill(Color(.systemGray2))
-                            .frame(width: width * currentRatio, height: barHeight)
+                            .frame(width: width * currentRatio)
                     }
                 } else if isHeal {
                     // 回復時: 緑（現在HP位置まで） + グレー（前のHP）
                     // 緑部分（回復後の位置まで）
                     if currentRatio > 0 {
-                        RoundedRectangle(cornerRadius: barHeight / 2)
+                        Rectangle()
                             .fill(Color(.systemGreen).opacity(0.7))
-                            .frame(width: width * currentRatio, height: barHeight)
+                            .frame(width: width * currentRatio)
                     }
 
                     // グレー部分（元のHP）- 不透明
                     if previousRatio > 0 {
-                        RoundedRectangle(cornerRadius: barHeight / 2)
+                        Rectangle()
                             .fill(Color(.systemGray2))
-                            .frame(width: width * previousRatio, height: barHeight)
+                            .frame(width: width * previousRatio)
                     }
                 } else {
                     // 変動なし: グレーのみ
                     if currentRatio > 0 {
-                        RoundedRectangle(cornerRadius: barHeight / 2)
+                        Rectangle()
                             .fill(Color(.systemGray2))
-                            .frame(width: width * currentRatio, height: barHeight)
+                            .frame(width: width * currentRatio)
                     }
                 }
 
@@ -111,6 +109,7 @@ struct HPBarView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
+            .clipShape(RoundedRectangle(cornerRadius: barHeight / 2))
         }
         .frame(height: barHeight)
     }
