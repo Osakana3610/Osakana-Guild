@@ -98,7 +98,25 @@ final class ExplorationProgressService {
         return fetched
     }
 
-    private func fetchAllExplorations() async throws -> [ExplorationSnapshot] {
+    /// 指定パーティの最新探索を取得（UI表示用、最大limit件）
+    func recentExplorations(forPartyId partyId: UInt8, limit: Int = 2) async throws -> [ExplorationSnapshot] {
+        let context = makeContext()
+        var descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId },
+            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+        )
+        descriptor.fetchLimit = limit
+        let runs = try context.fetch(descriptor)
+        var snapshots: [ExplorationSnapshot] = []
+        snapshots.reserveCapacity(runs.count)
+        for run in runs {
+            let snapshot = try await makeSnapshot(for: run, context: context)
+            snapshots.append(snapshot)
+        }
+        return snapshots
+    }
+
+    private func fetchAllExplorations() async throws -> [ExplorationSnapshot]  {
         let context = makeContext()
         let descriptor = FetchDescriptor<ExplorationRunRecord>(sortBy: [SortDescriptor(\.endedAt, order: .reverse)])
         let runs = try context.fetch(descriptor)
