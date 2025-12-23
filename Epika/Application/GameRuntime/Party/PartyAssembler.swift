@@ -17,7 +17,6 @@
 import Foundation
 
 enum PartyAssembler {
-    @MainActor
     static func assembleState(masterData: MasterDataCache,
                               party: PartySnapshot,
                               characters: [CharacterInput]) throws -> RuntimePartyState {

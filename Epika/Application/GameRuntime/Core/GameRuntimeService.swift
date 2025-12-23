@@ -221,18 +221,14 @@ actor GameRuntimeService {
                                              explorationInterval: interval)
     }
 
-    func runtimeCharacter(from input: CharacterInput) async throws -> RuntimeCharacter {
-        try await MainActor.run {
-            try RuntimeCharacterFactory.make(from: input, masterData: masterData)
-        }
+    func runtimeCharacter(from input: CharacterInput) throws -> RuntimeCharacter {
+        try RuntimeCharacterFactory.make(from: input, masterData: masterData)
     }
 
-    func runtimePartyState(party: PartySnapshot, characters: [CharacterInput]) async throws -> RuntimePartyState {
-        try await MainActor.run {
-            try PartyAssembler.assembleState(masterData: masterData,
-                                             party: party,
-                                             characters: characters)
-        }
+    func runtimePartyState(party: PartySnapshot, characters: [CharacterInput]) throws -> RuntimePartyState {
+        try PartyAssembler.assembleState(masterData: masterData,
+                                         party: party,
+                                         characters: characters)
     }
 
     func raceDefinition(withId raceId: UInt8) -> RaceDefinition? {
@@ -240,14 +236,12 @@ actor GameRuntimeService {
     }
 
     func recalculateCombatStats(for input: CharacterInput,
-                                   pandoraBoxStackKeys: Set<String> = []) async throws -> CombatStatCalculator.Result {
-        let runtimeCharacter = try await MainActor.run {
-            try RuntimeCharacterFactory.make(
-                from: input,
-                masterData: masterData,
-                pandoraBoxStackKeys: pandoraBoxStackKeys
-            )
-        }
+                                   pandoraBoxStackKeys: Set<String> = []) throws -> CombatStatCalculator.Result {
+        let runtimeCharacter = try RuntimeCharacterFactory.make(
+            from: input,
+            masterData: masterData,
+            pandoraBoxStackKeys: pandoraBoxStackKeys
+        )
         return CombatStatCalculator.Result(
             attributes: runtimeCharacter.attributes,
             hitPoints: CharacterValues.HitPoints(current: runtimeCharacter.currentHP, maximum: runtimeCharacter.maxHP),
