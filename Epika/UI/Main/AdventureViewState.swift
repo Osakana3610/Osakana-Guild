@@ -111,12 +111,6 @@ final class AdventureViewState {
     }
 
     func loadDungeons(using appServices: AppServices) async {
-        do {
-            try await appServices.synchronizeStoryAndDungeonUnlocks()
-        } catch {
-            present(error: error)
-            return
-        }
         await reloadDungeonList(using: appServices)
     }
 
@@ -260,7 +254,6 @@ final class AdventureViewState {
             await loadExplorationProgress(using: appServices)
         case .completed:
             await loadExplorationProgress(using: appServices)
-            await loadDungeons(using: appServices)
         }
     }
 

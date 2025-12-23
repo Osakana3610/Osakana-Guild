@@ -114,7 +114,7 @@ struct RuntimePartyDetailView: View {
             .contentMargins(.vertical, 8)
 
                 Section("出撃先迷宮") {
-                    Button(action: { showDungeonPicker = true }) {
+                    Button(action: { Task { await openDungeonPicker() } }) {
                         HStack {
                             Text(selectedDungeonName)
                                 .foregroundColor(.primary)
@@ -152,7 +152,7 @@ struct RuntimePartyDetailView: View {
             .task { await refreshData() }
             .sheet(isPresented: $showDungeonPicker) {
                 DungeonPickerView(
-                    dungeons: dungeons,
+                    dungeons: adventureState.runtimeDungeons,
                     currentSelection: selectedDungeon?.definition.id ?? currentParty.lastSelectedDungeonId,
                     currentDifficulty: currentParty.lastSelectedDifficulty,
                     onSelectDungeon: { dungeon in
@@ -199,6 +199,14 @@ struct RuntimePartyDetailView: View {
                 .foregroundColor(.primary)
                 .padding(.bottom, 8)
         }
+    }
+
+    // MARK: - Dungeon Picker
+
+    @MainActor
+    private func openDungeonPicker() async {
+        await adventureState.reloadDungeonList(using: appServices)
+        showDungeonPicker = true
     }
 
     // MARK: - Data Refresh
