@@ -66,30 +66,40 @@ struct HPBarView: View {
                 if isDamage {
                     // ダメージ時: 赤（前のHP位置まで） + グレー（現在HP）
                     // 赤部分（減少分）
-                    RoundedRectangle(cornerRadius: barHeight / 2)
-                        .fill(Color(.systemRed).opacity(0.7))
-                        .frame(width: max(0, width * previousRatio), height: barHeight)
+                    if previousRatio > 0 {
+                        RoundedRectangle(cornerRadius: barHeight / 2)
+                            .fill(Color(.systemRed).opacity(0.7))
+                            .frame(width: width * previousRatio, height: barHeight)
+                    }
 
                     // グレー部分（現在HP）- 不透明
-                    RoundedRectangle(cornerRadius: barHeight / 2)
-                        .fill(Color(.systemGray2))
-                        .frame(width: max(0, width * currentRatio), height: barHeight)
+                    if currentRatio > 0 {
+                        RoundedRectangle(cornerRadius: barHeight / 2)
+                            .fill(Color(.systemGray2))
+                            .frame(width: width * currentRatio, height: barHeight)
+                    }
                 } else if isHeal {
                     // 回復時: 緑（現在HP位置まで） + グレー（前のHP）
                     // 緑部分（回復後の位置まで）
-                    RoundedRectangle(cornerRadius: barHeight / 2)
-                        .fill(Color(.systemGreen).opacity(0.7))
-                        .frame(width: max(0, width * currentRatio), height: barHeight)
+                    if currentRatio > 0 {
+                        RoundedRectangle(cornerRadius: barHeight / 2)
+                            .fill(Color(.systemGreen).opacity(0.7))
+                            .frame(width: width * currentRatio, height: barHeight)
+                    }
 
                     // グレー部分（元のHP）- 不透明
-                    RoundedRectangle(cornerRadius: barHeight / 2)
-                        .fill(Color(.systemGray2))
-                        .frame(width: max(0, width * previousRatio), height: barHeight)
+                    if previousRatio > 0 {
+                        RoundedRectangle(cornerRadius: barHeight / 2)
+                            .fill(Color(.systemGray2))
+                            .frame(width: width * previousRatio, height: barHeight)
+                    }
                 } else {
                     // 変動なし: グレーのみ
-                    RoundedRectangle(cornerRadius: barHeight / 2)
-                        .fill(Color(.systemGray2))
-                        .frame(width: max(0, width * currentRatio), height: barHeight)
+                    if currentRatio > 0 {
+                        RoundedRectangle(cornerRadius: barHeight / 2)
+                            .fill(Color(.systemGray2))
+                            .frame(width: width * currentRatio, height: barHeight)
+                    }
                 }
 
                 // 数値表示（バーの上に重ねる）
