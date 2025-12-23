@@ -57,7 +57,7 @@ struct EndOfTurnHealingHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let value = try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        let value = try payload.requireValue(.valuePercent, skillId: context.skillId, effectIndex: context.effectIndex)
         accumulator.misc.endOfTurnHealingPercent = max(accumulator.misc.endOfTurnHealingPercent, value)
     }
 }
@@ -70,7 +70,7 @@ struct EndOfTurnSelfHPPercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        accumulator.misc.endOfTurnSelfHPPercent += try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        accumulator.misc.endOfTurnSelfHPPercent += try payload.requireValue(.valuePercent, skillId: context.skillId, effectIndex: context.effectIndex)
     }
 }
 
@@ -82,9 +82,9 @@ struct PartyAttackFlagHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let hasHostileAll = payload.value["hostileAll"] != nil
-        let hasVampiricImpulse = payload.value["vampiricImpulse"] != nil
-        let hasVampiricSuppression = payload.value["vampiricSuppression"] != nil
+        let hasHostileAll = payload.value[.hostileAll] != nil
+        let hasVampiricImpulse = payload.value[.vampiricImpulse] != nil
+        let hasVampiricSuppression = payload.value[.vampiricSuppression] != nil
         guard hasHostileAll || hasVampiricImpulse || hasVampiricSuppression else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) partyAttackFlag に有効なフラグがありません")
         }
@@ -102,9 +102,9 @@ struct PartyAttackTargetHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let targetId = try payload.requireParam("targetId", skillId: context.skillId, effectIndex: context.effectIndex)
-        let hostile = payload.value["hostile"] != nil
-        let protect = payload.value["protect"] != nil
+        let targetId = try payload.requireParam(.targetId, skillId: context.skillId, effectIndex: context.effectIndex)
+        let hostile = payload.value[.hostile] != nil
+        let protect = payload.value[.protect] != nil
         guard hostile || protect else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) partyAttackTarget にhostile/protect指定がありません")
         }
@@ -133,7 +133,7 @@ struct BreathVariantHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let extra = payload.value["extraCharges"].map { Int($0.rounded(.towardZero)) } ?? 0
+        let extra = payload.value[.extraCharges].map { Int($0.rounded(.towardZero)) } ?? 0
         accumulator.spell.breathExtraCharges += max(0, extra)
     }
 }
@@ -147,10 +147,10 @@ struct EquipmentStatMultiplierHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         // 両方のパラメータ名をサポート: equipmentType (JSON) と equipmentCategory (DB)
-        guard let category = payload.parameters["equipmentType"] ?? payload.parameters["equipmentCategory"] else {
+        guard let category = payload.parameters[.equipmentType] ?? payload.parameters[.equipmentCategory] else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) equipmentStatMultiplier の equipmentType/equipmentCategory が不足しています")
         }
-        let multiplier = try payload.requireValue("multiplier", skillId: context.skillId, effectIndex: context.effectIndex)
+        let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
         accumulator.misc.equipmentStatMultipliers[category, default: 1.0] *= multiplier
     }
 }
@@ -163,10 +163,10 @@ struct DodgeCapHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        if let maxCap = payload.value["maxDodge"] {
+        if let maxCap = payload.value[.maxDodge] {
             accumulator.misc.dodgeCapMax = max(accumulator.misc.dodgeCapMax ?? 0.0, maxCap)
         }
-        if let scale = payload.value["minHitScale"] {
+        if let scale = payload.value[.minHitScale] {
             accumulator.damage.minHitScale = accumulator.damage.minHitScale.map { min($0, scale) } ?? scale
         }
     }
@@ -180,10 +180,10 @@ struct AbsorptionHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        if let percent = payload.value["percent"] {
+        if let percent = payload.value[.percent] {
             accumulator.misc.absorptionPercent = max(accumulator.misc.absorptionPercent, percent)
         }
-        if let cap = payload.value["capPercent"] {
+        if let cap = payload.value[.capPercent] {
             accumulator.misc.absorptionCapPercent = max(accumulator.misc.absorptionCapPercent, cap)
         }
         if accumulator.misc.absorptionPercent == 0.0, accumulator.misc.absorptionCapPercent == 0.0 {
@@ -200,8 +200,8 @@ struct DegradationRepairHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let minP = payload.value["minPercent"] ?? 0.0
-        let maxP = payload.value["maxPercent"] ?? 0.0
+        let minP = payload.value[.minPercent] ?? 0.0
+        let maxP = payload.value[.maxPercent] ?? 0.0
         accumulator.misc.degradationRepairMinPercent = max(accumulator.misc.degradationRepairMinPercent, minP)
         accumulator.misc.degradationRepairMaxPercent = max(accumulator.misc.degradationRepairMaxPercent, maxP)
     }
@@ -215,7 +215,7 @@ struct DegradationRepairBoostHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        accumulator.misc.degradationRepairBonusPercent += try payload.requireValue("valuePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        accumulator.misc.degradationRepairBonusPercent += try payload.requireValue(.valuePercent, skillId: context.skillId, effectIndex: context.effectIndex)
     }
 }
 
@@ -239,8 +239,8 @@ struct RunawayMagicHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let threshold = try payload.requireValue("thresholdPercent", skillId: context.skillId, effectIndex: context.effectIndex)
-        let chance = try payload.requireValue("chancePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        let threshold = try payload.requireValue(.thresholdPercent, skillId: context.skillId, effectIndex: context.effectIndex)
+        let chance = try payload.requireValue(.chancePercent, skillId: context.skillId, effectIndex: context.effectIndex)
         accumulator.misc.magicRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
     }
 }
@@ -253,8 +253,8 @@ struct RunawayDamageHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let threshold = try payload.requireValue("thresholdPercent", skillId: context.skillId, effectIndex: context.effectIndex)
-        let chance = try payload.requireValue("chancePercent", skillId: context.skillId, effectIndex: context.effectIndex)
+        let threshold = try payload.requireValue(.thresholdPercent, skillId: context.skillId, effectIndex: context.effectIndex)
+        let chance = try payload.requireValue(.chancePercent, skillId: context.skillId, effectIndex: context.effectIndex)
         accumulator.misc.damageRunaway = .init(thresholdPercent: threshold, chancePercent: chance)
     }
 }
@@ -267,8 +267,8 @@ struct RetreatAtTurnHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let turnValue = payload.value["turn"]
-        let chance = payload.value["chancePercent"]
+        let turnValue = payload.value[.turn]
+        let chance = payload.value[.chancePercent]
         guard turnValue != nil || chance != nil else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) retreatAtTurn にturn/chanceがありません")
         }
@@ -290,7 +290,7 @@ struct TargetingWeightHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let weight = payload.value["weight"] ?? payload.value["multiplier"] ?? 1.0
+        let weight = payload.value[.weight] ?? payload.value[.multiplier] ?? 1.0
         accumulator.misc.targetingWeight *= weight
     }
 }

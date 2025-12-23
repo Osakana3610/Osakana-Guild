@@ -487,13 +487,13 @@ extension BattleTurnEngine {
         let allies: [BattleActor] = side == .player ? context.players : context.enemies
         let candidateIndices = allies.enumerated()
             .filter { $0.element.isAlive && !$0.element.skillEffects.resurrection.rescueCapabilities.isEmpty }
-            .sorted { lhs, rhs in
-                let leftRow = lhs.element.formationSlot.rawValue
-                let rightRow = rhs.element.formationSlot.rawValue
-                if leftRow == rightRow {
+            .sorted { (lhs: EnumeratedSequence<[BattleActor]>.Element, rhs: EnumeratedSequence<[BattleActor]>.Element) in
+                let leftSlot = lhs.element.formationSlot
+                let rightSlot = rhs.element.formationSlot
+                if leftSlot == rightSlot {
                     return lhs.offset < rhs.offset
                 }
-                return leftRow < rightRow
+                return leftSlot < rightSlot
             }
             .map { $0.offset }
 

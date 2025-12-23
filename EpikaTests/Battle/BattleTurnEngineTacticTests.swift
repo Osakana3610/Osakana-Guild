@@ -579,7 +579,7 @@ private enum BattleTestFactory {
         return BattleActor(identifier: id,
                            displayName: name ?? id,
                            kind: kind,
-                           formationSlot: .frontLeft,
+                           formationSlot: 1,  // frontLeft
                            strength: 50,
                            wisdom: 50,
                            spirit: 50,

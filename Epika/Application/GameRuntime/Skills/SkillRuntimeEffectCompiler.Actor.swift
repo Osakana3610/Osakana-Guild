@@ -68,20 +68,22 @@ extension BattleActor.SkillEffects.Reaction {
                      skillId: UInt16,
                      stats: ActorStats?) -> BattleActor.SkillEffects.Reaction? {
         guard payload.effectType == .reaction else { return nil }
-        guard let triggerRaw = payload.parameters["trigger"],
-              let trigger = BattleActor.SkillEffects.Reaction.Trigger(identifier: triggerRaw) else { return nil }
-        guard (payload.parameters["action"] ?? "") == "counterAttack" else { return nil }
-        let target = BattleActor.SkillEffects.Reaction.Target(identifier: payload.parameters["target"] ?? "") ?? .attacker
-        let requiresMartial = (payload.parameters["requiresMartial"]?.lowercased() == "true")
-        let damageIdentifier = payload.parameters["damageType"] ?? "physical"
-        let damageType = BattleDamageType(identifier: damageIdentifier) ?? .physical
-        var baseChance = payload.value["baseChancePercent"] ?? 100.0
+        guard let triggerRaw = payload.parameters[.trigger],
+              let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: UInt8(triggerRaw)) else { return nil }
+        // action: 2 = counterAttack (EnumMappings.effectActionType)
+        guard payload.parameters[.action] == 2 else { return nil }
+        let targetRaw = payload.parameters[.target] ?? Int(BattleActor.SkillEffects.Reaction.Target.attacker.rawValue)
+        let target = BattleActor.SkillEffects.Reaction.Target(rawValue: UInt8(targetRaw)) ?? .attacker
+        let requiresMartial = (payload.parameters[.requiresMartial] == 1)
+        let damageTypeRaw = payload.parameters[.damageType] ?? Int(BattleDamageType.physical.rawValue)
+        let damageType = BattleDamageType(rawValue: UInt8(damageTypeRaw)) ?? .physical
+        var baseChance = payload.value[.baseChancePercent] ?? 100.0
         // statScalingをコンパイル時に計算してbaseChanceに加算
         baseChance += payload.scaledValue(from: stats)
-        let attackCountMultiplier = payload.value["attackCountMultiplier"] ?? 0.3
-        let criticalRateMultiplier = payload.value["criticalRateMultiplier"] ?? 0.5
-        let accuracyMultiplier = payload.value["accuracyMultiplier"] ?? 1.0
-        let requiresAllyBehind = (payload.parameters["requiresAllyBehind"]?.lowercased() == "true")
+        let attackCountMultiplier = payload.value[.attackCountMultiplier] ?? 0.3
+        let criticalRateMultiplier = payload.value[.criticalRateMultiplier] ?? 0.5
+        let accuracyMultiplier = payload.value[.accuracyMultiplier] ?? 1.0
+        let requiresAllyBehind = (payload.parameters[.requiresAllyBehind] == 1)
 
         return BattleActor.SkillEffects.Reaction(identifier: String(skillId),
                                                  displayName: skillName,
@@ -98,16 +100,16 @@ extension BattleActor.SkillEffects.Reaction {
 }
 
 extension BattleActor.SkillEffects.RowProfile {
-    mutating func applyParameters(_ parameters: [String: String]?) {
+    mutating func applyParameters(_ parameters: [EffectParamKey: Int]?) {
         guard let parameters else { return }
-        if let baseRaw = parameters["profile"],
-           let parsedBase = Base(identifier: baseRaw) {
+        if let profileRaw = parameters[.profile],
+           let parsedBase = Base(rawValue: UInt8(profileRaw)) {
             base = parsedBase
         }
-        if let near = parameters["nearApt"], near.lowercased() == "true" {
+        if parameters[.nearApt] == 1 {
             hasMeleeApt = true
         }
-        if let far = parameters["farApt"], far.lowercased() == "true" {
+        if parameters[.farApt] == 1 {
             hasRangedApt = true
         }
     }

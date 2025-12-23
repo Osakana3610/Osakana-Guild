@@ -34,8 +34,8 @@ struct ResurrectionSaveHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let usesPriest = payload.value["usesPriestMagic"].map { $0 > 0 } ?? false
-        let minLevel = payload.value["minLevel"].map { Int($0.rounded(.towardZero)) } ?? 0
+        let usesPriest = payload.value[.usesPriestMagic].map { $0 > 0 } ?? false
+        let minLevel = payload.value[.minLevel].map { Int($0.rounded(.towardZero)) } ?? 0
         accumulator.resurrection.rescueCapabilities.append(.init(
             usesPriestMagic: usesPriest,
             minLevel: max(0, minLevel)
@@ -51,13 +51,14 @@ struct ResurrectionActiveHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        if let instant = payload.value["instant"], instant > 0 {
+        if let instant = payload.value[.instant], instant > 0 {
             accumulator.resurrection.rescueModifiers.ignoreActionCost = true
         }
-        let chance = Int((try payload.requireValue("chancePercent", skillId: context.skillId, effectIndex: context.effectIndex)).rounded(.towardZero))
-        let hpScaleRaw = payload.parameters["hpScale"] ?? payload.value["hpScale"].map { _ in "magicalHealing" }
-        let hpScale = BattleActor.SkillEffects.ResurrectionActive.HPScale(identifier: hpScaleRaw ?? "magicalHealing") ?? .magicalHealing
-        let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
+        let chance = Int((try payload.requireValue(.chancePercent, skillId: context.skillId, effectIndex: context.effectIndex)).rounded(.towardZero))
+        // hpScale: パラメータからIntで取得し、rawValueで初期化
+        let hpScaleRaw = payload.parameters[.hpScale] ?? 1 // デフォルトは magicalHealing = 1
+        let hpScale = BattleActor.SkillEffects.ResurrectionActive.HPScale(rawValue: UInt8(hpScaleRaw)) ?? .magicalHealing
+        let maxTriggers = payload.value[.maxTriggers].map { Int($0.rounded(.towardZero)) }
         accumulator.resurrection.resurrectionActives.append(.init(
             chancePercent: max(0, chance),
             hpScale: hpScale,
@@ -74,11 +75,11 @@ struct ResurrectionBuffHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let guaranteed = try payload.requireValue("guaranteed", skillId: context.skillId, effectIndex: context.effectIndex)
+        let guaranteed = try payload.requireValue(.guaranteed, skillId: context.skillId, effectIndex: context.effectIndex)
         guard guaranteed > 0 else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) resurrectionBuff guaranteed が不正です")
         }
-        let maxTriggers = payload.value["maxTriggers"].map { Int($0.rounded(.towardZero)) }
+        let maxTriggers = payload.value[.maxTriggers].map { Int($0.rounded(.towardZero)) }
         accumulator.resurrection.forcedResurrection = .init(maxTriggers: maxTriggers)
     }
 }
@@ -91,10 +92,11 @@ struct ResurrectionVitalizeHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let removePenalties = payload.value["removePenalties"].map { $0 > 0 } ?? false
-        let rememberSkills = payload.value["rememberSkills"].map { $0 > 0 } ?? false
-        let removeSkillIds = (payload.stringArrayValues["removeSkillIds"] ?? []).compactMap { UInt16($0) }
-        let grantSkillIds = (payload.stringArrayValues["grantSkillIds"] ?? []).compactMap { UInt16($0) }
+        let removePenalties = payload.value[.removePenalties].map { $0 > 0 } ?? false
+        let rememberSkills = payload.value[.rememberSkills].map { $0 > 0 } ?? false
+        // 配列は arrays から取得
+        let removeSkillIds = (payload.arrays[.removeSkillIds] ?? []).map { UInt16($0) }
+        let grantSkillIds = (payload.arrays[.grantSkillIds] ?? []).map { UInt16($0) }
         accumulator.resurrection.vitalizeResurrection = .init(
             removePenalties: removePenalties,
             rememberSkills: rememberSkills,
@@ -112,7 +114,7 @@ struct ResurrectionSummonHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let every = try payload.requireValue("everyTurns", skillId: context.skillId, effectIndex: context.effectIndex)
+        let every = try payload.requireValue(.everyTurns, skillId: context.skillId, effectIndex: context.effectIndex)
         guard every > 0 else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) resurrectionSummon everyTurns が不正です")
         }
@@ -128,13 +130,15 @@ struct ResurrectionPassiveHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let type = payload.parameters["type"] ?? "betweenFloors"
-        switch type {
-        case "betweenFloors":
+        // type パラメータ: 1 = betweenFloors (EnumMappingsで定義されている場合)
+        // 現状はbetweenFloorsのみサポート
+        let typeRaw = payload.parameters[.type] ?? 1
+        switch typeRaw {
+        case 1: // betweenFloors
             accumulator.resurrection.resurrectionPassiveBetweenFloors = true
         default:
             throw RuntimeError.invalidConfiguration(
-                reason: "Skill \(context.skillId)#\(context.effectIndex) resurrectionPassive の type が不正です: \(type)"
+                reason: "Skill \(context.skillId)#\(context.effectIndex) resurrectionPassive の type が不正です: \(typeRaw)"
             )
         }
     }
@@ -148,7 +152,7 @@ struct SacrificeRiteHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let every = try payload.requireValue("everyTurns", skillId: context.skillId, effectIndex: context.effectIndex)
+        let every = try payload.requireValue(.everyTurns, skillId: context.skillId, effectIndex: context.effectIndex)
         let interval = max(1, Int(every.rounded(.towardZero)))
         accumulator.resurrection.sacrificeInterval = accumulator.resurrection.sacrificeInterval.map { min($0, interval) } ?? interval
     }

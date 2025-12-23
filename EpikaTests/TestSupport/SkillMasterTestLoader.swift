@@ -71,6 +71,84 @@ private extension SkillMasterTestLoader {
         }
     }
 
+    // MARK: - Enum Key Conversion
+
+    /// 文字列キーからEffectParamKeyへの変換マップ
+    static let paramKeyMapping: [String: EffectParamKey] = {
+        var map: [String: EffectParamKey] = [:]
+        let names = ["", "action", "buffType", "condition", "damageType", "dungeonName",
+                     "equipmentCategory", "equipmentType", "farApt", "from", "mode",
+                     "nearApt", "preference", "procType", "profile", "requiresAllyBehind",
+                     "requiresMartial", "scalingStat", "school", "sourceStat", "specialAttackId",
+                     "spellId", "stacking", "stat", "statType", "status", "statusId", "statusType",
+                     "target", "targetId", "targetStat", "to", "trigger", "type", "variant",
+                     "hpScale", "targetStatus"]
+        for key in EffectParamKey.allCases {
+            if key.rawValue < names.count {
+                map[names[key.rawValue]] = key
+            }
+        }
+        return map
+    }()
+
+    /// 文字列キーからEffectValueKeyへの変換マップ
+    static let valueKeyMapping: [String: EffectValueKey] = {
+        var map: [String: EffectValueKey] = [:]
+        let names = ["", "accuracyMultiplier", "add", "addPercent", "additive", "attackCountMultiplier",
+                     "attackCountPercentPerTurn", "attackPercentPerTurn", "baseChancePercent", "bonusPercent",
+                     "cap", "capPercent", "chancePercent", "charges", "count", "criticalRateMultiplier",
+                     "damageDealtPercent", "damagePercent", "defensePercentPerTurn", "deltaPercent", "duration",
+                     "enabled", "evasionRatePerTurn", "everyTurns", "extraCharges", "gainOnPhysicalHit",
+                     "guaranteed", "hitRatePerTurn", "hitRatePercent", "hostile", "hostileAll", "hpPercent",
+                     "hpThresholdPercent", "initialBonus", "initialCharges", "instant", "maxChancePercent",
+                     "maxCharges", "maxDodge", "maxPercent", "maxTriggers", "minHitScale", "minLevel",
+                     "minPercent", "multiplier", "percent", "points", "protect", "reduction", "regenAmount",
+                     "regenCap", "regenEveryTurns", "rememberSkills", "removePenalties", "scalingCoefficient",
+                     "thresholdPercent", "tier", "triggerTurn", "turn", "usesPriestMagic", "valuePerUnit",
+                     "valuePercent", "vampiricImpulse", "vampiricSuppression", "weight"]
+        for key in EffectValueKey.allCases {
+            if key.rawValue < names.count {
+                map[names[key.rawValue]] = key
+            }
+        }
+        return map
+    }()
+
+    /// 文字列キーからEffectArrayKeyへの変換マップ
+    static let arrayKeyMapping: [String: EffectArrayKey] = {
+        var map: [String: EffectArrayKey] = [:]
+        let names = ["", "grantSkillIds", "removeSkillIds", "targetRaceIds"]
+        for key in EffectArrayKey.allCases {
+            if key.rawValue < names.count {
+                map[names[key.rawValue]] = key
+            }
+        }
+        return map
+    }()
+
+    static func convertToParamKeyDict(_ dict: [String: String]) -> [EffectParamKey: Int] {
+        return dict.reduce(into: [EffectParamKey: Int]()) { result, pair in
+            guard let key = paramKeyMapping[pair.key] else { return }
+            if let intParsed = Int(pair.value) {
+                result[key] = intParsed
+            }
+        }
+    }
+
+    static func convertToValueKeyDict(_ dict: [String: Double]) -> [EffectValueKey: Double] {
+        return dict.reduce(into: [EffectValueKey: Double]()) { result, pair in
+            guard let key = valueKeyMapping[pair.key] else { return }
+            result[key] = pair.value
+        }
+    }
+
+    static func convertToArrayKeyDict(_ dict: [String: [String]]) -> [EffectArrayKey: [Int]] {
+        return dict.reduce(into: [EffectArrayKey: [Int]]()) { result, pair in
+            guard let key = arrayKeyMapping[pair.key] else { return }
+            result[key] = pair.value.compactMap { Int($0) }
+        }
+    }
+
     static func categoryToEnum(_ key: String) -> SkillCategory {
         switch key {
         case "attack": return .combat
@@ -121,9 +199,9 @@ private extension SkillMasterTestLoader {
                             index: index,
                             effectType: skillEffectType,
                             familyId: familyIdInt,
-                            parameters: payload.parameters,
-                            values: payload.value,
-                            arrayValues: convertToIntArrayDict(payload.stringArrayValues)
+                            parameters: convertToParamKeyDict(payload.parameters),
+                            values: convertToValueKeyDict(payload.value),
+                            arrayValues: convertToArrayKeyDict(payload.stringArrayValues)
                         )
                         effects.append(effect)
                     }

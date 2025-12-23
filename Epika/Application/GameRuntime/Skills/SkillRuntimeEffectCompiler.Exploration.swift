@@ -30,13 +30,11 @@ extension SkillRuntimeEffectCompiler {
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case .explorationTimeMultiplier:
-                    let multiplier = try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
-                    let dungeonIdString = payload.parameters["dungeonId"]
-                    let dungeonId: UInt16? = dungeonIdString.flatMap { UInt16($0) }
-                    let dungeonName = payload.parameters["dungeonName"]
+                    let multiplier = try payload.requireValue(.multiplier, skillId: skill.id, effectIndex: effect.index)
+                    // dungeonId/dungeonNameはパラメータではなくfamilyIdで識別するため、ここでは直接設定しない
                     modifiers.addEntry(multiplier: multiplier,
-                                       dungeonId: dungeonId,
-                                       dungeonName: dungeonName)
+                                       dungeonId: nil,
+                                       dungeonName: nil)
                 case .absorption,
                      .actionOrderMultiplier,
                      .actionOrderShuffle,

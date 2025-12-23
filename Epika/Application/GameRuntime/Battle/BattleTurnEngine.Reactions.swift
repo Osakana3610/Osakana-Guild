@@ -209,7 +209,7 @@ extension BattleTurnEngine {
                 guard case .allyDamagedPhysical(let eventSide, let defenderIndex, _) = event,
                       eventSide == side,
                       let attackedActor = context.actor(for: side, index: defenderIndex),
-                      currentPerformer.formationSlot.row < attackedActor.formationSlot.row else {
+                      currentPerformer.formationSlot.formationRow < attackedActor.formationSlot.formationRow else {
                     continue
                 }
             }

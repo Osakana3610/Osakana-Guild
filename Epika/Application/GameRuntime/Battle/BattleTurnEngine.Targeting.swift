@@ -138,7 +138,7 @@ extension BattleTurnEngine {
                                          context: BattleContext,
                                          random: inout GameRandomSource) -> (ActorSide, Int)? {
         guard let target = context.actor(for: targetSide, index: targetIndex) else { return nil }
-        let targetRow = target.formationSlot.row
+        let targetRow = target.formationSlot.formationRow
 
         // 前列以外（row > 0）の場合のみ「かばう」が発動
         guard targetRow > 0 else { return nil }
@@ -149,7 +149,7 @@ extension BattleTurnEngine {
         for (index, ally) in allies.enumerated() {
             guard ally.isAlive else { continue }
             guard ally.skillEffects.misc.coverRowsBehind else { continue }
-            guard ally.formationSlot.row < targetRow else { continue }  // ターゲットより前列にいる
+            guard ally.formationSlot.formationRow < targetRow else { continue }  // ターゲットより前列にいる
             let weight = max(0.01, ally.skillEffects.misc.targetingWeight)
             coverCandidates.append((index, weight))
         }
@@ -190,12 +190,10 @@ extension BattleTurnEngine {
         return filtered
     }
 
-    static func matchTargetId(_ targetId: String, to actor: BattleActor) -> Bool {
-        let lower = targetId.lowercased()
-        if lower == actor.identifier.lowercased() { return true }
-        if let raceId = actor.raceId, lower == String(raceId) { return true }
-        if let jobName = actor.jobName, lower == jobName.lowercased() { return true }
-        if lower == actor.displayName.lowercased() { return true }
+    /// targetId（raceId）がアクターにマッチするかチェック
+    static func matchTargetId(_ targetId: Int, to actor: BattleActor) -> Bool {
+        // targetId は EnumMappings.targetIdValue で定義された種族ID
+        if let raceId = actor.raceId, Int(raceId) == targetId { return true }
         return false
     }
 

@@ -201,7 +201,7 @@ private struct BaseStatAccumulator {
     mutating func apply(equipment: [CharacterValues.EquippedItem],
                         definitions: [ItemDefinition],
                         titleDefinitions: [TitleDefinition],
-                        equipmentMultipliers: [String: Double],
+                        equipmentMultipliers: [Int: Double],
                         pandoraBoxStackKeys: Set<String>) throws {
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         let titlesById = Dictionary(uniqueKeysWithValues: titleDefinitions.map { ($0.id, $0) })
@@ -209,8 +209,7 @@ private struct BaseStatAccumulator {
             guard let definition = definitionsById[item.itemId] else {
                 throw CombatStatCalculator.CalculationError.missingItemDefinition(Int16(item.itemId))
             }
-            let categoryIdentifier = ItemSaleCategory(rawValue: definition.category)?.identifier ?? ""
-            let categoryMultiplier = equipmentMultipliers[categoryIdentifier] ?? 1.0
+            let categoryMultiplier = equipmentMultipliers[Int(definition.category)] ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
             let title = titlesById[item.normalTitleId]
@@ -371,7 +370,7 @@ private struct SkillEffectAggregator {
     let growthMultiplier: Double
     let statConversions: [CombatStatKey: [StatConversion]]
     let forcedToOne: Set<CombatStatKey>
-    let equipmentMultipliers: [String: Double]
+    let equipmentMultipliers: [Int: Double]
     let itemStatMultipliers: [CombatStatKey: Double]
 
     init(skills: [SkillDefinition]) throws {
@@ -383,7 +382,7 @@ private struct SkillEffectAggregator {
         var growthMultiplierProduct: Double = 1.0
         var conversions: [CombatStatKey: [StatConversion]] = [:]
         var forcedToOne: Set<CombatStatKey> = []
-        var equipmentMultipliers: [String: Double] = [:]
+        var equipmentMultipliers: [Int: Double] = [:]
         var itemStatMultipliers: [CombatStatKey: Double] = [:]
 
         for skill in skills {
@@ -391,69 +390,75 @@ private struct SkillEffectAggregator {
                 let payload = SkillEffectAggregator.payload(from: effect)
                 switch payload.effectType {
                 case .additionalDamageAdditive:
-                    if let value = payload.value["additive"] {
+                    if let value = payload.value[.additive] {
                         additives.add(stat: .additionalDamage, value: value)
                     }
                 case .additionalDamageMultiplier:
-                    if let value = payload.value["multiplier"] {
+                    if let value = payload.value[.multiplier] {
                         passives.multiply(stat: .additionalDamage, value: value)
                     }
                 case .statAdditive:
-                    if let statKey = CombatStatKey(payload.parameters["stat"]),
-                       let additive = payload.value["additive"] {
+                    if let statRaw = payload.parameters[.stat],
+                       let statKey = CombatStatKey(statRaw),
+                       let additive = payload.value[.additive] {
                         additives.add(stat: statKey, value: additive)
                     }
                 case .statMultiplier:
-                    if let statKey = CombatStatKey(payload.parameters["stat"]),
-                       let multiplier = payload.value["multiplier"] {
+                    if let statRaw = payload.parameters[.stat],
+                       let statKey = CombatStatKey(statRaw),
+                       let multiplier = payload.value[.multiplier] {
                         passives.multiply(stat: statKey, value: multiplier)
                     }
                 case .attackCountAdditive:
-                    if let additive = payload.value["additive"] {
+                    if let additive = payload.value[.additive] {
                         additives.add(stat: .attackCount, value: additive)
                     }
                 case .growthMultiplier:
-                    if let multiplier = payload.value["multiplier"] {
+                    if let multiplier = payload.value[.multiplier] {
                         growthMultiplierProduct *= multiplier
                     }
                 case .attackCountMultiplier:
-                    if let multiplier = payload.value["multiplier"] {
+                    if let multiplier = payload.value[.multiplier] {
                         passives.multiply(stat: .attackCount, value: multiplier)
                     }
                 case .equipmentStatMultiplier:
-                    if let category = payload.parameters["equipmentCategory"],
-                       let multiplier = payload.value["multiplier"] {
+                    if let category = payload.parameters[.equipmentCategory],
+                       let multiplier = payload.value[.multiplier] {
                         equipmentMultipliers[category, default: 1.0] *= multiplier
                     }
                 case .itemStatMultiplier:
-                    guard let statTypeRaw = payload.parameters["statType"] else {
+                    guard let statTypeRaw = payload.parameters[.statType] else {
                         throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): missing statType")
                     }
                     guard let statKey = CombatStatKey(statTypeRaw) else {
                         throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): invalid statType '\(statTypeRaw)'")
                     }
-                    guard let multiplier = payload.value["multiplier"] else {
+                    guard let multiplier = payload.value[.multiplier] else {
                         throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): missing multiplier")
                     }
                     itemStatMultipliers[statKey, default: 1.0] *= multiplier
                 case .statConversionPercent:
-                    guard let sourceKey = CombatStatKey(payload.parameters["sourceStat"]),
-                          let targetKey = CombatStatKey(payload.parameters["targetStat"]),
-                          let percent = payload.value["valuePercent"] else { continue }
+                    guard let sourceRaw = payload.parameters[.sourceStat],
+                          let sourceKey = CombatStatKey(sourceRaw),
+                          let targetRaw = payload.parameters[.targetStat],
+                          let targetKey = CombatStatKey(targetRaw),
+                          let percent = payload.value[.valuePercent] else { continue }
                     let entry = StatConversion(source: sourceKey, ratio: percent / 100.0)
                     conversions[targetKey, default: []].append(entry)
                 case .statConversionLinear:
-                    guard let sourceKey = CombatStatKey(payload.parameters["sourceStat"]),
-                          let targetKey = CombatStatKey(payload.parameters["targetStat"]),
-                          let ratio = payload.value["valuePerUnit"] ?? payload.value["valuePerCount"] else { continue }
+                    guard let sourceRaw = payload.parameters[.sourceStat],
+                          let sourceKey = CombatStatKey(sourceRaw),
+                          let targetRaw = payload.parameters[.targetStat],
+                          let targetKey = CombatStatKey(targetRaw),
+                          let ratio = payload.value[.valuePerUnit] else { continue }
                     let entry = StatConversion(source: sourceKey, ratio: ratio)
                     conversions[targetKey, default: []].append(entry)
                 case .criticalRateAdditive:
-                    if let points = payload.value["points"] {
+                    if let points = payload.value[.points] {
                         critical.flatBonus += points
                     }
                 case .criticalRateCap:
-                    if let cap = payload.value["cap"] ?? payload.value["maxPercent"] {
+                    if let cap = payload.value[.cap] ?? payload.value[.maxPercent] {
                         if let current = critical.cap {
                             critical.cap = min(current, cap)
                         } else {
@@ -461,7 +466,7 @@ private struct SkillEffectAggregator {
                         }
                     }
                 case .criticalRateMaxAbsolute:
-                    if let cap = payload.value["cap"] ?? payload.value["maxPercent"] {
+                    if let cap = payload.value[.cap] ?? payload.value[.maxPercent] {
                         if let current = critical.cap {
                             critical.cap = min(current, cap)
                         } else {
@@ -469,37 +474,40 @@ private struct SkillEffectAggregator {
                         }
                     }
                 case .criticalRateMaxDelta:
-                    if let delta = payload.value["deltaPercent"] {
+                    if let delta = payload.value[.deltaPercent] {
                         critical.capDelta += delta
                     }
                 case .criticalDamagePercent:
-                    if let value = payload.value["valuePercent"] {
+                    if let value = payload.value[.valuePercent] {
                         critical.damagePercent += value
                     }
                 case .criticalDamageMultiplier:
-                    if let multiplier = payload.value["multiplier"] {
+                    if let multiplier = payload.value[.multiplier] {
                         critical.damageMultiplier *= multiplier
                     }
                 case .martialBonusPercent:
-                    if let value = payload.value["valuePercent"] {
+                    if let value = payload.value[.valuePercent] {
                         martial.percent += value
                     }
                 case .martialBonusMultiplier:
-                    if let multiplier = payload.value["multiplier"] {
+                    if let multiplier = payload.value[.multiplier] {
                         martial.multiplier *= multiplier
                     }
                 case .talentStat:
-                    if let statKey = CombatStatKey(payload.parameters["stat"]) {
-                        let multiplier = payload.value["multiplier"] ?? 1.5
+                    if let statRaw = payload.parameters[.stat],
+                       let statKey = CombatStatKey(statRaw) {
+                        let multiplier = payload.value[.multiplier] ?? 1.5
                         talents.applyTalent(stat: statKey, value: multiplier)
                     }
                 case .incompetenceStat:
-                    if let statKey = CombatStatKey(payload.parameters["stat"]) {
-                        let multiplier = payload.value["multiplier"] ?? 0.5
+                    if let statRaw = payload.parameters[.stat],
+                       let statKey = CombatStatKey(statRaw) {
+                        let multiplier = payload.value[.multiplier] ?? 0.5
                         talents.applyIncompetence(stat: statKey, value: multiplier)
                     }
                 case .statFixedToOne:
-                    if let statKey = CombatStatKey(payload.parameters["stat"]) {
+                    if let statRaw = payload.parameters[.stat],
+                       let statKey = CombatStatKey(statRaw) {
                         forcedToOne.insert(statKey)
                     }
                 default:
@@ -541,8 +549,8 @@ private extension SkillEffectAggregator {
 
     struct Payload {
         let effectType: SkillEffectType
-        let parameters: [String: String]
-        let value: [String: Double]
+        let parameters: [EffectParamKey: Int]
+        let value: [EffectValueKey: Double]
     }
 }
 
@@ -565,7 +573,7 @@ private struct CombatAccumulator {
     private let growthMultiplier: Double
     private let statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]
     private let forcedToOne: Set<CombatStatKey>
-    private let equipmentMultipliers: [String: Double]
+    private let equipmentMultipliers: [Int: Double]
     private let itemStatMultipliers: [CombatStatKey: Double]
     private let pandoraBoxStackKeys: Set<String>
     private var hasPositivePhysicalAttackEquipment: Bool = false
@@ -586,7 +594,7 @@ private struct CombatAccumulator {
          growthMultiplier: Double,
          statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]],
          forcedToOne: Set<CombatStatKey>,
-         equipmentMultipliers: [String: Double],
+         equipmentMultipliers: [Int: Double],
          itemStatMultipliers: [CombatStatKey: Double],
          pandoraBoxStackKeys: Set<String>) {
         self.raceId = raceId
@@ -910,8 +918,7 @@ private struct CombatAccumulator {
 
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
-            let categoryIdentifier = ItemSaleCategory(rawValue: definition.category)?.identifier ?? ""
-            let categoryMultiplier = equipmentMultipliers[categoryIdentifier] ?? 1.0
+            let categoryMultiplier = equipmentMultipliers[Int(definition.category)] ?? 1.0
             let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
             let title = titlesById[item.normalTitleId]
@@ -1014,6 +1021,27 @@ private enum CombatStatKey: UInt8, CaseIterable {
     case additionalDamage = 12
     case breathDamage = 13
 
+    /// EnumMappings.combatStat のInt値から初期化
+    init?(_ intValue: Int) {
+        switch intValue {
+        case 10: self = .maxHP
+        case 11: self = .physicalAttack
+        case 12: self = .magicalAttack
+        case 13: self = .physicalDefense
+        case 14: self = .magicalDefense
+        case 15: self = .hitRate
+        case 16: self = .evasionRate
+        case 17: self = .criticalRate
+        case 18: self = .attackCount
+        case 19: self = .magicalHealing
+        case 20: self = .trapRemoval
+        case 21: self = .additionalDamage
+        case 22: self = .breathDamage
+        default: return nil
+        }
+    }
+
+    /// レガシー用: String識別子から初期化（forEachNonZero互換用、Step 10で削除予定）
     init?(_ raw: String?) {
         guard let raw else { return nil }
         switch raw {

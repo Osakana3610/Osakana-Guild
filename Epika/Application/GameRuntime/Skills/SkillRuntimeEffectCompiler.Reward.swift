@@ -31,21 +31,21 @@ extension SkillRuntimeEffectCompiler {
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case .rewardExperiencePercent:
-                    components.experienceBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
+                    components.experienceBonusSum += try payload.requireValue(.valuePercent, skillId: skill.id, effectIndex: effect.index) / 100.0
                 case .rewardExperienceMultiplier:
-                    components.experienceMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                    components.experienceMultiplierProduct *= try payload.requireValue(.multiplier, skillId: skill.id, effectIndex: effect.index)
                 case .rewardGoldPercent:
-                    components.goldBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
+                    components.goldBonusSum += try payload.requireValue(.valuePercent, skillId: skill.id, effectIndex: effect.index) / 100.0
                 case .rewardGoldMultiplier:
-                    components.goldMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                    components.goldMultiplierProduct *= try payload.requireValue(.multiplier, skillId: skill.id, effectIndex: effect.index)
                 case .rewardItemPercent:
-                    components.itemDropBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
+                    components.itemDropBonusSum += try payload.requireValue(.valuePercent, skillId: skill.id, effectIndex: effect.index) / 100.0
                 case .rewardItemMultiplier:
-                    components.itemDropMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                    components.itemDropMultiplierProduct *= try payload.requireValue(.multiplier, skillId: skill.id, effectIndex: effect.index)
                 case .rewardTitlePercent:
-                    components.titleBonusSum += try payload.requireValue("valuePercent", skillId: skill.id, effectIndex: effect.index) / 100.0
+                    components.titleBonusSum += try payload.requireValue(.valuePercent, skillId: skill.id, effectIndex: effect.index) / 100.0
                 case .rewardTitleMultiplier:
-                    components.titleMultiplierProduct *= try payload.requireValue("multiplier", skillId: skill.id, effectIndex: effect.index)
+                    components.titleMultiplierProduct *= try payload.requireValue(.multiplier, skillId: skill.id, effectIndex: effect.index)
                 case .absorption,
                      .actionOrderMultiplier,
                      .actionOrderShuffle,

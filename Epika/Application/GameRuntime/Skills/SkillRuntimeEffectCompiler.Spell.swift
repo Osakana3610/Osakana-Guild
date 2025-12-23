@@ -33,19 +33,21 @@ extension SkillRuntimeEffectCompiler {
                 try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
                 switch payload.effectType {
                 case .spellAccess:
-                    let spellIdValue = try payload.requireValue("spellId", skillId: skill.id, effectIndex: effect.index)
-                    let spellId = UInt8(spellIdValue.rounded(.towardZero))
-                    let action = (payload.parameters["action"] ?? "learn").lowercased()
-                    if action == "forget" {
+                    let spellIdRaw = try payload.requireParam(.spellId, skillId: skill.id, effectIndex: effect.index)
+                    let spellId = UInt8(spellIdRaw)
+                    // action: 1=learn, 2=forget (EnumMappingsに合わせる)
+                    let actionRaw = payload.parameters[.action] ?? 1  // デフォルトはlearn
+                    if actionRaw == 2 {  // forget
                         forgottenSpellIds.insert(spellId)
                     } else {
                         learnedSpellIds.insert(spellId)
                     }
                 case .spellTierUnlock:
-                    let schoolRaw = try payload.requireParam("school", skillId: skill.id, effectIndex: effect.index)
-                    guard let schoolIndex = SpellDefinition.School(identifier: schoolRaw)?.index else { continue }
-                    let tierValue = try payload.requireValue("tier", skillId: skill.id, effectIndex: effect.index)
+                    let schoolRaw = try payload.requireParam(.school, skillId: skill.id, effectIndex: effect.index)
+                    guard let school = SpellDefinition.School(rawValue: UInt8(schoolRaw)) else { continue }
+                    let tierValue = try payload.requireValue(.tier, skillId: skill.id, effectIndex: effect.index)
                     let tier = max(0, Int(tierValue.rounded(.towardZero)))
+                    let schoolIndex = school.index
                     guard tier > 0 else { continue }
                     let current = tierUnlocks[schoolIndex] ?? 0
                     if tier > current {
