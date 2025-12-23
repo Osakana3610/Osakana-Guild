@@ -214,9 +214,38 @@ struct EncounterDetailView: View {
         // rawActionsとfilteredActionsの対応を追跡するためのインデックス
         var filteredIndex = 0
 
-        for action in rawActions {
+        // 物理ダメージ統合用の追跡変数
+        var physicalDamageAccumulator: (
+            startIndex: Int,
+            filteredIdx: Int,
+            targetId: String,
+            beforeHP: Int
+        )? = nil
+
+        func flushPhysicalDamage() {
+            guard let acc = physicalDamageAccumulator,
+                  let state = stateMap[acc.targetId] else {
+                physicalDamageAccumulator = nil
+                return
+            }
+            actionHPChanges[acc.filteredIdx] = ActionHPChange(
+                targetId: acc.targetId,
+                targetName: state.name,
+                beforeHP: acc.beforeHP,
+                afterHP: state.currentHP,
+                maxHP: state.maxHP
+            )
+            physicalDamageAccumulator = nil
+        }
+
+        for (rawIndex, action) in rawActions.enumerated() {
             guard let kind = ActionKind(rawValue: action.kind) else { continue }
             let value = Int(action.value ?? 0)
+
+            // 物理ダメージ・回避以外が来たら、累積中のデータをフラッシュ
+            if kind != .physicalDamage && kind != .physicalEvade {
+                flushPhysicalDamage()
+            }
 
             // このrawActionに対応するfilteredActionを探す
             let matchingFilteredIndex = findMatchingFilteredIndex(
@@ -228,9 +257,35 @@ struct EncounterDetailView: View {
             )
 
             switch kind {
-            // ダメージ（ターゲットのHPを減らす）
-            case .physicalDamage, .magicDamage, .breathDamage, .statusTick,
-                 .enemySpecialDamage:
+            // 物理ダメージ（統合対応）
+            case .physicalDamage:
+                if let target = action.target,
+                   let targetId = indexToId[target],
+                   var state = stateMap[targetId] {
+                    // 統合の最初のアクションかどうか判定
+                    if physicalDamageAccumulator == nil, let idx = matchingFilteredIndex {
+                        physicalDamageAccumulator = (rawIndex, idx, targetId, state.currentHP)
+                        filteredIndex = idx + 1
+                    }
+                    state.currentHP = max(0, state.currentHP - value)
+                    stateMap[targetId] = state
+                }
+
+            // 物理回避（統合対応、HP変動なし）
+            case .physicalEvade:
+                if let target = action.target,
+                   let targetId = indexToId[target] {
+                    // 統合の最初のアクションかどうか判定
+                    if physicalDamageAccumulator == nil, let idx = matchingFilteredIndex {
+                        if let state = stateMap[targetId] {
+                            physicalDamageAccumulator = (rawIndex, idx, targetId, state.currentHP)
+                        }
+                        filteredIndex = idx + 1
+                    }
+                }
+
+            // その他のダメージ（ターゲットのHPを減らす）
+            case .magicDamage, .breathDamage, .statusTick, .enemySpecialDamage:
                 if let target = action.target,
                    let targetId = indexToId[target],
                    var state = stateMap[targetId] {
@@ -331,6 +386,9 @@ struct EncounterDetailView: View {
                 break
             }
         }
+
+        // ループ終了時に残っている物理ダメージをフラッシュ
+        flushPhysicalDamage()
 
         return (actionHPChanges, stateMap)
     }
