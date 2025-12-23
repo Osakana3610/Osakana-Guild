@@ -107,14 +107,33 @@ struct CombatExecutionService {
                                              maxHP: actor.snapshot.maxHP)
         }
 
+        // 同じ名前の敵が複数いる場合、A, B, C...のサフィックスをつける
+        let enemyNameCounts = resolution.enemyActors.reduce(into: [String: Int]()) { counts, actor in
+            counts[actor.displayName, default: 0] += 1
+        }
+        var enemyNameIndices: [String: Int] = [:]
+
         let enemySnapshots: [BattleParticipantSnapshot] = resolution.enemyActors.enumerated().map { (index, actor) in
             // actorIndex = (arrayIndex + 1) * 1000 + enemyMasterIndex
             // これは BattleContext.actorIndex の計算方法と一致する必要がある
             let actorIndex = UInt16(index + 1) * 1000 + (actor.enemyMasterIndex ?? 0)
+
+            // 名前にサフィックスを追加（同名が2体以上の場合のみ）
+            let baseName = actor.displayName
+            let displayName: String
+            if enemyNameCounts[baseName, default: 0] >= 2 {
+                let currentIndex = enemyNameIndices[baseName, default: 0]
+                let suffix = String(UnicodeScalar(65 + currentIndex)!)  // A, B, C...
+                displayName = "\(baseName)\(suffix)"
+                enemyNameIndices[baseName] = currentIndex + 1
+            } else {
+                displayName = baseName
+            }
+
             return BattleParticipantSnapshot(actorId: String(actorIndex),
                                              partyMemberId: nil,
                                              characterId: nil,
-                                             name: actor.displayName,
+                                             name: displayName,
                                              avatarIndex: nil,
                                              level: actor.level,
                                              maxHP: actor.snapshot.maxHP)
