@@ -62,17 +62,18 @@ struct MasterDataCache: Sendable {
     let raceSkillUnlocks: [UInt8: [(level: Int, skillId: UInt16)]]
 
     // MARK: - インデックス（Dictionary）
+    // 戦闘システム等で辞書アクセスが必要な場合はinternalで公開
 
     private let itemsById: [UInt16: ItemDefinition]
-    private let jobsById: [UInt8: JobDefinition]
-    private let racesById: [UInt8: RaceDefinition]
-    private let skillsById: [UInt16: SkillDefinition]
+    let jobsById: [UInt8: JobDefinition]
+    let racesById: [UInt8: RaceDefinition]
+    let skillsById: [UInt16: SkillDefinition]
     private let spellsById: [UInt8: SpellDefinition]
-    private let enemiesById: [UInt16: EnemyDefinition]
-    private let enemySkillsById: [UInt16: EnemySkillDefinition]
+    let enemiesById: [UInt16: EnemyDefinition]
+    let enemySkillsById: [UInt16: EnemySkillDefinition]
     private let titlesById: [UInt8: TitleDefinition]
     private let superRareTitlesById: [UInt8: SuperRareTitleDefinition]
-    private let statusEffectsById: [UInt8: StatusEffectDefinition]
+    let statusEffectsById: [UInt8: StatusEffectDefinition]
     private let dungeonsById: [UInt16: DungeonDefinition]
     private let explorationEventsById: [UInt8: ExplorationEventDefinition]
     private let personalityPrimaryById: [UInt8: PersonalityPrimaryDefinition]

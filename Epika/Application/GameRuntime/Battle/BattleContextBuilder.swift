@@ -19,8 +19,9 @@
 import Foundation
 
 struct BattleContextBuilder {
-    @MainActor
-    static func makePlayerActors(from party: RuntimePartyState) throws -> [BattleActor] {
+    /// プレイヤーパーティからBattleActorを構築
+    /// nonisolated - 計算処理のためMainActorに縛られない
+    nonisolated static func makePlayerActors(from party: RuntimePartyState) throws -> [BattleActor] {
         let members = party.members
             .filter { $0.character.hitPoints.maximum > 0 }
             .sorted { $0.order < $1.order }

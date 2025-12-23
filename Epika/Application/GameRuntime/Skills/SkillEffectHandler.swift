@@ -26,7 +26,8 @@ import Foundation
 
 /// スキルエフェクトを処理するハンドラのプロトコル
 /// 各 SkillEffectType に対応するハンドラが実装する
-protocol SkillEffectHandler {
+/// 静的メソッドのみで状態を持たないためSendable
+protocol SkillEffectHandler: Sendable {
     /// このハンドラが処理する SkillEffectType
     static var effectType: SkillEffectType { get }
 
@@ -91,7 +92,7 @@ extension DecodedSkillEffectPayload {
 
 /// SkillEffectType からハンドラを取得するレジストリ
 /// 静的イミュータブル辞書として起動時に一度だけ構築される
-@MainActor
+/// ハンドラは静的メソッドのみでSendable、辞書もSendable
 enum SkillEffectHandlerRegistry {
     /// 全ハンドラの辞書（遅延初期化）
     static let handlers: [SkillEffectType: any SkillEffectHandler.Type] = {

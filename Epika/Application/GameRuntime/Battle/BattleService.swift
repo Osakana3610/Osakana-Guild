@@ -15,7 +15,7 @@
 //     - playerActors, enemyActors
 //
 // 【公開API】
-//   - resolveBattle(...) → Resolution @MainActor
+//   - resolveBattle(...) → Resolution (nonisolated)
 //     - 敵グループ生成→BattleContext構築→ターンエンジン実行
 //
 // 【戦闘フロー】
@@ -67,8 +67,9 @@ enum BattleService {
         let enemyActors: [BattleActor]
     }
 
-    @MainActor
-    static func resolveBattle(masterData: MasterDataCache,
+    /// 戦闘を解決する
+    /// nonisolated - 計算処理のためMainActorに縛られない
+    nonisolated static func resolveBattle(masterData: MasterDataCache,
                               party: RuntimePartyState,
                               dungeon: DungeonDefinition,
                               floor: DungeonFloorDefinition,
@@ -77,7 +78,13 @@ enum BattleService {
                               encounterGroupMin: Int?,
                               encounterGroupMax: Int?,
                               random: inout GameRandomSource) throws -> Resolution {
-        let skillDictionary = Dictionary(uniqueKeysWithValues: masterData.allSkills.map { ($0.id, $0) })
+        // MasterDataCacheの既存辞書を使用（毎戦闘での辞書作成を回避）
+        let skillDictionary = masterData.skillsById
+        let enemyDictionary = masterData.enemiesById
+        let statusDefinitions = masterData.statusEffectsById
+        let jobDictionary = masterData.jobsById
+        let raceDictionary = masterData.racesById
+        let enemySkillDictionary = masterData.enemySkillsById
 
         let players = try BattleContextBuilder.makePlayerActors(from: party)
         guard !players.isEmpty else {
@@ -96,12 +103,6 @@ enum BattleService {
                               playerActors: [],
                               enemyActors: [])
         }
-
-        let enemyDictionary = Dictionary(uniqueKeysWithValues: masterData.allEnemies.map { ($0.id, $0) })
-        let statusDefinitions = Dictionary(uniqueKeysWithValues: masterData.allStatusEffects.map { ($0.id, $0) })
-        let jobDictionary = Dictionary(uniqueKeysWithValues: masterData.allJobs.map { ($0.id, $0) })
-        let raceDictionary = Dictionary(uniqueKeysWithValues: masterData.allRaces.map { ($0.id, $0) })
-        let enemySkillDictionary = Dictionary(uniqueKeysWithValues: masterData.allEnemySkills.map { ($0.id, $0) })
 
         var localRandom = random
         let enemyResult = try BattleEnemyGroupBuilder.makeEnemies(baseEnemyId: encounterEnemyId,

@@ -220,8 +220,8 @@ extension BattleTurnEngine {
 
     static func selectSpecialAttack(for attacker: BattleActor,
                                     context: inout BattleContext) -> BattleActor.SkillEffects.SpecialAttack? {
-        // 通常行動時は先制攻撃を除外
-        let specials = attacker.skillEffects.combat.specialAttacks.filter { !$0.preemptive }
+        // 通常行動時は先制攻撃を除外（プリ分類済み）
+        let specials = attacker.skillEffects.combat.specialAttacks.normal
         guard !specials.isEmpty else { return nil }
         for descriptor in specials {
             guard descriptor.chancePercent > 0 else { continue }
@@ -580,7 +580,8 @@ extension BattleTurnEngine {
     private static func executePreemptiveAttacksForActor(side: ActorSide, index: Int, context: inout BattleContext) {
         guard let attacker = context.actor(for: side, index: index), attacker.isAlive else { return }
 
-        let preemptives = attacker.skillEffects.combat.specialAttacks.filter { $0.preemptive }
+        // プリ分類済みの先制攻撃リストを使用
+        let preemptives = attacker.skillEffects.combat.specialAttacks.preemptive
         guard !preemptives.isEmpty else { return }
 
         for descriptor in preemptives {

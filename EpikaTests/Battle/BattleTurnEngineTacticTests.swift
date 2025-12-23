@@ -14,7 +14,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     func testSpecialAttackTriggers() {
         var attackerEffects = BattleActor.SkillEffects.neutral
-        attackerEffects.combat.specialAttacks = [.init(kind: .specialA, chancePercent: 100)]
+        attackerEffects.combat.specialAttacks = .init(from: [.init(kind: .specialA, chancePercent: 100)])
 
         var players = [
             BattleTestFactory.actor(

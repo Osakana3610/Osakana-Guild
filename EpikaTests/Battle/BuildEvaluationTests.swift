@@ -144,7 +144,7 @@ final class BuildEvaluationTests: XCTestCase {
         score += (effects.damage.criticalMultiplier - 1.0) * 20  // 1.5倍なら+10点
 
         // 特殊攻撃（攻撃回数増加など）
-        for attack in effects.combat.specialAttacks {
+        for attack in effects.combat.specialAttacks.all {
             score += Double(attack.chancePercent) * 0.3
         }
 
