@@ -155,12 +155,12 @@ final class DamageComparisonTests: XCTestCase {
             for effect in skill.effects {
                 switch effect.effectType {
                 case .martialBonusPercent:
-                    if let pct = effect.values["valuePercent"] { martialPercent += pct }
+                    if let pct = effect.values[.valuePercent] { martialPercent += pct }
                 case .martialBonusMultiplier:
-                    if let mult = effect.values["multiplier"] { martialMultiplier *= mult }
+                    if let mult = effect.values[.multiplier] { martialMultiplier *= mult }
                 case .damageDealtPercent:
-                    if effect.parameters["damageType"] == "physical",
-                       let pct = effect.values["valuePercent"] { damagePercent += pct }
+                    if effect.parameters[.damageType] == Int(BattleDamageType.physical.rawValue),
+                       let pct = effect.values[.valuePercent] { damagePercent += pct }
                 default:
                     break
                 }

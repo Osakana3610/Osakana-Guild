@@ -351,11 +351,8 @@ extension BattleTurnEngine {
     }
 
     static func barrierKey(for damageType: BattleDamageType) -> UInt8 {
-        switch damageType {
-        case .physical: return 0
-        case .magical: return 1
-        case .breath: return 2
-        }
+        // BattleDamageType.rawValue と一致させる (physical=1, magical=2, breath=3)
+        damageType.rawValue
     }
 
     static func applyBarrierIfAvailable(for damageType: BattleDamageType,

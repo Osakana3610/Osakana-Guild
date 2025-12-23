@@ -85,8 +85,10 @@ struct BattleContextBuilder {
     }
 
     static func slot(for index: Int) -> BattleFormationSlot? {
-        guard index >= 0 && index < BattleFormationSlot.allCases.count else { return nil }
-        return BattleFormationSlot.allCases[index]
+        // BattleFormationSlot は 1〜6 の整数
+        let slot = index + 1
+        guard slot >= 1 && slot <= 6 else { return nil }
+        return slot
     }
 
     private static func playerActionRates(for character: RuntimeCharacter) -> BattleActionRates {

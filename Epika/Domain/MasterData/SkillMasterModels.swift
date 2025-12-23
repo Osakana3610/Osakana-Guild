@@ -103,12 +103,12 @@ struct SkillDefinition: Identifiable, Sendable, Hashable {
         let index: Int
         let effectType: SkillEffectType
         let familyId: UInt16?
-        /// param_type (String key) -> int_value の逆変換済み辞書
-        let parameters: [String: String]
-        /// value_type (String key) -> value
-        let values: [String: Double]
-        /// array_type (String key) -> [int_value]
-        let arrayValues: [String: [Int]]
+        /// param_type → int_value
+        let parameters: [EffectParamKey: Int]
+        /// value_type → value
+        let values: [EffectValueKey: Double]
+        /// array_type → [int_value]
+        let arrayValues: [EffectArrayKey: [Int]]
     }
 
     let id: UInt16

@@ -317,7 +317,6 @@ SwiftDataモデル（永続化レコード）。
 
 | ファイル | 責務 |
 |---------|------|
-| SkillEffectReverseMappings.swift | SQLiteテーブル整数値を文字列に逆変換 |
 | SQLiteMasterDataManager.swift | SQLiteデータベース基本操作 |
 | SQLiteMasterDataQueries.swift | クエリメソッド群の索引ファイル |
 | SQLiteMasterDataQueries.CharacterNames.swift | 名前データ取得 |

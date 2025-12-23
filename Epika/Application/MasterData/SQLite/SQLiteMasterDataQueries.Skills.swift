@@ -6,7 +6,7 @@
 // 【責務】
 //   - スキル定義とエフェクトの取得クエリを提供
 //   - 複雑なマルチテーブル結合（skills, skill_effects, params, values, array_values）
-//   - SkillEffectReverseMappingsを使用して整数値を文字列に変換
+//   - EffectParamKey/EffectValueKey/EffectArrayKeyを使用してenum keyで直接アクセス
 //
 // 【公開API】
 //   - fetchAllSkills() -> [SkillDefinition]
@@ -92,7 +92,7 @@ extension SQLiteMasterDataManager {
         let paramStatement = try prepare(paramSQL)
         defer { sqlite3_finalize(paramStatement) }
 
-        var paramMap: [EffectKey: [String: String]] = [:]
+        var paramMap: [EffectKey: [EffectParamKey: Int]] = [:]
 
         while sqlite3_step(paramStatement) == SQLITE_ROW {
             let skillId = UInt16(sqlite3_column_int(paramStatement, 0))
@@ -100,17 +100,16 @@ extension SQLiteMasterDataManager {
             let paramTypeInt = Int(sqlite3_column_int(paramStatement, 2))
             let intValue = Int(sqlite3_column_int(paramStatement, 3))
 
-            guard let paramTypeName = SkillEffectReverseMappings.paramType[paramTypeInt] else {
+            guard let paramKey = EffectParamKey(rawValue: paramTypeInt) else {
                 throw SQLiteMasterDataError.executionFailed("未知の param_type \(paramTypeInt) (skill_id=\(skillId), index=\(effectIndex))")
             }
 
             let key = EffectKey(skillId: skillId, effectIndex: effectIndex)
-            let stringValue = SkillEffectReverseMappings.resolveParamValue(paramType: paramTypeName, intValue: intValue)
 
             if paramMap[key] == nil {
                 paramMap[key] = [:]
             }
-            paramMap[key]?[paramTypeName] = stringValue
+            paramMap[key]?[paramKey] = intValue
         }
 
         // 4. 数値を取得
@@ -118,7 +117,7 @@ extension SQLiteMasterDataManager {
         let valueStatement = try prepare(valueSQL)
         defer { sqlite3_finalize(valueStatement) }
 
-        var valueMap: [EffectKey: [String: Double]] = [:]
+        var valueMap: [EffectKey: [EffectValueKey: Double]] = [:]
 
         while sqlite3_step(valueStatement) == SQLITE_ROW {
             let skillId = UInt16(sqlite3_column_int(valueStatement, 0))
@@ -126,7 +125,7 @@ extension SQLiteMasterDataManager {
             let valueTypeInt = Int(sqlite3_column_int(valueStatement, 2))
             let value = sqlite3_column_double(valueStatement, 3)
 
-            guard let valueTypeName = SkillEffectReverseMappings.valueType[valueTypeInt] else {
+            guard let valueKey = EffectValueKey(rawValue: valueTypeInt) else {
                 throw SQLiteMasterDataError.executionFailed("未知の value_type \(valueTypeInt) (skill_id=\(skillId), index=\(effectIndex))")
             }
 
@@ -135,7 +134,7 @@ extension SQLiteMasterDataManager {
             if valueMap[key] == nil {
                 valueMap[key] = [:]
             }
-            valueMap[key]?[valueTypeName] = value
+            valueMap[key]?[valueKey] = value
         }
 
         // 5. 配列値を取得
@@ -143,7 +142,7 @@ extension SQLiteMasterDataManager {
         let arrayStatement = try prepare(arraySQL)
         defer { sqlite3_finalize(arrayStatement) }
 
-        var arrayMap: [EffectKey: [String: [Int]]] = [:]
+        var arrayMap: [EffectKey: [EffectArrayKey: [Int]]] = [:]
 
         while sqlite3_step(arrayStatement) == SQLITE_ROW {
             let skillId = UInt16(sqlite3_column_int(arrayStatement, 0))
@@ -152,7 +151,7 @@ extension SQLiteMasterDataManager {
             // element_index is at column 3, but we don't need it since we're iterating in order
             let intValue = Int(sqlite3_column_int(arrayStatement, 4))
 
-            guard let arrayTypeName = SkillEffectReverseMappings.arrayType[arrayTypeInt] else {
+            guard let arrayKey = EffectArrayKey(rawValue: arrayTypeInt) else {
                 throw SQLiteMasterDataError.executionFailed("未知の array_type \(arrayTypeInt) (skill_id=\(skillId), index=\(effectIndex))")
             }
 
@@ -161,10 +160,10 @@ extension SQLiteMasterDataManager {
             if arrayMap[key] == nil {
                 arrayMap[key] = [:]
             }
-            if arrayMap[key]?[arrayTypeName] == nil {
-                arrayMap[key]?[arrayTypeName] = []
+            if arrayMap[key]?[arrayKey] == nil {
+                arrayMap[key]?[arrayKey] = []
             }
-            arrayMap[key]?[arrayTypeName]?.append(intValue)
+            arrayMap[key]?[arrayKey]?.append(intValue)
         }
 
         // 6. エフェクトを組み立ててスキルに追加
