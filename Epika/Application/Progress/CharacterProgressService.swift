@@ -596,25 +596,6 @@ actor CharacterProgressService {
         notifyCharacterProgressDidChange()
     }
 
-    /// displayOrder未設定のキャラクターにID順で順序を設定（起動時マイグレーション用）
-    func migrateDisplayOrderIfNeeded() async throws {
-        let context = makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>()
-        descriptor.sortBy = [SortDescriptor(\CharacterRecord.id, order: .forward)]
-        let records = try context.fetch(descriptor)
-
-        // displayOrder = 0 のレコードがなければ何もしない
-        let unorderedRecords = records.filter { $0.displayOrder == 0 }
-        guard !unorderedRecords.isEmpty else { return }
-
-        // 全レコードにID順で順序を設定
-        for (index, record) in records.enumerated() {
-            record.displayOrder = UInt8(index + 1)
-        }
-
-        try context.save()
-    }
-
     // MARK: - Equipment Management
 
     /// キャラクターにアイテムを装備

@@ -45,7 +45,6 @@ final class CharacterRecord {
     var previousJobId: UInt8 = 0               // 前職（0=なし、転職は1回のみ）
     var avatarId: UInt16 = 0                   // 0=デフォルト（種族画像）、101〜316=職業、400+=カスタム
     var level: UInt8 = 1                       // 最大200
-    // [軽量マイグレーション] UInt32→UInt64 (Lv200対応) - 将来削除予定のコメント
     var experience: UInt64 = 0
     var currentHP: UInt32 = 0                  // 20万超の可能性
     var primaryPersonalityId: UInt8 = 0        // 0 = なし
