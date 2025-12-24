@@ -15,7 +15,7 @@
 //   - cleanupStock(itemId:) → Int - 在庫整理、チケット獲得
 //
 // 【データ構造】
-//   - ShopItem: 商店アイテム（definition, price, stockQuantity, isPlayerSold）
+//   - ShopItem: 商店アイテム（definition, price, stockQuantity）
 //   - SoldResult: 売却結果（added, gold, overflow）
 //
 // 【在庫管理】
@@ -33,7 +33,6 @@ actor ShopProgressService {
         let definition: ItemDefinition
         let price: Int
         let stockQuantity: UInt16?
-        let isPlayerSold: Bool
         let updatedAt: Date
 
         static func == (lhs: ShopItem, rhs: ShopItem) -> Bool { lhs.id == rhs.id }
@@ -98,7 +97,6 @@ actor ShopProgressService {
                             definition: definition,
                             price: definition.basePrice,
                             stockQuantity: stock.remaining,
-                            isPlayerSold: stock.isPlayerSold,
                             updatedAt: stock.updatedAt)
         }
     }
@@ -125,9 +123,9 @@ actor ShopProgressService {
         let context = makeContext()
         let now = Date()
 
-        // 既存の在庫を検索（プレイヤー売却品のみ）
+        // 既存の在庫を検索
         let descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate {
-            $0.itemId == itemId && $0.isPlayerSold == true
+            $0.itemId == itemId
         })
         let existingStock = try context.fetch(descriptor).first
 
@@ -144,7 +142,6 @@ actor ShopProgressService {
             actuallyAdded = min(quantity, Int(Self.stockInternalLimit))
             let stock = ShopStockRecord(itemId: itemId,
                                         remaining: UInt16(actuallyAdded),
-                                        isPlayerSold: true,
                                         updatedAt: now)
             context.insert(stock)
         }
@@ -190,12 +187,10 @@ actor ShopProgressService {
 
         // 既存在庫を一括取得
         let itemIdArray = Array(aggregated.keys)
-        let descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate {
-            $0.isPlayerSold == true
-        })
-        let allPlayerSoldStocks = try context.fetch(descriptor)
+        let descriptor = FetchDescriptor<ShopStockRecord>()
+        let allStocks = try context.fetch(descriptor)
         var stockMap: [UInt16: ShopStockRecord] = [:]
-        for stock in allPlayerSoldStocks where itemIdArray.contains(stock.itemId) {
+        for stock in allStocks where itemIdArray.contains(stock.itemId) {
             stockMap[stock.itemId] = stock
         }
 
@@ -216,7 +211,6 @@ actor ShopProgressService {
                 actuallyAdded = min(quantity, Int(Self.stockInternalLimit))
                 let stock = ShopStockRecord(itemId: itemId,
                                             remaining: UInt16(actuallyAdded),
-                                            isPlayerSold: true,
                                             updatedAt: now)
                 context.insert(stock)
                 stockMap[itemId] = stock
@@ -242,15 +236,14 @@ actor ShopProgressService {
         let context = makeContext()
         let stock = try fetchStockRecord(itemId: itemId, context: context)
 
-        guard stock.isPlayerSold else {
-            throw ProgressError.invalidInput(description: "マスターデータ由来の在庫は整理できません")
+        guard let definition = masterDataCache.item(stock.itemId) else {
+            throw ProgressError.itemDefinitionUnavailable(ids: [String(stock.itemId)])
+        }
+        guard definition.rarity != ItemRarity.normal.rawValue else {
+            throw ProgressError.invalidInput(description: "ノーマルアイテムは整理できません")
         }
         guard let remaining = stock.remaining, remaining > targetQuantity else {
             return 0
-        }
-
-        guard let definition = masterDataCache.item(stock.itemId) else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [String(stock.itemId)])
         }
 
         let now = Date()
@@ -264,12 +257,12 @@ actor ShopProgressService {
         return ticketsPerItem * Int(reducedQuantity)
     }
 
-    /// 在庫整理対象のアイテム一覧を取得（表示上限超過のプレイヤー売却品）
+    /// 在庫整理対象のアイテム一覧を取得（在庫99以上のノーマル以外のアイテム）
     func loadCleanupCandidates() async throws -> [ShopItem] {
         let items = try await loadItems()
         return items.filter { item in
             guard let quantity = item.stockQuantity else { return false }
-            return quantity > Self.stockDisplayLimit && item.isPlayerSold
+            return quantity >= Self.stockDisplayLimit && item.definition.rarity != ItemRarity.normal.rawValue
         }
     }
 
@@ -340,7 +333,23 @@ private extension ShopProgressService {
                     timestamp: Date) throws -> Bool {
         var changed = false
         let descriptor = FetchDescriptor<ShopStockRecord>()
-        var existing = Dictionary(uniqueKeysWithValues: try context.fetch(descriptor).map { ($0.itemId, $0) })
+        let allRecords = try context.fetch(descriptor)
+
+        // 重複レコードをクリーンアップ（同じitemIdが複数ある場合、1つに統合）
+        var existing: [UInt16: ShopStockRecord] = [:]
+        for record in allRecords {
+            if let existingRecord = existing[record.itemId] {
+                // 重複発見：在庫を統合して古い方を削除
+                let existingRemaining = existingRecord.remaining ?? 0
+                let recordRemaining = record.remaining ?? 0
+                existingRecord.remaining = existingRemaining + recordRemaining
+                existingRecord.updatedAt = max(existingRecord.updatedAt, record.updatedAt)
+                context.delete(record)
+                changed = true
+            } else {
+                existing[record.itemId] = record
+            }
+        }
 
         for entry in masterItems.sorted(by: { $0.orderIndex < $1.orderIndex }) {
             if existing.removeValue(forKey: entry.itemId) != nil {
@@ -350,19 +359,13 @@ private extension ShopProgressService {
                 let remaining: UInt16? = entry.quantity.map { UInt16($0) }
                 let stock = ShopStockRecord(itemId: entry.itemId,
                                             remaining: remaining,
-                                            isPlayerSold: false,
                                             updatedAt: timestamp)
                 context.insert(stock)
                 changed = true
             }
         }
 
-        if !existing.isEmpty {
-            for leftover in existing.values where !leftover.isPlayerSold {
-                context.delete(leftover)
-                changed = true
-            }
-        }
+        // マスターデータにないアイテムも保持（プレイヤー売却品）
         return changed
     }
 
@@ -385,7 +388,6 @@ private extension ShopProgressService {
         let stockSnapshots = stocks.map { stock in
             ShopSnapshot.Stock(itemId: stock.itemId,
                                remaining: stock.remaining,
-                               isPlayerSold: stock.isPlayerSold,
                                updatedAt: stock.updatedAt)
         }
         return ShopSnapshot(stocks: stockSnapshots,
