@@ -74,7 +74,7 @@ issues:
   - id: "FB0019"
     title: "複数パーティで探索を行うと端末が異常に熱くなる場合がある"
     category: "パフォーマンス"
-    status: "investigating"
+    status: "confirmed"
     reported_date: "2025-12-23"
     description: |
       複数のパーティで同時に探索を行うと、端末が異常に熱くなる場合がある。
