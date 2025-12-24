@@ -241,6 +241,28 @@ final class ExplorationProgressService {
         )
         return try context.fetch(descriptor).first
     }
+
+    /// 現在探索中の全パーティメンバーIDを取得
+    func runningPartyMemberIds() throws -> Set<UInt8> {
+        let context = makeContext()
+        let runningStatus = ExplorationResult.running.rawValue
+        let runDescriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.result == runningStatus }
+        )
+        let runningRecords = try context.fetch(runDescriptor)
+        let partyIds = Set(runningRecords.map { $0.partyId })
+
+        var memberIds = Set<UInt8>()
+        for partyId in partyIds {
+            let partyDescriptor = FetchDescriptor<PartyRecord>(
+                predicate: #Predicate { $0.id == partyId }
+            )
+            if let party = try context.fetch(partyDescriptor).first {
+                memberIds.formUnion(party.memberCharacterIds)
+            }
+        }
+        return memberIds
+    }
 }
 
 // MARK: - Private Helpers

@@ -562,6 +562,12 @@ actor CharacterProgressService {
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else { return }
+
+        // 探索中のキャラクターは解雇不可
+        if try isCharacterExploring(characterId: id, context: context) {
+            throw ProgressError.invalidInput(description: "探索中のキャラクターを解雇できません")
+        }
+
         try deleteEquipment(for: id, context: context)
         try removeFromParties(characterId: id, context: context)
         context.delete(record)
@@ -611,6 +617,11 @@ actor CharacterProgressService {
         characterDescriptor.fetchLimit = 1
         guard let characterRecord = try context.fetch(characterDescriptor).first else {
             throw ProgressError.invalidInput(description: "キャラクターが見つかりません")
+        }
+
+        // 探索中のキャラクターは装備変更不可
+        if try isCharacterExploring(characterId: characterId, context: context) {
+            throw ProgressError.invalidInput(description: "探索中のキャラクターは装備を変更できません")
         }
 
         // インベントリアイテムの取得（stackKeyでマッチング）
@@ -684,6 +695,11 @@ actor CharacterProgressService {
         characterDescriptor.fetchLimit = 1
         guard let characterRecord = try context.fetch(characterDescriptor).first else {
             throw ProgressError.invalidInput(description: "キャラクターが見つかりません")
+        }
+
+        // 探索中のキャラクターは装備変更不可
+        if try isCharacterExploring(characterId: characterId, context: context) {
+            throw ProgressError.invalidInput(description: "探索中のキャラクターは装備を変更できません")
         }
 
         // 装備レコードの取得（同じstackKeyのものを探す）

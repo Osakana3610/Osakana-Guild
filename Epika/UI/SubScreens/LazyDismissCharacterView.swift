@@ -29,6 +29,7 @@ struct LazyDismissCharacterView: View {
     @Environment(AppServices.self) private var appServices
 
     @State private var fullCharacters: [RuntimeCharacter] = []
+    @State private var exploringIds: Set<UInt8> = []
     @State private var selectedCharacter: RuntimeCharacter?
     @State private var showDeleteConfirmation = false
     @State private var isProcessing = false
@@ -125,7 +126,7 @@ struct LazyDismissCharacterView: View {
                         showDeleteConfirmation = true
                     }
                     .foregroundColor(.primary)
-                    .disabled(isProcessing)
+                    .disabled(isProcessing || exploringIds.contains(character.id))
                 }
                 .padding(.vertical, 4)
             }
@@ -147,6 +148,7 @@ struct LazyDismissCharacterView: View {
                 runtimeCharacters.append(runtime)
             }
             fullCharacters = runtimeCharacters.sorted { $0.id < $1.id }
+            exploringIds = try appServices.exploration.runningPartyMemberIds()
         } catch {
             errorMessage = error.localizedDescription
             showError = true
