@@ -146,7 +146,7 @@ struct BattleLogRenderer {
         } else {
             let totalAttempts = hitCount + evadeCount
             if evadeCount > 0 {
-                message = "\(actorName)の攻撃！\(hitCount)/\(totalAttempts)回ヒット！\(targetName)に\(totalDamage)のダメージ！"
+                message = "\(actorName)の攻撃！\(totalAttempts)回攻撃！\(hitCount)回ヒット！\(targetName)に\(totalDamage)のダメージ！"
             } else {
                 message = "\(actorName)の攻撃！\(hitCount)回ヒット！\(targetName)に\(totalDamage)のダメージ！"
             }
