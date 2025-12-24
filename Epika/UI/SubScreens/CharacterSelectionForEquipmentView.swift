@@ -28,6 +28,7 @@ import SwiftUI
 struct CharacterSelectionForEquipmentView: View {
     @Environment(AppServices.self) private var appServices
     @State private var characters: [RuntimeCharacter] = []
+    @State private var exploringIds: Set<UInt8> = []
     @State private var loadError: String?
     @State private var isLoading = true
 
@@ -69,6 +70,7 @@ struct CharacterSelectionForEquipmentView: View {
                 } label: {
                     CharacterRowForEquipment(character: character)
                 }
+                .disabled(exploringIds.contains(character.id))
             }
         }
         .listStyle(.insetGrouped)
@@ -88,6 +90,7 @@ struct CharacterSelectionForEquipmentView: View {
                 runtimeCharacters.append(runtime)
             }
             characters = runtimeCharacters
+            exploringIds = try appServices.exploration.runningPartyMemberIds()
         } catch {
             loadError = error.localizedDescription
         }

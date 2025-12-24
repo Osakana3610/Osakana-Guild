@@ -31,6 +31,7 @@ struct CharacterReviveView: View {
     @State private var errorMessage: String?
 
     private var characterService: CharacterProgressService { appServices.character }
+    private var explorationService: ExplorationProgressService { appServices.exploration }
 
     var body: some View {
         NavigationStack {
@@ -100,8 +101,10 @@ struct CharacterReviveView: View {
         errorMessage = nil
         defer { isLoading = false }
         do {
+            let exploringIds = try explorationService.runningPartyMemberIds()
             let progresses = try await characterService.allCharacters()
-            let deceased = progresses.filter { $0.hitPoints.current <= 0 }
+            // 探索中のキャラクターは除外（探索中は蘇生不可）
+            let deceased = progresses.filter { $0.hitPoints.current <= 0 && !exploringIds.contains($0.id) }
             var runtime: [RuntimeCharacter] = []
             for progress in deceased {
                 let character = try await characterService.runtimeCharacter(from: progress)

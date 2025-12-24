@@ -139,15 +139,7 @@ struct CharacterJobChangeView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            // 探索中のキャラクターIDを取得
-            let explorations = try await appServices.exploration.allExplorations()
-            let runningExplorations = explorations.filter { $0.status == .running }
-            var exploringIds = Set<UInt8>()
-            for exploration in runningExplorations {
-                exploringIds.formUnion(exploration.party.memberCharacterIds)
-            }
-            exploringCharacterIds = exploringIds
-
+            exploringCharacterIds = try appServices.exploration.runningPartyMemberIds()
             let progresses = try await characterService.allCharacters()
             var runtime: [RuntimeCharacter] = []
             for progress in progresses {
