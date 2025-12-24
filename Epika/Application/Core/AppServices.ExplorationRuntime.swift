@@ -263,7 +263,8 @@ extension AppServices {
                 socketNormalTitleId: 0,
                 socketItemId: 0
             )
-            let autoTradeKey = "\(superRareTitleId)|\(normalTitleId)|\(drop.item.id)"
+            // 6要素キー（ソケットなし）で自動売却登録と照合
+            let autoTradeKey = "\(superRareTitleId)|\(normalTitleId)|\(drop.item.id)|0|0|0"
 
             if autoTradeKeys.contains(autoTradeKey) {
                 autoSellItems.append((itemId: drop.item.id, quantity: drop.quantity))

@@ -72,9 +72,8 @@ extension AppServices {
 
         var totalGold = 0
         for item in items {
-            // autoTradeKeyを使用（superRareTitleId|normalTitleId|itemId）
-            let key = item.autoTradeKey
-            guard autoTradeKeys.contains(key) else { continue }
+            // 6要素stackKeyで自動売却登録と照合
+            guard autoTradeKeys.contains(item.stackKey) else { continue }
 
             // 売却（overflow分はインベントリに残る）
             let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: Int(item.quantity))

@@ -71,19 +71,6 @@ issues:
     fix_plan: |
       0.7.82（3）で基本的に修正済み。追加の改善がないか調査中。
 
-  - id: "FB0020"
-    title: "自動売却が機能せず、入手したアイテムが売られない場合がある"
-    category: "アイテム"
-    status: "investigating"
-    reported_date: "2025-12-24"
-    description: |
-      自動売却を設定していても、入手したアイテムが売却されない場合がある。
-    details: |
-      調査中。
-    workaround: ""
-    fix_plan: |
-      12/26までに修正予定。
-
   - id: "FB0022"
     title: "僧侶魔法、特にバリア系統が発動しない場合がある"
     category: "戦闘"
@@ -306,6 +293,20 @@ resolved:
       ノーマルアイテムに対するレアリティチェックが不足していた。
     resolution: |
       cleanupStock でノーマルアイテムを除外するガードを追加。
+
+  - id: "FB0020"
+    title: "自動売却が機能せず、入手したアイテムが売られない場合がある"
+    category: "アイテム"
+    status: "fixed"
+    reported_date: "2025-12-24"
+    resolved_date: "2025-12-25"
+    resolved_version: "0.7.83(1)"
+    description: |
+      自動売却を設定していても、入手したアイテムが売却されない場合がある。
+    details: |
+      登録時は6要素キー、判定時は3要素キーで比較していたため一致しなかった。
+    resolution: |
+      ドロップ時・インベントリ売却時も6要素キーで照合するよう修正。
 
   - id: "FB0023"
     title: "探索中にパーティメンバーを変更できてしまう"
