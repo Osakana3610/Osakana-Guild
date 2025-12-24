@@ -84,19 +84,6 @@ issues:
     fix_plan: |
       12/26までに修正予定。
 
-  - id: "FB0021"
-    title: "在庫整理でノーマルアイテムもキャット・チケットを入手できる"
-    category: "アイテム"
-    status: "investigating"
-    reported_date: "2025-12-24"
-    description: |
-      在庫整理機能でノーマルアイテムを整理した際にも、キャット・チケットを入手できてしまう。
-    details: |
-      調査中。
-    workaround: ""
-    fix_plan: |
-      12/26までに修正予定。
-
   - id: "FB0022"
     title: "僧侶魔法、特にバリア系統が発動しない場合がある"
     category: "戦闘"
@@ -305,6 +292,20 @@ resolved:
       探索再開時のタイマー計算で、元の開始時刻ではなく復帰時刻を基準にしていたため、待機時間がずれていた。
     resolution: |
       探索再開時に元の開始時刻と既存イベント数を正しく使用するよう修正。
+
+  - id: "FB0021"
+    title: "在庫整理でノーマルアイテムもキャット・チケットを入手できる"
+    category: "アイテム"
+    status: "fixed"
+    reported_date: "2025-12-24"
+    resolved_date: "2025-12-25"
+    resolved_version: "0.7.82(4)"
+    description: |
+      在庫整理機能でノーマルアイテムを整理した際にも、キャット・チケットを入手できてしまう。
+    details: |
+      ノーマルアイテムに対するレアリティチェックが不足していた。
+    resolution: |
+      cleanupStock でノーマルアイテムを除外するガードを追加。
 
   - id: "FB0023"
     title: "探索中にパーティメンバーを変更できてしまう"
