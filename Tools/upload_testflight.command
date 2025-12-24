@@ -7,11 +7,15 @@
 #
 # 処理内容:
 #   1. 前回タグからのコミット一覧を取得（リリースノート用）
-#   2. ビルド番号をインクリメント
+#   2. バージョン/ビルドの変更をコミット（未コミットの場合）
 #   3. アーカイブ & エクスポート
 #   4. App Store Connectにアップロード
 #   5. リリースノートを設定
 #   6. 新しいタグを作成
+#
+# 使い方:
+#   1. Xcodeでバージョン/ビルド番号を更新
+#   2. このスクリプトを実行
 # ==============================================================================
 
 set -e
@@ -82,24 +86,25 @@ echo "$RELEASE_NOTES" | sed 's/^/    /'
 echo ""
 
 # ==============================================================================
-# Step 2: ビルド番号をインクリメント
+# Step 2: バージョン/ビルド変更をコミット
 # ==============================================================================
-echo "[2/6] ビルド番号を更新中..."
+echo "[2/6] バージョン/ビルドを確認中..."
 
 # 現在のバージョンとビルド番号を取得
 CURRENT_VERSION=$(grep "MARKETING_VERSION" "$PROJECT/project.pbxproj" | head -1 | grep -o '[0-9]*\.[0-9]*\.[0-9]*')
 CURRENT_BUILD=$(grep "CURRENT_PROJECT_VERSION" "$PROJECT/project.pbxproj" | head -1 | grep -o '[0-9]*')
-NEW_BUILD=$((CURRENT_BUILD + 1))
 
 echo "  バージョン: $CURRENT_VERSION"
-echo "  ビルド: $CURRENT_BUILD → $NEW_BUILD"
+echo "  ビルド: $CURRENT_BUILD"
 
-# ビルド番号を更新
-sed -i '' "s/CURRENT_PROJECT_VERSION = $CURRENT_BUILD;/CURRENT_PROJECT_VERSION = $NEW_BUILD;/g" "$PROJECT/project.pbxproj"
-
-# コミット
-git add "$PROJECT/project.pbxproj"
-git commit -m "chore: ビルド番号を${CURRENT_VERSION}(${NEW_BUILD})に更新"
+# project.pbxprojに未コミットの変更があるかチェック
+if git diff --quiet "$PROJECT/project.pbxproj" 2>/dev/null; then
+    echo "  変更なし（既にコミット済み）"
+else
+    echo "  未コミットの変更を検出 → コミットします"
+    git add "$PROJECT/project.pbxproj"
+    git commit -m "chore: バージョンを${CURRENT_VERSION}(${CURRENT_BUILD})に更新"
+fi
 
 echo ""
 
@@ -194,7 +199,7 @@ import base64; print(base64.urlsafe_b64encode(r + s).rstrip(b'=').decode())
         sleep 10
 
         BUILD_RESPONSE=$(curl -s -g -H "Authorization: Bearer $JWT" \
-            "https://api.appstoreconnect.apple.com/v1/builds?filter[app]=6756705558&filter[version]=$NEW_BUILD&limit=1")
+            "https://api.appstoreconnect.apple.com/v1/builds?filter[app]=6756705558&filter[version]=$CURRENT_BUILD&limit=1")
 
         BUILD_ID=$(echo "$BUILD_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['data'][0]['id'] if d.get('data') else '')" 2>/dev/null || echo "")
 
@@ -257,7 +262,7 @@ echo ""
 # ==============================================================================
 echo "[6/6] タグを作成中..."
 
-NEW_TAG="v${CURRENT_VERSION}-${NEW_BUILD}"
+NEW_TAG="v${CURRENT_VERSION}-${CURRENT_BUILD}"
 git tag "$NEW_TAG"
 echo "  タグ作成: $NEW_TAG"
 
@@ -269,7 +274,7 @@ echo "======================================"
 echo "完了しました!"
 echo "======================================"
 echo ""
-echo "バージョン: $CURRENT_VERSION ($NEW_BUILD)"
+echo "バージョン: $CURRENT_VERSION ($CURRENT_BUILD)"
 echo "タグ: $NEW_TAG"
 echo ""
 echo "TestFlightで確認してください"
