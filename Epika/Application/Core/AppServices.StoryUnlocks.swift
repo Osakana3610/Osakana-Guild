@@ -10,11 +10,14 @@
 // 【公開API】
 //   - markStoryNodeAsRead(_:) → StorySnapshot
 //     ストーリーを既読にし、関連モジュール（ダンジョン等）を解放
+//   - unlockStoryForDungeonClear(_:)
+//     ダンジョンクリア時に次のストーリーを解放
 //   - unlockNextDifficultyIfEligible(for:clearedDifficulty:) → Bool
 //     次の難易度を解放（無称号→魔性の→宿った→伝説の）
 //
 // 【解放フロー】
 //   - ストーリー既読 → unlockModulesでダンジョン解放
+//   - ダンジョンクリア → 次のストーリーを解放
 //
 // 【補助型】
 //   - UnlockTarget: 解放対象（現在はdungeonのみ）
@@ -48,7 +51,35 @@ extension AppServices {
     }
 }
 
-// MARK: - Story & Dungeon Unlocks (Push型)
+// MARK: - Dungeon Clear → Story Unlock (Push型)
+
+extension AppServices {
+    /// ダンジョンクリア時に次のストーリーを解放する
+    /// - Parameter dungeonId: クリアしたダンジョンID
+    /// - Note: ダンジョンNをクリア → ストーリーN+1を解放
+    func unlockStoryForDungeonClear(_ dungeonId: UInt16) async throws {
+        let nextStoryId = dungeonId + 1
+
+        // ストーリーが存在しなければ何もしない
+        guard masterDataCache.storyNode(nextStoryId) != nil else { return }
+
+        let context = ModelContext(container)
+        context.autosaveEnabled = false
+
+        let record = try ensureStoryRecord(nodeId: nextStoryId, context: context)
+
+        // 既に解放済みなら何もしない
+        guard !record.isUnlocked else { return }
+
+        record.isUnlocked = true
+        record.updatedAt = Date()
+        try context.save()
+
+        NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+    }
+}
+
+// MARK: - Story Read → Dungeon Unlock (Push型)
 
 extension AppServices {
     /// ストーリーノードを既読にし、同一トランザクション内で解放対象を処理する

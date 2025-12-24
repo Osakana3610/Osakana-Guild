@@ -132,6 +132,8 @@ extension AppServices {
                                                   totalFloors: UInt8(artifact.floorCount))
                     let snapshot = try await dungeon.ensureDungeonSnapshot(for: artifact.dungeon.id)
                     _ = try await unlockNextDifficultyIfEligible(for: snapshot, clearedDifficulty: UInt8(runDifficulty))
+                    // ダンジョンクリアで次のストーリーを解放
+                    try await unlockStoryForDungeonClear(artifact.dungeon.id)
                 } else {
                     try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                             difficulty: UInt8(runDifficulty),
