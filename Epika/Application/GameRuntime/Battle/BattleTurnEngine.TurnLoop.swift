@@ -121,49 +121,48 @@ extension BattleTurnEngine {
             }
         }
 
-        let category = selectAction(for: side,
-                                    actorIndex: actorIndex,
-                                    context: &context)
-        switch category {
-        case .defend:
-            activateGuard(for: side, actorIndex: actorIndex, context: &context)
-        case .physicalAttack:
-            if !executePhysicalAttack(for: side,
-                                      attackerIndex: actorIndex,
-                                      context: &context,
-                                      forcedTargets: forcedTargets) {
+        let categories = selectActionCandidates(for: side,
+                                                 actorIndex: actorIndex,
+                                                 context: &context)
+
+        var executed = false
+        for category in categories {
+            switch category {
+            case .defend:
                 activateGuard(for: side, actorIndex: actorIndex, context: &context)
-            }
-        case .priestMagic:
-            if !executePriestMagic(for: side,
-                                   casterIndex: actorIndex,
-                                   context: &context,
-                                   forcedTargets: forcedTargets) {
-                activateGuard(for: side, actorIndex: actorIndex, context: &context)
-            }
-        case .mageMagic:
-            if !executeMageMagic(for: side,
-                                 attackerIndex: actorIndex,
-                                 context: &context,
-                                 forcedTargets: forcedTargets) {
-                activateGuard(for: side, actorIndex: actorIndex, context: &context)
-            }
-        case .breath:
-            if !executeBreath(for: side,
-                              attackerIndex: actorIndex,
-                              context: &context,
-                              forcedTargets: forcedTargets) {
-                activateGuard(for: side, actorIndex: actorIndex, context: &context)
-            }
-        case .enemySpecialSkill:
-            if !executeEnemySpecialSkill(for: side,
-                                         actorIndex: actorIndex,
+                executed = true
+            case .physicalAttack:
+                executed = executePhysicalAttack(for: side,
+                                                 attackerIndex: actorIndex,
+                                                 context: &context,
+                                                 forcedTargets: forcedTargets)
+            case .priestMagic:
+                executed = executePriestMagic(for: side,
+                                              casterIndex: actorIndex,
+                                              context: &context,
+                                              forcedTargets: forcedTargets)
+            case .mageMagic:
+                executed = executeMageMagic(for: side,
+                                            attackerIndex: actorIndex,
+                                            context: &context,
+                                            forcedTargets: forcedTargets)
+            case .breath:
+                executed = executeBreath(for: side,
+                                         attackerIndex: actorIndex,
                                          context: &context,
-                                         forcedTargets: forcedTargets) {
-                activateGuard(for: side, actorIndex: actorIndex, context: &context)
+                                         forcedTargets: forcedTargets)
+            case .enemySpecialSkill:
+                executed = executeEnemySpecialSkill(for: side,
+                                                    actorIndex: actorIndex,
+                                                    context: &context,
+                                                    forcedTargets: forcedTargets)
+            default:
+                break
             }
-        default:
-            // selectAction は行動選択用のケースのみ返すので、ここには到達しない
+            if executed { break }
+        }
+
+        if !executed {
             activateGuard(for: side, actorIndex: actorIndex, context: &context)
         }
 
@@ -184,65 +183,85 @@ extension BattleTurnEngine {
         }
     }
 
-    /// 行動カテゴリを選択
+    /// 行動カテゴリを選択（単一のカテゴリを返す、後方互換用）
     static func selectAction(for side: ActorSide,
                              actorIndex: Int,
                              context: inout BattleContext) -> ActionKind {
+        selectActionCandidates(for: side, actorIndex: actorIndex, context: &context).first ?? .defend
+    }
+
+    /// 抽選を行い、当選したカテゴリを順番に返す
+    /// 失敗時は次のカテゴリを試せるようにリストで返す
+    static func selectActionCandidates(for side: ActorSide,
+                                       actorIndex: Int,
+                                       context: inout BattleContext) -> [ActionKind] {
         let actor: BattleActor
         let allies: [BattleActor]
         let opponents: [BattleActor]
 
         switch side {
         case .player:
-            guard context.players.indices.contains(actorIndex) else { return .defend }
+            guard context.players.indices.contains(actorIndex) else { return [.defend] }
             actor = context.players[actorIndex]
             allies = context.players
             opponents = context.enemies
         case .enemy:
-            guard context.enemies.indices.contains(actorIndex) else { return .defend }
+            guard context.enemies.indices.contains(actorIndex) else { return [.defend] }
             actor = context.enemies[actorIndex]
             allies = context.enemies
             opponents = context.players
         }
 
-        guard actor.isAlive else { return .defend }
+        guard actor.isAlive else { return [.defend] }
 
         // 敵の場合、専用技を先にチェック
         if side == .enemy, !actor.baseSkillIds.isEmpty {
             if let _ = selectEnemySpecialSkill(for: actor, allies: allies, opponents: opponents, context: &context) {
-                return .enemySpecialSkill
+                return [.enemySpecialSkill]
             }
         }
 
         let candidates = buildCandidates(for: actor, allies: allies, opponents: opponents)
         if candidates.isEmpty {
             if canPerformPhysical(actor: actor, opponents: opponents) {
-                return .physicalAttack
+                return [.physicalAttack]
             }
-            return .defend
+            return [.defend]
         }
 
         // 順番に抽選（ブレス > 僧侶魔法 > 魔法使い魔法 > 物理攻撃）
-        // 各カテゴリの重み%で抽選し、当たればその行動を選択
-        // 100%なら必ず選択される
-        for candidate in candidates {
+        // 当選したカテゴリと、それ以降のカテゴリをリストで返す
+        var result: [ActionKind] = []
+        var hitIndex: Int? = nil
+
+        for (index, candidate) in candidates.enumerated() {
             let weight = max(0, min(100, candidate.weight))
             if weight >= 100 {
-                return candidate.category
+                hitIndex = index
+                break
             }
             if weight > 0 {
                 let roll = context.random.nextInt(in: 1...100)
                 if roll <= weight {
-                    return candidate.category
+                    hitIndex = index
+                    break
                 }
             }
         }
 
-        // すべて外れた場合はデフォルトで物理攻撃
-        if canPerformPhysical(actor: actor, opponents: opponents) {
-            return .physicalAttack
+        if let hitIndex {
+            // 当選したカテゴリ以降を返す
+            for i in hitIndex..<candidates.count {
+                result.append(candidates[i].category)
+            }
         }
-        return .defend
+
+        // 物理攻撃をフォールバックとして追加
+        if canPerformPhysical(actor: actor, opponents: opponents) && !result.contains(.physicalAttack) {
+            result.append(.physicalAttack)
+        }
+
+        return result.isEmpty ? [.defend] : result
     }
 
     /// 敵専用技を選択（発動判定込み）
@@ -316,10 +335,9 @@ extension BattleTurnEngine {
     }
 
     static func canPerformPriest(actor: BattleActor, allies: [BattleActor]) -> Bool {
-        guard actor.isAlive,
-              actor.snapshot.magicalHealing > 0,
-              actor.actionResources.hasAvailableSpell(in: actor.spells.priest) else { return false }
-        return selectHealingTargetIndex(in: allies) != nil
+        actor.isAlive &&
+        actor.snapshot.magicalHealing > 0 &&
+        actor.actionResources.hasAvailableSpell(in: actor.spells.priest)
     }
 
     static func canPerformMage(actor: BattleActor, opponents: [BattleActor]) -> Bool {

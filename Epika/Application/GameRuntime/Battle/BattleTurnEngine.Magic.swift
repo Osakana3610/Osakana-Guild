@@ -35,23 +35,46 @@ extension BattleTurnEngine {
                                    context: inout BattleContext,
                                    forcedTargets: BattleContext.SacrificeTargets) -> Bool {
         guard var caster = context.actor(for: side, index: casterIndex), caster.isAlive else { return false }
-        guard let spell = selectPriestHealingSpell(for: caster) else { return false }
 
         let allies: [BattleActor] = side == .player ? context.players : context.enemies
-        guard let targetIndex = selectHealingTargetIndex(in: allies) else { return false }
-        guard caster.actionResources.consume(spellId: spell.id) else { return false }
+        let opponents: [BattleActor] = side == .player ? context.enemies : context.players
 
+        // 発動条件を満たす呪文を探す
+        let available = caster.spells.priest.filter { caster.actionResources.hasAvailableCharges(for: $0.id) }
+        guard let spell = highestTierSpell(in: available, matching: { canCastSpell($0, caster: caster, allies: allies, opponents: opponents) }) else {
+            return false
+        }
+
+        guard caster.actionResources.consume(spellId: spell.id) else { return false }
         context.updateActor(caster, side: side, index: casterIndex)
 
         // 呪文名付きログを追加
         let casterIdx = context.actorIndex(for: side, arrayIndex: casterIndex)
         context.appendAction(kind: .priestMagic, actor: casterIdx, skillIndex: UInt16(spell.id))
 
-        performPriestMagic(casterSide: side,
-                           casterIndex: casterIndex,
-                           targetIndex: targetIndex,
-                           spell: spell,
-                           context: &context)
+        switch spell.category {
+        case .healing:
+            guard let targetIndex = selectHealingTargetIndex(in: allies) else { return true }
+            performPriestMagic(casterSide: side,
+                               casterIndex: casterIndex,
+                               targetIndex: targetIndex,
+                               spell: spell,
+                               context: &context)
+        case .buff:
+            performBuffSpell(casterSide: side,
+                             casterIndex: casterIndex,
+                             spell: spell,
+                             context: &context)
+        case .cleanse:
+            _ = performCleanseSpell(casterSide: side,
+                                    casterIndex: casterIndex,
+                                    spell: spell,
+                                    context: &context)
+        case .damage, .status:
+            // 僧侶はdamage/statusを持たない想定だが、念のため
+            break
+        }
+
         return true
     }
 
@@ -80,15 +103,33 @@ extension BattleTurnEngine {
                                  context: inout BattleContext,
                                  forcedTargets: BattleContext.SacrificeTargets) -> Bool {
         guard var attacker = context.actor(for: side, index: attackerIndex), attacker.isAlive else { return false }
-        guard let spell = selectMageSpell(for: attacker) else { return false }
-        guard attacker.actionResources.consume(spellId: spell.id) else { return false }
 
+        let allies: [BattleActor] = side == .player ? context.players : context.enemies
+        let opponents: [BattleActor] = side == .player ? context.enemies : context.players
+
+        // 発動条件を満たす呪文を探す
+        let available = attacker.spells.mage.filter { attacker.actionResources.hasAvailableCharges(for: $0.id) }
+        guard let spell = highestTierSpell(in: available, matching: { canCastSpell($0, caster: attacker, allies: allies, opponents: opponents) }) else {
+            return false
+        }
+
+        guard attacker.actionResources.consume(spellId: spell.id) else { return false }
         context.updateActor(attacker, side: side, index: attackerIndex)
 
         // 魔法名付きログを追加
         let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
         context.appendAction(kind: .mageMagic, actor: attackerIdx, skillIndex: UInt16(spell.id))
 
+        // buffの場合は専用処理
+        if spell.category == .buff {
+            performBuffSpell(casterSide: side,
+                             casterIndex: attackerIndex,
+                             spell: spell,
+                             context: &context)
+            return true
+        }
+
+        // damage/statusの処理
         let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, context: context)
         let targetCount = statusTargetCount(for: attacker, spell: spell)
         let targets = selectStatusTargets(attackerSide: side,
@@ -250,11 +291,16 @@ extension BattleTurnEngine {
     static func selectMageSpell(for actor: BattleActor) -> SpellDefinition? {
         let available = actor.spells.mage.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
         guard !available.isEmpty else { return nil }
-        return highestTierSpell(in: available) { spell in
-            spell.category == .damage || spell.category == .status
-        }
+        return highestTierSpell(in: available)
     }
 
+    static func selectPriestSpell(for actor: BattleActor) -> SpellDefinition? {
+        let available = actor.spells.priest.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
+        guard !available.isEmpty else { return nil }
+        return highestTierSpell(in: available)
+    }
+
+    /// 回復呪文のみを選択（救出処理用）
     static func selectPriestHealingSpell(for actor: BattleActor) -> SpellDefinition? {
         let available = actor.spells.priest.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
         guard !available.isEmpty else { return nil }
@@ -303,5 +349,95 @@ extension BattleTurnEngine {
             modifier *= specific
         }
         return modifier
+    }
+
+    // MARK: - Buff Spell
+
+    /// バフ呪文を味方全体に適用
+    static func performBuffSpell(casterSide: ActorSide,
+                                 casterIndex: Int,
+                                 spell: SpellDefinition,
+                                 context: inout BattleContext) {
+        let allies: [BattleActor] = casterSide == .player ? context.players : context.enemies
+
+        // spell.buffsからstatModifiersを構築
+        var statModifiers: [String: Double] = [:]
+        for buff in spell.buffs {
+            let key = buff.type.identifier + "Multiplier"
+            statModifiers[key] = buff.multiplier
+        }
+
+        // 戦闘中永続（戦闘は最大20ターンなので99で十分）
+        let permanentDuration = BattleContext.maxTurns * 5
+        let timedBuff = TimedBuff(
+            id: "spell.\(spell.id)",
+            baseDuration: permanentDuration,
+            remainingTurns: permanentDuration,
+            statModifiers: statModifiers
+        )
+
+        for index in allies.indices where allies[index].isAlive {
+            var target = allies[index]
+            upsert(buff: timedBuff, into: &target.timedBuffs)
+            context.updateActor(target, side: casterSide, index: index)
+        }
+
+        // ログ: バフ適用
+        let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
+        context.appendAction(kind: .buffApply, actor: casterIdx, skillIndex: UInt16(spell.id))
+    }
+
+    // MARK: - Cleanse Spell
+
+    /// 状態異常を持つ味方1人の状態異常を1つ除去
+    /// - Returns: 対象がいなければfalse
+    static func performCleanseSpell(casterSide: ActorSide,
+                                    casterIndex: Int,
+                                    spell: SpellDefinition,
+                                    context: inout BattleContext) -> Bool {
+        let allies: [BattleActor] = casterSide == .player ? context.players : context.enemies
+
+        // 状態異常を持つ味方のインデックスを収集
+        var afflictedIndices: [Int] = []
+        for index in allies.indices where allies[index].isAlive && !allies[index].statusEffects.isEmpty {
+            afflictedIndices.append(index)
+        }
+
+        guard !afflictedIndices.isEmpty else { return false }
+
+        // ランダムに1人選択
+        let targetIndex = afflictedIndices[context.random.nextInt(in: 0...(afflictedIndices.count - 1))]
+        var target = allies[targetIndex]
+
+        // ランダムに1つの状態異常を除去
+        let statusIndex = context.random.nextInt(in: 0...(target.statusEffects.count - 1))
+        let removedStatus = target.statusEffects.remove(at: statusIndex)
+        context.updateActor(target, side: casterSide, index: targetIndex)
+
+        // ログ: 状態異常回復（skillIndexにstatusIdを格納）
+        let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
+        let targetIdx = context.actorIndex(for: casterSide, arrayIndex: targetIndex)
+        context.appendAction(kind: .statusRecover, actor: casterIdx, target: targetIdx, skillIndex: UInt16(removedStatus.id))
+
+        return true
+    }
+
+    // MARK: - Spell Condition Checks
+
+    /// 呪文の発動条件をチェック
+    static func canCastSpell(_ spell: SpellDefinition,
+                             caster: BattleActor,
+                             allies: [BattleActor],
+                             opponents: [BattleActor]) -> Bool {
+        switch spell.category {
+        case .healing:
+            return selectHealingTargetIndex(in: allies) != nil
+        case .cleanse:
+            return allies.contains { $0.isAlive && !$0.statusEffects.isEmpty }
+        case .buff:
+            return true
+        case .damage, .status:
+            return opponents.contains { $0.isAlive }
+        }
     }
 }
