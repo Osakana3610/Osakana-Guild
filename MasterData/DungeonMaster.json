@@ -9287,6 +9287,1173 @@
           ]
         }
       ]
+    },
+    {
+      "id": 73,
+      "name": "バベルの塔",
+      "chapter": 0,
+      "stage": 0,
+      "description": "天を目指して築かれた伝説の塔。72層に及ぶ階層には、かつて倒した魔物たちの長が待ち受ける。",
+      "recommendedLevel": 1,
+      "explorationTime": 1,
+      "eventsPerFloor": 1,
+      "floorCount": 72,
+      "storyText": null,
+      "unlockConditions": [],
+      "floorEnemyMapping": [
+        {
+          "floorRange": [
+            1,
+            1
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 5,
+              "minLevel": 3,
+              "maxLevel": 8,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            2,
+            2
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 11,
+              "minLevel": 5,
+              "maxLevel": 10,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            3,
+            3
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 17,
+              "minLevel": 7,
+              "maxLevel": 12,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            4,
+            4
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 23,
+              "minLevel": 9,
+              "maxLevel": 14,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            5,
+            5
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 29,
+              "minLevel": 11,
+              "maxLevel": 16,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            6,
+            6
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 35,
+              "minLevel": 13,
+              "maxLevel": 18,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            7,
+            7
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 41,
+              "minLevel": 15,
+              "maxLevel": 20,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            8,
+            8
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 47,
+              "minLevel": 17,
+              "maxLevel": 22,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            9,
+            9
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 53,
+              "minLevel": 18,
+              "maxLevel": 23,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            10,
+            10
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 59,
+              "minLevel": 20,
+              "maxLevel": 25,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            11,
+            11
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 65,
+              "minLevel": 22,
+              "maxLevel": 27,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            12,
+            12
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 71,
+              "minLevel": 24,
+              "maxLevel": 29,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            13,
+            13
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 77,
+              "minLevel": 26,
+              "maxLevel": 31,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            14,
+            14
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 83,
+              "minLevel": 28,
+              "maxLevel": 33,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            15,
+            15
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 89,
+              "minLevel": 30,
+              "maxLevel": 35,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            16,
+            16
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 95,
+              "minLevel": 33,
+              "maxLevel": 38,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            17,
+            17
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 101,
+              "minLevel": 33,
+              "maxLevel": 38,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            18,
+            18
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 107,
+              "minLevel": 35,
+              "maxLevel": 40,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            19,
+            19
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 113,
+              "minLevel": 37,
+              "maxLevel": 42,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            20,
+            20
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 119,
+              "minLevel": 39,
+              "maxLevel": 44,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            21,
+            21
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 125,
+              "minLevel": 41,
+              "maxLevel": 46,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            22,
+            22
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 131,
+              "minLevel": 43,
+              "maxLevel": 48,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            23,
+            23
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 137,
+              "minLevel": 45,
+              "maxLevel": 50,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            24,
+            24
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 143,
+              "minLevel": 48,
+              "maxLevel": 53,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            25,
+            25
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 149,
+              "minLevel": 48,
+              "maxLevel": 53,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            26,
+            26
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 155,
+              "minLevel": 50,
+              "maxLevel": 55,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            27,
+            27
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 161,
+              "minLevel": 52,
+              "maxLevel": 57,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            28,
+            28
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 167,
+              "minLevel": 54,
+              "maxLevel": 59,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            29,
+            29
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 173,
+              "minLevel": 56,
+              "maxLevel": 61,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            30,
+            30
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 179,
+              "minLevel": 58,
+              "maxLevel": 63,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            31,
+            31
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 185,
+              "minLevel": 60,
+              "maxLevel": 65,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            32,
+            32
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 191,
+              "minLevel": 63,
+              "maxLevel": 68,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            33,
+            33
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 197,
+              "minLevel": 64,
+              "maxLevel": 69,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            34,
+            34
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 203,
+              "minLevel": 66,
+              "maxLevel": 71,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            35,
+            35
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 209,
+              "minLevel": 69,
+              "maxLevel": 74,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            36,
+            36
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 215,
+              "minLevel": 72,
+              "maxLevel": 77,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            37,
+            37
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 221,
+              "minLevel": 75,
+              "maxLevel": 80,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            38,
+            38
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 227,
+              "minLevel": 78,
+              "maxLevel": 83,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            39,
+            39
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 233,
+              "minLevel": 81,
+              "maxLevel": 86,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            40,
+            40
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 239,
+              "minLevel": 84,
+              "maxLevel": 89,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            41,
+            41
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 245,
+              "minLevel": 84,
+              "maxLevel": 89,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            42,
+            42
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 251,
+              "minLevel": 86,
+              "maxLevel": 91,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            43,
+            43
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 257,
+              "minLevel": 89,
+              "maxLevel": 94,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            44,
+            44
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 263,
+              "minLevel": 92,
+              "maxLevel": 97,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            45,
+            45
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 269,
+              "minLevel": 95,
+              "maxLevel": 100,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            46,
+            46
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 275,
+              "minLevel": 98,
+              "maxLevel": 103,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            47,
+            47
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 281,
+              "minLevel": 101,
+              "maxLevel": 106,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            48,
+            48
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 287,
+              "minLevel": 104,
+              "maxLevel": 109,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            49,
+            49
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 293,
+              "minLevel": 106,
+              "maxLevel": 111,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            50,
+            50
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 299,
+              "minLevel": 110,
+              "maxLevel": 115,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            51,
+            51
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 305,
+              "minLevel": 114,
+              "maxLevel": 119,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            52,
+            52
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 311,
+              "minLevel": 118,
+              "maxLevel": 123,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            53,
+            53
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 317,
+              "minLevel": 123,
+              "maxLevel": 128,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            54,
+            54
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 323,
+              "minLevel": 127,
+              "maxLevel": 132,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            55,
+            55
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 329,
+              "minLevel": 131,
+              "maxLevel": 136,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            56,
+            56
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 335,
+              "minLevel": 136,
+              "maxLevel": 141,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            57,
+            57
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 341,
+              "minLevel": 138,
+              "maxLevel": 143,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            58,
+            58
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 347,
+              "minLevel": 143,
+              "maxLevel": 148,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            59,
+            59
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 353,
+              "minLevel": 149,
+              "maxLevel": 154,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            60,
+            60
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 359,
+              "minLevel": 155,
+              "maxLevel": 160,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            61,
+            61
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 365,
+              "minLevel": 160,
+              "maxLevel": 165,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            62,
+            62
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 371,
+              "minLevel": 166,
+              "maxLevel": 171,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            63,
+            63
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 377,
+              "minLevel": 172,
+              "maxLevel": 177,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            64,
+            64
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 383,
+              "minLevel": 178,
+              "maxLevel": 183,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            65,
+            65
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 389,
+              "minLevel": 176,
+              "maxLevel": 181,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            66,
+            66
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 395,
+              "minLevel": 180,
+              "maxLevel": 185,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            67,
+            67
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 401,
+              "minLevel": 184,
+              "maxLevel": 189,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            68,
+            68
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 407,
+              "minLevel": 188,
+              "maxLevel": 193,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            69,
+            69
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 413,
+              "minLevel": 193,
+              "maxLevel": 198,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            70,
+            70
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 419,
+              "minLevel": 197,
+              "maxLevel": 202,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            71,
+            71
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 425,
+              "minLevel": 201,
+              "maxLevel": 206,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        },
+        {
+          "floorRange": [
+            72,
+            72
+          ],
+          "enemyGroups": [
+            {
+              "enemyId": 431,
+              "minLevel": 206,
+              "maxLevel": 211,
+              "weight": 100.0,
+              "groupMin": 1,
+              "groupMax": 1
+            }
+          ]
+        }
+      ]
     }
   ]
 }
