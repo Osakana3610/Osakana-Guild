@@ -508,7 +508,7 @@ extension BattleTurnEngine {
 
             var appliedHeal = revivedTarget.snapshot.maxHP
             if capability.usesPriestMagic {
-                guard let spell = selectPriestHealingSpell(for: rescuer) else { continue }
+                guard let spell = selectPriestHealingSpell(for: rescuer, random: &context.random) else { continue }
                 guard rescuer.actionResources.consume(spellId: spell.id) else { continue }
                 let healAmount = computeHealingAmount(caster: rescuer, target: revivedTarget, spellId: spell.id, context: &context)
                 appliedHeal = max(1, healAmount)
