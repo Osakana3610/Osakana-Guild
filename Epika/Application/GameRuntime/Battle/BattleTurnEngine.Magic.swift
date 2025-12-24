@@ -39,9 +39,9 @@ extension BattleTurnEngine {
         let allies: [BattleActor] = side == .player ? context.players : context.enemies
         let opponents: [BattleActor] = side == .player ? context.enemies : context.players
 
-        // 発動条件を満たす呪文を探す
+        // 発動条件を満たす呪文をtier重みで抽選
         let available = caster.spells.priest.filter { caster.actionResources.hasAvailableCharges(for: $0.id) }
-        guard let spell = highestTierSpell(in: available, matching: { canCastSpell($0, caster: caster, allies: allies, opponents: opponents) }) else {
+        guard let spell = selectSpellByTierWeight(in: available, matching: { canCastSpell($0, caster: caster, allies: allies, opponents: opponents) }, random: &context.random) else {
             return false
         }
 
@@ -107,9 +107,9 @@ extension BattleTurnEngine {
         let allies: [BattleActor] = side == .player ? context.players : context.enemies
         let opponents: [BattleActor] = side == .player ? context.enemies : context.players
 
-        // 発動条件を満たす呪文を探す
+        // 発動条件を満たす呪文をtier重みで抽選
         let available = attacker.spells.mage.filter { attacker.actionResources.hasAvailableCharges(for: $0.id) }
-        guard let spell = highestTierSpell(in: available, matching: { canCastSpell($0, caster: attacker, allies: allies, opponents: opponents) }) else {
+        guard let spell = selectSpellByTierWeight(in: available, matching: { canCastSpell($0, caster: attacker, allies: allies, opponents: opponents) }, random: &context.random) else {
             return false
         }
 
@@ -320,6 +320,34 @@ extension BattleTurnEngine {
             if lhs.tier != rhs.tier { return lhs.tier < rhs.tier }
             return lhs.id < rhs.id
         }
+    }
+
+    /// tierを重みとした抽選で呪文を選択（高tierほど選ばれやすい）
+    static func selectSpellByTierWeight(in spells: [SpellDefinition],
+                                        matching predicate: ((SpellDefinition) -> Bool)? = nil,
+                                        random: inout GameRandomSource) -> SpellDefinition? {
+        let filtered: [SpellDefinition]
+        if let predicate {
+            filtered = spells.filter(predicate)
+        } else {
+            filtered = spells
+        }
+        guard !filtered.isEmpty else { return nil }
+        if filtered.count == 1 { return filtered[0] }
+
+        // tierを重みとして抽選
+        let totalWeight = filtered.reduce(0) { $0 + $1.tier }
+        guard totalWeight > 0 else { return filtered[0] }
+
+        let roll = random.nextInt(in: 1...totalWeight)
+        var cumulative = 0
+        for spell in filtered {
+            cumulative += spell.tier
+            if roll <= cumulative {
+                return spell
+            }
+        }
+        return filtered.last
     }
 
     static func statusTargetCount(for caster: BattleActor, spell: SpellDefinition) -> Int {
