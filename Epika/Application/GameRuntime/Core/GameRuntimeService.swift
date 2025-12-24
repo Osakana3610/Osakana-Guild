@@ -283,7 +283,9 @@ actor GameRuntimeService {
         superRareState: SuperRareDailyState,
         droppedItemIds: Set<UInt16>,
         startFloor: Int,
-        startEventIndex: Int
+        startEventIndex: Int,
+        originalStartedAt: Date,
+        existingEventCount: Int
     ) async throws -> ExplorationRunSession {
         let provider = makeExplorationProvider()
         let scheduler = makeEventScheduler()
@@ -335,7 +337,6 @@ actor GameRuntimeService {
         let interval = TimeInterval(scaledInterval)
 
         let runId = UUID()
-        let startedAt = Date()  // 再開時刻
         let (stream, continuation) = AsyncStream.makeStream(of: ExplorationEngine.StepOutcome.self)
 
         let task = Task<ExplorationRunArtifact, Error> { [self] in
@@ -390,8 +391,8 @@ actor GameRuntimeService {
 
                     // 時間経過による早送り: 再開時は既に過ぎた時間分は待機しない
                     if interval > 0 {
-                        let totalEventCount = events.count
-                        let expectedTime = startedAt.addingTimeInterval(TimeInterval(totalEventCount) * interval)
+                        let totalEventCount = existingEventCount + events.count
+                        let expectedTime = originalStartedAt.addingTimeInterval(TimeInterval(totalEventCount) * interval)
                         let now = Date()
                         let waitSeconds = expectedTime.timeIntervalSince(now)
                         if waitSeconds > 0 {
@@ -409,7 +410,7 @@ actor GameRuntimeService {
                                                    displayDungeonName: preparation.dungeon.name,
                                                    floorCount: preparation.targetFloorNumber,
                                                    eventsPerFloor: preparation.eventsPerFloor,
-                                                   startedAt: startedAt,
+                                                   startedAt: originalStartedAt,
                                                    endedAt: Date(),
                                                    events: events,
                                                    totalExperience: totalExperience,
@@ -431,7 +432,7 @@ actor GameRuntimeService {
 
         return ExplorationRunSession(runId: runId,
                                      preparation: preparation,
-                                     startedAt: startedAt,
+                                     startedAt: originalStartedAt,
                                      seed: restoringRandomState,  // 復元したstate
                                      explorationInterval: interval,
                                      events: stream,

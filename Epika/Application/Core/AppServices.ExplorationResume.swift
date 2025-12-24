@@ -94,7 +94,9 @@ extension AppServices {
             superRareState: superRareState,
             droppedItemIds: droppedItemIds,
             startFloor: max(0, floorIndex),
-            startEventIndex: eventIndex
+            startEventIndex: eventIndex,
+            originalStartedAt: startedAt,
+            existingEventCount: eventRecords.count
         )
 
         // 8. 通常の探索フローに合流
