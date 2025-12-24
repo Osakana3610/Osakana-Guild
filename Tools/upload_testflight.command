@@ -73,8 +73,38 @@ else
     echo "  含まれるコミット:"
     echo "$COMMITS" | sed 's/^/    /'
 
-    # リリースノート生成（fix: や feat: などのプレフィックスを整形）
-    RELEASE_NOTES=$(echo "$COMMITS" | sed 's/^[a-f0-9]* //' | sed 's/^fix: /・修正: /' | sed 's/^feat: /・新機能: /' | sed 's/^chore: //' | sed 's/^docs: //' | sed 's/^perf: /・改善: /' | sed 's/^refactor: //' | grep -v "^Update known issues" | grep -v "^$" | head -10)
+    # リリースノート生成（種類でソート、プレフィックス削除）
+    RELEASE_NOTES=$(echo "$COMMITS" | python3 -c "
+import sys
+lines = [l.strip() for l in sys.stdin if l.strip()]
+# ハッシュを除去
+messages = [l.split(' ', 1)[1] if ' ' in l else l for l in lines]
+# 除外パターン
+messages = [m for m in messages if not m.startswith('Update known issues')]
+# 種類ごとに分類（優先順位: fix > feat > perf > その他）
+fix_msgs = []
+feat_msgs = []
+perf_msgs = []
+other_msgs = []
+for m in messages:
+    if m.startswith('fix:') or m.startswith('fix('):
+        # プレフィックス削除
+        clean = m.split(':', 1)[1].strip() if ':' in m else m
+        fix_msgs.append('・' + clean)
+    elif m.startswith('feat:') or m.startswith('feat('):
+        clean = m.split(':', 1)[1].strip() if ':' in m else m
+        feat_msgs.append('・' + clean)
+    elif m.startswith('perf:') or m.startswith('perf('):
+        clean = m.split(':', 1)[1].strip() if ':' in m else m
+        perf_msgs.append('・' + clean)
+    elif m.startswith('chore:') or m.startswith('docs:') or m.startswith('refactor:'):
+        pass  # 除外
+    else:
+        other_msgs.append('・' + m)
+# 結合（fix → feat → perf → other）
+result = fix_msgs + feat_msgs + perf_msgs + other_msgs
+print('\n'.join(result) if result else 'バグ修正と改善')
+")
 
     if [[ -z "$RELEASE_NOTES" ]]; then
         RELEASE_NOTES="バグ修正と改善"
