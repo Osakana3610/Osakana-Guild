@@ -90,6 +90,7 @@ struct RuntimePartyDetailView: View {
                         .frame(height: listRowHeight)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .disabled(adventureState.isExploring(partyId: currentParty.id))
 
                 NavigationLink {
                     PartyEquipmentListView(characters: membersOfCurrentParty)
