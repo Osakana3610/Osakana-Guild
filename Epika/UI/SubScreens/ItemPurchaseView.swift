@@ -192,7 +192,6 @@ struct ItemPurchaseView: View {
                             definition: oldItem.definition,
                             price: oldItem.price,
                             stockQuantity: newStock,
-                            isPlayerSold: oldItem.isPlayerSold,
                             updatedAt: Date()
                         )
                     }

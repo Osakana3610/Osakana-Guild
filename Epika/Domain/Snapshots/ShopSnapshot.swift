@@ -5,7 +5,7 @@
 //
 // 【責務】
 //   - 商店在庫のイミュータブルスナップショット
-//   - 在庫状態・プレイヤー売却品の表現
+//   - 在庫状態の表現
 //
 // 【データ構造】
 //   - ShopSnapshot: 商店在庫情報
@@ -15,7 +15,6 @@
 //   - Stock: 個別在庫情報
 //     - itemId: アイテムID
 //     - remaining: 残数（nil=無制限）
-//     - isPlayerSold: プレイヤーが売却したアイテムか
 //     - updatedAt: 更新日時
 //
 // 【使用箇所】
@@ -31,7 +30,6 @@ struct ShopSnapshot: Sendable, Hashable {
     struct Stock: Sendable, Hashable {
         var itemId: UInt16
         var remaining: UInt16?
-        var isPlayerSold: Bool
         var updatedAt: Date
     }
 
