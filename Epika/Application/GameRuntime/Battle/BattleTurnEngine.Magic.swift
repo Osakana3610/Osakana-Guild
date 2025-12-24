@@ -35,39 +35,23 @@ extension BattleTurnEngine {
                                    context: inout BattleContext,
                                    forcedTargets: BattleContext.SacrificeTargets) -> Bool {
         guard var caster = context.actor(for: side, index: casterIndex), caster.isAlive else { return false }
-        guard let spell = selectPriestSpell(for: caster, random: &context.random) else { return false }
+        guard let spell = selectPriestHealingSpell(for: caster) else { return false }
 
-        // クレンズは対象がいなければ選択しない（防御にフォールバック）
-        if spell.category == .cleanse {
-            let allies = side == .player ? context.players : context.enemies
-            let hasStatusEffects = allies.contains { $0.isAlive && !$0.statusEffects.isEmpty }
-            if !hasStatusEffects { return false }
-        }
-
+        let allies: [BattleActor] = side == .player ? context.players : context.enemies
+        guard let targetIndex = selectHealingTargetIndex(in: allies) else { return false }
         guard caster.actionResources.consume(spellId: spell.id) else { return false }
+
         context.updateActor(caster, side: side, index: casterIndex)
 
         // 呪文名付きログを追加
         let casterIdx = context.actorIndex(for: side, arrayIndex: casterIndex)
         context.appendAction(kind: .priestMagic, actor: casterIdx, skillIndex: UInt16(spell.id))
 
-        switch spell.category {
-        case .healing:
-            let allies = side == .player ? context.players : context.enemies
-            guard let targetIndex = selectHealingTargetIndex(in: allies) else { return true }
-            performPriestMagic(casterSide: side,
-                               casterIndex: casterIndex,
-                               targetIndex: targetIndex,
-                               spell: spell,
-                               context: &context)
-        case .buff:
-            performBuffSpell(casterSide: side, spell: spell, context: &context)
-        case .cleanse:
-            performCleanseSpell(casterSide: side, casterIndex: casterIndex, context: &context)
-        default:
-            break
-        }
-
+        performPriestMagic(casterSide: side,
+                           casterIndex: casterIndex,
+                           targetIndex: targetIndex,
+                           spell: spell,
+                           context: &context)
         return true
     }
 
@@ -96,7 +80,7 @@ extension BattleTurnEngine {
                                  context: inout BattleContext,
                                  forcedTargets: BattleContext.SacrificeTargets) -> Bool {
         guard var attacker = context.actor(for: side, index: attackerIndex), attacker.isAlive else { return false }
-        guard let spell = selectMageSpell(for: attacker, random: &context.random) else { return false }
+        guard let spell = selectMageSpell(for: attacker) else { return false }
         guard attacker.actionResources.consume(spellId: spell.id) else { return false }
 
         context.updateActor(attacker, side: side, index: attackerIndex)
@@ -104,12 +88,6 @@ extension BattleTurnEngine {
         // 魔法名付きログを追加
         let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
         context.appendAction(kind: .mageMagic, actor: attackerIdx, skillIndex: UInt16(spell.id))
-
-        // バフ呪文は早期リターン
-        if spell.category == .buff {
-            performBuffSpell(casterSide: side, spell: spell, context: &context)
-            return true
-        }
 
         let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, context: context)
         let targetCount = statusTargetCount(for: attacker, spell: spell)
@@ -269,24 +247,18 @@ extension BattleTurnEngine {
         return true
     }
 
-    /// 魔法使い呪文を選択（tier重み付きランダム、全カテゴリ対象）
-    static func selectMageSpell(for actor: BattleActor, random: inout GameRandomSource) -> SpellDefinition? {
+    static func selectMageSpell(for actor: BattleActor) -> SpellDefinition? {
         let available = actor.spells.mage.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
-        return selectSpellByTierWeight(from: available, random: &random)
-    }
-
-    /// 僧侶呪文を選択（tier重み付きランダム、全カテゴリ対象）
-    static func selectPriestSpell(for actor: BattleActor, random: inout GameRandomSource) -> SpellDefinition? {
-        let available = actor.spells.priest.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
-        return selectSpellByTierWeight(from: available, random: &random)
-    }
-
-    /// 僧侶回復呪文を選択（救出用、healingのみ）
-    static func selectPriestHealingSpell(for actor: BattleActor, random: inout GameRandomSource) -> SpellDefinition? {
-        let available = actor.spells.priest.filter {
-            actor.actionResources.hasAvailableCharges(for: $0.id) && $0.category == .healing
+        guard !available.isEmpty else { return nil }
+        return highestTierSpell(in: available) { spell in
+            spell.category == .damage || spell.category == .status
         }
-        return selectSpellByTierWeight(from: available, random: &random)
+    }
+
+    static func selectPriestHealingSpell(for actor: BattleActor) -> SpellDefinition? {
+        let available = actor.spells.priest.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
+        guard !available.isEmpty else { return nil }
+        return highestTierSpell(in: available) { $0.category == .healing }
     }
 
     static func highestTierSpell(in spells: [SpellDefinition],
@@ -302,17 +274,6 @@ extension BattleTurnEngine {
             if lhs.tier != rhs.tier { return lhs.tier < rhs.tier }
             return lhs.id < rhs.id
         }
-    }
-
-    /// tier重み付きランダムで呪文を選択（高tierほど選ばれやすい）
-    static func selectSpellByTierWeight(
-        from spells: [SpellDefinition],
-        random: inout GameRandomSource
-    ) -> SpellDefinition? {
-        guard !spells.isEmpty else { return nil }
-        let weights = spells.map { Double($0.tier) }
-        guard let index = random.nextIndex(weights: weights) else { return nil }
-        return spells[index]
     }
 
     static func statusTargetCount(for caster: BattleActor, spell: SpellDefinition) -> Int {
@@ -342,79 +303,5 @@ extension BattleTurnEngine {
             modifier *= specific
         }
         return modifier
-    }
-
-    // MARK: - Buff Spell
-
-    /// バフ呪文を実行（味方全体にTimedBuffを適用）
-    static func performBuffSpell(
-        casterSide: ActorSide,
-        spell: SpellDefinition,
-        context: inout BattleContext
-    ) {
-        guard !spell.buffs.isEmpty else { return }
-
-        var modifiers: [String: Double] = [:]
-        for buff in spell.buffs {
-            modifiers[buff.type.identifier + "Multiplier"] = buff.multiplier
-        }
-
-        let timedBuff = TimedBuff(
-            id: "spell_\(spell.id)",
-            baseDuration: 99,
-            remainingTurns: 99,
-            statModifiers: modifiers
-        )
-
-        var actors = casterSide == .player ? context.players : context.enemies
-        for index in actors.indices where actors[index].isAlive {
-            upsert(buff: timedBuff, into: &actors[index].timedBuffs)
-        }
-        if casterSide == .player {
-            context.players = actors
-        } else {
-            context.enemies = actors
-        }
-    }
-
-    // MARK: - Cleanse Spell
-
-    /// クレンズ呪文を実行（状態異常を持つ味方から1つ除去）
-    static func performCleanseSpell(
-        casterSide: ActorSide,
-        casterIndex: Int,
-        context: inout BattleContext
-    ) {
-        let actors = casterSide == .player ? context.players : context.enemies
-
-        // 状態異常を持つ味方を収集
-        var candidates: [(index: Int, count: Int)] = []
-        for (index, actor) in actors.enumerated() {
-            if actor.isAlive && !actor.statusEffects.isEmpty {
-                candidates.append((index, actor.statusEffects.count))
-            }
-        }
-
-        guard !candidates.isEmpty else { return }
-
-        // ランダムに1人選択
-        let candidateIdx = context.random.nextInt(in: 0...candidates.count - 1)
-        let targetArrayIndex = candidates[candidateIdx].index
-        var target = actors[targetArrayIndex]
-
-        // 状態異常をランダムに1つ除去
-        let statusIdx = context.random.nextInt(in: 0...target.statusEffects.count - 1)
-        target.statusEffects.remove(at: statusIdx)
-
-        if casterSide == .player {
-            context.players[targetArrayIndex] = target
-        } else {
-            context.enemies[targetArrayIndex] = target
-        }
-
-        // ログ出力
-        let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
-        let targetIdx = context.actorIndex(for: casterSide, arrayIndex: targetArrayIndex)
-        context.appendAction(kind: .statusRecover, actor: casterIdx, target: targetIdx)
     }
 }
