@@ -134,6 +134,19 @@ actor CharacterProgressService {
         )
     }
 
+    /// 装備変更時の高速RuntimeCharacter再構築
+    /// 既存のRuntimeCharacterからマスターデータを再利用し、装備関連のみを再計算する
+    nonisolated func runtimeCharacterWithEquipmentChange(
+        current: RuntimeCharacter,
+        newEquippedItems: [CharacterInput.EquippedItem]
+    ) throws -> RuntimeCharacter {
+        try RuntimeCharacterFactory.withEquipmentChange(
+            current: current,
+            newEquippedItems: newEquippedItems,
+            masterData: masterData
+        )
+    }
+
     /// CharacterSnapshotからCharacterInputへ変換
     private func makeInput(from snapshot: CharacterSnapshot) -> CharacterInput {
         CharacterInput(
