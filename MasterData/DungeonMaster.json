@@ -10396,8 +10396,7 @@
               "groupMax": 2
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10414,8 +10413,7 @@
               "groupMax": 2
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10432,8 +10430,7 @@
               "groupMax": 2
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10450,8 +10447,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10468,8 +10464,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10486,8 +10481,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10504,8 +10498,7 @@
               "groupMax": 4
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10522,8 +10515,7 @@
               "groupMax": 4
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10540,8 +10532,7 @@
               "groupMax": 5
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10558,8 +10549,7 @@
               "groupMax": 5
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10576,8 +10566,7 @@
               "groupMax": 5
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10594,8 +10583,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10612,8 +10600,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10630,8 +10617,7 @@
               "groupMax": 4
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10648,8 +10634,7 @@
               "groupMax": 4
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10666,8 +10651,7 @@
               "groupMax": 4
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10684,8 +10668,7 @@
               "groupMax": 4
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10702,8 +10685,7 @@
               "groupMax": 4
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10728,8 +10710,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10754,8 +10735,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10780,8 +10760,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10806,8 +10785,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10832,8 +10810,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10858,8 +10835,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10884,8 +10860,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10910,8 +10885,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10936,8 +10910,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10962,8 +10935,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10988,8 +10960,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11014,8 +10985,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11040,8 +11010,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11066,8 +11035,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11092,8 +11060,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11126,8 +11093,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11160,8 +11126,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11194,8 +11159,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11228,8 +11192,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11262,8 +11225,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11296,8 +11258,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11330,8 +11291,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11364,8 +11324,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11398,8 +11357,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11432,8 +11390,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11466,8 +11423,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11500,8 +11456,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11534,8 +11489,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11568,8 +11522,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11602,8 +11555,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11636,8 +11588,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11678,8 +11629,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11720,8 +11670,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11762,8 +11711,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11804,8 +11752,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11846,8 +11793,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11888,8 +11834,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11930,8 +11875,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11972,8 +11916,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12014,8 +11957,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12056,8 +11998,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12098,8 +12039,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12140,8 +12080,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12182,8 +12121,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12224,8 +12162,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12266,8 +12203,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12316,8 +12252,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12366,8 +12301,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12416,8 +12350,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12466,8 +12399,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12516,8 +12448,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12566,8 +12497,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12616,8 +12546,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12666,8 +12595,7 @@
               "groupMax": 3
             }
           ],
-          "totalMin": 2,
-          "totalMax": 5
+          "isBoss": true
         },
         {
           "floorRange": [
