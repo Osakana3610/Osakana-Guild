@@ -118,11 +118,14 @@ struct ExplorationEngine {
         // フロアの最後のイベントでボスがいる場合は強制ボス戦
         let encounterEvents: [EncounterTableDefinition.Event]
         let category: ExplorationEventScheduler.Category
+        let isBossEncounter: Bool
         if isLastEventOfFloor && hasBoss {
             encounterEvents = bossEvents
             category = .combat
+            isBossEncounter = true
         } else {
             encounterEvents = normalEvents
+            isBossEncounter = false
             let hasCombat = !encounterEvents.isEmpty
             category = try preparation.scheduler.nextCategory(hasScriptedEvents: hasScripted,
                                                               hasCombatEvents: hasCombat,
@@ -182,9 +185,9 @@ struct ExplorationEngine {
                 throw RuntimeError.invalidConfiguration(reason: "Encounter table not found for floor \(floor.floorNumber)")
             }
 
-            // 敵グループを生成
+            // 敵グループを生成（ボス戦かどうかはイベント選択時に決定済み）
             let enemySpecs: [EncounteredEnemySpec]
-            if encounterTable.isBoss {
+            if isBossEncounter {
                 // ボス戦：全敵グループをgroupMin〜groupMax体ずつ生成
                 enemySpecs = generateBossEncounter(events: encounterEvents,
                                                    levelMultiplier: preparation.enemyLevelMultiplier,
