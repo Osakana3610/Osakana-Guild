@@ -378,8 +378,8 @@ struct EquipmentEditorView: View {
                 .union(Set(currentCharacter.equippedItems.map { $0.itemId }))
             let masterData = appServices.masterDataCache
             for id in allItemIds {
-                if let def = masterData.item(id) {
-                    itemDefinitions[id] = def
+                if let definition = masterData.item(id) {
+                    itemDefinitions[id] = definition
                 }
             }
 

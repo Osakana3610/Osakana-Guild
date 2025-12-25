@@ -79,8 +79,8 @@ actor ShopProgressService {
         var definitionMap: [UInt16: ItemDefinition] = [:]
         var missing: [UInt16] = []
         for id in uniqueIds {
-            if let def = masterDataCache.item(id) {
-                definitionMap[id] = def
+            if let definition = masterDataCache.item(id) {
+                definitionMap[id] = definition
             } else {
                 missing.append(id)
             }
@@ -166,8 +166,8 @@ actor ShopProgressService {
         var definitionMap: [UInt16: ItemDefinition] = [:]
         var missing: [UInt16] = []
         for id in uniqueItemIds {
-            if let def = masterDataCache.item(id) {
-                definitionMap[id] = def
+            if let definition = masterDataCache.item(id) {
+                definitionMap[id] = definition
             } else {
                 missing.append(id)
             }
