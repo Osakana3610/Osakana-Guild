@@ -152,6 +152,9 @@ extension AppServices {
                                                         difficulty: UInt8(runDifficulty),
                                                         furthestFloor: UInt8(max(0, floorNumber)))
             }
+            // 探索完了時に一度だけキャラクター進捗通知を発行
+            character.notifyCharacterProgressDidChange()
+
             let finalUpdate = ExplorationRunUpdate(runId: runId,
                                                    stage: .completed(artifact))
             continuation.yield(finalUpdate)
