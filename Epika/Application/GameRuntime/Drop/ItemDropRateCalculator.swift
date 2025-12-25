@@ -48,8 +48,8 @@ struct ItemDropRateCalculator {
             return clamp(100.0 - (adjusted * 0.1))
         case .gem:
             let adjusted = rareMultiplier * (isRabiTicketActive ? 2.0 : 1.0)
-            let y = min(adjusted * 0.1, 1.0)
-            return clamp(100.0 - y)
+            let cappedPenalty = min(adjusted * 0.1, 1.0)
+            return clamp(100.0 - cappedPenalty)
         }
     }
 

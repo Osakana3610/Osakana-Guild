@@ -99,8 +99,8 @@ actor InventoryProgressService {
         var definitionMap: [UInt16: ItemDefinition] = [:]
         var missing: [UInt16] = []
         for id in masterIndices {
-            if let def = masterDataCache.item(id) {
-                definitionMap[id] = def
+            if let definition = masterDataCache.item(id) {
+                definitionMap[id] = definition
             } else {
                 missing.append(id)
             }
@@ -405,8 +405,8 @@ actor InventoryProgressService {
         var priceMap: [UInt16: Int] = [:]
         var missing: [UInt16] = []
         for id in masterIndices {
-            if let def = masterDataCache.item(id) {
-                priceMap[id] = def.sellValue
+            if let definition = masterDataCache.item(id) {
+                priceMap[id] = definition.sellValue
             } else {
                 missing.append(id)
             }
