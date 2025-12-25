@@ -210,7 +210,7 @@ struct ItemPurchaseView: View {
     private var purchaseAlertMessage: String {
         guard let item = selectedItem else { return "" }
         let single = item.price
-        let ten = item.price * 10
-        return "価格：\(single)GP\n10個：\(ten)GP"
+        let priceForTen = item.price * 10
+        return "価格：\(single)GP\n10個：\(priceForTen)GP"
     }
 }

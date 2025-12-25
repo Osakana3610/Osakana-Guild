@@ -395,16 +395,16 @@ extension BattleTurnEngine {
     }
 
     static func applyPhysicalDegradation(to defender: inout BattleActor) {
-        let d = defender.degradationPercent
+        let degradation = defender.degradationPercent
         let increment: Double
-        if d < 10.0 {
+        if degradation < 10.0 {
             increment = 0.5
-        } else if d < 30.0 {
+        } else if degradation < 30.0 {
             increment = 0.3
         } else {
-            increment = max(0.0, (100.0 - d) * 0.001)
+            increment = max(0.0, (100.0 - degradation) * 0.001)
         }
-        defender.degradationPercent = min(100.0, d + increment)
+        defender.degradationPercent = min(100.0, degradation + increment)
     }
 
     // 既知のスペルID定数（Definition層で確定後に更新）

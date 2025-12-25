@@ -370,8 +370,8 @@ extension BattleTurnEngine {
             let hitCount = skill.hitCount ?? 1
             var targets: [(ActorSide, Int)] = []
             for _ in 0..<hitCount {
-                let idx = context.random.nextInt(in: 0...(alive.count - 1))
-                let target = alive[idx]
+                let randomIndex = context.random.nextInt(in: 0...(alive.count - 1))
+                let target = alive[randomIndex]
                 targets.append((opponentSide, target.offset))
             }
             return targets
