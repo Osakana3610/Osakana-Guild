@@ -692,7 +692,8 @@ final class CharacterProgressService {
 
         try context.save()
 
-        notifyCharacterProgressDidChange()
+        // 装備変更は呼び出し元が状態を管理するため、通知は送らない
+        // （通知すると全キャラクター再構築が発生しUIをブロックする）
 
         // 更新後の装備リストを返す（軽量版）
         return try fetchEquippedItems(characterId: characterId, context: context)
@@ -779,7 +780,8 @@ final class CharacterProgressService {
 
         try context.save()
 
-        notifyCharacterProgressDidChange()
+        // 装備変更は呼び出し元が状態を管理するため、通知は送らない
+        // （通知すると全キャラクター再構築が発生しUIをブロックする）
 
         // 更新後の装備リストを返す（軽量版）
         return try fetchEquippedItems(characterId: characterId, context: context)
