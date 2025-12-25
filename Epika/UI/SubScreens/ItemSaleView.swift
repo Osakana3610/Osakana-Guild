@@ -209,10 +209,6 @@ struct ItemSaleView: View {
         isLoading = true
         defer { isLoading = false }
 
-        #if DEBUG
-        let totalStart = CFAbsoluteTimeGetCurrent()
-        #endif
-
         do {
             player = try await appServices.gameState.loadCurrentPlayer()
 
@@ -225,11 +221,6 @@ struct ItemSaleView: View {
             cacheVersion = service.version
             showError = false
             didLoadOnce = true
-
-            #if DEBUG
-            let totalEnd = CFAbsoluteTimeGetCurrent()
-            print("[Perf:ItemSaleView] total=\(String(format: "%.3f", totalEnd - totalStart))s preloaded=\(service.loaded)")
-            #endif
         } catch {
             showError = true
             errorMessage = error.localizedDescription
