@@ -37,7 +37,7 @@ extension AppServices {
         }
 
         // 出撃前にパーティメンバーのHP全回復（HP > 0 のキャラクターのみ）
-        try await character.healToFull(characterIds: partySnapshot.memberCharacterIds)
+        try character.healToFull(characterIds: partySnapshot.memberCharacterIds)
         let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId)
         guard dungeonSnapshot.isUnlocked else {
             throw ProgressError.dungeonLocked(id: String(dungeonId))
@@ -49,7 +49,7 @@ extension AppServices {
         }
         let runDifficulty = partySnapshot.lastSelectedDifficulty
         let characterIds = partySnapshot.memberCharacterIds
-        let characters = try await character.characters(withIds: characterIds)
+        let characters = try character.characters(withIds: characterIds)
         let session = try await runtime.startExplorationRun(party: partySnapshot,
                                                             characters: characters,
                                                             dungeonId: dungeonId,
