@@ -97,13 +97,13 @@ extension AppServices {
                     totalDrops.append(contentsOf: outcome.drops)
                 }
 
-                try await exploration.appendEvent(runId: recordId,
-                                                   event: outcome.entry,
-                                                   battleLog: outcome.battleLog,
-                                                   occurredAt: outcome.entry.occurredAt,
-                                                   randomState: outcome.randomState,
-                                                   superRareState: outcome.superRareState,
-                                                   droppedItemIds: outcome.droppedItemIds)
+                let battleLogId = try await exploration.appendEvent(runId: recordId,
+                                                                    event: outcome.entry,
+                                                                    battleLog: outcome.battleLog,
+                                                                    occurredAt: outcome.entry.occurredAt,
+                                                                    randomState: outcome.randomState,
+                                                                    superRareState: outcome.superRareState,
+                                                                    droppedItemIds: outcome.droppedItemIds)
 
                 try await handleExplorationEvent(memberIds: memberIds,
                                                   runtimeCharactersById: runtimeMap,
@@ -113,7 +113,7 @@ extension AppServices {
                                                   totalGold: totalGold,
                                                   drops: totalDrops)
                 let update = ExplorationRunUpdate(runId: runId,
-                                                  stage: .step(entry: outcome.entry, totals: totals))
+                                                  stage: .step(entry: outcome.entry, totals: totals, battleLogId: battleLogId))
                 continuation.yield(update)
             }
 

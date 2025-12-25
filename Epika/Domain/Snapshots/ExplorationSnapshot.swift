@@ -259,3 +259,63 @@ extension ExplorationSnapshot {
         }
     }
 }
+
+// MARK: - EncounterLog Conversion from Runtime Entry
+
+extension ExplorationSnapshot.EncounterLog {
+    /// ランタイムのイベントログエントリから EncounterLog を生成
+    init(from entry: ExplorationEventLogEntry, battleLogId: PersistentIdentifier?, masterData: MasterDataCache) {
+        let kind: Kind
+        var referenceId: String?
+        var combatSummary: CombatSummary?
+
+        switch entry.kind {
+        case .nothing:
+            kind = .nothing
+
+        case .combat(let combat):
+            kind = .enemyEncounter
+            referenceId = String(combat.enemy.id)
+            combatSummary = CombatSummary(
+                enemyId: combat.enemy.id,
+                enemyName: combat.enemy.name,
+                result: combat.result.identifier,
+                turns: combat.turns,
+                battleLogId: battleLogId
+            )
+
+        case .scripted(let scripted):
+            kind = .scriptedEvent
+            referenceId = scripted.name
+        }
+
+        // Context構造体を構築
+        var context = Context()
+        if entry.experienceGained > 0 {
+            context.exp = "\(entry.experienceGained)"
+        }
+        if entry.goldGained > 0 {
+            context.gold = "\(entry.goldGained)"
+        }
+        if !entry.drops.isEmpty {
+            let dropStrings = entry.drops.map { drop in
+                "\(drop.item.name)x\(drop.quantity)"
+            }
+            if !dropStrings.isEmpty {
+                context.drops = dropStrings.joined(separator: ", ")
+            }
+        }
+
+        self.init(
+            id: UUID(),
+            floorNumber: entry.floorNumber,
+            eventIndex: entry.eventIndex,
+            kind: kind,
+            referenceId: referenceId,
+            occurredAt: entry.occurredAt,
+            context: context,
+            metadata: ProgressMetadata(createdAt: entry.occurredAt, updatedAt: entry.occurredAt),
+            combatSummary: combatSummary
+        )
+    }
+}
