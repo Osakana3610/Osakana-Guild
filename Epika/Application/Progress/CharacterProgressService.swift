@@ -618,9 +618,19 @@ actor CharacterProgressService {
     // MARK: - Equipment Management
 
     /// キャラクターにアイテムを装備
-    func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1) async throws -> CharacterSnapshot {
+    /// - Parameters:
+    ///   - characterId: キャラクターID
+    ///   - inventoryItemStackKey: 装備するアイテムのstackKey
+    ///   - quantity: 装備数量（デフォルト1）
+    ///   - knownEquipmentCapacity: 呼び出し元が既に知っている装備上限（nilの場合は内部で計算）
+    func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1, knownEquipmentCapacity: Int? = nil) async throws -> CharacterSnapshot {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "装備数量は1以上である必要があります")
+        }
+
+        // stackKeyをパースして個別フィールドで検索
+        guard let components = StackKeyComponents(stackKey: inventoryItemStackKey) else {
+            throw ProgressError.invalidInput(description: "無効なstackKeyです")
         }
 
         let context = makeContext()
@@ -637,12 +647,25 @@ actor CharacterProgressService {
             throw ProgressError.invalidInput(description: "探索中のキャラクターは装備を変更できません")
         }
 
-        // インベントリアイテムの取得（stackKeyでマッチング）
+        // インベントリアイテムの取得（個別フィールドで検索）
         let storageTypeValue = ItemStorage.playerItem.rawValue
-        let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue
-        }))
-        guard let inventoryRecord = allInventory.first(where: { $0.stackKey == inventoryItemStackKey }) else {
+        let superRare = components.superRareTitleId
+        let normal = components.normalTitleId
+        let itemId = components.itemId
+        let socketSuperRare = components.socketSuperRareTitleId
+        let socketNormal = components.socketNormalTitleId
+        let socketItem = components.socketItemId
+        var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageType == storageTypeValue &&
+            $0.superRareTitleId == superRare &&
+            $0.normalTitleId == normal &&
+            $0.itemId == itemId &&
+            $0.socketSuperRareTitleId == socketSuperRare &&
+            $0.socketNormalTitleId == socketNormal &&
+            $0.socketItemId == socketItem
+        })
+        inventoryDescriptor.fetchLimit = 1
+        guard let inventoryRecord = try context.fetch(inventoryDescriptor).first else {
             throw ProgressError.invalidInput(description: "アイテムが見つかりません")
         }
 
@@ -654,17 +677,22 @@ actor CharacterProgressService {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let currentEquipment = try context.fetch(equipmentDescriptor)
 
-        // 装備可能数をスキル修正込みで計算
-        let input = try loadInput(characterRecord, context: context)
-        let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
-        let runtimeCharacter = try await MainActor.run {
-            try RuntimeCharacterFactory.make(
-                from: input,
-                masterData: masterData,
-                pandoraBoxStackKeys: pandoraStackKeys
-            )
+        // 装備可能数を取得（呼び出し元から渡された場合はそれを使用、なければ計算）
+        let equipmentCapacity: Int
+        if let known = knownEquipmentCapacity {
+            equipmentCapacity = known
+        } else {
+            let input = try loadInput(characterRecord, context: context)
+            let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
+            let runtimeCharacter = try await MainActor.run {
+                try RuntimeCharacterFactory.make(
+                    from: input,
+                    masterData: masterData,
+                    pandoraBoxStackKeys: pandoraStackKeys
+                )
+            }
+            equipmentCapacity = runtimeCharacter.equipmentCapacity
         }
-        let equipmentCapacity = runtimeCharacter.equipmentCapacity
         if currentEquipment.count + quantity > equipmentCapacity {
             throw ProgressError.invalidInput(description: "装備数が上限(\(equipmentCapacity)個)を超えます")
         }
@@ -701,6 +729,11 @@ actor CharacterProgressService {
             throw ProgressError.invalidInput(description: "解除数量は1以上である必要があります")
         }
 
+        // stackKeyをパースして個別フィールドで検索
+        guard let components = StackKeyComponents(stackKey: equipmentStackKey) else {
+            throw ProgressError.invalidInput(description: "無効なstackKeyです")
+        }
+
         let context = makeContext()
 
         // キャラクターの取得
@@ -715,10 +748,23 @@ actor CharacterProgressService {
             throw ProgressError.invalidInput(description: "探索中のキャラクターは装備を変更できません")
         }
 
-        // 装備レコードの取得（同じstackKeyのものを探す）
-        let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
-        let allEquipment = try context.fetch(equipmentDescriptor)
-        let matchingEquipment = allEquipment.filter { $0.stackKey == equipmentStackKey }
+        // 装備レコードの取得（個別フィールドで検索）
+        let superRare = components.superRareTitleId
+        let normal = components.normalTitleId
+        let itemId = components.itemId
+        let socketSuperRare = components.socketSuperRareTitleId
+        let socketNormal = components.socketNormalTitleId
+        let socketItem = components.socketItemId
+        let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate {
+            $0.characterId == characterId &&
+            $0.superRareTitleId == superRare &&
+            $0.normalTitleId == normal &&
+            $0.itemId == itemId &&
+            $0.socketSuperRareTitleId == socketSuperRare &&
+            $0.socketNormalTitleId == socketNormal &&
+            $0.socketItemId == socketItem
+        })
+        let matchingEquipment = try context.fetch(equipmentDescriptor)
 
         guard matchingEquipment.count >= quantity else {
             throw ProgressError.invalidInput(description: "解除数量が装備数を超えています")
@@ -726,13 +772,20 @@ actor CharacterProgressService {
 
         let storage = ItemStorage.playerItem
 
-        // インベントリに戻す（同じstackKeyのアイテムを探す）
+        // インベントリに戻す（個別フィールドで検索）
         let storageTypeValue = storage.rawValue
-        let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue
-        }))
+        var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageType == storageTypeValue &&
+            $0.superRareTitleId == superRare &&
+            $0.normalTitleId == normal &&
+            $0.itemId == itemId &&
+            $0.socketSuperRareTitleId == socketSuperRare &&
+            $0.socketNormalTitleId == socketNormal &&
+            $0.socketItemId == socketItem
+        })
+        inventoryDescriptor.fetchLimit = 1
 
-        if let existingInventory = allInventory.first(where: { $0.stackKey == equipmentStackKey }) {
+        if let existingInventory = try context.fetch(inventoryDescriptor).first {
             // 既存スタックに追加
             existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
         } else if let firstEquip = matchingEquipment.first {
