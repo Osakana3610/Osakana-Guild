@@ -26,7 +26,8 @@ final class SkillRuntimeEffectCompilerTests: XCTestCase {
 
         let effects: BattleActor.SkillEffects
         do {
-            effects = try SkillRuntimeEffectCompiler.actorEffects(from: tacticDefinitions)
+            let skillCompiler = try UnifiedSkillEffectCompiler(skills: tacticDefinitions)
+            effects = skillCompiler.actorEffects
         } catch {
             XCTFail("戦術スキルのコンパイルに失敗: \(error)")
             return
@@ -53,7 +54,7 @@ final class SkillRuntimeEffectCompilerTests: XCTestCase {
         }
 
         do {
-            _ = try SkillRuntimeEffectCompiler.actorEffects(from: filteredDefinitions)
+            _ = try UnifiedSkillEffectCompiler(skills: filteredDefinitions)
         } catch {
             XCTFail("スキルコンパイル失敗: \(error)")
         }

@@ -114,16 +114,18 @@ enum RuntimeCharacterFactory {
         // Loadout構築
         let loadout = assembleLoadout(masterData: masterData, from: input.equippedItems)
 
+        // 統合スキルエフェクトコンパイラで一括処理
+        let skillCompiler = try UnifiedSkillEffectCompiler(skills: learnedSkills)
+
         // 装備スロット計算
-        let slotModifiers = try SkillRuntimeEffectCompiler.equipmentSlots(from: learnedSkills)
-        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: input.level, modifiers: slotModifiers)
+        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: input.level, modifiers: skillCompiler.equipmentSlots)
         let usedSlots = input.equippedItems.reduce(0) { $0 + max(0, $1.quantity) }
         if usedSlots > allowedSlots {
             throw RuntimeError.invalidConfiguration(reason: "装備枠を超過しています（装備数: \(usedSlots) / 上限: \(allowedSlots)）")
         }
 
         // スペルブック
-        let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
+        let spellbook = skillCompiler.spellbook
         let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(
             from: spellbook,
             definitions: masterData.allSpells,
@@ -171,8 +173,7 @@ enum RuntimeCharacterFactory {
         // 蘇生パッシブチェック
         var resolvedCurrentHP = min(input.currentHP, calcResult.hitPoints.maximum)
         if resolvedCurrentHP <= 0 {
-            let effects = try SkillRuntimeEffectCompiler.actorEffects(from: learnedSkills)
-            if effects.resurrection.passiveBetweenFloors {
+            if skillCompiler.actorEffects.resurrection.passiveBetweenFloors {
                 resolvedCurrentHP = max(1, calcResult.hitPoints.maximum)
             }
         }
@@ -278,16 +279,18 @@ enum RuntimeCharacterFactory {
         // Loadout構築
         let loadout = assembleLoadout(masterData: masterData, from: newEquippedItems)
 
+        // 統合スキルエフェクトコンパイラで一括処理
+        let skillCompiler = try UnifiedSkillEffectCompiler(skills: learnedSkills)
+
         // 装備スロット計算
-        let slotModifiers = try SkillRuntimeEffectCompiler.equipmentSlots(from: learnedSkills)
-        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: current.level, modifiers: slotModifiers)
+        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: current.level, modifiers: skillCompiler.equipmentSlots)
         let usedSlots = newEquippedItems.reduce(0) { $0 + max(0, $1.quantity) }
         if usedSlots > allowedSlots {
             throw RuntimeError.invalidConfiguration(reason: "装備枠を超過しています（装備数: \(usedSlots) / 上限: \(allowedSlots)）")
         }
 
         // スペルブック
-        let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
+        let spellbook = skillCompiler.spellbook
         let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(
             from: spellbook,
             definitions: masterData.allSpells,

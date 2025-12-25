@@ -198,7 +198,8 @@ struct BattleEnemyGroupBuilder {
             return cached
         }
         let skills = definition.specialSkillIds.compactMap { skillDefinitions[$0] }
-        let effects = try SkillRuntimeEffectCompiler.actorEffects(from: skills)
+        let skillCompiler = try UnifiedSkillEffectCompiler(skills: skills)
+        let effects = skillCompiler.actorEffects
         cache[definition.id] = effects
         return effects
     }

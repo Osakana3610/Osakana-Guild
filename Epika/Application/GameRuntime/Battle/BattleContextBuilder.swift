@@ -43,7 +43,8 @@ struct BattleContextBuilder {
                 agility: character.attributes.agility,
                 luck: character.attributes.luck
             )
-            let skillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: character.learnedSkills, stats: stats)
+            let skillCompiler = try UnifiedSkillEffectCompiler(skills: character.learnedSkills, stats: stats)
+            let skillEffects = skillCompiler.actorEffects
             applySpellChargeModifiers(skillEffects: skillEffects,
                                       loadout: character.spellLoadout,
                                       resources: &resources)
