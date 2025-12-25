@@ -267,20 +267,6 @@ resolved:
     resolution: |
       探索再開時に元の開始時刻と既存イベント数を正しく使用するよう修正。
 
-  - id: "FB0021"
-    title: "在庫整理でノーマルアイテムもキャット・チケットを入手できる"
-    category: "アイテム"
-    status: "fixed"
-    reported_date: "2025-12-24"
-    resolved_date: "2025-12-25"
-    resolved_version: "0.7.82(4)"
-    description: |
-      在庫整理機能でノーマルアイテムを整理した際にも、キャット・チケットを入手できてしまう。
-    details: |
-      ノーマルアイテムに対するレアリティチェックが不足していた。
-    resolution: |
-      cleanupStock でノーマルアイテムを除外するガードを追加。
-
   - id: "FB0020"
     title: "自動売却が機能せず、入手したアイテムが売られない場合がある"
     category: "アイテム"
@@ -295,19 +281,19 @@ resolved:
     resolution: |
       ドロップ時・インベントリ売却時も6要素キーで照合するよう修正。
 
-  - id: "FB0023"
-    title: "探索中にパーティメンバーを変更できてしまう"
-    category: "探索"
+  - id: "FB0021"
+    title: "在庫整理でノーマルアイテムもキャット・チケットを入手できる"
+    category: "アイテム"
     status: "fixed"
     reported_date: "2025-12-24"
     resolved_date: "2025-12-25"
-    resolved_version: "0.7.83(1)"
+    resolved_version: "0.7.82(4)"
     description: |
-      探索中のパーティのメンバーを変更できてしまう問題。
+      在庫整理機能でノーマルアイテムを整理した際にも、キャット・チケットを入手できてしまう。
     details: |
-      パーティ詳細画面の「メンバーを変更する」リンクに探索中チェックがなかった。
+      ノーマルアイテムに対するレアリティチェックが不足していた。
     resolution: |
-      探索中のパーティではメンバー変更リンクを無効化するよう修正。
+      cleanupStock でノーマルアイテムを除外するガードを追加。
 
   - id: "FB0022"
     title: "僧侶魔法、特にバリア系統が発動しない場合がある"
@@ -322,6 +308,20 @@ resolved:
       buff/cleanse系の呪文カテゴリが未実装だった。
     resolution: |
       buff/cleanse呪文カテゴリを実装し、バリア系統の魔法が正しく発動するよう修正。
+
+  - id: "FB0023"
+    title: "探索中にパーティメンバーを変更できてしまう"
+    category: "探索"
+    status: "fixed"
+    reported_date: "2025-12-24"
+    resolved_date: "2025-12-25"
+    resolved_version: "0.7.83(1)"
+    description: |
+      探索中のパーティのメンバーを変更できてしまう問題。
+    details: |
+      パーティ詳細画面の「メンバーを変更する」リンクに探索中チェックがなかった。
+    resolution: |
+      探索中のパーティではメンバー変更リンクを無効化するよう修正。
 
   - id: "FB0024"
     title: "パーティ詳細画面から装備更新してもステータス変更通知が表示されない"
