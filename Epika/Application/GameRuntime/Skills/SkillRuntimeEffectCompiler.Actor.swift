@@ -4,62 +4,18 @@
 // ==============================================================================
 //
 // 【責務】
-//   - スキル定義から BattleActor.SkillEffects を構築
-//   - ActorEffectsAccumulator を使用して各種エフェクトを蓄積
-//   - アクターのステータス（ActorStats）を用いた statScaling 計算をサポート
+//   - BattleActor.SkillEffects 構築に必要なヘルパー関数を提供
 //
 // 【公開API】
-//   - actorEffects(from:stats:): スキル定義配列から SkillEffects を構築
 //   - BattleActor.SkillEffects.Reaction.make(from:skillName:skillId:stats:)
 //   - BattleActor.SkillEffects.RowProfile.applyParameters(_:)
 //
-// 【本体ファイルとの関係】
-//   - SkillRuntimeEffectCompiler.swift で定義された enum を拡張
-//   - ActorEffectsAccumulator を使用してエフェクトを蓄積
-//   - SkillEffectHandlerRegistry からハンドラを取得して実行
+// 【備考】
+//   - SkillEffects の構築は UnifiedSkillEffectCompiler で行う
 //
 // ==============================================================================
 
 import Foundation
-
-// MARK: - Actor Effects Compilation
-extension SkillRuntimeEffectCompiler {
-    /// スキル定義から BattleActor.SkillEffects を構築する
-    /// - Parameters:
-    ///   - skills: コンパイル対象のスキル定義配列
-    ///   - stats: アクターのステータス（statScaling計算用、nilの場合はスケーリングなし）
-    /// - Returns: 構築された SkillEffects
-    /// - Note: nonisolated - 計算処理のためMainActorに縛られない
-    nonisolated static func actorEffects(from skills: [SkillDefinition], stats: ActorStats? = nil) throws -> BattleActor.SkillEffects {
-        guard !skills.isEmpty else { return .neutral }
-
-        var accumulator = ActorEffectsAccumulator()
-
-        for skill in skills {
-            for effect in skill.effects {
-                let payload = try decodePayload(from: effect, skillId: skill.id)
-                try validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
-
-                let context = SkillEffectContext(
-                    skillId: skill.id,
-                    skillName: skill.name,
-                    effectIndex: effect.index,
-                    actorStats: stats
-                )
-
-                guard let handler = SkillEffectHandlerRegistry.handler(for: payload.effectType) else {
-                    throw RuntimeError.invalidConfiguration(
-                        reason: "Skill \(skill.id)#\(effect.index) の effectType \(payload.effectType.identifier) に対応するハンドラがありません"
-                    )
-                }
-
-                try handler.apply(payload: payload, to: &accumulator, context: context)
-            }
-        }
-
-        return accumulator.build()
-    }
-}
 
 // MARK: - Helper Extensions for Actor Effects
 extension BattleActor.SkillEffects.Reaction {

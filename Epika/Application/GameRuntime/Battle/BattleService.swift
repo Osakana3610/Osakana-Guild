@@ -130,7 +130,8 @@ enum BattleService {
                                                                        levelOverride: fallbackLevel,
                                                                        jobDefinitions: jobDictionary)
             let resources = BattleActionResource.makeDefault(for: snapshot)
-            let fallbackSkillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: fallbackDefinition.specialSkillIds.compactMap { skillDictionary[$0] })
+            let fallbackSkillCompiler = try UnifiedSkillEffectCompiler(skills: fallbackDefinition.specialSkillIds.compactMap { skillDictionary[$0] })
+            let fallbackSkillEffects = fallbackSkillCompiler.actorEffects
             let jobName: String? = fallbackDefinition.jobId.flatMap { jobDictionary[$0]?.name }
             enemies = [BattleActor(identifier: String(fallbackDefinition.id),
                                    displayName: fallbackDefinition.name,

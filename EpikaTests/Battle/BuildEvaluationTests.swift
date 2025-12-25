@@ -109,7 +109,8 @@ final class BuildEvaluationTests: XCTestCase {
             agility: 100,
             luck: 100
         )
-        let skillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: learnedSkills, stats: stats)
+        let skillCompiler = try UnifiedSkillEffectCompiler(skills: learnedSkills, stats: stats)
+        let skillEffects = skillCompiler.actorEffects
 
         // スコア計算
         let physicalScore = calculatePhysicalScore(skillEffects, job: job)
