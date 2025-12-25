@@ -62,32 +62,10 @@ actor InventoryProgressService {
     // MARK: - Public API
 
     func allItems(storage: ItemStorage) async throws -> [ItemSnapshot] {
-        #if DEBUG
-        let startTime = CFAbsoluteTimeGetCurrent()
-        #endif
-
         let context = makeContext()
         let descriptor = fetchDescriptor(for: storage)
-
-        #if DEBUG
-        let fetchStart = CFAbsoluteTimeGetCurrent()
-        #endif
-
         let records = try context.fetch(descriptor)
-
-        #if DEBUG
-        let fetchEnd = CFAbsoluteTimeGetCurrent()
-        let mapStart = CFAbsoluteTimeGetCurrent()
-        #endif
-
         let snapshots = records.map(makeSnapshot(_:))
-
-        #if DEBUG
-        let mapEnd = CFAbsoluteTimeGetCurrent()
-        let totalTime = mapEnd - startTime
-        print("[Perf:Inventory] allItems count=\(records.count) fetch=\(String(format: "%.3f", fetchEnd - fetchStart))s map=\(String(format: "%.3f", mapEnd - mapStart))s total=\(String(format: "%.3f", totalTime))s")
-        #endif
-
         return snapshots
     }
 
