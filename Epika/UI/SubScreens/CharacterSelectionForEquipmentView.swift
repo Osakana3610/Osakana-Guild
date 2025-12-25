@@ -420,7 +420,8 @@ struct EquipmentEditorView: View {
         do {
             let snapshot = try await characterService.equipItem(
                 characterId: currentCharacter.id,
-                inventoryItemStackKey: item.stackKey
+                inventoryItemStackKey: item.stackKey,
+                knownEquipmentCapacity: currentCharacter.equipmentCapacity
             )
             // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
             let runtime = try characterService.runtimeCharacterWithEquipmentChange(
