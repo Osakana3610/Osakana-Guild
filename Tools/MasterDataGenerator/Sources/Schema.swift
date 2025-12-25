@@ -503,7 +503,8 @@ extension Generator {
                 spawn_rate REAL,
                 group_min INTEGER,
                 group_max INTEGER,
-                enemy_level INTEGER,
+                min_level INTEGER,
+                max_level INTEGER,
                 PRIMARY KEY (table_id, order_index),
                 FOREIGN KEY (table_id) REFERENCES encounter_tables(id) ON DELETE CASCADE
             );
