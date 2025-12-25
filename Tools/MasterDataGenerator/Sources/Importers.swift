@@ -1632,11 +1632,20 @@ extension Generator {
                         let isBoss = mapping.isBoss ?? false
                         for floorNumber in start...end {
                             var info = infoByFloor[floorNumber] ?? FloorEncounterInfo()
-                            info.groups.append(contentsOf: mapping.enemyGroups)
-                            info.isBoss = info.isBoss || isBoss
-                            // totalMin/totalMaxは最初のmappingから取得（上書きしない）
-                            if info.totalMin == nil { info.totalMin = mapping.totalMin }
-                            if info.totalMax == nil { info.totalMax = mapping.totalMax }
+                            if isBoss {
+                                // ボス戦の場合は既存グループを置き換え（重複防止）
+                                info.groups = mapping.enemyGroups
+                                info.isBoss = true
+                                info.totalMin = mapping.totalMin
+                                info.totalMax = mapping.totalMax
+                            } else if !info.isBoss {
+                                // 通常戦の場合、ボス戦でなければ追加
+                                info.groups.append(contentsOf: mapping.enemyGroups)
+                                // totalMin/totalMaxは最初のmappingから取得（上書きしない）
+                                if info.totalMin == nil { info.totalMin = mapping.totalMin }
+                                if info.totalMax == nil { info.totalMax = mapping.totalMax }
+                            }
+                            // 既にボス戦設定があるフロアに通常戦を追加しようとした場合は無視
                             infoByFloor[floorNumber] = info
                         }
                     }
