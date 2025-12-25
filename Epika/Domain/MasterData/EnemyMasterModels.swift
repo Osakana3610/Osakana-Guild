@@ -8,7 +8,7 @@
 //
 // 【データ構造】
 //   - EnemyDefinition: 敵の完全定義
-//     - 基本情報: id, name, raceId, jobId, isBoss
+//     - 基本情報: id, name, raceId, jobId
 //     - 能力値: strength, wisdom, spirit, vitality, agility, luck
 //     - 耐性: resistances, resistanceOverrides
 //     - 行動設定: actionRates（攻撃/僧侶魔法/魔法使い魔法/ブレス）
@@ -56,7 +56,6 @@ struct EnemyDefinition: Identifiable, Sendable {
     let raceId: UInt8
     let jobId: UInt8?
     let baseExperience: Int
-    let isBoss: Bool
     let strength: Int
     let wisdom: Int
     let spirit: Int

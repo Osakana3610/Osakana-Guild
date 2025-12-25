@@ -28,7 +28,6 @@ extension SQLiteMasterDataManager {
             var raceId: UInt8
             var jobId: UInt8?
             var baseExperience: Int
-            var isBoss: Bool
             var strength: Int
             var wisdom: Int
             var spirit: Int
@@ -42,7 +41,7 @@ extension SQLiteMasterDataManager {
         }
 
         var builders: [UInt16: Builder] = [:]
-        let baseSQL = "SELECT e.id, e.name, e.race_id, e.job_id, e.base_experience, e.is_boss, s.strength, s.wisdom, s.spirit, s.vitality, s.agility, s.luck FROM enemies e JOIN enemy_stats s ON e.id = s.enemy_id;"
+        let baseSQL = "SELECT e.id, e.name, e.race_id, e.job_id, e.base_experience, s.strength, s.wisdom, s.spirit, s.vitality, s.agility, s.luck FROM enemies e JOIN enemy_stats s ON e.id = s.enemy_id;"
         let baseStatement = try prepare(baseSQL)
         defer { sqlite3_finalize(baseStatement) }
         while sqlite3_step(baseStatement) == SQLITE_ROW {
@@ -57,13 +56,12 @@ extension SQLiteMasterDataManager {
                 raceId: raceId,
                 jobId: jobId,
                 baseExperience: Int(sqlite3_column_int(baseStatement, 4)),
-                isBoss: sqlite3_column_int(baseStatement, 5) == 1,
-                strength: Int(sqlite3_column_int(baseStatement, 6)),
-                wisdom: Int(sqlite3_column_int(baseStatement, 7)),
-                spirit: Int(sqlite3_column_int(baseStatement, 8)),
-                vitality: Int(sqlite3_column_int(baseStatement, 9)),
-                agility: Int(sqlite3_column_int(baseStatement, 10)),
-                luck: Int(sqlite3_column_int(baseStatement, 11))
+                strength: Int(sqlite3_column_int(baseStatement, 5)),
+                wisdom: Int(sqlite3_column_int(baseStatement, 6)),
+                spirit: Int(sqlite3_column_int(baseStatement, 7)),
+                vitality: Int(sqlite3_column_int(baseStatement, 8)),
+                agility: Int(sqlite3_column_int(baseStatement, 9)),
+                luck: Int(sqlite3_column_int(baseStatement, 10))
             )
         }
 
@@ -124,7 +122,6 @@ extension SQLiteMasterDataManager {
                 raceId: builder.raceId,
                 jobId: builder.jobId,
                 baseExperience: builder.baseExperience,
-                isBoss: builder.isBoss,
                 strength: builder.strength,
                 wisdom: builder.wisdom,
                 spirit: builder.spirit,

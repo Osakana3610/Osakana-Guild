@@ -202,19 +202,8 @@ private struct EnemyRowView: View {
             EnemyImageView(enemyId: enemy.id, size: 55)
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack {
-                    Text(enemy.name)
-                        .font(.body)
-                    if enemy.isBoss {
-                        Text("BOSS")
-                            .font(.caption2)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 1)
-                            .background(Color.red.opacity(0.2))
-                            .foregroundColor(.red)
-                            .cornerRadius(4)
-                    }
-                }
+                Text(enemy.name)
+                    .font(.body)
 
                 HStack(spacing: 8) {
                     Text("Lv\(level)")
@@ -270,9 +259,6 @@ private struct EnemyDetailView: View {
                 LabeledContent("レベル", value: "\(level)")
                 LabeledContent("HP", value: "\(calculatedHP)")
                 LabeledContent("基本経験値", value: "\(enemy.baseExperience)")
-                if enemy.isBoss {
-                    LabeledContent("タイプ", value: "ボス")
-                }
             }
 
             // 基礎ステータス
