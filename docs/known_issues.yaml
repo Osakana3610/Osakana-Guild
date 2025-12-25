@@ -71,45 +71,6 @@ issues:
     fix_plan: |
       0.7.82（3）で基本的に修正済み。追加の改善がないか調査中。
 
-  - id: "FB0022"
-    title: "僧侶魔法、特にバリア系統が発動しない場合がある"
-    category: "戦闘"
-    status: "investigating"
-    reported_date: "2025-12-24"
-    description: |
-      僧侶魔法、特にバリア系統の魔法が発動しない場合がある。
-    details: |
-      調査中。
-    workaround: ""
-    fix_plan: |
-      12/26までに修正予定。
-
-  - id: "FB0024"
-    title: "パーティ詳細画面から装備更新してもステータス変更通知が表示されない"
-    category: "UI"
-    status: "confirmed"
-    reported_date: "2025-12-25"
-    description: |
-      パーティ詳細画面から装備の更新を行っても、ステータスの変更通知が表示されない。
-    details: |
-      装備変更後のステータス差分表示が動作していない。
-    workaround: ""
-    fix_plan: |
-      0.7.83（1）で修正予定。
-
-  - id: "FB0025"
-    title: "最新の迷宮をクリアしてもストーリーが解放されない"
-    category: "ストーリー"
-    status: "confirmed"
-    reported_date: "2025-12-25"
-    description: |
-      解放されている一番新しい迷宮をクリアしても、次のストーリーが解放されない。
-    details: |
-      迷宮クリア時のストーリー解放判定に問題がある可能性。
-    workaround: ""
-    fix_plan: |
-      0.7.83（1）で修正予定。
-
 # ==============================================================================
 # 解決済みの問題（Closed）
 # ==============================================================================
@@ -347,3 +308,45 @@ resolved:
       パーティ詳細画面の「メンバーを変更する」リンクに探索中チェックがなかった。
     resolution: |
       探索中のパーティではメンバー変更リンクを無効化するよう修正。
+
+  - id: "FB0022"
+    title: "僧侶魔法、特にバリア系統が発動しない場合がある"
+    category: "戦闘"
+    status: "fixed"
+    reported_date: "2025-12-24"
+    resolved_date: "2025-12-25"
+    resolved_version: "0.7.83(1)"
+    description: |
+      僧侶魔法、特にバリア系統の魔法が発動しない場合がある。
+    details: |
+      buff/cleanse系の呪文カテゴリが未実装だった。
+    resolution: |
+      buff/cleanse呪文カテゴリを実装し、バリア系統の魔法が正しく発動するよう修正。
+
+  - id: "FB0024"
+    title: "パーティ詳細画面から装備更新してもステータス変更通知が表示されない"
+    category: "UI"
+    status: "fixed"
+    reported_date: "2025-12-25"
+    resolved_date: "2025-12-25"
+    resolved_version: "0.7.83(1)"
+    description: |
+      パーティ詳細画面から装備の更新を行っても、ステータスの変更通知が表示されない。
+    details: |
+      装備変更後のステータス差分表示が動作していなかった。
+    resolution: |
+      パーティ詳細画面でステータス変動通知を表示するよう修正。
+
+  - id: "FB0025"
+    title: "最新の迷宮をクリアしてもストーリーが解放されない"
+    category: "ストーリー"
+    status: "fixed"
+    reported_date: "2025-12-25"
+    resolved_date: "2025-12-25"
+    resolved_version: "0.7.83(1)"
+    description: |
+      解放されている一番新しい迷宮をクリアしても、次のストーリーが解放されない。
+    details: |
+      迷宮クリア時のストーリー解放判定に問題があった。
+    resolution: |
+      ダンジョンクリア時のストーリー解放処理を修正。
