@@ -261,7 +261,8 @@ final class BattleBalanceTests: XCTestCase {
             )
 
             let skillDefs = definition.specialSkillIds.compactMap { skills[$0] }
-            let skillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: skillDefs)
+            let skillCompiler = try UnifiedSkillEffectCompiler(skills: skillDefs)
+            let skillEffects = skillCompiler.actorEffects
 
             var resources = BattleActionResource.makeDefault(for: snapshot, spellLoadout: .empty)
             if skillEffects.spell.breathExtraCharges > 0 {
@@ -396,7 +397,8 @@ final class BattleBalanceTests: XCTestCase {
                 agility: agility,
                 luck: luck
             )
-            let skillEffects = try SkillRuntimeEffectCompiler.actorEffects(from: learnedSkills, stats: stats)
+            let skillCompiler = try UnifiedSkillEffectCompiler(skills: learnedSkills, stats: stats)
+            let skillEffects = skillCompiler.actorEffects
 
             var resources = BattleActionResource.makeDefault(for: snapshot, spellLoadout: .empty)
             if skillEffects.spell.breathExtraCharges > 0 {

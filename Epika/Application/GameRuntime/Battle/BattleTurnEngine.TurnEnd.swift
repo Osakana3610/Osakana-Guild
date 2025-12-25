@@ -231,7 +231,8 @@ extension BattleTurnEngine {
                 agility: actor.agility,
                 luck: actor.luck
             )
-            let effects = try SkillRuntimeEffectCompiler.actorEffects(from: definitions, stats: stats)
+            let skillCompiler = try UnifiedSkillEffectCompiler(skills: definitions, stats: stats)
+            let effects = skillCompiler.actorEffects
             actor.skillEffects = effects
 
             for (key, value) in effects.combat.barrierCharges {
