@@ -154,12 +154,12 @@ struct BattleContext {
     // MARK: - 初期HP記録
     mutating func buildInitialHP() {
         for (index, player) in players.enumerated() {
-            let idx = actorIndex(for: .player, arrayIndex: index)
-            initialHP[idx] = UInt32(player.currentHP)
+            let playerActorIndex = actorIndex(for: .player, arrayIndex: index)
+            initialHP[playerActorIndex] = UInt32(player.currentHP)
         }
         for (index, enemy) in enemies.enumerated() {
-            let idx = actorIndex(for: .enemy, arrayIndex: index)
-            initialHP[idx] = UInt32(enemy.currentHP)
+            let enemyActorIndex = actorIndex(for: .enemy, arrayIndex: index)
+            initialHP[enemyActorIndex] = UInt32(enemy.currentHP)
         }
     }
 

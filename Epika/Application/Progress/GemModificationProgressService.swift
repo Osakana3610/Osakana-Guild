@@ -97,21 +97,21 @@ actor GemModificationProgressService {
 
     /// 宝石を装備アイテムに装着
     func attachGem(gemItemStackKey: String, targetItemStackKey: String) async throws {
-        guard let gc = StackKeyComponents(stackKey: gemItemStackKey) else {
+        guard let gemComponents = StackKeyComponents(stackKey: gemItemStackKey) else {
             throw ProgressError.invalidInput(description: "不正な宝石stackKeyです")
         }
-        guard let tc = StackKeyComponents(stackKey: targetItemStackKey) else {
+        guard let targetComponents = StackKeyComponents(stackKey: targetItemStackKey) else {
             throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
         }
         let context = makeContext()
 
         // 宝石レコードの取得
-        let gSuperRare = gc.superRareTitleId
-        let gNormal = gc.normalTitleId
-        let gItem = gc.itemId
-        let gSocketSuperRare = gc.socketSuperRareTitleId
-        let gSocketNormal = gc.socketNormalTitleId
-        let gSocketItem = gc.socketItemId
+        let gSuperRare = gemComponents.superRareTitleId
+        let gNormal = gemComponents.normalTitleId
+        let gItem = gemComponents.itemId
+        let gSocketSuperRare = gemComponents.socketSuperRareTitleId
+        let gSocketNormal = gemComponents.socketNormalTitleId
+        let gSocketItem = gemComponents.socketItemId
         var gemDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.superRareTitleId == gSuperRare &&
             $0.normalTitleId == gNormal &&
@@ -126,12 +126,12 @@ actor GemModificationProgressService {
         }
 
         // 対象アイテムレコードの取得
-        let tSuperRare = tc.superRareTitleId
-        let tNormal = tc.normalTitleId
-        let tItem = tc.itemId
-        let tSocketSuperRare = tc.socketSuperRareTitleId
-        let tSocketNormal = tc.socketNormalTitleId
-        let tSocketItem = tc.socketItemId
+        let tSuperRare = targetComponents.superRareTitleId
+        let tNormal = targetComponents.normalTitleId
+        let tItem = targetComponents.itemId
+        let tSocketSuperRare = targetComponents.socketSuperRareTitleId
+        let tSocketNormal = targetComponents.socketNormalTitleId
+        let tSocketItem = targetComponents.socketItemId
         var targetDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.superRareTitleId == tSuperRare &&
             $0.normalTitleId == tNormal &&

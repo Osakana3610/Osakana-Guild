@@ -277,14 +277,14 @@ private struct EnemyDetailView: View {
 
             // 耐性（ダメージ倍率: 1.0=通常, 0.5=半減, 2.0=弱点）
             Section("耐性") {
-                let r = enemy.resistances
-                LabeledContent("物理", value: formatResist(r.physical))
-                LabeledContent("貫通", value: formatResist(r.piercing))
-                LabeledContent("クリティカル", value: formatResist(r.critical))
-                LabeledContent("ブレス", value: formatResist(r.breath))
-                if !r.spells.isEmpty {
-                    ForEach(r.spells.keys.sorted(), id: \.self) { spellId in
-                        if let multiplier = r.spells[spellId] {
+                let resistances = enemy.resistances
+                LabeledContent("物理", value: formatResist(resistances.physical))
+                LabeledContent("貫通", value: formatResist(resistances.piercing))
+                LabeledContent("クリティカル", value: formatResist(resistances.critical))
+                LabeledContent("ブレス", value: formatResist(resistances.breath))
+                if !resistances.spells.isEmpty {
+                    ForEach(resistances.spells.keys.sorted(), id: \.self) { spellId in
+                        if let multiplier = resistances.spells[spellId] {
                             LabeledContent(spellName(spellId: spellId), value: formatResist(multiplier))
                         }
                     }

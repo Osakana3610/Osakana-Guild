@@ -125,8 +125,8 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
             let duration = Int(payload.value[.duration] ?? 1)
             var modifiers: [String: Double] = [:]
 
-            if let v = payload.value[.damageDealtPercent] { modifiers["damageDealtPercent"] = v }
-            if let v = payload.value[.hitRatePercent] { modifiers["hitRatePercent"] = v }
+            if let value = payload.value[.damageDealtPercent] { modifiers["damageDealtPercent"] = value }
+            if let value = payload.value[.hitRatePercent] { modifiers["hitRatePercent"] = value }
 
             accumulator.status.timedBuffTriggers.append(.init(
                 id: triggerId,
@@ -143,11 +143,11 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
             // 毎ターン累積
             var perTurnModifiers: [String: Double] = [:]
 
-            if let v = payload.value[.hitRatePerTurn] { perTurnModifiers["hitRatePercent"] = v }
-            if let v = payload.value[.evasionRatePerTurn] { perTurnModifiers["evasionRatePercent"] = v }
-            if let v = payload.value[.attackPercentPerTurn] { perTurnModifiers["attackPercent"] = v }
-            if let v = payload.value[.defensePercentPerTurn] { perTurnModifiers["defensePercent"] = v }
-            if let v = payload.value[.attackCountPercentPerTurn] { perTurnModifiers["attackCountPercent"] = v }
+            if let value = payload.value[.hitRatePerTurn] { perTurnModifiers["hitRatePercent"] = value }
+            if let value = payload.value[.evasionRatePerTurn] { perTurnModifiers["evasionRatePercent"] = value }
+            if let value = payload.value[.attackPercentPerTurn] { perTurnModifiers["attackPercent"] = value }
+            if let value = payload.value[.defensePercentPerTurn] { perTurnModifiers["defensePercent"] = value }
+            if let value = payload.value[.attackCountPercentPerTurn] { perTurnModifiers["attackCountPercent"] = value }
 
             accumulator.status.timedBuffTriggers.append(.init(
                 id: triggerId,
