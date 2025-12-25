@@ -10,6 +10,8 @@
 // 【公開API】
 //   - make(from:masterData:pandoraBoxStackKeys:) → RuntimeCharacter
 //     nonisolated - キャラクター生成（純粋計算）
+//   - withEquipmentChange(current:newEquippedItems:masterData:) → RuntimeCharacter
+//     nonisolated - 装備変更時の高速再構築（既存データを再利用）
 //
 // 【生成フロー】
 //   1. マスターデータ取得（種族/職業/性格）
@@ -213,6 +215,164 @@ enum RuntimeCharacterFactory {
         )
     }
 
+    // MARK: - Equipment Change (Fast Path)
+
+    /// 装備変更時の高速再構築
+    /// 既存のRuntimeCharacterからマスターデータ（種族/職業/性格）を再利用し、
+    /// 装備関連のみを再計算する
+    static func withEquipmentChange(
+        current: RuntimeCharacter,
+        newEquippedItems: [CharacterInput.EquippedItem],
+        masterData: MasterDataCache
+    ) throws -> RuntimeCharacter {
+        // 既存のマスターデータを再利用（必須データが欠落している場合はエラー）
+        guard let race = current.race else {
+            throw RuntimeError.invalidConfiguration(reason: "種族データが見つかりません")
+        }
+        guard let job = current.job else {
+            throw RuntimeError.invalidConfiguration(reason: "職業データが見つかりません")
+        }
+        let previousJob = current.previousJob
+        let primaryPersonality = current.personalityPrimary
+        let secondaryPersonality = current.personalitySecondary
+
+        // 装備アイテムの定義を取得
+        let equippedItemIds = Set(newEquippedItems.map { $0.itemId }).filter { $0 > 0 }
+        let equippedItemDefinitions = equippedItemIds.compactMap { masterData.item($0) }
+
+        // 装備アイテムの超レア称号を取得
+        let superRareTitleIds = Set(newEquippedItems.map { $0.superRareTitleId }).filter { $0 > 0 }
+        let superRareTitles = superRareTitleIds.compactMap { masterData.superRareTitle($0) }
+
+        // スキルIDを収集（職業/種族由来 + 装備由来）
+        var allSkillIds: [UInt16] = []
+
+        // パッシブスキル: 前職から引き継ぐ（転職済みの場合のみ）
+        if let previousJob {
+            allSkillIds.append(contentsOf: previousJob.learnedSkillIds)
+        }
+
+        // パッシブスキル: 現職
+        allSkillIds.append(contentsOf: job.learnedSkillIds)
+
+        // レベル習得スキル: 現職のみ（レベル条件を満たしたもの）
+        let jobUnlocks = masterData.jobSkillUnlocks[current.jobId] ?? []
+        for unlock in jobUnlocks where current.level >= unlock.level {
+            allSkillIds.append(unlock.skillId)
+        }
+
+        // 種族レベル習得スキル（レベル条件を満たしたもの）
+        let raceUnlocks = masterData.raceSkillUnlocks[current.raceId] ?? []
+        for unlock in raceUnlocks where current.level >= unlock.level {
+            allSkillIds.append(unlock.skillId)
+        }
+
+        // 装備から付与されるスキル（装備アイテム + 装備の超レア称号）
+        allSkillIds.append(contentsOf: equippedItemDefinitions.flatMap { $0.grantedSkillIds })
+        allSkillIds.append(contentsOf: superRareTitles.flatMap { $0.skillIds })
+
+        // 重複除去してからスキル定義に変換
+        let uniqueSkillIds = Set(allSkillIds)
+        let learnedSkills = uniqueSkillIds.compactMap { masterData.skill($0) }
+
+        // Loadout構築
+        let loadout = assembleLoadout(masterData: masterData, from: newEquippedItems)
+
+        // 装備スロット計算
+        let slotModifiers = try SkillRuntimeEffectCompiler.equipmentSlots(from: learnedSkills)
+        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: current.level, modifiers: slotModifiers)
+        let usedSlots = newEquippedItems.reduce(0) { $0 + max(0, $1.quantity) }
+        if usedSlots > allowedSlots {
+            throw RuntimeError.invalidConfiguration(reason: "装備枠を超過しています（装備数: \(usedSlots) / 上限: \(allowedSlots)）")
+        }
+
+        // スペルブック
+        let spellbook = try SkillRuntimeEffectCompiler.spellbook(from: learnedSkills)
+        let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(
+            from: spellbook,
+            definitions: masterData.allSpells,
+            characterLevel: current.level
+        )
+
+        // 装備を CharacterValues.EquippedItem に変換
+        let equippedItemsValues = newEquippedItems.map { item in
+            CharacterValues.EquippedItem(
+                superRareTitleId: item.superRareTitleId,
+                normalTitleId: item.normalTitleId,
+                itemId: item.itemId,
+                socketSuperRareTitleId: item.socketSuperRareTitleId,
+                socketNormalTitleId: item.socketNormalTitleId,
+                socketItemId: item.socketItemId,
+                quantity: item.quantity
+            )
+        }
+
+        // 戦闘ステータス計算
+        let calcContext = CombatStatCalculator.Context(
+            raceId: current.raceId,
+            jobId: current.jobId,
+            level: current.level,
+            currentHP: current.currentHP,
+            equippedItems: equippedItemsValues,
+            race: race,
+            job: job,
+            personalitySecondary: secondaryPersonality,
+            learnedSkills: learnedSkills,
+            loadout: RuntimeCharacter.Loadout(
+                items: loadout.items,
+                titles: loadout.titles,
+                superRareTitles: loadout.superRareTitles
+            ),
+            pandoraBoxStackKeys: []  // 装備変更時はパンドラボックス効果は変わらない
+        )
+
+        let calcResult = try CombatStatCalculator.calculate(for: calcContext)
+
+        // isMartialEligible判定
+        let isMartialEligible = calcResult.combat.isMartialEligible ||
+            (calcResult.combat.physicalAttack > 0 && !hasPositivePhysicalAttackBonus(equippedItems: newEquippedItems, loadout: loadout))
+
+        // 蘇生パッシブチェックはスキップ（装備変更でHPが0になることはない）
+        let resolvedCurrentHP = min(current.currentHP, calcResult.hitPoints.maximum)
+
+        // combatにisMartialEligibleを設定
+        var combat = calcResult.combat
+        combat.isMartialEligible = isMartialEligible
+
+        return RuntimeCharacter(
+            id: current.id,
+            displayName: current.displayName,
+            raceId: current.raceId,
+            jobId: current.jobId,
+            previousJobId: current.previousJobId,
+            avatarId: current.avatarId,
+            level: current.level,
+            experience: current.experience,
+            currentHP: resolvedCurrentHP,
+            equippedItems: newEquippedItems,
+            primaryPersonalityId: current.primaryPersonalityId,
+            secondaryPersonalityId: current.secondaryPersonalityId,
+            actionRateAttack: current.actionRateAttack,
+            actionRatePriestMagic: current.actionRatePriestMagic,
+            actionRateMageMagic: current.actionRateMageMagic,
+            actionRateBreath: current.actionRateBreath,
+            updatedAt: current.updatedAt,
+            attributes: calcResult.attributes,
+            maxHP: calcResult.hitPoints.maximum,
+            combat: combat,
+            equipmentCapacity: allowedSlots,
+            race: race,
+            job: job,
+            previousJob: previousJob,
+            personalityPrimary: primaryPersonality,
+            personalitySecondary: secondaryPersonality,
+            learnedSkills: learnedSkills,
+            loadout: loadout,
+            spellbook: spellbook,
+            spellLoadout: spellLoadout
+        )
+    }
+
     // MARK: - Private
 
     private static func assembleLoadout(
@@ -248,9 +408,16 @@ enum RuntimeCharacterFactory {
         input: CharacterInput,
         loadout: RuntimeCharacter.Loadout
     ) -> Bool {
-        guard !input.equippedItems.isEmpty else { return false }
+        hasPositivePhysicalAttackBonus(equippedItems: input.equippedItems, loadout: loadout)
+    }
+
+    private static func hasPositivePhysicalAttackBonus(
+        equippedItems: [CharacterInput.EquippedItem],
+        loadout: RuntimeCharacter.Loadout
+    ) -> Bool {
+        guard !equippedItems.isEmpty else { return false }
         let definitionsById = Dictionary(uniqueKeysWithValues: loadout.items.map { ($0.id, $0) })
-        for equipment in input.equippedItems {
+        for equipment in equippedItems {
             guard let definition = definitionsById[equipment.itemId] else { continue }
             if definition.combatBonuses.physicalAttack * equipment.quantity > 0 { return true }
         }
