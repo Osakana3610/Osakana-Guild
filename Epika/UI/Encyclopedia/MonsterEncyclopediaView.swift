@@ -130,7 +130,7 @@ struct MonsterEncyclopediaView: View {
                 if let enemyId = event.enemyId {
                     enemySet.insert(enemyId)
                     // Store the level (prefer higher level if already exists)
-                    if let level = event.level {
+                    if let level = event.maxLevel {
                         levelMap[enemyId] = max(levelMap[enemyId] ?? 0, level)
                     }
                 }

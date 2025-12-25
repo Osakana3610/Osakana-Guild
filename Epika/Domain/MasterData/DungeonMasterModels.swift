@@ -104,7 +104,8 @@ struct EncounterTableDefinition: Identifiable, Sendable, Hashable {
         let spawnRate: Double?
         let groupMin: Int?
         let groupMax: Int?
-        let level: Int?
+        let minLevel: Int?
+        let maxLevel: Int?
     }
 
     let id: UInt16

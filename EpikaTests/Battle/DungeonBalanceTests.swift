@@ -731,7 +731,7 @@ final class DungeonBalanceTests: XCTestCase {
             guard let enemyId = event.enemyId else { return nil }
             return (
                 enemyId: enemyId,
-                level: event.level,
+                level: event.maxLevel,
                 groupMin: event.groupMin ?? 1,
                 groupMax: event.groupMax ?? 1
             )

@@ -1508,8 +1508,8 @@ extension Generator {
             let insertWeightSQL = "INSERT INTO dungeon_encounter_weights (dungeon_id, order_index, enemy_id, weight) VALUES (?, ?, ?, ?);"
             let insertEncounterTableSQL = "INSERT INTO encounter_tables (id, name, is_boss, total_min, total_max) VALUES (?, ?, ?, ?, ?);"
             let insertEncounterEventSQL = """
-                INSERT INTO encounter_events (table_id, order_index, event_type, enemy_id, spawn_rate, group_min, group_max, enemy_level)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO encounter_events (table_id, order_index, event_type, enemy_id, spawn_rate, group_min, group_max, min_level, max_level)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
             let insertFloorSQL = """
                 INSERT INTO dungeon_floors (id, dungeon_id, name, floor_number, encounter_table_id, description)
@@ -1560,8 +1560,8 @@ extension Generator {
                     bindDouble(eventStatement, index: 5, value: group.weight)
                     bindInt(eventStatement, index: 6, value: group.groupMin)
                     bindInt(eventStatement, index: 7, value: group.groupMax)
-                    let averageLevel = Int((group.minLevel + group.maxLevel) / 2)
-                    bindInt(eventStatement, index: 8, value: averageLevel)
+                    bindInt(eventStatement, index: 8, value: Int(group.minLevel))
+                    bindInt(eventStatement, index: 9, value: Int(group.maxLevel))
                     try step(eventStatement)
                     reset(eventStatement)
                 }

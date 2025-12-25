@@ -316,7 +316,9 @@ private extension ExplorationEngine {
         var specs: [EncounteredEnemySpec] = []
         for event in events {
             guard let enemyId = event.enemyId else { continue }
-            let baseLevel = event.level ?? 1
+            let minLevel = event.minLevel ?? 1
+            let maxLevel = event.maxLevel ?? minLevel
+            let baseLevel = minLevel == maxLevel ? minLevel : random.nextInt(in: minLevel...maxLevel)
             let adjustedLevel = max(1, Int(Double(baseLevel) * levelMultiplier))
             let groupMin = event.groupMin ?? 1
             let groupMax = event.groupMax ?? 1
@@ -344,28 +346,36 @@ private extension ExplorationEngine {
         }
         guard totalWeight > 0 else { return [] }
 
-        // 各敵の出現数をカウント
-        var countByEnemy: [UInt16: (level: Int, count: Int)] = [:]
+        // 各敵の出現数をカウント（敵ごとにレベルも個別に決定）
+        var specs: [EncounteredEnemySpec] = []
         for _ in 0..<totalCount {
             let pick = random.nextDouble() * totalWeight
             var cursor: Double = 0
             for event in events {
                 cursor += max(event.spawnRate ?? 1.0, 0.0)
                 if pick <= cursor, let enemyId = event.enemyId {
-                    let baseLevel = event.level ?? 1
+                    let minLevel = event.minLevel ?? 1
+                    let maxLevel = event.maxLevel ?? minLevel
+                    let baseLevel = minLevel == maxLevel ? minLevel : random.nextInt(in: minLevel...maxLevel)
                     let adjustedLevel = max(1, Int(Double(baseLevel) * levelMultiplier))
-                    if let existing = countByEnemy[enemyId] {
-                        countByEnemy[enemyId] = (level: existing.level, count: existing.count + 1)
-                    } else {
-                        countByEnemy[enemyId] = (level: adjustedLevel, count: 1)
-                    }
+                    specs.append(EncounteredEnemySpec(enemyId: enemyId, level: adjustedLevel, count: 1))
                     break
                 }
             }
         }
 
-        // EncounteredEnemySpecに変換
-        return countByEnemy.map { EncounteredEnemySpec(enemyId: $0.key, level: $0.value.level, count: $0.value.count) }
+        // 同じenemyIdと同じlevelの敵をまとめる
+        var grouped: [String: EncounteredEnemySpec] = [:]
+        for spec in specs {
+            let key = "\(spec.enemyId)_\(spec.level)"
+            if let existing = grouped[key] {
+                grouped[key] = EncounteredEnemySpec(enemyId: spec.enemyId, level: spec.level, count: existing.count + 1)
+            } else {
+                grouped[key] = spec
+            }
+        }
+
+        return Array(grouped.values)
     }
 
     static func resolveScriptedEvent(for dungeon: DungeonDefinition,
