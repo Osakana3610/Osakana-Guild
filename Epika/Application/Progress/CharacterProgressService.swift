@@ -74,7 +74,7 @@ final class CharacterProgressService {
         self.masterData = masterData
     }
 
-    func notifyCharacterProgressDidChange() {
+    private func notifyCharacterProgressDidChange() {
         Task { @MainActor in
             NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
         }
@@ -430,6 +430,7 @@ final class CharacterProgressService {
         let records = try context.fetch(descriptor)
         let map = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
 
+        var anyLevelUp = false
         for update in updates {
             guard let record = map[update.characterId] else {
                 throw ProgressError.characterNotFound
@@ -447,6 +448,7 @@ final class CharacterProgressService {
                 let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
                 if computedLevel != Int(previousLevel) {
                     record.level = UInt8(computedLevel)
+                    anyLevelUp = true
                 }
             }
             if update.hpDelta != 0 {
@@ -455,6 +457,9 @@ final class CharacterProgressService {
             }
         }
         try context.save()
+        if anyLevelUp {
+            notifyCharacterProgressDidChange()
+        }
     }
 
     func updateHP(characterId: UInt8, newHP: UInt32) throws {
