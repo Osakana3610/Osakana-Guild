@@ -86,6 +86,7 @@ struct AdventureView: View {
                     dungeons: adventureState.runtimeDungeons
                 )
                 .environment(adventureState)
+                .environment(appServices.statChangeNotifications)
             }
             .sheet(item: $logsContext) { party in
                 let runs = adventureState.explorationProgress
