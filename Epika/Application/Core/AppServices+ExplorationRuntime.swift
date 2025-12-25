@@ -308,8 +308,8 @@ extension AppServices {
         // 定義を収集（キャッシュ更新用）
         var definitions: [UInt16: ItemDefinition] = [:]
         for id in itemIds {
-            if let def = masterDataCache.item(id) {
-                definitions[id] = def
+            if let definition = masterDataCache.item(id) {
+                definitions[id] = definition
             }
         }
 
