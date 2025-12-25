@@ -152,7 +152,7 @@ final class AdventureViewState {
 
     func loadExplorationProgress(using appServices: AppServices) async {
         do {
-            explorationProgress = try await appServices.exploration.allExplorations()
+            explorationProgress = try appServices.exploration.recentExplorationSummaries()
         } catch {
             present(error: error)
         }

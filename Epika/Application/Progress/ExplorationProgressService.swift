@@ -116,6 +116,30 @@ final class ExplorationProgressService {
         return snapshots
     }
 
+    /// 全パーティの最新探索サマリーを取得（初期ロード用、encounterLogsなし）
+    func recentExplorationSummaries(limitPerParty: Int = 2) throws -> [ExplorationSnapshot] {
+        let context = makeContext()
+        // 全パーティIDを取得
+        let partyDescriptor = FetchDescriptor<PartyRecord>()
+        let parties = try context.fetch(partyDescriptor)
+        let partyIds = parties.map { $0.id }
+
+        var snapshots: [ExplorationSnapshot] = []
+        for partyId in partyIds {
+            var descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.partyId == partyId },
+                sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+            )
+            descriptor.fetchLimit = limitPerParty
+            let runs = try context.fetch(descriptor)
+            for run in runs {
+                let snapshot = try makeSnapshotSummary(for: run, context: context)
+                snapshots.append(snapshot)
+            }
+        }
+        return snapshots
+    }
+
     private func fetchAllExplorations() async throws -> [ExplorationSnapshot]  {
         let context = makeContext()
         let descriptor = FetchDescriptor<ExplorationRunRecord>(sortBy: [SortDescriptor(\.endedAt, order: .reverse)])
@@ -470,6 +494,63 @@ private extension ExplorationProgressService {
     }
 
     // MARK: - Snapshot Building
+
+    /// サマリー専用の軽量スナップショット（encounterLogsなし）
+    func makeSnapshotSummary(for run: ExplorationRunRecord,
+                              context: ModelContext) throws -> ExplorationSnapshot {
+        guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
+            throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
+        }
+
+        let displayDungeonName = DungeonDisplayNameFormatter.displayName(
+            for: dungeonDefinition,
+            difficultyTitleId: run.difficulty,
+            masterData: masterDataCache
+        )
+
+        let partyId = run.partyId
+        let partyDescriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == partyId })
+        let partyRecord = try context.fetch(partyDescriptor).first
+        let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
+
+        let partySummary = ExplorationSnapshot.PartySummary(
+            partyId: run.partyId,
+            memberCharacterIds: memberCharacterIds,
+            inventorySnapshotId: nil
+        )
+
+        let metadata = ProgressMetadata(createdAt: run.startedAt, updatedAt: run.endedAt)
+        let status = runStatus(from: run.result)
+
+        let summary = ExplorationSnapshot.makeSummary(
+            displayDungeonName: displayDungeonName,
+            status: status,
+            activeFloorNumber: Int(run.finalFloor),
+            expectedReturnAt: nil,
+            startedAt: run.startedAt,
+            lastUpdatedAt: run.endedAt,
+            logs: []
+        )
+
+        return ExplorationSnapshot(
+            dungeonId: run.dungeonId,
+            displayDungeonName: displayDungeonName,
+            activeFloorNumber: Int(run.finalFloor),
+            party: partySummary,
+            startedAt: run.startedAt,
+            lastUpdatedAt: run.endedAt,
+            expectedReturnAt: nil,
+            encounterLogs: [],
+            rewards: ExplorationSnapshot.Rewards(
+                experience: Int(run.totalExp),
+                gold: Int(run.totalGold),
+                itemDrops: [:]
+            ),
+            summary: summary,
+            status: status,
+            metadata: metadata
+        )
+    }
 
     func makeSnapshot(for run: ExplorationRunRecord,
                       context: ModelContext) async throws -> ExplorationSnapshot {
