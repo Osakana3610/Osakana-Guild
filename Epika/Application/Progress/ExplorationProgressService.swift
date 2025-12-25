@@ -154,13 +154,15 @@ final class ExplorationProgressService {
         return runRecord.persistentModelID
     }
 
+    /// イベントを追加し、戦闘ログがあればそのIDを返す
+    @discardableResult
     func appendEvent(runId: PersistentIdentifier,
                      event: ExplorationEventLogEntry,
                      battleLog: BattleLogArchive?,
                      occurredAt: Date,
                      randomState: UInt64,
                      superRareState: SuperRareDailyState,
-                     droppedItemIds: Set<UInt16>) async throws {
+                     droppedItemIds: Set<UInt16>) async throws -> PersistentIdentifier? {
         let context = makeContext()
         let runRecord = try fetchRunRecord(runId: runId, context: context)
 
@@ -171,7 +173,7 @@ final class ExplorationProgressService {
         context.insert(eventRecord)
 
         // context挿入後にリレーションを設定
-        try await populateEventRecordRelationships(eventRecord: eventRecord, from: event, battleLog: battleLog, context: context)
+        let battleLogRecord = try await populateEventRecordRelationships(eventRecord: eventRecord, from: event, battleLog: battleLog, context: context)
 
         // 累計を更新
         runRecord.totalExp += eventRecord.exp
@@ -185,6 +187,8 @@ final class ExplorationProgressService {
         runRecord.droppedItemIdsData = Self.encodeItemIds(droppedItemIds)
 
         try saveIfNeeded(context)
+        // 保存後に永続IDを取得（保存前は一時IDになるため）
+        return battleLogRecord?.persistentModelID
     }
 
     func finalizeRun(runId: PersistentIdentifier,
@@ -345,10 +349,12 @@ private extension ExplorationProgressService {
     }
 
     /// contextに挿入済みのEventRecordにリレーションを設定
+    /// イベントレコードのリレーションを構築し、戦闘ログレコードを返す（ID取得は保存後に行う）
+    @discardableResult
     func populateEventRecordRelationships(eventRecord: ExplorationEventRecord,
                                           from event: ExplorationEventLogEntry,
                                           battleLog: BattleLogArchive?,
-                                          context: ModelContext) async throws {
+                                          context: ModelContext) async throws -> BattleLogRecord? {
         // ドロップレコードを作成してリレーションに追加
         for drop in event.drops {
             let dropRecord = ExplorationDropRecord(
@@ -427,7 +433,9 @@ private extension ExplorationProgressService {
                 pRecord.battleLog = logRecord
                 context.insert(pRecord)
             }
+            return logRecord
         }
+        return nil
     }
 
     func battleResultValue(_ result: BattleService.BattleResult) -> UInt8 {
