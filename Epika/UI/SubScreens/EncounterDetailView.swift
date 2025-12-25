@@ -666,29 +666,35 @@ struct EncounterDetailView: View {
             turns: record.turns
         )
 
-        // participants復元
-        let playerSnapshots = record.participants.filter { $0.isPlayer }.map { p in
-            BattleParticipantSnapshot(
-                actorId: p.actorId,
-                partyMemberId: p.partyMemberId == 0 ? nil : p.partyMemberId,
-                characterId: p.characterId == 0 ? nil : p.characterId,
-                name: p.name,
-                avatarIndex: p.avatarIndex == 0 ? nil : p.avatarIndex,
-                level: p.level == 0 ? nil : Int(p.level),
-                maxHP: Int(p.maxHP)
-            )
-        }
-        let enemySnapshots = record.participants.filter { !$0.isPlayer }.map { p in
-            BattleParticipantSnapshot(
-                actorId: p.actorId,
-                partyMemberId: p.partyMemberId == 0 ? nil : p.partyMemberId,
-                characterId: p.characterId == 0 ? nil : p.characterId,
-                name: p.name,
-                avatarIndex: p.avatarIndex == 0 ? nil : p.avatarIndex,
-                level: p.level == 0 ? nil : Int(p.level),
-                maxHP: Int(p.maxHP)
-            )
-        }
+        // participants復元（orderIndexでソートして順序を復元）
+        let playerSnapshots = record.participants
+            .filter { $0.isPlayer }
+            .sorted { $0.orderIndex < $1.orderIndex }
+            .map { p in
+                BattleParticipantSnapshot(
+                    actorId: p.actorId,
+                    partyMemberId: p.partyMemberId == 0 ? nil : p.partyMemberId,
+                    characterId: p.characterId == 0 ? nil : p.characterId,
+                    name: p.name,
+                    avatarIndex: p.avatarIndex == 0 ? nil : p.avatarIndex,
+                    level: p.level == 0 ? nil : Int(p.level),
+                    maxHP: Int(p.maxHP)
+                )
+            }
+        let enemySnapshots = record.participants
+            .filter { !$0.isPlayer }
+            .sorted { $0.orderIndex < $1.orderIndex }
+            .map { p in
+                BattleParticipantSnapshot(
+                    actorId: p.actorId,
+                    partyMemberId: p.partyMemberId == 0 ? nil : p.partyMemberId,
+                    characterId: p.characterId == 0 ? nil : p.characterId,
+                    name: p.name,
+                    avatarIndex: p.avatarIndex == 0 ? nil : p.avatarIndex,
+                    level: p.level == 0 ? nil : Int(p.level),
+                    maxHP: Int(p.maxHP)
+                )
+            }
 
         return BattleLogArchive(
             enemyId: record.enemyId,

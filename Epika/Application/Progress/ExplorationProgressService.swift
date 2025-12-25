@@ -398,9 +398,10 @@ private extension ExplorationProgressService {
                 context.insert(actionRecord)
             }
 
-            // participants
-            for snapshot in archive.playerSnapshots {
+            // participants（orderIndexで順序を保持）
+            for (index, snapshot) in archive.playerSnapshots.enumerated() {
                 let pRecord = BattleLogParticipantRecord()
+                pRecord.orderIndex = UInt8(index)
                 pRecord.isPlayer = true
                 pRecord.actorId = snapshot.actorId
                 pRecord.partyMemberId = snapshot.partyMemberId ?? 0
@@ -412,8 +413,9 @@ private extension ExplorationProgressService {
                 pRecord.battleLog = logRecord
                 context.insert(pRecord)
             }
-            for snapshot in archive.enemySnapshots {
+            for (index, snapshot) in archive.enemySnapshots.enumerated() {
                 let pRecord = BattleLogParticipantRecord()
+                pRecord.orderIndex = UInt8(index)
                 pRecord.isPlayer = false
                 pRecord.actorId = snapshot.actorId
                 pRecord.partyMemberId = snapshot.partyMemberId ?? 0

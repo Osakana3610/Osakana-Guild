@@ -136,7 +136,8 @@ enum BattleService {
             .filter { $0.isAlive }
             .compactMap { $0.partyMemberId }
 
-        let enemyDefinition = encounteredEnemies.first!.definition
+        // サマリー表示用：最もレベルが高い敵を選択
+        let enemyDefinition = encounteredEnemies.max { $0.level < $1.level }!.definition
 
         let result: BattleResult
         switch battleResult.outcome {
