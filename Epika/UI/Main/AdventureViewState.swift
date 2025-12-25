@@ -62,27 +62,27 @@ final class AdventureViewState {
 
     /// アプリ再起動後に残っている.running状態の探索を再開
     private func resumeOrphanedExplorations(using appServices: AppServices) async {
-        let allExplorations: [ExplorationSnapshot]
+        let runningSummaries: [ExplorationProgressService.RunningExplorationSummary]
         do {
-            allExplorations = try await appServices.exploration.allExplorations()
+            runningSummaries = try appServices.exploration.runningExplorationSummaries()
         } catch {
             present(error: error)
             return
         }
 
-        let orphaned = allExplorations.filter { snapshot in
-            snapshot.status == .running && activeExplorationTasks[snapshot.party.partyId] == nil
+        let orphaned = runningSummaries.filter { summary in
+            activeExplorationTasks[summary.partyId] == nil
         }
 
         var firstError: Error?
-        for snapshot in orphaned {
+        for summary in orphaned {
             do {
                 let handle = try await appServices.resumeOrphanedExploration(
-                    partyId: snapshot.party.partyId,
-                    startedAt: snapshot.startedAt
+                    partyId: summary.partyId,
+                    startedAt: summary.startedAt
                 )
-                activeExplorationHandles[snapshot.party.partyId] = handle
-                let partyId = snapshot.party.partyId
+                activeExplorationHandles[summary.partyId] = handle
+                let partyId = summary.partyId
                 activeExplorationTasks[partyId] = Task { [weak self, appServices] in
                     guard let self else { return }
                     await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)

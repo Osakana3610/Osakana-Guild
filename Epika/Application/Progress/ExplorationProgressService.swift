@@ -246,6 +246,22 @@ final class ExplorationProgressService {
         return try context.fetch(descriptor).first
     }
 
+    /// 現在探索中の探索サマリーを取得（軽量：encounterLogsなし）
+    struct RunningExplorationSummary: Sendable {
+        var partyId: UInt8
+        var startedAt: Date
+    }
+
+    func runningExplorationSummaries() throws -> [RunningExplorationSummary] {
+        let context = makeContext()
+        let runningStatus = ExplorationResult.running.rawValue
+        let descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.result == runningStatus }
+        )
+        let records = try context.fetch(descriptor)
+        return records.map { RunningExplorationSummary(partyId: $0.partyId, startedAt: $0.startedAt) }
+    }
+
     /// 現在探索中の全パーティメンバーIDを取得
     func runningPartyMemberIds() throws -> Set<UInt8> {
         let context = makeContext()
