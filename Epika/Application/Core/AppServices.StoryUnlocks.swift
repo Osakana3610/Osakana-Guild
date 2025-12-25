@@ -51,6 +51,67 @@ extension AppServices {
     }
 }
 
+// MARK: - Initial Unlock
+
+extension AppServices {
+    /// 解放条件がないストーリーを初期解放する
+    /// - Note: unlockRequirements: [] のストーリーは最初から解放済みとする
+    func ensureInitialStoriesUnlocked() async throws {
+        let context = ModelContext(container)
+        context.autosaveEnabled = false
+
+        let definitions = masterDataCache.allStoryNodes
+        let now = Date()
+        var didChange = false
+
+        for definition in definitions where definition.unlockRequirements.isEmpty {
+            let record = try ensureStoryRecord(nodeId: definition.id, context: context)
+            if !record.isUnlocked {
+                record.isUnlocked = true
+                record.updatedAt = now
+                didChange = true
+            }
+        }
+
+        if context.hasChanges {
+            try context.save()
+        }
+
+        if didChange {
+            NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+        }
+    }
+
+    /// 解放条件がないダンジョンを初期解放する
+    /// - Note: unlockConditions: [] のダンジョンは最初から解放済みとする
+    func ensureInitialDungeonsUnlocked() async throws {
+        let context = ModelContext(container)
+        context.autosaveEnabled = false
+
+        let definitions = masterDataCache.allDungeons
+        let now = Date()
+        var didChange = false
+
+        for definition in definitions where definition.unlockConditions.isEmpty {
+            let record = try ensureDungeonRecord(dungeonId: definition.id, context: context)
+            if !record.isUnlocked {
+                record.isUnlocked = true
+                record.highestUnlockedDifficulty = DungeonDisplayNameFormatter.initialDifficulty
+                record.updatedAt = now
+                didChange = true
+            }
+        }
+
+        if context.hasChanges {
+            try context.save()
+        }
+
+        if didChange {
+            NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+        }
+    }
+}
+
 // MARK: - Dungeon Clear → Story Unlock (Push型)
 
 extension AppServices {

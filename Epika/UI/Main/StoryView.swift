@@ -35,6 +35,9 @@ final class StoryViewModel {
         error = nil
 
         do {
+            // 初期ストーリー（unlockRequirements: []）を解放
+            try await appServices.ensureInitialStoriesUnlocked()
+
             let definitions = appServices.masterDataCache.allStoryNodes
             let snapshot = try await appServices.story.currentStorySnapshot()
             let unlocked = snapshot.unlockedNodeIds

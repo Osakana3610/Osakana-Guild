@@ -117,6 +117,9 @@ final class AdventureViewState {
     /// 同期せずにダンジョンリストを再読み込み（通知ハンドラ用、無限ループ防止）
     func reloadDungeonList(using appServices: AppServices) async {
         do {
+            // 初期ダンジョン（unlockConditions: []）を解放
+            try await appServices.ensureInitialDungeonsUnlocked()
+
             let dungeonService = appServices.dungeon
             let definitions = appServices.masterDataCache.allDungeons
             let progressSnapshots = try await dungeonService.allDungeonSnapshots()
