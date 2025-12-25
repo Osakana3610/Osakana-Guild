@@ -6,7 +6,7 @@ import SQLite3
 @main
 struct MasterDataGenerator {
     static let defaultInput = "MasterData"
-    static let defaultOutput = "Epika/Generated/master_data.db"
+    static let defaultOutput = "Tools/MasterDataGenerator/output/master_data.db"
 
     static func main() throws {
         setbuf(stdout, nil)  // Disable stdout buffering
