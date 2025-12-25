@@ -100,16 +100,19 @@ extension SQLiteMasterDataManager {
         }
 
         var tables: [UInt16: EncounterTableDefinition] = [:]
-        let tableSQL = "SELECT id, name FROM encounter_tables;"
+        let tableSQL = "SELECT id, name, is_boss, total_min, total_max FROM encounter_tables;"
         let tableStatement = try prepare(tableSQL)
         defer { sqlite3_finalize(tableStatement) }
         while sqlite3_step(tableStatement) == SQLITE_ROW {
             guard let nameC = sqlite3_column_text(tableStatement, 1) else { continue }
             let id = UInt16(sqlite3_column_int(tableStatement, 0))
-            tables[id] = EncounterTableDefinition(id: id, name: String(cString: nameC), events: [])
+            let isBoss = sqlite3_column_int(tableStatement, 2) == 1
+            let totalMin: Int? = sqlite3_column_type(tableStatement, 3) == SQLITE_NULL ? nil : Int(sqlite3_column_int(tableStatement, 3))
+            let totalMax: Int? = sqlite3_column_type(tableStatement, 4) == SQLITE_NULL ? nil : Int(sqlite3_column_int(tableStatement, 4))
+            tables[id] = EncounterTableDefinition(id: id, name: String(cString: nameC), events: [], isBoss: isBoss, totalMin: totalMin, totalMax: totalMax)
         }
 
-        let eventSQL = "SELECT table_id, event_type, enemy_id, spawn_rate, group_min, group_max, is_boss, enemy_level FROM encounter_events ORDER BY table_id, order_index;"
+        let eventSQL = "SELECT table_id, event_type, enemy_id, spawn_rate, group_min, group_max, enemy_level FROM encounter_events ORDER BY table_id, order_index;"
         let eventStatement = try prepare(eventSQL)
         defer { sqlite3_finalize(eventStatement) }
         while sqlite3_step(eventStatement) == SQLITE_ROW {
@@ -122,9 +125,8 @@ extension SQLiteMasterDataManager {
                                 spawnRate: sqlite3_column_type(eventStatement, 3) == SQLITE_NULL ? nil : sqlite3_column_double(eventStatement, 3),
                                 groupMin: sqlite3_column_type(eventStatement, 4) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 4)),
                                 groupMax: sqlite3_column_type(eventStatement, 5) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 5)),
-                                isBoss: sqlite3_column_type(eventStatement, 6) == SQLITE_NULL ? nil : sqlite3_column_int(eventStatement, 6) == 1,
-                                level: sqlite3_column_type(eventStatement, 7) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 7))))
-            tables[table.id] = EncounterTableDefinition(id: table.id, name: table.name, events: events)
+                                level: sqlite3_column_type(eventStatement, 6) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 6))))
+            tables[table.id] = EncounterTableDefinition(id: table.id, name: table.name, events: events, isBoss: table.isBoss, totalMin: table.totalMin, totalMax: table.totalMax)
         }
 
         var floors: [DungeonFloorDefinition] = []

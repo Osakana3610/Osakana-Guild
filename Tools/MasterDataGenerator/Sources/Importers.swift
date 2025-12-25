@@ -1450,13 +1450,15 @@ private struct DungeonMasterFile: Decodable {
             let weight: Double
             let minLevel: UInt
             let maxLevel: UInt
-            let groupMin: Int?
-            let groupMax: Int?
+            let groupMin: Int?  // ボス戦用
+            let groupMax: Int?  // ボス戦用
         }
 
         let floorRange: [Int]
         let enemyGroups: [EnemyGroup]
         let isBoss: Bool?
+        let totalMin: Int?  // 通常戦用：敵の総数の下限
+        let totalMax: Int?  // 通常戦用：敵の総数の上限
     }
 
     struct Dungeon: Decodable {
@@ -1504,10 +1506,10 @@ extension Generator {
             """
             let insertUnlockSQL = "INSERT INTO dungeon_unlock_conditions (dungeon_id, order_index, condition_type, condition_value) VALUES (?, ?, ?, ?);"
             let insertWeightSQL = "INSERT INTO dungeon_encounter_weights (dungeon_id, order_index, enemy_id, weight) VALUES (?, ?, ?, ?);"
-            let insertEncounterTableSQL = "INSERT INTO encounter_tables (id, name) VALUES (?, ?);"
+            let insertEncounterTableSQL = "INSERT INTO encounter_tables (id, name, is_boss, total_min, total_max) VALUES (?, ?, ?, ?, ?);"
             let insertEncounterEventSQL = """
-                INSERT INTO encounter_events (table_id, order_index, event_type, enemy_id, spawn_rate, group_min, group_max, is_boss, enemy_level)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO encounter_events (table_id, order_index, event_type, enemy_id, spawn_rate, group_min, group_max, enemy_level)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
             """
             let insertFloorSQL = """
                 INSERT INTO dungeon_floors (id, dungeon_id, name, floor_number, encounter_table_id, description)
@@ -1532,11 +1534,14 @@ extension Generator {
             var nextTableId = 1
             var nextFloorId = 1
 
-            func insertEncounterTable(name: String) throws -> Int {
+            func insertEncounterTable(name: String, isBoss: Bool, totalMin: Int?, totalMax: Int?) throws -> Int {
                 let tableId = nextTableId
                 nextTableId += 1
                 bindInt(tableStatement, index: 1, value: tableId)
                 bindText(tableStatement, index: 2, value: name)
+                bindBool(tableStatement, index: 3, value: isBoss)
+                bindInt(tableStatement, index: 4, value: totalMin)
+                bindInt(tableStatement, index: 5, value: totalMax)
                 try step(tableStatement)
                 reset(tableStatement)
                 return tableId
@@ -1555,9 +1560,8 @@ extension Generator {
                     bindDouble(eventStatement, index: 5, value: group.weight)
                     bindInt(eventStatement, index: 6, value: group.groupMin)
                     bindInt(eventStatement, index: 7, value: group.groupMax)
-                    bindBool(eventStatement, index: 8, value: isBoss)
                     let averageLevel = Int((group.minLevel + group.maxLevel) / 2)
-                    bindInt(eventStatement, index: 9, value: averageLevel)
+                    bindInt(eventStatement, index: 8, value: averageLevel)
                     try step(eventStatement)
                     reset(eventStatement)
                 }
@@ -1608,8 +1612,13 @@ extension Generator {
                     }
                 }
 
-                var groupsByFloor: [Int: [DungeonMasterFile.FloorEnemyMapping.EnemyGroup]] = [:]
-                var isBossByFloor: [Int: Bool] = [:]
+                struct FloorEncounterInfo {
+                    var groups: [DungeonMasterFile.FloorEnemyMapping.EnemyGroup] = []
+                    var isBoss: Bool = false
+                    var totalMin: Int?
+                    var totalMax: Int?
+                }
+                var infoByFloor: [Int: FloorEncounterInfo] = [:]
                 if let mappings = dungeon.floorEnemyMapping {
                     for mapping in mappings {
                         guard mapping.floorRange.count == 2 else {
@@ -1622,18 +1631,22 @@ extension Generator {
                         }
                         let isBoss = mapping.isBoss ?? false
                         for floorNumber in start...end {
-                            groupsByFloor[floorNumber, default: []].append(contentsOf: mapping.enemyGroups)
-                            // 複数のmappingが同じフロアをカバーする場合、いずれかがボスならボス
-                            isBossByFloor[floorNumber] = isBossByFloor[floorNumber, default: false] || isBoss
+                            var info = infoByFloor[floorNumber] ?? FloorEncounterInfo()
+                            info.groups.append(contentsOf: mapping.enemyGroups)
+                            info.isBoss = info.isBoss || isBoss
+                            // totalMin/totalMaxは最初のmappingから取得（上書きしない）
+                            if info.totalMin == nil { info.totalMin = mapping.totalMin }
+                            if info.totalMax == nil { info.totalMax = mapping.totalMax }
+                            infoByFloor[floorNumber] = info
                         }
                     }
                 }
 
                 for floorNumber in 1...floorCount {
                     let tableName = "\(dungeon.name) 第\(floorNumber)階エンカウント"
-                    let tableId = try insertEncounterTable(name: tableName)
-                    let isBoss = isBossByFloor[floorNumber] ?? false
-                    try insertEncounterEvents(tableId: tableId, groups: groupsByFloor[floorNumber] ?? [], isBoss: isBoss)
+                    let info = infoByFloor[floorNumber] ?? FloorEncounterInfo()
+                    let tableId = try insertEncounterTable(name: tableName, isBoss: info.isBoss, totalMin: info.totalMin, totalMax: info.totalMax)
+                    try insertEncounterEvents(tableId: tableId, groups: info.groups, isBoss: info.isBoss)
 
                     let floorId = nextFloorId
                     nextFloorId += 1

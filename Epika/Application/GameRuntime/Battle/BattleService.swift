@@ -73,24 +73,24 @@ enum BattleService {
                               party: RuntimePartyState,
                               dungeon: DungeonDefinition,
                               floor: DungeonFloorDefinition,
-                              encounterEnemyId: UInt16?,
-                              encounterLevel: Int?,
-                              encounterGroupMin: Int?,
-                              encounterGroupMax: Int?,
+                              enemySpecs: [EncounteredEnemySpec],
                               random: inout GameRandomSource) throws -> Resolution {
         // MasterDataCacheの既存辞書を使用（毎戦闘での辞書作成を回避）
         let skillDictionary = masterData.skillsById
         let enemyDictionary = masterData.enemiesById
         let statusDefinitions = masterData.statusEffectsById
         let jobDictionary = masterData.jobsById
-        let raceDictionary = masterData.racesById
         let enemySkillDictionary = masterData.enemySkillsById
+
+        guard !enemySpecs.isEmpty else {
+            throw RuntimeError.invalidConfiguration(reason: "敵が指定されていません")
+        }
 
         let players = try BattleContextBuilder.makePlayerActors(from: party)
         guard !players.isEmpty else {
-            guard let enemyId = encounterEnemyId,
-                  let enemyDefinition = masterData.enemy(enemyId) else {
-                throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: String(encounterEnemyId ?? 0))
+            guard let firstSpec = enemySpecs.first,
+                  let enemyDefinition = enemyDictionary[firstSpec.enemyId] else {
+                throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: String(enemySpecs.first?.enemyId ?? 0))
             }
             return Resolution(result: .defeat,
                               survivingAllyIds: [],
@@ -99,72 +99,19 @@ enum BattleService {
                               enemy: enemyDefinition,
                               enemies: [enemyDefinition],
                               encounteredEnemies: [BattleEnemyGroupBuilder.EncounteredEnemy(definition: enemyDefinition,
-                                                                                              level: encounterLevel ?? 1)],
+                                                                                              level: firstSpec.level)],
                               playerActors: [],
                               enemyActors: [])
         }
 
         var localRandom = random
-        let enemyResult = try BattleEnemyGroupBuilder.makeEnemies(baseEnemyId: encounterEnemyId,
-                                                                 baseEnemyLevel: encounterLevel,
-                                                                 groupMin: encounterGroupMin,
-                                                                 groupMax: encounterGroupMax,
-                                                                 dungeon: dungeon,
-                                                                 floor: floor,
+        let enemyResult = try BattleEnemyGroupBuilder.makeEnemies(specs: enemySpecs,
                                                                  enemyDefinitions: enemyDictionary,
                                                                  skillDefinitions: skillDictionary,
                                                                  jobDefinitions: jobDictionary,
-                                                                 raceDefinitions: raceDictionary,
                                                                  random: &localRandom)
-        var enemies = enemyResult.0
-        var encounteredEnemies = enemyResult.1
-
-        if enemies.isEmpty {
-            guard let enemyId = encounterEnemyId,
-                  let fallbackDefinition = enemyDictionary[enemyId] else {
-                throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: String(encounterEnemyId ?? 0))
-            }
-            let slot: BattleFormationSlot = 1  // frontLeft
-            let fallbackLevel = encounterLevel ?? 1
-            let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: fallbackDefinition,
-                                                                       levelOverride: fallbackLevel,
-                                                                       jobDefinitions: jobDictionary)
-            let resources = BattleActionResource.makeDefault(for: snapshot)
-            let fallbackSkillCompiler = try UnifiedSkillEffectCompiler(skills: fallbackDefinition.specialSkillIds.compactMap { skillDictionary[$0] })
-            let fallbackSkillEffects = fallbackSkillCompiler.actorEffects
-            let jobName: String? = fallbackDefinition.jobId.flatMap { jobDictionary[$0]?.name }
-            enemies = [BattleActor(identifier: String(fallbackDefinition.id),
-                                   displayName: fallbackDefinition.name,
-                                   kind: .enemy,
-                                   formationSlot: slot,
-                                   strength: fallbackDefinition.strength,
-                                   wisdom: fallbackDefinition.wisdom,
-                                   spirit: fallbackDefinition.spirit,
-                                   vitality: fallbackDefinition.vitality,
-                                   agility: fallbackDefinition.agility,
-                                   luck: fallbackDefinition.luck,
-                                   partyMemberId: nil,
-                                   level: fallbackLevel,
-                                   jobName: jobName,
-                                   avatarIndex: nil,
-                                   isMartialEligible: false,
-                                   raceId: fallbackDefinition.raceId,
-                                   enemyMasterIndex: fallbackDefinition.id,
-                                   snapshot: snapshot,
-                                   currentHP: snapshot.maxHP,
-                                   actionRates: BattleActionRates(attack: fallbackDefinition.actionRates.attack,
-                                                                  priestMagic: fallbackDefinition.actionRates.priestMagic,
-                                                                  mageMagic: fallbackDefinition.actionRates.mageMagic,
-                                                                  breath: fallbackDefinition.actionRates.breath),
-                                   actionResources: resources,
-                                   skillEffects: fallbackSkillEffects,
-                                   spellbook: .empty,
-                                   spells: .empty,
-                                   baseSkillIds: Set(fallbackDefinition.specialSkillIds) )]
-            encounteredEnemies = [BattleEnemyGroupBuilder.EncounteredEnemy(definition: fallbackDefinition,
-                                                                          level: encounterLevel ?? 1)]
-            random = localRandom
-        }
+        let enemies = enemyResult.0
+        let encounteredEnemies = enemyResult.1
         random = localRandom
 
         guard !enemies.isEmpty else {

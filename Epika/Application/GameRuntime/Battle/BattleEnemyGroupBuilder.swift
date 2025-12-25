@@ -27,109 +27,74 @@ struct BattleEnemyGroupBuilder {
         let level: Int
     }
 
-    /// 敵グループを生成
+    /// 敵グループを生成（複数種類の敵対応）
     /// nonisolated - 計算処理のためMainActorに縛られない
-    nonisolated static func makeEnemies(baseEnemyId: UInt16?,
-                            baseEnemyLevel: Int?,
-                            groupMin: Int?,
-                            groupMax: Int?,
-                            dungeon: DungeonDefinition,
-                            floor: DungeonFloorDefinition,
+    nonisolated static func makeEnemies(specs: [EncounteredEnemySpec],
                             enemyDefinitions: [UInt16: EnemyDefinition],
                             skillDefinitions: [UInt16: SkillDefinition],
                             jobDefinitions: [UInt8: JobDefinition],
-                            raceDefinitions: [UInt8: RaceDefinition],
                             random: inout GameRandomSource) throws -> ([BattleActor], [EncounteredEnemy]) {
         var skillCache: [UInt16: BattleActor.SkillEffects] = [:]
-
-        if let baseEnemyId, let definition = enemyDefinitions[baseEnemyId] {
-            let count = randomGroupSize(groupMin: groupMin, groupMax: groupMax, dungeon: dungeon, random: &random)
-            let actors = try makeActors(for: definition,
-                                        levelOverride: baseEnemyLevel,
-                                        count: count,
-                                        skillDefinitions: skillDefinitions,
-                                        jobDefinitions: jobDefinitions,
-                                        cache: &skillCache,
-                                        random: &random)
-            let encountered = Array(repeating: EncounteredEnemy(definition: definition, level: baseEnemyLevel ?? 1), count: count)
-            return (actors, encountered)
-        }
-
-        guard let config = dungeon.enemyGroupConfig else { return ([], []) }
-        let groups = BattleEnemyGroupConfigService.makeEncounter(using: config,
-                                                                floorNumber: floor.floorNumber,
-                                                                enemyPool: enemyDefinitions,
-                                                                random: &random)
         var actors: [BattleActor] = []
         var encountered: [EncounteredEnemy] = []
         var slotIndex = 0
-        for group in groups {
-            for _ in 0..<group.count {
+
+        for spec in specs {
+            guard let definition = enemyDefinitions[spec.enemyId] else { continue }
+
+            for _ in 0..<spec.count {
                 guard let slot = BattleContextBuilder.slot(for: slotIndex) else { break }
-                let levelOverride = baseEnemyLevel ?? 1
-                let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: group.definition,
-                                                                           levelOverride: levelOverride,
+
+                let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: definition,
+                                                                           levelOverride: spec.level,
                                                                            jobDefinitions: jobDefinitions)
                 var resources = BattleActionResource.makeDefault(for: snapshot,
                                                                 spellLoadout: .empty)
-                let skillEffects = try cachedSkillEffects(for: group.definition,
+                let skillEffects = try cachedSkillEffects(for: definition,
                                                           cache: &skillCache,
                                                           skillDefinitions: skillDefinitions)
                 if skillEffects.spell.breathExtraCharges > 0 {
                     let current = resources.charges(for: .breath)
                     resources.setCharges(for: .breath, value: current + skillEffects.spell.breathExtraCharges)
                 }
-                let identifier = "\(group.definition.id)_\(slotIndex)"
+                let identifier = "\(definition.id)_\(slotIndex)"
                 let actor = BattleActor(identifier: identifier,
-                                        displayName: group.definition.name,
+                                        displayName: definition.name,
                                         kind: .enemy,
                                         formationSlot: slot,
-                                        strength: group.definition.strength,
-                                        wisdom: group.definition.wisdom,
-                                        spirit: group.definition.spirit,
-                                        vitality: group.definition.vitality,
-                                        agility: group.definition.agility,
-                                        luck: group.definition.luck,
+                                        strength: definition.strength,
+                                        wisdom: definition.wisdom,
+                                        spirit: definition.spirit,
+                                        vitality: definition.vitality,
+                                        agility: definition.agility,
+                                        luck: definition.luck,
                                         partyMemberId: nil,
-                                        level: levelOverride,
-                                        jobName: group.definition.jobId.flatMap { jobDefinitions[$0]?.name } ?? "敵",
+                                        level: spec.level,
+                                        jobName: definition.jobId.flatMap { jobDefinitions[$0]?.name } ?? "敵",
                                         avatarIndex: nil,
                                         isMartialEligible: false,
-                                        raceId: group.definition.raceId,
-                                        enemyMasterIndex: group.definition.id,
+                                        raceId: definition.raceId,
+                                        enemyMasterIndex: definition.id,
                                         snapshot: snapshot,
                                         currentHP: snapshot.maxHP,
-                                        actionRates: BattleActionRates(attack: group.definition.actionRates.attack,
-                                                                       priestMagic: group.definition.actionRates.priestMagic,
-                                                                       mageMagic: group.definition.actionRates.mageMagic,
-                                                                       breath: group.definition.actionRates.breath),
+                                        actionRates: BattleActionRates(attack: definition.actionRates.attack,
+                                                                       priestMagic: definition.actionRates.priestMagic,
+                                                                       mageMagic: definition.actionRates.mageMagic,
+                                                                       breath: definition.actionRates.breath),
                                         actionResources: resources,
                                         barrierCharges: skillEffects.combat.barrierCharges,
                                         skillEffects: skillEffects,
                                         spellbook: .empty,
                                         spells: .empty,
-                                        baseSkillIds: Set(group.definition.specialSkillIds),
-                                        innateResistances: BattleInnateResistances(from: group.definition.resistances))
+                                        baseSkillIds: Set(definition.specialSkillIds),
+                                        innateResistances: BattleInnateResistances(from: definition.resistances))
                 actors.append(actor)
-                encountered.append(EncounteredEnemy(definition: group.definition, level: levelOverride))
+                encountered.append(EncounteredEnemy(definition: definition, level: spec.level))
                 slotIndex += 1
             }
         }
 
         return (actors, encountered)
-    }
-
-    private static func randomGroupSize(groupMin: Int?,
-                                        groupMax: Int?,
-                                        dungeon: DungeonDefinition,
-                                        random: inout GameRandomSource) -> Int {
-        // Use passed-in group size from encounter event, or fallback to dungeon config
-        let minSize = groupMin ?? dungeon.enemyGroupConfig?.defaultGroupSize.lowerBound ?? 1
-        let maxSize = groupMax ?? dungeon.enemyGroupConfig?.defaultGroupSize.upperBound ?? 1
-        let lower = max(1, minSize)
-        let upper = max(lower, maxSize)
-        if lower == upper { return lower }
-        return random.nextInt(in: lower...upper)
     }
 
     nonisolated private static func makeActors(for definition: EnemyDefinition,
