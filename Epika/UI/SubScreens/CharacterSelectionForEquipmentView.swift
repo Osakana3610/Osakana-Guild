@@ -422,7 +422,11 @@ struct EquipmentEditorView: View {
                 characterId: currentCharacter.id,
                 inventoryItemStackKey: item.stackKey
             )
-            let runtime = try await characterService.runtimeCharacter(from: snapshot)
+            // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
+            let runtime = try characterService.runtimeCharacterWithEquipmentChange(
+                current: currentCharacter,
+                newEquippedItems: snapshot.equippedItems
+            )
             currentCharacter = runtime
 
             // ステータス変動を通知
@@ -448,7 +452,11 @@ struct EquipmentEditorView: View {
             characterId: currentCharacter.id,
             equipmentStackKey: item.stackKey
         )
-        let runtime = try await characterService.runtimeCharacter(from: snapshot)
+        // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
+        let runtime = try characterService.runtimeCharacterWithEquipmentChange(
+            current: currentCharacter,
+            newEquippedItems: snapshot.equippedItems
+        )
         currentCharacter = runtime
 
         // ステータス変動を通知
