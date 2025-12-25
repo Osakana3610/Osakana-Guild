@@ -112,7 +112,7 @@ extension SQLiteMasterDataManager {
             tables[id] = EncounterTableDefinition(id: id, name: String(cString: nameC), events: [], isBoss: isBoss, totalMin: totalMin, totalMax: totalMax)
         }
 
-        let eventSQL = "SELECT table_id, event_type, enemy_id, spawn_rate, group_min, group_max, enemy_level FROM encounter_events ORDER BY table_id, order_index;"
+        let eventSQL = "SELECT table_id, event_type, enemy_id, spawn_rate, group_min, group_max, min_level, max_level FROM encounter_events ORDER BY table_id, order_index;"
         let eventStatement = try prepare(eventSQL)
         defer { sqlite3_finalize(eventStatement) }
         while sqlite3_step(eventStatement) == SQLITE_ROW {
@@ -125,7 +125,8 @@ extension SQLiteMasterDataManager {
                                 spawnRate: sqlite3_column_type(eventStatement, 3) == SQLITE_NULL ? nil : sqlite3_column_double(eventStatement, 3),
                                 groupMin: sqlite3_column_type(eventStatement, 4) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 4)),
                                 groupMax: sqlite3_column_type(eventStatement, 5) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 5)),
-                                level: sqlite3_column_type(eventStatement, 6) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 6))))
+                                minLevel: sqlite3_column_type(eventStatement, 6) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 6)),
+                                maxLevel: sqlite3_column_type(eventStatement, 7) == SQLITE_NULL ? nil : Int(sqlite3_column_int(eventStatement, 7))))
             tables[table.id] = EncounterTableDefinition(id: table.id, name: table.name, events: events, isBoss: table.isBoss, totalMin: table.totalMin, totalMax: table.totalMax)
         }
 
