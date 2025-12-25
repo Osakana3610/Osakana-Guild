@@ -134,15 +134,15 @@ final class AdventureViewState {
             runtimeDungeons = built
                 .filter { $0.isUnlocked }
                 .sorted { lhs, rhs in
-                let ld = lhs.definition
-                let rd = rhs.definition
-                if ld.chapter != rd.chapter {
-                    return ld.chapter < rd.chapter
+                let leftDungeon = lhs.definition
+                let rightDungeon = rhs.definition
+                if leftDungeon.chapter != rightDungeon.chapter {
+                    return leftDungeon.chapter < rightDungeon.chapter
                 }
-                if ld.stage != rd.stage {
-                    return ld.stage < rd.stage
+                if leftDungeon.stage != rightDungeon.stage {
+                    return leftDungeon.stage < rightDungeon.stage
                 }
-                return ld.name < rd.name
+                return leftDungeon.name < rightDungeon.name
             }
         } catch {
             present(error: error)

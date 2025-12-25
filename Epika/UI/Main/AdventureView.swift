@@ -266,8 +266,8 @@ struct AdventureView: View {
     }
 
     private func selectParty(_ party: PartySnapshot) {
-        if let idx = parties.firstIndex(where: { $0.id == party.id }) {
-            adventureState.selectParty(at: idx)
+        if let partyIndex = parties.firstIndex(where: { $0.id == party.id }) {
+            adventureState.selectParty(at: partyIndex)
         }
     }
 

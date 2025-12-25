@@ -183,9 +183,9 @@ struct ItemDetailView: View {
         item = masterData.item(itemId)
 
         // 称号情報がある場合は称号定義を取得
-        if let lw = lightweightItem {
-            titleDefinition = masterData.title(lw.enhancement.normalTitleId)
-            let superRareTitleId = lw.enhancement.superRareTitleId
+        if let lightweight = lightweightItem {
+            titleDefinition = masterData.title(lightweight.enhancement.normalTitleId)
+            let superRareTitleId = lightweight.enhancement.superRareTitleId
             if superRareTitleId > 0 {
                 superRareTitleDefinition = masterData.superRareTitle(superRareTitleId)
             }
@@ -211,8 +211,8 @@ struct ItemDetailView: View {
                     LabeledContent("レアリティ", value: rarity.displayName)
                 }
                 // 称号情報がある場合は計算済み売値、なければベース価格
-                if let lw = lightweightItem {
-                    LabeledContent("売却額", value: "\(lw.sellValue)G")
+                if let lightweight = lightweightItem {
+                    LabeledContent("売却額", value: "\(lightweight.sellValue)G")
                 } else {
                     LabeledContent("定価", value: "\(item.basePrice)G")
                     LabeledContent("売却額", value: "\(item.sellValue)G")
@@ -246,47 +246,47 @@ struct ItemDetailView: View {
     }
 
     private func hasStatBonuses(_ item: ItemDefinition) -> Bool {
-        let s = item.statBonuses
-        return s.strength != 0 || s.wisdom != 0 || s.spirit != 0 ||
-               s.vitality != 0 || s.agility != 0 || s.luck != 0
+        let stats = item.statBonuses
+        return stats.strength != 0 || stats.wisdom != 0 || stats.spirit != 0 ||
+               stats.vitality != 0 || stats.agility != 0 || stats.luck != 0
     }
 
     private func hasCombatBonuses(_ item: ItemDefinition) -> Bool {
-        let c = item.combatBonuses
-        return c.maxHP != 0 || c.physicalAttack != 0 || c.magicalAttack != 0 ||
-               c.physicalDefense != 0 || c.magicalDefense != 0 ||
-               c.hitRate != 0 || c.evasionRate != 0 || c.criticalRate != 0 ||
-               c.attackCount != 0 || c.magicalHealing != 0 || c.trapRemoval != 0 ||
-               c.additionalDamage != 0 || c.breathDamage != 0
+        let combat = item.combatBonuses
+        return combat.maxHP != 0 || combat.physicalAttack != 0 || combat.magicalAttack != 0 ||
+               combat.physicalDefense != 0 || combat.magicalDefense != 0 ||
+               combat.hitRate != 0 || combat.evasionRate != 0 || combat.criticalRate != 0 ||
+               combat.attackCount != 0 || combat.magicalHealing != 0 || combat.trapRemoval != 0 ||
+               combat.additionalDamage != 0 || combat.breathDamage != 0
     }
 
     @ViewBuilder
     private func statBonusRows(_ item: ItemDefinition) -> some View {
-        let s = item.statBonuses
-        if s.strength != 0 { LabeledContent("力", value: formatBonus(applyTitleMultiplier(s.strength))) }
-        if s.wisdom != 0 { LabeledContent("知", value: formatBonus(applyTitleMultiplier(s.wisdom))) }
-        if s.spirit != 0 { LabeledContent("精", value: formatBonus(applyTitleMultiplier(s.spirit))) }
-        if s.vitality != 0 { LabeledContent("体", value: formatBonus(applyTitleMultiplier(s.vitality))) }
-        if s.agility != 0 { LabeledContent("速", value: formatBonus(applyTitleMultiplier(s.agility))) }
-        if s.luck != 0 { LabeledContent("運", value: formatBonus(applyTitleMultiplier(s.luck))) }
+        let stats = item.statBonuses
+        if stats.strength != 0 { LabeledContent("力", value: formatBonus(applyTitleMultiplier(stats.strength))) }
+        if stats.wisdom != 0 { LabeledContent("知", value: formatBonus(applyTitleMultiplier(stats.wisdom))) }
+        if stats.spirit != 0 { LabeledContent("精", value: formatBonus(applyTitleMultiplier(stats.spirit))) }
+        if stats.vitality != 0 { LabeledContent("体", value: formatBonus(applyTitleMultiplier(stats.vitality))) }
+        if stats.agility != 0 { LabeledContent("速", value: formatBonus(applyTitleMultiplier(stats.agility))) }
+        if stats.luck != 0 { LabeledContent("運", value: formatBonus(applyTitleMultiplier(stats.luck))) }
     }
 
     @ViewBuilder
     private func combatBonusRows(_ item: ItemDefinition) -> some View {
-        let c = item.combatBonuses
-        if c.maxHP != 0 { LabeledContent("最大HP", value: formatBonus(applyTitleMultiplier(c.maxHP))) }
-        if c.physicalAttack != 0 { LabeledContent("物理攻撃", value: formatBonus(applyTitleMultiplier(c.physicalAttack))) }
-        if c.magicalAttack != 0 { LabeledContent("魔法攻撃", value: formatBonus(applyTitleMultiplier(c.magicalAttack))) }
-        if c.physicalDefense != 0 { LabeledContent("物理防御", value: formatBonus(applyTitleMultiplier(c.physicalDefense))) }
-        if c.magicalDefense != 0 { LabeledContent("魔法防御", value: formatBonus(applyTitleMultiplier(c.magicalDefense))) }
-        if c.hitRate != 0 { LabeledContent("命中", value: formatBonus(applyTitleMultiplier(c.hitRate))) }
-        if c.evasionRate != 0 { LabeledContent("回避", value: formatBonus(applyTitleMultiplier(c.evasionRate))) }
-        if c.criticalRate != 0 { LabeledContent("クリティカル", value: formatBonus(applyTitleMultiplier(c.criticalRate))) }
-        if c.attackCount != 0 { LabeledContent("攻撃回数", value: formatBonusDouble(applyTitleMultiplierDouble(c.attackCount))) }
-        if c.magicalHealing != 0 { LabeledContent("魔法回復", value: formatBonus(applyTitleMultiplier(c.magicalHealing))) }
-        if c.trapRemoval != 0 { LabeledContent("罠解除", value: formatBonus(applyTitleMultiplier(c.trapRemoval))) }
-        if c.additionalDamage != 0 { LabeledContent("追加ダメージ", value: formatBonus(applyTitleMultiplier(c.additionalDamage))) }
-        if c.breathDamage != 0 { LabeledContent("ブレスダメージ", value: formatBonus(applyTitleMultiplier(c.breathDamage))) }
+        let combat = item.combatBonuses
+        if combat.maxHP != 0 { LabeledContent("最大HP", value: formatBonus(applyTitleMultiplier(combat.maxHP))) }
+        if combat.physicalAttack != 0 { LabeledContent("物理攻撃", value: formatBonus(applyTitleMultiplier(combat.physicalAttack))) }
+        if combat.magicalAttack != 0 { LabeledContent("魔法攻撃", value: formatBonus(applyTitleMultiplier(combat.magicalAttack))) }
+        if combat.physicalDefense != 0 { LabeledContent("物理防御", value: formatBonus(applyTitleMultiplier(combat.physicalDefense))) }
+        if combat.magicalDefense != 0 { LabeledContent("魔法防御", value: formatBonus(applyTitleMultiplier(combat.magicalDefense))) }
+        if combat.hitRate != 0 { LabeledContent("命中", value: formatBonus(applyTitleMultiplier(combat.hitRate))) }
+        if combat.evasionRate != 0 { LabeledContent("回避", value: formatBonus(applyTitleMultiplier(combat.evasionRate))) }
+        if combat.criticalRate != 0 { LabeledContent("クリティカル", value: formatBonus(applyTitleMultiplier(combat.criticalRate))) }
+        if combat.attackCount != 0 { LabeledContent("攻撃回数", value: formatBonusDouble(applyTitleMultiplierDouble(combat.attackCount))) }
+        if combat.magicalHealing != 0 { LabeledContent("魔法回復", value: formatBonus(applyTitleMultiplier(combat.magicalHealing))) }
+        if combat.trapRemoval != 0 { LabeledContent("罠解除", value: formatBonus(applyTitleMultiplier(combat.trapRemoval))) }
+        if combat.additionalDamage != 0 { LabeledContent("追加ダメージ", value: formatBonus(applyTitleMultiplier(combat.additionalDamage))) }
+        if combat.breathDamage != 0 { LabeledContent("ブレスダメージ", value: formatBonus(applyTitleMultiplier(combat.breathDamage))) }
     }
 
     /// 称号倍率を適用（lightweightItemがある場合のみ）

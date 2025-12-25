@@ -432,16 +432,16 @@ actor InventoryProgressService {
 
     func updateItem(stackKey: String,
                     mutate: (InventoryItemRecord) throws -> Void) async throws -> ItemSnapshot {
-        guard let c = StackKeyComponents(stackKey: stackKey) else {
+        guard let components = StackKeyComponents(stackKey: stackKey) else {
             throw ProgressError.invalidInput(description: "不正なstackKeyです")
         }
         let context = makeContext()
-        let superRare = c.superRareTitleId
-        let normal = c.normalTitleId
-        let master = c.itemId
-        let socketSuperRare = c.socketSuperRareTitleId
-        let socketNormal = c.socketNormalTitleId
-        let socketMaster = c.socketItemId
+        let superRare = components.superRareTitleId
+        let normal = components.normalTitleId
+        let master = components.itemId
+        let socketSuperRare = components.socketSuperRareTitleId
+        let socketNormal = components.socketNormalTitleId
+        let socketMaster = components.socketItemId
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.superRareTitleId == superRare &&
             $0.normalTitleId == normal &&
@@ -461,16 +461,16 @@ actor InventoryProgressService {
 
     func decrementItem(stackKey: String, quantity: Int) async throws {
         guard quantity > 0 else { return }
-        guard let c = StackKeyComponents(stackKey: stackKey) else {
+        guard let components = StackKeyComponents(stackKey: stackKey) else {
             throw ProgressError.invalidInput(description: "不正なstackKeyです")
         }
         let context = makeContext()
-        let superRare = c.superRareTitleId
-        let normal = c.normalTitleId
-        let master = c.itemId
-        let socketSuperRare = c.socketSuperRareTitleId
-        let socketNormal = c.socketNormalTitleId
-        let socketMaster = c.socketItemId
+        let superRare = components.superRareTitleId
+        let normal = components.normalTitleId
+        let master = components.itemId
+        let socketSuperRare = components.socketSuperRareTitleId
+        let socketNormal = components.socketNormalTitleId
+        let socketMaster = components.socketItemId
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.superRareTitleId == superRare &&
             $0.normalTitleId == normal &&
@@ -496,21 +496,21 @@ actor InventoryProgressService {
     func inheritItem(targetStackKey: String,
                      sourceStackKey: String,
                      newEnhancement: ItemSnapshot.Enhancement) async throws -> RuntimeEquipment {
-        guard let tc = StackKeyComponents(stackKey: targetStackKey) else {
+        guard let targetComponents = StackKeyComponents(stackKey: targetStackKey) else {
             throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
         }
-        guard let sc = StackKeyComponents(stackKey: sourceStackKey) else {
+        guard let sourceComponents = StackKeyComponents(stackKey: sourceStackKey) else {
             throw ProgressError.invalidInput(description: "不正な提供stackKeyです")
         }
         let context = makeContext()
 
         // target fetch with individual field comparison
-        let tSuperRare = tc.superRareTitleId
-        let tNormal = tc.normalTitleId
-        let tMaster = tc.itemId
-        let tSocketSuperRare = tc.socketSuperRareTitleId
-        let tSocketNormal = tc.socketNormalTitleId
-        let tSocketMaster = tc.socketItemId
+        let tSuperRare = targetComponents.superRareTitleId
+        let tNormal = targetComponents.normalTitleId
+        let tMaster = targetComponents.itemId
+        let tSocketSuperRare = targetComponents.socketSuperRareTitleId
+        let tSocketNormal = targetComponents.socketNormalTitleId
+        let tSocketMaster = targetComponents.socketItemId
         var targetFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.superRareTitleId == tSuperRare &&
             $0.normalTitleId == tNormal &&
@@ -525,12 +525,12 @@ actor InventoryProgressService {
         }
 
         // source fetch with individual field comparison
-        let sSuperRare = sc.superRareTitleId
-        let sNormal = sc.normalTitleId
-        let sMaster = sc.itemId
-        let sSocketSuperRare = sc.socketSuperRareTitleId
-        let sSocketNormal = sc.socketNormalTitleId
-        let sSocketMaster = sc.socketItemId
+        let sSuperRare = sourceComponents.superRareTitleId
+        let sNormal = sourceComponents.normalTitleId
+        let sMaster = sourceComponents.itemId
+        let sSocketSuperRare = sourceComponents.socketSuperRareTitleId
+        let sSocketNormal = sourceComponents.socketNormalTitleId
+        let sSocketMaster = sourceComponents.socketItemId
         var sourceFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.superRareTitleId == sSuperRare &&
             $0.normalTitleId == sNormal &&

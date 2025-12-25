@@ -62,39 +62,39 @@ enum CombatFormulas {
 
     static func levelDependentValue(raceId: UInt8,
                                     level: Int) -> Double {
-        let lv = Double(level)
+        let levelDouble = Double(level)
         let isHuman = humanRaceIds.contains(raceId)
 
         switch level {
         case ...30:
-            return lv * 0.1
+            return levelDouble * 0.1
         case 31...60:
-            return lv * 0.15 - 1.5
+            return levelDouble * 0.15 - 1.5
         case 61...80:
-            return lv * 0.225 - 6.0
+            return levelDouble * 0.225 - 6.0
         case 81...100:
             if isHuman {
-                return lv * 0.225 - 6.0
+                return levelDouble * 0.225 - 6.0
             } else {
-                return lv * 0.45 - 24.0
+                return levelDouble * 0.45 - 24.0
             }
         case 101...150:
             if isHuman {
-                return lv * 0.1125 + 5.25
+                return levelDouble * 0.1125 + 5.25
             } else {
-                return lv * 0.45 - 24.0
+                return levelDouble * 0.45 - 24.0
             }
         case 151...180:
             if isHuman {
-                return lv * 0.16875 - 3.1875
+                return levelDouble * 0.16875 - 3.1875
             } else {
-                return lv * 0.45 - 24.0
+                return levelDouble * 0.45 - 24.0
             }
         default:
             if isHuman {
-                return lv * 0.253125 - 18.375
+                return levelDouble * 0.253125 - 18.375
             } else {
-                return lv * 0.45 - 24.0
+                return levelDouble * 0.45 - 24.0
             }
         }
     }
@@ -110,23 +110,23 @@ enum CombatFormulas {
     }
 
     static func strengthDependency(value: Int) -> Double {
-        let v = Double(value)
+        let valueDouble = Double(value)
         let dependency: Double
         switch value {
         case ..<10:
             dependency = 0.04
         case 10...20:
-            dependency = 0.004 * v
+            dependency = 0.004 * valueDouble
         case 20...25:
-            dependency = 0.008 * (v - 10.0)
+            dependency = 0.008 * (valueDouble - 10.0)
         case 25...30:
-            dependency = 0.024 * (v - 20.0)
+            dependency = 0.024 * (valueDouble - 20.0)
         case 30...33:
-            dependency = 0.040 * (v - 24.0)
+            dependency = 0.040 * (valueDouble - 24.0)
         case 33...35:
-            dependency = 0.060 * (v - 27.0)
+            dependency = 0.060 * (valueDouble - 27.0)
         default:
-            dependency = 0.060 * (v - 27.0)
+            dependency = 0.060 * (valueDouble - 27.0)
         }
         return dependency * 125.0
     }
@@ -151,12 +151,12 @@ enum CombatFormulas {
         }
 
         // 区間線形補間
-        for idx in 1..<table.count {
-            let (a0, v0) = table[idx - 1]
-            let (a1, v1) = table[idx]
+        for index in 1..<table.count {
+            let (a0, v0) = table[index - 1]
+            let (a1, v1) = table[index]
             if value <= a1 {
-                let t = (Double(value - a0)) / Double(a1 - a0)
-                return v0 + (v1 - v0) * t
+                let ratio = (Double(value - a0)) / Double(a1 - a0)
+                return v0 + (v1 - v0) * ratio
             }
         }
 

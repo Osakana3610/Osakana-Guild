@@ -71,14 +71,14 @@ private extension CharacterLevelSection {
 
     func makeExperienceData() throws -> ExperienceData {
         let level = max(1, character.level)
-        let cap = character.race?.maxLevel ?? 200
+        let maxLevel = character.race?.maxLevel ?? 200
         let total = character.experience
         let progress = try CharacterExperienceTable.experienceIntoCurrentLevel(accumulatedExperience: total,
                                                                                level: level)
         let multiplier = try experienceMultiplier()
-        if level >= cap {
+        if level >= maxLevel {
             return ExperienceData(level: level,
-                                  cap: cap,
+                                  cap: maxLevel,
                                   totalExperience: total,
                                   currentProgress: progress,
                                   nextLevelRequirement: nil,
@@ -88,7 +88,7 @@ private extension CharacterLevelSection {
         let delta = try CharacterExperienceTable.experienceToNextLevel(from: level)
         let remaining = max(0, delta - progress)
         return ExperienceData(level: level,
-                              cap: cap,
+                              cap: maxLevel,
                               totalExperience: total,
                               currentProgress: progress,
                               nextLevelRequirement: delta,

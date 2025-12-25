@@ -128,14 +128,14 @@ final class ProgressBootstrapper {
     }
 
     private func progressStoreURL() throws -> URL {
-        let fm = FileManager.default
-        let support = try fm.url(for: .applicationSupportDirectory,
-                                 in: .userDomainMask,
-                                 appropriateFor: nil,
-                                 create: true)
+        let fileManager = FileManager.default
+        let support = try fileManager.url(for: .applicationSupportDirectory,
+                                          in: .userDomainMask,
+                                          appropriateFor: nil,
+                                          create: true)
         let directory = support.appendingPathComponent("Epika", isDirectory: true)
-        if !fm.fileExists(atPath: directory.path) {
-            try fm.createDirectory(at: directory, withIntermediateDirectories: true)
+        if !fileManager.fileExists(atPath: directory.path) {
+            try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
         }
         return directory.appendingPathComponent("Progress.store")
     }
