@@ -74,7 +74,7 @@ final class CharacterProgressService {
         self.masterData = masterData
     }
 
-    private func notifyCharacterProgressDidChange() {
+    func notifyCharacterProgressDidChange() {
         Task { @MainActor in
             NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
         }
@@ -455,7 +455,6 @@ final class CharacterProgressService {
             }
         }
         try context.save()
-        notifyCharacterProgressDidChange()
     }
 
     func updateHP(characterId: UInt8, newHP: UInt32) throws {
