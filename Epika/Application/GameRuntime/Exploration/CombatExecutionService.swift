@@ -172,13 +172,13 @@ struct CombatExecutionService {
             return (snapshot, enemyId, suffixIndex)
         }
 
-        // enemyId降順、同じenemyId内はsuffixIndex降順（表示上A→B→Cになるように）
+        // enemyId昇順、同じenemyId内はsuffixIndex昇順（A→B→C→D）
         let enemySnapshots = snapshotsWithKeys
             .sorted { lhs, rhs in
                 if lhs.enemyId != rhs.enemyId {
-                    return lhs.enemyId > rhs.enemyId
+                    return lhs.enemyId < rhs.enemyId
                 }
-                return lhs.suffixIndex > rhs.suffixIndex  // 降順で試す
+                return lhs.suffixIndex < rhs.suffixIndex
             }
             .map { $0.snapshot }
 
