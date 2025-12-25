@@ -96,7 +96,7 @@
 <body>
     <h1>既知の問題</h1>
     <p>おさかなギルドで現在確認されている問題と、対応状況です。このページにない場合は<a href="itms-beta://beta.itunes.apple.com/v1/app/6756705558">こちら</a>からフィードバックを送信してください（iOSのみ）。</p>
-    <h2>対応中の問題 <span class="issue-count">(6件)</span></h2>
+    <h2>対応中の問題 <span class="issue-count">(3件)</span></h2>
     
     <div class="issue">
         <div class="issue-header">
@@ -177,79 +177,7 @@
         </div>
     </div>
 
-
-    <div class="issue">
-        <div class="issue-header">
-            <span class="toggle-icon">&#9654;</span>
-            <span class="issue-id">FB0022</span>
-            <span class="issue-title">僧侶魔法、特にバリア系統が発動しない場合がある</span>
-            <div class="issue-meta">
-                <span class="category">戦闘</span>
-                <span class="status" style="background-color: #f39c12">調査中</span>
-            </div>
-        </div>
-        <div class="issue-body">
-            <div class="date">報告日: 2025-12-24</div>
-            <div class="issue-section">
-                <div class="issue-section-title">概要</div>
-                <div class="issue-section-content">僧侶魔法、特にバリア系統の魔法が発動しない場合がある。</div>
-            </div>
-            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">調査中。</div></div>
-            
-            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">12/26までに修正予定。</div></div>
-            
-        </div>
-    </div>
-
-
-    <div class="issue">
-        <div class="issue-header">
-            <span class="toggle-icon">&#9654;</span>
-            <span class="issue-id">FB0024</span>
-            <span class="issue-title">パーティ詳細画面から装備更新してもステータス変更通知が表示されない</span>
-            <div class="issue-meta">
-                <span class="category">UI</span>
-                <span class="status" style="background-color: #3498db">確認済み</span>
-            </div>
-        </div>
-        <div class="issue-body">
-            <div class="date">報告日: 2025-12-25</div>
-            <div class="issue-section">
-                <div class="issue-section-title">概要</div>
-                <div class="issue-section-content">パーティ詳細画面から装備の更新を行っても、ステータスの変更通知が表示されない。</div>
-            </div>
-            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">装備変更後のステータス差分表示が動作していない。</div></div>
-            
-            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">0.7.83（1）で修正予定。</div></div>
-            
-        </div>
-    </div>
-
-
-    <div class="issue">
-        <div class="issue-header">
-            <span class="toggle-icon">&#9654;</span>
-            <span class="issue-id">FB0025</span>
-            <span class="issue-title">最新の迷宮をクリアしてもストーリーが解放されない</span>
-            <div class="issue-meta">
-                <span class="category">ストーリー</span>
-                <span class="status" style="background-color: #3498db">確認済み</span>
-            </div>
-        </div>
-        <div class="issue-body">
-            <div class="date">報告日: 2025-12-25</div>
-            <div class="issue-section">
-                <div class="issue-section-title">概要</div>
-                <div class="issue-section-content">解放されている一番新しい迷宮をクリアしても、次のストーリーが解放されない。</div>
-            </div>
-            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">迷宮クリア時のストーリー解放判定に問題がある可能性。</div></div>
-            
-            <div class="issue-section"><div class="issue-section-title">修正予定</div><div class="issue-section-content">0.7.83（1）で修正予定。</div></div>
-            
-        </div>
-    </div>
-
-    <h2 class="resolved-section">解決済みの問題 <span class="issue-count">(18件)</span></h2>
+    <h2 class="resolved-section">解決済みの問題 <span class="issue-count">(21件)</span></h2>
     <div class="resolved-section">
     
     <div class="issue">
@@ -684,6 +612,78 @@ breathVariantスキルを習得したキャラのみがブレスを使用でき�
             
             
             <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">探索中のパーティではメンバー変更リンクを無効化するよう修正。</div></div>
+        </div>
+    </div>
+
+
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">FB0022</span>
+            <span class="issue-title">僧侶魔法、特にバリア系統が発動しない場合がある</span>
+            <div class="issue-meta">
+                <span class="category">戦闘</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-24 / 解決日: 2025-12-25</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">僧侶魔法、特にバリア系統の魔法が発動しない場合がある。</div>
+            </div>
+            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">buff/cleanse系の呪文カテゴリが未実装だった。</div></div>
+            
+            
+            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">buff/cleanse呪文カテゴリを実装し、バリア系統の魔法が正しく発動するよう修正。</div></div>
+        </div>
+    </div>
+
+
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">FB0024</span>
+            <span class="issue-title">パーティ詳細画面から装備更新してもステータス変更通知が表示されない</span>
+            <div class="issue-meta">
+                <span class="category">UI</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-25 / 解決日: 2025-12-25</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">パーティ詳細画面から装備の更新を行っても、ステータスの変更通知が表示されない。</div>
+            </div>
+            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">装備変更後のステータス差分表示が動作していなかった。</div></div>
+            
+            
+            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">パーティ詳細画面でステータス変動通知を表示するよう修正。</div></div>
+        </div>
+    </div>
+
+
+    <div class="issue">
+        <div class="issue-header">
+            <span class="toggle-icon">&#9654;</span>
+            <span class="issue-id">FB0025</span>
+            <span class="issue-title">最新の迷宮をクリアしてもストーリーが解放されない</span>
+            <div class="issue-meta">
+                <span class="category">ストーリー</span>
+                <span class="status" style="background-color: #27ae60">修正済み</span>
+            </div>
+        </div>
+        <div class="issue-body">
+            <div class="date">報告日: 2025-12-25 / 解決日: 2025-12-25</div>
+            <div class="issue-section">
+                <div class="issue-section-title">概要</div>
+                <div class="issue-section-content">解放されている一番新しい迷宮をクリアしても、次のストーリーが解放されない。</div>
+            </div>
+            <div class="issue-section"><div class="issue-section-title">詳細</div><div class="issue-section-content">迷宮クリア時のストーリー解放判定に問題があった。</div></div>
+            
+            
+            <div class="issue-section"><div class="issue-section-title">解決方法</div><div class="issue-section-content">ダンジョンクリア時のストーリー解放処理を修正。</div></div>
         </div>
     </div>
 
