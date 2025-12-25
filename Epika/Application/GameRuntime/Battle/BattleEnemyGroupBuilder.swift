@@ -35,11 +35,20 @@ struct BattleEnemyGroupBuilder {
                             jobDefinitions: [UInt8: JobDefinition],
                             random: inout GameRandomSource) throws -> ([BattleActor], [EncounteredEnemy]) {
         var skillCache: [UInt16: BattleActor.SkillEffects] = [:]
+
+        // specsを敵ID順、レベル降順でソート（同じ敵が連続するように）
+        let sortedSpecs = specs.sorted { lhs, rhs in
+            if lhs.enemyId != rhs.enemyId {
+                return lhs.enemyId < rhs.enemyId
+            }
+            return lhs.level > rhs.level  // 同じ敵ならレベル高い順
+        }
+
         var actors: [BattleActor] = []
         var encountered: [EncounteredEnemy] = []
         var slotIndex = 0
 
-        for spec in specs {
+        for spec in sortedSpecs {
             guard let definition = enemyDefinitions[spec.enemyId] else { continue }
 
             for _ in 0..<spec.count {
