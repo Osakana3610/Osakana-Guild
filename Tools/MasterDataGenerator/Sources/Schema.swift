@@ -488,7 +488,10 @@ extension Generator {
             """
             CREATE TABLE IF NOT EXISTS encounter_tables (
                 id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL
+                name TEXT NOT NULL,
+                is_boss INTEGER NOT NULL DEFAULT 0,
+                total_min INTEGER,
+                total_max INTEGER
             );
             """,
             """
@@ -500,7 +503,6 @@ extension Generator {
                 spawn_rate REAL,
                 group_min INTEGER,
                 group_max INTEGER,
-                is_boss INTEGER,
                 enemy_level INTEGER,
                 PRIMARY KEY (table_id, order_index),
                 FOREIGN KEY (table_id) REFERENCES encounter_tables(id) ON DELETE CASCADE

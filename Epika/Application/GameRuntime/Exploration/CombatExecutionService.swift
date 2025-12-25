@@ -18,6 +18,13 @@
 
 import Foundation
 
+/// 戦闘に出現する敵1種類の仕様
+struct EncounteredEnemySpec: Sendable {
+    let enemyId: UInt16
+    let level: Int
+    let count: Int
+}
+
 struct CombatExecutionService {
     private let masterData: MasterDataCache
 
@@ -25,10 +32,7 @@ struct CombatExecutionService {
         self.masterData = masterData
     }
 
-    func runCombat(enemyId: UInt16,
-                   enemyLevel: Int?,
-                   groupMin: Int?,
-                   groupMax: Int?,
+    func runCombat(enemySpecs: [EncounteredEnemySpec],
                    dungeon: DungeonDefinition,
                    floor: DungeonFloorDefinition,
                    party: RuntimePartyState,
@@ -40,10 +44,7 @@ struct CombatExecutionService {
                                                          party: party,
                                                          dungeon: dungeon,
                                                          floor: floor,
-                                                         encounterEnemyId: enemyId,
-                                                         encounterLevel: enemyLevel,
-                                                         encounterGroupMin: groupMin,
-                                                         encounterGroupMax: groupMax,
+                                                         enemySpecs: enemySpecs,
                                                          random: &battleRandom)
         random = battleRandom
 

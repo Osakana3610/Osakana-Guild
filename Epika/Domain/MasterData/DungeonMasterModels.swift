@@ -104,13 +104,15 @@ struct EncounterTableDefinition: Identifiable, Sendable, Hashable {
         let spawnRate: Double?
         let groupMin: Int?
         let groupMax: Int?
-        let isBoss: Bool?
         let level: Int?
     }
 
     let id: UInt16
     let name: String
     let events: [Event]
+    let isBoss: Bool
+    let totalMin: Int?
+    let totalMax: Int?
 }
 
 struct DungeonFloorDefinition: Identifiable, Sendable, Hashable {

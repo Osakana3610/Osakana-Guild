@@ -178,20 +178,34 @@ struct ExplorationEngine {
             }
 
         case .combat:
-            guard let encounterChoice = selectEncounter(from: encounterEvents, random: &state.random) else {
-                throw RuntimeError.invalidConfiguration(reason: "Combat event selected but no encounter candidates for floor \(floor.floorNumber)")
+            guard let encounterTable = preparation.encounterTablesById[floor.encounterTableId] else {
+                throw RuntimeError.invalidConfiguration(reason: "Encounter table not found for floor \(floor.floorNumber)")
             }
-            guard let enemyId = encounterChoice.enemyId else {
-                throw RuntimeError.invalidConfiguration(reason: "Encounter event \(encounterChoice.eventType) missing enemyId")
+
+            // 敵グループを生成
+            let enemySpecs: [EncounteredEnemySpec]
+            if encounterTable.isBoss {
+                // ボス戦：全敵グループをgroupMin〜groupMax体ずつ生成
+                enemySpecs = generateBossEncounter(events: encounterEvents,
+                                                   levelMultiplier: preparation.enemyLevelMultiplier,
+                                                   random: &state.random)
+            } else {
+                // 通常戦：totalMin〜totalMaxの範囲でweightに基づいて抽選
+                let totalMin = encounterTable.totalMin ?? 1
+                let totalMax = encounterTable.totalMax ?? 3
+                enemySpecs = generateNormalEncounter(events: encounterEvents,
+                                                     totalMin: totalMin,
+                                                     totalMax: totalMax,
+                                                     levelMultiplier: preparation.enemyLevelMultiplier,
+                                                     random: &state.random)
             }
-            // 敵レベルに難易度の倍率を適用
-            let baseLevel = encounterChoice.level ?? 1
-            let adjustedLevel = max(1, Int(Double(baseLevel) * preparation.enemyLevelMultiplier))
+
+            guard !enemySpecs.isEmpty else {
+                throw RuntimeError.invalidConfiguration(reason: "No enemies generated for floor \(floor.floorNumber)")
+            }
+
             let combatService = CombatExecutionService(masterData: masterData)
-            let combatResult = try combatService.runCombat(enemyId: enemyId,
-                                                                 enemyLevel: adjustedLevel,
-                                                                 groupMin: encounterChoice.groupMin,
-                                                                 groupMax: encounterChoice.groupMax,
+            let combatResult = try combatService.runCombat(enemySpecs: enemySpecs,
                                                                  dungeon: preparation.dungeon,
                                                                  floor: floor,
                                                                  party: party,
@@ -293,6 +307,65 @@ private extension ExplorationEngine {
             }
         }
         return events.last
+    }
+
+    /// ボス戦用：全敵グループをgroupMin〜groupMax体ずつ生成
+    static func generateBossEncounter(events: [EncounterTableDefinition.Event],
+                                      levelMultiplier: Double,
+                                      random: inout GameRandomSource) -> [EncounteredEnemySpec] {
+        var specs: [EncounteredEnemySpec] = []
+        for event in events {
+            guard let enemyId = event.enemyId else { continue }
+            let baseLevel = event.level ?? 1
+            let adjustedLevel = max(1, Int(Double(baseLevel) * levelMultiplier))
+            let groupMin = event.groupMin ?? 1
+            let groupMax = event.groupMax ?? 1
+            let count = groupMin == groupMax ? groupMin : random.nextInt(in: groupMin...groupMax)
+            specs.append(EncounteredEnemySpec(enemyId: enemyId, level: adjustedLevel, count: count))
+        }
+        return specs
+    }
+
+    /// 通常戦用：totalMin〜totalMaxの範囲でweightに基づいて抽選
+    static func generateNormalEncounter(events: [EncounterTableDefinition.Event],
+                                        totalMin: Int,
+                                        totalMax: Int,
+                                        levelMultiplier: Double,
+                                        random: inout GameRandomSource) -> [EncounteredEnemySpec] {
+        guard !events.isEmpty else { return [] }
+
+        // 総数を決定
+        let totalCount = totalMin == totalMax ? totalMin : random.nextInt(in: totalMin...totalMax)
+        guard totalCount > 0 else { return [] }
+
+        // weightに基づいて敵を抽選
+        let totalWeight = events.reduce(0.0) { partial, event in
+            partial + max(event.spawnRate ?? 1.0, 0.0)
+        }
+        guard totalWeight > 0 else { return [] }
+
+        // 各敵の出現数をカウント
+        var countByEnemy: [UInt16: (level: Int, count: Int)] = [:]
+        for _ in 0..<totalCount {
+            let pick = random.nextDouble() * totalWeight
+            var cursor: Double = 0
+            for event in events {
+                cursor += max(event.spawnRate ?? 1.0, 0.0)
+                if pick <= cursor, let enemyId = event.enemyId {
+                    let baseLevel = event.level ?? 1
+                    let adjustedLevel = max(1, Int(Double(baseLevel) * levelMultiplier))
+                    if let existing = countByEnemy[enemyId] {
+                        countByEnemy[enemyId] = (level: existing.level, count: existing.count + 1)
+                    } else {
+                        countByEnemy[enemyId] = (level: adjustedLevel, count: 1)
+                    }
+                    break
+                }
+            }
+        }
+
+        // EncounteredEnemySpecに変換
+        return countByEnemy.map { EncounteredEnemySpec(enemyId: $0.key, level: $0.value.level, count: $0.value.count) }
     }
 
     static func resolveScriptedEvent(for dungeon: DungeonDefinition,
