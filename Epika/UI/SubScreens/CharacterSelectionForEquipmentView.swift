@@ -83,10 +83,10 @@ struct CharacterSelectionForEquipmentView: View {
         loadError = nil
 
         do {
-            let snapshots = try await characterService.allCharacters()
+            let snapshots = try characterService.allCharacters()
             var runtimeCharacters: [RuntimeCharacter] = []
             for snapshot in snapshots {
-                let runtime = try await characterService.runtimeCharacter(from: snapshot)
+                let runtime = try characterService.runtimeCharacter(from: snapshot)
                 runtimeCharacters.append(runtime)
             }
             characters = runtimeCharacters
@@ -242,7 +242,7 @@ struct EquipmentEditorView: View {
                             itemDefinitions: itemDefinitions,
                             equipmentCapacity: currentCharacter.equipmentCapacity,
                             onUnequip: { item in
-                                try await performUnequip(item)
+                                try performUnequip(item)
                             },
                             onDetail: { itemId in
                                 selectedItemIdForDetail = itemId
@@ -331,7 +331,7 @@ struct EquipmentEditorView: View {
         return HStack {
             Button {
                 if validation.canEquip {
-                    Task { await performEquip(item) }
+                    performEquip(item)
                 }
             } label: {
                 HStack {
@@ -413,20 +413,20 @@ struct EquipmentEditorView: View {
     }
 
     @MainActor
-    private func performEquip(_ item: LightweightItemData) async {
+    private func performEquip(_ item: LightweightItemData) {
         equipError = nil
         let oldCharacter = currentCharacter
 
         do {
-            let snapshot = try await characterService.equipItem(
+            let equippedItems = try characterService.equipItem(
                 characterId: currentCharacter.id,
                 inventoryItemStackKey: item.stackKey,
-                knownEquipmentCapacity: currentCharacter.equipmentCapacity
+                equipmentCapacity: currentCharacter.equipmentCapacity
             )
             // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
             let runtime = try characterService.runtimeCharacterWithEquipmentChange(
                 current: currentCharacter,
-                newEquippedItems: snapshot.equippedItems
+                newEquippedItems: equippedItems
             )
             currentCharacter = runtime
 
@@ -445,18 +445,18 @@ struct EquipmentEditorView: View {
     }
 
     @MainActor
-    private func performUnequip(_ item: CharacterInput.EquippedItem) async throws {
+    private func performUnequip(_ item: CharacterInput.EquippedItem) throws {
         equipError = nil
         let oldCharacter = currentCharacter
 
-        let snapshot = try await characterService.unequipItem(
+        let equippedItems = try characterService.unequipItem(
             characterId: currentCharacter.id,
             equipmentStackKey: item.stackKey
         )
         // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
         let runtime = try characterService.runtimeCharacterWithEquipmentChange(
             current: currentCharacter,
-            newEquippedItems: snapshot.equippedItems
+            newEquippedItems: equippedItems
         )
         currentCharacter = runtime
 

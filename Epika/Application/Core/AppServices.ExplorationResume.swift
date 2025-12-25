@@ -59,7 +59,7 @@ extension AppServices {
         guard let partySnapshot = try await party.partySnapshot(id: partyId) else {
             throw ExplorationResumeError.partyNotFound
         }
-        let characters = try await character.characters(withIds: partySnapshot.memberCharacterIds)
+        let characters = try character.characters(withIds: partySnapshot.memberCharacterIds)
 
         // 4. 最後の戦闘ログからHP復元
         let partyHP = restorePartyHP(from: eventRecords)

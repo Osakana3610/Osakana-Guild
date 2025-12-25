@@ -371,7 +371,7 @@ struct CharacterCreationView: View {
                 raceId: UInt8(race.id),
                 jobId: UInt8(job.id)
             )
-            _ = try await characterService.createCharacter(request)
+            _ = try characterService.createCharacter(request)
             onComplete()
             dismiss()
         } catch {

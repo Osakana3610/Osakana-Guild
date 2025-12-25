@@ -66,13 +66,13 @@ struct LazyDismissCharacterView: View {
             }
             .alert("キャラクター解雇", isPresented: $showDeleteConfirmation) {
                 Button("キャンセル", role: .cancel) { selectedCharacter = nil }
-                Button("解雇", role: .destructive) { Task { await dismissSelectedCharacter() } }
+                Button("解雇", role: .destructive) { dismissSelectedCharacter() }
             } message: {
                 if let character = selectedCharacter {
                     Text("「\(character.name)」を解雇しますか？この操作は取り消せません。")
                 }
             }
-            .task { await loadCharacters() }
+            .task { loadCharacters() }
         }
     }
 
@@ -137,14 +137,14 @@ struct LazyDismissCharacterView: View {
     // MARK: - Data Loading
 
     @MainActor
-    private func loadCharacters() async {
+    private func loadCharacters() {
         isLoading = true
         showError = false
         do {
-            let progresses = try await characterService.allCharacters()
+            let progresses = try characterService.allCharacters()
             var runtimeCharacters: [RuntimeCharacter] = []
             for snapshot in progresses {
-                let runtime = try await characterService.runtimeCharacter(from: snapshot)
+                let runtime = try characterService.runtimeCharacter(from: snapshot)
                 runtimeCharacters.append(runtime)
             }
             fullCharacters = runtimeCharacters.sorted { $0.id < $1.id }
@@ -158,13 +158,13 @@ struct LazyDismissCharacterView: View {
     }
 
     @MainActor
-    private func dismissSelectedCharacter() async {
+    private func dismissSelectedCharacter() {
         guard let character = selectedCharacter, !isProcessing else { return }
         isProcessing = true
         showError = false
         do {
-            try await characterService.deleteCharacter(id: character.id)
-            await loadCharacters()
+            try characterService.deleteCharacter(id: character.id)
+            loadCharacters()
             onComplete()
             if fullCharacters.isEmpty {
                 dismiss()

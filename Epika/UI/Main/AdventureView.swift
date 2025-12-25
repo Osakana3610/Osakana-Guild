@@ -197,8 +197,8 @@ struct AdventureView: View {
         adventureState.setPartyState(partyState)
         do {
             try await partyState.loadAllParties()
-            try await characterState.loadAllCharacters(using: appServices)
-            try await characterState.loadCharacterSummaries(using: appServices)
+            try characterState.loadAllCharacters(using: appServices)
+            try characterState.loadCharacterSummaries(using: appServices)
             await adventureState.loadInitialData(using: appServices)
             await adventureState.ensurePartySlots(using: appServices)
             try await partyState.loadAllParties()
@@ -218,8 +218,8 @@ struct AdventureView: View {
         errorMessage = nil
         do {
             try await partyState.refresh()
-            try await characterState.loadAllCharacters(using: appServices)
-            try await characterState.loadCharacterSummaries(using: appServices)
+            try characterState.loadAllCharacters(using: appServices)
+            try characterState.loadCharacterSummaries(using: appServices)
             await adventureState.refreshAll(using: appServices)
             try await partyState.loadAllParties()
             if !parties.isEmpty {
