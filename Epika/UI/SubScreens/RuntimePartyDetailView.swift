@@ -150,11 +150,6 @@ struct RuntimePartyDetailView: View {
             .navigationTitle("パーティ詳細")
             .navigationBarTitleDisplayMode(.inline)
             .overlay { if let errorMessage { errorView(errorMessage) } }
-            .overlay(alignment: .bottomLeading) {
-                StatChangeNotificationView()
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
-            }
             .task { await refreshData() }
             .sheet(isPresented: $showDungeonPicker) {
                 DungeonPickerView(
@@ -169,6 +164,11 @@ struct RuntimePartyDetailView: View {
                     }
                 )
             }
+        }
+        .overlay(alignment: .bottomLeading) {
+            StatChangeNotificationView()
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
         }
     }
 
