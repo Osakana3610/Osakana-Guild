@@ -605,7 +605,7 @@ private struct DungeonPickerView: View {
     }
 
     private func chapterTitle(_ chapter: Int) -> String {
-        "第\(chapter)章"
+        chapter == 0 ? "バベルの塔" : "第\(chapter)章"
     }
 
     private func currentDifficulty(for dungeon: RuntimeDungeon) -> UInt8 {
