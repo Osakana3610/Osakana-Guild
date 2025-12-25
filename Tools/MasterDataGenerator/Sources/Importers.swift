@@ -1321,7 +1321,6 @@ private struct EnemyMasterFile: Decodable {
         let baseExperience: Int
         let specialSkillIds: [Int]
         let resistances: [String: Double]
-        let isBoss: Bool
         let drops: [Int]
         let baseStats: [String: Int]
         let category: String
@@ -1348,8 +1347,8 @@ extension Generator {
             try execute("DELETE FROM enemies;")
 
             let insertEnemySQL = """
-                INSERT INTO enemies (id, name, race_id, category, job_id, base_experience, is_boss)
-                VALUES (?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO enemies (id, name, race_id, category, job_id, base_experience)
+                VALUES (?, ?, ?, ?, ?, ?);
             """
             let insertStatsSQL = """
                 INSERT INTO enemy_stats (enemy_id, strength, wisdom, spirit, vitality, agility, luck)
@@ -1382,7 +1381,6 @@ extension Generator {
                 bindInt(enemyStatement, index: 4, value: categoryInt)
                 bindInt(enemyStatement, index: 5, value: enemy.job)
                 bindInt(enemyStatement, index: 6, value: enemy.baseExperience)
-                bindBool(enemyStatement, index: 7, value: enemy.isBoss)
                 try step(enemyStatement)
                 reset(enemyStatement)
 
@@ -1454,11 +1452,11 @@ private struct DungeonMasterFile: Decodable {
             let maxLevel: UInt
             let groupMin: Int?
             let groupMax: Int?
-            let isBoss: Bool?
         }
 
         let floorRange: [Int]
         let enemyGroups: [EnemyGroup]
+        let isBoss: Bool?
     }
 
     struct Dungeon: Decodable {
@@ -1544,10 +1542,9 @@ extension Generator {
                 return tableId
             }
 
-            func insertEncounterEvents(tableId: Int, groups: [DungeonMasterFile.FloorEnemyMapping.EnemyGroup]) throws {
+            func insertEncounterEvents(tableId: Int, groups: [DungeonMasterFile.FloorEnemyMapping.EnemyGroup], isBoss: Bool) throws {
+                let eventTypeString = isBoss ? "boss_encounter" : "enemy_encounter"
                 for (index, group) in groups.enumerated() {
-                    let isBoss = group.isBoss ?? false
-                    let eventTypeString = isBoss ? "boss_encounter" : "enemy_encounter"
                     guard let eventTypeInt = EnumMappings.encounterEventType[eventTypeString] else {
                         throw GeneratorError.executionFailed("Unknown event type '\(eventTypeString)'")
                     }
@@ -1612,6 +1609,7 @@ extension Generator {
                 }
 
                 var groupsByFloor: [Int: [DungeonMasterFile.FloorEnemyMapping.EnemyGroup]] = [:]
+                var isBossByFloor: [Int: Bool] = [:]
                 if let mappings = dungeon.floorEnemyMapping {
                     for mapping in mappings {
                         guard mapping.floorRange.count == 2 else {
@@ -1622,8 +1620,11 @@ extension Generator {
                         guard start >= 1, end >= start, end <= floorCount else {
                             throw GeneratorError.executionFailed("Dungeon \(dungeon.id) の floorRange=\(mapping.floorRange) が floorCount と整合しません")
                         }
+                        let isBoss = mapping.isBoss ?? false
                         for floorNumber in start...end {
                             groupsByFloor[floorNumber, default: []].append(contentsOf: mapping.enemyGroups)
+                            // 複数のmappingが同じフロアをカバーする場合、いずれかがボスならボス
+                            isBossByFloor[floorNumber] = isBossByFloor[floorNumber, default: false] || isBoss
                         }
                     }
                 }
@@ -1631,7 +1632,8 @@ extension Generator {
                 for floorNumber in 1...floorCount {
                     let tableName = "\(dungeon.name) 第\(floorNumber)階エンカウント"
                     let tableId = try insertEncounterTable(name: tableName)
-                    try insertEncounterEvents(tableId: tableId, groups: groupsByFloor[floorNumber] ?? [])
+                    let isBoss = isBossByFloor[floorNumber] ?? false
+                    try insertEncounterEvents(tableId: tableId, groups: groupsByFloor[floorNumber] ?? [], isBoss: isBoss)
 
                     let floorId = nextFloorId
                     nextFloorId += 1

@@ -125,7 +125,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -254,7 +255,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -383,7 +385,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -512,7 +515,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -641,7 +645,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -770,7 +775,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -899,7 +905,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -1028,7 +1035,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -1157,7 +1165,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -1286,7 +1295,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -1415,7 +1425,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -1544,7 +1555,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -1673,7 +1685,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -1802,7 +1815,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -1931,7 +1945,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -2060,7 +2075,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -2189,7 +2205,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -2318,7 +2335,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -2447,7 +2465,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -2576,7 +2595,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -2705,7 +2725,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -2834,7 +2855,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -2963,7 +2985,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -3092,7 +3115,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -3221,7 +3245,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -3350,7 +3375,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -3479,7 +3505,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -3608,7 +3635,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -3737,7 +3765,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -3866,7 +3895,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -3995,7 +4025,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -4124,7 +4155,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -4253,7 +4285,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -4382,7 +4415,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -4511,7 +4545,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -4640,7 +4675,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -4769,7 +4805,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -4898,7 +4935,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -5027,7 +5065,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -5156,7 +5195,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -5285,7 +5325,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -5414,7 +5455,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -5543,7 +5585,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -5672,7 +5715,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -5801,7 +5845,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -5930,7 +5975,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -6059,7 +6105,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -6188,7 +6235,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -6317,7 +6365,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -6446,7 +6495,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -6575,7 +6625,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -6704,7 +6755,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -6833,7 +6885,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -6962,7 +7015,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -7091,7 +7145,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -7220,7 +7275,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -7349,7 +7405,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -7478,7 +7535,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -7607,7 +7665,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -7736,7 +7795,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -7865,7 +7925,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -7994,7 +8055,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -8123,7 +8185,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -8252,7 +8315,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -8381,7 +8445,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -8510,7 +8575,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -8639,7 +8705,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -8768,7 +8835,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -8897,7 +8965,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -9026,7 +9095,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -9155,7 +9225,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -9284,7 +9355,8 @@
               "groupMin": 1,
               "groupMax": 1
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     },
@@ -9313,8 +9385,7 @@
               "maxLevel": 8,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 4,
@@ -9322,10 +9393,10 @@
               "minLevel": 3,
               "maxLevel": 8,
               "groupMin": 2,
-              "groupMax": 2,
-              "isBoss": false
+              "groupMax": 2
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9339,8 +9410,7 @@
               "maxLevel": 10,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 10,
@@ -9348,10 +9418,10 @@
               "minLevel": 5,
               "maxLevel": 10,
               "groupMin": 2,
-              "groupMax": 2,
-              "isBoss": false
+              "groupMax": 2
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9365,8 +9435,7 @@
               "maxLevel": 12,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 16,
@@ -9374,10 +9443,10 @@
               "minLevel": 7,
               "maxLevel": 12,
               "groupMin": 2,
-              "groupMax": 2,
-              "isBoss": false
+              "groupMax": 2
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9391,8 +9460,7 @@
               "maxLevel": 14,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 22,
@@ -9400,10 +9468,10 @@
               "minLevel": 9,
               "maxLevel": 14,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9417,8 +9485,7 @@
               "maxLevel": 16,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 28,
@@ -9426,10 +9493,10 @@
               "minLevel": 11,
               "maxLevel": 16,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9443,8 +9510,7 @@
               "maxLevel": 18,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 34,
@@ -9452,10 +9518,10 @@
               "minLevel": 13,
               "maxLevel": 18,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9469,8 +9535,7 @@
               "maxLevel": 20,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 40,
@@ -9478,10 +9543,10 @@
               "minLevel": 15,
               "maxLevel": 20,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9495,8 +9560,7 @@
               "maxLevel": 22,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 46,
@@ -9504,10 +9568,10 @@
               "minLevel": 17,
               "maxLevel": 22,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9521,8 +9585,7 @@
               "maxLevel": 23,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 52,
@@ -9530,10 +9593,10 @@
               "minLevel": 18,
               "maxLevel": 23,
               "groupMin": 5,
-              "groupMax": 5,
-              "isBoss": false
+              "groupMax": 5
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9547,8 +9610,7 @@
               "maxLevel": 25,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 58,
@@ -9556,10 +9618,10 @@
               "minLevel": 20,
               "maxLevel": 25,
               "groupMin": 5,
-              "groupMax": 5,
-              "isBoss": false
+              "groupMax": 5
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9573,8 +9635,7 @@
               "maxLevel": 27,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 64,
@@ -9582,10 +9643,10 @@
               "minLevel": 22,
               "maxLevel": 27,
               "groupMin": 5,
-              "groupMax": 5,
-              "isBoss": false
+              "groupMax": 5
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9599,8 +9660,7 @@
               "maxLevel": 29,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 70,
@@ -9608,8 +9668,7 @@
               "minLevel": 24,
               "maxLevel": 29,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 65,
@@ -9617,10 +9676,10 @@
               "minLevel": 24,
               "maxLevel": 29,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9634,8 +9693,7 @@
               "maxLevel": 31,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 76,
@@ -9643,8 +9701,7 @@
               "minLevel": 26,
               "maxLevel": 31,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 71,
@@ -9652,10 +9709,10 @@
               "minLevel": 26,
               "maxLevel": 31,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9669,8 +9726,7 @@
               "maxLevel": 33,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 82,
@@ -9678,8 +9734,7 @@
               "minLevel": 28,
               "maxLevel": 33,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 77,
@@ -9687,10 +9742,10 @@
               "minLevel": 28,
               "maxLevel": 33,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9704,8 +9759,7 @@
               "maxLevel": 35,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 88,
@@ -9713,8 +9767,7 @@
               "minLevel": 30,
               "maxLevel": 35,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 83,
@@ -9722,10 +9775,10 @@
               "minLevel": 30,
               "maxLevel": 35,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9739,8 +9792,7 @@
               "maxLevel": 38,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 94,
@@ -9748,8 +9800,7 @@
               "minLevel": 33,
               "maxLevel": 38,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 89,
@@ -9757,10 +9808,10 @@
               "minLevel": 33,
               "maxLevel": 38,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9774,8 +9825,7 @@
               "maxLevel": 38,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 100,
@@ -9783,8 +9833,7 @@
               "minLevel": 33,
               "maxLevel": 38,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 95,
@@ -9792,10 +9841,10 @@
               "minLevel": 33,
               "maxLevel": 38,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9809,8 +9858,7 @@
               "maxLevel": 40,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 106,
@@ -9818,8 +9866,7 @@
               "minLevel": 35,
               "maxLevel": 40,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 101,
@@ -9827,10 +9874,10 @@
               "minLevel": 35,
               "maxLevel": 40,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9844,8 +9891,7 @@
               "maxLevel": 42,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 112,
@@ -9853,8 +9899,7 @@
               "minLevel": 37,
               "maxLevel": 42,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 107,
@@ -9862,8 +9907,7 @@
               "minLevel": 37,
               "maxLevel": 42,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 106,
@@ -9871,10 +9915,10 @@
               "minLevel": 37,
               "maxLevel": 42,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9888,8 +9932,7 @@
               "maxLevel": 44,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 118,
@@ -9897,8 +9940,7 @@
               "minLevel": 39,
               "maxLevel": 44,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 113,
@@ -9906,8 +9948,7 @@
               "minLevel": 39,
               "maxLevel": 44,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 112,
@@ -9915,10 +9956,10 @@
               "minLevel": 39,
               "maxLevel": 44,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9932,8 +9973,7 @@
               "maxLevel": 46,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 124,
@@ -9941,8 +9981,7 @@
               "minLevel": 41,
               "maxLevel": 46,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 119,
@@ -9950,8 +9989,7 @@
               "minLevel": 41,
               "maxLevel": 46,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 118,
@@ -9959,10 +9997,10 @@
               "minLevel": 41,
               "maxLevel": 46,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -9976,8 +10014,7 @@
               "maxLevel": 48,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 130,
@@ -9985,8 +10022,7 @@
               "minLevel": 43,
               "maxLevel": 48,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 125,
@@ -9994,8 +10030,7 @@
               "minLevel": 43,
               "maxLevel": 48,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 124,
@@ -10003,10 +10038,10 @@
               "minLevel": 43,
               "maxLevel": 48,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10020,8 +10055,7 @@
               "maxLevel": 50,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 136,
@@ -10029,8 +10063,7 @@
               "minLevel": 45,
               "maxLevel": 50,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 131,
@@ -10038,8 +10071,7 @@
               "minLevel": 45,
               "maxLevel": 50,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 130,
@@ -10047,10 +10079,10 @@
               "minLevel": 45,
               "maxLevel": 50,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10064,8 +10096,7 @@
               "maxLevel": 53,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 142,
@@ -10073,8 +10104,7 @@
               "minLevel": 48,
               "maxLevel": 53,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 137,
@@ -10082,8 +10112,7 @@
               "minLevel": 48,
               "maxLevel": 53,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 136,
@@ -10091,10 +10120,10 @@
               "minLevel": 48,
               "maxLevel": 53,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10108,8 +10137,7 @@
               "maxLevel": 53,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 148,
@@ -10117,8 +10145,7 @@
               "minLevel": 48,
               "maxLevel": 53,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 143,
@@ -10126,8 +10153,7 @@
               "minLevel": 48,
               "maxLevel": 53,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 142,
@@ -10135,10 +10161,10 @@
               "minLevel": 48,
               "maxLevel": 53,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10152,8 +10178,7 @@
               "maxLevel": 55,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 154,
@@ -10161,8 +10186,7 @@
               "minLevel": 50,
               "maxLevel": 55,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 149,
@@ -10170,8 +10194,7 @@
               "minLevel": 50,
               "maxLevel": 55,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 148,
@@ -10179,10 +10202,10 @@
               "minLevel": 50,
               "maxLevel": 55,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10196,8 +10219,7 @@
               "maxLevel": 57,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 160,
@@ -10205,8 +10227,7 @@
               "minLevel": 52,
               "maxLevel": 57,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 155,
@@ -10214,8 +10235,7 @@
               "minLevel": 52,
               "maxLevel": 57,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 154,
@@ -10223,8 +10243,7 @@
               "minLevel": 52,
               "maxLevel": 57,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 149,
@@ -10232,10 +10251,10 @@
               "minLevel": 52,
               "maxLevel": 57,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10249,8 +10268,7 @@
               "maxLevel": 59,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 166,
@@ -10258,8 +10276,7 @@
               "minLevel": 54,
               "maxLevel": 59,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 161,
@@ -10267,8 +10284,7 @@
               "minLevel": 54,
               "maxLevel": 59,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 160,
@@ -10276,8 +10292,7 @@
               "minLevel": 54,
               "maxLevel": 59,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 155,
@@ -10285,10 +10300,10 @@
               "minLevel": 54,
               "maxLevel": 59,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10302,8 +10317,7 @@
               "maxLevel": 61,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 172,
@@ -10311,8 +10325,7 @@
               "minLevel": 56,
               "maxLevel": 61,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 167,
@@ -10320,8 +10333,7 @@
               "minLevel": 56,
               "maxLevel": 61,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 166,
@@ -10329,8 +10341,7 @@
               "minLevel": 56,
               "maxLevel": 61,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 161,
@@ -10338,10 +10349,10 @@
               "minLevel": 56,
               "maxLevel": 61,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10355,8 +10366,7 @@
               "maxLevel": 63,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 178,
@@ -10364,8 +10374,7 @@
               "minLevel": 58,
               "maxLevel": 63,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 173,
@@ -10373,8 +10382,7 @@
               "minLevel": 58,
               "maxLevel": 63,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 172,
@@ -10382,8 +10390,7 @@
               "minLevel": 58,
               "maxLevel": 63,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 167,
@@ -10391,10 +10398,10 @@
               "minLevel": 58,
               "maxLevel": 63,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10408,8 +10415,7 @@
               "maxLevel": 65,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 184,
@@ -10417,8 +10423,7 @@
               "minLevel": 60,
               "maxLevel": 65,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 179,
@@ -10426,8 +10431,7 @@
               "minLevel": 60,
               "maxLevel": 65,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 178,
@@ -10435,8 +10439,7 @@
               "minLevel": 60,
               "maxLevel": 65,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 173,
@@ -10444,10 +10447,10 @@
               "minLevel": 60,
               "maxLevel": 65,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10461,8 +10464,7 @@
               "maxLevel": 68,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 190,
@@ -10470,8 +10472,7 @@
               "minLevel": 63,
               "maxLevel": 68,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 185,
@@ -10479,8 +10480,7 @@
               "minLevel": 63,
               "maxLevel": 68,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 184,
@@ -10488,8 +10488,7 @@
               "minLevel": 63,
               "maxLevel": 68,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 179,
@@ -10497,10 +10496,10 @@
               "minLevel": 63,
               "maxLevel": 68,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10514,8 +10513,7 @@
               "maxLevel": 69,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 196,
@@ -10523,8 +10521,7 @@
               "minLevel": 64,
               "maxLevel": 69,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 191,
@@ -10532,8 +10529,7 @@
               "minLevel": 64,
               "maxLevel": 69,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 190,
@@ -10541,8 +10537,7 @@
               "minLevel": 64,
               "maxLevel": 69,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 185,
@@ -10550,10 +10545,10 @@
               "minLevel": 64,
               "maxLevel": 69,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10567,8 +10562,7 @@
               "maxLevel": 71,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 202,
@@ -10576,8 +10570,7 @@
               "minLevel": 66,
               "maxLevel": 71,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 197,
@@ -10585,8 +10578,7 @@
               "minLevel": 66,
               "maxLevel": 71,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 196,
@@ -10594,8 +10586,7 @@
               "minLevel": 66,
               "maxLevel": 71,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 191,
@@ -10603,8 +10594,7 @@
               "minLevel": 66,
               "maxLevel": 71,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 190,
@@ -10612,10 +10602,10 @@
               "minLevel": 66,
               "maxLevel": 71,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10629,8 +10619,7 @@
               "maxLevel": 74,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 208,
@@ -10638,8 +10627,7 @@
               "minLevel": 69,
               "maxLevel": 74,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 203,
@@ -10647,8 +10635,7 @@
               "minLevel": 69,
               "maxLevel": 74,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 202,
@@ -10656,8 +10643,7 @@
               "minLevel": 69,
               "maxLevel": 74,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 197,
@@ -10665,8 +10651,7 @@
               "minLevel": 69,
               "maxLevel": 74,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 196,
@@ -10674,10 +10659,10 @@
               "minLevel": 69,
               "maxLevel": 74,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10691,8 +10676,7 @@
               "maxLevel": 77,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 214,
@@ -10700,8 +10684,7 @@
               "minLevel": 72,
               "maxLevel": 77,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 209,
@@ -10709,8 +10692,7 @@
               "minLevel": 72,
               "maxLevel": 77,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 208,
@@ -10718,8 +10700,7 @@
               "minLevel": 72,
               "maxLevel": 77,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 203,
@@ -10727,8 +10708,7 @@
               "minLevel": 72,
               "maxLevel": 77,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 202,
@@ -10736,10 +10716,10 @@
               "minLevel": 72,
               "maxLevel": 77,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10753,8 +10733,7 @@
               "maxLevel": 80,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 220,
@@ -10762,8 +10741,7 @@
               "minLevel": 75,
               "maxLevel": 80,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 215,
@@ -10771,8 +10749,7 @@
               "minLevel": 75,
               "maxLevel": 80,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 214,
@@ -10780,8 +10757,7 @@
               "minLevel": 75,
               "maxLevel": 80,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 209,
@@ -10789,8 +10765,7 @@
               "minLevel": 75,
               "maxLevel": 80,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 208,
@@ -10798,10 +10773,10 @@
               "minLevel": 75,
               "maxLevel": 80,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10815,8 +10790,7 @@
               "maxLevel": 83,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 226,
@@ -10824,8 +10798,7 @@
               "minLevel": 78,
               "maxLevel": 83,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 221,
@@ -10833,8 +10806,7 @@
               "minLevel": 78,
               "maxLevel": 83,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 220,
@@ -10842,8 +10814,7 @@
               "minLevel": 78,
               "maxLevel": 83,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 215,
@@ -10851,8 +10822,7 @@
               "minLevel": 78,
               "maxLevel": 83,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 214,
@@ -10860,10 +10830,10 @@
               "minLevel": 78,
               "maxLevel": 83,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10877,8 +10847,7 @@
               "maxLevel": 86,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 232,
@@ -10886,8 +10855,7 @@
               "minLevel": 81,
               "maxLevel": 86,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 227,
@@ -10895,8 +10863,7 @@
               "minLevel": 81,
               "maxLevel": 86,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 226,
@@ -10904,8 +10871,7 @@
               "minLevel": 81,
               "maxLevel": 86,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 221,
@@ -10913,8 +10879,7 @@
               "minLevel": 81,
               "maxLevel": 86,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 220,
@@ -10922,10 +10887,10 @@
               "minLevel": 81,
               "maxLevel": 86,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -10939,8 +10904,7 @@
               "maxLevel": 89,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 238,
@@ -10948,8 +10912,7 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 233,
@@ -10957,8 +10920,7 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 232,
@@ -10966,8 +10928,7 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 227,
@@ -10975,8 +10936,7 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 226,
@@ -10984,10 +10944,10 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11001,8 +10961,7 @@
               "maxLevel": 89,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 244,
@@ -11010,8 +10969,7 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 239,
@@ -11019,8 +10977,7 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 238,
@@ -11028,8 +10985,7 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 233,
@@ -11037,8 +10993,7 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 232,
@@ -11046,10 +11001,10 @@
               "minLevel": 84,
               "maxLevel": 89,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11063,8 +11018,7 @@
               "maxLevel": 91,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 250,
@@ -11072,8 +11026,7 @@
               "minLevel": 86,
               "maxLevel": 91,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 245,
@@ -11081,8 +11034,7 @@
               "minLevel": 86,
               "maxLevel": 91,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 244,
@@ -11090,8 +11042,7 @@
               "minLevel": 86,
               "maxLevel": 91,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 239,
@@ -11099,8 +11050,7 @@
               "minLevel": 86,
               "maxLevel": 91,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 238,
@@ -11108,8 +11058,7 @@
               "minLevel": 86,
               "maxLevel": 91,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 233,
@@ -11117,10 +11066,10 @@
               "minLevel": 86,
               "maxLevel": 91,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11134,8 +11083,7 @@
               "maxLevel": 94,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 256,
@@ -11143,8 +11091,7 @@
               "minLevel": 89,
               "maxLevel": 94,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 251,
@@ -11152,8 +11099,7 @@
               "minLevel": 89,
               "maxLevel": 94,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 250,
@@ -11161,8 +11107,7 @@
               "minLevel": 89,
               "maxLevel": 94,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 245,
@@ -11170,8 +11115,7 @@
               "minLevel": 89,
               "maxLevel": 94,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 244,
@@ -11179,8 +11123,7 @@
               "minLevel": 89,
               "maxLevel": 94,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 239,
@@ -11188,10 +11131,10 @@
               "minLevel": 89,
               "maxLevel": 94,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11205,8 +11148,7 @@
               "maxLevel": 97,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 262,
@@ -11214,8 +11156,7 @@
               "minLevel": 92,
               "maxLevel": 97,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 257,
@@ -11223,8 +11164,7 @@
               "minLevel": 92,
               "maxLevel": 97,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 256,
@@ -11232,8 +11172,7 @@
               "minLevel": 92,
               "maxLevel": 97,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 251,
@@ -11241,8 +11180,7 @@
               "minLevel": 92,
               "maxLevel": 97,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 250,
@@ -11250,8 +11188,7 @@
               "minLevel": 92,
               "maxLevel": 97,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 245,
@@ -11259,10 +11196,10 @@
               "minLevel": 92,
               "maxLevel": 97,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11276,8 +11213,7 @@
               "maxLevel": 100,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 268,
@@ -11285,8 +11221,7 @@
               "minLevel": 95,
               "maxLevel": 100,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 263,
@@ -11294,8 +11229,7 @@
               "minLevel": 95,
               "maxLevel": 100,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 262,
@@ -11303,8 +11237,7 @@
               "minLevel": 95,
               "maxLevel": 100,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 257,
@@ -11312,8 +11245,7 @@
               "minLevel": 95,
               "maxLevel": 100,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 256,
@@ -11321,8 +11253,7 @@
               "minLevel": 95,
               "maxLevel": 100,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 251,
@@ -11330,10 +11261,10 @@
               "minLevel": 95,
               "maxLevel": 100,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11347,8 +11278,7 @@
               "maxLevel": 103,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 274,
@@ -11356,8 +11286,7 @@
               "minLevel": 98,
               "maxLevel": 103,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 269,
@@ -11365,8 +11294,7 @@
               "minLevel": 98,
               "maxLevel": 103,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 268,
@@ -11374,8 +11302,7 @@
               "minLevel": 98,
               "maxLevel": 103,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 263,
@@ -11383,8 +11310,7 @@
               "minLevel": 98,
               "maxLevel": 103,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 262,
@@ -11392,8 +11318,7 @@
               "minLevel": 98,
               "maxLevel": 103,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 257,
@@ -11401,10 +11326,10 @@
               "minLevel": 98,
               "maxLevel": 103,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11418,8 +11343,7 @@
               "maxLevel": 106,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 280,
@@ -11427,8 +11351,7 @@
               "minLevel": 101,
               "maxLevel": 106,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 275,
@@ -11436,8 +11359,7 @@
               "minLevel": 101,
               "maxLevel": 106,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 274,
@@ -11445,8 +11367,7 @@
               "minLevel": 101,
               "maxLevel": 106,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 269,
@@ -11454,8 +11375,7 @@
               "minLevel": 101,
               "maxLevel": 106,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 268,
@@ -11463,8 +11383,7 @@
               "minLevel": 101,
               "maxLevel": 106,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 263,
@@ -11472,10 +11391,10 @@
               "minLevel": 101,
               "maxLevel": 106,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11489,8 +11408,7 @@
               "maxLevel": 109,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 286,
@@ -11498,8 +11416,7 @@
               "minLevel": 104,
               "maxLevel": 109,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 281,
@@ -11507,8 +11424,7 @@
               "minLevel": 104,
               "maxLevel": 109,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 280,
@@ -11516,8 +11432,7 @@
               "minLevel": 104,
               "maxLevel": 109,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 275,
@@ -11525,8 +11440,7 @@
               "minLevel": 104,
               "maxLevel": 109,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 274,
@@ -11534,8 +11448,7 @@
               "minLevel": 104,
               "maxLevel": 109,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 269,
@@ -11543,10 +11456,10 @@
               "minLevel": 104,
               "maxLevel": 109,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11560,8 +11473,7 @@
               "maxLevel": 111,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 292,
@@ -11569,8 +11481,7 @@
               "minLevel": 106,
               "maxLevel": 111,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 287,
@@ -11578,8 +11489,7 @@
               "minLevel": 106,
               "maxLevel": 111,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 286,
@@ -11587,8 +11497,7 @@
               "minLevel": 106,
               "maxLevel": 111,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 281,
@@ -11596,8 +11505,7 @@
               "minLevel": 106,
               "maxLevel": 111,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 280,
@@ -11605,8 +11513,7 @@
               "minLevel": 106,
               "maxLevel": 111,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 275,
@@ -11614,10 +11521,10 @@
               "minLevel": 106,
               "maxLevel": 111,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11631,8 +11538,7 @@
               "maxLevel": 115,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 298,
@@ -11640,8 +11546,7 @@
               "minLevel": 110,
               "maxLevel": 115,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 293,
@@ -11649,8 +11554,7 @@
               "minLevel": 110,
               "maxLevel": 115,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 292,
@@ -11658,8 +11562,7 @@
               "minLevel": 110,
               "maxLevel": 115,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 287,
@@ -11667,8 +11570,7 @@
               "minLevel": 110,
               "maxLevel": 115,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 286,
@@ -11676,8 +11578,7 @@
               "minLevel": 110,
               "maxLevel": 115,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 281,
@@ -11685,8 +11586,7 @@
               "minLevel": 110,
               "maxLevel": 115,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 280,
@@ -11694,10 +11594,10 @@
               "minLevel": 110,
               "maxLevel": 115,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11711,8 +11611,7 @@
               "maxLevel": 119,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 304,
@@ -11720,8 +11619,7 @@
               "minLevel": 114,
               "maxLevel": 119,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 299,
@@ -11729,8 +11627,7 @@
               "minLevel": 114,
               "maxLevel": 119,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 298,
@@ -11738,8 +11635,7 @@
               "minLevel": 114,
               "maxLevel": 119,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 293,
@@ -11747,8 +11643,7 @@
               "minLevel": 114,
               "maxLevel": 119,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 292,
@@ -11756,8 +11651,7 @@
               "minLevel": 114,
               "maxLevel": 119,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 287,
@@ -11765,8 +11659,7 @@
               "minLevel": 114,
               "maxLevel": 119,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 286,
@@ -11774,10 +11667,10 @@
               "minLevel": 114,
               "maxLevel": 119,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11791,8 +11684,7 @@
               "maxLevel": 123,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 310,
@@ -11800,8 +11692,7 @@
               "minLevel": 118,
               "maxLevel": 123,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 305,
@@ -11809,8 +11700,7 @@
               "minLevel": 118,
               "maxLevel": 123,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 304,
@@ -11818,8 +11708,7 @@
               "minLevel": 118,
               "maxLevel": 123,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 299,
@@ -11827,8 +11716,7 @@
               "minLevel": 118,
               "maxLevel": 123,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 298,
@@ -11836,8 +11724,7 @@
               "minLevel": 118,
               "maxLevel": 123,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 293,
@@ -11845,8 +11732,7 @@
               "minLevel": 118,
               "maxLevel": 123,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 292,
@@ -11854,10 +11740,10 @@
               "minLevel": 118,
               "maxLevel": 123,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11871,8 +11757,7 @@
               "maxLevel": 128,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 316,
@@ -11880,8 +11765,7 @@
               "minLevel": 123,
               "maxLevel": 128,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 311,
@@ -11889,8 +11773,7 @@
               "minLevel": 123,
               "maxLevel": 128,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 310,
@@ -11898,8 +11781,7 @@
               "minLevel": 123,
               "maxLevel": 128,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 305,
@@ -11907,8 +11789,7 @@
               "minLevel": 123,
               "maxLevel": 128,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 304,
@@ -11916,8 +11797,7 @@
               "minLevel": 123,
               "maxLevel": 128,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 299,
@@ -11925,8 +11805,7 @@
               "minLevel": 123,
               "maxLevel": 128,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 298,
@@ -11934,10 +11813,10 @@
               "minLevel": 123,
               "maxLevel": 128,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -11951,8 +11830,7 @@
               "maxLevel": 132,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 322,
@@ -11960,8 +11838,7 @@
               "minLevel": 127,
               "maxLevel": 132,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 317,
@@ -11969,8 +11846,7 @@
               "minLevel": 127,
               "maxLevel": 132,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 316,
@@ -11978,8 +11854,7 @@
               "minLevel": 127,
               "maxLevel": 132,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 311,
@@ -11987,8 +11862,7 @@
               "minLevel": 127,
               "maxLevel": 132,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 310,
@@ -11996,8 +11870,7 @@
               "minLevel": 127,
               "maxLevel": 132,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 305,
@@ -12005,8 +11878,7 @@
               "minLevel": 127,
               "maxLevel": 132,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 304,
@@ -12014,10 +11886,10 @@
               "minLevel": 127,
               "maxLevel": 132,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12031,8 +11903,7 @@
               "maxLevel": 136,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 328,
@@ -12040,8 +11911,7 @@
               "minLevel": 131,
               "maxLevel": 136,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 323,
@@ -12049,8 +11919,7 @@
               "minLevel": 131,
               "maxLevel": 136,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 322,
@@ -12058,8 +11927,7 @@
               "minLevel": 131,
               "maxLevel": 136,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 317,
@@ -12067,8 +11935,7 @@
               "minLevel": 131,
               "maxLevel": 136,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 316,
@@ -12076,8 +11943,7 @@
               "minLevel": 131,
               "maxLevel": 136,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 311,
@@ -12085,8 +11951,7 @@
               "minLevel": 131,
               "maxLevel": 136,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 310,
@@ -12094,10 +11959,10 @@
               "minLevel": 131,
               "maxLevel": 136,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12111,8 +11976,7 @@
               "maxLevel": 141,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 334,
@@ -12120,8 +11984,7 @@
               "minLevel": 136,
               "maxLevel": 141,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 329,
@@ -12129,8 +11992,7 @@
               "minLevel": 136,
               "maxLevel": 141,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 328,
@@ -12138,8 +12000,7 @@
               "minLevel": 136,
               "maxLevel": 141,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 323,
@@ -12147,8 +12008,7 @@
               "minLevel": 136,
               "maxLevel": 141,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 322,
@@ -12156,8 +12016,7 @@
               "minLevel": 136,
               "maxLevel": 141,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 317,
@@ -12165,8 +12024,7 @@
               "minLevel": 136,
               "maxLevel": 141,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 316,
@@ -12174,10 +12032,10 @@
               "minLevel": 136,
               "maxLevel": 141,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12191,8 +12049,7 @@
               "maxLevel": 143,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 340,
@@ -12200,8 +12057,7 @@
               "minLevel": 138,
               "maxLevel": 143,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 335,
@@ -12209,8 +12065,7 @@
               "minLevel": 138,
               "maxLevel": 143,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 334,
@@ -12218,8 +12073,7 @@
               "minLevel": 138,
               "maxLevel": 143,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 329,
@@ -12227,8 +12081,7 @@
               "minLevel": 138,
               "maxLevel": 143,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 328,
@@ -12236,8 +12089,7 @@
               "minLevel": 138,
               "maxLevel": 143,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 323,
@@ -12245,8 +12097,7 @@
               "minLevel": 138,
               "maxLevel": 143,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 322,
@@ -12254,8 +12105,7 @@
               "minLevel": 138,
               "maxLevel": 143,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 317,
@@ -12263,10 +12113,10 @@
               "minLevel": 138,
               "maxLevel": 143,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12280,8 +12130,7 @@
               "maxLevel": 148,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 346,
@@ -12289,8 +12138,7 @@
               "minLevel": 143,
               "maxLevel": 148,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 341,
@@ -12298,8 +12146,7 @@
               "minLevel": 143,
               "maxLevel": 148,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 340,
@@ -12307,8 +12154,7 @@
               "minLevel": 143,
               "maxLevel": 148,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 335,
@@ -12316,8 +12162,7 @@
               "minLevel": 143,
               "maxLevel": 148,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 334,
@@ -12325,8 +12170,7 @@
               "minLevel": 143,
               "maxLevel": 148,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 329,
@@ -12334,8 +12178,7 @@
               "minLevel": 143,
               "maxLevel": 148,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 328,
@@ -12343,8 +12186,7 @@
               "minLevel": 143,
               "maxLevel": 148,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 323,
@@ -12352,10 +12194,10 @@
               "minLevel": 143,
               "maxLevel": 148,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12369,8 +12211,7 @@
               "maxLevel": 154,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 352,
@@ -12378,8 +12219,7 @@
               "minLevel": 149,
               "maxLevel": 154,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 347,
@@ -12387,8 +12227,7 @@
               "minLevel": 149,
               "maxLevel": 154,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 346,
@@ -12396,8 +12235,7 @@
               "minLevel": 149,
               "maxLevel": 154,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 341,
@@ -12405,8 +12243,7 @@
               "minLevel": 149,
               "maxLevel": 154,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 340,
@@ -12414,8 +12251,7 @@
               "minLevel": 149,
               "maxLevel": 154,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 335,
@@ -12423,8 +12259,7 @@
               "minLevel": 149,
               "maxLevel": 154,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 334,
@@ -12432,8 +12267,7 @@
               "minLevel": 149,
               "maxLevel": 154,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 329,
@@ -12441,10 +12275,10 @@
               "minLevel": 149,
               "maxLevel": 154,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12458,8 +12292,7 @@
               "maxLevel": 160,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 358,
@@ -12467,8 +12300,7 @@
               "minLevel": 155,
               "maxLevel": 160,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 353,
@@ -12476,8 +12308,7 @@
               "minLevel": 155,
               "maxLevel": 160,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 352,
@@ -12485,8 +12316,7 @@
               "minLevel": 155,
               "maxLevel": 160,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 347,
@@ -12494,8 +12324,7 @@
               "minLevel": 155,
               "maxLevel": 160,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 346,
@@ -12503,8 +12332,7 @@
               "minLevel": 155,
               "maxLevel": 160,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 341,
@@ -12512,8 +12340,7 @@
               "minLevel": 155,
               "maxLevel": 160,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 340,
@@ -12521,8 +12348,7 @@
               "minLevel": 155,
               "maxLevel": 160,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 335,
@@ -12530,10 +12356,10 @@
               "minLevel": 155,
               "maxLevel": 160,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12547,8 +12373,7 @@
               "maxLevel": 165,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 364,
@@ -12556,8 +12381,7 @@
               "minLevel": 160,
               "maxLevel": 165,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 359,
@@ -12565,8 +12389,7 @@
               "minLevel": 160,
               "maxLevel": 165,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 358,
@@ -12574,8 +12397,7 @@
               "minLevel": 160,
               "maxLevel": 165,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 353,
@@ -12583,8 +12405,7 @@
               "minLevel": 160,
               "maxLevel": 165,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 352,
@@ -12592,8 +12413,7 @@
               "minLevel": 160,
               "maxLevel": 165,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 347,
@@ -12601,8 +12421,7 @@
               "minLevel": 160,
               "maxLevel": 165,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 346,
@@ -12610,8 +12429,7 @@
               "minLevel": 160,
               "maxLevel": 165,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 341,
@@ -12619,10 +12437,10 @@
               "minLevel": 160,
               "maxLevel": 165,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12636,8 +12454,7 @@
               "maxLevel": 171,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 370,
@@ -12645,8 +12462,7 @@
               "minLevel": 166,
               "maxLevel": 171,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 365,
@@ -12654,8 +12470,7 @@
               "minLevel": 166,
               "maxLevel": 171,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 364,
@@ -12663,8 +12478,7 @@
               "minLevel": 166,
               "maxLevel": 171,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 359,
@@ -12672,8 +12486,7 @@
               "minLevel": 166,
               "maxLevel": 171,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 358,
@@ -12681,8 +12494,7 @@
               "minLevel": 166,
               "maxLevel": 171,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 353,
@@ -12690,8 +12502,7 @@
               "minLevel": 166,
               "maxLevel": 171,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 352,
@@ -12699,8 +12510,7 @@
               "minLevel": 166,
               "maxLevel": 171,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 347,
@@ -12708,10 +12518,10 @@
               "minLevel": 166,
               "maxLevel": 171,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12725,8 +12535,7 @@
               "maxLevel": 177,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 376,
@@ -12734,8 +12543,7 @@
               "minLevel": 172,
               "maxLevel": 177,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 371,
@@ -12743,8 +12551,7 @@
               "minLevel": 172,
               "maxLevel": 177,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 370,
@@ -12752,8 +12559,7 @@
               "minLevel": 172,
               "maxLevel": 177,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 365,
@@ -12761,8 +12567,7 @@
               "minLevel": 172,
               "maxLevel": 177,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 364,
@@ -12770,8 +12575,7 @@
               "minLevel": 172,
               "maxLevel": 177,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 359,
@@ -12779,8 +12583,7 @@
               "minLevel": 172,
               "maxLevel": 177,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 358,
@@ -12788,8 +12591,7 @@
               "minLevel": 172,
               "maxLevel": 177,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 353,
@@ -12797,10 +12599,10 @@
               "minLevel": 172,
               "maxLevel": 177,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12814,8 +12616,7 @@
               "maxLevel": 183,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 382,
@@ -12823,8 +12624,7 @@
               "minLevel": 178,
               "maxLevel": 183,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 377,
@@ -12832,8 +12632,7 @@
               "minLevel": 178,
               "maxLevel": 183,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 376,
@@ -12841,8 +12640,7 @@
               "minLevel": 178,
               "maxLevel": 183,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 371,
@@ -12850,8 +12648,7 @@
               "minLevel": 178,
               "maxLevel": 183,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 370,
@@ -12859,8 +12656,7 @@
               "minLevel": 178,
               "maxLevel": 183,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 365,
@@ -12868,8 +12664,7 @@
               "minLevel": 178,
               "maxLevel": 183,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 364,
@@ -12877,8 +12672,7 @@
               "minLevel": 178,
               "maxLevel": 183,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 359,
@@ -12886,10 +12680,10 @@
               "minLevel": 178,
               "maxLevel": 183,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -12903,8 +12697,7 @@
               "maxLevel": 181,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 388,
@@ -12912,8 +12705,7 @@
               "minLevel": 176,
               "maxLevel": 181,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 383,
@@ -12921,8 +12713,7 @@
               "minLevel": 176,
               "maxLevel": 181,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 382,
@@ -12930,8 +12721,7 @@
               "minLevel": 176,
               "maxLevel": 181,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 377,
@@ -12939,8 +12729,7 @@
               "minLevel": 176,
               "maxLevel": 181,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 376,
@@ -12948,8 +12737,7 @@
               "minLevel": 176,
               "maxLevel": 181,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 371,
@@ -12957,8 +12745,7 @@
               "minLevel": 176,
               "maxLevel": 181,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 370,
@@ -12966,8 +12753,7 @@
               "minLevel": 176,
               "maxLevel": 181,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 365,
@@ -12975,8 +12761,7 @@
               "minLevel": 176,
               "maxLevel": 181,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 364,
@@ -12984,10 +12769,10 @@
               "minLevel": 176,
               "maxLevel": 181,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -13001,8 +12786,7 @@
               "maxLevel": 185,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 394,
@@ -13010,8 +12794,7 @@
               "minLevel": 180,
               "maxLevel": 185,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 389,
@@ -13019,8 +12802,7 @@
               "minLevel": 180,
               "maxLevel": 185,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 388,
@@ -13028,8 +12810,7 @@
               "minLevel": 180,
               "maxLevel": 185,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 383,
@@ -13037,8 +12818,7 @@
               "minLevel": 180,
               "maxLevel": 185,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 382,
@@ -13046,8 +12826,7 @@
               "minLevel": 180,
               "maxLevel": 185,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 377,
@@ -13055,8 +12834,7 @@
               "minLevel": 180,
               "maxLevel": 185,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 376,
@@ -13064,8 +12842,7 @@
               "minLevel": 180,
               "maxLevel": 185,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 371,
@@ -13073,8 +12850,7 @@
               "minLevel": 180,
               "maxLevel": 185,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 370,
@@ -13082,10 +12858,10 @@
               "minLevel": 180,
               "maxLevel": 185,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -13099,8 +12875,7 @@
               "maxLevel": 189,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 400,
@@ -13108,8 +12883,7 @@
               "minLevel": 184,
               "maxLevel": 189,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 395,
@@ -13117,8 +12891,7 @@
               "minLevel": 184,
               "maxLevel": 189,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 394,
@@ -13126,8 +12899,7 @@
               "minLevel": 184,
               "maxLevel": 189,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 389,
@@ -13135,8 +12907,7 @@
               "minLevel": 184,
               "maxLevel": 189,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 388,
@@ -13144,8 +12915,7 @@
               "minLevel": 184,
               "maxLevel": 189,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 383,
@@ -13153,8 +12923,7 @@
               "minLevel": 184,
               "maxLevel": 189,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 382,
@@ -13162,8 +12931,7 @@
               "minLevel": 184,
               "maxLevel": 189,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 377,
@@ -13171,8 +12939,7 @@
               "minLevel": 184,
               "maxLevel": 189,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 376,
@@ -13180,10 +12947,10 @@
               "minLevel": 184,
               "maxLevel": 189,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -13197,8 +12964,7 @@
               "maxLevel": 193,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 406,
@@ -13206,8 +12972,7 @@
               "minLevel": 188,
               "maxLevel": 193,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 401,
@@ -13215,8 +12980,7 @@
               "minLevel": 188,
               "maxLevel": 193,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 400,
@@ -13224,8 +12988,7 @@
               "minLevel": 188,
               "maxLevel": 193,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 395,
@@ -13233,8 +12996,7 @@
               "minLevel": 188,
               "maxLevel": 193,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 394,
@@ -13242,8 +13004,7 @@
               "minLevel": 188,
               "maxLevel": 193,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 389,
@@ -13251,8 +13012,7 @@
               "minLevel": 188,
               "maxLevel": 193,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 388,
@@ -13260,8 +13020,7 @@
               "minLevel": 188,
               "maxLevel": 193,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 383,
@@ -13269,8 +13028,7 @@
               "minLevel": 188,
               "maxLevel": 193,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 382,
@@ -13278,10 +13036,10 @@
               "minLevel": 188,
               "maxLevel": 193,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -13295,8 +13053,7 @@
               "maxLevel": 198,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 412,
@@ -13304,8 +13061,7 @@
               "minLevel": 193,
               "maxLevel": 198,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 407,
@@ -13313,8 +13069,7 @@
               "minLevel": 193,
               "maxLevel": 198,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 406,
@@ -13322,8 +13077,7 @@
               "minLevel": 193,
               "maxLevel": 198,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 401,
@@ -13331,8 +13085,7 @@
               "minLevel": 193,
               "maxLevel": 198,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 400,
@@ -13340,8 +13093,7 @@
               "minLevel": 193,
               "maxLevel": 198,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 395,
@@ -13349,8 +13101,7 @@
               "minLevel": 193,
               "maxLevel": 198,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 394,
@@ -13358,8 +13109,7 @@
               "minLevel": 193,
               "maxLevel": 198,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 389,
@@ -13367,8 +13117,7 @@
               "minLevel": 193,
               "maxLevel": 198,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 388,
@@ -13376,10 +13125,10 @@
               "minLevel": 193,
               "maxLevel": 198,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -13393,8 +13142,7 @@
               "maxLevel": 202,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 418,
@@ -13402,8 +13150,7 @@
               "minLevel": 197,
               "maxLevel": 202,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 413,
@@ -13411,8 +13158,7 @@
               "minLevel": 197,
               "maxLevel": 202,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 412,
@@ -13420,8 +13166,7 @@
               "minLevel": 197,
               "maxLevel": 202,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 407,
@@ -13429,8 +13174,7 @@
               "minLevel": 197,
               "maxLevel": 202,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 406,
@@ -13438,8 +13182,7 @@
               "minLevel": 197,
               "maxLevel": 202,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 401,
@@ -13447,8 +13190,7 @@
               "minLevel": 197,
               "maxLevel": 202,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 400,
@@ -13456,8 +13198,7 @@
               "minLevel": 197,
               "maxLevel": 202,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 395,
@@ -13465,8 +13206,7 @@
               "minLevel": 197,
               "maxLevel": 202,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 394,
@@ -13474,10 +13214,10 @@
               "minLevel": 197,
               "maxLevel": 202,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -13491,8 +13231,7 @@
               "maxLevel": 206,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 424,
@@ -13500,8 +13239,7 @@
               "minLevel": 201,
               "maxLevel": 206,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 419,
@@ -13509,8 +13247,7 @@
               "minLevel": 201,
               "maxLevel": 206,
               "groupMin": 4,
-              "groupMax": 4,
-              "isBoss": false
+              "groupMax": 4
             },
             {
               "enemyId": 418,
@@ -13518,8 +13255,7 @@
               "minLevel": 201,
               "maxLevel": 206,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 413,
@@ -13527,8 +13263,7 @@
               "minLevel": 201,
               "maxLevel": 206,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 412,
@@ -13536,8 +13271,7 @@
               "minLevel": 201,
               "maxLevel": 206,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 407,
@@ -13545,8 +13279,7 @@
               "minLevel": 201,
               "maxLevel": 206,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 406,
@@ -13554,8 +13287,7 @@
               "minLevel": 201,
               "maxLevel": 206,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 401,
@@ -13563,8 +13295,7 @@
               "minLevel": 201,
               "maxLevel": 206,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 400,
@@ -13572,10 +13303,10 @@
               "minLevel": 201,
               "maxLevel": 206,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         },
         {
           "floorRange": [
@@ -13589,8 +13320,7 @@
               "maxLevel": 211,
               "weight": 100.0,
               "groupMin": 1,
-              "groupMax": 1,
-              "isBoss": true
+              "groupMax": 1
             },
             {
               "enemyId": 430,
@@ -13598,8 +13328,7 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 425,
@@ -13607,8 +13336,7 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 424,
@@ -13616,8 +13344,7 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 419,
@@ -13625,8 +13352,7 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 418,
@@ -13634,8 +13360,7 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 413,
@@ -13643,8 +13368,7 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 412,
@@ -13652,8 +13376,7 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 407,
@@ -13661,8 +13384,7 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 406,
@@ -13670,8 +13392,7 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             },
             {
               "enemyId": 401,
@@ -13679,10 +13400,10 @@
               "minLevel": 206,
               "maxLevel": 211,
               "groupMin": 3,
-              "groupMax": 3,
-              "isBoss": false
+              "groupMax": 3
             }
-          ]
+          ],
+          "isBoss": true
         }
       ]
     }
