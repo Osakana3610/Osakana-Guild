@@ -244,8 +244,8 @@ struct BattleLogRenderer {
         // 物理攻撃結果
         case .physicalDamage:
             let target = targetName ?? "対象"
-            let dmg = value ?? 0
-            return ("\(actorName)の攻撃！\(target)に\(dmg)のダメージ！", .damage)
+            let damage = value ?? 0
+            return ("\(actorName)の攻撃！\(target)に\(damage)のダメージ！", .damage)
         case .physicalEvade:
             let target = targetName ?? "対象"
             return ("\(actorName)の攻撃！\(target)は攻撃をかわした！", .miss)
@@ -262,8 +262,8 @@ struct BattleLogRenderer {
         // 魔法結果
         case .magicDamage:
             let target = targetName ?? "対象"
-            let dmg = value ?? 0
-            return ("\(target)に\(dmg)のダメージ！", .damage)
+            let damage = value ?? 0
+            return ("\(target)に\(damage)のダメージ！", .damage)
         case .magicHeal:
             let target = targetName ?? "対象"
             let heal = value ?? 0
@@ -274,8 +274,8 @@ struct BattleLogRenderer {
         // ブレス結果
         case .breathDamage:
             let target = targetName ?? "対象"
-            let dmg = value ?? 0
-            return ("\(target)に\(dmg)のダメージ！", .damage)
+            let damage = value ?? 0
+            return ("\(target)に\(damage)のダメージ！", .damage)
 
         // 状態異常
         case .statusInflict:
@@ -289,8 +289,8 @@ struct BattleLogRenderer {
             return ("\(target)の状態異常が治った", .status)
         case .statusTick:
             let target = targetName ?? "対象"
-            let dmg = value ?? 0
-            return ("\(target)は継続ダメージで\(dmg)のダメージ！", .damage)
+            let damage = value ?? 0
+            return ("\(target)は継続ダメージで\(damage)のダメージ！", .damage)
         case .statusConfusion:
             return ("\(actorName)は暴走して混乱した！", .status)
         case .statusRampage:
@@ -317,8 +317,8 @@ struct BattleLogRenderer {
             let heal = value ?? 0
             return ("\(actorName)は自身の効果で\(heal)回復", .heal)
         case .damageSelf:
-            let dmg = value ?? 0
-            return ("\(actorName)は自身の効果で\(dmg)ダメージ", .damage)
+            let damage = value ?? 0
+            return ("\(actorName)は自身の効果で\(damage)ダメージ", .damage)
 
         // バフ
         case .buffApply:
@@ -359,8 +359,8 @@ struct BattleLogRenderer {
             return ("\(actorName)の特殊攻撃！", .action)
         case .enemySpecialDamage:
             let target = targetName ?? "対象"
-            let dmg = value ?? 0
-            return ("\(target)に\(dmg)のダメージ！", .damage)
+            let damage = value ?? 0
+            return ("\(target)に\(damage)のダメージ！", .damage)
         case .enemySpecialHeal:
             let heal = value ?? 0
             return ("\(actorName)は\(heal)回復した！", .heal)
