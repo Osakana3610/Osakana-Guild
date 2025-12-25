@@ -124,6 +124,7 @@ final class BattleLogActionRecord {
 /// 戦闘参加者レコード
 @Model
 final class BattleLogParticipantRecord {
+    var orderIndex: UInt8 = 0     // 表示順序（SwiftDataは配列順序を保証しないため）
     var isPlayer: Bool = true
     var actorId: String = ""
     var partyMemberId: UInt8 = 0  // 0 = nil
