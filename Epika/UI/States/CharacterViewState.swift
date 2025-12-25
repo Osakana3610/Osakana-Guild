@@ -86,17 +86,17 @@ final class CharacterViewState {
             for await _ in center.notifications(named: .characterProgressDidChange) {
                 if Task.isCancelled { break }
                 guard let self else { break }
-                await self.reloadAfterCharacterProgressChange(using: appServices)
+                self.reloadAfterCharacterProgressChange(using: appServices)
             }
         }
     }
 
-    func loadCharacterSummaries(using appServices: AppServices) async throws {
+    func loadCharacterSummaries(using appServices: AppServices) throws {
         if isLoadingSummaries { return }
         isLoadingSummaries = true
         defer { isLoadingSummaries = false }
 
-        let snapshots = try await appServices.character.allCharacters()
+        let snapshots = try appServices.character.allCharacters()
         if snapshots.isEmpty {
             summaries = []
             return
@@ -115,16 +115,16 @@ final class CharacterViewState {
         .sorted { $0.displayOrder < $1.displayOrder }
     }
 
-    func loadAllCharacters(using appServices: AppServices) async throws {
+    func loadAllCharacters(using appServices: AppServices) throws {
         if isLoadingAll { return }
         isLoadingAll = true
         defer { isLoadingAll = false }
 
         let characterService = appServices.character
-        let snapshots = try await characterService.allCharacters()
+        let snapshots = try characterService.allCharacters()
         var buffer: [RuntimeCharacter] = []
         for snapshot in snapshots {
-            let character = try await characterService.runtimeCharacter(from: snapshot)
+            let character = try characterService.runtimeCharacter(from: snapshot)
             buffer.append(character)
         }
         // allCharacters()が既にdisplayOrder順で返すので、その順序を維持
@@ -132,10 +132,10 @@ final class CharacterViewState {
     }
 
     @MainActor
-    private func reloadAfterCharacterProgressChange(using appServices: AppServices) async {
+    private func reloadAfterCharacterProgressChange(using appServices: AppServices) {
         do {
-            try await loadAllCharacters(using: appServices)
-            try await loadCharacterSummaries(using: appServices)
+            try loadAllCharacters(using: appServices)
+            try loadCharacterSummaries(using: appServices)
         } catch {
             assertionFailure("キャラクターデータの再読み込みに失敗しました: \(error)")
         }

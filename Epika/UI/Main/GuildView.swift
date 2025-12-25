@@ -222,12 +222,10 @@ struct GuildView: View {
         let fallenIds = fallenSummaries.map(\.id)
         let orderedIds = aliveIds + fallenIds
 
-        Task {
-            do {
-                try await appServices.character.reorderCharacters(orderedIds: orderedIds)
-            } catch {
-                errorMessage = "並び替えに失敗しました: \(error.localizedDescription)"
-            }
+        do {
+            try appServices.character.reorderCharacters(orderedIds: orderedIds)
+        } catch {
+            errorMessage = "並び替えに失敗しました: \(error.localizedDescription)"
         }
     }
 }
@@ -301,13 +299,13 @@ private struct LazyRuntimeCharacterDetailView: View {
             if let runtimeCharacter {
                 CharacterDetailContent(character: runtimeCharacter,
                                       onRename: { newName in
-                                          try await renameCharacter(to: newName)
+                                          try renameCharacter(to: newName)
                                       },
                                       onAvatarChange: { identifier in
-                                          try await changeAvatar(to: identifier)
+                                          try changeAvatar(to: identifier)
                                       },
                                       onActionPreferencesChange: { preferences in
-                                          try await updateActionPreferences(to: preferences)
+                                          try updateActionPreferences(to: preferences)
                                       })
                     .navigationTitle(runtimeCharacter.name)
                     .navigationBarTitleDisplayMode(.inline)
@@ -341,8 +339,8 @@ private struct LazyRuntimeCharacterDetailView: View {
         errorMessage = nil
         defer { isLoading = false }
         do {
-            if let progress = try await characterService.character(withId: characterId) {
-                runtimeCharacter = try await characterService.runtimeCharacter(from: progress)
+            if let progress = try characterService.character(withId: characterId) {
+                runtimeCharacter = try characterService.runtimeCharacter(from: progress)
             } else {
                 throw RuntimeError.missingProgressData(reason: "Character not found")
             }
@@ -352,7 +350,7 @@ private struct LazyRuntimeCharacterDetailView: View {
     }
 
     @MainActor
-    private func renameCharacter(to newName: String) async throws {
+    private func renameCharacter(to newName: String) throws {
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             throw ProgressError.invalidInput(description: "キャラクター名を入力してください")
@@ -360,32 +358,32 @@ private struct LazyRuntimeCharacterDetailView: View {
         if trimmed == runtimeCharacter?.name {
             return
         }
-        let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
+        let snapshot = try characterService.updateCharacter(id: characterId) { snapshot in
             snapshot.displayName = trimmed
         }
-        runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
+        runtimeCharacter = try characterService.runtimeCharacter(from: snapshot)
     }
 
     @MainActor
-    private func changeAvatar(to avatarId: UInt16) async throws {
+    private func changeAvatar(to avatarId: UInt16) throws {
         if let current = runtimeCharacter, current.avatarId == avatarId {
             return
         }
-        let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
+        let snapshot = try characterService.updateCharacter(id: characterId) { snapshot in
             snapshot.avatarId = avatarId
         }
-        runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
+        runtimeCharacter = try characterService.runtimeCharacter(from: snapshot)
     }
 
     @MainActor
-    private func updateActionPreferences(to newPreferences: CharacterSnapshot.ActionPreferences) async throws {
+    private func updateActionPreferences(to newPreferences: CharacterSnapshot.ActionPreferences) throws {
         let normalized = CharacterSnapshot.ActionPreferences.normalized(attack: newPreferences.attack,
                                                                         priestMagic: newPreferences.priestMagic,
                                                                         mageMagic: newPreferences.mageMagic,
                                                                         breath: newPreferences.breath)
-        let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
+        let snapshot = try characterService.updateCharacter(id: characterId) { snapshot in
             snapshot.actionPreferences = normalized
         }
-        runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
+        runtimeCharacter = try characterService.runtimeCharacter(from: snapshot)
     }
 }

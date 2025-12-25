@@ -206,7 +206,7 @@ extension AppServices {
                                  experienceDelta: gained,
                                  hpDelta: 0))
         }
-        try await character.applyBattleResults(updates)
+        try character.applyBattleResults(updates)
 
         if summary.goldEarned > 0 {
             let multiplier = partyGoldMultiplier(for: runtimeCharactersById.values)
@@ -228,7 +228,7 @@ extension AppServices {
             let updates = share.map { CharacterProgressService.BattleResultUpdate(characterId: $0.key,
                                                                                   experienceDelta: $0.value,
                                                                                   hpDelta: 0) }
-            try await character.applyBattleResults(updates)
+            try character.applyBattleResults(updates)
         }
         if goldBase > 0 {
             _ = try await gameState.addGold(UInt32(goldBase))

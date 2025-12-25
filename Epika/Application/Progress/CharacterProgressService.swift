@@ -41,7 +41,8 @@
 import Foundation
 import SwiftData
 
-actor CharacterProgressService {
+@MainActor
+final class CharacterProgressService {
     struct CharacterCreationRequest: Sendable {
         var displayName: String
         var raceId: UInt8
@@ -81,25 +82,25 @@ actor CharacterProgressService {
 
     // MARK: - Read Operations
 
-    func allCharacters() async throws -> [CharacterSnapshot] {
+    func allCharacters() throws -> [CharacterSnapshot] {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>()
         descriptor.sortBy = [SortDescriptor(\CharacterRecord.displayOrder, order: .forward)]
         let records = try context.fetch(descriptor)
-        return try await makeSnapshots(records, context: context)
+        return try makeSnapshots(records, context: context)
     }
 
-    func character(withId id: UInt8) async throws -> CharacterSnapshot? {
+    func character(withId id: UInt8) throws -> CharacterSnapshot? {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
             return nil
         }
-        return try await makeSnapshot(record, context: context)
+        return try makeSnapshot(record, context: context)
     }
 
-    func characters(withIds ids: [UInt8]) async throws -> [CharacterSnapshot] {
+    func characters(withIds ids: [UInt8]) throws -> [CharacterSnapshot] {
         guard !ids.isEmpty else { return [] }
         let context = makeContext()
         let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { ids.contains($0.id) })
@@ -121,7 +122,7 @@ actor CharacterProgressService {
             let identifierList = missing.map { String($0) }.joined(separator: ", ")
             throw ProgressError.invalidInput(description: "キャラクターが見つかりません (ID: \(identifierList))")
         }
-        return try await makeSnapshots(ordered, context: context)
+        return try makeSnapshots(ordered, context: context)
     }
 
     func runtimeCharacter(from snapshot: CharacterSnapshot) throws -> RuntimeCharacter {
@@ -235,7 +236,7 @@ actor CharacterProgressService {
 
     // MARK: - Create
 
-    func createCharacter(_ request: CharacterCreationRequest) async throws -> CharacterSnapshot {
+    func createCharacter(_ request: CharacterCreationRequest) throws -> CharacterSnapshot {
         let trimmedName = request.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw ProgressError.invalidInput(description: "キャラクター名が設定されていません")
@@ -278,7 +279,7 @@ actor CharacterProgressService {
         try context.save()
 
         // ステータス計算を行い、maxHPを取得してrecordに書き戻す
-        let snapshot = try await makeSnapshot(record, context: context)
+        let snapshot = try makeSnapshot(record, context: context)
         record.currentHP = UInt32(snapshot.hitPoints.maximum)
         try context.save()
 
@@ -347,9 +348,7 @@ actor CharacterProgressService {
             // 指定レベルに必要な経験値を計算
             let experience: UInt64
             if effectiveLevel > 1 {
-                let rawExperience = try await MainActor.run {
-                    try CharacterExperienceTable.totalExperience(toReach: effectiveLevel)
-                }
+                let rawExperience = try CharacterExperienceTable.totalExperience(toReach: effectiveLevel)
                 experience = UInt64(rawExperience)
             } else {
                 experience = 0
@@ -389,9 +388,7 @@ actor CharacterProgressService {
         let pandoraStackKeys = (try? fetchPandoraBoxStackKeys(context: context)) ?? []
         for record in allRecords where createdIdSet.contains(record.id) {
             let input = try loadInput(record, context: context)
-            let runtimeCharacter = try await MainActor.run {
-                try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxStackKeys: pandoraStackKeys)
-            }
+            let runtimeCharacter = try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxStackKeys: pandoraStackKeys)
             record.currentHP = UInt32(runtimeCharacter.maxHP)
         }
         try context.save()
@@ -403,29 +400,29 @@ actor CharacterProgressService {
     // MARK: - Update
 
     func updateCharacter(id: UInt8,
-                         mutate: @Sendable (inout CharacterSnapshot) throws -> Void) async throws -> CharacterSnapshot {
+                         mutate: @Sendable (inout CharacterSnapshot) throws -> Void) throws -> CharacterSnapshot {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
             throw ProgressError.characterNotFound
         }
-        var snapshot = try await makeSnapshot(record, context: context)
+        var snapshot = try makeSnapshot(record, context: context)
         try mutate(&snapshot)
         if snapshot.experience < 0 {
             throw ProgressError.invalidInput(description: "経験値は0以上である必要があります")
         }
-        let clampedExperience = try await clampExperience(snapshot.experience, raceId: snapshot.raceId)
+        let clampedExperience = try clampExperience(snapshot.experience, raceId: snapshot.raceId)
         snapshot.experience = clampedExperience
-        let normalizedLevel = try await resolveLevel(for: clampedExperience, raceId: snapshot.raceId)
+        let normalizedLevel = try resolveLevel(for: clampedExperience, raceId: snapshot.raceId)
         snapshot.level = normalizedLevel
         apply(snapshot: snapshot, to: record)
         try context.save()
         notifyCharacterProgressDidChange()
-        return try await makeSnapshot(record, context: context)
+        return try makeSnapshot(record, context: context)
     }
 
-    func applyBattleResults(_ updates: [BattleResultUpdate]) async throws {
+    func applyBattleResults(_ updates: [BattleResultUpdate]) throws {
         guard !updates.isEmpty else { return }
         let context = makeContext()
         let ids = updates.map { $0.characterId }
@@ -445,9 +442,9 @@ actor CharacterProgressService {
                 }
                 let updatedExperience = max(0, Int(addition.partialValue))
 
-                let cappedExperience = try await clampExperience(updatedExperience, raceId: record.raceId)
+                let cappedExperience = try clampExperience(updatedExperience, raceId: record.raceId)
                 record.experience = UInt64(cappedExperience)
-                let computedLevel = try await resolveLevel(for: cappedExperience, raceId: record.raceId)
+                let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
                 if computedLevel != Int(previousLevel) {
                     record.level = UInt8(computedLevel)
                 }
@@ -461,7 +458,7 @@ actor CharacterProgressService {
         notifyCharacterProgressDidChange()
     }
 
-    func updateHP(characterId: UInt8, newHP: UInt32) async throws {
+    func updateHP(characterId: UInt8, newHP: UInt32) throws {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
         descriptor.fetchLimit = 1
@@ -475,7 +472,7 @@ actor CharacterProgressService {
 
     /// HP > 0 のキャラクターを全回復する
     /// - Parameter characterIds: 対象キャラクターID配列
-    func healToFull(characterIds: [UInt8]) async throws {
+    func healToFull(characterIds: [UInt8]) throws {
         guard !characterIds.isEmpty else { return }
         let context = makeContext()
         let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { characterIds.contains($0.id) })
@@ -489,9 +486,7 @@ actor CharacterProgressService {
             // maxHPを計算
             let input = try loadInput(record, context: context)
             let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
-            let runtimeCharacter = try await MainActor.run {
-                try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxStackKeys: pandoraStackKeys)
-            }
+            let runtimeCharacter = try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxStackKeys: pandoraStackKeys)
             let maxHP = UInt32(runtimeCharacter.maxHP)
 
             if record.currentHP < maxHP {
@@ -513,7 +508,7 @@ actor CharacterProgressService {
     ///   - characterId: キャラクターID
     ///   - newJobId: 新しい職業ID（1〜16: 通常職、101〜116: マスター職）
     /// - Returns: 更新後のスナップショット
-    func changeJob(characterId: UInt8, newJobId: UInt8) async throws -> CharacterSnapshot {
+    func changeJob(characterId: UInt8, newJobId: UInt8) throws -> CharacterSnapshot {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
         descriptor.fetchLimit = 1
@@ -565,12 +560,12 @@ actor CharacterProgressService {
 
         try context.save()
         notifyCharacterProgressDidChange()
-        return try await makeSnapshot(record, context: context)
+        return try makeSnapshot(record, context: context)
     }
 
     // MARK: - Delete
 
-    func deleteCharacter(id: UInt8) async throws {
+    func deleteCharacter(id: UInt8) throws {
         let context = makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
@@ -592,7 +587,7 @@ actor CharacterProgressService {
 
     /// キャラクターの表示順序を更新
     /// - Parameter orderedIds: 新しい順序でのキャラクターID配列
-    func reorderCharacters(orderedIds: [UInt8]) async throws {
+    func reorderCharacters(orderedIds: [UInt8]) throws {
         guard !orderedIds.isEmpty else { return }
         let context = makeContext()
         let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { orderedIds.contains($0.id) })
@@ -617,13 +612,14 @@ actor CharacterProgressService {
 
     // MARK: - Equipment Management
 
-    /// キャラクターにアイテムを装備
+    /// キャラクターにアイテムを装備（軽量版）
     /// - Parameters:
     ///   - characterId: キャラクターID
     ///   - inventoryItemStackKey: 装備するアイテムのstackKey
     ///   - quantity: 装備数量（デフォルト1）
-    ///   - knownEquipmentCapacity: 呼び出し元が既に知っている装備上限（nilの場合は内部で計算）
-    func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1, knownEquipmentCapacity: Int? = nil) async throws -> CharacterSnapshot {
+    ///   - equipmentCapacity: 装備上限（呼び出し元が既に持っているRuntimeCharacterから取得）
+    /// - Returns: 更新後の装備リスト
+    func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1, equipmentCapacity: Int) throws -> [CharacterSnapshot.EquippedItem] {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "装備数量は1以上である必要があります")
         }
@@ -634,13 +630,6 @@ actor CharacterProgressService {
         }
 
         let context = makeContext()
-
-        // キャラクターの取得
-        var characterDescriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
-        characterDescriptor.fetchLimit = 1
-        guard let characterRecord = try context.fetch(characterDescriptor).first else {
-            throw ProgressError.invalidInput(description: "キャラクターが見つかりません")
-        }
 
         // 探索中のキャラクターは装備変更不可
         if try isCharacterExploring(characterId: characterId, context: context) {
@@ -677,22 +666,6 @@ actor CharacterProgressService {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let currentEquipment = try context.fetch(equipmentDescriptor)
 
-        // 装備可能数を取得（呼び出し元から渡された場合はそれを使用、なければ計算）
-        let equipmentCapacity: Int
-        if let known = knownEquipmentCapacity {
-            equipmentCapacity = known
-        } else {
-            let input = try loadInput(characterRecord, context: context)
-            let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
-            let runtimeCharacter = try await MainActor.run {
-                try RuntimeCharacterFactory.make(
-                    from: input,
-                    masterData: masterData,
-                    pandoraBoxStackKeys: pandoraStackKeys
-                )
-            }
-            equipmentCapacity = runtimeCharacter.equipmentCapacity
-        }
         if currentEquipment.count + quantity > equipmentCapacity {
             throw ProgressError.invalidInput(description: "装備数が上限(\(equipmentCapacity)個)を超えます")
         }
@@ -720,11 +693,14 @@ actor CharacterProgressService {
         try context.save()
 
         notifyCharacterProgressDidChange()
-        return try await makeSnapshot(characterRecord, context: context)
+
+        // 更新後の装備リストを返す（軽量版）
+        return try fetchEquippedItems(characterId: characterId, context: context)
     }
 
-    /// キャラクターからアイテムを解除（stackKeyで指定、quantity個）
-    func unequipItem(characterId: UInt8, equipmentStackKey: String, quantity: Int = 1) async throws -> CharacterSnapshot {
+    /// キャラクターからアイテムを解除（軽量版）
+    /// - Returns: 更新後の装備リスト
+    func unequipItem(characterId: UInt8, equipmentStackKey: String, quantity: Int = 1) throws -> [CharacterSnapshot.EquippedItem] {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "解除数量は1以上である必要があります")
         }
@@ -735,13 +711,6 @@ actor CharacterProgressService {
         }
 
         let context = makeContext()
-
-        // キャラクターの取得
-        var characterDescriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
-        characterDescriptor.fetchLimit = 1
-        guard let characterRecord = try context.fetch(characterDescriptor).first else {
-            throw ProgressError.invalidInput(description: "キャラクターが見つかりません")
-        }
 
         // 探索中のキャラクターは装備変更不可
         if try isCharacterExploring(characterId: characterId, context: context) {
@@ -811,11 +780,42 @@ actor CharacterProgressService {
         try context.save()
 
         notifyCharacterProgressDidChange()
-        return try await makeSnapshot(characterRecord, context: context)
+
+        // 更新後の装備リストを返す（軽量版）
+        return try fetchEquippedItems(characterId: characterId, context: context)
+    }
+
+    /// 装備リストを取得（内部ヘルパー、既存contextを使用）
+    private func fetchEquippedItems(characterId: UInt8, context: ModelContext) throws -> [CharacterSnapshot.EquippedItem] {
+        let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
+        let records = try context.fetch(descriptor)
+
+        // stackKeyでグループ化してquantityを計算
+        var grouped: [String: (record: CharacterEquipmentRecord, count: Int)] = [:]
+        for record in records {
+            let key = record.stackKey
+            if let existing = grouped[key] {
+                grouped[key] = (existing.record, existing.count + 1)
+            } else {
+                grouped[key] = (record, 1)
+            }
+        }
+
+        return grouped.values.map { (record, count) in
+            CharacterSnapshot.EquippedItem(
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                itemId: record.itemId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketItemId: record.socketItemId,
+                quantity: count
+            )
+        }
     }
 
     /// キャラクターの装備一覧を取得
-    func equippedItems(characterId: UInt8) async throws -> [CharacterSnapshot.EquippedItem] {
+    func equippedItems(characterId: UInt8) throws -> [CharacterSnapshot.EquippedItem] {
         let context = makeContext()
         let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let records = try context.fetch(descriptor)
@@ -848,12 +848,10 @@ actor CharacterProgressService {
 // MARK: - Private Helpers
 
 private extension CharacterProgressService {
-    func resolveLevel(for experience: Int, raceId: UInt8) async throws -> Int {
+    func resolveLevel(for experience: Int, raceId: UInt8) throws -> Int {
         let maxLevel = try raceMaxLevel(for: raceId)
         do {
-            return try await MainActor.run {
-                try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
-            }
+            return try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
         } catch CharacterExperienceError.invalidLevel {
             throw ProgressError.invalidInput(description: "経験値テーブルに無効なレベル要求が行われました")
         } catch CharacterExperienceError.invalidExperience {
@@ -875,20 +873,18 @@ private extension CharacterProgressService {
         return resolved
     }
 
-    func clampExperience(_ experience: Int, raceId: UInt8) async throws -> Int {
+    func clampExperience(_ experience: Int, raceId: UInt8) throws -> Int {
         guard experience > 0 else { return 0 }
-        let maximum = try await raceMaxExperience(for: raceId)
+        let maximum = try raceMaxExperience(for: raceId)
         return min(experience, maximum)
     }
 
-    func raceMaxExperience(for raceId: UInt8) async throws -> Int {
+    func raceMaxExperience(for raceId: UInt8) throws -> Int {
         if let cached = raceMaxExperienceCache[raceId] {
             return cached
         }
         let maxLevel = try raceMaxLevel(for: raceId)
-        let maximumExperience = try await MainActor.run {
-            try CharacterExperienceTable.totalExperience(toReach: maxLevel)
-        }
+        let maximumExperience = try CharacterExperienceTable.totalExperience(toReach: maxLevel)
         raceMaxExperienceCache[raceId] = maximumExperience
         return maximumExperience
     }
@@ -899,29 +895,27 @@ private extension CharacterProgressService {
         return context
     }
 
-    func makeSnapshots(_ records: [CharacterRecord], context: ModelContext) async throws -> [CharacterSnapshot] {
+    func makeSnapshots(_ records: [CharacterRecord], context: ModelContext) throws -> [CharacterSnapshot] {
         var snapshots: [CharacterSnapshot] = []
         snapshots.reserveCapacity(records.count)
         for record in records {
-            let snapshot = try await makeSnapshot(record, context: context)
+            let snapshot = try makeSnapshot(record, context: context)
             snapshots.append(snapshot)
         }
         return snapshots
     }
 
-    func makeSnapshot(_ record: CharacterRecord, context: ModelContext) async throws -> CharacterSnapshot {
+    func makeSnapshot(_ record: CharacterRecord, context: ModelContext) throws -> CharacterSnapshot {
         // CharacterInput を作成
         let input = try loadInput(record, context: context)
 
         // RuntimeCharacterFactory で計算済み RuntimeCharacter を取得
         let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
-        let runtimeCharacter = try await MainActor.run {
-            try RuntimeCharacterFactory.make(
-                from: input,
-                masterData: masterData,
-                pandoraBoxStackKeys: pandoraStackKeys
-            )
-        }
+        let runtimeCharacter = try RuntimeCharacterFactory.make(
+            from: input,
+            masterData: masterData,
+            pandoraBoxStackKeys: pandoraStackKeys
+        )
 
         // RuntimeCharacter から CharacterSnapshot を構築
         let now = Date()
