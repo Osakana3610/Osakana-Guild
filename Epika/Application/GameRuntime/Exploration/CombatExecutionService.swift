@@ -60,10 +60,9 @@ struct CombatExecutionService {
             // 勝利時は全敵倒されたとみなす
             var dropRandom = random
             let dropOutcome = try DropService.drops(masterData: masterData,
-                                                    for: resolution.enemies,
+                                                    for: resolution.encounteredEnemies,
                                                     party: party,
                                                     dungeonId: dungeon.id,
-                                                    chapter: dungeon.chapter,
                                                     floorNumber: floor.floorNumber,
                                                     droppedItemIds: droppedItemIds,
                                                     dailySuperRareState: updatedSuperRareState,

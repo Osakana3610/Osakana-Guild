@@ -108,18 +108,17 @@ struct ExplorationEngine {
         let floor = preparation.floors[state.floorIndex]
         let scriptedCandidates = preparation.scriptEventsByFloor[floor.floorNumber] ?? []
         let hasScripted = !scriptedCandidates.isEmpty
-        let isBossFloor = (state.floorIndex == preparation.targetFloorNumber - 1)
-        let isFinalEvent = isBossFloor && (state.eventIndex == preparation.eventsPerFloor - 1)
+        let isLastEventOfFloor = (state.eventIndex == preparation.eventsPerFloor - 1)
 
         // ボス敵と通常敵を分けて取得
         let bossEvents = bossEncounterEventsForFloor(floor, tables: preparation.encounterTablesById)
         let normalEvents = normalEncounterEventsForFloor(floor, tables: preparation.encounterTablesById)
         let hasBoss = !bossEvents.isEmpty
 
-        // 最終フロアの最後のイベントでボスがいる場合は強制ボス戦
+        // フロアの最後のイベントでボスがいる場合は強制ボス戦
         let encounterEvents: [EncounterTableDefinition.Event]
         let category: ExplorationEventScheduler.Category
-        if isFinalEvent && hasBoss {
+        if isLastEventOfFloor && hasBoss {
             encounterEvents = bossEvents
             category = .combat
         } else {

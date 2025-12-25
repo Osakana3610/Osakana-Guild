@@ -21,10 +21,9 @@ import Foundation
 /// 敵撃破時の戦利品計算を担当するサービス。
 enum DropService {
     static func drops(masterData: MasterDataCache,
-                      for enemies: [EnemyDefinition],
+                      for encounteredEnemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
                       party: RuntimePartyState,
                       dungeonId: UInt16? = nil,
-                      chapter: Int,
                       floorNumber: Int? = nil,
                       droppedItemIds: Set<UInt16> = [],
                       isRabiTicketActive: Bool = false,
@@ -32,7 +31,7 @@ enum DropService {
                       enemyTitleId: UInt8? = nil,
                       dailySuperRareState: SuperRareDailyState,
                       random: inout GameRandomSource) throws -> DropOutcome {
-        guard !enemies.isEmpty else {
+        guard !encounteredEnemies.isEmpty else {
             return DropOutcome(results: [], superRareState: dailySuperRareState, newlyDroppedItemIds: [])
         }
         let partyBonuses = party.makeDropBonuses()
@@ -48,7 +47,8 @@ enum DropService {
         var newlyDroppedItemIds: Set<UInt16> = []
 
         // 1. レアアイテム（敵マスタのdrops配列）を処理
-        for enemy in enemies {
+        for encountered in encounteredEnemies {
+            let enemy = encountered.definition
             for itemId in enemy.drops {
                 // ドロップ済みセットに含まれるアイテムは候補から除外
                 guard !droppedItemIds.contains(itemId) else { continue }
@@ -88,11 +88,10 @@ enum DropService {
             }
         }
 
-        // 2. ノーマルアイテム（敵種族・ダンジョン章から動的生成）を処理
+        // 2. ノーマルアイテム（敵種族・レベルから動的生成）を処理
         let combinedDroppedIds = droppedItemIds.union(newlyDroppedItemIds)
         let normalCandidates = try NormalItemDropGenerator.candidates(
-            for: enemies,
-            chapter: chapter,
+            for: encounteredEnemies,
             masterData: masterData,
             droppedItemIds: combinedDroppedIds,
             random: &random

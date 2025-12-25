@@ -4,12 +4,12 @@
 // ==============================================================================
 //
 // 【責務】
-//   - 敵種族とダンジョン章に基づいてノーマルアイテムの候補を動的生成
-//   - 章ごとの売値上限とドロップ済み制限の適用
+//   - 敵種族とレベルに基づいてノーマルアイテムの候補を動的生成
+//   - レベルごとの売値上限とドロップ済み制限の適用
 //   - 種族別カテゴリ重み付けによるアイテム選択
 //
 // 【公開API】
-//   - candidates(): 敵リストと章情報からノーマルアイテム候補を生成
+//   - candidates(): 敵リストからノーマルアイテム候補を生成
 //
 // 【使用箇所】
 //   - DropService（ノーマルアイテムのドロップ処理）
@@ -18,21 +18,18 @@
 
 import Foundation
 
-/// 敵種族・ダンジョン章に基づいてノーマルアイテム（rarity=1）の候補を生成する。
+/// 敵種族・レベルに基づいてノーマルアイテム（rarity=1）の候補を生成する。
 enum NormalItemDropGenerator {
-    /// 章ごとの売値上限（ランク上限に対応）
-    /// 下限は常に0なので、高い章でも低ランクアイテムがドロップする
-    static let sellValueThresholds: [Int: Int] = [
-        1: 250,      // 章1-2: ランク0-1
-        2: 250,
-        3: 6_250,    // 章3-4: ランク0-3
-        4: 6_250,
-        5: 120_000,  // 章5-6: ランク0-5
-        6: 120_000,
-        7: 360_000,  // 章7-8: ランク0-6
-        8: 360_000,
-        9: 720_000   // 章9: ランク0-7
-    ]
+    /// 敵レベルから売値上限を計算
+    static func sellValueLimit(forLevel level: Int) -> Int {
+        switch level {
+        case ...20: return 250
+        case 21...50: return 6_250
+        case 51...100: return 120_000
+        case 101...150: return 360_000
+        default: return 720_000
+        }
+    }
 
     /// 種族ごとのカテゴリ重み（ノーマルアイテムがある12カテゴリのみ）
     /// 魔道書（grimoire）にはノーマルアイテムがないため除外
@@ -74,45 +71,41 @@ enum NormalItemDropGenerator {
 
     /// 敵からノーマルアイテム候補を生成する
     /// - Parameters:
-    ///   - enemies: 倒した敵のリスト
-    ///   - chapter: ダンジョンの章（1-9）
+    ///   - enemies: 倒した敵のリスト（定義とレベル）
     ///   - masterData: マスターデータキャッシュ
     ///   - droppedItemIds: 既にドロップ済みのアイテムID
     ///   - random: 乱数生成器
     /// - Returns: ノーマルアイテム候補のリスト（アイテムIDと元の敵ID）
     static func candidates(
-        for enemies: [EnemyDefinition],
-        chapter: Int,
+        for enemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
         masterData: MasterDataCache,
         droppedItemIds: Set<UInt16>,
         random: inout GameRandomSource
     ) throws -> [(itemId: UInt16, sourceEnemyId: UInt16)] {
         guard !enemies.isEmpty else { return [] }
 
-        guard let sellValueLimit = sellValueThresholds[chapter] else {
-            throw RuntimeError.invalidConfiguration(reason: "Invalid chapter \(chapter) for normal item drop (expected 1-9)")
-        }
-
         // ノーマルアイテム一覧を取得
         let normalItems = masterData.allItems.filter { $0.rarity == ItemRarity.normal.rawValue }
-
-        // カテゴリ→アイテムのマップを構築（売値上限でフィルタ）
-        var itemsByCategory: [UInt8: [ItemDefinition]] = [:]
-        for item in normalItems {
-            guard item.sellValue <= sellValueLimit else { continue }
-            itemsByCategory[item.category, default: []].append(item)
-        }
 
         var results: [(itemId: UInt16, sourceEnemyId: UInt16)] = []
 
         for enemy in enemies {
+            let limit = sellValueLimit(forLevel: enemy.level)
+
+            // この敵のレベルに応じた売値上限でフィルタしたアイテムをカテゴリ別に構築
+            var itemsByCategory: [UInt8: [ItemDefinition]] = [:]
+            for item in normalItems {
+                guard item.sellValue <= limit else { continue }
+                itemsByCategory[item.category, default: []].append(item)
+            }
+
             // 敵の種族に基づいてカテゴリを選択
-            guard let categoryWeights = raceCategoryWeights[enemy.raceId],
+            guard let categoryWeights = raceCategoryWeights[enemy.definition.raceId],
                   !categoryWeights.isEmpty else {
                 continue
             }
 
-            let selectedCategory = try selectCategory(from: categoryWeights, raceId: enemy.raceId, random: &random)
+            let selectedCategory = try selectCategory(from: categoryWeights, raceId: enemy.definition.raceId, random: &random)
             guard let candidates = itemsByCategory[selectedCategory],
                   !candidates.isEmpty else {
                 continue
@@ -127,7 +120,7 @@ enum NormalItemDropGenerator {
             // ランダムに1つ選択
             let index = available.count == 1 ? 0 : random.nextInt(in: 0...(available.count - 1))
             let selected = available[index]
-            results.append((itemId: selected.id, sourceEnemyId: enemy.id))
+            results.append((itemId: selected.id, sourceEnemyId: enemy.definition.id))
         }
 
         return results
