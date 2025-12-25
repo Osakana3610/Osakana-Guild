@@ -374,8 +374,7 @@ extension Generator {
                 race_id INTEGER NOT NULL,
                 category INTEGER NOT NULL,
                 job_id INTEGER,
-                base_experience INTEGER NOT NULL,
-                is_boss INTEGER NOT NULL
+                base_experience INTEGER NOT NULL
             );
             """,
             """
