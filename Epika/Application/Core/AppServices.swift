@@ -77,7 +77,7 @@ final class AppServices {
 
     struct ExplorationRunUpdate: Sendable {
         enum Stage: Sendable {
-            case step(entry: ExplorationEventLogEntry, totals: ExplorationRunTotals)
+            case step(entry: ExplorationEventLogEntry, totals: ExplorationRunTotals, battleLogId: PersistentIdentifier?)
             case completed(ExplorationRunArtifact)
         }
 

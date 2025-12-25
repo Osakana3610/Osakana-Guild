@@ -21,6 +21,7 @@
 
 import Foundation
 import Observation
+import SwiftData
 
 @MainActor
 @Observable
@@ -242,10 +243,16 @@ final class AdventureViewState {
 
     private func runExplorationStream(handle: AppServices.ExplorationRunHandle, partyId: UInt8, using appServices: AppServices) async {
         do {
-            for try await _ in handle.updates {
+            for try await update in handle.updates {
                 try Task.checkCancellation()
-                // 該当パーティの最新2件だけ取得してログ表示を更新
-                await updateExplorationProgress(forPartyId: partyId, using: appServices)
+                switch update.stage {
+                case .step(let entry, let totals, let battleLogId):
+                    // 差分更新: 新しいイベントだけ追加（DBアクセスなし）
+                    appendEncounterLog(entry: entry, totals: totals, battleLogId: battleLogId, partyId: partyId, masterData: appServices.masterDataCache)
+                case .completed:
+                    // 完了時はDBから最新を取得（battleLogIdなど反映のため）
+                    await updateExplorationProgress(forPartyId: partyId, using: appServices)
+                }
             }
         } catch {
             await handle.cancel()
@@ -258,6 +265,43 @@ final class AdventureViewState {
         clearExplorationTask(partyId: partyId)
         // 帰還時も該当パーティの最新2件だけ取得
         await updateExplorationProgress(forPartyId: partyId, using: appServices)
+    }
+
+    /// 差分更新: 新しいイベントログを既存のスナップショットに追加
+    private func appendEncounterLog(
+        entry: ExplorationEventLogEntry,
+        totals: AppServices.ExplorationRunTotals,
+        battleLogId: PersistentIdentifier?,
+        partyId: UInt8,
+        masterData: MasterDataCache
+    ) {
+        guard let index = explorationProgress.firstIndex(where: {
+            $0.party.partyId == partyId && $0.status == .running
+        }) else { return }
+
+        let newLog = ExplorationSnapshot.EncounterLog(from: entry, battleLogId: battleLogId, masterData: masterData)
+        explorationProgress[index].encounterLogs.append(newLog)
+        explorationProgress[index].activeFloorNumber = entry.floorNumber
+        explorationProgress[index].lastUpdatedAt = entry.occurredAt
+
+        // サマリー更新
+        explorationProgress[index].summary = ExplorationSnapshot.makeSummary(
+            displayDungeonName: explorationProgress[index].displayDungeonName,
+            status: .running,
+            activeFloorNumber: entry.floorNumber,
+            expectedReturnAt: explorationProgress[index].expectedReturnAt,
+            startedAt: explorationProgress[index].startedAt,
+            lastUpdatedAt: entry.occurredAt,
+            logs: explorationProgress[index].encounterLogs
+        )
+
+        // 報酬更新（累計値を使用）
+        explorationProgress[index].rewards.experience = totals.totalExperience
+        explorationProgress[index].rewards.gold = totals.totalGold
+        // ドロップを追加（item は既に解決済み）
+        for drop in entry.drops {
+            explorationProgress[index].rewards.itemDrops[drop.item.name, default: 0] += drop.quantity
+        }
     }
 
     private func clearExplorationTask(partyId: UInt8) {
