@@ -227,14 +227,14 @@ final class ExplorationProgressService {
 
         func readUInt16() -> UInt16? {
             guard offset + 2 <= data.count else { return nil }
-            let value = data.withUnsafeBytes { $0.load(fromByteOffset: offset, as: UInt16.self) }
+            let value = data.withUnsafeBytes { $0.loadUnaligned(fromByteOffset: offset, as: UInt16.self) }
             offset += 2
             return value
         }
 
         func readUInt32() -> UInt32? {
             guard offset + 4 <= data.count else { return nil }
-            let value = data.withUnsafeBytes { $0.load(fromByteOffset: offset, as: UInt32.self) }
+            let value = data.withUnsafeBytes { $0.loadUnaligned(fromByteOffset: offset, as: UInt32.self) }
             offset += 4
             return value
         }
