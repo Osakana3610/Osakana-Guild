@@ -134,7 +134,7 @@ extension AppServices {
     func startExplorationRunsBatch(_ params: [BatchExplorationParams]) async throws -> [UInt8: ExplorationRunHandle] {
         guard !params.isEmpty else { return [:] }
 
-        // 1. 各パーティの準備処理を並列で実行
+        // 1. 各パーティの準備処理を順番に実行（並列だとsave()のロック競合が発生）
         var preparations: [(
             partySnapshot: PartySnapshot,
             session: ExplorationRuntimeSession,
@@ -142,19 +142,13 @@ extension AppServices {
             dungeonId: UInt16
         )] = []
 
-        try await withThrowingTaskGroup(of: (PartySnapshot, ExplorationRuntimeSession, Int, UInt16).self) { group in
-            for param in params {
-                group.addTask {
-                    try await self.prepareExplorationRun(
-                        partyId: param.partyId,
-                        dungeonId: param.dungeonId,
-                        targetFloor: param.targetFloor
-                    )
-                }
-            }
-            for try await result in group {
-                preparations.append(result)
-            }
+        for param in params {
+            let result = try await prepareExplorationRun(
+                partyId: param.partyId,
+                dungeonId: param.dungeonId,
+                targetFloor: param.targetFloor
+            )
+            preparations.append(result)
         }
 
         // 2. レコード作成パラメータを収集
