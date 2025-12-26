@@ -120,4 +120,152 @@ extension AppServices {
     func cancelPersistedExplorationRun(partyId: UInt8, startedAt: Date) async throws {
         try await exploration.cancelRun(partyId: partyId, startedAt: startedAt)
     }
+
+    // MARK: - Batch Exploration Run
+
+    /// 一斉出撃用のパラメータ
+    struct BatchExplorationParams: Sendable {
+        let partyId: UInt8
+        let dungeonId: UInt16
+        let targetFloor: Int
+    }
+
+    /// 複数の探索を一括で開始（1回のDB保存で済ませる）
+    func startExplorationRunsBatch(_ params: [BatchExplorationParams]) async throws -> [UInt8: ExplorationRunHandle] {
+        guard !params.isEmpty else { return [:] }
+
+        // 1. 各パーティの準備処理を並列で実行
+        var preparations: [(
+            partySnapshot: PartySnapshot,
+            session: ExplorationRuntimeSession,
+            runDifficulty: Int,
+            dungeonId: UInt16
+        )] = []
+
+        try await withThrowingTaskGroup(of: (PartySnapshot, ExplorationRuntimeSession, Int, UInt16).self) { group in
+            for param in params {
+                group.addTask {
+                    try await self.prepareExplorationRun(
+                        partyId: param.partyId,
+                        dungeonId: param.dungeonId,
+                        targetFloor: param.targetFloor
+                    )
+                }
+            }
+            for try await result in group {
+                preparations.append(result)
+            }
+        }
+
+        // 2. レコード作成パラメータを収集
+        let beginRunParams = preparations.map { prep in
+            ExplorationProgressService.BeginRunParams(
+                party: prep.partySnapshot,
+                dungeon: prep.session.preparation.dungeon,
+                difficulty: prep.runDifficulty,
+                targetFloor: prep.session.preparation.targetFloorNumber,
+                startedAt: prep.session.startedAt,
+                seed: prep.session.seed
+            )
+        }
+
+        // 3. 一括でレコード作成（1回のsave）
+        let recordIds: [UInt8: PersistentIdentifier]
+        do {
+            recordIds = try exploration.beginRunsBatch(beginRunParams)
+        } catch {
+            // レコード作成に失敗したら全セッションをキャンセル
+            for prep in preparations {
+                await prep.session.cancel()
+            }
+            throw error
+        }
+
+        // 4. 各パーティのストリームを設定
+        var handles: [UInt8: ExplorationRunHandle] = [:]
+        for prep in preparations {
+            let partyId = prep.partySnapshot.id
+            guard let recordId = recordIds[partyId] else { continue }
+
+            let runtimeMap = Dictionary(uniqueKeysWithValues: prep.session.runtimeCharacters.map { ($0.id, $0) })
+            let memberIds = prep.partySnapshot.memberCharacterIds
+            let session = prep.session
+            let runDifficulty = prep.runDifficulty
+            let dungeonId = prep.dungeonId
+
+            let updates = AsyncThrowingStream<ExplorationRunUpdate, Error> { continuation in
+                let processingTask = Task { [weak self] in
+                    guard let self else {
+                        continuation.finish(throwing: CancellationError())
+                        return
+                    }
+                    await self.processExplorationStream(session: session,
+                                                        recordId: recordId,
+                                                        memberIds: memberIds,
+                                                        runtimeMap: runtimeMap,
+                                                        runDifficulty: runDifficulty,
+                                                        dungeonId: dungeonId,
+                                                        continuation: continuation)
+                }
+
+                continuation.onTermination = { termination in
+                    guard case .cancelled = termination else { return }
+                    processingTask.cancel()
+                    Task { await session.cancel() }
+                    Task { @MainActor [weak self] in
+                        guard let self else { return }
+                        do {
+                            try await self.exploration.cancelRun(runId: recordId)
+                        } catch is CancellationError {
+                            // キャンセル済みであれば問題なし
+                        } catch {
+                            assertionFailure("Exploration cancel failed: \(error)")
+                        }
+                    }
+                }
+            }
+
+            handles[partyId] = ExplorationRunHandle(runId: session.runId,
+                                                     updates: updates,
+                                                     cancel: { await session.cancel() })
+        }
+
+        return handles
+    }
+
+    /// 探索開始の準備処理（HP回復、難易度チェック、セッション開始）
+    private func prepareExplorationRun(
+        partyId: UInt8,
+        dungeonId: UInt16,
+        targetFloor: Int
+    ) async throws -> (PartySnapshot, ExplorationRuntimeSession, Int, UInt16) {
+        guard var partySnapshot = try await party.partySnapshot(id: partyId) else {
+            throw ProgressError.partyNotFound
+        }
+
+        // 出撃前にパーティメンバーのHP全回復
+        try character.healToFull(characterIds: partySnapshot.memberCharacterIds)
+        let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId)
+        guard dungeonSnapshot.isUnlocked else {
+            throw ProgressError.dungeonLocked(id: String(dungeonId))
+        }
+        let highestDifficulty = max(0, dungeonSnapshot.highestUnlockedDifficulty)
+        if partySnapshot.lastSelectedDifficulty > highestDifficulty {
+            partySnapshot = try await party.setLastSelectedDifficulty(
+                persistentIdentifier: partySnapshot.persistentIdentifier,
+                difficulty: UInt8(highestDifficulty)
+            )
+        }
+        let runDifficulty = Int(partySnapshot.lastSelectedDifficulty)
+        let characterIds = partySnapshot.memberCharacterIds
+        let characters = try character.characters(withIds: characterIds)
+        let session = try await runtime.startExplorationRun(
+            party: partySnapshot,
+            characters: characters,
+            dungeonId: dungeonId,
+            targetFloorNumber: targetFloor
+        )
+
+        return (partySnapshot, session, runDifficulty, dungeonId)
+    }
 }
