@@ -8,8 +8,8 @@
 //   - キャラクター変更通知の監視と自動更新
 //
 // 【状態管理】
-//   - allCharacters: 全キャラクターの詳細情報（RuntimeCharacter）
-//   - summaries: キャラクターサマリ情報（軽量版）
+//   - allCharacters: UserDataLoadServiceのキャッシュを参照
+//   - summaries: キャラクターサマリ情報（RuntimeCharacterから派生）
 //   - characterProgressDidChange 通知による自動リロード
 //
 // 【使用箇所】
@@ -46,96 +46,66 @@ final class CharacterViewState {
             avatarId == 0 ? UInt16(raceId) : avatarId
         }
 
-        init(snapshot: CharacterSnapshot, job: JobDefinition?, previousJob: JobDefinition?, race: RaceDefinition?) {
-            self.id = snapshot.id
-            self.name = snapshot.displayName
-            self.level = snapshot.level
-            let currentJobName = job?.name ?? "職業\(snapshot.jobId)"
-            // マスター職（ID 100以上）は前職表示不要
-            if snapshot.jobId < 100, let previousJobName = previousJob?.name {
-                self.jobName = "\(currentJobName)（\(previousJobName)）"
-            } else {
-                self.jobName = currentJobName
-            }
-            self.raceName = race?.name ?? "種族\(snapshot.raceId)"
-            self.isAlive = snapshot.hitPoints.current > 0
-            self.displayOrder = snapshot.displayOrder
-            self.jobId = snapshot.jobId
-            self.raceId = snapshot.raceId
-            self.gender = race?.genderDisplayName ?? "不明"
-            self.currentHP = snapshot.hitPoints.current
-            self.maxHP = snapshot.hitPoints.maximum
-            self.avatarId = snapshot.avatarId
+        init(from runtime: RuntimeCharacter) {
+            self.id = runtime.id
+            self.name = runtime.displayName
+            self.level = runtime.level
+            self.jobName = runtime.displayJobName
+            self.raceName = runtime.raceName
+            self.isAlive = runtime.currentHP > 0
+            self.displayOrder = runtime.displayOrder
+            self.jobId = runtime.jobId
+            self.raceId = runtime.raceId
+            self.gender = runtime.gender
+            self.currentHP = runtime.currentHP
+            self.maxHP = runtime.maxHP
+            self.avatarId = runtime.avatarId
         }
 
     }
 
-    var allCharacters: [RuntimeCharacter] = []
     var summaries: [CharacterSummary] = []
-    var isLoadingAll: Bool = false
-    var isLoadingSummaries: Bool = false
+    private weak var appServicesRef: AppServices?
+
+    /// キャッシュされたキャラクター一覧（同期アクセス用）
+    var allCharacters: [RuntimeCharacter] {
+        appServicesRef?.userDataLoad.characters ?? []
+    }
 
     deinit {
         characterChangeTask?.cancel()
     }
 
     func startObservingChanges(using appServices: AppServices) {
+        appServicesRef = appServices
         guard characterChangeTask == nil else { return }
         characterChangeTask = Task { [weak self, appServices] in
             let center = NotificationCenter.default
             for await _ in center.notifications(named: .characterProgressDidChange) {
                 if Task.isCancelled { break }
                 guard let self else { break }
-                self.reloadAfterCharacterProgressChange(using: appServices)
+                await self.reloadAfterCharacterProgressChange(using: appServices)
             }
         }
     }
 
-    func loadCharacterSummaries(using appServices: AppServices) throws {
-        if isLoadingSummaries { return }
-        isLoadingSummaries = true
-        defer { isLoadingSummaries = false }
-
-        let snapshots = try appServices.character.allCharacters()
-        if snapshots.isEmpty {
-            summaries = []
-            return
-        }
-
-        let masterData = appServices.masterDataCache
-        let jobMap = Dictionary(uniqueKeysWithValues: masterData.allJobs.map { ($0.id, $0) })
-        let raceMap = Dictionary(uniqueKeysWithValues: masterData.allRaces.map { ($0.id, $0) })
-
-        summaries = snapshots.map { snapshot in
-            CharacterSummary(snapshot: snapshot,
-                             job: jobMap[snapshot.jobId],
-                             previousJob: jobMap[snapshot.previousJobId],
-                             race: raceMap[snapshot.raceId])
-        }
-        .sorted { $0.displayOrder < $1.displayOrder }
+    /// キャッシュからキャラクターをロード（キャッシュ済みならすぐ返る）
+    func loadAllCharacters(using appServices: AppServices) async throws {
+        _ = try await appServices.userDataLoad.getCharacters()
     }
 
-    func loadAllCharacters(using appServices: AppServices) throws {
-        if isLoadingAll { return }
-        isLoadingAll = true
-        defer { isLoadingAll = false }
-
-        let characterService = appServices.character
-        let snapshots = try characterService.allCharacters()
-        var buffer: [RuntimeCharacter] = []
-        for snapshot in snapshots {
-            let character = try characterService.runtimeCharacter(from: snapshot)
-            buffer.append(character)
-        }
-        // allCharacters()が既にdisplayOrder順で返すので、その順序を維持
-        allCharacters = buffer
+    /// キャッシュからサマリーを更新
+    func loadCharacterSummaries(using appServices: AppServices) async throws {
+        let characters = try await appServices.userDataLoad.getCharacters()
+        summaries = characters.map { CharacterSummary(from: $0) }
+            .sorted { $0.displayOrder < $1.displayOrder }
     }
 
     @MainActor
-    private func reloadAfterCharacterProgressChange(using appServices: AppServices) {
+    private func reloadAfterCharacterProgressChange(using appServices: AppServices) async {
+        appServices.userDataLoad.invalidateCharacters()
         do {
-            try loadAllCharacters(using: appServices)
-            try loadCharacterSummaries(using: appServices)
+            try await loadCharacterSummaries(using: appServices)
         } catch {
             assertionFailure("キャラクターデータの再読み込みに失敗しました: \(error)")
         }
