@@ -734,7 +734,7 @@ private extension ExplorationProgressService {
 
     // MARK: - Snapshot Building
 
-    /// サマリー専用の軽量スナップショット（戦闘詳細なし、イベント一覧あり）
+    /// サマリー専用の軽量スナップショット（イベント詳細なし、詳細画面でオンデマンド読み込み）
     func makeSnapshotSummary(for run: ExplorationRunRecord,
                               context: ModelContext) async throws -> ExplorationSnapshot {
         guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
@@ -752,14 +752,7 @@ private extension ExplorationProgressService {
         let partyRecord = try context.fetch(partyDescriptor).first
         let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
 
-        // EncounterLogs構築（イベント一覧表示用）
-        let eventRecords = run.events.sorted { $0.occurredAt < $1.occurredAt }
-        var encounterLogs: [ExplorationSnapshot.EncounterLog] = []
-        encounterLogs.reserveCapacity(eventRecords.count)
-        for (index, eventRecord) in eventRecords.enumerated() {
-            let log = try await buildEncounterLog(from: eventRecord, index: index)
-            encounterLogs.append(log)
-        }
+        // サマリー用にはイベント詳細は不要（詳細画面でオンデマンド読み込み）
 
         let partySummary = ExplorationSnapshot.PartySummary(
             partyId: run.partyId,
@@ -777,7 +770,7 @@ private extension ExplorationProgressService {
             expectedReturnAt: nil,
             startedAt: run.startedAt,
             lastUpdatedAt: run.endedAt,
-            logs: encounterLogs
+            logs: []
         )
 
         return ExplorationSnapshot(
@@ -788,7 +781,7 @@ private extension ExplorationProgressService {
             startedAt: run.startedAt,
             lastUpdatedAt: run.endedAt,
             expectedReturnAt: nil,
-            encounterLogs: encounterLogs,
+            encounterLogs: [],
             rewards: ExplorationSnapshot.Rewards(
                 experience: Int(run.totalExp),
                 gold: Int(run.totalGold),
