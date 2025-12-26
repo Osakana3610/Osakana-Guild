@@ -314,7 +314,7 @@ final class UserDataLoadService {
     }
 
     /// 差分更新: 新しいイベントログを既存のスナップショットに追加
-    private func appendEncounterLog(
+    func appendEncounterLog(
         entry: ExplorationEventLogEntry,
         totals: AppServices.ExplorationRunTotals,
         battleLogId: PersistentIdentifier?,

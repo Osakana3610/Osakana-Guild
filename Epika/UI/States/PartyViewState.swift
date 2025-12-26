@@ -8,8 +8,8 @@
 //   - パーティメンバーの更新処理
 //
 // 【状態管理】
-//   - parties: 全パーティのスナップショット
-//   - 重複読み込み防止（ongoingLoad による排他制御）
+//   - parties: UserDataLoadServiceのキャッシュを参照
+//   - 更新時はキャッシュを無効化して再読み込み
 //
 // 【使用箇所】
 //   - AdventureView
@@ -25,41 +25,32 @@ import Observation
 final class PartyViewState {
     private let appServices: AppServices
 
-    var parties: [PartySnapshot] = []
     var isLoading: Bool = false
-    private var ongoingLoad: Task<Void, Error>? = nil
 
     init(appServices: AppServices) {
         self.appServices = appServices
     }
 
-    private var partyService: PartyProgressService { appServices.party }
-
-    func loadAllParties() async throws {
-        if let task = ongoingLoad {
-            try await task.value
-            return
-        }
-
-        let task = Task { @MainActor in
-            isLoading = true
-            defer {
-                isLoading = false
-                ongoingLoad = nil
-            }
-            let partySnapshots = try await partyService.allParties()
-            parties = partySnapshots.sorted { $0.id < $1.id }
-        }
-        ongoingLoad = task
-        try await task.value
+    /// キャッシュからパーティ一覧を取得
+    var parties: [PartySnapshot] {
+        appServices.userDataLoad.parties
     }
 
+    /// キャッシュからパーティを読み込み（キャッシュ済みならすぐ返る）
+    func loadAllParties() async throws {
+        isLoading = true
+        defer { isLoading = false }
+        _ = try await appServices.userDataLoad.getParties()
+    }
+
+    /// キャッシュを無効化して再読み込み
     func refresh() async throws {
+        appServices.userDataLoad.invalidateParties()
         try await loadAllParties()
     }
 
     func updatePartyMembers(party: PartySnapshot, memberIds: [UInt8]) async throws {
-        _ = try await partyService.updatePartyMembers(persistentIdentifier: party.persistentIdentifier, memberIds: memberIds)
+        _ = try await appServices.party.updatePartyMembers(persistentIdentifier: party.persistentIdentifier, memberIds: memberIds)
         try await refresh()
     }
 }

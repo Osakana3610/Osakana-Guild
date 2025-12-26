@@ -65,6 +65,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     let actionRateMageMagic: Int
     let actionRateBreath: Int
     let updatedAt: Date
+    let displayOrder: UInt8
 
     // === 計算結果 ===
     let attributes: CoreAttributes
@@ -90,6 +91,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     var name: String { displayName }
     var isAlive: Bool { currentHP > 0 }
     var raceName: String { race?.name ?? "種族\(raceId)" }
+    var gender: String { race?.genderDisplayName ?? "不明" }
     var jobName: String {
         let currentJobName = job?.name ?? "職業\(jobId)"
         // マスター職（ID 100以上）は前職表示不要
@@ -98,6 +100,8 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
         }
         return currentJobName
     }
+    /// 職業表示名（CharacterSummary互換）
+    var displayJobName: String { jobName }
 
     var resolvedAvatarId: UInt16 {
         avatarId == 0 ? UInt16(raceId) : avatarId

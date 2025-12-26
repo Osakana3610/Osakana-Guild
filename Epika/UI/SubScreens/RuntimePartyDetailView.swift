@@ -223,7 +223,9 @@ struct RuntimePartyDetailView: View {
         do {
             // パーティメンバーのHP全回復（HP > 0 のキャラクターのみ）
             try appServices.character.healToFull(characterIds: currentParty.memberIds)
-            try loadAllCharacters()
+            // HP変更後にキャッシュを無効化
+            appServices.userDataLoad.invalidateCharacters()
+            try await loadAllCharacters()
             await refreshPartySnapshot()
         } catch {
             errorMessage = error.localizedDescription
@@ -231,22 +233,8 @@ struct RuntimePartyDetailView: View {
     }
 
     @MainActor
-    private func loadAllCharacters() throws {
-        let snapshots = try appServices.character.allCharacters()
-        guard !snapshots.isEmpty else {
-            allCharacters = []
-            return
-        }
-
-        var runtimeCharacters: [RuntimeCharacter] = []
-        runtimeCharacters.reserveCapacity(snapshots.count)
-
-        for snapshot in snapshots {
-            let runtimeCharacter = try appServices.character.runtimeCharacter(from: snapshot)
-            runtimeCharacters.append(runtimeCharacter)
-        }
-
-        allCharacters = runtimeCharacters
+    private func loadAllCharacters() async throws {
+        allCharacters = try await appServices.userDataLoad.getCharacters()
     }
 
     @MainActor
