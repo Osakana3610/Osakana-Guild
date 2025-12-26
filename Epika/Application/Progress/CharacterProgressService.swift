@@ -482,6 +482,9 @@ final class CharacterProgressService {
         let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { characterIds.contains($0.id) })
         let records = try context.fetch(descriptor)
 
+        // ループの外で1回だけ取得
+        let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
+
         var modified = false
         for record in records {
             // HP > 0 のキャラクターのみ回復（HP 0 は蘇生経路を使う）
@@ -489,7 +492,6 @@ final class CharacterProgressService {
 
             // maxHPを計算
             let input = try loadInput(record, context: context)
-            let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
             let runtimeCharacter = try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxStackKeys: pandoraStackKeys)
             let maxHP = UInt32(runtimeCharacter.maxHP)
 
