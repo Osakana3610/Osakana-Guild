@@ -283,16 +283,22 @@ struct AdventureView: View {
         defer { isBulkDepartureInProgress = false }
 
         errorMessage = nil
-        var failures: [String] = []
-        for party in massDepartureCandidates {
-            let success = await startExploration(for: party)
-            if !success {
-                failures.append(party.name)
-            }
+
+        // パーティとダンジョンのペアを作成
+        let batchParams: [AdventureViewState.BatchStartParams] = massDepartureCandidates.compactMap { party in
+            guard let dungeon = selectedDungeon(for: party) else { return nil }
+            return AdventureViewState.BatchStartParams(party: party, dungeon: dungeon)
         }
 
-        if !failures.isEmpty {
-            errorMessage = failures.joined(separator: ", ") + " の探索開始に失敗しました"
+        guard !batchParams.isEmpty else { return }
+
+        do {
+            let failures = try await adventureState.startExplorationsInBatch(batchParams, using: appServices)
+            if !failures.isEmpty {
+                errorMessage = failures.joined(separator: ", ") + " の探索開始に失敗しました"
+            }
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 }
