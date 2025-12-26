@@ -22,6 +22,7 @@ import SwiftData
 
 struct RootView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
 
     private let appServices: AppServices
     @State private var partyViewState: PartyViewState
@@ -38,6 +39,11 @@ struct RootView: View {
             .environment(appServices)
             .environment(appServices.dropNotifications)
             .environment(appServices.statChangeNotifications)
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    appServices.exploration.purgeOldRecordsInBackground()
+                }
+            }
     }
 }
 
