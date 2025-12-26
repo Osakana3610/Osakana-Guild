@@ -35,7 +35,7 @@
 //   - fullDisplayName → String: 称号含むフルネーム
 //
 // 【使用箇所】
-//   - ItemPreloadService: アイテム表示データのプリロード
+//   - UserDataLoadService: アイテム表示データのキャッシュ
 //   - InventoryCleanupView, ItemSaleView: 売却画面
 //   - AutoTradeView: 自動売却ルール設定
 //

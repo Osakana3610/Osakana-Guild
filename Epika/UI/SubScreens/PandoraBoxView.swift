@@ -30,7 +30,7 @@ struct PandoraBoxView: View {
 
     private var inventoryService: InventoryProgressService { appServices.inventory }
     private var gameStateService: GameStateService { appServices.gameState }
-    private var displayService: ItemPreloadService { appServices.itemPreload }
+    private var displayService: UserDataLoadService { appServices.userDataLoad }
 
     private let maxPandoraSlots = 5
 
@@ -126,12 +126,7 @@ struct PandoraBoxView: View {
             let player = try await gameStateService.currentPlayer()
             let pandoraStackKeys = Set(player.pandoraBoxStackKeys)
 
-            // プリロードが完了していなければ待機
-            if !displayService.loaded {
-                displayService.startPreload(inventoryService: inventoryService)
-                try await displayService.waitForPreload()
-            }
-
+            // 起動時に既にロード済み（UserDataLoadService.loadAllで）
             // 装備可能カテゴリのみ取得（追加候補用）
             let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .mazoMaterial])
             availableItems = displayService.getItems(categories: equipCategories)
@@ -169,7 +164,7 @@ struct PandoraBoxView: View {
 
 private struct PandoraItemRow: View {
     let item: LightweightItemData
-    let displayService: ItemPreloadService
+    let displayService: UserDataLoadService
 
     var body: some View {
         HStack {
@@ -197,7 +192,7 @@ private struct PandoraItemRow: View {
 private struct ItemPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
     let availableItems: [LightweightItemData]
-    let displayService: ItemPreloadService
+    let displayService: UserDataLoadService
     let onSelect: (LightweightItemData) -> Void
 
     var body: some View {
@@ -237,7 +232,7 @@ private struct ItemPickerSheet: View {
 
 private struct ItemPickerRow: View {
     let item: LightweightItemData
-    let displayService: ItemPreloadService
+    let displayService: UserDataLoadService
 
     var body: some View {
         HStack {

@@ -24,7 +24,7 @@
 //   - runtime: ゲームランタイムへのブリッジ
 //   - dropNotifications: ドロップ通知
 //   - statChangeNotifications: ステータス変動通知
-//   - itemPreload: アイテム表示用キャッシュ
+//   - userDataLoad: ユーザーデータ一括ロード＆キャッシュ
 //   - gemModification: 宝石改造
 //
 // 【補助型】
@@ -66,7 +66,7 @@ final class AppServices {
     let runtime: ProgressRuntimeService
     let dropNotifications: ItemDropNotificationService
     let statChangeNotifications: StatChangeNotificationService
-    let itemPreload: ItemPreloadService
+    let userDataLoad: UserDataLoadService
     let gemModification: GemModificationProgressService
 
     struct ExplorationRunTotals: Sendable {
@@ -129,9 +129,17 @@ final class AppServices {
                                                           gameStateService: gameStateService,
                                                           masterDataCache: masterDataCache)
         self.autoTrade = AutoTradeProgressService(container: container, gameStateService: gameStateService)
-        self.itemPreload = ItemPreloadService(masterDataCache: masterDataCache)
+        self.userDataLoad = UserDataLoadService(
+            masterDataCache: masterDataCache,
+            characterService: self.character,
+            partyService: self.party,
+            inventoryService: self.inventory,
+            explorationService: self.exploration
+        )
         self.gemModification = GemModificationProgressService(container: container,
                                                                masterDataCache: masterDataCache)
+        // 全プロパティ初期化後にAppServicesを設定
+        self.userDataLoad.setAppServices(self)
     }
 
     // MARK: - Player State Updates

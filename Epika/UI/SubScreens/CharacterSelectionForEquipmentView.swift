@@ -150,7 +150,7 @@ struct EquipmentEditorView: View {
 
     private var characterService: CharacterProgressService { appServices.character }
     private var inventoryService: InventoryProgressService { appServices.inventory }
-    private var displayService: ItemPreloadService { appServices.itemPreload }
+    private var displayService: UserDataLoadService { appServices.userDataLoad }
 
     /// 装備画面で除外するメインカテゴリ（合成素材・魔造素材）
     private static let excludedCategories: Set<ItemSaleCategory> = [.forSynthesis, .mazoMaterial]
@@ -359,32 +359,22 @@ struct EquipmentEditorView: View {
         isLoading = true
         loadError = nil
 
-        do {
-            // プリロードが完了していなければ待機
-            if !displayService.loaded {
-                displayService.startPreload(inventoryService: inventoryService)
-                try await displayService.waitForPreload()
+        // 起動時に既にロード済み（UserDataLoadService.loadAllで）
+        // サブカテゴリ別アイテムを取得（合成素材・魔造素材を除く）
+        let allSubcategorized = displayService.getSubcategorizedItems()
+        subcategorizedItems = allSubcategorized.filter { !Self.excludedCategories.contains($0.key.mainCategory) }
+        orderedSubcategories = displayService.getOrderedSubcategories()
+            .filter { !Self.excludedCategories.contains($0.mainCategory) }
+
+        // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
+        let availableIds = subcategorizedItems.values.flatMap { $0.map { $0.itemId } }
+        let allItemIds = Set(availableIds)
+            .union(Set(currentCharacter.equippedItems.map { $0.itemId }))
+        let masterData = appServices.masterDataCache
+        for id in allItemIds {
+            if let definition = masterData.item(id) {
+                itemDefinitions[id] = definition
             }
-
-            // サブカテゴリ別アイテムを取得（合成素材・魔造素材を除く）
-            let allSubcategorized = displayService.getSubcategorizedItems()
-            subcategorizedItems = allSubcategorized.filter { !Self.excludedCategories.contains($0.key.mainCategory) }
-            orderedSubcategories = displayService.getOrderedSubcategories()
-                .filter { !Self.excludedCategories.contains($0.mainCategory) }
-
-            // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
-            let availableIds = subcategorizedItems.values.flatMap { $0.map { $0.itemId } }
-            let allItemIds = Set(availableIds)
-                .union(Set(currentCharacter.equippedItems.map { $0.itemId }))
-            let masterData = appServices.masterDataCache
-            for id in allItemIds {
-                if let definition = masterData.item(id) {
-                    itemDefinitions[id] = definition
-                }
-            }
-
-        } catch {
-            loadError = error.localizedDescription
         }
 
         isLoading = false
