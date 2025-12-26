@@ -34,7 +34,7 @@ struct GemModificationView: View {
 
     private var gemService: GemModificationProgressService { appServices.gemModification }
     private var inventoryService: InventoryProgressService { appServices.inventory }
-    private var displayService: ItemPreloadService { appServices.itemPreload }
+    private var displayService: UserDataLoadService { appServices.userDataLoad }
 
     var body: some View {
         Group {
@@ -135,21 +135,12 @@ struct GemModificationView: View {
         isLoading = true
         loadError = nil
 
-        do {
-            // プリロードが完了していなければ待機
-            if !displayService.loaded {
-                displayService.startPreload(inventoryService: inventoryService)
-                try await displayService.waitForPreload()
-            }
+        // 起動時に既にロード済み（UserDataLoadService.loadAllで）
+        // 全アイテムを保持（selectGemでソケット可能アイテムをフィルタするため）
+        allItems = displayService.getItems(categories: Set(ItemSaleCategory.allCases))
 
-            // 全アイテムを保持（selectGemでソケット可能アイテムをフィルタするため）
-            allItems = displayService.getItems(categories: Set(ItemSaleCategory.allCases))
-
-            // 宝石カテゴリのみ取得
-            gems = displayService.getItems(categories: [.gem])
-        } catch {
-            loadError = error.localizedDescription
-        }
+        // 宝石カテゴリのみ取得
+        gems = displayService.getItems(categories: [.gem])
 
         isLoading = false
     }
@@ -192,7 +183,7 @@ struct GemModificationView: View {
 
 private struct GemRow: View {
     let item: LightweightItemData
-    let displayService: ItemPreloadService
+    let displayService: UserDataLoadService
 
     var body: some View {
         HStack {
@@ -217,7 +208,7 @@ private struct SocketableItemsSheet: View {
     let gem: LightweightItemData
     let socketableItems: [LightweightItemData]
     let isLoading: Bool
-    let displayService: ItemPreloadService
+    let displayService: UserDataLoadService
     let onSelect: (LightweightItemData) -> Void
     let onDismiss: () -> Void
 
@@ -279,7 +270,7 @@ private struct SocketableItemsSheet: View {
 
 private struct SocketableItemRow: View {
     let item: LightweightItemData
-    let displayService: ItemPreloadService
+    let displayService: UserDataLoadService
 
     var body: some View {
         HStack {

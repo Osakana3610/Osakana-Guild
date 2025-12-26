@@ -38,10 +38,10 @@ struct ItemSaleView: View {
     private var totalSellPriceText: String { "\(selectedTotalSellPrice)GP" }
     private var hasSelection: Bool { !selectedDisplayItems.isEmpty }
     private var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] {
-        appServices.itemPreload.getSubcategorizedItems()
+        appServices.userDataLoad.getSubcategorizedItems()
     }
     private var orderedSubcategories: [ItemDisplaySubcategory] {
-        appServices.itemPreload.getOrderedSubcategories()
+        appServices.userDataLoad.getOrderedSubcategories()
     }
 
     var body: some View {
@@ -153,7 +153,7 @@ struct ItemSaleView: View {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(.primary)
 
-                appServices.itemPreload.makeStyledDisplayText(for: item)
+                appServices.userDataLoad.makeStyledDisplayText(for: item)
                     .font(.body)
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -212,13 +212,9 @@ struct ItemSaleView: View {
         do {
             player = try await appServices.gameState.loadCurrentPlayer()
 
-            // プリロードが完了していなければ待機
-            let service = appServices.itemPreload
-            if !service.loaded {
-                service.startPreload(inventoryService: appServices.inventory)
-                try await service.waitForPreload()
-            }
-            cacheVersion = service.version
+            // 起動時に既にロード済み（UserDataLoadService.loadAllで）
+            let service = appServices.userDataLoad
+            cacheVersion = service.itemCacheVersion
             showError = false
             didLoadOnce = true
         } catch {
@@ -233,9 +229,9 @@ struct ItemSaleView: View {
         do {
             let stackKeys = selectedDisplayItems.map { $0.stackKey }
             _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
-            let service = appServices.itemPreload
+            let service = appServices.userDataLoad
             service.removeItems(stackKeys: Set(stackKeys))
-            cacheVersion = service.version
+            cacheVersion = service.itemCacheVersion
             selectedStackKeys.removeAll()
             selectedDisplayItems.removeAll()
             selectedTotalSellPrice = 0
@@ -267,9 +263,9 @@ struct ItemSaleView: View {
     private func sellItem(_ item: LightweightItemData, quantity: Int) async {
         do {
             _ = try await appServices.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
-            let service = appServices.itemPreload
+            let service = appServices.userDataLoad
             let newQuantity = try service.decrementQuantity(stackKey: item.stackKey, by: quantity)
-            cacheVersion = service.version
+            cacheVersion = service.itemCacheVersion
 
             if newQuantity <= 0 {
                 // 数量が0になった場合は選択から削除
@@ -297,9 +293,9 @@ struct ItemSaleView: View {
                 itemId: item.itemId
             )
             _ = try await appServices.sellItemsToShop(stackKeys: [item.stackKey])
-            let service = appServices.itemPreload
+            let service = appServices.userDataLoad
             service.removeItems(stackKeys: [item.stackKey])
-            cacheVersion = service.version
+            cacheVersion = service.itemCacheVersion
             selectedStackKeys.remove(item.stackKey)
             selectedDisplayItems.removeAll { $0.stackKey == item.stackKey }
             recalcSelectedTotalSellPrice()

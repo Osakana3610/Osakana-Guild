@@ -104,6 +104,9 @@ struct EpikaApp: App {
             let services = AppServices(container: bootstrap.container,
                                         masterDataCache: cache)
             appServices = services
+
+            // 3. ユーザーデータ一括ロード（探索再開も含む）
+            try await services.userDataLoad.loadAll()
         } catch {
             initializationError = "データベース初期化に失敗しました: \(error.localizedDescription)"
         }

@@ -1155,7 +1155,7 @@ struct DangerousOperationsView: View {
             NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
 
             // インベントリキャッシュをリロード
-            try await appServices.itemPreload.reload(inventoryService: appServices.inventory)
+            try await appServices.userDataLoad.reloadItems()
 
             await MainActor.run {
                 isUnequippingAll = false
