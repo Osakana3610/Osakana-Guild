@@ -180,7 +180,7 @@ final class ExplorationProgressService {
             difficulty: UInt8(difficulty),
             targetFloor: UInt8(targetFloor),
             startedAt: startedAt,
-            seed: seed
+            seed: Int64(bitPattern: seed)
         )
         context.insert(runRecord)
         try saveIfNeeded(context)
@@ -207,7 +207,7 @@ final class ExplorationProgressService {
                 difficulty: UInt8(param.difficulty),
                 targetFloor: UInt8(param.targetFloor),
                 startedAt: param.startedAt,
-                seed: param.seed
+                seed: Int64(bitPattern: param.seed)
             )
             context.insert(runRecord)
             records.append((param.party.id, runRecord))
@@ -251,7 +251,7 @@ final class ExplorationProgressService {
         runRecord.finalFloor = eventRecord.floor
 
         // RNG状態と探索状態を保存
-        runRecord.randomState = randomState
+        runRecord.randomState = Int64(bitPattern: randomState)
         runRecord.superRareJstDate = superRareState.jstDate
         runRecord.superRareHasTriggered = superRareState.hasTriggered
         runRecord.droppedItemIdsData = Self.encodeItemIds(droppedItemIds)

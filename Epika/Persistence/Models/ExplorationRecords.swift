@@ -206,10 +206,12 @@ final class ExplorationRunRecord {
     var startedAt: Date = Date()
 
     /// 決定論的乱数のシード
-    var seed: UInt64 = 0
+    /// Note: iOS 17.2以下でSwiftDataのUInt64アクセスがクラッシュするためInt64を使用
+    var seed: Int64 = 0
 
     /// 最新イベント処理後のRNG状態（0 = まだ保存なし）
-    var randomState: UInt64 = 0
+    /// Note: iOS 17.2以下でSwiftDataのUInt64アクセスがクラッシュするためInt64を使用
+    var randomState: Int64 = 0
 
     /// 超レア抽選の日次状態：JST日付（YYYYMMDD形式）
     var superRareJstDate: UInt32 = 0
@@ -244,7 +246,7 @@ final class ExplorationRunRecord {
          difficulty: UInt8,
          targetFloor: UInt8,
          startedAt: Date,
-         seed: UInt64) {
+         seed: Int64) {
         self.partyId = partyId
         self.dungeonId = dungeonId
         self.difficulty = difficulty
