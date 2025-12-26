@@ -357,8 +357,8 @@ final class ExplorationProgressService {
         return snapshots
     }
 
-    /// 全パーティの最新探索サマリーを取得（初期ロード用、encounterLogsなし）
-    func recentExplorationSummaries(limitPerParty: Int = 2) throws -> [ExplorationSnapshot] {
+    /// 全パーティの最新探索サマリーを取得（初期ロード用）
+    func recentExplorationSummaries(limitPerParty: Int = 2) async throws -> [ExplorationSnapshot] {
         let context = makeContext()
         // 全パーティIDを取得
         let partyDescriptor = FetchDescriptor<PartyRecord>()
@@ -374,7 +374,7 @@ final class ExplorationProgressService {
             descriptor.fetchLimit = limitPerParty
             let runs = try context.fetch(descriptor)
             for run in runs {
-                let snapshot = try makeSnapshotSummary(for: run, context: context)
+                let snapshot = try await makeSnapshotSummary(for: run, context: context)
                 snapshots.append(snapshot)
             }
         }
@@ -734,9 +734,9 @@ private extension ExplorationProgressService {
 
     // MARK: - Snapshot Building
 
-    /// サマリー専用の軽量スナップショット（encounterLogsなし）
+    /// サマリー専用の軽量スナップショット（戦闘詳細なし、イベント一覧あり）
     func makeSnapshotSummary(for run: ExplorationRunRecord,
-                              context: ModelContext) throws -> ExplorationSnapshot {
+                              context: ModelContext) async throws -> ExplorationSnapshot {
         guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
             throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
         }
@@ -751,6 +751,15 @@ private extension ExplorationProgressService {
         let partyDescriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == partyId })
         let partyRecord = try context.fetch(partyDescriptor).first
         let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
+
+        // EncounterLogs構築（イベント一覧表示用）
+        let eventRecords = run.events.sorted { $0.occurredAt < $1.occurredAt }
+        var encounterLogs: [ExplorationSnapshot.EncounterLog] = []
+        encounterLogs.reserveCapacity(eventRecords.count)
+        for (index, eventRecord) in eventRecords.enumerated() {
+            let log = try await buildEncounterLog(from: eventRecord, index: index)
+            encounterLogs.append(log)
+        }
 
         let partySummary = ExplorationSnapshot.PartySummary(
             partyId: run.partyId,
@@ -768,7 +777,7 @@ private extension ExplorationProgressService {
             expectedReturnAt: nil,
             startedAt: run.startedAt,
             lastUpdatedAt: run.endedAt,
-            logs: []
+            logs: encounterLogs
         )
 
         return ExplorationSnapshot(
@@ -779,7 +788,7 @@ private extension ExplorationProgressService {
             startedAt: run.startedAt,
             lastUpdatedAt: run.endedAt,
             expectedReturnAt: nil,
-            encounterLogs: [],
+            encounterLogs: encounterLogs,
             rewards: ExplorationSnapshot.Rewards(
                 experience: Int(run.totalExp),
                 gold: Int(run.totalGold),
