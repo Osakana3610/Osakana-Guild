@@ -187,12 +187,21 @@ final class ItemPreloadService {
 
     /// ドロップアイテムをキャッシュに追加する（帰還時の差分更新用）
     /// - Parameters:
-    ///   - snapshots: 追加されたアイテムのスナップショット
+    ///   - seeds: 追加したアイテムの情報（追加数量を含む）
+    ///   - snapshots: 追加されたアイテムのスナップショット（新規アイテムの構築用）
     ///   - definitions: アイテムIDからDefinitionへのマップ
-    func addDroppedItems(_ snapshots: [ItemSnapshot], definitions: [UInt16: ItemDefinition]) {
+    func addDroppedItems(seeds: [InventoryProgressService.BatchSeed], snapshots: [ItemSnapshot], definitions: [UInt16: ItemDefinition]) {
         guard !snapshots.isEmpty else { return }
 
-        // 既存のstackKeyを収集
+        // seedsをstackKeyで辞書化（重複は数量を合算）
+        // ※ DB集約と同じロジックでstackKeyを生成
+        var seedQuantityByStackKey: [String: Int] = [:]
+        for seed in seeds {
+            let stackKey = "\(seed.enhancements.superRareTitleId)|\(seed.enhancements.normalTitleId)|\(seed.itemId)|\(seed.enhancements.socketSuperRareTitleId)|\(seed.enhancements.socketNormalTitleId)|\(seed.enhancements.socketItemId)"
+            seedQuantityByStackKey[stackKey, default: 0] += seed.quantity
+        }
+
+        // 既存のstackKeyを収集（キャッシュから）
         var existingStackKeys = Set<String>()
         for items in categorizedItems.values {
             for item in items {
@@ -225,8 +234,11 @@ final class ItemPreloadService {
         // 各スナップショットを処理
         for snapshot in snapshots {
             if existingStackKeys.contains(snapshot.stackKey) {
-                // 既存アイテム: 数量を増加
-                incrementQuantity(stackKey: snapshot.stackKey, by: Int(snapshot.quantity))
+                // 既存アイテム: seedsから追加数量を取得してインクリメント
+                guard let addedQuantity = seedQuantityByStackKey[snapshot.stackKey] else {
+                    preconditionFailure("キャッシュ更新時にseedが見つからない: \(snapshot.stackKey)")
+                }
+                incrementQuantity(stackKey: snapshot.stackKey, by: addedQuantity)
             } else {
                 // 新規アイテム: LightweightItemDataを構築して追加
                 guard let definition = definitions[snapshot.itemId] else { continue }

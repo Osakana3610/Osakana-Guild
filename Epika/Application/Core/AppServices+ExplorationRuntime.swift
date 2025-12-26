@@ -145,7 +145,7 @@ extension AppServices {
                 // プレイヤー状態とインベントリキャッシュを更新（失敗しても探索完了フローは止めない）
                 Task { @MainActor [weak self, itemPreload] in
                     await self?.reloadPlayerState()
-                    itemPreload.addDroppedItems(dropResult.addedSnapshots, definitions: dropResult.definitions)
+                    itemPreload.addDroppedItems(seeds: dropResult.addedSeeds, snapshots: dropResult.addedSnapshots, definitions: dropResult.definitions)
                 }
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
@@ -238,12 +238,13 @@ extension AppServices {
     /// ドロップ報酬適用結果
     struct DropRewardsResult: Sendable {
         let addedSnapshots: [ItemSnapshot]
+        let addedSeeds: [InventoryProgressService.BatchSeed]
         let definitions: [UInt16: ItemDefinition]
     }
 
     func applyDropRewards(_ drops: [ItemDropResult]) async throws -> DropRewardsResult {
         guard !drops.isEmpty else {
-            return DropRewardsResult(addedSnapshots: [], definitions: [:])
+            return DropRewardsResult(addedSnapshots: [], addedSeeds: [], definitions: [:])
         }
 
         let autoTradeKeys = try await autoTrade.registeredStackKeys()
@@ -313,7 +314,7 @@ extension AppServices {
             }
         }
 
-        return DropRewardsResult(addedSnapshots: addedSnapshots, definitions: definitions)
+        return DropRewardsResult(addedSnapshots: addedSnapshots, addedSeeds: inventorySeeds, definitions: definitions)
     }
 
     func distributeFlatExperience(total: Int,
