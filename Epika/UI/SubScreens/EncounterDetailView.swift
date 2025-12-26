@@ -639,62 +639,20 @@ struct EncounterDetailView: View {
         return restoreBattleLogArchive(from: record)
     }
 
-    private func restoreBattleLogArchive(from record: BattleLogRecord) -> BattleLogArchive {
-        // initialHP復元
-        var initialHP: [UInt16: UInt32] = [:]
-        for hp in record.initialHPs {
-            initialHP[hp.actorIndex] = hp.hp
-        }
-
-        // actions復元
-        let actions = record.actions.sorted { $0.sortOrder < $1.sortOrder }.map { a in
-            BattleAction(
-                turn: a.turn,
-                kind: a.kind,
-                actor: a.actor,
-                target: a.target == 0 ? nil : a.target,
-                value: a.value == 0 ? nil : a.value,
-                skillIndex: a.skillIndex == 0 ? nil : a.skillIndex,
-                extra: a.extra == 0 ? nil : a.extra
-            )
+    private func restoreBattleLogArchive(from record: BattleLogRecord) -> BattleLogArchive? {
+        // バイナリBLOBからデコード
+        guard let decoded = ExplorationProgressService.decodeBattleLogData(record.logData) else {
+            // 旧形式または破損データ：詳細なしで返す
+            print("[BattleLogRestore] logDataのデコードに失敗: \(record.logData.count)バイト")
+            return nil
         }
 
         let battleLog = BattleLog(
-            initialHP: initialHP,
-            actions: actions,
-            outcome: record.outcome,
-            turns: record.turns
+            initialHP: decoded.initialHP,
+            actions: decoded.actions,
+            outcome: decoded.outcome,
+            turns: decoded.turns
         )
-
-        // participants復元（orderIndexでソートして順序を復元）
-        let playerSnapshots = record.participants
-            .filter { $0.isPlayer }
-            .sorted { $0.orderIndex < $1.orderIndex }
-            .map { p in
-                BattleParticipantSnapshot(
-                    actorId: p.actorId,
-                    partyMemberId: p.partyMemberId == 0 ? nil : p.partyMemberId,
-                    characterId: p.characterId == 0 ? nil : p.characterId,
-                    name: p.name,
-                    avatarIndex: p.avatarIndex == 0 ? nil : p.avatarIndex,
-                    level: p.level == 0 ? nil : Int(p.level),
-                    maxHP: Int(p.maxHP)
-                )
-            }
-        let enemySnapshots = record.participants
-            .filter { !$0.isPlayer }
-            .sorted { $0.orderIndex < $1.orderIndex }
-            .map { p in
-                BattleParticipantSnapshot(
-                    actorId: p.actorId,
-                    partyMemberId: p.partyMemberId == 0 ? nil : p.partyMemberId,
-                    characterId: p.characterId == 0 ? nil : p.characterId,
-                    name: p.name,
-                    avatarIndex: p.avatarIndex == 0 ? nil : p.avatarIndex,
-                    level: p.level == 0 ? nil : Int(p.level),
-                    maxHP: Int(p.maxHP)
-                )
-            }
 
         return BattleLogArchive(
             enemyId: record.enemyId,
@@ -703,8 +661,8 @@ struct EncounterDetailView: View {
             turns: Int(record.turns),
             timestamp: record.timestamp,
             battleLog: battleLog,
-            playerSnapshots: playerSnapshots,
-            enemySnapshots: enemySnapshots
+            playerSnapshots: decoded.playerSnapshots,
+            enemySnapshots: decoded.enemySnapshots
         )
     }
 

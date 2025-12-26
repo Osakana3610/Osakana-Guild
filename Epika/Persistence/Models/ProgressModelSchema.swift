@@ -16,7 +16,7 @@
 //       - InventoryItemRecord
 //       - StoryNodeProgressRecord
 //       - DungeonRecord
-//       - ExplorationRunRecord, ExplorationEventRecord
+//       - ExplorationRunRecord, ExplorationEventRecord, BattleLogRecord
 //       - ShopStockRecord
 //       - AutoTradeRuleRecord
 //
@@ -42,9 +42,6 @@ enum ProgressModelSchema {
             ExplorationEventRecord.self,
             ExplorationDropRecord.self,
             BattleLogRecord.self,
-            BattleLogInitialHPRecord.self,
-            BattleLogActionRecord.self,
-            BattleLogParticipantRecord.self,
             ShopStockRecord.self,
             AutoTradeRuleRecord.self
         ]
