@@ -222,6 +222,58 @@ final class AdventureViewState {
         await updateExplorationProgress(forPartyId: partyId, using: appServices)
     }
 
+    /// 一斉出撃用のパラメータ
+    struct BatchStartParams {
+        let party: PartySnapshot
+        let dungeon: RuntimeDungeon
+    }
+
+    /// 複数の探索を一括で開始（並列準備 + 1回のDB保存 + 1回の進捗更新）
+    func startExplorationsInBatch(_ params: [BatchStartParams], using appServices: AppServices) async throws -> [String] {
+        // 既に探索中のパーティを除外
+        let validParams = params.filter { activeExplorationTasks[$0.party.id] == nil }
+        guard !validParams.isEmpty else { return [] }
+
+        // バッチパラメータを作成
+        let batchParams = validParams.map { param in
+            AppServices.BatchExplorationParams(
+                partyId: param.party.id,
+                dungeonId: param.dungeon.id,
+                targetFloor: Int(param.party.targetFloor)
+            )
+        }
+
+        // 一括で探索を開始
+        let handles = try await appServices.startExplorationRunsBatch(batchParams)
+
+        // 失敗したパーティを追跡
+        var failures: [String] = []
+        var startedPartyIds: [UInt8] = []
+
+        // 各パーティのハンドルとタスクを設定
+        for param in validParams {
+            let partyId = param.party.id
+            guard let handle = handles[partyId] else {
+                failures.append(param.party.name)
+                continue
+            }
+
+            activeExplorationHandles[partyId] = handle
+            activeExplorationTasks[partyId] = Task { [weak self, appServices] in
+                guard let self else { return }
+                await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
+            }
+            startedPartyIds.append(partyId)
+        }
+
+        // 開始したパーティの進捗を一括更新
+        if !startedPartyIds.isEmpty {
+            await loadExplorationProgress(using: appServices)
+        }
+
+        return failures
+    }
+
     func cancelExploration(for party: PartySnapshot, using appServices: AppServices) async {
         let partyId = party.id
         if let handle = activeExplorationHandles[partyId] {

@@ -153,6 +153,16 @@ final class ExplorationProgressService {
         return snapshots
     }
 
+    /// バッチ保存用のパラメータ
+    struct BeginRunParams: Sendable {
+        let party: PartySnapshot
+        let dungeon: DungeonDefinition
+        let difficulty: Int
+        let targetFloor: Int
+        let startedAt: Date
+        let seed: UInt64
+    }
+
     func beginRun(party: PartySnapshot,
                   dungeon: DungeonDefinition,
                   difficulty: Int,
@@ -176,6 +186,41 @@ final class ExplorationProgressService {
         try saveIfNeeded(context)
         invalidateCache()  // パージや新規レコードでキャッシュが古くなる可能性
         return runRecord.persistentModelID
+    }
+
+    /// 複数の探索を一括で開始（1回のsaveで済ませる）
+    func beginRunsBatch(_ params: [BeginRunParams]) throws -> [UInt8: PersistentIdentifier] {
+        guard !params.isEmpty else { return [:] }
+
+        let context = makeContext()
+
+        // 200件パージ（1回だけ）
+        try purgeOldRecordsIfNeeded(context: context)
+
+        // レコードを作成してinsert（IDはsave後に取得）
+        var records: [(partyId: UInt8, record: ExplorationRunRecord)] = []
+        for param in params {
+            let runRecord = ExplorationRunRecord(
+                partyId: param.party.id,
+                dungeonId: param.dungeon.id,
+                difficulty: UInt8(param.difficulty),
+                targetFloor: UInt8(param.targetFloor),
+                startedAt: param.startedAt,
+                seed: param.seed
+            )
+            context.insert(runRecord)
+            records.append((param.party.id, runRecord))
+        }
+
+        // save後にIDを取得（save前は一時IDになるため）
+        try saveIfNeeded(context)
+        invalidateCache()
+
+        var results: [UInt8: PersistentIdentifier] = [:]
+        for (partyId, record) in records {
+            results[partyId] = record.persistentModelID
+        }
+        return results
     }
 
     /// イベントを追加し、戦闘ログがあればそのIDを返す
