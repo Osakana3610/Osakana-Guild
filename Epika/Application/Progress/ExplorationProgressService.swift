@@ -194,8 +194,9 @@ final class ExplorationProgressService {
 
         let context = makeContext()
 
+        // TODO: パフォーマンステスト後に戻す
         // 200件パージ（1回だけ）
-        try purgeOldRecordsIfNeeded(context: context)
+        // try purgeOldRecordsIfNeeded(context: context)
 
         // レコードを作成してinsert（IDはsave後に取得）
         var records: [(partyId: UInt8, record: ExplorationRunRecord)] = []
