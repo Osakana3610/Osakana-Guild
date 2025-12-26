@@ -143,9 +143,9 @@ extension AppServices {
                 let drops = makeItemDropResults(from: artifact.totalDrops)
                 let dropResult = try await applyDropRewards(drops)
                 // プレイヤー状態とインベントリキャッシュを更新（失敗しても探索完了フローは止めない）
-                Task { @MainActor [weak self, itemPreload] in
+                Task { @MainActor [weak self] in
                     await self?.reloadPlayerState()
-                    itemPreload.addDroppedItems(seeds: dropResult.addedSeeds, snapshots: dropResult.addedSnapshots, definitions: dropResult.definitions)
+                    self?.userDataLoad.addDroppedItems(seeds: dropResult.addedSeeds, snapshots: dropResult.addedSnapshots, definitions: dropResult.definitions)
                 }
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,

@@ -145,12 +145,12 @@ private struct TaskView: View {
                 }
             }
             .task {
-                self.deltas = appServices.itemPreload.getCombatDeltaDisplay(for: equipment)
+                self.deltas = appServices.userDataLoad.getCombatDeltaDisplay(for: equipment)
             }
         } else {
             // 初回ロード
             HStack {}.task {
-                self.deltas = appServices.itemPreload.getCombatDeltaDisplay(for: equipment)
+                self.deltas = appServices.userDataLoad.getCombatDeltaDisplay(for: equipment)
             }
         }
     }
