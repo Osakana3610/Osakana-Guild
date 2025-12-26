@@ -167,6 +167,7 @@ final class CharacterProgressService {
             actionRateMageMagic: snapshot.actionPreferences.mageMagic,
             actionRateBreath: snapshot.actionPreferences.breath,
             updatedAt: snapshot.updatedAt,
+            displayOrder: snapshot.displayOrder,
             equippedItems: snapshot.equippedItems.map { item in
                 CharacterInput.EquippedItem(
                     superRareTitleId: item.superRareTitleId,
@@ -230,6 +231,7 @@ final class CharacterProgressService {
             actionRateMageMagic: Int(record.actionRateMageMagic),
             actionRateBreath: Int(record.actionRateBreath),
             updatedAt: record.updatedAt,
+            displayOrder: record.displayOrder,
             equippedItems: equippedItems
         )
     }

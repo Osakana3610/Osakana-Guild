@@ -48,6 +48,7 @@ struct CharacterInput: Sendable, Hashable {
     let actionRateMageMagic: Int
     let actionRateBreath: Int
     let updatedAt: Date
+    let displayOrder: UInt8
     let equippedItems: [EquippedItem]
 }
 
@@ -71,6 +72,7 @@ extension CharacterInput {
             actionRateMageMagic: snapshot.actionPreferences.mageMagic,
             actionRateBreath: snapshot.actionPreferences.breath,
             updatedAt: snapshot.updatedAt,
+            displayOrder: snapshot.displayOrder,
             equippedItems: snapshot.equippedItems.map { item in
                 EquippedItem(
                     superRareTitleId: item.superRareTitleId,

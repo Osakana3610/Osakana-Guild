@@ -61,6 +61,7 @@ final class StatCalculationSanityTests: XCTestCase {
                     actionRateMageMagic: 75,
                     actionRateBreath: 50,
                     updatedAt: Date(),
+                    displayOrder: 0,
                     equippedItems: []
                 )
 
@@ -103,7 +104,7 @@ final class StatCalculationSanityTests: XCTestCase {
             primaryPersonalityId: 0, secondaryPersonalityId: 0,
             actionRateAttack: 100, actionRatePriestMagic: 75,
             actionRateMageMagic: 75, actionRateBreath: 50,
-            updatedAt: Date(), equippedItems: []
+            updatedAt: Date(), displayOrder: 0, equippedItems: []
         )
 
         let lv50Input = CharacterInput(
@@ -112,7 +113,7 @@ final class StatCalculationSanityTests: XCTestCase {
             primaryPersonalityId: 0, secondaryPersonalityId: 0,
             actionRateAttack: 100, actionRatePriestMagic: 75,
             actionRateMageMagic: 75, actionRateBreath: 50,
-            updatedAt: Date(), equippedItems: []
+            updatedAt: Date(), displayOrder: 0, equippedItems: []
         )
 
         let lv1Char = try RuntimeCharacterFactory.make(from: lv1Input, masterData: cache)

@@ -5,14 +5,14 @@
 //
 // 【責務】
 //   - 探索状態の管理（進行中の探索ハンドル、タスク管理）
-//   - ダンジョンリスト・探索進捗・プレイヤー情報の保持
-//   - 探索の開始・停止・再開処理
+//   - ダンジョンリスト・プレイヤー情報の保持
+//   - 探索の開始・停止処理
 //
 // 【状態管理】
 //   - activeExplorationHandles/Tasks: 進行中の探索管理
 //   - runtimeDungeons: 解放済みダンジョンリスト
-//   - explorationProgress: 全パーティの探索進捗
-//   - 孤立探索の検出と再開機能
+//   - explorationProgress: UserDataLoadService.explorationSummariesへのアクセサ
+//   - 孤立探索の再開はUserDataLoadServiceが起動時に実行
 //
 // 【使用箇所】
 //   - AdventureView
@@ -28,6 +28,7 @@ import SwiftData
 final class AdventureViewState {
     private var activeExplorationHandles: [UInt8: AppServices.ExplorationRunHandle] = [:]
     private var activeExplorationTasks: [UInt8: Task<Void, Never>] = [:]
+    private weak var appServicesRef: AppServices?
 
     var selectedPartyIndex: Int = 0
     var isLoading: Bool = false
@@ -39,65 +40,27 @@ final class AdventureViewState {
     var showPartyDetail: Bool = false
 
     var runtimeDungeons: [RuntimeDungeon] = []
-    var explorationProgress: [ExplorationSnapshot] = []
     var playerProgress: PlayerSnapshot?
 
     var partyState: PartyViewState?
+
+    /// 探索進捗（UserDataLoadServiceのキャッシュを参照）
+    var explorationProgress: [ExplorationSnapshot] {
+        appServicesRef?.userDataLoad.explorationSummaries ?? []
+    }
 
     func setPartyState(_ partyState: PartyViewState) {
         self.partyState = partyState
     }
 
     func loadInitialData(using appServices: AppServices) async {
-        // 孤立した探索（.running状態だがアクティブタスクがない）を検出して再開
-        await resumeOrphanedExplorations(using: appServices)
+        appServicesRef = appServices
+        // 孤立探索の再開はUserDataLoadServiceが起動時に実行済み
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadPartiesIfNeeded() }
             group.addTask { await self.loadDungeons(using: appServices) }
-            group.addTask { await self.loadExplorationProgress(using: appServices) }
             group.addTask { await self.loadPlayer(using: appServices) }
-        }
-    }
-
-    /// アプリ再起動後に残っている.running状態の探索を再開
-    private func resumeOrphanedExplorations(using appServices: AppServices) async {
-        let runningSummaries: [ExplorationProgressService.RunningExplorationSummary]
-        do {
-            runningSummaries = try appServices.exploration.runningExplorationSummaries()
-        } catch {
-            present(error: error)
-            return
-        }
-
-        let orphaned = runningSummaries.filter { summary in
-            activeExplorationTasks[summary.partyId] == nil
-        }
-
-        var firstError: Error?
-        for summary in orphaned {
-            do {
-                let handle = try await appServices.resumeOrphanedExploration(
-                    partyId: summary.partyId,
-                    startedAt: summary.startedAt
-                )
-                activeExplorationHandles[summary.partyId] = handle
-                let partyId = summary.partyId
-                activeExplorationTasks[partyId] = Task { [weak self, appServices] in
-                    guard let self else { return }
-                    await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
-                }
-            } catch {
-                // 1件の再開失敗で全体を止めず、残りも試行する
-                if firstError == nil {
-                    firstError = error
-                }
-            }
-        }
-
-        // 再開に失敗した探索があればユーザーに通知
-        if let error = firstError {
-            present(error: error)
         }
     }
 
@@ -150,9 +113,11 @@ final class AdventureViewState {
         }
     }
 
+    /// 探索進捗キャッシュを再読み込み
     func loadExplorationProgress(using appServices: AppServices) async {
         do {
-            explorationProgress = try await appServices.exploration.recentExplorationSummaries()
+            appServices.userDataLoad.invalidateExplorationSummaries()
+            _ = try await appServices.userDataLoad.getExplorationSummaries()
         } catch {
             present(error: error)
         }
@@ -161,10 +126,7 @@ final class AdventureViewState {
     /// 指定パーティの探索進捗だけを更新（全取得を避けるため）
     private func updateExplorationProgress(forPartyId partyId: UInt8, using appServices: AppServices) async {
         do {
-            let recentRuns = try await appServices.exploration.recentExplorations(forPartyId: partyId, limit: 2)
-            // 該当パーティの古いエントリを削除して新しいのに差し替え
-            explorationProgress.removeAll { $0.party.partyId == partyId }
-            explorationProgress.append(contentsOf: recentRuns)
+            try await appServices.userDataLoad.updateExplorationSummaries(forPartyId: partyId)
         } catch {
             present(error: error)
         }
@@ -319,7 +281,7 @@ final class AdventureViewState {
         await updateExplorationProgress(forPartyId: partyId, using: appServices)
     }
 
-    /// 差分更新: 新しいイベントログを既存のスナップショットに追加
+    /// 差分更新: 新しいイベントログを既存のスナップショットに追加（UserDataLoadServiceに委譲）
     private func appendEncounterLog(
         entry: ExplorationEventLogEntry,
         totals: AppServices.ExplorationRunTotals,
@@ -327,33 +289,13 @@ final class AdventureViewState {
         partyId: UInt8,
         masterData: MasterDataCache
     ) {
-        guard let index = explorationProgress.firstIndex(where: {
-            $0.party.partyId == partyId && $0.status == .running
-        }) else { return }
-
-        let newLog = ExplorationSnapshot.EncounterLog(from: entry, battleLogId: battleLogId, masterData: masterData)
-        explorationProgress[index].encounterLogs.append(newLog)
-        explorationProgress[index].activeFloorNumber = entry.floorNumber
-        explorationProgress[index].lastUpdatedAt = entry.occurredAt
-
-        // サマリー更新
-        explorationProgress[index].summary = ExplorationSnapshot.makeSummary(
-            displayDungeonName: explorationProgress[index].displayDungeonName,
-            status: .running,
-            activeFloorNumber: entry.floorNumber,
-            expectedReturnAt: explorationProgress[index].expectedReturnAt,
-            startedAt: explorationProgress[index].startedAt,
-            lastUpdatedAt: entry.occurredAt,
-            logs: explorationProgress[index].encounterLogs
+        appServicesRef?.userDataLoad.appendEncounterLog(
+            entry: entry,
+            totals: totals,
+            battleLogId: battleLogId,
+            partyId: partyId,
+            masterData: masterData
         )
-
-        // 報酬更新（累計値を使用）
-        explorationProgress[index].rewards.experience = totals.totalExperience
-        explorationProgress[index].rewards.gold = totals.totalGold
-        // ドロップを追加（item は既に解決済み）
-        for drop in entry.drops {
-            explorationProgress[index].rewards.itemDrops[drop.item.name, default: 0] += drop.quantity
-        }
     }
 
     private func clearExplorationTask(partyId: UInt8) {
