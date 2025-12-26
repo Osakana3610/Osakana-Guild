@@ -12,7 +12,7 @@
 //   - 各アイテムを行として表示（ItemDropRowView）
 //   - iOS 26以降はglassEffect、それ以前はultraThinMaterial背景
 //   - 超レアアイテムは白背景+赤tint、通常アイテムは濃いグレー
-//   - スプリングアニメーション対応（挿入/削除）
+//   - イーズアウトアニメーション対応（挿入/削除）
 //   - タップで全アイテムをクリア
 //
 // 【使用箇所】
@@ -70,7 +70,7 @@ struct ItemDropNotificationView: View {
             }
             .padding(.horizontal, 6)
             .padding(.bottom, 4)
-            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: dropService.droppedItems)
+            .animation(.easeOut(duration: 0.3), value: dropService.droppedItems)
         } else {
             // アイテムがない時は何も表示しない
             EmptyView()
