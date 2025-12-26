@@ -90,7 +90,7 @@ extension AppServices {
             targetFloorNumber: Int(record.targetFloor),
             difficultyTitleId: UInt8(record.difficulty),
             party: adjustedPartyState,
-            restoringRandomState: randomState,
+            restoringRandomState: UInt64(bitPattern: randomState),
             superRareState: superRareState,
             droppedItemIds: droppedItemIds,
             startFloor: max(0, floorIndex),
