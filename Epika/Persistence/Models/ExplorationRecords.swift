@@ -23,8 +23,7 @@
 //     - battleLog: 戦闘ログレコード（1対1リレーション）
 //
 //   - ExplorationDropRecord (@Model): ドロップレコード
-//   - BattleLogRecord (@Model): 戦闘ログレコード
-//   - BattleLogInitialHPRecord, BattleLogActionRecord, BattleLogParticipantRecord
+//   - BattleLogRecord (@Model): 戦闘ログレコード（logDataにバイナリBLOBで詳細保存）
 //
 // 【使用箇所】
 //   - ExplorationProgressService: 探索履歴の永続化
@@ -61,8 +60,8 @@ final class ExplorationDropRecord {
 
 /// 戦闘ログレコード
 ///
-/// BattleLogArchiveを正規化したSwiftDataモデル。
-/// JSONではなくリレーションで全データを保持。
+/// BattleLogArchiveをバイナリBLOBで保存するSwiftDataモデル。
+/// 詳細データ（initialHP、actions、participants）はlogDataにまとめて格納。
 @Model
 final class BattleLogRecord {
     var enemyId: UInt16 = 0
@@ -74,66 +73,9 @@ final class BattleLogRecord {
 
     var event: ExplorationEventRecord?
 
-    @Relationship(deleteRule: .cascade, inverse: \BattleLogInitialHPRecord.battleLog)
-    var initialHPs: [BattleLogInitialHPRecord] = []
-
-    @Relationship(deleteRule: .cascade, inverse: \BattleLogActionRecord.battleLog)
-    var actions: [BattleLogActionRecord] = []
-
-    @Relationship(deleteRule: .cascade, inverse: \BattleLogParticipantRecord.battleLog)
-    var participants: [BattleLogParticipantRecord] = []
-
-    init() {}
-}
-
-// MARK: - BattleLogInitialHPRecord
-
-/// 戦闘開始時HPレコード
-@Model
-final class BattleLogInitialHPRecord {
-    var actorIndex: UInt16 = 0
-    var hp: UInt32 = 0
-    var battleLog: BattleLogRecord?
-
-    init(actorIndex: UInt16, hp: UInt32) {
-        self.actorIndex = actorIndex
-        self.hp = hp
-    }
-}
-
-// MARK: - BattleLogActionRecord
-
-/// 戦闘アクションレコード
-@Model
-final class BattleLogActionRecord {
-    var sortOrder: UInt16 = 0
-    var turn: UInt8 = 0
-    var kind: UInt8 = 0
-    var actor: UInt16 = 0
-    var target: UInt16 = 0  // 0 = nil
-    var value: UInt32 = 0   // 0 = nil
-    var skillIndex: UInt16 = 0  // 0 = nil
-    var extra: UInt16 = 0   // 0 = nil
-    var battleLog: BattleLogRecord?
-
-    init() {}
-}
-
-// MARK: - BattleLogParticipantRecord
-
-/// 戦闘参加者レコード
-@Model
-final class BattleLogParticipantRecord {
-    var orderIndex: UInt8 = 0     // 表示順序（SwiftDataは配列順序を保証しないため）
-    var isPlayer: Bool = true
-    var actorId: String = ""
-    var partyMemberId: UInt8 = 0  // 0 = nil
-    var characterId: UInt8 = 0    // 0 = nil
-    var name: String = ""
-    var avatarIndex: UInt16 = 0   // 0 = nil
-    var level: UInt16 = 0         // 0 = nil
-    var maxHP: UInt32 = 0
-    var battleLog: BattleLogRecord?
+    /// 戦闘ログ詳細（バイナリBLOB）
+    /// フォーマット: ExplorationProgressService.encodeBattleLogData() 参照
+    var logData: Data = Data()
 
     init() {}
 }

@@ -143,21 +143,27 @@ extension AppServices {
             return [:]
         }
 
+        // バイナリBLOBからデコード
+        guard let decoded = ExplorationProgressService.decodeBattleLogData(logRecord.logData) else {
+            // デコード失敗時は空辞書を返す（全員フルHP扱い）
+            print("[RestorePartyHP] logDataのデコードに失敗: \(logRecord.logData.count)バイト")
+            return [:]
+        }
+
         var hp: [UInt16: Int] = [:]
 
         // 1. 初期HP設定
-        for hpRecord in logRecord.initialHPs {
-            hp[hpRecord.actorIndex] = Int(hpRecord.hp)
+        for (actorIndex, initialHP) in decoded.initialHP {
+            hp[actorIndex] = Int(initialHP)
         }
 
         // 2. actionsを順に処理
-        let sortedActions = logRecord.actions.sorted { $0.sortOrder < $1.sortOrder }
-        for actionRecord in sortedActions {
-            let kind = ActionKind(rawValue: actionRecord.kind)
-            let value = Int(actionRecord.value)
+        for action in decoded.actions {
+            let kind = ActionKind(rawValue: action.kind)
+            let value = Int(action.value ?? 0)
 
             // target系処理
-            let target = actionRecord.target
+            let target = action.target ?? 0
             if target != 0 {
                 switch kind {
                 // ダメージ
@@ -168,11 +174,11 @@ extension AppServices {
                     hp[target, default: 0] += value
                 // 蘇生（maxHPの25%で復活）
                 case .resurrection, .necromancer, .rescue:
-                    let playerParticipants = logRecord.participants.filter { $0.isPlayer }
-                    if let snapshot = playerParticipants.first(where: {
-                        UInt16($0.partyMemberId != 0 ? $0.partyMemberId : $0.characterId) == target
+                    if let snapshot = decoded.playerSnapshots.first(where: {
+                        let id = $0.partyMemberId ?? $0.characterId ?? 0
+                        return UInt16(id) == target
                     }) {
-                        hp[target] = Int(snapshot.maxHP) / 4
+                        hp[target] = snapshot.maxHP / 4
                     }
                 default:
                     break
@@ -182,9 +188,9 @@ extension AppServices {
             // actor系処理
             switch kind {
             case .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
-                hp[actionRecord.actor, default: 0] += value
+                hp[action.actor, default: 0] += value
             case .damageSelf:
-                hp[actionRecord.actor, default: 0] -= value
+                hp[action.actor, default: 0] -= value
             default:
                 break
             }
@@ -192,13 +198,11 @@ extension AppServices {
 
         // 3. characterId → HPに変換、クランプ
         var result: [UInt8: Int] = [:]
-        let playerParticipants = logRecord.participants.filter { $0.isPlayer }
-        for snapshot in playerParticipants {
-            let characterId = snapshot.characterId
-            guard characterId != 0 else { continue }
-            let actorIndex = UInt16(snapshot.partyMemberId != 0 ? snapshot.partyMemberId : characterId)
+        for snapshot in decoded.playerSnapshots {
+            guard let characterId = snapshot.characterId, characterId != 0 else { continue }
+            let actorIndex = UInt16(snapshot.partyMemberId ?? characterId)
             let currentHP = hp[actorIndex] ?? 0
-            result[characterId] = max(0, min(currentHP, Int(snapshot.maxHP)))
+            result[characterId] = max(0, min(currentHP, snapshot.maxHP))
         }
         return result
     }

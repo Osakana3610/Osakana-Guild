@@ -15,6 +15,7 @@
 //   - cancelRun(...) - 探索キャンセル
 //   - fetchRunningRecord(...) → ExplorationRunRecord? - 実行中レコード取得
 //   - encodeItemIds/decodeItemIds - バイナリフォーマットヘルパー
+//   - purgeOldRecordsInBackground() - バックグラウンドで古いレコードを削除
 //
 // 【データ管理】
 //   - 最大200件を保持（超過時は古いものから削除）
@@ -51,6 +52,42 @@ final class ExplorationProgressService {
         cachedExplorations = nil
     }
 
+    /// バックグラウンドで古いレコードを削除
+    /// フォアグラウンド復帰時などUIをブロックせずにパージを実行する
+    func purgeOldRecordsInBackground() {
+        let container = self.container
+        Task.detached(priority: .utility) {
+            let startTime = CFAbsoluteTimeGetCurrent()
+            let context = ModelContext(container)
+            context.autosaveEnabled = false
+
+            var countDescriptor = FetchDescriptor<ExplorationRunRecord>()
+            countDescriptor.propertiesToFetch = []
+            let count = (try? context.fetchCount(countDescriptor)) ?? 0
+
+            guard count >= 200 else { return }
+
+            let deleteCount = count - 200 + 1
+            print("[ExplorationPurge] 削除開始: 現在\(count)件 → \(deleteCount)件削除予定")
+
+            // 最古の完了済みレコードを削除
+            var oldestDescriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.result != 0 },  // running以外
+                sortBy: [SortDescriptor(\.startedAt, order: .forward)]
+            )
+            oldestDescriptor.fetchLimit = deleteCount
+
+            guard let oldRecords = try? context.fetch(oldestDescriptor) else { return }
+            for record in oldRecords {
+                context.delete(record)
+            }
+            try? context.save()
+
+            let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+            print("[ExplorationPurge] 削除完了: \(oldRecords.count)件削除, 所要時間: \(String(format: "%.3f", elapsed))秒")
+        }
+    }
+
     // MARK: - Binary Format Helpers
 
     /// Set<UInt16>をバイナリフォーマットにエンコード
@@ -78,6 +115,210 @@ final class ExplorationProgressService {
             result.insert(id)
         }
         return result
+    }
+
+    // MARK: - Battle Log Binary Format
+
+    /// 戦闘ログデータをバイナリ形式にエンコード
+    /// フォーマット: [Header][InitialHP][Actions][Participants]
+    static func encodeBattleLogData(
+        initialHP: [UInt16: UInt32],
+        actions: [BattleAction],
+        outcome: UInt8,
+        turns: UInt8,
+        playerSnapshots: [BattleParticipantSnapshot],
+        enemySnapshots: [BattleParticipantSnapshot]
+    ) -> Data {
+        var data = Data()
+
+        // Header: version(1) + outcome(1) + turns(1) = 3 bytes
+        data.append(1)  // version
+        data.append(outcome)
+        data.append(turns)
+
+        // InitialHP: count(2) + entries(6 each)
+        var hpCount = UInt16(initialHP.count)
+        withUnsafeBytes(of: &hpCount) { data.append(contentsOf: $0) }
+        for (actorIndex, hp) in initialHP {
+            var idx = actorIndex
+            var hpVal = hp
+            withUnsafeBytes(of: &idx) { data.append(contentsOf: $0) }
+            withUnsafeBytes(of: &hpVal) { data.append(contentsOf: $0) }
+        }
+
+        // Actions: count(2) + entries(12 each)
+        var actionCount = UInt16(actions.count)
+        withUnsafeBytes(of: &actionCount) { data.append(contentsOf: $0) }
+        for action in actions {
+            data.append(action.turn)
+            data.append(action.kind)
+            var actor = action.actor
+            var target = action.target ?? 0
+            var value = action.value ?? 0
+            var skillIndex = action.skillIndex ?? 0
+            var extra = action.extra ?? 0
+            withUnsafeBytes(of: &actor) { data.append(contentsOf: $0) }
+            withUnsafeBytes(of: &target) { data.append(contentsOf: $0) }
+            withUnsafeBytes(of: &value) { data.append(contentsOf: $0) }
+            withUnsafeBytes(of: &skillIndex) { data.append(contentsOf: $0) }
+            withUnsafeBytes(of: &extra) { data.append(contentsOf: $0) }
+        }
+
+        // Participants: playerCount(1) + enemyCount(1) + entries
+        data.append(UInt8(playerSnapshots.count))
+        data.append(UInt8(enemySnapshots.count))
+
+        func encodeParticipant(_ snapshot: BattleParticipantSnapshot, to data: inout Data) {
+            // actorId: length(1) + UTF8 bytes
+            let actorIdData = Data(snapshot.actorId.utf8)
+            data.append(UInt8(actorIdData.count))
+            data.append(actorIdData)
+
+            // partyMemberId(1) + characterId(1)
+            data.append(snapshot.partyMemberId ?? 0)
+            data.append(snapshot.characterId ?? 0)
+
+            // name: length(1) + UTF8 bytes
+            let nameData = Data(snapshot.name.utf8)
+            data.append(UInt8(nameData.count))
+            data.append(nameData)
+
+            // avatarIndex(2) + level(2) + maxHP(4)
+            var avatarIndex = snapshot.avatarIndex ?? 0
+            var level = UInt16(snapshot.level ?? 0)
+            var maxHP = UInt32(snapshot.maxHP)
+            withUnsafeBytes(of: &avatarIndex) { data.append(contentsOf: $0) }
+            withUnsafeBytes(of: &level) { data.append(contentsOf: $0) }
+            withUnsafeBytes(of: &maxHP) { data.append(contentsOf: $0) }
+        }
+
+        for snapshot in playerSnapshots {
+            encodeParticipant(snapshot, to: &data)
+        }
+        for snapshot in enemySnapshots {
+            encodeParticipant(snapshot, to: &data)
+        }
+
+        return data
+    }
+
+    /// バイナリ形式から戦闘ログデータをデコード
+    static func decodeBattleLogData(_ data: Data) -> (
+        initialHP: [UInt16: UInt32],
+        actions: [BattleAction],
+        outcome: UInt8,
+        turns: UInt8,
+        playerSnapshots: [BattleParticipantSnapshot],
+        enemySnapshots: [BattleParticipantSnapshot]
+    )? {
+        guard data.count >= 3 else {
+            print("[BattleLogDecode] データが短すぎます: \(data.count)バイト")
+            return nil
+        }
+
+        var offset = 0
+
+        func readUInt8() -> UInt8? {
+            guard offset < data.count else { return nil }
+            let value = data[offset]
+            offset += 1
+            return value
+        }
+
+        func readUInt16() -> UInt16? {
+            guard offset + 2 <= data.count else { return nil }
+            let value = data.withUnsafeBytes { $0.load(fromByteOffset: offset, as: UInt16.self) }
+            offset += 2
+            return value
+        }
+
+        func readUInt32() -> UInt32? {
+            guard offset + 4 <= data.count else { return nil }
+            let value = data.withUnsafeBytes { $0.load(fromByteOffset: offset, as: UInt32.self) }
+            offset += 4
+            return value
+        }
+
+        func readString() -> String? {
+            guard let length = readUInt8() else { return nil }
+            guard offset + Int(length) <= data.count else { return nil }
+            let stringData = data[offset..<(offset + Int(length))]
+            offset += Int(length)
+            return String(data: stringData, encoding: .utf8)
+        }
+
+        // Header
+        guard let version = readUInt8(), version == 1 else {
+            print("[BattleLogDecode] 不正なバージョン")
+            return nil
+        }
+        guard let outcome = readUInt8(), let turns = readUInt8() else { return nil }
+
+        // InitialHP
+        guard let hpCount = readUInt16() else { return nil }
+        var initialHP: [UInt16: UInt32] = [:]
+        for _ in 0..<hpCount {
+            guard let actorIndex = readUInt16(), let hp = readUInt32() else { return nil }
+            initialHP[actorIndex] = hp
+        }
+
+        // Actions
+        guard let actionCount = readUInt16() else { return nil }
+        var actions: [BattleAction] = []
+        for _ in 0..<actionCount {
+            guard let turn = readUInt8(),
+                  let kind = readUInt8(),
+                  let actor = readUInt16(),
+                  let target = readUInt16(),
+                  let value = readUInt32(),
+                  let skillIndex = readUInt16(),
+                  let extra = readUInt16() else { return nil }
+            actions.append(BattleAction(
+                turn: turn,
+                kind: kind,
+                actor: actor,
+                target: target == 0 ? nil : target,
+                value: value == 0 ? nil : value,
+                skillIndex: skillIndex == 0 ? nil : skillIndex,
+                extra: extra == 0 ? nil : extra
+            ))
+        }
+
+        // Participants
+        guard let playerCount = readUInt8(), let enemyCount = readUInt8() else { return nil }
+
+        func decodeParticipant() -> BattleParticipantSnapshot? {
+            guard let actorId = readString(),
+                  let partyMemberId = readUInt8(),
+                  let characterId = readUInt8(),
+                  let name = readString(),
+                  let avatarIndex = readUInt16(),
+                  let level = readUInt16(),
+                  let maxHP = readUInt32() else { return nil }
+            return BattleParticipantSnapshot(
+                actorId: actorId,
+                partyMemberId: partyMemberId == 0 ? nil : partyMemberId,
+                characterId: characterId == 0 ? nil : characterId,
+                name: name,
+                avatarIndex: avatarIndex == 0 ? nil : avatarIndex,
+                level: level == 0 ? nil : Int(level),
+                maxHP: Int(maxHP)
+            )
+        }
+
+        var playerSnapshots: [BattleParticipantSnapshot] = []
+        for _ in 0..<playerCount {
+            guard let snapshot = decodeParticipant() else { return nil }
+            playerSnapshots.append(snapshot)
+        }
+
+        var enemySnapshots: [BattleParticipantSnapshot] = []
+        for _ in 0..<enemyCount {
+            guard let snapshot = decodeParticipant() else { return nil }
+            enemySnapshots.append(snapshot)
+        }
+
+        return (initialHP, actions, outcome, turns, playerSnapshots, enemySnapshots)
     }
 
     private enum ExplorationSnapshotBuildError: Error {
@@ -171,9 +412,6 @@ final class ExplorationProgressService {
                   seed: UInt64) async throws -> PersistentIdentifier {
         let context = makeContext()
 
-        // 200件パージ
-        try purgeOldRecordsIfNeeded(context: context)
-
         let runRecord = ExplorationRunRecord(
             partyId: party.id,
             dungeonId: dungeon.id,
@@ -193,10 +431,6 @@ final class ExplorationProgressService {
         guard !params.isEmpty else { return [:] }
 
         let context = makeContext()
-
-        // TODO: パフォーマンステスト後に戻す
-        // 200件パージ（1回だけ）
-        // try purgeOldRecordsIfNeeded(context: context)
 
         // レコードを作成してinsert（IDはsave後に取得）
         var records: [(partyId: UInt8, record: ExplorationRunRecord)] = []
@@ -466,59 +700,18 @@ private extension ExplorationProgressService {
             logRecord.timestamp = archive.timestamp
             logRecord.outcome = archive.battleLog.outcome
             logRecord.event = eventRecord
+
+            // バイナリBLOBで詳細データを保存
+            logRecord.logData = Self.encodeBattleLogData(
+                initialHP: archive.battleLog.initialHP,
+                actions: archive.battleLog.actions,
+                outcome: archive.battleLog.outcome,
+                turns: archive.battleLog.turns,
+                playerSnapshots: archive.playerSnapshots,
+                enemySnapshots: archive.enemySnapshots
+            )
+
             context.insert(logRecord)
-
-            // initialHP
-            for (actorIndex, hp) in archive.battleLog.initialHP {
-                let hpRecord = BattleLogInitialHPRecord(actorIndex: actorIndex, hp: hp)
-                hpRecord.battleLog = logRecord
-                context.insert(hpRecord)
-            }
-
-            // actions
-            for (index, action) in archive.battleLog.actions.enumerated() {
-                let actionRecord = BattleLogActionRecord()
-                actionRecord.sortOrder = UInt16(index)
-                actionRecord.turn = action.turn
-                actionRecord.kind = action.kind
-                actionRecord.actor = action.actor
-                actionRecord.target = action.target ?? 0
-                actionRecord.value = action.value ?? 0
-                actionRecord.skillIndex = action.skillIndex ?? 0
-                actionRecord.extra = action.extra ?? 0
-                actionRecord.battleLog = logRecord
-                context.insert(actionRecord)
-            }
-
-            // participants（orderIndexで順序を保持）
-            for (index, snapshot) in archive.playerSnapshots.enumerated() {
-                let pRecord = BattleLogParticipantRecord()
-                pRecord.orderIndex = UInt8(index)
-                pRecord.isPlayer = true
-                pRecord.actorId = snapshot.actorId
-                pRecord.partyMemberId = snapshot.partyMemberId ?? 0
-                pRecord.characterId = snapshot.characterId ?? 0
-                pRecord.name = snapshot.name
-                pRecord.avatarIndex = snapshot.avatarIndex ?? 0
-                pRecord.level = UInt16(snapshot.level ?? 0)
-                pRecord.maxHP = UInt32(snapshot.maxHP)
-                pRecord.battleLog = logRecord
-                context.insert(pRecord)
-            }
-            for (index, snapshot) in archive.enemySnapshots.enumerated() {
-                let pRecord = BattleLogParticipantRecord()
-                pRecord.orderIndex = UInt8(index)
-                pRecord.isPlayer = false
-                pRecord.actorId = snapshot.actorId
-                pRecord.partyMemberId = snapshot.partyMemberId ?? 0
-                pRecord.characterId = snapshot.characterId ?? 0
-                pRecord.name = snapshot.name
-                pRecord.avatarIndex = snapshot.avatarIndex ?? 0
-                pRecord.level = UInt16(snapshot.level ?? 0)
-                pRecord.maxHP = UInt32(snapshot.maxHP)
-                pRecord.battleLog = logRecord
-                context.insert(pRecord)
-            }
             return logRecord
         }
         return nil
