@@ -43,20 +43,41 @@ final class SkillRuntimeEffectCompilerTests: XCTestCase {
         }
     }
 
+    /// 全スキルがエラーなくコンパイルできることを確認
+    /// これにより、SkillMaster.jsonの設定漏れ（必須フィールド欠落など）を検出できる
     func testAllSkillsCompileWithoutError() throws {
         let allDefinitions = try SkillMasterTestLoader.loadAllDefinitions()
-        XCTAssertGreaterThan(allDefinitions.count, 0)
+        XCTAssertGreaterThan(allDefinitions.count, 0, "スキル定義が存在すること")
 
-        let filteredDefinitions = allDefinitions.filter { def in
-            !def.effects.contains { (effect: SkillDefinition.Effect) in
-                effect.effectType.identifier == "damageDealtMultiplierAgainst"
+        // 全スキルを対象にコンパイル（除外なし）
+        // エラーが発生した場合、どのスキルで問題が起きたか分かるように個別にテスト
+        var failedSkills: [(id: UInt16, name: String, error: String)] = []
+
+        for definition in allDefinitions {
+            do {
+                _ = try UnifiedSkillEffectCompiler(skills: [definition])
+            } catch {
+                failedSkills.append((id: definition.id, name: definition.name, error: "\(error)"))
             }
         }
 
+        if !failedSkills.isEmpty {
+            let details = failedSkills.map { "  - ID \($0.id) [\($0.name)]: \($0.error)" }.joined(separator: "\n")
+            XCTFail("以下の\(failedSkills.count)件のスキルでコンパイルエラー:\n\(details)")
+        }
+    }
+
+    /// 全スキルを一括でコンパイルしてパフォーマンス確認
+    func testAllSkillsBatchCompile() throws {
+        let allDefinitions = try SkillMasterTestLoader.loadAllDefinitions()
+        XCTAssertGreaterThan(allDefinitions.count, 0)
+
         do {
-            _ = try UnifiedSkillEffectCompiler(skills: filteredDefinitions)
+            let compiler = try UnifiedSkillEffectCompiler(skills: allDefinitions)
+            // コンパイル結果が存在することを確認
+            XCTAssertNotNil(compiler.actorEffects)
         } catch {
-            XCTFail("スキルコンパイル失敗: \(error)")
+            XCTFail("全スキル一括コンパイル失敗: \(error)")
         }
     }
 }

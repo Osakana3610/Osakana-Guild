@@ -793,7 +793,7 @@
         "familyId": "damageDealtMultiplierAgainst.monster",
         "effectType": "damageDealtMultiplierAgainst",
         "stringArrayValues": {
-          "targetRaceIds": []
+          "targetRaceIds": ["2"]
         },
         "variants": [
           {
@@ -972,7 +972,7 @@
         "familyId": "damageDealtMultiplierAgainst.divine",
         "effectType": "damageDealtMultiplierAgainst",
         "stringArrayValues": {
-          "targetRaceIds": []
+          "targetRaceIds": ["5"]
         },
         "variants": [
           {
