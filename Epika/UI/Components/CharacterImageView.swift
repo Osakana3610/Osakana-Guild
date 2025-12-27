@@ -10,8 +10,8 @@
 // 【View構成】
 //   - avatarIndex範囲により画像リソースを判別:
 //     - 1-99: 種族画像 (Assets.xcassets/Races/)
-//     - 100-399: 職業画像 (Assets.xcassets/Jobs/)
-//     - 400以上: ユーザーカスタムアバター (UserAvatarStore)
+//     - 100-499: 職業画像 (Assets.xcassets/Jobs/)
+//     - 500以上: ユーザーカスタムアバター (UserAvatarStore)
 //   - 画像が存在しない場合はフォールバック表示（グレー+person.fillアイコン）
 //   - ダークモード対応（brightness調整）
 //
@@ -73,15 +73,15 @@ struct CharacterImageView: View {
     }
 
     private func resolveResource() -> ImageResource? {
-        // 400以上はユーザーカスタムアバター
-        if avatarIndex >= 400 {
+        // 500以上はユーザーカスタムアバター
+        if avatarIndex >= 500 {
             let identifier = String(avatarIndex)
             if let url = UserAvatarStore.fileURL(for: identifier) {
                 return .file(url)
             }
             return nil
         } else if avatarIndex >= 100 {
-            // 100-399: 職業画像 (genderCode * 100 + jobId)
+            // 100-499: 職業画像 (genderCode * 100 + jobId)
             return .bundle("Jobs/\(avatarIndex)")
         } else {
             // 1-99: 種族画像 (raceId)
