@@ -24,6 +24,7 @@
 //
 // 【スキル収集】
 //   - パッシブスキル: 前職 + 現職（転職しても引き継ぐ）
+//   - パッシブスキル: 種族（種族固有のスキル）
 //   - レベル習得スキル: 現職のみ（レベル条件を満たしたもの）
 //   - 種族レベル習得スキル（レベル条件を満たしたもの）
 //   - 装備アイテム + 超レア称号から付与されるスキル
@@ -90,6 +91,11 @@ enum RuntimeCharacterFactory {
 
         // パッシブスキル: 現職
         allSkillIds.append(contentsOf: job.learnedSkillIds)
+
+        // パッシブスキル: 種族
+        if let racePassiveSkills = masterData.racePassiveSkills[input.raceId] {
+            allSkillIds.append(contentsOf: racePassiveSkills)
+        }
 
         // レベル習得スキル: 現職のみ（レベル条件を満たしたもの）
         let jobUnlocks = masterData.jobSkillUnlocks[input.jobId] ?? []
@@ -256,6 +262,11 @@ enum RuntimeCharacterFactory {
 
         // パッシブスキル: 現職
         allSkillIds.append(contentsOf: job.learnedSkillIds)
+
+        // パッシブスキル: 種族
+        if let racePassiveSkills = masterData.racePassiveSkills[current.raceId] {
+            allSkillIds.append(contentsOf: racePassiveSkills)
+        }
 
         // レベル習得スキル: 現職のみ（レベル条件を満たしたもの）
         let jobUnlocks = masterData.jobSkillUnlocks[current.jobId] ?? []
