@@ -151,6 +151,7 @@ extension Generator {
                 base_power_multiplier REAL,
                 status_id INTEGER,
                 heal_multiplier REAL,
+                heal_percent_of_max_hp INTEGER,
                 cast_condition INTEGER,
                 description TEXT NOT NULL
             );
