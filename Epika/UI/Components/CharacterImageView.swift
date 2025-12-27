@@ -92,15 +92,18 @@ struct CharacterImageView: View {
     }
 
     /// マスター職のavatarIndexを基本職に正規化
-    /// - マスター職(jobId 101-116)を基本職(jobId 1-16)に変換
-    /// - 例: 性別不明のマスター職1 (3*100+101=401) → 性別不明の基本職1 (301)
+    /// - avatarIndex = genderCode * 100 + jobId で計算される
+    /// - マスター職(jobId 101-116)の場合、100を引いて基本職の画像を使用
+    /// - 例: 性別不明のマスター職1 (3*100+101=401) → 301
     private func normalizeJobAvatarIndex(_ index: UInt16) -> UInt16 {
-        // avatarIndex = genderCode * 100 + jobId
-        let genderCode = index / 100
-        let jobId = index % 100
-        // マスター職(101-116)を基本職(1-16)に変換
-        let normalizedJobId = jobId > 100 ? jobId - 100 : jobId
-        return genderCode * 100 + normalizedJobId
+        // 性別不明(genderCode=3)のマスター職は401-416の範囲
+        // 女性(genderCode=2)のマスター職は301-316の範囲（性別不明基本職と衝突）
+        // 男性(genderCode=1)のマスター職は201-216の範囲（女性基本職と衝突）
+        // 現状アセットがない401-416のみ変換
+        if index >= 400 {
+            return index - 100
+        }
+        return index
     }
 
     private func loadCGImage(from url: URL) -> CGImage? {
