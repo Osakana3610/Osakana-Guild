@@ -206,11 +206,15 @@ extension BattleTurnEngine {
         }
     }
 
-    static func selectHealingTargetIndex(in actors: [BattleActor]) -> Int? {
+    static func selectHealingTargetIndex(in actors: [BattleActor], requireHalfHP: Bool = false) -> Int? {
         var bestIndex: Int?
         var lowestRatio = Double.greatestFiniteMagnitude
         for (index, actor) in actors.enumerated() where actor.isAlive && actor.currentHP < actor.snapshot.maxHP {
             let ratio = Double(actor.currentHP) / Double(actor.snapshot.maxHP)
+            // requireHalfHPがtrueの場合、HP半分以下の味方のみを対象にする
+            if requireHalfHP && ratio > 0.5 {
+                continue
+            }
             if ratio < lowestRatio {
                 lowestRatio = ratio
                 bestIndex = index

@@ -54,7 +54,9 @@ extension BattleTurnEngine {
 
         switch spell.category {
         case .healing:
-            guard let targetIndex = selectHealingTargetIndex(in: allies) else { return true }
+            // castConditionがtargetHalfHPの場合、HP半分以下の味方のみを対象にする
+            let requireHalfHP = spell.castCondition.flatMap { SpellDefinition.CastCondition(rawValue: $0) } == .targetHalfHP
+            guard let targetIndex = selectHealingTargetIndex(in: allies, requireHalfHP: requireHalfHP) else { return true }
             performPriestMagic(casterSide: side,
                                casterIndex: casterIndex,
                                targetIndex: targetIndex,
@@ -86,7 +88,16 @@ extension BattleTurnEngine {
         guard let caster = context.actor(for: casterSide, index: casterIndex) else { return }
         guard var target = context.actor(for: casterSide, index: targetIndex) else { return }
 
-        let healAmount = computeHealingAmount(caster: caster, target: target, spellId: spell.id, context: &context)
+        let healAmount: Int
+        if let percent = spell.healPercentOfMaxHP {
+            // 最大HPの割合で回復（フルヒールなど）
+            healAmount = target.snapshot.maxHP * percent / 100
+        } else {
+            // 通常の回復計算 + healMultiplier
+            let baseAmount = computeHealingAmount(caster: caster, target: target, spellId: spell.id, context: &context)
+            let multiplier = spell.healMultiplier ?? 1.0
+            healAmount = Int(Double(baseAmount) * multiplier)
+        }
         let missing = target.snapshot.maxHP - target.currentHP
         let applied = min(healAmount, missing)
         target.currentHP += applied
@@ -459,6 +470,12 @@ extension BattleTurnEngine {
                              opponents: [BattleActor]) -> Bool {
         switch spell.category {
         case .healing:
+            // castConditionがtargetHalfHPの場合、HP半分以下の味方がいるかチェック
+            if let conditionRaw = spell.castCondition,
+               let condition = SpellDefinition.CastCondition(rawValue: conditionRaw),
+               condition == .targetHalfHP {
+                return selectHealingTargetIndex(in: allies, requireHalfHP: true) != nil
+            }
             return selectHealingTargetIndex(in: allies) != nil
         case .cleanse:
             return allies.contains { $0.isAlive && !$0.statusEffects.isEmpty }

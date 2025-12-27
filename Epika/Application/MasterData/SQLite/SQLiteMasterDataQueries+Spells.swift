@@ -35,6 +35,7 @@ extension SQLiteMasterDataManager {
             let basePowerMultiplier: Double?
             let statusId: UInt8?
             let healMultiplier: Double?
+            let healPercentOfMaxHP: Int?
             let castCondition: UInt8?
             let description: String
             var buffs: [SpellDefinition.Buff] = []
@@ -59,7 +60,7 @@ extension SQLiteMasterDataManager {
             SELECT id, name, school, tier, unlock_level, category, targeting,
                    max_targets_base, extra_targets_per_levels,
                    hits_per_cast, base_power_multiplier,
-                   status_id, heal_multiplier, cast_condition,
+                   status_id, heal_multiplier, heal_percent_of_max_hp, cast_condition,
                    description
             FROM spells;
         """
@@ -67,7 +68,7 @@ extension SQLiteMasterDataManager {
         defer { sqlite3_finalize(spellStatement) }
         while sqlite3_step(spellStatement) == SQLITE_ROW {
             guard let nameC = sqlite3_column_text(spellStatement, 1),
-                  let descriptionC = sqlite3_column_text(spellStatement, 14) else {
+                  let descriptionC = sqlite3_column_text(spellStatement, 15) else {
                 continue
             }
             let id = UInt8(sqlite3_column_int(spellStatement, 0))
@@ -99,7 +100,8 @@ extension SQLiteMasterDataManager {
                 basePowerMultiplier: optionalDouble(spellStatement, 10),
                 statusId: sqlite3_column_type(spellStatement, 11) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 11)),
                 healMultiplier: optionalDouble(spellStatement, 12),
-                castCondition: sqlite3_column_type(spellStatement, 13) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 13)),
+                healPercentOfMaxHP: optionalInt(spellStatement, 13),
+                castCondition: sqlite3_column_type(spellStatement, 14) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(spellStatement, 14)),
                 description: String(cString: descriptionC)
             )
             builders[id] = builder
@@ -147,6 +149,7 @@ extension SQLiteMasterDataManager {
                     statusId: builder.statusId,
                     buffs: builder.buffs,
                     healMultiplier: builder.healMultiplier,
+                    healPercentOfMaxHP: builder.healPercentOfMaxHP,
                     castCondition: builder.castCondition,
                     description: builder.description
                 )

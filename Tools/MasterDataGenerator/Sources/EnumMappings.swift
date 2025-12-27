@@ -379,7 +379,8 @@ enum EnumMappings {
         "none": 1,
         "low_hp": 2,
         "ally_dead": 3,
-        "enemy_count": 4
+        "enemy_count": 4,
+        "target_half_hp": 5
     ]
 
     // MARK: - SpellDefinition
