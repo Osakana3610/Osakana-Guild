@@ -500,38 +500,38 @@ extension BattleTurnEngine {
         let chancePercent = Int((descriptor.damageMultiplier * 100).rounded())
         guard chancePercent > 0 else { return }
 
-        while defender.isAlive && BattleRandomSystem.percentChance(chancePercent, random: &context.random) {
-            let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
-            let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
-            context.appendAction(kind: .martialArts, actor: attackerIdx, target: defenderIdx)
+        // 格闘追撃は1回の攻撃につき1回まで（スタックオーバーフロー防止）
+        guard defender.isAlive && BattleRandomSystem.percentChance(chancePercent, random: &context.random) else { return }
 
-            let followUpResult = performAttack(attackerSide: attackerSide,
-                                               attackerIndex: attackerIndex,
-                                               attacker: attacker,
-                                               defender: defender,
-                                               defenderSide: defenderSide,
-                                               defenderIndex: defenderIndex,
-                                               context: &context,
-                                               hitCountOverride: descriptor.hitCount,
-                                               accuracyMultiplier: BattleContext.martialAccuracyMultiplier)
+        let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+        let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
+        context.appendAction(kind: .martialArts, actor: attackerIdx, target: defenderIdx)
 
-            let outcome = applyAttackOutcome(attackerSide: attackerSide,
-                                             attackerIndex: attackerIndex,
-                                             defenderSide: defenderSide,
-                                             defenderIndex: defenderIndex,
-                                             attacker: followUpResult.attacker,
-                                             defender: followUpResult.defender,
-                                             attackResult: followUpResult,
-                                             context: &context,
-                                             reactionDepth: 0)
+        let followUpResult = performAttack(attackerSide: attackerSide,
+                                           attackerIndex: attackerIndex,
+                                           attacker: attacker,
+                                           defender: defender,
+                                           defenderSide: defenderSide,
+                                           defenderIndex: defenderIndex,
+                                           context: &context,
+                                           hitCountOverride: descriptor.hitCount,
+                                           accuracyMultiplier: BattleContext.martialAccuracyMultiplier)
 
-            guard let updatedAttacker = outcome.attacker,
-                  let updatedDefender = outcome.defender else { break }
+        let outcome = applyAttackOutcome(attackerSide: attackerSide,
+                                         attackerIndex: attackerIndex,
+                                         defenderSide: defenderSide,
+                                         defenderIndex: defenderIndex,
+                                         attacker: followUpResult.attacker,
+                                         defender: followUpResult.defender,
+                                         attackResult: followUpResult,
+                                         context: &context,
+                                         reactionDepth: 0)
 
+        if let updatedAttacker = outcome.attacker {
             attacker = updatedAttacker
+        }
+        if let updatedDefender = outcome.defender {
             defender = updatedDefender
-
-            guard defender.isAlive, followUpResult.successfulHits > 0 else { break }
         }
     }
 
