@@ -78,7 +78,7 @@ enum EffectValueKey: Int, Sendable, Hashable, CaseIterable {
     case hitRatePercent = 28
     case hostile = 29
     case hostileAll = 30
-    case hpPercent = 31
+    // 31: hpPercent 削除済み
     case hpThresholdPercent = 32
     case initialBonus = 33
     case initialCharges = 34

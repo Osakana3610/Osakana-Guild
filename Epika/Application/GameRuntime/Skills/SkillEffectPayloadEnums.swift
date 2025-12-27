@@ -164,7 +164,7 @@ enum SkillEffectValueType: UInt8, CaseIterable, Sendable, Hashable {
     case bonusPercent = 14
     case baseChancePercent = 15
     case maxChancePercent = 16
-    case hpPercent = 17
+    // 17: hpPercent 削除済み
     case hpThresholdPercent = 18
     case thresholdPercent = 19
     case damagePercent = 20
@@ -231,7 +231,6 @@ enum SkillEffectValueType: UInt8, CaseIterable, Sendable, Hashable {
         case "bonusPercent": self = .bonusPercent
         case "baseChancePercent": self = .baseChancePercent
         case "maxChancePercent": self = .maxChancePercent
-        case "hpPercent": self = .hpPercent
         case "hpThresholdPercent": self = .hpThresholdPercent
         case "thresholdPercent": self = .thresholdPercent
         case "damagePercent": self = .damagePercent
@@ -301,7 +300,6 @@ enum SkillEffectValueType: UInt8, CaseIterable, Sendable, Hashable {
         case .bonusPercent: return "bonusPercent"
         case .baseChancePercent: return "baseChancePercent"
         case .maxChancePercent: return "maxChancePercent"
-        case .hpPercent: return "hpPercent"
         case .hpThresholdPercent: return "hpThresholdPercent"
         case .thresholdPercent: return "thresholdPercent"
         case .damagePercent: return "damagePercent"

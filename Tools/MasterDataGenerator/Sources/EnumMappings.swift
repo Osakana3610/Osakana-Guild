@@ -1020,7 +1020,7 @@ enum EnumMappings {
         "hitRatePercent": 28,
         "hostile": 29,
         "hostileAll": 30,
-        "hpPercent": 31,
+        // 31: hpPercent 削除済み
         "hpThresholdPercent": 32,
         "initialBonus": 33,
         "initialCharges": 34,

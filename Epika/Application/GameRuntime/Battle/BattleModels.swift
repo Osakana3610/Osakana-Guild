@@ -553,6 +553,7 @@ struct BattleActor: Sendable {
         struct RescueCapability: Sendable, Hashable {
             let usesPriestMagic: Bool
             let minLevel: Int
+            let guaranteed: Bool
         }
 
         struct RescueModifiers: Sendable, Hashable {
