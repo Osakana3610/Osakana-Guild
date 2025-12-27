@@ -82,11 +82,25 @@ struct CharacterImageView: View {
             return nil
         } else if avatarIndex >= 100 {
             // 100-499: 職業画像 (genderCode * 100 + jobId)
-            return .bundle("Jobs/\(avatarIndex)")
+            // マスター職(jobId 101-116)は基本職(1-16)の画像を使用
+            let normalizedIndex = normalizeJobAvatarIndex(avatarIndex)
+            return .bundle("Jobs/\(normalizedIndex)")
         } else {
             // 1-99: 種族画像 (raceId)
             return .bundle("Races/\(avatarIndex)")
         }
+    }
+
+    /// マスター職のavatarIndexを基本職に正規化
+    /// - マスター職(jobId 101-116)を基本職(jobId 1-16)に変換
+    /// - 例: 性別不明のマスター職1 (3*100+101=401) → 性別不明の基本職1 (301)
+    private func normalizeJobAvatarIndex(_ index: UInt16) -> UInt16 {
+        // avatarIndex = genderCode * 100 + jobId
+        let genderCode = index / 100
+        let jobId = index % 100
+        // マスター職(101-116)を基本職(1-16)に変換
+        let normalizedJobId = jobId > 100 ? jobId - 100 : jobId
+        return genderCode * 100 + normalizedJobId
     }
 
     private func loadCGImage(from url: URL) -> CGImage? {
