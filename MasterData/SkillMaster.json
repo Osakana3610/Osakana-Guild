@@ -14121,15 +14121,15 @@
         ]
       },
       {
-        "familyId": "job.priest.salvation",
-        "effectType": "resurrectionPassive",
-        "parameters": {},
+        "familyId": "job.priest.rescue",
+        "effectType": "resurrectionSave",
         "variants": [
           {
             "id": 65055,
-            "label": "[職業:僧侶] 救済 蘇生確率+20%",
+            "label": "[職業:僧侶] 救出",
             "value": {
-              "hpPercent": 20
+              "usesPriestMagic": 1,
+              "minLevel": 1
             }
           }
         ]
@@ -15279,15 +15279,16 @@
         ]
       },
       {
-        "familyId": "master.priest.salvation",
-        "effectType": "resurrectionPassive",
-        "parameters": {},
+        "familyId": "master.priest.rescue",
+        "effectType": "resurrectionSave",
         "variants": [
           {
             "id": 65215,
-            "label": "[マスター:僧侶] 救済 蘇生確率+35%",
+            "label": "[マスター:僧侶] 救出",
             "value": {
-              "hpPercent": 35
+              "usesPriestMagic": 1,
+              "minLevel": 1,
+              "guaranteed": 1
             }
           }
         ]
