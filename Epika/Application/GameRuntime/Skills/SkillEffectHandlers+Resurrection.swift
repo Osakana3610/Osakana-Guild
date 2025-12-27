@@ -36,9 +36,11 @@ struct ResurrectionSaveHandler: SkillEffectHandler {
     ) throws {
         let usesPriest = payload.value[.usesPriestMagic].map { $0 > 0 } ?? false
         let minLevel = payload.value[.minLevel].map { Int($0.rounded(.towardZero)) } ?? 0
+        let guaranteed = payload.value[.guaranteed].map { $0 > 0 } ?? false
         accumulator.resurrection.rescueCapabilities.append(.init(
             usesPriestMagic: usesPriest,
-            minLevel: max(0, minLevel)
+            minLevel: max(0, minLevel),
+            guaranteed: guaranteed
         ))
     }
 }

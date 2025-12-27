@@ -499,7 +499,7 @@ extension BattleTurnEngine {
             let capabilities = availableRescueCapabilities(for: rescuer)
             guard let capability = capabilities.max(by: { $0.minLevel < $1.minLevel }) ?? capabilities.first else { continue }
 
-            let successChance = rescueChance(for: rescuer)
+            let successChance = capability.guaranteed ? 100 : rescueChance(for: rescuer)
             guard successChance > 0 else { continue }
             guard BattleRandomSystem.percentChance(successChance, random: &context.random) else { continue }
 

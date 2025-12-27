@@ -99,7 +99,7 @@ private extension SkillMasterTestLoader {
                      "cap", "capPercent", "chancePercent", "charges", "count", "criticalRateMultiplier",
                      "damageDealtPercent", "damagePercent", "defensePercentPerTurn", "deltaPercent", "duration",
                      "enabled", "evasionRatePerTurn", "everyTurns", "extraCharges", "gainOnPhysicalHit",
-                     "guaranteed", "hitRatePerTurn", "hitRatePercent", "hostile", "hostileAll", "hpPercent",
+                     "guaranteed", "hitRatePerTurn", "hitRatePercent", "hostile", "hostileAll",
                      "hpThresholdPercent", "initialBonus", "initialCharges", "instant", "maxChancePercent",
                      "maxCharges", "maxDodge", "maxPercent", "maxTriggers", "minHitScale", "minLevel",
                      "minPercent", "multiplier", "percent", "points", "protect", "reduction", "regenAmount",
