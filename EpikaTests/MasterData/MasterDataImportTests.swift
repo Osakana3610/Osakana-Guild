@@ -385,24 +385,34 @@ final class MasterDataImportTests: XCTestCase {
         XCTAssertGreaterThan(newCache.allDungeons.count, 0, "dungeons が空")
     }
 
-    /// 全スキルエフェクトがSkillRuntimeEffectCompilerでコンパイルできることを検証
-    func testAllSkillEffectsCompileSuccessfully() async throws {
-        var failures: [(skillId: UInt16, effectIndex: Int, error: String)] = []
+    /// 全スキルがUnifiedSkillEffectCompilerで完全にコンパイルできることを検証
+    /// これにより、ハンドラ内の必須フィールドチェック（requireArray等）も含めて検証される
+    /// 今回の「対魔物与ダメ倍率のtargetRaceIds不足」のような問題を検出する
+    func testAllSkillsCompileWithUnifiedCompiler() async throws {
+        var failures: [(skillId: UInt16, name: String, error: String)] = []
 
+        // 各スキルを個別にコンパイルしてエラーを特定
         for skill in cache.allSkills {
-            for effect in skill.effects {
-                do {
-                    let payload = try SkillRuntimeEffectCompiler.decodePayload(from: effect, skillId: skill.id)
-                    try SkillRuntimeEffectCompiler.validatePayload(payload, skillId: skill.id, effectIndex: effect.index)
-                } catch {
-                    failures.append((skill.id, effect.index, "\(error)"))
-                }
+            do {
+                _ = try UnifiedSkillEffectCompiler(skills: [skill])
+            } catch {
+                failures.append((skill.id, skill.name, "\(error)"))
             }
         }
 
         if !failures.isEmpty {
-            let details = failures.prefix(10).map { "Skill \($0.skillId)#\($0.effectIndex): \($0.error)" }
-            XCTFail("スキルエフェクトコンパイル失敗 (\(failures.count)件):\n\(details.joined(separator: "\n"))")
+            let details = failures.map { "  - ID \($0.skillId) [\($0.name)]: \($0.error)" }
+            XCTFail("UnifiedSkillEffectCompiler コンパイルエラー (\(failures.count)件):\n\(details.joined(separator: "\n"))")
+        }
+    }
+
+    /// 全スキルを一括コンパイルできることを検証（パフォーマンス確認も兼ねる）
+    func testAllSkillsBatchCompileWithUnifiedCompiler() async throws {
+        do {
+            let compiler = try UnifiedSkillEffectCompiler(skills: cache.allSkills)
+            XCTAssertNotNil(compiler.actorEffects, "コンパイル結果が存在すること")
+        } catch {
+            XCTFail("全スキル一括コンパイル失敗: \(error)")
         }
     }
 
