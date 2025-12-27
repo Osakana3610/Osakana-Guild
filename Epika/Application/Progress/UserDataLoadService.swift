@@ -459,14 +459,17 @@ final class UserDataLoadService {
     }
 
     /// キャッシュ内のアイテム数量を増やす（スタック追加時）
+    /// - Note: 上限99を超えないように制限
     func incrementQuantity(stackKey: String, by amount: Int) {
+        let maxQuantity = 99
         for key in categorizedItems.keys {
             if let index = categorizedItems[key]?.firstIndex(where: { $0.stackKey == stackKey }) {
                 let item = categorizedItems[key]![index]
-                categorizedItems[key]![index].quantity += amount
+                let newQuantity = min(item.quantity + amount, maxQuantity)
+                categorizedItems[key]![index].quantity = newQuantity
                 let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
                 if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                    subcategorizedItems[subcategory]![subIndex].quantity += amount
+                    subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
                 }
                 itemCacheVersion &+= 1
                 return
