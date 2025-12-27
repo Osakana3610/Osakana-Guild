@@ -27,12 +27,14 @@ struct BattleLogRenderer {
     ///   - allyNames: characterId → 表示名
     ///   - enemyNames: actorIndex → 表示名（敵）
     ///   - spellNames: spellId → 魔法名
+    ///   - enemySkillNames: enemySkillId → 敵スキル名
     /// - Returns: 表示用のBattleLogEntry配列
     static func render(
         battleLog: BattleLog,
         allyNames: [UInt8: String],
         enemyNames: [UInt16: String],
-        spellNames: [UInt8: String] = [:]
+        spellNames: [UInt8: String] = [:],
+        enemySkillNames: [UInt16: String] = [:]
     ) -> [BattleLogEntry] {
         var entries: [BattleLogEntry] = []
         let actions = battleLog.actions
@@ -70,7 +72,12 @@ struct BattleLogRenderer {
 
             let spellName: String?
             if let skillIndex = action.skillIndex {
-                spellName = spellNames[UInt8(skillIndex)]
+                // 敵スキルの場合はenemySkillNamesから取得
+                if kind == .enemySpecialSkill {
+                    spellName = enemySkillNames[skillIndex]
+                } else {
+                    spellName = spellNames[UInt8(skillIndex)]
+                }
             } else {
                 spellName = nil
             }
@@ -356,7 +363,8 @@ struct BattleLogRenderer {
 
         // 敵専用技
         case .enemySpecialSkill:
-            return ("\(actorName)の特殊攻撃！", .action)
+            let skill = spellName ?? "特殊攻撃"
+            return ("\(actorName)の\(skill)！", .action)
         case .enemySpecialDamage:
             let target = targetName ?? "対象"
             let damage = value ?? 0

@@ -615,12 +615,19 @@ struct EncounterDetailView: View {
                 spellNames[spell.id] = spell.name
             }
 
+            // 敵スキル名マップを構築
+            var enemySkillNames: [UInt16: String] = [:]
+            for skill in appServices.masterDataCache.allEnemySkills {
+                enemySkillNames[skill.id] = skill.name
+            }
+
             // BattleLogRenderer で変換
             battleLogEntries = BattleLogRenderer.render(
                 battleLog: archive.battleLog,
                 allyNames: allyNames,
                 enemyNames: enemyNames,
-                spellNames: spellNames
+                spellNames: spellNames,
+                enemySkillNames: enemySkillNames
             )
 
             actorIdentifierToMemberId = memberMap
