@@ -58,7 +58,7 @@ enum BattleActorKind: Sendable {
     case enemy
 }
 
-/// 陣形スロット（1〜6の整数）
+/// 陣形スロット（1始まりの整数、上限なし）
 typealias BattleFormationSlot = Int
 
 extension Int {
@@ -68,7 +68,7 @@ extension Int {
         case 1, 2: return 0  // 前列
         case 3, 4: return 1  // 中列
         case 5, 6: return 2  // 後列
-        default: return 0    // 範囲外は前列扱い
+        default: return 2    // 7番目以降は後列扱い
         }
     }
 }

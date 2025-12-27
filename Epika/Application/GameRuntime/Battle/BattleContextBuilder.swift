@@ -87,9 +87,9 @@ struct BattleContextBuilder {
     }
 
     static func slot(for index: Int) -> BattleFormationSlot? {
-        // BattleFormationSlot は 1〜6 の整数
+        // BattleFormationSlot は 1始まりの整数（上限なし、マスターデータで制御）
         let slot = index + 1
-        guard slot >= 1 && slot <= 6 else { return nil }
+        guard slot >= 1 else { return nil }
         return slot
     }
 
