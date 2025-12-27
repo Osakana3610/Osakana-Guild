@@ -334,22 +334,7 @@ private extension ShopProgressService {
         var changed = false
         let descriptor = FetchDescriptor<ShopStockRecord>()
         let allRecords = try context.fetch(descriptor)
-
-        // 重複レコードをクリーンアップ（同じitemIdが複数ある場合、1つに統合）
-        var existing: [UInt16: ShopStockRecord] = [:]
-        for record in allRecords {
-            if let existingRecord = existing[record.itemId] {
-                // 重複発見：在庫を統合して古い方を削除
-                let existingRemaining = existingRecord.remaining ?? 0
-                let recordRemaining = record.remaining ?? 0
-                existingRecord.remaining = existingRemaining + recordRemaining
-                existingRecord.updatedAt = max(existingRecord.updatedAt, record.updatedAt)
-                context.delete(record)
-                changed = true
-            } else {
-                existing[record.itemId] = record
-            }
-        }
+        var existing = Dictionary(uniqueKeysWithValues: allRecords.map { ($0.itemId, $0) })
 
         for entry in masterItems.sorted(by: { $0.orderIndex < $1.orderIndex }) {
             if existing.removeValue(forKey: entry.itemId) != nil {
