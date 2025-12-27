@@ -206,7 +206,7 @@ struct DecodedSkillEffectPayload: Sendable, Hashable {
     }
 
     func requireArray(_ key: EffectArrayKey, skillId: UInt16, effectIndex: Int) throws -> [Int] {
-        guard let array = self.arrays[key] else {
+        guard let array = self.arrays[key], !array.isEmpty else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.identifier) の必須配列 \(key) がありません")
         }
         return array
