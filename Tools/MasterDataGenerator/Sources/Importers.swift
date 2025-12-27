@@ -795,6 +795,7 @@ private struct SpellEntry: Decodable {
     let basePowerMultiplier: Double?
     let statusId: String?
     let healMultiplier: Double?
+    let healPercentOfMaxHP: Int?
     let castCondition: String?
     let description: String
     let buffs: [Buff]?
@@ -815,9 +816,9 @@ extension Generator {
                     id, name, school, tier, unlock_level, category, targeting,
                     max_targets_base, extra_targets_per_levels,
                     hits_per_cast, base_power_multiplier,
-                    status_id, heal_multiplier, cast_condition,
+                    status_id, heal_multiplier, heal_percent_of_max_hp, cast_condition,
                     description
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
             let insertBuffSQL = """
                 INSERT INTO spell_buffs (spell_id, order_index, type, multiplier)
@@ -855,8 +856,9 @@ extension Generator {
                 bindDouble(spellStatement, index: 11, value: spell.basePowerMultiplier)
                 bindInt(spellStatement, index: 12, value: spell.statusId.flatMap { Int($0) })
                 bindDouble(spellStatement, index: 13, value: spell.healMultiplier)
-                bindInt(spellStatement, index: 14, value: spell.castCondition.flatMap { EnumMappings.spellCastCondition[$0] })
-                bindText(spellStatement, index: 15, value: spell.description)
+                bindInt(spellStatement, index: 14, value: spell.healPercentOfMaxHP)
+                bindInt(spellStatement, index: 15, value: spell.castCondition.flatMap { EnumMappings.spellCastCondition[$0] })
+                bindText(spellStatement, index: 16, value: spell.description)
                 try step(spellStatement)
                 reset(spellStatement)
 

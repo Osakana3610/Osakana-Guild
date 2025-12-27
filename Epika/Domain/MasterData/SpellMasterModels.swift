@@ -12,7 +12,7 @@
 //     - 分類: school（魔法使い/僧侶）, category（ダメージ/回復/バフ/状態異常/浄化）
 //     - ターゲット: targeting（単体敵/ランダム敵/ランダム敵重複なし/単体味方/パーティ全体）
 //     - ダメージ系: basePowerMultiplier, hitsPerCast
-//     - 回復系: healMultiplier
+//     - 回復系: healMultiplier, healPercentOfMaxHP
 //     - バフ系: buffs
 //     - 状態異常系: statusId
 //     - ターゲット数: maxTargetsBase, extraTargetsPerLevels
@@ -22,7 +22,7 @@
 //   - SpellDefinition.Targeting: ターゲット種別
 //   - SpellDefinition.Buff: バフ効果（type, multiplier）
 //   - SpellDefinition.Buff.BuffType: バフ種別（与物理ダメージ/被物理ダメージ/被魔法ダメージ/被ブレスダメージ）
-//   - SpellDefinition.CastCondition: 詠唱条件（none/lowHP/allyDead/enemyCount）
+//   - SpellDefinition.CastCondition: 詠唱条件（none/lowHP/allyDead/enemyCount/targetHalfHP）
 //
 // 【使用箇所】
 //   - BattleTurnEngine.Magic: 呪文詠唱・効果処理
@@ -163,6 +163,7 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
         case lowHP = 2
         case allyDead = 3
         case enemyCount = 4
+        case targetHalfHP = 5
 
         var identifier: String {
             switch self {
@@ -170,6 +171,7 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
             case .lowHP: return "low_hp"
             case .allyDead: return "ally_dead"
             case .enemyCount: return "enemy_count"
+            case .targetHalfHP: return "target_half_hp"
             }
         }
 
@@ -179,6 +181,7 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
             case .lowHP: return "HP低下時"
             case .allyDead: return "味方死亡時"
             case .enemyCount: return "敵数条件"
+            case .targetHalfHP: return "対象HP半分以下"
             }
         }
     }
@@ -197,6 +200,7 @@ struct SpellDefinition: Identifiable, Sendable, Hashable {
     let statusId: UInt8?
     let buffs: [Buff]
     let healMultiplier: Double?
+    let healPercentOfMaxHP: Int?
     let castCondition: UInt8?
     let description: String
 }

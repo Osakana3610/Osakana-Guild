@@ -170,8 +170,8 @@
       "unlockLevel": 25,
       "category": "healing",
       "targeting": "singleAlly",
-      "healMultiplier": 2.5,
-      "castCondition": "targetHalfHP",
+      "healPercentOfMaxHP": 100,
+      "castCondition": "target_half_hp",
       "description": "HPが半分以下の味方を完全回復させる。"
     },
     {
