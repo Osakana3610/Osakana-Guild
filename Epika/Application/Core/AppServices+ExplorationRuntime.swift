@@ -251,7 +251,6 @@ extension AppServices {
 
         // ドロップを自動売却対象とインベントリ対象に分類
         var autoSellItems: [(itemId: UInt16, quantity: Int)] = []
-        var autoSellEnhancements: [UInt16: ItemSnapshot.Enhancement] = [:]
         var inventorySeeds: [InventoryProgressService.BatchSeed] = []
         var itemIds = Set<UInt16>()
 
@@ -271,8 +270,6 @@ extension AppServices {
 
             if autoTradeKeys.contains(autoTradeKey) {
                 autoSellItems.append((itemId: drop.item.id, quantity: drop.quantity))
-                // オーバーフロー時の enhancement を保存（後から見つかったものを優先）
-                autoSellEnhancements[drop.item.id] = enhancement
             } else {
                 inventorySeeds.append(.init(itemId: drop.item.id,
                                             quantity: drop.quantity,
@@ -288,15 +285,8 @@ extension AppServices {
             if sellResult.totalGold > 0 {
                 _ = try await gameState.addGold(UInt32(sellResult.totalGold))
             }
-            // オーバーフロー分をインベントリに追加
-            for (itemId, overflowQty) in sellResult.overflows where overflowQty > 0 {
-                if let enhancement = autoSellEnhancements[itemId] {
-                    inventorySeeds.append(.init(itemId: itemId,
-                                                quantity: overflowQty,
-                                                storage: .playerItem,
-                                                enhancements: enhancement))
-                    itemIds.insert(itemId)
-                }
+            if sellResult.totalTickets > 0 {
+                _ = try await gameState.addCatTickets(UInt16(clamping: sellResult.totalTickets))
             }
         }
 

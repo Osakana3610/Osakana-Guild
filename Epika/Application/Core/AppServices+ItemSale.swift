@@ -38,10 +38,17 @@ extension AppServices {
         let autoSellGold: Int    // 自動売却で獲得したゴールド
     }
 
+    /// 自動売却バッチ結果
+    struct AutoTradeSellResult: Sendable {
+        let gold: Int
+        let tickets: Int
+        let destroyed: [(itemId: UInt16, quantity: Int)]
+    }
+
     /// 在庫整理を実行し、インベントリ内の自動売却対象も売却する
     /// - Parameter itemId: 整理対象のアイテムID
     /// - Returns: 獲得したチケットとゴールド
-    /// - Note: 自動売却で再度overflow時はインベントリに残る（無限ループ防止）
+    /// - Note: 自動売却で再度overflowしてもインベントリには戻らず消失する
     func cleanupStockAndAutoSell(itemId: UInt16) async throws -> CleanupResult {
         // 1. 在庫整理でキャット・チケット獲得
         let tickets = try await shop.cleanupStock(itemId: itemId)
@@ -51,42 +58,57 @@ extension AppServices {
         }
 
         // 2. インベントリ内の自動売却対象を売却
-        let autoSellGold = try await sellAutoTradeItemsFromInventory()
+        let autoSellResult = try await sellAutoTradeItemsFromInventory()
 
         // 3. プレイヤー状態を更新
         await reloadPlayerState()
 
-        return CleanupResult(tickets: tickets, autoSellGold: autoSellGold)
+        return CleanupResult(tickets: tickets, autoSellGold: autoSellResult.gold)
+    }
+
+    /// インベントリ内の自動売却対象を全量処理する
+    /// - Returns: 売却で得たゴールド等の結果
+    func executeAutoTradeSellFromInventory() async throws -> AutoTradeSellResult {
+        let result = try await sellAutoTradeItemsFromInventory()
+        await reloadPlayerState()
+        return result
     }
 
     /// インベントリ内の自動売却登録アイテムを売却する
-    /// - Returns: 獲得ゴールド
-    /// - Note: overflow分はインベントリに残る（再帰しない）
+    /// - Returns: 獲得ゴールド/チケットと破棄アイテム情報
+    /// - Note: ショップ在庫が満杯の場合は在庫整理 → それでも余れば消失させる
     @discardableResult
-    private func sellAutoTradeItemsFromInventory() async throws -> Int {
+    private func sellAutoTradeItemsFromInventory() async throws -> AutoTradeSellResult {
         let autoTradeKeys = try await autoTrade.registeredStackKeys()
-        guard !autoTradeKeys.isEmpty else { return 0 }
+        guard !autoTradeKeys.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
 
         let items = try await inventory.allItems(storage: .playerItem)
-        guard !items.isEmpty else { return 0 }
+        guard !items.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
 
-        var totalGold = 0
-        for item in items {
-            // 6要素stackKeyで自動売却登録と照合
-            guard autoTradeKeys.contains(item.stackKey) else { continue }
+        let targets = items.filter { autoTradeKeys.contains($0.stackKey) }
+        guard !targets.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
 
-            // 売却（overflow分はインベントリに残る）
-            let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: Int(item.quantity))
-            totalGold += result.gold
-            if result.added > 0 {
-                try await inventory.decrementItem(stackKey: item.stackKey, quantity: result.added)
-            }
+        var aggregated: [UInt16: Int] = [:]
+        for item in targets {
+            aggregated[item.itemId, default: 0] += Int(item.quantity)
         }
 
-        if totalGold > 0 {
-            _ = try await gameState.addGold(UInt32(totalGold))
+        let sellResult = try await shop.addPlayerSoldItemsBatch(aggregated.map { ($0.key, $0.value) })
+
+        if sellResult.totalGold > 0 {
+            _ = try await gameState.addGold(UInt32(sellResult.totalGold))
         }
-        return totalGold
+        if sellResult.totalTickets > 0 {
+            _ = try await gameState.addCatTickets(UInt16(clamping: sellResult.totalTickets))
+        }
+
+        for item in targets {
+            try await inventory.decrementItem(stackKey: item.stackKey, quantity: Int(item.quantity))
+        }
+
+        return AutoTradeSellResult(gold: sellResult.totalGold,
+                                   tickets: sellResult.totalTickets,
+                                   destroyed: sellResult.destroyed)
     }
 
     /// アイテムを売却してゴールドを取得し、ショップ在庫に追加する

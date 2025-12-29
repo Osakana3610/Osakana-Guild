@@ -52,7 +52,8 @@ actor ShopProgressService {
     /// バッチ売却結果
     struct BatchSoldResult: Sendable {
         let totalGold: Int
-        let overflows: [(itemId: UInt16, quantity: Int)]
+        let totalTickets: Int
+        let destroyed: [(itemId: UInt16, quantity: Int)]
     }
 
     private let container: ModelContainer
@@ -104,6 +105,7 @@ actor ShopProgressService {
     /// 在庫上限（表示上限99、内部上限110）
     static let stockDisplayLimit: UInt16 = 99
     static let stockInternalLimit: UInt16 = 110
+    private static let cleanupTargetQuantity: UInt16 = 5
 
     /// プレイヤーがアイテムを売却した際にショップ在庫に追加する
     /// - Parameters:
@@ -155,10 +157,10 @@ actor ShopProgressService {
 
     /// プレイヤーが複数アイテムを一括売却した際にショップ在庫に追加する（バッチ処理）
     /// - Parameter items: アイテムIDと数量のペア配列
-    /// - Returns: バッチ売却結果（合計ゴールド、上限超過アイテム）
+    /// - Returns: バッチ売却結果（合計ゴールド、獲得キャット・チケット、消失アイテム）
     func addPlayerSoldItemsBatch(_ items: [(itemId: UInt16, quantity: Int)]) async throws -> BatchSoldResult {
         guard !items.isEmpty else {
-            return BatchSoldResult(totalGold: 0, overflows: [])
+            return BatchSoldResult(totalGold: 0, totalTickets: 0, destroyed: [])
         }
 
         // アイテム定義を一括取得
@@ -186,45 +188,69 @@ actor ShopProgressService {
         let now = Date()
 
         // 既存在庫を一括取得
-        let itemIdArray = Array(aggregated.keys)
+        let relevantItemIds = Set(aggregated.keys)
         let descriptor = FetchDescriptor<ShopStockRecord>()
         let allStocks = try context.fetch(descriptor)
         var stockMap: [UInt16: ShopStockRecord] = [:]
-        for stock in allStocks where itemIdArray.contains(stock.itemId) {
+        for stock in allStocks where relevantItemIds.contains(stock.itemId) {
             stockMap[stock.itemId] = stock
         }
 
         var totalGold = 0
-        var overflows: [(itemId: UInt16, quantity: Int)] = []
+        var totalTickets = 0
+        var destroyed: [(itemId: UInt16, quantity: Int)] = []
 
         for (itemId, quantity) in aggregated {
             guard let definition = definitionMap[itemId] else { continue }
+            var pending = quantity
 
-            var actuallyAdded = quantity
-            if let stock = stockMap[itemId] {
-                let previousRemaining = stock.remaining ?? 0
-                let newRemaining = min(previousRemaining + UInt16(quantity), Self.stockInternalLimit)
-                stock.remaining = newRemaining
-                actuallyAdded = Int(newRemaining - previousRemaining)
-                stock.updatedAt = now
-            } else {
-                actuallyAdded = min(quantity, Int(Self.stockInternalLimit))
-                let stock = ShopStockRecord(itemId: itemId,
-                                            remaining: UInt16(actuallyAdded),
+            while pending > 0 {
+                let stock: ShopStockRecord
+                if let existing = stockMap[itemId] {
+                    stock = existing
+                } else {
+                    stock = ShopStockRecord(itemId: itemId,
+                                            remaining: 0,
                                             updatedAt: now)
-                context.insert(stock)
-                stockMap[itemId] = stock
-            }
+                    context.insert(stock)
+                    stockMap[itemId] = stock
+                }
 
-            let overflow = quantity - actuallyAdded
-            if overflow > 0 {
-                overflows.append((itemId: itemId, quantity: overflow))
+                let current = Int(stock.remaining ?? 0)
+                let capacity = max(0, Int(Self.stockInternalLimit) - current)
+                if capacity <= 0 {
+                    if definition.rarity == ItemRarity.normal.rawValue {
+                        destroyed.append((itemId: itemId, quantity: pending))
+                        pending = 0
+                        break
+                    }
+
+                    if let cleanupResult = performCleanup(stock: stock,
+                                                          definition: definition,
+                                                          targetQuantity: Self.cleanupTargetQuantity,
+                                                          timestamp: now) {
+                        totalTickets += cleanupResult.tickets
+                        continue
+                    } else {
+                        destroyed.append((itemId: itemId, quantity: pending))
+                        pending = 0
+                        break
+                    }
+                }
+
+                let toAdd = min(pending, capacity)
+                let newRemaining = current + toAdd
+                stock.remaining = UInt16(newRemaining)
+                stock.updatedAt = now
+                pending -= toAdd
+                totalGold += definition.sellValue * toAdd
             }
-            totalGold += definition.sellValue * actuallyAdded
         }
 
         try saveIfNeeded(context)
-        return BatchSoldResult(totalGold: totalGold, overflows: overflows)
+        return BatchSoldResult(totalGold: totalGold,
+                               totalTickets: totalTickets,
+                               destroyed: destroyed)
     }
 
     /// 在庫整理：指定アイテムの在庫を目標数量まで減らし、減少分に応じたキャット・チケットを返す
@@ -242,19 +268,17 @@ actor ShopProgressService {
         guard definition.rarity != ItemRarity.normal.rawValue else {
             throw ProgressError.invalidInput(description: "ノーマルアイテムは整理できません")
         }
-        guard let remaining = stock.remaining, remaining > targetQuantity else {
+        let now = Date()
+        guard let cleanupResult = performCleanup(stock: stock,
+                                                 definition: definition,
+                                                 targetQuantity: targetQuantity,
+                                                 timestamp: now) else {
+            try saveIfNeeded(context)
             return 0
         }
 
-        let now = Date()
-        let reducedQuantity = remaining - targetQuantity
-        stock.remaining = targetQuantity
-        stock.updatedAt = now
         try saveIfNeeded(context)
-
-        // キャット・チケット計算：売値 / 100 * 減少数
-        let ticketsPerItem = max(1, definition.sellValue / 100)
-        return ticketsPerItem * Int(reducedQuantity)
+        return cleanupResult.tickets
     }
 
     /// 在庫整理対象のアイテム一覧を取得（在庫99以上のノーマル以外のアイテム）
@@ -310,6 +334,29 @@ actor ShopProgressService {
 }
 
 private extension ShopProgressService {
+    struct CleanupComputation {
+        let tickets: Int
+    }
+
+    func performCleanup(stock: ShopStockRecord,
+                        definition: ItemDefinition,
+                        targetQuantity: UInt16,
+                        timestamp: Date) -> CleanupComputation? {
+        guard definition.rarity != ItemRarity.normal.rawValue else { return nil }
+        guard let remaining = stock.remaining, remaining > targetQuantity else { return nil }
+
+        stock.remaining = targetQuantity
+        stock.updatedAt = timestamp
+
+        let reducedQuantity = remaining - targetQuantity
+        let stackUnit = Int(Self.stockDisplayLimit)
+        let stackCount = Int(reducedQuantity) / stackUnit
+        guard stackCount > 0 else { return nil }
+
+        let ticketsPerStack = max(1, definition.basePrice / 4_000_000)
+        return CleanupComputation(tickets: ticketsPerStack * stackCount)
+    }
+
     func makeContext() -> ModelContext {
         let context = ModelContext(container)
         context.autosaveEnabled = false
