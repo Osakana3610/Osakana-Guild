@@ -35,6 +35,12 @@ struct ItemSaleView: View {
     @State private var didLoadOnce = false
     @State private var detailItem: LightweightItemData?
     @State private var saleWarningContext: SaleWarningContext?
+    @State private var searchText = ""
+    @State private var showFilterSheet = false
+    @State private var selectedCategories: Set<ItemSaleCategory> = Set(ItemSaleCategory.allCases)
+    @State private var selectedNormalTitleIds: Set<UInt8>? = nil
+    @State private var showSuperRareOnly = false
+    @State private var showGemModifiedOnly = false
 
     private var totalSellPriceText: String { "\(selectedTotalSellPrice)GP" }
     private var hasSelection: Bool { !selectedDisplayItems.isEmpty }
@@ -53,6 +59,14 @@ struct ItemSaleView: View {
                 }
             }
         )
+    }
+
+    private var normalTitleOptions: [TitleDefinition] {
+        appServices.masterDataCache.allTitles.sorted { $0.id < $1.id }
+    }
+
+    private var allNormalTitleIds: Set<UInt8> {
+        Set(normalTitleOptions.map { $0.id })
     }
 
     var body: some View {
@@ -93,6 +107,27 @@ struct ItemSaleView: View {
         }
     }
 
+    private var filteredSections: [(subcategory: ItemDisplaySubcategory, items: [LightweightItemData])] {
+        orderedSubcategories.compactMap { subcategory in
+            guard let items = subcategorizedItems[subcategory] else { return nil }
+            let filteredItems = items.filter { matchesFilters($0) }
+            return filteredItems.isEmpty ? nil : (subcategory, filteredItems)
+        }
+    }
+
+    private func matchesFilters(_ item: LightweightItemData) -> Bool {
+        if !selectedCategories.contains(item.category) { return false }
+        let normalTitleSet = selectedNormalTitleIds ?? allNormalTitleIds
+        if !normalTitleSet.contains(item.enhancement.normalTitleId) { return false }
+        if !searchText.isEmpty &&
+            !item.fullDisplayName.localizedCaseInsensitiveContains(searchText) {
+            return false
+        }
+        if showSuperRareOnly && item.enhancement.superRareTitleId == 0 { return false }
+        if showGemModifiedOnly && !item.hasGemModification { return false }
+        return true
+    }
+
     private func buildContent() -> some View {
         VStack(spacing: 0) {
             if hasSelection {
@@ -100,12 +135,40 @@ struct ItemSaleView: View {
             }
 
             List {
-                ForEach(orderedSubcategories, id: \.self) { subcategory in
-                    buildSubcategorySection(for: subcategory)
+                if filteredSections.isEmpty {
+                    ContentUnavailableView {
+                        Label("アイテムが見つかりません", systemImage: "line.3.horizontal.decrease.circle")
+                    } description: {
+                        Text("検索条件またはカテゴリを見直してください。")
+                    }
+                } else {
+                    ForEach(filteredSections, id: \.subcategory) { section in
+                        buildSubcategorySection(for: section.subcategory, items: section.items)
+                    }
                 }
             }
             .id(cacheVersion)
             .avoidBottomGameInfo()
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showFilterSheet = true
+                    } label: {
+                        Label("フィルター", systemImage: "line.3.horizontal.decrease.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showFilterSheet) {
+                ItemSaleFilterSheet(
+                    selectedCategories: $selectedCategories,
+                    selectedNormalTitleIds: $selectedNormalTitleIds,
+                    normalTitleOptions: normalTitleOptions,
+                    allNormalTitleIds: allNormalTitleIds,
+                    showSuperRareOnly: $showSuperRareOnly,
+                    showGemModifiedOnly: $showGemModifiedOnly
+                )
+            }
         }
     }
 
@@ -149,8 +212,10 @@ struct ItemSaleView: View {
     }
 
     @ViewBuilder
-    private func buildSubcategorySection(for subcategory: ItemDisplaySubcategory) -> some View {
-        let items = subcategorizedItems[subcategory] ?? []
+    private func buildSubcategorySection(
+        for subcategory: ItemDisplaySubcategory,
+        items: [LightweightItemData]
+    ) -> some View {
         if items.isEmpty {
             EmptyView()
         } else {
@@ -458,6 +523,95 @@ struct ItemSaleView: View {
         return "\(reasonText)が含まれています。\(actionText)すると装備も宝石も元に戻せません。続行してよろしいですか？"
     }
 
+}
+
+private struct ItemSaleFilterSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selectedCategories: Set<ItemSaleCategory>
+    @Binding var selectedNormalTitleIds: Set<UInt8>?
+    let normalTitleOptions: [TitleDefinition]
+    let allNormalTitleIds: Set<UInt8>
+    @Binding var showSuperRareOnly: Bool
+    @Binding var showGemModifiedOnly: Bool
+
+    private let allCategories = ItemSaleCategory.allCases.sorted { $0.rawValue < $1.rawValue }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("一括操作") {
+                    Button("すべて選択") {
+                        selectedCategories = Set(allCategories)
+                        selectedNormalTitleIds = allNormalTitleIds
+                    }
+                    Button("全て解除") {
+                        selectedCategories.removeAll()
+                        selectedNormalTitleIds = []
+                    }
+                }
+
+                Section("称号") {
+                    ForEach(normalTitleOptions, id: \.id) { title in
+                        Toggle(displayName(for: title), isOn: titleBinding(for: title.id))
+                    }
+                }
+
+                Section("カテゴリ") {
+                    ForEach(allCategories, id: \.self) { category in
+                        Toggle(isOn: binding(for: category)) {
+                            Text(category.displayName)
+                        }
+                    }
+                }
+
+                Section("その他の条件") {
+                    Toggle("超レア称号のみ表示", isOn: $showSuperRareOnly)
+                    Toggle("宝石改造済みのみ表示", isOn: $showGemModifiedOnly)
+                }
+            }
+            .navigationTitle("フィルター")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("閉じる") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func binding(for category: ItemSaleCategory) -> Binding<Bool> {
+        Binding(
+            get: { selectedCategories.contains(category) },
+            set: { isOn in
+                if isOn {
+                    selectedCategories.insert(category)
+                } else {
+                    selectedCategories.remove(category)
+                }
+            }
+        )
+    }
+
+    private func titleBinding(for id: UInt8) -> Binding<Bool> {
+        Binding(
+            get: {
+                (selectedNormalTitleIds ?? allNormalTitleIds).contains(id)
+            },
+            set: { isOn in
+                var current = selectedNormalTitleIds ?? allNormalTitleIds
+                if isOn {
+                    current.insert(id)
+                } else {
+                    current.remove(id)
+                }
+                selectedNormalTitleIds = current
+            }
+        )
+    }
+
+    private func displayName(for title: TitleDefinition) -> String {
+        title.name.isEmpty ? "称号なし" : title.name
+    }
 }
 
 // MARK: - Sale Action Context
