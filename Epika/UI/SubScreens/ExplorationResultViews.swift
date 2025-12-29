@@ -80,7 +80,7 @@ struct ExplorationRunResultSummaryView: View {
                     } else {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("入手アイテム：")
-                            Text("探索が完了していないためアイテムは持ち帰れません。")
+                            Text(nonCompletionItemMessage)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -160,6 +160,19 @@ struct ExplorationRunResultSummaryView: View {
                            displayName: name,
                            count: formatNumber(summary.quantity),
                            isSuperRare: summary.isSuperRare)
+        }
+    }
+
+    private var nonCompletionItemMessage: String {
+        switch snapshot.status {
+        case .running:
+            return "探索中のためまだアイテムは持ち帰っていません。"
+        case .defeated:
+            return "探索に失敗したためアイテムは持ち帰れません。"
+        case .cancelled:
+            return "探索を中断したためアイテムは持ち帰れません。"
+        case .completed:
+            return ""
         }
     }
 

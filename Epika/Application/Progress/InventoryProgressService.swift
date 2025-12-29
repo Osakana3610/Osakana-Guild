@@ -220,6 +220,27 @@ actor InventoryProgressService {
         return snapshots
     }
 
+    /// stackKey重複レコードを数量が多いものだけ残して除去
+    /// TODO(Build 16): ビルド16で重複レコードが自然消滅したらこの処理を削除する
+    @discardableResult
+    func repairDuplicateStackKeys() async throws -> Int {
+        let context = makeContext()
+        let descriptor = FetchDescriptor<InventoryItemRecord>()
+        let allRecords = try context.fetch(descriptor)
+        guard !allRecords.isEmpty else { return 0 }
+
+        var totalRemoved = 0
+        let groupedByStorage = Dictionary(grouping: allRecords, by: { $0.storageType })
+        for recordsInStorage in groupedByStorage.values {
+            let result = deduplicateRecords(recordsInStorage, context: context)
+            totalRemoved += result.removedCount
+        }
+
+        guard totalRemoved > 0 else { return 0 }
+        try context.save()
+        return totalRemoved
+    }
+
     func addItems(_ seeds: [BatchSeed], chunkSize: Int = 1_000) async throws {
         guard !seeds.isEmpty else { return }
         guard chunkSize > 0 else {
@@ -707,5 +728,34 @@ actor InventoryProgressService {
         }
         result += baseName
         return result
+    }
+
+    /// TODO(Build 16): repairDuplicateStackKeys削除時に一緒に破棄予定
+    private struct DeduplicationResult {
+        let recordsByStackKey: [String: InventoryItemRecord]
+        let removedCount: Int
+    }
+
+    /// TODO(Build 16): repairDuplicateStackKeys削除時に一緒に破棄予定
+    private func deduplicateRecords(_ records: [InventoryItemRecord], context: ModelContext) -> DeduplicationResult {
+        guard !records.isEmpty else {
+            return DeduplicationResult(recordsByStackKey: [:], removedCount: 0)
+        }
+        var map: [String: InventoryItemRecord] = [:]
+        var removed = 0
+        for record in records {
+            if let existing = map[record.stackKey] {
+                if record.quantity > existing.quantity {
+                    context.delete(existing)
+                    map[record.stackKey] = record
+                } else {
+                    context.delete(record)
+                }
+                removed += 1
+            } else {
+                map[record.stackKey] = record
+            }
+        }
+        return DeduplicationResult(recordsByStackKey: map, removedCount: removed)
     }
 }
