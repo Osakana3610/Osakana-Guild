@@ -52,8 +52,21 @@ struct ExplorationRunResultSummaryView: View {
                     if !itemRows.isEmpty {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("入手アイテム：")
-                            ForEach(itemRows, id: \.name) { row in
-                                Text("・\(row.name) x\(row.count)")
+                            ForEach(itemRows) { row in
+                                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                    Text("・\(row.displayName) x\(row.count)")
+                                    if row.isSuperRare {
+                                        Text("超レア")
+                                            .font(.caption2)
+                                            .foregroundStyle(.red)
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(
+                                                Capsule()
+                                                    .fill(Color.red.opacity(0.12))
+                                            )
+                                    }
+                                }
                             }
                         }
                     }
@@ -111,10 +124,28 @@ struct ExplorationRunResultSummaryView: View {
         snapshot.summary.timingKind == .actual ? snapshot.summary.timingDate : nil
     }
 
-    private var itemRows: [(name: String, count: String)] {
-        snapshot.rewards.itemDrops
-            .sorted { lhs, rhs in lhs.key.localizedCompare(rhs.key) == .orderedAscending }
-            .map { ($0.key, formatNumber($0.value)) }
+    private var itemRows: [DropRow] {
+        let cache = appServices.masterDataCache
+        let rows = snapshot.rewards.itemDrops.compactMap { summary -> DropRow? in
+            guard let definition = cache.item(summary.itemId) else { return nil }
+            var name = ""
+            if summary.superRareTitleId > 0,
+               let title = cache.superRareTitle(summary.superRareTitleId)?.name,
+               !title.isEmpty {
+                name += title
+            }
+            if summary.normalTitleId > 0,
+               let title = cache.title(summary.normalTitleId)?.name,
+               !title.isEmpty {
+                name += title
+            }
+            name += definition.name
+            return DropRow(id: summary.id,
+                           displayName: name,
+                           count: formatNumber(summary.quantity),
+                           isSuperRare: summary.isSuperRare)
+        }
+        return rows.sorted { $0.displayName.localizedCompare($1.displayName) == .orderedAscending }
     }
 
     private var autoSellRows: [AutoSellRow] {
@@ -193,6 +224,13 @@ private struct AutoSellRow: Identifiable {
     var id: String {
         "\(itemId)|\(superRareTitleId)|\(normalTitleId)"
     }
+}
+
+private struct DropRow: Identifiable {
+    let id: String
+    let displayName: String
+    let count: String
+    let isSuperRare: Bool
 }
 
 struct SimplifiedEventSummaryRowView: View {

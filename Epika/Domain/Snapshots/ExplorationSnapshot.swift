@@ -79,9 +79,24 @@ struct ExplorationSnapshot: Sendable, Hashable {
             var quantity: Int
         }
 
+        struct ItemDropSummary: Sendable, Hashable, Identifiable {
+            var itemId: UInt16
+            var superRareTitleId: UInt8
+            var normalTitleId: UInt8
+            var quantity: Int
+
+            var id: String {
+                "\(itemId)|\(superRareTitleId)|\(normalTitleId)"
+            }
+
+            var isSuperRare: Bool {
+                superRareTitleId > 0
+            }
+        }
+
         var experience: Int = 0
         var gold: Int = 0
-        var itemDrops: [String: Int] = [:]  // アイテム名 -> 数量
+        var itemDrops: [ItemDropSummary] = []
         var autoSellGold: Int = 0
         var autoSoldItems: [AutoSellEntry] = []
     }
