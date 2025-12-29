@@ -30,6 +30,7 @@ MasterData.sqlite
 
 # Agents
 AGENTS.md
+/Users/licht/Development/Epika/AGENTS.md
 .agent/
 .claude/
 agent_docs/
