@@ -147,6 +147,14 @@ struct EquipmentEditorView: View {
     @State private var equipError: String?
     @State private var selectedItemForDetail: LightweightItemData?
     @State private var selectedItemIdForDetail: UInt16?  // 装備中アイテム用（図鑑モード）
+    @State private var searchText = ""
+    @State private var showFilterSheet = false
+    @State private var selectedCategories: Set<ItemSaleCategory> = Set(ItemSaleCategory.allCases)
+        .subtracting(Self.excludedCategories)
+    @State private var showEquippableOnly = false
+    @State private var selectedNormalTitleIds: Set<UInt8>? = nil
+    @State private var showSuperRareOnly = false
+    @State private var showGemModifiedOnly = false
 
     private var characterService: CharacterProgressService { appServices.character }
     private var inventoryService: InventoryProgressService { appServices.inventory }
@@ -250,8 +258,15 @@ struct EquipmentEditorView: View {
                         )
                     }
 
-                    ForEach(orderedSubcategories, id: \.self) { subcategory in
-                        buildSubcategorySection(for: subcategory)
+                    ForEach(filteredCandidateSections, id: \.subcategory) { section in
+                        buildSubcategorySection(for: section.subcategory, items: section.items)
+                    }
+                    if filteredCandidateSections.isEmpty {
+                        Section {
+                            Text("条件に一致する装備候補がありません。")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
                     Section("行動優先度") {
@@ -266,6 +281,28 @@ struct EquipmentEditorView: View {
                     }
                 }
                 .avoidBottomGameInfo()
+                .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showFilterSheet = true
+                        } label: {
+                            Label("フィルター", systemImage: "line.3.horizontal.decrease.circle")
+                        }
+                    }
+                }
+                .sheet(isPresented: $showFilterSheet) {
+                    EquipmentFilterSheet(
+                        selectedCategories: $selectedCategories,
+                        selectedNormalTitleIds: $selectedNormalTitleIds,
+                        showEquippableOnly: $showEquippableOnly,
+                        availableCategories: availableCategories,
+                        normalTitleOptions: normalTitleOptions,
+                        allNormalTitleIds: allNormalTitleIds,
+                        showSuperRareOnly: $showSuperRareOnly,
+                        showGemModifiedOnly: $showGemModifiedOnly
+                    )
+                }
             }
         }
         .navigationTitle(character.name)
@@ -299,9 +336,56 @@ struct EquipmentEditorView: View {
         }
     }
 
+    private var availableCategories: [ItemSaleCategory] {
+        ItemSaleCategory.allCases
+            .filter { !Self.excludedCategories.contains($0) }
+            .sorted { $0.rawValue < $1.rawValue }
+    }
+
+    private var normalTitleOptions: [TitleDefinition] {
+        appServices.masterDataCache.allTitles.sorted { $0.id < $1.id }
+    }
+
+    private var allNormalTitleIds: Set<UInt8> {
+        Set(normalTitleOptions.map { $0.id })
+    }
+
+    private var filteredCandidateSections: [(subcategory: ItemDisplaySubcategory, items: [LightweightItemData])] {
+        orderedSubcategories.compactMap { subcategory in
+            guard let items = subcategorizedItems[subcategory] else { return nil }
+            let filtered = items.filter { matchesFilters($0) }
+            return filtered.isEmpty ? nil : (subcategory, filtered)
+        }
+    }
+
+    private func matchesFilters(_ item: LightweightItemData) -> Bool {
+        if !selectedCategories.contains(item.category) { return false }
+        let normalTitleSet = selectedNormalTitleIds ?? allNormalTitleIds
+        if !normalTitleSet.contains(item.enhancement.normalTitleId) { return false }
+        if !searchText.isEmpty &&
+            !item.fullDisplayName.localizedCaseInsensitiveContains(searchText) {
+            return false
+        }
+        if showSuperRareOnly && item.enhancement.superRareTitleId == 0 {
+            return false
+        }
+        if showGemModifiedOnly && !item.hasGemModification {
+            return false
+        }
+        if showEquippableOnly {
+            let definition = itemDefinitions[item.itemId]
+            if !validateEquipment(definition: definition).canEquip {
+                return false
+            }
+        }
+        return true
+    }
+
     @ViewBuilder
-    private func buildSubcategorySection(for subcategory: ItemDisplaySubcategory) -> some View {
-        let items = subcategorizedItems[subcategory] ?? []
+    private func buildSubcategorySection(
+        for subcategory: ItemDisplaySubcategory,
+        items: [LightweightItemData]
+    ) -> some View {
         if items.isEmpty {
             EmptyView()
         } else {
@@ -579,5 +663,93 @@ struct EquipmentEditorView: View {
         addIfChanged(.breathDamage, oldVal: old.combat.breathDamage, newVal: new.combat.breathDamage)
 
         return changes
+    }
+}
+
+private struct EquipmentFilterSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selectedCategories: Set<ItemSaleCategory>
+    @Binding var selectedNormalTitleIds: Set<UInt8>?
+    @Binding var showEquippableOnly: Bool
+    let availableCategories: [ItemSaleCategory]
+    let normalTitleOptions: [TitleDefinition]
+    let allNormalTitleIds: Set<UInt8>
+    @Binding var showSuperRareOnly: Bool
+    @Binding var showGemModifiedOnly: Bool
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("一括操作") {
+                    Button("すべて選択") {
+                        selectedCategories = Set(availableCategories)
+                        selectedNormalTitleIds = allNormalTitleIds
+                    }
+                    Button("全て解除") {
+                        selectedCategories.removeAll()
+                        selectedNormalTitleIds = []
+                    }
+                }
+
+                Section("称号") {
+                    ForEach(normalTitleOptions, id: \.id) { title in
+                        Toggle(displayName(for: title), isOn: titleBinding(for: title.id))
+                    }
+                }
+
+                Section("カテゴリ") {
+                    ForEach(availableCategories, id: \.self) { category in
+                        Toggle(category.displayName, isOn: binding(for: category))
+                    }
+                }
+
+                Section("その他の条件") {
+                    Toggle("装備可能なものだけ表示", isOn: $showEquippableOnly)
+                    Toggle("超レア称号のみ表示", isOn: $showSuperRareOnly)
+                    Toggle("宝石改造済みのみ表示", isOn: $showGemModifiedOnly)
+                }
+            }
+            .navigationTitle("フィルター")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("閉じる") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func binding(for category: ItemSaleCategory) -> Binding<Bool> {
+        Binding(
+            get: { selectedCategories.contains(category) },
+            set: { isOn in
+                if isOn {
+                    selectedCategories.insert(category)
+                } else {
+                    selectedCategories.remove(category)
+                }
+            }
+        )
+    }
+
+    private func titleBinding(for id: UInt8) -> Binding<Bool> {
+        Binding(
+            get: {
+                (selectedNormalTitleIds ?? allNormalTitleIds).contains(id)
+            },
+            set: { isOn in
+                var current = selectedNormalTitleIds ?? allNormalTitleIds
+                if isOn {
+                    current.insert(id)
+                } else {
+                    current.remove(id)
+                }
+                selectedNormalTitleIds = current
+            }
+        )
+    }
+
+    private func displayName(for title: TitleDefinition) -> String {
+        title.name.isEmpty ? "称号なし" : title.name
     }
 }
