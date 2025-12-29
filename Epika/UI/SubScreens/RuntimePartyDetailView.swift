@@ -399,7 +399,12 @@ private struct PartyEquipmentListView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     } header: {
-                        Text(character.name)
+                        HStack(spacing: 6) {
+                            Text(character.name)
+                            Text(slotUsageText(for: character))
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
             }
@@ -424,6 +429,13 @@ private struct PartyEquipmentListView: View {
             result += " x\(entry.quantity)"
         }
         return result
+    }
+
+    private func slotUsageText(for character: RuntimeCharacter) -> String {
+        let usedSlots = character.equippedItems.reduce(into: 0) { result, item in
+            result += max(0, item.quantity)
+        }
+        return "装備 \(usedSlots)/\(character.equipmentCapacity)"
     }
 }
 
