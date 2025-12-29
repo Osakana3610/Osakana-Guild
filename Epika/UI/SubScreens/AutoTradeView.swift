@@ -26,8 +26,10 @@ struct AutoTradeView: View {
     @State private var rules: [AutoTradeProgressService.Rule] = []
     @State private var ruleDisplayNames: [String: String] = [:]
     @State private var isLoading = false
+    @State private var isRunningAutoSell = false
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var autoSellMessage: String?
 
     var body: some View {
         Group {
@@ -45,6 +47,25 @@ struct AutoTradeView: View {
         .avoidBottomGameInfo()
         .navigationTitle("自動売却")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    Task { await runInventoryAutoSell() }
+                } label: {
+                    Label("インベントリ整理", systemImage: "arrow.2.circlepath")
+                }
+                .disabled(isLoading || isRunningAutoSell)
+            }
+        }
+        .alert("自動売却", isPresented: autoSellAlertBinding, actions: {
+            Button("OK", role: .cancel) {
+                autoSellMessage = nil
+            }
+        }, message: {
+            if let message = autoSellMessage {
+                Text(message)
+            }
+        })
         .onAppear { Task { await loadRules() } }
     }
 
@@ -160,6 +181,50 @@ struct AutoTradeView: View {
             try await appServices.autoTrade.removeRule(stackKey: rule.stackKey)
             rules.removeAll { $0.id == rule.id }
             ruleDisplayNames.removeValue(forKey: rule.stackKey)
+        } catch {
+            showError = true
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private var autoSellAlertBinding: Binding<Bool> {
+        Binding(
+            get: { autoSellMessage != nil },
+            set: { newValue in
+                if !newValue {
+                    autoSellMessage = nil
+                }
+            }
+        )
+    }
+
+    @MainActor
+    private func runInventoryAutoSell() async {
+        if isRunningAutoSell { return }
+        isRunningAutoSell = true
+        defer { isRunningAutoSell = false }
+
+        do {
+            let result = try await appServices.executeAutoTradeSellFromInventory()
+            await loadRules()
+
+            if result.gold == 0 && result.tickets == 0 && result.destroyed.isEmpty {
+                autoSellMessage = "自動売却対象のアイテムはインベントリにありませんでした。"
+            } else {
+                var parts: [String] = []
+                if result.gold > 0 {
+                    parts.append("獲得ゴールド: +\(result.gold)")
+                }
+                if result.tickets > 0 {
+                    parts.append("キャット・チケット: +\(result.tickets)")
+                }
+                if !result.destroyed.isEmpty {
+                    let destroyedCount = result.destroyed.reduce(0) { $0 + $1.quantity }
+                    parts.append("在庫満杯のため \(destroyedCount) 個を破棄しました。")
+                }
+                autoSellMessage = parts.joined(separator: "\n")
+            }
+            showError = false
         } catch {
             showError = true
             errorMessage = error.localizedDescription
