@@ -965,49 +965,39 @@ private extension ExplorationProgressService {
         }
     }
 
-    private struct ItemDropKey: Hashable {
-        let itemId: UInt16
-        let superRareTitleId: UInt8
-        let normalTitleId: UInt8
-    }
-
     private func makeItemDropSummaries(from run: ExplorationRunRecord) -> [ExplorationSnapshot.Rewards.ItemDropSummary] {
         guard !run.events.isEmpty else { return [] }
-        var accumulator: [ItemDropKey: Int] = [:]
+        var summaries: [ExplorationSnapshot.Rewards.ItemDropSummary] = []
+        var indexByKey: [ExplorationDropKey: Int] = [:]
         for eventRecord in run.events {
             for drop in eventRecord.drops where drop.itemId > 0 && drop.quantity > 0 {
-                let key = ItemDropKey(
+                let key = ExplorationDropKey(
                     itemId: drop.itemId,
                     superRareTitleId: drop.superRareTitleId ?? 0,
                     normalTitleId: drop.normalTitleId ?? 2
                 )
-                accumulator[key, default: 0] += Int(drop.quantity)
+                if let index = indexByKey[key] {
+                    summaries[index].quantity += Int(drop.quantity)
+                } else {
+                    indexByKey[key] = summaries.count
+                    summaries.append(
+                        ExplorationSnapshot.Rewards.ItemDropSummary(
+                            itemId: key.itemId,
+                            superRareTitleId: key.superRareTitleId,
+                            normalTitleId: key.normalTitleId,
+                            quantity: Int(drop.quantity)
+                        )
+                    )
+                }
             }
         }
+        return summaries
+    }
 
-        let summaries = accumulator.map { entry -> ExplorationSnapshot.Rewards.ItemDropSummary in
-            let key = entry.key
-            let quantity = entry.value
-            return ExplorationSnapshot.Rewards.ItemDropSummary(
-                itemId: key.itemId,
-                superRareTitleId: key.superRareTitleId,
-                normalTitleId: key.normalTitleId,
-                quantity: quantity
-            )
-        }
-
-        return summaries.sorted { lhs, rhs in
-            if lhs.superRareTitleId != rhs.superRareTitleId {
-                return lhs.superRareTitleId > rhs.superRareTitleId
-            }
-            if lhs.itemId != rhs.itemId {
-                return lhs.itemId < rhs.itemId
-            }
-            if lhs.normalTitleId != rhs.normalTitleId {
-                return lhs.normalTitleId < rhs.normalTitleId
-            }
-            return lhs.quantity > rhs.quantity
-        }
+    private struct ExplorationDropKey: Hashable {
+        let itemId: UInt16
+        let superRareTitleId: UInt8
+        let normalTitleId: UInt8
     }
 
     func buildEncounterLog(from eventRecord: ExplorationEventRecord, index: Int) async throws -> ExplorationSnapshot.EncounterLog {

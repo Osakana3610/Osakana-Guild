@@ -359,23 +359,38 @@ final class UserDataLoadService {
         return explorationSummaries.contains { $0.party.partyId == partyId && $0.status == .running }
     }
 
+    private struct ExplorationDropKey: Hashable {
+        let itemId: UInt16
+        let superRareTitleId: UInt8
+        let normalTitleId: UInt8
+    }
+
     private func mergeDrops(
         current: [ExplorationSnapshot.Rewards.ItemDropSummary],
         newDrops: [ExplorationDropReward]
     ) -> [ExplorationSnapshot.Rewards.ItemDropSummary] {
         guard !newDrops.isEmpty else { return current }
         var merged = current
+        var indexByKey: [ExplorationDropKey: Int] = [:]
+        for (idx, summary) in merged.enumerated() {
+            let key = ExplorationDropKey(
+                itemId: summary.itemId,
+                superRareTitleId: summary.superRareTitleId,
+                normalTitleId: summary.normalTitleId
+            )
+            indexByKey[key] = idx
+        }
         for drop in newDrops where drop.quantity > 0 {
             let normalTitleId: UInt8 = drop.normalTitleId ?? 2
             let superRareTitleId: UInt8 = drop.superRareTitleId ?? 0
             let itemId = drop.item.id
-            if let index = merged.firstIndex(where: {
-                $0.itemId == itemId &&
-                $0.normalTitleId == normalTitleId &&
-                $0.superRareTitleId == superRareTitleId
-            }) {
+            let key = ExplorationDropKey(itemId: itemId,
+                                         superRareTitleId: superRareTitleId,
+                                         normalTitleId: normalTitleId)
+            if let index = indexByKey[key] {
                 merged[index].quantity += drop.quantity
             } else {
+                indexByKey[key] = merged.count
                 merged.append(
                     ExplorationSnapshot.Rewards.ItemDropSummary(
                         itemId: itemId,
@@ -385,18 +400,6 @@ final class UserDataLoadService {
                     )
                 )
             }
-        }
-        merged.sort { lhs, rhs in
-            if lhs.superRareTitleId != rhs.superRareTitleId {
-                return lhs.superRareTitleId > rhs.superRareTitleId
-            }
-            if lhs.itemId != rhs.itemId {
-                return lhs.itemId < rhs.itemId
-            }
-            if lhs.normalTitleId != rhs.normalTitleId {
-                return lhs.normalTitleId < rhs.normalTitleId
-            }
-            return lhs.quantity > rhs.quantity
         }
         return merged
     }
