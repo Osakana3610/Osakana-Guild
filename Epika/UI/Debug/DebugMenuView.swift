@@ -167,6 +167,7 @@ struct DebugMenuView: View {
             } message: {
                 Text(alertMessage)
             }
+#if DEBUG
             .sheet(isPresented: $showCreationSettings) {
                 ItemCreationSettingsView(
                     selectedType: $selectedCreationType,
@@ -176,6 +177,7 @@ struct DebugMenuView: View {
                     selectedSuperRareTitleIds: $selectedSuperRareTitleIds
                 )
             }
+#endif
             .sheet(isPresented: $showCharacterCreationSettings) {
                 CharacterCreationDebugSettingsView(
                     masterData: masterData,
@@ -189,6 +191,8 @@ struct DebugMenuView: View {
         }
     }
 
+#if DEBUG
+    @ViewBuilder
     private var itemCreationSection: some View {
         Section("アイテム作成") {
             if isCreatingItems {
@@ -226,6 +230,12 @@ struct DebugMenuView: View {
             }
         }
     }
+#else
+    @ViewBuilder
+    private var itemCreationSection: some View {
+        EmptyView()
+    }
+#endif
 
     private var characterCreationSection: some View {
         Section("キャラクター作成") {

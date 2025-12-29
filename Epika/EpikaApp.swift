@@ -103,6 +103,13 @@ struct EpikaApp: App {
             sharedModelContainer = bootstrap.container
             let services = AppServices(container: bootstrap.container,
                                         masterDataCache: cache)
+            // TODO(Build 16): 重複レコード修復処理が不要になったら削除する
+            let removedDuplicates = try await services.inventory.repairDuplicateStackKeys()
+#if DEBUG
+            if removedDuplicates > 0 {
+                print("[InventoryRepair] Removed \(removedDuplicates) duplicate stackKey records")
+            }
+#endif
             appServices = services
 
             // 3. ユーザーデータ一括ロード（探索再開も含む）
