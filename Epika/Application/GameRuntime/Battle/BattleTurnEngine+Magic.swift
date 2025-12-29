@@ -480,9 +480,21 @@ extension BattleTurnEngine {
         case .cleanse:
             return allies.contains { $0.isAlive && !$0.statusEffects.isEmpty }
         case .buff:
-            return true
+            return shouldCastBuffSpell(spell: spell, allies: allies)
         case .damage, .status:
             return opponents.contains { $0.isAlive }
         }
+    }
+
+    private static func shouldCastBuffSpell(spell: SpellDefinition,
+                                            allies: [BattleActor]) -> Bool {
+        guard spell.targeting == .partyAllies, !spell.buffs.isEmpty else { return true }
+        let buffId = "spell.\(spell.id)"
+        for ally in allies where ally.isAlive {
+            if ally.timedBuffs.contains(where: { $0.id == buffId && $0.remainingTurns > 0 }) {
+                return false
+            }
+        }
+        return true
     }
 }
