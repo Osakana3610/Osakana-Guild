@@ -16,6 +16,7 @@
 //     - endedAt, result, finalFloor, totalExp, totalGold
 //     - events: イベントレコード（1対多リレーション）
 //
+//   - ExplorationAutoSellRecord (@Model): 探索完了時の自動売却サマリー
 //   - ExplorationEventRecord (@Model): 探索イベントレコード
 //     - floor, kind, enemyId, battleResult, scriptedEventId
 //     - exp, gold, occurredAt, run
@@ -49,6 +50,30 @@ final class ExplorationDropRecord {
     var event: ExplorationEventRecord?
 
     init(superRareTitleId: UInt8?, normalTitleId: UInt8?, itemId: UInt16, quantity: UInt16) {
+        self.superRareTitleId = superRareTitleId
+        self.normalTitleId = normalTitleId
+        self.itemId = itemId
+        self.quantity = quantity
+    }
+}
+
+// MARK: - ExplorationAutoSellRecord
+
+/// 自動売却サマリーレコード
+///
+/// 探索完了時に自動売却されたアイテムの集計を保存する。
+@Model
+final class ExplorationAutoSellRecord {
+    var superRareTitleId: UInt8 = 0
+    var normalTitleId: UInt8 = 2
+    var itemId: UInt16 = 0
+    var quantity: UInt16 = 0
+    var run: ExplorationRunRecord?
+
+    init(superRareTitleId: UInt8,
+         normalTitleId: UInt8,
+         itemId: UInt16,
+         quantity: UInt16) {
         self.superRareTitleId = superRareTitleId
         self.normalTitleId = normalTitleId
         self.itemId = itemId
@@ -178,6 +203,13 @@ final class ExplorationRunRecord {
 
     /// 獲得ゴールド合計
     var totalGold: UInt32 = 0
+
+    /// 自動売却で獲得したゴールド
+    var autoSellGold: UInt32 = 0
+
+    /// 自動売却アイテム（正規化されたリレーション）
+    @Relationship(deleteRule: .cascade, inverse: \ExplorationAutoSellRecord.run)
+    var autoSellItems: [ExplorationAutoSellRecord] = []
 
     /// イベントレコード（正規化されたリレーション）
     @Relationship(deleteRule: .cascade, inverse: \ExplorationEventRecord.run)

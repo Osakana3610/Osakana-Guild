@@ -64,6 +64,46 @@ final class CharacterProgressService {
         let hpDelta: Int32
     }
 
+    @MainActor
+    final class BattleResultSession {
+        private unowned let service: CharacterProgressService
+        fileprivate let context: ModelContext
+        fileprivate let records: [UInt8: CharacterRecord]
+        private var pendingLevelUpNotification = false
+
+        fileprivate init(service: CharacterProgressService, characterIds: [UInt8]) throws {
+            self.service = service
+            self.context = service.makeContext()
+            if characterIds.isEmpty {
+                self.records = [:]
+                return
+            }
+
+            let ids = Array(Set(characterIds))
+            let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { ids.contains($0.id) })
+            let fetched = try context.fetch(descriptor)
+            self.records = Dictionary(uniqueKeysWithValues: fetched.map { ($0.id, $0) })
+        }
+
+        func applyBattleResults(_ updates: [BattleResultUpdate]) throws {
+            guard !updates.isEmpty else { return }
+            let levelUp = try service.applyBattleResultsInternal(updates,
+                                                                 records: records)
+            if levelUp {
+                pendingLevelUpNotification = true
+            }
+        }
+
+        func flushIfNeeded() throws {
+            guard context.hasChanges else { return }
+            try context.save()
+            if pendingLevelUpNotification {
+                service.notifyCharacterProgressDidChange()
+                pendingLevelUpNotification = false
+            }
+        }
+    }
+
     private let container: ModelContainer
     private let masterData: MasterDataCache
     private var raceLevelCache: [UInt8: Int] = [:]
@@ -426,15 +466,25 @@ final class CharacterProgressService {
 
     func applyBattleResults(_ updates: [BattleResultUpdate]) throws {
         guard !updates.isEmpty else { return }
-        let context = makeContext()
-        let ids = updates.map { $0.characterId }
-        let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { ids.contains($0.id) })
-        let records = try context.fetch(descriptor)
-        let map = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
+        let ids = Array(Set(updates.map { $0.characterId }))
+        let session = try makeBattleResultSession(characterIds: ids)
+        try session.applyBattleResults(updates)
+        try session.flushIfNeeded()
+    }
 
+    func makeBattleResultSession(characterIds: [UInt8]) throws -> BattleResultSession {
+        try BattleResultSession(service: self, characterIds: characterIds)
+    }
+
+    @discardableResult
+    fileprivate func applyBattleResultsInternal(
+        _ updates: [BattleResultUpdate],
+        records: [UInt8: CharacterRecord]
+    ) throws -> Bool {
+        guard !updates.isEmpty else { return false }
         var anyLevelUp = false
         for update in updates {
-            guard let record = map[update.characterId] else {
+            guard let record = records[update.characterId] else {
                 throw ProgressError.characterNotFound
             }
             if update.experienceDelta != 0 {
@@ -444,7 +494,6 @@ final class CharacterProgressService {
                     throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
                 }
                 let updatedExperience = max(0, Int(addition.partialValue))
-
                 let cappedExperience = try clampExperience(updatedExperience, raceId: record.raceId)
                 record.experience = UInt64(cappedExperience)
                 let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
@@ -458,10 +507,7 @@ final class CharacterProgressService {
                 record.currentHP = UInt32(max(0, newHP))
             }
         }
-        try context.save()
-        if anyLevelUp {
-            notifyCharacterProgressDidChange()
-        }
+        return anyLevelUp
     }
 
     func updateHP(characterId: UInt8, newHP: UInt32) throws {

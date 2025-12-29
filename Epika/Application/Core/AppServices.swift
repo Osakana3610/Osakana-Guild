@@ -68,6 +68,7 @@ final class AppServices {
     let statChangeNotifications: StatChangeNotificationService
     let userDataLoad: UserDataLoadService
     let gemModification: GemModificationProgressService
+    private var explorationPersistenceSessions: [PersistentIdentifier: ExplorationProgressService.EventSession] = [:]
 
     struct ExplorationRunTotals: Sendable {
         let totalExperience: Int
@@ -99,10 +100,27 @@ final class AppServices {
         let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)
         self.dropNotifications = dropNotifications
         self.statChangeNotifications = StatChangeNotificationService()
-        let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications] results in
+        let autoTradeService = AutoTradeProgressService(container: container, gameStateService: gameStateService)
+        self.autoTrade = autoTradeService
+        let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications, autoTradeService] results in
             guard let dropNotifications, !results.isEmpty else { return }
+            let filteredResults: [ItemDropResult]
+            do {
+                let autoTradeKeys = try await autoTradeService.registeredStackKeys()
+                if autoTradeKeys.isEmpty {
+                    filteredResults = results
+                } else {
+                    filteredResults = results.filter { !autoTradeKeys.contains($0.autoTradeStackKey) }
+                }
+            } catch {
+                #if DEBUG
+                print("[AppServices] Failed to load auto-trade keys for drop notifications: \(error)")
+                #endif
+                filteredResults = results
+            }
+            guard !filteredResults.isEmpty else { return }
             await MainActor.run {
-                dropNotifications.publish(results: results)
+                dropNotifications.publish(results: filteredResults)
             }
         }
         let runtimeService = GameRuntimeService(masterData: masterDataCache, dropNotifier: dropNotifier)
@@ -128,7 +146,6 @@ final class AppServices {
         self.itemSynthesis = ItemSynthesisProgressService(inventoryService: self.inventory,
                                                           gameStateService: gameStateService,
                                                           masterDataCache: masterDataCache)
-        self.autoTrade = AutoTradeProgressService(container: container, gameStateService: gameStateService)
         self.userDataLoad = UserDataLoadService(
             masterDataCache: masterDataCache,
             characterService: self.character,
@@ -158,6 +175,31 @@ final class AppServices {
         } catch {
             // プレイヤーが存在しない場合は初期値のまま
         }
+    }
+
+    func flushExplorationSessions() {
+        for session in explorationPersistenceSessions.values {
+            do {
+                try session.flushIfNeeded()
+            } catch {
+                #if DEBUG
+                print("[AppServices] flushExplorationSessions failed: \(error)")
+                #endif
+            }
+        }
+    }
+
+    func explorationSession(for runId: PersistentIdentifier) throws -> ExplorationProgressService.EventSession {
+        if let existing = explorationPersistenceSessions[runId] {
+            return existing
+        }
+        let session = try exploration.makeEventSession(runId: runId)
+        explorationPersistenceSessions[runId] = session
+        return session
+    }
+
+    func removeExplorationSession(runId: PersistentIdentifier) {
+        explorationPersistenceSessions.removeValue(forKey: runId)
     }
 }
 

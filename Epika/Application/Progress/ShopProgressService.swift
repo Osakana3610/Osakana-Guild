@@ -54,6 +54,7 @@ actor ShopProgressService {
         let totalGold: Int
         let totalTickets: Int
         let destroyed: [(itemId: UInt16, quantity: Int)]
+        let soldItems: [(itemId: UInt16, quantity: Int)]
     }
 
     private let container: ModelContainer
@@ -160,7 +161,7 @@ actor ShopProgressService {
     /// - Returns: バッチ売却結果（合計ゴールド、獲得キャット・チケット、消失アイテム）
     func addPlayerSoldItemsBatch(_ items: [(itemId: UInt16, quantity: Int)]) async throws -> BatchSoldResult {
         guard !items.isEmpty else {
-            return BatchSoldResult(totalGold: 0, totalTickets: 0, destroyed: [])
+            return BatchSoldResult(totalGold: 0, totalTickets: 0, destroyed: [], soldItems: [])
         }
 
         // アイテム定義を一括取得
@@ -199,6 +200,7 @@ actor ShopProgressService {
         var totalGold = 0
         var totalTickets = 0
         var destroyed: [(itemId: UInt16, quantity: Int)] = []
+        var soldQuantities: [UInt16: Int] = [:]
 
         for (itemId, quantity) in aggregated {
             guard let definition = definitionMap[itemId] else { continue }
@@ -244,13 +246,19 @@ actor ShopProgressService {
                 stock.updatedAt = now
                 pending -= toAdd
                 totalGold += definition.sellValue * toAdd
+                soldQuantities[itemId, default: 0] += toAdd
             }
         }
 
         try saveIfNeeded(context)
+        let sortedSoldItems = soldQuantities
+            .filter { $0.value > 0 }
+            .sorted { $0.key < $1.key }
+            .map { (itemId: $0.key, quantity: $0.value) }
         return BatchSoldResult(totalGold: totalGold,
                                totalTickets: totalTickets,
-                               destroyed: destroyed)
+                               destroyed: destroyed,
+                               soldItems: sortedSoldItems)
     }
 
     /// 在庫整理：指定アイテムの在庫を目標数量まで減らし、減少分に応じたキャット・チケットを返す

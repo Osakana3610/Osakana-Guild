@@ -72,9 +72,18 @@ struct ExplorationSnapshot: Sendable, Hashable {
 
     /// 探索報酬（経験値・ゴールド・アイテムドロップ）
     struct Rewards: Sendable, Hashable {
+        struct AutoSellEntry: Sendable, Hashable {
+            var itemId: UInt16
+            var superRareTitleId: UInt8
+            var normalTitleId: UInt8
+            var quantity: Int
+        }
+
         var experience: Int = 0
         var gold: Int = 0
         var itemDrops: [String: Int] = [:]  // アイテム名 -> 数量
+        var autoSellGold: Int = 0
+        var autoSoldItems: [AutoSellEntry] = []
     }
 
     struct PartySummary: Sendable, Hashable {

@@ -25,6 +25,7 @@ struct ExplorationRunResultSummaryView: View {
     let party: PartySnapshot
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppServices.self) private var appServices
 
     var body: some View {
         NavigationStack {
@@ -54,6 +55,27 @@ struct ExplorationRunResultSummaryView: View {
                             ForEach(itemRows, id: \.name) { row in
                                 Text("・\(row.name) x\(row.count)")
                             }
+                        }
+                    }
+
+                    if shouldShowAutoSellSection {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("自動売却")
+                                .font(.headline)
+                            Text("以下のアイテムを自動売却しました。")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            if autoSellRows.isEmpty {
+                                Text("自動売却アイテムの詳細を取得できませんでした。")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                ForEach(autoSellRows) { row in
+                                    Text("・\(row.name) x\(formatNumber(row.quantity))")
+                                }
+                            }
+                            Text("合計 \(formatNumber(snapshot.rewards.autoSellGold)) GP を入手しました。")
+                                .padding(.top, 4)
                         }
                     }
 
@@ -95,6 +117,27 @@ struct ExplorationRunResultSummaryView: View {
             .map { ($0.key, formatNumber($0.value)) }
     }
 
+    private var autoSellRows: [AutoSellRow] {
+        guard !snapshot.rewards.autoSoldItems.isEmpty else { return [] }
+        var rows: [AutoSellRow] = []
+        rows.reserveCapacity(snapshot.rewards.autoSoldItems.count)
+        let cache = appServices.masterDataCache
+        for entry in snapshot.rewards.autoSoldItems where entry.quantity > 0 {
+            guard let definition = cache.item(entry.itemId) else { continue }
+            let name = autoSellDisplayName(for: entry, definition: definition)
+            rows.append(AutoSellRow(itemId: entry.itemId,
+                                    superRareTitleId: entry.superRareTitleId,
+                                    normalTitleId: entry.normalTitleId,
+                                    name: name,
+                                    quantity: entry.quantity))
+        }
+        return rows
+    }
+
+    private var shouldShowAutoSellSection: Bool {
+        !snapshot.rewards.autoSoldItems.isEmpty || snapshot.rewards.autoSellGold > 0
+    }
+
     private static let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
@@ -119,6 +162,36 @@ struct ExplorationRunResultSummaryView: View {
 
     private func formatNumber(_ value: Int) -> String {
         Self.numberFormatter.string(from: NSNumber(value: value)) ?? "\(value)"
+    }
+
+    private func autoSellDisplayName(for entry: ExplorationSnapshot.Rewards.AutoSellEntry,
+                                     definition: ItemDefinition) -> String {
+        let cache = appServices.masterDataCache
+        var result = ""
+        if entry.superRareTitleId != 0,
+           let title = cache.superRareTitle(entry.superRareTitleId)?.name,
+           !title.isEmpty {
+            result += title
+        }
+        if entry.normalTitleId != 0,
+           let title = cache.title(entry.normalTitleId)?.name,
+           !title.isEmpty {
+            result += title
+        }
+        result += definition.name
+        return result
+    }
+}
+
+private struct AutoSellRow: Identifiable {
+    let itemId: UInt16
+    let superRareTitleId: UInt8
+    let normalTitleId: UInt8
+    let name: String
+    let quantity: Int
+
+    var id: String {
+        "\(itemId)|\(superRareTitleId)|\(normalTitleId)"
     }
 }
 
