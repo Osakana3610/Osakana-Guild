@@ -42,6 +42,92 @@ final class ExplorationProgressService {
     /// 探索履歴のキャッシュ
     private var cachedExplorations: [ExplorationSnapshot]?
 
+    @MainActor
+    final class EventSession {
+        private unowned let service: ExplorationProgressService
+        fileprivate let context: ModelContext
+        fileprivate let runRecord: ExplorationRunRecord
+
+        fileprivate init(service: ExplorationProgressService, runId: PersistentIdentifier) throws {
+            self.service = service
+            self.context = service.makeContext()
+            self.runRecord = try service.fetchRunRecord(runId: runId, context: context)
+        }
+
+        @discardableResult
+        func appendEvent(event: ExplorationEventLogEntry,
+                         battleLog: BattleLogArchive?,
+                         occurredAt: Date,
+                         randomState: UInt64,
+                         superRareState: SuperRareDailyState,
+                         droppedItemIds: Set<UInt16>) async throws -> BattleLogRecord? {
+            let eventRecord = service.buildBaseEventRecord(from: event, occurredAt: occurredAt)
+            eventRecord.run = runRecord
+            context.insert(eventRecord)
+            let battleLogRecord = try await service.populateEventRecordRelationships(eventRecord: eventRecord,
+                                                                                     from: event,
+                                                                                     battleLog: battleLog,
+                                                                                     context: context)
+            runRecord.totalExp += eventRecord.exp
+            runRecord.totalGold += eventRecord.gold
+            runRecord.finalFloor = eventRecord.floor
+            runRecord.randomState = Int64(bitPattern: randomState)
+            runRecord.superRareJstDate = superRareState.jstDate
+            runRecord.superRareHasTriggered = superRareState.hasTriggered
+            runRecord.droppedItemIdsData = ExplorationProgressService.encodeItemIds(droppedItemIds)
+            return battleLogRecord
+        }
+
+        func finalizeRun(endState: ExplorationEndState,
+                         endedAt: Date,
+                         totalExperience: Int,
+                         totalGold: Int,
+                         autoSellGold: Int = 0,
+                         autoSoldItems: [ExplorationSnapshot.Rewards.AutoSellEntry] = []) {
+            runRecord.endedAt = endedAt
+            runRecord.result = service.resultValue(for: endState)
+            runRecord.totalExp = UInt32(totalExperience)
+            runRecord.totalGold = UInt32(totalGold)
+            runRecord.autoSellGold = UInt32(clamping: max(0, autoSellGold))
+            updateAutoSellRecords(autoSoldItems)
+            if case let .defeated(floorNumber, _, _) = endState {
+                runRecord.finalFloor = UInt8(floorNumber)
+            }
+            service.invalidateCache()
+        }
+
+        func cancelRun(endedAt: Date = Date()) {
+            runRecord.endedAt = endedAt
+            runRecord.result = ExplorationResult.cancelled.rawValue
+            service.invalidateCache()
+        }
+
+        func flushIfNeeded() throws {
+            try service.saveIfNeeded(context)
+        }
+
+        private func updateAutoSellRecords(_ entries: [ExplorationSnapshot.Rewards.AutoSellEntry]) {
+            if !runRecord.autoSellItems.isEmpty {
+                for record in runRecord.autoSellItems {
+                    context.delete(record)
+                }
+                runRecord.autoSellItems.removeAll()
+            }
+            guard !entries.isEmpty else { return }
+            for entry in entries where entry.quantity > 0 {
+                let record = ExplorationAutoSellRecord(
+                    superRareTitleId: entry.superRareTitleId,
+                    normalTitleId: entry.normalTitleId,
+                    itemId: entry.itemId,
+                    quantity: UInt16(clamping: entry.quantity)
+                )
+                record.run = runRecord
+                runRecord.autoSellItems.append(record)
+                context.insert(record)
+            }
+        }
+    }
+
     init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
         self.masterDataCache = masterDataCache
@@ -467,31 +553,14 @@ final class ExplorationProgressService {
                      randomState: UInt64,
                      superRareState: SuperRareDailyState,
                      droppedItemIds: Set<UInt16>) async throws -> PersistentIdentifier? {
-        let context = makeContext()
-        let runRecord = try fetchRunRecord(runId: runId, context: context)
-
-        // iOS 17のSwiftDataバグ対策: contextへの挿入後にリレーションを設定
-        // @Relationship(inverse:)付きのto-manyリレーションは挿入前にアクセスするとクラッシュする
-        let eventRecord = buildBaseEventRecord(from: event, occurredAt: occurredAt)
-        eventRecord.run = runRecord
-        context.insert(eventRecord)
-
-        // context挿入後にリレーションを設定
-        let battleLogRecord = try await populateEventRecordRelationships(eventRecord: eventRecord, from: event, battleLog: battleLog, context: context)
-
-        // 累計を更新
-        runRecord.totalExp += eventRecord.exp
-        runRecord.totalGold += eventRecord.gold
-        runRecord.finalFloor = eventRecord.floor
-
-        // RNG状態と探索状態を保存
-        runRecord.randomState = Int64(bitPattern: randomState)
-        runRecord.superRareJstDate = superRareState.jstDate
-        runRecord.superRareHasTriggered = superRareState.hasTriggered
-        runRecord.droppedItemIdsData = Self.encodeItemIds(droppedItemIds)
-
-        try saveIfNeeded(context)
-        // 保存後に永続IDを取得（保存前は一時IDになるため）
+        let session = try makeEventSession(runId: runId)
+        let battleLogRecord = try await session.appendEvent(event: event,
+                                                            battleLog: battleLog,
+                                                            occurredAt: occurredAt,
+                                                            randomState: randomState,
+                                                            superRareState: superRareState,
+                                                            droppedItemIds: droppedItemIds)
+        try session.flushIfNeeded()
         return battleLogRecord?.persistentModelID
     }
 
@@ -499,30 +568,24 @@ final class ExplorationProgressService {
                      endState: ExplorationEndState,
                      endedAt: Date,
                      totalExperience: Int,
-                     totalGold: Int) async throws {
-        let context = makeContext()
-        let runRecord = try fetchRunRecord(runId: runId, context: context)
-        runRecord.endedAt = endedAt
-        runRecord.result = resultValue(for: endState)
-        runRecord.totalExp = UInt32(totalExperience)
-        runRecord.totalGold = UInt32(totalGold)
-
-        if case let .defeated(floorNumber, _, _) = endState {
-            runRecord.finalFloor = UInt8(floorNumber)
-        }
-
-        try saveIfNeeded(context)
-        invalidateCache()
+                     totalGold: Int,
+                     autoSellGold: Int = 0,
+                     autoSoldItems: [ExplorationSnapshot.Rewards.AutoSellEntry] = []) async throws {
+        let session = try makeEventSession(runId: runId)
+        session.finalizeRun(endState: endState,
+                            endedAt: endedAt,
+                            totalExperience: totalExperience,
+                            totalGold: totalGold,
+                            autoSellGold: autoSellGold,
+                            autoSoldItems: autoSoldItems)
+        try session.flushIfNeeded()
     }
 
     func cancelRun(runId: PersistentIdentifier,
                    endedAt: Date = Date()) async throws {
-        let context = makeContext()
-        let runRecord = try fetchRunRecord(runId: runId, context: context)
-        runRecord.endedAt = endedAt
-        runRecord.result = ExplorationResult.cancelled.rawValue
-        try saveIfNeeded(context)
-        invalidateCache()
+        let session = try makeEventSession(runId: runId)
+        session.cancelRun(endedAt: endedAt)
+        try session.flushIfNeeded()
     }
 
     /// partyIdとstartedAtで特定のRunをキャンセル
@@ -538,6 +601,10 @@ final class ExplorationProgressService {
         record.result = ExplorationResult.cancelled.rawValue
         try saveIfNeeded(context)
         invalidateCache()
+    }
+
+    func makeEventSession(runId: PersistentIdentifier) throws -> EventSession {
+        try EventSession(service: self, runId: runId)
     }
 
     /// Running状態の探索レコードを取得（再開用）
@@ -785,7 +852,9 @@ private extension ExplorationProgressService {
             rewards: ExplorationSnapshot.Rewards(
                 experience: Int(run.totalExp),
                 gold: Int(run.totalGold),
-                itemDrops: [:]
+                itemDrops: [:],
+                autoSellGold: Int(run.autoSellGold),
+                autoSoldItems: makeAutoSellEntries(from: run)
             ),
             summary: summary,
             status: status,
@@ -828,6 +897,8 @@ private extension ExplorationProgressService {
         var rewards = ExplorationSnapshot.Rewards()
         rewards.experience = Int(run.totalExp)
         rewards.gold = Int(run.totalGold)
+        rewards.autoSellGold = Int(run.autoSellGold)
+        rewards.autoSoldItems = makeAutoSellEntries(from: run)
 
         for eventRecord in eventRecords {
             for drop in eventRecord.drops {
@@ -872,6 +943,24 @@ private extension ExplorationProgressService {
             status: status,
             metadata: metadata
         )
+    }
+
+    private func makeAutoSellEntries(from run: ExplorationRunRecord) -> [ExplorationSnapshot.Rewards.AutoSellEntry] {
+        guard !run.autoSellItems.isEmpty else { return [] }
+        let entries = run.autoSellItems.map { record in
+            ExplorationSnapshot.Rewards.AutoSellEntry(
+                itemId: record.itemId,
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                quantity: Int(record.quantity)
+            )
+        }
+        return entries.sorted { lhs, rhs in
+            if lhs.itemId != rhs.itemId { return lhs.itemId < rhs.itemId }
+            if lhs.superRareTitleId != rhs.superRareTitleId { return lhs.superRareTitleId < rhs.superRareTitleId }
+            if lhs.normalTitleId != rhs.normalTitleId { return lhs.normalTitleId < rhs.normalTitleId }
+            return lhs.quantity > rhs.quantity
+        }
     }
 
     func buildEncounterLog(from eventRecord: ExplorationEventRecord, index: Int) async throws -> ExplorationSnapshot.EncounterLog {

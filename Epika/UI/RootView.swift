@@ -40,8 +40,13 @@ struct RootView: View {
             .environment(appServices.dropNotifications)
             .environment(appServices.statChangeNotifications)
             .onChange(of: scenePhase) { _, newPhase in
-                if newPhase == .active {
+                switch newPhase {
+                case .active:
                     appServices.exploration.purgeOldRecordsInBackground()
+                case .background:
+                    appServices.flushExplorationSessions()
+                default:
+                    break
                 }
             }
     }

@@ -44,6 +44,7 @@ actor AutoTradeProgressService {
 
     private let container: ModelContainer
     private let gameStateService: GameStateService
+    private var cachedStackKeys: Set<String>?
 
     init(container: ModelContainer, gameStateService: GameStateService) {
         self.container = container
@@ -91,6 +92,7 @@ actor AutoTradeProgressService {
         )
         context.insert(record)
         try context.save()
+        cachedStackKeys = nil
         return makeRule(record)
     }
 
@@ -112,6 +114,7 @@ actor AutoTradeProgressService {
         }
         context.delete(record)
         try context.save()
+        cachedStackKeys = nil
     }
 
     func shouldAutoSell(stackKey: String) async throws -> Bool {
@@ -132,10 +135,15 @@ actor AutoTradeProgressService {
     }
 
     func registeredStackKeys() async throws -> Set<String> {
+        if let cachedStackKeys {
+            return cachedStackKeys
+        }
         let context = makeContext()
         let descriptor = FetchDescriptor<AutoTradeRuleRecord>()
         let records = try context.fetch(descriptor)
-        return Set(records.map { $0.stackKey })
+        let keys = Set(records.map { $0.stackKey })
+        cachedStackKeys = keys
+        return keys
     }
 
     // MARK: - Private Helpers
