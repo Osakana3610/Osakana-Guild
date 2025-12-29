@@ -49,25 +49,40 @@ struct ExplorationRunResultSummaryView: View {
                         Text("獲得ゴールド：\(formatNumber(snapshot.rewards.gold))")
                     }
 
-                    if !itemRows.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("入手アイテム：")
-                            ForEach(itemRows) { row in
-                                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                                    Text("・\(row.displayName) x\(row.count)")
-                                    if row.isSuperRare {
-                                        Text("超レア")
-                                            .font(.caption2)
-                                            .foregroundStyle(.red)
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 2)
-                                            .background(
-                                                Capsule()
-                                                    .fill(Color.red.opacity(0.12))
-                                            )
+                    if snapshot.status == .completed {
+                        if itemRows.isEmpty {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("入手アイテム：")
+                                Text("なし")
+                                    .foregroundStyle(.secondary)
+                            }
+                        } else {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("入手アイテム：")
+                                ForEach(itemRows) { row in
+                                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                        Text("・\(row.displayName) x\(row.count)")
+                                        if row.isSuperRare {
+                                            Text("超レア")
+                                                .font(.caption2)
+                                                .foregroundStyle(.red)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(
+                                                    Capsule()
+                                                        .fill(Color.red.opacity(0.12))
+                                                )
+                                        }
                                     }
                                 }
                             }
+                        }
+                    } else {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("入手アイテム：")
+                            Text("探索が完了していないためアイテムは持ち帰れません。")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
 
@@ -125,8 +140,9 @@ struct ExplorationRunResultSummaryView: View {
     }
 
     private var itemRows: [DropRow] {
+        guard snapshot.status == .completed else { return [] }
         let cache = appServices.masterDataCache
-        let rows = snapshot.rewards.itemDrops.compactMap { summary -> DropRow? in
+        return snapshot.rewards.itemDrops.compactMap { summary -> DropRow? in
             guard let definition = cache.item(summary.itemId) else { return nil }
             var name = ""
             if summary.superRareTitleId > 0,
@@ -145,7 +161,6 @@ struct ExplorationRunResultSummaryView: View {
                            count: formatNumber(summary.quantity),
                            isSuperRare: summary.isSuperRare)
         }
-        return rows.sorted { $0.displayName.localizedCompare($1.displayName) == .orderedAscending }
     }
 
     private var autoSellRows: [AutoSellRow] {
