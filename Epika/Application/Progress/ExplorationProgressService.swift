@@ -863,7 +863,7 @@ private extension ExplorationProgressService {
             rewards: ExplorationSnapshot.Rewards(
                 experience: Int(run.totalExp),
                 gold: Int(run.totalGold),
-                itemDrops: [:],
+                itemDrops: makeItemDropSummaries(from: run),
                 autoSellGold: Int(run.autoSellGold),
                 autoSoldItems: makeAutoSellEntries(from: run)
             ),
@@ -910,16 +910,7 @@ private extension ExplorationProgressService {
         rewards.gold = Int(run.totalGold)
         rewards.autoSellGold = Int(run.autoSellGold)
         rewards.autoSoldItems = makeAutoSellEntries(from: run)
-
-        for eventRecord in eventRecords {
-            for drop in eventRecord.drops {
-                if drop.itemId > 0 {
-                    if let item = masterDataCache.item(drop.itemId) {
-                        rewards.itemDrops[item.name, default: 0] += Int(drop.quantity)
-                    }
-                }
-            }
-        }
+        rewards.itemDrops = makeItemDropSummaries(from: run)
 
         let partySummary = ExplorationSnapshot.PartySummary(
             partyId: run.partyId,
@@ -970,6 +961,51 @@ private extension ExplorationProgressService {
             if lhs.itemId != rhs.itemId { return lhs.itemId < rhs.itemId }
             if lhs.superRareTitleId != rhs.superRareTitleId { return lhs.superRareTitleId < rhs.superRareTitleId }
             if lhs.normalTitleId != rhs.normalTitleId { return lhs.normalTitleId < rhs.normalTitleId }
+            return lhs.quantity > rhs.quantity
+        }
+    }
+
+    private struct ItemDropKey: Hashable {
+        let itemId: UInt16
+        let superRareTitleId: UInt8
+        let normalTitleId: UInt8
+    }
+
+    private func makeItemDropSummaries(from run: ExplorationRunRecord) -> [ExplorationSnapshot.Rewards.ItemDropSummary] {
+        guard !run.events.isEmpty else { return [] }
+        var accumulator: [ItemDropKey: Int] = [:]
+        for eventRecord in run.events {
+            for drop in eventRecord.drops where drop.itemId > 0 && drop.quantity > 0 {
+                let key = ItemDropKey(
+                    itemId: drop.itemId,
+                    superRareTitleId: drop.superRareTitleId ?? 0,
+                    normalTitleId: drop.normalTitleId ?? 2
+                )
+                accumulator[key, default: 0] += Int(drop.quantity)
+            }
+        }
+
+        let summaries = accumulator.map { entry -> ExplorationSnapshot.Rewards.ItemDropSummary in
+            let key = entry.key
+            let quantity = entry.value
+            return ExplorationSnapshot.Rewards.ItemDropSummary(
+                itemId: key.itemId,
+                superRareTitleId: key.superRareTitleId,
+                normalTitleId: key.normalTitleId,
+                quantity: quantity
+            )
+        }
+
+        return summaries.sorted { lhs, rhs in
+            if lhs.superRareTitleId != rhs.superRareTitleId {
+                return lhs.superRareTitleId > rhs.superRareTitleId
+            }
+            if lhs.itemId != rhs.itemId {
+                return lhs.itemId < rhs.itemId
+            }
+            if lhs.normalTitleId != rhs.normalTitleId {
+                return lhs.normalTitleId < rhs.normalTitleId
+            }
             return lhs.quantity > rhs.quantity
         }
     }
