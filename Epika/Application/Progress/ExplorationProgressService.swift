@@ -443,6 +443,17 @@ final class ExplorationProgressService {
         return snapshots
     }
 
+    /// 指定パーティの探索（startedAt一致）を詳細ログ込みで取得
+    func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> ExplorationSnapshot? {
+        let context = makeContext()
+        var descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+        )
+        descriptor.fetchLimit = 1
+        guard let run = try context.fetch(descriptor).first else { return nil }
+        return try await makeSnapshot(for: run, context: context)
+    }
+
     /// 全パーティの最新探索サマリーを取得（初期ロード用）
     func recentExplorationSummaries(limitPerParty: Int = 2) async throws -> [ExplorationSnapshot] {
         let context = makeContext()

@@ -28,13 +28,19 @@ struct RecentExplorationLogsView: View {
     let party: PartySnapshot
     let runs: [ExplorationSnapshot]
 
+    @Environment(AppServices.self) private var appServices
+
     @State private var selectedRunForSummary: ExplorationSnapshot?
     @State private var selectedRunForResultSummary: ExplorationSnapshot?
+    @State private var enrichedRuns: [Int64: ExplorationSnapshot] = [:]
+    @State private var isFetchingDetail = false
+    @State private var detailErrorMessage: String?
 
     private let maxDisplayCount = 2
 
     private var partyRuns: [ExplorationSnapshot] {
         runs
+            .map { enrichedRuns[$0.id] ?? $0 }
             .filter { $0.party.partyId == party.id }
             .sorted { $0.startedAt > $1.startedAt }
             .prefix(maxDisplayCount)
@@ -43,6 +49,12 @@ struct RecentExplorationLogsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            if isFetchingDetail {
+                statusBanner(text: "探索ログを読み込み中…", systemImage: "arrow.clockwise")
+            } else if let detailErrorMessage {
+                statusBanner(text: detailErrorMessage, systemImage: "exclamationmark.triangle")
+            }
+
             if partyRuns.isEmpty {
                 emptyState
             } else {
@@ -93,17 +105,76 @@ struct RecentExplorationLogsView: View {
     }
 
     private func handleDetailButton(for run: ExplorationSnapshot) {
-        // 探索中・完了済み問わず、ログ詳細画面を表示
-        selectedRunForSummary = run
+        Task { await presentSummary(for: run) }
     }
 
     private func handleRowTap(for run: ExplorationSnapshot) {
-        if run.status == .running {
-            // 探索中はログ詳細画面を表示（完了イベントまで）
-            selectedRunForSummary = run
-            return
+        Task {
+            if run.status == .running {
+                await presentSummary(for: run)
+            } else {
+                await presentResultSummary(for: run)
+            }
         }
-        selectedRunForResultSummary = run
+    }
+
+    @MainActor
+    private func presentSummary(for run: ExplorationSnapshot) async {
+        guard let snapshot = await ensureDetailedSnapshot(for: run) else { return }
+        selectedRunForSummary = snapshot
+    }
+
+    @MainActor
+    private func presentResultSummary(for run: ExplorationSnapshot) async {
+        if let enriched = enrichedRuns[run.id] {
+            selectedRunForResultSummary = enriched
+        } else {
+            selectedRunForResultSummary = run
+        }
+    }
+
+    @MainActor
+    private func ensureDetailedSnapshot(for run: ExplorationSnapshot) async -> ExplorationSnapshot? {
+        detailErrorMessage = nil
+        let existing = enrichedRuns[run.id] ?? run
+        guard needsDetailFetch(existing) else { return existing }
+
+        isFetchingDetail = true
+        defer { isFetchingDetail = false }
+
+        do {
+            guard let snapshot = try await appServices.exploration.explorationSnapshot(
+                partyId: run.party.partyId,
+                startedAt: run.startedAt
+            ) else {
+                detailErrorMessage = "探索ログを取得できませんでした。データが存在しません。"
+                return nil
+            }
+            enrichedRuns[snapshot.id] = snapshot
+            return snapshot
+        } catch {
+            detailErrorMessage = "探索ログの取得に失敗しました: \(error.localizedDescription)"
+            return nil
+        }
+    }
+
+    private func needsDetailFetch(_ run: ExplorationSnapshot) -> Bool {
+        run.encounterLogs.isEmpty && run.status != .running
+    }
+
+    @ViewBuilder
+    private func statusBanner(text: String, systemImage: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Text(text)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+        .padding(.vertical, 4)
+        .padding(.horizontal, 8)
     }
 
 }
