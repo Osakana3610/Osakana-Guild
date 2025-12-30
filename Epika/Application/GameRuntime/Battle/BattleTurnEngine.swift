@@ -91,11 +91,13 @@ struct BattleTurnEngine {
         // 初期HP記録
         context.buildInitialHP()
 
-        context.appendAction(kind: .battleStart)
+        context.appendSimpleEntry(kind: .battleStart)
 
         for (index, _) in context.enemies.enumerated() {
             let actorIdx = context.actorIndex(for: .enemy, arrayIndex: index)
-            context.appendAction(kind: .enemyAppear, actor: actorIdx)
+            context.appendSimpleEntry(kind: .enemyAppear,
+                                      actorId: actorIdx,
+                                      effectKind: .enemyAppear)
         }
 
         // 先制攻撃の実行
@@ -103,27 +105,29 @@ struct BattleTurnEngine {
 
         // 先制攻撃後の勝敗判定
         if context.isVictory {
-            context.appendAction(kind: .victory)
+            context.appendSimpleEntry(kind: .victory)
             return context.makeResult(BattleLog.outcomeVictory)
         }
         if context.isDefeat {
-            context.appendAction(kind: .defeat)
+            context.appendSimpleEntry(kind: .defeat)
             return context.makeResult(BattleLog.outcomeDefeat)
         }
 
         while context.turn < BattleContext.maxTurns {
             // 勝敗判定
             if context.isVictory {
-                context.appendAction(kind: .victory)
+                context.appendSimpleEntry(kind: .victory)
                 return context.makeResult(BattleLog.outcomeVictory)
             }
             if context.isDefeat {
-                context.appendAction(kind: .defeat)
+                context.appendSimpleEntry(kind: .defeat)
                 return context.makeResult(BattleLog.outcomeDefeat)
             }
 
             context.turn += 1
-            context.appendAction(kind: .turnStart)
+            context.appendSimpleEntry(kind: .turnStart,
+                                      extra: UInt16(clamping: context.turn),
+                                      effectKind: .logOnly)
 
             resetRescueUsage(&context)
             applyRetreatIfNeeded(&context)
@@ -139,11 +143,11 @@ struct BattleTurnEngine {
 
                 // アクション後の勝敗判定
                 if context.isVictory {
-                    context.appendAction(kind: .victory)
+                    context.appendSimpleEntry(kind: .victory)
                     return context.makeResult(BattleLog.outcomeVictory)
                 }
                 if context.isDefeat {
-                    context.appendAction(kind: .defeat)
+                    context.appendSimpleEntry(kind: .defeat)
                     return context.makeResult(BattleLog.outcomeDefeat)
                 }
             }
@@ -151,7 +155,7 @@ struct BattleTurnEngine {
             endOfTurn(&context)
         }
 
-        context.appendAction(kind: .retreat)
+        context.appendSimpleEntry(kind: .retreat)
         return context.makeResult(BattleLog.outcomeRetreat)
     }
 

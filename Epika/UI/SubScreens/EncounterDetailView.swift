@@ -29,7 +29,7 @@ struct EncounterDetailView: View {
     @Environment(AppServices.self) private var appServices
 
     @State private var battleLogArchive: BattleLogArchive?
-    @State private var battleLogEntries: [BattleLogEntry] = []
+    @State private var renderedActions: [BattleLogRenderer.RenderedAction] = []
     @State private var isLoadingBattleLog = false
     @State private var battleLogError: String?
     @State private var actorIdentifierToMemberId: [String: UInt8] = [:]
@@ -91,14 +91,12 @@ struct EncounterDetailView: View {
     private func buildTurnSummaries() -> [TurnSummary] {
         guard let archive = battleLogArchive else { return [] }
 
-        // actorIndex → actorId のマッピング
+        // actorIndex → actorId
         var indexToId: [UInt16: String] = [:]
 
-        // 初期状態をarchiveから構築
         var states: [String: ParticipantState] = [:]
 
         for (index, participant) in archive.playerSnapshots.enumerated() {
-            // initialHPとBattleActionはpartyMemberIdをキーに使用
             guard let memberId = participant.partyMemberId else { continue }
             let actorIndex = UInt16(memberId)
             let initialHP = Int(archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP))
@@ -118,8 +116,6 @@ struct EncounterDetailView: View {
         }
 
         for (index, participant) in archive.enemySnapshots.enumerated() {
-            // actorId は CombatExecutionService で BattleContext.actorIndex と同じ計算式で保存されている
-            // 形式: (arrayIndex + 1) * 1000 + enemyMasterIndex
             guard let actorIndex = UInt16(participant.actorId) else { continue }
             let initialHP = Int(archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP))
             states[participant.actorId] = ParticipantState(
@@ -137,48 +133,37 @@ struct EncounterDetailView: View {
             indexToId[actorIndex] = participant.actorId
         }
 
-        // 生アクションをターンごとにグループ化（HP計算用）
-        var rawActionsByTurn: [Int: [BattleAction]] = [:]
-        for action in archive.battleLog.actions {
-            rawActionsByTurn[Int(action.turn), default: []].append(action)
-        }
-
-        // 表示用エントリーをターンごとにグループ化
-        var grouped: [Int: [BattleLogEntry]] = [:]
-        for entry in battleLogEntries {
-            grouped[entry.turn, default: []].append(entry)
-        }
-
         var result: [TurnSummary] = []
         var stateMap = states
-        var previousTurnStartStates = states  // 前ターン開始時の状態
-        let sortedTurns = grouped.keys.sorted().filter { $0 > 0 }
+        var previousTurnStartStates = states
+
+        let groupedByTurn = Dictionary(grouping: renderedActions, by: { $0.turn })
+        let sortedTurns = groupedByTurn.keys.sorted().filter { $0 > 0 }
 
         for turn in sortedTurns {
-            // ターン開始時の状態を記録
             let turnStartStates = stateMap
 
-            // HP概要用：currentHP=ターン開始時、previousHP=前ターン開始時
             var summaryStates: [String: ParticipantState] = [:]
             for (id, var state) in turnStartStates {
                 state.previousHP = previousTurnStartStates[id]?.currentHP ?? state.currentHP
                 summaryStates[id] = state
             }
 
-            // フィルタ後のアクション
-            let actions = (grouped[turn] ?? []).filter(shouldDisplayAction)
+            let actions = groupedByTurn[turn] ?? []
+            var groupedActions: [GroupedBattleAction] = []
+            var groupId = 0
 
-            // アクションごとのHP変動を計算
-            let rawActions = rawActionsByTurn[turn] ?? []
-            let (actionHPChanges, _) = computeActionHPChanges(
-                rawActions: rawActions,
-                filteredActions: actions,
-                stateMap: &stateMap,
-                indexToId: indexToId
-            )
-
-            // エントリをグループ化
-            let groupedActions = groupEntries(actions, actionHPChanges: actionHPChanges, participants: summaryStates)
+            for action in actions {
+                let hpChanges = computeHPChanges(for: action,
+                                                 stateMap: &stateMap,
+                                                 indexToId: indexToId)
+                let grouped = GroupedBattleAction(id: turn * 1000 + groupId,
+                                                  primaryEntry: action.declaration,
+                                                  results: action.results,
+                                                  hpChanges: hpChanges)
+                groupedActions.append(grouped)
+                groupId += 1
+            }
 
             let partyStates = summaryStates.values
                 .filter { $0.role == .player }
@@ -194,381 +179,16 @@ struct EncounterDetailView: View {
                                       participants: summaryStates,
                                       groupedActions: groupedActions))
 
-            // 次ターン用に前ターン開始時の状態を更新
             previousTurnStartStates = turnStartStates
         }
 
         return result
     }
 
-    /// アクションごとのHP変動を計算し、stateMapを更新する
-    /// - Returns: (actionHPChanges, 更新後のstateMap)
-    private func computeActionHPChanges(
-        rawActions: [BattleAction],
-        filteredActions: [BattleLogEntry],
-        stateMap: inout [String: ParticipantState],
-        indexToId: [UInt16: String]
-    ) -> ([Int: ActionHPChange], [String: ParticipantState]) {
-        var actionHPChanges: [Int: ActionHPChange] = [:]
-        var filteredIndex = 0
-
-        // 物理攻撃統合用: (filteredIdx, actor, target, beforeHP)
-        var physAccum: (idx: Int, actor: UInt16, target: UInt16, beforeHP: Int)? = nil
-
-        func flush() {
-            guard let acc = physAccum,
-                  let targetId = indexToId[acc.target],
-                  let state = stateMap[targetId] else {
-                physAccum = nil
-                return
-            }
-            actionHPChanges[acc.idx] = ActionHPChange(
-                targetId: targetId,
-                targetName: state.name,
-                beforeHP: acc.beforeHP,
-                afterHP: state.currentHP,
-                maxHP: state.maxHP
-            )
-            physAccum = nil
-        }
-
-        for action in rawActions {
-            guard let kind = ActionKind(rawValue: action.kind) else { continue }
-            let value = Int(action.value ?? 0)
-
-            // 物理攻撃/回避の場合
-            if kind == .physicalDamage || kind == .physicalEvade {
-                guard let target = action.target else { continue }
-
-                // actor/targetが変わったらフラッシュ
-                if let acc = physAccum, (acc.actor != action.actor || acc.target != target) {
-                    flush()
-                }
-
-                // 新しい統合の開始
-                if physAccum == nil {
-                    let matchIdx = findPhysicalFilteredIndex(actor: action.actor, target: target,
-                                                            filteredActions: filteredActions,
-                                                            startFrom: filteredIndex)
-                    if let idx = matchIdx, let targetId = indexToId[target], let state = stateMap[targetId] {
-                        physAccum = (idx, action.actor, target, state.currentHP)
-                        filteredIndex = idx + 1
-                    }
-                }
-
-                // HP更新（ダメージの場合のみ）
-                if kind == .physicalDamage, let targetId = indexToId[target], var state = stateMap[targetId] {
-                    state.currentHP = max(0, state.currentHP - value)
-                    stateMap[targetId] = state
-                }
-                continue
-            }
-
-            // 物理以外が来たらフラッシュ
-            flush()
-
-            // このrawActionに対応するfilteredActionを探す
-            let matchingFilteredIndex = findMatchingFilteredIndex(
-                action: action,
-                kind: kind,
-                filteredActions: filteredActions,
-                startFrom: filteredIndex,
-                indexToId: indexToId
-            )
-
-            switch kind {
-            // ダメージ（ターゲットのHPを減らす）
-            case .magicDamage, .breathDamage, .statusTick, .enemySpecialDamage:
-                if let target = action.target,
-                   let targetId = indexToId[target],
-                   var state = stateMap[targetId] {
-                    let beforeHP = state.currentHP
-                    state.currentHP = max(0, state.currentHP - value)
-                    stateMap[targetId] = state
-
-                    if let idx = matchingFilteredIndex {
-                        actionHPChanges[idx] = ActionHPChange(
-                            targetId: targetId,
-                            targetName: state.name,
-                            beforeHP: beforeHP,
-                            afterHP: state.currentHP,
-                            maxHP: state.maxHP
-                        )
-                        filteredIndex = idx + 1
-                    }
-                }
-            // 自傷ダメージ
-            case .damageSelf:
-                if let actorId = indexToId[action.actor],
-                   var state = stateMap[actorId] {
-                    let beforeHP = state.currentHP
-                    state.currentHP = max(0, state.currentHP - value)
-                    stateMap[actorId] = state
-
-                    if let idx = matchingFilteredIndex {
-                        actionHPChanges[idx] = ActionHPChange(
-                            targetId: actorId,
-                            targetName: state.name,
-                            beforeHP: beforeHP,
-                            afterHP: state.currentHP,
-                            maxHP: state.maxHP
-                        )
-                        filteredIndex = idx + 1
-                    }
-                }
-            // 回復（ターゲットのHPを増やす）
-            case .magicHeal, .healParty:
-                if let target = action.target,
-                   let targetId = indexToId[target],
-                   var state = stateMap[targetId] {
-                    let beforeHP = state.currentHP
-                    state.currentHP = min(state.maxHP, state.currentHP + value)
-                    stateMap[targetId] = state
-
-                    if let idx = matchingFilteredIndex {
-                        actionHPChanges[idx] = ActionHPChange(
-                            targetId: targetId,
-                            targetName: state.name,
-                            beforeHP: beforeHP,
-                            afterHP: state.currentHP,
-                            maxHP: state.maxHP
-                        )
-                        filteredIndex = idx + 1
-                    }
-                }
-            // 自己回復
-            case .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
-                if let actorId = indexToId[action.actor],
-                   var state = stateMap[actorId] {
-                    let beforeHP = state.currentHP
-                    state.currentHP = min(state.maxHP, state.currentHP + value)
-                    stateMap[actorId] = state
-
-                    if let idx = matchingFilteredIndex {
-                        actionHPChanges[idx] = ActionHPChange(
-                            targetId: actorId,
-                            targetName: state.name,
-                            beforeHP: beforeHP,
-                            afterHP: state.currentHP,
-                            maxHP: state.maxHP
-                        )
-                        filteredIndex = idx + 1
-                    }
-                }
-            // 戦闘不能
-            case .physicalKill:
-                if let target = action.target,
-                   let targetId = indexToId[target],
-                   var state = stateMap[targetId] {
-                    let beforeHP = state.currentHP
-                    state.currentHP = 0
-                    stateMap[targetId] = state
-
-                    if let idx = matchingFilteredIndex {
-                        actionHPChanges[idx] = ActionHPChange(
-                            targetId: targetId,
-                            targetName: state.name,
-                            beforeHP: beforeHP,
-                            afterHP: 0,
-                            maxHP: state.maxHP
-                        )
-                        filteredIndex = idx + 1
-                    }
-                }
-            default:
-                break
-            }
-        }
-
-        // ループ終了時に残っている物理ダメージをフラッシュ
-        flush()
-
-        return (actionHPChanges, stateMap)
-    }
-
-    /// 物理攻撃に対応するfilteredActionのインデックスを探す
-    private func findPhysicalFilteredIndex(
-        actor: UInt16,
-        target: UInt16,
-        filteredActions: [BattleLogEntry],
-        startFrom: Int
-    ) -> Int? {
-        let actorId = String(actor)
-        let targetId = String(target)
-
-        for idx in startFrom..<filteredActions.count {
-            let entry = filteredActions[idx]
-            // damageまたはmiss（回避）タイプで、actor/targetが一致するものを探す
-            if (entry.type == .damage || entry.type == .miss),
-               entry.actorId == actorId,
-               entry.targetId == targetId {
-                return idx
-            }
-        }
-
-        return nil
-    }
-
-    /// rawActionに対応するfilteredActionのインデックスを探す
-    private func findMatchingFilteredIndex(
-        action: BattleAction,
-        kind: ActionKind,
-        filteredActions: [BattleLogEntry],
-        startFrom: Int,
-        indexToId: [UInt16: String]
-    ) -> Int? {
-        // damage/healタイプのみ対応
-        let expectedType: BattleLogEntry.LogType
-        switch kind {
-        case .physicalDamage, .magicDamage, .breathDamage, .statusTick,
-             .enemySpecialDamage, .damageSelf:
-            expectedType = .damage
-        case .magicHeal, .healParty, .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
-            expectedType = .heal
-        case .physicalKill:
-            expectedType = .defeat
-        default:
-            return nil
-        }
-
-        // 対象のIDを特定
-        let targetIndex: UInt16
-        switch kind {
-        case .damageSelf, .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
-            targetIndex = action.actor
-        default:
-            guard let target = action.target else { return nil }
-            targetIndex = target
-        }
-        let targetId = String(targetIndex)
-
-        // startFromから順に探す
-        for idx in startFrom..<filteredActions.count {
-            let entry = filteredActions[idx]
-            if entry.type == expectedType && entry.targetId == targetId {
-                return idx
-            }
-        }
-
-        return nil
-    }
-
-    private func shouldDisplayAction(_ entry: BattleLogEntry) -> Bool {
-        if entry.turn == 0 { return false }
-        if entry.message.isEmpty { return false }
-        if entry.type == .system {
-            if entry.message.hasPrefix("---") { return false }
-            if entry.message.contains("戦闘開始") { return false }
-            if entry.message.hasSuffix("が現れた！") { return false }
-        }
-        return true
-    }
-
-    /// エントリをアクション単位でグループ化
-    /// アクション宣言（攻撃、魔法等）と、それに続く結果（ダメージ、回復等）をまとめる
-    private func groupEntries(
-        _ entries: [BattleLogEntry],
-        actionHPChanges: [Int: ActionHPChange],
-        participants: [String: ParticipantState]
-    ) -> [GroupedBattleAction] {
-        var groups: [GroupedBattleAction] = []
-        var currentPrimary: BattleLogEntry?
-        var currentResults: [BattleLogEntry] = []
-        var currentHPChanges: [ActionHPChange] = []
-        var groupId = 0
-
-        func finishGroup() {
-            guard let primary = currentPrimary else {
-                // アクション宣言なしの場合、各結果を個別グループとして追加
-                for (idx, result) in currentResults.enumerated() {
-                    // 対応するHPChangeがあれば含める
-                    let hpChangeForResult = idx < currentHPChanges.count ? [currentHPChanges[idx]] : []
-                    groups.append(GroupedBattleAction(
-                        id: groupId,
-                        primaryEntry: result,
-                        results: [],
-                        hpChanges: hpChangeForResult
-                    ))
-                    groupId += 1
-                }
-                currentResults = []
-                currentHPChanges = []
-                return
-            }
-            groups.append(GroupedBattleAction(
-                id: groupId,
-                primaryEntry: primary,
-                results: currentResults,
-                hpChanges: currentHPChanges
-            ))
-            groupId += 1
-            currentPrimary = nil
-            currentResults = []
-            currentHPChanges = []
-        }
-
-        for (index, entry) in entries.enumerated() {
-            let isActionDeclaration = entry.type == .action || entry.type == .guard
-            // ダメージ、回復、ミス、敗北は結果としてグループに含める
-            let isResult = entry.type == .damage || entry.type == .heal || entry.type == .miss || entry.type == .defeat
-            // 勝利、撤退、システムはグループを終了して単独表示
-            let isStandalone = entry.type == .victory || entry.type == .retreat || entry.type == .system
-
-            if isActionDeclaration {
-                // 前のグループを確定
-                finishGroup()
-                currentPrimary = entry
-                } else if isResult {
-                // actorIdが現在のprimaryと異なる場合は、別のキャラクターのアクション結果なので
-                // 前のグループを確定して個別グループとして追加
-                let belongsToCurrentGroup: Bool
-                if let primary = currentPrimary {
-                    // primaryと同じactorIdの結果のみグループに含める
-                    belongsToCurrentGroup = entry.actorId == primary.actorId
-                } else {
-                    belongsToCurrentGroup = false
-                }
-
-                if !belongsToCurrentGroup && currentPrimary != nil {
-                    // 前のグループを確定
-                    finishGroup()
-                }
-
-                // 結果をグループに追加（敗北含む）
-                // ただしdefeatはHP変動を持たないのでスキップ
-                if entry.type != .defeat {
-                    currentResults.append(entry)
-                    if let hpChange = actionHPChanges[index] {
-                        currentHPChanges.append(hpChange)
-                    }
-                }
-                // defeatは表示しない（HP 0/maxで十分わかる）
-            } else if isStandalone {
-                // 勝利・撤退・システムは単独表示
-                finishGroup()
-                groups.append(GroupedBattleAction(
-                    id: groupId,
-                    primaryEntry: entry,
-                    results: [],
-                    hpChanges: []
-                ))
-                groupId += 1
-            } else {
-                // status等はそのままグループに追加
-                currentResults.append(entry)
-            }
-        }
-
-        // 最後のグループを確定
-        finishGroup()
-
-        return groups
-    }
-
     @MainActor
     private func loadBattleLogIfNeeded() async {
         guard encounter.combatSummary?.battleLogId != nil else { return }
-        guard battleLogEntries.isEmpty, !isLoadingBattleLog, battleLogError == nil else { return }
+        guard renderedActions.isEmpty, !isLoadingBattleLog, battleLogError == nil else { return }
 
         isLoadingBattleLog = true
         battleLogError = nil
@@ -622,7 +242,7 @@ struct EncounterDetailView: View {
             }
 
             // BattleLogRenderer で変換
-            battleLogEntries = BattleLogRenderer.render(
+            renderedActions = BattleLogRenderer.render(
                 battleLog: archive.battleLog,
                 allyNames: allyNames,
                 enemyNames: enemyNames,
@@ -632,8 +252,10 @@ struct EncounterDetailView: View {
 
             actorIdentifierToMemberId = memberMap
             actorIcons = iconMap
+        } catch EncounterDetailError.unsupportedBattleLogVersion {
+            battleLogError = EncounterDetailError.unsupportedBattleLogVersion.errorDescription
         } catch {
-            battleLogError = error.localizedDescription
+            battleLogError = EncounterDetailError.decodingFailed.errorDescription
         }
         isLoadingBattleLog = false
     }
@@ -643,20 +265,23 @@ struct EncounterDetailView: View {
               let record = modelContext.model(for: id) as? BattleLogRecord else {
             return nil
         }
-        return restoreBattleLogArchive(from: record)
+        return try restoreBattleLogArchive(from: record)
     }
 
-    private func restoreBattleLogArchive(from record: BattleLogRecord) -> BattleLogArchive? {
+    private func restoreBattleLogArchive(from record: BattleLogRecord) throws -> BattleLogArchive? {
         // バイナリBLOBからデコード
-        guard let decoded = ExplorationProgressService.decodeBattleLogData(record.logData) else {
-            // 旧形式または破損データ：詳細なしで返す
-            print("[BattleLogRestore] logDataのデコードに失敗: \(record.logData.count)バイト")
-            return nil
+        let decoded: ExplorationProgressService.DecodedBattleLogData
+        do {
+            decoded = try ExplorationProgressService.decodeBattleLogData(record.logData)
+        } catch ExplorationProgressService.BattleLogArchiveDecodingError.unsupportedVersion {
+            throw EncounterDetailError.unsupportedBattleLogVersion
+        } catch {
+            throw EncounterDetailError.decodingFailed
         }
 
         let battleLog = BattleLog(
             initialHP: decoded.initialHP,
-            actions: decoded.actions,
+            entries: decoded.entries,
             outcome: decoded.outcome,
             turns: decoded.turns
         )
@@ -676,6 +301,7 @@ struct EncounterDetailView: View {
     enum EncounterDetailError: LocalizedError {
         case battleLogNotAvailable
         case decodingFailed
+        case unsupportedBattleLogVersion
 
         var errorDescription: String? {
             switch self {
@@ -683,6 +309,8 @@ struct EncounterDetailView: View {
                 return "戦闘ログを取得できませんでした"
             case .decodingFailed:
                 return "戦闘ログのデコードに失敗しました"
+            case .unsupportedBattleLogVersion:
+                return "旧形式の戦闘ログのため表示できません"
             }
         }
     }
@@ -970,3 +598,43 @@ struct BattleActorIcon: View {
             )
     }
 }
+    private func computeHPChanges(for action: BattleLogRenderer.RenderedAction,
+                                  stateMap: inout [String: ParticipantState],
+                                  indexToId: [UInt16: String]) -> [ActionHPChange] {
+        var changes: [ActionHPChange] = []
+
+        for effect in action.model.effects {
+            guard let impact = BattleLogEffectInterpreter.impact(for: effect) else { continue }
+
+            let targetIndex: UInt16
+            switch impact {
+            case .damage(let target, _), .heal(let target, _), .setHP(let target, _):
+                targetIndex = target
+            }
+
+            guard let participantId = indexToId[targetIndex],
+                  var participant = stateMap[participantId] else { continue }
+
+            let beforeHP = participant.currentHP
+            let maxHP = participant.maxHP
+
+            switch impact {
+            case .damage(_, let amount):
+                participant.currentHP = max(0, participant.currentHP - amount)
+            case .heal(_, let amount):
+                participant.currentHP = min(maxHP, participant.currentHP + amount)
+            case .setHP(_, let amount):
+                participant.currentHP = max(0, min(maxHP, amount))
+            }
+
+            stateMap[participantId] = participant
+            let change = ActionHPChange(targetId: participantId,
+                                        targetName: participant.name,
+                                        beforeHP: beforeHP,
+                                        afterHP: participant.currentHP,
+                                        maxHP: maxHP)
+            changes.append(change)
+        }
+
+        return changes
+    }

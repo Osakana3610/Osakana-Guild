@@ -34,7 +34,9 @@ extension BattleTurnEngine {
                                 category: ActionKind,
                                 context: inout BattleContext) {
         let actorIdx = context.actorIndex(for: side, arrayIndex: index)
-        context.appendAction(kind: category, actor: actorIdx)
+        context.appendSimpleEntry(kind: category,
+                                  actorId: actorIdx,
+                                  effectKind: .logOnly)
     }
 
     static func appendDefeatLog(for target: BattleActor,
@@ -42,7 +44,9 @@ extension BattleTurnEngine {
                                 index: Int,
                                 context: inout BattleContext) {
         let targetIdx = context.actorIndex(for: side, arrayIndex: index)
-        context.appendAction(kind: .physicalKill, target: targetIdx)
+        context.appendSimpleEntry(kind: .physicalKill,
+                                  targetId: targetIdx,
+                                  effectKind: .physicalKill)
     }
 
     static func appendStatusLockLog(for actor: BattleActor,
@@ -50,7 +54,10 @@ extension BattleTurnEngine {
                                     index: Int,
                                     context: inout BattleContext) {
         let actorIdx = context.actorIndex(for: side, arrayIndex: index)
-        context.appendAction(kind: .actionLocked, actor: actorIdx)
+        context.appendSimpleEntry(kind: .actionLocked,
+                                  actorId: actorIdx,
+                                  targetId: actorIdx,
+                                  effectKind: .actionLocked)
     }
 
     static func appendStatusExpireLog(for actor: BattleActor,
@@ -59,6 +66,9 @@ extension BattleTurnEngine {
                                       definition: StatusEffectDefinition,
                                       context: inout BattleContext) {
         let actorIdx = context.actorIndex(for: side, arrayIndex: index)
-        context.appendAction(kind: .statusRecover, actor: actorIdx)
+        context.appendSimpleEntry(kind: .statusRecover,
+                                  actorId: actorIdx,
+                                  targetId: actorIdx,
+                                  effectKind: .statusRecover)
     }
 }

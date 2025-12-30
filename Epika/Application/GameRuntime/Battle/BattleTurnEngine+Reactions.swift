@@ -105,7 +105,8 @@ extension BattleTurnEngine {
     static func attemptRunawayIfNeeded(for defenderSide: ActorSide,
                                        defenderIndex: Int,
                                        damage: Int,
-                                       context: inout BattleContext) {
+                                       context: inout BattleContext,
+                                       entryBuilder: BattleActionEntry.Builder?) {
         guard damage > 0 else { return }
         guard var defender = context.actor(for: defenderSide, index: defenderIndex) else { return }
         guard defender.isAlive else { return }
@@ -134,7 +135,7 @@ extension BattleTurnEngine {
                 context.updateActor(target, side: ref.0, index: ref.1)
                 let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
                 let targetIdx = context.actorIndex(for: ref.0, arrayIndex: ref.1)
-                context.appendAction(kind: .statusRampage, actor: defenderIdx, target: targetIdx, value: UInt32(applied))
+                entryBuilder?.addEffect(kind: .statusRampage, target: targetIdx, value: UInt32(applied))
             }
 
             if !hasStatus(tag: statusTagConfusion, in: defender, context: context) {
@@ -253,14 +254,19 @@ extension BattleTurnEngine {
 
             let performerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
             let targetIdx = context.actorIndex(for: resolvedTarget.0, arrayIndex: resolvedTarget.1)
-            context.appendAction(kind: .reactionAttack, actor: performerIdx, target: targetIdx)
+            let entryBuilder = context.makeActionEntryBuilder(actorId: performerIdx,
+                                                              kind: .reactionAttack,
+                                                              turnOverride: context.turn)
+            entryBuilder.addEffect(kind: .reactionAttack, target: targetIdx)
 
             executeReactionAttack(from: side,
                                   actorIndex: actorIndex,
                                   target: resolvedTarget,
                                   reaction: reaction,
                                   depth: depth + 1,
-                                  context: &context)
+                                  context: &context,
+                                  entryBuilder: entryBuilder)
+            context.appendActionEntry(entryBuilder.build())
         }
     }
 
@@ -269,7 +275,8 @@ extension BattleTurnEngine {
                                       target: (ActorSide, Int),
                                       reaction: BattleActor.SkillEffects.Reaction,
                                       depth: Int,
-                                      context: inout BattleContext) {
+                                      context: inout BattleContext,
+                                      entryBuilder: BattleActionEntry.Builder) {
         guard let attacker = context.actor(for: side, index: actorIndex), attacker.isAlive else { return }
         guard let initialTarget = context.actor(for: target.0, index: target.1) else { return }
 
@@ -293,7 +300,8 @@ extension BattleTurnEngine {
                                          defenderIndex: target.1,
                                          context: &context,
                                          hitCountOverride: scaledHits,
-                                         accuracyMultiplier: reaction.accuracyMultiplier)
+                                         accuracyMultiplier: reaction.accuracyMultiplier,
+                                         entryBuilder: entryBuilder)
         case .magical:
             var attackerCopy = modifiedAttacker
             var targetCopy = initialTarget
@@ -309,7 +317,7 @@ extension BattleTurnEngine {
                 applyAbsorptionIfNeeded(for: &attackerCopy, damageDealt: applied, damageType: .magical, context: &context)
                 totalDamage += applied
                 if applied > 0 {
-                    context.appendAction(kind: .magicDamage, actor: attackerIdx, target: targetIdx, value: UInt32(applied))
+                    entryBuilder.addEffect(kind: .magicDamage, target: targetIdx, value: UInt32(applied))
                 }
                 if !targetCopy.isAlive {
                     break
@@ -329,7 +337,7 @@ extension BattleTurnEngine {
             let damage = computeBreathDamage(attacker: attackerCopy, defender: &targetCopy, context: &context)
             let applied = applyDamage(amount: damage, to: &targetCopy)
             if applied > 0 {
-                context.appendAction(kind: .breathDamage, actor: attackerIdx, target: targetIdx, value: UInt32(applied))
+                entryBuilder.addEffect(kind: .breathDamage, target: targetIdx, value: UInt32(applied))
             }
             attackResult = AttackResult(attacker: attackerCopy,
                                         defender: targetCopy,
@@ -349,7 +357,8 @@ extension BattleTurnEngine {
                                defender: attackResult.defender,
                                attackResult: attackResult,
                                context: &context,
-                               reactionDepth: depth)
+                               reactionDepth: depth,
+                               entryBuilder: entryBuilder)
     }
 
     struct AttackOutcome {
@@ -365,14 +374,19 @@ extension BattleTurnEngine {
                                    defender: BattleActor,
                                    attackResult: AttackResult,
                                    context: inout BattleContext,
-                                   reactionDepth: Int) -> AttackOutcome {
+                                   reactionDepth: Int,
+                                   entryBuilder: BattleActionEntry.Builder? = nil) -> AttackOutcome {
         context.updateActor(attacker, side: attackerSide, index: attackerIndex)
         context.updateActor(defender, side: defenderSide, index: defenderIndex)
 
         var currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
         var currentDefender = context.actor(for: defenderSide, index: defenderIndex)
 
-        attemptRunawayIfNeeded(for: defenderSide, defenderIndex: defenderIndex, damage: attackResult.totalDamage, context: &context)
+        attemptRunawayIfNeeded(for: defenderSide,
+                               defenderIndex: defenderIndex,
+                               damage: attackResult.totalDamage,
+                               context: &context,
+                               entryBuilder: entryBuilder)
         currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
         currentDefender = context.actor(for: defenderSide, index: defenderIndex)
 
@@ -404,13 +418,13 @@ extension BattleTurnEngine {
         if attackResult.wasParried, let defenderActor = currentDefender, defenderActor.isAlive {
             let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
             let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
-            context.appendAction(kind: .physicalParry, actor: defenderIdx, target: attackerIdx)
+            entryBuilder?.addEffect(kind: .physicalParry, target: attackerIdx)
         }
 
         if attackResult.wasBlocked, let defenderActor = currentDefender, defenderActor.isAlive {
             let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
             let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
-            context.appendAction(kind: .physicalBlock, actor: defenderIdx, target: attackerIdx)
+            entryBuilder?.addEffect(kind: .physicalBlock, target: attackerIdx)
         }
 
         if attackResult.wasDodged, let defenderActor = currentDefender, defenderActor.isAlive {
@@ -469,4 +483,3 @@ private extension BattleActor.SkillEffects.Reaction {
         }
     }
 }
-

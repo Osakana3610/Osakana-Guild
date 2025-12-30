@@ -144,9 +144,12 @@ extension AppServices {
         }
 
         // バイナリBLOBからデコード
-        guard let decoded = ExplorationProgressService.decodeBattleLogData(logRecord.logData) else {
+        let decoded: ExplorationProgressService.DecodedBattleLogData
+        do {
+            decoded = try ExplorationProgressService.decodeBattleLogData(logRecord.logData)
+        } catch {
             // デコード失敗時は空辞書を返す（全員フルHP扱い）
-            print("[RestorePartyHP] logDataのデコードに失敗: \(logRecord.logData.count)バイト")
+            print("[RestorePartyHP] logDataのデコードに失敗: \(error)")
             return [:]
         }
 
@@ -157,42 +160,18 @@ extension AppServices {
             hp[actorIndex] = Int(initialHP)
         }
 
-        // 2. actionsを順に処理
-        for action in decoded.actions {
-            let kind = ActionKind(rawValue: action.kind)
-            let value = Int(action.value ?? 0)
-
-            // target系処理
-            let target = action.target ?? 0
-            if target != 0 {
-                switch kind {
-                // ダメージ
-                case .physicalDamage, .magicDamage, .breathDamage, .statusTick, .enemySpecialDamage:
-                    hp[target, default: 0] -= value
-                // 回復
-                case .magicHeal, .healParty:
-                    hp[target, default: 0] += value
-                // 蘇生（maxHPの25%で復活）
-                case .resurrection, .necromancer, .rescue:
-                    if let snapshot = decoded.playerSnapshots.first(where: {
-                        let id = $0.partyMemberId ?? $0.characterId ?? 0
-                        return UInt16(id) == target
-                    }) {
-                        hp[target] = snapshot.maxHP / 4
-                    }
-                default:
-                    break
+        // 2. entriesを順に処理
+        for entry in decoded.entries {
+            for effect in entry.effects {
+                guard let impact = BattleLogEffectInterpreter.impact(for: effect) else { continue }
+                switch impact {
+                case .damage(let target, let amount):
+                    hp[target, default: 0] -= amount
+                case .heal(let target, let amount):
+                    hp[target, default: 0] += amount
+                case .setHP(let target, let amount):
+                    hp[target] = amount
                 }
-            }
-
-            // actor系処理
-            switch kind {
-            case .healAbsorb, .healVampire, .healSelf, .enemySpecialHeal:
-                hp[action.actor, default: 0] += value
-            case .damageSelf:
-                hp[action.actor, default: 0] -= value
-            default:
-                break
             }
         }
 

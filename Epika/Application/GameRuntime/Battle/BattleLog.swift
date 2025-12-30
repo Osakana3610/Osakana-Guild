@@ -9,7 +9,6 @@
 //   - パーティメンバースナップショットの保持
 //
 // 【データ構造】
-//   - BattleAction: 1つの戦闘行動（ターン、種別、行動者、対象、値等）
 //   - BattleLog: 戦闘全体のログ（初期HP、行動リスト、結果、ターン数）
 //   - ActionKind: 行動種別の列挙（攻撃、魔法、状態異常等）
 //   - PartyMemberSnapshot: 探索開始時のパーティメンバー情報
@@ -22,30 +21,179 @@
 
 import Foundation
 
-// MARK: - BattleAction
+// MARK: - BattleActionEntry (Next-gen structure)
 
-/// 戦闘中の1行動 = ログエントリ
-/// すべて数値で表現し、表示時のみRendererで文字列化
-struct BattleAction: Codable, Sendable {
-    var turn: UInt8           // ターン番号（1〜20）
-    var kind: UInt8           // ActionKind.rawValue
-    var actor: UInt16         // 行動者（味方:1〜200, 敵:1000〜）
-    var target: UInt16?       // 対象
-    var value: UInt32?        // ダメージ/回復量（常に正の絶対値）
-    var skillIndex: UInt16?   // スキル/スペルのマスターデータindex
-    var extra: UInt16?        // 倍率×100等（UI表示用）
+/// 行動宣言と結果を1レコードにまとめた新版ログ構造
+/// 移行期間はBattleActionと併存させ、順次こちらへ置き換える
+struct BattleActionEntry: Codable, Sendable {
+    struct Declaration: Codable, Sendable {
+        var kind: ActionKind
+        var skillIndex: UInt16?
+        var extra: UInt16?
+    }
+
+    struct Effect: Codable, Sendable {
+        enum Kind: UInt8, Codable, Sendable {
+            case physicalDamage
+            case physicalEvade
+            case physicalParry
+            case physicalBlock
+            case physicalKill
+            case martialArts
+            case magicDamage
+            case magicHeal
+            case magicMiss
+            case breathDamage
+            case statusInflict
+            case statusResist
+            case statusRecover
+            case statusTick
+            case statusConfusion
+            case statusRampage
+            case reactionAttack
+            case followUp
+            case healAbsorb
+            case healVampire
+            case healParty
+            case healSelf
+            case damageSelf
+            case buffApply
+            case buffExpire
+            case resurrection
+            case necromancer
+            case rescue
+            case actionLocked
+            case noAction
+            case withdraw
+            case sacrifice
+            case vampireUrge
+            case enemySpecialDamage
+            case enemySpecialHeal
+            case enemySpecialBuff
+            case spellChargeRecover
+            case enemyAppear
+            case logOnly
+        }
+
+        var kind: Kind
+        var target: UInt16?
+        var value: UInt32?
+        var statusId: UInt16?
+        var extra: UInt16?
+    }
+
+    var turn: UInt8
+    var actor: UInt16?
+    var declaration: Declaration
+    var effects: [Effect]
+
+    init(turn: Int,
+         actor: UInt16?,
+         declaration: Declaration,
+         effects: [Effect] = []) {
+        self.turn = UInt8(clamping: turn)
+        self.actor = actor
+        self.declaration = declaration
+        self.effects = effects
+    }
+}
+
+extension BattleActionEntry {
+    final class Builder {
+        let turn: Int
+        let actor: UInt16?
+        let declaration: Declaration
+        private var effects: [Effect]
+
+        init(turn: Int, actor: UInt16?, declaration: Declaration) {
+            self.turn = turn
+            self.actor = actor
+            self.declaration = declaration
+            self.effects = []
+        }
+
+        func addEffect(_ effect: Effect) {
+            effects.append(effect)
+        }
+
+        func addEffect(kind: Effect.Kind,
+                       target: UInt16?,
+                       value: UInt32? = nil,
+                       statusId: UInt16? = nil,
+                       extra: UInt16? = nil) {
+            addEffect(Effect(kind: kind, target: target, value: value, statusId: statusId, extra: extra))
+        }
+
+        func build() -> BattleActionEntry {
+            BattleActionEntry(
+                turn: turn,
+                actor: actor,
+                declaration: declaration,
+                effects: effects
+            )
+        }
+    }
 }
 
 // MARK: - BattleLog
 
 /// 戦闘ログ全体
 struct BattleLog: Codable, Sendable {
-    var initialHP: [UInt16: UInt32]  // actorIndex → 開始時HP
-    var actions: [BattleAction]       // 行動列（これがログ本体）
-    var outcome: UInt8                // 0=victory, 1=defeat, 2=retreat
-    var turns: UInt8                  // 総ターン数
+    static let currentVersion: UInt8 = 2
 
-    static let empty = BattleLog(initialHP: [:], actions: [], outcome: 0, turns: 0)
+    var version: UInt8               // battle log schema version
+    var initialHP: [UInt16: UInt32]  // actorIndex → 開始時HP
+    var entries: [BattleActionEntry] // 新形式
+    var outcome: UInt8               // 0=victory, 1=defeat, 2=retreat
+    var turns: UInt8                 // 総ターン数
+
+    static let empty = BattleLog(initialHP: [:], entries: [], outcome: 0, turns: 0)
+
+    private enum CodingKeys: String, CodingKey {
+        case version
+        case initialHP
+        case entries
+        case outcome
+        case turns
+    }
+
+    init(initialHP: [UInt16: UInt32],
+         entries: [BattleActionEntry] = [],
+         outcome: UInt8,
+         turns: UInt8,
+         version: UInt8 = BattleLog.currentVersion) {
+        self.version = version
+        self.initialHP = initialHP
+        self.entries = entries
+        self.outcome = outcome
+        self.turns = turns
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let decodedVersion = try container.decodeIfPresent(UInt8.self, forKey: .version) ?? 0
+        guard decodedVersion == BattleLog.currentVersion else {
+            throw BattleLogDecodingError.unsupportedVersion(decodedVersion)
+        }
+        version = decodedVersion
+        initialHP = try container.decode([UInt16: UInt32].self, forKey: .initialHP)
+        entries = try container.decode([BattleActionEntry].self, forKey: .entries)
+        outcome = try container.decode(UInt8.self, forKey: .outcome)
+        turns = try container.decode(UInt8.self, forKey: .turns)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(version, forKey: .version)
+        try container.encode(initialHP, forKey: .initialHP)
+        try container.encode(entries, forKey: .entries)
+        try container.encode(outcome, forKey: .outcome)
+        try container.encode(turns, forKey: .turns)
+    }
+}
+
+enum BattleLogDecodingError: Error {
+    case unsupportedVersion(UInt8)
 }
 
 // MARK: - ActionKind
