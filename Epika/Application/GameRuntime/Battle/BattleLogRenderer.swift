@@ -28,12 +28,13 @@ struct BattleLogRenderer {
         allyNames: [UInt8: String],
         enemyNames: [UInt16: String],
         spellNames: [UInt8: String] = [:],
-        enemySkillNames: [UInt16: String] = [:]
+        enemySkillNames: [UInt16: String] = [:],
+        actorIdentifiers: [UInt16: String] = [:]
     ) -> [RenderedAction] {
         var rendered: [RenderedAction] = []
 
         for (index, entry) in battleLog.entries.enumerated() {
-            let actorIdString = entry.actor.map { String($0) }
+            let actorIdString = entry.actor.flatMap { actorIdentifiers[$0] } ?? entry.actor.map { String($0) }
             let actorName = resolveName(index: entry.actor, allyNames: allyNames, enemyNames: enemyNames)
             let declaration = makeDeclarationEntry(turn: Int(entry.turn),
                                                    actorId: actorIdString,
@@ -52,7 +53,8 @@ struct BattleLogRenderer {
                                     turn: Int(entry.turn),
                                     actorName: actorName,
                                     allyNames: allyNames,
-                                    enemyNames: enemyNames)
+                                    enemyNames: enemyNames,
+                                    actorIdentifiers: actorIdentifiers)
                 }
             } else {
                 effectEntries = []
@@ -94,14 +96,15 @@ struct BattleLogRenderer {
                                         turn: Int,
                                         actorName: String?,
                                         allyNames: [UInt8: String],
-                                        enemyNames: [UInt16: String]) -> BattleLogEntry? {
+                                        enemyNames: [UInt16: String],
+                                        actorIdentifiers: [UInt16: String]) -> BattleLogEntry? {
         let targetName = resolveName(index: effect.target, allyNames: allyNames, enemyNames: enemyNames)
         let (message, type) = effectMessage(kind: effect.kind,
                                             actorName: actorName,
                                             targetName: targetName,
                                             value: effect.value.map { Int($0) })
         guard !message.isEmpty else { return nil }
-        let targetId = effect.target.map { String($0) }
+        let targetId = effect.target.flatMap { actorIdentifiers[$0] } ?? effect.target.map { String($0) }
         return BattleLogEntry(turn: turn,
                               message: message,
                               type: type,
