@@ -28,6 +28,7 @@ import SwiftData
 actor GemModificationProgressService {
     private let container: ModelContainer
     private let masterDataCache: MasterDataCache
+    private let userDataLoad: UserDataLoadService
 
     /// ソケット装着不可カテゴリ
     private static let nonSocketableCategories: Set<UInt8> = [
@@ -35,9 +36,10 @@ actor GemModificationProgressService {
         ItemSaleCategory.forSynthesis.rawValue
     ]
 
-    init(container: ModelContainer, masterDataCache: MasterDataCache) {
+    init(container: ModelContainer, masterDataCache: MasterDataCache, userDataLoad: UserDataLoadService) {
         self.container = container
         self.masterDataCache = masterDataCache
+        self.userDataLoad = userDataLoad
     }
 
     // MARK: - Public API
@@ -167,10 +169,47 @@ actor GemModificationProgressService {
             throw ProgressError.invalidInput(description: "このカテゴリのアイテムには宝石改造を施すことができません")
         }
 
-        // 宝石の称号情報を対象アイテムに転送
-        targetRecord.socketItemId = gemRecord.itemId
-        targetRecord.socketSuperRareTitleId = gemRecord.superRareTitleId
-        targetRecord.socketNormalTitleId = gemRecord.normalTitleId
+        let socketItemId = gemRecord.itemId
+        let socketSuperRareId = gemRecord.superRareTitleId
+        let socketNormalId = gemRecord.normalTitleId
+        let gemStackKey = gemRecord.stackKey
+        let targetStackKey = targetRecord.stackKey
+
+        let socketedRecord: InventoryItemRecord
+        if targetRecord.quantity > 1 {
+            targetRecord.quantity -= 1
+            var socketedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.superRareTitleId == tSuperRare &&
+                $0.normalTitleId == tNormal &&
+                $0.itemId == tItem &&
+                $0.socketSuperRareTitleId == socketSuperRareId &&
+                $0.socketNormalTitleId == socketNormalId &&
+                $0.socketItemId == socketItemId
+            })
+            socketedDescriptor.fetchLimit = 1
+            if let existingSocketed = try context.fetch(socketedDescriptor).first {
+                existingSocketed.quantity += 1
+                socketedRecord = existingSocketed
+            } else {
+                let newRecord = InventoryItemRecord(
+                    superRareTitleId: tSuperRare,
+                    normalTitleId: tNormal,
+                    itemId: tItem,
+                    socketSuperRareTitleId: socketSuperRareId,
+                    socketNormalTitleId: socketNormalId,
+                    socketItemId: socketItemId,
+                    quantity: 1,
+                    storage: targetRecord.storage
+                )
+                context.insert(newRecord)
+                socketedRecord = newRecord
+            }
+        } else {
+            targetRecord.socketItemId = socketItemId
+            targetRecord.socketSuperRareTitleId = socketSuperRareId
+            targetRecord.socketNormalTitleId = socketNormalId
+            socketedRecord = targetRecord
+        }
 
         // 宝石をインベントリから削除（1個減算）
         if gemRecord.quantity <= 1 {
@@ -179,8 +218,18 @@ actor GemModificationProgressService {
             gemRecord.quantity -= 1
         }
 
+        let socketedSnapshot = makeSnapshot(socketedRecord)
+
         // アトミックに保存
         try context.save()
+
+        let diff = UserDataLoadService.InventoryDiff(
+            removedStackKeys: [gemStackKey, targetStackKey],
+            updatedSnapshots: [socketedSnapshot]
+        )
+        await MainActor.run {
+            userDataLoad.applyInventoryDiff(diff)
+        }
     }
 
     // MARK: - Private Helpers

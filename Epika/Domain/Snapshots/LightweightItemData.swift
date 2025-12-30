@@ -324,6 +324,8 @@ struct LightweightItemData: Sendable {
     var normalTitleName: String?
     var superRareTitleName: String?
     var gemName: String?
+    /// 装備中のキャラクターのアバターID（nilならインベントリアイテム）
+    var equippedByAvatarId: UInt16?
 
     /// 自動売却ルール用のキー（称号のみ、ソケットは除外）
     var autoTradeKey: String {
@@ -369,7 +371,8 @@ extension LightweightItemData: Equatable {
         lhs.rarity == rhs.rarity &&
         lhs.normalTitleName == rhs.normalTitleName &&
         lhs.superRareTitleName == rhs.superRareTitleName &&
-        lhs.gemName == rhs.gemName
+        lhs.gemName == rhs.gemName &&
+        lhs.equippedByAvatarId == rhs.equippedByAvatarId
     }
 }
 
@@ -387,5 +390,6 @@ extension LightweightItemData: Hashable {
         hasher.combine(normalTitleName)
         hasher.combine(superRareTitleName)
         hasher.combine(gemName)
+        hasher.combine(equippedByAvatarId)
     }
 }

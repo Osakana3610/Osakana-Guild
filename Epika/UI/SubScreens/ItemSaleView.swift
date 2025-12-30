@@ -82,6 +82,10 @@ struct ItemSaleView: View {
         .navigationTitle("アイテム売却")
         .navigationBarTitleDisplayMode(.large)
         .onAppear { Task { await loadIfNeeded() } }
+        .onChange(of: appServices.userDataLoad.itemCacheVersion) {
+            refreshSelectionFromCache()
+            cacheVersion = appServices.userDataLoad.itemCacheVersion
+        }
         .sheet(item: $detailItem) { item in
             NavigationStack {
                 ItemDetailView(item: item)
@@ -476,6 +480,21 @@ struct ItemSaleView: View {
         let keySet = Set(stackKeys)
         selectedStackKeys.subtract(keySet)
         selectedDisplayItems.removeAll { keySet.contains($0.stackKey) }
+        recalcSelectedTotalSellPrice()
+    }
+
+    @MainActor
+    private func refreshSelectionFromCache() {
+        let items = appServices.userDataLoad.getAllItems()
+        guard !items.isEmpty else {
+            selectedStackKeys.removeAll()
+            selectedDisplayItems.removeAll()
+            selectedTotalSellPrice = 0
+            return
+        }
+        let itemMap = Dictionary(uniqueKeysWithValues: items.map { ($0.stackKey, $0) })
+        selectedDisplayItems = selectedDisplayItems.compactMap { itemMap[$0.stackKey] }
+        selectedStackKeys = Set(selectedDisplayItems.map { $0.stackKey })
         recalcSelectedTotalSellPrice()
     }
 

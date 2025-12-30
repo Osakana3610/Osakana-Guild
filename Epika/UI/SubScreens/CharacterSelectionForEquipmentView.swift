@@ -310,6 +310,9 @@ struct EquipmentEditorView: View {
         .task {
             await loadData()
         }
+        .onChange(of: appServices.userDataLoad.itemCacheVersion) {
+            refreshSubcategorizedItems()
+        }
         .sheet(item: $selectedItemForDetail) { item in
             NavigationStack {
                 ItemDetailView(item: item)
@@ -351,29 +354,11 @@ struct EquipmentEditorView: View {
     }
 
     private var filteredCandidateSections: [(subcategory: ItemDisplaySubcategory, items: [LightweightItemData])] {
-        // 装備中アイテムがあるカテゴリも含める
-        let equippedSubcategories = Set(equippedItemsBySubcategory.keys)
-        let allSubcategories = orderedSubcategories + equippedSubcategories.filter { !orderedSubcategories.contains($0) }
-
-        return allSubcategories.compactMap { subcategory in
+        orderedSubcategories.compactMap { subcategory in
             let items = subcategorizedItems[subcategory] ?? []
             let filtered = items.filter { matchesFilters($0) }
-            let hasEquipped = equippedItemsBySubcategory[subcategory]?.isEmpty == false
-            // インベントリアイテムか装備中アイテムがあれば表示
-            return (filtered.isEmpty && !hasEquipped) ? nil : (subcategory, filtered)
+            return filtered.isEmpty ? nil : (subcategory, filtered)
         }
-    }
-
-    /// 装備中アイテムをサブカテゴリ別にグループ化
-    private var equippedItemsBySubcategory: [ItemDisplaySubcategory: [CharacterInput.EquippedItem]] {
-        var result: [ItemDisplaySubcategory: [CharacterInput.EquippedItem]] = [:]
-        for item in currentCharacter.equippedItems {
-            guard let definition = itemDefinitions[item.itemId],
-                  let category = ItemSaleCategory(rawValue: definition.category) else { continue }
-            let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: definition.rarity)
-            result[subcategory, default: []].append(item)
-        }
-        return result
     }
 
     private func matchesFilters(_ item: LightweightItemData) -> Bool {
@@ -404,20 +389,12 @@ struct EquipmentEditorView: View {
         for subcategory: ItemDisplaySubcategory,
         items: [LightweightItemData]
     ) -> some View {
-        let equippedInCategory = equippedItemsBySubcategory[subcategory] ?? []
-        let totalCount = items.count + equippedInCategory.reduce(0) { $0 + $1.quantity }
-
-        if items.isEmpty && equippedInCategory.isEmpty {
+        if items.isEmpty {
             EmptyView()
         } else {
             Section {
-                // インベントリアイテム
                 ForEach(items, id: \.stackKey) { item in
                     equipmentCandidateRow(item)
-                }
-                // 装備中アイテム（インベントリの下にキャラ画像付き）
-                ForEach(equippedInCategory, id: \.stackKey) { item in
-                    equippedItemInCategoryRow(item)
                 }
             } header: {
                 HStack {
@@ -425,7 +402,7 @@ struct EquipmentEditorView: View {
                         .font(.headline)
                         .fontWeight(.semibold)
                     Spacer()
-                    Text("\(totalCount)個")
+                    Text("\(items.count)個")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -434,67 +411,24 @@ struct EquipmentEditorView: View {
         }
     }
 
-    /// サブカテゴリ内に表示する装備中アイテムの行（先頭にキャラ画像）
-    private func equippedItemInCategoryRow(_ item: CharacterInput.EquippedItem) -> some View {
-        let definition = itemDefinitions[item.itemId]
-        let displayName = buildEquippedItemDisplayName(for: item, baseName: definition?.name)
-        let hasSuperRare = item.superRareTitleId > 0
-
-        return HStack(spacing: 8) {
-            // キャラクター画像
-            CharacterImageView(avatarIndex: currentCharacter.resolvedAvatarId, size: 32)
-                .frame(width: 32, height: 32)
-
-            Button {
-                try? performUnequip(item)
-            } label: {
-                HStack {
-                    Text(displayName)
-                        .font(.body)
-                        .fontWeight(hasSuperRare ? .bold : .regular)
-                    if item.quantity > 1 {
-                        Text("x\(item.quantity)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-
-            Button {
-                selectedItemIdForDetail = item.itemId
-            } label: {
-                Image(systemName: "info.circle")
-                    .foregroundStyle(.blue)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    /// 装備中アイテムの表示名を生成
-    private func buildEquippedItemDisplayName(for item: CharacterInput.EquippedItem, baseName: String?) -> String {
-        var result = ""
-        let masterData = appServices.masterDataCache
-        if item.superRareTitleId > 0,
-           let superRareTitle = masterData.superRareTitle(item.superRareTitleId) {
-            result += superRareTitle.name
-        }
-        if let normalTitle = masterData.title(item.normalTitleId) {
-            result += normalTitle.name
-        }
-        result += baseName ?? "不明なアイテム"
-        return result
-    }
-
     private func equipmentCandidateRow(_ item: LightweightItemData) -> some View {
         let definition = itemDefinitions[item.itemId]
-        let validation = validateEquipment(definition: definition)
+        let isEquipped = item.equippedByAvatarId != nil
+        let validation = isEquipped ? (canEquip: false, reason: nil) : validateEquipment(definition: definition)
 
-        return HStack {
+        return HStack(spacing: 8) {
+            // 装備中アイテムにはキャラ画像を表示
+            if let avatarId = item.equippedByAvatarId {
+                CharacterImageView(avatarIndex: avatarId, size: 36)
+            } else {
+                Color.clear
+                    .frame(width: 0)
+            }
+
             Button {
-                if validation.canEquip {
+                if isEquipped {
+                    performUnequipFromLightweight(item)
+                } else if validation.canEquip {
                     performEquip(item)
                 }
             } label: {
@@ -507,7 +441,7 @@ struct EquipmentEditorView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .foregroundStyle(validation.canEquip ? .primary : .secondary)
+            .foregroundStyle(isEquipped ? .primary : (validation.canEquip ? .primary : .secondary))
 
             Button {
                 selectedItemForDetail = item
@@ -517,6 +451,23 @@ struct EquipmentEditorView: View {
             }
             .buttonStyle(.plain)
         }
+        .listRowInsets(isEquipped
+            ? EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
+            : nil
+        )
+    }
+
+    /// LightweightItemDataから装備解除を実行
+    private func performUnequipFromLightweight(_ item: LightweightItemData) {
+        // stackKeyから_equippedサフィックスを除去して元のstackKeyを取得
+        let baseStackKey = String(item.stackKey.dropLast("_equipped".count))
+
+        // currentCharacter.equippedItemsから該当アイテムを探す
+        guard let equippedItem = currentCharacter.equippedItems.first(where: { $0.stackKey == baseStackKey }) else {
+            return
+        }
+
+        try? performUnequip(equippedItem)
     }
 
     private func loadData() async {
@@ -526,22 +477,115 @@ struct EquipmentEditorView: View {
         // 起動時に既にロード済み（UserDataLoadService.loadAllで）
         // サブカテゴリ別アイテムを取得（合成素材・魔造素材を除く）
         let allSubcategorized = displayService.getSubcategorizedItems()
-        subcategorizedItems = allSubcategorized.filter { !Self.excludedCategories.contains($0.key.mainCategory) }
+        var filtered = allSubcategorized.filter { !Self.excludedCategories.contains($0.key.mainCategory) }
         orderedSubcategories = displayService.getOrderedSubcategories()
             .filter { !Self.excludedCategories.contains($0.mainCategory) }
 
         // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
-        let availableIds = subcategorizedItems.values.flatMap { $0.map { $0.itemId } }
+        let availableIds = filtered.values.flatMap { $0.map { $0.itemId } }
         let allItemIds = Set(availableIds)
             .union(Set(currentCharacter.equippedItems.map { $0.itemId }))
         let masterData = appServices.masterDataCache
+        var definitions: [UInt16: ItemDefinition] = [:]
         for id in allItemIds {
             if let definition = masterData.item(id) {
-                itemDefinitions[id] = definition
+                definitions[id] = definition
             }
         }
+        itemDefinitions = definitions
+
+        // 装備中アイテムをLightweightItemDataに変換して挿入
+        insertEquippedItems(into: &filtered, masterData: masterData)
+        subcategorizedItems = filtered
 
         isLoading = false
+    }
+
+    /// 装備中アイテムをsubcategorizedItemsに挿入する
+    private func insertEquippedItems(
+        into subcategorized: inout [ItemDisplaySubcategory: [LightweightItemData]],
+        masterData: MasterDataCache
+    ) {
+        let avatarId = currentCharacter.resolvedAvatarId
+
+        for equipped in currentCharacter.equippedItems {
+            guard let definition = itemDefinitions[equipped.itemId],
+                  let category = ItemSaleCategory(rawValue: definition.category) else { continue }
+
+            let subcategory = ItemDisplaySubcategory(
+                mainCategory: category,
+                subcategory: definition.rarity
+            )
+
+            // 装備中アイテムからLightweightItemDataを生成
+            let lightweightItem = createLightweightItem(
+                from: equipped,
+                definition: definition,
+                masterData: masterData,
+                avatarId: avatarId
+            )
+
+            // 正しいソート位置に挿入
+            var items = subcategorized[subcategory] ?? []
+            let insertIndex = findInsertIndex(for: lightweightItem, in: items)
+            items.insert(lightweightItem, at: insertIndex)
+            subcategorized[subcategory] = items
+        }
+    }
+
+    /// 装備中アイテムからLightweightItemDataを生成
+    private func createLightweightItem(
+        from equipped: CharacterInput.EquippedItem,
+        definition: ItemDefinition,
+        masterData: MasterDataCache,
+        avatarId: UInt16
+    ) -> LightweightItemData {
+        let normalTitleName = masterData.title(equipped.normalTitleId)?.name
+        let superRareTitleName: String? = equipped.superRareTitleId > 0
+            ? masterData.superRareTitle(equipped.superRareTitleId)?.name
+            : nil
+        let gemName: String? = equipped.socketItemId > 0
+            ? masterData.item(equipped.socketItemId)?.name
+            : nil
+
+        return LightweightItemData(
+            stackKey: equipped.stackKey + "_equipped",  // インベントリと区別
+            itemId: equipped.itemId,
+            name: definition.name,
+            quantity: equipped.quantity,
+            sellValue: definition.sellValue,
+            category: ItemSaleCategory(rawValue: definition.category) ?? .other,
+            enhancement: ItemSnapshot.Enhancement(
+                superRareTitleId: equipped.superRareTitleId,
+                normalTitleId: equipped.normalTitleId,
+                socketSuperRareTitleId: equipped.socketSuperRareTitleId,
+                socketNormalTitleId: equipped.socketNormalTitleId,
+                socketItemId: equipped.socketItemId
+            ),
+            storage: .playerItem,
+            rarity: definition.rarity,
+            normalTitleName: normalTitleName,
+            superRareTitleName: superRareTitleName,
+            gemName: gemName,
+            equippedByAvatarId: avatarId
+        )
+    }
+
+    /// ソート順を維持して挿入位置を見つける
+    private func findInsertIndex(for item: LightweightItemData, in items: [LightweightItemData]) -> Int {
+        // 同じstackKeyのインベントリアイテムを探す（_equippedサフィックスを除去して比較）
+        let baseStackKey = String(item.stackKey.dropLast("_equipped".count))
+        if let matchIndex = items.firstIndex(where: { $0.stackKey == baseStackKey }) {
+            return matchIndex + 1  // インベントリアイテムの直後
+        }
+
+        // 見つからない場合はソート順に従って挿入
+        for (index, existing) in items.enumerated() {
+            if displayService.isOrderedBefore(item, existing) {
+                return index
+            }
+        }
+        return items.count  // 末尾に追加
     }
 
     private func validateEquipment(definition: ItemDefinition?) -> (canEquip: Bool, reason: String?) {
@@ -676,12 +720,17 @@ struct EquipmentEditorView: View {
         refreshSubcategorizedItems()
     }
 
-    /// サブカテゴリ表示を更新
+    /// サブカテゴリ表示を更新（装備中アイテムも含む）
     private func refreshSubcategorizedItems() {
-        subcategorizedItems = displayService.getSubcategorizedItems()
+        var filtered = displayService.getSubcategorizedItems()
             .filter { !Self.excludedCategories.contains($0.key.mainCategory) }
         orderedSubcategories = displayService.getOrderedSubcategories()
             .filter { !Self.excludedCategories.contains($0.mainCategory) }
+
+        // 装備中アイテムを挿入
+        let masterData = appServices.masterDataCache
+        insertEquippedItems(into: &filtered, masterData: masterData)
+        subcategorizedItems = filtered
     }
 
     /// 装備変更前後のステータス差分を計算

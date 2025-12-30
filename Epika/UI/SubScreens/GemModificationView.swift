@@ -31,6 +31,7 @@ struct GemModificationView: View {
     @State private var isLoadingTargets = false
     @State private var showConfirmation = false
     @State private var targetItem: LightweightItemData?
+    @State private var isSocketSheetPresented = false
 
     private var gemService: GemModificationProgressService { appServices.gemModification }
     private var inventoryService: InventoryProgressService { appServices.inventory }
@@ -55,10 +56,17 @@ struct GemModificationView: View {
         .task {
             await loadData()
         }
-        .sheet(isPresented: Binding(
-            get: { selectedGem != nil },
-            set: { if !$0 { selectedGem = nil } }
-        )) {
+        .onChange(of: appServices.userDataLoad.itemCacheVersion) {
+            Task {
+                await loadData()
+            }
+        }
+        .sheet(isPresented: $isSocketSheetPresented, onDismiss: {
+            if !showConfirmation {
+                selectedGem = nil
+                targetItem = nil
+            }
+        }) {
             if let gem = selectedGem {
                 SocketableItemsSheet(
                     gem: gem,
@@ -68,9 +76,10 @@ struct GemModificationView: View {
                     onSelect: { target in
                         targetItem = target
                         showConfirmation = true
+                        isSocketSheetPresented = false
                     },
-                    onDismiss: {
-                        selectedGem = nil
+                    onCancel: {
+                        isSocketSheetPresented = false
                     }
                 )
             }
@@ -150,6 +159,7 @@ struct GemModificationView: View {
         selectedGem = gem
         isLoadingTargets = true
         socketableItems = []
+        isSocketSheetPresented = true
 
         do {
             // ソケット可能アイテムのstackKeyを取得
@@ -161,6 +171,7 @@ struct GemModificationView: View {
         } catch {
             loadError = error.localizedDescription
             selectedGem = nil
+            isSocketSheetPresented = false
         }
 
         isLoadingTargets = false
@@ -210,7 +221,7 @@ private struct SocketableItemsSheet: View {
     let isLoading: Bool
     let displayService: UserDataLoadService
     let onSelect: (LightweightItemData) -> Void
-    let onDismiss: () -> Void
+    let onCancel: () -> Void
 
     var body: some View {
         NavigationStack {
@@ -243,7 +254,6 @@ private struct SocketableItemsSheet: View {
                                 Button {
                                     onSelect(item)
                                     dismiss()
-                                    onDismiss()
                                 } label: {
                                     SocketableItemRow(item: item, displayService: displayService)
                                 }
@@ -260,7 +270,7 @@ private struct SocketableItemsSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         dismiss()
-                        onDismiss()
+                        onCancel()
                     }
                 }
             }
