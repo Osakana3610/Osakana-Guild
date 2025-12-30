@@ -139,7 +139,7 @@ struct RuntimePartyDetailView: View {
                         .disabled(dungeon.availableDifficulties.count <= 1)
                     }
 
-                    TargetFloorPickerMenu(currentFloor: Int(currentParty.targetFloor),
+                    TargetFloorPickerRow(currentFloor: Int(currentParty.targetFloor),
                                           maxFloor: selectedDungeon?.definition.floorCount ?? 1,
                                           onSelect: { await updateTargetFloor($0) },
                                           rowHeight: listRowHeight)
@@ -488,58 +488,35 @@ private struct DifficultyPickerMenu: View {
     }
 }
 
-private struct TargetFloorPickerMenu: View {
+private struct TargetFloorPickerRow: View {
     let currentFloor: Int
     let maxFloor: Int
     let onSelect: (Int) async -> Void
     let rowHeight: CGFloat?
 
     var body: some View {
-        HStack {
-            Text("目標階層")
-                .foregroundColor(.primary)
-            Spacer(minLength: 12)
-            Menu {
-                ForEach(floorRange, id: \.self) { floor in
-                    Button {
-                        select(floor)
-                    } label: {
-                        HStack {
-                            if currentFloor == floor {
-                                Image(systemName: "checkmark")
-                            }
-                            Text(floorDisplayName(floor))
-                        }
-                    }
-                }
-            } label: {
+        NavigationLink {
+            TargetFloorPickerView(currentFloor: currentFloor,
+                                  maxFloor: maxFloor,
+                                  onSelect: onSelect)
+        } label: {
+            HStack {
+                Text("目標階層")
+                    .foregroundColor(.primary)
+                Spacer(minLength: 12)
                 HStack(spacing: 4) {
                     Text(floorDisplayName(currentFloor))
                         .foregroundColor(.secondary)
-                    Image(systemName: "chevron.up.chevron.down")
+                    Image(systemName: "chevron.right")
                         .foregroundStyle(Color(.tertiaryLabel))
                         .font(.footnote.weight(.semibold))
                 }
                 .frame(height: rowHeight)
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .menuStyle(.automatic)
+            .frame(height: rowHeight)
+            .contentShape(Rectangle())
         }
-        .frame(height: rowHeight)
-        .contentShape(Rectangle())
-    }
-
-    private var floorRange: [Int] {
-        let upperBound = max(1, maxFloor)
-        return [0] + Array(1...upperBound)
-    }
-
-    private func floorDisplayName(_ floor: Int) -> String {
-        floor == 0 ? "どこまでも進む" : "\(floor)階"
-    }
-
-    private func select(_ floor: Int) {
-        Task { await onSelect(floor) }
     }
 }
 
@@ -681,6 +658,43 @@ private struct DifficultyPickerView: View {
     }
 }
 
+private struct TargetFloorPickerView: View {
+    let currentFloor: Int
+    let maxFloor: Int
+    let onSelect: (Int) async -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    private var floorRange: [Int] { targetFloorRange(maxFloor: maxFloor) }
+
+    var body: some View {
+        List {
+            ForEach(floorRange, id: \.self) { floor in
+                Button(action: { choose(floor) }) {
+                    HStack {
+                        Text(floorDisplayName(floor))
+                            .foregroundColor(.primary)
+                        Spacer()
+                        if currentFloor == floor {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.primary)
+                        }
+                    }
+                }
+            }
+        }
+        .avoidBottomGameInfo()
+        .navigationTitle("目標階層")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func choose(_ floor: Int) {
+        Task {
+            await onSelect(floor)
+            dismiss()
+        }
+    }
+}
+
 private struct PartyNameEditorView: View {
     let party: PartySnapshot
     let onComplete: () async -> Void
@@ -735,4 +749,13 @@ private func formattedDifficultyLabel(for dungeon: RuntimeDungeon, difficulty: U
     let name = DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyTitleId: difficulty, masterData: masterData)
     let status = dungeon.statusDescription(for: difficulty)
     return "\(name)\(status)"
+}
+
+private func targetFloorRange(maxFloor: Int) -> [Int] {
+    let upperBound = max(1, maxFloor)
+    return [0] + Array(1...upperBound)
+}
+
+private func floorDisplayName(_ floor: Int) -> String {
+    floor == 0 ? "どこまでも進む" : "\(floor)階"
 }
