@@ -221,8 +221,14 @@ extension BattleTurnEngine {
             }
         }
 
+        let rates = actor.actionRates
+        let hasAnyActionRate = rates.attack > 0 || rates.priestMagic > 0 || rates.mageMagic > 0 || rates.breath > 0
+
         let candidates = buildCandidates(for: actor, allies: allies, opponents: opponents)
         if candidates.isEmpty {
+            if !hasAnyActionRate {
+                return [.defend]
+            }
             if canPerformPhysical(actor: actor, opponents: opponents) {
                 return [.physicalAttack]
             }
