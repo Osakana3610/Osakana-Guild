@@ -53,6 +53,11 @@ struct PandoraBoxView: View {
         .task {
             await loadData()
         }
+        .onChange(of: appServices.userDataLoad.itemCacheVersion) {
+            Task {
+                await loadData()
+            }
+        }
         .sheet(isPresented: $showingItemPicker) {
             ItemPickerSheet(
                 availableItems: availableItems.filter { item in

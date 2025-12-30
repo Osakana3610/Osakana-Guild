@@ -411,6 +411,32 @@ final class UserDataLoadService {
         isItemsLoaded = false
     }
 
+    // MARK: - Inventory Diff
+
+    struct InventoryDiff: Sendable {
+        let removedStackKeys: [String]
+        let updatedSnapshots: [ItemSnapshot]
+    }
+
+    /// アイテム差分をキャッシュへ適用
+    func applyInventoryDiff(_ diff: InventoryDiff) {
+        if !diff.removedStackKeys.isEmpty {
+            for stackKey in diff.removedStackKeys {
+                _ = decrementQuantityWithoutVersion(stackKey: stackKey, by: 1)
+            }
+        }
+
+        if !diff.updatedSnapshots.isEmpty {
+            for snapshot in diff.updatedSnapshots {
+                upsertItemWithoutVersion(from: snapshot)
+            }
+        }
+
+        sortCacheItems()
+        rebuildOrderedSubcategories()
+        itemCacheVersion &+= 1
+    }
+
     /// カテゴリ別にグループ化されたアイテムを取得
     func getCategorizedItems() -> [ItemSaleCategory: [LightweightItemData]] {
         categorizedItems
@@ -497,9 +523,7 @@ final class UserDataLoadService {
 
     /// キャッシュにアイテムを追加する（ドロップ時）
     func addItem(_ item: LightweightItemData) {
-        categorizedItems[item.category, default: []].append(item)
-        let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-        subcategorizedItems[subcategory, default: []].append(item)
+        insertItemWithoutVersion(item)
         rebuildOrderedSubcategories()
         itemCacheVersion &+= 1
     }
@@ -521,6 +545,143 @@ final class UserDataLoadService {
                 return
             }
         }
+    }
+
+    /// キャッシュの並び規則（共通）
+    func isOrderedBefore(_ lhs: LightweightItemData, _ rhs: LightweightItemData) -> Bool {
+        if lhs.itemId != rhs.itemId {
+            return lhs.itemId < rhs.itemId
+        }
+        let lhsHasSuperRare = lhs.enhancement.superRareTitleId > 0
+        let rhsHasSuperRare = rhs.enhancement.superRareTitleId > 0
+        if lhsHasSuperRare != rhsHasSuperRare {
+            return !lhsHasSuperRare
+        }
+        let lhsHasSocket = lhs.enhancement.socketItemId > 0
+        let rhsHasSocket = rhs.enhancement.socketItemId > 0
+        if lhsHasSocket != rhsHasSocket {
+            return !lhsHasSocket
+        }
+        if lhs.enhancement.normalTitleId != rhs.enhancement.normalTitleId {
+            return lhs.enhancement.normalTitleId < rhs.enhancement.normalTitleId
+        }
+        if lhs.enhancement.superRareTitleId != rhs.enhancement.superRareTitleId {
+            return lhs.enhancement.superRareTitleId < rhs.enhancement.superRareTitleId
+        }
+        return lhs.enhancement.socketItemId < rhs.enhancement.socketItemId
+    }
+
+    // MARK: - Item Cache Helpers
+
+    private func upsertItemWithoutVersion(from snapshot: ItemSnapshot) {
+        guard let item = makeDisplayItem(from: snapshot) else { return }
+        if !updateItem(item) {
+            insertItemWithoutVersion(item)
+        }
+    }
+
+    private func updateItem(_ item: LightweightItemData) -> Bool {
+        let category = item.category
+        guard let categoryItems = categorizedItems[category],
+              let index = categoryItems.firstIndex(where: { $0.stackKey == item.stackKey }) else {
+            return false
+        }
+        categorizedItems[category]?[index] = item
+        let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: item.rarity)
+        if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
+            subcategorizedItems[subcategory]?[subIndex] = item
+        } else {
+            subcategorizedItems[subcategory, default: []].append(item)
+        }
+        return true
+    }
+
+    private func makeDisplayItem(from snapshot: ItemSnapshot) -> LightweightItemData? {
+        guard let definition = masterDataCache.item(snapshot.itemId) else { return nil }
+        let sellValue = (try? ItemPriceCalculator.sellPrice(
+            baseSellValue: definition.sellValue,
+            normalTitleId: snapshot.enhancements.normalTitleId,
+            hasSuperRare: snapshot.enhancements.superRareTitleId != 0,
+            multiplierMap: Dictionary(uniqueKeysWithValues: masterDataCache.allTitles.map { ($0.id, $0.priceMultiplier) })
+        )) ?? Int(definition.sellValue)
+
+        let normalTitleName = snapshot.enhancements.normalTitleId != 0
+            ? masterDataCache.title(snapshot.enhancements.normalTitleId)?.name
+            : nil
+        let superRareTitleName = snapshot.enhancements.superRareTitleId != 0
+            ? masterDataCache.superRareTitle(snapshot.enhancements.superRareTitleId)?.name
+            : nil
+        let gemName = snapshot.enhancements.socketItemId != 0
+            ? masterDataCache.item(snapshot.enhancements.socketItemId)?.name
+            : nil
+
+        return LightweightItemData(
+            stackKey: snapshot.stackKey,
+            itemId: snapshot.itemId,
+            name: definition.name,
+            quantity: Int(snapshot.quantity),
+            sellValue: sellValue,
+            category: ItemSaleCategory(rawValue: definition.category) ?? .other,
+            enhancement: snapshot.enhancements,
+            storage: snapshot.storage,
+            rarity: definition.rarity,
+            normalTitleName: normalTitleName,
+            superRareTitleName: superRareTitleName,
+            gemName: gemName,
+            equippedByAvatarId: nil
+        )
+    }
+
+    private func sortCacheItems() {
+        for key in categorizedItems.keys {
+            categorizedItems[key]?.sort { isOrderedBefore($0, $1) }
+        }
+        for key in subcategorizedItems.keys {
+            subcategorizedItems[key]?.sort { isOrderedBefore($0, $1) }
+        }
+    }
+
+    private func insertItemWithoutVersion(_ item: LightweightItemData) {
+        var items = categorizedItems[item.category] ?? []
+        insertItem(item, into: &items)
+        categorizedItems[item.category] = items
+
+        let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+        var subItems = subcategorizedItems[subcategory] ?? []
+        insertItem(item, into: &subItems)
+        subcategorizedItems[subcategory] = subItems
+    }
+
+    private func insertItem(_ item: LightweightItemData, into items: inout [LightweightItemData]) {
+        if let index = items.firstIndex(where: { isOrderedBefore(item, $0) }) {
+            items.insert(item, at: index)
+        } else {
+            items.append(item)
+        }
+    }
+
+    @discardableResult
+    private func decrementQuantityWithoutVersion(stackKey: String, by amount: Int) -> Int {
+        for key in categorizedItems.keys {
+            if let index = categorizedItems[key]?.firstIndex(where: { $0.stackKey == stackKey }) {
+                let item = categorizedItems[key]![index]
+                let newQuantity = item.quantity - amount
+                if newQuantity <= 0 {
+                    categorizedItems[key]?.remove(at: index)
+                    let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+                    subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
+                    return 0
+                } else {
+                    categorizedItems[key]![index].quantity = newQuantity
+                    let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+                    if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
+                        subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
+                    }
+                    return newQuantity
+                }
+            }
+        }
+        preconditionFailure("キャッシュに存在しないstackKeyの減算: \(stackKey)")
     }
 
     /// ドロップアイテムをキャッシュに追加する
@@ -671,26 +832,7 @@ final class UserDataLoadService {
                 }
                 return updated
             }.sorted { lhs, rhs in
-                if lhs.itemId != rhs.itemId {
-                    return lhs.itemId < rhs.itemId
-                }
-                let lhsHasSuperRare = lhs.enhancement.superRareTitleId > 0
-                let rhsHasSuperRare = rhs.enhancement.superRareTitleId > 0
-                if lhsHasSuperRare != rhsHasSuperRare {
-                    return !lhsHasSuperRare
-                }
-                let lhsHasSocket = lhs.enhancement.socketItemId > 0
-                let rhsHasSocket = rhs.enhancement.socketItemId > 0
-                if lhsHasSocket != rhsHasSocket {
-                    return !lhsHasSocket
-                }
-                if lhs.enhancement.normalTitleId != rhs.enhancement.normalTitleId {
-                    return lhs.enhancement.normalTitleId < rhs.enhancement.normalTitleId
-                }
-                if lhs.enhancement.superRareTitleId != rhs.enhancement.superRareTitleId {
-                    return lhs.enhancement.superRareTitleId < rhs.enhancement.superRareTitleId
-                }
-                return lhs.enhancement.socketItemId < rhs.enhancement.socketItemId
+                isOrderedBefore(lhs, rhs)
             }
         }
 

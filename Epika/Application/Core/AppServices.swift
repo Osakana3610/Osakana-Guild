@@ -154,7 +154,8 @@ final class AppServices {
             explorationService: self.exploration
         )
         self.gemModification = GemModificationProgressService(container: container,
-                                                               masterDataCache: masterDataCache)
+                                                               masterDataCache: masterDataCache,
+                                                               userDataLoad: self.userDataLoad)
         // 全プロパティ初期化後にAppServicesを設定
         self.userDataLoad.setAppServices(self)
     }
