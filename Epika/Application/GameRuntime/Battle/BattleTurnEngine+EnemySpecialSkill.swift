@@ -142,7 +142,6 @@ extension BattleTurnEngine {
                 }
             }
 
-            let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
             let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
             entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(totalDamage))
 
@@ -206,7 +205,6 @@ extension BattleTurnEngine {
                 }
             }
 
-            let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
             let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
             entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(totalDamage))
 
@@ -249,7 +247,6 @@ extension BattleTurnEngine {
             let applied = applyDamage(amount: baseDamage, to: &target)
             context.updateActor(target, side: targetSide, index: targetIndex)
 
-            let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
             let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
             entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(applied))
 
@@ -321,7 +318,6 @@ extension BattleTurnEngine {
             target.currentHP += applied
             context.updateActor(target, side: targetSide, index: targetIndex)
 
-            let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
             let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
             entryBuilder.addEffect(kind: .enemySpecialHeal, target: targetIdx, value: UInt32(applied))
         }

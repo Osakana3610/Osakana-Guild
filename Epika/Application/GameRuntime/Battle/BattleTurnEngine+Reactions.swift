@@ -133,7 +133,6 @@ extension BattleTurnEngine {
                 let applied = max(1, Int((baseDamage * modifier).rounded()))
                 _ = applyDamage(amount: applied, to: &target)
                 context.updateActor(target, side: ref.0, index: ref.1)
-                let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
                 let targetIdx = context.actorIndex(for: ref.0, arrayIndex: ref.1)
                 entryBuilder?.addEffect(kind: .statusRampage, target: targetIdx, value: UInt32(applied))
             }
@@ -286,7 +285,6 @@ extension BattleTurnEngine {
         let scaledCritical = Int((Double(modifiedAttacker.snapshot.criticalRate) * reaction.criticalRateMultiplier).rounded(.down))
         modifiedAttacker.snapshot.criticalRate = max(0, min(100, scaledCritical))
 
-        let attackerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
         let targetIdx = context.actorIndex(for: target.0, arrayIndex: target.1)
 
         let attackResult: AttackResult
@@ -417,13 +415,11 @@ extension BattleTurnEngine {
 
         if attackResult.wasParried, let defenderActor = currentDefender, defenderActor.isAlive {
             let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
-            let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
             entryBuilder?.addEffect(kind: .physicalParry, target: attackerIdx)
         }
 
         if attackResult.wasBlocked, let defenderActor = currentDefender, defenderActor.isAlive {
             let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
-            let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
             entryBuilder?.addEffect(kind: .physicalBlock, target: attackerIdx)
         }
 

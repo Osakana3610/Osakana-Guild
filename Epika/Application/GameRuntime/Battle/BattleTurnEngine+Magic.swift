@@ -48,8 +48,6 @@ extension BattleTurnEngine {
         guard caster.actionResources.consume(spellId: spell.id) else { return false }
         context.updateActor(caster, side: side, index: casterIndex)
 
-        // 呪文名付きログを追加
-        let casterIdx = context.actorIndex(for: side, arrayIndex: casterIndex)
         switch spell.category {
         case .healing:
             // castConditionがtargetHalfHPの場合、HP半分以下の味方のみを対象にする
@@ -103,7 +101,7 @@ extension BattleTurnEngine {
 
         let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
         let targetIdx = context.actorIndex(for: casterSide, arrayIndex: targetIndex)
-        var entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
+        let entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
                                                           kind: .priestMagic,
                                                           skillIndex: UInt16(spell.id))
         entryBuilder.addEffect(kind: .magicHeal, target: targetIdx, value: UInt32(applied))
@@ -131,7 +129,7 @@ extension BattleTurnEngine {
 
         // 魔法名付きログを追加
         let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
-        var entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
+        let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
                                                           kind: .mageMagic,
                                                           skillIndex: UInt16(spell.id))
 
@@ -168,7 +166,6 @@ extension BattleTurnEngine {
 
             context.updateActor(target, side: targetRef.0, index: targetRef.1)
 
-            let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
             let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
             entryBuilder.addEffect(kind: .magicDamage, target: targetIdx, value: UInt32(applied))
 
@@ -409,7 +406,7 @@ extension BattleTurnEngine {
                                  context: inout BattleContext) {
         let allies: [BattleActor] = casterSide == .player ? context.players : context.enemies
         let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
-        var entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
+        let entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
                                                           kind: spell.school == .mage ? .mageMagic : .priestMagic,
                                                           skillIndex: UInt16(spell.id))
 
@@ -469,7 +466,7 @@ extension BattleTurnEngine {
 
         let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
         let targetIdx = context.actorIndex(for: casterSide, arrayIndex: targetIndex)
-        var entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
+        let entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
                                                           kind: spell.school == .mage ? .mageMagic : .priestMagic,
                                                           skillIndex: UInt16(spell.id))
         entryBuilder.addEffect(kind: .statusRecover,
