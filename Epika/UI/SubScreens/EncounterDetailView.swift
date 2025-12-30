@@ -205,11 +205,13 @@ struct EncounterDetailView: View {
             var enemyNames: [UInt16: String] = [:]
             var memberMap: [String: UInt8] = [:]
             var iconMap: [String: CharacterIconInfo] = [:]
+            var actorIdentifiers: [UInt16: String] = [:]
 
             for participant in archive.playerSnapshots {
                 if let memberId = participant.partyMemberId {
                     allyNames[memberId] = participant.name
                     memberMap[participant.actorId] = memberId
+                    actorIdentifiers[UInt16(memberId)] = participant.actorId
                 }
                 if let avatarIndex = participant.avatarIndex {
                     iconMap[participant.actorId] = CharacterIconInfo(avatarIndex: avatarIndex,
@@ -222,6 +224,7 @@ struct EncounterDetailView: View {
                 // actorIdは "(arrayIndex+1)*1000+enemyMasterIndex" 形式で保存されている
                 if let actorIndex = UInt16(participant.actorId) {
                     enemyNames[actorIndex] = participant.name
+                    actorIdentifiers[actorIndex] = participant.actorId
                     let enemyId = actorIndex % 1000
                     iconMap[participant.actorId] = CharacterIconInfo(avatarIndex: nil,
                                                                      enemyId: enemyId,
@@ -247,7 +250,8 @@ struct EncounterDetailView: View {
                 allyNames: allyNames,
                 enemyNames: enemyNames,
                 spellNames: spellNames,
-                enemySkillNames: enemySkillNames
+                enemySkillNames: enemySkillNames,
+                actorIdentifiers: actorIdentifiers
             )
 
             actorIdentifierToMemberId = memberMap
