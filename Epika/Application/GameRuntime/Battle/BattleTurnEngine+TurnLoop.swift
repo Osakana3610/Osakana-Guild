@@ -221,17 +221,8 @@ extension BattleTurnEngine {
             }
         }
 
-        let rates = actor.actionRates
-        let hasAnyActionRate = rates.attack > 0 || rates.priestMagic > 0 || rates.mageMagic > 0 || rates.breath > 0
-
         let candidates = buildCandidates(for: actor, allies: allies, opponents: opponents)
         if candidates.isEmpty {
-            if !hasAnyActionRate {
-                return [.defend]
-            }
-            if canPerformPhysical(actor: actor, opponents: opponents) {
-                return [.physicalAttack]
-            }
             return [.defend]
         }
 
@@ -260,11 +251,6 @@ extension BattleTurnEngine {
             for i in hitIndex..<candidates.count {
                 result.append(candidates[i].category)
             }
-        }
-
-        // 物理攻撃をフォールバックとして追加
-        if canPerformPhysical(actor: actor, opponents: opponents) && !result.contains(.physicalAttack) {
-            result.append(.physicalAttack)
         }
 
         return result.isEmpty ? [.defend] : result
@@ -328,10 +314,6 @@ extension BattleTurnEngine {
         }
         if rates.attack > 0 && canPerformPhysical(actor: actor, opponents: opponents) {
             candidates.append(ActionCandidate(category: .physicalAttack, weight: rates.attack))
-        }
-
-        if candidates.isEmpty && canPerformPhysical(actor: actor, opponents: opponents) {
-            candidates.append(ActionCandidate(category: .physicalAttack, weight: max(1, rates.attack)))
         }
         return candidates
     }
