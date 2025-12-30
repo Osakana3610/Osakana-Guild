@@ -223,6 +223,7 @@ struct BattleTurnEngine {
     private static func executeAction(_ reference: BattleContext.ActorReference,
                                        context: inout BattleContext,
                                        sacrificeTargets: BattleContext.SacrificeTargets) {
+        guard !context.isBattleOver else { return }
         switch reference {
         case .player(let index):
             guard context.players.indices.contains(index), context.players[index].isAlive else { return }

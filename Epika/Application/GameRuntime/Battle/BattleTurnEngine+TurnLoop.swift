@@ -94,6 +94,7 @@ extension BattleTurnEngine {
                               forcedTargets: BattleContext.SacrificeTargets,
                               depth: Int = 0) {
         guard depth < 5 else { return }
+        guard !context.isBattleOver else { return }
         var performer: BattleActor
         switch side {
         case .player:
@@ -159,11 +160,19 @@ extension BattleTurnEngine {
             default:
                 break
             }
-            if executed { break }
+            if executed || context.isBattleOver { break }
+        }
+
+        if context.isBattleOver {
+            return
         }
 
         if !executed {
             activateGuard(for: side, actorIndex: actorIndex, context: &context)
+        }
+
+        if context.isBattleOver {
+            return
         }
 
         if let refreshedActor = context.actor(for: side, index: actorIndex),
@@ -171,6 +180,9 @@ extension BattleTurnEngine {
            !refreshedActor.skillEffects.combat.extraActions.isEmpty {
             for extra in refreshedActor.skillEffects.combat.extraActions {
                 for _ in 0..<extra.count {
+                    if context.isBattleOver {
+                        return
+                    }
                     let probability = max(0.0, min(1.0, (extra.chancePercent * refreshedActor.skillEffects.combat.procChanceMultiplier) / 100.0))
                     guard context.random.nextBool(probability: probability) else { continue }
                     performAction(for: side,
@@ -178,6 +190,9 @@ extension BattleTurnEngine {
                                   context: &context,
                                   forcedTargets: forcedTargets,
                                   depth: depth + 1)
+                    if context.isBattleOver {
+                        return
+                    }
                 }
             }
         }
