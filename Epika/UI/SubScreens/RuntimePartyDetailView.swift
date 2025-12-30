@@ -35,6 +35,7 @@ struct RuntimePartyDetailView: View {
     @State private var allCharacters: [RuntimeCharacter] = []
     @State private var errorMessage: String?
     @State private var showDungeonPicker = false
+    @State private var selectedCharacter: RuntimeCharacter?
 
     init(party: PartySnapshot, selectedDungeon: Binding<RuntimeDungeon?>, dungeons: [RuntimeDungeon]) {
         _currentParty = State(initialValue: party)
@@ -55,6 +56,9 @@ struct RuntimePartyDetailView: View {
                         onPrimaryAction: {
                             handlePrimaryAction(isExploring: adventureState.isExploring(partyId: currentParty.id),
                                                 canDepart: canStartExploration(for: currentParty))
+                        },
+                        onMemberTap: { character in
+                            selectedCharacter = character
                         }
                     )
                     .padding(.vertical, 4)
@@ -164,6 +168,11 @@ struct RuntimePartyDetailView: View {
                     }
                 )
             }
+            .sheet(isPresented: isCharacterDetailPresented) {
+                if let character = selectedCharacter {
+                    RuntimeCharacterDetailSheetView(character: character)
+                }
+            }
         }
         .overlay(alignment: .bottomLeading) {
             StatChangeNotificationView()
@@ -195,6 +204,15 @@ struct RuntimePartyDetailView: View {
     private var listRowHeight: CGFloat? {
         let value = AppConstants.UI.listRowHeight
         return value > 0 ? value : nil
+    }
+
+    private var isCharacterDetailPresented: Binding<Bool> {
+        Binding(
+            get: { selectedCharacter != nil },
+            set: { isPresented in
+                if !isPresented { selectedCharacter = nil }
+            }
+        )
     }
 
     private func errorView(_ message: String) -> some View {

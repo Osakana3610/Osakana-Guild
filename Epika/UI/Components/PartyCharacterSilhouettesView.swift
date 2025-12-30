@@ -25,6 +25,13 @@ import SwiftUI
 struct PartyCharacterSilhouettesView: View {
     let party: PartySnapshot
     let characters: [RuntimeCharacter]
+    let onMemberTap: ((RuntimeCharacter) -> Void)?
+
+    init(party: PartySnapshot, characters: [RuntimeCharacter], onMemberTap: ((RuntimeCharacter) -> Void)? = nil) {
+        self.party = party
+        self.characters = characters
+        self.onMemberTap = onMemberTap
+    }
 
     private var orderedMembers: [RuntimeCharacter] {
         party.memberIds.compactMap { id in
@@ -51,18 +58,7 @@ struct PartyCharacterSilhouettesView: View {
                         Group {
                             if index < orderedMembers.count {
                                 let member = orderedMembers[index]
-                                VStack(spacing: 2) {
-                                    CharacterImageView(avatarIndex: member.resolvedAvatarId, size: 55)
-                                    VStack(spacing: 1) {
-                                        Text("Lv.\(member.level)")
-                                            .font(.caption2)
-                                            .foregroundStyle(.primary)
-                                        Text("HP\(member.currentHP)")
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                .frame(width: 48)
+                                memberSilhouette(member)
                             } else {
                                 Spacer()
                                     .frame(width: 48)
@@ -78,5 +74,30 @@ struct PartyCharacterSilhouettesView: View {
         }
         .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private func memberSilhouette(_ member: RuntimeCharacter) -> some View {
+        let content = VStack(spacing: 2) {
+            CharacterImageView(avatarIndex: member.resolvedAvatarId, size: 55)
+            VStack(spacing: 1) {
+                Text("Lv.\(member.level)")
+                    .font(.caption2)
+                    .foregroundStyle(.primary)
+                Text("HP\(member.currentHP)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: 48)
+
+        if let onMemberTap {
+            Button(action: { onMemberTap(member) }) {
+                content
+            }
+            .buttonStyle(.plain)
+        } else {
+            content
+        }
     }
 }
