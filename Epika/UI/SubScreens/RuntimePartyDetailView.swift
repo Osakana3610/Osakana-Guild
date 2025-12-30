@@ -35,10 +35,12 @@ struct RuntimePartyDetailView: View {
     @State private var allCharacters: [RuntimeCharacter] = []
     @State private var errorMessage: String?
     @State private var showDungeonPicker = false
+    @State private var targetFloorSelection: Int
 
     init(party: PartySnapshot, selectedDungeon: Binding<RuntimeDungeon?>, dungeons: [RuntimeDungeon]) {
         _currentParty = State(initialValue: party)
         _selectedDungeon = selectedDungeon
+        _targetFloorSelection = State(initialValue: Int(party.targetFloor))
         self.dungeons = dungeons
     }
 
@@ -139,10 +141,9 @@ struct RuntimePartyDetailView: View {
                         .disabled(dungeon.availableDifficulties.count <= 1)
                     }
 
-                    TargetFloorPickerRow(currentFloor: Int(currentParty.targetFloor),
-                                          maxFloor: selectedDungeon?.definition.floorCount ?? 1,
-                                          onSelect: { await updateTargetFloor($0) },
-                                          rowHeight: listRowHeight)
+                    TargetFloorPickerMenu(selection: $targetFloorSelection,
+                                           maxFloor: selectedDungeon?.definition.floorCount ?? 1,
+                                           rowHeight: listRowHeight)
                 }
             }
             .listStyle(.insetGrouped)
@@ -151,6 +152,17 @@ struct RuntimePartyDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .overlay { if let errorMessage { errorView(errorMessage) } }
             .task { await refreshData() }
+            .onChange(of: currentParty.targetFloor) { newValue in
+                let updatedValue = Int(newValue)
+                if targetFloorSelection != updatedValue {
+                    targetFloorSelection = updatedValue
+                }
+            }
+            .onChange(of: targetFloorSelection) { newValue in
+                if Int(currentParty.targetFloor) != newValue {
+                    Task { await updateTargetFloor(newValue) }
+                }
+            }
             .sheet(isPresented: $showDungeonPicker) {
                 DungeonPickerView(
                     dungeons: adventureState.runtimeDungeons,
@@ -488,36 +500,38 @@ private struct DifficultyPickerMenu: View {
     }
 }
 
-private struct TargetFloorPickerRow: View {
-    let currentFloor: Int
+private struct TargetFloorPickerMenu: View, Equatable {
+    @Binding var selection: Int
     let maxFloor: Int
-    let onSelect: (Int) async -> Void
     let rowHeight: CGFloat?
 
     var body: some View {
-        NavigationLink {
-            TargetFloorPickerView(currentFloor: currentFloor,
-                                  maxFloor: maxFloor,
-                                  onSelect: onSelect)
-        } label: {
-            HStack {
-                Text("目標階層")
-                    .foregroundColor(.primary)
-                Spacer(minLength: 12)
+        HStack {
+            Text("目標階層")
+                .foregroundColor(.primary)
+            Spacer(minLength: 12)
+            Picker(selection: $selection) {
+                ForEach(floorRange, id: \.self) { floor in
+                    Text(floorDisplayName(floor)).tag(floor)
+                }
+            } label: {
                 HStack(spacing: 4) {
-                    Text(floorDisplayName(currentFloor))
+                    Text(floorDisplayName(selection))
                         .foregroundColor(.secondary)
-                    Image(systemName: "chevron.right")
+                    Image(systemName: "chevron.up.chevron.down")
                         .foregroundStyle(Color(.tertiaryLabel))
                         .font(.footnote.weight(.semibold))
                 }
                 .frame(height: rowHeight)
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .frame(height: rowHeight)
-            .contentShape(Rectangle())
+            .pickerStyle(.menu)
         }
+        .frame(height: rowHeight)
+        .contentShape(Rectangle())
     }
+
+    private var floorRange: [Int] { targetFloorRange(maxFloor: maxFloor) }
 }
 
 
@@ -654,43 +668,6 @@ private struct DifficultyPickerView: View {
             if success {
                 dismiss()
             }
-        }
-    }
-}
-
-private struct TargetFloorPickerView: View {
-    let currentFloor: Int
-    let maxFloor: Int
-    let onSelect: (Int) async -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    private var floorRange: [Int] { targetFloorRange(maxFloor: maxFloor) }
-
-    var body: some View {
-        List {
-            ForEach(floorRange, id: \.self) { floor in
-                Button(action: { choose(floor) }) {
-                    HStack {
-                        Text(floorDisplayName(floor))
-                            .foregroundColor(.primary)
-                        Spacer()
-                        if currentFloor == floor {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                }
-            }
-        }
-        .avoidBottomGameInfo()
-        .navigationTitle("目標階層")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private func choose(_ floor: Int) {
-        Task {
-            await onSelect(floor)
-            dismiss()
         }
     }
 }
