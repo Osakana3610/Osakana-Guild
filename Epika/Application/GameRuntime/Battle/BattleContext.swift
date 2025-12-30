@@ -343,6 +343,7 @@ extension BattleContext {
     }
 
     static let maxReactionDepth = 4
+    static let maxExtraActionDepth = 5
 
     func actor(for side: ActorSide, index: Int) -> BattleActor? {
         switch side {
