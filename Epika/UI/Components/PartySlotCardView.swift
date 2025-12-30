@@ -29,6 +29,7 @@ struct PartySlotCardView<Footer: View>: View {
     let isExploring: Bool
     let canStartExploration: Bool
     let onPrimaryAction: () -> Void
+    let onMemberTap: ((RuntimeCharacter) -> Void)?
     let onMembersTap: (() -> Void)?
     private let footerBuilder: (() -> Footer)?
     init(party: PartySnapshot,
@@ -37,6 +38,7 @@ struct PartySlotCardView<Footer: View>: View {
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
+         onMemberTap: ((RuntimeCharacter) -> Void)? = nil,
          onMembersTap: (() -> Void)? = nil,
          @ViewBuilder footer: @escaping () -> Footer) {
         self.party = party
@@ -45,6 +47,7 @@ struct PartySlotCardView<Footer: View>: View {
         self.isExploring = isExploring
         self.canStartExploration = canStartExploration
         self.onPrimaryAction = onPrimaryAction
+        self.onMemberTap = onMemberTap
         self.onMembersTap = onMembersTap
         self.footerBuilder = footer
     }
@@ -55,6 +58,7 @@ struct PartySlotCardView<Footer: View>: View {
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
+         onMemberTap: ((RuntimeCharacter) -> Void)? = nil,
          onMembersTap: (() -> Void)? = nil)
     where Footer == EmptyView {
         self.party = party
@@ -63,6 +67,7 @@ struct PartySlotCardView<Footer: View>: View {
         self.isExploring = isExploring
         self.canStartExploration = canStartExploration
         self.onPrimaryAction = onPrimaryAction
+        self.onMemberTap = onMemberTap
         self.onMembersTap = onMembersTap
         self.footerBuilder = nil
     }
@@ -135,7 +140,9 @@ struct PartySlotCardView<Footer: View>: View {
 
     @ViewBuilder
     private var membersRow: some View {
-        if let onMembersTap {
+        if let onMemberTap {
+            PartyCharacterSilhouettesView(party: party, characters: members, onMemberTap: onMemberTap)
+        } else if let onMembersTap {
             Button(action: onMembersTap) {
                 PartyCharacterSilhouettesView(party: party, characters: members)
                     .contentShape(Rectangle())
