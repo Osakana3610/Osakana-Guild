@@ -47,11 +47,9 @@ struct BattleLogRenderer {
         actorIdentifiers: [UInt16: String] = [:]
     ) -> [RenderedAction] {
         var rendered: [RenderedAction] = []
-        var pendingKillEntries: [BattleActionEntry] = []
         var nextId = 0
 
-        func appendRenderedAction(for entry: BattleActionEntry,
-                                  additionalEffects: [BattleLogEntry] = []) {
+        func appendRenderedAction(for entry: BattleActionEntry) {
             let actorIdString = entry.actor.flatMap { actorIdentifiers[$0] } ?? entry.actor.map { String($0) }
             let actorName = resolveName(index: entry.actor, allyNames: allyNames, enemyNames: enemyNames)
 
@@ -79,9 +77,6 @@ struct BattleLogRenderer {
                                                     allyNames: allyNames,
                                                     enemyNames: enemyNames,
                                                     actorIdentifiers: actorIdentifiers)
-            }
-            if !additionalEffects.isEmpty {
-                effectEntries.append(contentsOf: additionalEffects)
             }
 
             rendered.append(RenderedAction(id: nextId,
@@ -93,88 +88,14 @@ struct BattleLogRenderer {
         }
 
         for entry in battleLog.entries {
-            if shouldDelayKillEntry(entry) {
-                pendingKillEntries.append(entry)
-                continue
-            }
-
-            var killsToAttach: [BattleActionEntry] = []
-            if !pendingKillEntries.isEmpty {
-                var remaining: [BattleActionEntry] = []
-
-                for kill in pendingKillEntries {
-                    if kill.turn < entry.turn {
-                        appendRenderedAction(for: kill)
-                        continue
-                    }
-                    if canAttachKillEffects(to: entry) && kill.turn == entry.turn {
-                        killsToAttach.append(kill)
-                    } else {
-                        remaining.append(kill)
-                    }
-                }
-
-                pendingKillEntries = remaining
-            }
-
-            let actorIdString = entry.actor.flatMap { actorIdentifiers[$0] } ?? entry.actor.map { String($0) }
-            let actorName = resolveName(index: entry.actor, allyNames: allyNames, enemyNames: enemyNames)
-            let declaration = makeDeclarationEntry(turn: Int(entry.turn),
-                                                   actorId: actorIdString,
-                                                   actorName: actorName,
-                                                   entry: entry,
-                                                   spellNames: spellNames,
-                                                   enemySkillNames: enemySkillNames,
-                                                   skillNames: skillNames,
-                                                   allyNames: allyNames,
-                                                   enemyNames: enemyNames)
-
-            let actionLabel = resolveActionLabel(entry: entry,
-                                                 spellNames: spellNames,
-                                                 enemySkillNames: enemySkillNames,
-                                                 skillNames: skillNames)
-
-            let shouldRenderEffects = rendersEffectLines(for: entry)
-            var effectEntries: [BattleLogEntry] = []
-            if shouldRenderEffects {
-                effectEntries = renderEffectEntries(for: entry,
-                                                    actorName: actorName,
-                                                    actionLabel: actionLabel,
-                                                    allyNames: allyNames,
-                                                    enemyNames: enemyNames,
-                                                    actorIdentifiers: actorIdentifiers)
-            }
-
-            if !killsToAttach.isEmpty {
-                let killEffects = killsToAttach.flatMap { kill -> [BattleLogEntry] in
-                    renderEffectEntries(for: kill,
-                                        actorName: actorName,
-                                        actionLabel: actionLabel,
-                                        allyNames: allyNames,
-                                        enemyNames: enemyNames,
-                                        actorIdentifiers: actorIdentifiers)
-                }
-                effectEntries.append(contentsOf: killEffects)
-            }
-
-            rendered.append(RenderedAction(id: nextId,
-                                           turn: Int(entry.turn),
-                                           model: entry,
-                                           declaration: declaration,
-                                           results: effectEntries))
-            nextId += 1
-        }
-
-        if !pendingKillEntries.isEmpty {
-            for kill in pendingKillEntries {
-                appendRenderedAction(for: kill)
-            }
+            appendRenderedAction(for: entry)
         }
 
         return rendered
     }
 
     // MARK: - Helpers
+
     private static func renderEffectEntries(for entry: BattleActionEntry,
                                             actorName: String?,
                                             actionLabel: String?,
@@ -333,33 +254,6 @@ struct BattleLogRenderer {
         }
     }
 
-    private static func shouldDelayKillEntry(_ entry: BattleActionEntry) -> Bool {
-        entry.declaration.kind == .physicalKill && entry.actor == nil
-    }
-
-    private static func canAttachKillEffects(to entry: BattleActionEntry) -> Bool {
-        switch entry.declaration.kind {
-        case .physicalAttack,
-             .reactionAttack,
-             .followUp,
-             .mageMagic,
-             .priestMagic,
-             .breath,
-             .enemySpecialSkill,
-             .healAbsorb,
-             .healVampire,
-             .healParty,
-             .healSelf,
-             .statusTick,
-             .statusRampage,
-             .damageSelf,
-             .enemySpecialDamage:
-            return true
-        default:
-            return false
-        }
-    }
-
     private static func shouldAggregatePhysicalEffects(for kind: ActionKind) -> Bool {
         switch kind {
         case .physicalAttack, .reactionAttack, .followUp:
@@ -452,6 +346,8 @@ struct BattleLogRenderer {
                 var summary = summaries[target] ?? PhysicalSummary()
                 summary.defeated = true
                 summaries[target] = summary
+                orderedTokens.append(.standard(effect))
+                continue
             case .physicalEvade, .physicalParry, .physicalBlock:
                 guard let target = effect.target else { continue }
                 ensureToken(for: target)
@@ -509,10 +405,6 @@ struct BattleLogRenderer {
             components.append("\(actor)の攻撃！")
         }
 
-        if summary.defeated {
-            components.append("\(targetName)を倒した！")
-        }
-
         if summary.totalDamage == 0 && !summary.defeated {
             guard summary.attempts > 0 else { return nil }
             let targetId = actorIdentifiers[target] ?? String(target)
@@ -523,7 +415,7 @@ struct BattleLogRenderer {
                                   targetId: targetId)
         } else {
             let targetId = actorIdentifiers[target] ?? String(target)
-            let type: BattleLogEntry.LogType = summary.defeated ? .defeat : .damage
+            let type: BattleLogEntry.LogType = summary.totalDamage > 0 ? .damage : .action
             return BattleLogEntry(turn: Int(entry.turn),
                                   message: components.joined(separator: " "),
                                   type: type,
@@ -573,6 +465,8 @@ struct BattleLogRenderer {
             return ("\(actor)は防御態勢を取った", .guard)
         case .physicalAttack:
             return (appendDetails(to: "\(actor)の攻撃！"), .action)
+        case .physicalKill:
+            return ("戦闘不能が発生した", .status)
         case .priestMagic:
             let spellName = actionLabel
                 ?? entry.declaration.skillIndex

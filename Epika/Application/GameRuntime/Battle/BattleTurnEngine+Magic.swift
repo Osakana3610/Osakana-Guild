@@ -170,7 +170,11 @@ extension BattleTurnEngine {
                 entryBuilder.addEffect(kind: .magicDamage, target: targetIdx, value: UInt32(applied))
 
                 if !target.isAlive {
-                    appendDefeatLog(for: target, side: targetRef.0, index: targetRef.1, context: &context)
+                    appendDefeatLog(for: target,
+                                    side: targetRef.0,
+                                    index: targetRef.1,
+                                    context: &context,
+                                    entryBuilder: entryBuilder)
                     let killerRef = BattleContext.reference(for: side, index: attackerIndex)
                     dispatchReactions(for: .allyDefeated(side: targetRef.0,
                                                          fallenIndex: targetRef.1,
@@ -272,7 +276,11 @@ extension BattleTurnEngine {
             entryBuilder.addEffect(kind: .breathDamage, target: targetIdx, value: UInt32(applied))
 
             if !target.isAlive {
-                appendDefeatLog(for: target, side: targetRef.0, index: targetRef.1, context: &context)
+                appendDefeatLog(for: target,
+                                side: targetRef.0,
+                                index: targetRef.1,
+                                context: &context,
+                                entryBuilder: entryBuilder)
                 let killerRef = BattleContext.reference(for: side, index: attackerIndex)
                 dispatchReactions(for: .allyDefeated(side: targetRef.0,
                                                      fallenIndex: targetRef.1,

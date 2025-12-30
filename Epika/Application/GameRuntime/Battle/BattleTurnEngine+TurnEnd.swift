@@ -424,6 +424,8 @@ extension BattleTurnEngine {
             context.appendSimpleEntry(kind: .buffApply,
                                       actorId: actorIdx,
                                       value: UInt32(context.turn),
+                                      skillIndex: trigger.sourceSkillId,
+                                      label: trigger.displayName,
                                       effectKind: .buffApply)
         }
     }
@@ -557,7 +559,8 @@ extension BattleTurnEngine {
                                       actorId: rescuerIdx,
                                       targetId: targetIdx,
                                       value: UInt32(appliedHeal),
-                                      effectKind: .rescue)
+                                      effectKind: .rescue,
+                                      postAction: true)
             return true
         }
 
