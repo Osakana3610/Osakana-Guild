@@ -157,48 +157,49 @@ extension BattleTurnEngine {
             guard var target = context.actor(for: targetRef.0, index: targetRef.1),
                   target.isAlive else { continue }
 
-            let damage = computeMagicalDamage(attacker: refreshedAttacker,
-                                              defender: &target,
-                                              spellId: spell.id,
-                                              context: &context)
-            let applied = applyDamage(amount: damage, to: &target)
-            applyMagicDegradation(to: &target, spellId: spell.id, caster: refreshedAttacker)
-
-            context.updateActor(target, side: targetRef.0, index: targetRef.1)
-
             let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
-            entryBuilder.addEffect(kind: .magicDamage, target: targetIdx, value: UInt32(applied))
+            if spell.category == .damage {
+                let damage = computeMagicalDamage(attacker: refreshedAttacker,
+                                                  defender: &target,
+                                                  spellId: spell.id,
+                                                  context: &context)
+                let applied = applyDamage(amount: damage, to: &target)
+                applyMagicDegradation(to: &target, spellId: spell.id, caster: refreshedAttacker)
 
-            if !target.isAlive {
-                appendDefeatLog(for: target, side: targetRef.0, index: targetRef.1, context: &context)
-                let killerRef = BattleContext.reference(for: side, index: attackerIndex)
-                dispatchReactions(for: .allyDefeated(side: targetRef.0,
-                                                     fallenIndex: targetRef.1,
-                                                     killer: killerRef),
-                                  depth: 0,
-                                  context: &context)
-                // 敵を倒したキャラのリアクション
-                let killedRef = BattleContext.reference(for: targetRef.0, index: targetRef.1)
-                dispatchReactions(for: .selfKilledEnemy(side: side,
-                                                        actorIndex: attackerIndex,
-                                                        killedEnemy: killedRef),
-                                  depth: 0,
-                                  context: &context)
-                if let _ = context.actor(for: targetRef.0, index: targetRef.1) {
-                    _ = attemptInstantResurrectionIfNeeded(of: targetRef.1,
-                                                          side: targetRef.0,
-                                                          context: &context)
-                        || attemptRescue(of: targetRef.1,
-                                        side: targetRef.0,
-                                        context: &context)
+                context.updateActor(target, side: targetRef.0, index: targetRef.1)
+                entryBuilder.addEffect(kind: .magicDamage, target: targetIdx, value: UInt32(applied))
+
+                if !target.isAlive {
+                    appendDefeatLog(for: target, side: targetRef.0, index: targetRef.1, context: &context)
+                    let killerRef = BattleContext.reference(for: side, index: attackerIndex)
+                    dispatchReactions(for: .allyDefeated(side: targetRef.0,
+                                                         fallenIndex: targetRef.1,
+                                                         killer: killerRef),
+                                      depth: 0,
+                                      context: &context)
+                    // 敵を倒したキャラのリアクション
+                    let killedRef = BattleContext.reference(for: targetRef.0, index: targetRef.1)
+                    dispatchReactions(for: .selfKilledEnemy(side: side,
+                                                            actorIndex: attackerIndex,
+                                                            killedEnemy: killedRef),
+                                      depth: 0,
+                                      context: &context)
+                    if let _ = context.actor(for: targetRef.0, index: targetRef.1) {
+                        _ = attemptInstantResurrectionIfNeeded(of: targetRef.1,
+                                                              side: targetRef.0,
+                                                              context: &context)
+                            || attemptRescue(of: targetRef.1,
+                                             side: targetRef.0,
+                                             context: &context)
+                    }
+                } else {
+                    let attackerRef = BattleContext.reference(for: side, index: attackerIndex)
+                    dispatchReactions(for: .selfDamagedMagical(side: targetRef.0,
+                                                               actorIndex: targetRef.1,
+                                                               attacker: attackerRef),
+                                      depth: 0,
+                                      context: &context)
                 }
-            } else {
-                let attackerRef = BattleContext.reference(for: side, index: attackerIndex)
-                dispatchReactions(for: .selfDamagedMagical(side: targetRef.0,
-                                                           actorIndex: targetRef.1,
-                                                           attacker: attackerRef),
-                                  depth: 0,
-                                  context: &context)
             }
 
             // 呪文にステータスIDが設定されている場合は付与を試みる
