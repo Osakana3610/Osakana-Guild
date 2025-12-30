@@ -524,29 +524,17 @@ private struct TargetFloorPickerMenu: View {
     let rowHeight: CGFloat?
 
     var body: some View {
-        HStack {
+        Picker(selection: $selection) {
+            ForEach(floorRange, id: \.self) { floor in
+                Text(floorDisplayName(floor)).tag(floor)
+            }
+        } label: {
             Text("目標階層")
                 .foregroundColor(.primary)
-            Spacer(minLength: 12)
-            Picker(selection: $selection) {
-                ForEach(floorRange, id: \.self) { floor in
-                    Text(floorDisplayName(floor)).tag(floor)
-                }
-            } label: {
-                HStack(spacing: 4) {
-                    Text(floorDisplayName(selection))
-                        .foregroundColor(.secondary)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .foregroundStyle(Color(.tertiaryLabel))
-                        .font(.footnote.weight(.semibold))
-                }
-                .frame(height: rowHeight)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            }
-            .pickerStyle(.menu)
         }
+        .pickerStyle(.menu)
+        .tint(Color(.secondaryLabel))
         .frame(height: rowHeight)
-        .contentShape(Rectangle())
     }
 
     private var floorRange: [Int] { targetFloorRange(maxFloor: maxFloor) }
