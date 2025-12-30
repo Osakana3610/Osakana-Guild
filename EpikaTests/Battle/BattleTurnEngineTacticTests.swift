@@ -133,6 +133,71 @@ final class BattleTurnEngineTacticTests: XCTestCase {
         XCTAssertTrue(actionsContain(result, kind: .physicalBlock))
     }
 
+    func testBuffSpellProducesNoDamageActions() {
+        let buffSpell = SpellDefinition(
+            id: 200,
+            name: "テストバフ",
+            school: .mage,
+            tier: 5,
+            unlockLevel: 1,
+            category: .buff,
+            targeting: .partyAllies,
+            maxTargetsBase: nil,
+            extraTargetsPerLevels: nil,
+            hitsPerCast: nil,
+            basePowerMultiplier: nil,
+            statusId: nil,
+            buffs: [SpellDefinition.Buff(type: .physicalDamageDealt, multiplier: 1.5)],
+            healMultiplier: nil,
+            healPercentOfMaxHP: nil,
+            castCondition: nil,
+            description: "味方強化"
+        )
+
+        let loadout = SkillRuntimeEffects.SpellLoadout(mage: [buffSpell], priest: [])
+
+        let players = [
+            BattleTestFactory.actor(
+                id: "buffer",
+                kind: .player,
+                combat: BattleTestFactory.combat(magicalAttack: 80),
+                actionRates: BattleActionRates(attack: 0, priestMagic: 0, mageMagic: 100, breath: 0),
+                spells: loadout
+            )
+        ]
+        let enemies = [
+            BattleTestFactory.actor(
+                id: "enemy",
+                kind: .enemy,
+                combat: BattleTestFactory.combat(maxHP: 150)
+            )
+        ]
+
+        let initialEnemyHP = enemies[0].currentHP
+
+        var context = BattleContext(players: players,
+                                    enemies: enemies,
+                                    statusDefinitions: [:],
+                                    skillDefinitions: [:],
+                                    random: GameRandomSource(seed: 99))
+
+        let executed = BattleTurnEngine.executeMageMagic(for: .player,
+                                                         attackerIndex: 0,
+                                                         context: &context,
+                                                         forcedTargets: .init(playerTarget: nil, enemyTarget: nil))
+
+        XCTAssertTrue(executed)
+        XCTAssertEqual(context.enemies[0].currentHP, initialEnemyHP)
+
+        let damageActions = context.actions.filter { $0.kind == ActionKind.magicDamage.rawValue }
+        XCTAssertTrue(damageActions.isEmpty)
+
+        let buffLogExists = context.actions.contains { action in
+            action.kind == ActionKind.buffApply.rawValue && action.skillIndex == UInt16(buffSpell.id)
+        }
+        XCTAssertTrue(buffLogExists)
+    }
+
     func testReactionAndExtraActionStackWithoutConflict() {
         var playerEffects = BattleActor.SkillEffects.neutral
         playerEffects.combat.reactions = [
