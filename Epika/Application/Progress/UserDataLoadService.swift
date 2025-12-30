@@ -912,14 +912,14 @@ final class UserDataLoadService {
 
         var segments: [Text] = []
         if let name = item.superRareTitleName {
-            segments.append(Text(name).foregroundColor(.primary))
+            segments.append(Text(name))
         }
         if let name = item.normalTitleName {
-            segments.append(Text(name).foregroundColor(.primary))
+            segments.append(Text(name))
         }
         segments.append(Text(item.name))
         if let gemName = item.gemName {
-            segments.append(Text("[\(gemName)]").foregroundColor(.primary))
+            segments.append(Text("[\(gemName)]"))
         }
 
         var content = segments.first ?? Text(item.name)

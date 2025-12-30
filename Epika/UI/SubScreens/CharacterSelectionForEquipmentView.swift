@@ -415,6 +415,7 @@ struct EquipmentEditorView: View {
         let definition = itemDefinitions[item.itemId]
         let isEquipped = item.equippedByAvatarId != nil
         let validation = isEquipped ? (canEquip: false, reason: nil) : validateEquipment(definition: definition)
+        let titleStyle: Color = isEquipped ? .primary : (validation.canEquip ? .primary : .secondary)
 
         return HStack(spacing: 8) {
             // 装備中アイテムにはキャラ画像を表示
@@ -436,12 +437,12 @@ struct EquipmentEditorView: View {
                     displayService.makeStyledDisplayText(for: item, includeSellValue: false)
                         .font(.body)
                         .lineLimit(1)
+                        .foregroundStyle(titleStyle)
                     Spacer()
                 }
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .foregroundStyle(isEquipped ? .primary : (validation.canEquip ? .primary : .secondary))
 
             Button {
                 selectedItemForDetail = item
