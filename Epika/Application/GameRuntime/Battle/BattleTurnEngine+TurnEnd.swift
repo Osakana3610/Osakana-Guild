@@ -108,7 +108,11 @@ extension BattleTurnEngine {
             context.updateActor(target, side: side, index: targetIndex)
             let healerIdx = context.actorIndex(for: side, arrayIndex: healerIndex)
             let targetIdx = context.actorIndex(for: side, arrayIndex: targetIndex)
-            context.appendAction(kind: .healParty, actor: healerIdx, target: targetIdx, value: UInt32(applied))
+            context.appendSimpleEntry(kind: .healParty,
+                                      actorId: healerIdx,
+                                      targetId: targetIdx,
+                                      value: UInt32(applied),
+                                      effectKind: .healParty)
         }
     }
 
@@ -135,10 +139,18 @@ extension BattleTurnEngine {
             guard missing > 0 else { return }
             let applied = min(amount, missing)
             actor.currentHP += applied
-            context.appendAction(kind: .healSelf, actor: actorIdx, value: UInt32(applied))
+            context.appendSimpleEntry(kind: .healSelf,
+                                      actorId: actorIdx,
+                                      targetId: actorIdx,
+                                      value: UInt32(applied),
+                                      effectKind: .healSelf)
         } else {
             let applied = applyDamage(amount: amount, to: &actor)
-            context.appendAction(kind: .damageSelf, actor: actorIdx, value: UInt32(applied))
+            context.appendSimpleEntry(kind: .damageSelf,
+                                      actorId: actorIdx,
+                                      targetId: actorIdx,
+                                      value: UInt32(applied),
+                                      effectKind: .damageSelf)
         }
     }
 
@@ -204,7 +216,11 @@ extension BattleTurnEngine {
         }
 
         let actorIdx = context.actorIndex(for: side, arrayIndex: index)
-        context.appendAction(kind: .resurrection, actor: actorIdx, value: UInt32(actor.currentHP))
+        context.appendSimpleEntry(kind: .resurrection,
+                                  actorId: actorIdx,
+                                  targetId: actorIdx,
+                                  value: UInt32(actor.currentHP),
+                                  effectKind: .resurrection)
     }
 
     static func rebuildSkillsAfterResurrection(for actor: inout BattleActor, context: BattleContext) {
@@ -299,7 +315,11 @@ extension BattleTurnEngine {
                 context.updateActor(target, side: side, index: reviveIndex)
                 let casterIdx = context.actorIndex(for: side, arrayIndex: index)
                 let targetIdx = context.actorIndex(for: side, arrayIndex: reviveIndex)
-                context.appendAction(kind: .necromancer, actor: casterIdx, target: targetIdx, value: UInt32(target.currentHP))
+                context.appendSimpleEntry(kind: .necromancer,
+                                          actorId: casterIdx,
+                                          targetId: targetIdx,
+                                          value: UInt32(target.currentHP),
+                                          effectKind: .necromancer)
             }
         }
     }
@@ -401,7 +421,10 @@ extension BattleTurnEngine {
             }
 
             let actorIdx = context.actorIndex(for: side, arrayIndex: ownerIndex)
-            context.appendAction(kind: .buffApply, actor: actorIdx, value: UInt32(context.turn))
+            context.appendSimpleEntry(kind: .buffApply,
+                                      actorId: actorIdx,
+                                      value: UInt32(context.turn),
+                                      effectKind: .buffApply)
         }
     }
 
@@ -470,7 +493,9 @@ extension BattleTurnEngine {
                 buff.remainingTurns -= 1
             }
             if buff.remainingTurns <= 0 {
-                context.appendAction(kind: .buffExpire, actor: actorIdx)
+                context.appendSimpleEntry(kind: .buffExpire,
+                                          actorId: actorIdx,
+                                          effectKind: .buffExpire)
                 continue
             }
             retained.append(buff)
@@ -528,7 +553,11 @@ extension BattleTurnEngine {
 
             let rescuerIdx = context.actorIndex(for: side, arrayIndex: candidateIndex)
             let targetIdx = context.actorIndex(for: side, arrayIndex: fallenIndex)
-            context.appendAction(kind: .rescue, actor: rescuerIdx, target: targetIdx, value: UInt32(appliedHeal))
+            context.appendSimpleEntry(kind: .rescue,
+                                      actorId: rescuerIdx,
+                                      targetId: targetIdx,
+                                      value: UInt32(appliedHeal),
+                                      effectKind: .rescue)
             return true
         }
 
@@ -622,7 +651,10 @@ extension BattleTurnEngine {
 
                 // ログ出力（オプション）
                 let actorIdx = context.actorIndex(for: side, arrayIndex: index)
-                context.appendAction(kind: .spellChargeRecover, actor: actorIdx, value: UInt32(targetSpell.id))
+                context.appendSimpleEntry(kind: .spellChargeRecover,
+                                          actorId: actorIdx,
+                                          value: UInt32(targetSpell.id),
+                                          effectKind: .spellChargeRecover)
             }
 
             actors[index] = actor

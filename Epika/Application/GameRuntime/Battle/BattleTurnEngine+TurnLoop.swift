@@ -401,7 +401,9 @@ extension BattleTurnEngine {
                     actor.currentHP = 0
                     context.updateActor(actor, side: side, index: index)
                     let actorIdx = context.actorIndex(for: side, arrayIndex: index)
-                    context.appendAction(kind: .withdraw, actor: actorIdx)
+                    context.appendSimpleEntry(kind: .withdraw,
+                                              actorId: actorIdx,
+                                              effectKind: .withdraw)
                 }
                 continue
             }
@@ -412,7 +414,9 @@ extension BattleTurnEngine {
                     actor.currentHP = 0
                     context.updateActor(actor, side: side, index: index)
                     let actorIdx = context.actorIndex(for: side, arrayIndex: index)
-                    context.appendAction(kind: .withdraw, actor: actorIdx)
+                    context.appendSimpleEntry(kind: .withdraw,
+                                              actorId: actorIdx,
+                                              effectKind: .withdraw)
                 }
             }
         }
@@ -451,7 +455,9 @@ extension BattleTurnEngine {
                                       turn: context.turn)
         if let target = playerTarget {
             let targetIdx = context.actorIndex(for: .player, arrayIndex: target)
-            context.appendAction(kind: .sacrifice, target: targetIdx)
+            context.appendSimpleEntry(kind: .sacrifice,
+                                      targetId: targetIdx,
+                                      effectKind: .sacrifice)
         }
 
         let enemyTarget = pickTarget(from: context.enemies,
@@ -460,7 +466,9 @@ extension BattleTurnEngine {
                                      turn: context.turn)
         if let target = enemyTarget {
             let targetIdx = context.actorIndex(for: .enemy, arrayIndex: target)
-            context.appendAction(kind: .sacrifice, target: targetIdx)
+            context.appendSimpleEntry(kind: .sacrifice,
+                                      targetId: targetIdx,
+                                      effectKind: .sacrifice)
         }
 
         return BattleContext.SacrificeTargets(playerTarget: playerTarget, enemyTarget: enemyTarget)

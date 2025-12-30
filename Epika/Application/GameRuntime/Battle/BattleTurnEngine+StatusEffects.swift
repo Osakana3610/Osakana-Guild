@@ -162,7 +162,11 @@ extension BattleTurnEngine {
                 let damage = max(1, Int(rawDamage.rounded()))
                 let applied = applyDamage(amount: damage, to: &actor)
                 if applied > 0 {
-                    context.appendAction(kind: .statusTick, actor: actorIdx, value: UInt32(applied))
+                    context.appendSimpleEntry(kind: .statusTick,
+                                              actorId: actorIdx,
+                                              targetId: actorIdx,
+                                              value: UInt32(applied),
+                                              effectKind: .statusTick)
                 }
             }
 
@@ -240,7 +244,10 @@ extension BattleTurnEngine {
         // ログ出力
         if hadStatus {
             let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
-            context.appendAction(kind: .statusRecover, actor: targetIdx)
+            context.appendSimpleEntry(kind: .statusRecover,
+                                      actorId: targetIdx,
+                                      targetId: targetIdx,
+                                      effectKind: .statusRecover)
         }
     }
 }

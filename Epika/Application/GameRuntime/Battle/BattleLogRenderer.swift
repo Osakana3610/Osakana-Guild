@@ -4,380 +4,275 @@
 // ==============================================================================
 //
 // 【責務】
-//   - 数値形式のBattleLogを表示用BattleLogEntryに変換
-//   - アクターインデックスからキャラクター名への解決
-//   - 行動種別に応じたメッセージ生成
-//
-// 【公開API】
-//   - render: BattleLogをBattleLogEntryの配列に変換
-//
-// 【使用箇所】
-//   - UI層（戦闘ログ表示時）
+//   - BattleLogEntryをアクション単位に描画するデータへ変換
+//   - 旧ロジックのヒューリスティックを排除し、BattleActionEntryをそのまま使用
 //
 // ==============================================================================
 
 import Foundation
 
-/// BattleLog（数値のみ）を BattleLogEntry（表示用）に変換するレンダラー
+/// BattleLog（ActionEntryベース）を UI 表示用にレンダリングする
 struct BattleLogRenderer {
+    struct RenderedAction: Sendable, Identifiable {
+        let id: Int
+        let turn: Int
+        let model: BattleActionEntry
+        let declaration: BattleLogEntry
+        let results: [BattleLogEntry]
 
-    /// BattleLogを表示用のBattleLogEntryに変換
-    /// - Parameters:
-    ///   - battleLog: 数値形式の戦闘ログ
-    ///   - allyNames: characterId → 表示名
-    ///   - enemyNames: actorIndex → 表示名（敵）
-    ///   - spellNames: spellId → 魔法名
-    ///   - enemySkillNames: enemySkillId → 敵スキル名
-    /// - Returns: 表示用のBattleLogEntry配列
+        var primaryEntry: BattleLogEntry { declaration }
+    }
+
     static func render(
         battleLog: BattleLog,
         allyNames: [UInt8: String],
         enemyNames: [UInt16: String],
         spellNames: [UInt8: String] = [:],
         enemySkillNames: [UInt16: String] = [:]
-    ) -> [BattleLogEntry] {
-        var entries: [BattleLogEntry] = []
-        let actions = battleLog.actions
-        var index = 0
+    ) -> [RenderedAction] {
+        var rendered: [RenderedAction] = []
 
-        while index < actions.count {
-            let action = actions[index]
-            guard let kind = ActionKind(rawValue: action.kind) else {
-                index += 1
-                continue
-            }
+        for (index, entry) in battleLog.entries.enumerated() {
+            let actorIdString = entry.actor.map { String($0) }
+            let actorName = resolveName(index: entry.actor, allyNames: allyNames, enemyNames: enemyNames)
+            let declaration = makeDeclarationEntry(turn: Int(entry.turn),
+                                                   actorId: actorIdString,
+                                                   actorName: actorName,
+                                                   entry: entry,
+                                                   spellNames: spellNames,
+                                                   enemySkillNames: enemySkillNames,
+                                                   allyNames: allyNames,
+                                                   enemyNames: enemyNames)
 
-            // 物理ダメージ・回避の連続をグループ化
-            if kind == .physicalDamage || kind == .physicalEvade {
-                let (entry, consumed) = consolidatePhysicalDamage(
-                    actions: actions,
-                    startIndex: index,
-                    allyNames: allyNames,
-                    enemyNames: enemyNames
-                )
-                if let entry = entry {
-                    entries.append(entry)
-                }
-                index += consumed
-                continue
-            }
-
-            let actorName = resolveName(index: action.actor, allyNames: allyNames, enemyNames: enemyNames)
-            let targetName: String?
-            if let target = action.target {
-                targetName = resolveName(index: target, allyNames: allyNames, enemyNames: enemyNames)
-            } else {
-                targetName = nil
-            }
-
-            let spellName: String?
-            if let skillIndex = action.skillIndex {
-                // 敵スキルの場合はenemySkillNamesから取得
-                if kind == .enemySpecialSkill {
-                    spellName = enemySkillNames[skillIndex]
-                } else {
-                    spellName = spellNames[UInt8(skillIndex)]
+            let shouldRenderEffects = rendersEffectLines(for: entry.declaration.kind)
+            let effectEntries: [BattleLogEntry]
+            if shouldRenderEffects {
+                effectEntries = entry.effects.compactMap { effect in
+                    makeEffectEntry(effect: effect,
+                                    turn: Int(entry.turn),
+                                    actorName: actorName,
+                                    allyNames: allyNames,
+                                    enemyNames: enemyNames)
                 }
             } else {
-                spellName = nil
+                effectEntries = []
             }
 
-            let entry = makeEntry(
-                turn: Int(action.turn),
-                kind: kind,
-                actorName: actorName,
-                targetName: targetName,
-                value: action.value.map { Int($0) },
-                actorId: String(action.actor),
-                targetId: action.target.map { String($0) },
-                spellName: spellName
-            )
-
-            if let entry = entry {
-                entries.append(entry)
-            }
-            index += 1
+            rendered.append(RenderedAction(id: index,
+                                           turn: Int(entry.turn),
+                                           model: entry,
+                                           declaration: declaration,
+                                           results: effectEntries))
         }
 
-        return entries
+        return rendered
     }
 
-    /// 連続する物理ダメージ・回避アクションをグループ化
-    private static func consolidatePhysicalDamage(
-        actions: [BattleAction],
-        startIndex: Int,
-        allyNames: [UInt8: String],
-        enemyNames: [UInt16: String]
-    ) -> (BattleLogEntry?, Int) {
-        let firstAction = actions[startIndex]
-        let actor = firstAction.actor
-        let target = firstAction.target
-        let turn = firstAction.turn
+    // MARK: - Helpers
 
-        var totalDamage = 0
-        var hitCount = 0
-        var evadeCount = 0
-        var consumed = 0
-
-        for i in startIndex..<actions.count {
-            let action = actions[i]
-            let isDamage = action.kind == ActionKind.physicalDamage.rawValue
-            let isEvade = action.kind == ActionKind.physicalEvade.rawValue
-            guard (isDamage || isEvade),
-                  action.actor == actor,
-                  action.target == target,
-                  action.turn == turn else {
-                break
-            }
-            if isDamage {
-                totalDamage += Int(action.value ?? 0)
-                hitCount += 1
-            } else {
-                evadeCount += 1
-            }
-            consumed += 1
-        }
-
-        let actorName = resolveName(index: actor, allyNames: allyNames, enemyNames: enemyNames)
-        let targetName = target.map { resolveName(index: $0, allyNames: allyNames, enemyNames: enemyNames) } ?? "対象"
-
-        let message: String
-        let logType: BattleLogEntry.LogType
-
-        if hitCount == 0 && evadeCount > 0 {
-            message = "\(actorName)の攻撃！\(targetName)は攻撃をかわした！"
-            logType = .miss
-        } else if hitCount == 1 && evadeCount == 0 {
-            message = "\(actorName)の攻撃！\(targetName)に\(totalDamage)のダメージ！"
-            logType = .damage
-        } else {
-            let totalAttempts = hitCount + evadeCount
-            if evadeCount > 0 {
-                message = "\(actorName)の攻撃！\(totalAttempts)回攻撃！\(hitCount)回ヒット！\(targetName)に\(totalDamage)のダメージ！"
-            } else {
-                message = "\(actorName)の攻撃！\(hitCount)回ヒット！\(targetName)に\(totalDamage)のダメージ！"
-            }
-            logType = .damage
-        }
-
-        let entry = BattleLogEntry(
-            turn: Int(turn),
-            message: message,
-            type: logType,
-            actorId: String(actor),
-            targetId: target.map { String($0) }
-        )
-
-        return (entry, consumed)
+    private static func makeDeclarationEntry(turn: Int,
+                                             actorId: String?,
+                                             actorName: String?,
+                                             entry: BattleActionEntry,
+                                             spellNames: [UInt8: String],
+                                             enemySkillNames: [UInt16: String],
+                                             allyNames: [UInt8: String],
+                                             enemyNames: [UInt16: String]) -> BattleLogEntry {
+        let (message, type) = declarationMessage(kind: entry.declaration.kind,
+                                                 actorName: actorName,
+                                                 entry: entry,
+                                                 spellNames: spellNames,
+                                                 enemySkillNames: enemySkillNames)
+        return BattleLogEntry(turn: turn,
+                              message: message,
+                              type: type,
+                              actorId: actorId,
+                              targetId: nil)
     }
 
-    private static func resolveName(
-        index: UInt16,
-        allyNames: [UInt8: String],
-        enemyNames: [UInt16: String]
-    ) -> String {
+    private static func makeEffectEntry(effect: BattleActionEntry.Effect,
+                                        turn: Int,
+                                        actorName: String?,
+                                        allyNames: [UInt8: String],
+                                        enemyNames: [UInt16: String]) -> BattleLogEntry? {
+        let targetName = resolveName(index: effect.target, allyNames: allyNames, enemyNames: enemyNames)
+        let (message, type) = effectMessage(kind: effect.kind,
+                                            actorName: actorName,
+                                            targetName: targetName,
+                                            value: effect.value.map { Int($0) })
+        guard !message.isEmpty else { return nil }
+        let targetId = effect.target.map { String($0) }
+        return BattleLogEntry(turn: turn,
+                              message: message,
+                              type: type,
+                              actorId: nil,
+                              targetId: targetId)
+    }
+
+    private static func resolveName(index: UInt16?,
+                                    allyNames: [UInt8: String],
+                                    enemyNames: [UInt16: String]) -> String? {
+        guard let index else { return nil }
         if index >= 1000 {
-            // 敵
             return enemyNames[index] ?? "敵\(index)"
         } else {
-            // 味方
             return allyNames[UInt8(index)] ?? "キャラ\(index)"
         }
     }
 
-    private static func makeEntry(
-        turn: Int,
-        kind: ActionKind,
-        actorName: String,
-        targetName: String?,
-        value: Int?,
-        actorId: String,
-        targetId: String?,
-        spellName: String?
-    ) -> BattleLogEntry? {
-        let (message, type) = messageAndType(
-            kind: kind,
-            actorName: actorName,
-            targetName: targetName,
-            value: value,
-            spellName: spellName
-        )
-
-        guard !message.isEmpty else { return nil }
-
-        return BattleLogEntry(
-            turn: turn,
-            message: message,
-            type: type,
-            actorId: actorId,
-            targetId: targetId
-        )
+    private static func rendersEffectLines(for kind: ActionKind) -> Bool {
+        switch kind {
+        case .physicalAttack,
+             .priestMagic,
+             .mageMagic,
+             .breath,
+             .enemySpecialSkill,
+             .reactionAttack,
+             .followUp:
+            return true
+        default:
+            return false
+        }
     }
 
-    private static func messageAndType(
-        kind: ActionKind,
-        actorName: String,
-        targetName: String?,
-        value: Int?,
-        spellName: String?
-    ) -> (String, BattleLogEntry.LogType) {
-        switch kind {
-        // 行動選択
-        case .defend:
-            return ("\(actorName)は防御態勢を取った", .guard)
-        case .physicalAttack:
-            return ("\(actorName)の攻撃！", .action)
-        case .priestMagic:
-            let spell = spellName ?? "回復魔法"
-            return ("\(actorName)は\(spell)を唱えた！", .action)
-        case .mageMagic:
-            let spell = spellName ?? "攻撃魔法"
-            return ("\(actorName)は\(spell)を唱えた！", .action)
-        case .breath:
-            return ("\(actorName)はブレスを吐いた！", .action)
+    private static func declarationMessage(kind: ActionKind,
+                                           actorName: String?,
+                                           entry: BattleActionEntry,
+                                           spellNames: [UInt8: String],
+                                           enemySkillNames: [UInt16: String]) -> (String, BattleLogEntry.LogType) {
+        let actor = actorName ?? "不明"
 
-        // 戦闘開始・終了
+        switch kind {
+        case .defend:
+            return ("\(actor)は防御態勢を取った", .guard)
+        case .physicalAttack:
+            return ("\(actor)の攻撃！", .action)
+        case .priestMagic:
+            let spellName = entry.declaration.skillIndex
+                .flatMap { UInt8(exactly: $0) }
+                .flatMap { spellNames[$0] } ?? "回復魔法"
+            return ("\(actor)は\(spellName)を唱えた！", .action)
+        case .mageMagic:
+            let spellName = entry.declaration.skillIndex
+                .flatMap { UInt8(exactly: $0) }
+                .flatMap { spellNames[$0] } ?? "攻撃魔法"
+            return ("\(actor)は\(spellName)を唱えた！", .action)
+        case .breath:
+            return ("\(actor)はブレスを吐いた！", .action)
         case .battleStart:
             return ("戦闘開始！", .system)
         case .turnStart:
-            return ("--- \(value ?? 1)ターン目 ---", .system)
+            let turnNumber = Int(entry.declaration.extra ?? UInt16(entry.turn))
+            return ("--- \(turnNumber)ターン目 ---", .system)
         case .victory:
             return ("勝利！ 敵を倒した！", .victory)
         case .defeat:
             return ("敗北… パーティは全滅した…", .defeat)
         case .retreat:
             return ("戦闘は長期化し、パーティは撤退を決断した", .retreat)
+        case .enemyAppear:
+            return ("敵が現れた！", .system)
+        case .enemySpecialSkill:
+            let skillName = entry.declaration.skillIndex
+                .flatMap { enemySkillNames[$0] } ?? "特殊攻撃"
+            return ("\(actor)の\(skillName)！", .action)
+        case .noAction:
+            return ("\(actor)は何もしなかった", .action)
+        case .withdraw:
+            return ("\(actor)は戦線離脱した", .status)
+        case .sacrifice:
+            return ("古の儀：\(actor)が供儀対象になった", .status)
+        case .vampireUrge:
+            return ("\(actor)は吸血衝動に駆られた", .status)
+        default:
+            // 残りは効果メッセージに委ねる
+            return ("", .system)
+        }
+    }
 
-        // 物理攻撃結果
+    private static func effectMessage(kind: BattleActionEntry.Effect.Kind,
+                                      actorName: String?,
+                                      targetName: String?,
+                                      value: Int?) -> (String, BattleLogEntry.LogType) {
+        let actor = actorName ?? "不明"
+        let target = targetName ?? "対象"
+        let amount = value ?? 0
+
+        switch kind {
         case .physicalDamage:
-            let target = targetName ?? "対象"
-            let damage = value ?? 0
-            return ("\(actorName)の攻撃！\(target)に\(damage)のダメージ！", .damage)
+            return ("\(actor)の攻撃！\(target)に\(amount)のダメージ！", .damage)
         case .physicalEvade:
-            let target = targetName ?? "対象"
-            return ("\(actorName)の攻撃！\(target)は攻撃をかわした！", .miss)
+            return ("\(actor)の攻撃！\(target)は攻撃をかわした！", .miss)
         case .physicalParry:
-            return ("\(actorName)の受け流し！", .action)
+            return ("\(target)の受け流し！", .action)
         case .physicalBlock:
-            return ("\(actorName)は大盾で防いだ！", .action)
+            return ("\(target)は大盾で防いだ！", .action)
         case .physicalKill:
-            let target = targetName ?? "対象"
             return ("\(target)を倒した！", .defeat)
         case .martialArts:
-            return ("\(actorName)の格闘戦！", .action)
-
-        // 魔法結果
+            return ("\(actor)の格闘戦！", .action)
         case .magicDamage:
-            let target = targetName ?? "対象"
-            let damage = value ?? 0
-            return ("\(actorName)の魔法！\(target)に\(damage)のダメージ！", .damage)
+            return ("\(actor)の魔法！\(target)に\(amount)のダメージ！", .damage)
         case .magicHeal:
-            let target = targetName ?? "対象"
-            let heal = value ?? 0
-            return ("\(target)のHPが\(heal)回復！", .heal)
+            return ("\(target)のHPが\(amount)回復！", .heal)
         case .magicMiss:
             return ("しかし効かなかった", .miss)
-
-        // ブレス結果
         case .breathDamage:
-            let target = targetName ?? "対象"
-            let damage = value ?? 0
-            return ("\(actorName)のブレス！\(target)に\(damage)のダメージ！", .damage)
-
-        // 状態異常
+            return ("\(actor)のブレス！\(target)に\(amount)のダメージ！", .damage)
         case .statusInflict:
-            let target = targetName ?? "対象"
             return ("\(target)は状態異常になった！", .status)
         case .statusResist:
-            let target = targetName ?? "対象"
             return ("\(target)は抵抗した！", .status)
         case .statusRecover:
-            let target = targetName ?? "対象"
             return ("\(target)の状態異常が治った", .status)
         case .statusTick:
-            let target = targetName ?? "対象"
-            let damage = value ?? 0
-            return ("\(target)は継続ダメージで\(damage)のダメージ！", .damage)
+            return ("\(target)は継続ダメージで\(amount)のダメージ！", .damage)
         case .statusConfusion:
-            return ("\(actorName)は暴走して混乱した！", .status)
+            return ("\(actor)は暴走して混乱した！", .status)
         case .statusRampage:
-            return ("\(actorName)の暴走！", .action)
-
-        // 反撃・特殊
+            return ("\(actor)の暴走！\(target)に\(amount)のダメージ！", .damage)
         case .reactionAttack:
-            return ("\(actorName)の反撃！", .action)
+            return ("\(actor)の反撃！", .action)
         case .followUp:
-            return ("\(actorName)の追加攻撃！", .action)
-
-        // 回復・吸収
+            return ("\(actor)の追加攻撃！", .action)
         case .healAbsorb:
-            let heal = value ?? 0
-            return ("\(actorName)は吸収能力で\(heal)回復", .heal)
+            return ("\(actor)は吸収能力で\(amount)回復", .heal)
         case .healVampire:
-            let heal = value ?? 0
-            return ("\(actorName)は吸血で\(heal)回復", .heal)
-        case .healParty:
-            let target = targetName ?? "対象"
-            let heal = value ?? 0
-            return ("\(target)のHPが\(heal)回復！", .heal)
-        case .healSelf:
-            let heal = value ?? 0
-            return ("\(actorName)は自身の効果で\(heal)回復", .heal)
+            return ("\(actor)は吸血で\(amount)回復", .heal)
+        case .healParty, .healSelf:
+            return ("\(target)のHPが\(amount)回復！", .heal)
         case .damageSelf:
-            let damage = value ?? 0
-            return ("\(actorName)は自身の効果で\(damage)ダメージ", .damage)
-
-        // バフ
+            return ("\(target)は自身の効果で\(amount)ダメージ", .damage)
         case .buffApply:
             return ("効果が発動した", .status)
         case .buffExpire:
-            return ("\(actorName)の効果が切れた", .status)
-
-        // 蘇生・救助
+            return ("\(target)の効果が切れた", .status)
         case .resurrection:
-            let target = targetName ?? actorName
             return ("\(target)が蘇生した！", .heal)
         case .necromancer:
-            let target = targetName ?? "対象"
-            return ("\(actorName)のネクロマンサーで\(target)が蘇生した！", .heal)
+            return ("\(actor)のネクロマンサーで\(target)が蘇生した！", .heal)
         case .rescue:
-            let target = targetName ?? "対象"
-            return ("\(actorName)は\(target)を救出した！", .heal)
-
-        // 行動不能・特殊
+            return ("\(actor)は\(target)を救出した！", .heal)
         case .actionLocked:
-            return ("\(actorName)は動けない", .status)
+            return ("\(actor)は動けない", .status)
         case .noAction:
-            return ("\(actorName)は何もしなかった", .action)
+            return ("\(actor)は何もしなかった", .action)
         case .withdraw:
-            return ("\(actorName)は戦線離脱した", .action)
+            return ("\(actor)は戦線離脱した", .status)
         case .sacrifice:
-            let target = targetName ?? "対象"
             return ("古の儀：\(target)が供儀対象になった", .status)
         case .vampireUrge:
-            return ("\(actorName)は吸血衝動に駆られた", .status)
-
-        // 敵出現
-        case .enemyAppear:
-            return ("敵が現れた！", .system)
-
-        // 敵専用技
-        case .enemySpecialSkill:
-            let skill = spellName ?? "特殊攻撃"
-            return ("\(actorName)の\(skill)！", .action)
+            return ("\(actor)は吸血衝動に駆られた", .status)
         case .enemySpecialDamage:
-            let target = targetName ?? "対象"
-            let damage = value ?? 0
-            return ("\(target)に\(damage)のダメージ！", .damage)
+            return ("\(target)に\(amount)のダメージ！", .damage)
         case .enemySpecialHeal:
-            let heal = value ?? 0
-            return ("\(actorName)は\(heal)回復した！", .heal)
+            return ("\(actor)は\(amount)回復した！", .heal)
         case .enemySpecialBuff:
-            return ("\(actorName)は能力を強化した！", .status)
-
-        // スキル効果
+            return ("\(actor)は能力を強化した！", .status)
         case .spellChargeRecover:
-            return ("\(actorName)は魔法のチャージを回復した", .heal)
+            return ("\(actor)は魔法のチャージを回復した", .status)
+        case .enemyAppear, .logOnly:
+            return ("", .system)
         }
     }
 }

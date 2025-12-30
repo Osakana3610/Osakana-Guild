@@ -64,7 +64,7 @@ struct BattleContext {
     // MARK: - 戦闘状態（可変）
     var players: [BattleActor]
     var enemies: [BattleActor]
-    var actions: [BattleAction]
+    var actionEntries: [BattleActionEntry]
     var initialHP: [UInt16: UInt32]
     var turn: Int
     var random: GameRandomSource
@@ -88,7 +88,7 @@ struct BattleContext {
         self.skillDefinitions = skillDefinitions
         self.enemySkillDefinitions = enemySkillDefinitions
         self.random = random
-        self.actions = []
+        self.actionEntries = []
         self.initialHP = [:]
         self.turn = 0
         self.enemySkillUsage = [:]
@@ -186,12 +186,10 @@ struct BattleContext {
     }
 
     func makeBattleLog(outcome: UInt8) -> BattleLog {
-        BattleLog(
-            initialHP: initialHP,
-            actions: actions,
-            outcome: outcome,
-            turns: UInt8(turn)
-        )
+        BattleLog(initialHP: initialHP,
+                  entries: actionEntries,
+                  outcome: outcome,
+                  turns: UInt8(turn))
     }
 
     // MARK: - 勝敗判定
@@ -229,25 +227,45 @@ struct BattleContext {
         enemySkillUsage[actorIdentifier]?[skillId] ?? 0
     }
 
-    // MARK: - アクション追加
-    mutating func appendAction(kind: ActionKind,
-                               actor: UInt16 = 0,
-                               target: UInt16? = nil,
-                               value: UInt32? = nil,
-                               skillIndex: UInt16? = nil,
-                               extra: UInt16? = nil) {
-        #if DEBUG
-        assert(turn >= 0 && turn <= 255, "turn out of range: \(turn)")
-        #endif
-        actions.append(BattleAction(
-            turn: UInt8(turn),
-            kind: kind.rawValue,
-            actor: actor,
-            target: target,
-            value: value,
-            skillIndex: skillIndex,
-            extra: extra
-        ))
+    mutating func appendActionEntry(_ entry: BattleActionEntry) {
+        actionEntries.append(entry)
+    }
+
+    mutating func appendSimpleEntry(kind: ActionKind,
+                                    actorId: UInt16? = nil,
+                                    targetId: UInt16? = nil,
+                                    value: UInt32? = nil,
+                                    statusId: UInt16? = nil,
+                                    skillIndex: UInt16? = nil,
+                                    extra: UInt16? = nil,
+                                    effectKind: BattleActionEntry.Effect.Kind = .logOnly,
+                                    turnOverride: Int? = nil) {
+        let builder = makeActionEntryBuilder(actorId: actorId,
+                                             kind: kind,
+                                             skillIndex: skillIndex,
+                                             extra: extra,
+                                             turnOverride: turnOverride)
+        if targetId != nil || value != nil || statusId != nil || effectKind != .logOnly || extra != nil {
+            builder.addEffect(kind: effectKind,
+                              target: targetId,
+                              value: value,
+                              statusId: statusId,
+                              extra: extra)
+        }
+        appendActionEntry(builder.build())
+    }
+
+    func makeActionEntryBuilder(actorId: UInt16?,
+                                kind: ActionKind,
+                                skillIndex: UInt16? = nil,
+                                extra: UInt16? = nil,
+                                turnOverride: Int? = nil) -> BattleActionEntry.Builder {
+        let declaration = BattleActionEntry.Declaration(kind: kind, skillIndex: skillIndex, extra: extra)
+        return BattleActionEntry.Builder(
+            turn: turnOverride ?? turn,
+            actor: actorId,
+            declaration: declaration
+        )
     }
 }
 

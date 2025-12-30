@@ -6,8 +6,10 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
     // MARK: - Helper
 
-    private func actionsContain(_ result: BattleTurnEngine.Result, kind: ActionKind) -> Bool {
-        result.battleLog.actions.contains { $0.kind == kind.rawValue }
+    private func effectsContain(_ result: BattleTurnEngine.Result, kind: BattleActionEntry.Effect.Kind) -> Bool {
+        result.battleLog.entries.contains { entry in
+            entry.effects.contains { $0.kind == kind }
+        }
     }
 
     // MARK: - Tests
@@ -35,7 +37,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
 
         // 戦闘が終了し、勝利していること
         XCTAssertEqual(result.outcome, BattleLog.outcomeVictory)
-        XCTAssertGreaterThan(result.battleLog.actions.count, 0)
+        XCTAssertGreaterThan(result.battleLog.entries.count, 0)
     }
 
     func testAntiHealingReplacesPhysicalAttack() {
@@ -69,7 +71,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
                                                 random: &random)
 
         // 戦闘が正常に終了していること
-        XCTAssertGreaterThan(result.battleLog.actions.count, 0)
+        XCTAssertGreaterThan(result.battleLog.entries.count, 0)
     }
 
     func testParryStopsMultiHit() {
@@ -100,7 +102,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
         // パリィが発動してダメージを防いでいること
         let survivingEnemy = result.enemies.first(where: { $0.identifier == "enemy.parry" })
         XCTAssertEqual(survivingEnemy?.currentHP, defenderHP)
-        XCTAssertTrue(actionsContain(result, kind: .physicalParry))
+        XCTAssertTrue(effectsContain(result, kind: .physicalParry))
     }
 
     func testShieldBlockPreventsDamage() {
@@ -130,7 +132,7 @@ final class BattleTurnEngineTacticTests: XCTestCase {
         // シールドブロックが発動してダメージを防いでいること
         let survivingEnemy = result.enemies.first(where: { $0.identifier == "enemy.shield" })
         XCTAssertEqual(survivingEnemy?.currentHP, defenderHP)
-        XCTAssertTrue(actionsContain(result, kind: .physicalBlock))
+        XCTAssertTrue(effectsContain(result, kind: .physicalBlock))
     }
 
     func testBuffSpellProducesNoDamageActions() {
@@ -189,13 +191,132 @@ final class BattleTurnEngineTacticTests: XCTestCase {
         XCTAssertTrue(executed)
         XCTAssertEqual(context.enemies[0].currentHP, initialEnemyHP)
 
-        let damageActions = context.actions.filter { $0.kind == ActionKind.magicDamage.rawValue }
-        XCTAssertTrue(damageActions.isEmpty)
+        let damageEffects = context.actionEntries.flatMap { $0.effects }.filter { $0.kind == .magicDamage }
+        XCTAssertTrue(damageEffects.isEmpty)
 
-        let buffLogExists = context.actions.contains { action in
-            action.kind == ActionKind.buffApply.rawValue && action.skillIndex == UInt16(buffSpell.id)
+        let buffLogExists = context.actionEntries.contains { entry in
+            entry.declaration.skillIndex == UInt16(buffSpell.id) &&
+            entry.effects.contains { $0.kind == BattleActionEntry.Effect.Kind.buffApply }
         }
         XCTAssertTrue(buffLogExists)
+    }
+
+    func testBattleLogEntryCapturesBuffTargets() {
+        let buffSpell = SpellDefinition(
+            id: 210,
+            name: "ガードアップ",
+            school: .mage,
+            tier: 3,
+            unlockLevel: 1,
+            category: .buff,
+            targeting: .partyAllies,
+            maxTargetsBase: nil,
+            extraTargetsPerLevels: nil,
+            hitsPerCast: nil,
+            basePowerMultiplier: nil,
+            statusId: nil,
+            buffs: [SpellDefinition.Buff(type: .physicalDamageTaken, multiplier: 1.2)],
+            healMultiplier: nil,
+            healPercentOfMaxHP: nil,
+            castCondition: nil,
+            description: "防御を高める"
+        )
+
+        let loadout = SkillRuntimeEffects.SpellLoadout(mage: [buffSpell], priest: [])
+
+        var players = [
+            BattleTestFactory.actor(
+                id: "buffer",
+                kind: .player,
+                combat: BattleTestFactory.combat(magicalAttack: 50),
+                actionRates: BattleActionRates(attack: 0, priestMagic: 0, mageMagic: 100, breath: 0),
+                spells: loadout
+            ),
+            BattleTestFactory.actor(
+                id: "ally",
+                kind: .player,
+                combat: BattleTestFactory.combat(maxHP: 120, physicalAttack: 5),
+                actionRates: BattleActionRates(attack: 0, priestMagic: 0, mageMagic: 0, breath: 0)
+            )
+        ]
+        var enemies = [
+            BattleTestFactory.actor(
+                id: "enemy",
+                kind: .enemy,
+                combat: BattleTestFactory.combat(maxHP: 400, physicalAttack: 10)
+            )
+        ]
+
+        var random = GameRandomSource(seed: 123)
+        let result = BattleTurnEngine.runBattle(players: &players,
+                                                enemies: &enemies,
+                                                statusEffects: [:],
+                                                skillDefinitions: [:],
+                                                random: &random)
+
+        let buffEntry = result.battleLog.entries.first {
+            $0.declaration.skillIndex == UInt16(buffSpell.id)
+        }
+        XCTAssertNotNil(buffEntry)
+        let buffEffects = buffEntry?.effects.filter { $0.kind == BattleActionEntry.Effect.Kind.buffApply } ?? []
+        XCTAssertEqual(buffEffects.count, 2)
+    }
+
+    func testBattleLogEntryRecordsReactionAttack() {
+        var playerEffects = BattleActor.SkillEffects.neutral
+        playerEffects.combat.reactions = [
+            .init(identifier: "parry.counter",
+                  displayName: "反撃",
+                  trigger: .selfDamagedPhysical,
+                  target: .attacker,
+                  damageType: .physical,
+                  baseChancePercent: 100,
+                  attackCountMultiplier: 1.0,
+                  criticalRateMultiplier: 1.0,
+                  accuracyMultiplier: 1.0,
+                  requiresMartial: false,
+                  requiresAllyBehind: false)
+        ]
+
+        var players = [
+            BattleTestFactory.actor(
+                id: "reactor",
+                kind: .player,
+                combat: BattleTestFactory.combat(maxHP: 200, physicalAttack: 40),
+                skillEffects: playerEffects,
+                actionRates: BattleActionRates(attack: 0, priestMagic: 0, mageMagic: 0, breath: 0)
+            )
+        ]
+
+        var enemies = [
+            BattleTestFactory.actor(
+                id: "aggressor",
+                kind: .enemy,
+                combat: BattleTestFactory.combat(maxHP: 150, physicalAttack: 30, hitRate: 90),
+                actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
+            )
+        ]
+
+        var random = GameRandomSource(seed: 77)
+        let result = BattleTurnEngine.runBattle(players: &players,
+                                                enemies: &enemies,
+                                                statusEffects: [:],
+                                                skillDefinitions: [:],
+                                                random: &random)
+
+        let reactionEntry = result.battleLog.entries.first { $0.declaration.kind == .reactionAttack }
+        XCTAssertNotNil(reactionEntry)
+        guard let reactionEntry else {
+            XCTFail("反撃エントリが見つかりません")
+            return
+        }
+
+        let damageEffect = reactionEntry.effects.first { $0.kind == .physicalDamage }
+        XCTAssertNotNil(damageEffect)
+        XCTAssertNotNil(reactionEntry.actor)
+        XCTAssertTrue((reactionEntry.actor ?? 0) < 1000)
+        XCTAssertNotNil(damageEffect?.target)
+        XCTAssertTrue((damageEffect?.target ?? 0) >= 1000)
     }
 
     func testReactionAndExtraActionStackWithoutConflict() {
@@ -242,7 +363,10 @@ final class BattleTurnEngineTacticTests: XCTestCase {
         XCTAssertTrue(actionsContain(result, kind: .reactionAttack))
 
         // 物理ダメージが複数回記録されていること（反撃 + 本行動 + 追加行動）
-        let physicalDamageCount = result.battleLog.actions.filter { $0.kind == ActionKind.physicalDamage.rawValue }.count
+        let physicalDamageCount = result.battleLog.entries
+            .flatMap { $0.effects }
+            .filter { $0.kind == .physicalDamage }
+            .count
         XCTAssertGreaterThanOrEqual(physicalDamageCount, 3)
     }
 
@@ -387,18 +511,12 @@ final class BattleTurnEngineTacticTests: XCTestCase {
                                                     skillDefinitions: [:],
                                                     random: &random)
 
-            // 敵のアクションを分析
-            for action in result.battleLog.actions {
-                guard let kind = ActionKind(rawValue: action.kind) else { continue }
-
-                // 敵が行ったダメージアクションを確認
-                let isEnemyActor = action.actor >= 1000
-                let isEnemyTarget = (action.target ?? 0) >= 1000
-
-                // 敵がダメージを与えるアクションで、ターゲットが敵の場合はバグ
-                let damageActions: [ActionKind] = [.physicalDamage, .magicDamage, .breathDamage]
-                if damageActions.contains(kind) && isEnemyActor && isEnemyTarget {
-                    XCTFail("敵が敵を攻撃しています: seed=\(seed), actor=\(action.actor), target=\(action.target ?? 0), kind=\(kind)")
+            for entry in result.battleLog.entries {
+                guard let actor = entry.actor, actor >= 1000 else { continue }
+                for effect in entry.effects {
+                    let damageKinds: [BattleActionEntry.Effect.Kind] = [.physicalDamage, .magicDamage, .breathDamage]
+                    guard damageKinds.contains(effect.kind), let target = effect.target, target >= 1000 else { continue }
+                    XCTFail("敵が敵を攻撃しています: seed=\(seed), actor=\(actor), target=\(target), kind=\(effect.kind)")
                 }
             }
         }
@@ -436,13 +554,12 @@ final class BattleTurnEngineTacticTests: XCTestCase {
                                                     skillDefinitions: [:],
                                                     random: &random)
 
-            for action in result.battleLog.actions {
-                guard let kind = ActionKind(rawValue: action.kind) else { continue }
-                let isEnemyActor = action.actor >= 1000
-                let isEnemyTarget = (action.target ?? 0) >= 1000
-                let damageActions: [ActionKind] = [.physicalDamage, .magicDamage, .breathDamage]
-                if damageActions.contains(kind) && isEnemyActor && isEnemyTarget {
-                    XCTFail("敵が敵を攻撃: seed=\(seed), actor=\(action.actor), target=\(action.target ?? 0)")
+            for entry in result.battleLog.entries {
+                guard let actor = entry.actor, actor >= 1000 else { continue }
+                for effect in entry.effects {
+                    let damageKinds: [BattleActionEntry.Effect.Kind] = [.physicalDamage, .magicDamage, .breathDamage]
+                    guard damageKinds.contains(effect.kind), let target = effect.target, target >= 1000 else { continue }
+                    XCTFail("敵が敵を攻撃: seed=\(seed), actor=\(actor), target=\(target)")
                 }
             }
         }
@@ -491,20 +608,10 @@ final class BattleTurnEngineTacticTests: XCTestCase {
             // 各ターンごとの敵の行動回数をカウント
             var enemyActionsPerTurn: [Int: [UInt16: Int]] = [:]  // [turn: [actorId: count]]
 
-            for action in result.battleLog.actions {
-                let turn = Int(action.turn)
-                let actor = action.actor
-
-                // 敵のアクターIDは1000以上
-                guard actor >= 1000 else { continue }
-
-                // 攻撃アクション（physicalAttack）のみカウント
-                guard action.kind == ActionKind.physicalAttack.rawValue else { continue }
-
-                if enemyActionsPerTurn[turn] == nil {
-                    enemyActionsPerTurn[turn] = [:]
-                }
-                enemyActionsPerTurn[turn]![actor, default: 0] += 1
+            for entry in result.battleLog.entries where entry.declaration.kind == .physicalAttack {
+                let turn = Int(entry.turn)
+                guard let actor = entry.actor, actor >= 1000 else { continue }
+                enemyActionsPerTurn[turn, default: [:]][actor, default: 0] += 1
             }
 
             // 検証: 各ターン、各敵は1回だけ行動するべき
@@ -560,10 +667,9 @@ final class BattleTurnEngineTacticTests: XCTestCase {
                 var enemyActionsPerTurn: [Int: Int] = [:]  // [turn: totalEnemyActions]
                 var aliveEnemiesPerTurn: [Int: Int] = [:]  // [turn: aliveEnemyCount]
 
-                for action in result.battleLog.actions {
-                    let turn = Int(action.turn)
-                    guard action.actor >= 1000 else { continue }
-                    guard action.kind == ActionKind.physicalAttack.rawValue else { continue }
+                for entry in result.battleLog.entries where entry.declaration.kind == .physicalAttack {
+                    let turn = Int(entry.turn)
+                    guard let actor = entry.actor, actor >= 1000 else { continue }
                     enemyActionsPerTurn[turn, default: 0] += 1
                 }
 
@@ -585,6 +691,13 @@ final class BattleTurnEngineTacticTests: XCTestCase {
                     }
                 }
             }
+        }
+    }
+
+    private func actionsContain(_ result: BattleTurnEngine.Result,
+                                kind: BattleActionEntry.Effect.Kind) -> Bool {
+        result.battleLog.entries.contains { entry in
+            entry.effects.contains { $0.kind == kind }
         }
     }
 }

@@ -207,9 +207,23 @@ final class ExplorationProgressService {
 
     /// 戦闘ログデータをバイナリ形式にエンコード
     /// フォーマット: [Header][InitialHP][Actions][Participants]
+    struct DecodedBattleLogData {
+        let initialHP: [UInt16: UInt32]
+        let entries: [BattleActionEntry]
+        let outcome: UInt8
+        let turns: UInt8
+        let playerSnapshots: [BattleParticipantSnapshot]
+        let enemySnapshots: [BattleParticipantSnapshot]
+    }
+
+    enum BattleLogArchiveDecodingError: Error {
+        case unsupportedVersion(UInt8)
+        case malformedData
+    }
+
     static func encodeBattleLogData(
         initialHP: [UInt16: UInt32],
-        actions: [BattleAction],
+        entries: [BattleActionEntry],
         outcome: UInt8,
         turns: UInt8,
         playerSnapshots: [BattleParticipantSnapshot],
@@ -218,7 +232,7 @@ final class ExplorationProgressService {
         var data = Data()
 
         // Header: version(1) + outcome(1) + turns(1) = 3 bytes
-        data.append(1)  // version
+        data.append(BattleLog.currentVersion)
         data.append(outcome)
         data.append(turns)
 
@@ -232,22 +246,73 @@ final class ExplorationProgressService {
             withUnsafeBytes(of: &hpVal) { data.append(contentsOf: $0) }
         }
 
-        // Actions: count(2) + entries(12 each)
-        var actionCount = UInt16(actions.count)
-        withUnsafeBytes(of: &actionCount) { data.append(contentsOf: $0) }
-        for action in actions {
-            data.append(action.turn)
-            data.append(action.kind)
-            var actor = action.actor
-            var target = action.target ?? 0
-            var value = action.value ?? 0
-            var skillIndex = action.skillIndex ?? 0
-            var extra = action.extra ?? 0
-            withUnsafeBytes(of: &actor) { data.append(contentsOf: $0) }
-            withUnsafeBytes(of: &target) { data.append(contentsOf: $0) }
-            withUnsafeBytes(of: &value) { data.append(contentsOf: $0) }
-            withUnsafeBytes(of: &skillIndex) { data.append(contentsOf: $0) }
-            withUnsafeBytes(of: &extra) { data.append(contentsOf: $0) }
+        // Entries: count(2) + variable payload per entry
+        var entryCount = UInt16(entries.count)
+        withUnsafeBytes(of: &entryCount) { data.append(contentsOf: $0) }
+        for entry in entries {
+            data.append(UInt8(entry.turn))
+            if let actor = entry.actor {
+                data.append(1)
+                var actorValue = actor
+                withUnsafeBytes(of: &actorValue) { data.append(contentsOf: $0) }
+            } else {
+                data.append(0)
+            }
+
+            data.append(entry.declaration.kind.rawValue)
+
+            if let skillIndex = entry.declaration.skillIndex {
+                data.append(1)
+                var skillValue = skillIndex
+                withUnsafeBytes(of: &skillValue) { data.append(contentsOf: $0) }
+            } else {
+                data.append(0)
+            }
+
+            if let extra = entry.declaration.extra {
+                data.append(1)
+                var extraValue = extra
+                withUnsafeBytes(of: &extraValue) { data.append(contentsOf: $0) }
+            } else {
+                data.append(0)
+            }
+
+            data.append(UInt8(entry.effects.count))
+            for effect in entry.effects {
+                data.append(effect.kind.rawValue)
+
+                if let target = effect.target {
+                    data.append(1)
+                    var targetValue = target
+                    withUnsafeBytes(of: &targetValue) { data.append(contentsOf: $0) }
+                } else {
+                    data.append(0)
+                }
+
+                if let value = effect.value {
+                    data.append(1)
+                    var valueCopy = value
+                    withUnsafeBytes(of: &valueCopy) { data.append(contentsOf: $0) }
+                } else {
+                    data.append(0)
+                }
+
+                if let statusId = effect.statusId {
+                    data.append(1)
+                    var statusValue = statusId
+                    withUnsafeBytes(of: &statusValue) { data.append(contentsOf: $0) }
+                } else {
+                    data.append(0)
+                }
+
+                if let extra = effect.extra {
+                    data.append(1)
+                    var extraValue = extra
+                    withUnsafeBytes(of: &extraValue) { data.append(contentsOf: $0) }
+                } else {
+                    data.append(0)
+                }
+            }
         }
 
         // Participants: playerCount(1) + enemyCount(1) + entries
@@ -289,98 +354,130 @@ final class ExplorationProgressService {
     }
 
     /// バイナリ形式から戦闘ログデータをデコード
-    static func decodeBattleLogData(_ data: Data) -> (
-        initialHP: [UInt16: UInt32],
-        actions: [BattleAction],
-        outcome: UInt8,
-        turns: UInt8,
-        playerSnapshots: [BattleParticipantSnapshot],
-        enemySnapshots: [BattleParticipantSnapshot]
-    )? {
+    static func decodeBattleLogData(_ data: Data) throws -> DecodedBattleLogData {
         guard data.count >= 3 else {
-            print("[BattleLogDecode] データが短すぎます: \(data.count)バイト")
-            return nil
+            throw BattleLogArchiveDecodingError.malformedData
         }
 
         var offset = 0
 
-        func readUInt8() -> UInt8? {
-            guard offset < data.count else { return nil }
+        func readUInt8() throws -> UInt8 {
+            guard offset < data.count else { throw BattleLogArchiveDecodingError.malformedData }
             let value = data[offset]
             offset += 1
             return value
         }
 
-        func readUInt16() -> UInt16? {
-            guard offset + 2 <= data.count else { return nil }
+        func readUInt16() throws -> UInt16 {
+            guard offset + 2 <= data.count else { throw BattleLogArchiveDecodingError.malformedData }
             let value = data.withUnsafeBytes { $0.loadUnaligned(fromByteOffset: offset, as: UInt16.self) }
             offset += 2
             return value
         }
 
-        func readUInt32() -> UInt32? {
-            guard offset + 4 <= data.count else { return nil }
+        func readUInt32() throws -> UInt32 {
+            guard offset + 4 <= data.count else { throw BattleLogArchiveDecodingError.malformedData }
             let value = data.withUnsafeBytes { $0.loadUnaligned(fromByteOffset: offset, as: UInt32.self) }
             offset += 4
             return value
         }
 
-        func readString() -> String? {
-            guard let length = readUInt8() else { return nil }
-            guard offset + Int(length) <= data.count else { return nil }
+        func readString() throws -> String {
+            let length = try readUInt8()
+            guard offset + Int(length) <= data.count else { throw BattleLogArchiveDecodingError.malformedData }
             let stringData = data[offset..<(offset + Int(length))]
             offset += Int(length)
-            return String(data: stringData, encoding: .utf8)
+            guard let string = String(data: stringData, encoding: .utf8) else {
+                throw BattleLogArchiveDecodingError.malformedData
+            }
+            return string
         }
 
         // Header
-        guard let version = readUInt8(), version == 1 else {
-            print("[BattleLogDecode] 不正なバージョン")
-            return nil
+        let version = try readUInt8()
+        guard version == BattleLog.currentVersion else {
+            throw BattleLogArchiveDecodingError.unsupportedVersion(version)
         }
-        guard let outcome = readUInt8(), let turns = readUInt8() else { return nil }
+        let outcome = try readUInt8()
+        let turns = try readUInt8()
 
         // InitialHP
-        guard let hpCount = readUInt16() else { return nil }
+        let hpCount = try readUInt16()
         var initialHP: [UInt16: UInt32] = [:]
         for _ in 0..<hpCount {
-            guard let actorIndex = readUInt16(), let hp = readUInt32() else { return nil }
+            let actorIndex = try readUInt16()
+            let hp = try readUInt32()
             initialHP[actorIndex] = hp
         }
 
-        // Actions
-        guard let actionCount = readUInt16() else { return nil }
-        var actions: [BattleAction] = []
-        for _ in 0..<actionCount {
-            guard let turn = readUInt8(),
-                  let kind = readUInt8(),
-                  let actor = readUInt16(),
-                  let target = readUInt16(),
-                  let value = readUInt32(),
-                  let skillIndex = readUInt16(),
-                  let extra = readUInt16() else { return nil }
-            actions.append(BattleAction(
-                turn: turn,
-                kind: kind,
-                actor: actor,
-                target: target == 0 ? nil : target,
-                value: value == 0 ? nil : value,
-                skillIndex: skillIndex == 0 ? nil : skillIndex,
-                extra: extra == 0 ? nil : extra
-            ))
+        // Entries
+        let entryCount = try readUInt16()
+        var entries: [BattleActionEntry] = []
+        for _ in 0..<entryCount {
+            let turn = try readUInt8()
+            let hasActor = try readUInt8()
+            let actor: UInt16? = hasActor == 1 ? try readUInt16() : nil
+
+            let kindRaw = try readUInt8()
+            guard let kind = ActionKind(rawValue: kindRaw) else {
+                throw BattleLogArchiveDecodingError.malformedData
+            }
+
+            let hasSkill = try readUInt8()
+            let skillIndex: UInt16? = hasSkill == 1 ? try readUInt16() : nil
+
+            let hasExtra = try readUInt8()
+            let declarationExtra: UInt16? = hasExtra == 1 ? try readUInt16() : nil
+
+            let effectCount = try readUInt8()
+            var effects: [BattleActionEntry.Effect] = []
+            for _ in 0..<effectCount {
+                let effectKindRaw = try readUInt8()
+                guard let effectKind = BattleActionEntry.Effect.Kind(rawValue: effectKindRaw) else {
+                    throw BattleLogArchiveDecodingError.malformedData
+                }
+
+                let hasTarget = try readUInt8()
+                let target: UInt16? = hasTarget == 1 ? try readUInt16() : nil
+
+                let hasValue = try readUInt8()
+                let value: UInt32? = hasValue == 1 ? try readUInt32() : nil
+
+                let hasStatus = try readUInt8()
+                let statusId: UInt16? = hasStatus == 1 ? try readUInt16() : nil
+
+                let hasEffectExtra = try readUInt8()
+                let effectExtra: UInt16? = hasEffectExtra == 1 ? try readUInt16() : nil
+
+                effects.append(BattleActionEntry.Effect(kind: effectKind,
+                                                        target: target,
+                                                        value: value,
+                                                        statusId: statusId,
+                                                        extra: effectExtra))
+            }
+
+            let declaration = BattleActionEntry.Declaration(kind: kind,
+                                                            skillIndex: skillIndex,
+                                                            extra: declarationExtra)
+            let entry = BattleActionEntry(turn: Int(turn),
+                                          actor: actor,
+                                          declaration: declaration,
+                                          effects: effects)
+            entries.append(entry)
         }
 
         // Participants
-        guard let playerCount = readUInt8(), let enemyCount = readUInt8() else { return nil }
+        let playerCount = try readUInt8()
+        let enemyCount = try readUInt8()
 
-        func decodeParticipant() -> BattleParticipantSnapshot? {
-            guard let actorId = readString(),
-                  let partyMemberId = readUInt8(),
-                  let characterId = readUInt8(),
-                  let name = readString(),
-                  let avatarIndex = readUInt16(),
-                  let level = readUInt16(),
-                  let maxHP = readUInt32() else { return nil }
+        func decodeParticipant() throws -> BattleParticipantSnapshot {
+            let actorId = try readString()
+            let partyMemberId = try readUInt8()
+            let characterId = try readUInt8()
+            let name = try readString()
+            let avatarIndex = try readUInt16()
+            let level = try readUInt16()
+            let maxHP = try readUInt32()
             return BattleParticipantSnapshot(
                 actorId: actorId,
                 partyMemberId: partyMemberId == 0 ? nil : partyMemberId,
@@ -394,17 +491,22 @@ final class ExplorationProgressService {
 
         var playerSnapshots: [BattleParticipantSnapshot] = []
         for _ in 0..<playerCount {
-            guard let snapshot = decodeParticipant() else { return nil }
+            let snapshot = try decodeParticipant()
             playerSnapshots.append(snapshot)
         }
 
         var enemySnapshots: [BattleParticipantSnapshot] = []
         for _ in 0..<enemyCount {
-            guard let snapshot = decodeParticipant() else { return nil }
+            let snapshot = try decodeParticipant()
             enemySnapshots.append(snapshot)
         }
 
-        return (initialHP, actions, outcome, turns, playerSnapshots, enemySnapshots)
+        return DecodedBattleLogData(initialHP: initialHP,
+                                    entries: entries,
+                                    outcome: outcome,
+                                    turns: turns,
+                                    playerSnapshots: playerSnapshots,
+                                    enemySnapshots: enemySnapshots)
     }
 
     private enum ExplorationSnapshotBuildError: Error {
@@ -782,7 +884,7 @@ private extension ExplorationProgressService {
             // バイナリBLOBで詳細データを保存
             logRecord.logData = Self.encodeBattleLogData(
                 initialHP: archive.battleLog.initialHP,
-                actions: archive.battleLog.actions,
+                entries: archive.battleLog.entries,
                 outcome: archive.battleLog.outcome,
                 turns: archive.battleLog.turns,
                 playerSnapshots: archive.playerSnapshots,

@@ -65,6 +65,11 @@ extension BattleTurnEngine {
         guard var attacker = context.actor(for: attackerSide, index: attackerIndex) else { return }
         guard var defender = context.actor(for: target.0, index: target.1) else { return }
 
+        let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+        let actionEntryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
+                                                                kind: .physicalAttack)
+        defer { context.appendActionEntry(actionEntryBuilder.build()) }
+
         let useAntiHealing = attacker.skillEffects.misc.antiHealingEnabled && attacker.snapshot.magicalHealing > 0
         let isMartial = shouldUseMartialAttack(attacker: attacker)
         let accuracyMultiplier = isMartial ? BattleContext.martialAccuracyMultiplier : 1.0
@@ -76,7 +81,8 @@ extension BattleTurnEngine {
                                                         defenderSide: target.0,
                                                         defenderIndex: target.1,
                                                         defender: defender,
-                                                        context: &context)
+                                                        context: &context,
+                                                        entryBuilder: actionEntryBuilder)
             let outcome = applyAttackOutcome(attackerSide: attackerSide,
                                              attackerIndex: attackerIndex,
                                              defenderSide: target.0,
@@ -85,7 +91,8 @@ extension BattleTurnEngine {
                                              defender: attackResult.defender,
                                              attackResult: attackResult,
                                              context: &context,
-                                             reactionDepth: 0)
+                                             reactionDepth: 0,
+                                             entryBuilder: actionEntryBuilder)
             guard outcome.attacker != nil, outcome.defender != nil else { return }
             return
         }
@@ -98,7 +105,8 @@ extension BattleTurnEngine {
                                                     defenderSide: target.0,
                                                     defenderIndex: target.1,
                                                     defender: defender,
-                                                    context: &context)
+                                                    context: &context,
+                                                    entryBuilder: actionEntryBuilder)
             let outcome = applyAttackOutcome(attackerSide: attackerSide,
                                              attackerIndex: attackerIndex,
                                              defenderSide: target.0,
@@ -107,7 +115,8 @@ extension BattleTurnEngine {
                                              defender: attackResult.defender,
                                              attackResult: attackResult,
                                              context: &context,
-                                             reactionDepth: 0)
+                                             reactionDepth: 0,
+                                             entryBuilder: actionEntryBuilder)
             guard outcome.attacker != nil, outcome.defender != nil else { return }
             return
         }
@@ -120,7 +129,8 @@ extension BattleTurnEngine {
                                          defenderIndex: target.1,
                                          context: &context,
                                          hitCountOverride: nil,
-                                         accuracyMultiplier: accuracyMultiplier)
+                                         accuracyMultiplier: accuracyMultiplier,
+                                         entryBuilder: actionEntryBuilder)
 
         let outcome = applyAttackOutcome(attackerSide: attackerSide,
                                          attackerIndex: attackerIndex,
@@ -130,7 +140,8 @@ extension BattleTurnEngine {
                                          defender: attackResult.defender,
                                          attackResult: attackResult,
                                          context: &context,
-                                         reactionDepth: 0)
+                                         reactionDepth: 0,
+                                         entryBuilder: actionEntryBuilder)
 
         guard var updatedAttacker = outcome.attacker else { return }
         guard var updatedDefender = outcome.defender else { return }
@@ -177,7 +188,9 @@ extension BattleTurnEngine {
 
         let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
         let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetIndex)
-        context.appendAction(kind: .vampireUrge, actor: attackerIdx, target: targetIdx)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
+                                                          kind: .vampireUrge)
+        entryBuilder.addEffect(kind: .vampireUrge, target: targetIdx)
 
         let attackResult = performAttack(attackerSide: attackerSide,
                                          attackerIndex: attackerIndex,
@@ -187,7 +200,8 @@ extension BattleTurnEngine {
                                          defenderIndex: targetIndex,
                                          context: &context,
                                          hitCountOverride: nil,
-                                         accuracyMultiplier: 1.0)
+                                         accuracyMultiplier: 1.0,
+                                         entryBuilder: entryBuilder)
 
         let outcome = applyAttackOutcome(attackerSide: attackerSide,
                                          attackerIndex: attackerIndex,
@@ -197,7 +211,8 @@ extension BattleTurnEngine {
                                          defender: attackResult.defender,
                                          attackResult: attackResult,
                                          context: &context,
-                                         reactionDepth: 0)
+                                         reactionDepth: 0,
+                                         entryBuilder: entryBuilder)
 
         guard var updatedAttacker = outcome.attacker,
               let updatedDefender = outcome.defender else { return true }
@@ -209,12 +224,13 @@ extension BattleTurnEngine {
                 let healed = min(missing, attackResult.totalDamage)
                 updatedAttacker.currentHP += healed
                 let actorIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
-                context.appendAction(kind: .healVampire, actor: actorIdx, value: UInt32(healed))
+                entryBuilder.addEffect(kind: .healVampire, target: actorIdx, value: UInt32(healed))
             }
         }
 
         context.updateActor(updatedAttacker, side: attackerSide, index: attackerIndex)
         context.updateActor(updatedDefender, side: targetRef.0, index: targetRef.1)
+        context.appendActionEntry(entryBuilder.build())
         return true
     }
 
@@ -239,7 +255,8 @@ extension BattleTurnEngine {
                                      defenderSide: ActorSide,
                                      defenderIndex: Int,
                                      defender: BattleActor,
-                                     context: inout BattleContext) -> AttackResult {
+                                     context: inout BattleContext,
+                                     entryBuilder: BattleActionEntry.Builder) -> AttackResult {
         var overrides = PhysicalAttackOverrides()
         var hitCountOverride: Int? = nil
         var specialAccuracyMultiplier: Double = 1.0
@@ -278,7 +295,8 @@ extension BattleTurnEngine {
                              context: &context,
                              hitCountOverride: hitCountOverride,
                              accuracyMultiplier: specialAccuracyMultiplier,
-                             overrides: overrides)
+                             overrides: overrides,
+                             entryBuilder: entryBuilder)
     }
 
     static func performAttack(attackerSide: ActorSide,
@@ -290,7 +308,8 @@ extension BattleTurnEngine {
                               context: inout BattleContext,
                               hitCountOverride: Int?,
                               accuracyMultiplier: Double,
-                              overrides: PhysicalAttackOverrides? = nil) -> AttackResult {
+                              overrides: PhysicalAttackOverrides? = nil,
+                              entryBuilder: BattleActionEntry.Builder) -> AttackResult {
         var attackerCopy = attacker
         var defenderCopy = defender
 
@@ -377,7 +396,7 @@ extension BattleTurnEngine {
                                                               context: &context)
             if !forceHit && !BattleRandomSystem.probability(hitChance, random: &context.random) {
                 defenderEvaded = true
-                context.appendAction(kind: .physicalEvade, actor: attackerIdx, target: defenderIdx)
+                entryBuilder.addEffect(kind: .physicalEvade, target: defenderIdx)
                 continue
             }
 
@@ -408,7 +427,7 @@ extension BattleTurnEngine {
             successfulHits += 1
             if result.critical { criticalHits += 1 }
 
-            context.appendAction(kind: .physicalDamage, actor: attackerIdx, target: defenderIdx, value: UInt32(applied))
+            entryBuilder.addEffect(kind: .physicalDamage, target: defenderIdx, value: UInt32(applied))
 
             if !defenderCopy.isAlive {
                 if let defSide = defenderSide, let defIndex = defenderIndex {
@@ -434,7 +453,8 @@ extension BattleTurnEngine {
                                          defenderSide: ActorSide,
                                          defenderIndex: Int,
                                          defender: BattleActor,
-                                         context: inout BattleContext) -> AttackResult {
+                                         context: inout BattleContext,
+                                         entryBuilder: BattleActionEntry.Builder) -> AttackResult {
         let attackerCopy = attacker
         var defenderCopy = defender
 
@@ -458,7 +478,7 @@ extension BattleTurnEngine {
                                          accuracyMultiplier: 1.0,
                                          context: &context)
         if !BattleRandomSystem.probability(hitChance, random: &context.random) {
-            context.appendAction(kind: .physicalEvade, actor: attackerIdx, target: defenderIdx)
+            entryBuilder.addEffect(kind: .physicalEvade, target: defenderIdx)
             return AttackResult(attacker: attackerCopy,
                                 defender: defenderCopy,
                                 totalDamage: 0,
@@ -472,7 +492,7 @@ extension BattleTurnEngine {
         let result = computeAntiHealingDamage(attacker: attackerCopy, defender: &defenderCopy, context: &context)
         let applied = applyDamage(amount: result.damage, to: &defenderCopy)
 
-        context.appendAction(kind: .physicalDamage, actor: attackerIdx, target: defenderIdx, value: UInt32(applied))
+        entryBuilder.addEffect(kind: .physicalDamage, target: defenderIdx, value: UInt32(applied))
 
         if !defenderCopy.isAlive {
             appendDefeatLog(for: defenderCopy, side: defenderSide, index: defenderIndex, context: &context)
@@ -505,7 +525,10 @@ extension BattleTurnEngine {
 
         let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
         let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
-        context.appendAction(kind: .martialArts, actor: attackerIdx, target: defenderIdx)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
+                                                          kind: .followUp,
+                                                          turnOverride: context.turn)
+        entryBuilder.addEffect(kind: .followUp, target: defenderIdx)
 
         let followUpResult = performAttack(attackerSide: attackerSide,
                                            attackerIndex: attackerIndex,
@@ -515,7 +538,8 @@ extension BattleTurnEngine {
                                            defenderIndex: defenderIndex,
                                            context: &context,
                                            hitCountOverride: descriptor.hitCount,
-                                           accuracyMultiplier: BattleContext.martialAccuracyMultiplier)
+                                           accuracyMultiplier: BattleContext.martialAccuracyMultiplier,
+                                           entryBuilder: entryBuilder)
 
         let outcome = applyAttackOutcome(attackerSide: attackerSide,
                                          attackerIndex: attackerIndex,
@@ -525,7 +549,10 @@ extension BattleTurnEngine {
                                          defender: followUpResult.defender,
                                          attackResult: followUpResult,
                                          context: &context,
-                                         reactionDepth: 0)
+                                         reactionDepth: 0,
+                                         entryBuilder: entryBuilder)
+
+        context.appendActionEntry(entryBuilder.build())
 
         if let updatedAttacker = outcome.attacker {
             attacker = updatedAttacker
@@ -599,8 +626,10 @@ extension BattleTurnEngine {
             guard let refreshedAttacker = context.actor(for: side, index: index), refreshedAttacker.isAlive else { return }
             guard let defender = context.actor(for: target.0, index: target.1), defender.isAlive else { continue }
 
-            // 先制攻撃のログ
-            appendActionLog(for: refreshedAttacker, side: side, index: index, category: .physicalAttack, context: &context)
+            let attackerIdx = context.actorIndex(for: side, arrayIndex: index)
+            let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
+                                                              kind: .physicalAttack,
+                                                              turnOverride: context.turn)
 
             let attackResult = performSpecialAttack(descriptor,
                                                     attackerSide: side,
@@ -609,7 +638,8 @@ extension BattleTurnEngine {
                                                     defenderSide: target.0,
                                                     defenderIndex: target.1,
                                                     defender: defender,
-                                                    context: &context)
+                                                    context: &context,
+                                                    entryBuilder: entryBuilder)
             _ = applyAttackOutcome(attackerSide: side,
                                    attackerIndex: index,
                                    defenderSide: target.0,
@@ -618,7 +648,10 @@ extension BattleTurnEngine {
                                    defender: attackResult.defender,
                                    attackResult: attackResult,
                                    context: &context,
-                                   reactionDepth: 0)
+                                   reactionDepth: 0,
+                                   entryBuilder: entryBuilder)
+
+            context.appendActionEntry(entryBuilder.build())
 
             if context.isBattleOver { return }
         }
