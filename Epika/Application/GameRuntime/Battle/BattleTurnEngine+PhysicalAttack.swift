@@ -354,7 +354,6 @@ extension BattleTurnEngine {
         var criticalHits = 0
         var defenderEvaded = false
 
-        let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
         let defenderIdx: UInt16
         if let defSide = defenderSide, let defIndex = defenderIndex {
             defenderIdx = context.actorIndex(for: defSide, arrayIndex: defIndex)
@@ -469,7 +468,6 @@ extension BattleTurnEngine {
                                 wasBlocked: false)
         }
 
-        let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
         let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
 
         let hitChance = computeHitChance(attacker: attackerCopy,
