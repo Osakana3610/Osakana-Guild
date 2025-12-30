@@ -13,6 +13,20 @@ import Foundation
 
 /// BattleLog（ActionEntryベース）を UI 表示用にレンダリングする
 struct BattleLogRenderer {
+    private struct PhysicalSummary {
+        var totalDamage: Int
+        var defeated: Bool
+        var attempts: Int
+        var hits: Int
+
+        init(totalDamage: Int = 0, defeated: Bool = false, attempts: Int = 0, hits: Int = 0) {
+            self.totalDamage = totalDamage
+            self.defeated = defeated
+            self.attempts = attempts
+            self.hits = hits
+        }
+    }
+
     struct RenderedAction: Sendable, Identifiable {
         let id: Int
         let turn: Int
@@ -29,11 +43,80 @@ struct BattleLogRenderer {
         enemyNames: [UInt16: String],
         spellNames: [UInt8: String] = [:],
         enemySkillNames: [UInt16: String] = [:],
+        skillNames: [UInt16: String] = [:],
         actorIdentifiers: [UInt16: String] = [:]
     ) -> [RenderedAction] {
         var rendered: [RenderedAction] = []
+        var pendingKillEntries: [BattleActionEntry] = []
+        var nextId = 0
 
-        for (index, entry) in battleLog.entries.enumerated() {
+        func appendRenderedAction(for entry: BattleActionEntry,
+                                  additionalEffects: [BattleLogEntry] = []) {
+            let actorIdString = entry.actor.flatMap { actorIdentifiers[$0] } ?? entry.actor.map { String($0) }
+            let actorName = resolveName(index: entry.actor, allyNames: allyNames, enemyNames: enemyNames)
+
+            let declaration = makeDeclarationEntry(turn: Int(entry.turn),
+                                                   actorId: actorIdString,
+                                                   actorName: actorName,
+                                                   entry: entry,
+                                                   spellNames: spellNames,
+                                                   enemySkillNames: enemySkillNames,
+                                                   skillNames: skillNames,
+                                                   allyNames: allyNames,
+                                                   enemyNames: enemyNames)
+
+            let actionLabel = resolveActionLabel(entry: entry,
+                                                 spellNames: spellNames,
+                                                 enemySkillNames: enemySkillNames,
+                                                 skillNames: skillNames)
+
+            let shouldRenderEffects = rendersEffectLines(for: entry)
+            var effectEntries: [BattleLogEntry] = []
+            if shouldRenderEffects {
+                effectEntries = renderEffectEntries(for: entry,
+                                                    actorName: actorName,
+                                                    actionLabel: actionLabel,
+                                                    allyNames: allyNames,
+                                                    enemyNames: enemyNames,
+                                                    actorIdentifiers: actorIdentifiers)
+            }
+            if !additionalEffects.isEmpty {
+                effectEntries.append(contentsOf: additionalEffects)
+            }
+
+            rendered.append(RenderedAction(id: nextId,
+                                           turn: Int(entry.turn),
+                                           model: entry,
+                                           declaration: declaration,
+                                           results: effectEntries))
+            nextId += 1
+        }
+
+        for entry in battleLog.entries {
+            if shouldDelayKillEntry(entry) {
+                pendingKillEntries.append(entry)
+                continue
+            }
+
+            var killsToAttach: [BattleActionEntry] = []
+            if !pendingKillEntries.isEmpty {
+                var remaining: [BattleActionEntry] = []
+
+                for kill in pendingKillEntries {
+                    if kill.turn < entry.turn {
+                        appendRenderedAction(for: kill)
+                        continue
+                    }
+                    if canAttachKillEffects(to: entry) && kill.turn == entry.turn {
+                        killsToAttach.append(kill)
+                    } else {
+                        remaining.append(kill)
+                    }
+                }
+
+                pendingKillEntries = remaining
+            }
+
             let actorIdString = entry.actor.flatMap { actorIdentifiers[$0] } ?? entry.actor.map { String($0) }
             let actorName = resolveName(index: entry.actor, allyNames: allyNames, enemyNames: enemyNames)
             let declaration = makeDeclarationEntry(turn: Int(entry.turn),
@@ -42,35 +125,90 @@ struct BattleLogRenderer {
                                                    entry: entry,
                                                    spellNames: spellNames,
                                                    enemySkillNames: enemySkillNames,
+                                                   skillNames: skillNames,
                                                    allyNames: allyNames,
                                                    enemyNames: enemyNames)
 
-            let shouldRenderEffects = rendersEffectLines(for: entry.declaration.kind)
-            let effectEntries: [BattleLogEntry]
+            let actionLabel = resolveActionLabel(entry: entry,
+                                                 spellNames: spellNames,
+                                                 enemySkillNames: enemySkillNames,
+                                                 skillNames: skillNames)
+
+            let shouldRenderEffects = rendersEffectLines(for: entry)
+            var effectEntries: [BattleLogEntry] = []
             if shouldRenderEffects {
-                effectEntries = entry.effects.compactMap { effect in
-                    makeEffectEntry(effect: effect,
-                                    turn: Int(entry.turn),
-                                    actorName: actorName,
-                                    allyNames: allyNames,
-                                    enemyNames: enemyNames,
-                                    actorIdentifiers: actorIdentifiers)
-                }
-            } else {
-                effectEntries = []
+                effectEntries = renderEffectEntries(for: entry,
+                                                    actorName: actorName,
+                                                    actionLabel: actionLabel,
+                                                    allyNames: allyNames,
+                                                    enemyNames: enemyNames,
+                                                    actorIdentifiers: actorIdentifiers)
             }
 
-            rendered.append(RenderedAction(id: index,
+            if !killsToAttach.isEmpty {
+                let killEffects = killsToAttach.flatMap { kill -> [BattleLogEntry] in
+                    renderEffectEntries(for: kill,
+                                        actorName: actorName,
+                                        actionLabel: actionLabel,
+                                        allyNames: allyNames,
+                                        enemyNames: enemyNames,
+                                        actorIdentifiers: actorIdentifiers)
+                }
+                effectEntries.append(contentsOf: killEffects)
+            }
+
+            rendered.append(RenderedAction(id: nextId,
                                            turn: Int(entry.turn),
                                            model: entry,
                                            declaration: declaration,
                                            results: effectEntries))
+            nextId += 1
+        }
+
+        if !pendingKillEntries.isEmpty {
+            for kill in pendingKillEntries {
+                appendRenderedAction(for: kill)
+            }
         }
 
         return rendered
     }
 
     // MARK: - Helpers
+    private static func renderEffectEntries(for entry: BattleActionEntry,
+                                            actorName: String?,
+                                            actionLabel: String?,
+                                            allyNames: [UInt8: String],
+                                            enemyNames: [UInt16: String],
+                                            actorIdentifiers: [UInt16: String]) -> [BattleLogEntry] {
+        if let buffSummary = renderBuffSummary(for: entry,
+                                               actionLabel: actionLabel,
+                                               allyNames: allyNames,
+                                               enemyNames: enemyNames) {
+            return buffSummary
+        }
+
+        if shouldAggregatePhysicalEffects(for: entry.declaration.kind) {
+            return renderPhysicalEffects(for: entry,
+                                         actorName: actorName,
+                                         actionLabel: actionLabel,
+                                         allyNames: allyNames,
+                                         enemyNames: enemyNames,
+                                         actorIdentifiers: actorIdentifiers)
+        }
+
+        return entry.effects.compactMap { effect in
+            guard !shouldSkipEffectLine(for: entry.declaration.kind, effectKind: effect.kind) else { return nil }
+            return makeEffectEntry(effect: effect,
+                                   entry: entry,
+                                   turn: Int(entry.turn),
+                                   actorName: actorName,
+                                   actionLabel: actionLabel,
+                                   allyNames: allyNames,
+                                   enemyNames: enemyNames,
+                                   actorIdentifiers: actorIdentifiers)
+        }
+    }
 
     private static func makeDeclarationEntry(turn: Int,
                                              actorId: String?,
@@ -78,13 +216,17 @@ struct BattleLogRenderer {
                                              entry: BattleActionEntry,
                                              spellNames: [UInt8: String],
                                              enemySkillNames: [UInt16: String],
+                                             skillNames: [UInt16: String],
                                              allyNames: [UInt8: String],
                                              enemyNames: [UInt16: String]) -> BattleLogEntry {
         let (message, type) = declarationMessage(kind: entry.declaration.kind,
                                                  actorName: actorName,
                                                  entry: entry,
                                                  spellNames: spellNames,
-                                                 enemySkillNames: enemySkillNames)
+                                                 enemySkillNames: enemySkillNames,
+                                                 skillNames: skillNames,
+                                                 allyNames: allyNames,
+                                                 enemyNames: enemyNames)
         return BattleLogEntry(turn: turn,
                               message: message,
                               type: type,
@@ -93,8 +235,10 @@ struct BattleLogRenderer {
     }
 
     private static func makeEffectEntry(effect: BattleActionEntry.Effect,
+                                        entry: BattleActionEntry,
                                         turn: Int,
                                         actorName: String?,
+                                        actionLabel: String?,
                                         allyNames: [UInt8: String],
                                         enemyNames: [UInt16: String],
                                         actorIdentifiers: [UInt16: String]) -> BattleLogEntry? {
@@ -102,7 +246,8 @@ struct BattleLogRenderer {
         let (message, type) = effectMessage(kind: effect.kind,
                                             actorName: actorName,
                                             targetName: targetName,
-                                            value: effect.value.map { Int($0) })
+                                            value: effect.value.map { Int($0) },
+                                            actionLabel: actionLabel)
         guard !message.isEmpty else { return nil }
         let targetId = effect.target.flatMap { actorIdentifiers[$0] } ?? effect.target.map { String($0) }
         return BattleLogEntry(turn: turn,
@@ -123,45 +268,327 @@ struct BattleLogRenderer {
         }
     }
 
-    private static func rendersEffectLines(for kind: ActionKind) -> Bool {
-        switch kind {
+    private static func resolveActionLabel(entry: BattleActionEntry,
+                                           spellNames: [UInt8: String],
+                                           enemySkillNames: [UInt16: String],
+                                           skillNames: [UInt16: String]) -> String? {
+        if let label = entry.declaration.label, !label.isEmpty {
+            return label
+        }
+
+        guard let skillIndex = entry.declaration.skillIndex else { return nil }
+
+        if entry.declaration.kind == .priestMagic || entry.declaration.kind == .mageMagic {
+            if let spellId = UInt8(exactly: skillIndex), let name = spellNames[spellId] {
+                return name
+            }
+        }
+
+        if entry.declaration.kind == .enemySpecialSkill {
+            if let name = enemySkillNames[skillIndex] {
+                return name
+            }
+        }
+
+        return skillNames[skillIndex]
+    }
+
+    private static func summarizeHits(for entry: BattleActionEntry,
+                                      actionKind: ActionKind) -> String? {
+        let attemptKinds: Set<BattleActionEntry.Effect.Kind>
+        let hitKinds: Set<BattleActionEntry.Effect.Kind>
+
+        switch actionKind {
+        case .physicalAttack, .followUp, .reactionAttack:
+            attemptKinds = [.physicalDamage, .physicalEvade, .physicalParry, .physicalBlock]
+            hitKinds = [.physicalDamage]
+        case .breath:
+            attemptKinds = [.breathDamage]
+            hitKinds = [.breathDamage]
+        case .enemySpecialSkill:
+            attemptKinds = [.enemySpecialDamage]
+            hitKinds = [.enemySpecialDamage]
+        default:
+            return nil
+        }
+
+        let attempts = entry.effects.filter { attemptKinds.contains($0.kind) }.count
+        guard attempts > 1 else { return nil }
+        let hits = entry.effects.filter { hitKinds.contains($0.kind) }.count
+        return "（\(attempts)回攻撃、\(hits)ヒット）"
+    }
+
+    private static func rendersEffectLines(for entry: BattleActionEntry) -> Bool {
+        guard !entry.effects.isEmpty else { return false }
+        switch entry.declaration.kind {
+        case .battleStart,
+             .turnStart,
+             .victory,
+             .defeat,
+             .retreat,
+             .enemyAppear:
+            return false
+        default:
+            return true
+        }
+    }
+
+    private static func shouldDelayKillEntry(_ entry: BattleActionEntry) -> Bool {
+        entry.declaration.kind == .physicalKill && entry.actor == nil
+    }
+
+    private static func canAttachKillEffects(to entry: BattleActionEntry) -> Bool {
+        switch entry.declaration.kind {
         case .physicalAttack,
-             .priestMagic,
+             .reactionAttack,
+             .followUp,
              .mageMagic,
+             .priestMagic,
              .breath,
              .enemySpecialSkill,
-             .reactionAttack,
-             .followUp:
+             .healAbsorb,
+             .healVampire,
+             .healParty,
+             .healSelf,
+             .statusTick,
+             .statusRampage,
+             .damageSelf,
+             .enemySpecialDamage:
             return true
         default:
             return false
         }
     }
 
+    private static func shouldAggregatePhysicalEffects(for kind: ActionKind) -> Bool {
+        switch kind {
+        case .physicalAttack, .reactionAttack, .followUp:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private static func renderBuffSummary(for entry: BattleActionEntry,
+                                          actionLabel: String?,
+                                          allyNames: [UInt8: String],
+                                          enemyNames: [UInt16: String]) -> [BattleLogEntry]? {
+        guard shouldSummarizeBuff(entry: entry) else { return nil }
+        let targets = entry.effects.compactMap { $0.target }
+        guard !targets.isEmpty else { return nil }
+        let description = describeTargetGroup(for: targets,
+                                              allyNames: allyNames,
+                                              enemyNames: enemyNames)
+        let label = actionLabel ?? "効果"
+        let message = "\(description)に\(label)の効果が付与された！"
+        let entryLine = BattleLogEntry(turn: Int(entry.turn),
+                                       message: message,
+                                       type: .status,
+                                       actorId: nil,
+                                       targetId: nil)
+        return [entryLine]
+    }
+
+    private static func shouldSummarizeBuff(entry: BattleActionEntry) -> Bool {
+        guard entry.declaration.kind == .mageMagic || entry.declaration.kind == .priestMagic else {
+            return false
+        }
+        guard !entry.effects.isEmpty else { return false }
+        return entry.effects.allSatisfy { $0.kind == .buffApply }
+    }
+
+    private static func shouldSkipEffectLine(for actionKind: ActionKind,
+                                             effectKind: BattleActionEntry.Effect.Kind) -> Bool {
+        switch actionKind {
+        case .physicalAttack, .reactionAttack, .followUp:
+            return effectKind == .physicalEvade
+                || effectKind == .physicalParry
+                || effectKind == .physicalBlock
+        default:
+            return false
+        }
+    }
+
+    private static func renderPhysicalEffects(for entry: BattleActionEntry,
+                                              actorName: String?,
+                                              actionLabel: String?,
+                                              allyNames: [UInt8: String],
+                                              enemyNames: [UInt16: String],
+                                              actorIdentifiers: [UInt16: String]) -> [BattleLogEntry] {
+        enum RenderToken {
+            case physicalSummary(UInt16)
+            case standard(BattleActionEntry.Effect)
+        }
+
+        var summaries: [UInt16: PhysicalSummary] = [:]
+        var orderedTokens: [RenderToken] = []
+        var insertedTargets: Set<UInt16> = []
+
+        func ensureToken(for target: UInt16) {
+            guard !insertedTargets.contains(target) else { return }
+            insertedTargets.insert(target)
+            orderedTokens.append(.physicalSummary(target))
+        }
+
+        for effect in entry.effects {
+            switch effect.kind {
+            case .physicalDamage:
+                guard let target = effect.target, let value = effect.value else {
+                    orderedTokens.append(.standard(effect))
+                    continue
+                }
+                ensureToken(for: target)
+                var summary = summaries[target] ?? PhysicalSummary()
+                summary.totalDamage += Int(value)
+                summary.attempts += 1
+                summary.hits += 1
+                summaries[target] = summary
+            case .physicalKill:
+                guard let target = effect.target else {
+                    orderedTokens.append(.standard(effect))
+                    continue
+                }
+                ensureToken(for: target)
+                var summary = summaries[target] ?? PhysicalSummary()
+                summary.defeated = true
+                summaries[target] = summary
+            case .physicalEvade, .physicalParry, .physicalBlock:
+                guard let target = effect.target else { continue }
+                ensureToken(for: target)
+                var summary = summaries[target] ?? PhysicalSummary()
+                summary.attempts += 1
+                summaries[target] = summary
+                continue
+            default:
+                orderedTokens.append(.standard(effect))
+            }
+        }
+
+        return orderedTokens.compactMap { token -> BattleLogEntry? in
+            switch token {
+            case .physicalSummary(let target):
+                guard let summary = summaries[target],
+                      summary.attempts > 0 || summary.totalDamage > 0 || summary.defeated else {
+                    return nil
+                }
+                return makePhysicalSummaryEntry(summary: summary,
+                                                target: target,
+                                                entry: entry,
+                                                actorName: actorName,
+                                                allyNames: allyNames,
+                                                enemyNames: enemyNames,
+                                                actorIdentifiers: actorIdentifiers)
+            case .standard(let effect):
+                guard !shouldSkipEffectLine(for: entry.declaration.kind, effectKind: effect.kind) else { return nil }
+                return makeEffectEntry(effect: effect,
+                                       entry: entry,
+                                       turn: Int(entry.turn),
+                                       actorName: actorName,
+                                       actionLabel: actionLabel,
+                                       allyNames: allyNames,
+                                       enemyNames: enemyNames,
+                                       actorIdentifiers: actorIdentifiers)
+            }
+        }
+    }
+
+    private static func makePhysicalSummaryEntry(summary: PhysicalSummary,
+                                                 target: UInt16,
+                                                 entry: BattleActionEntry,
+                                                 actorName: String?,
+                                                 allyNames: [UInt8: String],
+                                                 enemyNames: [UInt16: String],
+                                                 actorIdentifiers: [UInt16: String]) -> BattleLogEntry? {
+        let actor = actorName ?? "不明"
+        let targetName = resolveName(index: target, allyNames: allyNames, enemyNames: enemyNames) ?? "対象"
+        var components: [String] = []
+
+        if summary.totalDamage > 0 {
+            components.append("\(actor)の攻撃！\(targetName)に\(summary.totalDamage)のダメージ！")
+        } else {
+            components.append("\(actor)の攻撃！")
+        }
+
+        if summary.defeated {
+            components.append("\(targetName)を倒した！")
+        }
+
+        if summary.totalDamage == 0 && !summary.defeated {
+            guard summary.attempts > 0 else { return nil }
+            let targetId = actorIdentifiers[target] ?? String(target)
+            return BattleLogEntry(turn: Int(entry.turn),
+                                  message: "\(targetName)は攻撃をかわした！",
+                                  type: .miss,
+                                  actorId: nil,
+                                  targetId: targetId)
+        } else {
+            let targetId = actorIdentifiers[target] ?? String(target)
+            let type: BattleLogEntry.LogType = summary.defeated ? .defeat : .damage
+            return BattleLogEntry(turn: Int(entry.turn),
+                                  message: components.joined(separator: " "),
+                                  type: type,
+                              actorId: nil,
+                              targetId: targetId)
+        }
+    }
+
+    private static func describeTargetGroup(for targets: [UInt16],
+                                            allyNames: [UInt8: String],
+                                            enemyNames: [UInt16: String]) -> String {
+        let uniqueTargets = Array(Set(targets))
+        guard let first = uniqueTargets.first else { return "対象" }
+        let isEnemySide = first >= 1000
+        if uniqueTargets.count == 1 {
+            return resolveName(index: first, allyNames: allyNames, enemyNames: enemyNames) ?? (isEnemySide ? "敵" : "味方")
+        }
+        let descriptor = isEnemySide ? "敵" : "味方"
+        return "\(descriptor)全体"
+    }
+
     private static func declarationMessage(kind: ActionKind,
                                            actorName: String?,
                                            entry: BattleActionEntry,
                                            spellNames: [UInt8: String],
-                                           enemySkillNames: [UInt16: String]) -> (String, BattleLogEntry.LogType) {
+                                           enemySkillNames: [UInt16: String],
+                                           skillNames: [UInt16: String],
+                                           allyNames: [UInt8: String],
+                                           enemyNames: [UInt16: String]) -> (String, BattleLogEntry.LogType) {
         let actor = actorName ?? "不明"
+        let hitSummary = summarizeHits(for: entry, actionKind: kind)
+        let actionLabel = resolveActionLabel(entry: entry,
+                                             spellNames: spellNames,
+                                             enemySkillNames: enemySkillNames,
+                                             skillNames: skillNames)
+
+        func appendDetails(to message: String) -> String {
+            var result = message
+            if let hitSummary {
+                result += " \(hitSummary)"
+            }
+            return result
+        }
 
         switch kind {
         case .defend:
             return ("\(actor)は防御態勢を取った", .guard)
         case .physicalAttack:
-            return ("\(actor)の攻撃！", .action)
+            return (appendDetails(to: "\(actor)の攻撃！"), .action)
         case .priestMagic:
-            let spellName = entry.declaration.skillIndex
-                .flatMap { UInt8(exactly: $0) }
-                .flatMap { spellNames[$0] } ?? "回復魔法"
-            return ("\(actor)は\(spellName)を唱えた！", .action)
+            let spellName = actionLabel
+                ?? entry.declaration.skillIndex
+                    .flatMap { UInt8(exactly: $0) }
+                    .flatMap { spellNames[$0] }
+                ?? "回復魔法"
+            return (appendDetails(to: "\(actor)は\(spellName)を唱えた！"), .action)
         case .mageMagic:
-            let spellName = entry.declaration.skillIndex
-                .flatMap { UInt8(exactly: $0) }
-                .flatMap { spellNames[$0] } ?? "攻撃魔法"
-            return ("\(actor)は\(spellName)を唱えた！", .action)
+            let spellName = actionLabel
+                ?? entry.declaration.skillIndex
+                    .flatMap { UInt8(exactly: $0) }
+                    .flatMap { spellNames[$0] }
+                ?? "攻撃魔法"
+            return (appendDetails(to: "\(actor)は\(spellName)を唱えた！"), .action)
         case .breath:
-            return ("\(actor)はブレスを吐いた！", .action)
+            return (appendDetails(to: "\(actor)はブレスを吐いた！"), .action)
         case .battleStart:
             return ("戦闘開始！", .system)
         case .turnStart:
@@ -176,9 +603,11 @@ struct BattleLogRenderer {
         case .enemyAppear:
             return ("敵が現れた！", .system)
         case .enemySpecialSkill:
-            let skillName = entry.declaration.skillIndex
-                .flatMap { enemySkillNames[$0] } ?? "特殊攻撃"
-            return ("\(actor)の\(skillName)！", .action)
+            let skillName = actionLabel
+                ?? entry.declaration.skillIndex
+                    .flatMap { enemySkillNames[$0] }
+                ?? "特殊攻撃"
+            return (appendDetails(to: "\(actor)の\(skillName)！"), .action)
         case .noAction:
             return ("\(actor)は何もしなかった", .action)
         case .withdraw:
@@ -187,6 +616,58 @@ struct BattleLogRenderer {
             return ("古の儀：\(actor)が供儀対象になった", .status)
         case .vampireUrge:
             return ("\(actor)は吸血衝動に駆られた", .status)
+        case .reactionAttack:
+            return (appendDetails(to: "\(actor)の反撃！"), .action)
+        case .followUp:
+            return (appendDetails(to: "\(actor)の追撃！"), .action)
+        case .healParty:
+            let name = actionLabel ?? "回復術"
+            return (appendDetails(to: "\(actor)の\(name)！"), .heal)
+        case .healSelf:
+            let name = actionLabel ?? "回復"
+            return ("\(actor)は\(name)で自分を癒やした", .heal)
+        case .healAbsorb:
+            let name = actionLabel ?? "吸収"
+            return ("\(actor)は\(name)で回復した", .heal)
+        case .healVampire:
+            let name = actionLabel ?? "吸血"
+            return ("\(actor)は\(name)で回復した", .heal)
+        case .damageSelf:
+            let name = actionLabel ?? "反動"
+            return ("\(actor)は\(name)でダメージを受けた", .damage)
+        case .statusTick:
+            let name = actionLabel ?? "状態異常"
+            return ("\(actor)は\(name)の影響を受けている", .status)
+        case .statusRecover:
+            let name = actionLabel ?? "状態異常"
+            return ("\(actor)の\(name)が治った", .status)
+        case .buffApply:
+            if let label = actionLabel {
+                return ("\(actor)に\(label)の効果が付与された", .status)
+            } else {
+                return ("\(actor)に効果が付与された", .status)
+            }
+        case .buffExpire:
+            if let label = actionLabel {
+                return ("\(actor)の\(label)が切れた", .status)
+            } else {
+                return ("\(actor)の効果が切れた", .status)
+            }
+        case .resurrection:
+            let name = actionLabel ?? "蘇生の術"
+            return (appendDetails(to: "\(actor)は\(name)を行った"), .status)
+        case .necromancer:
+            let name = actionLabel ?? "ネクロマンサー"
+            return (appendDetails(to: "\(actor)は\(name)で死者を蘇らせた"), .status)
+        case .rescue:
+            let name = actionLabel ?? "救出"
+            return (appendDetails(to: "\(actor)は\(name)を行った"), .status)
+        case .actionLocked:
+            let name = actionLabel ?? "行動不能"
+            return ("\(actor)は\(name)だ", .status)
+        case .spellChargeRecover:
+            let name = actionLabel ?? "呪文"
+            return ("\(actor)は\(name)を再装填した", .status)
         default:
             // 残りは効果メッセージに委ねる
             return ("", .system)
@@ -196,7 +677,8 @@ struct BattleLogRenderer {
     private static func effectMessage(kind: BattleActionEntry.Effect.Kind,
                                       actorName: String?,
                                       targetName: String?,
-                                      value: Int?) -> (String, BattleLogEntry.LogType) {
+                                      value: Int?,
+                                      actionLabel: String?) -> (String, BattleLogEntry.LogType) {
         let actor = actorName ?? "不明"
         let target = targetName ?? "対象"
         let amount = value ?? 0
@@ -247,9 +729,17 @@ struct BattleLogRenderer {
         case .damageSelf:
             return ("\(target)は自身の効果で\(amount)ダメージ", .damage)
         case .buffApply:
-            return ("効果が発動した", .status)
+            if let label = actionLabel {
+                return ("\(label)が\(target)に付与された", .status)
+            } else {
+                return ("効果が発動した", .status)
+            }
         case .buffExpire:
-            return ("\(target)の効果が切れた", .status)
+            if let label = actionLabel {
+                return ("\(target)の\(label)が切れた", .status)
+            } else {
+                return ("\(target)の効果が切れた", .status)
+            }
         case .resurrection:
             return ("\(target)が蘇生した！", .heal)
         case .necromancer:
