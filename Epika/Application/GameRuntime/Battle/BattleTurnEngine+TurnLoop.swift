@@ -93,38 +93,79 @@ extension BattleTurnEngine {
                               context: inout BattleContext,
                               forcedTargets: BattleContext.SacrificeTargets,
                               depth: Int = 0) {
-        guard depth < 5 else { return }
-        guard !context.isBattleOver else { return }
-        var performer: BattleActor
-        switch side {
-        case .player:
-            guard context.players.indices.contains(actorIndex) else { return }
-            performer = context.players[actorIndex]
-        case .enemy:
-            guard context.enemies.indices.contains(actorIndex) else { return }
-            performer = context.enemies[actorIndex]
+        var pendingDepths: [Int] = [depth]
+
+        while let currentDepth = pendingDepths.popLast() {
+            guard currentDepth < BattleContext.maxExtraActionDepth else { continue }
+            guard !context.isBattleOver else { return }
+
+            let allowsExtraActions = executeSingleAction(for: side,
+                                                         actorIndex: actorIndex,
+                                                         context: &context,
+                                                         forcedTargets: forcedTargets)
+
+            if context.isBattleOver {
+                return
+            }
+            guard allowsExtraActions else { continue }
+            guard let refreshedActor = context.actor(for: side, index: actorIndex),
+                  refreshedActor.isAlive else { continue }
+            let nextDepth = currentDepth + 1
+            guard nextDepth < BattleContext.maxExtraActionDepth else { continue }
+
+            let extraDescriptors = refreshedActor.skillEffects.combat.extraActions
+            guard !extraDescriptors.isEmpty else { continue }
+
+            var scheduledActions = 0
+            for descriptor in extraDescriptors {
+                guard descriptor.count > 0 else { continue }
+                for _ in 0..<descriptor.count {
+                    let probability = max(0.0, min(1.0, (descriptor.chancePercent * refreshedActor.skillEffects.combat.procChanceMultiplier) / 100.0))
+                    guard probability > 0 else { continue }
+                    if context.random.nextBool(probability: probability) {
+                        scheduledActions += 1
+                    }
+                }
+            }
+
+            guard scheduledActions > 0 else { continue }
+            for _ in 0..<scheduledActions {
+                pendingDepths.append(nextDepth)
+            }
+        }
+    }
+
+    @discardableResult
+    private static func executeSingleAction(for side: ActorSide,
+                                            actorIndex: Int,
+                                            context: inout BattleContext,
+                                            forcedTargets: BattleContext.SacrificeTargets) -> Bool {
+        guard let performer = context.actor(for: side, index: actorIndex),
+              performer.isAlive else {
+            return false
         }
 
         if isActionLocked(actor: performer, context: context) {
             appendStatusLockLog(for: performer, side: side, index: actorIndex, context: &context)
-            return
+            return false
         }
 
-        _ = shouldTriggerBerserk(for: &performer, context: &context)
+        var mutablePerformer = performer
+        _ = shouldTriggerBerserk(for: &mutablePerformer, context: &context)
 
-        if hasVampiricImpulse(actor: performer) {
+        if hasVampiricImpulse(actor: mutablePerformer) {
             let didImpulse = handleVampiricImpulse(attackerSide: side,
                                                    attackerIndex: actorIndex,
-                                                   attacker: performer,
+                                                   attacker: mutablePerformer,
                                                    context: &context)
             if didImpulse {
-                return
+                return false
             }
         }
 
         let categories = selectActionCandidates(for: side,
-                                                 actorIndex: actorIndex,
-                                                 context: &context)
+                                                actorIndex: actorIndex,
+                                                context: &context)
 
         var executed = false
         for category in categories {
@@ -164,7 +205,7 @@ extension BattleTurnEngine {
         }
 
         if context.isBattleOver {
-            return
+            return false
         }
 
         if !executed {
@@ -172,30 +213,10 @@ extension BattleTurnEngine {
         }
 
         if context.isBattleOver {
-            return
+            return false
         }
 
-        if let refreshedActor = context.actor(for: side, index: actorIndex),
-           refreshedActor.isAlive,
-           !refreshedActor.skillEffects.combat.extraActions.isEmpty {
-            for extra in refreshedActor.skillEffects.combat.extraActions {
-                for _ in 0..<extra.count {
-                    if context.isBattleOver {
-                        return
-                    }
-                    let probability = max(0.0, min(1.0, (extra.chancePercent * refreshedActor.skillEffects.combat.procChanceMultiplier) / 100.0))
-                    guard context.random.nextBool(probability: probability) else { continue }
-                    performAction(for: side,
-                                  actorIndex: actorIndex,
-                                  context: &context,
-                                  forcedTargets: forcedTargets,
-                                  depth: depth + 1)
-                    if context.isBattleOver {
-                        return
-                    }
-                }
-            }
-        }
+        return true
     }
 
     /// 行動カテゴリを選択（単一のカテゴリを返す、後方互換用）
