@@ -42,8 +42,13 @@ extension BattleTurnEngine {
     static func appendDefeatLog(for target: BattleActor,
                                 side: ActorSide,
                                 index: Int,
-                                context: inout BattleContext) {
+                                context: inout BattleContext,
+                                entryBuilder: BattleActionEntry.Builder? = nil) {
         let targetIdx = context.actorIndex(for: side, arrayIndex: index)
+        if let entryBuilder {
+            entryBuilder.addEffect(kind: .physicalKill, target: targetIdx)
+            return
+        }
         context.appendSimpleEntry(kind: .physicalKill,
                                   targetId: targetIdx,
                                   effectKind: .physicalKill)
@@ -69,6 +74,7 @@ extension BattleTurnEngine {
         context.appendSimpleEntry(kind: .statusRecover,
                                   actorId: actorIdx,
                                   targetId: actorIdx,
+                                  label: definition.name,
                                   effectKind: .statusRecover)
     }
 }

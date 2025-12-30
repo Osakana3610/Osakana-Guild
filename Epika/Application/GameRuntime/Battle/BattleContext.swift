@@ -65,6 +65,7 @@ struct BattleContext {
     var players: [BattleActor]
     var enemies: [BattleActor]
     var actionEntries: [BattleActionEntry]
+    var pendingPostActionEntries: [BattleActionEntry]
     var initialHP: [UInt16: UInt32]
     var turn: Int
     var random: GameRandomSource
@@ -89,6 +90,7 @@ struct BattleContext {
         self.enemySkillDefinitions = enemySkillDefinitions
         self.random = random
         self.actionEntries = []
+        self.pendingPostActionEntries = []
         self.initialHP = [:]
         self.turn = 0
         self.enemySkillUsage = [:]
@@ -229,6 +231,14 @@ struct BattleContext {
 
     mutating func appendActionEntry(_ entry: BattleActionEntry) {
         actionEntries.append(entry)
+        if !pendingPostActionEntries.isEmpty {
+            actionEntries.append(contentsOf: pendingPostActionEntries)
+            pendingPostActionEntries.removeAll()
+        }
+    }
+
+    mutating func appendPostActionEntry(_ entry: BattleActionEntry) {
+        pendingPostActionEntries.append(entry)
     }
 
     mutating func appendSimpleEntry(kind: ActionKind,
@@ -238,12 +248,15 @@ struct BattleContext {
                                     statusId: UInt16? = nil,
                                     skillIndex: UInt16? = nil,
                                     extra: UInt16? = nil,
+                                    label: String? = nil,
                                     effectKind: BattleActionEntry.Effect.Kind = .logOnly,
-                                    turnOverride: Int? = nil) {
+                                    turnOverride: Int? = nil,
+                                    postAction: Bool = false) {
         let builder = makeActionEntryBuilder(actorId: actorId,
                                              kind: kind,
                                              skillIndex: skillIndex,
                                              extra: extra,
+                                             label: label,
                                              turnOverride: turnOverride)
         if targetId != nil || value != nil || statusId != nil || effectKind != .logOnly || extra != nil {
             builder.addEffect(kind: effectKind,
@@ -252,15 +265,24 @@ struct BattleContext {
                               statusId: statusId,
                               extra: extra)
         }
-        appendActionEntry(builder.build())
+        let entry = builder.build()
+        if postAction {
+            appendPostActionEntry(entry)
+        } else {
+            appendActionEntry(entry)
+        }
     }
 
     func makeActionEntryBuilder(actorId: UInt16?,
                                 kind: ActionKind,
                                 skillIndex: UInt16? = nil,
                                 extra: UInt16? = nil,
+                                label: String? = nil,
                                 turnOverride: Int? = nil) -> BattleActionEntry.Builder {
-        let declaration = BattleActionEntry.Declaration(kind: kind, skillIndex: skillIndex, extra: extra)
+        let declaration = BattleActionEntry.Declaration(kind: kind,
+                                                        skillIndex: skillIndex,
+                                                        extra: extra,
+                                                        label: label)
         return BattleActionEntry.Builder(
             turn: turnOverride ?? turn,
             actor: actorId,

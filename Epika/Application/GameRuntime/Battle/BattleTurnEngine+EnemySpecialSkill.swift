@@ -455,9 +455,11 @@ extension BattleTurnEngine {
         guard let target = context.actor(for: targetSide, index: targetIndex),
               !target.isAlive else { return }
 
-        appendDefeatLog(for: target, side: targetSide, index: targetIndex, context: &context)
-        let fallenIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
-        entryBuilder.addEffect(kind: .physicalKill, target: fallenIdx)
+        appendDefeatLog(for: target,
+                        side: targetSide,
+                        index: targetIndex,
+                        context: &context,
+                        entryBuilder: entryBuilder)
 
         let killerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
         dispatchReactions(for: .allyDefeated(side: targetSide,

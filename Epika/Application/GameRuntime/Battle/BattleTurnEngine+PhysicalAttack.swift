@@ -430,7 +430,11 @@ extension BattleTurnEngine {
 
             if !defenderCopy.isAlive {
                 if let defSide = defenderSide, let defIndex = defenderIndex {
-                    appendDefeatLog(for: defenderCopy, side: defSide, index: defIndex, context: &context)
+                    appendDefeatLog(for: defenderCopy,
+                                    side: defSide,
+                                    index: defIndex,
+                                    context: &context,
+                                    entryBuilder: entryBuilder)
                 }
                 break
             }
@@ -493,7 +497,11 @@ extension BattleTurnEngine {
         entryBuilder.addEffect(kind: .physicalDamage, target: defenderIdx, value: UInt32(applied))
 
         if !defenderCopy.isAlive {
-            appendDefeatLog(for: defenderCopy, side: defenderSide, index: defenderIndex, context: &context)
+            appendDefeatLog(for: defenderCopy,
+                            side: defenderSide,
+                            index: defenderIndex,
+                            context: &context,
+                            entryBuilder: entryBuilder)
         }
 
         return AttackResult(attacker: attackerCopy,
