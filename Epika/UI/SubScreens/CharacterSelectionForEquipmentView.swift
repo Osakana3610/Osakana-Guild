@@ -338,12 +338,12 @@ struct EquipmentEditorView: View {
                     displayService.makeStyledDisplayText(for: item, includeSellValue: false)
                         .font(.body)
                         .lineLimit(1)
+                        .foregroundStyle(validation.canEquip ? .primary : .secondary)
                     Spacer()
                 }
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .foregroundStyle(validation.canEquip ? .primary : .secondary)
 
             Button {
                 selectedItemForDetail = item
