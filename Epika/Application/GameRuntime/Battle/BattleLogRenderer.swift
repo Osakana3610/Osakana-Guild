@@ -270,7 +270,7 @@ struct BattleLogRenderer {
         case .magicDamage:
             let target = targetName ?? "対象"
             let damage = value ?? 0
-            return ("\(target)に\(damage)のダメージ！", .damage)
+            return ("\(actorName)の魔法！\(target)に\(damage)のダメージ！", .damage)
         case .magicHeal:
             let target = targetName ?? "対象"
             let heal = value ?? 0
@@ -282,7 +282,7 @@ struct BattleLogRenderer {
         case .breathDamage:
             let target = targetName ?? "対象"
             let damage = value ?? 0
-            return ("\(target)に\(damage)のダメージ！", .damage)
+            return ("\(actorName)のブレス！\(target)に\(damage)のダメージ！", .damage)
 
         // 状態異常
         case .statusInflict:
