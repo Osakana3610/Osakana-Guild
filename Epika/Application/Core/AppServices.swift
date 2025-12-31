@@ -42,17 +42,16 @@ import Foundation
 import SwiftData
 import Observation
 
-@MainActor
 @Observable
-final class AppServices {
+final class AppServices: Sendable {
     let container: ModelContainer
     let contextProvider: SwiftDataContextProvider
     let masterDataCache: MasterDataCache
     let gameState: GameStateService
 
-    // MARK: - Observable Player State
-    var playerGold: UInt32 = 0
-    var playerCatTickets: UInt16 = 0
+    // MARK: - Observable Player State（UIからアクセスされるため@MainActor）
+    @MainActor var playerGold: UInt32 = 0
+    @MainActor var playerCatTickets: UInt16 = 0
     let character: CharacterProgressService
     let party: PartyProgressService
     let inventory: InventoryProgressService
@@ -69,7 +68,6 @@ final class AppServices {
     let statChangeNotifications: StatChangeNotificationService
     let userDataLoad: UserDataLoadService
     let gemModification: GemModificationProgressService
-    private var explorationPersistenceSessions: [PersistentIdentifier: ExplorationProgressService.EventSession] = [:]
 
     struct ExplorationRunTotals: Sendable {
         let totalExperience: Int
@@ -93,6 +91,7 @@ final class AppServices {
         let cancel: @Sendable () async -> Void
     }
 
+    @MainActor
     init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
         let contextProvider = SwiftDataContextProvider(container: container)
@@ -166,49 +165,20 @@ final class AppServices {
     // MARK: - Player State Updates
 
     /// PlayerSnapshotからObservable状態を更新
+    @MainActor
     func applyPlayerSnapshot(_ snapshot: PlayerSnapshot) {
         playerGold = snapshot.gold
         playerCatTickets = snapshot.catTickets
     }
 
     /// 現在のプレイヤー状態をロードしてObservable状態を更新
+    @MainActor
     func reloadPlayerState() async {
         do {
             let snapshot = try await gameState.currentPlayer()
             applyPlayerSnapshot(snapshot)
         } catch {
             // プレイヤーが存在しない場合は初期値のまま
-        }
-    }
-
-    func flushExplorationSessions() {
-        for session in explorationPersistenceSessions.values {
-            do {
-                try session.flushIfNeeded()
-            } catch {
-                #if DEBUG
-                print("[AppServices] flushExplorationSessions failed: \(error)")
-                #endif
-            }
-        }
-    }
-
-    func explorationSession(for runId: PersistentIdentifier) throws -> ExplorationProgressService.EventSession {
-        if let existing = explorationPersistenceSessions[runId] {
-            return existing
-        }
-        let session = try ExplorationProgressService.EventSession(contextProvider: contextProvider, runId: runId)
-        explorationPersistenceSessions[runId] = session
-        return session
-    }
-
-    func removeExplorationSession(runId: PersistentIdentifier) {
-        if let session = explorationPersistenceSessions.removeValue(forKey: runId),
-           session.shouldInvalidateCache {
-            // actorへのキャッシュ無効化はバックグラウンドで実行
-            Task {
-                await exploration.invalidateCache()
-            }
         }
     }
 }

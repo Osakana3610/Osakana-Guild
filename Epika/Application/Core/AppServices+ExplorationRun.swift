@@ -87,14 +87,14 @@ extension AppServices {
                                                     continuation: continuation)
             }
 
+            let explorationService = exploration
             continuation.onTermination = { termination in
                 guard case .cancelled = termination else { return }
                 processingTask.cancel()
                 Task { await session.cancel() }
-                Task { @MainActor [weak self] in
-                    guard let self else { return }
+                Task {
                     do {
-                        try await self.exploration.cancelRun(runId: recordId)
+                        try await explorationService.cancelRun(runId: recordId)
                     } catch is CancellationError {
                         // キャンセル済みであれば問題なし
                     } catch {
@@ -202,14 +202,14 @@ extension AppServices {
                                                         continuation: continuation)
                 }
 
+                let explorationService = exploration
                 continuation.onTermination = { termination in
                     guard case .cancelled = termination else { return }
                     processingTask.cancel()
                     Task { await session.cancel() }
-                    Task { @MainActor [weak self] in
-                        guard let self else { return }
+                    Task {
                         do {
-                            try await self.exploration.cancelRun(runId: recordId)
+                            try await explorationService.cancelRun(runId: recordId)
                         } catch is CancellationError {
                             // キャンセル済みであれば問題なし
                         } catch {
