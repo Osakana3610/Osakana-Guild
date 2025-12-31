@@ -42,12 +42,12 @@ actor AutoTradeProgressService {
         var stackKey: String { id }
     }
 
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let gameStateService: GameStateService
     private var cachedStackKeys: Set<String>?
 
-    init(container: ModelContainer, gameStateService: GameStateService) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider, gameStateService: GameStateService) {
+        self.contextProvider = contextProvider
         self.gameStateService = gameStateService
     }
 
@@ -149,9 +149,7 @@ actor AutoTradeProgressService {
     // MARK: - Private Helpers
 
     private func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
+        contextProvider.newBackgroundContext()
     }
 
     private func fetchRecord(superRareTitleId: UInt8,

@@ -57,17 +57,17 @@ actor ShopProgressService {
         let soldItems: [(itemId: UInt16, quantity: Int)]
     }
 
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let masterDataCache: MasterDataCache
     private let inventoryService: InventoryProgressService
     private let gameStateService: GameStateService
     private let unlimitedSentinel: UInt16? = nil
 
-    init(container: ModelContainer,
+    init(contextProvider: SwiftDataContextProvider,
          masterDataCache: MasterDataCache,
          inventoryService: InventoryProgressService,
          gameStateService: GameStateService) {
-        self.container = container
+        self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
         self.inventoryService = inventoryService
         self.gameStateService = gameStateService
@@ -366,9 +366,7 @@ private extension ShopProgressService {
     }
 
     func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
+        contextProvider.newBackgroundContext()
     }
 
     func loadShopSnapshot(masterItems: [MasterShopItem]) async throws -> ShopSnapshot {
