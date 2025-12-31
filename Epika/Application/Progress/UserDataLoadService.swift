@@ -137,11 +137,11 @@ final class UserDataLoadService {
     // MARK: - Individual Loaders
 
     private func loadCharacters() async throws {
-        let snapshots = try characterService.allCharacters()
+        let snapshots = try await characterService.allCharacters()
         var buffer: [RuntimeCharacter] = []
         buffer.reserveCapacity(snapshots.count)
         for snapshot in snapshots {
-            let character = try characterService.runtimeCharacter(from: snapshot)
+            let character = try await characterService.runtimeCharacter(from: snapshot)
             buffer.append(character)
         }
         characters = buffer
@@ -225,7 +225,7 @@ final class UserDataLoadService {
 
         let runningSummaries: [ExplorationProgressService.RunningExplorationSummary]
         do {
-            runningSummaries = try explorationService.runningExplorationSummaries()
+            runningSummaries = try await explorationService.runningExplorationSummaries()
         } catch {
             // 失敗しても続行（エラーは握りつぶさず記録だけ）
             #if DEBUG

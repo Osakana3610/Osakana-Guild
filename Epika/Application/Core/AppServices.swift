@@ -197,13 +197,19 @@ final class AppServices {
         if let existing = explorationPersistenceSessions[runId] {
             return existing
         }
-        let session = try exploration.makeEventSession(runId: runId)
+        let session = try ExplorationProgressService.EventSession(contextProvider: contextProvider, runId: runId)
         explorationPersistenceSessions[runId] = session
         return session
     }
 
     func removeExplorationSession(runId: PersistentIdentifier) {
-        explorationPersistenceSessions.removeValue(forKey: runId)
+        if let session = explorationPersistenceSessions.removeValue(forKey: runId),
+           session.shouldInvalidateCache {
+            // actorへのキャッシュ無効化はバックグラウンドで実行
+            Task {
+                await exploration.invalidateCache()
+            }
+        }
     }
 }
 

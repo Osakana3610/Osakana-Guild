@@ -41,8 +41,7 @@
 import Foundation
 import SwiftData
 
-@MainActor
-final class CharacterProgressService {
+actor CharacterProgressService {
     struct CharacterCreationRequest: Sendable {
         var displayName: String
         var raceId: UInt8
@@ -64,16 +63,20 @@ final class CharacterProgressService {
         let hpDelta: Int32
     }
 
-    @MainActor
+    /// 戦闘結果を一括適用するためのセッション
+    /// サービスへの参照を持たず、必要な依存のみ受け取る
+    /// バックグラウンドスレッドで作成・使用することを想定
     final class BattleResultSession {
-        private unowned let service: CharacterProgressService
-        fileprivate let context: ModelContext
-        fileprivate let records: [UInt8: CharacterRecord]
+        private let context: ModelContext
+        private let records: [UInt8: CharacterRecord]
+        private let masterData: MasterDataCache
         private var pendingLevelUpNotification = false
 
-        fileprivate init(service: CharacterProgressService, characterIds: [UInt8]) throws {
-            self.service = service
-            self.context = service.contextProvider.makeContext()
+        init(contextProvider: SwiftDataContextProvider,
+             masterData: MasterDataCache,
+             characterIds: [UInt8]) throws {
+            self.context = contextProvider.makeContext()
+            self.masterData = masterData
             if characterIds.isEmpty {
                 self.records = [:]
                 return
@@ -87,8 +90,7 @@ final class CharacterProgressService {
 
         func applyBattleResults(_ updates: [BattleResultUpdate]) throws {
             guard !updates.isEmpty else { return }
-            let levelUp = try service.applyBattleResultsInternal(updates,
-                                                                 records: records)
+            let levelUp = try applyBattleResultsInternal(updates)
             if levelUp {
                 pendingLevelUpNotification = true
             }
@@ -98,9 +100,71 @@ final class CharacterProgressService {
             guard context.hasChanges else { return }
             try context.save()
             if pendingLevelUpNotification {
-                service.notifyCharacterProgressDidChange()
+                NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
                 pendingLevelUpNotification = false
             }
+        }
+
+        // MARK: - Private
+
+        private func applyBattleResultsInternal(_ updates: [BattleResultUpdate]) throws -> Bool {
+            var anyLevelUp = false
+            for update in updates {
+                guard let record = records[update.characterId] else {
+                    throw ProgressError.characterNotFound
+                }
+                if update.experienceDelta != 0 {
+                    let previousLevel = record.level
+                    let addition = Int64(record.experience).addingReportingOverflow(Int64(update.experienceDelta))
+                    guard !addition.overflow else {
+                        throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
+                    }
+                    let updatedExperience = max(0, Int(addition.partialValue))
+                    let cappedExperience = try clampExperience(updatedExperience, raceId: record.raceId)
+                    record.experience = UInt64(cappedExperience)
+                    let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
+                    if computedLevel != Int(previousLevel) {
+                        record.level = UInt8(computedLevel)
+                        anyLevelUp = true
+                    }
+                }
+                if update.hpDelta != 0 {
+                    let newHP = Int64(record.currentHP) + Int64(update.hpDelta)
+                    record.currentHP = UInt32(max(0, newHP))
+                }
+            }
+            return anyLevelUp
+        }
+
+        private func resolveLevel(for experience: Int, raceId: UInt8) throws -> Int {
+            let maxLevel = try raceMaxLevel(for: raceId)
+            do {
+                return try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
+            } catch CharacterExperienceError.invalidLevel {
+                throw ProgressError.invalidInput(description: "経験値テーブルに無効なレベル要求が行われました")
+            } catch CharacterExperienceError.invalidExperience {
+                throw ProgressError.invalidInput(description: "経験値が負の値になる操作は許可されていません")
+            } catch CharacterExperienceError.overflowedComputation {
+                throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
+            }
+        }
+
+        private func raceMaxLevel(for raceId: UInt8) throws -> Int {
+            guard let definition = masterData.race(raceId) else {
+                throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
+            }
+            return definition.maxLevel
+        }
+
+        private func clampExperience(_ experience: Int, raceId: UInt8) throws -> Int {
+            guard experience > 0 else { return 0 }
+            let maximum = try raceMaxExperience(for: raceId)
+            return min(experience, maximum)
+        }
+
+        private func raceMaxExperience(for raceId: UInt8) throws -> Int {
+            let maxLevel = try raceMaxLevel(for: raceId)
+            return try CharacterExperienceTable.totalExperience(toReach: maxLevel)
         }
     }
 
@@ -473,7 +537,9 @@ final class CharacterProgressService {
     }
 
     func makeBattleResultSession(characterIds: [UInt8]) throws -> BattleResultSession {
-        try BattleResultSession(service: self, characterIds: characterIds)
+        try BattleResultSession(contextProvider: contextProvider,
+                                masterData: masterData,
+                                characterIds: characterIds)
     }
 
     @discardableResult
