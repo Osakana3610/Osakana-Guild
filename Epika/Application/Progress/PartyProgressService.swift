@@ -32,7 +32,7 @@ actor PartyProgressService {
     }
 
     func allParties() async throws -> [PartySnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<PartyRecord>()
         descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
         let records = try context.fetch(descriptor)
@@ -45,7 +45,7 @@ actor PartyProgressService {
             return try await allParties()
         }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<PartyRecord>()
         descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
         var records = try context.fetch(descriptor)
@@ -82,7 +82,7 @@ actor PartyProgressService {
             throw ProgressError.invalidInput(description: "パーティ名は空にできません")
         }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.displayName = trimmed
         party.updatedAt = Date()
@@ -91,7 +91,7 @@ actor PartyProgressService {
     }
 
     func updatePartyMembers(persistentIdentifier: PersistentIdentifier, memberIds: [UInt8]) async throws -> PartySnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.memberCharacterIds = memberIds
         party.updatedAt = Date()
@@ -100,7 +100,7 @@ actor PartyProgressService {
     }
 
     func setLastSelectedDungeon(persistentIdentifier: PersistentIdentifier, dungeonId: UInt16) async throws -> PartySnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.lastSelectedDungeonId = dungeonId
         party.updatedAt = Date()
@@ -109,7 +109,7 @@ actor PartyProgressService {
     }
 
     func setLastSelectedDifficulty(persistentIdentifier: PersistentIdentifier, difficulty: UInt8) async throws -> PartySnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.lastSelectedDifficulty = difficulty
         party.updatedAt = Date()
@@ -118,7 +118,7 @@ actor PartyProgressService {
     }
 
     func setTargetFloor(persistentIdentifier: PersistentIdentifier, floor: UInt8) async throws -> PartySnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.targetFloor = floor
         party.updatedAt = Date()
@@ -127,7 +127,7 @@ actor PartyProgressService {
     }
 
     func characterIdsInOtherParties(excluding identifier: PersistentIdentifier?) async throws -> Set<UInt8> {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<PartyRecord>()
         let records = try context.fetch(descriptor)
 
@@ -147,7 +147,7 @@ actor PartyProgressService {
     }
 
     func partySnapshot(id: UInt8) async throws -> PartySnapshot? {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == id })
         guard let record = try context.fetch(descriptor).first else {
             return nil
@@ -162,10 +162,6 @@ actor PartyProgressService {
 }
 
 private extension PartyProgressService {
-    func makeContext() -> ModelContext {
-        contextProvider.newBackgroundContext()
-    }
-
     func fetchParty(persistentIdentifier: PersistentIdentifier, context: ModelContext) throws -> PartyRecord {
         guard let record = context.model(for: persistentIdentifier) as? PartyRecord else {
             throw ProgressError.partyNotFound

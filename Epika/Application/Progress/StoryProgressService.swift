@@ -28,7 +28,7 @@ actor StoryProgressService {
     }
 
     func currentStorySnapshot() async throws -> StorySnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let nodes = try fetchAllNodeProgress(context: context)
         let maxUpdatedAt = nodes.map(\.updatedAt).max() ?? Date()
         return Self.snapshot(from: nodes, updatedAt: maxUpdatedAt)
@@ -36,7 +36,7 @@ actor StoryProgressService {
 
     @discardableResult
     func markNodeAsRead(_ nodeId: UInt16) async throws -> StorySnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let node = try ensureNodeProgress(nodeId: nodeId, context: context)
         guard node.isUnlocked else {
             throw ProgressError.storyLocked(nodeId: String(nodeId))
@@ -56,7 +56,7 @@ actor StoryProgressService {
     }
 
     func setUnlocked(_ isUnlocked: Bool, nodeId: UInt16) async throws {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let node = try ensureNodeProgress(nodeId: nodeId, context: context)
         if node.isUnlocked != isUnlocked {
             node.isUnlocked = isUnlocked
@@ -67,10 +67,6 @@ actor StoryProgressService {
 }
 
 private extension StoryProgressService {
-    func makeContext() -> ModelContext {
-        contextProvider.newBackgroundContext()
-    }
-
     func fetchAllNodeProgress(context: ModelContext) throws -> [StoryNodeProgressRecord] {
         let descriptor = FetchDescriptor<StoryNodeProgressRecord>()
         return try context.fetch(descriptor)
