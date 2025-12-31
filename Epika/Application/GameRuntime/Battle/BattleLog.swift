@@ -30,6 +30,7 @@ struct BattleActionEntry: Codable, Sendable {
         var kind: ActionKind
         var skillIndex: UInt16?
         var extra: UInt16?
+        var label: String?
     }
 
     struct Effect: Codable, Sendable {

@@ -543,6 +543,7 @@ struct BattleActor: Sendable {
             let duration: Int                      // バフ持続ターン
             let scope: Scope
             let category: String
+            let sourceSkillId: UInt16?
         }
 
         struct StatusInflict: Sendable, Hashable {
@@ -1057,4 +1058,3 @@ struct BattleActor: Sendable {
     var isAlive: Bool { currentHP > 0 }
     var rowIndex: Int { formationSlot.formationRow }
 }
-

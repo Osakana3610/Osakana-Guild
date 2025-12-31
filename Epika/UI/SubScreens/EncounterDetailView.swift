@@ -149,7 +149,7 @@ struct EncounterDetailView: View {
                 summaryStates[id] = state
             }
 
-            let actions = groupedByTurn[turn] ?? []
+            let actions = (groupedByTurn[turn] ?? []).sorted { $0.id < $1.id }
             var groupedActions: [GroupedBattleAction] = []
             var groupId = 0
 
@@ -244,6 +244,12 @@ struct EncounterDetailView: View {
                 enemySkillNames[skill.id] = skill.name
             }
 
+            // 汎用スキル名マップ
+            var skillNames: [UInt16: String] = [:]
+            for skill in appServices.masterDataCache.allSkills {
+                skillNames[skill.id] = skill.name
+            }
+
             // BattleLogRenderer で変換
             renderedActions = BattleLogRenderer.render(
                 battleLog: archive.battleLog,
@@ -251,6 +257,7 @@ struct EncounterDetailView: View {
                 enemyNames: enemyNames,
                 spellNames: spellNames,
                 enemySkillNames: enemySkillNames,
+                skillNames: skillNames,
                 actorIdentifiers: actorIdentifiers
             )
 
@@ -527,28 +534,53 @@ struct GroupedActionRowView: View {
                     }
                 }
 
-                // 各結果（ダメージ/回復等）とHP変動を表示
-                ForEach(Array(zip(group.results, group.hpChanges).enumerated()), id: \.offset) { _, pair in
-                    let (result, hpChange) = pair
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(result.message)
+                let partition = partitionResults(group.results)
+                let sections: [TargetResultSection] = group.hpChanges.map { hpChange in
+                    let entries = partition.byTarget[hpChange.targetId] ?? []
+                    let (beforeHPEntries, afterHPEntries) = splitEntries(entries)
+                    return TargetResultSection(id: hpChange.targetId,
+                                               hpChange: hpChange,
+                                               beforeEntries: beforeHPEntries,
+                                               afterEntries: afterHPEntries)
+                }
+                let handledTargets = Set(sections.map { $0.id })
+                let remainingTargets = partition.order.filter { !handledTargets.contains($0) }
+
+                ForEach(sections) { section in
+                    ForEach(section.beforeEntries.indices, id: \.self) { idx in
+                        Text(section.beforeEntries[idx].message)
                             .font(.caption)
                             .foregroundStyle(.primary)
-                        HPBarView(
-                            currentHP: hpChange.afterHP,
-                            previousHP: hpChange.beforeHP,
-                            maxHP: hpChange.maxHP
-                        )
-                        .frame(maxWidth: 120)
                     }
-                }
-                // HP変動がない結果（ミス等）を表示
-                if group.results.count > group.hpChanges.count {
-                    ForEach(Array(group.results.dropFirst(group.hpChanges.count).enumerated()), id: \.offset) { _, result in
-                        Text(result.message)
+
+                    HPBarView(
+                        currentHP: section.hpChange.afterHP,
+                        previousHP: section.hpChange.beforeHP,
+                        maxHP: section.hpChange.maxHP
+                    )
+                    .frame(maxWidth: 120)
+
+                    ForEach(section.afterEntries.indices, id: \.self) { idx in
+                        Text(section.afterEntries[idx].message)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                }
+
+                ForEach(remainingTargets, id: \.self) { targetId in
+                    if let entries = partition.byTarget[targetId] {
+                        ForEach(entries.indices, id: \.self) { idx in
+                            Text(entries[idx].message)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                ForEach(partition.untargetedResults.indices, id: \.self) { idx in
+                    Text(partition.untargetedResults[idx].message)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -556,6 +588,46 @@ struct GroupedActionRowView: View {
         }
         .padding(.vertical, 8)
     }
+}
+
+private struct TargetResultSection: Identifiable {
+    let id: String
+    let hpChange: ActionHPChange
+    let beforeEntries: [BattleLogEntry]
+    let afterEntries: [BattleLogEntry]
+}
+
+private func partitionResults(_ results: [BattleLogEntry]) -> (byTarget: [String: [BattleLogEntry]], order: [String], untargetedResults: [BattleLogEntry]) {
+    var dictionary: [String: [BattleLogEntry]] = [:]
+    var order: [String] = []
+    var untargeted: [BattleLogEntry] = []
+
+    for entry in results {
+        if let targetId = entry.targetId {
+            if dictionary[targetId] == nil {
+                dictionary[targetId] = []
+                order.append(targetId)
+            }
+            dictionary[targetId]?.append(entry)
+        } else {
+            untargeted.append(entry)
+        }
+    }
+
+    return (dictionary, order, untargeted)
+}
+
+private func splitEntries(_ entries: [BattleLogEntry]) -> ([BattleLogEntry], [BattleLogEntry]) {
+    var before: [BattleLogEntry] = []
+    var after: [BattleLogEntry] = []
+    for entry in entries {
+        if entry.type == .defeat {
+            after.append(entry)
+        } else {
+            before.append(entry)
+        }
+    }
+    return (before, after)
 }
 
 struct BattleActorIcon: View {
@@ -605,7 +677,16 @@ struct BattleActorIcon: View {
     private func computeHPChanges(for action: BattleLogRenderer.RenderedAction,
                                   stateMap: inout [String: ParticipantState],
                                   indexToId: [UInt16: String]) -> [ActionHPChange] {
-        var changes: [ActionHPChange] = []
+        struct AggregatedChange {
+            var targetId: String
+            var targetName: String
+            var beforeHP: Int
+            var afterHP: Int
+            var maxHP: Int
+        }
+
+        var aggregated: [String: AggregatedChange] = [:]
+        var order: [String] = []
 
         for effect in action.model.effects {
             guard let impact = BattleLogEffectInterpreter.impact(for: effect) else { continue }
@@ -619,26 +700,37 @@ struct BattleActorIcon: View {
             guard let participantId = indexToId[targetIndex],
                   var participant = stateMap[participantId] else { continue }
 
-            let beforeHP = participant.currentHP
-            let maxHP = participant.maxHP
+            if aggregated[participantId] == nil {
+                aggregated[participantId] = AggregatedChange(targetId: participantId,
+                                                             targetName: participant.name,
+                                                             beforeHP: participant.currentHP,
+                                                             afterHP: participant.currentHP,
+                                                             maxHP: participant.maxHP)
+                order.append(participantId)
+            }
 
             switch impact {
             case .damage(_, let amount):
                 participant.currentHP = max(0, participant.currentHP - amount)
             case .heal(_, let amount):
-                participant.currentHP = min(maxHP, participant.currentHP + amount)
+                participant.currentHP = min(participant.maxHP, participant.currentHP + amount)
             case .setHP(_, let amount):
-                participant.currentHP = max(0, min(maxHP, amount))
+                participant.currentHP = max(0, min(participant.maxHP, amount))
             }
 
             stateMap[participantId] = participant
-            let change = ActionHPChange(targetId: participantId,
-                                        targetName: participant.name,
-                                        beforeHP: beforeHP,
-                                        afterHP: participant.currentHP,
-                                        maxHP: maxHP)
-            changes.append(change)
+
+            var change = aggregated[participantId]!
+            change.afterHP = participant.currentHP
+            aggregated[participantId] = change
         }
 
-        return changes
+        return order.compactMap { key in
+            guard let change = aggregated[key] else { return nil }
+            return ActionHPChange(targetId: change.targetId,
+                                  targetName: change.targetName,
+                                  beforeHP: change.beforeHP,
+                                  afterHP: change.afterHP,
+                                  maxHP: change.maxHP)
+        }
     }

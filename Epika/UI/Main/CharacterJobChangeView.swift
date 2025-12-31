@@ -139,11 +139,11 @@ struct CharacterJobChangeView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            exploringCharacterIds = try appServices.exploration.runningPartyMemberIds()
-            let progresses = try characterService.allCharacters()
+            exploringCharacterIds = try await appServices.exploration.runningPartyMemberIds()
+            let progresses = try await characterService.allCharacters()
             var runtime: [RuntimeCharacter] = []
             for progress in progresses {
-                let character = try characterService.runtimeCharacter(from: progress)
+                let character = try await characterService.runtimeCharacter(from: progress)
                 runtime.append(character)
             }
             characters = runtime.sorted { $0.id < $1.id }
@@ -166,8 +166,8 @@ struct CharacterJobChangeView: View {
         errorMessage = nil
         defer { isProcessing = false }
         do {
-            let updated = try characterService.changeJob(characterId: characterId, newJobId: jobIndex)
-            let runtime = try characterService.runtimeCharacter(from: updated)
+            let updated = try await characterService.changeJob(characterId: characterId, newJobId: jobIndex)
+            let runtime = try await characterService.runtimeCharacter(from: updated)
             if let index = characters.firstIndex(where: { $0.id == runtime.id }) {
                 characters[index] = runtime
             }

@@ -27,28 +27,28 @@ import Foundation
 import SwiftData
 
 actor DungeonProgressService {
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
 
-    init(container: ModelContainer) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider) {
+        self.contextProvider = contextProvider
     }
 
     func allDungeonSnapshots() async throws -> [DungeonSnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<DungeonRecord>()
         let records = try context.fetch(descriptor)
         return records.map { Self.snapshot(from: $0) }
     }
 
     func ensureDungeonSnapshot(for dungeonId: UInt16) async throws -> DungeonSnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         try saveIfNeeded(context)
         return Self.snapshot(from: record)
     }
 
     func setUnlocked(_ isUnlocked: Bool, dungeonId: UInt16) async throws {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         if record.isUnlocked != isUnlocked {
             record.isUnlocked = isUnlocked
@@ -61,7 +61,7 @@ actor DungeonProgressService {
     /// - Returns: 初クリアの場合は`true`
     @discardableResult
     func markCleared(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws -> Bool {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         let now = Date()
 
@@ -84,7 +84,7 @@ actor DungeonProgressService {
     }
 
     func unlockDifficulty(dungeonId: UInt16, difficulty: UInt8) async throws {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         if record.highestUnlockedDifficulty < difficulty {
             record.highestUnlockedDifficulty = difficulty
@@ -96,7 +96,7 @@ actor DungeonProgressService {
 
     func updatePartialProgress(dungeonId: UInt16, difficulty: UInt8, furthestFloor: UInt8) async throws {
         guard furthestFloor > 0 else { return }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         if difficulty == record.highestUnlockedDifficulty {
             record.furthestClearedFloor = max(record.furthestClearedFloor, furthestFloor)
@@ -107,12 +107,6 @@ actor DungeonProgressService {
 }
 
 private extension DungeonProgressService {
-    func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
-    }
-
     func ensureDungeonRecord(dungeonId: UInt16, context: ModelContext) throws -> DungeonRecord {
         var descriptor = FetchDescriptor<DungeonRecord>(predicate: #Predicate { $0.dungeonId == dungeonId })
         descriptor.fetchLimit = 1

@@ -30,16 +30,16 @@ import SwiftData
 
 /// ゲーム状態（プレイヤー資産・メタ情報）を管理するService
 actor GameStateService {
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
 
-    init(container: ModelContainer) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider) {
+        self.contextProvider = contextProvider
     }
 
     // MARK: - Reset
 
     func resetAllProgress() async throws {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         try deleteAll(GameStateRecord.self, context: context)
         try deleteAll(InventoryItemRecord.self, context: context)
         try deleteAll(CharacterRecord.self, context: context)
@@ -59,7 +59,7 @@ actor GameStateService {
     // MARK: - Super Rare Daily State
 
     func loadSuperRareDailyState(currentDate: Date = Date()) async throws -> SuperRareDailyState {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureGameState(context: context)
         let today = JSTDateUtility.dateAsInt(from: currentDate)
 
@@ -72,7 +72,7 @@ actor GameStateService {
     }
 
     func updateSuperRareDailyState(_ state: SuperRareDailyState) async throws {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureGameState(context: context)
         if state.hasTriggered {
             record.superRareLastTriggeredDate = state.jstDate
@@ -84,13 +84,13 @@ actor GameStateService {
     // MARK: - Daily Processing
 
     func lastDailyProcessedDate() async throws -> UInt32? {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureGameState(context: context)
         return record.lastDailyProcessedDate
     }
 
     func markDailyProcessed(date: UInt32) async throws {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureGameState(context: context)
         record.lastDailyProcessedDate = date
         record.updatedAt = Date()
@@ -100,14 +100,14 @@ actor GameStateService {
     // MARK: - Player Snapshot
 
     func loadCurrentPlayer(initialGold: UInt32 = 1000) async throws -> PlayerSnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureGameState(context: context, initialGold: initialGold)
         try saveIfNeeded(context)
         return Self.snapshot(from: record)
     }
 
     func currentPlayer() async throws -> PlayerSnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try fetchGameState(context: context)
         return Self.snapshot(from: record)
     }
@@ -142,7 +142,7 @@ actor GameStateService {
     // MARK: - Pandora Box
 
     func pandoraBoxStackKeys() async throws -> [String] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try fetchGameState(context: context)
         return record.pandoraBoxStackKeys
     }
@@ -151,7 +151,7 @@ actor GameStateService {
         guard stackKeys.count <= 5 else {
             throw ProgressError.invalidInput(description: "パンドラボックスには最大5個までのアイテムを登録できます")
         }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try fetchGameState(context: context)
         record.pandoraBoxStackKeys = stackKeys
         record.updatedAt = Date()
@@ -160,7 +160,7 @@ actor GameStateService {
     }
 
     func addToPandoraBox(stackKey: String) async throws -> PlayerSnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try fetchGameState(context: context)
         guard !record.pandoraBoxStackKeys.contains(stackKey) else {
             return Self.snapshot(from: record)
@@ -175,7 +175,7 @@ actor GameStateService {
     }
 
     func removeFromPandoraBox(stackKey: String) async throws -> PlayerSnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try fetchGameState(context: context)
         record.pandoraBoxStackKeys.removeAll { $0 == stackKey }
         record.updatedAt = Date()
@@ -187,12 +187,6 @@ actor GameStateService {
 // MARK: - Private Helpers
 
 private extension GameStateService {
-    func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
-    }
-
     func ensureGameState(context: ModelContext, initialGold: UInt32 = 1000) throws -> GameStateRecord {
         var descriptor = FetchDescriptor<GameStateRecord>()
         descriptor.fetchLimit = 1
@@ -227,7 +221,7 @@ private extension GameStateService {
     }
 
     func mutateWallet(_ mutate: @Sendable (inout PlayerWallet) throws -> Void) async throws -> PlayerSnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try ensureGameState(context: context)
         var wallet = PlayerWallet(gold: record.gold, catTickets: record.catTickets)
         try mutate(&wallet)
