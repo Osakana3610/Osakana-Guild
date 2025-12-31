@@ -91,7 +91,10 @@ extension AppServices {
         let persistenceSession: ExplorationProgressService.EventSession
         let characterSession: CharacterProgressService.BattleResultSession
         do {
-            persistenceSession = try explorationSession(for: recordId)
+            persistenceSession = try ExplorationProgressService.EventSession(
+                contextProvider: contextProvider,
+                runId: recordId
+            )
             characterSession = try CharacterProgressService.BattleResultSession(
                 contextProvider: contextProvider,
                 masterData: masterDataCache,
@@ -106,10 +109,16 @@ extension AppServices {
         let explorationFlushThreshold = 8
         let characterFlushThreshold = 3
 
-        defer {
+        // 探索サービスへの参照をローカルにキャプチャ（asyncクロージャ内で使用）
+        let explorationService = exploration
+
+        // セッションクリーンアップ用ヘルパー（deferでasyncが使えないため関数を抽出）
+        func cleanupSessions() async {
             try? characterSession.flushIfNeeded()
             try? persistenceSession.flushIfNeeded()
-            removeExplorationSession(runId: recordId)
+            if persistenceSession.shouldInvalidateCache {
+                await explorationService.invalidateCache()
+            }
         }
 
         do {
@@ -189,10 +198,14 @@ extension AppServices {
                 let dropResult = try await applyDropRewards(drops)
                 autoSellGold = dropResult.autoSellGold
                 autoSoldItems = dropResult.autoSoldItems
-                // プレイヤー状態とインベントリキャッシュを更新（失敗しても探索完了フローは止めない）
-                Task { @MainActor [weak self] in
-                    await self?.reloadPlayerState()
-                    self?.userDataLoad.addDroppedItems(seeds: dropResult.addedSeeds, snapshots: dropResult.addedSnapshots, definitions: dropResult.definitions)
+                // キャッシュを更新（プレイヤー状態は探索結果画面表示時にリロード）
+                let userDataLoadService = userDataLoad
+                await MainActor.run {
+                    userDataLoadService.addDroppedItems(
+                        seeds: dropResult.addedSeeds,
+                        snapshots: dropResult.addedSnapshots,
+                        definitions: dropResult.definitions
+                    )
                 }
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
@@ -210,6 +223,7 @@ extension AppServices {
                                                    stage: .completed(artifact))
             continuation.yield(finalUpdate)
             continuation.finish()
+            await cleanupSessions()
         } catch {
             let originalError = error
             await cancel()
@@ -217,15 +231,19 @@ extension AppServices {
                 persistenceSession.cancelRun(endedAt: Date())
                 try persistenceSession.flushIfNeeded()
             } catch is CancellationError {
+                await cleanupSessions()
                 continuation.finish(throwing: originalError)
                 return
             } catch let cleanupError {
+                await cleanupSessions()
                 continuation.finish(throwing: cleanupError)
                 return
             }
+            await cleanupSessions()
             continuation.finish(throwing: originalError)
         }
     }
+
 
     func handleExplorationEvent(memberIds: [UInt8],
                                 runtimeCharactersById: [UInt8: RuntimeCharacter],
