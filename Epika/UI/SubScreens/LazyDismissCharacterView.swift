@@ -66,13 +66,13 @@ struct LazyDismissCharacterView: View {
             }
             .alert("キャラクター解雇", isPresented: $showDeleteConfirmation) {
                 Button("キャンセル", role: .cancel) { selectedCharacter = nil }
-                Button("解雇", role: .destructive) { dismissSelectedCharacter() }
+                Button("解雇", role: .destructive) { Task { await dismissSelectedCharacter() } }
             } message: {
                 if let character = selectedCharacter {
                     Text("「\(character.name)」を解雇しますか？この操作は取り消せません。")
                 }
             }
-            .task { loadCharacters() }
+            .task { await loadCharacters() }
         }
     }
 
@@ -137,18 +137,18 @@ struct LazyDismissCharacterView: View {
     // MARK: - Data Loading
 
     @MainActor
-    private func loadCharacters() {
+    private func loadCharacters() async {
         isLoading = true
         showError = false
         do {
-            let progresses = try characterService.allCharacters()
+            let progresses = try await characterService.allCharacters()
             var runtimeCharacters: [RuntimeCharacter] = []
             for snapshot in progresses {
-                let runtime = try characterService.runtimeCharacter(from: snapshot)
+                let runtime = try await characterService.runtimeCharacter(from: snapshot)
                 runtimeCharacters.append(runtime)
             }
             fullCharacters = runtimeCharacters.sorted { $0.id < $1.id }
-            exploringIds = try appServices.exploration.runningPartyMemberIds()
+            exploringIds = try await appServices.exploration.runningPartyMemberIds()
         } catch {
             errorMessage = error.localizedDescription
             showError = true
@@ -158,13 +158,13 @@ struct LazyDismissCharacterView: View {
     }
 
     @MainActor
-    private func dismissSelectedCharacter() {
+    private func dismissSelectedCharacter() async {
         guard let character = selectedCharacter, !isProcessing else { return }
         isProcessing = true
         showError = false
         do {
-            try characterService.deleteCharacter(id: character.id)
-            loadCharacters()
+            try await characterService.deleteCharacter(id: character.id)
+            await loadCharacters()
             onComplete()
             if fullCharacters.isEmpty {
                 dismiss()

@@ -42,7 +42,7 @@ struct RootView: View {
             .onChange(of: scenePhase) { _, newPhase in
                 switch newPhase {
                 case .active:
-                    appServices.exploration.purgeOldRecordsInBackground()
+                    Task { await appServices.exploration.purgeOldRecordsInBackground() }
                 case .background:
                     appServices.flushExplorationSessions()
                 default:

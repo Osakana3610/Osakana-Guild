@@ -92,7 +92,11 @@ extension AppServices {
         let characterSession: CharacterProgressService.BattleResultSession
         do {
             persistenceSession = try explorationSession(for: recordId)
-            characterSession = try character.makeBattleResultSession(characterIds: memberIds)
+            characterSession = try CharacterProgressService.BattleResultSession(
+                contextProvider: contextProvider,
+                masterData: masterDataCache,
+                characterIds: memberIds
+            )
         } catch {
             continuation.finish(throwing: error)
             return
@@ -116,12 +120,12 @@ extension AppServices {
                     totalDrops.append(contentsOf: outcome.drops)
                 }
 
-                let battleLogRecord = try await persistenceSession.appendEvent(event: outcome.entry,
-                                                                               battleLog: outcome.battleLog,
-                                                                               occurredAt: outcome.entry.occurredAt,
-                                                                               randomState: outcome.randomState,
-                                                                               superRareState: outcome.superRareState,
-                                                                               droppedItemIds: outcome.droppedItemIds)
+                let battleLogRecord = try persistenceSession.appendEvent(event: outcome.entry,
+                                                                         battleLog: outcome.battleLog,
+                                                                         occurredAt: outcome.entry.occurredAt,
+                                                                         randomState: outcome.randomState,
+                                                                         superRareState: outcome.superRareState,
+                                                                         droppedItemIds: outcome.droppedItemIds)
 
                 var battleLogId: PersistentIdentifier?
                 if let logRecord = battleLogRecord {
