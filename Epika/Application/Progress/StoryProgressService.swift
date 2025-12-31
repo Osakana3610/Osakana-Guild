@@ -21,10 +21,10 @@ import Foundation
 import SwiftData
 
 actor StoryProgressService {
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
 
-    init(container: ModelContainer) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider) {
+        self.contextProvider = contextProvider
     }
 
     func currentStorySnapshot() async throws -> StorySnapshot {
@@ -68,9 +68,7 @@ actor StoryProgressService {
 
 private extension StoryProgressService {
     func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
+        contextProvider.newBackgroundContext()
     }
 
     func fetchAllNodeProgress(context: ModelContext) throws -> [StoryNodeProgressRecord] {

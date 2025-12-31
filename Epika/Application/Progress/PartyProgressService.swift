@@ -25,10 +25,10 @@ import Foundation
 import SwiftData
 
 actor PartyProgressService {
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
 
-    init(container: ModelContainer) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider) {
+        self.contextProvider = contextProvider
     }
 
     func allParties() async throws -> [PartySnapshot] {
@@ -163,9 +163,7 @@ actor PartyProgressService {
 
 private extension PartyProgressService {
     func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
+        contextProvider.newBackgroundContext()
     }
 
     func fetchParty(persistentIdentifier: PersistentIdentifier, context: ModelContext) throws -> PartyRecord {

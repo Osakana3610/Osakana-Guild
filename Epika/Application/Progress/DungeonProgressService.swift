@@ -27,10 +27,10 @@ import Foundation
 import SwiftData
 
 actor DungeonProgressService {
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
 
-    init(container: ModelContainer) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider) {
+        self.contextProvider = contextProvider
     }
 
     func allDungeonSnapshots() async throws -> [DungeonSnapshot] {
@@ -108,9 +108,7 @@ actor DungeonProgressService {
 
 private extension DungeonProgressService {
     func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
+        contextProvider.newBackgroundContext()
     }
 
     func ensureDungeonRecord(dungeonId: UInt16, context: ModelContext) throws -> DungeonRecord {

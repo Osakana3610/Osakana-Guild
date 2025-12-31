@@ -26,7 +26,7 @@ import SwiftData
 /// 宝石改造サービス
 /// 宝石を装備アイテムにソケットとして装着する機能を提供
 actor GemModificationProgressService {
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let masterDataCache: MasterDataCache
     private let userDataLoad: UserDataLoadService
 
@@ -36,8 +36,8 @@ actor GemModificationProgressService {
         ItemSaleCategory.forSynthesis.rawValue
     ]
 
-    init(container: ModelContainer, masterDataCache: MasterDataCache, userDataLoad: UserDataLoadService) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider, masterDataCache: MasterDataCache, userDataLoad: UserDataLoadService) {
+        self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
         self.userDataLoad = userDataLoad
     }
@@ -235,9 +235,7 @@ actor GemModificationProgressService {
     // MARK: - Private Helpers
 
     private func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
+        contextProvider.newBackgroundContext()
     }
 
     private func makeSnapshot(_ record: InventoryItemRecord) -> ItemSnapshot {

@@ -101,7 +101,7 @@ final class AppServices {
         let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)
         self.dropNotifications = dropNotifications
         self.statChangeNotifications = StatChangeNotificationService()
-        let autoTradeService = AutoTradeProgressService(container: container, gameStateService: gameStateService)
+        let autoTradeService = AutoTradeProgressService(contextProvider: contextProvider, gameStateService: gameStateService)
         self.autoTrade = autoTradeService
         let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications, autoTradeService] results in
             guard let dropNotifications, !results.isEmpty else { return }
@@ -128,18 +128,18 @@ final class AppServices {
         self.runtime = ProgressRuntimeService(runtimeService: runtimeService,
                                               gameStateService: gameStateService)
 
-        self.party = PartyProgressService(container: container)
+        self.party = PartyProgressService(contextProvider: contextProvider)
         self.inventory = InventoryProgressService(contextProvider: contextProvider,
                                                   gameStateService: gameStateService,
                                                   masterDataCache: masterDataCache)
-        self.shop = ShopProgressService(container: container,
+        self.shop = ShopProgressService(contextProvider: contextProvider,
                                         masterDataCache: masterDataCache,
                                         inventoryService: self.inventory,
                                         gameStateService: gameStateService)
         self.character = CharacterProgressService(contextProvider: contextProvider, masterData: masterDataCache)
         self.exploration = ExplorationProgressService(contextProvider: contextProvider, masterDataCache: masterDataCache)
-        self.dungeon = DungeonProgressService(container: container)
-        self.story = StoryProgressService(container: container)
+        self.dungeon = DungeonProgressService(contextProvider: contextProvider)
+        self.story = StoryProgressService(contextProvider: contextProvider)
         self.titleInheritance = TitleInheritanceProgressService(inventoryService: self.inventory,
                                                                   masterDataCache: masterDataCache)
         self.artifactExchange = ArtifactExchangeProgressService(inventoryService: self.inventory,
@@ -154,7 +154,7 @@ final class AppServices {
             inventoryService: self.inventory,
             explorationService: self.exploration
         )
-        self.gemModification = GemModificationProgressService(container: container,
+        self.gemModification = GemModificationProgressService(contextProvider: contextProvider,
                                                                masterDataCache: masterDataCache,
                                                                userDataLoad: self.userDataLoad)
         // 全プロパティ初期化後にAppServicesを設定
