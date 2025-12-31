@@ -62,7 +62,7 @@ actor InventoryProgressService {
     // MARK: - Public API
 
     func allItems(storage: ItemStorage) async throws -> [ItemSnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = fetchDescriptor(for: storage)
         let records = try context.fetch(descriptor)
         let snapshots = records.map(makeSnapshot(_:))
@@ -158,7 +158,7 @@ actor InventoryProgressService {
             throw ProgressError.invalidInput(description: "追加数量は1以上である必要があります")
         }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try fetchOrCreateRecord(
             superRareTitleId: enhancements.superRareTitleId,
             normalTitleId: enhancements.normalTitleId,
@@ -178,7 +178,7 @@ actor InventoryProgressService {
     func addItemsBatchReturningSnapshots(_ seeds: [BatchSeed]) async throws -> [ItemSnapshot] {
         guard !seeds.isEmpty else { return [] }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let aggregated = aggregate(seeds)
         var snapshots: [ItemSnapshot] = []
 
@@ -224,7 +224,7 @@ actor InventoryProgressService {
     /// TODO(Build 16): ビルド16で重複レコードが自然消滅したらこの処理を削除する
     @discardableResult
     func repairDuplicateStackKeys() async throws -> Int {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<InventoryItemRecord>()
         let allRecords = try context.fetch(descriptor)
         guard !allRecords.isEmpty else { return 0 }
@@ -263,7 +263,7 @@ actor InventoryProgressService {
             let chunk = Array(seeds[index..<end])
             chunkNumber += 1
             let localIndex = chunkNumber
-            let context = makeContext()
+            let context = contextProvider.makeContext()
             let aggregated = aggregate(chunk)
 
             for (storage, entries) in aggregated {
@@ -319,7 +319,7 @@ actor InventoryProgressService {
             #if DEBUG
             chunkNumber += 1
             #endif
-            let context = makeContext()
+            let context = contextProvider.makeContext()
             for i in index..<end {
                 let seed = seeds[i]
                 let record = InventoryItemRecord(
@@ -390,7 +390,7 @@ actor InventoryProgressService {
             return try await gameStateService.currentPlayer()
         }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         // Fetch all records, then filter in memory by stackKey
         // (SwiftData #Predicate cannot use computed properties like stackKey)
         let stackKeySet = Set(stackKeys)
@@ -434,7 +434,7 @@ actor InventoryProgressService {
         guard let components = StackKeyComponents(stackKey: stackKey) else {
             throw ProgressError.invalidInput(description: "不正なstackKeyです")
         }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let superRare = components.superRareTitleId
         let normal = components.normalTitleId
         let master = components.itemId
@@ -463,7 +463,7 @@ actor InventoryProgressService {
         guard let components = StackKeyComponents(stackKey: stackKey) else {
             throw ProgressError.invalidInput(description: "不正なstackKeyです")
         }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let superRare = components.superRareTitleId
         let normal = components.normalTitleId
         let master = components.itemId
@@ -501,7 +501,7 @@ actor InventoryProgressService {
         guard let sourceComponents = StackKeyComponents(stackKey: sourceStackKey) else {
             throw ProgressError.invalidInput(description: "不正な提供stackKeyです")
         }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
 
         // target fetch with individual field comparison
         let tSuperRare = targetComponents.superRareTitleId
@@ -596,10 +596,6 @@ actor InventoryProgressService {
     }
 
     // MARK: - Private Helpers
-
-    private func makeContext() -> ModelContext {
-        contextProvider.newBackgroundContext()
-    }
 
     private func fetchDescriptor(for storage: ItemStorage) -> FetchDescriptor<InventoryItemRecord> {
         let storageTypeValue = storage.rawValue

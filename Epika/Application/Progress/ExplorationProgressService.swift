@@ -50,14 +50,14 @@ actor ExplorationSnapshotQueryActor {
     }
 
     func allExplorations() async throws -> [ExplorationSnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<ExplorationRunRecord>(sortBy: [SortDescriptor(\.endedAt, order: .reverse)])
         let runs = try context.fetch(descriptor)
         return try await makeSnapshots(runs: runs, context: context)
     }
 
     func recentExplorations(forPartyId partyId: UInt8, limit: Int) async throws -> [ExplorationSnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId },
             sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
@@ -68,7 +68,7 @@ actor ExplorationSnapshotQueryActor {
     }
 
     func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int) async throws -> [ExplorationSnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId },
             sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
@@ -79,7 +79,7 @@ actor ExplorationSnapshotQueryActor {
     }
 
     func recentExplorationSummaries(limitPerParty: Int) async throws -> [ExplorationSnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let partyDescriptor = FetchDescriptor<PartyRecord>()
         let parties = try context.fetch(partyDescriptor)
         var snapshots: [ExplorationSnapshot] = []
@@ -99,7 +99,7 @@ actor ExplorationSnapshotQueryActor {
     }
 
     func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> ExplorationSnapshot? {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
         )
@@ -402,9 +402,6 @@ actor ExplorationSnapshotQueryActor {
         }
     }
 
-    private func makeContext() -> ModelContext {
-        contextProvider.newBackgroundContext()
-    }
 }
 
 @MainActor
@@ -427,7 +424,7 @@ final class ExplorationProgressService {
 
         fileprivate init(service: ExplorationProgressService, runId: PersistentIdentifier) throws {
             self.service = service
-            self.context = service.makeContext()
+            self.context = service.contextProvider.makeContext()
             self.runRecord = try service.fetchRunRecord(runId: runId, context: context)
         }
 
@@ -523,7 +520,7 @@ final class ExplorationProgressService {
         let contextProvider = self.contextProvider
         Task.detached(priority: .utility) {
             let startTime = CFAbsoluteTimeGetCurrent()
-            let context = contextProvider.newBackgroundContext()
+            let context = contextProvider.makeContext()
 
             var countDescriptor = FetchDescriptor<ExplorationRunRecord>()
             countDescriptor.propertiesToFetch = []
@@ -934,7 +931,7 @@ final class ExplorationProgressService {
                   targetFloor: Int,
                   startedAt: Date,
                   seed: UInt64) async throws -> PersistentIdentifier {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
 
         let runRecord = ExplorationRunRecord(
             partyId: party.id,
@@ -954,7 +951,7 @@ final class ExplorationProgressService {
     func beginRunsBatch(_ params: [BeginRunParams]) throws -> [UInt8: PersistentIdentifier] {
         guard !params.isEmpty else { return [:] }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
 
         // レコードを作成してinsert（IDはsave後に取得）
         var records: [(partyId: UInt8, record: ExplorationRunRecord)] = []
@@ -1028,7 +1025,7 @@ final class ExplorationProgressService {
 
     /// partyIdとstartedAtで特定のRunをキャンセル
     func cancelRun(partyId: UInt8, startedAt: Date, endedAt: Date = Date()) async throws {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
         )
@@ -1047,7 +1044,7 @@ final class ExplorationProgressService {
 
     /// Running状態の探索レコードを取得（再開用）
     func fetchRunningRecord(partyId: UInt8, startedAt: Date) throws -> ExplorationRunRecord? {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let runningStatus = ExplorationResult.running.rawValue
         let descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt && $0.result == runningStatus }
@@ -1062,7 +1059,7 @@ final class ExplorationProgressService {
     }
 
     func runningExplorationSummaries() throws -> [RunningExplorationSummary] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let runningStatus = ExplorationResult.running.rawValue
         let descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.result == runningStatus }
@@ -1073,7 +1070,7 @@ final class ExplorationProgressService {
 
     /// 現在探索中の全パーティメンバーIDを取得
     func runningPartyMemberIds() throws -> Set<UInt8> {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let runningStatus = ExplorationResult.running.rawValue
         let runDescriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.result == runningStatus }
@@ -1102,10 +1099,6 @@ private extension ExplorationProgressService {
             throw ProgressPersistenceError.explorationRunNotFoundByPersistentId
         }
         return record
-    }
-
-    func makeContext() -> ModelContext {
-        contextProvider.newBackgroundContext()
     }
 
     func saveIfNeeded(_ context: ModelContext) throws {

@@ -57,8 +57,7 @@ extension AppServices {
     /// 解放条件がないストーリーを初期解放する
     /// - Note: unlockRequirements: [] のストーリーは最初から解放済みとする
     func ensureInitialStoriesUnlocked() async throws {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
+        let context = contextProvider.makeContext()
 
         let definitions = masterDataCache.allStoryNodes
         let now = Date()
@@ -85,8 +84,7 @@ extension AppServices {
     /// 解放条件がないダンジョンを初期解放する
     /// - Note: unlockConditions: [] のダンジョンは最初から解放済みとする
     func ensureInitialDungeonsUnlocked() async throws {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
+        let context = contextProvider.makeContext()
 
         let definitions = masterDataCache.allDungeons
         let now = Date()
@@ -124,8 +122,7 @@ extension AppServices {
         // ストーリーが存在しなければ何もしない
         guard masterDataCache.storyNode(nextStoryId) != nil else { return }
 
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
+        let context = contextProvider.makeContext()
 
         let record = try ensureStoryRecord(nodeId: nextStoryId, context: context)
 
@@ -146,8 +143,7 @@ extension AppServices {
     /// ストーリーノードを既読にし、同一トランザクション内で解放対象を処理する
     @discardableResult
     func markStoryNodeAsRead(_ nodeId: UInt16) async throws -> StorySnapshot {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
+        let context = contextProvider.makeContext()
 
         // 1. ストーリー定義を取得（unlocksModulesを含む）
         guard let definition = masterDataCache.storyNode(nodeId) else {

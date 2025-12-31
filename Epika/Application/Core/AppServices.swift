@@ -46,6 +46,7 @@ import Observation
 @Observable
 final class AppServices {
     let container: ModelContainer
+    let contextProvider: SwiftDataContextProvider
     let masterDataCache: MasterDataCache
     let gameState: GameStateService
 
@@ -94,8 +95,9 @@ final class AppServices {
 
     init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
-        self.masterDataCache = masterDataCache
         let contextProvider = SwiftDataContextProvider(container: container)
+        self.contextProvider = contextProvider
+        self.masterDataCache = masterDataCache
         let gameStateService = GameStateService(contextProvider: contextProvider)
         self.gameState = gameStateService
         let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)

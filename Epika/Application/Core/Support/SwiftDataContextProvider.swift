@@ -9,7 +9,7 @@
 //   - サービス層が MainActor から独立して動作できる基盤を提供
 //
 // 【使い方】
-//   let context = contextProvider.newBackgroundContext()
+//   let context = contextProvider.makeContext()
 //   // ... データ操作 ...
 //   try context.save()
 //
@@ -26,13 +26,13 @@ import SwiftData
 struct SwiftDataContextProvider: Sendable {
     let container: ModelContainer
 
-    /// 新しい背景用コンテキストを生成する
+    /// 新しいコンテキストを生成する
     ///
     /// - Returns: autosaveEnabled = false に設定された ModelContext
     ///
     /// このメソッドで生成されたコンテキストは自動保存されないため、
     /// 変更を永続化するには明示的に `context.save()` を呼ぶ必要がある。
-    func newBackgroundContext() -> ModelContext {
+    func makeContext() -> ModelContext {
         let context = ModelContext(container)
         context.autosaveEnabled = false
         return context
