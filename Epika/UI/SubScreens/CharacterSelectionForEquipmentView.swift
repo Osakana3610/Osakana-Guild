@@ -83,14 +83,14 @@ struct CharacterSelectionForEquipmentView: View {
         loadError = nil
 
         do {
-            let snapshots = try characterService.allCharacters()
+            let snapshots = try await characterService.allCharacters()
             var runtimeCharacters: [RuntimeCharacter] = []
             for snapshot in snapshots {
-                let runtime = try characterService.runtimeCharacter(from: snapshot)
+                let runtime = try await characterService.runtimeCharacter(from: snapshot)
                 runtimeCharacters.append(runtime)
             }
             characters = runtimeCharacters
-            exploringIds = try appServices.exploration.runningPartyMemberIds()
+            exploringIds = try await appServices.exploration.runningPartyMemberIds()
         } catch {
             loadError = error.localizedDescription
         }
@@ -250,7 +250,7 @@ struct EquipmentEditorView: View {
                             itemDefinitions: itemDefinitions,
                             equipmentCapacity: currentCharacter.equipmentCapacity,
                             onUnequip: { item in
-                                try performUnequip(item)
+                                try await performUnequip(item)
                             },
                             onDetail: { itemId in
                                 selectedItemIdForDetail = itemId
@@ -427,10 +427,12 @@ struct EquipmentEditorView: View {
             }
 
             Button {
-                if isEquipped {
-                    performUnequipFromLightweight(item)
-                } else if validation.canEquip {
-                    performEquip(item)
+                Task {
+                    if isEquipped {
+                        await performUnequipFromLightweight(item)
+                    } else if validation.canEquip {
+                        await performEquip(item)
+                    }
                 }
             } label: {
                 HStack {
@@ -459,7 +461,7 @@ struct EquipmentEditorView: View {
     }
 
     /// LightweightItemDataから装備解除を実行
-    private func performUnequipFromLightweight(_ item: LightweightItemData) {
+    private func performUnequipFromLightweight(_ item: LightweightItemData) async {
         // stackKeyから_equippedサフィックスを除去して元のstackKeyを取得
         let baseStackKey = String(item.stackKey.dropLast("_equipped".count))
 
@@ -468,7 +470,7 @@ struct EquipmentEditorView: View {
             return
         }
 
-        try? performUnequip(equippedItem)
+        try? await performUnequip(equippedItem)
     }
 
     private func loadData() async {
@@ -612,12 +614,12 @@ struct EquipmentEditorView: View {
     }
 
     @MainActor
-    private func performEquip(_ item: LightweightItemData) {
+    private func performEquip(_ item: LightweightItemData) async {
         equipError = nil
         let oldCharacter = currentCharacter
 
         do {
-            let equippedItems = try characterService.equipItem(
+            let equippedItems = try await characterService.equipItem(
                 characterId: currentCharacter.id,
                 inventoryItemStackKey: item.stackKey,
                 equipmentCapacity: currentCharacter.equipmentCapacity
@@ -644,11 +646,11 @@ struct EquipmentEditorView: View {
     }
 
     @MainActor
-    private func performUnequip(_ item: CharacterInput.EquippedItem) throws {
+    private func performUnequip(_ item: CharacterInput.EquippedItem) async throws {
         equipError = nil
         let oldCharacter = currentCharacter
 
-        let equippedItems = try characterService.unequipItem(
+        let equippedItems = try await characterService.unequipItem(
             characterId: currentCharacter.id,
             equipmentStackKey: item.stackKey
         )

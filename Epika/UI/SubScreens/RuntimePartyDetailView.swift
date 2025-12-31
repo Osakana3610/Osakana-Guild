@@ -252,7 +252,7 @@ struct RuntimePartyDetailView: View {
         errorMessage = nil
         do {
             // パーティメンバーのHP全回復（HP > 0 のキャラクターのみ）
-            try appServices.character.healToFull(characterIds: currentParty.memberIds)
+            try await appServices.character.healToFull(characterIds: currentParty.memberIds)
             // HP変更後にキャッシュを無効化
             appServices.userDataLoad.invalidateCharacters()
             try await loadAllCharacters()

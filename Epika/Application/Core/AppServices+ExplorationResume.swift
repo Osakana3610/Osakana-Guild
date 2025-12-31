@@ -41,8 +41,13 @@ enum ExplorationResumeError: Error {
 extension AppServices {
     /// 孤立した探索を再開
     func resumeOrphanedExploration(partyId: UInt8, startedAt: Date) async throws -> ExplorationRunHandle {
-        // 1. 探索レコードを取得
-        guard let record = try exploration.fetchRunningRecord(partyId: partyId, startedAt: startedAt) else {
+        // 1. 探索レコードを取得（actor境界を越えないよう直接フェッチ）
+        let context = contextProvider.makeContext()
+        let runningStatus = ExplorationResult.running.rawValue
+        let descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt && $0.result == runningStatus }
+        )
+        guard let record = try context.fetch(descriptor).first else {
             throw ExplorationResumeError.recordNotFound
         }
 
@@ -59,7 +64,7 @@ extension AppServices {
         guard let partySnapshot = try await party.partySnapshot(id: partyId) else {
             throw ExplorationResumeError.partyNotFound
         }
-        let characters = try character.characters(withIds: partySnapshot.memberCharacterIds)
+        let characters = try await character.characters(withIds: partySnapshot.memberCharacterIds)
 
         // 4. 最後の戦闘ログからHP復元
         let partyHP = restorePartyHP(from: eventRecords)

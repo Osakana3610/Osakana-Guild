@@ -26,7 +26,7 @@ import SwiftData
 /// 宝石改造サービス
 /// 宝石を装備アイテムにソケットとして装着する機能を提供
 actor GemModificationProgressService {
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let masterDataCache: MasterDataCache
     private let userDataLoad: UserDataLoadService
 
@@ -36,8 +36,8 @@ actor GemModificationProgressService {
         ItemSaleCategory.forSynthesis.rawValue
     ]
 
-    init(container: ModelContainer, masterDataCache: MasterDataCache, userDataLoad: UserDataLoadService) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider, masterDataCache: MasterDataCache, userDataLoad: UserDataLoadService) {
+        self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
         self.userDataLoad = userDataLoad
     }
@@ -46,7 +46,7 @@ actor GemModificationProgressService {
 
     /// 宝石一覧を取得
     func getGems() async throws -> [ItemSnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let storageTypeValue = ItemStorage.playerItem.rawValue
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.storageType == storageTypeValue
@@ -70,7 +70,7 @@ actor GemModificationProgressService {
 
     /// 指定した宝石をソケットとして装着可能なアイテム一覧を取得
     func getSocketableItems(for _: String) async throws -> [ItemSnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let storageTypeValue = ItemStorage.playerItem.rawValue
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.storageType == storageTypeValue && $0.socketItemId == 0
@@ -105,7 +105,7 @@ actor GemModificationProgressService {
         guard let targetComponents = StackKeyComponents(stackKey: targetItemStackKey) else {
             throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
         }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
 
         // 宝石レコードの取得
         let gSuperRare = gemComponents.superRareTitleId
@@ -233,12 +233,6 @@ actor GemModificationProgressService {
     }
 
     // MARK: - Private Helpers
-
-    private func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
-    }
 
     private func makeSnapshot(_ record: InventoryItemRecord) -> ItemSnapshot {
         ItemSnapshot(

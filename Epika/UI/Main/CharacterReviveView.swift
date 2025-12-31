@@ -101,13 +101,13 @@ struct CharacterReviveView: View {
         errorMessage = nil
         defer { isLoading = false }
         do {
-            let exploringIds = try explorationService.runningPartyMemberIds()
-            let progresses = try characterService.allCharacters()
+            let exploringIds = try await explorationService.runningPartyMemberIds()
+            let progresses = try await characterService.allCharacters()
             // 探索中のキャラクターは除外（探索中は蘇生不可）
             let deceased = progresses.filter { $0.hitPoints.current <= 0 && !exploringIds.contains($0.id) }
             var runtime: [RuntimeCharacter] = []
             for progress in deceased {
-                let character = try characterService.runtimeCharacter(from: progress)
+                let character = try await characterService.runtimeCharacter(from: progress)
                 runtime.append(character)
             }
             deadCharacters = runtime.sorted { $0.id < $1.id }
@@ -124,7 +124,7 @@ struct CharacterReviveView: View {
         errorMessage = nil
         defer { isProcessing = false }
         do {
-            _ = try characterService.updateCharacter(id: character.id) { progress in
+            _ = try await characterService.updateCharacter(id: character.id) { progress in
                 var hitPoints = progress.hitPoints
                 hitPoints.current = max(1, hitPoints.maximum / 2)
                 progress.hitPoints = hitPoints

@@ -41,8 +41,7 @@
 import Foundation
 import SwiftData
 
-@MainActor
-final class CharacterProgressService {
+actor CharacterProgressService {
     struct CharacterCreationRequest: Sendable {
         var displayName: String
         var raceId: UInt8
@@ -64,16 +63,20 @@ final class CharacterProgressService {
         let hpDelta: Int32
     }
 
-    @MainActor
+    /// 戦闘結果を一括適用するためのセッション
+    /// サービスへの参照を持たず、必要な依存のみ受け取る
+    /// バックグラウンドスレッドで作成・使用することを想定
     final class BattleResultSession {
-        private unowned let service: CharacterProgressService
-        fileprivate let context: ModelContext
-        fileprivate let records: [UInt8: CharacterRecord]
+        private let context: ModelContext
+        private let records: [UInt8: CharacterRecord]
+        private let masterData: MasterDataCache
         private var pendingLevelUpNotification = false
 
-        fileprivate init(service: CharacterProgressService, characterIds: [UInt8]) throws {
-            self.service = service
-            self.context = service.makeContext()
+        init(contextProvider: SwiftDataContextProvider,
+             masterData: MasterDataCache,
+             characterIds: [UInt8]) throws {
+            self.context = contextProvider.makeContext()
+            self.masterData = masterData
             if characterIds.isEmpty {
                 self.records = [:]
                 return
@@ -87,8 +90,7 @@ final class CharacterProgressService {
 
         func applyBattleResults(_ updates: [BattleResultUpdate]) throws {
             guard !updates.isEmpty else { return }
-            let levelUp = try service.applyBattleResultsInternal(updates,
-                                                                 records: records)
+            let levelUp = try applyBattleResultsInternal(updates)
             if levelUp {
                 pendingLevelUpNotification = true
             }
@@ -98,19 +100,81 @@ final class CharacterProgressService {
             guard context.hasChanges else { return }
             try context.save()
             if pendingLevelUpNotification {
-                service.notifyCharacterProgressDidChange()
+                NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
                 pendingLevelUpNotification = false
             }
         }
+
+        // MARK: - Private
+
+        private func applyBattleResultsInternal(_ updates: [BattleResultUpdate]) throws -> Bool {
+            var anyLevelUp = false
+            for update in updates {
+                guard let record = records[update.characterId] else {
+                    throw ProgressError.characterNotFound
+                }
+                if update.experienceDelta != 0 {
+                    let previousLevel = record.level
+                    let addition = Int64(record.experience).addingReportingOverflow(Int64(update.experienceDelta))
+                    guard !addition.overflow else {
+                        throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
+                    }
+                    let updatedExperience = max(0, Int(addition.partialValue))
+                    let cappedExperience = try clampExperience(updatedExperience, raceId: record.raceId)
+                    record.experience = UInt64(cappedExperience)
+                    let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
+                    if computedLevel != Int(previousLevel) {
+                        record.level = UInt8(computedLevel)
+                        anyLevelUp = true
+                    }
+                }
+                if update.hpDelta != 0 {
+                    let newHP = Int64(record.currentHP) + Int64(update.hpDelta)
+                    record.currentHP = UInt32(max(0, newHP))
+                }
+            }
+            return anyLevelUp
+        }
+
+        private func resolveLevel(for experience: Int, raceId: UInt8) throws -> Int {
+            let maxLevel = try raceMaxLevel(for: raceId)
+            do {
+                return try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
+            } catch CharacterExperienceError.invalidLevel {
+                throw ProgressError.invalidInput(description: "経験値テーブルに無効なレベル要求が行われました")
+            } catch CharacterExperienceError.invalidExperience {
+                throw ProgressError.invalidInput(description: "経験値が負の値になる操作は許可されていません")
+            } catch CharacterExperienceError.overflowedComputation {
+                throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
+            }
+        }
+
+        private func raceMaxLevel(for raceId: UInt8) throws -> Int {
+            guard let definition = masterData.race(raceId) else {
+                throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
+            }
+            return definition.maxLevel
+        }
+
+        private func clampExperience(_ experience: Int, raceId: UInt8) throws -> Int {
+            guard experience > 0 else { return 0 }
+            let maximum = try raceMaxExperience(for: raceId)
+            return min(experience, maximum)
+        }
+
+        private func raceMaxExperience(for raceId: UInt8) throws -> Int {
+            let maxLevel = try raceMaxLevel(for: raceId)
+            return try CharacterExperienceTable.totalExperience(toReach: maxLevel)
+        }
     }
 
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let masterData: MasterDataCache
     private var raceLevelCache: [UInt8: Int] = [:]
     private var raceMaxExperienceCache: [UInt8: Int] = [:]
 
-    init(container: ModelContainer, masterData: MasterDataCache) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider, masterData: MasterDataCache) {
+        self.contextProvider = contextProvider
         self.masterData = masterData
     }
 
@@ -123,7 +187,7 @@ final class CharacterProgressService {
     // MARK: - Read Operations
 
     func allCharacters() throws -> [CharacterSnapshot] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>()
         descriptor.sortBy = [SortDescriptor(\CharacterRecord.displayOrder, order: .forward)]
         let records = try context.fetch(descriptor)
@@ -131,7 +195,7 @@ final class CharacterProgressService {
     }
 
     func character(withId id: UInt8) throws -> CharacterSnapshot? {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
@@ -142,7 +206,7 @@ final class CharacterProgressService {
 
     func characters(withIds ids: [UInt8]) throws -> [CharacterSnapshot] {
         guard !ids.isEmpty else { return [] }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { ids.contains($0.id) })
         let records = try context.fetch(descriptor)
         let map = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
@@ -167,7 +231,7 @@ final class CharacterProgressService {
 
     func runtimeCharacter(from snapshot: CharacterSnapshot) throws -> RuntimeCharacter {
         let input = makeInput(from: snapshot)
-        let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: makeContext())
+        let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: contextProvider.makeContext())
         return try RuntimeCharacterFactory.make(
             from: input,
             masterData: masterData,
@@ -284,7 +348,7 @@ final class CharacterProgressService {
             throw ProgressError.invalidInput(description: "キャラクター名が設定されていません")
         }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
 
         // ID採番: 1〜200で最小の未使用IDを割り当てる
         let newId = try allocateCharacterId(context: context)
@@ -338,7 +402,7 @@ final class CharacterProgressService {
         onProgress: (@Sendable (Int, Int) async -> Void)? = nil
     ) async throws -> Int {
         guard !requests.isEmpty else { return 0 }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
 
         // 使用可能なIDを確保
         let occupied = Set(try context.fetch(FetchDescriptor<CharacterRecord>()).map(\.id))
@@ -443,7 +507,7 @@ final class CharacterProgressService {
 
     func updateCharacter(id: UInt8,
                          mutate: @Sendable (inout CharacterSnapshot) throws -> Void) throws -> CharacterSnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
@@ -473,7 +537,9 @@ final class CharacterProgressService {
     }
 
     func makeBattleResultSession(characterIds: [UInt8]) throws -> BattleResultSession {
-        try BattleResultSession(service: self, characterIds: characterIds)
+        try BattleResultSession(contextProvider: contextProvider,
+                                masterData: masterData,
+                                characterIds: characterIds)
     }
 
     @discardableResult
@@ -511,7 +577,7 @@ final class CharacterProgressService {
     }
 
     func updateHP(characterId: UInt8, newHP: UInt32) throws {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
@@ -526,7 +592,7 @@ final class CharacterProgressService {
     /// - Parameter characterIds: 対象キャラクターID配列
     func healToFull(characterIds: [UInt8]) throws {
         guard !characterIds.isEmpty else { return }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { characterIds.contains($0.id) })
         let records = try context.fetch(descriptor)
 
@@ -563,7 +629,7 @@ final class CharacterProgressService {
     ///   - newJobId: 新しい職業ID（1〜16: 通常職、101〜116: マスター職）
     /// - Returns: 更新後のスナップショット
     func changeJob(characterId: UInt8, newJobId: UInt8) throws -> CharacterSnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
@@ -620,7 +686,7 @@ final class CharacterProgressService {
     // MARK: - Delete
 
     func deleteCharacter(id: UInt8) throws {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else { return }
@@ -643,7 +709,7 @@ final class CharacterProgressService {
     /// - Parameter orderedIds: 新しい順序でのキャラクターID配列
     func reorderCharacters(orderedIds: [UInt8]) throws {
         guard !orderedIds.isEmpty else { return }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { orderedIds.contains($0.id) })
         let records = try context.fetch(descriptor)
         let recordMap = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
@@ -683,7 +749,7 @@ final class CharacterProgressService {
             throw ProgressError.invalidInput(description: "無効なstackKeyです")
         }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
 
         // 探索中のキャラクターは装備変更不可
         if try isCharacterExploring(characterId: characterId, context: context) {
@@ -765,7 +831,7 @@ final class CharacterProgressService {
             throw ProgressError.invalidInput(description: "無効なstackKeyです")
         }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
 
         // 探索中のキャラクターは装備変更不可
         if try isCharacterExploring(characterId: characterId, context: context) {
@@ -872,7 +938,7 @@ final class CharacterProgressService {
 
     /// キャラクターの装備一覧を取得
     func equippedItems(characterId: UInt8) throws -> [CharacterSnapshot.EquippedItem] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let records = try context.fetch(descriptor)
 
@@ -943,12 +1009,6 @@ private extension CharacterProgressService {
         let maximumExperience = try CharacterExperienceTable.totalExperience(toReach: maxLevel)
         raceMaxExperienceCache[raceId] = maximumExperience
         return maximumExperience
-    }
-
-    func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
     }
 
     func makeSnapshots(_ records: [CharacterRecord], context: ModelContext) throws -> [CharacterSnapshot] {

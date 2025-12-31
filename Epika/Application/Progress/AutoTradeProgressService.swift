@@ -42,19 +42,19 @@ actor AutoTradeProgressService {
         var stackKey: String { id }
     }
 
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let gameStateService: GameStateService
     private var cachedStackKeys: Set<String>?
 
-    init(container: ModelContainer, gameStateService: GameStateService) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider, gameStateService: GameStateService) {
+        self.contextProvider = contextProvider
         self.gameStateService = gameStateService
     }
 
     // MARK: - Public API
 
     func allRules() async throws -> [Rule] {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<AutoTradeRuleRecord>()
         descriptor.sortBy = [SortDescriptor(\AutoTradeRuleRecord.updatedAt, order: .forward)]
         let records = try context.fetch(descriptor)
@@ -67,7 +67,7 @@ actor AutoTradeProgressService {
                  socketSuperRareTitleId: UInt8 = 0,
                  socketNormalTitleId: UInt8 = 0,
                  socketItemId: UInt16 = 0) async throws -> Rule {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let existing = try fetchRecord(
             superRareTitleId: superRareTitleId,
             normalTitleId: normalTitleId,
@@ -100,7 +100,7 @@ actor AutoTradeProgressService {
         guard let components = StackKeyComponents(stackKey: stackKey) else {
             throw ProgressError.invalidInput(description: "不正なstackKeyです: \(stackKey)")
         }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         guard let record = try fetchRecord(
             superRareTitleId: components.superRareTitleId,
             normalTitleId: components.normalTitleId,
@@ -121,7 +121,7 @@ actor AutoTradeProgressService {
         guard let components = StackKeyComponents(stackKey: stackKey) else {
             return false
         }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let record = try fetchRecord(
             superRareTitleId: components.superRareTitleId,
             normalTitleId: components.normalTitleId,
@@ -138,7 +138,7 @@ actor AutoTradeProgressService {
         if let cachedStackKeys {
             return cachedStackKeys
         }
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<AutoTradeRuleRecord>()
         let records = try context.fetch(descriptor)
         let keys = Set(records.map { $0.stackKey })
@@ -147,12 +147,6 @@ actor AutoTradeProgressService {
     }
 
     // MARK: - Private Helpers
-
-    private func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
-    }
 
     private func fetchRecord(superRareTitleId: UInt8,
                              normalTitleId: UInt8,

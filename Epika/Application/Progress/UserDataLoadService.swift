@@ -35,9 +35,8 @@ import Observation
 import SwiftData
 import SwiftUI
 
-@MainActor
 @Observable
-final class UserDataLoadService {
+final class UserDataLoadService: Sendable {
     // MARK: - Dependencies
 
     private let masterDataCache: MasterDataCache
@@ -45,38 +44,39 @@ final class UserDataLoadService {
     private let partyService: PartyProgressService
     private let inventoryService: InventoryProgressService
     private let explorationService: ExplorationProgressService
-    private weak var appServices: AppServices?
+    @MainActor private weak var appServices: AppServices?
 
-    // MARK: - Cache
+    // MARK: - Cache（UIから観測されるため@MainActor）
 
-    private(set) var characters: [RuntimeCharacter] = []
-    private(set) var parties: [PartySnapshot] = []
-    private(set) var explorationSummaries: [ExplorationSnapshot] = []
+    @MainActor private(set) var characters: [RuntimeCharacter] = []
+    @MainActor private(set) var parties: [PartySnapshot] = []
+    @MainActor private(set) var explorationSummaries: [ExplorationSnapshot] = []
 
     // アイテムキャッシュ（ItemPreloadServiceから移行）
-    private(set) var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
-    private(set) var orderedCategories: [ItemSaleCategory] = []
-    private(set) var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
-    private(set) var orderedSubcategories: [ItemDisplaySubcategory] = []
-    private(set) var itemCacheVersion: Int = 0
+    @MainActor private(set) var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
+    @MainActor private(set) var orderedCategories: [ItemSaleCategory] = []
+    @MainActor private(set) var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
+    @MainActor private(set) var orderedSubcategories: [ItemDisplaySubcategory] = []
+    @MainActor private(set) var itemCacheVersion: Int = 0
 
     // MARK: - State
 
-    private(set) var isLoaded = false
-    private(set) var isCharactersLoaded = false
-    private(set) var isPartiesLoaded = false
-    private(set) var isItemsLoaded = false
-    private(set) var isExplorationSummariesLoaded = false
+    @MainActor private(set) var isLoaded = false
+    @MainActor private(set) var isCharactersLoaded = false
+    @MainActor private(set) var isPartiesLoaded = false
+    @MainActor private(set) var isItemsLoaded = false
+    @MainActor private(set) var isExplorationSummariesLoaded = false
 
-    private var loadTask: Task<Void, Error>?
+    @MainActor private var loadTask: Task<Void, Error>?
 
     // MARK: - Exploration Resume State
 
-    private var activeExplorationHandles: [UInt8: AppServices.ExplorationRunHandle] = [:]
-    private var activeExplorationTasks: [UInt8: Task<Void, Never>] = [:]
+    @MainActor private var activeExplorationHandles: [UInt8: AppServices.ExplorationRunHandle] = [:]
+    @MainActor private var activeExplorationTasks: [UInt8: Task<Void, Never>] = [:]
 
     // MARK: - Init
 
+    @MainActor
     init(
         masterDataCache: MasterDataCache,
         characterService: CharacterProgressService,
@@ -92,6 +92,7 @@ final class UserDataLoadService {
     }
 
     /// AppServicesへの参照を設定（探索再開に必要）
+    @MainActor
     func setAppServices(_ appServices: AppServices) {
         self.appServices = appServices
     }
@@ -100,6 +101,7 @@ final class UserDataLoadService {
 
     /// 全データロード（起動時に1回呼ぶ）
     /// - 探索再開もここで実行（データロード完了後に実行されることを保証）
+    @MainActor
     func loadAll() async throws {
         // 既に完了済み or 進行中なら待機
         if let task = loadTask {
@@ -124,10 +126,10 @@ final class UserDataLoadService {
                 await resumeOrphanedExplorations()
 
                 // 3. 全成功後にフラグ設定
-                isLoaded = true
+                await MainActor.run { self.isLoaded = true }
             } catch {
                 // 失敗時はloadTaskをクリアしてリトライ可能に
-                loadTask = nil
+                await MainActor.run { self.loadTask = nil }
                 throw error
             }
         }
@@ -137,95 +139,113 @@ final class UserDataLoadService {
     // MARK: - Individual Loaders
 
     private func loadCharacters() async throws {
-        let snapshots = try characterService.allCharacters()
+        let snapshots = try await characterService.allCharacters()
         var buffer: [RuntimeCharacter] = []
         buffer.reserveCapacity(snapshots.count)
         for snapshot in snapshots {
-            let character = try characterService.runtimeCharacter(from: snapshot)
+            let character = try await characterService.runtimeCharacter(from: snapshot)
             buffer.append(character)
         }
-        characters = buffer
-        isCharactersLoaded = true
+        await MainActor.run {
+            self.characters = buffer
+            self.isCharactersLoaded = true
+        }
     }
 
     private func loadParties() async throws {
         let partySnapshots = try await partyService.allParties()
-        parties = partySnapshots.sorted { $0.id < $1.id }
-        isPartiesLoaded = true
+        let sorted = partySnapshots.sorted { $0.id < $1.id }
+        await MainActor.run {
+            self.parties = sorted
+            self.isPartiesLoaded = true
+        }
     }
 
     private func loadItems() async throws {
         let items = try await inventoryService.allItems(storage: .playerItem)
         try await buildItemCache(from: items)
-        isItemsLoaded = true
+        await MainActor.run { self.isItemsLoaded = true }
     }
 
     private func loadExplorationSummaries() async throws {
-        explorationSummaries = try await explorationService.recentExplorationSummaries()
-        isExplorationSummariesLoaded = true
+        let summaries = try await explorationService.recentExplorationSummaries()
+        await MainActor.run {
+            self.explorationSummaries = summaries
+            self.isExplorationSummariesLoaded = true
+        }
     }
 
     // MARK: - Character Cache
 
     /// キャラクターキャッシュを無効化（次回アクセス時に再ロード）
+    @MainActor
     func invalidateCharacters() {
         isCharactersLoaded = false
     }
 
     /// キャラクターを取得（キャッシュ不在時は再ロード）
     func getCharacters() async throws -> [RuntimeCharacter] {
-        if !isCharactersLoaded {
+        let needsLoad = await MainActor.run { !isCharactersLoaded }
+        if needsLoad {
             try await loadCharacters()
         }
-        return characters
+        return await characters
     }
 
     // MARK: - Party Cache
 
     /// パーティキャッシュを無効化（次回アクセス時に再ロード）
+    @MainActor
     func invalidateParties() {
         isPartiesLoaded = false
     }
 
     /// パーティを取得（キャッシュ不在時は再ロード）
     func getParties() async throws -> [PartySnapshot] {
-        if !isPartiesLoaded {
+        let needsLoad = await MainActor.run { !isPartiesLoaded }
+        if needsLoad {
             try await loadParties()
         }
-        return parties
+        return await parties
     }
 
     // MARK: - Exploration Summary Cache
 
     /// 探索サマリーキャッシュを無効化（次回アクセス時に再ロード）
+    @MainActor
     func invalidateExplorationSummaries() {
         isExplorationSummariesLoaded = false
     }
 
     /// 探索サマリーを取得（キャッシュ不在時は再ロード）
     func getExplorationSummaries() async throws -> [ExplorationSnapshot] {
-        if !isExplorationSummariesLoaded {
+        let needsLoad = await MainActor.run { !isExplorationSummariesLoaded }
+        if needsLoad {
             try await loadExplorationSummaries()
         }
-        return explorationSummaries
+        return await explorationSummaries
     }
 
     /// 指定パーティの探索サマリーを更新
     func updateExplorationSummaries(forPartyId partyId: UInt8) async throws {
-        let recentRuns = try await explorationService.recentExplorations(forPartyId: partyId, limit: 2)
-        explorationSummaries.removeAll { $0.party.partyId == partyId }
-        explorationSummaries.append(contentsOf: recentRuns)
+        let recentRuns = try await explorationService.recentExplorationSummaries(forPartyId: partyId, limit: 2)
+        await MainActor.run {
+            self.explorationSummaries.removeAll { $0.party.partyId == partyId }
+            self.explorationSummaries.append(contentsOf: recentRuns)
+        }
     }
 
     // MARK: - Exploration Resume
 
     /// 孤立した探索を再開（起動時にloadAll内で呼ばれる）
     private func resumeOrphanedExplorations() async {
-        guard let appServices else { return }
+        // @MainActorプロパティを取得
+        let services = await MainActor.run { appServices }
+        guard let services else { return }
 
         let runningSummaries: [ExplorationProgressService.RunningExplorationSummary]
         do {
-            runningSummaries = try explorationService.runningExplorationSummaries()
+            runningSummaries = try await explorationService.runningExplorationSummaries()
         } catch {
             // 失敗しても続行（エラーは握りつぶさず記録だけ）
             #if DEBUG
@@ -234,22 +254,26 @@ final class UserDataLoadService {
             return
         }
 
+        // アクティブなタスクを確認
+        let activeTasks = await MainActor.run { activeExplorationTasks }
         let orphaned = runningSummaries.filter { summary in
-            activeExplorationTasks[summary.partyId] == nil
+            activeTasks[summary.partyId] == nil
         }
 
         var firstError: Error?
         for summary in orphaned {
             do {
-                let handle = try await appServices.resumeOrphanedExploration(
+                let handle = try await services.resumeOrphanedExploration(
                     partyId: summary.partyId,
                     startedAt: summary.startedAt
                 )
-                activeExplorationHandles[summary.partyId] = handle
                 let partyId = summary.partyId
-                activeExplorationTasks[partyId] = Task { [weak self, weak appServices] in
-                    guard let self, let appServices else { return }
-                    await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
+                await MainActor.run {
+                    self.activeExplorationHandles[partyId] = handle
+                    self.activeExplorationTasks[partyId] = Task { [weak self, weak services] in
+                        guard let self, let services else { return }
+                        await self.runExplorationStream(handle: handle, partyId: partyId, using: services)
+                    }
                 }
             } catch {
                 if firstError == nil {
@@ -277,7 +301,7 @@ final class UserDataLoadService {
                 try Task.checkCancellation()
                 switch update.stage {
                 case .step(let entry, let totals, let battleLogId):
-                    appendEncounterLog(
+                    await appendEncounterLog(
                         entry: entry,
                         totals: totals,
                         battleLogId: battleLogId,
@@ -303,7 +327,7 @@ final class UserDataLoadService {
             }
         }
 
-        clearExplorationTask(partyId: partyId)
+        await clearExplorationTask(partyId: partyId)
         do {
             try await updateExplorationSummaries(forPartyId: partyId)
         } catch {
@@ -314,6 +338,7 @@ final class UserDataLoadService {
     }
 
     /// 差分更新: 新しいイベントログを既存のスナップショットに追加
+    @MainActor
     func appendEncounterLog(
         entry: ExplorationEventLogEntry,
         totals: AppServices.ExplorationRunTotals,
@@ -348,12 +373,14 @@ final class UserDataLoadService {
         )
     }
 
+    @MainActor
     private func clearExplorationTask(partyId: UInt8) {
         activeExplorationTasks[partyId] = nil
         activeExplorationHandles[partyId] = nil
     }
 
     /// 探索中かどうかを判定
+    @MainActor
     func isExploring(partyId: UInt8) -> Bool {
         if activeExplorationTasks[partyId] != nil { return true }
         return explorationSummaries.contains { $0.party.partyId == partyId && $0.status == .running }
@@ -407,6 +434,7 @@ final class UserDataLoadService {
     // MARK: - Item Cache (from ItemPreloadService)
 
     /// アイテムキャッシュを無効化（次回アクセス時に再ロード）
+    @MainActor
     func invalidateItems() {
         isItemsLoaded = false
     }
@@ -419,6 +447,7 @@ final class UserDataLoadService {
     }
 
     /// アイテム差分をキャッシュへ適用
+    @MainActor
     func applyInventoryDiff(_ diff: InventoryDiff) {
         if !diff.removedStackKeys.isEmpty {
             for stackKey in diff.removedStackKeys {
@@ -438,21 +467,25 @@ final class UserDataLoadService {
     }
 
     /// カテゴリ別にグループ化されたアイテムを取得
+    @MainActor
     func getCategorizedItems() -> [ItemSaleCategory: [LightweightItemData]] {
         categorizedItems
     }
 
     /// サブカテゴリ別にグループ化されたアイテムを取得
+    @MainActor
     func getSubcategorizedItems() -> [ItemDisplaySubcategory: [LightweightItemData]] {
         subcategorizedItems
     }
 
     /// サブカテゴリのソート済み順序を取得
+    @MainActor
     func getOrderedSubcategories() -> [ItemDisplaySubcategory] {
         orderedSubcategories
     }
 
     /// 指定カテゴリのアイテムをフラット配列で取得
+    @MainActor
     func getItems(categories: Set<ItemSaleCategory>) -> [LightweightItemData] {
         orderedCategories
             .filter { categories.contains($0) }
@@ -460,11 +493,13 @@ final class UserDataLoadService {
     }
 
     /// 全カテゴリのアイテムをフラット配列で取得
+    @MainActor
     func getAllItems() -> [LightweightItemData] {
         orderedCategories.flatMap { categorizedItems[$0] ?? [] }
     }
 
     /// アイテムキャッシュをクリア
+    @MainActor
     func clearItemCache() {
         categorizedItems.removeAll()
         orderedCategories.removeAll()
@@ -475,12 +510,14 @@ final class UserDataLoadService {
     }
 
     /// アイテムキャッシュを再読み込み
+    @MainActor
     func reloadItems() async throws {
         clearItemCache()
         try await loadItems()
     }
 
     /// キャッシュからアイテムを削除する（完全売却時）
+    @MainActor
     func removeItems(stackKeys: Set<String>) {
         guard !stackKeys.isEmpty else { return }
         for key in categorizedItems.keys {
@@ -494,6 +531,7 @@ final class UserDataLoadService {
     }
 
     /// キャッシュ内のアイテム数量を減らす（部分売却時）
+    @MainActor
     @discardableResult
     func decrementQuantity(stackKey: String, by amount: Int) throws -> Int {
         for key in categorizedItems.keys {
@@ -522,6 +560,7 @@ final class UserDataLoadService {
     }
 
     /// キャッシュにアイテムを追加する（ドロップ時）
+    @MainActor
     func addItem(_ item: LightweightItemData) {
         insertItemWithoutVersion(item)
         rebuildOrderedSubcategories()
@@ -530,6 +569,7 @@ final class UserDataLoadService {
 
     /// キャッシュ内のアイテム数量を増やす（スタック追加時）
     /// - Note: 上限99を超えないように制限
+    @MainActor
     func incrementQuantity(stackKey: String, by amount: Int) {
         let maxQuantity = 99
         for key in categorizedItems.keys {
@@ -573,6 +613,7 @@ final class UserDataLoadService {
 
     // MARK: - Item Cache Helpers
 
+    @MainActor
     private func upsertItemWithoutVersion(from snapshot: ItemSnapshot) {
         guard let item = makeDisplayItem(from: snapshot) else { return }
         if !updateItem(item) {
@@ -580,6 +621,7 @@ final class UserDataLoadService {
         }
     }
 
+    @MainActor
     private func updateItem(_ item: LightweightItemData) -> Bool {
         let category = item.category
         guard let categoryItems = categorizedItems[category],
@@ -632,6 +674,7 @@ final class UserDataLoadService {
         )
     }
 
+    @MainActor
     private func sortCacheItems() {
         for key in categorizedItems.keys {
             categorizedItems[key]?.sort { isOrderedBefore($0, $1) }
@@ -641,6 +684,7 @@ final class UserDataLoadService {
         }
     }
 
+    @MainActor
     private func insertItemWithoutVersion(_ item: LightweightItemData) {
         var items = categorizedItems[item.category] ?? []
         insertItem(item, into: &items)
@@ -652,6 +696,7 @@ final class UserDataLoadService {
         subcategorizedItems[subcategory] = subItems
     }
 
+    @MainActor
     private func insertItem(_ item: LightweightItemData, into items: inout [LightweightItemData]) {
         if let index = items.firstIndex(where: { isOrderedBefore(item, $0) }) {
             items.insert(item, at: index)
@@ -660,6 +705,7 @@ final class UserDataLoadService {
         }
     }
 
+    @MainActor
     @discardableResult
     private func decrementQuantityWithoutVersion(stackKey: String, by amount: Int) -> Int {
         for key in categorizedItems.keys {
@@ -685,6 +731,7 @@ final class UserDataLoadService {
     }
 
     /// ドロップアイテムをキャッシュに追加する
+    @MainActor
     func addDroppedItems(
         seeds: [InventoryProgressService.BatchSeed],
         snapshots: [ItemSnapshot],
@@ -769,10 +816,11 @@ final class UserDataLoadService {
     private func buildItemCache(from items: [ItemSnapshot]) async throws {
         let itemIds = Set(items.map { $0.itemId })
         guard !itemIds.isEmpty else {
-            categorizedItems.removeAll()
+            await MainActor.run { categorizedItems.removeAll() }
             return
         }
 
+        // バックグラウンドで辞書構築
         let definitions = masterDataCache.items(Array(itemIds))
         let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
 
@@ -836,8 +884,7 @@ final class UserDataLoadService {
             }
         }
 
-        categorizedItems = grouped
-        orderedCategories = grouped.keys.sorted {
+        let sortedCategories = grouped.keys.sorted {
             (grouped[$0]?.first?.itemId ?? .max) < (grouped[$1]?.first?.itemId ?? .max)
         }
 
@@ -851,14 +898,21 @@ final class UserDataLoadService {
                 subgrouped[subcategory, default: []].append(item)
             }
         }
-        subcategorizedItems = subgrouped
-        orderedSubcategories = subgrouped.keys.sorted {
+        let sortedSubcategories = subgrouped.keys.sorted {
             (subgrouped[$0]?.first?.itemId ?? .max) < (subgrouped[$1]?.first?.itemId ?? .max)
         }
 
-        itemCacheVersion &+= 1
+        // MainActorでキャッシュに代入
+        await MainActor.run {
+            self.categorizedItems = grouped
+            self.orderedCategories = sortedCategories
+            self.subcategorizedItems = subgrouped
+            self.orderedSubcategories = sortedSubcategories
+            self.itemCacheVersion &+= 1
+        }
     }
 
+    @MainActor
     private func rebuildOrderedSubcategories() {
         orderedCategories = categorizedItems.keys
             .filter { !(categorizedItems[$0]?.isEmpty ?? true) }

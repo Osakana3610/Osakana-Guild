@@ -37,7 +37,7 @@ extension AppServices {
         }
 
         // 出撃前にパーティメンバーのHP全回復（HP > 0 のキャラクターのみ）
-        try character.healToFull(characterIds: partySnapshot.memberCharacterIds)
+        try await character.healToFull(characterIds: partySnapshot.memberCharacterIds)
         let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId)
         guard dungeonSnapshot.isUnlocked else {
             throw ProgressError.dungeonLocked(id: String(dungeonId))
@@ -49,7 +49,7 @@ extension AppServices {
         }
         let runDifficulty = partySnapshot.lastSelectedDifficulty
         let characterIds = partySnapshot.memberCharacterIds
-        let characters = try character.characters(withIds: characterIds)
+        let characters = try await character.characters(withIds: characterIds)
         let session = try await runtime.startExplorationRun(party: partySnapshot,
                                                             characters: characters,
                                                             dungeonId: dungeonId,
@@ -87,14 +87,14 @@ extension AppServices {
                                                     continuation: continuation)
             }
 
+            let explorationService = exploration
             continuation.onTermination = { termination in
                 guard case .cancelled = termination else { return }
                 processingTask.cancel()
                 Task { await session.cancel() }
-                Task { @MainActor [weak self] in
-                    guard let self else { return }
+                Task {
                     do {
-                        try await self.exploration.cancelRun(runId: recordId)
+                        try await explorationService.cancelRun(runId: recordId)
                     } catch is CancellationError {
                         // キャンセル済みであれば問題なし
                     } catch {
@@ -166,7 +166,7 @@ extension AppServices {
         // 3. 一括でレコード作成（1回のsave）
         let recordIds: [UInt8: PersistentIdentifier]
         do {
-            recordIds = try exploration.beginRunsBatch(beginRunParams)
+            recordIds = try await exploration.beginRunsBatch(beginRunParams)
         } catch {
             // レコード作成に失敗したら全セッションをキャンセル
             for prep in preparations {
@@ -202,14 +202,14 @@ extension AppServices {
                                                         continuation: continuation)
                 }
 
+                let explorationService = exploration
                 continuation.onTermination = { termination in
                     guard case .cancelled = termination else { return }
                     processingTask.cancel()
                     Task { await session.cancel() }
-                    Task { @MainActor [weak self] in
-                        guard let self else { return }
+                    Task {
                         do {
-                            try await self.exploration.cancelRun(runId: recordId)
+                            try await explorationService.cancelRun(runId: recordId)
                         } catch is CancellationError {
                             // キャンセル済みであれば問題なし
                         } catch {
@@ -238,7 +238,7 @@ extension AppServices {
         }
 
         // 出撃前にパーティメンバーのHP全回復
-        try character.healToFull(characterIds: partySnapshot.memberCharacterIds)
+        try await character.healToFull(characterIds: partySnapshot.memberCharacterIds)
         let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId)
         guard dungeonSnapshot.isUnlocked else {
             throw ProgressError.dungeonLocked(id: String(dungeonId))
@@ -252,7 +252,7 @@ extension AppServices {
         }
         let runDifficulty = Int(partySnapshot.lastSelectedDifficulty)
         let characterIds = partySnapshot.memberCharacterIds
-        let characters = try character.characters(withIds: characterIds)
+        let characters = try await character.characters(withIds: characterIds)
         let session = try await runtime.startExplorationRun(
             party: partySnapshot,
             characters: characters,

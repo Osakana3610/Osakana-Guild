@@ -42,16 +42,16 @@ import Foundation
 import SwiftData
 import Observation
 
-@MainActor
 @Observable
-final class AppServices {
+final class AppServices: Sendable {
     let container: ModelContainer
+    let contextProvider: SwiftDataContextProvider
     let masterDataCache: MasterDataCache
     let gameState: GameStateService
 
-    // MARK: - Observable Player State
-    var playerGold: UInt32 = 0
-    var playerCatTickets: UInt16 = 0
+    // MARK: - Observable Player State（UIからアクセスされるため@MainActor）
+    @MainActor var playerGold: UInt32 = 0
+    @MainActor var playerCatTickets: UInt16 = 0
     let character: CharacterProgressService
     let party: PartyProgressService
     let inventory: InventoryProgressService
@@ -68,7 +68,6 @@ final class AppServices {
     let statChangeNotifications: StatChangeNotificationService
     let userDataLoad: UserDataLoadService
     let gemModification: GemModificationProgressService
-    private var explorationPersistenceSessions: [PersistentIdentifier: ExplorationProgressService.EventSession] = [:]
 
     struct ExplorationRunTotals: Sendable {
         let totalExperience: Int
@@ -92,15 +91,18 @@ final class AppServices {
         let cancel: @Sendable () async -> Void
     }
 
+    @MainActor
     init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
+        let contextProvider = SwiftDataContextProvider(container: container)
+        self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
-        let gameStateService = GameStateService(container: container)
+        let gameStateService = GameStateService(contextProvider: contextProvider)
         self.gameState = gameStateService
         let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)
         self.dropNotifications = dropNotifications
         self.statChangeNotifications = StatChangeNotificationService()
-        let autoTradeService = AutoTradeProgressService(container: container, gameStateService: gameStateService)
+        let autoTradeService = AutoTradeProgressService(contextProvider: contextProvider, gameStateService: gameStateService)
         self.autoTrade = autoTradeService
         let dropNotifier: @Sendable ([ItemDropResult]) async -> Void = { [weak dropNotifications, autoTradeService] results in
             guard let dropNotifications, !results.isEmpty else { return }
@@ -127,18 +129,18 @@ final class AppServices {
         self.runtime = ProgressRuntimeService(runtimeService: runtimeService,
                                               gameStateService: gameStateService)
 
-        self.party = PartyProgressService(container: container)
-        self.inventory = InventoryProgressService(container: container,
+        self.party = PartyProgressService(contextProvider: contextProvider)
+        self.inventory = InventoryProgressService(contextProvider: contextProvider,
                                                   gameStateService: gameStateService,
                                                   masterDataCache: masterDataCache)
-        self.shop = ShopProgressService(container: container,
+        self.shop = ShopProgressService(contextProvider: contextProvider,
                                         masterDataCache: masterDataCache,
                                         inventoryService: self.inventory,
                                         gameStateService: gameStateService)
-        self.character = CharacterProgressService(container: container, masterData: masterDataCache)
-        self.exploration = ExplorationProgressService(container: container, masterDataCache: masterDataCache)
-        self.dungeon = DungeonProgressService(container: container)
-        self.story = StoryProgressService(container: container)
+        self.character = CharacterProgressService(contextProvider: contextProvider, masterData: masterDataCache)
+        self.exploration = ExplorationProgressService(contextProvider: contextProvider, masterDataCache: masterDataCache)
+        self.dungeon = DungeonProgressService(contextProvider: contextProvider)
+        self.story = StoryProgressService(contextProvider: contextProvider)
         self.titleInheritance = TitleInheritanceProgressService(inventoryService: self.inventory,
                                                                   masterDataCache: masterDataCache)
         self.artifactExchange = ArtifactExchangeProgressService(inventoryService: self.inventory,
@@ -153,7 +155,7 @@ final class AppServices {
             inventoryService: self.inventory,
             explorationService: self.exploration
         )
-        self.gemModification = GemModificationProgressService(container: container,
+        self.gemModification = GemModificationProgressService(contextProvider: contextProvider,
                                                                masterDataCache: masterDataCache,
                                                                userDataLoad: self.userDataLoad)
         // 全プロパティ初期化後にAppServicesを設定
@@ -163,12 +165,14 @@ final class AppServices {
     // MARK: - Player State Updates
 
     /// PlayerSnapshotからObservable状態を更新
+    @MainActor
     func applyPlayerSnapshot(_ snapshot: PlayerSnapshot) {
         playerGold = snapshot.gold
         playerCatTickets = snapshot.catTickets
     }
 
     /// 現在のプレイヤー状態をロードしてObservable状態を更新
+    @MainActor
     func reloadPlayerState() async {
         do {
             let snapshot = try await gameState.currentPlayer()
@@ -176,31 +180,6 @@ final class AppServices {
         } catch {
             // プレイヤーが存在しない場合は初期値のまま
         }
-    }
-
-    func flushExplorationSessions() {
-        for session in explorationPersistenceSessions.values {
-            do {
-                try session.flushIfNeeded()
-            } catch {
-                #if DEBUG
-                print("[AppServices] flushExplorationSessions failed: \(error)")
-                #endif
-            }
-        }
-    }
-
-    func explorationSession(for runId: PersistentIdentifier) throws -> ExplorationProgressService.EventSession {
-        if let existing = explorationPersistenceSessions[runId] {
-            return existing
-        }
-        let session = try exploration.makeEventSession(runId: runId)
-        explorationPersistenceSessions[runId] = session
-        return session
-    }
-
-    func removeExplorationSession(runId: PersistentIdentifier) {
-        explorationPersistenceSessions.removeValue(forKey: runId)
     }
 }
 

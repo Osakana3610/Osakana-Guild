@@ -54,7 +54,7 @@ extension AppServices {
         let tickets = try await shop.cleanupStock(itemId: itemId)
         if tickets > 0 {
             let snapshot = try await gameState.addCatTickets(UInt16(tickets))
-            applyPlayerSnapshot(snapshot)
+            await applyPlayerSnapshot(snapshot)
         }
 
         // 2. インベントリ内の自動売却対象を売却
@@ -157,7 +157,7 @@ extension AppServices {
         } else {
             snapshot = try await gameState.currentPlayer()
         }
-        applyPlayerSnapshot(snapshot)
+        await applyPlayerSnapshot(snapshot)
         return snapshot
     }
 
@@ -200,7 +200,7 @@ extension AppServices {
         } else {
             snapshot = try await gameState.currentPlayer()
         }
-        applyPlayerSnapshot(snapshot)
+        await applyPlayerSnapshot(snapshot)
         return snapshot
     }
 

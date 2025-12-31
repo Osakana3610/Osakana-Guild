@@ -57,17 +57,17 @@ actor ShopProgressService {
         let soldItems: [(itemId: UInt16, quantity: Int)]
     }
 
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let masterDataCache: MasterDataCache
     private let inventoryService: InventoryProgressService
     private let gameStateService: GameStateService
     private let unlimitedSentinel: UInt16? = nil
 
-    init(container: ModelContainer,
+    init(contextProvider: SwiftDataContextProvider,
          masterDataCache: MasterDataCache,
          inventoryService: InventoryProgressService,
          gameStateService: GameStateService) {
-        self.container = container
+        self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
         self.inventoryService = inventoryService
         self.gameStateService = gameStateService
@@ -123,7 +123,7 @@ actor ShopProgressService {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(itemId)])
         }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let now = Date()
 
         // 既存の在庫を検索
@@ -185,7 +185,7 @@ actor ShopProgressService {
             aggregated[item.itemId, default: 0] += item.quantity
         }
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let now = Date()
 
         // 既存在庫を一括取得
@@ -267,7 +267,7 @@ actor ShopProgressService {
     ///   - targetQuantity: 目標数量（デフォルト5、0以上）
     /// - Returns: 獲得キャット・チケット数
     func cleanupStock(itemId: UInt16, targetQuantity: UInt16 = 5) async throws -> Int {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let stock = try fetchStockRecord(itemId: itemId, context: context)
 
         guard let definition = masterDataCache.item(stock.itemId) else {
@@ -320,7 +320,7 @@ actor ShopProgressService {
         let totalCost = target.price * quantity
         let playerSnapshot = try await gameStateService.spendGold(UInt32(totalCost))
 
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let stockRecord = try fetchStockRecord(itemId: itemId, context: context)
         if let remaining = stockRecord.remaining {
             guard remaining >= quantity else {
@@ -365,14 +365,8 @@ private extension ShopProgressService {
         return CleanupComputation(tickets: ticketsPerStack * stackCount)
     }
 
-    func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
-    }
-
     func loadShopSnapshot(masterItems: [MasterShopItem]) async throws -> ShopSnapshot {
-        let context = makeContext()
+        let context = contextProvider.makeContext()
         let now = Date()
         _ = try syncStocks(masterItems: masterItems,
                            context: context,
