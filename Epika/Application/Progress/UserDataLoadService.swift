@@ -212,7 +212,7 @@ final class UserDataLoadService {
 
     /// 指定パーティの探索サマリーを更新
     func updateExplorationSummaries(forPartyId partyId: UInt8) async throws {
-        let recentRuns = try await explorationService.recentExplorations(forPartyId: partyId, limit: 2)
+        let recentRuns = try await explorationService.recentExplorationSummaries(forPartyId: partyId, limit: 2)
         explorationSummaries.removeAll { $0.party.partyId == partyId }
         explorationSummaries.append(contentsOf: recentRuns)
     }

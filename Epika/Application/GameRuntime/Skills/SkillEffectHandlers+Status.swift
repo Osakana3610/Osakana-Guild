@@ -136,7 +136,8 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
                 perTurnModifiers: [:],
                 duration: duration,
                 scope: scope,
-                category: category
+                category: category,
+                sourceSkillId: context.skillId
             ))
 
         case Int(ReactionTrigger.turnElapsed.rawValue):
@@ -157,7 +158,8 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
                 perTurnModifiers: perTurnModifiers,
                 duration: 0,
                 scope: scope,
-                category: category
+                category: category,
+                sourceSkillId: context.skillId
             ))
 
         default:
@@ -191,7 +193,8 @@ struct TimedMagicPowerAmplifyHandler: SkillEffectHandler {
             perTurnModifiers: [:],
             duration: triggerTurn,
             scope: scope,
-            category: "magic"
+            category: "magic",
+            sourceSkillId: context.skillId
         ))
     }
 }
@@ -219,7 +222,8 @@ struct TimedBreathPowerAmplifyHandler: SkillEffectHandler {
             perTurnModifiers: [:],
             duration: triggerTurn,
             scope: scope,
-            category: "breath"
+            category: "breath",
+            sourceSkillId: context.skillId
         ))
     }
 }

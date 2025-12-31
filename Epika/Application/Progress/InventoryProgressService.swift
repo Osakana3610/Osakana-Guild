@@ -29,7 +29,7 @@ import Foundation
 import SwiftData
 
 actor InventoryProgressService {
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let gameStateService: GameStateService
     private let masterDataCache: MasterDataCache
     private let maxStackSize: UInt16 = 99
@@ -51,10 +51,10 @@ actor InventoryProgressService {
         }
     }
 
-    init(container: ModelContainer,
+    init(contextProvider: SwiftDataContextProvider,
          gameStateService: GameStateService,
          masterDataCache: MasterDataCache) {
-        self.container = container
+        self.contextProvider = contextProvider
         self.gameStateService = gameStateService
         self.masterDataCache = masterDataCache
     }
@@ -598,9 +598,7 @@ actor InventoryProgressService {
     // MARK: - Private Helpers
 
     private func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
+        contextProvider.newBackgroundContext()
     }
 
     private func fetchDescriptor(for storage: ItemStorage) -> FetchDescriptor<InventoryItemRecord> {

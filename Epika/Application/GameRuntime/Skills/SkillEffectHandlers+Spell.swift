@@ -201,7 +201,8 @@ struct TacticSpellAmplifyHandler: SkillEffectHandler {
             perTurnModifiers: [:],
             duration: turn,
             scope: scope,
-            category: "spell"
+            category: "spell",
+            sourceSkillId: context.skillId
         ))
     }
 }
