@@ -112,7 +112,8 @@ extension AppServices {
         let dungeonId = record.dungeonId
 
         let updates = AsyncThrowingStream<ExplorationRunUpdate, Error> { continuation in
-            let processingTask = Task { [weak self] in
+            // バックグラウンドで探索処理を実行（UIをブロックしない）
+            let processingTask = Task.detached { [weak self] in
                 guard let self else {
                     continuation.finish(throwing: CancellationError())
                     return
