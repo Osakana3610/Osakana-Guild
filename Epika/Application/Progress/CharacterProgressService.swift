@@ -104,13 +104,13 @@ final class CharacterProgressService {
         }
     }
 
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let masterData: MasterDataCache
     private var raceLevelCache: [UInt8: Int] = [:]
     private var raceMaxExperienceCache: [UInt8: Int] = [:]
 
-    init(container: ModelContainer, masterData: MasterDataCache) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider, masterData: MasterDataCache) {
+        self.contextProvider = contextProvider
         self.masterData = masterData
     }
 
@@ -946,9 +946,7 @@ private extension CharacterProgressService {
     }
 
     func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
+        contextProvider.newBackgroundContext()
     }
 
     func makeSnapshots(_ records: [CharacterRecord], context: ModelContext) throws -> [CharacterSnapshot] {

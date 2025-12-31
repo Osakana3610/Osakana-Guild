@@ -95,7 +95,8 @@ final class AppServices {
     init(container: ModelContainer, masterDataCache: MasterDataCache) {
         self.container = container
         self.masterDataCache = masterDataCache
-        let gameStateService = GameStateService(container: container)
+        let contextProvider = SwiftDataContextProvider(container: container)
+        let gameStateService = GameStateService(contextProvider: contextProvider)
         self.gameState = gameStateService
         let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)
         self.dropNotifications = dropNotifications
@@ -128,15 +129,15 @@ final class AppServices {
                                               gameStateService: gameStateService)
 
         self.party = PartyProgressService(container: container)
-        self.inventory = InventoryProgressService(container: container,
+        self.inventory = InventoryProgressService(contextProvider: contextProvider,
                                                   gameStateService: gameStateService,
                                                   masterDataCache: masterDataCache)
         self.shop = ShopProgressService(container: container,
                                         masterDataCache: masterDataCache,
                                         inventoryService: self.inventory,
                                         gameStateService: gameStateService)
-        self.character = CharacterProgressService(container: container, masterData: masterDataCache)
-        self.exploration = ExplorationProgressService(container: container, masterDataCache: masterDataCache)
+        self.character = CharacterProgressService(contextProvider: contextProvider, masterData: masterDataCache)
+        self.exploration = ExplorationProgressService(contextProvider: contextProvider, masterDataCache: masterDataCache)
         self.dungeon = DungeonProgressService(container: container)
         self.story = StoryProgressService(container: container)
         self.titleInheritance = TitleInheritanceProgressService(inventoryService: self.inventory,

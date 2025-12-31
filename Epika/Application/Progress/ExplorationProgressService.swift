@@ -31,10 +31,387 @@
 import Foundation
 import SwiftData
 
+private enum ExplorationSnapshotBuildError: Error {
+    case dungeonNotFound(UInt16)
+    case itemNotFound(UInt16)
+    case enemyNotFound(UInt16)
+    case statusEffectNotFound(String)
+}
+
+// MARK: - Snapshot Query Actor
+
+actor ExplorationSnapshotQueryActor {
+    private let contextProvider: SwiftDataContextProvider
+    private let masterDataCache: MasterDataCache
+
+    init(contextProvider: SwiftDataContextProvider, masterDataCache: MasterDataCache) {
+        self.contextProvider = contextProvider
+        self.masterDataCache = masterDataCache
+    }
+
+    func allExplorations() async throws -> [ExplorationSnapshot] {
+        let context = makeContext()
+        let descriptor = FetchDescriptor<ExplorationRunRecord>(sortBy: [SortDescriptor(\.endedAt, order: .reverse)])
+        let runs = try context.fetch(descriptor)
+        return try await makeSnapshots(runs: runs, context: context)
+    }
+
+    func recentExplorations(forPartyId partyId: UInt8, limit: Int) async throws -> [ExplorationSnapshot] {
+        let context = makeContext()
+        var descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId },
+            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+        )
+        descriptor.fetchLimit = limit
+        let runs = try context.fetch(descriptor)
+        return try await makeSnapshots(runs: runs, context: context)
+    }
+
+    func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int) async throws -> [ExplorationSnapshot] {
+        let context = makeContext()
+        var descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId },
+            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+        )
+        descriptor.fetchLimit = limit
+        let runs = try context.fetch(descriptor)
+        return try await makeSummarySnapshots(runs: runs, context: context)
+    }
+
+    func recentExplorationSummaries(limitPerParty: Int) async throws -> [ExplorationSnapshot] {
+        let context = makeContext()
+        let partyDescriptor = FetchDescriptor<PartyRecord>()
+        let parties = try context.fetch(partyDescriptor)
+        var snapshots: [ExplorationSnapshot] = []
+        snapshots.reserveCapacity(parties.count * limitPerParty)
+        for party in parties {
+            let partyId = party.id
+            var descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.partyId == partyId },
+                sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+            )
+            descriptor.fetchLimit = limitPerParty
+            let runs = try context.fetch(descriptor)
+            let partySnapshots = try await makeSummarySnapshots(runs: runs, context: context)
+            snapshots.append(contentsOf: partySnapshots)
+        }
+        return snapshots
+    }
+
+    func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> ExplorationSnapshot? {
+        let context = makeContext()
+        var descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+        )
+        descriptor.fetchLimit = 1
+        guard let run = try context.fetch(descriptor).first else { return nil }
+        return try await makeSnapshot(for: run, context: context)
+    }
+
+    // MARK: - Snapshot Builders
+
+    private func makeSummarySnapshots(runs: [ExplorationRunRecord],
+                                      context: ModelContext) async throws -> [ExplorationSnapshot] {
+        var snapshots: [ExplorationSnapshot] = []
+        snapshots.reserveCapacity(runs.count)
+        for run in runs {
+            let snapshot = try await makeSnapshotSummary(for: run, context: context)
+            snapshots.append(snapshot)
+        }
+        return snapshots
+    }
+
+    private func makeSnapshots(runs: [ExplorationRunRecord],
+                               context: ModelContext) async throws -> [ExplorationSnapshot] {
+        var snapshots: [ExplorationSnapshot] = []
+        snapshots.reserveCapacity(runs.count)
+        for run in runs {
+            let snapshot = try await makeSnapshot(for: run, context: context)
+            snapshots.append(snapshot)
+        }
+        return snapshots
+    }
+
+    private func makeSnapshotSummary(for run: ExplorationRunRecord,
+                                     context: ModelContext) async throws -> ExplorationSnapshot {
+        guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
+            throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
+        }
+
+        let displayDungeonName = DungeonDisplayNameFormatter.displayName(
+            for: dungeonDefinition,
+            difficultyTitleId: run.difficulty,
+            masterData: masterDataCache
+        )
+
+        let partyId = run.partyId
+        let partyDescriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == partyId })
+        let partyRecord = try context.fetch(partyDescriptor).first
+        let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
+
+        let partySummary = ExplorationSnapshot.PartySummary(
+            partyId: run.partyId,
+            memberCharacterIds: memberCharacterIds,
+            inventorySnapshotId: nil
+        )
+
+        let metadata = ProgressMetadata(createdAt: run.startedAt, updatedAt: run.endedAt)
+        let status = runStatus(from: run.result)
+
+        let summary = ExplorationSnapshot.makeSummary(
+            displayDungeonName: displayDungeonName,
+            status: status,
+            activeFloorNumber: Int(run.finalFloor),
+            expectedReturnAt: nil,
+            startedAt: run.startedAt,
+            lastUpdatedAt: run.endedAt,
+            logs: []
+        )
+
+        return ExplorationSnapshot(
+            dungeonId: run.dungeonId,
+            displayDungeonName: displayDungeonName,
+            activeFloorNumber: Int(run.finalFloor),
+            party: partySummary,
+            startedAt: run.startedAt,
+            lastUpdatedAt: run.endedAt,
+            expectedReturnAt: nil,
+            encounterLogs: [],
+            rewards: ExplorationSnapshot.Rewards(
+                experience: Int(run.totalExp),
+                gold: Int(run.totalGold),
+                itemDrops: makeItemDropSummaries(from: run),
+                autoSellGold: Int(run.autoSellGold),
+                autoSoldItems: makeAutoSellEntries(from: run)
+            ),
+            summary: summary,
+            status: status,
+            metadata: metadata
+        )
+    }
+
+    private func makeSnapshot(for run: ExplorationRunRecord,
+                              context: ModelContext) async throws -> ExplorationSnapshot {
+        let eventRecords = run.events.sorted { $0.occurredAt < $1.occurredAt }
+
+        guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
+            throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
+        }
+
+        let displayDungeonName = DungeonDisplayNameFormatter.displayName(
+            for: dungeonDefinition,
+            difficultyTitleId: run.difficulty,
+            masterData: masterDataCache
+        )
+
+        let partyId = run.partyId
+        let partyDescriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == partyId })
+        let partyRecord = try context.fetch(partyDescriptor).first
+        let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
+
+        var encounterLogs: [ExplorationSnapshot.EncounterLog] = []
+        encounterLogs.reserveCapacity(eventRecords.count)
+
+        for (index, eventRecord) in eventRecords.enumerated() {
+            let log = try await buildEncounterLog(from: eventRecord, index: index)
+            encounterLogs.append(log)
+        }
+
+        var rewards = ExplorationSnapshot.Rewards()
+        rewards.experience = Int(run.totalExp)
+        rewards.gold = Int(run.totalGold)
+        rewards.autoSellGold = Int(run.autoSellGold)
+        rewards.autoSoldItems = makeAutoSellEntries(from: run)
+        rewards.itemDrops = makeItemDropSummaries(from: run)
+
+        let partySummary = ExplorationSnapshot.PartySummary(
+            partyId: run.partyId,
+            memberCharacterIds: memberCharacterIds,
+            inventorySnapshotId: nil
+        )
+
+        let metadata = ProgressMetadata(createdAt: run.startedAt, updatedAt: run.endedAt)
+        let status = runStatus(from: run.result)
+
+        let summary = ExplorationSnapshot.makeSummary(
+            displayDungeonName: displayDungeonName,
+            status: status,
+            activeFloorNumber: Int(run.finalFloor),
+            expectedReturnAt: nil,
+            startedAt: run.startedAt,
+            lastUpdatedAt: run.endedAt,
+            logs: encounterLogs
+        )
+
+        return ExplorationSnapshot(
+            dungeonId: run.dungeonId,
+            displayDungeonName: displayDungeonName,
+            activeFloorNumber: Int(run.finalFloor),
+            party: partySummary,
+            startedAt: run.startedAt,
+            lastUpdatedAt: run.endedAt,
+            expectedReturnAt: nil,
+            encounterLogs: encounterLogs,
+            rewards: rewards,
+            summary: summary,
+            status: status,
+            metadata: metadata
+        )
+    }
+
+    private func makeAutoSellEntries(from run: ExplorationRunRecord) -> [ExplorationSnapshot.Rewards.AutoSellEntry] {
+        guard !run.autoSellItems.isEmpty else { return [] }
+        let entries = run.autoSellItems.map { record in
+            ExplorationSnapshot.Rewards.AutoSellEntry(
+                itemId: record.itemId,
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                quantity: Int(record.quantity)
+            )
+        }
+        return entries.sorted { lhs, rhs in
+            if lhs.itemId != rhs.itemId { return lhs.itemId < rhs.itemId }
+            if lhs.superRareTitleId != rhs.superRareTitleId { return lhs.superRareTitleId < rhs.superRareTitleId }
+            if lhs.normalTitleId != rhs.normalTitleId { return lhs.normalTitleId < rhs.normalTitleId }
+            return lhs.quantity > rhs.quantity
+        }
+    }
+
+    private func makeItemDropSummaries(from run: ExplorationRunRecord) -> [ExplorationSnapshot.Rewards.ItemDropSummary] {
+        guard !run.events.isEmpty else { return [] }
+        var summaries: [ExplorationSnapshot.Rewards.ItemDropSummary] = []
+        var indexByKey: [ExplorationDropKey: Int] = [:]
+        for eventRecord in run.events {
+            for drop in eventRecord.drops where drop.itemId > 0 && drop.quantity > 0 {
+                let key = ExplorationDropKey(
+                    itemId: drop.itemId,
+                    superRareTitleId: drop.superRareTitleId ?? 0,
+                    normalTitleId: drop.normalTitleId ?? 2
+                )
+                if let index = indexByKey[key] {
+                    summaries[index].quantity += Int(drop.quantity)
+                } else {
+                    indexByKey[key] = summaries.count
+                    summaries.append(
+                        ExplorationSnapshot.Rewards.ItemDropSummary(
+                            itemId: key.itemId,
+                            superRareTitleId: key.superRareTitleId,
+                            normalTitleId: key.normalTitleId,
+                            quantity: Int(drop.quantity)
+                        )
+                    )
+                }
+            }
+        }
+        return summaries
+    }
+
+    private struct ExplorationDropKey: Hashable {
+        let itemId: UInt16
+        let superRareTitleId: UInt8
+        let normalTitleId: UInt8
+    }
+
+    private func buildEncounterLog(from eventRecord: ExplorationEventRecord,
+                                   index: Int) async throws -> ExplorationSnapshot.EncounterLog {
+        let kind: ExplorationSnapshot.EncounterLog.Kind
+        var referenceId: String?
+        var combatSummary: ExplorationSnapshot.EncounterLog.CombatSummary?
+
+        switch EventKind(rawValue: eventRecord.kind) {
+        case .nothing, .none:
+            kind = .nothing
+
+        case .combat:
+            kind = .enemyEncounter
+            if let enemyId = eventRecord.enemyId {
+                referenceId = String(enemyId)
+                if let enemy = masterDataCache.enemy(enemyId) {
+                    let result = battleResultString(eventRecord.battleResult ?? 0)
+                    let turns = Int(eventRecord.battleLog?.turns ?? 0)
+                    combatSummary = ExplorationSnapshot.EncounterLog.CombatSummary(
+                        enemyId: enemyId,
+                        enemyName: enemy.name,
+                        result: result,
+                        turns: turns,
+                        battleLogId: eventRecord.battleLog?.persistentModelID
+                    )
+                }
+            }
+
+        case .scripted:
+            kind = .scriptedEvent
+            if let eventId = eventRecord.scriptedEventId {
+                if let eventDef = masterDataCache.explorationEvent(eventId) {
+                    referenceId = eventDef.name
+                } else {
+                    referenceId = String(eventId)
+                }
+            }
+        }
+
+        var context = ExplorationSnapshot.EncounterLog.Context()
+        if eventRecord.exp > 0 {
+            context.exp = "\(eventRecord.exp)"
+        }
+        if eventRecord.gold > 0 {
+            context.gold = "\(eventRecord.gold)"
+        }
+        if !eventRecord.drops.isEmpty {
+            var dropStrings: [String] = []
+            for drop in eventRecord.drops {
+                if drop.itemId > 0,
+                   let item = masterDataCache.item(drop.itemId) {
+                    dropStrings.append("\(item.name)x\(drop.quantity)")
+                }
+            }
+            if !dropStrings.isEmpty {
+                context.drops = dropStrings.joined(separator: ", ")
+            }
+        }
+
+        return ExplorationSnapshot.EncounterLog(
+            id: UUID(),
+            floorNumber: Int(eventRecord.floor),
+            eventIndex: index,
+            kind: kind,
+            referenceId: referenceId,
+            occurredAt: eventRecord.occurredAt,
+            context: context,
+            metadata: ProgressMetadata(createdAt: eventRecord.occurredAt, updatedAt: eventRecord.occurredAt),
+            combatSummary: combatSummary
+        )
+    }
+
+    private func battleResultString(_ value: UInt8) -> String {
+        switch BattleResult(rawValue: value) {
+        case .victory: return "victory"
+        case .defeat: return "defeat"
+        case .retreat: return "retreat"
+        case .none: return "unknown"
+        }
+    }
+
+    private func runStatus(from value: UInt8) -> ExplorationSnapshot.Status {
+        switch ExplorationResult(rawValue: value) {
+        case .running: return .running
+        case .completed: return .completed
+        case .defeated: return .defeated
+        case .cancelled: return .cancelled
+        case .none: return .running
+        }
+    }
+
+    private func makeContext() -> ModelContext {
+        contextProvider.newBackgroundContext()
+    }
+}
+
 @MainActor
 final class ExplorationProgressService {
-    private let container: ModelContainer
+    private let contextProvider: SwiftDataContextProvider
     private let masterDataCache: MasterDataCache
+    private let snapshotQuery: ExplorationSnapshotQueryActor
 
     /// 探索レコードの最大保持件数
     private static let maxRecordCount = 200
@@ -128,9 +505,11 @@ final class ExplorationProgressService {
         }
     }
 
-    init(container: ModelContainer, masterDataCache: MasterDataCache) {
-        self.container = container
+    init(contextProvider: SwiftDataContextProvider, masterDataCache: MasterDataCache) {
+        self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
+        self.snapshotQuery = ExplorationSnapshotQueryActor(contextProvider: contextProvider,
+                                                           masterDataCache: masterDataCache)
     }
 
     /// キャッシュを無効化する
@@ -141,11 +520,10 @@ final class ExplorationProgressService {
     /// バックグラウンドで古いレコードを削除
     /// フォアグラウンド復帰時などUIをブロックせずにパージを実行する
     func purgeOldRecordsInBackground() {
-        let container = self.container
+        let contextProvider = self.contextProvider
         Task.detached(priority: .utility) {
             let startTime = CFAbsoluteTimeGetCurrent()
-            let context = ModelContext(container)
-            context.autosaveEnabled = false
+            let context = contextProvider.newBackgroundContext()
 
             var countDescriptor = FetchDescriptor<ExplorationRunRecord>()
             countDescriptor.propertiesToFetch = []
@@ -509,88 +887,35 @@ final class ExplorationProgressService {
                                     enemySnapshots: enemySnapshots)
     }
 
-    private enum ExplorationSnapshotBuildError: Error {
-        case dungeonNotFound(UInt16)
-        case itemNotFound(UInt16)
-        case enemyNotFound(UInt16)
-        case statusEffectNotFound(String)
-    }
-
     // MARK: - Public API
 
     func allExplorations() async throws -> [ExplorationSnapshot] {
         if let cached = cachedExplorations {
             return cached
         }
-        let fetched = try await fetchAllExplorations()
+        let fetched = try await snapshotQuery.allExplorations()
         cachedExplorations = fetched
         return fetched
     }
 
     /// 指定パーティの最新探索を取得（UI表示用、最大limit件）
     func recentExplorations(forPartyId partyId: UInt8, limit: Int = 2) async throws -> [ExplorationSnapshot] {
-        let context = makeContext()
-        var descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId },
-            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
-        )
-        descriptor.fetchLimit = limit
-        let runs = try context.fetch(descriptor)
-        var snapshots: [ExplorationSnapshot] = []
-        snapshots.reserveCapacity(runs.count)
-        for run in runs {
-            let snapshot = try await makeSnapshot(for: run, context: context)
-            snapshots.append(snapshot)
-        }
-        return snapshots
+        try await snapshotQuery.recentExplorations(forPartyId: partyId, limit: limit)
+    }
+
+    /// 指定パーティの最新探索サマリーを取得（軽量: encounterLogsなし）
+    func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int = 2) async throws -> [ExplorationSnapshot] {
+        try await snapshotQuery.recentExplorationSummaries(forPartyId: partyId, limit: limit)
     }
 
     /// 指定パーティの探索（startedAt一致）を詳細ログ込みで取得
     func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> ExplorationSnapshot? {
-        let context = makeContext()
-        var descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
-        )
-        descriptor.fetchLimit = 1
-        guard let run = try context.fetch(descriptor).first else { return nil }
-        return try await makeSnapshot(for: run, context: context)
+        try await snapshotQuery.explorationSnapshot(partyId: partyId, startedAt: startedAt)
     }
 
     /// 全パーティの最新探索サマリーを取得（初期ロード用）
     func recentExplorationSummaries(limitPerParty: Int = 2) async throws -> [ExplorationSnapshot] {
-        let context = makeContext()
-        // 全パーティIDを取得
-        let partyDescriptor = FetchDescriptor<PartyRecord>()
-        let parties = try context.fetch(partyDescriptor)
-        let partyIds = parties.map { $0.id }
-
-        var snapshots: [ExplorationSnapshot] = []
-        for partyId in partyIds {
-            var descriptor = FetchDescriptor<ExplorationRunRecord>(
-                predicate: #Predicate { $0.partyId == partyId },
-                sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
-            )
-            descriptor.fetchLimit = limitPerParty
-            let runs = try context.fetch(descriptor)
-            for run in runs {
-                let snapshot = try await makeSnapshotSummary(for: run, context: context)
-                snapshots.append(snapshot)
-            }
-        }
-        return snapshots
-    }
-
-    private func fetchAllExplorations() async throws -> [ExplorationSnapshot]  {
-        let context = makeContext()
-        let descriptor = FetchDescriptor<ExplorationRunRecord>(sortBy: [SortDescriptor(\.endedAt, order: .reverse)])
-        let runs = try context.fetch(descriptor)
-        var snapshots: [ExplorationSnapshot] = []
-        snapshots.reserveCapacity(runs.count)
-        for run in runs {
-            let snapshot = try await makeSnapshot(for: run, context: context)
-            snapshots.append(snapshot)
-        }
-        return snapshots
+        try await snapshotQuery.recentExplorationSummaries(limitPerParty: limitPerParty)
     }
 
     /// バッチ保存用のパラメータ
@@ -780,9 +1105,7 @@ private extension ExplorationProgressService {
     }
 
     func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
+        contextProvider.newBackgroundContext()
     }
 
     func saveIfNeeded(_ context: ModelContext) throws {
@@ -914,282 +1237,4 @@ private extension ExplorationProgressService {
 
     // MARK: - Snapshot Building
 
-    /// サマリー専用の軽量スナップショット（イベント詳細なし、詳細画面でオンデマンド読み込み）
-    func makeSnapshotSummary(for run: ExplorationRunRecord,
-                              context: ModelContext) async throws -> ExplorationSnapshot {
-        guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
-            throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
-        }
-
-        let displayDungeonName = DungeonDisplayNameFormatter.displayName(
-            for: dungeonDefinition,
-            difficultyTitleId: run.difficulty,
-            masterData: masterDataCache
-        )
-
-        let partyId = run.partyId
-        let partyDescriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == partyId })
-        let partyRecord = try context.fetch(partyDescriptor).first
-        let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
-
-        // サマリー用にはイベント詳細は不要（詳細画面でオンデマンド読み込み）
-
-        let partySummary = ExplorationSnapshot.PartySummary(
-            partyId: run.partyId,
-            memberCharacterIds: memberCharacterIds,
-            inventorySnapshotId: nil
-        )
-
-        let metadata = ProgressMetadata(createdAt: run.startedAt, updatedAt: run.endedAt)
-        let status = runStatus(from: run.result)
-
-        let summary = ExplorationSnapshot.makeSummary(
-            displayDungeonName: displayDungeonName,
-            status: status,
-            activeFloorNumber: Int(run.finalFloor),
-            expectedReturnAt: nil,
-            startedAt: run.startedAt,
-            lastUpdatedAt: run.endedAt,
-            logs: []
-        )
-
-        return ExplorationSnapshot(
-            dungeonId: run.dungeonId,
-            displayDungeonName: displayDungeonName,
-            activeFloorNumber: Int(run.finalFloor),
-            party: partySummary,
-            startedAt: run.startedAt,
-            lastUpdatedAt: run.endedAt,
-            expectedReturnAt: nil,
-            encounterLogs: [],
-            rewards: ExplorationSnapshot.Rewards(
-                experience: Int(run.totalExp),
-                gold: Int(run.totalGold),
-                itemDrops: makeItemDropSummaries(from: run),
-                autoSellGold: Int(run.autoSellGold),
-                autoSoldItems: makeAutoSellEntries(from: run)
-            ),
-            summary: summary,
-            status: status,
-            metadata: metadata
-        )
-    }
-
-    func makeSnapshot(for run: ExplorationRunRecord,
-                      context: ModelContext) async throws -> ExplorationSnapshot {
-        // FetchDescriptorでsortBy指定してイベントを取得
-        let eventRecords = run.events.sorted { $0.occurredAt < $1.occurredAt }
-
-        // ダンジョン情報取得
-        guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
-            throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
-        }
-
-        let displayDungeonName = DungeonDisplayNameFormatter.displayName(
-            for: dungeonDefinition,
-            difficultyTitleId: run.difficulty,
-            masterData: masterDataCache
-        )
-
-        // パーティメンバー情報取得
-        let partyId = run.partyId
-        let partyDescriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == partyId })
-        let partyRecord = try context.fetch(partyDescriptor).first
-        let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
-
-        // EncounterLogs構築
-        var encounterLogs: [ExplorationSnapshot.EncounterLog] = []
-        encounterLogs.reserveCapacity(eventRecords.count)
-
-        for (index, eventRecord) in eventRecords.enumerated() {
-            let log = try await buildEncounterLog(from: eventRecord, index: index)
-            encounterLogs.append(log)
-        }
-
-        // 報酬集計
-        var rewards = ExplorationSnapshot.Rewards()
-        rewards.experience = Int(run.totalExp)
-        rewards.gold = Int(run.totalGold)
-        rewards.autoSellGold = Int(run.autoSellGold)
-        rewards.autoSoldItems = makeAutoSellEntries(from: run)
-        rewards.itemDrops = makeItemDropSummaries(from: run)
-
-        let partySummary = ExplorationSnapshot.PartySummary(
-            partyId: run.partyId,
-            memberCharacterIds: memberCharacterIds,
-            inventorySnapshotId: nil
-        )
-
-        let metadata = ProgressMetadata(createdAt: run.startedAt, updatedAt: run.endedAt)
-        let status = runStatus(from: run.result)
-
-        let summary = ExplorationSnapshot.makeSummary(
-            displayDungeonName: displayDungeonName,
-            status: status,
-            activeFloorNumber: Int(run.finalFloor),
-            expectedReturnAt: nil,
-            startedAt: run.startedAt,
-            lastUpdatedAt: run.endedAt,
-            logs: encounterLogs
-        )
-
-        return ExplorationSnapshot(
-            dungeonId: run.dungeonId,
-            displayDungeonName: displayDungeonName,
-            activeFloorNumber: Int(run.finalFloor),
-            party: partySummary,
-            startedAt: run.startedAt,
-            lastUpdatedAt: run.endedAt,
-            expectedReturnAt: nil,
-            encounterLogs: encounterLogs,
-            rewards: rewards,
-            summary: summary,
-            status: status,
-            metadata: metadata
-        )
-    }
-
-    private func makeAutoSellEntries(from run: ExplorationRunRecord) -> [ExplorationSnapshot.Rewards.AutoSellEntry] {
-        guard !run.autoSellItems.isEmpty else { return [] }
-        let entries = run.autoSellItems.map { record in
-            ExplorationSnapshot.Rewards.AutoSellEntry(
-                itemId: record.itemId,
-                superRareTitleId: record.superRareTitleId,
-                normalTitleId: record.normalTitleId,
-                quantity: Int(record.quantity)
-            )
-        }
-        return entries.sorted { lhs, rhs in
-            if lhs.itemId != rhs.itemId { return lhs.itemId < rhs.itemId }
-            if lhs.superRareTitleId != rhs.superRareTitleId { return lhs.superRareTitleId < rhs.superRareTitleId }
-            if lhs.normalTitleId != rhs.normalTitleId { return lhs.normalTitleId < rhs.normalTitleId }
-            return lhs.quantity > rhs.quantity
-        }
-    }
-
-    private func makeItemDropSummaries(from run: ExplorationRunRecord) -> [ExplorationSnapshot.Rewards.ItemDropSummary] {
-        guard !run.events.isEmpty else { return [] }
-        var summaries: [ExplorationSnapshot.Rewards.ItemDropSummary] = []
-        var indexByKey: [ExplorationDropKey: Int] = [:]
-        for eventRecord in run.events {
-            for drop in eventRecord.drops where drop.itemId > 0 && drop.quantity > 0 {
-                let key = ExplorationDropKey(
-                    itemId: drop.itemId,
-                    superRareTitleId: drop.superRareTitleId ?? 0,
-                    normalTitleId: drop.normalTitleId ?? 2
-                )
-                if let index = indexByKey[key] {
-                    summaries[index].quantity += Int(drop.quantity)
-                } else {
-                    indexByKey[key] = summaries.count
-                    summaries.append(
-                        ExplorationSnapshot.Rewards.ItemDropSummary(
-                            itemId: key.itemId,
-                            superRareTitleId: key.superRareTitleId,
-                            normalTitleId: key.normalTitleId,
-                            quantity: Int(drop.quantity)
-                        )
-                    )
-                }
-            }
-        }
-        return summaries
-    }
-
-    private struct ExplorationDropKey: Hashable {
-        let itemId: UInt16
-        let superRareTitleId: UInt8
-        let normalTitleId: UInt8
-    }
-
-    func buildEncounterLog(from eventRecord: ExplorationEventRecord, index: Int) async throws -> ExplorationSnapshot.EncounterLog {
-        let kind: ExplorationSnapshot.EncounterLog.Kind
-        var referenceId: String?
-        var combatSummary: ExplorationSnapshot.EncounterLog.CombatSummary?
-
-        switch EventKind(rawValue: eventRecord.kind) {
-        case .nothing, .none:
-            kind = .nothing
-
-        case .combat:
-            kind = .enemyEncounter
-            if let enemyId = eventRecord.enemyId {
-                referenceId = String(enemyId)
-                if let enemy = masterDataCache.enemy(enemyId) {
-                    let result = battleResultString(eventRecord.battleResult ?? 0)
-                    // battleLogリレーションからターン数を取得
-                    let turns = Int(eventRecord.battleLog?.turns ?? 0)
-                    combatSummary = ExplorationSnapshot.EncounterLog.CombatSummary(
-                        enemyId: enemyId,
-                        enemyName: enemy.name,
-                        result: result,
-                        turns: turns,
-                        battleLogId: eventRecord.battleLog?.persistentModelID
-                    )
-                }
-            }
-
-        case .scripted:
-            kind = .scriptedEvent
-            if let eventId = eventRecord.scriptedEventId {
-                if let eventDef = masterDataCache.explorationEvent(eventId) {
-                    referenceId = eventDef.name
-                } else {
-                    referenceId = String(eventId)
-                }
-            }
-        }
-
-        // Context構造体を構築
-        var context = ExplorationSnapshot.EncounterLog.Context()
-        if eventRecord.exp > 0 {
-            context.exp = "\(eventRecord.exp)"
-        }
-        if eventRecord.gold > 0 {
-            context.gold = "\(eventRecord.gold)"
-        }
-        if !eventRecord.drops.isEmpty {
-            var dropStrings: [String] = []
-            for drop in eventRecord.drops {
-                if drop.itemId > 0,
-                   let item = masterDataCache.item(drop.itemId) {
-                    dropStrings.append("\(item.name)x\(drop.quantity)")
-                }
-            }
-            if !dropStrings.isEmpty {
-                context.drops = dropStrings.joined(separator: ", ")
-            }
-        }
-
-        return ExplorationSnapshot.EncounterLog(
-            id: UUID(),  // 新構造ではUUIDは識別子として使わない
-            floorNumber: Int(eventRecord.floor),
-            eventIndex: index,
-            kind: kind,
-            referenceId: referenceId,
-            occurredAt: eventRecord.occurredAt,
-            context: context,
-            metadata: ProgressMetadata(createdAt: eventRecord.occurredAt, updatedAt: eventRecord.occurredAt),
-            combatSummary: combatSummary
-        )
-    }
-
-    func battleResultString(_ value: UInt8) -> String {
-        switch BattleResult(rawValue: value) {
-        case .victory: return "victory"
-        case .defeat: return "defeat"
-        case .retreat: return "retreat"
-        case .none: return "unknown"
-        }
-    }
-
-    func runStatus(from value: UInt8) -> ExplorationSnapshot.Status {
-        switch ExplorationResult(rawValue: value) {
-        case .running: return .running
-        case .completed: return .completed
-        case .defeated: return .defeated
-        case .cancelled: return .cancelled
-        case .none: return .running
-        }
-    }
 }
