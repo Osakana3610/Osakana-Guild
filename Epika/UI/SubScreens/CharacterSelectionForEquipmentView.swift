@@ -127,6 +127,81 @@ private struct CharacterRowForEquipment: View {
     }
 }
 
+/// 装備画面で表示するアイテムの種類
+enum EquipmentDisplayItem: Identifiable, Hashable {
+    case inventory(InventoryItemRecord)
+    case equipped(CharacterInput.EquippedItem, avatarId: UInt16)
+
+    var id: String {
+        switch self {
+        case .inventory(let record): return record.stackKey
+        case .equipped(let item, _): return item.stackKey + "_equipped"
+        }
+    }
+
+    var stackKey: String {
+        switch self {
+        case .inventory(let record): return record.stackKey
+        case .equipped(let item, _): return item.stackKey
+        }
+    }
+
+    var itemId: UInt16 {
+        switch self {
+        case .inventory(let record): return record.itemId
+        case .equipped(let item, _): return item.itemId
+        }
+    }
+
+    var quantity: Int {
+        switch self {
+        case .inventory(let record): return Int(record.quantity)
+        case .equipped(let item, _): return Int(item.quantity)
+        }
+    }
+
+    var normalTitleId: UInt8 {
+        switch self {
+        case .inventory(let record): return record.normalTitleId
+        case .equipped(let item, _): return item.normalTitleId
+        }
+    }
+
+    var superRareTitleId: UInt8 {
+        switch self {
+        case .inventory(let record): return record.superRareTitleId
+        case .equipped(let item, _): return item.superRareTitleId
+        }
+    }
+
+    var socketItemId: UInt16 {
+        switch self {
+        case .inventory(let record): return record.socketItemId
+        case .equipped(let item, _): return item.socketItemId
+        }
+    }
+
+    var isEquipped: Bool {
+        if case .equipped = self { return true }
+        return false
+    }
+
+    var equippedAvatarId: UInt16? {
+        if case .equipped(_, let avatarId) = self { return avatarId }
+        return nil
+    }
+
+    var equippedItem: CharacterInput.EquippedItem? {
+        if case .equipped(let item, _) = self { return item }
+        return nil
+    }
+
+    var inventoryRecord: InventoryItemRecord? {
+        if case .inventory(let record) = self { return record }
+        return nil
+    }
+}
+
 /// 装備編集画面
 struct EquipmentEditorView: View {
     let character: RuntimeCharacter
@@ -134,14 +209,13 @@ struct EquipmentEditorView: View {
     @Environment(AppServices.self) private var appServices
     @Environment(StatChangeNotificationService.self) private var statChangeService
     @State private var currentCharacter: RuntimeCharacter
-    @State private var equippedItemsForDisplay: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
+    @State private var equippedItemsBySubcategory: [ItemDisplaySubcategory: [EquipmentDisplayItem]] = [:]
     @State private var orderedSubcategories: [ItemDisplaySubcategory] = []
     @State private var itemDefinitions: [UInt16: ItemDefinition] = [:]
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var equipError: String?
-    @State private var selectedItemForDetail: LightweightItemData?
-    @State private var selectedItemIdForDetail: UInt16?  // 装備中アイテム用（図鑑モード）
+    @State private var selectedItemForDetail: EquipmentDisplayItem?
     @State private var searchText = ""
     @State private var showFilterSheet = false
     @State private var selectedCategories: Set<ItemSaleCategory> = Set(ItemSaleCategory.allCases)
@@ -167,10 +241,10 @@ struct EquipmentEditorView: View {
     }
 
     /// 装備中アイテムをソート順でフラット化（CharacterEquippedItemsSection用）
-    private var sortedEquippedItemsForDisplay: [LightweightItemData] {
-        equippedItemsForDisplay.values
+    private var sortedEquippedItemsForDisplay: [EquipmentDisplayItem] {
+        equippedItemsBySubcategory.values
             .flatMap { $0 }
-            .sorted { displayService.isOrderedBefore($0, $1) }
+            .sorted { isOrderedBefore($0, $1) }
     }
 
     private var raceSkillUnlocks: [(level: Int, skill: SkillDefinition)] {
@@ -252,11 +326,15 @@ struct EquipmentEditorView: View {
                         CharacterEquippedItemsSection(
                             equippedItems: sortedEquippedItemsForDisplay,
                             equipmentCapacity: currentCharacter.equipmentCapacity,
-                            onUnequip: { item in
-                                await performUnequipFromLightweight(item)
+                            displayService: displayService,
+                            itemDefinitions: itemDefinitions,
+                            onUnequip: { displayItem in
+                                if let equipped = displayItem.equippedItem {
+                                    try? await performUnequip(equipped)
+                                }
                             },
-                            onDetail: { item in
-                                selectedItemForDetail = item
+                            onDetail: { displayItem in
+                                selectedItemForDetail = displayItem
                             }
                         )
                     }
@@ -313,28 +391,28 @@ struct EquipmentEditorView: View {
         .task {
             await loadData()
         }
-        .sheet(item: $selectedItemForDetail) { item in
+        .sheet(item: $selectedItemForDetail) { displayItem in
             NavigationStack {
-                ItemDetailView(item: item)
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("閉じる") {
-                                selectedItemForDetail = nil
+                // InventoryItemRecordならrecord版、EquippedItemならitemId版
+                if let record = displayItem.inventoryRecord {
+                    ItemDetailView(record: record)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("閉じる") {
+                                    selectedItemForDetail = nil
+                                }
                             }
                         }
-                    }
-            }
-        }
-        .sheet(item: $selectedItemIdForDetail) { itemId in
-            NavigationStack {
-                ItemDetailView(itemId: itemId)
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("閉じる") {
-                                selectedItemIdForDetail = nil
+                } else {
+                    ItemDetailView(itemId: displayItem.itemId)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("閉じる") {
+                                    selectedItemForDetail = nil
+                                }
                             }
                         }
-                    }
+                }
             }
         }
     }
@@ -346,27 +424,25 @@ struct EquipmentEditorView: View {
     }
 
     /// フィルタ済みセクション（computed property - @Observableで自動更新）
-    private var filteredSections: [(subcategory: ItemDisplaySubcategory, items: [LightweightItemData])] {
+    private var filteredSections: [(subcategory: ItemDisplaySubcategory, items: [EquipmentDisplayItem])] {
         // キャッシュから直接参照
-        let cacheItems = displayService.getSubcategorizedItems()
+        let cacheRecords = displayService.getSubcategorizedRecords()
 
         return orderedSubcategories.compactMap { subcategory in
             // キャッシュのアイテム（除外カテゴリは既にorderedSubcategoriesでフィルタ済み）
-            let inventoryItems = cacheItems[subcategory] ?? []
+            let inventoryRecords = cacheRecords[subcategory] ?? []
             // 装備中アイテム
-            let equippedItems = equippedItemsForDisplay[subcategory] ?? []
+            let equippedItems = equippedItemsBySubcategory[subcategory] ?? []
 
             // マージしてソート（装備中アイテムはインベントリアイテムの直後に配置）
-            var merged: [LightweightItemData] = []
+            var merged: [EquipmentDisplayItem] = []
             var equippedQueue = equippedItems
 
-            for item in inventoryItems {
+            for record in inventoryRecords {
+                let item = EquipmentDisplayItem.inventory(record)
                 merged.append(item)
                 // 同じstackKeyの装備中アイテムがあれば直後に挿入
-                let baseKey = item.stackKey
-                if let idx = equippedQueue.firstIndex(where: {
-                    $0.stackKey == baseKey + "_equipped"
-                }) {
+                if let idx = equippedQueue.firstIndex(where: { $0.stackKey == record.stackKey }) {
                     merged.append(equippedQueue[idx])
                     equippedQueue.remove(at: idx)
                 }
@@ -383,27 +459,60 @@ struct EquipmentEditorView: View {
     }
 
     /// ソート順を維持して挿入位置を見つける
-    private func findInsertIndex(for item: LightweightItemData, in items: [LightweightItemData]) -> Int {
+    private func findInsertIndex(for item: EquipmentDisplayItem, in items: [EquipmentDisplayItem]) -> Int {
         for (index, existing) in items.enumerated() {
-            if displayService.isOrderedBefore(item, existing) {
+            if isOrderedBefore(item, existing) {
                 return index
             }
         }
         return items.count  // 末尾に追加
     }
 
-    private func matchesFilters(_ item: LightweightItemData) -> Bool {
-        if !selectedCategories.contains(item.category) { return false }
+    /// EquipmentDisplayItemのソート順比較
+    private func isOrderedBefore(_ lhs: EquipmentDisplayItem, _ rhs: EquipmentDisplayItem) -> Bool {
+        if lhs.itemId != rhs.itemId {
+            return lhs.itemId < rhs.itemId
+        }
+        let lhsHasSuperRare = lhs.superRareTitleId > 0
+        let rhsHasSuperRare = rhs.superRareTitleId > 0
+        if lhsHasSuperRare != rhsHasSuperRare {
+            return !lhsHasSuperRare
+        }
+        let lhsHasSocket = lhs.socketItemId > 0
+        let rhsHasSocket = rhs.socketItemId > 0
+        if lhsHasSocket != rhsHasSocket {
+            return !lhsHasSocket
+        }
+        if lhs.normalTitleId != rhs.normalTitleId {
+            return lhs.normalTitleId < rhs.normalTitleId
+        }
+        if lhs.superRareTitleId != rhs.superRareTitleId {
+            return lhs.superRareTitleId < rhs.superRareTitleId
+        }
+        return lhs.socketItemId < rhs.socketItemId
+    }
+
+    private func matchesFilters(_ item: EquipmentDisplayItem) -> Bool {
+        guard let category = displayService.category(for: item.stackKey) ?? {
+            // 装備中アイテムの場合はitemDefinitionsから取得
+            if let def = itemDefinitions[item.itemId] {
+                return ItemSaleCategory(rawValue: def.category)
+            }
+            return nil
+        }() else { return false }
+        if !selectedCategories.contains(category) { return false }
         let normalTitleSet = selectedNormalTitleIds ?? cachedAllNormalTitleIds
-        if !normalTitleSet.contains(item.enhancement.normalTitleId) { return false }
-        if !searchText.isEmpty &&
-            !item.fullDisplayName.localizedCaseInsensitiveContains(searchText) {
+        if !normalTitleSet.contains(item.normalTitleId) { return false }
+        if !searchText.isEmpty {
+            let displayName = getDisplayName(for: item)
+            if !displayName.localizedCaseInsensitiveContains(searchText) {
+                return false
+            }
+        }
+        if showSuperRareOnly && item.superRareTitleId == 0 {
             return false
         }
-        if showSuperRareOnly && item.enhancement.superRareTitleId == 0 {
-            return false
-        }
-        if showGemModifiedOnly && !item.hasGemModification {
+        if showGemModifiedOnly && item.socketItemId == 0 {
             return false
         }
         if showEquippableOnly {
@@ -415,16 +524,27 @@ struct EquipmentEditorView: View {
         return true
     }
 
+    /// 表示名を取得
+    private func getDisplayName(for item: EquipmentDisplayItem) -> String {
+        switch item {
+        case .inventory(let record):
+            return displayService.displayName(for: record.stackKey)
+        case .equipped(let equipped, _):
+            let itemName = itemDefinitions[equipped.itemId]?.name
+            return displayService.fullDisplayName(for: equipped, itemName: itemName)
+        }
+    }
+
     @ViewBuilder
     private func buildSubcategorySection(
         for subcategory: ItemDisplaySubcategory,
-        items: [LightweightItemData]
+        items: [EquipmentDisplayItem]
     ) -> some View {
         if items.isEmpty {
             EmptyView()
         } else {
             Section {
-                ForEach(items, id: \.stackKey) { item in
+                ForEach(items, id: \.id) { item in
                     equipmentCandidateRow(item)
                 }
             } header: {
@@ -442,18 +562,17 @@ struct EquipmentEditorView: View {
         }
     }
 
-    private func equipmentCandidateRow(_ item: LightweightItemData) -> some View {
+    private func equipmentCandidateRow(_ item: EquipmentDisplayItem) -> some View {
         let definition = itemDefinitions[item.itemId]
-        let isEquipped = item.equippedByAvatarId != nil
-        let validation = isEquipped ? (canEquip: false, reason: nil) : validateEquipment(definition: definition)
-        let titleStyle: Color = isEquipped ? .primary : (validation.canEquip ? .primary : .secondary)
+        let validation = item.isEquipped ? (canEquip: false, reason: nil) : validateEquipment(definition: definition)
+        let titleStyle: Color = item.isEquipped ? .primary : (validation.canEquip ? .primary : .secondary)
 
         return HStack(spacing: 8) {
             // 装備中アイテムにはキャラ画像を表示（タップで装備解除）
-            if let avatarId = item.equippedByAvatarId {
+            if let avatarId = item.equippedAvatarId, let equipped = item.equippedItem {
                 Button {
                     Task {
-                        await performUnequipFromLightweight(item)
+                        try? await performUnequip(equipped)
                     }
                 } label: {
                     CharacterImageView(avatarIndex: avatarId, size: 36)
@@ -466,15 +585,15 @@ struct EquipmentEditorView: View {
 
             Button {
                 Task {
-                    if isEquipped {
-                        await performUnequipFromLightweight(item)
-                    } else if validation.canEquip {
-                        await performEquip(item)
+                    if let equipped = item.equippedItem {
+                        try? await performUnequip(equipped)
+                    } else if validation.canEquip, let record = item.inventoryRecord {
+                        await performEquip(record)
                     }
                 }
             } label: {
                 HStack {
-                    displayService.makeStyledDisplayText(for: item, includeSellValue: false)
+                    makeStyledDisplayText(for: item)
                         .font(.body)
                         .lineLimit(1)
                         .foregroundStyle(titleStyle)
@@ -495,17 +614,19 @@ struct EquipmentEditorView: View {
         .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
     }
 
-    /// LightweightItemDataから装備解除を実行
-    private func performUnequipFromLightweight(_ item: LightweightItemData) async {
-        // stackKeyから_equippedサフィックスを除去して元のstackKeyを取得
-        let baseStackKey = String(item.stackKey.dropLast("_equipped".count))
+    /// スタイル付き表示テキストを生成
+    private func makeStyledDisplayText(for item: EquipmentDisplayItem) -> Text {
+        let isSuperRare = item.superRareTitleId != 0
+        let fullName = getDisplayName(for: item)
+        let content = Text(fullName)
+        let quantitySegment = Text("x\(item.quantity)")
 
-        // currentCharacter.equippedItemsから該当アイテムを探す
-        guard let equippedItem = currentCharacter.equippedItems.first(where: { $0.stackKey == baseStackKey }) else {
-            return
+        let display = quantitySegment + Text("  ") + content
+
+        if isSuperRare {
+            return display.bold()
         }
-
-        try? await performUnequip(equippedItem)
+        return display
     }
 
     private func loadData() async {
@@ -527,8 +648,8 @@ struct EquipmentEditorView: View {
             .filter { !Self.excludedCategories.contains($0.mainCategory) }
 
         // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
-        let cacheItems = displayService.getSubcategorizedItems()
-        let availableIds = cacheItems.values.flatMap { $0.map { $0.itemId } }
+        let cacheRecords = displayService.getSubcategorizedRecords()
+        let availableIds = cacheRecords.values.flatMap { $0.map { $0.itemId } }
         let allItemIds = Set(availableIds)
             .union(Set(currentCharacter.equippedItems.map { $0.itemId }))
         let masterData = appServices.masterDataCache
@@ -541,7 +662,7 @@ struct EquipmentEditorView: View {
         itemDefinitions = definitions
 
         // 装備中アイテムだけを別変数に保持（キャッシュには挿入しない）
-        buildEquippedItemsForDisplay(masterData: masterData)
+        buildEquippedItemsBySubcategory()
 
         // 称号オプションをキャッシュ（毎回ソートを避ける）
         cachedNormalTitleOptions = masterData.allTitles.sorted { $0.id < $1.id }
@@ -550,9 +671,9 @@ struct EquipmentEditorView: View {
         isLoading = false
     }
 
-    /// 装備中アイテムをequippedItemsForDisplayに構築する
-    private func buildEquippedItemsForDisplay(masterData: MasterDataCache) {
-        var result: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
+    /// 装備中アイテムをequippedItemsBySubcategoryに構築する
+    private func buildEquippedItemsBySubcategory() {
+        var result: [ItemDisplaySubcategory: [EquipmentDisplayItem]] = [:]
         let avatarId = currentCharacter.resolvedAvatarId
 
         for equipped in currentCharacter.equippedItems {
@@ -564,53 +685,16 @@ struct EquipmentEditorView: View {
                 subcategory: definition.rarity
             )
 
-            // 装備中アイテムからLightweightItemDataを生成
-            let lightweightItem = createLightweightItem(
-                from: equipped,
-                definition: definition,
-                avatarId: avatarId
-            )
+            let displayItem = EquipmentDisplayItem.equipped(equipped, avatarId: avatarId)
 
             // サブカテゴリ別に分類
             if result[subcategory] == nil {
                 result[subcategory] = []
             }
-            result[subcategory]?.append(lightweightItem)
+            result[subcategory]?.append(displayItem)
         }
 
-        equippedItemsForDisplay = result
-    }
-
-    /// 装備中アイテムからLightweightItemDataを生成
-    private func createLightweightItem(
-        from equipped: CharacterInput.EquippedItem,
-        definition: ItemDefinition,
-        avatarId: UInt16
-    ) -> LightweightItemData {
-        let fullDisplayName = displayService.fullDisplayName(
-            for: equipped,
-            itemName: definition.name
-        )
-
-        return LightweightItemData(
-            stackKey: equipped.stackKey + "_equipped",  // インベントリと区別
-            itemId: equipped.itemId,
-            name: definition.name,
-            quantity: equipped.quantity,
-            sellValue: definition.sellValue,
-            category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-            enhancement: ItemEnhancement(
-                superRareTitleId: equipped.superRareTitleId,
-                normalTitleId: equipped.normalTitleId,
-                socketSuperRareTitleId: equipped.socketSuperRareTitleId,
-                socketNormalTitleId: equipped.socketNormalTitleId,
-                socketItemId: equipped.socketItemId
-            ),
-            storage: .playerItem,
-            rarity: definition.rarity,
-            fullDisplayName: fullDisplayName,
-            equippedByAvatarId: avatarId
-        )
+        equippedItemsBySubcategory = result
     }
 
     private func validateEquipment(definition: ItemDefinition?) -> (canEquip: Bool, reason: String?) {
@@ -636,7 +720,7 @@ struct EquipmentEditorView: View {
     }
 
     @MainActor
-    private func performEquip(_ item: LightweightItemData) async {
+    private func performEquip(_ record: InventoryItemRecord) async {
         equipError = nil
         let oldCharacter = currentCharacter
 
@@ -644,7 +728,7 @@ struct EquipmentEditorView: View {
             // 通知をスキップして装備処理を実行（手動でキャッシュを一括更新するため）
             let result = try await characterService.equipItem(
                 characterId: currentCharacter.id,
-                inventoryItemStackKey: item.stackKey,
+                inventoryItemStackKey: record.stackKey,
                 equipmentCapacity: currentCharacter.equipmentCapacity,
                 skipNotification: true
             )
@@ -719,47 +803,20 @@ struct EquipmentEditorView: View {
         displayService.incrementQuantity(stackKey: item.stackKey, by: 1)
 
         // incrementQuantityは存在しない場合何もしないので、キャッシュを確認
-        let cacheItems = displayService.getSubcategorizedItems()
-        let exists = cacheItems.values.contains { items in
-            items.contains { $0.stackKey == item.stackKey }
+        let cacheRecords = displayService.getSubcategorizedRecords()
+        let exists = cacheRecords.values.contains { records in
+            records.contains { $0.stackKey == item.stackKey }
         }
 
-        // 存在しない場合は新規追加
+        // 存在しない場合はSwiftDataから取得してキャッシュに追加
         if !exists {
-            guard let definition = itemDefinitions[item.itemId] else { return }
-
-            let fullDisplayName = displayService.fullDisplayName(
-                for: item,
-                itemName: definition.name
-            )
-
-            let lightweightItem = LightweightItemData(
-                stackKey: item.stackKey,
-                itemId: item.itemId,
-                name: definition.name,
-                quantity: newQuantity,
-                sellValue: definition.sellValue,
-                category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-                enhancement: ItemEnhancement(
-                    superRareTitleId: item.superRareTitleId,
-                    normalTitleId: item.normalTitleId,
-                    socketSuperRareTitleId: item.socketSuperRareTitleId,
-                    socketNormalTitleId: item.socketNormalTitleId,
-                    socketItemId: item.socketItemId
-                ),
-                storage: .playerItem,
-                rarity: definition.rarity,
-                fullDisplayName: fullDisplayName,
-                equippedByAvatarId: nil
-            )
-            displayService.addItem(lightweightItem)
+            displayService.addRecordByStackKey(item.stackKey)
         }
     }
 
     /// 装備中アイテムを再構築（filteredSectionsはcomputed propertyなので自動更新）
     private func rebuildEquippedItemsAndRefresh() {
-        let masterData = appServices.masterDataCache
-        buildEquippedItemsForDisplay(masterData: masterData)
+        buildEquippedItemsBySubcategory()
     }
 
     /// 装備変更前後のステータス差分を計算

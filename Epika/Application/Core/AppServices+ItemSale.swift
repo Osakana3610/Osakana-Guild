@@ -29,6 +29,7 @@
 // ==============================================================================
 
 import Foundation
+import SwiftData
 
 // MARK: - Item Sale with Shop Stock
 extension AppServices {
@@ -82,22 +83,29 @@ extension AppServices {
         let autoTradeKeys = try await autoTrade.registeredStackKeys()
         guard !autoTradeKeys.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
 
-        let items = try await inventory.allItems(storage: .playerItem)
-        guard !items.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
+        // SwiftDataから直接フェッチ
+        let context = contextProvider.makeContext()
+        let storageTypeValue = ItemStorage.playerItem.rawValue
+        let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageType == storageTypeValue
+        })
+        let records = try context.fetch(descriptor)
+        guard !records.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
 
-        let targets = items.filter { autoTradeKeys.contains($0.stackKey) }
+        let autoTradeKeySet = Set(autoTradeKeys)
+        let targets = records.filter { autoTradeKeySet.contains($0.stackKey) }
         guard !targets.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
 
         var aggregated: [UInt16: Int] = [:]
-        for item in targets {
-            aggregated[item.itemId, default: 0] += Int(item.quantity)
+        for record in targets {
+            aggregated[record.itemId, default: 0] += Int(record.quantity)
         }
 
         // ゴールド・チケット加算はShopProgressService内で完結
         let sellResult = try await shop.addPlayerSoldItemsBatch(aggregated.map { ($0.key, $0.value) })
 
-        for item in targets {
-            try await inventory.decrementItem(stackKey: item.stackKey, quantity: Int(item.quantity))
+        for record in targets {
+            try await inventory.decrementItem(stackKey: record.stackKey, quantity: Int(record.quantity))
         }
 
         return AutoTradeSellResult(gold: sellResult.totalGold,
@@ -116,26 +124,33 @@ extension AppServices {
             return try await gameState.currentPlayer()
         }
 
-        // アイテム情報を取得
-        let items = try await inventory.allItems(storage: .playerItem)
+        // SwiftDataから直接フェッチ
+        let context = contextProvider.makeContext()
+        let storageTypeValue = ItemStorage.playerItem.rawValue
+        let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageType == storageTypeValue
+        })
+        let records = try context.fetch(descriptor)
         let stackKeySet = Set(stackKeys)
-        let targetItems = items.filter { stackKeySet.contains($0.stackKey) }
-        guard !targetItems.isEmpty else {
+        let targetRecords = records.filter { stackKeySet.contains($0.stackKey) }
+        guard !targetRecords.isEmpty else {
             return try await gameState.currentPlayer()
         }
 
         // 各アイテムを売却してショップ在庫に追加
         var totalGold = 0
         var decrementList: [(stackKey: String, quantity: Int)] = []
-        for item in targetItems {
+        for record in targetRecords {
             // ショップ在庫に追加（素のitemIdのみ、称号なし）
-            let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: Int(item.quantity))
+            let result = try await shop.addPlayerSoldItem(itemId: record.itemId, quantity: Int(record.quantity))
             totalGold += result.gold
             // 実際に追加された分のみ減算対象（overflow分はインベントリに残る）
             if result.added > 0 {
-                decrementList.append((stackKey: item.stackKey, quantity: result.added))
+                decrementList.append((stackKey: record.stackKey, quantity: result.added))
                 // ソケット宝石が装着されている場合、売却数量分の宝石を分離してインベントリに戻す
-                try await separateGemFromItem(item, quantity: result.added)
+                if record.socketItemId != 0 {
+                    try await separateGemFromRecord(record, quantity: result.added)
+                }
             }
         }
 
@@ -168,23 +183,30 @@ extension AppServices {
             return try await gameState.currentPlayer()
         }
 
-        // アイテム情報を取得
-        let items = try await inventory.allItems(storage: .playerItem)
-        guard let item = items.first(where: { $0.stackKey == stackKey }) else {
+        // SwiftDataから直接フェッチ
+        let context = contextProvider.makeContext()
+        let storageTypeValue = ItemStorage.playerItem.rawValue
+        let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageType == storageTypeValue
+        })
+        let records = try context.fetch(descriptor)
+        guard let record = records.first(where: { $0.stackKey == stackKey }) else {
             throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
         }
-        guard item.quantity >= quantity else {
+        guard record.quantity >= quantity else {
             throw ProgressError.invalidInput(description: "数量が不足しています")
         }
 
         // ショップ在庫に追加（素のitemIdのみ、称号なし）
-        let result = try await shop.addPlayerSoldItem(itemId: item.itemId, quantity: quantity)
+        let result = try await shop.addPlayerSoldItem(itemId: record.itemId, quantity: quantity)
 
         // インベントリから減算（実際に売却された分のみ、overflow分はインベントリに残る）
         if result.added > 0 {
             try await inventory.decrementItem(stackKey: stackKey, quantity: result.added)
             // ソケット宝石が装着されている場合、売却数量分の宝石を分離してインベントリに戻す
-            try await separateGemFromItem(item, quantity: result.added)
+            if record.socketItemId != 0 {
+                try await separateGemFromRecord(record, quantity: result.added)
+            }
         }
 
         // ゴールドを加算
@@ -200,25 +222,24 @@ extension AppServices {
 
     // MARK: - Private Helpers
 
-    /// アイテムからソケット宝石を分離してインベントリに戻す
+    /// レコードからソケット宝石を分離してインベントリに戻す
     /// - Parameters:
-    ///   - item: 宝石が装着されたアイテム
+    ///   - record: 宝石が装着されたアイテムのレコード
     ///   - quantity: 分離する宝石の数量（売却された装備の数量）
     /// - Note: 宝石の称号情報（socketSuperRareTitleId, socketNormalTitleId）も引き継ぐ
-    private func separateGemFromItem(_ item: ItemSnapshot, quantity: Int) async throws {
-        guard item.enhancements.hasSocket else { return }
+    private func separateGemFromRecord(_ record: InventoryItemRecord, quantity: Int) async throws {
         guard quantity > 0 else { return }
 
         // 宝石をインベントリに追加（宝石の称号情報を引き継ぐ）
         let gemEnhancement = ItemEnhancement(
-            superRareTitleId: item.enhancements.socketSuperRareTitleId,
-            normalTitleId: item.enhancements.socketNormalTitleId,
+            superRareTitleId: record.socketSuperRareTitleId,
+            normalTitleId: record.socketNormalTitleId,
             socketSuperRareTitleId: 0,
             socketNormalTitleId: 0,
             socketItemId: 0
         )
         _ = try await inventory.addItem(
-            itemId: item.enhancements.socketItemId,
+            itemId: record.socketItemId,
             quantity: quantity,
             storage: .playerItem,
             enhancements: gemEnhancement

@@ -125,8 +125,8 @@ struct ItemDetailView: View {
 
     /// 図鑑用: itemIdのみ
     let itemId: UInt16
-    /// 売却/装備画面用: 称号情報込みのデータ（オプション）
-    let lightweightItem: LightweightItemData?
+    /// 売却/装備画面用: インベントリレコード（オプション）
+    let inventoryRecord: InventoryItemRecord?
 
     @State private var item: ItemDefinition?
     @State private var skillNames: [UInt16: String] = [:]
@@ -138,17 +138,20 @@ struct ItemDetailView: View {
     /// 図鑑用イニシャライザ
     init(itemId: UInt16) {
         self.itemId = itemId
-        self.lightweightItem = nil
+        self.inventoryRecord = nil
     }
 
     /// 売却/装備画面用イニシャライザ
-    init(item: LightweightItemData) {
-        self.itemId = item.itemId
-        self.lightweightItem = item
+    init(record: InventoryItemRecord) {
+        self.itemId = record.itemId
+        self.inventoryRecord = record
     }
 
     private var displayName: String {
-        lightweightItem?.fullDisplayName ?? item?.name ?? "アイテム詳細"
+        if let record = inventoryRecord {
+            return appServices.userDataLoad.displayName(for: record.stackKey)
+        }
+        return item?.name ?? "アイテム詳細"
     }
 
     var body: some View {
@@ -183,11 +186,10 @@ struct ItemDetailView: View {
         item = masterData.item(itemId)
 
         // 称号情報がある場合は称号定義を取得
-        if let lightweight = lightweightItem {
-            titleDefinition = masterData.title(lightweight.enhancement.normalTitleId)
-            let superRareTitleId = lightweight.enhancement.superRareTitleId
-            if superRareTitleId > 0 {
-                superRareTitleDefinition = masterData.superRareTitle(superRareTitleId)
+        if let record = inventoryRecord {
+            titleDefinition = masterData.title(record.normalTitleId)
+            if record.superRareTitleId > 0 {
+                superRareTitleDefinition = masterData.superRareTitle(record.superRareTitleId)
             }
         }
 
@@ -206,13 +208,19 @@ struct ItemDetailView: View {
         List {
             Section("基本情報") {
                 LabeledContent("カテゴリ", value: (ItemSaleCategory(rawValue: item.category) ?? .other).displayName)
-                if let rarityValue = lightweightItem?.rarity ?? item.rarity,
-                   let rarity = ItemRarity(rawValue: rarityValue) {
+                let rarityValue: UInt8? = {
+                    if let record = inventoryRecord {
+                        return appServices.userDataLoad.rarity(for: record.stackKey)
+                    }
+                    return item.rarity
+                }()
+                if let rarityValue, let rarity = ItemRarity(rawValue: rarityValue) {
                     LabeledContent("レアリティ", value: rarity.displayName)
                 }
                 // 称号情報がある場合は計算済み売値、なければベース価格
-                if let lightweight = lightweightItem {
-                    LabeledContent("売却額", value: "\(lightweight.sellValue)G")
+                if let record = inventoryRecord {
+                    let sellValue = appServices.userDataLoad.sellValue(for: record.stackKey)
+                    LabeledContent("売却額", value: "\(sellValue)G")
                 } else {
                     LabeledContent("定価", value: "\(item.basePrice)G")
                     LabeledContent("売却額", value: "\(item.sellValue)G")
@@ -289,19 +297,19 @@ struct ItemDetailView: View {
         if combat.breathDamage != 0 { LabeledContent("ブレスダメージ", value: formatBonus(applyTitleMultiplier(combat.breathDamage))) }
     }
 
-    /// 称号倍率を適用（lightweightItemがある場合のみ）
+    /// 称号倍率を適用（inventoryRecordがある場合のみ）
     private func applyTitleMultiplier(_ value: Int) -> Int {
         guard let title = titleDefinition else { return value }
         let multiplier = value > 0 ? (title.statMultiplier ?? 1.0) : (title.negativeMultiplier ?? 1.0)
         // 超レアがついている場合はさらに2倍
-        let superRareMultiplier: Double = (lightweightItem?.enhancement.superRareTitleId ?? 0) > 0 ? 2.0 : 1.0
+        let superRareMultiplier: Double = (inventoryRecord?.superRareTitleId ?? 0) > 0 ? 2.0 : 1.0
         return Int((Double(value) * multiplier * superRareMultiplier).rounded(.towardZero))
     }
 
     private func applyTitleMultiplierDouble(_ value: Double) -> Double {
         guard let title = titleDefinition else { return value }
         let multiplier = value > 0 ? (title.statMultiplier ?? 1.0) : (title.negativeMultiplier ?? 1.0)
-        let superRareMultiplier: Double = (lightweightItem?.enhancement.superRareTitleId ?? 0) > 0 ? 2.0 : 1.0
+        let superRareMultiplier: Double = (inventoryRecord?.superRareTitleId ?? 0) > 0 ? 2.0 : 1.0
         return value * multiplier * superRareMultiplier
     }
 

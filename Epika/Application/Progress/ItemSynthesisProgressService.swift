@@ -76,7 +76,7 @@ actor ItemSynthesisProgressService {
 
         try await inventoryService.decrementItem(stackKey: childStackKey, quantity: 1)
 
-        let snapshot = try await inventoryService.updateItem(stackKey: parentStackKey) { record in
+        let updatedStackKey = try await inventoryService.updateItem(stackKey: parentStackKey) { record in
             guard record.storage == .playerItem else {
                 throw ProgressError.invalidInput(description: "親アイテムは所持品から選択してください")
             }
@@ -88,21 +88,22 @@ actor ItemSynthesisProgressService {
             // ソケット情報は維持
         }
 
+        // 更新後の状態: itemId変更、称号リセット、ソケットは親から維持
         return RuntimeEquipment(
-            id: snapshot.stackKey,
-            itemId: snapshot.itemId,
+            id: updatedStackKey,
+            itemId: synthesisContext.resultDefinition.id,
             masterDataId: String(synthesisContext.resultDefinition.id),
             displayName: synthesisContext.resultDefinition.name,
-            quantity: Int(snapshot.quantity),
+            quantity: 1,
             category: ItemSaleCategory(rawValue: synthesisContext.resultDefinition.category) ?? .other,
             baseValue: synthesisContext.resultDefinition.basePrice,
             sellValue: synthesisContext.resultDefinition.sellValue,
-            enhancement: .init(
-                superRareTitleId: snapshot.enhancements.superRareTitleId,
-                normalTitleId: snapshot.enhancements.normalTitleId,
-                socketSuperRareTitleId: snapshot.enhancements.socketSuperRareTitleId,
-                socketNormalTitleId: snapshot.enhancements.socketNormalTitleId,
-                socketItemId: snapshot.enhancements.socketItemId
+            enhancement: ItemEnhancement(
+                superRareTitleId: 0,  // リセット済み
+                normalTitleId: 0,      // リセット済み
+                socketSuperRareTitleId: synthesisContext.parent.enhancement.socketSuperRareTitleId,
+                socketNormalTitleId: synthesisContext.parent.enhancement.socketNormalTitleId,
+                socketItemId: synthesisContext.parent.enhancement.socketItemId
             ),
             rarity: synthesisContext.resultDefinition.rarity,
             statBonuses: synthesisContext.resultDefinition.statBonuses,

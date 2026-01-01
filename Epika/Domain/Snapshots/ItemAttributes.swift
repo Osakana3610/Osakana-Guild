@@ -1,22 +1,20 @@
 // ==============================================================================
-// ItemEnhancement.swift
+// ItemAttributes.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - アイテムの強化情報（称号・ソケット）を表現
+//   - アイテムの属性を表す小さな型の定義
 //
-// 【データ構造】
-//   - superRareTitleId: 超レア称号ID（0=なし）
-//   - normalTitleId: 通常称号rank（0=なし）
-//   - socketSuperRareTitleId, socketNormalTitleId, socketItemId: ソケット宝石
-//
-// 【導出プロパティ】
-//   - hasSocket → Bool: 宝石改造の有無
+// 【型】
+//   - ItemEnhancement: 強化情報（称号・ソケット）
+//   - ItemStorage: 保管場所
 //
 // ==============================================================================
 
 import Foundation
+
+// MARK: - ItemEnhancement
 
 /// アイテムの強化情報（称号・ソケット）
 struct ItemEnhancement: Sendable, Equatable, Hashable {
@@ -42,4 +40,13 @@ struct ItemEnhancement: Sendable, Equatable, Hashable {
     var hasSocket: Bool {
         socketItemId != 0
     }
+}
+
+// MARK: - ItemStorage
+
+/// アイテムの保管場所
+/// - Note: 0 は「未初期化」を表す予約値。新しいケースは 1 以上で追加すること。
+enum ItemStorage: UInt8, Codable, Sendable {
+    case playerItem = 1
+    case unknown = 2
 }

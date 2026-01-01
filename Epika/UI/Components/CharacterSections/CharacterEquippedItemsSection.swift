@@ -24,22 +24,28 @@ import SwiftUI
 /// CharacterSectionType: equippedItems
 @MainActor
 struct CharacterEquippedItemsSection: View {
-    let equippedItems: [LightweightItemData]
+    let equippedItems: [EquipmentDisplayItem]
     let equipmentCapacity: Int
-    let onUnequip: ((LightweightItemData) async throws -> Void)?
-    let onDetail: ((LightweightItemData) -> Void)?
+    let displayService: UserDataLoadService
+    let itemDefinitions: [UInt16: ItemDefinition]
+    let onUnequip: ((EquipmentDisplayItem) async throws -> Void)?
+    let onDetail: ((EquipmentDisplayItem) -> Void)?
 
     @State private var unequipError: String?
     @State private var isUnequipping = false
 
     init(
-        equippedItems: [LightweightItemData],
+        equippedItems: [EquipmentDisplayItem],
         equipmentCapacity: Int,
-        onUnequip: ((LightweightItemData) async throws -> Void)? = nil,
-        onDetail: ((LightweightItemData) -> Void)? = nil
+        displayService: UserDataLoadService,
+        itemDefinitions: [UInt16: ItemDefinition],
+        onUnequip: ((EquipmentDisplayItem) async throws -> Void)? = nil,
+        onDetail: ((EquipmentDisplayItem) -> Void)? = nil
     ) {
         self.equippedItems = equippedItems
         self.equipmentCapacity = equipmentCapacity
+        self.displayService = displayService
+        self.itemDefinitions = itemDefinitions
         self.onUnequip = onUnequip
         self.onDetail = onDetail
     }
@@ -51,7 +57,7 @@ struct CharacterEquippedItemsSection: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             } else {
-                ForEach(equippedItems, id: \.stackKey) { item in
+                ForEach(equippedItems, id: \.id) { item in
                     equippedItemRow(item)
                 }
 
@@ -74,15 +80,16 @@ struct CharacterEquippedItemsSection: View {
     }
 
     @ViewBuilder
-    private func equippedItemRow(_ item: LightweightItemData) -> some View {
-        let hasSuperRare = item.enhancement.superRareTitleId > 0
+    private func equippedItemRow(_ item: EquipmentDisplayItem) -> some View {
+        let hasSuperRare = item.superRareTitleId > 0
+        let displayName = getDisplayName(for: item)
 
         HStack {
             Button {
                 unequipItem(item)
             } label: {
                 HStack {
-                    Text("• \(item.fullDisplayName)")
+                    Text("• \(displayName)")
                         .fontWeight(hasSuperRare ? .bold : .regular)
                     if item.quantity > 1 {
                         Text("x\(item.quantity)")
@@ -108,7 +115,17 @@ struct CharacterEquippedItemsSection: View {
         }
     }
 
-    private func unequipItem(_ item: LightweightItemData) {
+    private func getDisplayName(for item: EquipmentDisplayItem) -> String {
+        switch item {
+        case .inventory(let record):
+            return displayService.displayName(for: record.stackKey)
+        case .equipped(let equipped, _):
+            let itemName = itemDefinitions[equipped.itemId]?.name
+            return displayService.fullDisplayName(for: equipped, itemName: itemName)
+        }
+    }
+
+    private func unequipItem(_ item: EquipmentDisplayItem) {
         guard let onUnequip else { return }
         isUnequipping = true
         unequipError = nil

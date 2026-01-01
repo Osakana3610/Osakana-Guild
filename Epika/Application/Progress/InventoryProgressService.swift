@@ -8,12 +8,12 @@
 //   - アイテムの追加・削除・数量変更
 //
 // 【公開API】
-//   - allItems(storage:) → [ItemSnapshot] - 指定ストレージの全アイテム
-//   - addItem(...) → ItemSnapshot - アイテム追加（スタック上限99）
-//   - addItems(_:) - 一括追加
-//   - decrementItem(stackKey:quantity:) - 数量減算
-//   - removeItem(stackKey:) - アイテム削除
 //   - allEquipment(storage:) → [RuntimeEquipment] - 装備一覧
+//   - addItem(...) → String (stackKey) - アイテム追加（スタック上限99）
+//   - addItemsBatch(_:) → [String] - 一括追加
+//   - decrementItem(stackKey:quantity:) - 数量減算
+//   - updateItem(stackKey:mutate:) → String - アイテム更新
+//   - attachSocket(...) → String - 宝石装着
 //
 // 【データ構造】
 //   - BatchSeed: 一括追加用のシードデータ
@@ -61,19 +61,13 @@ actor InventoryProgressService {
 
     // MARK: - Public API
 
-    func allItems(storage: ItemStorage) async throws -> [ItemSnapshot] {
+    func allEquipment(storage: ItemStorage) async throws -> [RuntimeEquipment] {
         let context = contextProvider.makeContext()
         let descriptor = fetchDescriptor(for: storage)
         let records = try context.fetch(descriptor)
-        let snapshots = records.map(makeSnapshot(_:))
-        return snapshots
-    }
+        if records.isEmpty { return [] }
 
-    func allEquipment(storage: ItemStorage) async throws -> [RuntimeEquipment] {
-        let snapshots = try await allItems(storage: storage)
-        if snapshots.isEmpty { return [] }
-
-        let masterIndices = Array(Set(snapshots.map { $0.itemId }))
+        let masterIndices = Array(Set(records.map { $0.itemId }))
         var definitionMap: [UInt16: ItemDefinition] = [:]
         var missing: [UInt16] = []
         for id in masterIndices {
@@ -88,31 +82,31 @@ actor InventoryProgressService {
             throw ProgressError.itemDefinitionUnavailable(ids: missingIds)
         }
 
-        return snapshots.compactMap { snapshot -> RuntimeEquipment? in
-            guard let definition = definitionMap[snapshot.itemId] else {
+        return records.compactMap { record -> RuntimeEquipment? in
+            guard let definition = definitionMap[record.itemId] else {
                 return nil
             }
             // 称号を含めた表示名を生成
             let displayName = buildDisplayName(
                 baseName: definition.name,
-                superRareTitleId: snapshot.enhancements.superRareTitleId,
-                normalTitleId: snapshot.enhancements.normalTitleId
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId
             )
             return RuntimeEquipment(
-                id: snapshot.stackKey,
-                itemId: snapshot.itemId,
+                id: record.stackKey,
+                itemId: record.itemId,
                 masterDataId: String(definition.id),
                 displayName: displayName,
-                quantity: Int(snapshot.quantity),
+                quantity: Int(record.quantity),
                 category: ItemSaleCategory(rawValue: definition.category) ?? .other,
                 baseValue: definition.basePrice,
                 sellValue: definition.sellValue,
-                enhancement: .init(
-                    superRareTitleId: snapshot.enhancements.superRareTitleId,
-                    normalTitleId: snapshot.enhancements.normalTitleId,
-                    socketSuperRareTitleId: snapshot.enhancements.socketSuperRareTitleId,
-                    socketNormalTitleId: snapshot.enhancements.socketNormalTitleId,
-                    socketItemId: snapshot.enhancements.socketItemId
+                enhancement: ItemEnhancement(
+                    superRareTitleId: record.superRareTitleId,
+                    normalTitleId: record.normalTitleId,
+                    socketSuperRareTitleId: record.socketSuperRareTitleId,
+                    socketNormalTitleId: record.socketNormalTitleId,
+                    socketItemId: record.socketItemId
                 ),
                 rarity: definition.rarity,
                 statBonuses: definition.statBonuses,
@@ -150,10 +144,11 @@ actor InventoryProgressService {
         }
     }
 
+    @discardableResult
     func addItem(itemId: UInt16,
                  quantity: Int,
                  storage: ItemStorage,
-                 enhancements: ItemEnhancement = .init()) async throws -> ItemSnapshot {
+                 enhancements: ItemEnhancement = .init()) async throws -> String {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "追加数量は1以上である必要があります")
         }
@@ -172,17 +167,16 @@ actor InventoryProgressService {
         _ = applyIncrement(to: record, amount: quantity)
         try context.save()
         postInventoryChange(upserted: [record.stackKey])
-        return makeSnapshot(record)
+        return record.stackKey
     }
 
-    /// バッチ追加してスナップショットを返す（ドロップ報酬用）
-    func addItemsBatchReturningSnapshots(_ seeds: [BatchSeed]) async throws -> [ItemSnapshot] {
+    /// バッチ追加してstackKeyを返す（ドロップ報酬用）
+    func addItemsBatch(_ seeds: [BatchSeed]) async throws -> [String] {
         guard !seeds.isEmpty else { return [] }
 
         let context = contextProvider.makeContext()
         let aggregated = aggregate(seeds)
         var stackKeys: [String] = []
-        var snapshots: [ItemSnapshot] = []
 
         for (storage, entries) in aggregated {
             for entry in entries {
@@ -198,13 +192,12 @@ actor InventoryProgressService {
                 )
                 _ = applyIncrement(to: record, amount: entry.totalQuantity)
                 stackKeys.append(record.stackKey)
-                snapshots.append(makeSnapshot(record))
             }
         }
 
         try context.save()
         postInventoryChange(upserted: stackKeys)
-        return snapshots
+        return stackKeys
     }
 
     /// stackKey重複レコードを数量が多いものだけ残して除去
@@ -359,8 +352,9 @@ actor InventoryProgressService {
         return result
     }
 
+    @discardableResult
     func updateItem(stackKey: String,
-                    mutate: (InventoryItemRecord) throws -> Void) async throws -> ItemSnapshot {
+                    mutate: (InventoryItemRecord) throws -> Void) async throws -> String {
         guard let components = StackKeyComponents(stackKey: stackKey) else {
             throw ProgressError.invalidInput(description: "不正なstackKeyです")
         }
@@ -386,7 +380,7 @@ actor InventoryProgressService {
         try mutate(record)
         try context.save()
         postInventoryChange(upserted: [record.stackKey])
-        return makeSnapshot(record)
+        return record.stackKey
     }
 
     func decrementItem(stackKey: String, quantity: Int) async throws {
@@ -515,28 +509,27 @@ actor InventoryProgressService {
         guard let definition = masterDataCache.item(targetRecord.itemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.itemId)])
         }
-        let snapshot = makeSnapshot(targetRecord)
         // 称号を含めた表示名を生成
         let displayName = buildDisplayName(
             baseName: definition.name,
-            superRareTitleId: snapshot.enhancements.superRareTitleId,
-            normalTitleId: snapshot.enhancements.normalTitleId
+            superRareTitleId: targetRecord.superRareTitleId,
+            normalTitleId: targetRecord.normalTitleId
         )
         return RuntimeEquipment(
-            id: snapshot.stackKey,
-            itemId: snapshot.itemId,
+            id: targetRecord.stackKey,
+            itemId: targetRecord.itemId,
             masterDataId: String(definition.id),
             displayName: displayName,
-            quantity: Int(snapshot.quantity),
+            quantity: Int(targetRecord.quantity),
             category: ItemSaleCategory(rawValue: definition.category) ?? .other,
             baseValue: definition.basePrice,
             sellValue: definition.sellValue,
-            enhancement: .init(
-                superRareTitleId: snapshot.enhancements.superRareTitleId,
-                normalTitleId: snapshot.enhancements.normalTitleId,
-                socketSuperRareTitleId: snapshot.enhancements.socketSuperRareTitleId,
-                socketNormalTitleId: snapshot.enhancements.socketNormalTitleId,
-                socketItemId: snapshot.enhancements.socketItemId
+            enhancement: ItemEnhancement(
+                superRareTitleId: targetRecord.superRareTitleId,
+                normalTitleId: targetRecord.normalTitleId,
+                socketSuperRareTitleId: targetRecord.socketSuperRareTitleId,
+                socketNormalTitleId: targetRecord.socketNormalTitleId,
+                socketItemId: targetRecord.socketItemId
             ),
             rarity: definition.rarity,
             statBonuses: definition.statBonuses,
@@ -548,9 +541,10 @@ actor InventoryProgressService {
     /// - Parameters:
     ///   - gemStackKey: 宝石のstackKey
     ///   - targetStackKey: 対象アイテムのstackKey
-    /// - Returns: ソケット装着後のアイテムスナップショット
+    /// - Returns: ソケット装着後のアイテムのstackKey
     /// - Note: 対象の数量が2以上の場合、1個減らして新しいソケット付きスタックを作成
-    func attachSocket(gemStackKey: String, targetStackKey: String) async throws -> ItemSnapshot {
+    @discardableResult
+    func attachSocket(gemStackKey: String, targetStackKey: String) async throws -> String {
         guard let gemComponents = StackKeyComponents(stackKey: gemStackKey) else {
             throw ProgressError.invalidInput(description: "不正な宝石stackKeyです")
         }
@@ -670,7 +664,7 @@ actor InventoryProgressService {
         try context.save()
         postInventoryChange(upserted: upsertedStackKeys, removed: removedKeys)
 
-        return makeSnapshot(socketedRecord)
+        return socketedRecord.stackKey
     }
 
     // MARK: - Private Helpers
@@ -688,22 +682,6 @@ actor InventoryProgressService {
             SortDescriptor(\InventoryItemRecord.socketItemId, order: .forward)
         ]
         return descriptor
-    }
-
-    private func makeSnapshot(_ record: InventoryItemRecord) -> ItemSnapshot {
-        ItemSnapshot(
-            stackKey: record.stackKey,
-            itemId: record.itemId,
-            quantity: record.quantity,
-            storage: record.storage,
-            enhancements: .init(
-                superRareTitleId: record.superRareTitleId,
-                normalTitleId: record.normalTitleId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketItemId: record.socketItemId
-            )
-        )
     }
 
     private func fetchOrCreateRecord(
