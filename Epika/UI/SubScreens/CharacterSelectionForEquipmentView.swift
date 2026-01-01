@@ -150,6 +150,9 @@ struct EquipmentEditorView: View {
     @State private var selectedNormalTitleIds: Set<UInt8>? = nil
     @State private var showSuperRareOnly = false
     @State private var showGemModifiedOnly = false
+    @State private var cachedFilteredSections: [(subcategory: ItemDisplaySubcategory, items: [LightweightItemData])] = []
+    @State private var cachedNormalTitleOptions: [TitleDefinition] = []
+    @State private var cachedAllNormalTitleIds: Set<UInt8> = []
 
     private var characterService: CharacterProgressService { appServices.character }
     private var inventoryService: InventoryProgressService { appServices.inventory }
@@ -253,10 +256,10 @@ struct EquipmentEditorView: View {
                         )
                     }
 
-                    ForEach(filteredCandidateSections, id: \.subcategory) { section in
+                    ForEach(cachedFilteredSections, id: \.subcategory) { section in
                         buildSubcategorySection(for: section.subcategory, items: section.items)
                     }
-                    if filteredCandidateSections.isEmpty {
+                    if cachedFilteredSections.isEmpty {
                         Section {
                             Text("条件に一致する装備候補がありません。")
                                 .font(.caption)
@@ -292,8 +295,8 @@ struct EquipmentEditorView: View {
                         selectedNormalTitleIds: $selectedNormalTitleIds,
                         showEquippableOnly: $showEquippableOnly,
                         availableCategories: availableCategories,
-                        normalTitleOptions: normalTitleOptions,
-                        allNormalTitleIds: allNormalTitleIds,
+                        normalTitleOptions: cachedNormalTitleOptions,
+                        allNormalTitleIds: cachedAllNormalTitleIds,
                         showSuperRareOnly: $showSuperRareOnly,
                         showGemModifiedOnly: $showGemModifiedOnly
                     )
@@ -305,9 +308,12 @@ struct EquipmentEditorView: View {
         .task {
             await loadData()
         }
-        .onChange(of: appServices.userDataLoad.itemCacheVersion) {
-            refreshSubcategorizedItems()
-        }
+        .onChange(of: searchText) { updateFilteredSections() }
+        .onChange(of: selectedCategories) { updateFilteredSections() }
+        .onChange(of: selectedNormalTitleIds) { updateFilteredSections() }
+        .onChange(of: showEquippableOnly) { updateFilteredSections() }
+        .onChange(of: showSuperRareOnly) { updateFilteredSections() }
+        .onChange(of: showGemModifiedOnly) { updateFilteredSections() }
         .sheet(item: $selectedItemForDetail) { item in
             NavigationStack {
                 ItemDetailView(item: item)
@@ -340,16 +346,9 @@ struct EquipmentEditorView: View {
             .sorted { $0.rawValue < $1.rawValue }
     }
 
-    private var normalTitleOptions: [TitleDefinition] {
-        appServices.masterDataCache.allTitles.sorted { $0.id < $1.id }
-    }
-
-    private var allNormalTitleIds: Set<UInt8> {
-        Set(normalTitleOptions.map { $0.id })
-    }
-
-    private var filteredCandidateSections: [(subcategory: ItemDisplaySubcategory, items: [LightweightItemData])] {
-        orderedSubcategories.compactMap { subcategory in
+    /// フィルタ済みセクションを更新（フィルタ条件変更時に呼ぶ）
+    private func updateFilteredSections() {
+        cachedFilteredSections = orderedSubcategories.compactMap { subcategory in
             let items = subcategorizedItems[subcategory] ?? []
             let filtered = items.filter { matchesFilters($0) }
             return filtered.isEmpty ? nil : (subcategory, filtered)
@@ -358,7 +357,7 @@ struct EquipmentEditorView: View {
 
     private func matchesFilters(_ item: LightweightItemData) -> Bool {
         if !selectedCategories.contains(item.category) { return false }
-        let normalTitleSet = selectedNormalTitleIds ?? allNormalTitleIds
+        let normalTitleSet = selectedNormalTitleIds ?? cachedAllNormalTitleIds
         if !normalTitleSet.contains(item.enhancement.normalTitleId) { return false }
         if !searchText.isEmpty &&
             !item.fullDisplayName.localizedCaseInsensitiveContains(searchText) {
@@ -495,6 +494,13 @@ struct EquipmentEditorView: View {
         // 装備中アイテムをLightweightItemDataに変換して挿入
         insertEquippedItems(into: &filtered, masterData: masterData)
         subcategorizedItems = filtered
+
+        // 称号オプションをキャッシュ（毎回ソートを避ける）
+        cachedNormalTitleOptions = masterData.allTitles.sorted { $0.id < $1.id }
+        cachedAllNormalTitleIds = Set(cachedNormalTitleOptions.map { $0.id })
+
+        // フィルタ済みセクションを更新
+        updateFilteredSections()
 
         isLoading = false
     }
@@ -635,11 +641,8 @@ struct EquipmentEditorView: View {
             // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
             displayService.updateCharacter(runtime)
 
-            // インベントリキャッシュから装備した分を減らす（1個）
-            // Note: inventoryDidChange通知でキャッシュは自動更新されるが、
-            // 即時反映のためローカルでも減算
-            _ = try? displayService.decrementQuantity(stackKey: item.stackKey, by: 1)
-            refreshSubcategorizedItems()
+            // 装備中アイテムの表示を差分更新（全データコピーを避ける）
+            updateEquippedItemsDisplay()
         } catch {
             equipError = error.localizedDescription
         }
@@ -670,65 +673,26 @@ struct EquipmentEditorView: View {
         // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
         displayService.updateCharacter(runtime)
 
-        // キャッシュに同じstackKeyがあれば数量を増やす、なければ新規追加
-        // Note: inventoryDidChange通知でキャッシュは自動更新されるが、
-        // 即時反映のためローカルでも更新
-        updateCacheForUnequippedItem(item)
+        // 装備中アイテムの表示を差分更新（全データコピーを避ける）
+        updateEquippedItemsDisplay()
     }
 
-    /// 解除したアイテムをキャッシュに反映
-    private func updateCacheForUnequippedItem(_ item: CharacterInput.EquippedItem) {
-        // 既存アイテムがあれば数量を増やす
-        displayService.incrementQuantity(stackKey: item.stackKey, by: 1)
-
-        // incrementQuantityは既存アイテムがない場合何もしないので、
-        // キャッシュを確認して存在しなければ新規追加
-        let allItems = displayService.getAllItems()
-        if allItems.contains(where: { $0.stackKey == item.stackKey }) {
-            // 既に存在する（incrementで更新済み）
-            refreshSubcategorizedItems()
-            return
+    /// 装備中アイテムの表示だけを差分更新（全データコピーを避ける）
+    private func updateEquippedItemsDisplay() {
+        // 古い装備中アイテム（_equippedサフィックス付き）を全て削除
+        for key in subcategorizedItems.keys {
+            subcategorizedItems[key]?.removeAll { $0.stackKey.hasSuffix("_equipped") }
         }
 
-        // 新規追加: LightweightItemDataを構築
-        guard let definition = itemDefinitions[item.itemId] else { return }
+        // 新しい装備中アイテムを挿入
         let masterData = appServices.masterDataCache
+        insertEquippedItems(into: &subcategorizedItems, masterData: masterData)
 
-        let superRareTitleName: String? = item.superRareTitleId > 0
-            ? masterData.superRareTitle(item.superRareTitleId)?.name
-            : nil
-        let normalTitleName: String? = masterData.title(item.normalTitleId)?.name
-
-        let gemName: String? = item.socketItemId > 0
-            ? masterData.item(item.socketItemId)?.name
-            : nil
-
-        let lightweightItem = LightweightItemData(
-            stackKey: item.stackKey,
-            itemId: item.itemId,
-            name: definition.name,
-            quantity: 1,
-            sellValue: definition.sellValue,
-            category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-            enhancement: ItemSnapshot.Enhancement(
-                superRareTitleId: item.superRareTitleId,
-                normalTitleId: item.normalTitleId,
-                socketSuperRareTitleId: item.socketSuperRareTitleId,
-                socketNormalTitleId: item.socketNormalTitleId,
-                socketItemId: item.socketItemId
-            ),
-            storage: .playerItem,
-            rarity: definition.rarity,
-            normalTitleName: normalTitleName,
-            superRareTitleName: superRareTitleName,
-            gemName: gemName
-        )
-
-        displayService.addItem(lightweightItem)
-        refreshSubcategorizedItems()
+        // フィルタ済みセクションを更新
+        updateFilteredSections()
     }
 
-    /// サブカテゴリ表示を更新（装備中アイテムも含む）
+    /// サブカテゴリ表示を全体更新（初回ロード時のみ使用）
     private func refreshSubcategorizedItems() {
         var filtered = displayService.getSubcategorizedItems()
             .filter { !Self.excludedCategories.contains($0.key.mainCategory) }
@@ -739,6 +703,9 @@ struct EquipmentEditorView: View {
         let masterData = appServices.masterDataCache
         insertEquippedItems(into: &filtered, masterData: masterData)
         subcategorizedItems = filtered
+
+        // フィルタ済みセクションを更新
+        updateFilteredSections()
     }
 
     /// 装備変更前後のステータス差分を計算
