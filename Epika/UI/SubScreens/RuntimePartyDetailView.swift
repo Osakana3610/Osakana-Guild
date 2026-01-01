@@ -99,7 +99,7 @@ struct RuntimePartyDetailView: View {
                 .disabled(adventureState.isExploring(partyId: currentParty.id))
 
                 NavigationLink {
-                    PartyEquipmentListView(characters: membersOfCurrentParty)
+                    PartyEquipmentListView(memberIds: currentParty.memberIds)
                 } label: {
                     Text("装備アイテムの一覧")
                         .foregroundColor(.primary)
@@ -401,8 +401,9 @@ private struct PartySkillsListView: View {
 }
 
 private struct PartyEquipmentListView: View {
-    let characters: [RuntimeCharacter]
+    let memberIds: [UInt8]
     @Environment(AppServices.self) private var appServices
+    @State private var characters: [RuntimeCharacter] = []
 
     var body: some View {
         List {
@@ -442,6 +443,20 @@ private struct PartyEquipmentListView: View {
         .avoidBottomGameInfo()
         .navigationTitle("装備一覧")
         .navigationBarTitleDisplayMode(.inline)
+        .task { await loadCharacters() }
+        .onAppear { Task { await loadCharacters() } }
+    }
+
+    @MainActor
+    private func loadCharacters() async {
+        do {
+            let allCharacters = try await appServices.userDataLoad.getCharacters()
+            characters = memberIds.compactMap { memberId in
+                allCharacters.first { $0.id == memberId }
+            }
+        } catch {
+            characters = []
+        }
     }
 
     private func itemDisplayName(entry: CharacterInput.EquippedItem, itemsById: [UInt16: ItemDefinition]) -> String {
