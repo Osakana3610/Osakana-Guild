@@ -13,13 +13,7 @@
 //     - itemId: アイテムマスターID
 //     - quantity: 数量
 //     - storage (ItemStorage): 保管場所
-//     - enhancements (Enhancement): 強化情報
-//
-//   - Enhancement: 称号・ソケット情報
-//     - superRareTitleId: 超レア称号ID（0=なし）
-//     - normalTitleId: 通常称号rank（0=なし）
-//     - socketSuperRareTitleId, socketNormalTitleId, socketItemId: ソケット宝石
-//     - hasSocket → Bool: 宝石改造の有無
+//     - enhancements (ItemEnhancement): 強化情報
 //
 //   - ItemStorage: playerItem/unknown
 //
@@ -37,38 +31,12 @@
 import Foundation
 
 struct ItemSnapshot: Sendable {
-    /// Int Idベースの強化情報
-    struct Enhancement: Sendable, Equatable, Hashable {
-        var superRareTitleId: UInt8
-        var normalTitleId: UInt8
-        var socketSuperRareTitleId: UInt8
-        var socketNormalTitleId: UInt8
-        var socketItemId: UInt16
-
-        nonisolated init(superRareTitleId: UInt8 = 0,
-                         normalTitleId: UInt8 = 0,
-                         socketSuperRareTitleId: UInt8 = 0,
-                         socketNormalTitleId: UInt8 = 0,
-                         socketItemId: UInt16 = 0) {
-            self.superRareTitleId = superRareTitleId
-            self.normalTitleId = normalTitleId
-            self.socketSuperRareTitleId = socketSuperRareTitleId
-            self.socketNormalTitleId = socketNormalTitleId
-            self.socketItemId = socketItemId
-        }
-
-        /// 宝石改造が施されているか
-        var hasSocket: Bool {
-            socketItemId != 0
-        }
-    }
-
     /// スタック識別キー（6つのidの組み合わせ）
     var stackKey: String
     var itemId: UInt16
     var quantity: UInt16
     var storage: ItemStorage
-    var enhancements: Enhancement
+    var enhancements: ItemEnhancement
 
     /// 自動売却ルール用キー（ソケット情報を除く3要素）
     var autoTradeKey: String {

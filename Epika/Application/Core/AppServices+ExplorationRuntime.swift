@@ -385,7 +385,7 @@ extension AppServices {
             let superRareTitleId: UInt8 = drop.superRareTitleId ?? 0
             let normalTitleId: UInt8 = drop.normalTitleId ?? 2
 
-            let enhancement = ItemSnapshot.Enhancement(
+            let enhancement = ItemEnhancement(
                 superRareTitleId: superRareTitleId,
                 normalTitleId: normalTitleId,
                 socketSuperRareTitleId: 0,

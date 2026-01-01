@@ -101,7 +101,7 @@ enum ItemCategory: String, CaseIterable, Identifiable {
 
 private struct ItemSeed {
     let itemId: UInt16
-    let enhancement: ItemSnapshot.Enhancement
+    let enhancement: ItemEnhancement
 }
 
 struct DebugMenuView: View {

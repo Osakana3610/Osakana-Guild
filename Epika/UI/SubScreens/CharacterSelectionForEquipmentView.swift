@@ -599,7 +599,7 @@ struct EquipmentEditorView: View {
             quantity: equipped.quantity,
             sellValue: definition.sellValue,
             category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-            enhancement: ItemSnapshot.Enhancement(
+            enhancement: ItemEnhancement(
                 superRareTitleId: equipped.superRareTitleId,
                 normalTitleId: equipped.normalTitleId,
                 socketSuperRareTitleId: equipped.socketSuperRareTitleId,
@@ -740,7 +740,7 @@ struct EquipmentEditorView: View {
                 quantity: newQuantity,
                 sellValue: definition.sellValue,
                 category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-                enhancement: ItemSnapshot.Enhancement(
+                enhancement: ItemEnhancement(
                     superRareTitleId: item.superRareTitleId,
                     normalTitleId: item.normalTitleId,
                     socketSuperRareTitleId: item.socketSuperRareTitleId,

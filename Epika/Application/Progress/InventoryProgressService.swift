@@ -38,12 +38,12 @@ actor InventoryProgressService {
         let itemId: UInt16
         let quantity: Int
         let storage: ItemStorage
-        let enhancements: ItemSnapshot.Enhancement
+        let enhancements: ItemEnhancement
 
         init(itemId: UInt16,
              quantity: Int,
              storage: ItemStorage,
-             enhancements: ItemSnapshot.Enhancement = .init()) {
+             enhancements: ItemEnhancement = .init()) {
             self.itemId = itemId
             self.quantity = quantity
             self.storage = storage
@@ -153,7 +153,7 @@ actor InventoryProgressService {
     func addItem(itemId: UInt16,
                  quantity: Int,
                  storage: ItemStorage,
-                 enhancements: ItemSnapshot.Enhancement = .init()) async throws -> ItemSnapshot {
+                 enhancements: ItemEnhancement = .init()) async throws -> ItemSnapshot {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "追加数量は1以上である必要があります")
         }
@@ -431,7 +431,7 @@ actor InventoryProgressService {
 
     func inheritItem(targetStackKey: String,
                      sourceStackKey: String,
-                     newEnhancement: ItemSnapshot.Enhancement) async throws -> RuntimeEquipment {
+                     newEnhancement: ItemEnhancement) async throws -> RuntimeEquipment {
         guard let targetComponents = StackKeyComponents(stackKey: targetStackKey) else {
             throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
         }

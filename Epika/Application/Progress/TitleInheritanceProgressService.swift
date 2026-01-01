@@ -31,7 +31,7 @@ actor TitleInheritanceProgressService {
         let currentTitleName: String
         let sourceTitleName: String
         let resultTitleName: String
-        let resultEnhancement: ItemSnapshot.Enhancement
+        let resultEnhancement: ItemEnhancement
     }
 
     private let inventoryService: InventoryProgressService
@@ -55,7 +55,7 @@ actor TitleInheritanceProgressService {
         let inheritance = try await resolveContext(targetStackKey: targetStackKey, sourceStackKey: sourceStackKey)
         let currentTitle = try titleDisplayName(for: inheritance.target.enhancement)
         let sourceTitle = try titleDisplayName(for: inheritance.source.enhancement)
-        let resultEnhancement = ItemSnapshot.Enhancement(
+        let resultEnhancement = ItemEnhancement(
             superRareTitleId: inheritance.source.enhancement.superRareTitleId,
             normalTitleId: inheritance.source.enhancement.normalTitleId,
             socketSuperRareTitleId: inheritance.target.enhancement.socketSuperRareTitleId,
@@ -73,7 +73,7 @@ actor TitleInheritanceProgressService {
 
     func inherit(targetStackKey: String, sourceStackKey: String) async throws -> RuntimeEquipment {
         let inheritance = try await resolveContext(targetStackKey: targetStackKey, sourceStackKey: sourceStackKey)
-        let newEnhancement = ItemSnapshot.Enhancement(
+        let newEnhancement = ItemEnhancement(
             superRareTitleId: inheritance.source.enhancement.superRareTitleId,
             normalTitleId: inheritance.source.enhancement.normalTitleId,
             socketSuperRareTitleId: inheritance.target.enhancement.socketSuperRareTitleId,
@@ -107,7 +107,7 @@ private extension TitleInheritanceProgressService {
         return (target, source)
     }
 
-    nonisolated func titleDisplayName(for enhancement: ItemSnapshot.Enhancement) throws -> String {
+    nonisolated func titleDisplayName(for enhancement: ItemEnhancement) throws -> String {
         // 超レア称号があればその名前を返す
         if enhancement.superRareTitleId != 0 {
             if let definition = masterDataCache.superRareTitle(enhancement.superRareTitleId) {
