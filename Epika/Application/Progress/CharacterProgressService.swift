@@ -197,23 +197,6 @@ actor CharacterProgressService {
         }
     }
 
-    /// InventoryItemRecordからItemSnapshotを作成
-    private func makeInventorySnapshot(_ record: InventoryItemRecord) -> ItemSnapshot {
-        ItemSnapshot(
-            stackKey: record.stackKey,
-            itemId: record.itemId,
-            quantity: record.quantity,
-            storage: record.storage,
-            enhancements: .init(
-                superRareTitleId: record.superRareTitleId,
-                normalTitleId: record.normalTitleId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketItemId: record.socketItemId
-            )
-        )
-    }
-
     // MARK: - Read Operations
 
     func allCharacters() throws -> [CharacterSnapshot] {

@@ -232,11 +232,11 @@ extension AppServices {
                     }
                     // ドロップ報酬永続化
                     if let calculated = calculatedDropRewards {
-                        let addedSnapshots = try await appServices.persistCalculatedDropRewards(calculated)
+                        let addedStackKeys = try await appServices.persistCalculatedDropRewards(calculated)
                         await MainActor.run {
                             userDataLoadService.addDroppedItems(
                                 seeds: calculated.inventorySeeds,
-                                snapshots: addedSnapshots,
+                                stackKeys: addedStackKeys,
                                 definitions: calculated.definitions
                             )
                         }
@@ -344,7 +344,7 @@ extension AppServices {
 
     /// ドロップ報酬適用結果
     struct DropRewardsResult: Sendable {
-        let addedSnapshots: [ItemSnapshot]
+        let addedStackKeys: [String]
         let addedSeeds: [InventoryProgressService.BatchSeed]
         let definitions: [UInt16: ItemDefinition]
         let autoSoldItems: [ExplorationSnapshot.Rewards.AutoSellEntry]
@@ -431,28 +431,28 @@ extension AppServices {
     }
 
     /// 計算済み報酬をDBに永続化する（バックグラウンド実行用）
-    func persistCalculatedDropRewards(_ calculated: CalculatedDropRewards) async throws -> [ItemSnapshot] {
+    func persistCalculatedDropRewards(_ calculated: CalculatedDropRewards) async throws -> [String] {
         // 自動売却をバッチ処理（ゴールド・チケット加算はShopProgressService内で完結）
         if !calculated.autoSellItems.isEmpty {
             _ = try await shop.addPlayerSoldItemsBatch(calculated.autoSellItems)
         }
 
         // インベントリ追加をバッチ処理
-        var addedSnapshots: [ItemSnapshot] = []
+        var addedStackKeys: [String] = []
         if !calculated.inventorySeeds.isEmpty {
-            addedSnapshots = try await inventory.addItemsBatchReturningSnapshots(calculated.inventorySeeds)
+            addedStackKeys = try await inventory.addItemsBatch(calculated.inventorySeeds)
         }
 
-        return addedSnapshots
+        return addedStackKeys
     }
 
     /// ドロップ報酬を適用する（既存互換用、計算と永続化を一括実行）
     func applyDropRewards(_ drops: [ItemDropResult]) async throws -> DropRewardsResult {
         let calculated = try await calculateDropRewards(drops)
-        let addedSnapshots = try await persistCalculatedDropRewards(calculated)
+        let addedStackKeys = try await persistCalculatedDropRewards(calculated)
 
         return DropRewardsResult(
-            addedSnapshots: addedSnapshots,
+            addedStackKeys: addedStackKeys,
             addedSeeds: calculated.inventorySeeds,
             definitions: calculated.definitions,
             autoSoldItems: calculated.autoSellEntries,

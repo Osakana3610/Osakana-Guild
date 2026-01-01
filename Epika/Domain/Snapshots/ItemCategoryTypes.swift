@@ -1,21 +1,12 @@
 // ==============================================================================
-// LightweightItemData.swift
+// ItemCategoryTypes.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - UI表示用の軽量アイテムデータ
-//   - アイテムカテゴリ・レアリティの分類
+//   - アイテムカテゴリ・レアリティの分類定義
 //
 // 【データ構造】
-//   - LightweightItemData: 表示最適化されたアイテム情報
-//     - stackKey, itemId, name, quantity, sellValue
-//     - category (ItemSaleCategory): 売却カテゴリ
-//     - enhancement (Enhancement): 称号・ソケット情報
-//     - storage (ItemStorage): 保管場所
-//     - rarity: レアリティ
-//     - normalTitleName, superRareTitleName, gemName: 表示名
-//
 //   - ItemSaleCategory: 売却用カテゴリ分類（24種）
 //     - 武器: thinSword/sword/magicSword/katana/bow 等
 //     - 防具: armor/heavyArmor/shield/gauntlet 等
@@ -29,15 +20,10 @@
 //
 //   - ItemDisplaySubcategory: カテゴリ+レアリティのサブ分類
 //
-// 【導出プロパティ】
-//   - autoTradeKey → String: 自動売却ルール用キー
-//   - hasGemModification → Bool: 宝石改造の有無
-//   - fullDisplayName → String: 称号含むフルネーム
-//
 // 【使用箇所】
-//   - UserDataLoadService: アイテム表示データのキャッシュ
-//   - InventoryCleanupView, ItemSaleView: 売却画面
-//   - AutoTradeView: 自動売却ルール設定
+//   - UserDataLoadService: アイテムカテゴリ判定
+//   - ItemSaleView, GemModificationView: カテゴリ別フィルタリング
+//   - ItemEncyclopediaView: カテゴリ別表示
 //
 // ==============================================================================
 
@@ -308,48 +294,3 @@ enum ItemRarity: UInt8, CaseIterable, Sendable {
     }
 }
 
-// MARK: - Lightweight Item Data
-
-struct LightweightItemData: Sendable {
-    /// スタック識別キー
-    var stackKey: String
-    var itemId: UInt16
-    var name: String
-    var quantity: Int
-    var sellValue: Int
-    var category: ItemSaleCategory
-    var enhancement: ItemEnhancement
-    var storage: ItemStorage
-    var rarity: UInt8?
-    /// フルネーム（超レア称号 + 称号 + アイテム名 + [ソケットフルネーム]）
-    var fullDisplayName: String
-    /// 装備中のキャラクターのアバターID（nilならインベントリアイテム）
-    var equippedByAvatarId: UInt16?
-
-    /// 自動売却ルール用のキー（称号のみ、ソケットは除外）
-    var autoTradeKey: String {
-        "\(enhancement.superRareTitleId)|\(enhancement.normalTitleId)|\(itemId)"
-    }
-
-    /// 宝石改造が施されているか
-    var hasGemModification: Bool {
-        enhancement.socketItemId != 0
-    }
-}
-
-extension LightweightItemData: Identifiable {
-    var id: String { stackKey }
-}
-
-extension LightweightItemData: Equatable {
-    /// stackKeyは一意なので、それだけで等価判定（パフォーマンス最適化）
-    static func == (lhs: LightweightItemData, rhs: LightweightItemData) -> Bool {
-        lhs.stackKey == rhs.stackKey
-    }
-}
-
-extension LightweightItemData: Hashable {
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(stackKey)
-    }
-}

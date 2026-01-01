@@ -14,7 +14,7 @@
 //   - isLoaded: Bool: ロード完了状態
 //   - characters: [RuntimeCharacter]: キャラクターキャッシュ
 //   - parties: [PartySnapshot]: パーティキャッシュ
-//   - items: [LightweightItemData]: アイテムキャッシュ
+//   - items: [InventoryItemRecord]: アイテムキャッシュ
 //   - explorationSummaries: [ExplorationSnapshot]: 探索サマリーキャッシュ
 //   - invalidateCharacters(): キャラクターキャッシュ無効化
 //   - invalidateParties(): パーティキャッシュ無効化
@@ -53,13 +53,18 @@ final class UserDataLoadService: Sendable {
     @MainActor private(set) var parties: [PartySnapshot] = []
     @MainActor private(set) var explorationSummaries: [ExplorationSnapshot] = []
 
-    // アイテムキャッシュ（ItemPreloadServiceから移行）
-    @MainActor private(set) var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
+    // アイテムキャッシュ（レコード + 派生データ）
+    @MainActor private(set) var categorizedRecords: [ItemSaleCategory: [InventoryItemRecord]] = [:]
+    @MainActor private(set) var subcategorizedRecords: [ItemDisplaySubcategory: [InventoryItemRecord]] = [:]
     @MainActor private var stackKeyIndex: [String: ItemSaleCategory] = [:]  // O(1)検索用
     @MainActor private(set) var orderedCategories: [ItemSaleCategory] = []
-    @MainActor private(set) var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
     @MainActor private(set) var orderedSubcategories: [ItemDisplaySubcategory] = []
     @MainActor private(set) var itemCacheVersion: Int = 0
+
+    // 派生データ（名前解決・計算結果）
+    @MainActor private var displayNames: [String: String] = [:]      // stackKey → fullDisplayName
+    @MainActor private var sellValues: [String: Int] = [:]           // stackKey → sellValue
+    @MainActor private var itemRarities: [String: UInt8?] = [:]      // stackKey → rarity
 
     // MARK: - State
 
@@ -116,16 +121,17 @@ final class UserDataLoadService: Sendable {
 
         loadTask = Task {
             do {
-                // 1. データロード（並列実行）
+                // 1. データロード（並列実行可能なものとMainActor必須のもの）
                 async let charactersTask: () = loadCharacters()
                 async let partiesTask: () = loadParties()
-                async let itemsTask: () = loadItems()
                 async let explorationTask: () = loadExplorationSummaries()
 
                 try await charactersTask
                 try await partiesTask
-                try await itemsTask
                 try await explorationTask
+
+                // アイテムロードはMainActorで実行
+                try await MainActor.run { try self.loadItems() }
 
                 // 2. 探索再開（データロード完了後に実行）
                 await resumeOrphanedExplorations()
@@ -166,13 +172,15 @@ final class UserDataLoadService: Sendable {
         }
     }
 
-    private func loadItems() async throws {
-        try await buildItemCacheFromSwiftData(storage: .playerItem)
-        await MainActor.run { self.isItemsLoaded = true }
+    @MainActor
+    private func loadItems() throws {
+        try buildItemCacheFromSwiftData(storage: .playerItem)
+        self.isItemsLoaded = true
     }
 
     /// SwiftDataから直接フェッチしてキャッシュを構築
-    private func buildItemCacheFromSwiftData(storage: ItemStorage) async throws {
+    @MainActor
+    private func buildItemCacheFromSwiftData(storage: ItemStorage) throws {
         let context = contextProvider.makeContext()
         let storageTypeValue = storage.rawValue
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
@@ -187,13 +195,14 @@ final class UserDataLoadService: Sendable {
         let records = try context.fetch(descriptor)
 
         guard !records.isEmpty else {
-            await MainActor.run {
-                categorizedItems.removeAll()
-                stackKeyIndex.removeAll()
-                orderedCategories.removeAll()
-                subcategorizedItems.removeAll()
-                orderedSubcategories.removeAll()
-            }
+            categorizedRecords.removeAll()
+            subcategorizedRecords.removeAll()
+            stackKeyIndex.removeAll()
+            orderedCategories.removeAll()
+            orderedSubcategories.removeAll()
+            displayNames.removeAll()
+            sellValues.removeAll()
+            itemRarities.removeAll()
             return
         }
 
@@ -205,10 +214,26 @@ final class UserDataLoadService: Sendable {
         let allTitles = masterDataCache.allTitles
         let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
 
-        var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
+        // カテゴリ別・サブカテゴリ別にグループ化
+        var grouped: [ItemSaleCategory: [InventoryItemRecord]] = [:]
+        var subgrouped: [ItemDisplaySubcategory: [InventoryItemRecord]] = [:]
+        var newStackKeyIndex: [String: ItemSaleCategory] = [:]
+        var newDisplayNames: [String: String] = [:]
+        var newSellValues: [String: Int] = [:]
+        var newItemRarities: [String: UInt8?] = [:]
+
         for record in records {
             guard let definition = definitionMap[record.itemId] else { continue }
 
+            let category = ItemSaleCategory(rawValue: definition.category) ?? .other
+            grouped[category, default: []].append(record)
+
+            let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: definition.rarity)
+            subgrouped[subcategory, default: []].append(record)
+
+            newStackKeyIndex[record.stackKey] = category
+
+            // 派生データを計算
             let enhancement = ItemEnhancement(
                 superRareTitleId: record.superRareTitleId,
                 normalTitleId: record.normalTitleId,
@@ -216,71 +241,68 @@ final class UserDataLoadService: Sendable {
                 socketNormalTitleId: record.socketNormalTitleId,
                 socketItemId: record.socketItemId
             )
-
-            let sellPrice = try ItemPriceCalculator.sellPrice(
+            newDisplayNames[record.stackKey] = buildFullDisplayName(
+                itemName: definition.name,
+                enhancement: enhancement
+            )
+            newSellValues[record.stackKey] = (try? ItemPriceCalculator.sellPrice(
                 baseSellValue: definition.sellValue,
                 normalTitleId: record.normalTitleId,
                 hasSuperRare: record.superRareTitleId != 0,
                 multiplierMap: priceMultiplierMap
-            )
-
-            let fullDisplayName = buildFullDisplayName(
-                itemName: definition.name,
-                enhancement: enhancement
-            )
-
-            let category = ItemSaleCategory(rawValue: definition.category) ?? .other
-            let data = LightweightItemData(
-                stackKey: record.stackKey,
-                itemId: record.itemId,
-                name: definition.name,
-                quantity: Int(record.quantity),
-                sellValue: sellPrice,
-                category: category,
-                enhancement: enhancement,
-                storage: record.storage,
-                rarity: definition.rarity,
-                fullDisplayName: fullDisplayName,
-                equippedByAvatarId: nil
-            )
-            grouped[category, default: []].append(data)
+            )) ?? definition.sellValue
+            newItemRarities[record.stackKey] = definition.rarity
         }
 
         // ソート
         for key in grouped.keys {
-            grouped[key]?.sort { isOrderedBefore($0, $1) }
+            grouped[key]?.sort { isRecordOrderedBefore($0, $1) }
+        }
+        for key in subgrouped.keys {
+            subgrouped[key]?.sort { isRecordOrderedBefore($0, $1) }
         }
 
         let sortedCategories = grouped.keys.sorted {
             (grouped[$0]?.first?.itemId ?? .max) < (grouped[$1]?.first?.itemId ?? .max)
         }
-
-        // stackKeyインデックスとサブカテゴリを構築
-        var newStackKeyIndex: [String: ItemSaleCategory] = [:]
-        var subgrouped: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
-        for (category, items) in grouped {
-            for item in items {
-                newStackKeyIndex[item.stackKey] = category
-                let subcategory = ItemDisplaySubcategory(
-                    mainCategory: item.category,
-                    subcategory: item.rarity
-                )
-                subgrouped[subcategory, default: []].append(item)
-            }
-        }
         let sortedSubcategories = subgrouped.keys.sorted {
             (subgrouped[$0]?.first?.itemId ?? .max) < (subgrouped[$1]?.first?.itemId ?? .max)
         }
 
-        // MainActorでキャッシュに代入
-        await MainActor.run {
-            self.categorizedItems = grouped
-            self.stackKeyIndex = newStackKeyIndex
-            self.orderedCategories = sortedCategories
-            self.subcategorizedItems = subgrouped
-            self.orderedSubcategories = sortedSubcategories
-            self.itemCacheVersion &+= 1
+        // キャッシュに代入
+        self.categorizedRecords = grouped
+        self.subcategorizedRecords = subgrouped
+        self.stackKeyIndex = newStackKeyIndex
+        self.orderedCategories = sortedCategories
+        self.orderedSubcategories = sortedSubcategories
+        self.displayNames = newDisplayNames
+        self.sellValues = newSellValues
+        self.itemRarities = newItemRarities
+        self.itemCacheVersion &+= 1
+    }
+
+    /// レコードのソート順（itemId → 超レアなし優先 → ソケットなし優先 → normalTitleId → superRareTitleId → socketItemId）
+    private func isRecordOrderedBefore(_ lhs: InventoryItemRecord, _ rhs: InventoryItemRecord) -> Bool {
+        if lhs.itemId != rhs.itemId {
+            return lhs.itemId < rhs.itemId
         }
+        let lhsHasSuperRare = lhs.superRareTitleId > 0
+        let rhsHasSuperRare = rhs.superRareTitleId > 0
+        if lhsHasSuperRare != rhsHasSuperRare {
+            return !lhsHasSuperRare
+        }
+        let lhsHasSocket = lhs.socketItemId > 0
+        let rhsHasSocket = rhs.socketItemId > 0
+        if lhsHasSocket != rhsHasSocket {
+            return !lhsHasSocket
+        }
+        if lhs.normalTitleId != rhs.normalTitleId {
+            return lhs.normalTitleId < rhs.normalTitleId
+        }
+        if lhs.superRareTitleId != rhs.superRareTitleId {
+            return lhs.superRareTitleId < rhs.superRareTitleId
+        }
+        return lhs.socketItemId < rhs.socketItemId
     }
 
     private func loadExplorationSummaries() async throws {
@@ -589,20 +611,20 @@ final class UserDataLoadService: Sendable {
     private func applyInventoryChange(_ change: InventoryChange) async {
         // upsertedのstackKeyからレコードを再取得してキャッシュ更新
         if !change.upserted.isEmpty {
-            await refetchAndUpsertItems(stackKeys: change.upserted)
+            await refetchAndUpsertRecords(stackKeys: change.upserted)
         }
         await MainActor.run {
             for stackKey in change.removed {
-                removeItemWithoutVersion(stackKey: stackKey)
+                removeRecordWithoutVersion(stackKey: stackKey)
             }
-            sortCacheItems()
+            sortCacheRecords()
             rebuildOrderedSubcategories()
             itemCacheVersion &+= 1
         }
     }
 
     /// stackKeyでSwiftDataからレコードを再取得してキャッシュに反映
-    private func refetchAndUpsertItems(stackKeys: [String]) async {
+    private func refetchAndUpsertRecords(stackKeys: [String]) async {
         let context = contextProvider.makeContext()
         let stackKeySet = Set(stackKeys)
         let descriptor = FetchDescriptor<InventoryItemRecord>()
@@ -626,7 +648,8 @@ final class UserDataLoadService: Sendable {
         let allTitles = masterDataCache.allTitles
         let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
 
-        var itemsToUpsert: [LightweightItemData] = []
+        // レコードと派生データを収集
+        var recordsToUpsert: [(record: InventoryItemRecord, category: ItemSaleCategory, rarity: UInt8?, displayName: String, sellValue: Int)] = []
         for record in targetRecords {
             guard let definition = definitionMap[record.itemId] else { continue }
 
@@ -651,69 +674,61 @@ final class UserDataLoadService: Sendable {
             )
 
             let category = ItemSaleCategory(rawValue: definition.category) ?? .other
-            let data = LightweightItemData(
-                stackKey: record.stackKey,
-                itemId: record.itemId,
-                name: definition.name,
-                quantity: Int(record.quantity),
-                sellValue: sellPrice,
-                category: category,
-                enhancement: enhancement,
-                storage: record.storage,
-                rarity: definition.rarity,
-                fullDisplayName: fullDisplayName,
-                equippedByAvatarId: nil
-            )
-            itemsToUpsert.append(data)
+            recordsToUpsert.append((record, category, definition.rarity, fullDisplayName, sellPrice))
         }
 
         await MainActor.run {
-            for item in itemsToUpsert {
-                upsertItem(item)
+            for entry in recordsToUpsert {
+                upsertRecord(entry.record, category: entry.category, rarity: entry.rarity, displayName: entry.displayName, sellValue: entry.sellValue)
             }
         }
     }
 
-    /// アイテムをキャッシュにupsert
+    /// レコードをキャッシュにupsert
     @MainActor
-    private func upsertItem(_ item: LightweightItemData) {
-        let category = item.category
-        if let existingIndex = categorizedItems[category]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
-            categorizedItems[category]?[existingIndex] = item
+    private func upsertRecord(_ record: InventoryItemRecord, category: ItemSaleCategory, rarity: UInt8?, displayName: String, sellValue: Int) {
+        if let existingIndex = categorizedRecords[category]?.firstIndex(where: { $0.stackKey == record.stackKey }) {
+            categorizedRecords[category]?[existingIndex] = record
         } else {
-            insertItemWithoutVersion(item)
+            insertRecordWithoutVersion(record, category: category, rarity: rarity)
         }
-        let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: item.rarity)
-        if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
-            subcategorizedItems[subcategory]?[subIndex] = item
+        let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: rarity)
+        if let subIndex = subcategorizedRecords[subcategory]?.firstIndex(where: { $0.stackKey == record.stackKey }) {
+            subcategorizedRecords[subcategory]?[subIndex] = record
         } else {
-            var subItems = subcategorizedItems[subcategory] ?? []
-            insertItem(item, into: &subItems)
-            subcategorizedItems[subcategory] = subItems
+            var subRecords = subcategorizedRecords[subcategory] ?? []
+            insertRecord(record, into: &subRecords)
+            subcategorizedRecords[subcategory] = subRecords
         }
-        stackKeyIndex[item.stackKey] = category
+        stackKeyIndex[record.stackKey] = category
+        displayNames[record.stackKey] = displayName
+        sellValues[record.stackKey] = sellValue
+        itemRarities[record.stackKey] = rarity
     }
 
-    /// stackKeyでアイテムを完全削除（バージョン更新なし）
+    /// stackKeyでレコードを完全削除（バージョン更新なし）
     @MainActor
-    private func removeItemWithoutVersion(stackKey: String) {
+    private func removeRecordWithoutVersion(stackKey: String) {
         guard let category = stackKeyIndex.removeValue(forKey: stackKey) else { return }
-        categorizedItems[category]?.removeAll { $0.stackKey == stackKey }
-        for key in subcategorizedItems.keys {
-            subcategorizedItems[key]?.removeAll { $0.stackKey == stackKey }
+        categorizedRecords[category]?.removeAll { $0.stackKey == stackKey }
+        for key in subcategorizedRecords.keys {
+            subcategorizedRecords[key]?.removeAll { $0.stackKey == stackKey }
         }
+        displayNames.removeValue(forKey: stackKey)
+        sellValues.removeValue(forKey: stackKey)
+        itemRarities.removeValue(forKey: stackKey)
     }
 
-    /// カテゴリ別にグループ化されたアイテムを取得
+    /// カテゴリ別にグループ化されたレコードを取得
     @MainActor
-    func getCategorizedItems() -> [ItemSaleCategory: [LightweightItemData]] {
-        categorizedItems
+    func getCategorizedRecords() -> [ItemSaleCategory: [InventoryItemRecord]] {
+        categorizedRecords
     }
 
-    /// サブカテゴリ別にグループ化されたアイテムを取得
+    /// サブカテゴリ別にグループ化されたレコードを取得
     @MainActor
-    func getSubcategorizedItems() -> [ItemDisplaySubcategory: [LightweightItemData]] {
-        subcategorizedItems
+    func getSubcategorizedRecords() -> [ItemDisplaySubcategory: [InventoryItemRecord]] {
+        subcategorizedRecords
     }
 
     /// サブカテゴリのソート済み順序を取得
@@ -722,37 +737,66 @@ final class UserDataLoadService: Sendable {
         orderedSubcategories
     }
 
-    /// 指定カテゴリのアイテムをフラット配列で取得
+    /// 指定カテゴリのレコードをフラット配列で取得
     @MainActor
-    func getItems(categories: Set<ItemSaleCategory>) -> [LightweightItemData] {
+    func getRecords(categories: Set<ItemSaleCategory>) -> [InventoryItemRecord] {
         orderedCategories
             .filter { categories.contains($0) }
-            .flatMap { categorizedItems[$0] ?? [] }
+            .flatMap { categorizedRecords[$0] ?? [] }
     }
 
-    /// 全カテゴリのアイテムをフラット配列で取得
+    /// 全カテゴリのレコードをフラット配列で取得
     @MainActor
-    func getAllItems() -> [LightweightItemData] {
-        orderedCategories.flatMap { categorizedItems[$0] ?? [] }
+    func getAllRecords() -> [InventoryItemRecord] {
+        orderedCategories.flatMap { categorizedRecords[$0] ?? [] }
+    }
+
+    // MARK: - 派生データ取得API
+
+    /// stackKeyから表示名を取得
+    @MainActor
+    func displayName(for stackKey: String) -> String {
+        displayNames[stackKey] ?? ""
+    }
+
+    /// stackKeyから売却価格を取得
+    @MainActor
+    func sellValue(for stackKey: String) -> Int {
+        sellValues[stackKey] ?? 0
+    }
+
+    /// stackKeyからレアリティを取得
+    @MainActor
+    func rarity(for stackKey: String) -> UInt8? {
+        itemRarities[stackKey] ?? nil
+    }
+
+    /// stackKeyからカテゴリを取得
+    @MainActor
+    func category(for stackKey: String) -> ItemSaleCategory? {
+        stackKeyIndex[stackKey]
     }
 
     /// アイテムキャッシュをクリア
     @MainActor
     func clearItemCache() {
-        categorizedItems.removeAll()
+        categorizedRecords.removeAll()
+        subcategorizedRecords.removeAll()
         stackKeyIndex.removeAll()
         orderedCategories.removeAll()
-        subcategorizedItems.removeAll()
         orderedSubcategories.removeAll()
+        displayNames.removeAll()
+        sellValues.removeAll()
+        itemRarities.removeAll()
         isItemsLoaded = false
         itemCacheVersion &+= 1
     }
 
     /// アイテムキャッシュを再読み込み
     @MainActor
-    func reloadItems() async throws {
+    func reloadItems() throws {
         clearItemCache()
-        try await loadItems()
+        try loadItems()
     }
 
     /// キャッシュからアイテムを削除する（完全売却時）
@@ -761,151 +805,146 @@ final class UserDataLoadService: Sendable {
         guard !stackKeys.isEmpty else { return }
         for stackKey in stackKeys {
             guard let category = stackKeyIndex.removeValue(forKey: stackKey) else { continue }
-            categorizedItems[category]?.removeAll { $0.stackKey == stackKey }
+            categorizedRecords[category]?.removeAll { $0.stackKey == stackKey }
+            displayNames.removeValue(forKey: stackKey)
+            sellValues.removeValue(forKey: stackKey)
+            itemRarities.removeValue(forKey: stackKey)
         }
-        for key in subcategorizedItems.keys {
-            subcategorizedItems[key]?.removeAll { stackKeys.contains($0.stackKey) }
+        for key in subcategorizedRecords.keys {
+            subcategorizedRecords[key]?.removeAll { stackKeys.contains($0.stackKey) }
         }
         rebuildOrderedSubcategories()
         itemCacheVersion &+= 1
     }
 
     /// キャッシュ内のアイテム数量を減らす（部分売却時）
+    /// - Note: レコードのquantityは直接変更できないため、キャッシュから削除して再取得が必要
     @MainActor
     @discardableResult
     func decrementQuantity(stackKey: String, by amount: Int) throws -> Int {
         guard let category = stackKeyIndex[stackKey],
-              let index = categorizedItems[category]?.firstIndex(where: { $0.stackKey == stackKey }) else {
+              let index = categorizedRecords[category]?.firstIndex(where: { $0.stackKey == stackKey }) else {
             throw UserDataLoadError.itemNotFoundInCache(stackKey: stackKey)
         }
-        let item = categorizedItems[category]![index]
-        let newQuantity = item.quantity - amount
+        let record = categorizedRecords[category]![index]
+        let newQuantity = Int(record.quantity) - amount
         if newQuantity <= 0 {
-            categorizedItems[category]?.remove(at: index)
+            // 完全削除
+            categorizedRecords[category]?.remove(at: index)
             stackKeyIndex.removeValue(forKey: stackKey)
-            let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-            subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
+            displayNames.removeValue(forKey: stackKey)
+            sellValues.removeValue(forKey: stackKey)
+            let rarity = itemRarities.removeValue(forKey: stackKey) ?? nil
+            let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: rarity)
+            subcategorizedRecords[subcategory]?.removeAll { $0.stackKey == stackKey }
             rebuildOrderedSubcategories()
             itemCacheVersion &+= 1
             return 0
         } else {
-            categorizedItems[category]![index].quantity = newQuantity
-            let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-            if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
-            }
+            // 数量更新（レコードはSwiftDataで管理されるため、ここではキャッシュバージョンのみ更新）
+            // 実際のquantity更新は通知経由で反映される
             itemCacheVersion &+= 1
             return newQuantity
         }
     }
 
-    /// キャッシュにアイテムを追加する（ドロップ時）
+    /// キャッシュ内のアイテム数量を増やす（スタック追加時）
+    /// - Note: 実際のquantity更新は通知経由で反映される
     @MainActor
-    func addItem(_ item: LightweightItemData) {
-        insertItemWithoutVersion(item)
+    func incrementQuantity(stackKey: String, by amount: Int) {
+        // キャッシュバージョンを更新して変更を通知
+        itemCacheVersion &+= 1
+    }
+
+    /// stackKeyからレコードを取得してキャッシュに追加する（装備解除時）
+    @MainActor
+    func addRecordByStackKey(_ stackKey: String) {
+        // 既にキャッシュにある場合は何もしない
+        guard stackKeyIndex[stackKey] == nil else {
+            itemCacheVersion &+= 1
+            return
+        }
+
+        // SwiftDataからレコードを取得
+        let context = contextProvider.makeContext()
+        let descriptor = FetchDescriptor<InventoryItemRecord>()
+        guard let allRecords = try? context.fetch(descriptor),
+              let record = allRecords.first(where: { $0.stackKey == stackKey }) else {
+            return
+        }
+
+        // マスターデータからカテゴリとレアリティを取得
+        guard let definition = masterDataCache.item(record.itemId) else { return }
+        let category = ItemSaleCategory(rawValue: definition.category) ?? .other
+
+        // キャッシュに追加
+        let enhancement = ItemEnhancement(
+            superRareTitleId: record.superRareTitleId,
+            normalTitleId: record.normalTitleId,
+            socketSuperRareTitleId: record.socketSuperRareTitleId,
+            socketNormalTitleId: record.socketNormalTitleId,
+            socketItemId: record.socketItemId
+        )
+
+        let allTitles = masterDataCache.allTitles
+        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
+        let sellPrice = (try? ItemPriceCalculator.sellPrice(
+            baseSellValue: definition.sellValue,
+            normalTitleId: enhancement.normalTitleId,
+            hasSuperRare: enhancement.superRareTitleId != 0,
+            multiplierMap: priceMultiplierMap
+        )) ?? definition.sellValue
+
+        let fullDisplayName = buildFullDisplayName(
+            itemName: definition.name,
+            enhancement: enhancement
+        )
+
+        insertRecordWithoutVersion(record, category: category, rarity: definition.rarity)
+        displayNames[record.stackKey] = fullDisplayName
+        sellValues[record.stackKey] = sellPrice
+        itemRarities[record.stackKey] = definition.rarity
         rebuildOrderedSubcategories()
         itemCacheVersion &+= 1
     }
 
-    /// キャッシュ内のアイテム数量を増やす（スタック追加時）
-    /// - Note: 上限99を超えないように制限
+    /// 2つのレコードのソート順を比較（公開API）
     @MainActor
-    func incrementQuantity(stackKey: String, by amount: Int) {
-        let maxQuantity = 99
-        guard let category = stackKeyIndex[stackKey],
-              let index = categorizedItems[category]?.firstIndex(where: { $0.stackKey == stackKey }) else {
-            return
-        }
-        let item = categorizedItems[category]![index]
-        let newQuantity = min(item.quantity + amount, maxQuantity)
-        categorizedItems[category]![index].quantity = newQuantity
-        let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-        if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
-            subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
-        }
-        itemCacheVersion &+= 1
-    }
-
-    /// キャッシュの並び規則（共通）
-    func isOrderedBefore(_ lhs: LightweightItemData, _ rhs: LightweightItemData) -> Bool {
-        if lhs.itemId != rhs.itemId {
-            return lhs.itemId < rhs.itemId
-        }
-        let lhsHasSuperRare = lhs.enhancement.superRareTitleId > 0
-        let rhsHasSuperRare = rhs.enhancement.superRareTitleId > 0
-        if lhsHasSuperRare != rhsHasSuperRare {
-            return !lhsHasSuperRare
-        }
-        let lhsHasSocket = lhs.enhancement.socketItemId > 0
-        let rhsHasSocket = rhs.enhancement.socketItemId > 0
-        if lhsHasSocket != rhsHasSocket {
-            return !lhsHasSocket
-        }
-        if lhs.enhancement.normalTitleId != rhs.enhancement.normalTitleId {
-            return lhs.enhancement.normalTitleId < rhs.enhancement.normalTitleId
-        }
-        if lhs.enhancement.superRareTitleId != rhs.enhancement.superRareTitleId {
-            return lhs.enhancement.superRareTitleId < rhs.enhancement.superRareTitleId
-        }
-        return lhs.enhancement.socketItemId < rhs.enhancement.socketItemId
+    func isOrderedBefore(_ lhs: InventoryItemRecord, _ rhs: InventoryItemRecord) -> Bool {
+        isRecordOrderedBefore(lhs, rhs)
     }
 
     // MARK: - Item Cache Helpers
 
     @MainActor
-    private func sortCacheItems() {
-        for key in categorizedItems.keys {
-            categorizedItems[key]?.sort { isOrderedBefore($0, $1) }
+    private func sortCacheRecords() {
+        for key in categorizedRecords.keys {
+            categorizedRecords[key]?.sort { isRecordOrderedBefore($0, $1) }
         }
-        for key in subcategorizedItems.keys {
-            subcategorizedItems[key]?.sort { isOrderedBefore($0, $1) }
+        for key in subcategorizedRecords.keys {
+            subcategorizedRecords[key]?.sort { isRecordOrderedBefore($0, $1) }
         }
     }
 
     @MainActor
-    private func insertItemWithoutVersion(_ item: LightweightItemData) {
-        var items = categorizedItems[item.category] ?? []
-        insertItem(item, into: &items)
-        categorizedItems[item.category] = items
-        stackKeyIndex[item.stackKey] = item.category
+    private func insertRecordWithoutVersion(_ record: InventoryItemRecord, category: ItemSaleCategory, rarity: UInt8?) {
+        var records = categorizedRecords[category] ?? []
+        insertRecord(record, into: &records)
+        categorizedRecords[category] = records
+        stackKeyIndex[record.stackKey] = category
 
-        let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-        var subItems = subcategorizedItems[subcategory] ?? []
-        insertItem(item, into: &subItems)
-        subcategorizedItems[subcategory] = subItems
+        let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: rarity)
+        var subRecords = subcategorizedRecords[subcategory] ?? []
+        insertRecord(record, into: &subRecords)
+        subcategorizedRecords[subcategory] = subRecords
     }
 
     @MainActor
-    private func insertItem(_ item: LightweightItemData, into items: inout [LightweightItemData]) {
-        if let index = items.firstIndex(where: { isOrderedBefore(item, $0) }) {
-            items.insert(item, at: index)
+    private func insertRecord(_ record: InventoryItemRecord, into records: inout [InventoryItemRecord]) {
+        if let index = records.firstIndex(where: { isRecordOrderedBefore(record, $0) }) {
+            records.insert(record, at: index)
         } else {
-            items.append(item)
-        }
-    }
-
-    @MainActor
-    @discardableResult
-    private func decrementQuantityWithoutVersion(stackKey: String, by amount: Int) -> Int {
-        guard let category = stackKeyIndex[stackKey],
-              let index = categorizedItems[category]?.firstIndex(where: { $0.stackKey == stackKey }) else {
-            preconditionFailure("キャッシュに存在しないstackKeyの減算: \(stackKey)")
-        }
-        let item = categorizedItems[category]![index]
-        let newQuantity = item.quantity - amount
-        if newQuantity <= 0 {
-            categorizedItems[category]?.remove(at: index)
-            stackKeyIndex.removeValue(forKey: stackKey)
-            let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-            subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
-            return 0
-        } else {
-            categorizedItems[category]![index].quantity = newQuantity
-            let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-            if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
-            }
-            return newQuantity
+            records.append(record)
         }
     }
 
@@ -913,84 +952,93 @@ final class UserDataLoadService: Sendable {
     @MainActor
     func addDroppedItems(
         seeds: [InventoryProgressService.BatchSeed],
-        snapshots: [ItemSnapshot],
+        stackKeys: [String],
         definitions: [UInt16: ItemDefinition]
     ) {
-        guard !snapshots.isEmpty else { return }
+        guard !stackKeys.isEmpty else { return }
 
+        // seedから追加数量を計算
         var seedQuantityByStackKey: [String: Int] = [:]
         for seed in seeds {
             let stackKey = "\(seed.enhancements.superRareTitleId)|\(seed.enhancements.normalTitleId)|\(seed.itemId)|\(seed.enhancements.socketSuperRareTitleId)|\(seed.enhancements.socketNormalTitleId)|\(seed.enhancements.socketItemId)"
             seedQuantityByStackKey[stackKey, default: 0] += seed.quantity
         }
 
+        // SwiftDataからレコードを取得
+        let context = contextProvider.makeContext()
+        let stackKeySet = Set(stackKeys)
+        let descriptor = FetchDescriptor<InventoryItemRecord>()
+        guard let allRecords = try? context.fetch(descriptor) else { return }
+        let records = allRecords.filter { stackKeySet.contains($0.stackKey) }
+
         let allTitles = masterDataCache.allTitles
         let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
 
-        for snapshot in snapshots {
-            if stackKeyIndex[snapshot.stackKey] != nil {
-                // 既存アイテム: 数量を加算
-                guard let addedQuantity = seedQuantityByStackKey[snapshot.stackKey] else {
-                    preconditionFailure("キャッシュ更新時にseedが見つからない: \(snapshot.stackKey)")
-                }
-                incrementQuantity(stackKey: snapshot.stackKey, by: addedQuantity)
+        for record in records {
+            guard let definition = definitions[record.itemId] else { continue }
+
+            if stackKeyIndex[record.stackKey] != nil {
+                // 既存アイテム: 数量を加算（バージョン更新のみ）
+                incrementQuantity(stackKey: record.stackKey, by: 0)
             } else {
                 // 新規アイテム: キャッシュに追加
-                guard let definition = definitions[snapshot.itemId] else { continue }
+                let enhancement = ItemEnhancement(
+                    superRareTitleId: record.superRareTitleId,
+                    normalTitleId: record.normalTitleId,
+                    socketSuperRareTitleId: record.socketSuperRareTitleId,
+                    socketNormalTitleId: record.socketNormalTitleId,
+                    socketItemId: record.socketItemId
+                )
 
                 let sellPrice = (try? ItemPriceCalculator.sellPrice(
                     baseSellValue: definition.sellValue,
-                    normalTitleId: snapshot.enhancements.normalTitleId,
-                    hasSuperRare: snapshot.enhancements.superRareTitleId != 0,
+                    normalTitleId: enhancement.normalTitleId,
+                    hasSuperRare: enhancement.superRareTitleId != 0,
                     multiplierMap: priceMultiplierMap
                 )) ?? definition.sellValue
 
                 let fullDisplayName = buildFullDisplayName(
                     itemName: definition.name,
-                    enhancement: snapshot.enhancements
+                    enhancement: enhancement
                 )
 
-                let data = LightweightItemData(
-                    stackKey: snapshot.stackKey,
-                    itemId: snapshot.itemId,
-                    name: definition.name,
-                    quantity: Int(snapshot.quantity),
-                    sellValue: sellPrice,
-                    category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-                    enhancement: snapshot.enhancements,
-                    storage: snapshot.storage,
-                    rarity: definition.rarity,
-                    fullDisplayName: fullDisplayName,
-                    equippedByAvatarId: nil
-                )
-                addItem(data)
+                let category = ItemSaleCategory(rawValue: definition.category) ?? .other
+                insertRecordWithoutVersion(record, category: category, rarity: definition.rarity)
+                displayNames[record.stackKey] = fullDisplayName
+                sellValues[record.stackKey] = sellPrice
+                itemRarities[record.stackKey] = definition.rarity
             }
         }
+        rebuildOrderedSubcategories()
+        itemCacheVersion &+= 1
     }
 
     // MARK: - Item Cache Private Helpers
 
     @MainActor
     private func rebuildOrderedSubcategories() {
-        orderedCategories = categorizedItems.keys
-            .filter { !(categorizedItems[$0]?.isEmpty ?? true) }
-            .sorted { (categorizedItems[$0]?.first?.itemId ?? .max) < (categorizedItems[$1]?.first?.itemId ?? .max) }
-        orderedSubcategories = subcategorizedItems.keys
-            .filter { !(subcategorizedItems[$0]?.isEmpty ?? true) }
-            .sorted { (subcategorizedItems[$0]?.first?.itemId ?? .max) < (subcategorizedItems[$1]?.first?.itemId ?? .max) }
+        orderedCategories = categorizedRecords.keys
+            .filter { !(categorizedRecords[$0]?.isEmpty ?? true) }
+            .sorted { (categorizedRecords[$0]?.first?.itemId ?? .max) < (categorizedRecords[$1]?.first?.itemId ?? .max) }
+        orderedSubcategories = subcategorizedRecords.keys
+            .filter { !(subcategorizedRecords[$0]?.isEmpty ?? true) }
+            .sorted { (subcategorizedRecords[$0]?.first?.itemId ?? .max) < (subcategorizedRecords[$1]?.first?.itemId ?? .max) }
     }
 
-    // MARK: - Display Helpers (from ItemPreloadService)
+    // MARK: - Display Helpers
 
-    /// スタイル付き表示テキストを生成
-    func makeStyledDisplayText(for item: LightweightItemData, includeSellValue: Bool = true) -> Text {
-        let isSuperRare = item.enhancement.superRareTitleId != 0
-        let content = Text(item.fullDisplayName)
-        let quantitySegment = Text("x\(item.quantity)")
+    /// スタイル付き表示テキストを生成（レコード用）
+    @MainActor
+    func makeStyledDisplayText(for record: InventoryItemRecord, includeSellValue: Bool = true) -> Text {
+        let isSuperRare = record.superRareTitleId != 0
+        let fullName = displayName(for: record.stackKey)
+        let sell = sellValue(for: record.stackKey)
+        let content = Text(fullName)
+        let quantitySegment = Text("x\(record.quantity)")
 
         var display: Text
         if includeSellValue {
-            let priceSegment = Text("\(item.sellValue)GP")
+            let priceSegment = Text("\(sell)GP")
             display = priceSegment + Text("  ") + quantitySegment + Text("  ") + content
         } else {
             display = quantitySegment + Text("  ") + content

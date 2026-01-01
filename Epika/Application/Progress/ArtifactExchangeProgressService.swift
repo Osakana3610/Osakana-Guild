@@ -85,7 +85,7 @@ actor ArtifactExchangeProgressService {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(rule.rewardItemId)])
         }
 
-        let snapshot = try await inventoryService.updateItem(stackKey: givingItemStackKey) { record in
+        let updatedStackKey = try await inventoryService.updateItem(stackKey: givingItemStackKey) { record in
             guard record.storage == .playerItem else {
                 throw ProgressError.invalidInput(description: "提供アイテムは所持品から選択してください")
             }
@@ -98,22 +98,17 @@ actor ArtifactExchangeProgressService {
             record.socketNormalTitleId = 0
         }
 
+        // 更新後はすべてリセットされた状態
         return RuntimeEquipment(
-            id: snapshot.stackKey,
-            itemId: snapshot.itemId,
+            id: updatedStackKey,
+            itemId: rule.rewardItemId,
             masterDataId: String(rewardDefinition.id),
             displayName: rewardDefinition.name,
-            quantity: Int(snapshot.quantity),
+            quantity: 1,
             category: ItemSaleCategory(rawValue: rewardDefinition.category) ?? .other,
             baseValue: rewardDefinition.basePrice,
             sellValue: rewardDefinition.sellValue,
-            enhancement: .init(
-                superRareTitleId: snapshot.enhancements.superRareTitleId,
-                normalTitleId: snapshot.enhancements.normalTitleId,
-                socketSuperRareTitleId: snapshot.enhancements.socketSuperRareTitleId,
-                socketNormalTitleId: snapshot.enhancements.socketNormalTitleId,
-                socketItemId: snapshot.enhancements.socketItemId
-            ),
+            enhancement: ItemEnhancement(),  // すべて0にリセット済み
             rarity: rewardDefinition.rarity,
             statBonuses: rewardDefinition.statBonuses,
             combatBonuses: rewardDefinition.combatBonuses

@@ -22,15 +22,15 @@ import SwiftUI
 struct GemModificationView: View {
     @Environment(AppServices.self) private var appServices
 
-    @State private var gems: [LightweightItemData] = []
-    @State private var allItems: [LightweightItemData] = []
+    @State private var gems: [InventoryItemRecord] = []
+    @State private var allItems: [InventoryItemRecord] = []
     @State private var isLoading = true
     @State private var loadError: String?
-    @State private var selectedGem: LightweightItemData?
-    @State private var socketableItems: [LightweightItemData] = []
+    @State private var selectedGem: InventoryItemRecord?
+    @State private var socketableItems: [InventoryItemRecord] = []
     @State private var isLoadingTargets = false
     @State private var showConfirmation = false
-    @State private var targetItem: LightweightItemData?
+    @State private var targetItem: InventoryItemRecord?
     @State private var isSocketSheetPresented = false
 
     private var gemService: GemModificationProgressService { appServices.gemModification }
@@ -95,7 +95,9 @@ struct GemModificationView: View {
             }
         } message: {
             if let gem = selectedGem, let target = targetItem {
-                Text("\(target.name)に\(gem.name)で宝石改造を施しますか？\n（宝石は消費されます）")
+                let gemName = displayService.displayName(for: gem.stackKey)
+                let targetName = displayService.displayName(for: target.stackKey)
+                Text("\(targetName)に\(gemName)で宝石改造を施しますか？\n（宝石は消費されます）")
             } else {
                 Text("宝石改造を施しますか？")
             }
@@ -128,7 +130,7 @@ struct GemModificationView: View {
                                 await selectGem(gem)
                             }
                         } label: {
-                            GemRow(item: gem, displayService: displayService)
+                            GemRow(record: gem, displayService: displayService)
                         }
                         .tint(.primary)
                     }
@@ -146,16 +148,16 @@ struct GemModificationView: View {
 
         // 起動時に既にロード済み（UserDataLoadService.loadAllで）
         // 全アイテムを保持（selectGemでソケット可能アイテムをフィルタするため）
-        allItems = displayService.getItems(categories: Set(ItemSaleCategory.allCases))
+        allItems = displayService.getRecords(categories: Set(ItemSaleCategory.allCases))
 
         // 宝石カテゴリのみ取得
-        gems = displayService.getItems(categories: [.gem])
+        gems = displayService.getRecords(categories: [.gem])
 
         isLoading = false
     }
 
     @MainActor
-    private func selectGem(_ gem: LightweightItemData) async {
+    private func selectGem(_ gem: InventoryItemRecord) async {
         selectedGem = gem
         isLoadingTargets = true
         socketableItems = []
@@ -163,11 +165,10 @@ struct GemModificationView: View {
 
         do {
             // ソケット可能アイテムのstackKeyを取得
-            let socketableSnapshots = try await gemService.getSocketableItems(for: gem.stackKey)
-            let socketableStackKeys = Set(socketableSnapshots.map { $0.stackKey })
+            let socketableStackKeySet = Set(try await gemService.getSocketableStackKeys(for: gem.stackKey))
 
             // キャッシュからフィルタリング
-            socketableItems = allItems.filter { socketableStackKeys.contains($0.stackKey) }
+            socketableItems = allItems.filter { socketableStackKeySet.contains($0.stackKey) }
         } catch {
             loadError = error.localizedDescription
             selectedGem = nil
@@ -193,12 +194,12 @@ struct GemModificationView: View {
 }
 
 private struct GemRow: View {
-    let item: LightweightItemData
+    let record: InventoryItemRecord
     let displayService: UserDataLoadService
 
     var body: some View {
         HStack {
-            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
+            displayService.makeStyledDisplayText(for: record, includeSellValue: false)
                 .font(.body)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
@@ -216,11 +217,11 @@ private struct GemRow: View {
 
 private struct SocketableItemsSheet: View {
     @Environment(\.dismiss) private var dismiss
-    let gem: LightweightItemData
-    let socketableItems: [LightweightItemData]
+    let gem: InventoryItemRecord
+    let socketableItems: [InventoryItemRecord]
     let isLoading: Bool
     let displayService: UserDataLoadService
-    let onSelect: (LightweightItemData) -> Void
+    let onSelect: (InventoryItemRecord) -> Void
     let onCancel: () -> Void
 
     var body: some View {
@@ -250,12 +251,12 @@ private struct SocketableItemsSheet: View {
                         }
 
                         Section("装着先を選択") {
-                            ForEach(socketableItems, id: \.stackKey) { item in
+                            ForEach(socketableItems, id: \.stackKey) { record in
                                 Button {
-                                    onSelect(item)
+                                    onSelect(record)
                                     dismiss()
                                 } label: {
-                                    SocketableItemRow(item: item, displayService: displayService)
+                                    SocketableItemRow(record: record, displayService: displayService)
                                 }
                                 .tint(.primary)
                             }
@@ -279,12 +280,12 @@ private struct SocketableItemsSheet: View {
 }
 
 private struct SocketableItemRow: View {
-    let item: LightweightItemData
+    let record: InventoryItemRecord
     let displayService: UserDataLoadService
 
     var body: some View {
         HStack {
-            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
+            displayService.makeStyledDisplayText(for: record, includeSellValue: false)
                 .font(.body)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
