@@ -171,9 +171,8 @@ actor InventoryProgressService {
         )
         _ = applyIncrement(to: record, amount: quantity)
         try context.save()
-        let snapshot = makeSnapshot(record)
-        postInventoryChange(upserted: [snapshot])
-        return snapshot
+        postInventoryChange(upserted: [record.stackKey])
+        return makeSnapshot(record)
     }
 
     /// バッチ追加してスナップショットを返す（ドロップ報酬用）
@@ -182,6 +181,7 @@ actor InventoryProgressService {
 
         let context = contextProvider.makeContext()
         let aggregated = aggregate(seeds)
+        var stackKeys: [String] = []
         var snapshots: [ItemSnapshot] = []
 
         for (storage, entries) in aggregated {
@@ -197,12 +197,13 @@ actor InventoryProgressService {
                     context: context
                 )
                 _ = applyIncrement(to: record, amount: entry.totalQuantity)
+                stackKeys.append(record.stackKey)
                 snapshots.append(makeSnapshot(record))
             }
         }
 
         try context.save()
-        postInventoryChange(upserted: snapshots)
+        postInventoryChange(upserted: stackKeys)
         return snapshots
     }
 
@@ -251,7 +252,7 @@ actor InventoryProgressService {
             let localIndex = chunkNumber
             let context = contextProvider.makeContext()
             let aggregated = aggregate(chunk)
-            var chunkSnapshots: [ItemSnapshot] = []
+            var chunkStackKeys: [String] = []
 
             for (storage, entries) in aggregated {
                 try Task.checkCancellation()
@@ -267,14 +268,14 @@ actor InventoryProgressService {
                         context: context
                     )
                     _ = applyIncrement(to: record, amount: entry.totalQuantity)
-                    chunkSnapshots.append(makeSnapshot(record))
+                    chunkStackKeys.append(record.stackKey)
                 }
             }
 #if DEBUG
             print("[Inventory] inserted chunk #\(localIndex) size=\(chunk.count)")
 #endif
             try context.save()
-            postInventoryChange(upserted: chunkSnapshots)
+            postInventoryChange(upserted: chunkStackKeys)
             index = end
         }
     }
@@ -384,9 +385,8 @@ actor InventoryProgressService {
         }
         try mutate(record)
         try context.save()
-        let snapshot = makeSnapshot(record)
-        postInventoryChange(upserted: [snapshot])
-        return snapshot
+        postInventoryChange(upserted: [record.stackKey])
+        return makeSnapshot(record)
     }
 
     func decrementItem(stackKey: String, quantity: Int) async throws {
@@ -425,7 +425,7 @@ actor InventoryProgressService {
         if wasDeleted {
             postInventoryChange(removed: [stackKey])
         } else {
-            postInventoryChange(upserted: [makeSnapshot(record)])
+            postInventoryChange(upserted: [record.stackKey])
         }
     }
 
@@ -502,17 +502,15 @@ actor InventoryProgressService {
         try context.save()
 
         // 通知: 対象は旧stackKeyが削除され、新stackKeyで追加
-        var upsertedSnapshots: [ItemSnapshot] = []
+        var upsertedStackKeys: [String] = [targetRecord.stackKey]
         var removedKeys: [String] = [targetStackKey]
-        let targetSnapshot = makeSnapshot(targetRecord)
-        upsertedSnapshots.append(targetSnapshot)
         // ソースは削除または更新
         if sourceWasDeleted {
             removedKeys.append(sourceStackKey)
         } else {
-            upsertedSnapshots.append(makeSnapshot(sourceRecord))
+            upsertedStackKeys.append(sourceRecord.stackKey)
         }
-        postInventoryChange(upserted: upsertedSnapshots, removed: removedKeys)
+        postInventoryChange(upserted: upsertedStackKeys, removed: removedKeys)
 
         guard let definition = masterDataCache.item(targetRecord.itemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.itemId)])
@@ -612,14 +610,14 @@ actor InventoryProgressService {
         let socketNormalId = gemRecord.normalTitleId
 
         // 通知用の追跡
-        var upsertedSnapshots: [ItemSnapshot] = []
+        var upsertedStackKeys: [String] = []
         var removedKeys: [String] = []
 
         let socketedRecord: InventoryItemRecord
         if targetRecord.quantity > 1 {
             // 数量2以上：1個減らし、新しいソケット付きレコードを作成/追加
             targetRecord.quantity -= 1
-            upsertedSnapshots.append(makeSnapshot(targetRecord))
+            upsertedStackKeys.append(targetRecord.stackKey)
 
             // 既存のソケット付きレコードを検索
             var socketedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
@@ -664,16 +662,15 @@ actor InventoryProgressService {
             removedKeys.append(gemStackKey)
         } else {
             gemRecord.quantity -= 1
-            upsertedSnapshots.append(makeSnapshot(gemRecord))
+            upsertedStackKeys.append(gemRecord.stackKey)
         }
 
-        let socketedSnapshot = makeSnapshot(socketedRecord)
-        upsertedSnapshots.append(socketedSnapshot)
+        upsertedStackKeys.append(socketedRecord.stackKey)
 
         try context.save()
-        postInventoryChange(upserted: upsertedSnapshots, removed: removedKeys)
+        postInventoryChange(upserted: upsertedStackKeys, removed: removedKeys)
 
-        return socketedSnapshot
+        return makeSnapshot(socketedRecord)
     }
 
     // MARK: - Private Helpers
@@ -837,7 +834,7 @@ actor InventoryProgressService {
     // MARK: - Inventory Change Notification
 
     /// インベントリ変更通知を送信
-    private func postInventoryChange(upserted: [ItemSnapshot] = [], removed: [String] = []) {
+    private func postInventoryChange(upserted: [String] = [], removed: [String] = []) {
         guard !upserted.isEmpty || !removed.isEmpty else { return }
         let change = UserDataLoadService.InventoryChange(upserted: upserted, removed: removed)
         Task { @MainActor in
