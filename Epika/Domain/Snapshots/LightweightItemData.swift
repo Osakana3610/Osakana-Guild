@@ -359,37 +359,14 @@ extension LightweightItemData: Identifiable {
 }
 
 extension LightweightItemData: Equatable {
+    /// stackKeyは一意なので、それだけで等価判定（パフォーマンス最適化）
     static func == (lhs: LightweightItemData, rhs: LightweightItemData) -> Bool {
-        lhs.stackKey == rhs.stackKey &&
-        lhs.itemId == rhs.itemId &&
-        lhs.name == rhs.name &&
-        lhs.quantity == rhs.quantity &&
-        lhs.sellValue == rhs.sellValue &&
-        lhs.category == rhs.category &&
-        lhs.enhancement == rhs.enhancement &&
-        lhs.storage == rhs.storage &&
-        lhs.rarity == rhs.rarity &&
-        lhs.normalTitleName == rhs.normalTitleName &&
-        lhs.superRareTitleName == rhs.superRareTitleName &&
-        lhs.gemName == rhs.gemName &&
-        lhs.equippedByAvatarId == rhs.equippedByAvatarId
+        lhs.stackKey == rhs.stackKey
     }
 }
 
 extension LightweightItemData: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(stackKey)
-        hasher.combine(itemId)
-        hasher.combine(name)
-        hasher.combine(quantity)
-        hasher.combine(sellValue)
-        hasher.combine(category)
-        hasher.combine(enhancement)
-        hasher.combine(storage)
-        hasher.combine(rarity)
-        hasher.combine(normalTitleName)
-        hasher.combine(superRareTitleName)
-        hasher.combine(gemName)
-        hasher.combine(equippedByAvatarId)
     }
 }
