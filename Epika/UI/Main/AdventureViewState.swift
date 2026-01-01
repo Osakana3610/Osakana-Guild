@@ -176,12 +176,12 @@ final class AdventureViewState {
                                                                    targetFloor: Int(party.targetFloor))
         let partyId = party.id
         activeExplorationHandles[partyId] = handle
+        // スナップショットをロードしてからイベント処理を開始（1階ログが欠落しないように）
+        await updateExplorationProgress(forPartyId: partyId, using: appServices)
         activeExplorationTasks[partyId] = Task { [weak self, appServices] in
             guard let self else { return }
             await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
         }
-        // 該当パーティの最新2件だけ取得（進行中ログの表示用）
-        await updateExplorationProgress(forPartyId: partyId, using: appServices)
     }
 
     /// 一斉出撃用のパラメータ
@@ -212,7 +212,7 @@ final class AdventureViewState {
         var failures: [String] = []
         var startedPartyIds: [UInt8] = []
 
-        // 各パーティのハンドルとタスクを設定
+        // 各パーティのハンドルを設定
         for param in validParams {
             let partyId = param.party.id
             guard let handle = handles[partyId] else {
@@ -221,16 +221,21 @@ final class AdventureViewState {
             }
 
             activeExplorationHandles[partyId] = handle
+            startedPartyIds.append(partyId)
+        }
+
+        // スナップショットをロードしてからイベント処理を開始（1階ログが欠落しないように）
+        if !startedPartyIds.isEmpty {
+            await loadExplorationProgress(using: appServices)
+        }
+
+        // イベント処理タスクを開始
+        for partyId in startedPartyIds {
+            guard let handle = activeExplorationHandles[partyId] else { continue }
             activeExplorationTasks[partyId] = Task { [weak self, appServices] in
                 guard let self else { return }
                 await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
             }
-            startedPartyIds.append(partyId)
-        }
-
-        // 開始したパーティの進捗を一括更新
-        if !startedPartyIds.isEmpty {
-            await loadExplorationProgress(using: appServices)
         }
 
         return failures
