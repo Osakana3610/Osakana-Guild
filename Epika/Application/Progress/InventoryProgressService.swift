@@ -171,7 +171,9 @@ actor InventoryProgressService {
         )
         _ = applyIncrement(to: record, amount: quantity)
         try context.save()
-        return makeSnapshot(record)
+        let snapshot = makeSnapshot(record)
+        postInventoryChange(upserted: [snapshot])
+        return snapshot
     }
 
     /// バッチ追加してスナップショットを返す（ドロップ報酬用）
@@ -200,6 +202,7 @@ actor InventoryProgressService {
         }
 
         try context.save()
+        postInventoryChange(upserted: snapshots)
         return snapshots
     }
 
@@ -248,6 +251,7 @@ actor InventoryProgressService {
             let localIndex = chunkNumber
             let context = contextProvider.makeContext()
             let aggregated = aggregate(chunk)
+            var chunkSnapshots: [ItemSnapshot] = []
 
             for (storage, entries) in aggregated {
                 try Task.checkCancellation()
@@ -263,12 +267,14 @@ actor InventoryProgressService {
                         context: context
                     )
                     _ = applyIncrement(to: record, amount: entry.totalQuantity)
+                    chunkSnapshots.append(makeSnapshot(record))
                 }
             }
 #if DEBUG
             print("[Inventory] inserted chunk #\(localIndex) size=\(chunk.count)")
 #endif
             try context.save()
+            postInventoryChange(upserted: chunkSnapshots)
             index = end
         }
     }
@@ -378,7 +384,9 @@ actor InventoryProgressService {
         }
         try mutate(record)
         try context.save()
-        return makeSnapshot(record)
+        let snapshot = makeSnapshot(record)
+        postInventoryChange(upserted: [snapshot])
+        return snapshot
     }
 
     func decrementItem(stackKey: String, quantity: Int) async throws {
@@ -409,10 +417,16 @@ actor InventoryProgressService {
             throw ProgressError.invalidInput(description: "アイテム数量が不足しています")
         }
         record.quantity -= UInt16(quantity)
-        if record.quantity <= 0 {
+        let wasDeleted = record.quantity <= 0
+        if wasDeleted {
             context.delete(record)
         }
         try context.save()
+        if wasDeleted {
+            postInventoryChange(removed: [stackKey])
+        } else {
+            postInventoryChange(upserted: [makeSnapshot(record)])
+        }
     }
 
     func inheritItem(targetStackKey: String,
@@ -478,13 +492,27 @@ actor InventoryProgressService {
         targetRecord.socketNormalTitleId = newEnhancement.socketNormalTitleId
         targetRecord.socketItemId = newEnhancement.socketItemId
 
-        if sourceRecord.quantity <= 1 {
+        let sourceWasDeleted = sourceRecord.quantity <= 1
+        if sourceWasDeleted {
             context.delete(sourceRecord)
         } else {
             sourceRecord.quantity -= 1
         }
 
         try context.save()
+
+        // 通知: 対象は旧stackKeyが削除され、新stackKeyで追加
+        var upsertedSnapshots: [ItemSnapshot] = []
+        var removedKeys: [String] = [targetStackKey]
+        let targetSnapshot = makeSnapshot(targetRecord)
+        upsertedSnapshots.append(targetSnapshot)
+        // ソースは削除または更新
+        if sourceWasDeleted {
+            removedKeys.append(sourceStackKey)
+        } else {
+            upsertedSnapshots.append(makeSnapshot(sourceRecord))
+        }
+        postInventoryChange(upserted: upsertedSnapshots, removed: removedKeys)
 
         guard let definition = masterDataCache.item(targetRecord.itemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.itemId)])
@@ -674,5 +702,20 @@ actor InventoryProgressService {
             }
         }
         return DeduplicationResult(recordsByStackKey: map, removedCount: removed)
+    }
+
+    // MARK: - Inventory Change Notification
+
+    /// インベントリ変更通知を送信
+    private func postInventoryChange(upserted: [ItemSnapshot] = [], removed: [String] = []) {
+        guard !upserted.isEmpty || !removed.isEmpty else { return }
+        let change = UserDataLoadService.InventoryChange(upserted: upserted, removed: removed)
+        Task { @MainActor in
+            NotificationCenter.default.post(
+                name: .inventoryDidChange,
+                object: nil,
+                userInfo: ["change": change]
+            )
+        }
     }
 }

@@ -186,4 +186,5 @@ final class AppServices: Sendable {
 extension Notification.Name {
     static let progressUnlocksDidChange = Notification.Name("ProgressUnlocksDidChange")
     static let characterProgressDidChange = Notification.Name("CharacterProgressDidChange")
+    static let inventoryDidChange = Notification.Name("InventoryDidChange")
 }

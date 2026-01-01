@@ -90,6 +90,7 @@ final class UserDataLoadService: Sendable {
         self.partyService = partyService
         self.inventoryService = inventoryService
         self.explorationService = explorationService
+        subscribeInventoryChanges()
     }
 
     /// AppServicesへの参照を設定（探索再開に必要）
@@ -465,6 +466,50 @@ final class UserDataLoadService: Sendable {
         sortCacheItems()
         rebuildOrderedSubcategories()
         itemCacheVersion &+= 1
+    }
+
+    // MARK: - Inventory Change Notification
+
+    /// インベントリ変更通知用の構造体
+    struct InventoryChange: Sendable {
+        let upserted: [ItemSnapshot]    // 追加または更新されたアイテム
+        let removed: [String]           // 完全削除されたstackKey
+    }
+
+    /// インベントリ変更通知を購読開始
+    @MainActor
+    func subscribeInventoryChanges() {
+        Task { @MainActor [weak self] in
+            for await notification in NotificationCenter.default.notifications(named: .inventoryDidChange) {
+                guard let self,
+                      let change = notification.userInfo?["change"] as? InventoryChange else { continue }
+                self.applyInventoryChange(change)
+            }
+        }
+    }
+
+    /// インベントリ変更をキャッシュへ適用
+    @MainActor
+    private func applyInventoryChange(_ change: InventoryChange) {
+        for snapshot in change.upserted {
+            upsertItemWithoutVersion(from: snapshot)
+        }
+        for stackKey in change.removed {
+            removeItemWithoutVersion(stackKey: stackKey)
+        }
+        sortCacheItems()
+        rebuildOrderedSubcategories()
+        itemCacheVersion &+= 1
+    }
+
+    /// stackKeyでアイテムを完全削除（バージョン更新なし）
+    @MainActor
+    private func removeItemWithoutVersion(stackKey: String) {
+        guard let category = stackKeyIndex.removeValue(forKey: stackKey) else { return }
+        categorizedItems[category]?.removeAll { $0.stackKey == stackKey }
+        for key in subcategorizedItems.keys {
+            subcategorizedItems[key]?.removeAll { $0.stackKey == stackKey }
+        }
     }
 
     /// カテゴリ別にグループ化されたアイテムを取得
