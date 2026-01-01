@@ -343,8 +343,10 @@ private struct LazyRuntimeCharacterDetailView: View {
         errorMessage = nil
         defer { isLoading = false }
         do {
-            if let progress = try await characterService.character(withId: characterId) {
-                runtimeCharacter = try await characterService.runtimeCharacter(from: progress)
+            // キャッシュからキャラクターを取得（DB直接アクセスではなく）
+            let characters = try await appServices.userDataLoad.getCharacters()
+            if let character = characters.first(where: { $0.id == characterId }) {
+                runtimeCharacter = character
             } else {
                 throw RuntimeError.missingProgressData(reason: "Character not found")
             }

@@ -140,13 +140,9 @@ struct CharacterJobChangeView: View {
         defer { isLoading = false }
         do {
             exploringCharacterIds = try await appServices.exploration.runningPartyMemberIds()
-            let progresses = try await characterService.allCharacters()
-            var runtime: [RuntimeCharacter] = []
-            for progress in progresses {
-                let character = try await characterService.runtimeCharacter(from: progress)
-                runtime.append(character)
-            }
-            characters = runtime.sorted { $0.id < $1.id }
+            // キャッシュからキャラクターを取得（DB直接アクセスではなく）
+            let cachedCharacters = try await appServices.userDataLoad.getCharacters()
+            characters = cachedCharacters.sorted { $0.id < $1.id }
             jobs = masterData.allJobs.sorted { $0.id < $1.id }
             if selectedCharacterId == nil {
                 selectedCharacterId = eligibleCharacters.first?.id

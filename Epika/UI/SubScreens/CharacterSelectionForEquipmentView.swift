@@ -83,13 +83,8 @@ struct CharacterSelectionForEquipmentView: View {
         loadError = nil
 
         do {
-            let snapshots = try await characterService.allCharacters()
-            var runtimeCharacters: [RuntimeCharacter] = []
-            for snapshot in snapshots {
-                let runtime = try await characterService.runtimeCharacter(from: snapshot)
-                runtimeCharacters.append(runtime)
-            }
-            characters = runtimeCharacters
+            // キャッシュからキャラクターを取得（DB直接アクセスではなく）
+            characters = try await appServices.userDataLoad.getCharacters()
             exploringIds = try await appServices.exploration.runningPartyMemberIds()
         } catch {
             loadError = error.localizedDescription
@@ -637,7 +632,12 @@ struct EquipmentEditorView: View {
                 statChangeService.publish(changes)
             }
 
+            // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
+            displayService.updateCharacter(runtime)
+
             // インベントリキャッシュから装備した分を減らす（1個）
+            // Note: inventoryDidChange通知でキャッシュは自動更新されるが、
+            // 即時反映のためローカルでも減算
             _ = try? displayService.decrementQuantity(stackKey: item.stackKey, by: 1)
             refreshSubcategorizedItems()
         } catch {
@@ -667,7 +667,12 @@ struct EquipmentEditorView: View {
             statChangeService.publish(changes)
         }
 
+        // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
+        displayService.updateCharacter(runtime)
+
         // キャッシュに同じstackKeyがあれば数量を増やす、なければ新規追加
+        // Note: inventoryDidChange通知でキャッシュは自動更新されるが、
+        // 即時反映のためローカルでも更新
         updateCacheForUnequippedItem(item)
     }
 

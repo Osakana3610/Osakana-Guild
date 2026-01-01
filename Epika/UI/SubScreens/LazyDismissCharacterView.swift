@@ -141,13 +141,9 @@ struct LazyDismissCharacterView: View {
         isLoading = true
         showError = false
         do {
-            let progresses = try await characterService.allCharacters()
-            var runtimeCharacters: [RuntimeCharacter] = []
-            for snapshot in progresses {
-                let runtime = try await characterService.runtimeCharacter(from: snapshot)
-                runtimeCharacters.append(runtime)
-            }
-            fullCharacters = runtimeCharacters.sorted { $0.id < $1.id }
+            // キャッシュからキャラクターを取得（DB直接アクセスではなく）
+            let characters = try await appServices.userDataLoad.getCharacters()
+            fullCharacters = characters.sorted { $0.id < $1.id }
             exploringIds = try await appServices.exploration.runningPartyMemberIds()
         } catch {
             errorMessage = error.localizedDescription

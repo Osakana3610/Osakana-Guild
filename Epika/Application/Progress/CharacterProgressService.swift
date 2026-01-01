@@ -184,6 +184,36 @@ actor CharacterProgressService {
         }
     }
 
+    /// インベントリ変更通知を送信（装備のつけ外し時に使用）
+    private func postInventoryChange(upserted: [ItemSnapshot] = [], removed: [String] = []) {
+        guard !upserted.isEmpty || !removed.isEmpty else { return }
+        let change = UserDataLoadService.InventoryChange(upserted: upserted, removed: removed)
+        Task { @MainActor in
+            NotificationCenter.default.post(
+                name: .inventoryDidChange,
+                object: nil,
+                userInfo: ["change": change]
+            )
+        }
+    }
+
+    /// InventoryItemRecordからItemSnapshotを作成
+    private func makeInventorySnapshot(_ record: InventoryItemRecord) -> ItemSnapshot {
+        ItemSnapshot(
+            stackKey: record.stackKey,
+            itemId: record.itemId,
+            quantity: record.quantity,
+            storage: record.storage,
+            enhancements: .init(
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketItemId: record.socketItemId
+            )
+        )
+    }
+
     // MARK: - Read Operations
 
     func allCharacters() throws -> [CharacterSnapshot] {
@@ -805,15 +835,22 @@ actor CharacterProgressService {
         }
 
         // インベントリから減算
+        let stackKey = inventoryRecord.stackKey
         inventoryRecord.quantity -= UInt16(quantity)
-        if inventoryRecord.quantity <= 0 {
+        let wasDeleted = inventoryRecord.quantity <= 0
+        if wasDeleted {
             context.delete(inventoryRecord)
         }
 
         try context.save()
 
-        // 装備変更は呼び出し元が状態を管理するため、通知は送らない
-        // （通知すると全キャラクター再構築が発生しUIをブロックする）
+        // キャッシュ更新のためインベントリ変更通知を送信
+        // （characterProgressDidChange通知は送らない。全キャラクター再構築でUIをブロックするため）
+        if wasDeleted {
+            postInventoryChange(removed: [stackKey])
+        } else {
+            postInventoryChange(upserted: [makeInventorySnapshot(inventoryRecord)])
+        }
 
         // 更新後の装備リストを返す（軽量版）
         return try fetchEquippedItems(characterId: characterId, context: context)
@@ -875,9 +912,11 @@ actor CharacterProgressService {
         })
         inventoryDescriptor.fetchLimit = 1
 
+        var inventoryRecordForNotification: InventoryItemRecord?
         if let existingInventory = try context.fetch(inventoryDescriptor).first {
             // 既存スタックに追加
             existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
+            inventoryRecordForNotification = existingInventory
         } else if let firstEquip = matchingEquipment.first {
             // 新規インベントリレコード作成
             let inventoryRecord = InventoryItemRecord(
@@ -891,6 +930,7 @@ actor CharacterProgressService {
                 storage: storage
             )
             context.insert(inventoryRecord)
+            inventoryRecordForNotification = inventoryRecord
         }
 
         // 装備レコードを削除（quantity個）
@@ -900,8 +940,11 @@ actor CharacterProgressService {
 
         try context.save()
 
-        // 装備変更は呼び出し元が状態を管理するため、通知は送らない
-        // （通知すると全キャラクター再構築が発生しUIをブロックする）
+        // キャッシュ更新のためインベントリ変更通知を送信
+        // （characterProgressDidChange通知は送らない。全キャラクター再構築でUIをブロックするため）
+        if let record = inventoryRecordForNotification {
+            postInventoryChange(upserted: [makeInventorySnapshot(record)])
+        }
 
         // 更新後の装備リストを返す（軽量版）
         return try fetchEquippedItems(characterId: characterId, context: context)
