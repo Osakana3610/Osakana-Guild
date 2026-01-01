@@ -198,7 +198,7 @@ enum RuntimeCharacterFactory {
             level: input.level,
             experience: input.experience,
             currentHP: resolvedCurrentHP,
-            equippedItems: input.equippedItems,
+            equippedItems: sortedEquippedItems(input.equippedItems),
             primaryPersonalityId: input.primaryPersonalityId,
             secondaryPersonalityId: input.secondaryPersonalityId,
             actionRateAttack: input.actionRateAttack,
@@ -364,7 +364,7 @@ enum RuntimeCharacterFactory {
             level: current.level,
             experience: current.experience,
             currentHP: resolvedCurrentHP,
-            equippedItems: newEquippedItems,
+            equippedItems: sortedEquippedItems(newEquippedItems),
             primaryPersonalityId: current.primaryPersonalityId,
             secondaryPersonalityId: current.secondaryPersonalityId,
             actionRateAttack: current.actionRateAttack,
@@ -390,6 +390,40 @@ enum RuntimeCharacterFactory {
     }
 
     // MARK: - Private
+
+    /// 装備アイテムをインベントリと同じソート順で並べ替え
+    private static func sortedEquippedItems(
+        _ items: [CharacterInput.EquippedItem]
+    ) -> [CharacterInput.EquippedItem] {
+        items.sorted { lhs, rhs in
+            // itemId の昇順
+            if lhs.itemId != rhs.itemId {
+                return lhs.itemId < rhs.itemId
+            }
+            // 超レア称号あり → 後
+            let lhsHasSuperRare = lhs.superRareTitleId > 0
+            let rhsHasSuperRare = rhs.superRareTitleId > 0
+            if lhsHasSuperRare != rhsHasSuperRare {
+                return !lhsHasSuperRare
+            }
+            // ソケットあり → 後
+            let lhsHasSocket = lhs.socketItemId > 0
+            let rhsHasSocket = rhs.socketItemId > 0
+            if lhsHasSocket != rhsHasSocket {
+                return !lhsHasSocket
+            }
+            // normalTitleId の昇順
+            if lhs.normalTitleId != rhs.normalTitleId {
+                return lhs.normalTitleId < rhs.normalTitleId
+            }
+            // superRareTitleId の昇順
+            if lhs.superRareTitleId != rhs.superRareTitleId {
+                return lhs.superRareTitleId < rhs.superRareTitleId
+            }
+            // socketItemId の昇順
+            return lhs.socketItemId < rhs.socketItemId
+        }
+    }
 
     private static func assembleLoadout(
         masterData: MasterDataCache,

@@ -166,6 +166,13 @@ struct EquipmentEditorView: View {
         return "\(count)/\(currentCharacter.equipmentCapacity)"
     }
 
+    /// 装備中アイテムをソート順でフラット化（CharacterEquippedItemsSection用）
+    private var sortedEquippedItemsForDisplay: [LightweightItemData] {
+        equippedItemsForDisplay.values
+            .flatMap { $0 }
+            .sorted { displayService.isOrderedBefore($0, $1) }
+    }
+
     private var raceSkillUnlocks: [(level: Int, skill: SkillDefinition)] {
         let masterData = appServices.masterDataCache
         let unlocks = masterData.raceSkillUnlocks[currentCharacter.raceId] ?? []
@@ -243,14 +250,13 @@ struct EquipmentEditorView: View {
 
                     Section("装備中 (\(equippedItemsSummary))") {
                         CharacterEquippedItemsSection(
-                            equippedItems: currentCharacter.equippedItems,
-                            itemDefinitions: itemDefinitions,
+                            equippedItems: sortedEquippedItemsForDisplay,
                             equipmentCapacity: currentCharacter.equipmentCapacity,
                             onUnequip: { item in
-                                try await performUnequip(item)
+                                await performUnequipFromLightweight(item)
                             },
-                            onDetail: { itemId in
-                                selectedItemIdForDetail = itemId
+                            onDetail: { item in
+                                selectedItemForDetail = item
                             }
                         )
                     }
@@ -562,7 +568,6 @@ struct EquipmentEditorView: View {
             let lightweightItem = createLightweightItem(
                 from: equipped,
                 definition: definition,
-                masterData: masterData,
                 avatarId: avatarId
             )
 
@@ -580,16 +585,12 @@ struct EquipmentEditorView: View {
     private func createLightweightItem(
         from equipped: CharacterInput.EquippedItem,
         definition: ItemDefinition,
-        masterData: MasterDataCache,
         avatarId: UInt16
     ) -> LightweightItemData {
-        let normalTitleName = masterData.title(equipped.normalTitleId)?.name
-        let superRareTitleName: String? = equipped.superRareTitleId > 0
-            ? masterData.superRareTitle(equipped.superRareTitleId)?.name
-            : nil
-        let gemName: String? = equipped.socketItemId > 0
-            ? masterData.item(equipped.socketItemId)?.name
-            : nil
+        let fullDisplayName = displayService.fullDisplayName(
+            for: equipped,
+            itemName: definition.name
+        )
 
         return LightweightItemData(
             stackKey: equipped.stackKey + "_equipped",  // インベントリと区別
@@ -607,9 +608,7 @@ struct EquipmentEditorView: View {
             ),
             storage: .playerItem,
             rarity: definition.rarity,
-            normalTitleName: normalTitleName,
-            superRareTitleName: superRareTitleName,
-            gemName: gemName,
+            fullDisplayName: fullDisplayName,
             equippedByAvatarId: avatarId
         )
     }
@@ -728,15 +727,11 @@ struct EquipmentEditorView: View {
         // 存在しない場合は新規追加
         if !exists {
             guard let definition = itemDefinitions[item.itemId] else { return }
-            let masterData = appServices.masterDataCache
 
-            let normalTitleName = masterData.title(item.normalTitleId)?.name
-            let superRareTitleName: String? = item.superRareTitleId > 0
-                ? masterData.superRareTitle(item.superRareTitleId)?.name
-                : nil
-            let gemName: String? = item.socketItemId > 0
-                ? masterData.item(item.socketItemId)?.name
-                : nil
+            let fullDisplayName = displayService.fullDisplayName(
+                for: item,
+                itemName: definition.name
+            )
 
             let lightweightItem = LightweightItemData(
                 stackKey: item.stackKey,
@@ -754,9 +749,7 @@ struct EquipmentEditorView: View {
                 ),
                 storage: .playerItem,
                 rarity: definition.rarity,
-                normalTitleName: normalTitleName,
-                superRareTitleName: superRareTitleName,
-                gemName: gemName,
+                fullDisplayName: fullDisplayName,
                 equippedByAvatarId: nil
             )
             displayService.addItem(lightweightItem)

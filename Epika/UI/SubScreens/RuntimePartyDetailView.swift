@@ -460,16 +460,10 @@ private struct PartyEquipmentListView: View {
     }
 
     private func itemDisplayName(entry: CharacterInput.EquippedItem, itemsById: [UInt16: ItemDefinition]) -> String {
-        let masterData = appServices.masterDataCache
-        var result = ""
-        if entry.superRareTitleId > 0,
-           let superRareTitle = masterData.superRareTitle(entry.superRareTitleId) {
-            result += superRareTitle.name
-        }
-        if let normalTitle = masterData.title(entry.normalTitleId) {
-            result += normalTitle.name
-        }
-        result += itemsById[entry.itemId]?.name ?? "不明なアイテム"
+        var result = appServices.userDataLoad.fullDisplayName(
+            for: entry,
+            itemName: itemsById[entry.itemId]?.name
+        )
         if entry.quantity > 1 {
             result += " x\(entry.quantity)"
         }

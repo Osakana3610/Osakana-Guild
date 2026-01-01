@@ -704,15 +704,11 @@ final class UserDataLoadService: Sendable {
             multiplierMap: Dictionary(uniqueKeysWithValues: masterDataCache.allTitles.map { ($0.id, $0.priceMultiplier) })
         )) ?? Int(definition.sellValue)
 
-        let normalTitleName = snapshot.enhancements.normalTitleId != 0
-            ? masterDataCache.title(snapshot.enhancements.normalTitleId)?.name
-            : nil
-        let superRareTitleName = snapshot.enhancements.superRareTitleId != 0
-            ? masterDataCache.superRareTitle(snapshot.enhancements.superRareTitleId)?.name
-            : nil
-        let gemName = snapshot.enhancements.socketItemId != 0
-            ? masterDataCache.item(snapshot.enhancements.socketItemId)?.name
-            : nil
+        // フルネームを組み立て
+        let fullDisplayName = buildFullDisplayName(
+            itemName: definition.name,
+            enhancement: snapshot.enhancements
+        )
 
         return LightweightItemData(
             stackKey: snapshot.stackKey,
@@ -724,9 +720,7 @@ final class UserDataLoadService: Sendable {
             enhancement: snapshot.enhancements,
             storage: snapshot.storage,
             rarity: definition.rarity,
-            normalTitleName: normalTitleName,
-            superRareTitleName: superRareTitleName,
-            gemName: gemName,
+            fullDisplayName: fullDisplayName,
             equippedByAvatarId: nil
         )
     }
@@ -814,6 +808,11 @@ final class UserDataLoadService: Sendable {
             }
             if snapshot.enhancements.socketItemId != 0 {
                 socketItemIds.insert(snapshot.enhancements.socketItemId)
+                // ソケットの称号IDも収集
+                normalTitleIds.insert(snapshot.enhancements.socketNormalTitleId)
+                if snapshot.enhancements.socketSuperRareTitleId != 0 {
+                    superRareTitleIds.insert(snapshot.enhancements.socketSuperRareTitleId)
+                }
             }
         }
 
@@ -841,6 +840,13 @@ final class UserDataLoadService: Sendable {
                     multiplierMap: priceMultiplierMap
                 )) ?? definition.sellValue
 
+                let fullDisplayName = buildFullDisplayName(
+                    itemName: definition.name,
+                    enhancement: snapshot.enhancements,
+                    titleNames: titleNames,
+                    gemNames: gemNames
+                )
+
                 let data = LightweightItemData(
                     stackKey: snapshot.stackKey,
                     itemId: snapshot.itemId,
@@ -851,13 +857,8 @@ final class UserDataLoadService: Sendable {
                     enhancement: snapshot.enhancements,
                     storage: snapshot.storage,
                     rarity: definition.rarity,
-                    normalTitleName: titleNames.normal[snapshot.enhancements.normalTitleId],
-                    superRareTitleName: snapshot.enhancements.superRareTitleId != 0
-                        ? titleNames.superRare[snapshot.enhancements.superRareTitleId]
-                        : nil,
-                    gemName: snapshot.enhancements.socketItemId != 0
-                        ? gemNames[snapshot.enhancements.socketItemId]
-                        : nil
+                    fullDisplayName: fullDisplayName,
+                    equippedByAvatarId: nil
                 )
                 addItem(data)
             }
@@ -883,11 +884,31 @@ final class UserDataLoadService: Sendable {
         let allTitles = masterDataCache.allTitles
         let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
 
-        var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
+        // 1パス目: 名前解決に必要なIDを収集
         var normalTitleIds: Set<UInt8> = []
         var superRareTitleIds: Set<UInt8> = []
         var socketItemIds: Set<UInt16> = []
 
+        for snapshot in items {
+            normalTitleIds.insert(snapshot.enhancements.normalTitleId)
+            if snapshot.enhancements.superRareTitleId != 0 {
+                superRareTitleIds.insert(snapshot.enhancements.superRareTitleId)
+            }
+            if snapshot.enhancements.socketItemId != 0 {
+                socketItemIds.insert(snapshot.enhancements.socketItemId)
+                // ソケットの称号IDも収集
+                normalTitleIds.insert(snapshot.enhancements.socketNormalTitleId)
+                if snapshot.enhancements.socketSuperRareTitleId != 0 {
+                    superRareTitleIds.insert(snapshot.enhancements.socketSuperRareTitleId)
+                }
+            }
+        }
+
+        let titleNames = resolveTitleNames(normalIds: normalTitleIds, superRareIds: superRareTitleIds)
+        let gemDisplayNames = resolveGemNames(socketItemIds: socketItemIds)
+
+        // 2パス目: フルネーム付きでアイテムを作成
+        var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
         for snapshot in items {
             guard let definition = definitionMap[snapshot.itemId] else { continue }
             let sellPrice = try ItemPriceCalculator.sellPrice(
@@ -896,6 +917,14 @@ final class UserDataLoadService: Sendable {
                 hasSuperRare: snapshot.enhancements.superRareTitleId != 0,
                 multiplierMap: priceMultiplierMap
             )
+
+            let fullDisplayName = buildFullDisplayName(
+                itemName: definition.name,
+                enhancement: snapshot.enhancements,
+                titleNames: titleNames,
+                gemNames: gemDisplayNames
+            )
+
             let data = LightweightItemData(
                 stackKey: snapshot.stackKey,
                 itemId: snapshot.itemId,
@@ -906,38 +935,15 @@ final class UserDataLoadService: Sendable {
                 enhancement: snapshot.enhancements,
                 storage: snapshot.storage,
                 rarity: definition.rarity,
-                normalTitleName: nil,
-                superRareTitleName: nil,
-                gemName: nil
+                fullDisplayName: fullDisplayName,
+                equippedByAvatarId: nil
             )
             grouped[data.category, default: []].append(data)
-
-            normalTitleIds.insert(snapshot.enhancements.normalTitleId)
-            if snapshot.enhancements.superRareTitleId != 0 {
-                superRareTitleIds.insert(snapshot.enhancements.superRareTitleId)
-            }
-            if snapshot.enhancements.socketItemId != 0 {
-                socketItemIds.insert(snapshot.enhancements.socketItemId)
-            }
         }
 
-        let titleNames = resolveTitleNames(normalIds: normalTitleIds, superRareIds: superRareTitleIds)
-        let gemDisplayNames = resolveGemNames(socketItemIds: socketItemIds)
-
+        // ソート
         for key in grouped.keys {
-            grouped[key] = grouped[key]?.map { item in
-                var updated = item
-                updated.normalTitleName = titleNames.normal[item.enhancement.normalTitleId]
-                if item.enhancement.superRareTitleId != 0 {
-                    updated.superRareTitleName = titleNames.superRare[item.enhancement.superRareTitleId]
-                }
-                if item.enhancement.socketItemId != 0 {
-                    updated.gemName = gemDisplayNames[item.enhancement.socketItemId]
-                }
-                return updated
-            }.sorted { lhs, rhs in
-                isOrderedBefore(lhs, rhs)
-            }
+            grouped[key]?.sort { isOrderedBefore($0, $1) }
         }
 
         let sortedCategories = grouped.keys.sorted {
@@ -1023,24 +1029,7 @@ final class UserDataLoadService: Sendable {
     /// スタイル付き表示テキストを生成
     func makeStyledDisplayText(for item: LightweightItemData, includeSellValue: Bool = true) -> Text {
         let isSuperRare = item.enhancement.superRareTitleId != 0
-
-        var segments: [Text] = []
-        if let name = item.superRareTitleName {
-            segments.append(Text(name))
-        }
-        if let name = item.normalTitleName {
-            segments.append(Text(name))
-        }
-        segments.append(Text(item.name))
-        if let gemName = item.gemName {
-            segments.append(Text("[\(gemName)]"))
-        }
-
-        var content = segments.first ?? Text(item.name)
-        for segment in segments.dropFirst() {
-            content = content + segment
-        }
-
+        let content = Text(item.fullDisplayName)
         let quantitySegment = Text("x\(item.quantity)")
 
         var display: Text
@@ -1055,6 +1044,120 @@ final class UserDataLoadService: Sendable {
             display = display.bold()
         }
         return display
+    }
+
+    /// 装備中アイテムのフルネームを生成（超レア称号 + 称号 + アイテム名 + [ソケットフルネーム]）
+    func fullDisplayName(for item: CharacterInput.EquippedItem, itemName: String?) -> String {
+        var result = ""
+
+        // 超レア称号
+        if item.superRareTitleId > 0,
+           let superRareTitle = masterDataCache.superRareTitle(item.superRareTitleId) {
+            result += superRareTitle.name
+        }
+        // 通常称号
+        if let normalTitle = masterDataCache.title(item.normalTitleId) {
+            result += normalTitle.name
+        }
+        result += itemName ?? "不明なアイテム"
+
+        // ソケット（宝石改造）のフルネーム
+        if item.socketItemId > 0 {
+            var socketName = ""
+            if item.socketSuperRareTitleId > 0,
+               let socketSuperRare = masterDataCache.superRareTitle(item.socketSuperRareTitleId) {
+                socketName += socketSuperRare.name
+            }
+            if let socketNormal = masterDataCache.title(item.socketNormalTitleId) {
+                socketName += socketNormal.name
+            }
+            if let socketItem = masterDataCache.item(item.socketItemId) {
+                socketName += socketItem.name
+            }
+            if !socketName.isEmpty {
+                result += "[\(socketName)]"
+            }
+        }
+
+        return result
+    }
+
+    /// フルネームを構築（超レア称号 + 称号 + アイテム名 + [ソケットフルネーム]）
+    /// - マスターデータから個別に名前を解決するバージョン
+    private func buildFullDisplayName(itemName: String, enhancement: ItemSnapshot.Enhancement) -> String {
+        var result = ""
+
+        // 超レア称号
+        if enhancement.superRareTitleId > 0,
+           let superRareTitle = masterDataCache.superRareTitle(enhancement.superRareTitleId) {
+            result += superRareTitle.name
+        }
+        // 通常称号
+        if let normalTitle = masterDataCache.title(enhancement.normalTitleId) {
+            result += normalTitle.name
+        }
+        result += itemName
+
+        // ソケット（宝石改造）のフルネーム
+        if enhancement.socketItemId > 0 {
+            var socketName = ""
+            if enhancement.socketSuperRareTitleId > 0,
+               let socketSuperRare = masterDataCache.superRareTitle(enhancement.socketSuperRareTitleId) {
+                socketName += socketSuperRare.name
+            }
+            if let socketNormalTitle = masterDataCache.title(enhancement.socketNormalTitleId) {
+                socketName += socketNormalTitle.name
+            }
+            if let socketItem = masterDataCache.item(enhancement.socketItemId) {
+                socketName += socketItem.name
+            }
+            if !socketName.isEmpty {
+                result += "[\(socketName)]"
+            }
+        }
+
+        return result
+    }
+
+    /// フルネームを構築（バッチ解決済みの名前辞書を使用）
+    private func buildFullDisplayName(
+        itemName: String,
+        enhancement: ItemSnapshot.Enhancement,
+        titleNames: (normal: [UInt8: String], superRare: [UInt8: String]),
+        gemNames: [UInt16: String]
+    ) -> String {
+        var result = ""
+
+        // 超レア称号
+        if enhancement.superRareTitleId > 0,
+           let superRareName = titleNames.superRare[enhancement.superRareTitleId] {
+            result += superRareName
+        }
+        // 通常称号
+        if let normalName = titleNames.normal[enhancement.normalTitleId] {
+            result += normalName
+        }
+        result += itemName
+
+        // ソケット（宝石改造）のフルネーム
+        if enhancement.socketItemId > 0 {
+            var socketName = ""
+            if enhancement.socketSuperRareTitleId > 0,
+               let socketSuperRare = titleNames.superRare[enhancement.socketSuperRareTitleId] {
+                socketName += socketSuperRare
+            }
+            if let socketNormal = titleNames.normal[enhancement.socketNormalTitleId] {
+                socketName += socketNormal
+            }
+            if let gemName = gemNames[enhancement.socketItemId] {
+                socketName += gemName
+            }
+            if !socketName.isEmpty {
+                result += "[\(socketName)]"
+            }
+        }
+
+        return result
     }
 
     /// 装備のステータス差分表示を取得

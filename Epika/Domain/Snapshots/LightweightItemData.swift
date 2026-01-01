@@ -321,9 +321,8 @@ struct LightweightItemData: Sendable {
     var enhancement: ItemSnapshot.Enhancement
     var storage: ItemStorage
     var rarity: UInt8?
-    var normalTitleName: String?
-    var superRareTitleName: String?
-    var gemName: String?
+    /// フルネーム（超レア称号 + 称号 + アイテム名 + [ソケットフルネーム]）
+    var fullDisplayName: String
     /// 装備中のキャラクターのアバターID（nilならインベントリアイテム）
     var equippedByAvatarId: UInt16?
 
@@ -335,22 +334,6 @@ struct LightweightItemData: Sendable {
     /// 宝石改造が施されているか
     var hasGemModification: Bool {
         enhancement.socketItemId != 0
-    }
-
-    /// 称号を含むフルネーム（自動売却ルール表示用）
-    var fullDisplayName: String {
-        var result = ""
-        if let superRare = superRareTitleName {
-            result += superRare
-        }
-        if let normal = normalTitleName {
-            result += normal
-        }
-        result += name
-        if let gem = gemName {
-            result += "(\(gem))"
-        }
-        return result
     }
 }
 

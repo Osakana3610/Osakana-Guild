@@ -24,26 +24,21 @@ import SwiftUI
 /// CharacterSectionType: equippedItems
 @MainActor
 struct CharacterEquippedItemsSection: View {
-    @Environment(AppServices.self) private var appServices
-
-    let equippedItems: [CharacterInput.EquippedItem]
-    let itemDefinitions: [UInt16: ItemDefinition]
+    let equippedItems: [LightweightItemData]
     let equipmentCapacity: Int
-    let onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)?
-    let onDetail: ((UInt16) -> Void)?
+    let onUnequip: ((LightweightItemData) async throws -> Void)?
+    let onDetail: ((LightweightItemData) -> Void)?
 
     @State private var unequipError: String?
     @State private var isUnequipping = false
 
     init(
-        equippedItems: [CharacterInput.EquippedItem],
-        itemDefinitions: [UInt16: ItemDefinition],
+        equippedItems: [LightweightItemData],
         equipmentCapacity: Int,
-        onUnequip: ((CharacterInput.EquippedItem) async throws -> Void)? = nil,
-        onDetail: ((UInt16) -> Void)? = nil
+        onUnequip: ((LightweightItemData) async throws -> Void)? = nil,
+        onDetail: ((LightweightItemData) -> Void)? = nil
     ) {
         self.equippedItems = equippedItems
-        self.itemDefinitions = itemDefinitions
         self.equipmentCapacity = equipmentCapacity
         self.onUnequip = onUnequip
         self.onDetail = onDetail
@@ -79,18 +74,15 @@ struct CharacterEquippedItemsSection: View {
     }
 
     @ViewBuilder
-    private func equippedItemRow(_ item: CharacterInput.EquippedItem) -> some View {
-        let definition = itemDefinitions[item.itemId]
-        let displayName = buildDisplayName(for: item, baseName: definition?.name)
-
-        let hasSuperRare = item.superRareTitleId > 0
+    private func equippedItemRow(_ item: LightweightItemData) -> some View {
+        let hasSuperRare = item.enhancement.superRareTitleId > 0
 
         HStack {
             Button {
                 unequipItem(item)
             } label: {
                 HStack {
-                    Text("• \(displayName)")
+                    Text("• \(item.fullDisplayName)")
                         .fontWeight(hasSuperRare ? .bold : .regular)
                     if item.quantity > 1 {
                         Text("x\(item.quantity)")
@@ -106,7 +98,7 @@ struct CharacterEquippedItemsSection: View {
 
             if onDetail != nil {
                 Button {
-                    onDetail?(item.itemId)
+                    onDetail?(item)
                 } label: {
                     Image(systemName: "info.circle")
                         .foregroundStyle(.blue)
@@ -116,24 +108,7 @@ struct CharacterEquippedItemsSection: View {
         }
     }
 
-    /// 称号を含めた表示名を生成
-    private func buildDisplayName(for item: CharacterInput.EquippedItem, baseName: String?) -> String {
-        var result = ""
-        let masterData = appServices.masterDataCache
-        // 超レア称号
-        if item.superRareTitleId > 0,
-           let superRareTitle = masterData.superRareTitle(item.superRareTitleId) {
-            result += superRareTitle.name
-        }
-        // 通常称号（無称号=2は空文字列なので影響なし）
-        if let normalTitle = masterData.title(item.normalTitleId) {
-            result += normalTitle.name
-        }
-        result += baseName ?? "不明なアイテム"
-        return result
-    }
-
-    private func unequipItem(_ item: CharacterInput.EquippedItem) {
+    private func unequipItem(_ item: LightweightItemData) {
         guard let onUnequip else { return }
         isUnequipping = true
         unequipError = nil
