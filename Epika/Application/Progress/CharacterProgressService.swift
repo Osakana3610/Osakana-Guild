@@ -762,14 +762,23 @@ actor CharacterProgressService {
 
     // MARK: - Equipment Management
 
+    /// 装備処理の結果
+    struct EquipResult {
+        let equippedItems: [CharacterSnapshot.EquippedItem]
+        let inventoryStackKey: String
+        let wasDeleted: Bool
+        let newQuantity: UInt16
+    }
+
     /// キャラクターにアイテムを装備（軽量版）
     /// - Parameters:
     ///   - characterId: キャラクターID
     ///   - inventoryItemStackKey: 装備するアイテムのstackKey
     ///   - quantity: 装備数量（デフォルト1）
     ///   - equipmentCapacity: 装備上限（呼び出し元が既に持っているRuntimeCharacterから取得）
-    /// - Returns: 更新後の装備リスト
-    func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1, equipmentCapacity: Int) throws -> [CharacterSnapshot.EquippedItem] {
+    ///   - skipNotification: trueの場合、インベントリ変更通知を送信しない（呼び出し元で手動更新する場合）
+    /// - Returns: 装備処理の結果（装備リストとインベントリ変更情報）
+    func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1, equipmentCapacity: Int, skipNotification: Bool = false) throws -> EquipResult {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "装備数量は1以上である必要があります")
         }
@@ -844,21 +853,43 @@ actor CharacterProgressService {
 
         try context.save()
 
-        // キャッシュ更新のためインベントリ変更通知を送信
+        let newQuantity = wasDeleted ? 0 : inventoryRecord.quantity
+
+        // キャッシュ更新のためインベントリ変更通知を送信（スキップオプションがない場合のみ）
         // （characterProgressDidChange通知は送らない。全キャラクター再構築でUIをブロックするため）
-        if wasDeleted {
-            postInventoryChange(removed: [stackKey])
-        } else {
-            postInventoryChange(upserted: [makeInventorySnapshot(inventoryRecord)])
+        if !skipNotification {
+            if wasDeleted {
+                postInventoryChange(removed: [stackKey])
+            } else {
+                postInventoryChange(upserted: [makeInventorySnapshot(inventoryRecord)])
+            }
         }
 
         // 更新後の装備リストを返す（軽量版）
-        return try fetchEquippedItems(characterId: characterId, context: context)
+        let equippedItems = try fetchEquippedItems(characterId: characterId, context: context)
+        return EquipResult(
+            equippedItems: equippedItems,
+            inventoryStackKey: stackKey,
+            wasDeleted: wasDeleted,
+            newQuantity: newQuantity
+        )
+    }
+
+    /// 解除処理の結果
+    struct UnequipResult {
+        let equippedItems: [CharacterSnapshot.EquippedItem]
+        let inventoryStackKey: String
+        let newQuantity: UInt16
     }
 
     /// キャラクターからアイテムを解除（軽量版）
-    /// - Returns: 更新後の装備リスト
-    func unequipItem(characterId: UInt8, equipmentStackKey: String, quantity: Int = 1) throws -> [CharacterSnapshot.EquippedItem] {
+    /// - Parameters:
+    ///   - characterId: キャラクターID
+    ///   - equipmentStackKey: 解除するアイテムのstackKey
+    ///   - quantity: 解除数量（デフォルト1）
+    ///   - skipNotification: trueの場合、インベントリ変更通知を送信しない（呼び出し元で手動更新する場合）
+    /// - Returns: 解除処理の結果（装備リストとインベントリ変更情報）
+    func unequipItem(characterId: UInt8, equipmentStackKey: String, quantity: Int = 1, skipNotification: Bool = false) throws -> UnequipResult {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "解除数量は1以上である必要があります")
         }
@@ -940,14 +971,22 @@ actor CharacterProgressService {
 
         try context.save()
 
-        // キャッシュ更新のためインベントリ変更通知を送信
+        let stackKey = inventoryRecordForNotification?.stackKey ?? equipmentStackKey
+        let newQuantity = inventoryRecordForNotification?.quantity ?? UInt16(quantity)
+
+        // キャッシュ更新のためインベントリ変更通知を送信（スキップオプションがない場合のみ）
         // （characterProgressDidChange通知は送らない。全キャラクター再構築でUIをブロックするため）
-        if let record = inventoryRecordForNotification {
+        if !skipNotification, let record = inventoryRecordForNotification {
             postInventoryChange(upserted: [makeInventorySnapshot(record)])
         }
 
         // 更新後の装備リストを返す（軽量版）
-        return try fetchEquippedItems(characterId: characterId, context: context)
+        let equippedItems = try fetchEquippedItems(characterId: characterId, context: context)
+        return UnequipResult(
+            equippedItems: equippedItems,
+            inventoryStackKey: stackKey,
+            newQuantity: newQuantity
+        )
     }
 
     /// 装備リストを取得（内部ヘルパー、既存contextを使用）
