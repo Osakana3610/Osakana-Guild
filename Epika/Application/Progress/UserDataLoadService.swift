@@ -54,6 +54,7 @@ final class UserDataLoadService: Sendable {
 
     // アイテムキャッシュ（ItemPreloadServiceから移行）
     @MainActor private(set) var categorizedItems: [ItemSaleCategory: [LightweightItemData]] = [:]
+    @MainActor private var stackKeyIndex: [String: ItemSaleCategory] = [:]  // O(1)検索用
     @MainActor private(set) var orderedCategories: [ItemSaleCategory] = []
     @MainActor private(set) var subcategorizedItems: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
     @MainActor private(set) var orderedSubcategories: [ItemDisplaySubcategory] = []
@@ -502,6 +503,7 @@ final class UserDataLoadService: Sendable {
     @MainActor
     func clearItemCache() {
         categorizedItems.removeAll()
+        stackKeyIndex.removeAll()
         orderedCategories.removeAll()
         subcategorizedItems.removeAll()
         orderedSubcategories.removeAll()
@@ -520,8 +522,9 @@ final class UserDataLoadService: Sendable {
     @MainActor
     func removeItems(stackKeys: Set<String>) {
         guard !stackKeys.isEmpty else { return }
-        for key in categorizedItems.keys {
-            categorizedItems[key]?.removeAll { stackKeys.contains($0.stackKey) }
+        for stackKey in stackKeys {
+            guard let category = stackKeyIndex.removeValue(forKey: stackKey) else { continue }
+            categorizedItems[category]?.removeAll { $0.stackKey == stackKey }
         }
         for key in subcategorizedItems.keys {
             subcategorizedItems[key]?.removeAll { stackKeys.contains($0.stackKey) }
@@ -534,29 +537,29 @@ final class UserDataLoadService: Sendable {
     @MainActor
     @discardableResult
     func decrementQuantity(stackKey: String, by amount: Int) throws -> Int {
-        for key in categorizedItems.keys {
-            if let index = categorizedItems[key]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                let item = categorizedItems[key]![index]
-                let newQuantity = item.quantity - amount
-                if newQuantity <= 0 {
-                    categorizedItems[key]?.remove(at: index)
-                    let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-                    subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
-                    rebuildOrderedSubcategories()
-                    itemCacheVersion &+= 1
-                    return 0
-                } else {
-                    categorizedItems[key]![index].quantity = newQuantity
-                    let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-                    if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                        subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
-                    }
-                    itemCacheVersion &+= 1
-                    return newQuantity
-                }
-            }
+        guard let category = stackKeyIndex[stackKey],
+              let index = categorizedItems[category]?.firstIndex(where: { $0.stackKey == stackKey }) else {
+            throw UserDataLoadError.itemNotFoundInCache(stackKey: stackKey)
         }
-        throw UserDataLoadError.itemNotFoundInCache(stackKey: stackKey)
+        let item = categorizedItems[category]![index]
+        let newQuantity = item.quantity - amount
+        if newQuantity <= 0 {
+            categorizedItems[category]?.remove(at: index)
+            stackKeyIndex.removeValue(forKey: stackKey)
+            let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+            subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
+            rebuildOrderedSubcategories()
+            itemCacheVersion &+= 1
+            return 0
+        } else {
+            categorizedItems[category]![index].quantity = newQuantity
+            let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+            if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
+                subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
+            }
+            itemCacheVersion &+= 1
+            return newQuantity
+        }
     }
 
     /// キャッシュにアイテムを追加する（ドロップ時）
@@ -572,19 +575,18 @@ final class UserDataLoadService: Sendable {
     @MainActor
     func incrementQuantity(stackKey: String, by amount: Int) {
         let maxQuantity = 99
-        for key in categorizedItems.keys {
-            if let index = categorizedItems[key]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                let item = categorizedItems[key]![index]
-                let newQuantity = min(item.quantity + amount, maxQuantity)
-                categorizedItems[key]![index].quantity = newQuantity
-                let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-                if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                    subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
-                }
-                itemCacheVersion &+= 1
-                return
-            }
+        guard let category = stackKeyIndex[stackKey],
+              let index = categorizedItems[category]?.firstIndex(where: { $0.stackKey == stackKey }) else {
+            return
         }
+        let item = categorizedItems[category]![index]
+        let newQuantity = min(item.quantity + amount, maxQuantity)
+        categorizedItems[category]![index].quantity = newQuantity
+        let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+        if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
+            subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
+        }
+        itemCacheVersion &+= 1
     }
 
     /// キャッシュの並び規則（共通）
@@ -689,6 +691,7 @@ final class UserDataLoadService: Sendable {
         var items = categorizedItems[item.category] ?? []
         insertItem(item, into: &items)
         categorizedItems[item.category] = items
+        stackKeyIndex[item.stackKey] = item.category
 
         let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
         var subItems = subcategorizedItems[subcategory] ?? []
@@ -708,26 +711,26 @@ final class UserDataLoadService: Sendable {
     @MainActor
     @discardableResult
     private func decrementQuantityWithoutVersion(stackKey: String, by amount: Int) -> Int {
-        for key in categorizedItems.keys {
-            if let index = categorizedItems[key]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                let item = categorizedItems[key]![index]
-                let newQuantity = item.quantity - amount
-                if newQuantity <= 0 {
-                    categorizedItems[key]?.remove(at: index)
-                    let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-                    subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
-                    return 0
-                } else {
-                    categorizedItems[key]![index].quantity = newQuantity
-                    let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
-                    if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                        subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
-                    }
-                    return newQuantity
-                }
-            }
+        guard let category = stackKeyIndex[stackKey],
+              let index = categorizedItems[category]?.firstIndex(where: { $0.stackKey == stackKey }) else {
+            preconditionFailure("キャッシュに存在しないstackKeyの減算: \(stackKey)")
         }
-        preconditionFailure("キャッシュに存在しないstackKeyの減算: \(stackKey)")
+        let item = categorizedItems[category]![index]
+        let newQuantity = item.quantity - amount
+        if newQuantity <= 0 {
+            categorizedItems[category]?.remove(at: index)
+            stackKeyIndex.removeValue(forKey: stackKey)
+            let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+            subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
+            return 0
+        } else {
+            categorizedItems[category]![index].quantity = newQuantity
+            let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+            if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
+                subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
+            }
+            return newQuantity
+        }
     }
 
     /// ドロップアイテムをキャッシュに追加する
@@ -745,17 +748,11 @@ final class UserDataLoadService: Sendable {
             seedQuantityByStackKey[stackKey, default: 0] += seed.quantity
         }
 
-        var existingStackKeys = Set<String>()
-        for items in categorizedItems.values {
-            for item in items {
-                existingStackKeys.insert(item.stackKey)
-            }
-        }
-
+        // 新規アイテムのタイトル・ジェム名解決に必要なIDを収集（インデックスでO(1)判定）
         var normalTitleIds = Set<UInt8>()
         var superRareTitleIds = Set<UInt8>()
         var socketItemIds = Set<UInt16>()
-        for snapshot in snapshots where !existingStackKeys.contains(snapshot.stackKey) {
+        for snapshot in snapshots where stackKeyIndex[snapshot.stackKey] == nil {
             normalTitleIds.insert(snapshot.enhancements.normalTitleId)
             if snapshot.enhancements.superRareTitleId != 0 {
                 superRareTitleIds.insert(snapshot.enhancements.superRareTitleId)
@@ -772,12 +769,14 @@ final class UserDataLoadService: Sendable {
         let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
 
         for snapshot in snapshots {
-            if existingStackKeys.contains(snapshot.stackKey) {
+            if stackKeyIndex[snapshot.stackKey] != nil {
+                // 既存アイテム: 数量を加算
                 guard let addedQuantity = seedQuantityByStackKey[snapshot.stackKey] else {
                     preconditionFailure("キャッシュ更新時にseedが見つからない: \(snapshot.stackKey)")
                 }
                 incrementQuantity(stackKey: snapshot.stackKey, by: addedQuantity)
             } else {
+                // 新規アイテム: キャッシュに追加
                 guard let definition = definitions[snapshot.itemId] else { continue }
 
                 let sellPrice = (try? ItemPriceCalculator.sellPrice(
@@ -806,7 +805,6 @@ final class UserDataLoadService: Sendable {
                         : nil
                 )
                 addItem(data)
-                existingStackKeys.insert(snapshot.stackKey)
             }
         }
     }
@@ -816,7 +814,10 @@ final class UserDataLoadService: Sendable {
     private func buildItemCache(from items: [ItemSnapshot]) async throws {
         let itemIds = Set(items.map { $0.itemId })
         guard !itemIds.isEmpty else {
-            await MainActor.run { categorizedItems.removeAll() }
+            await MainActor.run {
+                categorizedItems.removeAll()
+                stackKeyIndex.removeAll()
+            }
             return
         }
 
@@ -888,9 +889,12 @@ final class UserDataLoadService: Sendable {
             (grouped[$0]?.first?.itemId ?? .max) < (grouped[$1]?.first?.itemId ?? .max)
         }
 
+        // stackKeyインデックスとサブカテゴリを構築
+        var newStackKeyIndex: [String: ItemSaleCategory] = [:]
         var subgrouped: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
-        for (_, items) in grouped {
+        for (category, items) in grouped {
             for item in items {
+                newStackKeyIndex[item.stackKey] = category
                 let subcategory = ItemDisplaySubcategory(
                     mainCategory: item.category,
                     subcategory: item.rarity
@@ -905,6 +909,7 @@ final class UserDataLoadService: Sendable {
         // MainActorでキャッシュに代入
         await MainActor.run {
             self.categorizedItems = grouped
+            self.stackKeyIndex = newStackKeyIndex
             self.orderedCategories = sortedCategories
             self.subcategorizedItems = subgrouped
             self.orderedSubcategories = sortedSubcategories
