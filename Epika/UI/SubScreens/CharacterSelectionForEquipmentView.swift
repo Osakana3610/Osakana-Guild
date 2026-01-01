@@ -471,6 +471,16 @@ struct EquipmentEditorView: View {
         isLoading = true
         loadError = nil
 
+        // 最新のキャラクターデータをキャッシュから取得
+        do {
+            let allCharacters = try await displayService.getCharacters()
+            if let latest = allCharacters.first(where: { $0.id == character.id }) {
+                currentCharacter = latest
+            }
+        } catch {
+            // キャッシュ取得に失敗した場合は元のデータを使用
+        }
+
         // 起動時に既にロード済み（UserDataLoadService.loadAllで）
         // サブカテゴリ別アイテムを取得（合成素材・魔造素材を除く）
         let allSubcategorized = displayService.getSubcategorizedItems()
@@ -641,6 +651,9 @@ struct EquipmentEditorView: View {
             // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
             displayService.updateCharacter(runtime)
 
+            // インベントリアイテムの数量を減らす（装備したので-1）
+            updateInventoryItemQuantity(stackKey: item.stackKey, delta: -1)
+
             // 装備中アイテムの表示を差分更新（全データコピーを避ける）
             updateEquippedItemsDisplay()
         } catch {
@@ -673,6 +686,9 @@ struct EquipmentEditorView: View {
         // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
         displayService.updateCharacter(runtime)
 
+        // インベントリアイテムの数量を増やす（装備解除したので+1）
+        updateInventoryItemQuantity(stackKey: item.stackKey, delta: +1)
+
         // 装備中アイテムの表示を差分更新（全データコピーを避ける）
         updateEquippedItemsDisplay()
     }
@@ -690,6 +706,38 @@ struct EquipmentEditorView: View {
 
         // フィルタ済みセクションを更新
         updateFilteredSections()
+    }
+
+    /// インベントリアイテムの数量を差分更新
+    /// - Parameters:
+    ///   - stackKey: 対象アイテムのstackKey
+    ///   - delta: 数量の変化（装備時: -1、解除時: +1）
+    private func updateInventoryItemQuantity(stackKey: String, delta: Int) {
+        // 全サブカテゴリを走査して該当アイテムを探す
+        for (subcategory, items) in subcategorizedItems {
+            if let index = items.firstIndex(where: { $0.stackKey == stackKey }) {
+                var updatedItems = items
+                var item = updatedItems[index]
+                item.quantity += delta
+
+                if item.quantity <= 0 {
+                    // 数量が0以下になったら削除
+                    updatedItems.remove(at: index)
+                } else {
+                    // 数量を更新
+                    updatedItems[index] = item
+                }
+                subcategorizedItems[subcategory] = updatedItems
+                return
+            }
+        }
+
+        // 解除時にアイテムが見つからない場合（インベントリに存在しなかった場合）
+        // → 新しいアイテムを追加する必要があるが、これは稀なケース
+        // 　 その場合は全体更新にフォールバック
+        if delta > 0 {
+            refreshSubcategorizedItems()
+        }
     }
 
     /// サブカテゴリ表示を全体更新（初回ロード時のみ使用）
