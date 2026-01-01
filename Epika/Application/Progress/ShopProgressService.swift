@@ -342,7 +342,7 @@ actor ShopProgressService {
         try saveIfNeeded(context)
 
         // ショップ購入品は無称号（normalTitleId = 2）
-        let noTitleEnhancement = ItemSnapshot.Enhancement(normalTitleId: 2)
+        let noTitleEnhancement = ItemEnhancement(normalTitleId: 2)
         _ = try await inventoryService.addItem(itemId: target.definition.id,
                                                quantity: quantity,
                                                storage: .playerItem,

@@ -210,7 +210,7 @@ extension AppServices {
         guard quantity > 0 else { return }
 
         // 宝石をインベントリに追加（宝石の称号情報を引き継ぐ）
-        let gemEnhancement = ItemSnapshot.Enhancement(
+        let gemEnhancement = ItemEnhancement(
             superRareTitleId: item.enhancements.socketSuperRareTitleId,
             normalTitleId: item.enhancements.socketNormalTitleId,
             socketSuperRareTitleId: 0,

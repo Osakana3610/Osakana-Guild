@@ -318,7 +318,7 @@ struct LightweightItemData: Sendable {
     var quantity: Int
     var sellValue: Int
     var category: ItemSaleCategory
-    var enhancement: ItemSnapshot.Enhancement
+    var enhancement: ItemEnhancement
     var storage: ItemStorage
     var rarity: UInt8?
     /// フルネーム（超レア称号 + 称号 + アイテム名 + [ソケットフルネーム]）

@@ -209,7 +209,7 @@ final class UserDataLoadService: Sendable {
         for record in records {
             guard let definition = definitionMap[record.itemId] else { continue }
 
-            let enhancement = ItemSnapshot.Enhancement(
+            let enhancement = ItemEnhancement(
                 superRareTitleId: record.superRareTitleId,
                 normalTitleId: record.normalTitleId,
                 socketSuperRareTitleId: record.socketSuperRareTitleId,
@@ -565,33 +565,6 @@ final class UserDataLoadService: Sendable {
         isItemsLoaded = false
     }
 
-    // MARK: - Inventory Diff
-
-    struct InventoryDiff: Sendable {
-        let removedStackKeys: [String]
-        let updatedSnapshots: [ItemSnapshot]
-    }
-
-    /// アイテム差分をキャッシュへ適用
-    @MainActor
-    func applyInventoryDiff(_ diff: InventoryDiff) {
-        if !diff.removedStackKeys.isEmpty {
-            for stackKey in diff.removedStackKeys {
-                _ = decrementQuantityWithoutVersion(stackKey: stackKey, by: 1)
-            }
-        }
-
-        if !diff.updatedSnapshots.isEmpty {
-            for snapshot in diff.updatedSnapshots {
-                upsertItemWithoutVersion(from: snapshot)
-            }
-        }
-
-        sortCacheItems()
-        rebuildOrderedSubcategories()
-        itemCacheVersion &+= 1
-    }
-
     // MARK: - Inventory Change Notification
 
     /// インベントリ変更通知用の構造体
@@ -657,7 +630,7 @@ final class UserDataLoadService: Sendable {
         for record in targetRecords {
             guard let definition = definitionMap[record.itemId] else { continue }
 
-            let enhancement = ItemSnapshot.Enhancement(
+            let enhancement = ItemEnhancement(
                 superRareTitleId: record.superRareTitleId,
                 normalTitleId: record.normalTitleId,
                 socketSuperRareTitleId: record.socketSuperRareTitleId,
@@ -880,61 +853,6 @@ final class UserDataLoadService: Sendable {
     // MARK: - Item Cache Helpers
 
     @MainActor
-    private func upsertItemWithoutVersion(from snapshot: ItemSnapshot) {
-        guard let item = makeDisplayItem(from: snapshot) else { return }
-        if !updateItem(item) {
-            insertItemWithoutVersion(item)
-        }
-    }
-
-    @MainActor
-    private func updateItem(_ item: LightweightItemData) -> Bool {
-        let category = item.category
-        guard let categoryItems = categorizedItems[category],
-              let index = categoryItems.firstIndex(where: { $0.stackKey == item.stackKey }) else {
-            return false
-        }
-        categorizedItems[category]?[index] = item
-        let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: item.rarity)
-        if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
-            subcategorizedItems[subcategory]?[subIndex] = item
-        } else {
-            subcategorizedItems[subcategory, default: []].append(item)
-        }
-        return true
-    }
-
-    private func makeDisplayItem(from snapshot: ItemSnapshot) -> LightweightItemData? {
-        guard let definition = masterDataCache.item(snapshot.itemId) else { return nil }
-        let sellValue = (try? ItemPriceCalculator.sellPrice(
-            baseSellValue: definition.sellValue,
-            normalTitleId: snapshot.enhancements.normalTitleId,
-            hasSuperRare: snapshot.enhancements.superRareTitleId != 0,
-            multiplierMap: Dictionary(uniqueKeysWithValues: masterDataCache.allTitles.map { ($0.id, $0.priceMultiplier) })
-        )) ?? Int(definition.sellValue)
-
-        // フルネームを組み立て
-        let fullDisplayName = buildFullDisplayName(
-            itemName: definition.name,
-            enhancement: snapshot.enhancements
-        )
-
-        return LightweightItemData(
-            stackKey: snapshot.stackKey,
-            itemId: snapshot.itemId,
-            name: definition.name,
-            quantity: Int(snapshot.quantity),
-            sellValue: sellValue,
-            category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-            enhancement: snapshot.enhancements,
-            storage: snapshot.storage,
-            rarity: definition.rarity,
-            fullDisplayName: fullDisplayName,
-            equippedByAvatarId: nil
-        )
-    }
-
-    @MainActor
     private func sortCacheItems() {
         for key in categorizedItems.keys {
             categorizedItems[key]?.sort { isOrderedBefore($0, $1) }
@@ -1122,7 +1040,7 @@ final class UserDataLoadService: Sendable {
 
     /// フルネームを構築（超レア称号 + 称号 + アイテム名 + [ソケットフルネーム]）
     /// - マスターデータから個別に名前を解決するバージョン
-    private func buildFullDisplayName(itemName: String, enhancement: ItemSnapshot.Enhancement) -> String {
+    private func buildFullDisplayName(itemName: String, enhancement: ItemEnhancement) -> String {
         var result = ""
 
         // 超レア称号
