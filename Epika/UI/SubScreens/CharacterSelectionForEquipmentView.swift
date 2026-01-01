@@ -443,9 +443,16 @@ struct EquipmentEditorView: View {
         let titleStyle: Color = isEquipped ? .primary : (validation.canEquip ? .primary : .secondary)
 
         return HStack(spacing: 8) {
-            // 装備中アイテムにはキャラ画像を表示
+            // 装備中アイテムにはキャラ画像を表示（タップで装備解除）
             if let avatarId = item.equippedByAvatarId {
-                CharacterImageView(avatarIndex: avatarId, size: 36)
+                Button {
+                    Task {
+                        await performUnequipFromLightweight(item)
+                    }
+                } label: {
+                    CharacterImageView(avatarIndex: avatarId, size: 36)
+                }
+                .buttonStyle(.plain)
             } else {
                 Color.clear
                     .frame(width: 0)
@@ -479,10 +486,7 @@ struct EquipmentEditorView: View {
             }
             .buttonStyle(.plain)
         }
-        .listRowInsets(isEquipped
-            ? EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
-            : nil
-        )
+        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
     }
 
     /// LightweightItemDataから装備解除を実行
@@ -700,9 +704,14 @@ struct EquipmentEditorView: View {
         // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
         displayService.updateCharacter(runtime)
 
-        // インベントリキャッシュと装備中アイテムを同時に更新（1回の再描画で完了）
-        updateInventoryCacheForUnequip(item: item, newQuantity: Int(result.newQuantity))
-        rebuildEquippedItemsAndRefresh()
+        // 装備中アイテムとインベントリキャッシュを同じトランザクションで更新
+        // （@Stateと@Observableの変更を同時にSwiftUIに認識させる）
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            rebuildEquippedItemsAndRefresh()
+            updateInventoryCacheForUnequip(item: item, newQuantity: Int(result.newQuantity))
+        }
     }
 
     /// 解除時にインベントリキャッシュを更新（存在すれば数量増加、なければ新規追加）
