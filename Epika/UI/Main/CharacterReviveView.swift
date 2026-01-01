@@ -102,15 +102,12 @@ struct CharacterReviveView: View {
         defer { isLoading = false }
         do {
             let exploringIds = try await explorationService.runningPartyMemberIds()
-            let progresses = try await characterService.allCharacters()
-            // 探索中のキャラクターは除外（探索中は蘇生不可）
-            let deceased = progresses.filter { $0.hitPoints.current <= 0 && !exploringIds.contains($0.id) }
-            var runtime: [RuntimeCharacter] = []
-            for progress in deceased {
-                let character = try await characterService.runtimeCharacter(from: progress)
-                runtime.append(character)
-            }
-            deadCharacters = runtime.sorted { $0.id < $1.id }
+            // キャッシュからキャラクターを取得（DB直接アクセスではなく）
+            let allCharacters = try await appServices.userDataLoad.getCharacters()
+            // HP 0 かつ 探索中でないキャラクターをフィルタ
+            deadCharacters = allCharacters
+                .filter { $0.currentHP <= 0 && !exploringIds.contains($0.id) }
+                .sorted { $0.id < $1.id }
         } catch {
             errorMessage = error.localizedDescription
             deadCharacters = []

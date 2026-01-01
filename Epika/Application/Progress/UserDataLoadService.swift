@@ -185,6 +185,16 @@ final class UserDataLoadService: Sendable {
         isCharactersLoaded = false
     }
 
+    /// 特定のキャラクターをキャッシュで差分更新
+    /// - Note: 装備変更時に使用。全キャラクター再構築を避けるため、
+    ///   characterProgressDidChange通知の代わりにこのメソッドを使う
+    @MainActor
+    func updateCharacter(_ character: RuntimeCharacter) {
+        if let index = characters.firstIndex(where: { $0.id == character.id }) {
+            characters[index] = character
+        }
+    }
+
     /// キャラクターを取得（キャッシュ不在時は再ロード）
     func getCharacters() async throws -> [RuntimeCharacter] {
         let needsLoad = await MainActor.run { !isCharactersLoaded }
