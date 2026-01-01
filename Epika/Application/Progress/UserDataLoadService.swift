@@ -39,6 +39,7 @@ import SwiftUI
 final class UserDataLoadService: Sendable {
     // MARK: - Dependencies
 
+    private let contextProvider: SwiftDataContextProvider
     private let masterDataCache: MasterDataCache
     private let characterService: CharacterProgressService
     private let partyService: PartyProgressService
@@ -79,12 +80,14 @@ final class UserDataLoadService: Sendable {
 
     @MainActor
     init(
+        contextProvider: SwiftDataContextProvider,
         masterDataCache: MasterDataCache,
         characterService: CharacterProgressService,
         partyService: PartyProgressService,
         inventoryService: InventoryProgressService,
         explorationService: ExplorationProgressService
     ) {
+        self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
         self.characterService = characterService
         self.partyService = partyService
@@ -164,9 +167,120 @@ final class UserDataLoadService: Sendable {
     }
 
     private func loadItems() async throws {
-        let items = try await inventoryService.allItems(storage: .playerItem)
-        try await buildItemCache(from: items)
+        try await buildItemCacheFromSwiftData(storage: .playerItem)
         await MainActor.run { self.isItemsLoaded = true }
+    }
+
+    /// SwiftDataから直接フェッチしてキャッシュを構築
+    private func buildItemCacheFromSwiftData(storage: ItemStorage) async throws {
+        let context = contextProvider.makeContext()
+        let storageTypeValue = storage.rawValue
+        var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageType == storageTypeValue
+        })
+        descriptor.sortBy = [
+            SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.normalTitleId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.itemId, order: .forward),
+            SortDescriptor(\InventoryItemRecord.socketItemId, order: .forward)
+        ]
+        let records = try context.fetch(descriptor)
+
+        guard !records.isEmpty else {
+            await MainActor.run {
+                categorizedItems.removeAll()
+                stackKeyIndex.removeAll()
+                orderedCategories.removeAll()
+                subcategorizedItems.removeAll()
+                orderedSubcategories.removeAll()
+            }
+            return
+        }
+
+        // レコードからitemIdを収集してマスターデータを取得
+        let itemIds = Set(records.map { $0.itemId })
+        let definitions = masterDataCache.items(Array(itemIds))
+        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+
+        let allTitles = masterDataCache.allTitles
+        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
+
+        var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
+        for record in records {
+            guard let definition = definitionMap[record.itemId] else { continue }
+
+            let enhancement = ItemSnapshot.Enhancement(
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketItemId: record.socketItemId
+            )
+
+            let sellPrice = try ItemPriceCalculator.sellPrice(
+                baseSellValue: definition.sellValue,
+                normalTitleId: record.normalTitleId,
+                hasSuperRare: record.superRareTitleId != 0,
+                multiplierMap: priceMultiplierMap
+            )
+
+            let fullDisplayName = buildFullDisplayName(
+                itemName: definition.name,
+                enhancement: enhancement
+            )
+
+            let category = ItemSaleCategory(rawValue: definition.category) ?? .other
+            let data = LightweightItemData(
+                stackKey: record.stackKey,
+                itemId: record.itemId,
+                name: definition.name,
+                quantity: Int(record.quantity),
+                sellValue: sellPrice,
+                category: category,
+                enhancement: enhancement,
+                storage: record.storage,
+                rarity: definition.rarity,
+                fullDisplayName: fullDisplayName,
+                equippedByAvatarId: nil
+            )
+            grouped[category, default: []].append(data)
+        }
+
+        // ソート
+        for key in grouped.keys {
+            grouped[key]?.sort { isOrderedBefore($0, $1) }
+        }
+
+        let sortedCategories = grouped.keys.sorted {
+            (grouped[$0]?.first?.itemId ?? .max) < (grouped[$1]?.first?.itemId ?? .max)
+        }
+
+        // stackKeyインデックスとサブカテゴリを構築
+        var newStackKeyIndex: [String: ItemSaleCategory] = [:]
+        var subgrouped: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
+        for (category, items) in grouped {
+            for item in items {
+                newStackKeyIndex[item.stackKey] = category
+                let subcategory = ItemDisplaySubcategory(
+                    mainCategory: item.category,
+                    subcategory: item.rarity
+                )
+                subgrouped[subcategory, default: []].append(item)
+            }
+        }
+        let sortedSubcategories = subgrouped.keys.sorted {
+            (subgrouped[$0]?.first?.itemId ?? .max) < (subgrouped[$1]?.first?.itemId ?? .max)
+        }
+
+        // MainActorでキャッシュに代入
+        await MainActor.run {
+            self.categorizedItems = grouped
+            self.stackKeyIndex = newStackKeyIndex
+            self.orderedCategories = sortedCategories
+            self.subcategorizedItems = subgrouped
+            self.orderedSubcategories = sortedSubcategories
+            self.itemCacheVersion &+= 1
+        }
     }
 
     private func loadExplorationSummaries() async throws {
@@ -482,8 +596,8 @@ final class UserDataLoadService: Sendable {
 
     /// インベントリ変更通知用の構造体
     struct InventoryChange: Sendable {
-        let upserted: [ItemSnapshot]    // 追加または更新されたアイテム
-        let removed: [String]           // 完全削除されたstackKey
+        let upserted: [String]    // 追加または更新されたstackKey
+        let removed: [String]     // 完全削除されたstackKey
     }
 
     /// インベントリ変更通知を購読開始
@@ -493,23 +607,118 @@ final class UserDataLoadService: Sendable {
             for await notification in NotificationCenter.default.notifications(named: .inventoryDidChange) {
                 guard let self,
                       let change = notification.userInfo?["change"] as? InventoryChange else { continue }
-                self.applyInventoryChange(change)
+                await self.applyInventoryChange(change)
             }
         }
     }
 
     /// インベントリ変更をキャッシュへ適用
+    private func applyInventoryChange(_ change: InventoryChange) async {
+        // upsertedのstackKeyからレコードを再取得してキャッシュ更新
+        if !change.upserted.isEmpty {
+            await refetchAndUpsertItems(stackKeys: change.upserted)
+        }
+        await MainActor.run {
+            for stackKey in change.removed {
+                removeItemWithoutVersion(stackKey: stackKey)
+            }
+            sortCacheItems()
+            rebuildOrderedSubcategories()
+            itemCacheVersion &+= 1
+        }
+    }
+
+    /// stackKeyでSwiftDataからレコードを再取得してキャッシュに反映
+    private func refetchAndUpsertItems(stackKeys: [String]) async {
+        let context = contextProvider.makeContext()
+        let stackKeySet = Set(stackKeys)
+        let descriptor = FetchDescriptor<InventoryItemRecord>()
+        let allRecords: [InventoryItemRecord]
+        do {
+            allRecords = try context.fetch(descriptor)
+        } catch {
+            #if DEBUG
+            print("[UserDataLoadService] Failed to fetch records for notification: \(error)")
+            #endif
+            return
+        }
+
+        let targetRecords = allRecords.filter { stackKeySet.contains($0.stackKey) }
+        guard !targetRecords.isEmpty else { return }
+
+        let itemIds = Set(targetRecords.map { $0.itemId })
+        let definitions = masterDataCache.items(Array(itemIds))
+        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+
+        let allTitles = masterDataCache.allTitles
+        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
+
+        var itemsToUpsert: [LightweightItemData] = []
+        for record in targetRecords {
+            guard let definition = definitionMap[record.itemId] else { continue }
+
+            let enhancement = ItemSnapshot.Enhancement(
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketItemId: record.socketItemId
+            )
+
+            let sellPrice = (try? ItemPriceCalculator.sellPrice(
+                baseSellValue: definition.sellValue,
+                normalTitleId: record.normalTitleId,
+                hasSuperRare: record.superRareTitleId != 0,
+                multiplierMap: priceMultiplierMap
+            )) ?? definition.sellValue
+
+            let fullDisplayName = buildFullDisplayName(
+                itemName: definition.name,
+                enhancement: enhancement
+            )
+
+            let category = ItemSaleCategory(rawValue: definition.category) ?? .other
+            let data = LightweightItemData(
+                stackKey: record.stackKey,
+                itemId: record.itemId,
+                name: definition.name,
+                quantity: Int(record.quantity),
+                sellValue: sellPrice,
+                category: category,
+                enhancement: enhancement,
+                storage: record.storage,
+                rarity: definition.rarity,
+                fullDisplayName: fullDisplayName,
+                equippedByAvatarId: nil
+            )
+            itemsToUpsert.append(data)
+        }
+
+        await MainActor.run {
+            for item in itemsToUpsert {
+                upsertItem(item)
+            }
+        }
+    }
+
+    /// アイテムをキャッシュにupsert
     @MainActor
-    private func applyInventoryChange(_ change: InventoryChange) {
-        for snapshot in change.upserted {
-            upsertItemWithoutVersion(from: snapshot)
+    private func upsertItem(_ item: LightweightItemData) {
+        let category = item.category
+        if let existingIndex = categorizedItems[category]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
+            categorizedItems[category]?[existingIndex] = item
+        } else {
+            insertItemWithoutVersion(item)
         }
-        for stackKey in change.removed {
-            removeItemWithoutVersion(stackKey: stackKey)
+        let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: item.rarity)
+        if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
+            subcategorizedItems[subcategory]?[subIndex] = item
+        } else {
+            var subItems = subcategorizedItems[subcategory] ?? []
+            insertItem(item, into: &subItems)
+            subcategorizedItems[subcategory] = subItems
         }
-        sortCacheItems()
-        rebuildOrderedSubcategories()
-        itemCacheVersion &+= 1
+        stackKeyIndex[item.stackKey] = category
     }
 
     /// stackKeyでアイテムを完全削除（バージョン更新なし）
@@ -842,91 +1051,6 @@ final class UserDataLoadService: Sendable {
     }
 
     // MARK: - Item Cache Private Helpers
-
-    private func buildItemCache(from items: [ItemSnapshot]) async throws {
-        let itemIds = Set(items.map { $0.itemId })
-        guard !itemIds.isEmpty else {
-            await MainActor.run {
-                categorizedItems.removeAll()
-                stackKeyIndex.removeAll()
-            }
-            return
-        }
-
-        // バックグラウンドで辞書構築
-        let definitions = masterDataCache.items(Array(itemIds))
-        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
-
-        let allTitles = masterDataCache.allTitles
-        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
-
-        var grouped: [ItemSaleCategory: [LightweightItemData]] = [:]
-        for snapshot in items {
-            guard let definition = definitionMap[snapshot.itemId] else { continue }
-            let sellPrice = try ItemPriceCalculator.sellPrice(
-                baseSellValue: definition.sellValue,
-                normalTitleId: snapshot.enhancements.normalTitleId,
-                hasSuperRare: snapshot.enhancements.superRareTitleId != 0,
-                multiplierMap: priceMultiplierMap
-            )
-
-            let fullDisplayName = buildFullDisplayName(
-                itemName: definition.name,
-                enhancement: snapshot.enhancements
-            )
-
-            let data = LightweightItemData(
-                stackKey: snapshot.stackKey,
-                itemId: snapshot.itemId,
-                name: definition.name,
-                quantity: Int(snapshot.quantity),
-                sellValue: sellPrice,
-                category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-                enhancement: snapshot.enhancements,
-                storage: snapshot.storage,
-                rarity: definition.rarity,
-                fullDisplayName: fullDisplayName,
-                equippedByAvatarId: nil
-            )
-            grouped[data.category, default: []].append(data)
-        }
-
-        // ソート
-        for key in grouped.keys {
-            grouped[key]?.sort { isOrderedBefore($0, $1) }
-        }
-
-        let sortedCategories = grouped.keys.sorted {
-            (grouped[$0]?.first?.itemId ?? .max) < (grouped[$1]?.first?.itemId ?? .max)
-        }
-
-        // stackKeyインデックスとサブカテゴリを構築
-        var newStackKeyIndex: [String: ItemSaleCategory] = [:]
-        var subgrouped: [ItemDisplaySubcategory: [LightweightItemData]] = [:]
-        for (category, items) in grouped {
-            for item in items {
-                newStackKeyIndex[item.stackKey] = category
-                let subcategory = ItemDisplaySubcategory(
-                    mainCategory: item.category,
-                    subcategory: item.rarity
-                )
-                subgrouped[subcategory, default: []].append(item)
-            }
-        }
-        let sortedSubcategories = subgrouped.keys.sorted {
-            (subgrouped[$0]?.first?.itemId ?? .max) < (subgrouped[$1]?.first?.itemId ?? .max)
-        }
-
-        // MainActorでキャッシュに代入
-        await MainActor.run {
-            self.categorizedItems = grouped
-            self.stackKeyIndex = newStackKeyIndex
-            self.orderedCategories = sortedCategories
-            self.subcategorizedItems = subgrouped
-            self.orderedSubcategories = sortedSubcategories
-            self.itemCacheVersion &+= 1
-        }
-    }
 
     @MainActor
     private func rebuildOrderedSubcategories() {

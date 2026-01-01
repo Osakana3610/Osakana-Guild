@@ -185,7 +185,7 @@ actor CharacterProgressService {
     }
 
     /// インベントリ変更通知を送信（装備のつけ外し時に使用）
-    private func postInventoryChange(upserted: [ItemSnapshot] = [], removed: [String] = []) {
+    private func postInventoryChange(upserted: [String] = [], removed: [String] = []) {
         guard !upserted.isEmpty || !removed.isEmpty else { return }
         let change = UserDataLoadService.InventoryChange(upserted: upserted, removed: removed)
         Task { @MainActor in
@@ -861,7 +861,7 @@ actor CharacterProgressService {
             if wasDeleted {
                 postInventoryChange(removed: [stackKey])
             } else {
-                postInventoryChange(upserted: [makeInventorySnapshot(inventoryRecord)])
+                postInventoryChange(upserted: [inventoryRecord.stackKey])
             }
         }
 
@@ -977,7 +977,7 @@ actor CharacterProgressService {
         // キャッシュ更新のためインベントリ変更通知を送信（スキップオプションがない場合のみ）
         // （characterProgressDidChange通知は送らない。全キャラクター再構築でUIをブロックするため）
         if !skipNotification, let record = inventoryRecordForNotification {
-            postInventoryChange(upserted: [makeInventorySnapshot(record)])
+            postInventoryChange(upserted: [record.stackKey])
         }
 
         // 更新後の装備リストを返す（軽量版）

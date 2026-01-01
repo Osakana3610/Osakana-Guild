@@ -149,6 +149,7 @@ final class AppServices: Sendable {
                                                           gameStateService: gameStateService,
                                                           masterDataCache: masterDataCache)
         self.userDataLoad = UserDataLoadService(
+            contextProvider: contextProvider,
             masterDataCache: masterDataCache,
             characterService: self.character,
             partyService: self.party,
