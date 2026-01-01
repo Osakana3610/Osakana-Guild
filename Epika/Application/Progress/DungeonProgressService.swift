@@ -104,6 +104,39 @@ actor DungeonProgressService {
         }
         try saveIfNeeded(context)
     }
+
+    /// ダンジョンクリアを記録し、次の難易度を解放してスナップショットを返す（1回のDB操作で完結）
+    /// - Parameters:
+    ///   - dungeonId: ダンジョンID
+    ///   - difficulty: クリアした難易度
+    ///   - totalFloors: 到達フロア数
+    /// - Returns: 更新後のスナップショット
+    func markClearedAndUnlockNext(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws -> DungeonSnapshot {
+        let context = contextProvider.makeContext()
+        let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
+        let now = Date()
+
+        // クリアした難易度を更新
+        if let current = record.highestClearedDifficulty {
+            if difficulty > current {
+                record.highestClearedDifficulty = difficulty
+            }
+        } else {
+            record.highestClearedDifficulty = difficulty
+        }
+        record.furthestClearedFloor = max(record.furthestClearedFloor, totalFloors)
+
+        // 次の難易度を解放（条件を満たす場合）
+        if let nextDifficulty = DungeonDisplayNameFormatter.nextDifficulty(after: difficulty),
+           record.highestUnlockedDifficulty < nextDifficulty {
+            record.highestUnlockedDifficulty = nextDifficulty
+            record.furthestClearedFloor = 0
+        }
+
+        record.updatedAt = now
+        try saveIfNeeded(context)
+        return Self.snapshot(from: record)
+    }
 }
 
 private extension DungeonProgressService {

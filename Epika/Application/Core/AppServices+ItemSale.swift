@@ -93,14 +93,8 @@ extension AppServices {
             aggregated[item.itemId, default: 0] += Int(item.quantity)
         }
 
+        // ゴールド・チケット加算はShopProgressService内で完結
         let sellResult = try await shop.addPlayerSoldItemsBatch(aggregated.map { ($0.key, $0.value) })
-
-        if sellResult.totalGold > 0 {
-            _ = try await gameState.addGold(UInt32(sellResult.totalGold))
-        }
-        if sellResult.totalTickets > 0 {
-            _ = try await gameState.addCatTickets(UInt16(clamping: sellResult.totalTickets))
-        }
 
         for item in targets {
             try await inventory.decrementItem(stackKey: item.stackKey, quantity: Int(item.quantity))
