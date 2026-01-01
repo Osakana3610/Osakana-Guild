@@ -28,7 +28,7 @@ import SwiftData
 actor GemModificationProgressService {
     private let contextProvider: SwiftDataContextProvider
     private let masterDataCache: MasterDataCache
-    private let userDataLoad: UserDataLoadService
+    private let inventoryService: InventoryProgressService
 
     /// ソケット装着不可カテゴリ
     private static let nonSocketableCategories: Set<UInt8> = [
@@ -36,10 +36,12 @@ actor GemModificationProgressService {
         ItemSaleCategory.forSynthesis.rawValue
     ]
 
-    init(contextProvider: SwiftDataContextProvider, masterDataCache: MasterDataCache, userDataLoad: UserDataLoadService) {
+    init(contextProvider: SwiftDataContextProvider,
+         masterDataCache: MasterDataCache,
+         inventoryService: InventoryProgressService) {
         self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
-        self.userDataLoad = userDataLoad
+        self.inventoryService = inventoryService
     }
 
     // MARK: - Public API
@@ -105,61 +107,15 @@ actor GemModificationProgressService {
         guard let targetComponents = StackKeyComponents(stackKey: targetItemStackKey) else {
             throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
         }
-        let context = contextProvider.makeContext()
-
-        // 宝石レコードの取得
-        let gSuperRare = gemComponents.superRareTitleId
-        let gNormal = gemComponents.normalTitleId
-        let gItem = gemComponents.itemId
-        let gSocketSuperRare = gemComponents.socketSuperRareTitleId
-        let gSocketNormal = gemComponents.socketNormalTitleId
-        let gSocketItem = gemComponents.socketItemId
-        var gemDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleId == gSuperRare &&
-            $0.normalTitleId == gNormal &&
-            $0.itemId == gItem &&
-            $0.socketSuperRareTitleId == gSocketSuperRare &&
-            $0.socketNormalTitleId == gSocketNormal &&
-            $0.socketItemId == gSocketItem
-        })
-        gemDescriptor.fetchLimit = 1
-        guard let gemRecord = try context.fetch(gemDescriptor).first else {
-            throw ProgressError.invalidInput(description: "宝石が見つかりません")
-        }
-
-        // 対象アイテムレコードの取得
-        let tSuperRare = targetComponents.superRareTitleId
-        let tNormal = targetComponents.normalTitleId
-        let tItem = targetComponents.itemId
-        let tSocketSuperRare = targetComponents.socketSuperRareTitleId
-        let tSocketNormal = targetComponents.socketNormalTitleId
-        let tSocketItem = targetComponents.socketItemId
-        var targetDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleId == tSuperRare &&
-            $0.normalTitleId == tNormal &&
-            $0.itemId == tItem &&
-            $0.socketSuperRareTitleId == tSocketSuperRare &&
-            $0.socketNormalTitleId == tSocketNormal &&
-            $0.socketItemId == tSocketItem
-        })
-        targetDescriptor.fetchLimit = 1
-        guard let targetRecord = try context.fetch(targetDescriptor).first else {
-            throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
-        }
-
-        // 対象アイテムに既に宝石改造が施されていないか確認
-        guard targetRecord.socketItemId == 0 else {
-            throw ProgressError.invalidInput(description: "このアイテムには既に宝石改造が施されています")
-        }
 
         // 宝石のカテゴリ確認
-        guard let gemDefinition = masterDataCache.item(gemRecord.itemId),
+        guard let gemDefinition = masterDataCache.item(gemComponents.itemId),
               gemDefinition.category == ItemSaleCategory.gem.rawValue else {
             throw ProgressError.invalidInput(description: "選択したアイテムは宝石ではありません")
         }
 
         // 対象アイテムがソケット装着可能か確認
-        guard let targetDefinition = masterDataCache.item(targetRecord.itemId) else {
+        guard let targetDefinition = masterDataCache.item(targetComponents.itemId) else {
             throw ProgressError.invalidInput(description: "対象アイテムの定義が見つかりません")
         }
         if targetDefinition.category == ItemSaleCategory.gem.rawValue {
@@ -169,67 +125,11 @@ actor GemModificationProgressService {
             throw ProgressError.invalidInput(description: "このカテゴリのアイテムには宝石改造を施すことができません")
         }
 
-        let socketItemId = gemRecord.itemId
-        let socketSuperRareId = gemRecord.superRareTitleId
-        let socketNormalId = gemRecord.normalTitleId
-        let gemStackKey = gemRecord.stackKey
-        let targetStackKey = targetRecord.stackKey
-
-        let socketedRecord: InventoryItemRecord
-        if targetRecord.quantity > 1 {
-            targetRecord.quantity -= 1
-            var socketedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-                $0.superRareTitleId == tSuperRare &&
-                $0.normalTitleId == tNormal &&
-                $0.itemId == tItem &&
-                $0.socketSuperRareTitleId == socketSuperRareId &&
-                $0.socketNormalTitleId == socketNormalId &&
-                $0.socketItemId == socketItemId
-            })
-            socketedDescriptor.fetchLimit = 1
-            if let existingSocketed = try context.fetch(socketedDescriptor).first {
-                existingSocketed.quantity += 1
-                socketedRecord = existingSocketed
-            } else {
-                let newRecord = InventoryItemRecord(
-                    superRareTitleId: tSuperRare,
-                    normalTitleId: tNormal,
-                    itemId: tItem,
-                    socketSuperRareTitleId: socketSuperRareId,
-                    socketNormalTitleId: socketNormalId,
-                    socketItemId: socketItemId,
-                    quantity: 1,
-                    storage: targetRecord.storage
-                )
-                context.insert(newRecord)
-                socketedRecord = newRecord
-            }
-        } else {
-            targetRecord.socketItemId = socketItemId
-            targetRecord.socketSuperRareTitleId = socketSuperRareId
-            targetRecord.socketNormalTitleId = socketNormalId
-            socketedRecord = targetRecord
-        }
-
-        // 宝石をインベントリから削除（1個減算）
-        if gemRecord.quantity <= 1 {
-            context.delete(gemRecord)
-        } else {
-            gemRecord.quantity -= 1
-        }
-
-        let socketedSnapshot = makeSnapshot(socketedRecord)
-
-        // アトミックに保存
-        try context.save()
-
-        let diff = UserDataLoadService.InventoryDiff(
-            removedStackKeys: [gemStackKey, targetStackKey],
-            updatedSnapshots: [socketedSnapshot]
+        // InventoryProgressServiceに委譲（通知も自動で送信される）
+        _ = try await inventoryService.attachSocket(
+            gemStackKey: gemItemStackKey,
+            targetStackKey: targetItemStackKey
         )
-        await MainActor.run {
-            userDataLoad.applyInventoryDiff(diff)
-        }
     }
 
     // MARK: - Private Helpers

@@ -157,7 +157,7 @@ final class AppServices: Sendable {
         )
         self.gemModification = GemModificationProgressService(contextProvider: contextProvider,
                                                                masterDataCache: masterDataCache,
-                                                               userDataLoad: self.userDataLoad)
+                                                               inventoryService: self.inventory)
         // 全プロパティ初期化後にAppServicesを設定
         self.userDataLoad.setAppServices(self)
     }
