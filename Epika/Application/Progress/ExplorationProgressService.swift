@@ -115,7 +115,13 @@ actor ExplorationSnapshotQueryActor {
         var snapshots: [ExplorationSnapshot] = []
         snapshots.reserveCapacity(runs.count)
         for run in runs {
-            let snapshot = try await makeSnapshotSummary(for: run, context: context)
+            // 探索中の場合はログを含めてロード（再開時に既存ログが表示されるように）
+            let snapshot: ExplorationSnapshot
+            if run.result == ExplorationResult.running.rawValue {
+                snapshot = try await makeSnapshot(for: run, context: context)
+            } else {
+                snapshot = try await makeSnapshotSummary(for: run, context: context)
+            }
             snapshots.append(snapshot)
         }
         return snapshots
