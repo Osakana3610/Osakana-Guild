@@ -177,6 +177,7 @@ extension AppServices {
 
             var autoSellGold = 0
             var autoSoldItems: [ExplorationSnapshot.Rewards.AutoSellEntry] = []
+            var calculatedDropRewards: CalculatedDropRewards?
             switch artifact.endState {
             case .completed:
                 let dungeonFloorCount = max(1, artifact.dungeon.floorCount)
@@ -193,25 +194,18 @@ extension AppServices {
                                                             difficulty: UInt8(runDifficulty),
                                                             furthestFloor: UInt8(artifact.floorCount))
                 }
-                // 帰還時にドロップ報酬を適用
+                // 帰還時にドロップ報酬を計算（DB書き込みなし、並列実行可能）
                 let drops = makeItemDropResults(from: artifact.totalDrops)
-                let dropResult = try await applyDropRewards(drops)
-                autoSellGold = dropResult.autoSellGold
-                autoSoldItems = dropResult.autoSoldItems
-                // キャッシュを更新（プレイヤー状態は探索結果画面表示時にリロード）
-                let userDataLoadService = userDataLoad
-                await MainActor.run {
-                    userDataLoadService.addDroppedItems(
-                        seeds: dropResult.addedSeeds,
-                        snapshots: dropResult.addedSnapshots,
-                        definitions: dropResult.definitions
-                    )
-                }
+                let calculated = try await calculateDropRewards(drops)
+                calculatedDropRewards = calculated
+                autoSellGold = calculated.autoSellGold
+                autoSoldItems = calculated.autoSellEntries
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                         difficulty: UInt8(runDifficulty),
                                                         furthestFloor: UInt8(max(0, floorNumber)))
             }
+            // 探索記録を保存して帰還通知を発火
             persistenceSession.finalizeRun(endState: artifact.endState,
                                            endedAt: artifact.endedAt,
                                            totalExperience: artifact.totalExperience,
@@ -223,6 +217,27 @@ extension AppServices {
                                                    stage: .completed(artifact))
             continuation.yield(finalUpdate)
             continuation.finish()
+
+            // バックグラウンドでDB書き込みとキャッシュ更新を実行
+            if let calculated = calculatedDropRewards {
+                let userDataLoadService = userDataLoad
+                let appServices = self
+                Task {
+                    do {
+                        let addedSnapshots = try await appServices.persistCalculatedDropRewards(calculated)
+                        await MainActor.run {
+                            userDataLoadService.addDroppedItems(
+                                seeds: calculated.inventorySeeds,
+                                snapshots: addedSnapshots,
+                                definitions: calculated.definitions
+                            )
+                        }
+                    } catch {
+                        // バックグラウンド永続化エラーはログのみ（帰還通知は既に完了）
+                        print("[ExplorationRuntime] Background persist error: \(error)")
+                    }
+                }
+            }
             await cleanupSessions()
         } catch {
             let originalError = error
@@ -328,22 +343,35 @@ extension AppServices {
         let autoSellGold: Int
     }
 
-    func applyDropRewards(_ drops: [ItemDropResult]) async throws -> DropRewardsResult {
+    /// ドロップ報酬計算結果（DB書き込み前の確定データ）
+    struct CalculatedDropRewards: Sendable {
+        let autoSellItems: [(itemId: UInt16, quantity: Int)]
+        let autoSellEntries: [ExplorationSnapshot.Rewards.AutoSellEntry]
+        let autoSellGold: Int
+        let inventorySeeds: [InventoryProgressService.BatchSeed]
+        let definitions: [UInt16: ItemDefinition]
+    }
+
+    /// ドロップ報酬を計算する（DB書き込みなし、並列実行可能）
+    func calculateDropRewards(_ drops: [ItemDropResult]) async throws -> CalculatedDropRewards {
         guard !drops.isEmpty else {
-            return DropRewardsResult(addedSnapshots: [],
-                                     addedSeeds: [],
-                                     definitions: [:],
-                                     autoSoldItems: [],
-                                     autoSellGold: 0)
+            return CalculatedDropRewards(
+                autoSellItems: [],
+                autoSellEntries: [],
+                autoSellGold: 0,
+                inventorySeeds: [],
+                definitions: [:]
+            )
         }
 
         let autoTradeKeys = try await autoTrade.registeredStackKeys()
 
         // ドロップを自動売却対象とインベントリ対象に分類
         var autoSellItems: [(itemId: UInt16, quantity: Int)] = []
-        var autoSellSummaries: [String: ExplorationSnapshot.Rewards.AutoSellEntry] = [:]
+        var autoSellEntries: [ExplorationSnapshot.Rewards.AutoSellEntry] = []
         var inventorySeeds: [InventoryProgressService.BatchSeed] = []
         var itemIds = Set<UInt16>()
+        var autoSellGold = 0
 
         for drop in drops where drop.quantity > 0 {
             let superRareTitleId: UInt8 = drop.superRareTitleId ?? 0
@@ -356,19 +384,18 @@ extension AppServices {
                 socketNormalTitleId: 0,
                 socketItemId: 0
             )
-            // 6要素キー（ソケットなし）で自動売却登録と照合
             let autoTradeKey = drop.autoTradeStackKey
 
             if autoTradeKeys.contains(autoTradeKey) {
                 autoSellItems.append((itemId: drop.item.id, quantity: drop.quantity))
-                var entry = autoSellSummaries[autoTradeKey] ?? ExplorationSnapshot.Rewards.AutoSellEntry(
+                autoSellEntries.append(ExplorationSnapshot.Rewards.AutoSellEntry(
                     itemId: drop.item.id,
                     superRareTitleId: superRareTitleId,
                     normalTitleId: normalTitleId,
-                    quantity: 0
-                )
-                entry.quantity += drop.quantity
-                autoSellSummaries[autoTradeKey] = entry
+                    quantity: drop.quantity
+                ))
+                // 売却金額を計算（definition.sellValue * quantity）
+                autoSellGold += Int(drop.item.sellValue) * drop.quantity
             } else {
                 inventorySeeds.append(.init(itemId: drop.item.id,
                                             quantity: drop.quantity,
@@ -376,28 +403,6 @@ extension AppServices {
                                             enhancements: enhancement))
                 itemIds.insert(drop.item.id)
             }
-        }
-
-        // 自動売却をバッチ処理
-        var autoSellGold = 0
-        var finalizedAutoSellEntries: [ExplorationSnapshot.Rewards.AutoSellEntry] = []
-        if !autoSellItems.isEmpty {
-            let sellResult = try await shop.addPlayerSoldItemsBatch(autoSellItems)
-            if sellResult.totalGold > 0 {
-                _ = try await gameState.addGold(UInt32(sellResult.totalGold))
-            }
-            autoSellGold = sellResult.totalGold
-            if sellResult.totalTickets > 0 {
-                _ = try await gameState.addCatTickets(UInt16(clamping: sellResult.totalTickets))
-            }
-            finalizedAutoSellEntries = adjustAutoSellEntries(autoSellSummaries,
-                                                             soldItems: sellResult.soldItems)
-        }
-
-        // インベントリ追加をバッチ処理
-        var addedSnapshots: [ItemSnapshot] = []
-        if !inventorySeeds.isEmpty {
-            addedSnapshots = try await inventory.addItemsBatchReturningSnapshots(inventorySeeds)
         }
 
         // 定義を収集（キャッシュ更新用）
@@ -408,11 +413,49 @@ extension AppServices {
             }
         }
 
-        return DropRewardsResult(addedSnapshots: addedSnapshots,
-                                 addedSeeds: inventorySeeds,
-                                 definitions: definitions,
-                                 autoSoldItems: finalizedAutoSellEntries,
-                                 autoSellGold: autoSellGold)
+        return CalculatedDropRewards(
+            autoSellItems: autoSellItems,
+            autoSellEntries: autoSellEntries,
+            autoSellGold: autoSellGold,
+            inventorySeeds: inventorySeeds,
+            definitions: definitions
+        )
+    }
+
+    /// 計算済み報酬をDBに永続化する（バックグラウンド実行用）
+    func persistCalculatedDropRewards(_ calculated: CalculatedDropRewards) async throws -> [ItemSnapshot] {
+        // 自動売却をバッチ処理
+        if !calculated.autoSellItems.isEmpty {
+            let sellResult = try await shop.addPlayerSoldItemsBatch(calculated.autoSellItems)
+            if sellResult.totalGold > 0 {
+                _ = try await gameState.addGold(UInt32(sellResult.totalGold))
+            }
+            if sellResult.totalTickets > 0 {
+                _ = try await gameState.addCatTickets(UInt16(clamping: sellResult.totalTickets))
+            }
+        }
+
+        // インベントリ追加をバッチ処理
+        var addedSnapshots: [ItemSnapshot] = []
+        if !calculated.inventorySeeds.isEmpty {
+            addedSnapshots = try await inventory.addItemsBatchReturningSnapshots(calculated.inventorySeeds)
+        }
+
+        return addedSnapshots
+    }
+
+    /// ドロップ報酬を適用する（既存互換用、計算と永続化を一括実行）
+    func applyDropRewards(_ drops: [ItemDropResult]) async throws -> DropRewardsResult {
+        let calculated = try await calculateDropRewards(drops)
+        let addedSnapshots = try await persistCalculatedDropRewards(calculated)
+
+        return DropRewardsResult(
+            addedSnapshots: addedSnapshots,
+            addedSeeds: calculated.inventorySeeds,
+            definitions: calculated.definitions,
+            autoSoldItems: calculated.autoSellEntries,
+            autoSellGold: calculated.autoSellGold
+        )
     }
 
     private func adjustAutoSellEntries(_ summaries: [String: ExplorationSnapshot.Rewards.AutoSellEntry],
