@@ -159,6 +159,7 @@ actor ShopProgressService {
     /// プレイヤーが複数アイテムを一括売却した際にショップ在庫に追加する（バッチ処理）
     /// - Parameter items: アイテムIDと数量のペア配列
     /// - Returns: バッチ売却結果（合計ゴールド、獲得キャット・チケット、消失アイテム）
+    /// - Note: ゴールド・チケットは内部で加算済み。呼び出し側での追加処理は不要
     func addPlayerSoldItemsBatch(_ items: [(itemId: UInt16, quantity: Int)]) async throws -> BatchSoldResult {
         guard !items.isEmpty else {
             return BatchSoldResult(totalGold: 0, totalTickets: 0, destroyed: [], soldItems: [])
@@ -251,6 +252,15 @@ actor ShopProgressService {
         }
 
         try saveIfNeeded(context)
+
+        // ゴールド・チケットを加算（責務をShopProgressServiceで完結）
+        if totalGold > 0 {
+            _ = try await gameStateService.addGold(UInt32(totalGold))
+        }
+        if totalTickets > 0 {
+            _ = try await gameStateService.addCatTickets(UInt16(clamping: totalTickets))
+        }
+
         let sortedSoldItems = soldQuantities
             .filter { $0.value > 0 }
             .sorted { $0.key < $1.key }

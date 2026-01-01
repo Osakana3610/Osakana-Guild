@@ -178,18 +178,13 @@ extension AppServices {
             var autoSellGold = 0
             var autoSoldItems: [ExplorationSnapshot.Rewards.AutoSellEntry] = []
             var calculatedDropRewards: CalculatedDropRewards?
+            var isFullClear = false
             switch artifact.endState {
             case .completed:
                 let dungeonFloorCount = max(1, artifact.dungeon.floorCount)
-                if artifact.floorCount >= dungeonFloorCount {
-                    try await dungeon.markCleared(dungeonId: artifact.dungeon.id,
-                                                  difficulty: UInt8(runDifficulty),
-                                                  totalFloors: UInt8(artifact.floorCount))
-                    let snapshot = try await dungeon.ensureDungeonSnapshot(for: artifact.dungeon.id)
-                    _ = try await unlockNextDifficultyIfEligible(for: snapshot, clearedDifficulty: UInt8(runDifficulty))
-                    // ダンジョンクリアで次のストーリーを解放
-                    try await unlockStoryForDungeonClear(artifact.dungeon.id)
-                } else {
+                isFullClear = artifact.floorCount >= dungeonFloorCount
+                if !isFullClear {
+                    // 途中帰還の場合のみ即時更新（クリア処理はバックグラウンドで行う）
                     try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                             difficulty: UInt8(runDifficulty),
                                                             furthestFloor: UInt8(artifact.floorCount))
@@ -218,12 +213,25 @@ extension AppServices {
             continuation.yield(finalUpdate)
             continuation.finish()
 
-            // バックグラウンドでDB書き込みとキャッシュ更新を実行
-            if let calculated = calculatedDropRewards {
-                let userDataLoadService = userDataLoad
-                let appServices = self
-                Task {
-                    do {
+            // バックグラウンドでDB書き込みを実行（帰還通知後）
+            let userDataLoadService = userDataLoad
+            let appServices = self
+            let capturedDungeonId = artifact.dungeon.id
+            let capturedDifficulty = UInt8(runDifficulty)
+            let capturedFloorCount = UInt8(artifact.floorCount)
+            Task {
+                do {
+                    // ダンジョンクリア処理とストーリー解放（完全クリア時のみ）
+                    if isFullClear {
+                        _ = try await appServices.dungeon.markClearedAndUnlockNext(
+                            dungeonId: capturedDungeonId,
+                            difficulty: capturedDifficulty,
+                            totalFloors: capturedFloorCount
+                        )
+                        try await appServices.unlockStoryForDungeonClear(capturedDungeonId)
+                    }
+                    // ドロップ報酬永続化
+                    if let calculated = calculatedDropRewards {
                         let addedSnapshots = try await appServices.persistCalculatedDropRewards(calculated)
                         await MainActor.run {
                             userDataLoadService.addDroppedItems(
@@ -232,10 +240,10 @@ extension AppServices {
                                 definitions: calculated.definitions
                             )
                         }
-                    } catch {
-                        // バックグラウンド永続化エラーはログのみ（帰還通知は既に完了）
-                        print("[ExplorationRuntime] Background persist error: \(error)")
                     }
+                } catch {
+                    // バックグラウンド永続化エラーはログのみ（帰還通知は既に完了）
+                    print("[ExplorationRuntime] Background persist error: \(error)")
                 }
             }
             await cleanupSessions()
@@ -424,15 +432,9 @@ extension AppServices {
 
     /// 計算済み報酬をDBに永続化する（バックグラウンド実行用）
     func persistCalculatedDropRewards(_ calculated: CalculatedDropRewards) async throws -> [ItemSnapshot] {
-        // 自動売却をバッチ処理
+        // 自動売却をバッチ処理（ゴールド・チケット加算はShopProgressService内で完結）
         if !calculated.autoSellItems.isEmpty {
-            let sellResult = try await shop.addPlayerSoldItemsBatch(calculated.autoSellItems)
-            if sellResult.totalGold > 0 {
-                _ = try await gameState.addGold(UInt32(sellResult.totalGold))
-            }
-            if sellResult.totalTickets > 0 {
-                _ = try await gameState.addCatTickets(UInt16(clamping: sellResult.totalTickets))
-            }
+            _ = try await shop.addPlayerSoldItemsBatch(calculated.autoSellItems)
         }
 
         // インベントリ追加をバッチ処理
