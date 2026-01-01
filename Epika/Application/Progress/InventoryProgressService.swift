@@ -183,35 +183,18 @@ actor InventoryProgressService {
         var snapshots: [ItemSnapshot] = []
 
         for (storage, entries) in aggregated {
-            let stackKeySet = Set(entries.map { $0.key.stackKey })
-            let storageTypeValue = storage.rawValue
-            let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-                $0.storageType == storageTypeValue
-            })
-            let allRecords = try context.fetch(descriptor)
-            let existingRecords = allRecords.filter { stackKeySet.contains($0.stackKey) }
-            let recordMap = Dictionary(uniqueKeysWithValues: existingRecords.map { ($0.stackKey, $0) })
-
             for entry in entries {
-                let record: InventoryItemRecord
-                if let existing = recordMap[entry.key.stackKey] {
-                    _ = applyIncrement(to: existing, amount: entry.totalQuantity)
-                    record = existing
-                } else {
-                    let newRecord = InventoryItemRecord(
-                        superRareTitleId: entry.seed.enhancements.superRareTitleId,
-                        normalTitleId: entry.seed.enhancements.normalTitleId,
-                        itemId: entry.seed.itemId,
-                        socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
-                        socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
-                        socketItemId: entry.seed.enhancements.socketItemId,
-                        quantity: 0,
-                        storage: storage
-                    )
-                    _ = applyIncrement(to: newRecord, amount: entry.totalQuantity)
-                    context.insert(newRecord)
-                    record = newRecord
-                }
+                let record = try fetchOrCreateRecord(
+                    superRareTitleId: entry.seed.enhancements.superRareTitleId,
+                    normalTitleId: entry.seed.enhancements.normalTitleId,
+                    itemId: entry.seed.itemId,
+                    socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
+                    socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
+                    socketItemId: entry.seed.enhancements.socketItemId,
+                    storage: storage,
+                    context: context
+                )
+                _ = applyIncrement(to: record, amount: entry.totalQuantity)
                 snapshots.append(makeSnapshot(record))
             }
         }
@@ -268,34 +251,18 @@ actor InventoryProgressService {
 
             for (storage, entries) in aggregated {
                 try Task.checkCancellation()
-                let stackKeySet = Set(entries.map { $0.key.stackKey })
-                // Fetch all records for this storage, then filter in memory
-                // (SwiftData #Predicate cannot use computed properties like stackKey)
-                let storageTypeValue = storage.rawValue
-                let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-                    $0.storageType == storageTypeValue
-                })
-                let allRecords = try context.fetch(descriptor)
-                let existingRecords = allRecords.filter { stackKeySet.contains($0.stackKey) }
-                let recordMap = Dictionary(uniqueKeysWithValues: existingRecords.map { ($0.stackKey, $0) })
-
                 for entry in entries {
-                    if let record = recordMap[entry.key.stackKey] {
-                        _ = applyIncrement(to: record, amount: entry.totalQuantity)
-                    } else {
-                        let newRecord = InventoryItemRecord(
-                            superRareTitleId: entry.seed.enhancements.superRareTitleId,
-                            normalTitleId: entry.seed.enhancements.normalTitleId,
-                            itemId: entry.seed.itemId,
-                            socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
-                            socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
-                            socketItemId: entry.seed.enhancements.socketItemId,
-                            quantity: 0,
-                            storage: storage
-                        )
-                        _ = applyIncrement(to: newRecord, amount: entry.totalQuantity)
-                        context.insert(newRecord)
-                    }
+                    let record = try fetchOrCreateRecord(
+                        superRareTitleId: entry.seed.enhancements.superRareTitleId,
+                        normalTitleId: entry.seed.enhancements.normalTitleId,
+                        itemId: entry.seed.itemId,
+                        socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
+                        socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
+                        socketItemId: entry.seed.enhancements.socketItemId,
+                        storage: storage,
+                        context: context
+                    )
+                    _ = applyIncrement(to: record, amount: entry.totalQuantity)
                 }
             }
 #if DEBUG
@@ -383,50 +350,6 @@ actor InventoryProgressService {
             result[storage, default: []].append(entry)
         }
         return result
-    }
-
-    func sellItems(stackKeys: [String]) async throws -> PlayerSnapshot {
-        guard !stackKeys.isEmpty else {
-            return try await gameStateService.currentPlayer()
-        }
-
-        let context = contextProvider.makeContext()
-        // Fetch all records, then filter in memory by stackKey
-        // (SwiftData #Predicate cannot use computed properties like stackKey)
-        let stackKeySet = Set(stackKeys)
-        let descriptor = FetchDescriptor<InventoryItemRecord>()
-        let allRecords = try context.fetch(descriptor)
-        let records = allRecords.filter { stackKeySet.contains($0.stackKey) }
-        guard !records.isEmpty else {
-            return try await gameStateService.currentPlayer()
-        }
-        let masterIndices = Array(Set(records.map { $0.itemId }))
-        var priceMap: [UInt16: Int] = [:]
-        var missing: [UInt16] = []
-        for id in masterIndices {
-            if let definition = masterDataCache.item(id) {
-                priceMap[id] = definition.sellValue
-            } else {
-                missing.append(id)
-            }
-        }
-        if !missing.isEmpty {
-            throw ProgressError.itemDefinitionUnavailable(ids: missing.map { String($0) })
-        }
-        let totalGain = records.reduce(into: 0) { total, record in
-            guard record.quantity > 0, let value = priceMap[record.itemId] else { return }
-            total += value * Int(record.quantity)
-        }
-        for record in records {
-            context.delete(record)
-        }
-        try context.save()
-
-        guard totalGain > 0 else {
-            return try await gameStateService.currentPlayer()
-        }
-
-        return try await gameStateService.addGold(UInt32(totalGain))
     }
 
     func updateItem(stackKey: String,
