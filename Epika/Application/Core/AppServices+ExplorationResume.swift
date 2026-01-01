@@ -75,10 +75,9 @@ extension AppServices {
         }
 
         // 6. 開始フロアとイベントインデックスを計算
-        let lastFloor = eventRecords.last?.floor ?? 0
+        // 処理済みイベント数から「次の」位置を計算（最後の位置ではない）
         let eventsPerFloor = dungeonDef.eventsPerFloor > 0 ? dungeonDef.eventsPerFloor : 1
-        // フロアインデックスは0ベース、イベントインデックスはeventsPerFloorでリセット
-        let floorIndex = Int(lastFloor) - 1  // フロア番号は1ベースなので-1
+        let floorIndex = eventRecords.count / eventsPerFloor
         let eventIndex = eventRecords.count % eventsPerFloor
 
         // 7. RNG状態を復元してセッション開始
