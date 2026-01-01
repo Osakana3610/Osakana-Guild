@@ -546,6 +546,136 @@ actor InventoryProgressService {
         )
     }
 
+    /// 宝石をアイテムにソケットとして装着
+    /// - Parameters:
+    ///   - gemStackKey: 宝石のstackKey
+    ///   - targetStackKey: 対象アイテムのstackKey
+    /// - Returns: ソケット装着後のアイテムスナップショット
+    /// - Note: 対象の数量が2以上の場合、1個減らして新しいソケット付きスタックを作成
+    func attachSocket(gemStackKey: String, targetStackKey: String) async throws -> ItemSnapshot {
+        guard let gemComponents = StackKeyComponents(stackKey: gemStackKey) else {
+            throw ProgressError.invalidInput(description: "不正な宝石stackKeyです")
+        }
+        guard let targetComponents = StackKeyComponents(stackKey: targetStackKey) else {
+            throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
+        }
+
+        let context = contextProvider.makeContext()
+
+        // 宝石レコードの取得
+        let gSuperRare = gemComponents.superRareTitleId
+        let gNormal = gemComponents.normalTitleId
+        let gItem = gemComponents.itemId
+        let gSocketSuperRare = gemComponents.socketSuperRareTitleId
+        let gSocketNormal = gemComponents.socketNormalTitleId
+        let gSocketItem = gemComponents.socketItemId
+        var gemDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.superRareTitleId == gSuperRare &&
+            $0.normalTitleId == gNormal &&
+            $0.itemId == gItem &&
+            $0.socketSuperRareTitleId == gSocketSuperRare &&
+            $0.socketNormalTitleId == gSocketNormal &&
+            $0.socketItemId == gSocketItem
+        })
+        gemDescriptor.fetchLimit = 1
+        guard let gemRecord = try context.fetch(gemDescriptor).first else {
+            throw ProgressError.invalidInput(description: "宝石が見つかりません")
+        }
+
+        // 対象アイテムレコードの取得
+        let tSuperRare = targetComponents.superRareTitleId
+        let tNormal = targetComponents.normalTitleId
+        let tItem = targetComponents.itemId
+        let tSocketSuperRare = targetComponents.socketSuperRareTitleId
+        let tSocketNormal = targetComponents.socketNormalTitleId
+        let tSocketItem = targetComponents.socketItemId
+        var targetDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.superRareTitleId == tSuperRare &&
+            $0.normalTitleId == tNormal &&
+            $0.itemId == tItem &&
+            $0.socketSuperRareTitleId == tSocketSuperRare &&
+            $0.socketNormalTitleId == tSocketNormal &&
+            $0.socketItemId == tSocketItem
+        })
+        targetDescriptor.fetchLimit = 1
+        guard let targetRecord = try context.fetch(targetDescriptor).first else {
+            throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
+        }
+
+        // 既にソケットが装着されていないか確認
+        guard targetRecord.socketItemId == 0 else {
+            throw ProgressError.invalidInput(description: "このアイテムには既に宝石改造が施されています")
+        }
+
+        let socketItemId = gemRecord.itemId
+        let socketSuperRareId = gemRecord.superRareTitleId
+        let socketNormalId = gemRecord.normalTitleId
+
+        // 通知用の追跡
+        var upsertedSnapshots: [ItemSnapshot] = []
+        var removedKeys: [String] = []
+
+        let socketedRecord: InventoryItemRecord
+        if targetRecord.quantity > 1 {
+            // 数量2以上：1個減らし、新しいソケット付きレコードを作成/追加
+            targetRecord.quantity -= 1
+            upsertedSnapshots.append(makeSnapshot(targetRecord))
+
+            // 既存のソケット付きレコードを検索
+            var socketedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.superRareTitleId == tSuperRare &&
+                $0.normalTitleId == tNormal &&
+                $0.itemId == tItem &&
+                $0.socketSuperRareTitleId == socketSuperRareId &&
+                $0.socketNormalTitleId == socketNormalId &&
+                $0.socketItemId == socketItemId
+            })
+            socketedDescriptor.fetchLimit = 1
+            if let existingSocketed = try context.fetch(socketedDescriptor).first {
+                existingSocketed.quantity += 1
+                socketedRecord = existingSocketed
+            } else {
+                let newRecord = InventoryItemRecord(
+                    superRareTitleId: tSuperRare,
+                    normalTitleId: tNormal,
+                    itemId: tItem,
+                    socketSuperRareTitleId: socketSuperRareId,
+                    socketNormalTitleId: socketNormalId,
+                    socketItemId: socketItemId,
+                    quantity: 1,
+                    storage: targetRecord.storage
+                )
+                context.insert(newRecord)
+                socketedRecord = newRecord
+            }
+        } else {
+            // 数量1：ソケット情報を直接更新（stackKeyが変わる）
+            removedKeys.append(targetStackKey)
+            targetRecord.socketItemId = socketItemId
+            targetRecord.socketSuperRareTitleId = socketSuperRareId
+            targetRecord.socketNormalTitleId = socketNormalId
+            socketedRecord = targetRecord
+        }
+
+        // 宝石を1個減算
+        let gemWasDeleted = gemRecord.quantity <= 1
+        if gemWasDeleted {
+            context.delete(gemRecord)
+            removedKeys.append(gemStackKey)
+        } else {
+            gemRecord.quantity -= 1
+            upsertedSnapshots.append(makeSnapshot(gemRecord))
+        }
+
+        let socketedSnapshot = makeSnapshot(socketedRecord)
+        upsertedSnapshots.append(socketedSnapshot)
+
+        try context.save()
+        postInventoryChange(upserted: upsertedSnapshots, removed: removedKeys)
+
+        return socketedSnapshot
+    }
+
     // MARK: - Private Helpers
 
     private func fetchDescriptor(for storage: ItemStorage) -> FetchDescriptor<InventoryItemRecord> {
