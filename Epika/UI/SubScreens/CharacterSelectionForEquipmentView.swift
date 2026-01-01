@@ -365,12 +365,25 @@ struct EquipmentEditorView: View {
                     equippedQueue.remove(at: idx)
                 }
             }
-            // 残った装備中アイテム（インベントリに対応がないもの）を末尾に追加
-            merged.append(contentsOf: equippedQueue)
+            // 残った装備中アイテム（インベントリに対応がないもの）を正しいソート位置に挿入
+            for equippedItem in equippedQueue {
+                let insertIndex = findInsertIndex(for: equippedItem, in: merged)
+                merged.insert(equippedItem, at: insertIndex)
+            }
 
             let filtered = merged.filter { matchesFilters($0) }
             return filtered.isEmpty ? nil : (subcategory, filtered)
         }
+    }
+
+    /// ソート順を維持して挿入位置を見つける
+    private func findInsertIndex(for item: LightweightItemData, in items: [LightweightItemData]) -> Int {
+        for (index, existing) in items.enumerated() {
+            if displayService.isOrderedBefore(item, existing) {
+                return index
+            }
+        }
+        return items.count  // 末尾に追加
     }
 
     private func matchesFilters(_ item: LightweightItemData) -> Bool {
@@ -625,15 +638,17 @@ struct EquipmentEditorView: View {
         let oldCharacter = currentCharacter
 
         do {
-            let equippedItems = try await characterService.equipItem(
+            // 通知をスキップして装備処理を実行（手動でキャッシュを一括更新するため）
+            let result = try await characterService.equipItem(
                 characterId: currentCharacter.id,
                 inventoryItemStackKey: item.stackKey,
-                equipmentCapacity: currentCharacter.equipmentCapacity
+                equipmentCapacity: currentCharacter.equipmentCapacity,
+                skipNotification: true
             )
             // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
             let runtime = try characterService.runtimeCharacterWithEquipmentChange(
                 current: currentCharacter,
-                newEquippedItems: equippedItems
+                newEquippedItems: result.equippedItems
             )
             currentCharacter = runtime
 
@@ -646,7 +661,12 @@ struct EquipmentEditorView: View {
             // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
             displayService.updateCharacter(runtime)
 
-            // 装備中アイテムを再構築してフィルタ済みセクションを更新
+            // インベントリキャッシュと装備中アイテムを同時に更新（1回の再描画で完了）
+            if result.wasDeleted {
+                displayService.removeItems(stackKeys: [result.inventoryStackKey])
+            } else {
+                _ = try? displayService.decrementQuantity(stackKey: result.inventoryStackKey, by: 1)
+            }
             rebuildEquippedItemsAndRefresh()
         } catch {
             equipError = error.localizedDescription
@@ -658,14 +678,16 @@ struct EquipmentEditorView: View {
         equipError = nil
         let oldCharacter = currentCharacter
 
-        let equippedItems = try await characterService.unequipItem(
+        // 通知をスキップして解除処理を実行（手動でキャッシュを一括更新するため）
+        let result = try await characterService.unequipItem(
             characterId: currentCharacter.id,
-            equipmentStackKey: item.stackKey
+            equipmentStackKey: item.stackKey,
+            skipNotification: true
         )
         // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
         let runtime = try characterService.runtimeCharacterWithEquipmentChange(
             current: currentCharacter,
-            newEquippedItems: equippedItems
+            newEquippedItems: result.equippedItems
         )
         currentCharacter = runtime
 
@@ -678,8 +700,58 @@ struct EquipmentEditorView: View {
         // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
         displayService.updateCharacter(runtime)
 
-        // 装備中アイテムを再構築してフィルタ済みセクションを更新
+        // インベントリキャッシュと装備中アイテムを同時に更新（1回の再描画で完了）
+        updateInventoryCacheForUnequip(item: item, newQuantity: Int(result.newQuantity))
         rebuildEquippedItemsAndRefresh()
+    }
+
+    /// 解除時にインベントリキャッシュを更新（存在すれば数量増加、なければ新規追加）
+    private func updateInventoryCacheForUnequip(item: CharacterInput.EquippedItem, newQuantity: Int) {
+        // まず既存アイテムの数量を増やしてみる
+        displayService.incrementQuantity(stackKey: item.stackKey, by: 1)
+
+        // incrementQuantityは存在しない場合何もしないので、キャッシュを確認
+        let cacheItems = displayService.getSubcategorizedItems()
+        let exists = cacheItems.values.contains { items in
+            items.contains { $0.stackKey == item.stackKey }
+        }
+
+        // 存在しない場合は新規追加
+        if !exists {
+            guard let definition = itemDefinitions[item.itemId] else { return }
+            let masterData = appServices.masterDataCache
+
+            let normalTitleName = masterData.title(item.normalTitleId)?.name
+            let superRareTitleName: String? = item.superRareTitleId > 0
+                ? masterData.superRareTitle(item.superRareTitleId)?.name
+                : nil
+            let gemName: String? = item.socketItemId > 0
+                ? masterData.item(item.socketItemId)?.name
+                : nil
+
+            let lightweightItem = LightweightItemData(
+                stackKey: item.stackKey,
+                itemId: item.itemId,
+                name: definition.name,
+                quantity: newQuantity,
+                sellValue: definition.sellValue,
+                category: ItemSaleCategory(rawValue: definition.category) ?? .other,
+                enhancement: ItemSnapshot.Enhancement(
+                    superRareTitleId: item.superRareTitleId,
+                    normalTitleId: item.normalTitleId,
+                    socketSuperRareTitleId: item.socketSuperRareTitleId,
+                    socketNormalTitleId: item.socketNormalTitleId,
+                    socketItemId: item.socketItemId
+                ),
+                storage: .playerItem,
+                rarity: definition.rarity,
+                normalTitleName: normalTitleName,
+                superRareTitleName: superRareTitleName,
+                gemName: gemName,
+                equippedByAvatarId: nil
+            )
+            displayService.addItem(lightweightItem)
+        }
     }
 
     /// 装備中アイテムを再構築（filteredSectionsはcomputed propertyなので自動更新）
