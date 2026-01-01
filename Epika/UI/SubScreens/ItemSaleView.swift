@@ -325,9 +325,7 @@ struct ItemSaleView: View {
         do {
             let stackKeys = items.map { $0.stackKey }
             _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
-            let service = appServices.userDataLoad
-            service.removeItems(stackKeys: Set(stackKeys))
-            cacheVersion = service.itemCacheVersion
+            cacheVersion = appServices.userDataLoad.itemCacheVersion
             removeSelection(forKeys: stackKeys)
         } catch {
             showError = true
@@ -356,9 +354,7 @@ struct ItemSaleView: View {
             try await registerAutoTradeRules(for: items)
             let stackKeys = items.map { $0.stackKey }
             _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
-            let service = appServices.userDataLoad
-            service.removeItems(stackKeys: Set(stackKeys))
-            cacheVersion = service.itemCacheVersion
+            cacheVersion = appServices.userDataLoad.itemCacheVersion
             removeSelection(forKeys: stackKeys)
         } catch {
             showError = true
@@ -449,9 +445,7 @@ struct ItemSaleView: View {
         do {
             try await registerAutoTradeRules(for: [item])
             _ = try await appServices.sellItemsToShop(stackKeys: [item.stackKey])
-            let service = appServices.userDataLoad
-            service.removeItems(stackKeys: Set([item.stackKey]))
-            cacheVersion = service.itemCacheVersion
+            cacheVersion = appServices.userDataLoad.itemCacheVersion
             removeSelection(forKeys: [item.stackKey])
         } catch {
             showError = true
