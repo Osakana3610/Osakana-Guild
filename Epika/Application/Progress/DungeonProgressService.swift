@@ -33,6 +33,17 @@ actor DungeonProgressService {
         self.contextProvider = contextProvider
     }
 
+    /// ダンジョン進行変更通知を送信
+    private func notifyDungeonChange(dungeonIds: [UInt16]) {
+        Task { @MainActor in
+            NotificationCenter.default.post(
+                name: .dungeonProgressDidChange,
+                object: nil,
+                userInfo: ["dungeonIds": dungeonIds]
+            )
+        }
+    }
+
     func allDungeonSnapshots() async throws -> [DungeonSnapshot] {
         let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<DungeonRecord>()
@@ -55,6 +66,7 @@ actor DungeonProgressService {
             record.updatedAt = Date()
         }
         try saveIfNeeded(context)
+        notifyDungeonChange(dungeonIds: [dungeonId])
     }
 
     /// ダンジョンをクリア済みとしてマーク
@@ -80,6 +92,7 @@ actor DungeonProgressService {
         record.furthestClearedFloor = max(record.furthestClearedFloor, totalFloors)
         record.updatedAt = now
         try saveIfNeeded(context)
+        notifyDungeonChange(dungeonIds: [dungeonId])
         return isFirstClear
     }
 
@@ -92,6 +105,7 @@ actor DungeonProgressService {
             record.updatedAt = Date()
         }
         try saveIfNeeded(context)
+        notifyDungeonChange(dungeonIds: [dungeonId])
     }
 
     func updatePartialProgress(dungeonId: UInt16, difficulty: UInt8, furthestFloor: UInt8) async throws {
@@ -103,6 +117,7 @@ actor DungeonProgressService {
             record.updatedAt = Date()
         }
         try saveIfNeeded(context)
+        notifyDungeonChange(dungeonIds: [dungeonId])
     }
 
     /// ダンジョンクリアを記録し、次の難易度を解放してスナップショットを返す（1回のDB操作で完結）
@@ -135,6 +150,7 @@ actor DungeonProgressService {
 
         record.updatedAt = now
         try saveIfNeeded(context)
+        notifyDungeonChange(dungeonIds: [dungeonId])
         return Self.snapshot(from: record)
     }
 }

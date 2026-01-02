@@ -51,6 +51,18 @@ actor AutoTradeProgressService {
         self.gameStateService = gameStateService
     }
 
+    /// 自動売却ルール変更通知を送信
+    private func notifyAutoTradeChange(addedStackKeys: [String] = [], removedStackKeys: [String] = []) {
+        let change = UserDataLoadService.AutoTradeChange(addedStackKeys: addedStackKeys, removedStackKeys: removedStackKeys)
+        Task { @MainActor in
+            NotificationCenter.default.post(
+                name: .autoTradeRulesDidChange,
+                object: nil,
+                userInfo: ["change": change]
+            )
+        }
+    }
+
     // MARK: - Public API
 
     func allRules() async throws -> [Rule] {
@@ -93,7 +105,9 @@ actor AutoTradeProgressService {
         context.insert(record)
         try context.save()
         cachedStackKeys = nil
-        return makeRule(record)
+        let rule = makeRule(record)
+        notifyAutoTradeChange(addedStackKeys: [rule.stackKey])
+        return rule
     }
 
     func removeRule(stackKey: String) async throws {
@@ -115,6 +129,7 @@ actor AutoTradeProgressService {
         context.delete(record)
         try context.save()
         cachedStackKeys = nil
+        notifyAutoTradeChange(removedStackKeys: [stackKey])
     }
 
     func shouldAutoSell(stackKey: String) async throws -> Bool {

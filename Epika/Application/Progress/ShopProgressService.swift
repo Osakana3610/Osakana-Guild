@@ -28,6 +28,17 @@ import Foundation
 import SwiftData
 
 actor ShopProgressService {
+    /// 在庫変更通知を送信
+    private func notifyShopStockChange(updatedItemIds: [UInt16]) {
+        Task { @MainActor in
+            NotificationCenter.default.post(
+                name: .shopStockDidChange,
+                object: nil,
+                userInfo: ["updatedItemIds": updatedItemIds]
+            )
+        }
+    }
+
     struct ShopItem: Identifiable, Sendable, Hashable {
         let id: UInt16  // itemId
         let definition: ItemDefinition
@@ -150,6 +161,7 @@ actor ShopProgressService {
         }
 
         try saveIfNeeded(context)
+        notifyShopStockChange(updatedItemIds: [itemId])
 
         let overflow = quantity - actuallyAdded
         let gold = definition.sellValue * actuallyAdded
@@ -253,6 +265,12 @@ actor ShopProgressService {
 
         try saveIfNeeded(context)
 
+        // 変更されたアイテムIDを通知
+        let updatedItemIds = Array(stockMap.keys)
+        if !updatedItemIds.isEmpty {
+            notifyShopStockChange(updatedItemIds: updatedItemIds)
+        }
+
         // ゴールド・チケットを加算（責務をShopProgressServiceで完結）
         if totalGold > 0 {
             _ = try await gameStateService.addGold(UInt32(totalGold))
@@ -296,6 +314,7 @@ actor ShopProgressService {
         }
 
         try saveIfNeeded(context)
+        notifyShopStockChange(updatedItemIds: [itemId])
         return cleanupResult.tickets
     }
 
@@ -340,6 +359,7 @@ actor ShopProgressService {
         }
         stockRecord.updatedAt = Date()
         try saveIfNeeded(context)
+        notifyShopStockChange(updatedItemIds: [itemId])
 
         // ショップ購入品は無称号（normalTitleId = 2）
         let noTitleEnhancement = ItemEnhancement(normalTitleId: 2)

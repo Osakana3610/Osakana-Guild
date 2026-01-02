@@ -36,6 +36,17 @@ actor GameStateService {
         self.contextProvider = contextProvider
     }
 
+    /// ゲーム状態変更通知を送信
+    private func notifyGameStateChange(_ change: UserDataLoadService.GameStateChange) {
+        Task { @MainActor in
+            NotificationCenter.default.post(
+                name: .gameStateDidChange,
+                object: nil,
+                userInfo: ["change": change]
+            )
+        }
+    }
+
     // MARK: - Reset
 
     func resetAllProgress() async throws {
@@ -178,6 +189,13 @@ actor GameStateService {
         record.pandoraBoxItems.append(packed)
         record.updatedAt = Date()
         try saveIfNeeded(context)
+        let change = UserDataLoadService.GameStateChange(
+            gold: nil,
+            catTickets: nil,
+            partySlots: nil,
+            pandoraBoxItems: record.pandoraBoxItems
+        )
+        notifyGameStateChange(change)
         return Self.snapshot(from: record)
     }
 
@@ -216,6 +234,13 @@ actor GameStateService {
 
         record.updatedAt = Date()
         try saveIfNeeded(context)
+        let change = UserDataLoadService.GameStateChange(
+            gold: nil,
+            catTickets: nil,
+            partySlots: nil,
+            pandoraBoxItems: record.pandoraBoxItems
+        )
+        notifyGameStateChange(change)
         return Self.snapshot(from: record)
     }
 }
@@ -262,10 +287,19 @@ private extension GameStateService {
         var wallet = PlayerWallet(gold: record.gold, catTickets: record.catTickets)
         try mutate(&wallet)
         // 上限を適用
-        record.gold = min(wallet.gold, AppConstants.Progress.maximumGold)
-        record.catTickets = min(wallet.catTickets, AppConstants.Progress.maximumCatTickets)
+        let newGold = min(wallet.gold, AppConstants.Progress.maximumGold)
+        let newCatTickets = min(wallet.catTickets, AppConstants.Progress.maximumCatTickets)
+        record.gold = newGold
+        record.catTickets = newCatTickets
         record.updatedAt = Date()
         try saveIfNeeded(context)
+        let change = UserDataLoadService.GameStateChange(
+            gold: newGold,
+            catTickets: newCatTickets,
+            partySlots: nil,
+            pandoraBoxItems: nil
+        )
+        notifyGameStateChange(change)
         return Self.snapshot(from: record)
     }
 

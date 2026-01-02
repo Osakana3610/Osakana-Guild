@@ -27,6 +27,17 @@ actor StoryProgressService {
         self.contextProvider = contextProvider
     }
 
+    /// ストーリー進行変更通知を送信
+    private func notifyStoryChange(nodeIds: [UInt16]) {
+        Task { @MainActor in
+            NotificationCenter.default.post(
+                name: .storyProgressDidChange,
+                object: nil,
+                userInfo: ["nodeIds": nodeIds]
+            )
+        }
+    }
+
     func currentStorySnapshot() async throws -> StorySnapshot {
         let context = contextProvider.makeContext()
         let nodes = try fetchAllNodeProgress(context: context)
@@ -51,6 +62,7 @@ actor StoryProgressService {
             node.updatedAt = now
         }
         try saveIfNeeded(context)
+        notifyStoryChange(nodeIds: [nodeId])
         let nodes = try fetchAllNodeProgress(context: context)
         return Self.snapshot(from: nodes, updatedAt: now)
     }
@@ -63,6 +75,7 @@ actor StoryProgressService {
             node.updatedAt = Date()
         }
         try saveIfNeeded(context)
+        notifyStoryChange(nodeIds: [nodeId])
     }
 }
 

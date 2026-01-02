@@ -12,7 +12,7 @@
 //   - iOS 26以降はglassEffect、それ以前はsystemGray6背景
 //   - Dynamic Type対応（表示名を動的に短縮）
 //   - Timer駆動で1秒ごとに時刻更新
-//   - ゴールド/チケットはAppServicesの@Observableプロパティを参照（即時反映）
+//   - ゴールド/チケットはUserDataLoadServiceのキャッシュを参照（即時反映）
 //
 // 【使用箇所】
 //   - アプリ全体の主要画面下部
@@ -80,7 +80,7 @@ struct BottomGameInfoView: View {
                         .font(.subheadline)
                         .foregroundColor(.primary)
 
-                    Text("\(appServices.playerCatTickets)枚")
+                    Text("\(appServices.userDataLoad.playerCatTickets)枚")
                         .font(.subheadline.bold())
                         .foregroundColor(.primary)
                 }
@@ -108,7 +108,7 @@ struct BottomGameInfoView: View {
                 Spacer()
 
                 HStack(spacing: 2) {
-                    Text("\(formatGold(Int(appServices.playerGold)))GP")
+                    Text("\(formatGold(Int(appServices.userDataLoad.playerGold)))GP")
                         .font(.footnote)
                         .foregroundColor(.primary)
                 }
@@ -118,7 +118,6 @@ struct BottomGameInfoView: View {
         }
         .padding(.vertical, 6)
         .modifier(BottomGameInfoStyleModifier())
-        .task { await appServices.reloadPlayerState() }
         .onReceive(secondsTimer) { _ in currentTime = Date() }
     }
 
