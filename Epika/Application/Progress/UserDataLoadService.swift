@@ -845,34 +845,34 @@ final class UserDataLoadService: Sendable {
         itemCacheVersion &+= 1
     }
 
-    /// stackKeyからレコードを取得してキャッシュに追加する（装備解除時）
+    /// キャッシュにアイテムが存在するか確認（O(1)）
     @MainActor
-    func addItemByStackKey(_ stackKey: String) {
+    func containsItem(stackKey: String) -> Bool {
+        stackKeyIndex[stackKey] != nil
+    }
+
+    /// 装備中アイテムからキャッシュに追加する（装備解除時・SwiftDataアクセス不要）
+    @MainActor
+    func addItemFromEquipped(_ equippedItem: CharacterInput.EquippedItem) {
+        let stackKey = equippedItem.stackKey
+
         // 既にキャッシュにある場合は何もしない
         guard stackKeyIndex[stackKey] == nil else {
             itemCacheVersion &+= 1
             return
         }
 
-        // SwiftDataからレコードを取得
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<InventoryItemRecord>()
-        guard let allRecords = try? context.fetch(descriptor),
-              let record = allRecords.first(where: { $0.stackKey == stackKey }) else {
-            return
-        }
-
         // マスターデータからカテゴリとレアリティを取得
-        guard let definition = masterDataCache.item(record.itemId) else { return }
+        guard let definition = masterDataCache.item(equippedItem.itemId) else { return }
         let category = ItemSaleCategory(rawValue: definition.category) ?? .other
 
         // キャッシュに追加
         let enhancement = ItemEnhancement(
-            superRareTitleId: record.superRareTitleId,
-            normalTitleId: record.normalTitleId,
-            socketSuperRareTitleId: record.socketSuperRareTitleId,
-            socketNormalTitleId: record.socketNormalTitleId,
-            socketItemId: record.socketItemId
+            superRareTitleId: equippedItem.superRareTitleId,
+            normalTitleId: equippedItem.normalTitleId,
+            socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
+            socketNormalTitleId: equippedItem.socketNormalTitleId,
+            socketItemId: equippedItem.socketItemId
         )
 
         let allTitles = masterDataCache.allTitles
@@ -890,14 +890,14 @@ final class UserDataLoadService: Sendable {
         )
 
         let cachedItem = CachedInventoryItem(
-            stackKey: record.stackKey,
-            itemId: record.itemId,
-            quantity: record.quantity,
-            normalTitleId: record.normalTitleId,
-            superRareTitleId: record.superRareTitleId,
-            socketItemId: record.socketItemId,
-            socketNormalTitleId: record.socketNormalTitleId,
-            socketSuperRareTitleId: record.socketSuperRareTitleId,
+            stackKey: stackKey,
+            itemId: equippedItem.itemId,
+            quantity: 1,  // 装備解除時は常に1
+            normalTitleId: equippedItem.normalTitleId,
+            superRareTitleId: equippedItem.superRareTitleId,
+            socketItemId: equippedItem.socketItemId,
+            socketNormalTitleId: equippedItem.socketNormalTitleId,
+            socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
             category: category,
             rarity: definition.rarity,
             displayName: fullDisplayName,
