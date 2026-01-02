@@ -9,7 +9,7 @@
 //
 // 【状態管理】
 //   - allCharacters: UserDataLoadServiceのキャッシュを参照
-//   - summaries: キャラクターサマリ情報（RuntimeCharacterから派生）
+//   - summaries: キャラクターサマリ情報（CachedCharacterから派生）
 //   - characterProgressDidChange 通知による自動リロード
 //
 // 【使用箇所】
@@ -46,7 +46,7 @@ final class CharacterViewState {
             avatarId == 0 ? UInt16(raceId) : avatarId
         }
 
-        init(from runtime: RuntimeCharacter) {
+        init(from runtime: CachedCharacter) {
             self.id = runtime.id
             self.name = runtime.displayName
             self.level = runtime.level
@@ -68,7 +68,7 @@ final class CharacterViewState {
     private weak var appServicesRef: AppServices?
 
     /// キャッシュされたキャラクター一覧（同期アクセス用）
-    var allCharacters: [RuntimeCharacter] {
+    var allCharacters: [CachedCharacter] {
         appServicesRef?.userDataLoad.characters ?? []
     }
 

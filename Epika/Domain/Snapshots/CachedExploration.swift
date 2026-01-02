@@ -1,5 +1,5 @@
 // ==============================================================================
-// ExplorationSnapshot.swift
+// CachedExploration.swift
 // Epika
 // ==============================================================================
 //
@@ -8,7 +8,7 @@
 //   - 探索状態・報酬・エンカウントログの表現
 //
 // 【データ構造】
-//   - ExplorationSnapshot: 探索セッション全情報
+//   - CachedExploration: 探索セッション全情報
 //     - dungeonId, displayDungeonName, activeFloorNumber
 //     - party (PartySummary): 参加パーティ情報
 //     - startedAt, lastUpdatedAt, expectedReturnAt
@@ -43,7 +43,7 @@
 import Foundation
 import SwiftData
 
-struct ExplorationSnapshot: Sendable, Hashable {
+struct CachedExploration: Sendable, Hashable {
     enum Status: UInt8, Sendable, Hashable {
         case running = 1
         case completed = 2
@@ -190,7 +190,7 @@ struct ExplorationSnapshot: Sendable, Hashable {
     var metadata: ProgressMetadata
 }
 
-extension ExplorationSnapshot {
+extension CachedExploration {
     static func resultMessage(for status: Status) -> String {
         switch status {
         case .completed:
@@ -286,7 +286,7 @@ extension ExplorationSnapshot {
 
 // MARK: - EncounterLog Conversion from Runtime Entry
 
-extension ExplorationSnapshot.EncounterLog {
+extension CachedExploration.EncounterLog {
     /// ランタイムのイベントログエントリから EncounterLog を生成
     init(from entry: ExplorationEventLogEntry, battleLogId: PersistentIdentifier?, masterData: MasterDataCache) {
         let kind: Kind

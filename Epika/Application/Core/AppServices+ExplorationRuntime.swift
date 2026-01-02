@@ -34,7 +34,7 @@ extension AppServices {
     func processExplorationStream(session: ExplorationRuntimeSession,
                                   recordId: PersistentIdentifier,
                                   memberIds: [UInt8],
-                                  runtimeMap: [UInt8: RuntimeCharacter],
+                                  runtimeMap: [UInt8: CachedCharacter],
                                   runDifficulty: Int,
                                   dungeonId: UInt16,
                                   continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
@@ -55,7 +55,7 @@ extension AppServices {
     func processExplorationStream(session: ExplorationRunSession,
                                   recordId: PersistentIdentifier,
                                   memberIds: [UInt8],
-                                  runtimeMap: [UInt8: RuntimeCharacter],
+                                  runtimeMap: [UInt8: CachedCharacter],
                                   runDifficulty: Int,
                                   dungeonId: UInt16,
                                   continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
@@ -80,7 +80,7 @@ extension AppServices {
         cancel: @escaping @Sendable () async -> Void,
         recordId: PersistentIdentifier,
         memberIds: [UInt8],
-        runtimeMap: [UInt8: RuntimeCharacter],
+        runtimeMap: [UInt8: CachedCharacter],
         runDifficulty: Int,
         dungeonId: UInt16,
         continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation
@@ -176,7 +176,7 @@ extension AppServices {
             try characterSession.flushIfNeeded()
 
             var autoSellGold = 0
-            var autoSoldItems: [ExplorationSnapshot.Rewards.AutoSellEntry] = []
+            var autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []
             var calculatedDropRewards: CalculatedDropRewards?
             var isFullClear = false
             switch artifact.endState {
@@ -269,7 +269,7 @@ extension AppServices {
 
 
     func handleExplorationEvent(memberIds: [UInt8],
-                                runtimeCharactersById: [UInt8: RuntimeCharacter],
+                                runtimeCharactersById: [UInt8: CachedCharacter],
                                 outcome: ExplorationEngine.StepOutcome,
                                 battleResultSession: CharacterProgressService.BattleResultSession) async throws -> Bool {
         switch outcome.entry.kind {
@@ -290,7 +290,7 @@ extension AppServices {
     }
 
     func applyCombatRewards(memberIds: [UInt8],
-                            runtimeCharactersById: [UInt8: RuntimeCharacter],
+                            runtimeCharactersById: [UInt8: CachedCharacter],
                             summary: CombatSummary,
                             battleResultSession: CharacterProgressService.BattleResultSession) async throws -> Bool {
         let participants = uniqueOrdered(memberIds)
@@ -319,7 +319,7 @@ extension AppServices {
     }
 
     func applyNonBattleRewards(memberIds: [UInt8],
-                               runtimeCharactersById: [UInt8: RuntimeCharacter],
+                               runtimeCharactersById: [UInt8: CachedCharacter],
                                totalExperience: Int,
                                goldBase: Int,
                                battleResultSession: CharacterProgressService.BattleResultSession) async throws -> Bool {
@@ -347,14 +347,14 @@ extension AppServices {
         let addedStackKeys: [String]
         let addedSeeds: [InventoryProgressService.BatchSeed]
         let definitions: [UInt16: ItemDefinition]
-        let autoSoldItems: [ExplorationSnapshot.Rewards.AutoSellEntry]
+        let autoSoldItems: [CachedExploration.Rewards.AutoSellEntry]
         let autoSellGold: Int
     }
 
     /// ドロップ報酬計算結果（DB書き込み前の確定データ）
     struct CalculatedDropRewards: Sendable {
         let autoSellItems: [(itemId: UInt16, quantity: Int)]
-        let autoSellEntries: [ExplorationSnapshot.Rewards.AutoSellEntry]
+        let autoSellEntries: [CachedExploration.Rewards.AutoSellEntry]
         let autoSellGold: Int
         let inventorySeeds: [InventoryProgressService.BatchSeed]
         let definitions: [UInt16: ItemDefinition]
@@ -376,7 +376,7 @@ extension AppServices {
 
         // ドロップを自動売却対象とインベントリ対象に分類
         var autoSellItems: [(itemId: UInt16, quantity: Int)] = []
-        var autoSellEntries: [ExplorationSnapshot.Rewards.AutoSellEntry] = []
+        var autoSellEntries: [CachedExploration.Rewards.AutoSellEntry] = []
         var inventorySeeds: [InventoryProgressService.BatchSeed] = []
         var itemIds = Set<UInt16>()
         var autoSellGold = 0
@@ -396,7 +396,7 @@ extension AppServices {
 
             if autoTradeKeys.contains(autoTradeKey) {
                 autoSellItems.append((itemId: drop.item.id, quantity: drop.quantity))
-                autoSellEntries.append(ExplorationSnapshot.Rewards.AutoSellEntry(
+                autoSellEntries.append(CachedExploration.Rewards.AutoSellEntry(
                     itemId: drop.item.id,
                     superRareTitleId: superRareTitleId,
                     normalTitleId: normalTitleId,
@@ -460,12 +460,12 @@ extension AppServices {
         )
     }
 
-    private func adjustAutoSellEntries(_ summaries: [String: ExplorationSnapshot.Rewards.AutoSellEntry],
-                                       soldItems: [(itemId: UInt16, quantity: Int)]) -> [ExplorationSnapshot.Rewards.AutoSellEntry] {
+    private func adjustAutoSellEntries(_ summaries: [String: CachedExploration.Rewards.AutoSellEntry],
+                                       soldItems: [(itemId: UInt16, quantity: Int)]) -> [CachedExploration.Rewards.AutoSellEntry] {
         guard !summaries.isEmpty else { return [] }
         guard !soldItems.isEmpty else { return [] }
         var remainingSold = Dictionary(uniqueKeysWithValues: soldItems.map { ($0.itemId, $0.quantity) })
-        var adjusted: [ExplorationSnapshot.Rewards.AutoSellEntry] = []
+        var adjusted: [CachedExploration.Rewards.AutoSellEntry] = []
         let orderedEntries = summaries.values.sorted(by: autoSellEntrySortPredicate)
         for var entry in orderedEntries {
             var available = remainingSold[entry.itemId] ?? 0
@@ -479,8 +479,8 @@ extension AppServices {
         return adjusted
     }
 
-    private func autoSellEntrySortPredicate(_ lhs: ExplorationSnapshot.Rewards.AutoSellEntry,
-                                            _ rhs: ExplorationSnapshot.Rewards.AutoSellEntry) -> Bool {
+    private func autoSellEntrySortPredicate(_ lhs: CachedExploration.Rewards.AutoSellEntry,
+                                            _ rhs: CachedExploration.Rewards.AutoSellEntry) -> Bool {
         if lhs.itemId != rhs.itemId { return lhs.itemId < rhs.itemId }
         if lhs.superRareTitleId != rhs.superRareTitleId { return lhs.superRareTitleId < rhs.superRareTitleId }
         if lhs.normalTitleId != rhs.normalTitleId { return lhs.normalTitleId < rhs.normalTitleId }
@@ -489,7 +489,7 @@ extension AppServices {
 
     func distributeFlatExperience(total: Int,
                                   recipients: [UInt8],
-                                  runtimeCharactersById: [UInt8: RuntimeCharacter]) -> [UInt8: Int] {
+                                  runtimeCharactersById: [UInt8: CachedCharacter]) -> [UInt8: Int] {
         guard total > 0 else { return [:] }
         let eligible = recipients.filter { runtimeCharactersById[$0] != nil }
         guard !eligible.isEmpty else { return [:] }
@@ -514,7 +514,7 @@ extension AppServices {
         return assignments
     }
 
-    func partyGoldMultiplier(for characters: some Collection<RuntimeCharacter>) -> Double {
+    func partyGoldMultiplier(for characters: some Collection<CachedCharacter>) -> Double {
         guard !characters.isEmpty else { return 1.0 }
         let luckSum = characters.reduce(0.0) { $0 + Double($1.attributes.luck) }
         return 1.0 + min(luckSum / 1000.0, 2.0)

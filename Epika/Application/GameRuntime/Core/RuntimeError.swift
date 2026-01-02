@@ -14,7 +14,7 @@
 //   - missingProgressData: 進行データ欠落
 //
 // 【使用箇所】
-//   - RuntimeCharacterFactory: キャラクター生成エラー
+//   - CachedCharacterFactory: キャラクター生成エラー
 //   - GameRuntimeService: 探索エラー
 //   - CombatStatCalculator: 計算エラー
 //

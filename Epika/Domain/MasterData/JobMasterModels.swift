@@ -26,7 +26,7 @@
 // 【使用箇所】
 //   - CombatStatCalculator: ステータス計算時の係数適用
 //   - CharacterJobChangeView: 転職先の係数表示
-//   - RuntimeCharacterFactory: キャラクター生成時のステータス計算
+//   - CachedCharacterFactory: キャラクター生成時のステータス計算
 //
 // ==============================================================================
 

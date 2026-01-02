@@ -25,16 +25,16 @@ struct RuntimePartyState: Sendable {
         var id: UInt8 { characterId }
         let characterId: UInt8
         let order: Int
-        var character: RuntimeCharacter
+        var character: CachedCharacter
     }
 
-    let party: PartySnapshot
+    let party: CachedParty
     var members: [Member]
     /// 探索時間モディファイア（事前計算）
     let explorationModifiers: SkillRuntimeEffects.ExplorationModifiers
 
-    init(party: PartySnapshot,
-         characters: [RuntimeCharacter],
+    init(party: CachedParty,
+         characters: [CachedCharacter],
          explorationModifiers: SkillRuntimeEffects.ExplorationModifiers = .neutral) throws {
         self.party = party
         self.explorationModifiers = explorationModifiers

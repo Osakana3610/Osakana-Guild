@@ -27,7 +27,7 @@ import SwiftUI
 /// キャラクター選択 → 装備編集の2段階UI
 struct CharacterSelectionForEquipmentView: View {
     @Environment(AppServices.self) private var appServices
-    @State private var characters: [RuntimeCharacter] = []
+    @State private var characters: [CachedCharacter] = []
     @State private var exploringIds: Set<UInt8> = []
     @State private var loadError: String?
     @State private var isLoading = true
@@ -96,7 +96,7 @@ struct CharacterSelectionForEquipmentView: View {
 
 /// キャラクター選択リストの行
 private struct CharacterRowForEquipment: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
 
     var body: some View {
         HStack(spacing: 12) {
@@ -211,11 +211,11 @@ enum EquipmentDisplayItem: Identifiable, Hashable {
 
 /// 装備編集画面
 struct EquipmentEditorView: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
 
     @Environment(AppServices.self) private var appServices
     @Environment(StatChangeNotificationService.self) private var statChangeService
-    @State private var currentCharacter: RuntimeCharacter
+    @State private var currentCharacter: CachedCharacter
     @State private var equippedItemsBySubcategory: [ItemDisplaySubcategory: [EquipmentDisplayItem]] = [:]
     @State private var orderedSubcategories: [ItemDisplaySubcategory] = []
     @State private var itemDefinitions: [UInt16: ItemDefinition] = [:]
@@ -272,7 +272,7 @@ struct EquipmentEditorView: View {
         }
     }
 
-    init(character: RuntimeCharacter) {
+    init(character: CachedCharacter) {
         self.character = character
         _currentCharacter = State(initialValue: character)
     }
@@ -807,8 +807,8 @@ struct EquipmentEditorView: View {
 
     /// 装備変更前後のステータス差分を計算
     private func calculateStatChanges(
-        old: RuntimeCharacter,
-        new: RuntimeCharacter
+        old: CachedCharacter,
+        new: CachedCharacter
     ) -> [StatChangeNotificationService.StatChangeNotification] {
         typealias Notification = StatChangeNotificationService.StatChangeNotification
         typealias StatKind = StatChangeNotificationService.StatKind

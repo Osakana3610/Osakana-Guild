@@ -18,13 +18,13 @@ import Foundation
 
 enum PartyAssembler {
     static func assembleState(masterData: MasterDataCache,
-                              party: PartySnapshot,
+                              party: CachedParty,
                               characters: [CharacterInput]) throws -> RuntimePartyState {
         let characterMap = Dictionary(uniqueKeysWithValues: characters.map { ($0.id, $0) })
-        var assembled: [RuntimeCharacter] = []
+        var assembled: [CachedCharacter] = []
         for characterId in party.memberIds {
             guard let input = characterMap[characterId] else { continue }
-            let runtimeCharacter = try RuntimeCharacterFactory.make(
+            let runtimeCharacter = try CachedCharacterFactory.make(
                 from: input,
                 masterData: masterData
             )

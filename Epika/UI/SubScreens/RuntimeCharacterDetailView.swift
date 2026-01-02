@@ -1,5 +1,5 @@
 // ==============================================================================
-// RuntimeCharacterDetailView.swift
+// CachedCharacterDetailView.swift
 // Epika
 // ==============================================================================
 //
@@ -7,7 +7,7 @@
 //   - キャラクターの詳細情報を表示するシートとコンテンツを提供
 //
 // 【View構成】
-//   - RuntimeCharacterDetailSheetView: シート形式の詳細画面
+//   - CachedCharacterDetailSheetView: シート形式の詳細画面
 //   - CharacterDetailContent: 詳細情報の本体
 //     - キャラクターヘッダー（名前・アバター変更）
 //     - プロフィール情報
@@ -40,8 +40,8 @@ struct CharacterDetailTip: Tip {
     }
 }
 
-struct RuntimeCharacterDetailSheetView: View {
-    let character: RuntimeCharacter
+struct CachedCharacterDetailSheetView: View {
+    let character: CachedCharacter
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -59,13 +59,13 @@ struct RuntimeCharacterDetailSheetView: View {
 }
 
 struct CharacterDetailContent: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
     let onRename: ((String) async throws -> Void)?
     let onAvatarChange: ((UInt16) async throws -> Void)?
     let onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)?
     @Environment(AppServices.self) private var appServices
 
-    init(character: RuntimeCharacter,
+    init(character: CachedCharacter,
          onRename: ((String) async throws -> Void)? = nil,
          onAvatarChange: ((UInt16) async throws -> Void)? = nil,
          onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)? = nil) {

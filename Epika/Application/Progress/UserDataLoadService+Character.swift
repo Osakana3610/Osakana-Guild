@@ -32,7 +32,7 @@ extension UserDataLoadService {
 extension UserDataLoadService {
     func loadCharacters() async throws {
         let snapshots = try await characterService.allCharacters()
-        var buffer: [RuntimeCharacter] = []
+        var buffer: [CachedCharacter] = []
         buffer.reserveCapacity(snapshots.count)
         for snapshot in snapshots {
             let character = try await characterService.runtimeCharacter(from: snapshot)
@@ -56,14 +56,14 @@ extension UserDataLoadService {
     /// - Note: 装備変更時に使用。全キャラクター再構築を避けるため、
     ///   characterProgressDidChange通知の代わりにこのメソッドを使う
     @MainActor
-    func updateCharacter(_ character: RuntimeCharacter) {
+    func updateCharacter(_ character: CachedCharacter) {
         if let index = characters.firstIndex(where: { $0.id == character.id }) {
             characters[index] = character
         }
     }
 
     /// キャラクターを取得（キャッシュ不在時は再ロード）
-    func getCharacters() async throws -> [RuntimeCharacter] {
+    func getCharacters() async throws -> [CachedCharacter] {
         let needsLoad = await MainActor.run { !isCharactersLoaded }
         if needsLoad {
             try await loadCharacters()

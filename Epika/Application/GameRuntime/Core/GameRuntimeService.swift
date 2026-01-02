@@ -19,7 +19,7 @@
 //   - resumeExplorationRun(...) → ExplorationRunSession: 探索再開
 //   - cancelExploration(runId:): 探索キャンセル
 //   - prepareExplorationRun(...) → ExplorationRunPreparationData: 準備のみ
-//   - runtimeCharacter(from:) → RuntimeCharacter: キャラクター生成
+//   - runtimeCharacter(from:) → CachedCharacter: キャラクター生成
 //   - runtimePartyState(party:characters:) → RuntimePartyState: パーティ生成
 //   - recalculateCombatStats(for:) → Result: ステータス再計算
 //   - raceDefinition(withId:) → RaceDefinition?: 種族取得
@@ -221,11 +221,11 @@ actor GameRuntimeService {
                                              explorationInterval: interval)
     }
 
-    func runtimeCharacter(from input: CharacterInput) throws -> RuntimeCharacter {
-        try RuntimeCharacterFactory.make(from: input, masterData: masterData)
+    func runtimeCharacter(from input: CharacterInput) throws -> CachedCharacter {
+        try CachedCharacterFactory.make(from: input, masterData: masterData)
     }
 
-    func runtimePartyState(party: PartySnapshot, characters: [CharacterInput]) throws -> RuntimePartyState {
+    func runtimePartyState(party: CachedParty, characters: [CharacterInput]) throws -> RuntimePartyState {
         try PartyAssembler.assembleState(masterData: masterData,
                                          party: party,
                                          characters: characters)
@@ -237,7 +237,7 @@ actor GameRuntimeService {
 
     func recalculateCombatStats(for input: CharacterInput,
                                    pandoraBoxItems: Set<UInt64> = []) throws -> CombatStatCalculator.Result {
-        let runtimeCharacter = try RuntimeCharacterFactory.make(
+        let runtimeCharacter = try CachedCharacterFactory.make(
             from: input,
             masterData: masterData,
             pandoraBoxItems: pandoraBoxItems

@@ -19,7 +19,7 @@
 import SwiftUI
 
 struct BattleStatsView: View {
-    let characters: [RuntimeCharacter]
+    let characters: [CachedCharacter]
 
     var body: some View {
         List {

@@ -1094,7 +1094,7 @@ struct DangerousOperationsView: View {
     }
 
     /// 装備バグ復旧用：全キャラクターの装備を直接DBから解除
-    /// 通常のunequipItemはRuntimeCharacterFactory経由で装備枠チェックが入るため、
+    /// 通常のunequipItemはCachedCharacterFactory経由で装備枠チェックが入るため、
     /// 装備枠を超過した状態では使用できない。この処理は直接DBを操作してバイパスする。
     private func unequipAllCharacters() async {
         if isUnequippingAll { return }

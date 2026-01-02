@@ -24,7 +24,7 @@ import SwiftUI
 /// CharacterSectionType: actionPreferences
 @MainActor
 struct CharacterActionPreferencesSection: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
     let onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)?
 
     @State private var actionPreferenceAttack: Double
@@ -33,7 +33,7 @@ struct CharacterActionPreferencesSection: View {
     @State private var actionPreferenceBreath: Double
     @State private var actionPreferenceError: String?
 
-    init(character: RuntimeCharacter,
+    init(character: CachedCharacter,
          onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)? = nil) {
         self.character = character
         self.onActionPreferencesChange = onActionPreferencesChange

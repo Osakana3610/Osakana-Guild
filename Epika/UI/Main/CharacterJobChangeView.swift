@@ -26,7 +26,7 @@ struct CharacterJobChangeView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    @State private var characters: [RuntimeCharacter] = []
+    @State private var characters: [CachedCharacter] = []
     @State private var jobs: [JobDefinition] = []
     @State private var exploringCharacterIds: Set<UInt8> = []
     @State private var selectedCharacterId: UInt8?
@@ -40,12 +40,12 @@ struct CharacterJobChangeView: View {
     private var masterData: MasterDataCache { appServices.masterDataCache }
 
     /// 転職可能なキャラクター（未転職かつ探索中でない）
-    private var eligibleCharacters: [RuntimeCharacter] {
+    private var eligibleCharacters: [CachedCharacter] {
         characters.filter { $0.previousJobId == 0 && !exploringCharacterIds.contains($0.id) }
     }
 
     /// 選択中のキャラクター
-    private var selectedCharacter: RuntimeCharacter? {
+    private var selectedCharacter: CachedCharacter? {
         guard let id = selectedCharacterId else { return nil }
         return characters.first { $0.id == id }
     }

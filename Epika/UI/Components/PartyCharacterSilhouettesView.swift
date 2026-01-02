@@ -23,17 +23,17 @@ import SwiftUI
 
 /// パーティメンバーを最大6枠のグリッドで表示する。
 struct PartyCharacterSilhouettesView: View {
-    let party: PartySnapshot
-    let characters: [RuntimeCharacter]
-    let onMemberTap: ((RuntimeCharacter) -> Void)?
+    let party: CachedParty
+    let characters: [CachedCharacter]
+    let onMemberTap: ((CachedCharacter) -> Void)?
 
-    init(party: PartySnapshot, characters: [RuntimeCharacter], onMemberTap: ((RuntimeCharacter) -> Void)? = nil) {
+    init(party: CachedParty, characters: [CachedCharacter], onMemberTap: ((CachedCharacter) -> Void)? = nil) {
         self.party = party
         self.characters = characters
         self.onMemberTap = onMemberTap
     }
 
-    private var orderedMembers: [RuntimeCharacter] {
+    private var orderedMembers: [CachedCharacter] {
         party.memberIds.compactMap { id in
             characters.first { $0.id == id }
         }
@@ -77,7 +77,7 @@ struct PartyCharacterSilhouettesView: View {
     }
 
     @ViewBuilder
-    private func memberSilhouette(_ member: RuntimeCharacter) -> some View {
+    private func memberSilhouette(_ member: CachedCharacter) -> some View {
         let content = VStack(spacing: 2) {
             CharacterImageView(avatarIndex: member.resolvedAvatarId, size: 55)
             VStack(spacing: 1) {

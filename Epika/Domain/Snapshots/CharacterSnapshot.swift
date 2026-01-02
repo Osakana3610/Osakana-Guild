@@ -23,7 +23,7 @@
 //
 // 【使用箇所】
 //   - CharacterProgressService: CRUD操作の戻り値
-//   - CharacterInput: RuntimeCharacter生成用の入力データへ変換
+//   - CharacterInput: CachedCharacter生成用の入力データへ変換
 //   - UI層: キャラクター情報表示
 //
 // ==============================================================================

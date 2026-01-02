@@ -21,9 +21,9 @@ import SwiftUI
 import SwiftData
 
 struct EncounterDetailView: View {
-    let snapshot: ExplorationSnapshot
-    let party: PartySnapshot
-    let encounter: ExplorationSnapshot.EncounterLog
+    let snapshot: CachedExploration
+    let party: CachedParty
+    let encounter: CachedExploration.EncounterLog
 
     @Environment(\.modelContext) private var modelContext
     @Environment(AppServices.self) private var appServices

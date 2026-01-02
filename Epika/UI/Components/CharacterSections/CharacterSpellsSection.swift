@@ -23,7 +23,7 @@ import SwiftUI
 /// CharacterSectionType: mageMagic
 @MainActor
 struct CharacterMageSpellsSection: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
 
     var body: some View {
         let spells = character.spellLoadout.mage
@@ -47,7 +47,7 @@ struct CharacterMageSpellsSection: View {
 /// CharacterSectionType: priestMagic
 @MainActor
 struct CharacterPriestSpellsSection: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
 
     var body: some View {
         let spells = character.spellLoadout.priest

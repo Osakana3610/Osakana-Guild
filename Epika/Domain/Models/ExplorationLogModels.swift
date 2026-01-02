@@ -17,7 +17,7 @@
 //     - enemyGroupDescription, drops, battleResult
 //
 // 【変換】
-//   - EventKind ↔ ExplorationSnapshot.EncounterLog.Kind
+//   - EventKind ↔ CachedExploration.EncounterLog.Kind
 //   - BattleResult ↔ BattleService.BattleResult
 //
 // ==============================================================================
@@ -38,8 +38,8 @@ enum EventKind: UInt8, Codable, Sendable {
     case combat = 1
     case scripted = 2
 
-    /// ExplorationSnapshot.EncounterLog.Kindとの相互変換
-    init(_ kind: ExplorationSnapshot.EncounterLog.Kind) {
+    /// CachedExploration.EncounterLog.Kindとの相互変換
+    init(_ kind: CachedExploration.EncounterLog.Kind) {
         switch kind {
         case .nothing: self = .nothing
         case .enemyEncounter: self = .combat
@@ -47,7 +47,7 @@ enum EventKind: UInt8, Codable, Sendable {
         }
     }
 
-    var snapshotKind: ExplorationSnapshot.EncounterLog.Kind {
+    var snapshotKind: CachedExploration.EncounterLog.Kind {
         switch self {
         case .nothing: return .nothing
         case .combat: return .enemyEncounter
@@ -85,8 +85,8 @@ enum ExplorationResult: UInt8, Codable, Sendable {
     case defeated = 2
     case cancelled = 3
 
-    /// ExplorationSnapshot.Statusとの相互変換
-    init(_ status: ExplorationSnapshot.Status) {
+    /// CachedExploration.Statusとの相互変換
+    init(_ status: CachedExploration.Status) {
         switch status {
         case .running: self = .running
         case .completed: self = .completed
@@ -95,7 +95,7 @@ enum ExplorationResult: UInt8, Codable, Sendable {
         }
     }
 
-    var snapshotStatus: ExplorationSnapshot.Status {
+    var snapshotStatus: CachedExploration.Status {
         switch self {
         case .running: return .running
         case .completed: return .completed

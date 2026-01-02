@@ -21,8 +21,8 @@
 import SwiftUI
 
 struct ExplorationRunResultSummaryView: View {
-    let snapshot: ExplorationSnapshot
-    let party: PartySnapshot
+    let snapshot: CachedExploration
+    let party: CachedParty
 
     @Environment(\.dismiss) private var dismiss
     @Environment(AppServices.self) private var appServices
@@ -31,7 +31,7 @@ struct ExplorationRunResultSummaryView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("\(snapshot.displayDungeonName)：\(ExplorationSnapshot.resultMessage(for: snapshot.status))")
+                    Text("\(snapshot.displayDungeonName)：\(CachedExploration.resultMessage(for: snapshot.status))")
                         .font(.headline)
                         .foregroundStyle(.primary)
 
@@ -223,7 +223,7 @@ struct ExplorationRunResultSummaryView: View {
         Self.numberFormatter.string(from: NSNumber(value: value)) ?? "\(value)"
     }
 
-    private func autoSellDisplayName(for entry: ExplorationSnapshot.Rewards.AutoSellEntry,
+    private func autoSellDisplayName(for entry: CachedExploration.Rewards.AutoSellEntry,
                                      definition: ItemDefinition) -> String {
         let cache = appServices.masterDataCache
         var result = ""
@@ -262,8 +262,8 @@ private struct DropRow: Identifiable {
 }
 
 struct SimplifiedEventSummaryRowView: View {
-    let encounter: ExplorationSnapshot.EncounterLog
-    let runStatus: ExplorationSnapshot.Status
+    let encounter: CachedExploration.EncounterLog
+    let runStatus: CachedExploration.Status
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -295,7 +295,7 @@ struct SimplifiedEventSummaryRowView: View {
     }
 
     private var titleText: String {
-        return ExplorationSnapshot.eventTitle(for: encounter, status: runStatus)
+        return CachedExploration.eventTitle(for: encounter, status: runStatus)
     }
 
     private var subtitleText: String? {
@@ -317,14 +317,14 @@ struct SimplifiedEventSummaryRowView: View {
     private var resultText: String? {
         // 戦闘結果は CombatSummary から取得
         if let result = encounter.combatSummary?.result, !result.isEmpty {
-            return ExplorationSnapshot.localizedCombatResult(result)
+            return CachedExploration.localizedCombatResult(result)
         }
         return nil
     }
 }
 
 struct FinalExplorationSummaryRowView: View {
-    let summary: ExplorationSnapshot.Summary
+    let summary: CachedExploration.Summary
 
     var body: some View {
         HStack(alignment: .center) {
@@ -349,7 +349,7 @@ struct FinalExplorationSummaryRowView: View {
     }
 }
 
-func formatSummaryHeader(_ summary: ExplorationSnapshot.Summary) -> String {
+func formatSummaryHeader(_ summary: CachedExploration.Summary) -> String {
     let label = summary.timingKind == .expected ? "帰還予定" : "帰還日時"
     let timestamp = ExplorationDateFormatters.short.string(from: summary.timingDate)
     return "[\(summary.floorNumber)F] \(label) \(timestamp)"

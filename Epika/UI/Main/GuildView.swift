@@ -121,7 +121,7 @@ struct GuildView: View {
                 } else {
                     ForEach(aliveSummaries) { summary in
                         NavigationLink {
-                            LazyRuntimeCharacterDetailView(characterId: summary.id,
+                            LazyCachedCharacterDetailView(characterId: summary.id,
                                                             summary: summary,
                                                             appServices: appServices)
                         } label: {
@@ -287,12 +287,12 @@ private struct GuildCharacterRow: View {
 
 // MARK: - Character Detail Loader
 
-private struct LazyRuntimeCharacterDetailView: View {
+private struct LazyCachedCharacterDetailView: View {
     let characterId: UInt8
     let summary: CharacterViewState.CharacterSummary
     let appServices: AppServices
 
-    @State private var runtimeCharacter: RuntimeCharacter?
+    @State private var runtimeCharacter: CachedCharacter?
     @State private var errorMessage: String?
     @State private var isLoading = false
 

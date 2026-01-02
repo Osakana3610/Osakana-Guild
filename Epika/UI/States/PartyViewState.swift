@@ -32,7 +32,7 @@ final class PartyViewState {
     }
 
     /// キャッシュからパーティ一覧を取得
-    var parties: [PartySnapshot] {
+    var parties: [CachedParty] {
         appServices.userDataLoad.parties
     }
 
@@ -49,7 +49,7 @@ final class PartyViewState {
         try await loadAllParties()
     }
 
-    func updatePartyMembers(party: PartySnapshot, memberIds: [UInt8]) async throws {
+    func updatePartyMembers(party: CachedParty, memberIds: [UInt8]) async throws {
         _ = try await appServices.party.updatePartyMembers(persistentIdentifier: party.persistentIdentifier, memberIds: memberIds)
         try await refresh()
     }

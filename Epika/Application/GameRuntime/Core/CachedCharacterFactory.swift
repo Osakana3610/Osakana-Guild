@@ -1,16 +1,16 @@
 // ==============================================================================
-// RuntimeCharacterFactory.swift
+// CachedCharacterFactory.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - CharacterInputからRuntimeCharacterを生成
+//   - CharacterInputからCachedCharacterを生成
 //   - マスターデータ取得と戦闘ステータス計算の統合
 //
 // 【公開API】
-//   - make(from:masterData:pandoraBoxItems:) → RuntimeCharacter
+//   - make(from:masterData:pandoraBoxItems:) → CachedCharacter
 //     nonisolated - キャラクター生成（純粋計算）
-//   - withEquipmentChange(current:newEquippedItems:masterData:) → RuntimeCharacter
+//   - withEquipmentChange(current:newEquippedItems:masterData:) → CachedCharacter
 //     nonisolated - 装備変更時の高速再構築（既存データを再利用）
 //
 // 【生成フロー】
@@ -20,7 +20,7 @@
 //   4. 装備スロット計算・検証
 //   5. スペルブック構築
 //   6. CombatStatCalculatorで戦闘ステータス計算
-//   7. RuntimeCharacter生成
+//   7. CachedCharacter生成
 //
 // 【スキル収集】
 //   - パッシブスキル: 前職 + 現職（転職しても引き継ぐ）
@@ -42,15 +42,15 @@
 
 import Foundation
 
-/// CharacterInputからRuntimeCharacterを生成するファクトリ。
+/// CharacterInputからCachedCharacterを生成するファクトリ。
 /// マスターデータ取得と戦闘ステータス計算を行う。
-enum RuntimeCharacterFactory {
+enum CachedCharacterFactory {
 
     static func make(
         from input: CharacterInput,
         masterData: MasterDataCache,
         pandoraBoxItems: Set<UInt64> = []
-    ) throws -> RuntimeCharacter {
+    ) throws -> CachedCharacter {
 
         // マスターデータ取得
         guard let race = masterData.race(input.raceId) else {
@@ -162,7 +162,7 @@ enum RuntimeCharacterFactory {
             job: job,
             personalitySecondary: secondaryPersonality,
             learnedSkills: learnedSkills,
-            loadout: RuntimeCharacter.Loadout(
+            loadout: CachedCharacter.Loadout(
                 items: loadout.items,
                 titles: loadout.titles,
                 superRareTitles: loadout.superRareTitles
@@ -188,7 +188,7 @@ enum RuntimeCharacterFactory {
         var combat = calcResult.combat
         combat.isMartialEligible = isMartialEligible
 
-        return RuntimeCharacter(
+        return CachedCharacter(
             id: input.id,
             displayName: input.displayName,
             raceId: input.raceId,
@@ -226,13 +226,13 @@ enum RuntimeCharacterFactory {
     // MARK: - Equipment Change (Fast Path)
 
     /// 装備変更時の高速再構築
-    /// 既存のRuntimeCharacterからマスターデータ（種族/職業/性格）を再利用し、
+    /// 既存のCachedCharacterからマスターデータ（種族/職業/性格）を再利用し、
     /// 装備関連のみを再計算する
     static func withEquipmentChange(
-        current: RuntimeCharacter,
+        current: CachedCharacter,
         newEquippedItems: [CharacterInput.EquippedItem],
         masterData: MasterDataCache
-    ) throws -> RuntimeCharacter {
+    ) throws -> CachedCharacter {
         // 既存のマスターデータを再利用（必須データが欠落している場合はエラー）
         guard let race = current.race else {
             throw RuntimeError.invalidConfiguration(reason: "種族データが見つかりません")
@@ -333,7 +333,7 @@ enum RuntimeCharacterFactory {
             job: job,
             personalitySecondary: secondaryPersonality,
             learnedSkills: learnedSkills,
-            loadout: RuntimeCharacter.Loadout(
+            loadout: CachedCharacter.Loadout(
                 items: loadout.items,
                 titles: loadout.titles,
                 superRareTitles: loadout.superRareTitles
@@ -354,7 +354,7 @@ enum RuntimeCharacterFactory {
         var combat = calcResult.combat
         combat.isMartialEligible = isMartialEligible
 
-        return RuntimeCharacter(
+        return CachedCharacter(
             id: current.id,
             displayName: current.displayName,
             raceId: current.raceId,
@@ -428,7 +428,7 @@ enum RuntimeCharacterFactory {
     private static func assembleLoadout(
         masterData: MasterDataCache,
         from equippedItems: [CharacterInput.EquippedItem]
-    ) -> RuntimeCharacter.Loadout {
+    ) -> CachedCharacter.Loadout {
         // アイテムIDを収集（装備とソケット宝石）
         var itemIds = Set(equippedItems.map { $0.itemId })
         let socketItemIds = Set(equippedItems.map { $0.socketItemId }).filter { $0 > 0 }
@@ -447,7 +447,7 @@ enum RuntimeCharacterFactory {
         superRareTitleIds.formUnion(socketSuperRareTitleIds)
         let superRareTitles = superRareTitleIds.filter { $0 > 0 }.compactMap { masterData.superRareTitle($0) }
 
-        return RuntimeCharacter.Loadout(
+        return CachedCharacter.Loadout(
             items: items,
             titles: titles,
             superRareTitles: superRareTitles
@@ -456,14 +456,14 @@ enum RuntimeCharacterFactory {
 
     private static func hasPositivePhysicalAttackBonus(
         input: CharacterInput,
-        loadout: RuntimeCharacter.Loadout
+        loadout: CachedCharacter.Loadout
     ) -> Bool {
         hasPositivePhysicalAttackBonus(equippedItems: input.equippedItems, loadout: loadout)
     }
 
     private static func hasPositivePhysicalAttackBonus(
         equippedItems: [CharacterInput.EquippedItem],
-        loadout: RuntimeCharacter.Loadout
+        loadout: CachedCharacter.Loadout
     ) -> Bool {
         guard !equippedItems.isEmpty else { return false }
         let definitionsById = Dictionary(uniqueKeysWithValues: loadout.items.map { ($0.id, $0) })

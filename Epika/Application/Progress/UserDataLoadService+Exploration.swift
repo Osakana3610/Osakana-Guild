@@ -33,7 +33,7 @@ extension UserDataLoadService {
     }
 
     /// 探索サマリーを取得（キャッシュ不在時は再ロード）
-    func getExplorationSummaries() async throws -> [ExplorationSnapshot] {
+    func getExplorationSummaries() async throws -> [CachedExploration] {
         let needsLoad = await MainActor.run { !isExplorationSummariesLoaded }
         if needsLoad {
             try await loadExplorationSummaries()
@@ -165,12 +165,12 @@ extension UserDataLoadService {
             $0.party.partyId == partyId && $0.status == .running
         }) else { return }
 
-        let newLog = ExplorationSnapshot.EncounterLog(from: entry, battleLogId: battleLogId, masterData: masterData)
+        let newLog = CachedExploration.EncounterLog(from: entry, battleLogId: battleLogId, masterData: masterData)
         explorationSummaries[index].encounterLogs.append(newLog)
         explorationSummaries[index].activeFloorNumber = entry.floorNumber
         explorationSummaries[index].lastUpdatedAt = entry.occurredAt
 
-        explorationSummaries[index].summary = ExplorationSnapshot.makeSummary(
+        explorationSummaries[index].summary = CachedExploration.makeSummary(
             displayDungeonName: explorationSummaries[index].displayDungeonName,
             status: .running,
             activeFloorNumber: entry.floorNumber,
@@ -210,9 +210,9 @@ extension UserDataLoadService {
     }
 
     private func mergeDrops(
-        current: [ExplorationSnapshot.Rewards.ItemDropSummary],
+        current: [CachedExploration.Rewards.ItemDropSummary],
         newDrops: [ExplorationDropReward]
-    ) -> [ExplorationSnapshot.Rewards.ItemDropSummary] {
+    ) -> [CachedExploration.Rewards.ItemDropSummary] {
         guard !newDrops.isEmpty else { return current }
         var merged = current
         var indexByKey: [ExplorationDropKey: Int] = [:]
@@ -236,7 +236,7 @@ extension UserDataLoadService {
             } else {
                 indexByKey[key] = merged.count
                 merged.append(
-                    ExplorationSnapshot.Rewards.ItemDropSummary(
+                    CachedExploration.Rewards.ItemDropSummary(
                         itemId: itemId,
                         superRareTitleId: superRareTitleId,
                         normalTitleId: normalTitleId,

@@ -25,7 +25,7 @@ import SwiftUI
 /// CharacterSectionType: levelExp
 @MainActor
 struct CharacterLevelSection: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

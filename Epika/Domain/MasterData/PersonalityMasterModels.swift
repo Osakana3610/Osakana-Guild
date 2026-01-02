@@ -23,7 +23,7 @@
 //     - id, payloadJSON: 効果定義（JSON形式）
 //
 // 【使用箇所】
-//   - RuntimeCharacterFactory: キャラクター性格効果の適用
+//   - CachedCharacterFactory: キャラクター性格効果の適用
 //   - BattleTurnEngine: 戦闘時の性格効果発動
 //   - CharacterCreationView: 性格選択（将来実装）
 //

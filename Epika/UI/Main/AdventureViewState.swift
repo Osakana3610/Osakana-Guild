@@ -35,7 +35,7 @@ final class AdventureViewState {
     var showError: Bool = false
     var errorMessage: String = ""
 
-    var showCharacterDetail: RuntimeCharacter?
+    var showCharacterDetail: CachedCharacter?
     var showDungeonSelection: Bool = false
     var showPartyDetail: Bool = false
 
@@ -45,7 +45,7 @@ final class AdventureViewState {
     var partyState: PartyViewState?
 
     /// 探索進捗（UserDataLoadServiceのキャッシュを参照）
-    var explorationProgress: [ExplorationSnapshot] {
+    var explorationProgress: [CachedExploration] {
         appServicesRef?.userDataLoad.explorationSummaries ?? []
     }
 
@@ -166,7 +166,7 @@ final class AdventureViewState {
         }
     }
 
-    func startExploration(party: PartySnapshot, dungeon: RuntimeDungeon, using appServices: AppServices) async throws {
+    func startExploration(party: CachedParty, dungeon: RuntimeDungeon, using appServices: AppServices) async throws {
         guard activeExplorationTasks[party.id] == nil else {
             throw RuntimeError.explorationAlreadyActive(dungeonId: dungeon.id)
         }
@@ -186,7 +186,7 @@ final class AdventureViewState {
 
     /// 一斉出撃用のパラメータ
     struct BatchStartParams {
-        let party: PartySnapshot
+        let party: CachedParty
         let dungeon: RuntimeDungeon
     }
 
@@ -241,7 +241,7 @@ final class AdventureViewState {
         return failures
     }
 
-    func cancelExploration(for party: PartySnapshot, using appServices: AppServices) async {
+    func cancelExploration(for party: CachedParty, using appServices: AppServices) async {
         let partyId = party.id
         if let handle = activeExplorationHandles[partyId] {
             activeExplorationTasks[partyId]?.cancel()
@@ -308,7 +308,7 @@ final class AdventureViewState {
         activeExplorationHandles[partyId] = nil
     }
 
-    private func cancelPersistedExploration(for party: PartySnapshot, using appServices: AppServices) async {
+    private func cancelPersistedExploration(for party: CachedParty, using appServices: AppServices) async {
         guard let running = explorationProgress.first(where: { $0.party.partyId == party.id && $0.status == .running }) else {
             return
         }

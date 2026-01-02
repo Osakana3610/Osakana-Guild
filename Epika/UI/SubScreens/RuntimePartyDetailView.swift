@@ -24,7 +24,7 @@
 import SwiftUI
 
 struct RuntimePartyDetailView: View {
-    @State private var currentParty: PartySnapshot
+    @State private var currentParty: CachedParty
     @Binding private var selectedDungeon: RuntimeDungeon?
     let dungeons: [RuntimeDungeon]
 
@@ -32,13 +32,13 @@ struct RuntimePartyDetailView: View {
     @Environment(AdventureViewState.self) private var adventureState
     @Environment(AppServices.self) private var appServices
 
-    @State private var allCharacters: [RuntimeCharacter] = []
+    @State private var allCharacters: [CachedCharacter] = []
     @State private var errorMessage: String?
     @State private var showDungeonPicker = false
     @State private var targetFloorSelection: Int
-    @State private var selectedCharacter: RuntimeCharacter?
+    @State private var selectedCharacter: CachedCharacter?
 
-    init(party: PartySnapshot, selectedDungeon: Binding<RuntimeDungeon?>, dungeons: [RuntimeDungeon]) {
+    init(party: CachedParty, selectedDungeon: Binding<RuntimeDungeon?>, dungeons: [RuntimeDungeon]) {
         _currentParty = State(initialValue: party)
         _selectedDungeon = selectedDungeon
         _targetFloorSelection = State(initialValue: Int(party.targetFloor))
@@ -88,7 +88,7 @@ struct RuntimePartyDetailView: View {
                         allCharacters: allCharacters
                     )
                     .onDisappear {
-                        Task { await refreshPartySnapshot() }
+                        Task { await refreshCachedParty() }
                     }
                 } label: {
                     Text("メンバーを変更する (6名まで)")
@@ -109,7 +109,7 @@ struct RuntimePartyDetailView: View {
 
                 NavigationLink {
                     PartyNameEditorView(party: currentParty) {
-                        await refreshPartySnapshot()
+                        await refreshCachedParty()
                     }
                 } label: {
                     Text("パーティ名を変更する")
@@ -182,7 +182,7 @@ struct RuntimePartyDetailView: View {
             }
             .sheet(isPresented: isCharacterDetailPresented) {
                 if let character = selectedCharacter {
-                    RuntimeCharacterDetailSheetView(character: character)
+                    CachedCharacterDetailSheetView(character: character)
                 }
             }
         }
@@ -195,7 +195,7 @@ struct RuntimePartyDetailView: View {
 
     private var partyService: PartyProgressService { appServices.party }
 
-    private var membersOfCurrentParty: [RuntimeCharacter] {
+    private var membersOfCurrentParty: [CachedCharacter] {
         currentParty.memberIds.compactMap { memberId in
             allCharacters.first { $0.id == memberId }
         }
@@ -256,7 +256,7 @@ struct RuntimePartyDetailView: View {
             // HP変更後にキャッシュを無効化
             appServices.userDataLoad.invalidateCharacters()
             try await loadAllCharacters()
-            await refreshPartySnapshot()
+            await refreshCachedParty()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -268,7 +268,7 @@ struct RuntimePartyDetailView: View {
     }
 
     @MainActor
-    private func refreshPartySnapshot() async {
+    private func refreshCachedParty() async {
         do {
             try await partyState.refresh()
             if let updated = partyState.parties.first(where: { $0.id == currentParty.id }) {
@@ -323,7 +323,7 @@ struct RuntimePartyDetailView: View {
         }
     }
 
-    private func canStartExploration(for party: PartySnapshot) -> Bool {
+    private func canStartExploration(for party: CachedParty) -> Bool {
         guard let dungeon = activeDungeon else { return false }
         guard dungeon.isUnlocked else { return false }
         guard party.lastSelectedDifficulty <= dungeon.highestUnlockedDifficulty else { return false }
@@ -336,7 +336,7 @@ struct RuntimePartyDetailView: View {
     private func updateDungeonSelection(dungeonId: UInt16) async -> Bool {
         do {
             _ = try await partyService.setLastSelectedDungeon(persistentIdentifier: currentParty.persistentIdentifier, dungeonId: dungeonId)
-            await refreshPartySnapshot()
+            await refreshCachedParty()
             return true
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
@@ -347,7 +347,7 @@ struct RuntimePartyDetailView: View {
     private func updateTargetFloor(_ floor: Int) async {
         do {
             _ = try await partyService.setTargetFloor(persistentIdentifier: currentParty.persistentIdentifier, floor: UInt8(floor))
-            await refreshPartySnapshot()
+            await refreshCachedParty()
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
         }
@@ -357,7 +357,7 @@ struct RuntimePartyDetailView: View {
         do {
             _ = try await partyService.setLastSelectedDifficulty(persistentIdentifier: currentParty.persistentIdentifier,
                                                                  difficulty: difficulty)
-            await refreshPartySnapshot()
+            await refreshCachedParty()
             return true
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
@@ -373,7 +373,7 @@ struct RuntimePartyDetailView: View {
 }
 
 private struct PartySkillsListView: View {
-    let characters: [RuntimeCharacter]
+    let characters: [CachedCharacter]
 
     var body: some View {
         List {
@@ -403,7 +403,7 @@ private struct PartySkillsListView: View {
 private struct PartyEquipmentListView: View {
     let memberIds: [UInt8]
     @Environment(AppServices.self) private var appServices
-    @State private var characters: [RuntimeCharacter] = []
+    @State private var characters: [CachedCharacter] = []
 
     var body: some View {
         List {
@@ -470,7 +470,7 @@ private struct PartyEquipmentListView: View {
         return result
     }
 
-    private func slotUsageText(for character: RuntimeCharacter) -> String {
+    private func slotUsageText(for character: CachedCharacter) -> String {
         let usedSlots = character.equippedItems.reduce(into: 0) { result, item in
             result += max(0, item.quantity)
         }
@@ -688,7 +688,7 @@ private struct DifficultyPickerView: View {
 }
 
 private struct PartyNameEditorView: View {
-    let party: PartySnapshot
+    let party: CachedParty
     let onComplete: () async -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(AppServices.self) private var appServices

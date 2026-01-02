@@ -1,5 +1,5 @@
 // ==============================================================================
-// RuntimeCharacterModels.swift
+// CachedCharacterModels.swift
 // Epika
 // ==============================================================================
 //
@@ -8,7 +8,7 @@
 //   - ゲームロジックで使用する完全なキャラクター表現
 //
 // 【データ構造】
-//   - RuntimeCharacter: キャラクター完全表現
+//   - CachedCharacter: キャラクター完全表現
 //     永続化データ:
 //       - id, displayName, raceId, jobId, previousJobId, avatarId
 //       - level, experience, currentHP
@@ -42,11 +42,11 @@
 
 import Foundation
 
-// MARK: - 新RuntimeCharacter（フラット化）
+// MARK: - 新CachedCharacter（フラット化）
 
 /// ゲームロジックで使用するキャラクターの完全な表現。
 /// CharacterInput + マスターデータ + 計算結果を統合。
-struct RuntimeCharacter: Identifiable, Sendable, Hashable {
+struct CachedCharacter: Identifiable, Sendable, Hashable {
     // === 永続化データ（CharacterInputから） ===
     let id: UInt8
     var displayName: String
@@ -123,7 +123,7 @@ struct RuntimeCharacter: Identifiable, Sendable, Hashable {
     }
 }
 
-extension RuntimeCharacter {
+extension CachedCharacter {
     typealias CoreAttributes = CharacterValues.CoreAttributes
     typealias Combat = CharacterValues.Combat
 

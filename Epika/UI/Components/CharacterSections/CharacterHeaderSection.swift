@@ -24,7 +24,7 @@ import SwiftUI
 /// CharacterSectionType: name, characterImage
 @MainActor
 struct CharacterHeaderSection: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
     let onRename: ((String) async throws -> Void)?
     let onAvatarChange: ((UInt16) async throws -> Void)?
 
@@ -36,7 +36,7 @@ struct CharacterHeaderSection: View {
     @State private var avatarChangeError: String?
     @State private var isChangingAvatar = false
 
-    init(character: RuntimeCharacter,
+    init(character: CachedCharacter,
          onRename: ((String) async throws -> Void)? = nil,
          onAvatarChange: ((UInt16) async throws -> Void)? = nil) {
         self.character = character
@@ -129,7 +129,7 @@ struct CharacterHeaderSection: View {
         }
     }
 
-    /// デフォルトのavatarIdはRuntimeCharacterから直接取得可能
+    /// デフォルトのavatarIdはCachedCharacterから直接取得可能
     private var defaultAvatarId: UInt16 { character.avatarId }
 
     private func triggerRename() {
