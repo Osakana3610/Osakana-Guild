@@ -1,5 +1,5 @@
 // ==============================================================================
-// RuntimeEquipmentRow.swift
+// InventoryItemRow.swift
 // Epika
 // ==============================================================================
 //
@@ -23,25 +23,25 @@
 
 import SwiftUI
 
-struct RuntimeEquipmentRow: View {
-    let equipment: RuntimeEquipment
+struct InventoryItemRow: View {
+    let item: CachedInventoryItem
     let showPrice: Bool
     let price: Int?
-    let currencyType: RuntimeEquipment.CurrencyType
+    let currencyType: CurrencyType
     let isAffordable: Bool
     let isSelected: Bool
     let onTap: (() -> Void)?
 
     init(
-        equipment: RuntimeEquipment,
+        item: CachedInventoryItem,
         showPrice: Bool = false,
         price: Int? = nil,
-        currencyType: RuntimeEquipment.CurrencyType = .gold,
+        currencyType: CurrencyType = .gold,
         isAffordable: Bool = true,
         isSelected: Bool = false,
         onTap: (() -> Void)? = nil
     ) {
-        self.equipment = equipment
+        self.item = item
         self.showPrice = showPrice
         self.price = price
         self.currencyType = currencyType
@@ -60,15 +60,15 @@ struct RuntimeEquipmentRow: View {
             }
 
             // 装備アイコン
-            EquipmentIcon(equipment: equipment)
+            EquipmentIcon(item: item)
 
             // 装備情報
             VStack(alignment: .leading, spacing: 4) {
-                Text(equipment.displayName)
+                Text(item.displayName)
                     .font(.body)
                     .lineLimit(1)
 
-                EquipmentStatsView(equipment: equipment)
+                EquipmentStatsView(item: item)
 
                 // 装備中表示は画面側文脈で判定するため、この行では表示しない
             }
@@ -96,14 +96,14 @@ struct RuntimeEquipmentRow: View {
 }
 
 struct EquipmentIcon: View {
-    let equipment: RuntimeEquipment
+    let item: CachedInventoryItem
 
     var body: some View {
         RoundedRectangle(cornerRadius: 6)
             .fill(Color.secondary.opacity(0.15))
             .frame(width: 40, height: 40)
             .overlay(
-                Image(systemName: equipment.category.iconName)
+                Image(systemName: item.category.iconName)
                     .foregroundColor(.secondary)
                     .font(.title3)
             )
@@ -115,25 +115,25 @@ struct EquipmentIcon: View {
 }
 
 struct EquipmentStatsView: View {
-    let equipment: RuntimeEquipment
+    let item: CachedInventoryItem
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 8) {
-                if equipment.baseValue > 0 {
-                    StatChip(label: "基本価値", value: equipment.baseValue, color: .green)
+                if item.baseValue > 0 {
+                    StatChip(label: "基本価値", value: item.baseValue, color: .green)
                 }
             }
 
             // 戦闘ステ加算のプレビュー（新ロジック準拠）
-            TaskView(equipment: equipment)
+            CombatDeltaView(item: item)
         }
     }
 }
 
-private struct TaskView: View {
+private struct CombatDeltaView: View {
     @Environment(AppServices.self) private var appServices
-    let equipment: RuntimeEquipment
+    let item: CachedInventoryItem
     @State private var deltas: [(String, Int)] = []
 
     var body: some View {
@@ -145,12 +145,12 @@ private struct TaskView: View {
                 }
             }
             .task {
-                self.deltas = appServices.userDataLoad.getCombatDeltaDisplay(for: equipment)
+                self.deltas = appServices.userDataLoad.getCombatDeltaDisplay(for: item)
             }
         } else {
             // 初回ロード
             HStack {}.task {
-                self.deltas = appServices.userDataLoad.getCombatDeltaDisplay(for: equipment)
+                self.deltas = appServices.userDataLoad.getCombatDeltaDisplay(for: item)
             }
         }
     }

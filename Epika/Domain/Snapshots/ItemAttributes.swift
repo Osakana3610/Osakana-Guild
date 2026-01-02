@@ -31,7 +31,10 @@ struct CachedInventoryItem: Sendable, Identifiable, Hashable {
     let category: ItemSaleCategory
     let rarity: UInt8?
     let displayName: String
+    let baseValue: Int
     let sellValue: Int
+    let statBonuses: ItemDefinition.StatBonuses
+    let combatBonuses: ItemDefinition.CombatBonuses
 
     var id: String { stackKey }
 
@@ -49,6 +52,15 @@ struct CachedInventoryItem: Sendable, Identifiable, Hashable {
     var hasGemModification: Bool {
         socketItemId != 0
     }
+}
+
+// MARK: - CurrencyType
+
+/// 通貨タイプ（UI表示用）
+enum CurrencyType: Sendable {
+    case gold
+    case catTicket
+    case gem
 }
 
 // MARK: - ItemEnhancement

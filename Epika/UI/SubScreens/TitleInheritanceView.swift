@@ -22,12 +22,12 @@ import SwiftUI
 
 struct TitleInheritanceView: View {
     @Environment(AppServices.self) private var appServices
-    @State private var targetItems: [RuntimeEquipment] = []
-    @State private var sourceItems: [RuntimeEquipment] = []
-    @State private var selectedTarget: RuntimeEquipment?
-    @State private var selectedSource: RuntimeEquipment?
+    @State private var targetItems: [CachedInventoryItem] = []
+    @State private var sourceItems: [CachedInventoryItem] = []
+    @State private var selectedTarget: CachedInventoryItem?
+    @State private var selectedSource: CachedInventoryItem?
     @State private var preview: TitleInheritanceProgressService.TitleInheritancePreview?
-    @State private var resultItem: RuntimeEquipment?
+    @State private var resultItem: CachedInventoryItem?
     @State private var showResult = false
     @State private var showError = false
     @State private var errorMessage = ""
@@ -284,7 +284,7 @@ struct TitleInheritancePreviewCard: View {
 }
 
 struct TitleInheritanceResultView: View {
-    let item: RuntimeEquipment
+    let item: CachedInventoryItem
     let onDismiss: () async -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -294,7 +294,7 @@ struct TitleInheritanceResultView: View {
                 .font(.title2)
                 .bold()
 
-            RuntimeEquipmentRow(equipment: item, showPrice: false)
+            InventoryItemRow(item: item, showPrice: false)
 
             Button("閉じる") {
                 Task {

@@ -24,7 +24,7 @@ import Observation
 @MainActor
 @Observable
 final class StoryViewModel {
-    var nodes: [RuntimeStoryNode] = []
+    var nodes: [CachedStoryNode] = []
     var isLoading: Bool = false
     var error: Error?
 
@@ -46,7 +46,7 @@ final class StoryViewModel {
 
             nodes = definitions.compactMap { definition in
                 guard unlocked.contains(definition.id) else { return nil }
-                return RuntimeStoryNode(
+                return CachedStoryNode(
                     definition: definition,
                     isUnlocked: unlocked.contains(definition.id),
                     isCompleted: read.contains(definition.id),
@@ -54,8 +54,8 @@ final class StoryViewModel {
                 )
             }
             .sorted { lhs, rhs in
-                if lhs.definition.chapter != rhs.definition.chapter {
-                    return lhs.definition.chapter < rhs.definition.chapter
+                if lhs.chapter != rhs.chapter {
+                    return lhs.chapter < rhs.chapter
                 }
                 if lhs.section != rhs.section {
                     return lhs.section < rhs.section
@@ -68,7 +68,7 @@ final class StoryViewModel {
         }
     }
 
-    func groupedByChapter() -> [(chapter: String, nodes: [RuntimeStoryNode])] {
+    func groupedByChapter() -> [(chapter: String, nodes: [CachedStoryNode])] {
         let grouped = Dictionary(grouping: nodes) { node in
             node.chapterId
         }
@@ -194,7 +194,7 @@ struct StoryView: View {
 }
 
 private struct StoryRow: View {
-    let node: RuntimeStoryNode
+    let node: CachedStoryNode
 
     var body: some View {
         HStack {

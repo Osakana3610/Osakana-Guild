@@ -8,10 +8,10 @@
 //   - あるアイテムの称号を別のアイテムに移す
 //
 // 【公開API】
-//   - availableTargetItems() → [RuntimeEquipment] - 継承先候補
-//   - availableSourceItems(for:) → [RuntimeEquipment] - 継承元候補
+//   - availableTargetItems() → [CachedInventoryItem] - 継承先候補
+//   - availableSourceItems(for:) → [CachedInventoryItem] - 継承元候補
 //   - preview(targetStackKey:sourceStackKey:) → TitleInheritancePreview
-//   - inherit(targetStackKey:sourceStackKey:) → RuntimeEquipment
+//   - inherit(targetStackKey:sourceStackKey:) → CachedInventoryItem
 //
 // 【継承ルール】
 //   - 同一カテゴリのアイテム間でのみ継承可能
@@ -42,13 +42,13 @@ actor TitleInheritanceProgressService {
         self.masterDataCache = masterDataCache
     }
 
-    func availableTargetItems() async throws -> [RuntimeEquipment] {
+    func availableTargetItems() async throws -> [CachedInventoryItem] {
         try await inventoryService.allEquipment(storage: .playerItem)
     }
 
-    func availableSourceItems(for target: RuntimeEquipment) async throws -> [RuntimeEquipment] {
+    func availableSourceItems(for target: CachedInventoryItem) async throws -> [CachedInventoryItem] {
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        return equipments.filter { $0.id != target.id && $0.category == target.category }
+        return equipments.filter { $0.stackKey != target.stackKey && $0.category == target.category }
     }
 
     func preview(targetStackKey: String, sourceStackKey: String) async throws -> TitleInheritancePreview {
@@ -71,7 +71,7 @@ actor TitleInheritanceProgressService {
                                        resultEnhancement: resultEnhancement)
     }
 
-    func inherit(targetStackKey: String, sourceStackKey: String) async throws -> RuntimeEquipment {
+    func inherit(targetStackKey: String, sourceStackKey: String) async throws -> CachedInventoryItem {
         let inheritance = try await resolveContext(targetStackKey: targetStackKey, sourceStackKey: sourceStackKey)
         let newEnhancement = ItemEnhancement(
             superRareTitleId: inheritance.source.enhancement.superRareTitleId,
@@ -90,15 +90,15 @@ private extension TitleInheritanceProgressService {
     nonisolated func resolveContext(
         targetStackKey: String,
         sourceStackKey: String
-    ) async throws -> (target: RuntimeEquipment, source: RuntimeEquipment) {
+    ) async throws -> (target: CachedInventoryItem, source: CachedInventoryItem) {
         guard targetStackKey != sourceStackKey else {
             throw ProgressError.invalidInput(description: "同じアイテム間での継承はできません")
         }
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        guard let target = equipments.first(where: { $0.id == targetStackKey }) else {
+        guard let target = equipments.first(where: { $0.stackKey == targetStackKey }) else {
             throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
         }
-        guard let source = equipments.first(where: { $0.id == sourceStackKey }) else {
+        guard let source = equipments.first(where: { $0.stackKey == sourceStackKey }) else {
             throw ProgressError.invalidInput(description: "提供アイテムが見つかりません")
         }
         guard source.category == target.category else {

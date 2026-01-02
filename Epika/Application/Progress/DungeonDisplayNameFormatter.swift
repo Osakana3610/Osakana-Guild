@@ -23,7 +23,7 @@
 //   - statMultiplier(for:masterData:) → Double: 敵ステータス倍率
 //
 // 【使用箇所】
-//   - RuntimeDungeon: 難易度リスト取得
+//   - CachedDungeonProgress: 難易度リスト取得
 //   - AdventureView: 難易度選択UI
 //   - BattleEnemyGroupConfigService: 敵レベル計算
 //

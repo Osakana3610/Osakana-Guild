@@ -10,9 +10,9 @@
 // 【公開API】
 //   - availableArtifacts() → [ArtifactOption]
 //     交換可能な神器リストを取得
-//   - playerArtifacts() → [RuntimeEquipment]
+//   - playerArtifacts() → [CachedInventoryItem]
 //     プレイヤー所持の神器を取得
-//   - exchange(givingItemStackKey:desiredItemId:) → RuntimeEquipment
+//   - exchange(givingItemStackKey:desiredItemId:) → CachedInventoryItem
 //     神器交換を実行
 //
 // 【補助型】
@@ -62,11 +62,11 @@ actor ArtifactExchangeProgressService {
         }
     }
 
-    func playerArtifacts() async throws -> [RuntimeEquipment] {
+    func playerArtifacts() async throws -> [CachedInventoryItem] {
         try await inventoryService.allEquipment(storage: .playerItem)
     }
 
-    func exchange(givingItemStackKey: String, desiredItemId: UInt16) async throws -> RuntimeEquipment {
+    func exchange(givingItemStackKey: String, desiredItemId: UInt16) async throws -> CachedInventoryItem {
         guard !exchangeRules.isEmpty else {
             throw ProgressError.invalidInput(description: "神器交換レシピが未定義です")
         }
@@ -75,7 +75,7 @@ actor ArtifactExchangeProgressService {
         }
 
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        guard let offering = equipments.first(where: { $0.id == givingItemStackKey }) else {
+        guard let offering = equipments.first(where: { $0.stackKey == givingItemStackKey }) else {
             throw ProgressError.invalidInput(description: "提供する神器が所持品に存在しません")
         }
         guard offering.itemId == rule.requiredItemId else {
@@ -99,17 +99,20 @@ actor ArtifactExchangeProgressService {
         }
 
         // 更新後はすべてリセットされた状態
-        return RuntimeEquipment(
-            id: updatedStackKey,
+        return CachedInventoryItem(
+            stackKey: updatedStackKey,
             itemId: rule.rewardItemId,
-            masterDataId: String(rewardDefinition.id),
-            displayName: rewardDefinition.name,
             quantity: 1,
+            normalTitleId: 0,
+            superRareTitleId: 0,
+            socketItemId: 0,
+            socketNormalTitleId: 0,
+            socketSuperRareTitleId: 0,
             category: ItemSaleCategory(rawValue: rewardDefinition.category) ?? .other,
+            rarity: rewardDefinition.rarity,
+            displayName: rewardDefinition.name,
             baseValue: rewardDefinition.basePrice,
             sellValue: rewardDefinition.sellValue,
-            enhancement: ItemEnhancement(),  // すべて0にリセット済み
-            rarity: rewardDefinition.rarity,
             statBonuses: rewardDefinition.statBonuses,
             combatBonuses: rewardDefinition.combatBonuses
         )

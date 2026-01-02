@@ -22,15 +22,15 @@ import SwiftUI
 struct ArtifactExchangeView: View {
     @Environment(AppServices.self) private var appServices
     @State private var availableOptions: [ArtifactExchangeProgressService.ArtifactOption] = []
-    @State private var playerArtifacts: [RuntimeEquipment] = []
+    @State private var playerArtifacts: [CachedInventoryItem] = []
     @State private var selectedOption: ArtifactExchangeProgressService.ArtifactOption?
-    @State private var selectedPlayerArtifact: RuntimeEquipment?
+    @State private var selectedPlayerArtifact: CachedInventoryItem?
     @State private var showArtifactPicker = false
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var isLoading = false
     @State private var showGemWarning = false
-    @State private var pendingExchange: (option: ArtifactExchangeProgressService.ArtifactOption, artifact: RuntimeEquipment)?
+    @State private var pendingExchange: (option: ArtifactExchangeProgressService.ArtifactOption, artifact: CachedInventoryItem)?
 
     private var exchangeService: ArtifactExchangeProgressService { appServices.artifactExchange }
 
@@ -105,7 +105,7 @@ struct ArtifactExchangeView: View {
                         .italic()
                 } else {
                     ForEach(playerArtifacts, id: \.id) { artifact in
-                        RuntimeEquipmentRow(equipment: artifact)
+                        InventoryItemRow(item: artifact)
                     }
                 }
             }
@@ -146,10 +146,10 @@ struct ArtifactExchangeView: View {
     }
 
     @MainActor
-    private func tryPerformExchange(option: ArtifactExchangeProgressService.ArtifactOption, artifact: RuntimeEquipment) async {
+    private func tryPerformExchange(option: ArtifactExchangeProgressService.ArtifactOption, artifact: CachedInventoryItem) async {
         showArtifactPicker = false
         // 宝石改造が施されている場合は警告を表示
-        if artifact.enhancement.socketItemId != 0 {
+        if artifact.hasGemModification {
             pendingExchange = (option, artifact)
             showGemWarning = true
         } else {
@@ -158,7 +158,7 @@ struct ArtifactExchangeView: View {
     }
 
     @MainActor
-    private func performExchange(option: ArtifactExchangeProgressService.ArtifactOption, artifact: RuntimeEquipment) async {
+    private func performExchange(option: ArtifactExchangeProgressService.ArtifactOption, artifact: CachedInventoryItem) async {
         do {
             _ = try await exchangeService.exchange(givingItemStackKey: artifact.id, desiredItemId: option.definition.id)
             selectedOption = nil

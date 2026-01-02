@@ -222,11 +222,13 @@ extension AppServices {
             Task {
                 do {
                     // ダンジョンクリア処理とストーリー解放（完全クリア時のみ）
-                    if isFullClear {
+                    if isFullClear,
+                       let dungeonDef = appServices.masterDataCache.dungeon(capturedDungeonId) {
                         _ = try await appServices.dungeon.markClearedAndUnlockNext(
                             dungeonId: capturedDungeonId,
                             difficulty: capturedDifficulty,
-                            totalFloors: capturedFloorCount
+                            totalFloors: capturedFloorCount,
+                            definition: dungeonDef
                         )
                         try await appServices.unlockStoryForDungeonClear(capturedDungeonId)
                     }

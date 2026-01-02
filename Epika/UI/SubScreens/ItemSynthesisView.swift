@@ -22,12 +22,12 @@ import SwiftUI
 
 struct ItemSynthesisView: View {
     @Environment(AppServices.self) private var appServices
-    @State private var parentItems: [RuntimeEquipment] = []
-    @State private var childItems: [RuntimeEquipment] = []
-    @State private var selectedParent: RuntimeEquipment?
-    @State private var selectedChild: RuntimeEquipment?
+    @State private var parentItems: [CachedInventoryItem] = []
+    @State private var childItems: [CachedInventoryItem] = []
+    @State private var selectedParent: CachedInventoryItem?
+    @State private var selectedChild: CachedInventoryItem?
     @State private var preview: ItemSynthesisProgressService.SynthesisPreview?
-    @State private var synthesisResult: RuntimeEquipment?
+    @State private var synthesisResult: CachedInventoryItem?
     @State private var showResult = false
     @State private var isLoading = false
     @State private var showError = false
@@ -198,7 +198,7 @@ struct ItemSynthesisView: View {
     }
 
     @MainActor
-    private func loadChildItems(for parent: RuntimeEquipment) async {
+    private func loadChildItems(for parent: CachedInventoryItem) async {
         do {
             childItems = try await synthesisService.availableChildItems(forParent: parent)
         } catch {
@@ -270,7 +270,7 @@ struct SynthesisInstructionCard: View {
 struct ItemSelectionCard: View {
     let title: String
     let subtitle: String
-    let selectedItem: RuntimeEquipment?
+    let selectedItem: CachedInventoryItem?
     let onSelect: () -> Void
     let onClear: () -> Void
 
@@ -287,7 +287,7 @@ struct ItemSelectionCard: View {
 
                 if let item = selectedItem {
                     HStack {
-                        RuntimeEquipmentRow(equipment: item, showPrice: false)
+                        InventoryItemRow(item: item, showPrice: false)
 
                         Button("変更", action: onSelect)
                             .buttonStyle(.bordered)
@@ -334,7 +334,7 @@ struct SynthesisPreviewCard: View {
 }
 
 struct SynthesisResultView: View {
-    let result: RuntimeEquipment
+    let result: CachedInventoryItem
     let onDismiss: () async -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -344,7 +344,7 @@ struct SynthesisResultView: View {
                 .font(.title2)
                 .fontWeight(.bold)
 
-            RuntimeEquipmentRow(equipment: result, showPrice: false)
+            InventoryItemRow(item: result, showPrice: false)
 
             Button("閉じる") {
                 Task {
@@ -363,12 +363,12 @@ struct SynthesisResultView: View {
 
 struct ItemPickerView: View {
     let title: String
-    let items: [RuntimeEquipment]
-    @Binding var selectedItem: RuntimeEquipment?
+    let items: [CachedInventoryItem]
+    @Binding var selectedItem: CachedInventoryItem?
     let onSelection: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
 
-    init(title: String, items: [RuntimeEquipment], selectedItem: Binding<RuntimeEquipment?>, onSelection: (() -> Void)? = nil) {
+    init(title: String, items: [CachedInventoryItem], selectedItem: Binding<CachedInventoryItem?>, onSelection: (() -> Void)? = nil) {
         self.title = title
         self.items = items
         self._selectedItem = selectedItem
@@ -384,7 +384,7 @@ struct ItemPickerView: View {
                         onSelection?()
                         dismiss()
                     } label: {
-                        RuntimeEquipmentRow(equipment: item, showPrice: false)
+                        InventoryItemRow(item: item, showPrice: false)
                             .foregroundColor(.primary)
                             .frame(height: AppConstants.UI.listRowHeight)
                     }

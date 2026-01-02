@@ -10,7 +10,7 @@
 //
 // 【状態管理】
 //   - activeExplorationHandles/Tasks: 進行中の探索管理
-//   - runtimeDungeons: 解放済みダンジョンリスト
+//   - dungeons: 解放済みダンジョンリスト
 //   - explorationProgress: UserDataLoadService.explorationSummariesへのアクセサ
 //   - 孤立探索の再開はUserDataLoadServiceが起動時に実行
 //
@@ -39,7 +39,7 @@ final class AdventureViewState {
     var showDungeonSelection: Bool = false
     var showPartyDetail: Bool = false
 
-    var runtimeDungeons: [RuntimeDungeon] = []
+    var dungeons: [CachedDungeonProgress] = []
     var playerProgress: CachedPlayer?
 
     var partyState: PartyViewState?
@@ -86,28 +86,32 @@ final class AdventureViewState {
 
             let dungeonService = appServices.dungeon
             let definitions = appServices.masterDataCache.allDungeons
-            let progressSnapshots = try await dungeonService.allDungeonSnapshots()
+            let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+            let progressSnapshots = try await dungeonService.allDungeonSnapshots(definitions: definitionMap)
             var progressCache = Dictionary(progressSnapshots.map { ($0.dungeonId, $0) },
                                            uniquingKeysWith: { _, latest in latest })
-            var built: [RuntimeDungeon] = []
+            var built: [CachedDungeonProgress] = []
             built.reserveCapacity(definitions.count)
             for definition in definitions {
-                let snapshot = try await resolveDungeonProgress(id: definition.id, cache: &progressCache, using: appServices)
-                built.append(RuntimeDungeon(definition: definition, progress: snapshot))
+                let snapshot = try await resolveDungeonProgress(
+                    id: definition.id,
+                    definition: definition,
+                    cache: &progressCache,
+                    using: appServices
+                )
+                built.append(snapshot)
             }
-            runtimeDungeons = built
+            dungeons = built
                 .filter { $0.isUnlocked }
                 .sorted { lhs, rhs in
-                let leftDungeon = lhs.definition
-                let rightDungeon = rhs.definition
-                if leftDungeon.chapter != rightDungeon.chapter {
-                    return leftDungeon.chapter < rightDungeon.chapter
+                    if lhs.chapter != rhs.chapter {
+                        return lhs.chapter < rhs.chapter
+                    }
+                    if lhs.stage != rhs.stage {
+                        return lhs.stage < rhs.stage
+                    }
+                    return lhs.name < rhs.name
                 }
-                if leftDungeon.stage != rightDungeon.stage {
-                    return leftDungeon.stage < rightDungeon.stage
-                }
-                return leftDungeon.name < rightDungeon.name
-            }
         } catch {
             present(error: error)
         }
@@ -166,7 +170,7 @@ final class AdventureViewState {
         }
     }
 
-    func startExploration(party: CachedParty, dungeon: RuntimeDungeon, using appServices: AppServices) async throws {
+    func startExploration(party: CachedParty, dungeon: CachedDungeonProgress, using appServices: AppServices) async throws {
         guard activeExplorationTasks[party.id] == nil else {
             throw RuntimeError.explorationAlreadyActive(dungeonId: dungeon.id)
         }
@@ -187,7 +191,7 @@ final class AdventureViewState {
     /// 一斉出撃用のパラメータ
     struct BatchStartParams {
         let party: CachedParty
-        let dungeon: RuntimeDungeon
+        let dungeon: CachedDungeonProgress
     }
 
     /// 複数の探索を一括で開始（並列準備 + 1回のDB保存 + 1回の進捗更新）
@@ -320,13 +324,16 @@ final class AdventureViewState {
         }
     }
 
-    private func resolveDungeonProgress(id: UInt16,
-                                        cache: inout [UInt16: CachedDungeonProgress],
-                                        using appServices: AppServices) async throws -> CachedDungeonProgress {
+    private func resolveDungeonProgress(
+        id: UInt16,
+        definition: DungeonDefinition,
+        cache: inout [UInt16: CachedDungeonProgress],
+        using appServices: AppServices
+    ) async throws -> CachedDungeonProgress {
         if let cached = cache[id] {
             return cached
         }
-        let ensured = try await appServices.dungeon.ensureDungeonSnapshot(for: id)
+        let ensured = try await appServices.dungeon.ensureDungeonSnapshot(for: id, definition: definition)
         cache[id] = ensured
         return ensured
     }
