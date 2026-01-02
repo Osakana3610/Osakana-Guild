@@ -5,7 +5,7 @@
 //
 // 【責務】
 //   - キャラクター関連値型の名前空間
-//   - CharacterSnapshot/RuntimeCharacterで共有される構造体の定義
+//   - CharacterSnapshot/CachedCharacterで共有される構造体の定義
 //
 // 【データ構造】
 //   - CoreAttributes: 基礎ステータス（STR/WIS/SPI/VIT/AGI/LUK）
@@ -29,14 +29,14 @@
 //
 // 【使用箇所】
 //   - CharacterSnapshot: 値型の型エイリアス元
-//   - RuntimeCharacter: ランタイムキャラクター
+//   - CachedCharacter: ランタイムキャラクター
 //   - CharacterInput: 変換用中間型
 //
 // ==============================================================================
 
 import Foundation
 
-/// CharacterSnapshotとRuntimeCharacterで共有される値型の名前空間。
+/// CharacterSnapshotとCachedCharacterで共有される値型の名前空間。
 /// インスタンス化は意図しない（enumとして定義）。
 enum CharacterValues {
     struct CoreAttributes: Sendable, Hashable {

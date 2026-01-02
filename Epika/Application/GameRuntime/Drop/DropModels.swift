@@ -65,8 +65,8 @@ struct PartyDropBonuses: Sendable {
                                           averageLuck: 0.0,
                                           fortune: 0)
 
-    /// RuntimeCharacter配列からボーナスを計算する。
-    init(members: [RuntimeCharacter]) {
+    /// CachedCharacter配列からボーナスを計算する。
+    init(members: [CachedCharacter]) {
         guard !members.isEmpty else {
             self = .neutral
             return

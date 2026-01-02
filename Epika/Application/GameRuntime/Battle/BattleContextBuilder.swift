@@ -93,7 +93,7 @@ struct BattleContextBuilder {
         return slot
     }
 
-    private static func playerActionRates(for character: RuntimeCharacter) -> BattleActionRates {
+    private static func playerActionRates(for character: CachedCharacter) -> BattleActionRates {
         let preferences = character.actionPreferences
         let breath = character.combat.breathDamage > 0 ? preferences.breath : 0
         return BattleActionRates(attack: preferences.attack,

@@ -8,7 +8,7 @@
 //   - 探索レコードの作成・更新・終了処理
 //
 // 【公開API】
-//   - allExplorations() → [ExplorationSnapshot] - 全探索履歴
+//   - allExplorations() → [CachedExploration] - 全探索履歴
 //   - beginRun(...) → PersistentIdentifier - 探索開始、レコード作成
 //   - appendEvent(...) - イベント追加、乱数状態保存
 //   - finalizeRun(...) - 探索終了処理
@@ -31,7 +31,7 @@
 import Foundation
 import SwiftData
 
-private enum ExplorationSnapshotBuildError: Error {
+private enum CachedExplorationBuildError: Error {
     case dungeonNotFound(UInt16)
     case itemNotFound(UInt16)
     case enemyNotFound(UInt16)
@@ -40,7 +40,7 @@ private enum ExplorationSnapshotBuildError: Error {
 
 // MARK: - Snapshot Query Actor
 
-actor ExplorationSnapshotQueryActor {
+actor CachedExplorationQueryActor {
     private let contextProvider: SwiftDataContextProvider
     private let masterDataCache: MasterDataCache
 
@@ -49,14 +49,14 @@ actor ExplorationSnapshotQueryActor {
         self.masterDataCache = masterDataCache
     }
 
-    func allExplorations() async throws -> [ExplorationSnapshot] {
+    func allExplorations() async throws -> [CachedExploration] {
         let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<ExplorationRunRecord>(sortBy: [SortDescriptor(\.endedAt, order: .reverse)])
         let runs = try context.fetch(descriptor)
         return try await makeSnapshots(runs: runs, context: context)
     }
 
-    func recentExplorations(forPartyId partyId: UInt8, limit: Int) async throws -> [ExplorationSnapshot] {
+    func recentExplorations(forPartyId partyId: UInt8, limit: Int) async throws -> [CachedExploration] {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId },
@@ -67,7 +67,7 @@ actor ExplorationSnapshotQueryActor {
         return try await makeSnapshots(runs: runs, context: context)
     }
 
-    func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int) async throws -> [ExplorationSnapshot] {
+    func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int) async throws -> [CachedExploration] {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId },
@@ -78,11 +78,11 @@ actor ExplorationSnapshotQueryActor {
         return try await makeSummarySnapshots(runs: runs, context: context)
     }
 
-    func recentExplorationSummaries(limitPerParty: Int) async throws -> [ExplorationSnapshot] {
+    func recentExplorationSummaries(limitPerParty: Int) async throws -> [CachedExploration] {
         let context = contextProvider.makeContext()
         let partyDescriptor = FetchDescriptor<PartyRecord>()
         let parties = try context.fetch(partyDescriptor)
-        var snapshots: [ExplorationSnapshot] = []
+        var snapshots: [CachedExploration] = []
         snapshots.reserveCapacity(parties.count * limitPerParty)
         for party in parties {
             let partyId = party.id
@@ -98,7 +98,7 @@ actor ExplorationSnapshotQueryActor {
         return snapshots
     }
 
-    func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> ExplorationSnapshot? {
+    func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> CachedExploration? {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
@@ -111,12 +111,12 @@ actor ExplorationSnapshotQueryActor {
     // MARK: - Snapshot Builders
 
     private func makeSummarySnapshots(runs: [ExplorationRunRecord],
-                                      context: ModelContext) async throws -> [ExplorationSnapshot] {
-        var snapshots: [ExplorationSnapshot] = []
+                                      context: ModelContext) async throws -> [CachedExploration] {
+        var snapshots: [CachedExploration] = []
         snapshots.reserveCapacity(runs.count)
         for run in runs {
             // 探索中の場合はログを含めてロード（再開時に既存ログが表示されるように）
-            let snapshot: ExplorationSnapshot
+            let snapshot: CachedExploration
             if run.result == ExplorationResult.running.rawValue {
                 snapshot = try await makeSnapshot(for: run, context: context)
             } else {
@@ -128,8 +128,8 @@ actor ExplorationSnapshotQueryActor {
     }
 
     private func makeSnapshots(runs: [ExplorationRunRecord],
-                               context: ModelContext) async throws -> [ExplorationSnapshot] {
-        var snapshots: [ExplorationSnapshot] = []
+                               context: ModelContext) async throws -> [CachedExploration] {
+        var snapshots: [CachedExploration] = []
         snapshots.reserveCapacity(runs.count)
         for run in runs {
             let snapshot = try await makeSnapshot(for: run, context: context)
@@ -139,9 +139,9 @@ actor ExplorationSnapshotQueryActor {
     }
 
     private func makeSnapshotSummary(for run: ExplorationRunRecord,
-                                     context: ModelContext) async throws -> ExplorationSnapshot {
+                                     context: ModelContext) async throws -> CachedExploration {
         guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
-            throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
+            throw CachedExplorationBuildError.dungeonNotFound(run.dungeonId)
         }
 
         let displayDungeonName = DungeonDisplayNameFormatter.displayName(
@@ -155,7 +155,7 @@ actor ExplorationSnapshotQueryActor {
         let partyRecord = try context.fetch(partyDescriptor).first
         let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
 
-        let partySummary = ExplorationSnapshot.PartySummary(
+        let partySummary = CachedExploration.PartySummary(
             partyId: run.partyId,
             memberCharacterIds: memberCharacterIds,
             inventorySnapshotId: nil
@@ -164,7 +164,7 @@ actor ExplorationSnapshotQueryActor {
         let metadata = ProgressMetadata(createdAt: run.startedAt, updatedAt: run.endedAt)
         let status = runStatus(from: run.result)
 
-        let summary = ExplorationSnapshot.makeSummary(
+        let summary = CachedExploration.makeSummary(
             displayDungeonName: displayDungeonName,
             status: status,
             activeFloorNumber: Int(run.finalFloor),
@@ -174,7 +174,7 @@ actor ExplorationSnapshotQueryActor {
             logs: []
         )
 
-        return ExplorationSnapshot(
+        return CachedExploration(
             dungeonId: run.dungeonId,
             displayDungeonName: displayDungeonName,
             activeFloorNumber: Int(run.finalFloor),
@@ -183,7 +183,7 @@ actor ExplorationSnapshotQueryActor {
             lastUpdatedAt: run.endedAt,
             expectedReturnAt: nil,
             encounterLogs: [],
-            rewards: ExplorationSnapshot.Rewards(
+            rewards: CachedExploration.Rewards(
                 experience: Int(run.totalExp),
                 gold: Int(run.totalGold),
                 itemDrops: makeItemDropSummaries(from: run),
@@ -197,11 +197,11 @@ actor ExplorationSnapshotQueryActor {
     }
 
     private func makeSnapshot(for run: ExplorationRunRecord,
-                              context: ModelContext) async throws -> ExplorationSnapshot {
+                              context: ModelContext) async throws -> CachedExploration {
         let eventRecords = run.events.sorted { $0.occurredAt < $1.occurredAt }
 
         guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
-            throw ExplorationSnapshotBuildError.dungeonNotFound(run.dungeonId)
+            throw CachedExplorationBuildError.dungeonNotFound(run.dungeonId)
         }
 
         let displayDungeonName = DungeonDisplayNameFormatter.displayName(
@@ -215,7 +215,7 @@ actor ExplorationSnapshotQueryActor {
         let partyRecord = try context.fetch(partyDescriptor).first
         let memberCharacterIds = partyRecord?.memberCharacterIds ?? []
 
-        var encounterLogs: [ExplorationSnapshot.EncounterLog] = []
+        var encounterLogs: [CachedExploration.EncounterLog] = []
         encounterLogs.reserveCapacity(eventRecords.count)
 
         for (index, eventRecord) in eventRecords.enumerated() {
@@ -223,14 +223,14 @@ actor ExplorationSnapshotQueryActor {
             encounterLogs.append(log)
         }
 
-        var rewards = ExplorationSnapshot.Rewards()
+        var rewards = CachedExploration.Rewards()
         rewards.experience = Int(run.totalExp)
         rewards.gold = Int(run.totalGold)
         rewards.autoSellGold = Int(run.autoSellGold)
         rewards.autoSoldItems = makeAutoSellEntries(from: run)
         rewards.itemDrops = makeItemDropSummaries(from: run)
 
-        let partySummary = ExplorationSnapshot.PartySummary(
+        let partySummary = CachedExploration.PartySummary(
             partyId: run.partyId,
             memberCharacterIds: memberCharacterIds,
             inventorySnapshotId: nil
@@ -239,7 +239,7 @@ actor ExplorationSnapshotQueryActor {
         let metadata = ProgressMetadata(createdAt: run.startedAt, updatedAt: run.endedAt)
         let status = runStatus(from: run.result)
 
-        let summary = ExplorationSnapshot.makeSummary(
+        let summary = CachedExploration.makeSummary(
             displayDungeonName: displayDungeonName,
             status: status,
             activeFloorNumber: Int(run.finalFloor),
@@ -249,7 +249,7 @@ actor ExplorationSnapshotQueryActor {
             logs: encounterLogs
         )
 
-        return ExplorationSnapshot(
+        return CachedExploration(
             dungeonId: run.dungeonId,
             displayDungeonName: displayDungeonName,
             activeFloorNumber: Int(run.finalFloor),
@@ -265,10 +265,10 @@ actor ExplorationSnapshotQueryActor {
         )
     }
 
-    private func makeAutoSellEntries(from run: ExplorationRunRecord) -> [ExplorationSnapshot.Rewards.AutoSellEntry] {
+    private func makeAutoSellEntries(from run: ExplorationRunRecord) -> [CachedExploration.Rewards.AutoSellEntry] {
         guard !run.autoSellItems.isEmpty else { return [] }
         let entries = run.autoSellItems.map { record in
-            ExplorationSnapshot.Rewards.AutoSellEntry(
+            CachedExploration.Rewards.AutoSellEntry(
                 itemId: record.itemId,
                 superRareTitleId: record.superRareTitleId,
                 normalTitleId: record.normalTitleId,
@@ -283,9 +283,9 @@ actor ExplorationSnapshotQueryActor {
         }
     }
 
-    private func makeItemDropSummaries(from run: ExplorationRunRecord) -> [ExplorationSnapshot.Rewards.ItemDropSummary] {
+    private func makeItemDropSummaries(from run: ExplorationRunRecord) -> [CachedExploration.Rewards.ItemDropSummary] {
         guard !run.events.isEmpty else { return [] }
-        var summaries: [ExplorationSnapshot.Rewards.ItemDropSummary] = []
+        var summaries: [CachedExploration.Rewards.ItemDropSummary] = []
         var indexByKey: [ExplorationDropKey: Int] = [:]
         for eventRecord in run.events {
             for drop in eventRecord.drops where drop.itemId > 0 && drop.quantity > 0 {
@@ -299,7 +299,7 @@ actor ExplorationSnapshotQueryActor {
                 } else {
                     indexByKey[key] = summaries.count
                     summaries.append(
-                        ExplorationSnapshot.Rewards.ItemDropSummary(
+                        CachedExploration.Rewards.ItemDropSummary(
                             itemId: key.itemId,
                             superRareTitleId: key.superRareTitleId,
                             normalTitleId: key.normalTitleId,
@@ -319,10 +319,10 @@ actor ExplorationSnapshotQueryActor {
     }
 
     private func buildEncounterLog(from eventRecord: ExplorationEventRecord,
-                                   index: Int) async throws -> ExplorationSnapshot.EncounterLog {
-        let kind: ExplorationSnapshot.EncounterLog.Kind
+                                   index: Int) async throws -> CachedExploration.EncounterLog {
+        let kind: CachedExploration.EncounterLog.Kind
         var referenceId: String?
-        var combatSummary: ExplorationSnapshot.EncounterLog.CombatSummary?
+        var combatSummary: CachedExploration.EncounterLog.CombatSummary?
 
         switch EventKind(rawValue: eventRecord.kind) {
         case .nothing, .none:
@@ -335,7 +335,7 @@ actor ExplorationSnapshotQueryActor {
                 if let enemy = masterDataCache.enemy(enemyId) {
                     let result = battleResultString(eventRecord.battleResult ?? 0)
                     let turns = Int(eventRecord.battleLog?.turns ?? 0)
-                    combatSummary = ExplorationSnapshot.EncounterLog.CombatSummary(
+                    combatSummary = CachedExploration.EncounterLog.CombatSummary(
                         enemyId: enemyId,
                         enemyName: enemy.name,
                         result: result,
@@ -356,7 +356,7 @@ actor ExplorationSnapshotQueryActor {
             }
         }
 
-        var context = ExplorationSnapshot.EncounterLog.Context()
+        var context = CachedExploration.EncounterLog.Context()
         if eventRecord.exp > 0 {
             context.exp = "\(eventRecord.exp)"
         }
@@ -376,7 +376,7 @@ actor ExplorationSnapshotQueryActor {
             }
         }
 
-        return ExplorationSnapshot.EncounterLog(
+        return CachedExploration.EncounterLog(
             id: UUID(),
             floorNumber: Int(eventRecord.floor),
             eventIndex: index,
@@ -398,7 +398,7 @@ actor ExplorationSnapshotQueryActor {
         }
     }
 
-    private func runStatus(from value: UInt8) -> ExplorationSnapshot.Status {
+    private func runStatus(from value: UInt8) -> CachedExploration.Status {
         switch ExplorationResult(rawValue: value) {
         case .running: return .running
         case .completed: return .completed
@@ -413,13 +413,13 @@ actor ExplorationSnapshotQueryActor {
 actor ExplorationProgressService {
     private let contextProvider: SwiftDataContextProvider
     private let masterDataCache: MasterDataCache
-    private let snapshotQuery: ExplorationSnapshotQueryActor
+    private let snapshotQuery: CachedExplorationQueryActor
 
     /// 探索レコードの最大保持件数
     private static let maxRecordCount = 200
 
     /// 探索履歴のキャッシュ
-    private var cachedExplorations: [ExplorationSnapshot]?
+    private var cachedExplorations: [CachedExploration]?
 
     /// 探索イベントを記録するためのセッション
     /// サービスへの参照を持たず、必要な依存のみ受け取る
@@ -469,7 +469,7 @@ actor ExplorationProgressService {
                          totalExperience: Int,
                          totalGold: Int,
                          autoSellGold: Int = 0,
-                         autoSoldItems: [ExplorationSnapshot.Rewards.AutoSellEntry] = []) {
+                         autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []) {
             runRecord.endedAt = endedAt
             runRecord.result = resultValue(for: endState)
             runRecord.totalExp = UInt32(totalExperience)
@@ -495,7 +495,7 @@ actor ExplorationProgressService {
 
         // MARK: - Private
 
-        private func updateAutoSellRecords(_ entries: [ExplorationSnapshot.Rewards.AutoSellEntry]) {
+        private func updateAutoSellRecords(_ entries: [CachedExploration.Rewards.AutoSellEntry]) {
             if !runRecord.autoSellItems.isEmpty {
                 for record in runRecord.autoSellItems {
                     context.delete(record)
@@ -608,7 +608,7 @@ actor ExplorationProgressService {
     init(contextProvider: SwiftDataContextProvider, masterDataCache: MasterDataCache) {
         self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
-        self.snapshotQuery = ExplorationSnapshotQueryActor(contextProvider: contextProvider,
+        self.snapshotQuery = CachedExplorationQueryActor(contextProvider: contextProvider,
                                                            masterDataCache: masterDataCache)
     }
 
@@ -992,7 +992,7 @@ actor ExplorationProgressService {
 
     // MARK: - Public API
 
-    func allExplorations() async throws -> [ExplorationSnapshot] {
+    func allExplorations() async throws -> [CachedExploration] {
         if let cached = cachedExplorations {
             return cached
         }
@@ -1002,28 +1002,28 @@ actor ExplorationProgressService {
     }
 
     /// 指定パーティの最新探索を取得（UI表示用、最大limit件）
-    func recentExplorations(forPartyId partyId: UInt8, limit: Int = 2) async throws -> [ExplorationSnapshot] {
+    func recentExplorations(forPartyId partyId: UInt8, limit: Int = 2) async throws -> [CachedExploration] {
         try await snapshotQuery.recentExplorations(forPartyId: partyId, limit: limit)
     }
 
     /// 指定パーティの最新探索サマリーを取得（軽量: encounterLogsなし）
-    func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int = 2) async throws -> [ExplorationSnapshot] {
+    func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int = 2) async throws -> [CachedExploration] {
         try await snapshotQuery.recentExplorationSummaries(forPartyId: partyId, limit: limit)
     }
 
     /// 指定パーティの探索（startedAt一致）を詳細ログ込みで取得
-    func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> ExplorationSnapshot? {
+    func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> CachedExploration? {
         try await snapshotQuery.explorationSnapshot(partyId: partyId, startedAt: startedAt)
     }
 
     /// 全パーティの最新探索サマリーを取得（初期ロード用）
-    func recentExplorationSummaries(limitPerParty: Int = 2) async throws -> [ExplorationSnapshot] {
+    func recentExplorationSummaries(limitPerParty: Int = 2) async throws -> [CachedExploration] {
         try await snapshotQuery.recentExplorationSummaries(limitPerParty: limitPerParty)
     }
 
     /// バッチ保存用のパラメータ
     struct BeginRunParams: Sendable {
-        let party: PartySnapshot
+        let party: CachedParty
         let dungeon: DungeonDefinition
         let difficulty: Int
         let targetFloor: Int
@@ -1031,7 +1031,7 @@ actor ExplorationProgressService {
         let seed: UInt64
     }
 
-    func beginRun(party: PartySnapshot,
+    func beginRun(party: CachedParty,
                   dungeon: DungeonDefinition,
                   difficulty: Int,
                   targetFloor: Int,
@@ -1111,7 +1111,7 @@ actor ExplorationProgressService {
                      totalExperience: Int,
                      totalGold: Int,
                      autoSellGold: Int = 0,
-                     autoSoldItems: [ExplorationSnapshot.Rewards.AutoSellEntry] = []) async throws {
+                     autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []) async throws {
         let session = try makeEventSession(runId: runId)
         session.finalizeRun(endState: endState,
                             endedAt: endedAt,

@@ -28,9 +28,9 @@ struct LazyDismissCharacterView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AppServices.self) private var appServices
 
-    @State private var fullCharacters: [RuntimeCharacter] = []
+    @State private var fullCharacters: [CachedCharacter] = []
     @State private var exploringIds: Set<UInt8> = []
-    @State private var selectedCharacter: RuntimeCharacter?
+    @State private var selectedCharacter: CachedCharacter?
     @State private var showDeleteConfirmation = false
     @State private var isProcessing = false
     @State private var isLoading = true

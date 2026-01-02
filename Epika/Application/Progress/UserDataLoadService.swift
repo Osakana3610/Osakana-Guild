@@ -47,9 +47,9 @@ final class UserDataLoadService: Sendable {
 
     // MARK: - Cache（UIから観測されるため@MainActor）
 
-    @MainActor var characters: [RuntimeCharacter] = []
-    @MainActor var parties: [PartySnapshot] = []
-    @MainActor var explorationSummaries: [ExplorationSnapshot] = []
+    @MainActor var characters: [CachedCharacter] = []
+    @MainActor var parties: [CachedParty] = []
+    @MainActor var explorationSummaries: [CachedExploration] = []
 
     // アイテムキャッシュ（軽量な値型）
     @MainActor var categorizedItems: [ItemSaleCategory: [CachedInventoryItem]] = [:]

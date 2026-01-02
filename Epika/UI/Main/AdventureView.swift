@@ -32,13 +32,13 @@ struct AdventureView: View {
     @State private var didLoadOnce = false
 
     @State private var partyDetailContext: PartyDetailContext?
-    @State private var logsContext: PartySnapshot?
+    @State private var logsContext: CachedParty?
 
-    private var parties: [PartySnapshot] {
+    private var parties: [CachedParty] {
         partyState.parties.sorted { $0.id < $1.id }
     }
 
-    private var massDepartureCandidates: [PartySnapshot] {
+    private var massDepartureCandidates: [CachedParty] {
         parties.filter { canStartExploration(for: $0) }
     }
 
@@ -111,7 +111,7 @@ struct AdventureView: View {
     }
 
     @ViewBuilder
-    private func partySection(for party: PartySnapshot, index: Int) -> some View {
+    private func partySection(for party: CachedParty, index: Int) -> some View {
         let members = runtimeMembers(for: party)
         let bonuses = PartyDropBonuses(members: members)
         let runs = adventureState.explorationProgress
@@ -146,7 +146,7 @@ struct AdventureView: View {
         .contentMargins(.vertical, 8)
     }
 
-    private func handleDeparture(for party: PartySnapshot) {
+    private func handleDeparture(for party: CachedParty) {
         if selectedDungeon(for: party) == nil {
             showPartyDetail(for: party)
             return
@@ -231,17 +231,17 @@ struct AdventureView: View {
         isLoading = false
     }
 
-    private func runtimeMembers(for party: PartySnapshot) -> [RuntimeCharacter] {
+    private func runtimeMembers(for party: CachedParty) -> [CachedCharacter] {
         let map = Dictionary(uniqueKeysWithValues: characterState.allCharacters.map { ($0.id, $0) })
         return party.memberIds.compactMap { map[$0] }
     }
 
-    private func selectedDungeon(for party: PartySnapshot) -> RuntimeDungeon? {
+    private func selectedDungeon(for party: CachedParty) -> RuntimeDungeon? {
         guard let dungeonId = party.lastSelectedDungeonId else { return nil }
         return adventureState.runtimeDungeons.first { $0.definition.id == dungeonId }
     }
 
-    private func canStartExploration(for party: PartySnapshot) -> Bool {
+    private func canStartExploration(for party: CachedParty) -> Bool {
         guard let dungeon = selectedDungeon(for: party) else { return false }
         guard dungeon.isUnlocked else { return false }
         guard party.lastSelectedDifficulty <= dungeon.highestUnlockedDifficulty else { return false }
@@ -250,7 +250,7 @@ struct AdventureView: View {
     }
 
     @MainActor
-    private func startExploration(for party: PartySnapshot) async -> Bool {
+    private func startExploration(for party: CachedParty) async -> Bool {
         errorMessage = nil
         guard let dungeon = selectedDungeon(for: party) else {
             errorMessage = "ダンジョンを選択してください"
@@ -265,13 +265,13 @@ struct AdventureView: View {
         }
     }
 
-    private func selectParty(_ party: PartySnapshot) {
+    private func selectParty(_ party: CachedParty) {
         if let partyIndex = parties.firstIndex(where: { $0.id == party.id }) {
             adventureState.selectParty(at: partyIndex)
         }
     }
 
-    private func showPartyDetail(for party: PartySnapshot) {
+    private func showPartyDetail(for party: CachedParty) {
         let selected = selectedDungeon(for: party)
         partyDetailContext = PartyDetailContext(party: party, selectedDungeon: selected)
     }
@@ -304,7 +304,7 @@ struct AdventureView: View {
 }
 
 private struct PartyDetailContext: Identifiable {
-    var party: PartySnapshot
+    var party: CachedParty
     var selectedDungeon: RuntimeDungeon?
     var id: UInt8 { party.id }
 }

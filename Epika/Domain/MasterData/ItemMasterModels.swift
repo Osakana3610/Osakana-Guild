@@ -23,7 +23,7 @@
 //
 // 【使用箇所】
 //   - EquipmentProgressService: 装備可否判定
-//   - RuntimeCharacterFactory: キャラクターステータス計算
+//   - CachedCharacterFactory: キャラクターステータス計算
 //   - UserDataLoadService: アイテム表示・売却処理
 //   - ItemEncyclopediaView: 図鑑表示
 //

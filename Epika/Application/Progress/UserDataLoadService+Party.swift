@@ -49,7 +49,7 @@ extension UserDataLoadService {
     }
 
     /// パーティを取得（キャッシュ不在時は再ロード）
-    func getParties() async throws -> [PartySnapshot] {
+    func getParties() async throws -> [CachedParty] {
         let needsLoad = await MainActor.run { !isPartiesLoaded }
         if needsLoad {
             try await loadParties()

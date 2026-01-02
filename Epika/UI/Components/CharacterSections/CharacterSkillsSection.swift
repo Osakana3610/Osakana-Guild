@@ -22,7 +22,7 @@ import SwiftUI
 /// CharacterSectionType: ownedSkills
 @MainActor
 struct CharacterSkillsSection: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
     @State private var selectedSkill: SkillDefinition?
 
     var body: some View {

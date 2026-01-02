@@ -8,13 +8,13 @@
 //   - 装備管理（装着・解除）
 //   - 転職処理
 //   - 戦闘結果適用（経験値・HP）
-//   - RuntimeCharacter生成
+//   - CachedCharacter生成
 //
 // 【公開API - 読み取り】
 //   - allCharacters() → [CharacterSnapshot]
 //   - character(withId:) → CharacterSnapshot?
 //   - characters(withIds:) → [CharacterSnapshot]
-//   - runtimeCharacter(from:) → RuntimeCharacter
+//   - runtimeCharacter(from:) → CachedCharacter
 //
 // 【公開API - 書き込み】
 //   - createCharacter(request:) → CharacterSnapshot
@@ -269,23 +269,23 @@ actor CharacterProgressService {
         return try makeSnapshots(ordered, context: context)
     }
 
-    func runtimeCharacter(from snapshot: CharacterSnapshot) throws -> RuntimeCharacter {
+    func runtimeCharacter(from snapshot: CharacterSnapshot) throws -> CachedCharacter {
         let input = makeInput(from: snapshot)
         let pandoraItems = try fetchPandoraBoxItems(context: contextProvider.makeContext())
-        return try RuntimeCharacterFactory.make(
+        return try CachedCharacterFactory.make(
             from: input,
             masterData: masterData,
             pandoraBoxItems: pandoraItems
         )
     }
 
-    /// 装備変更時の高速RuntimeCharacter再構築
-    /// 既存のRuntimeCharacterからマスターデータを再利用し、装備関連のみを再計算する
+    /// 装備変更時の高速CachedCharacter再構築
+    /// 既存のCachedCharacterからマスターデータを再利用し、装備関連のみを再計算する
     nonisolated func runtimeCharacterWithEquipmentChange(
-        current: RuntimeCharacter,
+        current: CachedCharacter,
         newEquippedItems: [CharacterInput.EquippedItem]
-    ) throws -> RuntimeCharacter {
-        try RuntimeCharacterFactory.withEquipmentChange(
+    ) throws -> CachedCharacter {
+        try CachedCharacterFactory.withEquipmentChange(
             current: current,
             newEquippedItems: newEquippedItems,
             masterData: masterData
@@ -534,7 +534,7 @@ actor CharacterProgressService {
         let pandoraBoxItems = (try? fetchPandoraBoxItems(context: context)) ?? []
         for record in allRecords where createdIdSet.contains(record.id) {
             let input = try loadInput(record, context: context)
-            let runtimeCharacter = try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
+            let runtimeCharacter = try CachedCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
             record.currentHP = UInt32(runtimeCharacter.maxHP)
         }
         try context.save()
@@ -646,7 +646,7 @@ actor CharacterProgressService {
 
             // maxHPを計算
             let input = try loadInput(record, context: context)
-            let runtimeCharacter = try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
+            let runtimeCharacter = try CachedCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
             let maxHP = UInt32(runtimeCharacter.maxHP)
 
             if record.currentHP < maxHP {
@@ -785,7 +785,7 @@ actor CharacterProgressService {
     ///   - characterId: キャラクターID
     ///   - inventoryItemStackKey: 装備するアイテムのstackKey
     ///   - quantity: 装備数量（デフォルト1）
-    ///   - equipmentCapacity: 装備上限（呼び出し元が既に持っているRuntimeCharacterから取得）
+    ///   - equipmentCapacity: 装備上限（呼び出し元が既に持っているCachedCharacterから取得）
     ///   - skipNotification: trueの場合、インベントリ変更通知を送信しない（呼び出し元で手動更新する場合）
     /// - Returns: 装備処理の結果（装備リストとインベントリ変更情報）
     func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1, equipmentCapacity: Int, skipNotification: Bool = false) throws -> EquipResult {
@@ -1117,15 +1117,15 @@ private extension CharacterProgressService {
         // CharacterInput を作成
         let input = try loadInput(record, context: context)
 
-        // RuntimeCharacterFactory で計算済み RuntimeCharacter を取得
+        // CachedCharacterFactory で計算済み CachedCharacter を取得
         let pandoraBoxItems = try fetchPandoraBoxItems(context: context)
-        let runtimeCharacter = try RuntimeCharacterFactory.make(
+        let runtimeCharacter = try CachedCharacterFactory.make(
             from: input,
             masterData: masterData,
             pandoraBoxItems: pandoraBoxItems
         )
 
-        // RuntimeCharacter から CharacterSnapshot を構築
+        // CachedCharacter から CharacterSnapshot を構築
         let now = Date()
 
         func clamp(_ value: Int) -> Int {

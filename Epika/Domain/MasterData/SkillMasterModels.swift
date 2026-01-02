@@ -32,7 +32,7 @@
 //
 // 【使用箇所】
 //   - SkillRuntimeEffects: スキル効果のコンパイル・適用
-//   - RuntimeCharacterFactory: キャラクタースキル効果の集計
+//   - CachedCharacterFactory: キャラクタースキル効果の集計
 //   - BattleTurnEngine: 戦闘中のスキル発動
 //
 // ==============================================================================

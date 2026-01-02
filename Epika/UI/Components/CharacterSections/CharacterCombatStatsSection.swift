@@ -25,7 +25,7 @@ import SwiftUI
 /// CharacterSectionType: combatStats
 @MainActor
 struct CharacterCombatStatsSection: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
 
     var body: some View {
         let stats = character.combat

@@ -27,7 +27,7 @@ import TipKit
 /// subJobは将来実装予定
 @MainActor
 struct CharacterIdentitySection: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
     @State private var showRaceDetail = false
     @State private var selectedJob: JobDefinition?
 

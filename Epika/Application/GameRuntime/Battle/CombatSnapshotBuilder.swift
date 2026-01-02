@@ -40,7 +40,7 @@ struct CombatSnapshotBuilder {
             job: jobDefinition,
             personalitySecondary: nil,
             learnedSkills: [],
-            loadout: RuntimeCharacter.Loadout(items: [], titles: [], superRareTitles: [])
+            loadout: CachedCharacter.Loadout(items: [], titles: [], superRareTitles: [])
         )
 
         let result = try CombatStatCalculator.calculate(for: context)

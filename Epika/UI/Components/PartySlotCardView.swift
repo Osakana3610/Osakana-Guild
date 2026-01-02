@@ -23,22 +23,22 @@
 import SwiftUI
 
 struct PartySlotCardView<Footer: View>: View {
-    let party: PartySnapshot
-    let members: [RuntimeCharacter]
+    let party: CachedParty
+    let members: [CachedCharacter]
     let bonuses: PartyDropBonuses
     let isExploring: Bool
     let canStartExploration: Bool
     let onPrimaryAction: () -> Void
-    let onMemberTap: ((RuntimeCharacter) -> Void)?
+    let onMemberTap: ((CachedCharacter) -> Void)?
     let onMembersTap: (() -> Void)?
     private let footerBuilder: (() -> Footer)?
-    init(party: PartySnapshot,
-         members: [RuntimeCharacter],
+    init(party: CachedParty,
+         members: [CachedCharacter],
          bonuses: PartyDropBonuses,
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
-         onMemberTap: ((RuntimeCharacter) -> Void)? = nil,
+         onMemberTap: ((CachedCharacter) -> Void)? = nil,
          onMembersTap: (() -> Void)? = nil,
          @ViewBuilder footer: @escaping () -> Footer) {
         self.party = party
@@ -52,13 +52,13 @@ struct PartySlotCardView<Footer: View>: View {
         self.footerBuilder = footer
     }
 
-    init(party: PartySnapshot,
-         members: [RuntimeCharacter],
+    init(party: CachedParty,
+         members: [CachedCharacter],
          bonuses: PartyDropBonuses,
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
-         onMemberTap: ((RuntimeCharacter) -> Void)? = nil,
+         onMemberTap: ((CachedCharacter) -> Void)? = nil,
          onMembersTap: (() -> Void)? = nil)
     where Footer == EmptyView {
         self.party = party

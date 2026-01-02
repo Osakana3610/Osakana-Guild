@@ -136,7 +136,7 @@ extension AppServices {
 
         // 1. 各パーティの準備処理を順番に実行（並列だとsave()のロック競合が発生）
         var preparations: [(
-            partySnapshot: PartySnapshot,
+            partySnapshot: CachedParty,
             session: ExplorationRuntimeSession,
             runDifficulty: Int,
             dungeonId: UInt16
@@ -232,7 +232,7 @@ extension AppServices {
         partyId: UInt8,
         dungeonId: UInt16,
         targetFloor: Int
-    ) async throws -> (PartySnapshot, ExplorationRuntimeSession, Int, UInt16) {
+    ) async throws -> (CachedParty, ExplorationRuntimeSession, Int, UInt16) {
         guard var partySnapshot = try await party.partySnapshot(id: partyId) else {
             throw ProgressError.partyNotFound
         }

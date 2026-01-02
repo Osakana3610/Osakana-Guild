@@ -8,13 +8,13 @@
 //   - パーティスロットの管理
 //
 // 【公開API】
-//   - allParties() → [PartySnapshot] - 全パーティ取得
-//   - partySnapshot(id:) → PartySnapshot? - 指定パーティ取得
-//   - ensurePartySlots(atLeast:) → [PartySnapshot] - スロット数確保
-//   - setMemberCharacterIds(...) → PartySnapshot - メンバー設定
-//   - setLastSelectedDungeon(...) → PartySnapshot - 選択ダンジョン設定
-//   - setLastSelectedDifficulty(...) → PartySnapshot - 選択難易度設定
-//   - setTargetFloor(...) → PartySnapshot - 目標フロア設定
+//   - allParties() → [CachedParty] - 全パーティ取得
+//   - partySnapshot(id:) → CachedParty? - 指定パーティ取得
+//   - ensurePartySlots(atLeast:) → [CachedParty] - スロット数確保
+//   - setMemberCharacterIds(...) → CachedParty - メンバー設定
+//   - setLastSelectedDungeon(...) → CachedParty - 選択ダンジョン設定
+//   - setLastSelectedDifficulty(...) → CachedParty - 選択難易度設定
+//   - setTargetFloor(...) → CachedParty - 目標フロア設定
 //
 // 【デフォルト設定】
 //   - パーティ名: "PARTY1", "PARTY2", ...
@@ -46,7 +46,7 @@ actor PartyProgressService {
         }
     }
 
-    func allParties() async throws -> [PartySnapshot] {
+    func allParties() async throws -> [CachedParty] {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<PartyRecord>()
         descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
@@ -55,7 +55,7 @@ actor PartyProgressService {
     }
 
     func ensurePartySlots(atLeast desiredCount: Int,
-                          nameProvider: @Sendable (Int) -> String = PartyProgressService.defaultPartyName) async throws -> [PartySnapshot] {
+                          nameProvider: @Sendable (Int) -> String = PartyProgressService.defaultPartyName) async throws -> [CachedParty] {
         guard desiredCount > 0 else {
             return try await allParties()
         }
@@ -92,7 +92,7 @@ actor PartyProgressService {
         return sortedRecords.map(Self.snapshot)
     }
 
-    func updatePartyName(persistentIdentifier: PersistentIdentifier, name: String) async throws -> PartySnapshot {
+    func updatePartyName(persistentIdentifier: PersistentIdentifier, name: String) async throws -> CachedParty {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             throw ProgressError.invalidInput(description: "パーティ名は空にできません")
@@ -107,7 +107,7 @@ actor PartyProgressService {
         return Self.snapshot(from: party)
     }
 
-    func updatePartyMembers(persistentIdentifier: PersistentIdentifier, memberIds: [UInt8]) async throws -> PartySnapshot {
+    func updatePartyMembers(persistentIdentifier: PersistentIdentifier, memberIds: [UInt8]) async throws -> CachedParty {
         let context = contextProvider.makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.memberCharacterIds = memberIds
@@ -117,7 +117,7 @@ actor PartyProgressService {
         return Self.snapshot(from: party)
     }
 
-    func setLastSelectedDungeon(persistentIdentifier: PersistentIdentifier, dungeonId: UInt16) async throws -> PartySnapshot {
+    func setLastSelectedDungeon(persistentIdentifier: PersistentIdentifier, dungeonId: UInt16) async throws -> CachedParty {
         let context = contextProvider.makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.lastSelectedDungeonId = dungeonId
@@ -127,7 +127,7 @@ actor PartyProgressService {
         return Self.snapshot(from: party)
     }
 
-    func setLastSelectedDifficulty(persistentIdentifier: PersistentIdentifier, difficulty: UInt8) async throws -> PartySnapshot {
+    func setLastSelectedDifficulty(persistentIdentifier: PersistentIdentifier, difficulty: UInt8) async throws -> CachedParty {
         let context = contextProvider.makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.lastSelectedDifficulty = difficulty
@@ -137,7 +137,7 @@ actor PartyProgressService {
         return Self.snapshot(from: party)
     }
 
-    func setTargetFloor(persistentIdentifier: PersistentIdentifier, floor: UInt8) async throws -> PartySnapshot {
+    func setTargetFloor(persistentIdentifier: PersistentIdentifier, floor: UInt8) async throws -> CachedParty {
         let context = contextProvider.makeContext()
         let party = try fetchParty(persistentIdentifier: persistentIdentifier, context: context)
         party.targetFloor = floor
@@ -167,7 +167,7 @@ actor PartyProgressService {
         return result
     }
 
-    func partySnapshot(id: UInt8) async throws -> PartySnapshot? {
+    func partySnapshot(id: UInt8) async throws -> CachedParty? {
         let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == id })
         guard let record = try context.fetch(descriptor).first else {
@@ -190,8 +190,8 @@ private extension PartyProgressService {
         return record
     }
 
-    static func snapshot(from record: PartyRecord) -> PartySnapshot {
-        PartySnapshot(persistentIdentifier: record.persistentModelID,
+    static func snapshot(from record: PartyRecord) -> CachedParty {
+        CachedParty(persistentIdentifier: record.persistentModelID,
                       id: record.id,
                       displayName: record.displayName,
                       lastSelectedDungeonId: record.lastSelectedDungeonId,

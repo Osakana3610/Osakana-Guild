@@ -20,25 +20,25 @@
 import SwiftUI
 import SwiftData
 
-extension ExplorationSnapshot: Identifiable {}
-extension ExplorationSnapshot.EncounterLog: Identifiable {}
+extension CachedExploration: Identifiable {}
+extension CachedExploration.EncounterLog: Identifiable {}
 extension CharacterSnapshot: Identifiable {}
 
 struct RecentExplorationLogsView: View {
-    let party: PartySnapshot
-    let runs: [ExplorationSnapshot]
+    let party: CachedParty
+    let runs: [CachedExploration]
 
     @Environment(AppServices.self) private var appServices
 
-    @State private var selectedRunForSummary: ExplorationSnapshot?
-    @State private var selectedRunForResultSummary: ExplorationSnapshot?
-    @State private var enrichedRuns: [Int64: ExplorationSnapshot] = [:]
+    @State private var selectedRunForSummary: CachedExploration?
+    @State private var selectedRunForResultSummary: CachedExploration?
+    @State private var enrichedRuns: [Int64: CachedExploration] = [:]
     @State private var isFetchingDetail = false
     @State private var detailErrorMessage: String?
 
     private let maxDisplayCount = 2
 
-    private var partyRuns: [ExplorationSnapshot] {
+    private var partyRuns: [CachedExploration] {
         runs
             .map { enrichedRuns[$0.id] ?? $0 }
             .filter { $0.party.partyId == party.id }
@@ -102,11 +102,11 @@ struct RecentExplorationLogsView: View {
         .frame(maxWidth: .infinity, alignment: .center)
     }
 
-    private func handleDetailButton(for run: ExplorationSnapshot) {
+    private func handleDetailButton(for run: CachedExploration) {
         Task { await presentSummary(for: run) }
     }
 
-    private func handleRowTap(for run: ExplorationSnapshot) {
+    private func handleRowTap(for run: CachedExploration) {
         Task {
             if run.status == .running {
                 await presentSummary(for: run)
@@ -117,13 +117,13 @@ struct RecentExplorationLogsView: View {
     }
 
     @MainActor
-    private func presentSummary(for run: ExplorationSnapshot) async {
+    private func presentSummary(for run: CachedExploration) async {
         guard let snapshot = await ensureDetailedSnapshot(for: run) else { return }
         selectedRunForSummary = snapshot
     }
 
     @MainActor
-    private func presentResultSummary(for run: ExplorationSnapshot) async {
+    private func presentResultSummary(for run: CachedExploration) async {
         if let enriched = enrichedRuns[run.id] {
             selectedRunForResultSummary = enriched
         } else {
@@ -132,7 +132,7 @@ struct RecentExplorationLogsView: View {
     }
 
     @MainActor
-    private func ensureDetailedSnapshot(for run: ExplorationSnapshot) async -> ExplorationSnapshot? {
+    private func ensureDetailedSnapshot(for run: CachedExploration) async -> CachedExploration? {
         detailErrorMessage = nil
         let existing = enrichedRuns[run.id] ?? run
         guard needsDetailFetch(existing) else { return existing }
@@ -156,7 +156,7 @@ struct RecentExplorationLogsView: View {
         }
     }
 
-    private func needsDetailFetch(_ run: ExplorationSnapshot) -> Bool {
+    private func needsDetailFetch(_ run: CachedExploration) -> Bool {
         run.encounterLogs.isEmpty && run.status != .running
     }
 
@@ -219,14 +219,14 @@ private struct ExplorationLogRowView: View {
 // MARK: - Run Summary View
 
 private struct ExplorationRunSummaryView: View {
-    let snapshot: ExplorationSnapshot
-    let party: PartySnapshot
+    let snapshot: CachedExploration
+    let party: CachedParty
 
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedEncounter: ExplorationSnapshot.EncounterLog?
+    @State private var selectedEncounter: CachedExploration.EncounterLog?
     @State private var showingResultSummary = false
 
-    private var eventsByFloor: [(floor: Int, events: [ExplorationSnapshot.EncounterLog])] {
+    private var eventsByFloor: [(floor: Int, events: [CachedExploration.EncounterLog])] {
         let grouped = Dictionary(grouping: snapshot.encounterLogs) { $0.floorNumber }
         return grouped.keys.sorted().map { floor in
             let events = (grouped[floor] ?? []).sorted { lhs, rhs in

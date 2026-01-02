@@ -23,8 +23,8 @@
 import SwiftUI
 
 struct RuntimePartyMemberEditView: View {
-    var party: PartySnapshot
-    let allCharacters: [RuntimeCharacter]
+    var party: CachedParty
+    let allCharacters: [CachedCharacter]
     @Environment(PartyViewState.self) private var partyState
     @Environment(AppServices.self) private var appServices
     @State private var currentMemberIds: [UInt8] = []
@@ -35,7 +35,7 @@ struct RuntimePartyMemberEditView: View {
     @State private var errorMessage = ""
     @State private var isSaving = false
 
-    private var availableCharacters: [RuntimeCharacter] {
+    private var availableCharacters: [CachedCharacter] {
         let filtered = allCharacters.filter { character in
             searchText.isEmpty || character.name.localizedCaseInsensitiveCompare(searchText) == .orderedSame || character.name.localizedCaseInsensitiveContains(searchText)
         }
@@ -49,7 +49,7 @@ struct RuntimePartyMemberEditView: View {
     private var partyService: PartyProgressService { appServices.party }
     private var emptySlotCount: Int { Self.maxSlots - currentMemberIds.count }
 
-    private func character(for id: UInt8) -> RuntimeCharacter? {
+    private func character(for id: UInt8) -> CachedCharacter? {
         allCharacters.first { $0.id == id }
     }
 
@@ -162,7 +162,7 @@ struct RuntimePartyMemberEditView: View {
         }
     }
 
-    private func addCharacter(_ character: RuntimeCharacter) {
+    private func addCharacter(_ character: CachedCharacter) {
         guard currentMemberIds.count < Self.maxSlots else { return }
         currentMemberIds.append(character.id)
         selectedMemberId = nil
@@ -196,7 +196,7 @@ private extension RuntimePartyMemberEditView {
 // MARK: - Supporting Views
 
 private struct PartyMemberRow: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
     let isSelected: Bool
     let onTap: () -> Void
 
@@ -242,7 +242,7 @@ private struct EmptySlotRow: View {
 }
 
 private struct AvailableCharacterRow: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
     let onTap: () -> Void
 
     var body: some View {

@@ -36,7 +36,7 @@
 //   - ソケット宝石（係数0.5、魔防0.25）
 //
 // 【使用箇所】
-//   - RuntimeCharacterFactory: RuntimeCharacter生成
+//   - CachedCharacterFactory: CachedCharacter生成
 //   - GameRuntimeService: 再計算API
 //
 // ==============================================================================
@@ -63,7 +63,7 @@ struct CombatStatCalculator {
         let job: JobDefinition
         let personalitySecondary: PersonalitySecondaryDefinition?
         let learnedSkills: [SkillDefinition]
-        let loadout: RuntimeCharacter.Loadout
+        let loadout: CachedCharacter.Loadout
 
         // オプション
         /// パンドラボックス内アイテム（StackKeyをUInt64にパック）
@@ -78,7 +78,7 @@ struct CombatStatCalculator {
                          job: JobDefinition,
                          personalitySecondary: PersonalitySecondaryDefinition?,
                          learnedSkills: [SkillDefinition],
-                         loadout: RuntimeCharacter.Loadout,
+                         loadout: CachedCharacter.Loadout,
                          pandoraBoxItems: Set<UInt64> = []) {
             self.raceId = raceId
             self.jobId = jobId

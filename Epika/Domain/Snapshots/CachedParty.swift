@@ -1,5 +1,5 @@
 // ==============================================================================
-// PartySnapshot.swift
+// CachedParty.swift
 // Epika
 // ==============================================================================
 //
@@ -8,7 +8,7 @@
 //   - 永続化層（PartyRecord）とUI/サービス層の橋渡し
 //
 // 【データ構造】
-//   - PartySnapshot: パーティ情報
+//   - CachedParty: パーティ情報
 //     - persistentIdentifier: SwiftData永続化ID
 //     - id: パーティID（1〜8）
 //     - displayName: 表示名
@@ -31,7 +31,7 @@
 import Foundation
 import SwiftData
 
-struct PartySnapshot: Identifiable, Sendable, Hashable {
+struct CachedParty: Identifiable, Sendable, Hashable {
     let persistentIdentifier: PersistentIdentifier
     var id: UInt8                              // 1〜8
     var displayName: String

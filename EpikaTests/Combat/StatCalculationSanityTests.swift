@@ -65,9 +65,9 @@ final class StatCalculationSanityTests: XCTestCase {
                     equippedItems: []
                 )
 
-                let character: RuntimeCharacter
+                let character: CachedCharacter
                 do {
-                    character = try RuntimeCharacterFactory.make(from: input, masterData: cache)
+                    character = try CachedCharacterFactory.make(from: input, masterData: cache)
                 } catch {
                     XCTFail("Race '\(race.name)' + Job '\(job.name)' でキャラ生成失敗: \(error)")
                     continue
@@ -116,8 +116,8 @@ final class StatCalculationSanityTests: XCTestCase {
             updatedAt: Date(), displayOrder: 0, equippedItems: []
         )
 
-        let lv1Char = try RuntimeCharacterFactory.make(from: lv1Input, masterData: cache)
-        let lv50Char = try RuntimeCharacterFactory.make(from: lv50Input, masterData: cache)
+        let lv1Char = try CachedCharacterFactory.make(from: lv1Input, masterData: cache)
+        let lv50Char = try CachedCharacterFactory.make(from: lv50Input, masterData: cache)
 
         XCTAssertGreaterThan(lv50Char.maxHP, lv1Char.maxHP,
             "Lv50のmaxHP(\(lv50Char.maxHP))がLv1(\(lv1Char.maxHP))より低い")

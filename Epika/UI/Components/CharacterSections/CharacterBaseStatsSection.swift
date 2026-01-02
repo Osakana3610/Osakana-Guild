@@ -24,7 +24,7 @@ import SwiftUI
 /// CharacterSectionType: baseStats
 @MainActor
 struct CharacterBaseStatsSection: View {
-    let character: RuntimeCharacter
+    let character: CachedCharacter
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {

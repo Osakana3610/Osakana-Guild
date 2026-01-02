@@ -46,7 +46,7 @@ actor ProgressRuntimeService {
         await runtimeService.cancelExploration(runId: runId)
     }
 
-    func startExplorationRun(party: PartySnapshot,
+    func startExplorationRun(party: CachedParty,
                               characters: [CharacterSnapshot],
                               dungeonId: UInt16,
                               targetFloorNumber: Int) async throws -> ExplorationRuntimeSession {
@@ -91,7 +91,7 @@ struct ExplorationRuntimeSession: Sendable {
     let explorationInterval: TimeInterval
     let events: AsyncStream<ExplorationEngine.StepOutcome>
     let runtimePartyState: RuntimePartyState
-    let runtimeCharacters: [RuntimeCharacter]
+    let runtimeCharacters: [CachedCharacter]
     let waitForCompletion: @Sendable () async throws -> ExplorationRunArtifact
     let cancel: @Sendable () async -> Void
 }

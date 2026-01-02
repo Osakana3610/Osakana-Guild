@@ -25,7 +25,7 @@ struct CharacterReviveView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    @State private var deadCharacters: [RuntimeCharacter] = []
+    @State private var deadCharacters: [CachedCharacter] = []
     @State private var isLoading = false
     @State private var isProcessing = false
     @State private var errorMessage: String?
@@ -115,7 +115,7 @@ struct CharacterReviveView: View {
     }
 
     @MainActor
-    private func reviveCharacter(_ character: RuntimeCharacter) async {
+    private func reviveCharacter(_ character: CachedCharacter) async {
         if isProcessing { return }
         isProcessing = true
         errorMessage = nil

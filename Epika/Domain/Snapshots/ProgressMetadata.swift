@@ -13,8 +13,8 @@
 //     - updatedAt: 更新日時
 //
 // 【使用箇所】
-//   - ExplorationSnapshot.EncounterLog: エンカウントログのメタデータ
-//   - ExplorationSnapshot: 探索セッションのメタデータ
+//   - CachedExploration.EncounterLog: エンカウントログのメタデータ
+//   - CachedExploration: 探索セッションのメタデータ
 //   - 永続化レコード全般: 監査用タイムスタンプ
 //
 // ==============================================================================

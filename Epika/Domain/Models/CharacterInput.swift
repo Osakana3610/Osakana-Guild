@@ -22,14 +22,14 @@
 //     - stackKey: スタック識別キー
 //
 // 【使用箇所】
-//   - RuntimeCharacterFactory: RuntimeCharacter生成の入力
+//   - CachedCharacterFactory: CachedCharacter生成の入力
 //   - ProgressRuntimeService: 探索開始時のデータ変換
 //
 // ==============================================================================
 
 import Foundation
 
-/// CharacterRecordからRuntimeCharacterへの変換用中間データ。
+/// CharacterRecordからCachedCharacterへの変換用中間データ。
 /// 計算結果は含まない。Progress層からRuntime層へデータを渡すために使用。
 struct CharacterInput: Sendable, Hashable {
     let id: UInt8
