@@ -23,7 +23,7 @@ import SwiftUI
 struct ItemPurchaseView: View {
     @Environment(AppServices.self) private var appServices
     @State private var shopItems: [ShopProgressService.ShopItem] = []
-    @State private var player: PlayerSnapshot?
+    @State private var player: CachedPlayer?
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var selectedItem: ShopProgressService.ShopItem?

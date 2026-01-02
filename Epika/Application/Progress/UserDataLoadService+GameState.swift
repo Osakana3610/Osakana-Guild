@@ -43,9 +43,9 @@ extension UserDataLoadService {
 // MARK: - GameState Cache API
 
 extension UserDataLoadService {
-    /// ゲーム状態を更新（PlayerSnapshotから）
+    /// ゲーム状態を更新（CachedPlayerから）
     @MainActor
-    func applyGameStateSnapshot(_ snapshot: PlayerSnapshot) {
+    func applyGameStateSnapshot(_ snapshot: CachedPlayer) {
         playerGold = snapshot.gold
         playerCatTickets = snapshot.catTickets
         playerPartySlots = snapshot.partySlots

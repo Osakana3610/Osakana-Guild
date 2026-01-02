@@ -1,14 +1,14 @@
 // ==============================================================================
-// DungeonSnapshot.swift
+// CachedDungeonProgress.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - ダンジョン進行状態のイミュータブルスナップショット
+//   - ダンジョン進行状態のキャッシュ表現
 //   - 解放状態・難易度・クリア状況の表現
 //
 // 【データ構造】
-//   - DungeonSnapshot: ダンジョン進行情報
+//   - CachedDungeonProgress: ダンジョン進行情報
 //     - dungeonId: ダンジョンID
 //     - isUnlocked: 解放済みか
 //     - highestUnlockedDifficulty: 解放済み最高難易度
@@ -27,7 +27,7 @@
 
 import Foundation
 
-struct DungeonSnapshot: Sendable, Hashable {
+struct CachedDungeonProgress: Sendable, Hashable {
     var dungeonId: UInt16
     var isUnlocked: Bool
     var highestUnlockedDifficulty: UInt8

@@ -10,7 +10,7 @@
 // 【データ構造】
 //   - RuntimeDungeon: 定義+進行の複合型
 //     - definition (DungeonDefinition): マスターデータ定義
-//     - progress (DungeonSnapshot?): 進行状態（nil=未解放）
+//     - progress (CachedDungeonProgress?): 進行状態（nil=未解放）
 //
 // 【導出プロパティ】
 //   - id → UInt16: ダンジョンID
@@ -33,7 +33,7 @@ import Foundation
 
 struct RuntimeDungeon: Identifiable, Hashable, Sendable {
     let definition: DungeonDefinition
-    let progress: DungeonSnapshot?
+    let progress: CachedDungeonProgress?
 
     var id: UInt16 { definition.id }
     var isUnlocked: Bool { progress?.isUnlocked ?? false }

@@ -334,7 +334,7 @@ actor ShopProgressService {
     }
 
     @discardableResult
-    func purchase(itemId: UInt16, quantity: Int) async throws -> PlayerSnapshot {
+    func purchase(itemId: UInt16, quantity: Int) async throws -> CachedPlayer {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "購入数量は1以上である必要があります")
         }
@@ -395,7 +395,7 @@ private extension ShopProgressService {
         return CleanupComputation(tickets: ticketsPerStack * stackCount)
     }
 
-    func loadShopSnapshot(masterItems: [MasterShopItem]) async throws -> ShopSnapshot {
+    func loadShopSnapshot(masterItems: [MasterShopItem]) async throws -> CachedShopStock {
         let context = contextProvider.makeContext()
         let now = Date()
         _ = try syncStocks(masterItems: masterItems,
@@ -448,14 +448,14 @@ private extension ShopProgressService {
     }
 
     func makeSnapshot(from stocks: [ShopStockRecord],
-                      updatedAt: Date) -> ShopSnapshot {
+                      updatedAt: Date) -> CachedShopStock {
         let stockSnapshots = stocks.map { stock in
-            ShopSnapshot.Stock(itemId: stock.itemId,
-                               remaining: stock.remaining,
-                               updatedAt: stock.updatedAt)
+            CachedShopStock.Stock(itemId: stock.itemId,
+                                  remaining: stock.remaining,
+                                  updatedAt: stock.updatedAt)
         }
-        return ShopSnapshot(stocks: stockSnapshots,
-                            updatedAt: updatedAt)
+        return CachedShopStock(stocks: stockSnapshots,
+                               updatedAt: updatedAt)
     }
 
     func saveIfNeeded(_ context: ModelContext) throws {

@@ -8,7 +8,7 @@
 //   - 難易度解放処理
 //
 // 【公開API】
-//   - markStoryNodeAsRead(_:) → StorySnapshot
+//   - markStoryNodeAsRead(_:) → CachedStoryProgress
 //     ストーリーを既読にし、関連モジュール（ダンジョン等）を解放
 //   - unlockStoryForDungeonClear(_:)
 //     ダンジョンクリア時に次のストーリーを解放
@@ -43,7 +43,7 @@ extension AppServices {
     /// - 魔性の(4)クリア → 宿った(5)解放
     /// - 宿った(5)クリア → 伝説の(6)解放
     @discardableResult
-    func unlockNextDifficultyIfEligible(for snapshot: DungeonSnapshot, clearedDifficulty: UInt8) async throws -> Bool {
+    func unlockNextDifficultyIfEligible(for snapshot: CachedDungeonProgress, clearedDifficulty: UInt8) async throws -> Bool {
         guard let nextDifficulty = DungeonDisplayNameFormatter.nextDifficulty(after: clearedDifficulty),
               snapshot.highestUnlockedDifficulty < nextDifficulty else { return false }
         try await dungeon.unlockDifficulty(dungeonId: snapshot.dungeonId, difficulty: nextDifficulty)
@@ -142,7 +142,7 @@ extension AppServices {
 extension AppServices {
     /// ストーリーノードを既読にし、同一トランザクション内で解放対象を処理する
     @discardableResult
-    func markStoryNodeAsRead(_ nodeId: UInt16) async throws -> StorySnapshot {
+    func markStoryNodeAsRead(_ nodeId: UInt16) async throws -> CachedStoryProgress {
         let context = contextProvider.makeContext()
 
         // 1. ストーリー定義を取得（unlocksModulesを含む）
@@ -242,11 +242,11 @@ private extension AppServices {
         return try context.fetch(descriptor)
     }
 
-    func makeStorySnapshot(from nodes: [StoryNodeProgressRecord], updatedAt: Date) -> StorySnapshot {
+    func makeStorySnapshot(from nodes: [StoryNodeProgressRecord], updatedAt: Date) -> CachedStoryProgress {
         let unlocked = Set(nodes.filter { $0.isUnlocked }.map(\.nodeId))
         let read = Set(nodes.filter { $0.isRead }.map(\.nodeId))
         let rewarded = Set(nodes.filter { $0.isRewardClaimed }.map(\.nodeId))
-        return StorySnapshot(
+        return CachedStoryProgress(
             unlockedNodeIds: unlocked,
             readNodeIds: read,
             rewardedNodeIds: rewarded,

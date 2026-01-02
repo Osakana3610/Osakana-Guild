@@ -27,7 +27,7 @@ extension UserDataLoadService {
 
 extension UserDataLoadService {
     func loadStorySnapshot() async throws {
-        let snapshot = try await appServices?.story.currentStorySnapshot() ?? StorySnapshot(
+        let snapshot = try await appServices?.story.currentStorySnapshot() ?? CachedStoryProgress(
             unlockedNodeIds: [],
             readNodeIds: [],
             rewardedNodeIds: [],

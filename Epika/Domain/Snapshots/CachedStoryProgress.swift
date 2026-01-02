@@ -1,14 +1,14 @@
 // ==============================================================================
-// StorySnapshot.swift
+// CachedStoryProgress.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - ストーリー進行状態のイミュータブルスナップショット
+//   - ストーリー進行状態のキャッシュ表現
 //   - 解放・既読・報酬受取状態の管理
 //
 // 【データ構造】
-//   - StorySnapshot: ストーリー進行情報
+//   - CachedStoryProgress: ストーリー進行情報
 //     - unlockedNodeIds: 解放済みノードIDセット
 //     - readNodeIds: 既読ノードIDセット
 //     - rewardedNodeIds: 報酬受取済みノードIDセット
@@ -21,9 +21,8 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 
-struct StorySnapshot: Sendable, Hashable {
+struct CachedStoryProgress: Sendable, Hashable {
     var unlockedNodeIds: Set<UInt16>
     var readNodeIds: Set<UInt16>
     var rewardedNodeIds: Set<UInt16>

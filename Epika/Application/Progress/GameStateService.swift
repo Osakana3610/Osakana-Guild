@@ -10,11 +10,11 @@
 //   - 日次処理の追跡
 //
 // 【公開API】
-//   - currentPlayer() → PlayerSnapshot - 現在のプレイヤー情報
-//   - loadCurrentPlayer() → PlayerSnapshot - DB再読み込み
-//   - addGold(_:) → PlayerSnapshot - ゴールド加算
-//   - subtractGold(_:) → PlayerSnapshot - ゴールド減算
-//   - addCatTickets(_:) → PlayerSnapshot - チケット加算
+//   - currentPlayer() → CachedPlayer - 現在のプレイヤー情報
+//   - loadCurrentPlayer() → CachedPlayer - DB再読み込み
+//   - addGold(_:) → CachedPlayer - ゴールド加算
+//   - subtractGold(_:) → CachedPlayer - ゴールド減算
+//   - addCatTickets(_:) → CachedPlayer - チケット加算
 //   - resetAllProgress() - 全データリセット
 //   - loadSuperRareDailyState() → SuperRareDailyState
 //   - updateSuperRareDailyState(_:)
@@ -110,14 +110,14 @@ actor GameStateService {
 
     // MARK: - Player Snapshot
 
-    func loadCurrentPlayer(initialGold: UInt32 = 1000) async throws -> PlayerSnapshot {
+    func loadCurrentPlayer(initialGold: UInt32 = 1000) async throws -> CachedPlayer {
         let context = contextProvider.makeContext()
         let record = try ensureGameState(context: context, initialGold: initialGold)
         try saveIfNeeded(context)
         return Self.snapshot(from: record)
     }
 
-    func currentPlayer() async throws -> PlayerSnapshot {
+    func currentPlayer() async throws -> CachedPlayer {
         let context = contextProvider.makeContext()
         let record = try fetchGameState(context: context)
         return Self.snapshot(from: record)
@@ -125,14 +125,14 @@ actor GameStateService {
 
     // MARK: - Gold Operations
 
-    func addGold(_ amount: UInt32) async throws -> PlayerSnapshot {
+    func addGold(_ amount: UInt32) async throws -> CachedPlayer {
         return try await mutateWallet { wallet in
             let newGold = UInt64(wallet.gold) + UInt64(amount)
             wallet.gold = UInt32(min(newGold, UInt64(AppConstants.Progress.maximumGold)))
         }
     }
 
-    func spendGold(_ amount: UInt32) async throws -> PlayerSnapshot {
+    func spendGold(_ amount: UInt32) async throws -> CachedPlayer {
         return try await mutateWallet { wallet in
             guard wallet.gold >= amount else {
                 throw ProgressError.insufficientFunds(required: Int(amount), available: Int(wallet.gold))
@@ -143,7 +143,7 @@ actor GameStateService {
 
     // MARK: - Cat Tickets
 
-    func addCatTickets(_ amount: UInt16) async throws -> PlayerSnapshot {
+    func addCatTickets(_ amount: UInt16) async throws -> CachedPlayer {
         return try await mutateWallet { wallet in
             let newTickets = UInt32(wallet.catTickets) + UInt32(amount)
             wallet.catTickets = UInt16(min(newTickets, UInt32(AppConstants.Progress.maximumCatTickets)))
@@ -166,7 +166,7 @@ actor GameStateService {
     func addToPandoraBox(
         stackKey: StackKey,
         inventoryService: InventoryProgressService
-    ) async throws -> PlayerSnapshot {
+    ) async throws -> CachedPlayer {
         let packed = stackKey.packed
 
         let context = contextProvider.makeContext()
@@ -206,7 +206,7 @@ actor GameStateService {
     func removeFromPandoraBox(
         stackKey: StackKey,
         inventoryService: InventoryProgressService
-    ) async throws -> PlayerSnapshot {
+    ) async throws -> CachedPlayer {
         let packed = stackKey.packed
 
         let context = contextProvider.makeContext()
@@ -281,7 +281,7 @@ private extension GameStateService {
         return record
     }
 
-    func mutateWallet(_ mutate: @Sendable (inout PlayerWallet) throws -> Void) async throws -> PlayerSnapshot {
+    func mutateWallet(_ mutate: @Sendable (inout PlayerWallet) throws -> Void) async throws -> CachedPlayer {
         let context = contextProvider.makeContext()
         let record = try ensureGameState(context: context)
         var wallet = PlayerWallet(gold: record.gold, catTickets: record.catTickets)
@@ -316,8 +316,8 @@ private extension GameStateService {
         try context.save()
     }
 
-    nonisolated static func snapshot(from record: GameStateRecord) -> PlayerSnapshot {
-        PlayerSnapshot(
+    nonisolated static func snapshot(from record: GameStateRecord) -> CachedPlayer {
+        CachedPlayer(
             gold: record.gold,
             catTickets: record.catTickets,
             partySlots: record.partySlots,

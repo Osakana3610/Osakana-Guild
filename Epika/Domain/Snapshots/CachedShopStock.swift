@@ -1,14 +1,14 @@
 // ==============================================================================
-// ShopSnapshot.swift
+// CachedShopStock.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - 商店在庫のイミュータブルスナップショット
+//   - 商店在庫のキャッシュ表現
 //   - 在庫状態の表現
 //
 // 【データ構造】
-//   - ShopSnapshot: 商店在庫情報
+//   - CachedShopStock: 商店在庫情報
 //     - stocks: 在庫アイテムリスト
 //     - updatedAt: 更新日時
 //
@@ -24,9 +24,8 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 
-struct ShopSnapshot: Sendable, Hashable {
+struct CachedShopStock: Sendable, Hashable {
     struct Stock: Sendable, Hashable {
         var itemId: UInt16
         var remaining: UInt16?

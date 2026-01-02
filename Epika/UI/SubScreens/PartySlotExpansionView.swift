@@ -25,7 +25,7 @@ struct PartySlotExpansionView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    @State private var playerSnapshot: PlayerSnapshot?
+    @State private var playerSnapshot: CachedPlayer?
     @State private var partySnapshots: [CachedParty] = []
     @State private var isLoading = false
     @State private var isExpanding = false

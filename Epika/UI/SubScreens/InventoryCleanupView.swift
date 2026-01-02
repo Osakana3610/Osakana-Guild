@@ -25,7 +25,7 @@ import SwiftUI
 struct InventoryCleanupView: View {
     @Environment(AppServices.self) private var appServices
     @State private var candidates: [ShopProgressService.ShopItem] = []
-    @State private var player: PlayerSnapshot?
+    @State private var player: CachedPlayer?
     @State private var isLoading = false
     @State private var showError = false
     @State private var errorMessage = ""
