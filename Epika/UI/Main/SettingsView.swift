@@ -22,6 +22,13 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("設定") {
+                    NavigationLink {
+                        DropNotificationSettingsView()
+                    } label: {
+                        Label("ドロップ通知設定", systemImage: "bell.badge")
+                    }
+                }
                 Section("図鑑") {
                     NavigationLink {
                         MonsterEncyclopediaView()
