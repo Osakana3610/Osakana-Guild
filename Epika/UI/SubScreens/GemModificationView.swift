@@ -22,15 +22,15 @@ import SwiftUI
 struct GemModificationView: View {
     @Environment(AppServices.self) private var appServices
 
-    @State private var gems: [InventoryItemRecord] = []
-    @State private var allItems: [InventoryItemRecord] = []
+    @State private var gems: [CachedInventoryItem] = []
+    @State private var allItems: [CachedInventoryItem] = []
     @State private var isLoading = true
     @State private var loadError: String?
-    @State private var selectedGem: InventoryItemRecord?
-    @State private var socketableItems: [InventoryItemRecord] = []
+    @State private var selectedGem: CachedInventoryItem?
+    @State private var socketableItems: [CachedInventoryItem] = []
     @State private var isLoadingTargets = false
     @State private var showConfirmation = false
-    @State private var targetItem: InventoryItemRecord?
+    @State private var targetItem: CachedInventoryItem?
     @State private var isSocketSheetPresented = false
 
     private var gemService: GemModificationProgressService { appServices.gemModification }
@@ -95,9 +95,7 @@ struct GemModificationView: View {
             }
         } message: {
             if let gem = selectedGem, let target = targetItem {
-                let gemName = displayService.displayName(for: gem.stackKey)
-                let targetName = displayService.displayName(for: target.stackKey)
-                Text("\(targetName)に\(gemName)で宝石改造を施しますか？\n（宝石は消費されます）")
+                Text("\(target.displayName)に\(gem.displayName)で宝石改造を施しますか？\n（宝石は消費されます）")
             } else {
                 Text("宝石改造を施しますか？")
             }
@@ -130,7 +128,7 @@ struct GemModificationView: View {
                                 await selectGem(gem)
                             }
                         } label: {
-                            GemRow(record: gem, displayService: displayService)
+                            GemRow(item: gem, displayService: displayService)
                         }
                         .tint(.primary)
                     }
@@ -148,16 +146,16 @@ struct GemModificationView: View {
 
         // 起動時に既にロード済み（UserDataLoadService.loadAllで）
         // 全アイテムを保持（selectGemでソケット可能アイテムをフィルタするため）
-        allItems = displayService.getRecords(categories: Set(ItemSaleCategory.allCases))
+        allItems = displayService.getItems(categories: Set(ItemSaleCategory.allCases))
 
         // 宝石カテゴリのみ取得
-        gems = displayService.getRecords(categories: [.gem])
+        gems = displayService.getItems(categories: [.gem])
 
         isLoading = false
     }
 
     @MainActor
-    private func selectGem(_ gem: InventoryItemRecord) async {
+    private func selectGem(_ gem: CachedInventoryItem) async {
         selectedGem = gem
         isLoadingTargets = true
         socketableItems = []
@@ -194,12 +192,12 @@ struct GemModificationView: View {
 }
 
 private struct GemRow: View {
-    let record: InventoryItemRecord
+    let item: CachedInventoryItem
     let displayService: UserDataLoadService
 
     var body: some View {
         HStack {
-            displayService.makeStyledDisplayText(for: record, includeSellValue: false)
+            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
                 .font(.body)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
@@ -217,11 +215,11 @@ private struct GemRow: View {
 
 private struct SocketableItemsSheet: View {
     @Environment(\.dismiss) private var dismiss
-    let gem: InventoryItemRecord
-    let socketableItems: [InventoryItemRecord]
+    let gem: CachedInventoryItem
+    let socketableItems: [CachedInventoryItem]
     let isLoading: Bool
     let displayService: UserDataLoadService
-    let onSelect: (InventoryItemRecord) -> Void
+    let onSelect: (CachedInventoryItem) -> Void
     let onCancel: () -> Void
 
     var body: some View {
@@ -251,12 +249,12 @@ private struct SocketableItemsSheet: View {
                         }
 
                         Section("装着先を選択") {
-                            ForEach(socketableItems, id: \.stackKey) { record in
+                            ForEach(socketableItems, id: \.stackKey) { item in
                                 Button {
-                                    onSelect(record)
+                                    onSelect(item)
                                     dismiss()
                                 } label: {
-                                    SocketableItemRow(record: record, displayService: displayService)
+                                    SocketableItemRow(item: item, displayService: displayService)
                                 }
                                 .tint(.primary)
                             }
@@ -280,12 +278,12 @@ private struct SocketableItemsSheet: View {
 }
 
 private struct SocketableItemRow: View {
-    let record: InventoryItemRecord
+    let item: CachedInventoryItem
     let displayService: UserDataLoadService
 
     var body: some View {
         HStack {
-            displayService.makeStyledDisplayText(for: record, includeSellValue: false)
+            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
                 .font(.body)
                 .foregroundStyle(.primary)
                 .lineLimit(1)

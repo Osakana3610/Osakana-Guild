@@ -29,11 +29,11 @@ struct ItemSaleView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var selectedStackKeys: Set<String> = []
-    @State private var selectedRecords: [InventoryItemRecord] = []
+    @State private var selectedItems: [CachedInventoryItem] = []
     @State private var selectedTotalSellPrice: Int = 0
     @State private var cacheVersion: Int = 0
     @State private var didLoadOnce = false
-    @State private var detailRecord: InventoryItemRecord?
+    @State private var detailItem: CachedInventoryItem?
     @State private var saleWarningContext: SaleWarningContext?
     @State private var searchText = ""
     @State private var showFilterSheet = false
@@ -43,9 +43,9 @@ struct ItemSaleView: View {
     @State private var showGemModifiedOnly = false
 
     private var totalSellPriceText: String { "\(selectedTotalSellPrice)GP" }
-    private var hasSelection: Bool { !selectedRecords.isEmpty }
-    private var subcategorizedRecords: [ItemDisplaySubcategory: [InventoryItemRecord]] {
-        appServices.userDataLoad.getSubcategorizedRecords()
+    private var hasSelection: Bool { !selectedItems.isEmpty }
+    private var subcategorizedItems: [ItemDisplaySubcategory: [CachedInventoryItem]] {
+        appServices.userDataLoad.getSubcategorizedItems()
     }
     private var orderedSubcategories: [ItemDisplaySubcategory] {
         appServices.userDataLoad.getOrderedSubcategories()
@@ -86,12 +86,12 @@ struct ItemSaleView: View {
             refreshSelectionFromCache()
             cacheVersion = appServices.userDataLoad.itemCacheVersion
         }
-        .sheet(item: $detailRecord) { record in
+        .sheet(item: $detailItem) { item in
             NavigationStack {
-                ItemDetailView(record: record)
+                ItemDetailView(cachedItem: item)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("閉じる") { detailRecord = nil }
+                            Button("閉じる") { detailItem = nil }
                         }
                     }
             }
@@ -111,27 +111,25 @@ struct ItemSaleView: View {
         }
     }
 
-    private var filteredSections: [(subcategory: ItemDisplaySubcategory, records: [InventoryItemRecord])] {
+    private var filteredSections: [(subcategory: ItemDisplaySubcategory, items: [CachedInventoryItem])] {
         orderedSubcategories.compactMap { subcategory in
-            guard let records = subcategorizedRecords[subcategory] else { return nil }
-            let filteredRecords = records.filter { matchesFilters($0) }
-            return filteredRecords.isEmpty ? nil : (subcategory, filteredRecords)
+            guard let items = subcategorizedItems[subcategory] else { return nil }
+            let filteredItems = items.filter { matchesFilters($0) }
+            return filteredItems.isEmpty ? nil : (subcategory, filteredItems)
         }
     }
 
-    private func matchesFilters(_ record: InventoryItemRecord) -> Bool {
-        guard let category = appServices.userDataLoad.category(for: record.stackKey) else { return false }
-        if !selectedCategories.contains(category) { return false }
+    private func matchesFilters(_ item: CachedInventoryItem) -> Bool {
+        if !selectedCategories.contains(item.category) { return false }
         let normalTitleSet = selectedNormalTitleIds ?? allNormalTitleIds
-        if !normalTitleSet.contains(record.normalTitleId) { return false }
+        if !normalTitleSet.contains(item.normalTitleId) { return false }
         if !searchText.isEmpty {
-            let displayName = appServices.userDataLoad.displayName(for: record.stackKey)
-            if !displayName.localizedCaseInsensitiveContains(searchText) {
+            if !item.displayName.localizedCaseInsensitiveContains(searchText) {
                 return false
             }
         }
-        if showSuperRareOnly && record.superRareTitleId == 0 { return false }
-        if showGemModifiedOnly && record.socketItemId == 0 { return false }
+        if showSuperRareOnly && item.superRareTitleId == 0 { return false }
+        if showGemModifiedOnly && item.socketItemId == 0 { return false }
         return true
     }
 
@@ -150,7 +148,7 @@ struct ItemSaleView: View {
                     }
                 } else {
                     ForEach(filteredSections, id: \.subcategory) { section in
-                        buildSubcategorySection(for: section.subcategory, records: section.records)
+                        buildSubcategorySection(for: section.subcategory, items: section.items)
                     }
                 }
             }
@@ -182,7 +180,7 @@ struct ItemSaleView: View {
     private var selectionSummary: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("\(selectedRecords.count)個選択中")
+                Text("\(selectedItems.count)個選択中")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
@@ -199,7 +197,7 @@ struct ItemSaleView: View {
 
             Button("選択解除") {
                 selectedStackKeys.removeAll()
-                selectedRecords.removeAll()
+                selectedItems.removeAll()
                 selectedTotalSellPrice = 0
             }
             .buttonStyle(.bordered)
@@ -221,14 +219,14 @@ struct ItemSaleView: View {
     @ViewBuilder
     private func buildSubcategorySection(
         for subcategory: ItemDisplaySubcategory,
-        records: [InventoryItemRecord]
+        items: [CachedInventoryItem]
     ) -> some View {
-        if records.isEmpty {
+        if items.isEmpty {
             EmptyView()
         } else {
             Section {
-                ForEach(records, id: \.stackKey) { record in
-                    buildRow(for: record)
+                ForEach(items, id: \.stackKey) { item in
+                    buildRow(for: item)
                 }
             } header: {
                 HStack {
@@ -236,7 +234,7 @@ struct ItemSaleView: View {
                         .font(.headline)
                         .fontWeight(.semibold)
                     Spacer()
-                    Text("\(records.count)個")
+                    Text("\(items.count)個")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -245,16 +243,16 @@ struct ItemSaleView: View {
         }
     }
 
-    private func buildRow(for record: InventoryItemRecord) -> some View {
-        let isSelected = selectedStackKeys.contains(record.stackKey)
+    private func buildRow(for item: CachedInventoryItem) -> some View {
+        let isSelected = selectedStackKeys.contains(item.stackKey)
         return Button {
-            toggleSelection(record)
+            toggleSelection(item)
         } label: {
             HStack {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(.primary)
 
-                appServices.userDataLoad.makeStyledDisplayText(for: record)
+                appServices.userDataLoad.makeStyledDisplayText(for: item)
                     .font(.body)
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -262,7 +260,7 @@ struct ItemSaleView: View {
                 Spacer()
 
                 Button {
-                    detailRecord = record
+                    detailItem = item
                 } label: {
                     Image(systemName: "info.circle")
                         .foregroundColor(.secondary)
@@ -274,22 +272,22 @@ struct ItemSaleView: View {
         .frame(height: AppConstants.UI.listRowHeight)
         .contextMenu {
             Button {
-                handleSingleSell(record: record, quantity: 1)
+                handleSingleSell(item: item, quantity: 1)
             } label: {
                 Label("1個売る", systemImage: "1.circle")
             }
-            .disabled(record.quantity < 1)
+            .disabled(item.quantity < 1)
 
-            if record.quantity >= 10 {
+            if item.quantity >= 10 {
                 Button {
-                    handleSingleSell(record: record, quantity: 10)
+                    handleSingleSell(item: item, quantity: 10)
                 } label: {
                     Label("10個売る", systemImage: "10.circle")
                 }
             }
 
             Button {
-                handleAutoTradeAddition(for: record)
+                handleAutoTradeAddition(for: item)
             } label: {
                 Label("自動売却に追加", systemImage: "arrow.triangle.2.circlepath")
             }
@@ -323,10 +321,10 @@ struct ItemSaleView: View {
     }
 
     @MainActor
-    private func sellSelectedItems(for records: [InventoryItemRecord]) async {
-        guard !records.isEmpty else { return }
+    private func sellSelectedItems(for items: [CachedInventoryItem]) async {
+        guard !items.isEmpty else { return }
         do {
-            let stackKeys = records.map { $0.stackKey }
+            let stackKeys = items.map { $0.stackKey }
             _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
             cacheVersion = appServices.userDataLoad.itemCacheVersion
             removeSelection(forKeys: stackKeys)
@@ -339,23 +337,23 @@ struct ItemSaleView: View {
     @MainActor
     private func executeSaleAction(_ action: SaleAction) async {
         switch action {
-        case .sellSelection(let records):
-            await sellSelectedItems(for: records)
-        case .autoSellSelection(let records):
-            await autoSellItems(records)
-        case .sellSingle(let record, let quantity):
-            await sellItem(record, quantity: quantity)
-        case .addAutoRule(let record):
-            await addToAutoTrade(record)
+        case .sellSelection(let items):
+            await sellSelectedItems(for: items)
+        case .autoSellSelection(let items):
+            await autoSellItems(items)
+        case .sellSingle(let item, let quantity):
+            await sellItem(item, quantity: quantity)
+        case .addAutoRule(let item):
+            await addToAutoTrade(item)
         }
     }
 
     @MainActor
-    private func autoSellItems(_ records: [InventoryItemRecord]) async {
-        guard !records.isEmpty else { return }
+    private func autoSellItems(_ items: [CachedInventoryItem]) async {
+        guard !items.isEmpty else { return }
         do {
-            try await registerAutoTradeRules(for: records)
-            let stackKeys = records.map { $0.stackKey }
+            try await registerAutoTradeRules(for: items)
+            let stackKeys = items.map { $0.stackKey }
             _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
             cacheVersion = appServices.userDataLoad.itemCacheVersion
             removeSelection(forKeys: stackKeys)
@@ -365,21 +363,20 @@ struct ItemSaleView: View {
         }
     }
 
-    private func toggleSelection(_ record: InventoryItemRecord) {
-        if selectedStackKeys.contains(record.stackKey) {
-            selectedStackKeys.remove(record.stackKey)
-            selectedRecords.removeAll { $0.stackKey == record.stackKey }
+    private func toggleSelection(_ item: CachedInventoryItem) {
+        if selectedStackKeys.contains(item.stackKey) {
+            selectedStackKeys.remove(item.stackKey)
+            selectedItems.removeAll { $0.stackKey == item.stackKey }
         } else {
-            selectedStackKeys.insert(record.stackKey)
-            selectedRecords.append(record)
+            selectedStackKeys.insert(item.stackKey)
+            selectedItems.append(item)
         }
         recalcSelectedTotalSellPrice()
     }
 
     private func recalcSelectedTotalSellPrice() {
-        let displayService = appServices.userDataLoad
-        let total = selectedRecords.reduce(into: 0) { partial, record in
-            partial += displayService.sellValue(for: record.stackKey) * Int(record.quantity)
+        let total = selectedItems.reduce(into: 0) { partial, item in
+            partial += item.sellValue * Int(item.quantity)
         }
         selectedTotalSellPrice = total
     }
@@ -388,25 +385,25 @@ struct ItemSaleView: View {
 
     @MainActor
     private func handleSellSelection() {
-        let action = SaleAction.sellSelection(records: selectedRecords)
+        let action = SaleAction.sellSelection(items: selectedItems)
         processSaleAction(action)
     }
 
     @MainActor
     private func handleAutoSellSelection() {
-        let action = SaleAction.autoSellSelection(records: selectedRecords)
+        let action = SaleAction.autoSellSelection(items: selectedItems)
         processSaleAction(action)
     }
 
     @MainActor
-    private func handleSingleSell(record: InventoryItemRecord, quantity: Int) {
-        let action = SaleAction.sellSingle(record: record, quantity: quantity)
+    private func handleSingleSell(item: CachedInventoryItem, quantity: Int) {
+        let action = SaleAction.sellSingle(item: item, quantity: quantity)
         processSaleAction(action)
     }
 
     @MainActor
-    private func handleAutoTradeAddition(for record: InventoryItemRecord) {
-        let action = SaleAction.addAutoRule(record: record)
+    private func handleAutoTradeAddition(for item: CachedInventoryItem) {
+        let action = SaleAction.addAutoRule(item: item)
         processSaleAction(action)
     }
 
@@ -420,21 +417,21 @@ struct ItemSaleView: View {
     }
 
     @MainActor
-    private func sellItem(_ record: InventoryItemRecord, quantity: Int) async {
+    private func sellItem(_ item: CachedInventoryItem, quantity: Int) async {
         do {
-            _ = try await appServices.sellItemToShop(stackKey: record.stackKey, quantity: quantity)
+            _ = try await appServices.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
             let service = appServices.userDataLoad
-            let newQuantity = try service.decrementQuantity(stackKey: record.stackKey, by: quantity)
+            let newQuantity = try service.decrementQuantity(stackKey: item.stackKey, by: quantity)
             cacheVersion = service.itemCacheVersion
 
             if newQuantity <= 0 {
                 // 数量が0になった場合は選択から削除
-                selectedStackKeys.remove(record.stackKey)
-                selectedRecords.removeAll { $0.stackKey == record.stackKey }
+                selectedStackKeys.remove(item.stackKey)
+                selectedItems.removeAll { $0.stackKey == item.stackKey }
             } else {
                 // 選択中アイテムの数量も更新
-                if let index = selectedRecords.firstIndex(where: { $0.stackKey == record.stackKey }) {
-                    selectedRecords[index].quantity = UInt16(newQuantity)
+                if let index = selectedItems.firstIndex(where: { $0.stackKey == item.stackKey }) {
+                    selectedItems[index].quantity = UInt16(newQuantity)
                 }
             }
             recalcSelectedTotalSellPrice()
@@ -445,12 +442,12 @@ struct ItemSaleView: View {
     }
 
     @MainActor
-    private func addToAutoTrade(_ record: InventoryItemRecord) async {
+    private func addToAutoTrade(_ item: CachedInventoryItem) async {
         do {
-            try await registerAutoTradeRules(for: [record])
-            _ = try await appServices.sellItemsToShop(stackKeys: [record.stackKey])
+            try await registerAutoTradeRules(for: [item])
+            _ = try await appServices.sellItemsToShop(stackKeys: [item.stackKey])
             cacheVersion = appServices.userDataLoad.itemCacheVersion
-            removeSelection(forKeys: [record.stackKey])
+            removeSelection(forKeys: [item.stackKey])
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -458,16 +455,16 @@ struct ItemSaleView: View {
     }
 
     @MainActor
-    private func registerAutoTradeRules(for records: [InventoryItemRecord]) async throws {
-        guard !records.isEmpty else { return }
-        for record in records {
+    private func registerAutoTradeRules(for items: [CachedInventoryItem]) async throws {
+        guard !items.isEmpty else { return }
+        for item in items {
             _ = try await appServices.autoTrade.addRule(
-                superRareTitleId: record.superRareTitleId,
-                normalTitleId: record.normalTitleId,
-                itemId: record.itemId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketItemId: record.socketItemId
+                superRareTitleId: item.superRareTitleId,
+                normalTitleId: item.normalTitleId,
+                itemId: item.itemId,
+                socketSuperRareTitleId: item.socketSuperRareTitleId,
+                socketNormalTitleId: item.socketNormalTitleId,
+                socketItemId: item.socketItemId
             )
         }
     }
@@ -477,22 +474,22 @@ struct ItemSaleView: View {
         guard !stackKeys.isEmpty else { return }
         let keySet = Set(stackKeys)
         selectedStackKeys.subtract(keySet)
-        selectedRecords.removeAll { keySet.contains($0.stackKey) }
+        selectedItems.removeAll { keySet.contains($0.stackKey) }
         recalcSelectedTotalSellPrice()
     }
 
     @MainActor
     private func refreshSelectionFromCache() {
-        let records = appServices.userDataLoad.getAllRecords()
-        guard !records.isEmpty else {
+        let allItems = appServices.userDataLoad.getAllItems()
+        guard !allItems.isEmpty else {
             selectedStackKeys.removeAll()
-            selectedRecords.removeAll()
+            selectedItems.removeAll()
             selectedTotalSellPrice = 0
             return
         }
-        let recordMap = Dictionary(uniqueKeysWithValues: records.map { ($0.stackKey, $0) })
-        selectedRecords = selectedRecords.compactMap { recordMap[$0.stackKey] }
-        selectedStackKeys = Set(selectedRecords.map { $0.stackKey })
+        let itemMap = Dictionary(uniqueKeysWithValues: allItems.map { ($0.stackKey, $0) })
+        selectedItems = selectedItems.compactMap { itemMap[$0.stackKey] }
+        selectedStackKeys = Set(selectedItems.map { $0.stackKey })
         recalcSelectedTotalSellPrice()
     }
 
@@ -502,18 +499,18 @@ struct ItemSaleView: View {
     }
 
     private func warningFlags(for action: SaleAction) -> (hasGem: Bool, hasSuperRare: Bool) {
-        let records: [InventoryItemRecord]
+        let items: [CachedInventoryItem]
         switch action {
         case .sellSelection(let targets), .autoSellSelection(let targets):
-            records = targets
-        case .sellSingle(let record, _), .addAutoRule(let record):
-            records = [record]
+            items = targets
+        case .sellSingle(let item, _), .addAutoRule(let item):
+            items = [item]
         }
         var hasGem = false
         var hasSuperRare = false
-        for record in records {
-            if record.socketItemId != 0 { hasGem = true }
-            if record.superRareTitleId > 0 { hasSuperRare = true }
+        for item in items {
+            if item.socketItemId != 0 { hasGem = true }
+            if item.superRareTitleId > 0 { hasSuperRare = true }
             if hasGem && hasSuperRare { break }
         }
         return (hasGem, hasSuperRare)
@@ -639,8 +636,8 @@ private struct SaleWarningContext: Identifiable {
 }
 
 private enum SaleAction {
-    case sellSelection(records: [InventoryItemRecord])
-    case autoSellSelection(records: [InventoryItemRecord])
-    case sellSingle(record: InventoryItemRecord, quantity: Int)
-    case addAutoRule(record: InventoryItemRecord)
+    case sellSelection(items: [CachedInventoryItem])
+    case autoSellSelection(items: [CachedInventoryItem])
+    case sellSingle(item: CachedInventoryItem, quantity: Int)
+    case addAutoRule(item: CachedInventoryItem)
 }
