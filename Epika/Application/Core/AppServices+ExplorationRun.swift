@@ -38,7 +38,10 @@ extension AppServices {
 
         // 出撃前にパーティメンバーのHP全回復（HP > 0 のキャラクターのみ）
         try await character.healToFull(characterIds: partySnapshot.memberCharacterIds)
-        let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId)
+        guard let dungeonDef = masterDataCache.dungeon(dungeonId) else {
+            throw ProgressError.dungeonLocked(id: String(dungeonId))
+        }
+        let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId, definition: dungeonDef)
         guard dungeonSnapshot.isUnlocked else {
             throw ProgressError.dungeonLocked(id: String(dungeonId))
         }
@@ -239,7 +242,10 @@ extension AppServices {
 
         // 出撃前にパーティメンバーのHP全回復
         try await character.healToFull(characterIds: partySnapshot.memberCharacterIds)
-        let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId)
+        guard let dungeonDef = masterDataCache.dungeon(dungeonId) else {
+            throw ProgressError.dungeonLocked(id: String(dungeonId))
+        }
+        let dungeonSnapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId, definition: dungeonDef)
         guard dungeonSnapshot.isUnlocked else {
             throw ProgressError.dungeonLocked(id: String(dungeonId))
         }

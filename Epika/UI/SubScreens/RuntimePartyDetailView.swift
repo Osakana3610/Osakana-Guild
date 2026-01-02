@@ -25,8 +25,8 @@ import SwiftUI
 
 struct RuntimePartyDetailView: View {
     @State private var currentParty: CachedParty
-    @Binding private var selectedDungeon: RuntimeDungeon?
-    let dungeons: [RuntimeDungeon]
+    @Binding private var selectedDungeon: CachedDungeonProgress?
+    let dungeons: [CachedDungeonProgress]
 
     @Environment(PartyViewState.self) private var partyState
     @Environment(AdventureViewState.self) private var adventureState
@@ -38,7 +38,7 @@ struct RuntimePartyDetailView: View {
     @State private var targetFloorSelection: Int
     @State private var selectedCharacter: CachedCharacter?
 
-    init(party: CachedParty, selectedDungeon: Binding<RuntimeDungeon?>, dungeons: [RuntimeDungeon]) {
+    init(party: CachedParty, selectedDungeon: Binding<CachedDungeonProgress?>, dungeons: [CachedDungeonProgress]) {
         _currentParty = State(initialValue: party)
         _selectedDungeon = selectedDungeon
         _targetFloorSelection = State(initialValue: Int(party.targetFloor))
@@ -146,7 +146,7 @@ struct RuntimePartyDetailView: View {
                     }
 
                     TargetFloorPickerMenu(selection: $targetFloorSelection,
-                                          maxFloor: selectedDungeon?.definition.floorCount ?? 1,
+                                          maxFloor: selectedDungeon?.floorCount ?? 1,
                                           rowHeight: listRowHeight)
                 }
             }
@@ -169,11 +169,11 @@ struct RuntimePartyDetailView: View {
             }
             .sheet(isPresented: $showDungeonPicker) {
                 DungeonPickerView(
-                    dungeons: adventureState.runtimeDungeons,
-                    currentSelection: selectedDungeon?.definition.id ?? currentParty.lastSelectedDungeonId,
+                    dungeons: adventureState.dungeons,
+                    currentSelection: selectedDungeon?.dungeonId ?? currentParty.lastSelectedDungeonId,
                     currentDifficulty: currentParty.lastSelectedDifficulty,
                     onSelectDungeon: { dungeon in
-                        await updateDungeonSelection(dungeonId: dungeon.definition.id)
+                        await updateDungeonSelection(dungeonId: dungeon.dungeonId)
                     },
                     onSelectDifficulty: { dungeon, difficulty in
                         await updateDifficultySelectionFromDungeonPicker(dungeon: dungeon, difficulty: difficulty)
@@ -201,8 +201,8 @@ struct RuntimePartyDetailView: View {
         }
     }
 
-    private var activeDungeon: RuntimeDungeon? {
-        selectedDungeon ?? dungeons.first { $0.definition.id == currentParty.lastSelectedDungeonId }
+    private var activeDungeon: CachedDungeonProgress? {
+        selectedDungeon ?? dungeons.first { $0.dungeonId == currentParty.lastSelectedDungeonId }
     }
 
     private var selectedDungeonName: String {
@@ -273,7 +273,7 @@ struct RuntimePartyDetailView: View {
             try await partyState.refresh()
             if let updated = partyState.parties.first(where: { $0.id == currentParty.id }) {
                 currentParty = updated
-                if let dungeon = dungeons.first(where: { $0.definition.id == updated.lastSelectedDungeonId }) {
+                if let dungeon = dungeons.first(where: { $0.dungeonId == updated.lastSelectedDungeonId }) {
                     selectedDungeon = dungeon
                 } else {
                     selectedDungeon = nil
@@ -286,7 +286,7 @@ struct RuntimePartyDetailView: View {
                         try await partyState.refresh()
                         if let adjusted = partyState.parties.first(where: { $0.id == updated.id }) {
                             currentParty = adjusted
-                            selectedDungeon = dungeons.first(where: { $0.definition.id == adjusted.lastSelectedDungeonId })
+                            selectedDungeon = dungeons.first(where: { $0.dungeonId == adjusted.lastSelectedDungeonId })
                         }
                     } catch {
                         errorMessage = error.localizedDescription
@@ -365,7 +365,7 @@ struct RuntimePartyDetailView: View {
         }
     }
 
-    private func updateDifficultySelectionFromDungeonPicker(dungeon: RuntimeDungeon, difficulty: UInt8) async -> Bool {
+    private func updateDifficultySelectionFromDungeonPicker(dungeon: CachedDungeonProgress, difficulty: UInt8) async -> Bool {
         let success = await updateDifficultySelection(difficulty)
         return success
     }
@@ -482,7 +482,7 @@ private struct PartyEquipmentListView: View {
 
 private struct DifficultyPickerMenu: View {
     @Environment(AppServices.self) private var appServices
-    let dungeon: RuntimeDungeon
+    let dungeon: CachedDungeonProgress
     let currentDifficulty: UInt8
     let onSelect: (UInt8) async -> Bool
     let rowHeight: CGFloat?
@@ -554,13 +554,13 @@ private struct TargetFloorPickerMenu: View {
 
 private struct DungeonPickerView: View {
     @Environment(AppServices.self) private var appServices
-    let dungeons: [RuntimeDungeon]
+    let dungeons: [CachedDungeonProgress]
     let currentSelection: UInt16?
     let currentDifficulty: UInt8
-    let onSelectDungeon: (RuntimeDungeon) async -> Bool
-    let onSelectDifficulty: (RuntimeDungeon, UInt8) async -> Bool
+    let onSelectDungeon: (CachedDungeonProgress) async -> Bool
+    let onSelectDifficulty: (CachedDungeonProgress, UInt8) async -> Bool
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedDungeonForDifficulty: RuntimeDungeon?
+    @State private var selectedDungeonForDifficulty: CachedDungeonProgress?
 
     var body: some View {
         NavigationStack {
@@ -611,22 +611,22 @@ private struct DungeonPickerView: View {
         }
     }
 
-    private var groupedDungeons: [Int: [RuntimeDungeon]] {
-        Dictionary(grouping: dungeons) { $0.definition.chapter }
+    private var groupedDungeons: [Int: [CachedDungeonProgress]] {
+        Dictionary(grouping: dungeons) { $0.chapter }
     }
 
     private func chapterTitle(_ chapter: Int) -> String {
         chapter == 0 ? "バベルの塔" : "第\(chapter)章"
     }
 
-    private func currentDifficulty(for dungeon: RuntimeDungeon) -> UInt8 {
-        if currentSelection == dungeon.definition.id {
+    private func currentDifficulty(for dungeon: CachedDungeonProgress) -> UInt8 {
+        if currentSelection == dungeon.dungeonId {
             return currentDifficulty
         }
         return min(currentDifficulty, dungeon.highestUnlockedDifficulty)
     }
 
-    private func handleDungeonTap(_ dungeon: RuntimeDungeon) {
+    private func handleDungeonTap(_ dungeon: CachedDungeonProgress) {
         Task {
             let success = await onSelectDungeon(dungeon)
             if success {
@@ -637,7 +637,7 @@ private struct DungeonPickerView: View {
         }
     }
 
-    private func selectDifficulty(for dungeon: RuntimeDungeon, difficulty: UInt8) async -> Bool {
+    private func selectDifficulty(for dungeon: CachedDungeonProgress, difficulty: UInt8) async -> Bool {
         let success = await onSelectDifficulty(dungeon, difficulty)
         if success {
             await MainActor.run {
@@ -650,7 +650,7 @@ private struct DungeonPickerView: View {
 }
 
 private struct DifficultyPickerView: View {
-    let dungeon: RuntimeDungeon
+    let dungeon: CachedDungeonProgress
     let currentDifficulty: UInt8
     let onSelect: (UInt8) async -> Bool
     @Environment(\.dismiss) private var dismiss
@@ -737,8 +737,12 @@ private struct PartyNameEditorView: View {
     }
 }
 
-private func formattedDifficultyLabel(for dungeon: RuntimeDungeon, difficulty: UInt8, masterData: MasterDataCache) -> String {
-    let name = DungeonDisplayNameFormatter.displayName(for: dungeon.definition, difficultyTitleId: difficulty, masterData: masterData)
+private func formattedDifficultyLabel(for dungeon: CachedDungeonProgress, difficulty: UInt8, masterData: MasterDataCache) -> String {
+    // 難易度プレフィックスを取得
+    var name = dungeon.name
+    if let prefix = DungeonDisplayNameFormatter.difficultyPrefix(for: difficulty, masterData: masterData) {
+        name = "\(prefix)\(name)"
+    }
     let status = dungeon.statusDescription(for: difficulty)
     return "\(name)\(status)"
 }

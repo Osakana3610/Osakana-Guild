@@ -17,21 +17,19 @@
 //
 // 【使用箇所】
 //   - ショップ画面
-//   - アイテム一覧（RuntimeEquipmentRow内）
+//   - アイテム一覧（InventoryItemRow内）
 //   - 装備購入/売却画面
 //
 // ==============================================================================
 
 import SwiftUI
 
-typealias ItemCurrencyType = RuntimeEquipment.CurrencyType
-
 struct PriceView: View {
     let price: Int
-    let currencyType: ItemCurrencyType
+    let currencyType: CurrencyType
     let isAffordable: Bool
 
-    init(price: Int, currencyType: ItemCurrencyType = .gold, isAffordable: Bool = true) {
+    init(price: Int, currencyType: CurrencyType = .gold, isAffordable: Bool = true) {
         self.price = price
         self.currencyType = currencyType
         self.isAffordable = isAffordable

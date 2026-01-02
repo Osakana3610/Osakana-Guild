@@ -27,7 +27,14 @@ extension UserDataLoadService {
 
 extension UserDataLoadService {
     func loadDungeonSnapshots() async throws {
-        let snapshots = try await appServices?.dungeon.allDungeonSnapshots() ?? []
+        let (dungeonService, definitionMap) = await MainActor.run { () -> (DungeonProgressService?, [UInt16: DungeonDefinition]) in
+            guard let appServices else { return (nil, [:]) }
+            let definitions = appServices.masterDataCache.allDungeons
+            let defMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+            return (appServices.dungeon, defMap)
+        }
+        guard let dungeonService else { return }
+        let snapshots = try await dungeonService.allDungeonSnapshots(definitions: definitionMap)
         await MainActor.run {
             self.dungeonSnapshots = snapshots
             self.isDungeonSnapshotsLoaded = true
@@ -81,12 +88,14 @@ extension UserDataLoadService {
     /// ダンジョン進行変更をキャッシュへ適用（差分更新）
     @MainActor
     private func applyDungeonChange(dungeonIds: [UInt16]) async {
-        guard let dungeon = appServices?.dungeon else { return }
+        guard let appServices,
+              let dungeon = appServices.dungeon as DungeonProgressService? else { return }
         do {
             // 変更されたダンジョンのスナップショットを取得
             var snapshotMap = Dictionary(uniqueKeysWithValues: dungeonSnapshots.map { ($0.dungeonId, $0) })
             for dungeonId in dungeonIds {
-                let snapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId)
+                guard let definition = appServices.masterDataCache.dungeon(dungeonId) else { continue }
+                let snapshot = try await dungeon.ensureDungeonSnapshot(for: dungeonId, definition: definition)
                 snapshotMap[dungeonId] = snapshot
             }
             dungeonSnapshots = Array(snapshotMap.values).sorted { $0.dungeonId < $1.dungeonId }

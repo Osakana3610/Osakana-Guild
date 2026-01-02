@@ -8,10 +8,10 @@
 //   - 合成レシピの評価とアイテム変換
 //
 // 【公開API】
-//   - availableParentItems() → [RuntimeEquipment] - 親素材候補
-//   - availableChildItems(forParent:) → [RuntimeEquipment] - 子素材候補
+//   - availableParentItems() → [CachedInventoryItem] - 親素材候補
+//   - availableChildItems(forParent:) → [CachedInventoryItem] - 子素材候補
 //   - preview(parentStackKey:childStackKey:) → SynthesisPreview - 合成結果プレビュー
-//   - synthesize(parentStackKey:childStackKey:) → RuntimeEquipment - 合成実行
+//   - synthesize(parentStackKey:childStackKey:) → CachedInventoryItem - 合成実行
 //
 // 【合成フロー】
 //   1. 親アイテムと子アイテムを選択
@@ -44,7 +44,7 @@ actor ItemSynthesisProgressService {
         self.masterDataCache = masterDataCache
     }
 
-    func availableParentItems() async throws -> [RuntimeEquipment] {
+    func availableParentItems() async throws -> [CachedInventoryItem] {
         let recipes = loadRecipes()
         let parentIds = Set(recipes.map { $0.parentItemId })
         guard !parentIds.isEmpty else { return [] }
@@ -52,12 +52,12 @@ actor ItemSynthesisProgressService {
         return equipments.filter { parentIds.contains($0.itemId) }
     }
 
-    func availableChildItems(forParent parent: RuntimeEquipment) async throws -> [RuntimeEquipment] {
+    func availableChildItems(forParent parent: CachedInventoryItem) async throws -> [CachedInventoryItem] {
         let recipes = loadRecipes()
         let childIds = Set(recipes.filter { $0.parentItemId == parent.itemId }.map { $0.childItemId })
         guard !childIds.isEmpty else { return [] }
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        return equipments.filter { $0.id != parent.id && childIds.contains($0.itemId) }
+        return equipments.filter { $0.stackKey != parent.stackKey && childIds.contains($0.itemId) }
     }
 
     func preview(parentStackKey: String, childStackKey: String) async throws -> SynthesisPreview {
@@ -66,7 +66,7 @@ actor ItemSynthesisProgressService {
         return SynthesisPreview(resultDefinition: context.resultDefinition, cost: cost)
     }
 
-    func synthesize(parentStackKey: String, childStackKey: String) async throws -> RuntimeEquipment {
+    func synthesize(parentStackKey: String, childStackKey: String) async throws -> CachedInventoryItem {
         let synthesisContext = try await resolveContext(parentStackKey: parentStackKey, childStackKey: childStackKey)
         let cost = calculateCost()
 
@@ -89,23 +89,20 @@ actor ItemSynthesisProgressService {
         }
 
         // 更新後の状態: itemId変更、称号リセット、ソケットは親から維持
-        return RuntimeEquipment(
-            id: updatedStackKey,
+        return CachedInventoryItem(
+            stackKey: updatedStackKey,
             itemId: synthesisContext.resultDefinition.id,
-            masterDataId: String(synthesisContext.resultDefinition.id),
-            displayName: synthesisContext.resultDefinition.name,
             quantity: 1,
+            normalTitleId: 0,  // リセット済み
+            superRareTitleId: 0,  // リセット済み
+            socketItemId: synthesisContext.parent.enhancement.socketItemId,
+            socketNormalTitleId: synthesisContext.parent.enhancement.socketNormalTitleId,
+            socketSuperRareTitleId: synthesisContext.parent.enhancement.socketSuperRareTitleId,
             category: ItemSaleCategory(rawValue: synthesisContext.resultDefinition.category) ?? .other,
+            rarity: synthesisContext.resultDefinition.rarity,
+            displayName: synthesisContext.resultDefinition.name,
             baseValue: synthesisContext.resultDefinition.basePrice,
             sellValue: synthesisContext.resultDefinition.sellValue,
-            enhancement: ItemEnhancement(
-                superRareTitleId: 0,  // リセット済み
-                normalTitleId: 0,      // リセット済み
-                socketSuperRareTitleId: synthesisContext.parent.enhancement.socketSuperRareTitleId,
-                socketNormalTitleId: synthesisContext.parent.enhancement.socketNormalTitleId,
-                socketItemId: synthesisContext.parent.enhancement.socketItemId
-            ),
-            rarity: synthesisContext.resultDefinition.rarity,
             statBonuses: synthesisContext.resultDefinition.statBonuses,
             combatBonuses: synthesisContext.resultDefinition.combatBonuses
         )
@@ -118,8 +115,8 @@ actor ItemSynthesisProgressService {
     private func resolveContext(
         parentStackKey: String,
         childStackKey: String
-    ) async throws -> (parent: RuntimeEquipment,
-                       child: RuntimeEquipment,
+    ) async throws -> (parent: CachedInventoryItem,
+                       child: CachedInventoryItem,
                        recipe: SynthesisRecipeDefinition,
                        resultDefinition: ItemDefinition) {
         guard parentStackKey != childStackKey else {
@@ -127,10 +124,10 @@ actor ItemSynthesisProgressService {
         }
 
         let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        guard let parent = equipments.first(where: { $0.id == parentStackKey }) else {
+        guard let parent = equipments.first(where: { $0.stackKey == parentStackKey }) else {
             throw ProgressError.invalidInput(description: "親アイテムが見つかりません")
         }
-        guard let child = equipments.first(where: { $0.id == childStackKey }) else {
+        guard let child = equipments.first(where: { $0.stackKey == childStackKey }) else {
             throw ProgressError.invalidInput(description: "子アイテムが見つかりません")
         }
 

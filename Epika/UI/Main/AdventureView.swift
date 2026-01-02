@@ -83,7 +83,7 @@ struct AdventureView: View {
                             }
                         }
                     ),
-                    dungeons: adventureState.runtimeDungeons
+                    dungeons: adventureState.dungeons
                 )
                 .environment(adventureState)
                 .environment(appServices.statChangeNotifications)
@@ -236,9 +236,9 @@ struct AdventureView: View {
         return party.memberIds.compactMap { map[$0] }
     }
 
-    private func selectedDungeon(for party: CachedParty) -> RuntimeDungeon? {
+    private func selectedDungeon(for party: CachedParty) -> CachedDungeonProgress? {
         guard let dungeonId = party.lastSelectedDungeonId else { return nil }
-        return adventureState.runtimeDungeons.first { $0.definition.id == dungeonId }
+        return adventureState.dungeons.first { $0.dungeonId == dungeonId }
     }
 
     private func canStartExploration(for party: CachedParty) -> Bool {
@@ -305,6 +305,6 @@ struct AdventureView: View {
 
 private struct PartyDetailContext: Identifiable {
     var party: CachedParty
-    var selectedDungeon: RuntimeDungeon?
+    var selectedDungeon: CachedDungeonProgress?
     var id: UInt8 { party.id }
 }

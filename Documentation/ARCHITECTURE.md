@@ -67,12 +67,11 @@ Epika/
 | CachedPlayer.swift | プレイヤー資産のキャッシュ |
 | CachedShopStock.swift | 商店在庫のキャッシュ |
 | CachedStoryProgress.swift | ストーリー進行状態のキャッシュ |
-| ItemAttributes.swift | アイテム属性の値型 |
+| ItemAttributes.swift | CachedInventoryItem, CurrencyType, ItemEnhancement, ItemStorageの定義 |
 | ItemCategoryTypes.swift | アイテムカテゴリ定義 |
 | ProgressMetadata.swift | 進行データ共通のメタデータ |
-| RuntimeDungeon.swift | ダンジョン定義と進行状態の統合ビュー |
-| RuntimeEquipment.swift | 装備アイテムの統合ビュー（マスター+インベントリ+価格） |
-| RuntimeStoryNode.swift | ストーリーノード定義と進行状態の統合ビュー |
+| CachedDungeonProgress.swift | ダンジョン進行状態のキャッシュ（マスターデータ派生情報含む） |
+| CachedStoryNode.swift | ストーリーノード情報のキャッシュ（マスターデータ派生情報含む） |
 
 ---
 
@@ -364,7 +363,7 @@ SwiftDataモデル（永続化レコード）。
 | PartyCharacterSilhouettesView.swift | パーティメンバーを最大6枠のグリッドで簡易表示 |
 | PartySlotCardView.swift | パーティスロットをカード形式で表示 |
 | PriceView.swift | 価格を通貨種別に応じて表示 |
-| RuntimeEquipmentRow.swift | 装備品を行形式で表示 |
+| InventoryItemRow.swift | 装備品を行形式で表示 |
 | RuntimePartyMemberEditView.swift | パーティメンバーの編集画面を提供 |
 
 ### CharacterSections

@@ -44,18 +44,21 @@ actor DungeonProgressService {
         }
     }
 
-    func allDungeonSnapshots() async throws -> [CachedDungeonProgress] {
+    func allDungeonSnapshots(definitions: [UInt16: DungeonDefinition]) async throws -> [CachedDungeonProgress] {
         let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<DungeonRecord>()
         let records = try context.fetch(descriptor)
-        return records.map { Self.snapshot(from: $0) }
+        return records.compactMap { record in
+            guard let definition = definitions[record.dungeonId] else { return nil }
+            return Self.snapshot(from: record, definition: definition)
+        }
     }
 
-    func ensureDungeonSnapshot(for dungeonId: UInt16) async throws -> CachedDungeonProgress {
+    func ensureDungeonSnapshot(for dungeonId: UInt16, definition: DungeonDefinition) async throws -> CachedDungeonProgress {
         let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         try saveIfNeeded(context)
-        return Self.snapshot(from: record)
+        return Self.snapshot(from: record, definition: definition)
     }
 
     func setUnlocked(_ isUnlocked: Bool, dungeonId: UInt16) async throws {
@@ -125,8 +128,9 @@ actor DungeonProgressService {
     ///   - dungeonId: ダンジョンID
     ///   - difficulty: クリアした難易度
     ///   - totalFloors: 到達フロア数
+    ///   - definition: ダンジョン定義
     /// - Returns: 更新後のスナップショット
-    func markClearedAndUnlockNext(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws -> CachedDungeonProgress {
+    func markClearedAndUnlockNext(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8, definition: DungeonDefinition) async throws -> CachedDungeonProgress {
         let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         let now = Date()
@@ -151,7 +155,7 @@ actor DungeonProgressService {
         record.updatedAt = now
         try saveIfNeeded(context)
         notifyDungeonChange(dungeonIds: [dungeonId])
-        return Self.snapshot(from: record)
+        return Self.snapshot(from: record, definition: definition)
     }
 }
 
@@ -178,12 +182,18 @@ private extension DungeonProgressService {
         try context.save()
     }
 
-    static func snapshot(from record: DungeonRecord) -> CachedDungeonProgress {
-        CachedDungeonProgress(dungeonId: record.dungeonId,
-                        isUnlocked: record.isUnlocked,
-                        highestUnlockedDifficulty: record.highestUnlockedDifficulty,
-                        highestClearedDifficulty: record.highestClearedDifficulty,
-                        furthestClearedFloor: record.furthestClearedFloor,
-                        updatedAt: record.updatedAt)
+    static func snapshot(from record: DungeonRecord, definition: DungeonDefinition) -> CachedDungeonProgress {
+        CachedDungeonProgress(
+            dungeonId: record.dungeonId,
+            name: definition.name,
+            chapter: definition.chapter,
+            stage: definition.stage,
+            floorCount: definition.floorCount,
+            isUnlocked: record.isUnlocked,
+            highestUnlockedDifficulty: record.highestUnlockedDifficulty,
+            highestClearedDifficulty: record.highestClearedDifficulty,
+            furthestClearedFloor: record.furthestClearedFloor,
+            updatedAt: record.updatedAt
+        )
     }
 }

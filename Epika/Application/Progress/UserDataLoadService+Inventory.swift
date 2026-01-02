@@ -119,7 +119,10 @@ extension UserDataLoadService {
                 category: category,
                 rarity: definition.rarity,
                 displayName: displayName,
-                sellValue: sellValue
+                baseValue: definition.basePrice,
+                sellValue: sellValue,
+                statBonuses: definition.statBonuses,
+                combatBonuses: definition.combatBonuses
             )
 
             grouped[subcategory, default: []].append(cachedItem)
@@ -354,7 +357,10 @@ extension UserDataLoadService {
                     category: category,
                     rarity: definition.rarity,
                     displayName: fullDisplayName,
-                    sellValue: sellPrice
+                    baseValue: definition.basePrice,
+                    sellValue: sellPrice,
+                    statBonuses: definition.statBonuses,
+                    combatBonuses: definition.combatBonuses
                 )
                 upsertItem(cachedItem)
             }
@@ -495,7 +501,10 @@ extension UserDataLoadService {
                     category: category,
                     rarity: definition.rarity,
                     displayName: fullDisplayName,
-                    sellValue: sellPrice
+                    baseValue: definition.basePrice,
+                    sellValue: sellPrice,
+                    statBonuses: definition.statBonuses,
+                    combatBonuses: definition.combatBonuses
                 )
                 insertItemWithoutVersion(cachedItem)
                 needsRebuild = true
@@ -558,7 +567,10 @@ extension UserDataLoadService {
             category: category,
             rarity: definition.rarity,
             displayName: fullDisplayName,
-            sellValue: sellPrice
+            baseValue: definition.basePrice,
+            sellValue: sellPrice,
+            statBonuses: definition.statBonuses,
+            combatBonuses: definition.combatBonuses
         )
 
         insertItemWithoutVersion(cachedItem)
@@ -665,12 +677,12 @@ extension UserDataLoadService {
     }
 
     /// 装備のステータス差分表示を取得
-    func getCombatDeltaDisplay(for equipment: RuntimeEquipment) -> [(String, Int)] {
+    func getCombatDeltaDisplay(for item: CachedInventoryItem) -> [(String, Int)] {
         var deltas: [(String, Int)] = []
-        equipment.statBonuses.forEachNonZero { stat, value in
+        item.statBonuses.forEachNonZero { stat, value in
             deltas.append((statLabel(for: stat), value))
         }
-        equipment.combatBonuses.forEachNonZero { stat, value in
+        item.combatBonuses.forEachNonZero { stat, value in
             deltas.append((statLabel(for: stat), value))
         }
         return deltas

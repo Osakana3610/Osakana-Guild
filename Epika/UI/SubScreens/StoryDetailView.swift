@@ -22,7 +22,7 @@
 import SwiftUI
 
 struct StoryDetailView: View {
-    let story: RuntimeStoryNode
+    let story: CachedStoryNode
     let onUpdate: () -> Void
 
     @Environment(AppServices.self) private var appServices
@@ -105,7 +105,7 @@ struct StoryDetailView: View {
 }
 
 private struct StoryInfoContent: View {
-    let story: RuntimeStoryNode
+    let story: CachedStoryNode
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -124,7 +124,7 @@ private struct StoryInfoContent: View {
 }
 
 struct StoryStatusBadge: View {
-    let story: RuntimeStoryNode
+    let story: CachedStoryNode
 
     var body: some View {
         Group {

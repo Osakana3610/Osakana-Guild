@@ -8,7 +8,7 @@
 //   - アイテムの追加・削除・数量変更
 //
 // 【公開API】
-//   - allEquipment(storage:) → [RuntimeEquipment] - 装備一覧
+//   - allEquipment(storage:) → [CachedInventoryItem] - 装備一覧
 //   - addItem(...) → String (stackKey) - アイテム追加（スタック上限99）
 //   - addItemsBatch(_:) → [String] - 一括追加
 //   - decrementItem(stackKey:quantity:) - 数量減算
@@ -61,7 +61,7 @@ actor InventoryProgressService {
 
     // MARK: - Public API
 
-    func allEquipment(storage: ItemStorage) async throws -> [RuntimeEquipment] {
+    func allEquipment(storage: ItemStorage) async throws -> [CachedInventoryItem] {
         let context = contextProvider.makeContext()
         let descriptor = fetchDescriptor(for: storage)
         let records = try context.fetch(descriptor)
@@ -82,7 +82,7 @@ actor InventoryProgressService {
             throw ProgressError.itemDefinitionUnavailable(ids: missingIds)
         }
 
-        return records.compactMap { record -> RuntimeEquipment? in
+        return records.compactMap { record -> CachedInventoryItem? in
             guard let definition = definitionMap[record.itemId] else {
                 return nil
             }
@@ -92,23 +92,20 @@ actor InventoryProgressService {
                 superRareTitleId: record.superRareTitleId,
                 normalTitleId: record.normalTitleId
             )
-            return RuntimeEquipment(
-                id: record.stackKey,
+            return CachedInventoryItem(
+                stackKey: record.stackKey,
                 itemId: record.itemId,
-                masterDataId: String(definition.id),
-                displayName: displayName,
-                quantity: Int(record.quantity),
+                quantity: record.quantity,
+                normalTitleId: record.normalTitleId,
+                superRareTitleId: record.superRareTitleId,
+                socketItemId: record.socketItemId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
                 category: ItemSaleCategory(rawValue: definition.category) ?? .other,
+                rarity: definition.rarity,
+                displayName: displayName,
                 baseValue: definition.basePrice,
                 sellValue: definition.sellValue,
-                enhancement: ItemEnhancement(
-                    superRareTitleId: record.superRareTitleId,
-                    normalTitleId: record.normalTitleId,
-                    socketSuperRareTitleId: record.socketSuperRareTitleId,
-                    socketNormalTitleId: record.socketNormalTitleId,
-                    socketItemId: record.socketItemId
-                ),
-                rarity: definition.rarity,
                 statBonuses: definition.statBonuses,
                 combatBonuses: definition.combatBonuses
             )
@@ -425,7 +422,7 @@ actor InventoryProgressService {
 
     func inheritItem(targetStackKey: String,
                      sourceStackKey: String,
-                     newEnhancement: ItemEnhancement) async throws -> RuntimeEquipment {
+                     newEnhancement: ItemEnhancement) async throws -> CachedInventoryItem {
         guard let targetComponents = StackKeyComponents(stackKey: targetStackKey) else {
             throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
         }
@@ -515,23 +512,20 @@ actor InventoryProgressService {
             superRareTitleId: targetRecord.superRareTitleId,
             normalTitleId: targetRecord.normalTitleId
         )
-        return RuntimeEquipment(
-            id: targetRecord.stackKey,
+        return CachedInventoryItem(
+            stackKey: targetRecord.stackKey,
             itemId: targetRecord.itemId,
-            masterDataId: String(definition.id),
-            displayName: displayName,
-            quantity: Int(targetRecord.quantity),
+            quantity: targetRecord.quantity,
+            normalTitleId: targetRecord.normalTitleId,
+            superRareTitleId: targetRecord.superRareTitleId,
+            socketItemId: targetRecord.socketItemId,
+            socketNormalTitleId: targetRecord.socketNormalTitleId,
+            socketSuperRareTitleId: targetRecord.socketSuperRareTitleId,
             category: ItemSaleCategory(rawValue: definition.category) ?? .other,
+            rarity: definition.rarity,
+            displayName: displayName,
             baseValue: definition.basePrice,
             sellValue: definition.sellValue,
-            enhancement: ItemEnhancement(
-                superRareTitleId: targetRecord.superRareTitleId,
-                normalTitleId: targetRecord.normalTitleId,
-                socketSuperRareTitleId: targetRecord.socketSuperRareTitleId,
-                socketNormalTitleId: targetRecord.socketNormalTitleId,
-                socketItemId: targetRecord.socketItemId
-            ),
-            rarity: definition.rarity,
             statBonuses: definition.statBonuses,
             combatBonuses: definition.combatBonuses
         )
