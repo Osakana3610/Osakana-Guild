@@ -31,6 +31,21 @@ actor PartyProgressService {
         self.contextProvider = contextProvider
     }
 
+    /// パーティ変更通知を送信（差分更新対応）
+    /// - Parameters:
+    ///   - upserted: 追加・更新されたパーティのID配列
+    ///   - removed: 削除されたパーティのID配列
+    private func notifyPartyChange(upserted: [UInt8] = [], removed: [UInt8] = []) {
+        let change = UserDataLoadService.PartyChange(upserted: upserted, removed: removed)
+        Task { @MainActor in
+            NotificationCenter.default.post(
+                name: .partyProgressDidChange,
+                object: nil,
+                userInfo: ["change": change]
+            )
+        }
+    }
+
     func allParties() async throws -> [PartySnapshot] {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<PartyRecord>()
@@ -49,7 +64,7 @@ actor PartyProgressService {
         var descriptor = FetchDescriptor<PartyRecord>()
         descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
         var records = try context.fetch(descriptor)
-        var didMutate = false
+        var createdIds: [UInt8] = []
         let now = Date()
 
         if records.count < desiredCount {
@@ -64,12 +79,13 @@ actor PartyProgressService {
                                          updatedAt: now)
                 context.insert(record)
                 records.append(record)
-                didMutate = true
+                createdIds.append(partyId)
             }
         }
 
-        if didMutate {
+        if !createdIds.isEmpty {
             try context.save()
+            notifyPartyChange(upserted: createdIds)
         }
 
         let sortedRecords = records.sorted { $0.id < $1.id }
@@ -87,6 +103,7 @@ actor PartyProgressService {
         party.displayName = trimmed
         party.updatedAt = Date()
         try context.save()
+        notifyPartyChange(upserted: [party.id])
         return Self.snapshot(from: party)
     }
 
@@ -96,6 +113,7 @@ actor PartyProgressService {
         party.memberCharacterIds = memberIds
         party.updatedAt = Date()
         try context.save()
+        notifyPartyChange(upserted: [party.id])
         return Self.snapshot(from: party)
     }
 
@@ -105,6 +123,7 @@ actor PartyProgressService {
         party.lastSelectedDungeonId = dungeonId
         party.updatedAt = Date()
         try context.save()
+        notifyPartyChange(upserted: [party.id])
         return Self.snapshot(from: party)
     }
 
@@ -114,6 +133,7 @@ actor PartyProgressService {
         party.lastSelectedDifficulty = difficulty
         party.updatedAt = Date()
         try context.save()
+        notifyPartyChange(upserted: [party.id])
         return Self.snapshot(from: party)
     }
 
@@ -123,6 +143,7 @@ actor PartyProgressService {
         party.targetFloor = floor
         party.updatedAt = Date()
         try context.save()
+        notifyPartyChange(upserted: [party.id])
         return Self.snapshot(from: party)
     }
 

@@ -70,7 +70,7 @@ actor CharacterProgressService {
         private let context: ModelContext
         private let records: [UInt8: CharacterRecord]
         private let masterData: MasterDataCache
-        private var pendingLevelUpNotification = false
+        private var levelUpCharacterIds: [UInt8] = []
 
         init(contextProvider: SwiftDataContextProvider,
              masterData: MasterDataCache,
@@ -90,25 +90,30 @@ actor CharacterProgressService {
 
         func applyBattleResults(_ updates: [BattleResultUpdate]) throws {
             guard !updates.isEmpty else { return }
-            let levelUp = try applyBattleResultsInternal(updates)
-            if levelUp {
-                pendingLevelUpNotification = true
-            }
+            let leveledUpIds = try applyBattleResultsInternal(updates)
+            levelUpCharacterIds.append(contentsOf: leveledUpIds)
         }
 
         func flushIfNeeded() throws {
             guard context.hasChanges else { return }
             try context.save()
-            if pendingLevelUpNotification {
-                NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
-                pendingLevelUpNotification = false
+            if !levelUpCharacterIds.isEmpty {
+                let change = UserDataLoadService.CharacterChange(upserted: levelUpCharacterIds, removed: [])
+                Task { @MainActor in
+                    NotificationCenter.default.post(
+                        name: .characterProgressDidChange,
+                        object: nil,
+                        userInfo: ["change": change]
+                    )
+                }
+                levelUpCharacterIds = []
             }
         }
 
         // MARK: - Private
 
-        private func applyBattleResultsInternal(_ updates: [BattleResultUpdate]) throws -> Bool {
-            var anyLevelUp = false
+        private func applyBattleResultsInternal(_ updates: [BattleResultUpdate]) throws -> [UInt8] {
+            var leveledUpIds: [UInt8] = []
             for update in updates {
                 guard let record = records[update.characterId] else {
                     throw ProgressError.characterNotFound
@@ -125,7 +130,7 @@ actor CharacterProgressService {
                     let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
                     if computedLevel != Int(previousLevel) {
                         record.level = UInt8(computedLevel)
-                        anyLevelUp = true
+                        leveledUpIds.append(update.characterId)
                     }
                 }
                 if update.hpDelta != 0 {
@@ -133,7 +138,7 @@ actor CharacterProgressService {
                     record.currentHP = UInt32(max(0, newHP))
                 }
             }
-            return anyLevelUp
+            return leveledUpIds
         }
 
         private func resolveLevel(for experience: Int, raceId: UInt8) throws -> Int {
@@ -178,9 +183,18 @@ actor CharacterProgressService {
         self.masterData = masterData
     }
 
-    private func notifyCharacterProgressDidChange() {
+    /// キャラクター変更通知を送信（差分更新対応）
+    /// - Parameters:
+    ///   - upserted: 追加・更新されたキャラクターのID配列
+    ///   - removed: 削除されたキャラクターのID配列
+    private func notifyCharacterChange(upserted: [UInt8] = [], removed: [UInt8] = []) {
+        let change = UserDataLoadService.CharacterChange(upserted: upserted, removed: removed)
         Task { @MainActor in
-            NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
+            NotificationCenter.default.post(
+                name: .characterProgressDidChange,
+                object: nil,
+                userInfo: ["change": change]
+            )
         }
     }
 
@@ -415,7 +429,7 @@ actor CharacterProgressService {
         record.currentHP = UInt32(snapshot.hitPoints.maximum)
         try context.save()
 
-        notifyCharacterProgressDidChange()
+        notifyCharacterChange(upserted: [newId])
         return snapshot
     }
 
@@ -525,7 +539,7 @@ actor CharacterProgressService {
         }
         try context.save()
 
-        notifyCharacterProgressDidChange()
+        notifyCharacterChange(upserted: createdIds)
         return createdIds.count
     }
 
@@ -550,7 +564,7 @@ actor CharacterProgressService {
         snapshot.level = normalizedLevel
         apply(snapshot: snapshot, to: record)
         try context.save()
-        notifyCharacterProgressDidChange()
+        notifyCharacterChange(upserted: [id])
         return try makeSnapshot(record, context: context)
     }
 
@@ -611,7 +625,7 @@ actor CharacterProgressService {
         }
         record.currentHP = newHP
         try context.save()
-        notifyCharacterProgressDidChange()
+        notifyCharacterChange(upserted: [characterId])
     }
 
     /// HP > 0 のキャラクターを全回復する
@@ -625,7 +639,7 @@ actor CharacterProgressService {
         // ループの外で1回だけ取得
         let pandoraBoxItems = try fetchPandoraBoxItems(context: context)
 
-        var modified = false
+        var modifiedIds: [UInt8] = []
         for record in records {
             // HP > 0 のキャラクターのみ回復（HP 0 は蘇生経路を使う）
             guard record.currentHP > 0 else { continue }
@@ -637,13 +651,13 @@ actor CharacterProgressService {
 
             if record.currentHP < maxHP {
                 record.currentHP = maxHP
-                modified = true
+                modifiedIds.append(record.id)
             }
         }
 
-        if modified {
+        if !modifiedIds.isEmpty {
             try context.save()
-            notifyCharacterProgressDidChange()
+            notifyCharacterChange(upserted: modifiedIds)
         }
     }
 
@@ -705,7 +719,7 @@ actor CharacterProgressService {
         }
 
         try context.save()
-        notifyCharacterProgressDidChange()
+        notifyCharacterChange(upserted: [characterId])
         return try makeSnapshot(record, context: context)
     }
 
@@ -726,7 +740,7 @@ actor CharacterProgressService {
         try removeFromParties(characterId: id, context: context)
         context.delete(record)
         try context.save()
-        notifyCharacterProgressDidChange()
+        notifyCharacterChange(removed: [id])
     }
 
     // MARK: - Display Order
@@ -753,7 +767,7 @@ actor CharacterProgressService {
         }
 
         try context.save()
-        notifyCharacterProgressDidChange()
+        notifyCharacterChange(upserted: orderedIds)
     }
 
     // MARK: - Equipment Management
