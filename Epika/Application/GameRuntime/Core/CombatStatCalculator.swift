@@ -66,7 +66,8 @@ struct CombatStatCalculator {
         let loadout: RuntimeCharacter.Loadout
 
         // オプション
-        let pandoraBoxStackKeys: Set<String>
+        /// パンドラボックス内アイテム（StackKeyをUInt64にパック）
+        let pandoraBoxItems: Set<UInt64>
 
         nonisolated init(raceId: UInt8,
                          jobId: UInt8,
@@ -78,7 +79,7 @@ struct CombatStatCalculator {
                          personalitySecondary: PersonalitySecondaryDefinition?,
                          learnedSkills: [SkillDefinition],
                          loadout: RuntimeCharacter.Loadout,
-                         pandoraBoxStackKeys: Set<String> = []) {
+                         pandoraBoxItems: Set<UInt64> = []) {
             self.raceId = raceId
             self.jobId = jobId
             self.level = level
@@ -89,7 +90,7 @@ struct CombatStatCalculator {
             self.personalitySecondary = personalitySecondary
             self.learnedSkills = learnedSkills
             self.loadout = loadout
-            self.pandoraBoxStackKeys = pandoraBoxStackKeys
+            self.pandoraBoxItems = pandoraBoxItems
         }
     }
 
@@ -116,7 +117,7 @@ struct CombatStatCalculator {
                        definitions: context.loadout.items,
                        titleDefinitions: context.loadout.titles,
                        equipmentMultipliers: skillEffects.equipmentMultipliers,
-                       pandoraBoxStackKeys: context.pandoraBoxStackKeys)
+                       pandoraBoxItems: context.pandoraBoxItems)
 
         var attributes = base.makeAttributes()
 
@@ -145,7 +146,7 @@ struct CombatStatCalculator {
                                              forcedToOne: skillEffects.forcedToOne,
                                              equipmentMultipliers: skillEffects.equipmentMultipliers,
                                              itemStatMultipliers: skillEffects.itemStatMultipliers,
-                                             pandoraBoxStackKeys: context.pandoraBoxStackKeys)
+                                             pandoraBoxItems: context.pandoraBoxItems)
 
         var combat = try combatResult.makeCombat()
         // 結果の切り捨て
@@ -202,7 +203,7 @@ private struct BaseStatAccumulator {
                         definitions: [ItemDefinition],
                         titleDefinitions: [TitleDefinition],
                         equipmentMultipliers: [Int: Double],
-                        pandoraBoxStackKeys: Set<String>) throws {
+                        pandoraBoxItems: Set<UInt64>) throws {
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         let titlesById = Dictionary(uniqueKeysWithValues: titleDefinitions.map { ($0.id, $0) })
         for item in equipment {
@@ -210,7 +211,7 @@ private struct BaseStatAccumulator {
                 throw CombatStatCalculator.CalculationError.missingItemDefinition(Int16(item.itemId))
             }
             let categoryMultiplier = equipmentMultipliers[Int(definition.category)] ?? 1.0
-            let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
+            let pandoraMultiplier = pandoraBoxItems.contains(item.packedStackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
             let title = titlesById[item.normalTitleId]
             let statMultiplier = title?.statMultiplier ?? 1.0
@@ -575,7 +576,7 @@ private struct CombatAccumulator {
     private let forcedToOne: Set<CombatStatKey>
     private let equipmentMultipliers: [Int: Double]
     private let itemStatMultipliers: [CombatStatKey: Double]
-    private let pandoraBoxStackKeys: Set<String>
+    private let pandoraBoxItems: Set<UInt64>
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
     init(raceId: UInt8,
@@ -596,7 +597,7 @@ private struct CombatAccumulator {
          forcedToOne: Set<CombatStatKey>,
          equipmentMultipliers: [Int: Double],
          itemStatMultipliers: [CombatStatKey: Double],
-         pandoraBoxStackKeys: Set<String>) {
+         pandoraBoxItems: Set<UInt64>) {
         self.raceId = raceId
         self.level = level
         self.attributes = attributes
@@ -615,7 +616,7 @@ private struct CombatAccumulator {
         self.forcedToOne = forcedToOne
         self.equipmentMultipliers = equipmentMultipliers
         self.itemStatMultipliers = itemStatMultipliers
-        self.pandoraBoxStackKeys = pandoraBoxStackKeys
+        self.pandoraBoxItems = pandoraBoxItems
         self.hasPositivePhysicalAttackEquipment = CombatAccumulator.containsPositivePhysicalAttack(equipment: equipment,
                                                                                                    definitions: itemDefinitions)
     }
@@ -919,7 +920,7 @@ private struct CombatAccumulator {
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
             let categoryMultiplier = equipmentMultipliers[Int(definition.category)] ?? 1.0
-            let pandoraMultiplier = pandoraBoxStackKeys.contains(item.stackKey) ? 1.5 : 1.0
+            let pandoraMultiplier = pandoraBoxItems.contains(item.packedStackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
             let title = titlesById[item.normalTitleId]
             let titleStatMult = title?.statMultiplier ?? 1.0

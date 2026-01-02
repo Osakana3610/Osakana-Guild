@@ -12,6 +12,11 @@
 //   - アイテム選択シート（ItemPickerSheet）
 //   - スワイプで登録解除機能
 //
+// 【仕様】
+//   - パンドラに追加するとインベントリから1個減る
+//   - パンドラから解除するとインベントリに1個戻る
+//   - パンドラのアイテムはマスターデータから表示（インベントリ依存なし）
+//
 // 【使用箇所】
 //   - アイテム関連画面からナビゲーション
 //
@@ -19,10 +24,19 @@
 
 import SwiftUI
 
+/// パンドラボックスに登録されたアイテムの表示用データ
+private struct PandoraDisplayItem: Identifiable {
+    let stackKey: StackKey
+    let displayName: String
+    let hasSuperRare: Bool
+
+    var id: UInt64 { stackKey.packed }
+}
+
 struct PandoraBoxView: View {
     @Environment(AppServices.self) private var appServices
 
-    @State private var pandoraItems: [CachedInventoryItem] = []
+    @State private var pandoraItems: [PandoraDisplayItem] = []
     @State private var availableItems: [CachedInventoryItem] = []
     @State private var isLoading = true
     @State private var loadError: String?
@@ -31,6 +45,7 @@ struct PandoraBoxView: View {
     private var inventoryService: InventoryProgressService { appServices.inventory }
     private var gameStateService: GameStateService { appServices.gameState }
     private var displayService: UserDataLoadService { appServices.userDataLoad }
+    private var masterData: MasterDataCache { appServices.masterDataCache }
 
     private let maxPandoraSlots = 5
 
@@ -61,7 +76,8 @@ struct PandoraBoxView: View {
         .sheet(isPresented: $showingItemPicker) {
             ItemPickerSheet(
                 availableItems: availableItems.filter { item in
-                    !pandoraItems.contains { $0.stackKey == item.stackKey }
+                    let packed = StackKey(stringValue: item.stackKey)?.packed
+                    return !pandoraItems.contains { $0.stackKey.packed == packed }
                 },
                 displayService: displayService,
                 onSelect: { item in
@@ -93,8 +109,8 @@ struct PandoraBoxView: View {
                         .foregroundStyle(.secondary)
                         .font(.callout)
                 } else {
-                    ForEach(pandoraItems, id: \.stackKey) { item in
-                        PandoraItemRow(item: item, displayService: displayService)
+                    ForEach(pandoraItems) { item in
+                        PandoraItemRow(item: item)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     Task {
@@ -129,16 +145,16 @@ struct PandoraBoxView: View {
 
         do {
             let player = try await gameStateService.currentPlayer()
-            let pandoraStackKeys = Set(player.pandoraBoxStackKeys)
 
-            // 起動時に既にロード済み（UserDataLoadService.loadAllで）
-            // 装備可能カテゴリのみ取得（追加候補用）
+            // パンドラアイテムをマスターデータから構築（インベントリに依存しない）
+            pandoraItems = player.pandoraBoxItems.compactMap { packed in
+                let stackKey = StackKey(packed: packed)
+                return makePandoraDisplayItem(stackKey: stackKey)
+            }
+
+            // インベントリから追加候補を取得（装備可能カテゴリのみ）
             let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .mazoMaterial])
             availableItems = displayService.getItems(categories: equipCategories)
-
-            // 登録済みアイテムは全カテゴリから取得（既存の非装備アイテムも表示して削除可能にする）
-            let allItems = displayService.getItems(categories: Set(ItemSaleCategory.allCases))
-            pandoraItems = allItems.filter { pandoraStackKeys.contains($0.stackKey) }
         } catch {
             loadError = error.localizedDescription
         }
@@ -146,10 +162,56 @@ struct PandoraBoxView: View {
         isLoading = false
     }
 
+    /// StackKeyからマスターデータを参照して表示用データを構築
+    private func makePandoraDisplayItem(stackKey: StackKey) -> PandoraDisplayItem? {
+        guard let itemDef = masterData.item(stackKey.itemId) else { return nil }
+
+        var displayName = ""
+
+        // 超レア称号
+        if stackKey.superRareTitleId > 0,
+           let superRareTitle = masterData.superRareTitle(stackKey.superRareTitleId) {
+            displayName += superRareTitle.name
+        }
+        // 通常称号
+        if let normalTitle = masterData.title(stackKey.normalTitleId) {
+            displayName += normalTitle.name
+        }
+        displayName += itemDef.name
+
+        // ソケット（宝石改造）
+        if stackKey.socketItemId > 0 {
+            var socketName = ""
+            if stackKey.socketSuperRareTitleId > 0,
+               let socketSuperRare = masterData.superRareTitle(stackKey.socketSuperRareTitleId) {
+                socketName += socketSuperRare.name
+            }
+            if let socketNormal = masterData.title(stackKey.socketNormalTitleId) {
+                socketName += socketNormal.name
+            }
+            if let socketItem = masterData.item(stackKey.socketItemId) {
+                socketName += socketItem.name
+            }
+            if !socketName.isEmpty {
+                displayName += "[\(socketName)]"
+            }
+        }
+
+        return PandoraDisplayItem(
+            stackKey: stackKey,
+            displayName: displayName,
+            hasSuperRare: stackKey.superRareTitleId > 0
+        )
+    }
+
     @MainActor
     private func addToPandoraBox(item: CachedInventoryItem) async {
+        guard let stackKey = StackKey(stringValue: item.stackKey) else { return }
         do {
-            _ = try await gameStateService.addToPandoraBox(stackKey: item.stackKey)
+            _ = try await gameStateService.addToPandoraBox(
+                stackKey: stackKey,
+                inventoryService: inventoryService
+            )
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -157,9 +219,12 @@ struct PandoraBoxView: View {
     }
 
     @MainActor
-    private func removeFromPandoraBox(item: CachedInventoryItem) async {
+    private func removeFromPandoraBox(item: PandoraDisplayItem) async {
         do {
-            _ = try await gameStateService.removeFromPandoraBox(stackKey: item.stackKey)
+            _ = try await gameStateService.removeFromPandoraBox(
+                stackKey: item.stackKey,
+                inventoryService: inventoryService
+            )
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -168,13 +233,13 @@ struct PandoraBoxView: View {
 }
 
 private struct PandoraItemRow: View {
-    let item: CachedInventoryItem
-    let displayService: UserDataLoadService
+    let item: PandoraDisplayItem
 
     var body: some View {
         HStack {
-            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
+            Text(item.displayName)
                 .font(.body)
+                .fontWeight(item.hasSuperRare ? .bold : .regular)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
 

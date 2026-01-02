@@ -12,7 +12,7 @@
 //     - gold: 所持金（UInt32）
 //     - catTickets: 猫チケット数（UInt16）
 //     - partySlots: 解放済みパーティスロット数（UInt8）
-//     - pandoraBoxStackKeys: パンドラボックス内アイテムのstackKey配列
+//     - pandoraBoxItems: パンドラボックス内アイテム（StackKeyをUInt64にパック）
 //
 // 【使用箇所】
 //   - GameStateService: プレイヤー資産の取得・更新
@@ -27,5 +27,6 @@ struct PlayerSnapshot: Sendable, Hashable {
     var gold: UInt32
     var catTickets: UInt16
     var partySlots: UInt8
-    var pandoraBoxStackKeys: [String]
+    /// パンドラボックス内アイテム（StackKeyをUInt64にパック）
+    var pandoraBoxItems: [UInt64]
 }

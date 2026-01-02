@@ -141,43 +141,79 @@ actor GameStateService {
 
     // MARK: - Pandora Box
 
-    func pandoraBoxStackKeys() async throws -> [String] {
+    /// パンドラボックス内のアイテム（UInt64にパック済み）
+    func pandoraBoxItems() async throws -> [UInt64] {
         let context = contextProvider.makeContext()
         let record = try fetchGameState(context: context)
-        return record.pandoraBoxStackKeys
+        return record.pandoraBoxItems
     }
 
-    func setPandoraBoxStackKeys(_ stackKeys: [String]) async throws -> PlayerSnapshot {
-        guard stackKeys.count <= 5 else {
-            throw ProgressError.invalidInput(description: "パンドラボックスには最大5個までのアイテムを登録できます")
-        }
-        let context = contextProvider.makeContext()
-        let record = try fetchGameState(context: context)
-        record.pandoraBoxStackKeys = stackKeys
-        record.updatedAt = Date()
-        try saveIfNeeded(context)
-        return Self.snapshot(from: record)
-    }
+    /// パンドラボックスにアイテムを追加（インベントリから1個減らす）
+    /// - Parameters:
+    ///   - stackKey: 追加するアイテムのStackKey
+    ///   - inventoryService: インベントリ操作用サービス
+    func addToPandoraBox(
+        stackKey: StackKey,
+        inventoryService: InventoryProgressService
+    ) async throws -> PlayerSnapshot {
+        let packed = stackKey.packed
 
-    func addToPandoraBox(stackKey: String) async throws -> PlayerSnapshot {
         let context = contextProvider.makeContext()
         let record = try fetchGameState(context: context)
-        guard !record.pandoraBoxStackKeys.contains(stackKey) else {
+
+        // 既に登録済みなら何もしない
+        guard !record.pandoraBoxItems.contains(packed) else {
             return Self.snapshot(from: record)
         }
-        guard record.pandoraBoxStackKeys.count < 5 else {
+
+        // 満杯チェック
+        guard record.pandoraBoxItems.count < 5 else {
             throw ProgressError.invalidInput(description: "パンドラボックスは既に満杯です")
         }
-        record.pandoraBoxStackKeys.append(stackKey)
+
+        // インベントリから1個減らす（なければエラー）
+        try await inventoryService.decrementItem(stackKey: stackKey.stringValue, quantity: 1)
+
+        // パンドラに追加
+        record.pandoraBoxItems.append(packed)
         record.updatedAt = Date()
         try saveIfNeeded(context)
         return Self.snapshot(from: record)
     }
 
-    func removeFromPandoraBox(stackKey: String) async throws -> PlayerSnapshot {
+    /// パンドラボックスからアイテムを解除（インベントリに1個戻す）
+    /// - Parameters:
+    ///   - stackKey: 解除するアイテムのStackKey
+    ///   - inventoryService: インベントリ操作用サービス
+    func removeFromPandoraBox(
+        stackKey: StackKey,
+        inventoryService: InventoryProgressService
+    ) async throws -> PlayerSnapshot {
+        let packed = stackKey.packed
+
         let context = contextProvider.makeContext()
         let record = try fetchGameState(context: context)
-        record.pandoraBoxStackKeys.removeAll { $0 == stackKey }
+
+        // パンドラから削除
+        let originalCount = record.pandoraBoxItems.count
+        record.pandoraBoxItems.removeAll { $0 == packed }
+
+        // 実際に削除された場合のみインベントリに戻す
+        if record.pandoraBoxItems.count < originalCount {
+            _ = try await inventoryService.addItem(
+                itemId: stackKey.itemId,
+                quantity: 1,
+                storage: .playerItem,
+                enhancements: ItemEnhancement(
+                    superRareTitleId: stackKey.superRareTitleId,
+                    normalTitleId: stackKey.normalTitleId,
+                    socketSuperRareTitleId: stackKey.socketSuperRareTitleId,
+                    socketNormalTitleId: stackKey.socketNormalTitleId,
+                    socketItemId: stackKey.socketItemId
+                )
+            )
+        }
+
         record.updatedAt = Date()
         try saveIfNeeded(context)
         return Self.snapshot(from: record)
@@ -251,7 +287,7 @@ private extension GameStateService {
             gold: record.gold,
             catTickets: record.catTickets,
             partySlots: record.partySlots,
-            pandoraBoxStackKeys: record.pandoraBoxStackKeys
+            pandoraBoxItems: record.pandoraBoxItems
         )
     }
 }

@@ -16,9 +16,8 @@
 //     - gold: 所持金
 //     - catTickets: 猫チケット
 //     - partySlots: 解放済みパーティスロット数
-//     - pandoraBoxStackKeys: パンドラボックス内アイテム（stackKey配列）
+//     - pandoraBoxItems: パンドラボックス内アイテム（UInt64パック配列）
 //
-//   - PandoraBoxItem (Codable): パンドラボックスアイテム構成要素
 //   - PlayerWallet (Codable): プレイヤー財布（gold/catTickets）
 //
 // 【ユーティリティ】
@@ -31,46 +30,6 @@
 
 import Foundation
 import SwiftData
-
-/// パンドラボックスに登録するアイテムの構成要素
-struct PandoraBoxItem: Codable, Sendable, Hashable {
-    var superRareTitleId: UInt8
-    var normalTitleId: UInt8
-    var itemId: UInt16
-    var socketSuperRareTitleId: UInt8
-    var socketNormalTitleId: UInt8
-    var socketItemId: UInt16
-
-    init(superRareTitleId: UInt8 = 0,
-         normalTitleId: UInt8 = 0,
-         itemId: UInt16 = 0,
-         socketSuperRareTitleId: UInt8 = 0,
-         socketNormalTitleId: UInt8 = 0,
-         socketItemId: UInt16 = 0) {
-        self.superRareTitleId = superRareTitleId
-        self.normalTitleId = normalTitleId
-        self.itemId = itemId
-        self.socketSuperRareTitleId = socketSuperRareTitleId
-        self.socketNormalTitleId = socketNormalTitleId
-        self.socketItemId = socketItemId
-    }
-
-    /// stackKey文字列から生成
-    init?(stackKey: String) {
-        guard let components = StackKeyComponents(stackKey: stackKey) else { return nil }
-        self.superRareTitleId = components.superRareTitleId
-        self.normalTitleId = components.normalTitleId
-        self.itemId = components.itemId
-        self.socketSuperRareTitleId = components.socketSuperRareTitleId
-        self.socketNormalTitleId = components.socketNormalTitleId
-        self.socketItemId = components.socketItemId
-    }
-
-    /// stackKey文字列に変換
-    var stackKey: String {
-        "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
-    }
-}
 
 /// プレイヤーの財布（ゴールド・チケット）
 struct PlayerWallet: Codable, Sendable, Hashable {
@@ -98,8 +57,9 @@ final class GameStateRecord {
     var partySlots: UInt8 = UInt8(AppConstants.Progress.defaultPartySlotCount)
 
     // MARK: - パンドラボックス
-    /// パンドラボックスに登録されたアイテム（最大5件）- stackKey文字列の配列
-    var pandoraBoxStackKeys: [String] = []
+    /// パンドラボックスに登録されたアイテム（最大5件）- StackKeyをUInt64にパックした配列
+    /// パンドラに入れたアイテムはインベントリから1個減らされ、ここに実体として保持される
+    var pandoraBoxItems: [UInt64] = []
 
     init(schemaVersion: UInt8 = 1,
          updatedAt: Date = Date(),
@@ -108,7 +68,7 @@ final class GameStateRecord {
          gold: UInt32 = 0,
          catTickets: UInt16 = 0,
          partySlots: UInt8 = UInt8(AppConstants.Progress.defaultPartySlotCount),
-         pandoraBoxStackKeys: [String] = []) {
+         pandoraBoxItems: [UInt64] = []) {
         self.schemaVersion = schemaVersion
         self.updatedAt = updatedAt
         self.lastDailyProcessedDate = lastDailyProcessedDate
@@ -116,7 +76,7 @@ final class GameStateRecord {
         self.gold = gold
         self.catTickets = catTickets
         self.partySlots = partySlots
-        self.pandoraBoxStackKeys = pandoraBoxStackKeys
+        self.pandoraBoxItems = pandoraBoxItems
     }
 }
 

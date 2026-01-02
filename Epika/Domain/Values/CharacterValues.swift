@@ -98,9 +98,19 @@ enum CharacterValues {
         // 数量（グループ化後）
         var quantity: Int
 
-        /// スタック識別キー
+        /// スタック識別キー（文字列形式）
         var stackKey: String {
             "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
+        }
+
+        /// スタック識別キー（UInt64にパック、高速比較用）
+        var packedStackKey: UInt64 {
+            UInt64(superRareTitleId) << 56 |
+            UInt64(normalTitleId) << 48 |
+            UInt64(itemId) << 32 |
+            UInt64(socketSuperRareTitleId) << 24 |
+            UInt64(socketNormalTitleId) << 16 |
+            UInt64(socketItemId)
         }
     }
 

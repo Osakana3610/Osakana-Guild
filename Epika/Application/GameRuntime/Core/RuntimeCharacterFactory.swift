@@ -8,7 +8,7 @@
 //   - マスターデータ取得と戦闘ステータス計算の統合
 //
 // 【公開API】
-//   - make(from:masterData:pandoraBoxStackKeys:) → RuntimeCharacter
+//   - make(from:masterData:pandoraBoxItems:) → RuntimeCharacter
 //     nonisolated - キャラクター生成（純粋計算）
 //   - withEquipmentChange(current:newEquippedItems:masterData:) → RuntimeCharacter
 //     nonisolated - 装備変更時の高速再構築（既存データを再利用）
@@ -49,7 +49,7 @@ enum RuntimeCharacterFactory {
     static func make(
         from input: CharacterInput,
         masterData: MasterDataCache,
-        pandoraBoxStackKeys: Set<String> = []
+        pandoraBoxItems: Set<UInt64> = []
     ) throws -> RuntimeCharacter {
 
         // マスターデータ取得
@@ -167,7 +167,7 @@ enum RuntimeCharacterFactory {
                 titles: loadout.titles,
                 superRareTitles: loadout.superRareTitles
             ),
-            pandoraBoxStackKeys: pandoraBoxStackKeys
+            pandoraBoxItems: pandoraBoxItems
         )
 
         let calcResult = try CombatStatCalculator.calculate(for: calcContext)
@@ -338,7 +338,7 @@ enum RuntimeCharacterFactory {
                 titles: loadout.titles,
                 superRareTitles: loadout.superRareTitles
             ),
-            pandoraBoxStackKeys: []  // 装備変更時はパンドラボックス効果は変わらない
+            pandoraBoxItems: []  // 装備変更時はパンドラボックス効果は変わらない
         )
 
         let calcResult = try CombatStatCalculator.calculate(for: calcContext)
