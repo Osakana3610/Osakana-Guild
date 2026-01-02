@@ -783,30 +783,20 @@ struct EquipmentEditorView: View {
         // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
         displayService.updateCharacter(runtime)
 
-        // 装備中アイテムとインベントリキャッシュを同じトランザクションで更新
-        // （@Stateと@Observableの変更を同時にSwiftUIに認識させる）
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            rebuildEquippedItemsAndRefresh()
-            updateInventoryCacheForUnequip(item: item, newQuantity: Int(result.newQuantity))
-        }
+        // つける時と同じ順序で更新（キャッシュ変更 → @State変更）
+        updateInventoryCacheForUnequip(item: item, newQuantity: Int(result.newQuantity))
+        rebuildEquippedItemsAndRefresh()
     }
 
     /// 解除時にインベントリキャッシュを更新（存在すれば数量増加、なければ新規追加）
     private func updateInventoryCacheForUnequip(item: CharacterInput.EquippedItem, newQuantity: Int) {
-        // まず既存アイテムの数量を増やしてみる
-        displayService.incrementQuantity(stackKey: item.stackKey, by: 1)
-
-        // incrementQuantityは存在しない場合何もしないので、キャッシュを確認
-        let cachedItems = displayService.getSubcategorizedItems()
-        let exists = cachedItems.values.contains { items in
-            items.contains { $0.stackKey == item.stackKey }
-        }
-
-        // 存在しない場合はSwiftDataから取得してキャッシュに追加
-        if !exists {
-            displayService.addItemByStackKey(item.stackKey)
+        // キャッシュに存在するか確認（O(1)）
+        if displayService.containsItem(stackKey: item.stackKey) {
+            // 存在する場合は数量更新を通知
+            displayService.incrementQuantity(stackKey: item.stackKey, by: 1)
+        } else {
+            // 存在しない場合はEquippedItemから直接キャッシュに追加
+            displayService.addItemFromEquipped(item)
         }
     }
 
