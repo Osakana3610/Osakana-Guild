@@ -25,7 +25,7 @@ import SwiftUI
 @MainActor
 struct CharacterActionPreferencesSection: View {
     let character: CachedCharacter
-    let onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)?
+    let onActionPreferencesChange: ((CharacterValues.ActionPreferences) async throws -> Void)?
 
     @State private var actionPreferenceAttack: Double
     @State private var actionPreferencePriest: Double
@@ -34,7 +34,7 @@ struct CharacterActionPreferencesSection: View {
     @State private var actionPreferenceError: String?
 
     init(character: CachedCharacter,
-         onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)? = nil) {
+         onActionPreferencesChange: ((CharacterValues.ActionPreferences) async throws -> Void)? = nil) {
         self.character = character
         self.onActionPreferencesChange = onActionPreferencesChange
         let preferences = character.actionPreferences
@@ -112,19 +112,19 @@ struct CharacterActionPreferencesSection: View {
 }
 
 private extension CharacterActionPreferencesSection {
-    var originalActionPreferences: CharacterSnapshot.ActionPreferences {
+    var originalActionPreferences: CharacterValues.ActionPreferences {
         character.actionPreferences
     }
 
-    var editedActionPreferences: CharacterSnapshot.ActionPreferences {
+    var editedActionPreferences: CharacterValues.ActionPreferences {
         func clamp(_ value: Double) -> Int {
             let rounded = Int(value.rounded())
             return max(0, min(100, rounded))
         }
-        return CharacterSnapshot.ActionPreferences(attack: clamp(actionPreferenceAttack),
-                                                   priestMagic: clamp(actionPreferencePriest),
-                                                   mageMagic: clamp(actionPreferenceMage),
-                                                   breath: clamp(actionPreferenceBreath))
+        return CharacterValues.ActionPreferences(attack: clamp(actionPreferenceAttack),
+                                                 priestMagic: clamp(actionPreferencePriest),
+                                                 mageMagic: clamp(actionPreferenceMage),
+                                                 breath: clamp(actionPreferenceBreath))
     }
 
     var actionPreferencesDirty: Bool {

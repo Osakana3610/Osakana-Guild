@@ -121,11 +121,7 @@ struct CharacterReviveView: View {
         errorMessage = nil
         defer { isProcessing = false }
         do {
-            _ = try await characterService.updateCharacter(id: character.id) { progress in
-                var hitPoints = progress.hitPoints
-                hitPoints.current = max(1, hitPoints.maximum / 2)
-                progress.hitPoints = hitPoints
-            }
+            try await characterService.reviveCharacter(id: character.id)
             await loadDeadCharacters()
             onComplete()
             if deadCharacters.isEmpty {

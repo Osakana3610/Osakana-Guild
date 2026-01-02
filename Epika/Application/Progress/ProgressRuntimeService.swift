@@ -15,7 +15,7 @@
 //     パーティ・キャラクター情報からランタイムセッションを開始
 //
 // 【セッション開始フロー】
-//   1. CharacterSnapshotをCharacterInputに変換
+//   1. CachedCharacterをCharacterInputに変換
 //   2. RuntimePartyStateを生成
 //   3. 超レア日次状態を読み込み
 //   4. GameRuntimeServiceでセッション開始
@@ -47,7 +47,7 @@ actor ProgressRuntimeService {
     }
 
     func startExplorationRun(party: CachedParty,
-                              characters: [CharacterSnapshot],
+                              characters: [CachedCharacter],
                               dungeonId: UInt16,
                               targetFloorNumber: Int) async throws -> ExplorationRuntimeSession {
         let characterInputs = characters.map { CharacterInput(from: $0) }
