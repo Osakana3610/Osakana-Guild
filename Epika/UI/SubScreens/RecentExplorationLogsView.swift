@@ -49,9 +49,7 @@ struct RecentExplorationLogsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if isFetchingDetail {
-                statusBanner(text: "探索ログを読み込み中…", systemImage: "arrow.clockwise")
-            } else if let detailErrorMessage {
+            if let detailErrorMessage {
                 statusBanner(text: detailErrorMessage, systemImage: "exclamationmark.triangle")
             }
 
