@@ -40,7 +40,7 @@ final class AdventureViewState {
     var showPartyDetail: Bool = false
 
     var runtimeDungeons: [RuntimeDungeon] = []
-    var playerProgress: PlayerSnapshot?
+    var playerProgress: CachedPlayer?
 
     var partyState: PartyViewState?
 
@@ -321,8 +321,8 @@ final class AdventureViewState {
     }
 
     private func resolveDungeonProgress(id: UInt16,
-                                        cache: inout [UInt16: DungeonSnapshot],
-                                        using appServices: AppServices) async throws -> DungeonSnapshot {
+                                        cache: inout [UInt16: CachedDungeonProgress],
+                                        using appServices: AppServices) async throws -> CachedDungeonProgress {
         if let cached = cache[id] {
             return cached
         }

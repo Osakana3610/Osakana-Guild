@@ -75,10 +75,10 @@ final class UserDataLoadService: Sendable {
     @MainActor var shopItems: [ShopProgressService.ShopItem] = []
 
     // ダンジョン進行キャッシュ
-    @MainActor var dungeonSnapshots: [DungeonSnapshot] = []
+    @MainActor var dungeonSnapshots: [CachedDungeonProgress] = []
 
     // ストーリー進行キャッシュ
-    @MainActor var storySnapshot: StorySnapshot = StorySnapshot(
+    @MainActor var storySnapshot: CachedStoryProgress = CachedStoryProgress(
         unlockedNodeIds: [],
         readNodeIds: [],
         rewardedNodeIds: [],

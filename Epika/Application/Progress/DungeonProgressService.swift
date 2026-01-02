@@ -8,8 +8,8 @@
 //   - 解放状態・クリア状態・難易度管理
 //
 // 【公開API】
-//   - allDungeonSnapshots() → [DungeonSnapshot]
-//   - ensureDungeonSnapshot(for:) → DungeonSnapshot
+//   - allDungeonSnapshots() → [CachedDungeonProgress]
+//   - ensureDungeonSnapshot(for:) → CachedDungeonProgress
 //   - setUnlocked(_:dungeonId:) - 解放状態を設定
 //   - markCleared(dungeonId:difficulty:totalFloors:) - クリア記録
 //   - updatePartialProgress(dungeonId:difficulty:furthestFloor:) - 部分進捗更新
@@ -44,14 +44,14 @@ actor DungeonProgressService {
         }
     }
 
-    func allDungeonSnapshots() async throws -> [DungeonSnapshot] {
+    func allDungeonSnapshots() async throws -> [CachedDungeonProgress] {
         let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<DungeonRecord>()
         let records = try context.fetch(descriptor)
         return records.map { Self.snapshot(from: $0) }
     }
 
-    func ensureDungeonSnapshot(for dungeonId: UInt16) async throws -> DungeonSnapshot {
+    func ensureDungeonSnapshot(for dungeonId: UInt16) async throws -> CachedDungeonProgress {
         let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         try saveIfNeeded(context)
@@ -126,7 +126,7 @@ actor DungeonProgressService {
     ///   - difficulty: クリアした難易度
     ///   - totalFloors: 到達フロア数
     /// - Returns: 更新後のスナップショット
-    func markClearedAndUnlockNext(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws -> DungeonSnapshot {
+    func markClearedAndUnlockNext(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws -> CachedDungeonProgress {
         let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
         let now = Date()
@@ -178,8 +178,8 @@ private extension DungeonProgressService {
         try context.save()
     }
 
-    static func snapshot(from record: DungeonRecord) -> DungeonSnapshot {
-        DungeonSnapshot(dungeonId: record.dungeonId,
+    static func snapshot(from record: DungeonRecord) -> CachedDungeonProgress {
+        CachedDungeonProgress(dungeonId: record.dungeonId,
                         isUnlocked: record.isUnlocked,
                         highestUnlockedDifficulty: record.highestUnlockedDifficulty,
                         highestClearedDifficulty: record.highestClearedDifficulty,

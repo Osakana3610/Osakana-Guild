@@ -40,19 +40,19 @@ extension UserDataLoadService {
 extension UserDataLoadService {
     /// 指定されたdungeonIdの進行情報を取得
     @MainActor
-    func dungeonSnapshot(dungeonId: UInt16) -> DungeonSnapshot? {
+    func dungeonSnapshot(dungeonId: UInt16) -> CachedDungeonProgress? {
         dungeonSnapshots.first { $0.dungeonId == dungeonId }
     }
 
     /// 解放済みダンジョン一覧
     @MainActor
-    func unlockedDungeonSnapshots() -> [DungeonSnapshot] {
+    func unlockedDungeonSnapshots() -> [CachedDungeonProgress] {
         dungeonSnapshots.filter { $0.isUnlocked }
     }
 
     /// クリア済みダンジョン一覧
     @MainActor
-    func clearedDungeonSnapshots() -> [DungeonSnapshot] {
+    func clearedDungeonSnapshots() -> [CachedDungeonProgress] {
         dungeonSnapshots.filter { $0.highestClearedDifficulty != nil }
     }
 }

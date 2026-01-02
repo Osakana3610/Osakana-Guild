@@ -11,9 +11,9 @@
 // 【公開API】
 //   - cleanupStockAndAutoSell(itemId:) → CleanupResult
 //     在庫整理でチケット獲得、自動売却対象も売却
-//   - sellItemsToShop(stackKeys:) → PlayerSnapshot
+//   - sellItemsToShop(stackKeys:) → CachedPlayer
 //     複数アイテムを一括売却
-//   - sellItemToShop(stackKey:quantity:) → PlayerSnapshot
+//   - sellItemToShop(stackKey:quantity:) → CachedPlayer
 //     単一アイテムを指定数量売却
 //
 // 【売却フロー】
@@ -113,7 +113,7 @@ extension AppServices {
     /// - Note: ソケット宝石が装着されている場合、宝石も一緒にショップに売却する
     /// - Note: 在庫満杯時はノーマルアイテムは消失、それ以外は在庫整理してチケット獲得
     @discardableResult
-    func sellItemsToShop(stackKeys: [String]) async throws -> PlayerSnapshot {
+    func sellItemsToShop(stackKeys: [String]) async throws -> CachedPlayer {
         guard !stackKeys.isEmpty else {
             return try await gameState.currentPlayer()
         }
@@ -164,7 +164,7 @@ extension AppServices {
     /// - Note: ソケット宝石が装着されている場合、宝石も一緒にショップに売却する
     /// - Note: 在庫満杯時はノーマルアイテムは消失、それ以外は在庫整理してチケット獲得
     @discardableResult
-    func sellItemToShop(stackKey: String, quantity: Int) async throws -> PlayerSnapshot {
+    func sellItemToShop(stackKey: String, quantity: Int) async throws -> CachedPlayer {
         guard quantity > 0 else {
             return try await gameState.currentPlayer()
         }

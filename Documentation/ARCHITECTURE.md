@@ -61,19 +61,18 @@ Epika/
 
 | ファイル | 責務 |
 |---------|------|
-| CharacterSnapshot.swift | キャラクターデータのイミュータブルスナップショット |
-| DungeonSnapshot.swift | ダンジョン進行状態のイミュータブルスナップショット |
-| ExplorationSnapshot.swift | 探索セッションのイミュータブルスナップショット |
-| ItemSnapshot.swift | インベントリアイテムのイミュータブルスナップショット |
-| LightweightItemData.swift | UI表示用の軽量アイテムデータ |
-| PartySnapshot.swift | パーティ編成のイミュータブルスナップショット |
-| PlayerSnapshot.swift | プレイヤー資産のイミュータブルスナップショット |
+| CachedDungeonProgress.swift | ダンジョン進行状態のキャッシュ |
+| CachedExploration.swift | 探索セッションのキャッシュ |
+| CachedParty.swift | パーティ編成のキャッシュ |
+| CachedPlayer.swift | プレイヤー資産のキャッシュ |
+| CachedShopStock.swift | 商店在庫のキャッシュ |
+| CachedStoryProgress.swift | ストーリー進行状態のキャッシュ |
+| ItemAttributes.swift | アイテム属性の値型 |
+| ItemCategoryTypes.swift | アイテムカテゴリ定義 |
 | ProgressMetadata.swift | 進行データ共通のメタデータ |
 | RuntimeDungeon.swift | ダンジョン定義と進行状態の統合ビュー |
 | RuntimeEquipment.swift | 装備アイテムの統合ビュー（マスター+インベントリ+価格） |
 | RuntimeStoryNode.swift | ストーリーノード定義と進行状態の統合ビュー |
-| ShopSnapshot.swift | 商店在庫のイミュータブルスナップショット |
-| StorySnapshot.swift | ストーリー進行状態のイミュータブルスナップショット |
 
 ---
 

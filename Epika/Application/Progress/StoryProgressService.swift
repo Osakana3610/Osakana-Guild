@@ -8,12 +8,12 @@
 //   - ノードの解放・既読状態管理
 //
 // 【公開API】
-//   - currentStorySnapshot() → StorySnapshot - 現在の進行状態
-//   - markNodeAsRead(_:) → StorySnapshot - ノードを既読に
+//   - currentStorySnapshot() → CachedStoryProgress - 現在の進行状態
+//   - markNodeAsRead(_:) → CachedStoryProgress - ノードを既読に
 //   - setUnlocked(_:nodeId:) - 解放状態を設定
 //
 // 【データ構造】
-//   - StorySnapshot: 解放済み・既読・報酬受取済みノードのセット
+//   - CachedStoryProgress: 解放済み・既読・報酬受取済みノードのセット
 //
 // ==============================================================================
 
@@ -38,7 +38,7 @@ actor StoryProgressService {
         }
     }
 
-    func currentStorySnapshot() async throws -> StorySnapshot {
+    func currentStorySnapshot() async throws -> CachedStoryProgress {
         let context = contextProvider.makeContext()
         let nodes = try fetchAllNodeProgress(context: context)
         let maxUpdatedAt = nodes.map(\.updatedAt).max() ?? Date()
@@ -46,7 +46,7 @@ actor StoryProgressService {
     }
 
     @discardableResult
-    func markNodeAsRead(_ nodeId: UInt16) async throws -> StorySnapshot {
+    func markNodeAsRead(_ nodeId: UInt16) async throws -> CachedStoryProgress {
         let context = contextProvider.makeContext()
         let node = try ensureNodeProgress(nodeId: nodeId, context: context)
         guard node.isUnlocked else {
@@ -108,11 +108,11 @@ private extension StoryProgressService {
     }
 
     static func snapshot(from nodes: [StoryNodeProgressRecord],
-                         updatedAt: Date) -> StorySnapshot {
+                         updatedAt: Date) -> CachedStoryProgress {
         let unlocked = Set(nodes.filter { $0.isUnlocked }.map(\.nodeId))
         let read = Set(nodes.filter { $0.isRead }.map(\.nodeId))
         let rewarded = Set(nodes.filter { $0.isRewardClaimed }.map(\.nodeId))
-        return StorySnapshot(unlockedNodeIds: unlocked,
+        return CachedStoryProgress(unlockedNodeIds: unlocked,
                              readNodeIds: read,
                              rewardedNodeIds: rewarded,
                              updatedAt: updatedAt)

@@ -1,14 +1,14 @@
 // ==============================================================================
-// PlayerSnapshot.swift
+// CachedPlayer.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - プレイヤー資産のイミュータブルスナップショット
+//   - プレイヤー資産のキャッシュ表現
 //   - ゴールド・チケット・パーティスロット・パンドラボックスの表現
 //
 // 【データ構造】
-//   - PlayerSnapshot: プレイヤー資産情報
+//   - CachedPlayer: プレイヤー資産情報
 //     - gold: 所持金（UInt32）
 //     - catTickets: 猫チケット数（UInt16）
 //     - partySlots: 解放済みパーティスロット数（UInt8）
@@ -23,7 +23,7 @@
 
 import Foundation
 
-struct PlayerSnapshot: Sendable, Hashable {
+struct CachedPlayer: Sendable, Hashable {
     var gold: UInt32
     var catTickets: UInt16
     var partySlots: UInt8

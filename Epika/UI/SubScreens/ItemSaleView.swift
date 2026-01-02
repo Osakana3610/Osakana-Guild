@@ -24,7 +24,7 @@ import SwiftUI
 /// アイテム売却画面（Runtimeサービス準拠）
 struct ItemSaleView: View {
     @Environment(AppServices.self) private var appServices
-    @State private var player: PlayerSnapshot?
+    @State private var player: CachedPlayer?
     @State private var isLoading = false
     @State private var showError = false
     @State private var errorMessage = ""
