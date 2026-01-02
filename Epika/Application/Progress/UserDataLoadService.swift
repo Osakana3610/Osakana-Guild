@@ -591,8 +591,20 @@ final class UserDataLoadService: Sendable {
 
     /// インベントリ変更通知用の構造体
     struct InventoryChange: Sendable {
-        let upserted: [String]    // 追加または更新されたstackKey
-        let removed: [String]     // 完全削除されたstackKey
+        /// 追加または更新されたアイテムの詳細情報
+        struct UpsertedItem: Sendable {
+            let stackKey: String
+            let itemId: UInt16
+            let quantity: UInt16
+            let normalTitleId: UInt8
+            let superRareTitleId: UInt8
+            let socketItemId: UInt16
+            let socketNormalTitleId: UInt8
+            let socketSuperRareTitleId: UInt8
+        }
+
+        let upserted: [UpsertedItem]  // 追加または更新されたアイテム
+        let removed: [String]         // 完全削除されたstackKey
     }
 
     /// インベントリ変更通知を購読開始
@@ -602,100 +614,74 @@ final class UserDataLoadService: Sendable {
             for await notification in NotificationCenter.default.notifications(named: .inventoryDidChange) {
                 guard let self,
                       let change = notification.userInfo?["change"] as? InventoryChange else { continue }
-                await self.applyInventoryChange(change)
+                self.applyInventoryChange(change)
             }
         }
     }
 
     /// インベントリ変更をキャッシュへ適用
-    private func applyInventoryChange(_ change: InventoryChange) async {
-        // upsertedのstackKeyからレコードを再取得してキャッシュ更新
+    /// - Note: 通知に含まれる詳細情報から直接キャッシュを更新。SwiftDataへのアクセスは行わない。
+    @MainActor
+    private func applyInventoryChange(_ change: InventoryChange) {
+        // upsertedアイテムをキャッシュに反映
         if !change.upserted.isEmpty {
-            await refetchAndUpsertItems(stackKeys: change.upserted)
-        }
-        await MainActor.run {
-            for stackKey in change.removed {
-                removeItemWithoutVersion(stackKey: stackKey)
-            }
-            sortCacheItems()
-            rebuildOrderedSubcategories()
-            itemCacheVersion &+= 1
-        }
-    }
+            let itemIds = change.upserted.map { $0.itemId }
+            let definitions = masterDataCache.items(itemIds)
+            let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
 
-    /// stackKeyでSwiftDataからレコードを再取得してキャッシュに反映
-    private func refetchAndUpsertItems(stackKeys: [String]) async {
-        let context = contextProvider.makeContext()
-        let stackKeySet = Set(stackKeys)
-        let descriptor = FetchDescriptor<InventoryItemRecord>()
-        let allRecords: [InventoryItemRecord]
-        do {
-            allRecords = try context.fetch(descriptor)
-        } catch {
-            #if DEBUG
-            print("[UserDataLoadService] Failed to fetch records for notification: \(error)")
-            #endif
-            return
-        }
+            let allTitles = masterDataCache.allTitles
+            let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
 
-        let targetRecords = allRecords.filter { stackKeySet.contains($0.stackKey) }
-        guard !targetRecords.isEmpty else { return }
+            for item in change.upserted {
+                guard let definition = definitionMap[item.itemId] else { continue }
 
-        let itemIds = Set(targetRecords.map { $0.itemId })
-        let definitions = masterDataCache.items(Array(itemIds))
-        let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+                let enhancement = ItemEnhancement(
+                    superRareTitleId: item.superRareTitleId,
+                    normalTitleId: item.normalTitleId,
+                    socketSuperRareTitleId: item.socketSuperRareTitleId,
+                    socketNormalTitleId: item.socketNormalTitleId,
+                    socketItemId: item.socketItemId
+                )
 
-        let allTitles = masterDataCache.allTitles
-        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
+                let sellPrice = (try? ItemPriceCalculator.sellPrice(
+                    baseSellValue: definition.sellValue,
+                    normalTitleId: item.normalTitleId,
+                    hasSuperRare: item.superRareTitleId != 0,
+                    multiplierMap: priceMultiplierMap
+                )) ?? definition.sellValue
 
-        // CachedInventoryItemを構築
-        var itemsToUpsert: [CachedInventoryItem] = []
-        for record in targetRecords {
-            guard let definition = definitionMap[record.itemId] else { continue }
+                let fullDisplayName = buildFullDisplayName(
+                    itemName: definition.name,
+                    enhancement: enhancement
+                )
 
-            let enhancement = ItemEnhancement(
-                superRareTitleId: record.superRareTitleId,
-                normalTitleId: record.normalTitleId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketItemId: record.socketItemId
-            )
-
-            let sellPrice = (try? ItemPriceCalculator.sellPrice(
-                baseSellValue: definition.sellValue,
-                normalTitleId: record.normalTitleId,
-                hasSuperRare: record.superRareTitleId != 0,
-                multiplierMap: priceMultiplierMap
-            )) ?? definition.sellValue
-
-            let fullDisplayName = buildFullDisplayName(
-                itemName: definition.name,
-                enhancement: enhancement
-            )
-
-            let category = ItemSaleCategory(rawValue: definition.category) ?? .other
-            let cachedItem = CachedInventoryItem(
-                stackKey: record.stackKey,
-                itemId: record.itemId,
-                quantity: record.quantity,
-                normalTitleId: record.normalTitleId,
-                superRareTitleId: record.superRareTitleId,
-                socketItemId: record.socketItemId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
-                category: category,
-                rarity: definition.rarity,
-                displayName: fullDisplayName,
-                sellValue: sellPrice
-            )
-            itemsToUpsert.append(cachedItem)
-        }
-
-        await MainActor.run {
-            for item in itemsToUpsert {
-                upsertItem(item)
+                let category = ItemSaleCategory(rawValue: definition.category) ?? .other
+                let cachedItem = CachedInventoryItem(
+                    stackKey: item.stackKey,
+                    itemId: item.itemId,
+                    quantity: item.quantity,
+                    normalTitleId: item.normalTitleId,
+                    superRareTitleId: item.superRareTitleId,
+                    socketItemId: item.socketItemId,
+                    socketNormalTitleId: item.socketNormalTitleId,
+                    socketSuperRareTitleId: item.socketSuperRareTitleId,
+                    category: category,
+                    rarity: definition.rarity,
+                    displayName: fullDisplayName,
+                    sellValue: sellPrice
+                )
+                upsertItem(cachedItem)
             }
         }
+
+        // removedアイテムをキャッシュから削除
+        for stackKey in change.removed {
+            removeItemWithoutVersion(stackKey: stackKey)
+        }
+
+        sortCacheItems()
+        rebuildOrderedSubcategories()
+        itemCacheVersion &+= 1
     }
 
     /// アイテムをキャッシュにupsert
