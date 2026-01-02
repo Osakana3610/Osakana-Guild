@@ -23,6 +23,11 @@
 //   - UserDataLoadService+Party.swift: パーティキャッシュ
 //   - UserDataLoadService+Inventory.swift: インベントリキャッシュ
 //   - UserDataLoadService+Exploration.swift: 探索キャッシュ
+//   - UserDataLoadService+GameState.swift: ゲーム状態キャッシュ（ゴールド、猫チケット等）
+//   - UserDataLoadService+AutoTrade.swift: 自動売却ルールキャッシュ
+//   - UserDataLoadService+Shop.swift: 商店在庫キャッシュ
+//   - UserDataLoadService+Dungeon.swift: ダンジョン進行キャッシュ
+//   - UserDataLoadService+Story.swift: ストーリー進行キャッシュ
 //
 // ==============================================================================
 
