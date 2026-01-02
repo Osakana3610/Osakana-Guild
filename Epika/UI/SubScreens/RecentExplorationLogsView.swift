@@ -22,7 +22,6 @@ import SwiftData
 
 extension CachedExploration: Identifiable {}
 extension CachedExploration.EncounterLog: Identifiable {}
-extension CharacterSnapshot: Identifiable {}
 
 struct RecentExplorationLogsView: View {
     let party: CachedParty

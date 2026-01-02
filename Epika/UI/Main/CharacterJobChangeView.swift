@@ -163,9 +163,8 @@ struct CharacterJobChangeView: View {
         defer { isProcessing = false }
         do {
             let updated = try await characterService.changeJob(characterId: characterId, newJobId: jobIndex)
-            let runtime = try await characterService.runtimeCharacter(from: updated)
-            if let index = characters.firstIndex(where: { $0.id == runtime.id }) {
-                characters[index] = runtime
+            if let index = characters.firstIndex(where: { $0.id == updated.id }) {
+                characters[index] = updated
             }
             onComplete()
             dismiss()

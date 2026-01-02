@@ -5,7 +5,7 @@
 //
 // 【責務】
 //   - Progress層からRuntime層へのキャラクターデータ受け渡し
-//   - CharacterSnapshot → CharacterInput 変換
+//   - CachedCharacter → CharacterInput 変換
 //
 // 【データ構造】
 //   - CharacterInput: キャラクター入力データ
@@ -53,37 +53,27 @@ struct CharacterInput: Sendable, Hashable {
 }
 
 extension CharacterInput {
-    /// CharacterSnapshotからCharacterInputを生成
-    init(from snapshot: CharacterSnapshot) {
+    /// CachedCharacterからCharacterInputを生成
+    init(from character: CachedCharacter) {
         self.init(
-            id: snapshot.id,
-            displayName: snapshot.displayName,
-            raceId: snapshot.raceId,
-            jobId: snapshot.jobId,
-            previousJobId: snapshot.previousJobId,
-            avatarId: snapshot.avatarId,
-            level: snapshot.level,
-            experience: snapshot.experience,
-            currentHP: snapshot.hitPoints.current,
-            primaryPersonalityId: snapshot.personality.primaryId,
-            secondaryPersonalityId: snapshot.personality.secondaryId,
-            actionRateAttack: snapshot.actionPreferences.attack,
-            actionRatePriestMagic: snapshot.actionPreferences.priestMagic,
-            actionRateMageMagic: snapshot.actionPreferences.mageMagic,
-            actionRateBreath: snapshot.actionPreferences.breath,
-            updatedAt: snapshot.updatedAt,
-            displayOrder: snapshot.displayOrder,
-            equippedItems: snapshot.equippedItems.map { item in
-                EquippedItem(
-                    superRareTitleId: item.superRareTitleId,
-                    normalTitleId: item.normalTitleId,
-                    itemId: item.itemId,
-                    socketSuperRareTitleId: item.socketSuperRareTitleId,
-                    socketNormalTitleId: item.socketNormalTitleId,
-                    socketItemId: item.socketItemId,
-                    quantity: item.quantity
-                )
-            }
+            id: character.id,
+            displayName: character.displayName,
+            raceId: character.raceId,
+            jobId: character.jobId,
+            previousJobId: character.previousJobId,
+            avatarId: character.avatarId,
+            level: character.level,
+            experience: character.experience,
+            currentHP: character.currentHP,
+            primaryPersonalityId: character.primaryPersonalityId,
+            secondaryPersonalityId: character.secondaryPersonalityId,
+            actionRateAttack: character.actionRateAttack,
+            actionRatePriestMagic: character.actionRatePriestMagic,
+            actionRateMageMagic: character.actionRateMageMagic,
+            actionRateBreath: character.actionRateBreath,
+            updatedAt: character.updatedAt,
+            displayOrder: character.displayOrder,
+            equippedItems: character.equippedItems
         )
     }
 

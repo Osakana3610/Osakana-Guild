@@ -31,15 +31,9 @@ extension UserDataLoadService {
 
 extension UserDataLoadService {
     func loadCharacters() async throws {
-        let snapshots = try await characterService.allCharacters()
-        var buffer: [CachedCharacter] = []
-        buffer.reserveCapacity(snapshots.count)
-        for snapshot in snapshots {
-            let character = try await characterService.runtimeCharacter(from: snapshot)
-            buffer.append(character)
-        }
+        let loadedCharacters = try await characterService.allCharacters()
         await MainActor.run {
-            self.characters = buffer
+            self.characters = loadedCharacters
             self.isCharactersLoaded = true
         }
     }
@@ -111,10 +105,9 @@ extension UserDataLoadService {
         // 更新されたキャラクターを再構築
         if !change.upserted.isEmpty {
             do {
-                let snapshots = try await characterService.characters(withIds: change.upserted)
-                for snapshot in snapshots {
-                    let character = try await characterService.runtimeCharacter(from: snapshot)
-                    await MainActor.run {
+                let updatedCharacters = try await characterService.characters(withIds: change.upserted)
+                await MainActor.run {
+                    for character in updatedCharacters {
                         if let index = self.characters.firstIndex(where: { $0.id == character.id }) {
                             self.characters[index] = character
                         } else {

@@ -62,13 +62,13 @@ struct CharacterDetailContent: View {
     let character: CachedCharacter
     let onRename: ((String) async throws -> Void)?
     let onAvatarChange: ((UInt16) async throws -> Void)?
-    let onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)?
+    let onActionPreferencesChange: ((CharacterValues.ActionPreferences) async throws -> Void)?
     @Environment(AppServices.self) private var appServices
 
     init(character: CachedCharacter,
          onRename: ((String) async throws -> Void)? = nil,
          onAvatarChange: ((UInt16) async throws -> Void)? = nil,
-         onActionPreferencesChange: ((CharacterSnapshot.ActionPreferences) async throws -> Void)? = nil) {
+         onActionPreferencesChange: ((CharacterValues.ActionPreferences) async throws -> Void)? = nil) {
         self.character = character
         self.onRename = onRename
         self.onAvatarChange = onAvatarChange

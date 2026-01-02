@@ -11,26 +11,29 @@
 //   - CachedCharacter生成
 //
 // 【公開API - 読み取り】
-//   - allCharacters() → [CharacterSnapshot]
-//   - character(withId:) → CharacterSnapshot?
-//   - characters(withIds:) → [CharacterSnapshot]
-//   - runtimeCharacter(from:) → CachedCharacter
+//   - allCharacters() → [CachedCharacter]
+//   - character(withId:) → CachedCharacter?
+//   - characters(withIds:) → [CachedCharacter]
 //
 // 【公開API - 書き込み】
-//   - createCharacter(request:) → CharacterSnapshot
+//   - createCharacter(request:) → CachedCharacter
 //   - createCharactersBatch(requests:) - デバッグ用バッチ作成
 //   - deleteCharacter(id:)
-//   - changeJob(characterId:newJobId:) → CharacterSnapshot
-//   - equipItem(characterId:inventoryItemStackKey:) → CharacterSnapshot
-//   - unequipItem(characterId:equipmentStackKey:) → CharacterSnapshot
-//   - unequipAllItems(characterId:) → CharacterSnapshot
+//   - updateName(characterId:newName:) - 名前変更
+//   - updateAvatar(characterId:newAvatarId:) - アバター変更
+//   - updateActionPreferences(characterId:...) - 行動優先度変更
+//   - changeJob(characterId:newJobId:) → CachedCharacter
+//   - equipItem(characterId:inventoryItemStackKey:) → EquipResult
+//   - unequipItem(characterId:equipmentStackKey:) → UnequipResult
 //   - applyBattleResults(_:) - 経験値・HP変更を一括適用
 //   - healToFull(characterIds:) - HP全回復
-//   - reviveCharacter(id:) → CharacterSnapshot
+//   - reviveCharacter(id:) - HP 0のキャラクター蘇生
 //
 // 【補助型】
 //   - CharacterCreationRequest: 作成リクエスト
 //   - BattleResultUpdate: 戦闘結果更新
+//   - EquipResult: 装備処理結果
+//   - UnequipResult: 解除処理結果
 //
 // 【キャッシュ】
 //   - raceLevelCache: 種族別最大レベル
@@ -226,25 +229,25 @@ actor CharacterProgressService {
 
     // MARK: - Read Operations
 
-    func allCharacters() throws -> [CharacterSnapshot] {
+    func allCharacters() throws -> [CachedCharacter] {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>()
         descriptor.sortBy = [SortDescriptor(\CharacterRecord.displayOrder, order: .forward)]
         let records = try context.fetch(descriptor)
-        return try makeSnapshots(records, context: context)
+        return try makeCachedCharacters(records, context: context)
     }
 
-    func character(withId id: UInt8) throws -> CharacterSnapshot? {
+    func character(withId id: UInt8) throws -> CachedCharacter? {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
             return nil
         }
-        return try makeSnapshot(record, context: context)
+        return try makeCachedCharacter(record, context: context)
     }
 
-    func characters(withIds ids: [UInt8]) throws -> [CharacterSnapshot] {
+    func characters(withIds ids: [UInt8]) throws -> [CachedCharacter] {
         guard !ids.isEmpty else { return [] }
         let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { ids.contains($0.id) })
@@ -266,17 +269,7 @@ actor CharacterProgressService {
             let identifierList = missing.map { String($0) }.joined(separator: ", ")
             throw ProgressError.invalidInput(description: "キャラクターが見つかりません (ID: \(identifierList))")
         }
-        return try makeSnapshots(ordered, context: context)
-    }
-
-    func runtimeCharacter(from snapshot: CharacterSnapshot) throws -> CachedCharacter {
-        let input = makeInput(from: snapshot)
-        let pandoraItems = try fetchPandoraBoxItems(context: contextProvider.makeContext())
-        return try CachedCharacterFactory.make(
-            from: input,
-            masterData: masterData,
-            pandoraBoxItems: pandoraItems
-        )
+        return try makeCachedCharacters(ordered, context: context)
     }
 
     /// 装備変更時の高速CachedCharacter再構築
@@ -289,40 +282,6 @@ actor CharacterProgressService {
             current: current,
             newEquippedItems: newEquippedItems,
             masterData: masterData
-        )
-    }
-
-    /// CharacterSnapshotからCharacterInputへ変換
-    private func makeInput(from snapshot: CharacterSnapshot) -> CharacterInput {
-        CharacterInput(
-            id: snapshot.id,
-            displayName: snapshot.displayName,
-            raceId: snapshot.raceId,
-            jobId: snapshot.jobId,
-            previousJobId: snapshot.previousJobId,
-            avatarId: snapshot.avatarId,
-            level: snapshot.level,
-            experience: snapshot.experience,
-            currentHP: snapshot.hitPoints.current,
-            primaryPersonalityId: snapshot.personality.primaryId,
-            secondaryPersonalityId: snapshot.personality.secondaryId,
-            actionRateAttack: snapshot.actionPreferences.attack,
-            actionRatePriestMagic: snapshot.actionPreferences.priestMagic,
-            actionRateMageMagic: snapshot.actionPreferences.mageMagic,
-            actionRateBreath: snapshot.actionPreferences.breath,
-            updatedAt: snapshot.updatedAt,
-            displayOrder: snapshot.displayOrder,
-            equippedItems: snapshot.equippedItems.map { item in
-                CharacterInput.EquippedItem(
-                    superRareTitleId: item.superRareTitleId,
-                    normalTitleId: item.normalTitleId,
-                    itemId: item.itemId,
-                    socketSuperRareTitleId: item.socketSuperRareTitleId,
-                    socketNormalTitleId: item.socketNormalTitleId,
-                    socketItemId: item.socketItemId,
-                    quantity: item.quantity
-                )
-            }
         )
     }
 
@@ -382,7 +341,7 @@ actor CharacterProgressService {
 
     // MARK: - Create
 
-    func createCharacter(_ request: CharacterCreationRequest) throws -> CharacterSnapshot {
+    func createCharacter(_ request: CharacterCreationRequest) throws -> CachedCharacter {
         let trimmedName = request.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw ProgressError.invalidInput(description: "キャラクター名が設定されていません")
@@ -425,12 +384,12 @@ actor CharacterProgressService {
         try context.save()
 
         // ステータス計算を行い、maxHPを取得してrecordに書き戻す
-        let snapshot = try makeSnapshot(record, context: context)
-        record.currentHP = UInt32(snapshot.hitPoints.maximum)
+        let character = try makeCachedCharacter(record, context: context)
+        record.currentHP = UInt32(character.maxHP)
         try context.save()
 
         notifyCharacterChange(upserted: [newId])
-        return snapshot
+        return character
     }
 
     /// デバッグ用: 複数キャラクターを一括作成
@@ -545,27 +504,84 @@ actor CharacterProgressService {
 
     // MARK: - Update
 
-    func updateCharacter(id: UInt8,
-                         mutate: @Sendable (inout CharacterSnapshot) throws -> Void) throws -> CharacterSnapshot {
+    /// 表示名を更新
+    func updateName(characterId: UInt8, newName: String) throws {
+        let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            throw ProgressError.invalidInput(description: "キャラクター名が設定されていません")
+        }
+        let context = contextProvider.makeContext()
+        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+        descriptor.fetchLimit = 1
+        guard let record = try context.fetch(descriptor).first else {
+            throw ProgressError.characterNotFound
+        }
+        record.displayName = trimmed
+        try context.save()
+        notifyCharacterChange(upserted: [characterId])
+    }
+
+    /// アバターを更新
+    func updateAvatar(characterId: UInt8, newAvatarId: UInt16) throws {
+        let context = contextProvider.makeContext()
+        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+        descriptor.fetchLimit = 1
+        guard let record = try context.fetch(descriptor).first else {
+            throw ProgressError.characterNotFound
+        }
+        record.avatarId = newAvatarId
+        try context.save()
+        notifyCharacterChange(upserted: [characterId])
+    }
+
+    /// 行動優先度を更新
+    func updateActionPreferences(
+        characterId: UInt8,
+        attack: Int,
+        priestMagic: Int,
+        mageMagic: Int,
+        breath: Int
+    ) throws {
+        // 値を正規化（0-100にクランプ）
+        let normalized = CharacterValues.ActionPreferences.normalized(
+            attack: attack,
+            priestMagic: priestMagic,
+            mageMagic: mageMagic,
+            breath: breath
+        )
+
+        let context = contextProvider.makeContext()
+        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+        descriptor.fetchLimit = 1
+        guard let record = try context.fetch(descriptor).first else {
+            throw ProgressError.characterNotFound
+        }
+        record.actionRateAttack = UInt8(normalized.attack)
+        record.actionRatePriestMagic = UInt8(normalized.priestMagic)
+        record.actionRateMageMagic = UInt8(normalized.mageMagic)
+        record.actionRateBreath = UInt8(normalized.breath)
+        try context.save()
+        notifyCharacterChange(upserted: [characterId])
+    }
+
+    /// HP 0のキャラクターを蘇生（HP = maxHP / 2、最低1）
+    func reviveCharacter(id: UInt8) throws {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let record = try context.fetch(descriptor).first else {
             throw ProgressError.characterNotFound
         }
-        var snapshot = try makeSnapshot(record, context: context)
-        try mutate(&snapshot)
-        if snapshot.experience < 0 {
-            throw ProgressError.invalidInput(description: "経験値は0以上である必要があります")
+        guard record.currentHP == 0 else {
+            throw ProgressError.invalidInput(description: "このキャラクターは既に生存しています")
         }
-        let clampedExperience = try clampExperience(snapshot.experience, raceId: snapshot.raceId)
-        snapshot.experience = clampedExperience
-        let normalizedLevel = try resolveLevel(for: clampedExperience, raceId: snapshot.raceId)
-        snapshot.level = normalizedLevel
-        apply(snapshot: snapshot, to: record)
+        // maxHPを計算
+        let input = try loadInput(record, context: context)
+        let pandoraBoxItems = try fetchPandoraBoxItems(context: context)
+        let character = try CachedCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
+        record.currentHP = UInt32(max(1, character.maxHP / 2))
         try context.save()
         notifyCharacterChange(upserted: [id])
-        return try makeSnapshot(record, context: context)
     }
 
     func applyBattleResults(_ updates: [BattleResultUpdate]) throws {
@@ -667,8 +683,8 @@ actor CharacterProgressService {
     /// - Parameters:
     ///   - characterId: キャラクターID
     ///   - newJobId: 新しい職業ID（1〜16: 通常職、101〜116: マスター職）
-    /// - Returns: 更新後のスナップショット
-    func changeJob(characterId: UInt8, newJobId: UInt8) throws -> CharacterSnapshot {
+    /// - Returns: 更新後のキャラクター
+    func changeJob(characterId: UInt8, newJobId: UInt8) throws -> CachedCharacter {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
         descriptor.fetchLimit = 1
@@ -720,7 +736,7 @@ actor CharacterProgressService {
 
         try context.save()
         notifyCharacterChange(upserted: [characterId])
-        return try makeSnapshot(record, context: context)
+        return try makeCachedCharacter(record, context: context)
     }
 
     // MARK: - Delete
@@ -774,7 +790,7 @@ actor CharacterProgressService {
 
     /// 装備処理の結果
     struct EquipResult {
-        let equippedItems: [CharacterSnapshot.EquippedItem]
+        let equippedItems: [CharacterValues.EquippedItem]
         let inventoryStackKey: String
         let wasDeleted: Bool
         let newQuantity: UInt16
@@ -887,7 +903,7 @@ actor CharacterProgressService {
 
     /// 解除処理の結果
     struct UnequipResult {
-        let equippedItems: [CharacterSnapshot.EquippedItem]
+        let equippedItems: [CharacterValues.EquippedItem]
         let inventoryStackKey: String
         let newQuantity: UInt16
     }
@@ -1000,7 +1016,7 @@ actor CharacterProgressService {
     }
 
     /// 装備リストを取得（内部ヘルパー、既存contextを使用）
-    private func fetchEquippedItems(characterId: UInt8, context: ModelContext) throws -> [CharacterSnapshot.EquippedItem] {
+    private func fetchEquippedItems(characterId: UInt8, context: ModelContext) throws -> [CharacterValues.EquippedItem] {
         let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let records = try context.fetch(descriptor)
 
@@ -1016,7 +1032,7 @@ actor CharacterProgressService {
         }
 
         return grouped.values.map { (record, count) in
-            CharacterSnapshot.EquippedItem(
+            CharacterValues.EquippedItem(
                 superRareTitleId: record.superRareTitleId,
                 normalTitleId: record.normalTitleId,
                 itemId: record.itemId,
@@ -1029,7 +1045,7 @@ actor CharacterProgressService {
     }
 
     /// キャラクターの装備一覧を取得
-    func equippedItems(characterId: UInt8) throws -> [CharacterSnapshot.EquippedItem] {
+    func equippedItems(characterId: UInt8) throws -> [CharacterValues.EquippedItem] {
         let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let records = try context.fetch(descriptor)
@@ -1046,7 +1062,7 @@ actor CharacterProgressService {
         }
 
         return grouped.values.map { (record, count) in
-            CharacterSnapshot.EquippedItem(
+            CharacterValues.EquippedItem(
                 superRareTitleId: record.superRareTitleId,
                 normalTitleId: record.normalTitleId,
                 itemId: record.itemId,
@@ -1103,121 +1119,24 @@ private extension CharacterProgressService {
         return maximumExperience
     }
 
-    func makeSnapshots(_ records: [CharacterRecord], context: ModelContext) throws -> [CharacterSnapshot] {
-        var snapshots: [CharacterSnapshot] = []
-        snapshots.reserveCapacity(records.count)
+    func makeCachedCharacters(_ records: [CharacterRecord], context: ModelContext) throws -> [CachedCharacter] {
+        var characters: [CachedCharacter] = []
+        characters.reserveCapacity(records.count)
         for record in records {
-            let snapshot = try makeSnapshot(record, context: context)
-            snapshots.append(snapshot)
+            let character = try makeCachedCharacter(record, context: context)
+            characters.append(character)
         }
-        return snapshots
+        return characters
     }
 
-    func makeSnapshot(_ record: CharacterRecord, context: ModelContext) throws -> CharacterSnapshot {
-        // CharacterInput を作成
+    func makeCachedCharacter(_ record: CharacterRecord, context: ModelContext) throws -> CachedCharacter {
         let input = try loadInput(record, context: context)
-
-        // CachedCharacterFactory で計算済み CachedCharacter を取得
         let pandoraBoxItems = try fetchPandoraBoxItems(context: context)
-        let runtimeCharacter = try CachedCharacterFactory.make(
+        return try CachedCharacterFactory.make(
             from: input,
             masterData: masterData,
             pandoraBoxItems: pandoraBoxItems
         )
-
-        // CachedCharacter から CharacterSnapshot を構築
-        let now = Date()
-
-        func clamp(_ value: Int) -> Int {
-            max(0, min(100, value))
-        }
-        let actionPreferences = CharacterSnapshot.ActionPreferences(
-            attack: clamp(runtimeCharacter.actionRateAttack),
-            priestMagic: clamp(runtimeCharacter.actionRatePriestMagic),
-            mageMagic: clamp(runtimeCharacter.actionRateMageMagic),
-            breath: clamp(runtimeCharacter.actionRateBreath)
-        )
-
-        let personality = CharacterSnapshot.Personality(
-            primaryId: runtimeCharacter.primaryPersonalityId,
-            secondaryId: runtimeCharacter.secondaryPersonalityId
-        )
-
-        let equippedItems = runtimeCharacter.equippedItems.map { item in
-            CharacterSnapshot.EquippedItem(
-                superRareTitleId: item.superRareTitleId,
-                normalTitleId: item.normalTitleId,
-                itemId: item.itemId,
-                socketSuperRareTitleId: item.socketSuperRareTitleId,
-                socketNormalTitleId: item.socketNormalTitleId,
-                socketItemId: item.socketItemId,
-                quantity: item.quantity
-            )
-        }
-
-        let attributes = CharacterSnapshot.CoreAttributes(
-            strength: runtimeCharacter.attributes.strength,
-            wisdom: runtimeCharacter.attributes.wisdom,
-            spirit: runtimeCharacter.attributes.spirit,
-            vitality: runtimeCharacter.attributes.vitality,
-            agility: runtimeCharacter.attributes.agility,
-            luck: runtimeCharacter.attributes.luck
-        )
-
-        let hitPoints = CharacterSnapshot.HitPoints(
-            current: runtimeCharacter.currentHP,
-            maximum: runtimeCharacter.maxHP
-        )
-
-        let combat = CharacterSnapshot.Combat(
-            maxHP: runtimeCharacter.combat.maxHP,
-            physicalAttack: runtimeCharacter.combat.physicalAttack,
-            magicalAttack: runtimeCharacter.combat.magicalAttack,
-            physicalDefense: runtimeCharacter.combat.physicalDefense,
-            magicalDefense: runtimeCharacter.combat.magicalDefense,
-            hitRate: runtimeCharacter.combat.hitRate,
-            evasionRate: runtimeCharacter.combat.evasionRate,
-            criticalRate: runtimeCharacter.combat.criticalRate,
-            attackCount: runtimeCharacter.combat.attackCount,
-            magicalHealing: runtimeCharacter.combat.magicalHealing,
-            trapRemoval: runtimeCharacter.combat.trapRemoval,
-            additionalDamage: runtimeCharacter.combat.additionalDamage,
-            breathDamage: runtimeCharacter.combat.breathDamage,
-            isMartialEligible: runtimeCharacter.combat.isMartialEligible
-        )
-
-        return CharacterSnapshot(
-            id: runtimeCharacter.id,
-            displayName: runtimeCharacter.displayName,
-            raceId: runtimeCharacter.raceId,
-            jobId: runtimeCharacter.jobId,
-            previousJobId: runtimeCharacter.previousJobId,
-            avatarId: runtimeCharacter.avatarId,
-            level: runtimeCharacter.level,
-            experience: runtimeCharacter.experience,
-            attributes: attributes,
-            hitPoints: hitPoints,
-            combat: combat,
-            personality: personality,
-            equippedItems: equippedItems,
-            actionPreferences: actionPreferences,
-            displayOrder: record.displayOrder,
-            createdAt: now,
-            updatedAt: now
-        )
-    }
-
-    func apply(snapshot: CharacterSnapshot, to record: CharacterRecord) {
-        record.displayName = snapshot.displayName
-        record.avatarId = snapshot.avatarId
-        record.level = UInt8(snapshot.level)
-        record.experience = UInt64(snapshot.experience)
-        record.currentHP = UInt32(snapshot.hitPoints.current)
-        record.actionRateAttack = UInt8(snapshot.actionPreferences.attack)
-        record.actionRatePriestMagic = UInt8(snapshot.actionPreferences.priestMagic)
-        record.actionRateMageMagic = UInt8(snapshot.actionPreferences.mageMagic)
-        record.actionRateBreath = UInt8(snapshot.actionPreferences.breath)
-        // raceId, jobId, personalityIdは変更しない（種族・職業変更は別APIで）
     }
 
     func deleteEquipment(for characterId: UInt8, context: ModelContext) throws {

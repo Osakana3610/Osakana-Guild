@@ -364,10 +364,8 @@ private struct LazyCachedCharacterDetailView: View {
         if trimmed == runtimeCharacter?.name {
             return
         }
-        let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
-            snapshot.displayName = trimmed
-        }
-        runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
+        try await characterService.updateName(characterId: characterId, newName: trimmed)
+        refreshCharacterFromCache()
     }
 
     @MainActor
@@ -375,21 +373,28 @@ private struct LazyCachedCharacterDetailView: View {
         if let current = runtimeCharacter, current.avatarId == avatarId {
             return
         }
-        let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
-            snapshot.avatarId = avatarId
-        }
-        runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
+        try await characterService.updateAvatar(characterId: characterId, newAvatarId: avatarId)
+        refreshCharacterFromCache()
     }
 
     @MainActor
-    private func updateActionPreferences(to newPreferences: CharacterSnapshot.ActionPreferences) async throws {
-        let normalized = CharacterSnapshot.ActionPreferences.normalized(attack: newPreferences.attack,
-                                                                        priestMagic: newPreferences.priestMagic,
-                                                                        mageMagic: newPreferences.mageMagic,
-                                                                        breath: newPreferences.breath)
-        let snapshot = try await characterService.updateCharacter(id: characterId) { snapshot in
-            snapshot.actionPreferences = normalized
+    private func updateActionPreferences(to newPreferences: CharacterValues.ActionPreferences) async throws {
+        try await characterService.updateActionPreferences(
+            characterId: characterId,
+            attack: newPreferences.attack,
+            priestMagic: newPreferences.priestMagic,
+            mageMagic: newPreferences.mageMagic,
+            breath: newPreferences.breath
+        )
+        refreshCharacterFromCache()
+    }
+
+    /// キャッシュから最新のキャラクターデータを取得
+    @MainActor
+    private func refreshCharacterFromCache() {
+        let characters = appServices.userDataLoad.characters
+        if let character = characters.first(where: { $0.id == characterId }) {
+            runtimeCharacter = character
         }
-        runtimeCharacter = try await characterService.runtimeCharacter(from: snapshot)
     }
 }

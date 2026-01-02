@@ -107,9 +107,9 @@ struct CachedCharacter: Identifiable, Sendable, Hashable {
         avatarId == 0 ? UInt16(raceId) : avatarId
     }
 
-    /// 行動優先度（互換用）
-    var actionPreferences: CharacterSnapshot.ActionPreferences {
-        CharacterSnapshot.ActionPreferences(
+    /// 行動優先度
+    var actionPreferences: CharacterValues.ActionPreferences {
+        CharacterValues.ActionPreferences(
             attack: actionRateAttack,
             priestMagic: actionRatePriestMagic,
             mageMagic: actionRateMageMagic,
