@@ -22,12 +22,10 @@ import SwiftUI
 
 struct ItemSynthesisView: View {
     @Environment(AppServices.self) private var appServices
-    @State private var parentItems: [CachedInventoryItem] = []
-    @State private var childItems: [CachedInventoryItem] = []
     @State private var selectedParent: CachedInventoryItem?
     @State private var selectedChild: CachedInventoryItem?
     @State private var preview: ItemSynthesisProgressService.SynthesisPreview?
-    @State private var synthesisResult: CachedInventoryItem?
+    @State private var resultStackKey: String?
     @State private var showResult = false
     @State private var isLoading = false
     @State private var showError = false
@@ -36,12 +34,53 @@ struct ItemSynthesisView: View {
     @State private var showChildPicker = false
 
     private var synthesisService: ItemSynthesisProgressService { appServices.itemSynthesis }
+    private var userDataLoad: UserDataLoadService { appServices.userDataLoad }
+    private var masterDataCache: MasterDataCache { appServices.masterDataCache }
+
+    /// UserDataLoadServiceのキャッシュから全アイテムを取得
+    private var allItems: [CachedInventoryItem] {
+        userDataLoad.subcategorizedItems.values.flatMap { $0 }
+    }
+
+    /// 合成レシピ一覧
+    private var recipes: [SynthesisRecipeDefinition] {
+        masterDataCache.allSynthesisRecipes
+    }
+
+    /// 親アイテム候補（レシピに存在するアイテムID）
+    private var parentItems: [CachedInventoryItem] {
+        let parentIds = Set(recipes.map { $0.parentItemId })
+        guard !parentIds.isEmpty else { return [] }
+        return allItems.filter { parentIds.contains($0.itemId) }
+    }
+
+    /// 子アイテム候補（選択された親とレシピでマッチ）
+    private var childItems: [CachedInventoryItem] {
+        guard let parent = selectedParent else { return [] }
+        let childIds = Set(recipes.filter { $0.parentItemId == parent.itemId }.map { $0.childItemId })
+        guard !childIds.isEmpty else { return [] }
+        return allItems.filter { $0.stackKey != parent.stackKey && childIds.contains($0.itemId) }
+    }
+
+    /// 選択されたアイテムからレシピを解決
+    private func resolveRecipe() -> (recipe: SynthesisRecipeDefinition, resultDefinition: ItemDefinition)? {
+        guard let parent = selectedParent, let child = selectedChild else { return nil }
+        guard let recipe = recipes.first(where: { $0.parentItemId == parent.itemId && $0.childItemId == child.itemId }) else { return nil }
+        guard let resultDefinition = masterDataCache.item(recipe.resultItemId) else { return nil }
+        return (recipe, resultDefinition)
+    }
+
+    /// 合成結果のアイテム（キャッシュから取得）
+    private var resultItem: CachedInventoryItem? {
+        guard let stackKey = resultStackKey else { return nil }
+        return allItems.first { $0.stackKey == stackKey }
+    }
 
     var body: some View {
         Group {
             if showError {
                 ErrorView(message: errorMessage) {
-                    Task { await loadParentItems() }
+                    showError = false
                 }
             } else {
                 buildContent()
@@ -49,12 +88,9 @@ struct ItemSynthesisView: View {
         }
         .navigationTitle("アイテム合成")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await loadParentItems() }
         .sheet(isPresented: $showResult) {
-            if let result = synthesisResult {
-                SynthesisResultView(result: result) {
-                    await loadParentItems()
-                }
+            if let item = resultItem {
+                SynthesisResultView(item: item)
             }
         }
         .sheet(isPresented: $showParentPicker) {
@@ -67,11 +103,6 @@ struct ItemSynthesisView: View {
                         selectedParent = newValue
                         selectedChild = nil
                         preview = nil
-                        if let item = newValue {
-                            Task { await loadChildItems(for: item) }
-                        } else {
-                            childItems = []
-                        }
                     }
                 )
             )
@@ -84,7 +115,7 @@ struct ItemSynthesisView: View {
                     get: { selectedChild },
                     set: { newValue in
                         selectedChild = newValue
-                        Task { await updatePreview() }
+                        updatePreview()
                     }
                 )
             )
@@ -100,13 +131,10 @@ struct ItemSynthesisView: View {
                     title: "親アイテム（残存）",
                     subtitle: "合成後も残るアイテム",
                     selectedItem: selectedParent,
-                    onSelect: {
-                        Task { await openParentPicker() }
-                    },
+                    onSelect: { showParentPicker = true },
                     onClear: {
                         selectedParent = nil
                         selectedChild = nil
-                        childItems = []
                         preview = nil
                     }
                 )
@@ -119,9 +147,7 @@ struct ItemSynthesisView: View {
                     title: "子アイテム（消滅）",
                     subtitle: "合成により消失するアイテム",
                     selectedItem: selectedChild,
-                    onSelect: {
-                        Task { await openChildPicker() }
-                    },
+                    onSelect: { showChildPicker = true },
                     onClear: {
                         selectedChild = nil
                         preview = nil
@@ -147,74 +173,14 @@ struct ItemSynthesisView: View {
         .avoidBottomGameInfo()
     }
 
-    @MainActor
-    private func loadParentItems() async {
-        if isLoading { return }
-        isLoading = true
-        showError = false
-        defer { isLoading = false }
-        do {
-            parentItems = try await synthesisService.availableParentItems()
-            if let parent = selectedParent {
-                selectedParent = parentItems.first(where: { $0.id == parent.id })
-            }
-            if let parent = selectedParent {
-                childItems = try await synthesisService.availableChildItems(forParent: parent)
-            } else {
-                childItems = []
-            }
-            if selectedParent != nil, selectedChild != nil {
-                await updatePreview()
-            } else {
-                preview = nil
-            }
-        } catch {
-            showError = true
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    @MainActor
-    private func openParentPicker() async {
-        do {
-            parentItems = try await synthesisService.availableParentItems()
-            showParentPicker = true
-        } catch {
-            showError = true
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    @MainActor
-    private func openChildPicker() async {
-        guard let parent = selectedParent else { return }
-        do {
-            childItems = try await synthesisService.availableChildItems(forParent: parent)
-            showChildPicker = true
-        } catch {
-            showError = true
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    @MainActor
-    private func loadChildItems(for parent: CachedInventoryItem) async {
-        do {
-            childItems = try await synthesisService.availableChildItems(forParent: parent)
-        } catch {
-            showError = true
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    @MainActor
-    private func updatePreview() async {
-        guard let parent = selectedParent, let child = selectedChild else {
+    private func updatePreview() {
+        guard let parent = selectedParent, let child = selectedChild,
+              let resolved = resolveRecipe() else {
             preview = nil
             return
         }
         do {
-            preview = try await synthesisService.preview(parentStackKey: parent.id, childStackKey: child.id)
+            preview = try synthesisService.preview(parent: parent, child: child, resultDefinition: resolved.resultDefinition)
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -223,17 +189,16 @@ struct ItemSynthesisView: View {
 
     @MainActor
     private func performSynthesis() async {
-        guard let parent = selectedParent, let child = selectedChild else { return }
+        guard let parent = selectedParent, let child = selectedChild,
+              let resolved = resolveRecipe() else { return }
         do {
             isLoading = true
-            let result = try await synthesisService.synthesize(parentStackKey: parent.id, childStackKey: child.id)
-            synthesisResult = result
-            selectedParent = result
+            let newStackKey = try await synthesisService.synthesize(parent: parent, child: child, resultItemId: resolved.resultDefinition.id)
+            resultStackKey = newStackKey
+            selectedParent = allItems.first { $0.stackKey == newStackKey }
             selectedChild = nil
             preview = nil
-            childItems = []
             showResult = true
-            await loadParentItems()
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -334,8 +299,7 @@ struct SynthesisPreviewCard: View {
 }
 
 struct SynthesisResultView: View {
-    let result: CachedInventoryItem
-    let onDismiss: () async -> Void
+    let item: CachedInventoryItem
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -344,13 +308,10 @@ struct SynthesisResultView: View {
                 .font(.title2)
                 .fontWeight(.bold)
 
-            InventoryItemRow(item: result, showPrice: false)
+            InventoryItemRow(item: item, showPrice: false)
 
             Button("閉じる") {
-                Task {
-                    await onDismiss()
-                    dismiss()
-                }
+                dismiss()
             }
             .buttonStyle(.borderedProminent)
         }

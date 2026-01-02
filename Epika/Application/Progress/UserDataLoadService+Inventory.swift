@@ -676,6 +676,19 @@ extension UserDataLoadService {
         return result
     }
 
+    /// 称号名のみを取得（超レア称号 + 通常称号）
+    func titleDisplayName(for enhancement: ItemEnhancement) -> String {
+        var result = ""
+        if enhancement.superRareTitleId > 0,
+           let superRareTitle = masterDataCache.superRareTitle(enhancement.superRareTitleId) {
+            result += superRareTitle.name
+        }
+        if let normalTitle = masterDataCache.title(enhancement.normalTitleId) {
+            result += normalTitle.name
+        }
+        return result
+    }
+
     /// 装備のステータス差分表示を取得
     func getCombatDeltaDisplay(for item: CachedInventoryItem) -> [(String, Int)] {
         var deltas: [(String, Int)] = []

@@ -8,12 +8,12 @@
 //   - アイテムの追加・削除・数量変更
 //
 // 【公開API】
-//   - allEquipment(storage:) → [CachedInventoryItem] - 装備一覧
 //   - addItem(...) → String (stackKey) - アイテム追加（スタック上限99）
 //   - addItemsBatch(_:) → [String] - 一括追加
 //   - decrementItem(stackKey:quantity:) - 数量減算
 //   - updateItem(stackKey:mutate:) → String - アイテム更新
 //   - attachSocket(...) → String - 宝石装着
+//   - inheritItem(...) → String (newStackKey) - 称号継承
 //
 // 【データ構造】
 //   - BatchSeed: 一括追加用のシードデータ
@@ -31,7 +31,6 @@ import SwiftData
 actor InventoryProgressService {
     private let contextProvider: SwiftDataContextProvider
     private let gameStateService: GameStateService
-    private let masterDataCache: MasterDataCache
     private let maxStackSize: UInt16 = 99
 
     struct BatchSeed: Sendable {
@@ -52,94 +51,12 @@ actor InventoryProgressService {
     }
 
     init(contextProvider: SwiftDataContextProvider,
-         gameStateService: GameStateService,
-         masterDataCache: MasterDataCache) {
+         gameStateService: GameStateService) {
         self.contextProvider = contextProvider
         self.gameStateService = gameStateService
-        self.masterDataCache = masterDataCache
     }
 
     // MARK: - Public API
-
-    func allEquipment(storage: ItemStorage) async throws -> [CachedInventoryItem] {
-        let context = contextProvider.makeContext()
-        let descriptor = fetchDescriptor(for: storage)
-        let records = try context.fetch(descriptor)
-        if records.isEmpty { return [] }
-
-        let masterIndices = Array(Set(records.map { $0.itemId }))
-        var definitionMap: [UInt16: ItemDefinition] = [:]
-        var missing: [UInt16] = []
-        for id in masterIndices {
-            if let definition = masterDataCache.item(id) {
-                definitionMap[id] = definition
-            } else {
-                missing.append(id)
-            }
-        }
-        if !missing.isEmpty {
-            let missingIds = missing.map { String($0) }
-            throw ProgressError.itemDefinitionUnavailable(ids: missingIds)
-        }
-
-        return records.compactMap { record -> CachedInventoryItem? in
-            guard let definition = definitionMap[record.itemId] else {
-                return nil
-            }
-            // 称号を含めた表示名を生成
-            let displayName = buildDisplayName(
-                baseName: definition.name,
-                superRareTitleId: record.superRareTitleId,
-                normalTitleId: record.normalTitleId
-            )
-            return CachedInventoryItem(
-                stackKey: record.stackKey,
-                itemId: record.itemId,
-                quantity: record.quantity,
-                normalTitleId: record.normalTitleId,
-                superRareTitleId: record.superRareTitleId,
-                socketItemId: record.socketItemId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
-                category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-                rarity: definition.rarity,
-                displayName: displayName,
-                baseValue: definition.basePrice,
-                sellValue: definition.sellValue,
-                statBonuses: definition.statBonuses,
-                combatBonuses: definition.combatBonuses
-            )
-        }
-        .sorted { lhs, rhs in
-            // ソート順: アイテムごとに 通常称号のみ → 通常称号+ソケット → 超レア → 超レア+ソケット
-            // 1. アイテム (ベースアイテムでグループ化)
-            if lhs.itemId != rhs.itemId {
-                return lhs.itemId < rhs.itemId
-            }
-            // 2. 超レアの有無 (なしが先)
-            let lhsHasSuperRare = lhs.enhancement.superRareTitleId > 0
-            let rhsHasSuperRare = rhs.enhancement.superRareTitleId > 0
-            if lhsHasSuperRare != rhsHasSuperRare {
-                return !lhsHasSuperRare
-            }
-            // 3. ソケットの有無 (なしが先)
-            let lhsHasSocket = lhs.enhancement.socketItemId > 0
-            let rhsHasSocket = rhs.enhancement.socketItemId > 0
-            if lhsHasSocket != rhsHasSocket {
-                return !lhsHasSocket
-            }
-            // 4. 通常称号
-            if lhs.enhancement.normalTitleId != rhs.enhancement.normalTitleId {
-                return lhs.enhancement.normalTitleId < rhs.enhancement.normalTitleId
-            }
-            // 5. 超レア称号の詳細
-            if lhs.enhancement.superRareTitleId != rhs.enhancement.superRareTitleId {
-                return lhs.enhancement.superRareTitleId < rhs.enhancement.superRareTitleId
-            }
-            // 6. ソケットの詳細
-            return lhs.enhancement.socketItemId < rhs.enhancement.socketItemId
-        }
-    }
 
     @discardableResult
     func addItem(itemId: UInt16,
@@ -420,9 +337,12 @@ actor InventoryProgressService {
         }
     }
 
+    /// 称号継承を実行し、新しいstackKeyを返す
+    /// - Returns: 継承後のアイテムのstackKey
+    @discardableResult
     func inheritItem(targetStackKey: String,
                      sourceStackKey: String,
-                     newEnhancement: ItemEnhancement) async throws -> CachedInventoryItem {
+                     newEnhancement: ItemEnhancement) async throws -> String {
         guard let targetComponents = StackKeyComponents(stackKey: targetStackKey) else {
             throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
         }
@@ -503,32 +423,7 @@ actor InventoryProgressService {
         }
         postInventoryChange(upserted: upsertedRecords, removed: removedKeys)
 
-        guard let definition = masterDataCache.item(targetRecord.itemId) else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.itemId)])
-        }
-        // 称号を含めた表示名を生成
-        let displayName = buildDisplayName(
-            baseName: definition.name,
-            superRareTitleId: targetRecord.superRareTitleId,
-            normalTitleId: targetRecord.normalTitleId
-        )
-        return CachedInventoryItem(
-            stackKey: targetRecord.stackKey,
-            itemId: targetRecord.itemId,
-            quantity: targetRecord.quantity,
-            normalTitleId: targetRecord.normalTitleId,
-            superRareTitleId: targetRecord.superRareTitleId,
-            socketItemId: targetRecord.socketItemId,
-            socketNormalTitleId: targetRecord.socketNormalTitleId,
-            socketSuperRareTitleId: targetRecord.socketSuperRareTitleId,
-            category: ItemSaleCategory(rawValue: definition.category) ?? .other,
-            rarity: definition.rarity,
-            displayName: displayName,
-            baseValue: definition.basePrice,
-            sellValue: definition.sellValue,
-            statBonuses: definition.statBonuses,
-            combatBonuses: definition.combatBonuses
-        )
+        return targetRecord.stackKey
     }
 
     /// 宝石をアイテムにソケットとして装着
@@ -749,29 +644,6 @@ actor InventoryProgressService {
         record.quantity = clampedCurrent + UInt16(addable)
 
         return amount - addable
-    }
-
-    /// 称号を含めた表示名を生成
-    /// - Parameters:
-    ///   - baseName: アイテムのベース名
-    ///   - superRareTitleId: 超レア称号ID（0=なし）
-    ///   - normalTitleId: 通常称号ID（0=最低な, 2=無称号）
-    /// - Returns: 「超レア称号名 + 通常称号名 + アイテム名」形式の表示名
-    private func buildDisplayName(baseName: String,
-                                  superRareTitleId: UInt8,
-                                  normalTitleId: UInt8) -> String {
-        var result = ""
-        // 超レア称号
-        if superRareTitleId > 0,
-           let superRareTitle = masterDataCache.superRareTitle(superRareTitleId) {
-            result += superRareTitle.name
-        }
-        // 通常称号（無称号=2は空文字列なので影響なし）
-        if let normalTitle = masterDataCache.title(normalTitleId) {
-            result += normalTitle.name
-        }
-        result += baseName
-        return result
     }
 
     /// TODO(Build 16): repairDuplicateStackKeys削除時に一緒に破棄予定
