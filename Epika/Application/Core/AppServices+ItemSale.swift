@@ -54,15 +54,11 @@ extension AppServices {
         // 1. 在庫整理でキャット・チケット獲得
         let tickets = try await shop.cleanupStock(itemId: itemId)
         if tickets > 0 {
-            let snapshot = try await gameState.addCatTickets(UInt16(tickets))
-            await applyPlayerSnapshot(snapshot)
+            _ = try await gameState.addCatTickets(UInt16(tickets))
         }
 
         // 2. インベントリ内の自動売却対象を売却
         let autoSellResult = try await sellAutoTradeItemsFromInventory()
-
-        // 3. プレイヤー状態を更新
-        await reloadPlayerState()
 
         return CleanupResult(tickets: tickets, autoSellGold: autoSellResult.gold)
     }
@@ -70,9 +66,7 @@ extension AppServices {
     /// インベントリ内の自動売却対象を全量処理する
     /// - Returns: 売却で得たゴールド等の結果
     func executeAutoTradeSellFromInventory() async throws -> AutoTradeSellResult {
-        let result = try await sellAutoTradeItemsFromInventory()
-        await reloadPlayerState()
-        return result
+        return try await sellAutoTradeItemsFromInventory()
     }
 
     /// インベントリ内の自動売却登録アイテムを売却する
@@ -159,9 +153,7 @@ extension AppServices {
         }
 
         // 最新のプレイヤー状態を取得して返す
-        let snapshot = try await gameState.currentPlayer()
-        await applyPlayerSnapshot(snapshot)
-        return snapshot
+        return try await gameState.currentPlayer()
     }
 
     /// 単一アイテムを指定数量売却してショップ在庫に追加する
@@ -205,8 +197,6 @@ extension AppServices {
         try await inventory.decrementItem(stackKey: stackKey, quantity: quantity)
 
         // 最新のプレイヤー状態を取得して返す
-        let snapshot = try await gameState.currentPlayer()
-        await applyPlayerSnapshot(snapshot)
-        return snapshot
+        return try await gameState.currentPlayer()
     }
 }

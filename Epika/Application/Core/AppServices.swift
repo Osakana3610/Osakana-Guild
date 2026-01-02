@@ -48,10 +48,6 @@ final class AppServices: Sendable {
     let contextProvider: SwiftDataContextProvider
     let masterDataCache: MasterDataCache
     let gameState: GameStateService
-
-    // MARK: - Observable Player State（UIからアクセスされるため@MainActor）
-    @MainActor var playerGold: UInt32 = 0
-    @MainActor var playerCatTickets: UInt16 = 0
     let character: CharacterProgressService
     let party: PartyProgressService
     let inventory: InventoryProgressService
@@ -154,33 +150,15 @@ final class AppServices: Sendable {
             characterService: self.character,
             partyService: self.party,
             inventoryService: self.inventory,
-            explorationService: self.exploration
+            explorationService: self.exploration,
+            gameStateService: gameStateService,
+            autoTradeService: autoTradeService
         )
         self.gemModification = GemModificationProgressService(contextProvider: contextProvider,
                                                                masterDataCache: masterDataCache,
                                                                inventoryService: self.inventory)
         // 全プロパティ初期化後にAppServicesを設定
         self.userDataLoad.setAppServices(self)
-    }
-
-    // MARK: - Player State Updates
-
-    /// PlayerSnapshotからObservable状態を更新
-    @MainActor
-    func applyPlayerSnapshot(_ snapshot: PlayerSnapshot) {
-        playerGold = snapshot.gold
-        playerCatTickets = snapshot.catTickets
-    }
-
-    /// 現在のプレイヤー状態をロードしてObservable状態を更新
-    @MainActor
-    func reloadPlayerState() async {
-        do {
-            let snapshot = try await gameState.currentPlayer()
-            applyPlayerSnapshot(snapshot)
-        } catch {
-            // プレイヤーが存在しない場合は初期値のまま
-        }
     }
 }
 
@@ -189,4 +167,9 @@ extension Notification.Name {
     static let characterProgressDidChange = Notification.Name("CharacterProgressDidChange")
     static let partyProgressDidChange = Notification.Name("PartyProgressDidChange")
     static let inventoryDidChange = Notification.Name("InventoryDidChange")
+    static let gameStateDidChange = Notification.Name("GameStateDidChange")
+    static let autoTradeRulesDidChange = Notification.Name("AutoTradeRulesDidChange")
+    static let shopStockDidChange = Notification.Name("ShopStockDidChange")
+    static let dungeonProgressDidChange = Notification.Name("DungeonProgressDidChange")
+    static let storyProgressDidChange = Notification.Name("StoryProgressDidChange")
 }

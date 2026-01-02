@@ -177,8 +177,7 @@ struct ItemPurchaseView: View {
     private func confirmPurchase(quantity: Int) async {
         guard let item = selectedItem else { return }
         do {
-            let snapshot = try await shopService.purchase(itemId: item.id, quantity: quantity)
-            appServices.applyPlayerSnapshot(snapshot)
+            _ = try await shopService.purchase(itemId: item.id, quantity: quantity)
             // 在庫を即時更新
             if let index = shopItems.firstIndex(where: { $0.id == item.id }) {
                 let oldItem = shopItems[index]
