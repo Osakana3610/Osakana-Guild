@@ -236,11 +236,11 @@ actor GameRuntimeService {
     }
 
     func recalculateCombatStats(for input: CharacterInput,
-                                   pandoraBoxStackKeys: Set<String> = []) throws -> CombatStatCalculator.Result {
+                                   pandoraBoxItems: Set<UInt64> = []) throws -> CombatStatCalculator.Result {
         let runtimeCharacter = try RuntimeCharacterFactory.make(
             from: input,
             masterData: masterData,
-            pandoraBoxStackKeys: pandoraBoxStackKeys
+            pandoraBoxItems: pandoraBoxItems
         )
         return CombatStatCalculator.Result(
             attributes: runtimeCharacter.attributes,

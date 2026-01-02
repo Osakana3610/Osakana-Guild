@@ -244,11 +244,11 @@ actor CharacterProgressService {
 
     func runtimeCharacter(from snapshot: CharacterSnapshot) throws -> RuntimeCharacter {
         let input = makeInput(from: snapshot)
-        let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: contextProvider.makeContext())
+        let pandoraItems = try fetchPandoraBoxItems(context: contextProvider.makeContext())
         return try RuntimeCharacterFactory.make(
             from: input,
             masterData: masterData,
-            pandoraBoxStackKeys: pandoraStackKeys
+            pandoraBoxItems: pandoraItems
         )
     }
 
@@ -504,10 +504,10 @@ actor CharacterProgressService {
         let createdIdSet = Set(createdIds)
         let allRecords = try context.fetch(FetchDescriptor<CharacterRecord>())
         // デバッグ用バッチ作成ではGameStateがない可能性があるため、エラー時は空セットを使用
-        let pandoraStackKeys = (try? fetchPandoraBoxStackKeys(context: context)) ?? []
+        let pandoraBoxItems = (try? fetchPandoraBoxItems(context: context)) ?? []
         for record in allRecords where createdIdSet.contains(record.id) {
             let input = try loadInput(record, context: context)
-            let runtimeCharacter = try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxStackKeys: pandoraStackKeys)
+            let runtimeCharacter = try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
             record.currentHP = UInt32(runtimeCharacter.maxHP)
         }
         try context.save()
@@ -610,7 +610,7 @@ actor CharacterProgressService {
         let records = try context.fetch(descriptor)
 
         // ループの外で1回だけ取得
-        let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
+        let pandoraBoxItems = try fetchPandoraBoxItems(context: context)
 
         var modified = false
         for record in records {
@@ -619,7 +619,7 @@ actor CharacterProgressService {
 
             // maxHPを計算
             let input = try loadInput(record, context: context)
-            let runtimeCharacter = try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxStackKeys: pandoraStackKeys)
+            let runtimeCharacter = try RuntimeCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
             let maxHP = UInt32(runtimeCharacter.maxHP)
 
             if record.currentHP < maxHP {
@@ -1091,11 +1091,11 @@ private extension CharacterProgressService {
         let input = try loadInput(record, context: context)
 
         // RuntimeCharacterFactory で計算済み RuntimeCharacter を取得
-        let pandoraStackKeys = try fetchPandoraBoxStackKeys(context: context)
+        let pandoraBoxItems = try fetchPandoraBoxItems(context: context)
         let runtimeCharacter = try RuntimeCharacterFactory.make(
             from: input,
             masterData: masterData,
-            pandoraBoxStackKeys: pandoraStackKeys
+            pandoraBoxItems: pandoraBoxItems
         )
 
         // RuntimeCharacter から CharacterSnapshot を構築
@@ -1303,12 +1303,12 @@ private extension CharacterProgressService {
         }
     }
 
-    func fetchPandoraBoxStackKeys(context: ModelContext) throws -> Set<String> {
+    func fetchPandoraBoxItems(context: ModelContext) throws -> Set<UInt64> {
         var descriptor = FetchDescriptor<GameStateRecord>()
         descriptor.fetchLimit = 1
         guard let gameState = try context.fetch(descriptor).first else {
             throw ProgressError.playerNotFound
         }
-        return Set(gameState.pandoraBoxStackKeys)
+        return Set(gameState.pandoraBoxItems)
     }
 }
