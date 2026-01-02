@@ -55,23 +55,20 @@ Epika/
 
 ---
 
-## Domain/Snapshots
+## Domain/Cache
 
 永続化レコードからUIに渡すためのSendable値型。Swift並行性でactor境界を越えて渡すために必要。
+マスターデータから派生する表示用情報も含むUI対応型。
 
 | ファイル | 責務 |
 |---------|------|
-| CachedDungeonProgress.swift | ダンジョン進行状態のキャッシュ |
+| CachedDungeonProgress.swift | ダンジョン進行状態のキャッシュ（マスターデータ派生情報含む） |
 | CachedExploration.swift | 探索セッションのキャッシュ |
 | CachedParty.swift | パーティ編成のキャッシュ |
 | CachedPlayer.swift | プレイヤー資産のキャッシュ |
 | CachedShopStock.swift | 商店在庫のキャッシュ |
-| CachedStoryProgress.swift | ストーリー進行状態のキャッシュ |
-| ItemAttributes.swift | CachedInventoryItem, CurrencyType, ItemEnhancement, ItemStorageの定義 |
-| ItemCategoryTypes.swift | アイテムカテゴリ定義 |
-| ProgressMetadata.swift | 進行データ共通のメタデータ |
-| CachedDungeonProgress.swift | ダンジョン進行状態のキャッシュ（マスターデータ派生情報含む） |
 | CachedStoryNode.swift | ストーリーノード情報のキャッシュ（マスターデータ派生情報含む） |
+| CachedStoryProgress.swift | ストーリー進行状態のキャッシュ |
 
 ---
 
@@ -94,9 +91,15 @@ Epika/
 
 ## Domain/Values
 
+キャッシュではない値型。アイテム属性やカテゴリ定義など。
+
 | ファイル | 責務 |
 |---------|------|
 | CharacterValues.swift | キャラクター関連値型の名前空間 |
+| ItemAttributes.swift | CachedInventoryItem, CurrencyType, ItemEnhancement, ItemStorageの定義 |
+| ItemCategoryTypes.swift | アイテムカテゴリ定義 |
+| ProgressMetadata.swift | 進行データ共通のメタデータ |
+| StackKey.swift | アイテムスタッキング用キー |
 
 ---
 
