@@ -26,8 +26,6 @@ import SwiftUI
 struct CharacterEquippedItemsSection: View {
     let equippedItems: [EquipmentDisplayItem]
     let equipmentCapacity: Int
-    let displayService: UserDataLoadService
-    let itemDefinitions: [UInt16: ItemDefinition]
     let onUnequip: ((EquipmentDisplayItem) async throws -> Void)?
     let onDetail: ((EquipmentDisplayItem) -> Void)?
 
@@ -37,15 +35,11 @@ struct CharacterEquippedItemsSection: View {
     init(
         equippedItems: [EquipmentDisplayItem],
         equipmentCapacity: Int,
-        displayService: UserDataLoadService,
-        itemDefinitions: [UInt16: ItemDefinition],
         onUnequip: ((EquipmentDisplayItem) async throws -> Void)? = nil,
         onDetail: ((EquipmentDisplayItem) -> Void)? = nil
     ) {
         self.equippedItems = equippedItems
         self.equipmentCapacity = equipmentCapacity
-        self.displayService = displayService
-        self.itemDefinitions = itemDefinitions
         self.onUnequip = onUnequip
         self.onDetail = onDetail
     }
@@ -82,14 +76,13 @@ struct CharacterEquippedItemsSection: View {
     @ViewBuilder
     private func equippedItemRow(_ item: EquipmentDisplayItem) -> some View {
         let hasSuperRare = item.superRareTitleId > 0
-        let displayName = getDisplayName(for: item)
 
         HStack {
             Button {
                 unequipItem(item)
             } label: {
                 HStack {
-                    Text("• \(displayName)")
+                    Text("• \(item.displayName)")
                         .fontWeight(hasSuperRare ? .bold : .regular)
                     if item.quantity > 1 {
                         Text("x\(item.quantity)")
@@ -112,16 +105,6 @@ struct CharacterEquippedItemsSection: View {
                 }
                 .buttonStyle(.plain)
             }
-        }
-    }
-
-    private func getDisplayName(for item: EquipmentDisplayItem) -> String {
-        switch item {
-        case .inventory(let record):
-            return displayService.displayName(for: record.stackKey)
-        case .equipped(let equipped, _):
-            let itemName = itemDefinitions[equipped.itemId]?.name
-            return displayService.fullDisplayName(for: equipped, itemName: itemName)
         }
     }
 

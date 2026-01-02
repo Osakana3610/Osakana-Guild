@@ -22,8 +22,8 @@ import SwiftUI
 struct PandoraBoxView: View {
     @Environment(AppServices.self) private var appServices
 
-    @State private var pandoraRecords: [InventoryItemRecord] = []
-    @State private var availableRecords: [InventoryItemRecord] = []
+    @State private var pandoraItems: [CachedInventoryItem] = []
+    @State private var availableItems: [CachedInventoryItem] = []
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var showingItemPicker = false
@@ -60,13 +60,13 @@ struct PandoraBoxView: View {
         }
         .sheet(isPresented: $showingItemPicker) {
             ItemPickerSheet(
-                availableRecords: availableRecords.filter { record in
-                    !pandoraRecords.contains { $0.stackKey == record.stackKey }
+                availableItems: availableItems.filter { item in
+                    !pandoraItems.contains { $0.stackKey == item.stackKey }
                 },
                 displayService: displayService,
-                onSelect: { record in
+                onSelect: { item in
                     Task {
-                        await addToPandoraBox(record: record)
+                        await addToPandoraBox(item: item)
                     }
                 }
             )
@@ -80,7 +80,7 @@ struct PandoraBoxView: View {
                     Text("パンドラボックスに入れたアイテムを装備すると、そのステータス効果が1.5倍になります。")
                         .font(.callout)
                         .foregroundStyle(.secondary)
-                    Text("最大\(maxPandoraSlots)個まで登録可能 (\(pandoraRecords.count)/\(maxPandoraSlots))")
+                    Text("最大\(maxPandoraSlots)個まで登録可能 (\(pandoraItems.count)/\(maxPandoraSlots))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -88,17 +88,17 @@ struct PandoraBoxView: View {
             }
 
             Section("登録中のアイテム") {
-                if pandoraRecords.isEmpty {
+                if pandoraItems.isEmpty {
                     Text("アイテムが登録されていません")
                         .foregroundStyle(.secondary)
                         .font(.callout)
                 } else {
-                    ForEach(pandoraRecords, id: \.stackKey) { record in
-                        PandoraItemRow(record: record, displayService: displayService)
+                    ForEach(pandoraItems, id: \.stackKey) { item in
+                        PandoraItemRow(item: item, displayService: displayService)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     Task {
-                                        await removeFromPandoraBox(record: record)
+                                        await removeFromPandoraBox(item: item)
                                     }
                                 } label: {
                                     Label("解除", systemImage: "minus.circle")
@@ -108,7 +108,7 @@ struct PandoraBoxView: View {
                 }
             }
 
-            if pandoraRecords.count < maxPandoraSlots {
+            if pandoraItems.count < maxPandoraSlots {
                 Section {
                     Button {
                         showingItemPicker = true
@@ -134,11 +134,11 @@ struct PandoraBoxView: View {
             // 起動時に既にロード済み（UserDataLoadService.loadAllで）
             // 装備可能カテゴリのみ取得（追加候補用）
             let equipCategories = Set(ItemSaleCategory.allCases).subtracting([.forSynthesis, .mazoMaterial])
-            availableRecords = displayService.getRecords(categories: equipCategories)
+            availableItems = displayService.getItems(categories: equipCategories)
 
             // 登録済みアイテムは全カテゴリから取得（既存の非装備アイテムも表示して削除可能にする）
-            let allRecords = displayService.getRecords(categories: Set(ItemSaleCategory.allCases))
-            pandoraRecords = allRecords.filter { pandoraStackKeys.contains($0.stackKey) }
+            let allItems = displayService.getItems(categories: Set(ItemSaleCategory.allCases))
+            pandoraItems = allItems.filter { pandoraStackKeys.contains($0.stackKey) }
         } catch {
             loadError = error.localizedDescription
         }
@@ -147,9 +147,9 @@ struct PandoraBoxView: View {
     }
 
     @MainActor
-    private func addToPandoraBox(record: InventoryItemRecord) async {
+    private func addToPandoraBox(item: CachedInventoryItem) async {
         do {
-            _ = try await gameStateService.addToPandoraBox(stackKey: record.stackKey)
+            _ = try await gameStateService.addToPandoraBox(stackKey: item.stackKey)
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -157,9 +157,9 @@ struct PandoraBoxView: View {
     }
 
     @MainActor
-    private func removeFromPandoraBox(record: InventoryItemRecord) async {
+    private func removeFromPandoraBox(item: CachedInventoryItem) async {
         do {
-            _ = try await gameStateService.removeFromPandoraBox(stackKey: record.stackKey)
+            _ = try await gameStateService.removeFromPandoraBox(stackKey: item.stackKey)
             await loadData()
         } catch {
             loadError = error.localizedDescription
@@ -168,12 +168,12 @@ struct PandoraBoxView: View {
 }
 
 private struct PandoraItemRow: View {
-    let record: InventoryItemRecord
+    let item: CachedInventoryItem
     let displayService: UserDataLoadService
 
     var body: some View {
         HStack {
-            displayService.makeStyledDisplayText(for: record, includeSellValue: false)
+            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
                 .font(.body)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
@@ -196,26 +196,26 @@ private struct PandoraItemRow: View {
 
 private struct ItemPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
-    let availableRecords: [InventoryItemRecord]
+    let availableItems: [CachedInventoryItem]
     let displayService: UserDataLoadService
-    let onSelect: (InventoryItemRecord) -> Void
+    let onSelect: (CachedInventoryItem) -> Void
 
     var body: some View {
         NavigationStack {
             List {
-                if availableRecords.isEmpty {
+                if availableItems.isEmpty {
                     ContentUnavailableView {
                         Label("追加できるアイテムがありません", systemImage: "tray")
                     } description: {
                         Text("所持品にアイテムがないか、すべて登録済みです")
                     }
                 } else {
-                    ForEach(availableRecords, id: \.stackKey) { record in
+                    ForEach(availableItems, id: \.stackKey) { item in
                         Button {
-                            onSelect(record)
+                            onSelect(item)
                             dismiss()
                         } label: {
-                            ItemPickerRow(record: record, displayService: displayService)
+                            ItemPickerRow(item: item, displayService: displayService)
                         }
                         .tint(.primary)
                     }
@@ -236,12 +236,12 @@ private struct ItemPickerSheet: View {
 }
 
 private struct ItemPickerRow: View {
-    let record: InventoryItemRecord
+    let item: CachedInventoryItem
     let displayService: UserDataLoadService
 
     var body: some View {
         HStack {
-            displayService.makeStyledDisplayText(for: record, includeSellValue: false)
+            displayService.makeStyledDisplayText(for: item, includeSellValue: false)
                 .font(.body)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
