@@ -642,10 +642,13 @@ actor ExplorationProgressService {
             oldestDescriptor.fetchLimit = deleteCount
 
             guard let oldRecords = try? context.fetch(oldestDescriptor) else { return }
+            // 一件ずつ削除＆saveすることでSwiftDataのカスケード削除競合を回避
+            // 複数レコードを一度に削除すると、カスケード削除中に無効化されたオブジェクトに
+            // アクセスしてクラッシュする可能性がある（_InvalidFutureBackingData）
             for record in oldRecords {
                 context.delete(record)
+                try? context.save()
             }
-            try? context.save()
 
             let elapsed = CFAbsoluteTimeGetCurrent() - startTime
             print("[ExplorationPurge] 削除完了: \(oldRecords.count)件削除, 所要時間: \(String(format: "%.3f", elapsed))秒")
