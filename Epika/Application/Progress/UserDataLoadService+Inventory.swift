@@ -63,10 +63,8 @@ extension UserDataLoadService {
         let records = try context.fetch(descriptor)
 
         guard !records.isEmpty else {
-            categorizedItems.removeAll()
             subcategorizedItems.removeAll()
             stackKeyIndex.removeAll()
-            orderedCategories.removeAll()
             orderedSubcategories.removeAll()
             return
         }
@@ -79,10 +77,9 @@ extension UserDataLoadService {
         let allTitles = masterDataCache.allTitles
         let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
 
-        // カテゴリ別・サブカテゴリ別にグループ化
-        var grouped: [ItemSaleCategory: [CachedInventoryItem]] = [:]
-        var subgrouped: [ItemDisplaySubcategory: [CachedInventoryItem]] = [:]
-        var newStackKeyIndex: [String: ItemSaleCategory] = [:]
+        // サブカテゴリ別にグループ化
+        var grouped: [ItemDisplaySubcategory: [CachedInventoryItem]] = [:]
+        var newStackKeyIndex: [String: ItemDisplaySubcategory] = [:]
 
         for record in records {
             guard let definition = definitionMap[record.itemId] else { continue }
@@ -125,31 +122,22 @@ extension UserDataLoadService {
                 sellValue: sellValue
             )
 
-            grouped[category, default: []].append(cachedItem)
-            subgrouped[subcategory, default: []].append(cachedItem)
-            newStackKeyIndex[record.stackKey] = category
+            grouped[subcategory, default: []].append(cachedItem)
+            newStackKeyIndex[record.stackKey] = subcategory
         }
 
         // ソート
         for key in grouped.keys {
             grouped[key]?.sort { isCachedItemOrderedBefore($0, $1) }
         }
-        for key in subgrouped.keys {
-            subgrouped[key]?.sort { isCachedItemOrderedBefore($0, $1) }
-        }
 
-        let sortedCategories = grouped.keys.sorted {
+        let sortedSubcategories = grouped.keys.sorted {
             (grouped[$0]?.first?.itemId ?? .max) < (grouped[$1]?.first?.itemId ?? .max)
-        }
-        let sortedSubcategories = subgrouped.keys.sorted {
-            (subgrouped[$0]?.first?.itemId ?? .max) < (subgrouped[$1]?.first?.itemId ?? .max)
         }
 
         // キャッシュに代入
-        self.categorizedItems = grouped
-        self.subcategorizedItems = subgrouped
+        self.subcategorizedItems = grouped
         self.stackKeyIndex = newStackKeyIndex
-        self.orderedCategories = sortedCategories
         self.orderedSubcategories = sortedSubcategories
         self.itemCacheVersion &+= 1
     }
@@ -188,12 +176,6 @@ extension UserDataLoadService {
         isItemsLoaded = false
     }
 
-    /// カテゴリ別にグループ化されたアイテムを取得
-    @MainActor
-    func getCategorizedItems() -> [ItemSaleCategory: [CachedInventoryItem]] {
-        categorizedItems
-    }
-
     /// サブカテゴリ別にグループ化されたアイテムを取得
     @MainActor
     func getSubcategorizedItems() -> [ItemDisplaySubcategory: [CachedInventoryItem]] {
@@ -209,37 +191,35 @@ extension UserDataLoadService {
     /// 指定カテゴリのアイテムをフラット配列で取得
     @MainActor
     func getItems(categories: Set<ItemSaleCategory>) -> [CachedInventoryItem] {
-        orderedCategories
-            .filter { categories.contains($0) }
-            .flatMap { categorizedItems[$0] ?? [] }
+        orderedSubcategories
+            .filter { categories.contains($0.mainCategory) }
+            .flatMap { subcategorizedItems[$0] ?? [] }
     }
 
-    /// 全カテゴリのアイテムをフラット配列で取得
+    /// 全アイテムをフラット配列で取得
     @MainActor
     func getAllItems() -> [CachedInventoryItem] {
-        orderedCategories.flatMap { categorizedItems[$0] ?? [] }
+        orderedSubcategories.flatMap { subcategorizedItems[$0] ?? [] }
     }
 
     /// stackKeyからアイテムを取得
     @MainActor
     func getItem(stackKey: String) -> CachedInventoryItem? {
-        guard let category = stackKeyIndex[stackKey] else { return nil }
-        return categorizedItems[category]?.first { $0.stackKey == stackKey }
+        guard let subcategory = stackKeyIndex[stackKey] else { return nil }
+        return subcategorizedItems[subcategory]?.first { $0.stackKey == stackKey }
     }
 
-    /// stackKeyからカテゴリを取得
+    /// stackKeyからサブカテゴリを取得
     @MainActor
-    func category(for stackKey: String) -> ItemSaleCategory? {
+    func subcategory(for stackKey: String) -> ItemDisplaySubcategory? {
         stackKeyIndex[stackKey]
     }
 
     /// アイテムキャッシュをクリア
     @MainActor
     func clearItemCache() {
-        categorizedItems.removeAll()
         subcategorizedItems.removeAll()
         stackKeyIndex.removeAll()
-        orderedCategories.removeAll()
         orderedSubcategories.removeAll()
         isItemsLoaded = false
         itemCacheVersion &+= 1
@@ -257,11 +237,8 @@ extension UserDataLoadService {
     func removeItems(stackKeys: Set<String>) {
         guard !stackKeys.isEmpty else { return }
         for stackKey in stackKeys {
-            guard let category = stackKeyIndex.removeValue(forKey: stackKey) else { continue }
-            categorizedItems[category]?.removeAll { $0.stackKey == stackKey }
-        }
-        for key in subcategorizedItems.keys {
-            subcategorizedItems[key]?.removeAll { stackKeys.contains($0.stackKey) }
+            guard let subcategory = stackKeyIndex.removeValue(forKey: stackKey) else { continue }
+            subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
         }
         rebuildOrderedSubcategories()
         itemCacheVersion &+= 1
@@ -271,27 +248,22 @@ extension UserDataLoadService {
     @MainActor
     @discardableResult
     func decrementQuantity(stackKey: String, by amount: Int) throws -> Int {
-        guard let category = stackKeyIndex[stackKey],
-              let index = categorizedItems[category]?.firstIndex(where: { $0.stackKey == stackKey }) else {
+        guard let subcategory = stackKeyIndex[stackKey],
+              let index = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) else {
             throw UserDataLoadError.itemNotFoundInCache(stackKey: stackKey)
         }
-        let item = categorizedItems[category]![index]
+        let item = subcategorizedItems[subcategory]![index]
         let newQuantity = Int(item.quantity) - amount
         if newQuantity <= 0 {
             // 完全削除
-            categorizedItems[category]?.remove(at: index)
+            subcategorizedItems[subcategory]?.remove(at: index)
             stackKeyIndex.removeValue(forKey: stackKey)
-            let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: item.rarity)
-            subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
             rebuildOrderedSubcategories()
             itemCacheVersion &+= 1
             return 0
         } else {
             // 数量更新
-            categorizedItems[category]![index].quantity = UInt16(newQuantity)
-            if let subIndex = subcategorizedItems[ItemDisplaySubcategory(mainCategory: category, subcategory: item.rarity)]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                subcategorizedItems[ItemDisplaySubcategory(mainCategory: category, subcategory: item.rarity)]![subIndex].quantity = UInt16(newQuantity)
-            }
+            subcategorizedItems[subcategory]![index].quantity = UInt16(newQuantity)
             itemCacheVersion &+= 1
             return newQuantity
         }
@@ -401,31 +373,22 @@ extension UserDataLoadService {
     /// アイテムをキャッシュにupsert
     @MainActor
     private func upsertItem(_ item: CachedInventoryItem) {
-        let category = item.category
-        if let existingIndex = categorizedItems[category]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
-            categorizedItems[category]?[existingIndex] = item
+        let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+        if let existingIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
+            subcategorizedItems[subcategory]?[existingIndex] = item
         } else {
-            insertItemWithoutVersion(item)
+            var items = subcategorizedItems[subcategory] ?? []
+            insertItem(item, into: &items)
+            subcategorizedItems[subcategory] = items
         }
-        let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: item.rarity)
-        if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
-            subcategorizedItems[subcategory]?[subIndex] = item
-        } else {
-            var subItems = subcategorizedItems[subcategory] ?? []
-            insertItem(item, into: &subItems)
-            subcategorizedItems[subcategory] = subItems
-        }
-        stackKeyIndex[item.stackKey] = category
+        stackKeyIndex[item.stackKey] = subcategory
     }
 
     /// stackKeyでアイテムを完全削除（バージョン更新なし）
     @MainActor
     private func removeItemWithoutVersion(stackKey: String) {
-        guard let category = stackKeyIndex.removeValue(forKey: stackKey) else { return }
-        categorizedItems[category]?.removeAll { $0.stackKey == stackKey }
-        for key in subcategorizedItems.keys {
-            subcategorizedItems[key]?.removeAll { $0.stackKey == stackKey }
-        }
+        guard let subcategory = stackKeyIndex.removeValue(forKey: stackKey) else { return }
+        subcategorizedItems[subcategory]?.removeAll { $0.stackKey == stackKey }
     }
 }
 
@@ -434,9 +397,6 @@ extension UserDataLoadService {
 extension UserDataLoadService {
     @MainActor
     func sortCacheItems() {
-        for key in categorizedItems.keys {
-            categorizedItems[key]?.sort { isCachedItemOrderedBefore($0, $1) }
-        }
         for key in subcategorizedItems.keys {
             subcategorizedItems[key]?.sort { isCachedItemOrderedBefore($0, $1) }
         }
@@ -444,16 +404,11 @@ extension UserDataLoadService {
 
     @MainActor
     func insertItemWithoutVersion(_ item: CachedInventoryItem) {
-        let category = item.category
-        var items = categorizedItems[category] ?? []
+        let subcategory = ItemDisplaySubcategory(mainCategory: item.category, subcategory: item.rarity)
+        var items = subcategorizedItems[subcategory] ?? []
         insertItem(item, into: &items)
-        categorizedItems[category] = items
-        stackKeyIndex[item.stackKey] = category
-
-        let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: item.rarity)
-        var subItems = subcategorizedItems[subcategory] ?? []
-        insertItem(item, into: &subItems)
-        subcategorizedItems[subcategory] = subItems
+        subcategorizedItems[subcategory] = items
+        stackKeyIndex[item.stackKey] = subcategory
     }
 
     @MainActor
@@ -467,9 +422,6 @@ extension UserDataLoadService {
 
     @MainActor
     func rebuildOrderedSubcategories() {
-        orderedCategories = categorizedItems.keys
-            .filter { !(categorizedItems[$0]?.isEmpty ?? true) }
-            .sorted { (categorizedItems[$0]?.first?.itemId ?? .max) < (categorizedItems[$1]?.first?.itemId ?? .max) }
         orderedSubcategories = subcategorizedItems.keys
             .filter { !(subcategorizedItems[$0]?.isEmpty ?? true) }
             .sorted { (subcategorizedItems[$0]?.first?.itemId ?? .max) < (subcategorizedItems[$1]?.first?.itemId ?? .max) }
@@ -508,18 +460,12 @@ extension UserDataLoadService {
             let seed = entry.seed
             guard let definition = definitions[seed.itemId] else { continue }
 
-            if let category = stackKeyIndex[stackKey],
-               let index = categorizedItems[category]?.firstIndex(where: { $0.stackKey == stackKey }) {
+            if let subcategory = stackKeyIndex[stackKey],
+               let index = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
                 // 既存アイテム: 数量を加算
-                let currentQuantity = Int(categorizedItems[category]![index].quantity)
+                let currentQuantity = Int(subcategorizedItems[subcategory]![index].quantity)
                 let newQuantity = UInt16(min(currentQuantity + entry.totalQuantity, Int(UInt16.max)))
-                categorizedItems[category]![index].quantity = newQuantity
-
-                // サブカテゴリも更新
-                let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: definition.rarity)
-                if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
-                    subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
-                }
+                subcategorizedItems[subcategory]![index].quantity = newQuantity
             } else {
                 // 新規アイテム: キャッシュに追加
                 let enhancement = seed.enhancements

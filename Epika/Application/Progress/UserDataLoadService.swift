@@ -11,7 +11,7 @@
 //
 // 【UIからの参照】
 //   - UI層はSwiftDataを直接参照せず、このサービスのキャッシュを使用すること
-//   - characters, parties, categorizedItems 等を直接参照可能
+//   - characters, parties, subcategorizedItems 等を直接参照可能
 //
 // 【内部処理からの参照】
 //   - 自動売却判定等、内部処理もキャッシュを参照すること
@@ -57,10 +57,8 @@ final class UserDataLoadService: Sendable {
     @MainActor var explorationSummaries: [CachedExploration] = []
 
     // アイテムキャッシュ（軽量な値型）
-    @MainActor var categorizedItems: [ItemSaleCategory: [CachedInventoryItem]] = [:]
     @MainActor var subcategorizedItems: [ItemDisplaySubcategory: [CachedInventoryItem]] = [:]
-    @MainActor var stackKeyIndex: [String: ItemSaleCategory] = [:]  // O(1)検索用
-    @MainActor var orderedCategories: [ItemSaleCategory] = []
+    @MainActor var stackKeyIndex: [String: ItemDisplaySubcategory] = [:]  // O(1)検索用
     @MainActor var orderedSubcategories: [ItemDisplaySubcategory] = []
     @MainActor var itemCacheVersion: Int = 0
 

@@ -498,7 +498,7 @@ struct EquipmentEditorView: View {
     }
 
     private func matchesFilters(_ item: EquipmentDisplayItem) -> Bool {
-        guard let category = displayService.category(for: item.stackKey) ?? {
+        guard let category = displayService.subcategory(for: item.stackKey)?.mainCategory ?? {
             // 装備中アイテムの場合はitemDefinitionsから取得
             if let def = itemDefinitions[item.itemId] {
                 return ItemSaleCategory(rawValue: def.category)
