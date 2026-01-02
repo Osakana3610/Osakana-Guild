@@ -951,46 +951,49 @@ final class UserDataLoadService: Sendable {
     }
 
     /// ドロップアイテムをキャッシュに追加する
+    /// - Note: seedsから直接構築。SwiftDataへのアクセスは行わない。
     @MainActor
     func addDroppedItems(
         seeds: [InventoryProgressService.BatchSeed],
         stackKeys: [String],
         definitions: [UInt16: ItemDefinition]
     ) {
-        guard !stackKeys.isEmpty else { return }
+        guard !seeds.isEmpty else { return }
 
-        // seedから追加数量を計算
-        var seedQuantityByStackKey: [String: Int] = [:]
+        // seedからstackKey別の数量を集計
+        var seedByStackKey: [String: (seed: InventoryProgressService.BatchSeed, totalQuantity: Int)] = [:]
         for seed in seeds {
             let stackKey = "\(seed.enhancements.superRareTitleId)|\(seed.enhancements.normalTitleId)|\(seed.itemId)|\(seed.enhancements.socketSuperRareTitleId)|\(seed.enhancements.socketNormalTitleId)|\(seed.enhancements.socketItemId)"
-            seedQuantityByStackKey[stackKey, default: 0] += seed.quantity
+            if let existing = seedByStackKey[stackKey] {
+                seedByStackKey[stackKey] = (existing.seed, existing.totalQuantity + seed.quantity)
+            } else {
+                seedByStackKey[stackKey] = (seed, seed.quantity)
+            }
         }
-
-        // SwiftDataからレコードを取得
-        let context = contextProvider.makeContext()
-        let stackKeySet = Set(stackKeys)
-        let descriptor = FetchDescriptor<InventoryItemRecord>()
-        guard let allRecords = try? context.fetch(descriptor) else { return }
-        let records = allRecords.filter { stackKeySet.contains($0.stackKey) }
 
         let allTitles = masterDataCache.allTitles
         let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
 
-        for record in records {
-            guard let definition = definitions[record.itemId] else { continue }
+        var needsRebuild = false
+        for (stackKey, entry) in seedByStackKey {
+            let seed = entry.seed
+            guard let definition = definitions[seed.itemId] else { continue }
 
-            if stackKeyIndex[record.stackKey] != nil {
-                // 既存アイテム: 数量を加算（バージョン更新のみ）
-                incrementQuantity(stackKey: record.stackKey, by: 0)
+            if let category = stackKeyIndex[stackKey],
+               let index = categorizedItems[category]?.firstIndex(where: { $0.stackKey == stackKey }) {
+                // 既存アイテム: 数量を加算
+                let currentQuantity = Int(categorizedItems[category]![index].quantity)
+                let newQuantity = UInt16(min(currentQuantity + entry.totalQuantity, Int(UInt16.max)))
+                categorizedItems[category]![index].quantity = newQuantity
+
+                // サブカテゴリも更新
+                let subcategory = ItemDisplaySubcategory(mainCategory: category, subcategory: definition.rarity)
+                if let subIndex = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) {
+                    subcategorizedItems[subcategory]![subIndex].quantity = newQuantity
+                }
             } else {
                 // 新規アイテム: キャッシュに追加
-                let enhancement = ItemEnhancement(
-                    superRareTitleId: record.superRareTitleId,
-                    normalTitleId: record.normalTitleId,
-                    socketSuperRareTitleId: record.socketSuperRareTitleId,
-                    socketNormalTitleId: record.socketNormalTitleId,
-                    socketItemId: record.socketItemId
-                )
+                let enhancement = seed.enhancements
 
                 let sellPrice = (try? ItemPriceCalculator.sellPrice(
                     baseSellValue: definition.sellValue,
@@ -1006,23 +1009,27 @@ final class UserDataLoadService: Sendable {
 
                 let category = ItemSaleCategory(rawValue: definition.category) ?? .other
                 let cachedItem = CachedInventoryItem(
-                    stackKey: record.stackKey,
-                    itemId: record.itemId,
-                    quantity: record.quantity,
-                    normalTitleId: record.normalTitleId,
-                    superRareTitleId: record.superRareTitleId,
-                    socketItemId: record.socketItemId,
-                    socketNormalTitleId: record.socketNormalTitleId,
-                    socketSuperRareTitleId: record.socketSuperRareTitleId,
+                    stackKey: stackKey,
+                    itemId: seed.itemId,
+                    quantity: UInt16(min(entry.totalQuantity, Int(UInt16.max))),
+                    normalTitleId: enhancement.normalTitleId,
+                    superRareTitleId: enhancement.superRareTitleId,
+                    socketItemId: enhancement.socketItemId,
+                    socketNormalTitleId: enhancement.socketNormalTitleId,
+                    socketSuperRareTitleId: enhancement.socketSuperRareTitleId,
                     category: category,
                     rarity: definition.rarity,
                     displayName: fullDisplayName,
                     sellValue: sellPrice
                 )
                 insertItemWithoutVersion(cachedItem)
+                needsRebuild = true
             }
         }
-        rebuildOrderedSubcategories()
+
+        if needsRebuild {
+            rebuildOrderedSubcategories()
+        }
         itemCacheVersion &+= 1
     }
 
