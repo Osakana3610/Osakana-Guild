@@ -22,12 +22,10 @@ import SwiftUI
 
 struct TitleInheritanceView: View {
     @Environment(AppServices.self) private var appServices
-    @State private var targetItems: [CachedInventoryItem] = []
-    @State private var sourceItems: [CachedInventoryItem] = []
     @State private var selectedTarget: CachedInventoryItem?
     @State private var selectedSource: CachedInventoryItem?
     @State private var preview: TitleInheritanceProgressService.TitleInheritancePreview?
-    @State private var resultItem: CachedInventoryItem?
+    @State private var resultStackKey: String?
     @State private var showResult = false
     @State private var showError = false
     @State private var errorMessage = ""
@@ -36,12 +34,35 @@ struct TitleInheritanceView: View {
     @State private var showSourcePicker = false
 
     private var titleService: TitleInheritanceProgressService { appServices.titleInheritance }
+    private var userDataLoad: UserDataLoadService { appServices.userDataLoad }
+
+    /// UserDataLoadServiceのキャッシュから全アイテムを取得
+    private var allItems: [CachedInventoryItem] {
+        userDataLoad.subcategorizedItems.values.flatMap { $0 }
+    }
+
+    /// 対象アイテム候補（全アイテム）
+    private var targetItems: [CachedInventoryItem] {
+        allItems
+    }
+
+    /// 提供アイテム候補（対象と同カテゴリ、対象以外）
+    private var sourceItems: [CachedInventoryItem] {
+        guard let target = selectedTarget else { return [] }
+        return allItems.filter { $0.stackKey != target.stackKey && $0.category == target.category }
+    }
+
+    /// 継承結果のアイテム（キャッシュから取得）
+    private var resultItem: CachedInventoryItem? {
+        guard let stackKey = resultStackKey else { return nil }
+        return allItems.first { $0.stackKey == stackKey }
+    }
 
     var body: some View {
         Group {
             if showError {
                 ErrorView(message: errorMessage) {
-                    Task { await loadTargets() }
+                    showError = false
                 }
             } else {
                 buildContent()
@@ -49,12 +70,9 @@ struct TitleInheritanceView: View {
         }
         .navigationTitle("称号継承")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await loadTargets() }
         .sheet(isPresented: $showResult) {
             if let item = resultItem {
-                TitleInheritanceResultView(item: item) {
-                    await loadTargets()
-                }
+                TitleInheritanceResultView(item: item)
             }
         }
         .sheet(isPresented: $showTargetPicker) {
@@ -67,7 +85,6 @@ struct TitleInheritanceView: View {
                         selectedTarget = newValue
                         selectedSource = nil
                         preview = nil
-                        Task { await loadSources() }
                     }
                 )
             )
@@ -80,7 +97,7 @@ struct TitleInheritanceView: View {
                     get: { selectedSource },
                     set: { newValue in
                         selectedSource = newValue
-                        Task { await updatePreview() }
+                        updatePreview()
                     }
                 )
             )
@@ -96,7 +113,7 @@ struct TitleInheritanceView: View {
                     title: "対象アイテム（残存）",
                     subtitle: "称号を受け取るアイテム",
                     selectedItem: selectedTarget,
-                    onSelect: { Task { await openTargetPicker() } },
+                    onSelect: { showTargetPicker = true },
                     onClear: {
                         selectedTarget = nil
                         selectedSource = nil
@@ -112,15 +129,20 @@ struct TitleInheritanceView: View {
                     title: "提供アイテム（消滅）",
                     subtitle: "称号を提供し消失するアイテム",
                     selectedItem: selectedSource,
-                    onSelect: { Task { await openSourcePicker() } },
+                    onSelect: { showSourcePicker = true },
                     onClear: {
                         selectedSource = nil
                         preview = nil
                     }
                 )
 
-                if let preview {
-                    TitleInheritancePreviewCard(preview: preview)
+                if let preview, let target = selectedTarget, let source = selectedSource {
+                    TitleInheritancePreviewCard(
+                        currentTitleName: userDataLoad.titleDisplayName(for: target.enhancement),
+                        sourceTitleName: userDataLoad.titleDisplayName(for: source.enhancement),
+                        resultTitleName: userDataLoad.titleDisplayName(for: preview.resultEnhancement),
+                        isSameTitle: preview.isSameTitle
+                    )
                 }
 
                 if preview != nil {
@@ -138,52 +160,13 @@ struct TitleInheritanceView: View {
         .avoidBottomGameInfo()
     }
 
-    @MainActor
-    private func loadTargets() async {
-        if isLoading { return }
-        isLoading = true
-        showError = false
-        defer { isLoading = false }
-        do {
-            targetItems = try await titleService.availableTargetItems()
-            if let target = selectedTarget {
-                selectedTarget = targetItems.first(where: { $0.id == target.id })
-            }
-            await loadSources()
-        } catch {
-            showError = true
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    @MainActor
-    private func loadSources() async {
-        guard let target = selectedTarget else {
-            sourceItems = []
-            return
-        }
-        do {
-            sourceItems = try await titleService.availableSourceItems(for: target)
-            if let source = selectedSource {
-                selectedSource = sourceItems.first(where: { $0.id == source.id })
-            }
-            if selectedSource != nil {
-                await updatePreview()
-            }
-        } catch {
-            showError = true
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    @MainActor
-    private func updatePreview() async {
+    private func updatePreview() {
         guard let target = selectedTarget, let source = selectedSource else {
             preview = nil
             return
         }
         do {
-            preview = try await titleService.preview(targetStackKey: target.id, sourceStackKey: source.id)
+            preview = try titleService.preview(target: target, source: source)
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -195,41 +178,17 @@ struct TitleInheritanceView: View {
         guard let target = selectedTarget, let source = selectedSource else { return }
         do {
             isLoading = true
-            let updated = try await titleService.inherit(targetStackKey: target.id, sourceStackKey: source.id)
-            resultItem = updated
-            selectedTarget = updated
+            let newStackKey = try await titleService.inherit(target: target, source: source)
+            resultStackKey = newStackKey
+            selectedTarget = allItems.first { $0.stackKey == newStackKey }
             selectedSource = nil
             preview = nil
             showResult = true
-            await loadTargets()
         } catch {
             showError = true
             errorMessage = error.localizedDescription
         }
         isLoading = false
-    }
-
-    @MainActor
-    private func openTargetPicker() async {
-        do {
-            targetItems = try await titleService.availableTargetItems()
-            showTargetPicker = true
-        } catch {
-            showError = true
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    @MainActor
-    private func openSourcePicker() async {
-        guard let target = selectedTarget else { return }
-        do {
-            sourceItems = try await titleService.availableSourceItems(for: target)
-            showSourcePicker = true
-        } catch {
-            showError = true
-            errorMessage = error.localizedDescription
-        }
     }
 }
 
@@ -259,7 +218,10 @@ struct TitleInheritanceInstructionCard: View {
 }
 
 struct TitleInheritancePreviewCard: View {
-    let preview: TitleInheritanceProgressService.TitleInheritancePreview
+    let currentTitleName: String
+    let sourceTitleName: String
+    let resultTitleName: String
+    let isSameTitle: Bool
 
     var body: some View {
         GroupBox {
@@ -271,13 +233,19 @@ struct TitleInheritancePreviewCard: View {
                         .font(.headline)
                 }
 
-                Text("現在: \(preview.currentTitleName)")
+                Text("現在: \(currentTitleName.isEmpty ? "（無称号）" : currentTitleName)")
                     .font(.body)
-                Text("提供: \(preview.sourceTitleName)")
+                Text("提供: \(sourceTitleName.isEmpty ? "（無称号）" : sourceTitleName)")
                     .font(.body)
-                Text("結果: \(preview.resultTitleName)")
+                Text("結果: \(resultTitleName.isEmpty ? "（無称号）" : resultTitleName)")
                     .font(.body)
-                    .foregroundColor(.primary)
+                    .foregroundColor(isSameTitle ? .secondary : .primary)
+
+                if isSameTitle {
+                    Text("※ 称号は変わりません")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
         }
     }
@@ -285,7 +253,6 @@ struct TitleInheritancePreviewCard: View {
 
 struct TitleInheritanceResultView: View {
     let item: CachedInventoryItem
-    let onDismiss: () async -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -297,10 +264,7 @@ struct TitleInheritanceResultView: View {
             InventoryItemRow(item: item, showPrice: false)
 
             Button("閉じる") {
-                Task {
-                    await onDismiss()
-                    dismiss()
-                }
+                dismiss()
             }
             .buttonStyle(.borderedProminent)
         }

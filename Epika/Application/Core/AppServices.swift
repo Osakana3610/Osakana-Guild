@@ -127,8 +127,7 @@ final class AppServices: Sendable {
 
         self.party = PartyProgressService(contextProvider: contextProvider)
         self.inventory = InventoryProgressService(contextProvider: contextProvider,
-                                                  gameStateService: gameStateService,
-                                                  masterDataCache: masterDataCache)
+                                                  gameStateService: gameStateService)
         self.shop = ShopProgressService(contextProvider: contextProvider,
                                         masterDataCache: masterDataCache,
                                         inventoryService: self.inventory,
@@ -137,13 +136,10 @@ final class AppServices: Sendable {
         self.exploration = ExplorationProgressService(contextProvider: contextProvider, masterDataCache: masterDataCache)
         self.dungeon = DungeonProgressService(contextProvider: contextProvider)
         self.story = StoryProgressService(contextProvider: contextProvider)
-        self.titleInheritance = TitleInheritanceProgressService(inventoryService: self.inventory,
-                                                                  masterDataCache: masterDataCache)
-        self.artifactExchange = ArtifactExchangeProgressService(inventoryService: self.inventory,
-                                                                  masterDataCache: masterDataCache)
+        self.titleInheritance = TitleInheritanceProgressService(inventoryService: self.inventory)
+        self.artifactExchange = ArtifactExchangeProgressService(inventoryService: self.inventory)
         self.itemSynthesis = ItemSynthesisProgressService(inventoryService: self.inventory,
-                                                          gameStateService: gameStateService,
-                                                          masterDataCache: masterDataCache)
+                                                          gameStateService: gameStateService)
         self.userDataLoad = UserDataLoadService(
             contextProvider: contextProvider,
             masterDataCache: masterDataCache,

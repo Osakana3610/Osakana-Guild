@@ -8,113 +8,35 @@
 //   - 特定アイテムを別のアイテムに交換
 //
 // 【公開API】
-//   - availableArtifacts() → [ArtifactOption]
-//     交換可能な神器リストを取得
-//   - playerArtifacts() → [CachedInventoryItem]
-//     プレイヤー所持の神器を取得
-//   - exchange(givingItemStackKey:desiredItemId:) → CachedInventoryItem
+//   - exchange(offering:desiredItemId:) → String (newStackKey)
 //     神器交換を実行
 //
-// 【補助型】
-//   - ArtifactOption: 交換先の神器オプション
+// 【使用方法】
+//   - 呼び出し側はUserDataLoadServiceのキャッシュからアイテムを取得
+//   - 交換ルールと定義情報も呼び出し側で解決
+//
+// 【ステータス】
+//   - 現在は交換ルールが未定義のため機能未実装
 //
 // ==============================================================================
 
 import Foundation
 
 actor ArtifactExchangeProgressService {
-    struct ArtifactOption: Identifiable, Sendable, Hashable {
-        let definition: ItemDefinition
-        var id: UInt16 { definition.id }
-
-        static func == (lhs: ArtifactOption, rhs: ArtifactOption) -> Bool {
-            lhs.id == rhs.id
-        }
-
-        func hash(into hasher: inout Hasher) {
-            hasher.combine(id)
-        }
-    }
-
     private let inventoryService: InventoryProgressService
-    private let masterDataCache: MasterDataCache
 
-    private struct ExchangeRule: Sendable, Hashable {
-        let requiredItemId: UInt16
-        let rewardItemId: UInt16
-    }
-
-    private let exchangeRules: [ExchangeRule] = []
-
-    init(inventoryService: InventoryProgressService, masterDataCache: MasterDataCache) {
+    init(inventoryService: InventoryProgressService) {
         self.inventoryService = inventoryService
-        self.masterDataCache = masterDataCache
     }
 
-    func availableArtifacts() async throws -> [ArtifactOption] {
-        guard !exchangeRules.isEmpty else { return [] }
-        let rewardIds = Set(exchangeRules.map { $0.rewardItemId })
-        let definitions = masterDataCache.items(Array(rewardIds))
-        let map = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
-        return exchangeRules.compactMap { rule in
-            guard let definition = map[rule.rewardItemId] else { return nil }
-            return ArtifactOption(definition: definition)
-        }
-    }
-
-    func playerArtifacts() async throws -> [CachedInventoryItem] {
-        try await inventoryService.allEquipment(storage: .playerItem)
-    }
-
-    func exchange(givingItemStackKey: String, desiredItemId: UInt16) async throws -> CachedInventoryItem {
-        guard !exchangeRules.isEmpty else {
-            throw ProgressError.invalidInput(description: "神器交換レシピが未定義です")
-        }
-        guard let rule = exchangeRules.first(where: { $0.rewardItemId == desiredItemId }) else {
-            throw ProgressError.invalidInput(description: "指定された神器の交換レシピが存在しません")
-        }
-
-        let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        guard let offering = equipments.first(where: { $0.stackKey == givingItemStackKey }) else {
-            throw ProgressError.invalidInput(description: "提供する神器が所持品に存在しません")
-        }
-        guard offering.itemId == rule.requiredItemId else {
-            throw ProgressError.invalidInput(description: "交換条件を満たしていません")
-        }
-        guard let rewardDefinition = masterDataCache.item(rule.rewardItemId) else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [String(rule.rewardItemId)])
-        }
-
-        let updatedStackKey = try await inventoryService.updateItem(stackKey: givingItemStackKey) { record in
-            guard record.storage == .playerItem else {
-                throw ProgressError.invalidInput(description: "提供アイテムは所持品から選択してください")
-            }
-            // 提供アイテムは報酬アイテムに完全置換（称号・ソケット全てリセット）
-            record.itemId = rule.rewardItemId
-            record.normalTitleId = 0
-            record.superRareTitleId = 0
-            record.socketItemId = 0
-            record.socketSuperRareTitleId = 0
-            record.socketNormalTitleId = 0
-        }
-
-        // 更新後はすべてリセットされた状態
-        return CachedInventoryItem(
-            stackKey: updatedStackKey,
-            itemId: rule.rewardItemId,
-            quantity: 1,
-            normalTitleId: 0,
-            superRareTitleId: 0,
-            socketItemId: 0,
-            socketNormalTitleId: 0,
-            socketSuperRareTitleId: 0,
-            category: ItemSaleCategory(rawValue: rewardDefinition.category) ?? .other,
-            rarity: rewardDefinition.rarity,
-            displayName: rewardDefinition.name,
-            baseValue: rewardDefinition.basePrice,
-            sellValue: rewardDefinition.sellValue,
-            statBonuses: rewardDefinition.statBonuses,
-            combatBonuses: rewardDefinition.combatBonuses
-        )
+    /// 神器交換を実行
+    /// - Parameters:
+    ///   - offering: 提供するアイテム（UserDataLoadServiceのキャッシュから取得）
+    ///   - rewardItemId: 報酬アイテムID
+    /// - Returns: 交換後のアイテムのstackKey
+    /// - Note: 現在は交換ルールが未定義のため常にエラーを返す
+    func exchange(offering: CachedInventoryItem, rewardItemId: UInt16) async throws -> String {
+        // TODO: 交換ルールを実装する際に有効化
+        throw ProgressError.invalidInput(description: "神器交換レシピが未定義です")
     }
 }

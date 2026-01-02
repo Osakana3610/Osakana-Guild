@@ -5,26 +5,27 @@
 //
 // 【責務】
 //   - アイテム合成機能
-//   - 合成レシピの評価とアイテム変換
+//   - SwiftDataレコードの操作のみを担当
 //
 // 【公開API】
-//   - availableParentItems() → [CachedInventoryItem] - 親素材候補
-//   - availableChildItems(forParent:) → [CachedInventoryItem] - 子素材候補
-//   - preview(parentStackKey:childStackKey:) → SynthesisPreview - 合成結果プレビュー
-//   - synthesize(parentStackKey:childStackKey:) → CachedInventoryItem - 合成実行
+//   - preview(parent:child:resultDefinition:) → SynthesisPreview - 合成結果プレビュー
+//   - synthesize(parent:child:resultItemId:) → String (newStackKey) - 合成実行
 //
 // 【合成フロー】
-//   1. 親アイテムと子アイテムを選択
-//   2. レシピに基づいて結果アイテムを決定
-//   3. コストを支払い、素材を消費して結果を生成
+//   1. 呼び出し側がUserDataLoadServiceのキャッシュからアイテムを取得
+//   2. 呼び出し側がレシピを使用して結果アイテム定義を解決
+//   3. 本サービスがSwiftDataレコードを更新し、stackKeyを返す
 //
 // 【補助型】
 //   - SynthesisPreview: 合成結果プレビュー（resultDefinition, cost）
 //
+// 【使用方法】
+//   - 呼び出し側はUserDataLoadServiceのキャッシュからアイテムを取得
+//   - レシピのフィルタリングは呼び出し側で実施
+//
 // ==============================================================================
 
 import Foundation
-import SwiftData
 
 actor ItemSynthesisProgressService {
     struct SynthesisPreview: Sendable {
@@ -34,116 +35,61 @@ actor ItemSynthesisProgressService {
 
     private let inventoryService: InventoryProgressService
     private let gameStateService: GameStateService
-    private let masterDataCache: MasterDataCache
 
     init(inventoryService: InventoryProgressService,
-         gameStateService: GameStateService,
-         masterDataCache: MasterDataCache) {
+         gameStateService: GameStateService) {
         self.inventoryService = inventoryService
         self.gameStateService = gameStateService
-        self.masterDataCache = masterDataCache
     }
 
-    func availableParentItems() async throws -> [CachedInventoryItem] {
-        let recipes = loadRecipes()
-        let parentIds = Set(recipes.map { $0.parentItemId })
-        guard !parentIds.isEmpty else { return [] }
-        let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        return equipments.filter { parentIds.contains($0.itemId) }
-    }
-
-    func availableChildItems(forParent parent: CachedInventoryItem) async throws -> [CachedInventoryItem] {
-        let recipes = loadRecipes()
-        let childIds = Set(recipes.filter { $0.parentItemId == parent.itemId }.map { $0.childItemId })
-        guard !childIds.isEmpty else { return [] }
-        let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        return equipments.filter { $0.stackKey != parent.stackKey && childIds.contains($0.itemId) }
-    }
-
-    func preview(parentStackKey: String, childStackKey: String) async throws -> SynthesisPreview {
-        let context = try await resolveContext(parentStackKey: parentStackKey, childStackKey: childStackKey)
+    /// 合成プレビューを生成
+    /// - Parameters:
+    ///   - parent: 親アイテム（UserDataLoadServiceのキャッシュから取得）
+    ///   - child: 子アイテム（UserDataLoadServiceのキャッシュから取得）
+    ///   - resultDefinition: 結果アイテム定義（呼び出し側でレシピから解決）
+    nonisolated func preview(parent: CachedInventoryItem, child: CachedInventoryItem, resultDefinition: ItemDefinition) throws -> SynthesisPreview {
+        guard parent.stackKey != child.stackKey else {
+            throw ProgressError.invalidInput(description: "同じアイテム同士は合成できません")
+        }
         let cost = calculateCost()
-        return SynthesisPreview(resultDefinition: context.resultDefinition, cost: cost)
+        return SynthesisPreview(resultDefinition: resultDefinition, cost: cost)
     }
 
-    func synthesize(parentStackKey: String, childStackKey: String) async throws -> CachedInventoryItem {
-        let synthesisContext = try await resolveContext(parentStackKey: parentStackKey, childStackKey: childStackKey)
-        let cost = calculateCost()
+    /// 合成を実行
+    /// - Parameters:
+    ///   - parent: 親アイテム（UserDataLoadServiceのキャッシュから取得）
+    ///   - child: 子アイテム（UserDataLoadServiceのキャッシュから取得）
+    ///   - resultItemId: 結果アイテムID（呼び出し側でレシピから解決）
+    /// - Returns: 合成後のアイテムのstackKey
+    @discardableResult
+    func synthesize(parent: CachedInventoryItem, child: CachedInventoryItem, resultItemId: UInt16) async throws -> String {
+        guard parent.stackKey != child.stackKey else {
+            throw ProgressError.invalidInput(description: "同じアイテム同士は合成できません")
+        }
 
+        let cost = calculateCost()
         if cost > 0 {
             _ = try await gameStateService.spendGold(UInt32(cost))
         }
 
-        try await inventoryService.decrementItem(stackKey: childStackKey, quantity: 1)
+        try await inventoryService.decrementItem(stackKey: child.stackKey, quantity: 1)
 
-        let updatedStackKey = try await inventoryService.updateItem(stackKey: parentStackKey) { record in
+        let updatedStackKey = try await inventoryService.updateItem(stackKey: parent.stackKey) { record in
             guard record.storage == .playerItem else {
                 throw ProgressError.invalidInput(description: "親アイテムは所持品から選択してください")
             }
             // アイテムIDを更新
-            record.itemId = synthesisContext.resultDefinition.id
+            record.itemId = resultItemId
             // 称号情報をリセット
             record.normalTitleId = 0
             record.superRareTitleId = 0
             // ソケット情報は維持
         }
 
-        // 更新後の状態: itemId変更、称号リセット、ソケットは親から維持
-        return CachedInventoryItem(
-            stackKey: updatedStackKey,
-            itemId: synthesisContext.resultDefinition.id,
-            quantity: 1,
-            normalTitleId: 0,  // リセット済み
-            superRareTitleId: 0,  // リセット済み
-            socketItemId: synthesisContext.parent.enhancement.socketItemId,
-            socketNormalTitleId: synthesisContext.parent.enhancement.socketNormalTitleId,
-            socketSuperRareTitleId: synthesisContext.parent.enhancement.socketSuperRareTitleId,
-            category: ItemSaleCategory(rawValue: synthesisContext.resultDefinition.category) ?? .other,
-            rarity: synthesisContext.resultDefinition.rarity,
-            displayName: synthesisContext.resultDefinition.name,
-            baseValue: synthesisContext.resultDefinition.basePrice,
-            sellValue: synthesisContext.resultDefinition.sellValue,
-            statBonuses: synthesisContext.resultDefinition.statBonuses,
-            combatBonuses: synthesisContext.resultDefinition.combatBonuses
-        )
+        return updatedStackKey
     }
 
-    private func loadRecipes() -> [SynthesisRecipeDefinition] {
-        masterDataCache.allSynthesisRecipes
-    }
-
-    private func resolveContext(
-        parentStackKey: String,
-        childStackKey: String
-    ) async throws -> (parent: CachedInventoryItem,
-                       child: CachedInventoryItem,
-                       recipe: SynthesisRecipeDefinition,
-                       resultDefinition: ItemDefinition) {
-        guard parentStackKey != childStackKey else {
-            throw ProgressError.invalidInput(description: "同じアイテム同士は合成できません")
-        }
-
-        let equipments = try await inventoryService.allEquipment(storage: .playerItem)
-        guard let parent = equipments.first(where: { $0.stackKey == parentStackKey }) else {
-            throw ProgressError.invalidInput(description: "親アイテムが見つかりません")
-        }
-        guard let child = equipments.first(where: { $0.stackKey == childStackKey }) else {
-            throw ProgressError.invalidInput(description: "子アイテムが見つかりません")
-        }
-
-        let recipes = loadRecipes()
-        guard let recipe = recipes.first(where: { $0.parentItemId == parent.itemId && $0.childItemId == child.itemId }) else {
-            throw ProgressError.invalidInput(description: "指定の組み合わせは合成レシピに存在しません")
-        }
-
-        guard let resultDefinition = masterDataCache.item(recipe.resultItemId) else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [String(recipe.resultItemId)])
-        }
-
-        return (parent, child, recipe, resultDefinition)
-    }
-
-    private func calculateCost() -> Int {
+    private nonisolated func calculateCost() -> Int {
         0
     }
 }
