@@ -185,9 +185,22 @@ actor CharacterProgressService {
     }
 
     /// インベントリ変更通知を送信（装備のつけ外し時に使用）
-    private func postInventoryChange(upserted: [String] = [], removed: [String] = []) {
+    private func postInventoryChange(upserted: [InventoryItemRecord] = [], removed: [String] = []) {
         guard !upserted.isEmpty || !removed.isEmpty else { return }
-        let change = UserDataLoadService.InventoryChange(upserted: upserted, removed: removed)
+        // レコードから詳細情報を抽出（actorの境界を超える前に）
+        let upsertedItems = upserted.map { record in
+            UserDataLoadService.InventoryChange.UpsertedItem(
+                stackKey: record.stackKey,
+                itemId: record.itemId,
+                quantity: record.quantity,
+                normalTitleId: record.normalTitleId,
+                superRareTitleId: record.superRareTitleId,
+                socketItemId: record.socketItemId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId
+            )
+        }
+        let change = UserDataLoadService.InventoryChange(upserted: upsertedItems, removed: removed)
         Task { @MainActor in
             NotificationCenter.default.post(
                 name: .inventoryDidChange,
@@ -844,7 +857,7 @@ actor CharacterProgressService {
             if wasDeleted {
                 postInventoryChange(removed: [stackKey])
             } else {
-                postInventoryChange(upserted: [inventoryRecord.stackKey])
+                postInventoryChange(upserted: [inventoryRecord])
             }
         }
 
@@ -960,7 +973,7 @@ actor CharacterProgressService {
         // キャッシュ更新のためインベントリ変更通知を送信（スキップオプションがない場合のみ）
         // （characterProgressDidChange通知は送らない。全キャラクター再構築でUIをブロックするため）
         if !skipNotification, let record = inventoryRecordForNotification {
-            postInventoryChange(upserted: [record.stackKey])
+            postInventoryChange(upserted: [record])
         }
 
         // 更新後の装備リストを返す（軽量版）

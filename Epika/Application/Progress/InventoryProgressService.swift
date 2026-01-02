@@ -166,7 +166,7 @@ actor InventoryProgressService {
         )
         _ = applyIncrement(to: record, amount: quantity)
         try context.save()
-        postInventoryChange(upserted: [record.stackKey])
+        postInventoryChange(upserted: [record])
         return record.stackKey
     }
 
@@ -176,7 +176,7 @@ actor InventoryProgressService {
 
         let context = contextProvider.makeContext()
         let aggregated = aggregate(seeds)
-        var stackKeys: [String] = []
+        var records: [InventoryItemRecord] = []
 
         for (storage, entries) in aggregated {
             for entry in entries {
@@ -191,13 +191,13 @@ actor InventoryProgressService {
                     context: context
                 )
                 _ = applyIncrement(to: record, amount: entry.totalQuantity)
-                stackKeys.append(record.stackKey)
+                records.append(record)
             }
         }
 
         try context.save()
-        postInventoryChange(upserted: stackKeys)
-        return stackKeys
+        postInventoryChange(upserted: records)
+        return records.map { $0.stackKey }
     }
 
     /// stackKey重複レコードを数量が多いものだけ残して除去
@@ -245,7 +245,7 @@ actor InventoryProgressService {
             let localIndex = chunkNumber
             let context = contextProvider.makeContext()
             let aggregated = aggregate(chunk)
-            var chunkStackKeys: [String] = []
+            var chunkRecords: [InventoryItemRecord] = []
 
             for (storage, entries) in aggregated {
                 try Task.checkCancellation()
@@ -261,14 +261,14 @@ actor InventoryProgressService {
                         context: context
                     )
                     _ = applyIncrement(to: record, amount: entry.totalQuantity)
-                    chunkStackKeys.append(record.stackKey)
+                    chunkRecords.append(record)
                 }
             }
 #if DEBUG
             print("[Inventory] inserted chunk #\(localIndex) size=\(chunk.count)")
 #endif
             try context.save()
-            postInventoryChange(upserted: chunkStackKeys)
+            postInventoryChange(upserted: chunkRecords)
             index = end
         }
     }
@@ -379,7 +379,7 @@ actor InventoryProgressService {
         }
         try mutate(record)
         try context.save()
-        postInventoryChange(upserted: [record.stackKey])
+        postInventoryChange(upserted: [record])
         return record.stackKey
     }
 
@@ -419,7 +419,7 @@ actor InventoryProgressService {
         if wasDeleted {
             postInventoryChange(removed: [stackKey])
         } else {
-            postInventoryChange(upserted: [record.stackKey])
+            postInventoryChange(upserted: [record])
         }
     }
 
@@ -496,15 +496,15 @@ actor InventoryProgressService {
         try context.save()
 
         // 通知: 対象は旧stackKeyが削除され、新stackKeyで追加
-        var upsertedStackKeys: [String] = [targetRecord.stackKey]
+        var upsertedRecords: [InventoryItemRecord] = [targetRecord]
         var removedKeys: [String] = [targetStackKey]
         // ソースは削除または更新
         if sourceWasDeleted {
             removedKeys.append(sourceStackKey)
         } else {
-            upsertedStackKeys.append(sourceRecord.stackKey)
+            upsertedRecords.append(sourceRecord)
         }
-        postInventoryChange(upserted: upsertedStackKeys, removed: removedKeys)
+        postInventoryChange(upserted: upsertedRecords, removed: removedKeys)
 
         guard let definition = masterDataCache.item(targetRecord.itemId) else {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(targetRecord.itemId)])
@@ -604,14 +604,14 @@ actor InventoryProgressService {
         let socketNormalId = gemRecord.normalTitleId
 
         // 通知用の追跡
-        var upsertedStackKeys: [String] = []
+        var upsertedRecords: [InventoryItemRecord] = []
         var removedKeys: [String] = []
 
         let socketedRecord: InventoryItemRecord
         if targetRecord.quantity > 1 {
             // 数量2以上：1個減らし、新しいソケット付きレコードを作成/追加
             targetRecord.quantity -= 1
-            upsertedStackKeys.append(targetRecord.stackKey)
+            upsertedRecords.append(targetRecord)
 
             // 既存のソケット付きレコードを検索
             var socketedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
@@ -656,13 +656,13 @@ actor InventoryProgressService {
             removedKeys.append(gemStackKey)
         } else {
             gemRecord.quantity -= 1
-            upsertedStackKeys.append(gemRecord.stackKey)
+            upsertedRecords.append(gemRecord)
         }
 
-        upsertedStackKeys.append(socketedRecord.stackKey)
+        upsertedRecords.append(socketedRecord)
 
         try context.save()
-        postInventoryChange(upserted: upsertedStackKeys, removed: removedKeys)
+        postInventoryChange(upserted: upsertedRecords, removed: removedKeys)
 
         return socketedRecord.stackKey
     }
@@ -812,9 +812,22 @@ actor InventoryProgressService {
     // MARK: - Inventory Change Notification
 
     /// インベントリ変更通知を送信
-    private func postInventoryChange(upserted: [String] = [], removed: [String] = []) {
+    private func postInventoryChange(upserted: [InventoryItemRecord] = [], removed: [String] = []) {
         guard !upserted.isEmpty || !removed.isEmpty else { return }
-        let change = UserDataLoadService.InventoryChange(upserted: upserted, removed: removed)
+        // レコードから詳細情報を抽出（actorの境界を超える前に）
+        let upsertedItems = upserted.map { record in
+            UserDataLoadService.InventoryChange.UpsertedItem(
+                stackKey: record.stackKey,
+                itemId: record.itemId,
+                quantity: record.quantity,
+                normalTitleId: record.normalTitleId,
+                superRareTitleId: record.superRareTitleId,
+                socketItemId: record.socketItemId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId
+            )
+        }
+        let change = UserDataLoadService.InventoryChange(upserted: upsertedItems, removed: removed)
         Task { @MainActor in
             NotificationCenter.default.post(
                 name: .inventoryDidChange,
