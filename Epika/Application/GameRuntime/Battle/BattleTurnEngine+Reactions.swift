@@ -279,8 +279,8 @@ extension BattleTurnEngine {
         guard let attacker = context.actor(for: side, index: actorIndex), attacker.isAlive else { return }
         guard let initialTarget = context.actor(for: target.0, index: target.1) else { return }
 
-        let baseHits = max(1, attacker.snapshot.attackCount)
-        let scaledHits = max(1, Int(round(Double(baseHits) * reaction.attackCountMultiplier)))
+        let baseHits = max(1.0, attacker.snapshot.attackCount)
+        let scaledHits = max(1, Int(baseHits * reaction.attackCountMultiplier))
         var modifiedAttacker = attacker
         let scaledCritical = Int((Double(modifiedAttacker.snapshot.criticalRate) * reaction.criticalRateMultiplier).rounded(.down))
         modifiedAttacker.snapshot.criticalRate = max(0, min(100, scaledCritical))

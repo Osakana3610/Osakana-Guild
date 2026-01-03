@@ -74,7 +74,7 @@ struct CombatStatRowDouble: View {
             Text(label)
                 .font(.subheadline)
             Spacer()
-            Text(String(format: "%.1f", value))
+            Text(String(format: "%.1f", floor(value * 10) / 10))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }

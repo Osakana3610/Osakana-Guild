@@ -581,8 +581,8 @@ extension BattleTurnEngine {
     }
 
     static func martialFollowUpHitCount(for attacker: BattleActor) -> Int {
-        let baseHits = max(1, attacker.snapshot.attackCount)
-        let scaled = Int(round(Double(baseHits) * 0.3))
+        let baseHits = max(1.0, attacker.snapshot.attackCount)
+        let scaled = Int(baseHits * 0.3)
         return max(1, scaled)
     }
 
