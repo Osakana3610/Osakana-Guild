@@ -15,7 +15,7 @@
 //   - EnemySkillDefinition: 敵の特殊技
 //     - SkillType: 物理/魔法/ブレス/回復/バフ/状態異常
 //     - Targeting: 単体/全体/ランダム/自分/味方全体
-//     - ダメージ系: multiplier, hitCount, ignoreDefense, element
+//     - ダメージ系: damageDealtMultiplier, hitCount, element
 //     - 状態異常系: statusId, statusChance
 //     - 回復系: healPercent
 //     - バフ系: buffType, buffMultiplier
@@ -226,9 +226,8 @@ struct EnemySkillDefinition: Identifiable, Sendable, Hashable {
     let usesPerBattle: Int
 
     // Damage skills
-    let multiplier: Double?
+    let damageDealtMultiplier: Double?
     let hitCount: Int?
-    let ignoreDefense: Bool
     let element: UInt8?
 
     // Status skills

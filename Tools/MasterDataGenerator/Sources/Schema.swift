@@ -409,6 +409,15 @@ extension Generator {
             );
             """,
             """
+            CREATE TABLE IF NOT EXISTS enemy_passive_skills (
+                enemy_id INTEGER NOT NULL,
+                order_index INTEGER NOT NULL,
+                skill_id INTEGER NOT NULL,
+                PRIMARY KEY (enemy_id, order_index),
+                FOREIGN KEY (enemy_id) REFERENCES enemies(id) ON DELETE CASCADE
+            );
+            """,
+            """
             CREATE TABLE IF NOT EXISTS enemy_drops (
                 enemy_id INTEGER NOT NULL,
                 order_index INTEGER NOT NULL,
@@ -440,9 +449,8 @@ extension Generator {
                 targeting INTEGER NOT NULL,
                 chance_percent INTEGER NOT NULL,
                 uses_per_battle INTEGER NOT NULL,
-                multiplier REAL,
+                damage_dealt_multiplier REAL,
                 hit_count INTEGER,
-                ignore_defense INTEGER NOT NULL DEFAULT 0,
                 element INTEGER,
                 status_id INTEGER,
                 status_chance INTEGER,

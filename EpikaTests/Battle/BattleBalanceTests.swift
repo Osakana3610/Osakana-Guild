@@ -257,7 +257,8 @@ final class BattleBalanceTests: XCTestCase {
             let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(
                 from: definition,
                 levelOverride: level,
-                jobDefinitions: jobs
+                jobDefinitions: jobs,
+                skillDefinitions: skills
             )
 
             let skillDefs = definition.specialSkillIds.compactMap { skills[$0] }

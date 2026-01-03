@@ -14,6 +14,7 @@
 //     - 行動設定: actionRates（攻撃/僧侶魔法/魔法使い魔法/ブレス）
 //     - ドロップ: drops（アイテムID配列）
 //     - 特殊技: specialSkillIds
+//     - パッシブスキル: skillIds（SkillMaster.jsonのスキルID）
 //     - 報酬: baseExperience
 //   - EnemyDefinition.ActionRates: 行動選択確率
 //   - EnemyDefinition.Resistances: ダメージ倍率（1.0=通常, 0.5=半減, 2.0=弱点）
@@ -65,6 +66,7 @@ struct EnemyDefinition: Identifiable, Sendable {
     let resistances: Resistances
     let resistanceOverrides: Resistances?
     let specialSkillIds: [UInt16]
+    let skillIds: [UInt16]
     let drops: [UInt16]
     let actionRates: ActionRates
 }

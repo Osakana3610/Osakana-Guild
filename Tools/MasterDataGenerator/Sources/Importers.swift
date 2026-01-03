@@ -1322,6 +1322,7 @@ private struct EnemyMasterFile: Decodable {
         let race: Int
         let baseExperience: Int
         let specialSkillIds: [Int]
+        let skillIds: [Int]?
         let resistances: [String: Double]
         let drops: [Int]
         let baseStats: [String: Int]
@@ -1358,18 +1359,21 @@ extension Generator {
             """
             let insertResistanceSQL = "INSERT INTO enemy_resistances (enemy_id, element, value) VALUES (?, ?, ?);"
             let insertSkillSQL = "INSERT INTO enemy_skills (enemy_id, order_index, skill_id) VALUES (?, ?, ?);"
+            let insertPassiveSkillSQL = "INSERT INTO enemy_passive_skills (enemy_id, order_index, skill_id) VALUES (?, ?, ?);"
             let insertDropSQL = "INSERT INTO enemy_drops (enemy_id, order_index, item_id) VALUES (?, ?, ?);"
 
             let enemyStatement = try prepare(insertEnemySQL)
             let statsStatement = try prepare(insertStatsSQL)
             let resistanceStatement = try prepare(insertResistanceSQL)
             let skillStatement = try prepare(insertSkillSQL)
+            let passiveSkillStatement = try prepare(insertPassiveSkillSQL)
             let dropStatement = try prepare(insertDropSQL)
             defer {
                 sqlite3_finalize(enemyStatement)
                 sqlite3_finalize(statsStatement)
                 sqlite3_finalize(resistanceStatement)
                 sqlite3_finalize(skillStatement)
+                sqlite3_finalize(passiveSkillStatement)
                 sqlite3_finalize(dropStatement)
             }
 
@@ -1422,6 +1426,14 @@ extension Generator {
                     bindInt(skillStatement, index: 3, value: skillId)
                     try step(skillStatement)
                     reset(skillStatement)
+                }
+
+                for (index, skillId) in (enemy.skillIds ?? []).enumerated() {
+                    bindInt(passiveSkillStatement, index: 1, value: enemy.id)
+                    bindInt(passiveSkillStatement, index: 2, value: index)
+                    bindInt(passiveSkillStatement, index: 3, value: skillId)
+                    try step(passiveSkillStatement)
+                    reset(passiveSkillStatement)
                 }
 
                 for (index, itemId) in enemy.drops.enumerated() {
@@ -2368,9 +2380,8 @@ private struct EnemySkillMasterFile: Decodable {
         let targeting: String
         let chancePercent: Int
         let usesPerBattle: Int
-        let multiplier: Double?
+        let damageDealtMultiplier: Double?
         let hitCount: Int?
-        let ignoreDefense: Bool?
         let element: String?
         let statusId: Int?
         let statusChance: Int?
@@ -2393,9 +2404,9 @@ extension Generator {
             let sql = """
                 INSERT INTO enemy_special_skills (
                     id, name, type, targeting, chance_percent, uses_per_battle,
-                    multiplier, hit_count, ignore_defense, element,
+                    damage_dealt_multiplier, hit_count, element,
                     status_id, status_chance, heal_percent, buff_type, buff_multiplier
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
             let statement = try prepare(sql)
             defer { sqlite3_finalize(statement) }
@@ -2434,15 +2445,14 @@ extension Generator {
                 bindInt(statement, index: 4, value: targetingInt)
                 bindInt(statement, index: 5, value: skill.chancePercent)
                 bindInt(statement, index: 6, value: skill.usesPerBattle)
-                bindDouble(statement, index: 7, value: skill.multiplier)
+                bindDouble(statement, index: 7, value: skill.damageDealtMultiplier)
                 bindInt(statement, index: 8, value: skill.hitCount)
-                bindBool(statement, index: 9, value: skill.ignoreDefense ?? false)
-                bindInt(statement, index: 10, value: elementInt)
-                bindInt(statement, index: 11, value: skill.statusId)
-                bindInt(statement, index: 12, value: skill.statusChance)
-                bindInt(statement, index: 13, value: skill.healPercent)
-                bindInt(statement, index: 14, value: buffTypeInt)
-                bindDouble(statement, index: 15, value: skill.buffMultiplier)
+                bindInt(statement, index: 9, value: elementInt)
+                bindInt(statement, index: 10, value: skill.statusId)
+                bindInt(statement, index: 11, value: skill.statusChance)
+                bindInt(statement, index: 12, value: skill.healPercent)
+                bindInt(statement, index: 13, value: buffTypeInt)
+                bindDouble(statement, index: 14, value: skill.buffMultiplier)
                 try step(statement)
                 reset(statement)
             }

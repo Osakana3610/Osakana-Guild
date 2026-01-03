@@ -36,6 +36,7 @@ extension SQLiteMasterDataManager {
             var luck: Int
             var resistances: [UInt8: Double] = [:]
             var specialSkillIds: [UInt16] = []
+            var skillIds: [UInt16] = []
             var drops: [UInt16] = []
             var actionRates: EnemyDefinition.ActionRates = .init(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0)
         }
@@ -87,6 +88,17 @@ extension SQLiteMasterDataManager {
             builders[builder.id] = builder
         }
 
+        let passiveSkillSQL = "SELECT enemy_id, skill_id FROM enemy_passive_skills ORDER BY enemy_id, order_index;"
+        let passiveSkillStatement = try prepare(passiveSkillSQL)
+        defer { sqlite3_finalize(passiveSkillStatement) }
+        while sqlite3_step(passiveSkillStatement) == SQLITE_ROW {
+            let id = UInt16(sqlite3_column_int(passiveSkillStatement, 0))
+            guard var builder = builders[id] else { continue }
+            let skillId = UInt16(sqlite3_column_int(passiveSkillStatement, 1))
+            builder.skillIds.append(skillId)
+            builders[builder.id] = builder
+        }
+
         let dropSQL = "SELECT enemy_id, item_id FROM enemy_drops ORDER BY enemy_id, order_index;"
         let dropStatement = try prepare(dropSQL)
         defer { sqlite3_finalize(dropStatement) }
@@ -131,6 +143,7 @@ extension SQLiteMasterDataManager {
                 resistances: resistances,
                 resistanceOverrides: nil,
                 specialSkillIds: builder.specialSkillIds,
+                skillIds: builder.skillIds,
                 drops: builder.drops,
                 actionRates: builder.actionRates
             )
@@ -140,7 +153,7 @@ extension SQLiteMasterDataManager {
     func fetchAllEnemySkills() throws -> [EnemySkillDefinition] {
         let sql = """
             SELECT id, name, type, targeting, chance_percent, uses_per_battle,
-                   multiplier, hit_count, ignore_defense, element,
+                   damage_dealt_multiplier, hit_count, element,
                    status_id, status_chance, heal_percent, buff_type, buff_multiplier
             FROM enemy_special_skills;
         """
@@ -169,15 +182,14 @@ extension SQLiteMasterDataManager {
                 targeting: targeting,
                 chancePercent: Int(sqlite3_column_int(statement, 4)),
                 usesPerBattle: Int(sqlite3_column_int(statement, 5)),
-                multiplier: sqlite3_column_type(statement, 6) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 6),
+                damageDealtMultiplier: sqlite3_column_type(statement, 6) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 6),
                 hitCount: sqlite3_column_type(statement, 7) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 7)),
-                ignoreDefense: sqlite3_column_int(statement, 8) == 1,
-                element: sqlite3_column_type(statement, 9) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 9)),
-                statusId: sqlite3_column_type(statement, 10) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 10)),
-                statusChance: sqlite3_column_type(statement, 11) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 11)),
-                healPercent: sqlite3_column_type(statement, 12) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 12)),
-                buffType: sqlite3_column_type(statement, 13) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 13)),
-                buffMultiplier: sqlite3_column_type(statement, 14) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 14)
+                element: sqlite3_column_type(statement, 8) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 8)),
+                statusId: sqlite3_column_type(statement, 9) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 9)),
+                statusChance: sqlite3_column_type(statement, 10) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 10)),
+                healPercent: sqlite3_column_type(statement, 11) == SQLITE_NULL ? nil : Int(sqlite3_column_int(statement, 11)),
+                buffType: sqlite3_column_type(statement, 12) == SQLITE_NULL ? nil : UInt8(sqlite3_column_int(statement, 12)),
+                buffMultiplier: sqlite3_column_type(statement, 13) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 13)
             )
             skills.append(skill)
         }

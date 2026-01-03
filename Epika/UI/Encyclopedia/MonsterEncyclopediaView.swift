@@ -403,14 +403,11 @@ private struct EnemySkillRow: View {
     private var detailText: String {
         var parts: [String] = []
 
-        if let multiplier = skill.multiplier, multiplier != 1.0 {
+        if let multiplier = skill.damageDealtMultiplier, multiplier != 1.0 {
             parts.append("威力\(Int(multiplier * 100))%")
         }
         if let hitCount = skill.hitCount, hitCount > 1 {
             parts.append("\(hitCount)回攻撃")
-        }
-        if skill.ignoreDefense {
-            parts.append("防御無視")
         }
         if let elementRaw = skill.element,
            let element = Element(rawValue: elementRaw) {

@@ -56,7 +56,8 @@ struct BattleEnemyGroupBuilder {
 
                 let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: definition,
                                                                            levelOverride: spec.level,
-                                                                           jobDefinitions: jobDefinitions)
+                                                                           jobDefinitions: jobDefinitions,
+                                                                           skillDefinitions: skillDefinitions)
                 var resources = BattleActionResource.makeDefault(for: snapshot,
                                                                 spellLoadout: .empty)
                 let skillEffects = try cachedSkillEffects(for: definition,
@@ -119,7 +120,8 @@ struct BattleEnemyGroupBuilder {
             let level = levelOverride ?? 1
             let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: definition,
                                                                        levelOverride: level,
-                                                                       jobDefinitions: jobDefinitions)
+                                                                       jobDefinitions: jobDefinitions,
+                                                                       skillDefinitions: skillDefinitions)
             var resources = BattleActionResource.makeDefault(for: snapshot,
                                                             spellLoadout: .empty)
             let skillEffects = try cachedSkillEffects(for: definition,

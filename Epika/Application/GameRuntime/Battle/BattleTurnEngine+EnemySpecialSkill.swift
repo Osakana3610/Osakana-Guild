@@ -107,7 +107,7 @@ extension BattleTurnEngine {
                                                   attackerIndex: Int,
                                                   context: inout BattleContext,
                                                   entryBuilder: BattleActionEntry.Builder) {
-        guard let attacker = context.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
+        guard var attacker = context.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
 
         let targets = selectEnemySkillTargets(skill: skill,
                                               attackerSide: attackerSide,
@@ -115,24 +115,40 @@ extension BattleTurnEngine {
                                               context: &context)
 
         let hitCount = skill.hitCount ?? 1
-        let multiplier = skill.multiplier ?? 1.0
+        let damageMultiplier = skill.damageDealtMultiplier ?? 1.0
+
+        // damageDealtMultiplierを攻撃者のskillEffects.damage.dealtに適用
+        attacker.skillEffects.damage.dealt.physical *= damageMultiplier
 
         for (targetSide, targetIndex) in targets {
-            guard let refreshedAttacker = context.actor(for: attackerSide, index: attackerIndex),
-                  refreshedAttacker.isAlive else { break }
+            guard attacker.isAlive else { break }
             guard var target = context.actor(for: targetSide, index: targetIndex),
                   target.isAlive else { continue }
 
             var totalDamage = 0
-            for _ in 0..<hitCount {
+
+            for hitIndex in 1...hitCount {
                 guard target.isAlive else { break }
 
-                let baseDamage = computeEnemySkillPhysicalDamage(attacker: refreshedAttacker,
-                                                                 defender: target,
-                                                                 multiplier: multiplier,
-                                                                 ignoreDefense: skill.ignoreDefense,
-                                                                 context: &context)
-                let applied = applyDamage(amount: baseDamage, to: &target)
+                // 命中判定（通常物理攻撃と同じパイプライン）
+                let hitChance = computeHitChance(attacker: attacker,
+                                                 defender: target,
+                                                 hitIndex: hitIndex,
+                                                 accuracyMultiplier: 1.0,
+                                                 context: &context)
+                let roll = context.random.nextDouble()
+                guard roll <= hitChance else {
+                    let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
+                    entryBuilder.addEffect(kind: .physicalEvade, target: targetIdx)
+                    continue
+                }
+
+                // ダメージ計算（通常物理攻撃と同じパイプライン）
+                let (damage, _) = computePhysicalDamage(attacker: attacker,
+                                                       defender: &target,
+                                                       hitIndex: hitIndex,
+                                                       context: &context)
+                let applied = applyDamage(amount: damage, to: &target)
                 totalDamage += applied
                 context.updateActor(target, side: targetSide, index: targetIndex)
 
@@ -142,8 +158,10 @@ extension BattleTurnEngine {
                 }
             }
 
-            let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
-            entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(totalDamage))
+            if totalDamage > 0 {
+                let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
+                entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(totalDamage))
+            }
 
             handleEnemySkillDefeat(targetSide: targetSide,
                                    targetIndex: targetIndex,
@@ -171,7 +189,7 @@ extension BattleTurnEngine {
                                                  attackerIndex: Int,
                                                  context: inout BattleContext,
                                                  entryBuilder: BattleActionEntry.Builder) {
-        guard let attacker = context.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
+        guard var attacker = context.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
 
         let targets = selectEnemySkillTargets(skill: skill,
                                               attackerSide: attackerSide,
@@ -179,11 +197,13 @@ extension BattleTurnEngine {
                                               context: &context)
 
         let hitCount = skill.hitCount ?? 1
-        let multiplier = skill.multiplier ?? 1.0
+        let damageMultiplier = skill.damageDealtMultiplier ?? 1.0
+
+        // damageDealtMultiplierを攻撃者のskillEffects.damage.dealtに適用
+        attacker.skillEffects.damage.dealt.magical *= damageMultiplier
 
         for (targetSide, targetIndex) in targets {
-            guard let refreshedAttacker = context.actor(for: attackerSide, index: attackerIndex),
-                  refreshedAttacker.isAlive else { break }
+            guard attacker.isAlive else { break }
             guard var target = context.actor(for: targetSide, index: targetIndex),
                   target.isAlive else { continue }
 
@@ -191,12 +211,12 @@ extension BattleTurnEngine {
             for _ in 0..<hitCount {
                 guard target.isAlive else { break }
 
-                let baseDamage = computeEnemySkillMagicalDamage(attacker: refreshedAttacker,
-                                                                defender: target,
-                                                                multiplier: multiplier,
-                                                                element: skill.element,
-                                                                context: &context)
-                let applied = applyDamage(amount: baseDamage, to: &target)
+                // ダメージ計算（通常魔法攻撃と同じパイプライン）
+                let damage = computeMagicalDamage(attacker: attacker,
+                                                  defender: &target,
+                                                  spellId: nil,
+                                                  context: &context)
+                let applied = applyDamage(amount: damage, to: &target)
                 totalDamage += applied
                 context.updateActor(target, side: targetSide, index: targetIndex)
 
@@ -205,8 +225,10 @@ extension BattleTurnEngine {
                 }
             }
 
-            let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
-            entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(totalDamage))
+            if totalDamage > 0 {
+                let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
+                entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(totalDamage))
+            }
 
             handleEnemySkillDefeat(targetSide: targetSide,
                                    targetIndex: targetIndex,
@@ -224,27 +246,28 @@ extension BattleTurnEngine {
                                                 attackerIndex: Int,
                                                 context: inout BattleContext,
                                                 entryBuilder: BattleActionEntry.Builder) {
-        guard let attacker = context.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
+        guard var attacker = context.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
 
         let targets = selectEnemySkillTargets(skill: skill,
                                               attackerSide: attackerSide,
                                               attackerIndex: attackerIndex,
                                               context: &context)
 
-        let multiplier = skill.multiplier ?? 1.0
+        let damageMultiplier = skill.damageDealtMultiplier ?? 1.0
+
+        // damageDealtMultiplierを攻撃者のskillEffects.damage.dealtに適用
+        attacker.skillEffects.damage.dealt.breath *= damageMultiplier
 
         for (targetSide, targetIndex) in targets {
-            guard let refreshedAttacker = context.actor(for: attackerSide, index: attackerIndex),
-                  refreshedAttacker.isAlive else { break }
+            guard attacker.isAlive else { break }
             guard var target = context.actor(for: targetSide, index: targetIndex),
                   target.isAlive else { continue }
 
-            let baseDamage = computeEnemySkillBreathDamage(attacker: refreshedAttacker,
-                                                           defender: target,
-                                                           multiplier: multiplier,
-                                                           element: skill.element,
-                                                           context: &context)
-            let applied = applyDamage(amount: baseDamage, to: &target)
+            // ダメージ計算（通常ブレス攻撃と同じパイプライン）
+            let damage = computeBreathDamage(attacker: attacker,
+                                             defender: &target,
+                                             context: &context)
+            let applied = applyDamage(amount: damage, to: &target)
             context.updateActor(target, side: targetSide, index: targetIndex)
 
             let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
@@ -406,44 +429,6 @@ extension BattleTurnEngine {
                 .filter { $0.element.isAlive }
                 .map { (attackerSide, $0.offset) }
         }
-    }
-
-    private static func computeEnemySkillPhysicalDamage(attacker: BattleActor,
-                                                        defender: BattleActor,
-                                                        multiplier: Double,
-                                                        ignoreDefense: Bool,
-                                                        context: inout BattleContext) -> Int {
-        let baseAttack = Double(attacker.snapshot.physicalAttack)
-        let baseDefense = ignoreDefense ? 0.0 : Double(defender.snapshot.physicalDefense)
-        let rawDamage = max(1.0, baseAttack * multiplier - baseDefense * 0.5)
-
-        let variance = context.random.nextDouble(in: 0.9...1.1)
-        return max(1, Int(rawDamage * variance))
-    }
-
-    private static func computeEnemySkillMagicalDamage(attacker: BattleActor,
-                                                       defender: BattleActor,
-                                                       multiplier: Double,
-                                                       element: UInt8?,
-                                                       context: inout BattleContext) -> Int {
-        let baseAttack = Double(attacker.snapshot.magicalAttack)
-        let baseDefense = Double(defender.snapshot.magicalDefense)
-        let rawDamage = max(1.0, baseAttack * multiplier - baseDefense * 0.3)
-
-        let variance = context.random.nextDouble(in: 0.9...1.1)
-        return max(1, Int(rawDamage * variance))
-    }
-
-    private static func computeEnemySkillBreathDamage(attacker: BattleActor,
-                                                      defender: BattleActor,
-                                                      multiplier: Double,
-                                                      element: UInt8?,
-                                                      context: inout BattleContext) -> Int {
-        let baseBreath = Double(attacker.snapshot.breathDamage)
-        let rawDamage = max(1.0, baseBreath * multiplier)
-
-        let variance = context.random.nextDouble(in: 0.9...1.1)
-        return max(1, Int(rawDamage * variance))
     }
 
     private static func handleEnemySkillDefeat(targetSide: ActorSide,

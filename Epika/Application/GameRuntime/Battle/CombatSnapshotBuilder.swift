@@ -23,12 +23,16 @@ struct CombatSnapshotBuilder {
     /// 味方と同じ `CombatStatCalculator` を使用して計算する。
     static func makeEnemySnapshot(from definition: EnemyDefinition,
                                   levelOverride: Int?,
-                                  jobDefinitions: [UInt8: JobDefinition]) throws -> CharacterValues.Combat {
+                                  jobDefinitions: [UInt8: JobDefinition],
+                                  skillDefinitions: [UInt16: SkillDefinition]) throws -> CharacterValues.Combat {
         let level = max(1, levelOverride ?? 1)
 
         // 敵独自のbaseStatsからRaceDefinitionを作成
         let raceDefinition = makeRaceDefinition(for: definition)
         let jobDefinition = definition.jobId.flatMap { jobDefinitions[$0] } ?? makeJobDefinition(for: definition)
+
+        // 敵のパッシブスキルを取得
+        let learnedSkills = definition.skillIds.compactMap { skillDefinitions[$0] }
 
         let context = CombatStatCalculator.Context(
             raceId: definition.raceId,
@@ -40,7 +44,7 @@ struct CombatSnapshotBuilder {
             race: raceDefinition,
             job: jobDefinition,
             personalitySecondary: nil,
-            learnedSkills: [],
+            learnedSkills: learnedSkills,
             loadout: CachedCharacter.Loadout(items: [], titles: [], superRareTitles: [])
         )
 
