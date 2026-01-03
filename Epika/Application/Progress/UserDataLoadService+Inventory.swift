@@ -272,11 +272,16 @@ extension UserDataLoadService {
         }
     }
 
-    /// キャッシュ内のアイテム数量を増やす（スタック追加時）
-    /// - Note: 実際のquantity更新は通知経由で反映される
+    /// キャッシュ内のアイテム数量を増やす（装備解除時など）
     @MainActor
     func incrementQuantity(stackKey: String, by amount: Int) {
-        // キャッシュバージョンを更新して変更を通知
+        guard let subcategory = stackKeyIndex[stackKey],
+              let index = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == stackKey }) else {
+            return
+        }
+        let currentQuantity = Int(subcategorizedItems[subcategory]![index].quantity)
+        let newQuantity = UInt16(min(currentQuantity + amount, 99))
+        subcategorizedItems[subcategory]![index].quantity = newQuantity
         itemCacheVersion &+= 1
     }
 
