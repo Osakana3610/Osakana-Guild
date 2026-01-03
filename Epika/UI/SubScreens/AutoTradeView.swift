@@ -131,7 +131,7 @@ struct AutoTradeView: View {
         // Collect all item IDs and title IDs
         let itemIds = Set(rules.map { $0.itemId })
         let superRareTitleIds = Set(rules.map { $0.superRareTitleId }).filter { $0 > 0 }
-        let normalTitleIds = Set(rules.map { $0.normalTitleId }).filter { $0 > 0 }
+        let normalTitleIds = Set(rules.map { $0.normalTitleId })
 
         // Load item definitions
         var itemNames: [UInt16: String] = [:]
