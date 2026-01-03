@@ -96,7 +96,9 @@ struct InventoryCleanupView: View {
                 Text(item.definition.name)
                     .font(.body)
                 if let quantity = item.stockQuantity {
-                    Text("在庫: \(quantity)個")
+                    let displayLimit = ShopProgressService.stockDisplayLimit
+                    let displayText = quantity >= displayLimit ? "\(displayLimit)+個" : "\(quantity)個"
+                    Text("在庫: \(displayText)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

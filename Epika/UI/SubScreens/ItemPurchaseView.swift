@@ -137,7 +137,8 @@ struct ItemPurchaseView: View {
             HStack {
                 Text("\(item.price)GP")
                 if let quantity = item.stockQuantity {
-                    Text("x\(quantity)")
+                    let displayLimit = ShopProgressService.stockDisplayLimit
+                    Text(quantity >= displayLimit ? "x\(displayLimit)+" : "x\(quantity)")
                 }
                 Text(item.definition.name)
                 Spacer()
