@@ -166,8 +166,7 @@ enum CachedCharacterFactory {
                 items: loadout.items,
                 titles: loadout.titles,
                 superRareTitles: loadout.superRareTitles
-            ),
-            pandoraBoxItems: pandoraBoxItems
+            )
         )
 
         let calcResult = try CombatStatCalculator.calculate(for: calcContext)
@@ -198,7 +197,7 @@ enum CachedCharacterFactory {
             level: input.level,
             experience: input.experience,
             currentHP: resolvedCurrentHP,
-            equippedItems: makeCachedEquippedItems(from: input.equippedItems, masterData: masterData),
+            equippedItems: makeCachedEquippedItems(from: input.equippedItems, masterData: masterData, pandoraBoxItems: pandoraBoxItems),
             primaryPersonalityId: input.primaryPersonalityId,
             secondaryPersonalityId: input.secondaryPersonalityId,
             actionRateAttack: input.actionRateAttack,
@@ -231,7 +230,8 @@ enum CachedCharacterFactory {
     static func withEquipmentChange(
         current: CachedCharacter,
         newEquippedItems: [CharacterInput.EquippedItem],
-        masterData: MasterDataCache
+        masterData: MasterDataCache,
+        pandoraBoxItems: Set<UInt64>
     ) throws -> CachedCharacter {
         // 既存のマスターデータを再利用（必須データが欠落している場合はエラー）
         guard let race = current.race else {
@@ -337,8 +337,7 @@ enum CachedCharacterFactory {
                 items: loadout.items,
                 titles: loadout.titles,
                 superRareTitles: loadout.superRareTitles
-            ),
-            pandoraBoxItems: []  // 装備変更時はパンドラボックス効果は変わらない
+            )
         )
 
         let calcResult = try CombatStatCalculator.calculate(for: calcContext)
@@ -364,7 +363,7 @@ enum CachedCharacterFactory {
             level: current.level,
             experience: current.experience,
             currentHP: resolvedCurrentHP,
-            equippedItems: makeCachedEquippedItems(from: newEquippedItems, masterData: masterData),
+            equippedItems: makeCachedEquippedItems(from: newEquippedItems, masterData: masterData, pandoraBoxItems: pandoraBoxItems),
             primaryPersonalityId: current.primaryPersonalityId,
             secondaryPersonalityId: current.secondaryPersonalityId,
             actionRateAttack: current.actionRateAttack,
@@ -394,7 +393,8 @@ enum CachedCharacterFactory {
     /// 装備アイテムからCachedInventoryItemのリストを構築
     private static func makeCachedEquippedItems(
         from items: [CharacterInput.EquippedItem],
-        masterData: MasterDataCache
+        masterData: MasterDataCache,
+        pandoraBoxItems: Set<UInt64>
     ) -> [CachedInventoryItem] {
         let allTitles = masterData.allTitles
         let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
@@ -447,6 +447,11 @@ enum CachedCharacterFactory {
                 grantedSkillIds.append(contentsOf: superRareSkillIds)
             }
 
+            // パンドラボックス効果: combatBonuses を1.5倍
+            let combatBonuses = pandoraBoxItems.contains(item.packedStackKey)
+                ? definition.combatBonuses.scaled(by: 1.5)
+                : definition.combatBonuses
+
             return CachedInventoryItem(
                 stackKey: item.stackKey,
                 itemId: item.itemId,
@@ -462,7 +467,7 @@ enum CachedCharacterFactory {
                 baseValue: definition.basePrice,
                 sellValue: sellValue,
                 statBonuses: definition.statBonuses,
-                combatBonuses: definition.combatBonuses,
+                combatBonuses: combatBonuses,
                 grantedSkillIds: grantedSkillIds
             )
         }

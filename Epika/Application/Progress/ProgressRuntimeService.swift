@@ -51,8 +51,10 @@ actor ProgressRuntimeService {
                               dungeonId: UInt16,
                               targetFloorNumber: Int) async throws -> ExplorationRuntimeSession {
         let characterInputs = characters.map { CharacterInput(from: $0) }
+        let pandoraBoxItems = try await gameStateService.pandoraBoxItems()
         let partyState = try await runtimeService.runtimePartyState(party: party,
-                                                                    characters: characterInputs)
+                                                                    characters: characterInputs,
+                                                                    pandoraBoxItems: Set(pandoraBoxItems))
         let runtimeCharacters = partyState.members.map { $0.character }
         let superRareState = try await gameStateService.loadSuperRareDailyState()
         let session = try await runtimeService.startExplorationRun(dungeonId: dungeonId,

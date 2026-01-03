@@ -82,8 +82,10 @@ extension AppServices {
 
         // 7. RNG状態を復元してセッション開始
         let characterInputs = characters.map { CharacterInput(from: $0) }
+        let pandoraBoxItems = try await gameState.pandoraBoxItems()
         let partyState = try await runtime.runtimeService.runtimePartyState(party: partySnapshot,
-                                                                             characters: characterInputs)
+                                                                             characters: characterInputs,
+                                                                             pandoraBoxItems: Set(pandoraBoxItems))
 
         // HPを適用
         var adjustedPartyState = partyState

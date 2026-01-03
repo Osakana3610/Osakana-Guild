@@ -46,6 +46,23 @@ extension UserDataLoadService {
         self.isItemsLoaded = true
     }
 
+    /// パンドラボックス用のパック済みスタックキーを計算
+    func packedStackKey(
+        superRareTitleId: UInt8,
+        normalTitleId: UInt8,
+        itemId: UInt16,
+        socketSuperRareTitleId: UInt8,
+        socketNormalTitleId: UInt8,
+        socketItemId: UInt16
+    ) -> UInt64 {
+        UInt64(superRareTitleId) << 56 |
+        UInt64(normalTitleId) << 48 |
+        UInt64(itemId) << 32 |
+        UInt64(socketSuperRareTitleId) << 24 |
+        UInt64(socketNormalTitleId) << 16 |
+        UInt64(socketItemId)
+    }
+
     /// SwiftDataから直接フェッチしてキャッシュを構築
     @MainActor
     private func buildItemCacheFromSwiftData(storage: ItemStorage) throws {
@@ -113,6 +130,19 @@ extension UserDataLoadService {
                 grantedSkillIds.append(contentsOf: superRareSkillIds)
             }
 
+            // パンドラボックス効果: combatBonuses を1.5倍
+            let packed = packedStackKey(
+                superRareTitleId: record.superRareTitleId,
+                normalTitleId: record.normalTitleId,
+                itemId: record.itemId,
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                socketNormalTitleId: record.socketNormalTitleId,
+                socketItemId: record.socketItemId
+            )
+            let combatBonuses = pandoraBoxItems.contains(packed)
+                ? definition.combatBonuses.scaled(by: 1.5)
+                : definition.combatBonuses
+
             // 軽量な値型に変換してキャッシュ
             let cachedItem = CachedInventoryItem(
                 stackKey: record.stackKey,
@@ -129,7 +159,7 @@ extension UserDataLoadService {
                 baseValue: definition.basePrice,
                 sellValue: sellValue,
                 statBonuses: definition.statBonuses,
-                combatBonuses: definition.combatBonuses,
+                combatBonuses: combatBonuses,
                 grantedSkillIds: grantedSkillIds
             )
 
@@ -364,6 +394,19 @@ extension UserDataLoadService {
                     grantedSkillIds.append(contentsOf: superRareSkillIds)
                 }
 
+                // パンドラボックス効果: combatBonuses を1.5倍
+                let packed = packedStackKey(
+                    superRareTitleId: item.superRareTitleId,
+                    normalTitleId: item.normalTitleId,
+                    itemId: item.itemId,
+                    socketSuperRareTitleId: item.socketSuperRareTitleId,
+                    socketNormalTitleId: item.socketNormalTitleId,
+                    socketItemId: item.socketItemId
+                )
+                let combatBonuses = pandoraBoxItems.contains(packed)
+                    ? definition.combatBonuses.scaled(by: 1.5)
+                    : definition.combatBonuses
+
                 let category = ItemSaleCategory(rawValue: definition.category) ?? .other
                 let cachedItem = CachedInventoryItem(
                     stackKey: item.stackKey,
@@ -380,7 +423,7 @@ extension UserDataLoadService {
                     baseValue: definition.basePrice,
                     sellValue: sellPrice,
                     statBonuses: definition.statBonuses,
-                    combatBonuses: definition.combatBonuses,
+                    combatBonuses: combatBonuses,
                     grantedSkillIds: grantedSkillIds
                 )
                 upsertItem(cachedItem)
@@ -516,6 +559,19 @@ extension UserDataLoadService {
                     grantedSkillIds.append(contentsOf: superRareSkillIds)
                 }
 
+                // パンドラボックス効果: combatBonuses を1.5倍
+                let packed = packedStackKey(
+                    superRareTitleId: enhancement.superRareTitleId,
+                    normalTitleId: enhancement.normalTitleId,
+                    itemId: seed.itemId,
+                    socketSuperRareTitleId: enhancement.socketSuperRareTitleId,
+                    socketNormalTitleId: enhancement.socketNormalTitleId,
+                    socketItemId: enhancement.socketItemId
+                )
+                let combatBonuses = pandoraBoxItems.contains(packed)
+                    ? definition.combatBonuses.scaled(by: 1.5)
+                    : definition.combatBonuses
+
                 let category = ItemSaleCategory(rawValue: definition.category) ?? .other
                 let cachedItem = CachedInventoryItem(
                     stackKey: stackKey,
@@ -532,7 +588,7 @@ extension UserDataLoadService {
                     baseValue: definition.basePrice,
                     sellValue: sellPrice,
                     statBonuses: definition.statBonuses,
-                    combatBonuses: definition.combatBonuses,
+                    combatBonuses: combatBonuses,
                     grantedSkillIds: grantedSkillIds
                 )
                 insertItemWithoutVersion(cachedItem)
@@ -591,6 +647,19 @@ extension UserDataLoadService {
             grantedSkillIds.append(contentsOf: superRareSkillIds)
         }
 
+        // パンドラボックス効果: combatBonuses を1.5倍
+        let packed = packedStackKey(
+            superRareTitleId: equippedItem.superRareTitleId,
+            normalTitleId: equippedItem.normalTitleId,
+            itemId: equippedItem.itemId,
+            socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
+            socketNormalTitleId: equippedItem.socketNormalTitleId,
+            socketItemId: equippedItem.socketItemId
+        )
+        let combatBonuses = pandoraBoxItems.contains(packed)
+            ? definition.combatBonuses.scaled(by: 1.5)
+            : definition.combatBonuses
+
         let cachedItem = CachedInventoryItem(
             stackKey: stackKey,
             itemId: equippedItem.itemId,
@@ -606,7 +675,7 @@ extension UserDataLoadService {
             baseValue: definition.basePrice,
             sellValue: sellPrice,
             statBonuses: definition.statBonuses,
-            combatBonuses: definition.combatBonuses,
+            combatBonuses: combatBonuses,
             grantedSkillIds: grantedSkillIds
         )
 

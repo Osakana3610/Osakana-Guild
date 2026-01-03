@@ -95,6 +95,25 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
             if additionalDamage != 0 { body("additionalDamage", additionalDamage) }
             if breathDamage != 0 { body("breathDamage", breathDamage) }
         }
+
+        /// 全値を指定倍率でスケール（パンドラボックス効果用）
+        nonisolated func scaled(by multiplier: Double) -> CombatBonuses {
+            CombatBonuses(
+                maxHP: Int(Double(maxHP) * multiplier),
+                physicalAttack: Int(Double(physicalAttack) * multiplier),
+                magicalAttack: Int(Double(magicalAttack) * multiplier),
+                physicalDefense: Int(Double(physicalDefense) * multiplier),
+                magicalDefense: Int(Double(magicalDefense) * multiplier),
+                hitRate: Int(Double(hitRate) * multiplier),
+                evasionRate: Int(Double(evasionRate) * multiplier),
+                criticalRate: Int(Double(criticalRate) * multiplier),
+                attackCount: attackCount * multiplier,
+                magicalHealing: Int(Double(magicalHealing) * multiplier),
+                trapRemoval: Int(Double(trapRemoval) * multiplier),
+                additionalDamage: Int(Double(additionalDamage) * multiplier),
+                breathDamage: Int(Double(breathDamage) * multiplier)
+            )
+        }
     }
 
     let id: UInt16

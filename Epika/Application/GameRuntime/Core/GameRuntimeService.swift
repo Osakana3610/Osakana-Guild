@@ -221,14 +221,15 @@ actor GameRuntimeService {
                                              explorationInterval: interval)
     }
 
-    func runtimeCharacter(from input: CharacterInput) throws -> CachedCharacter {
-        try CachedCharacterFactory.make(from: input, masterData: masterData)
+    func runtimeCharacter(from input: CharacterInput, pandoraBoxItems: Set<UInt64> = []) throws -> CachedCharacter {
+        try CachedCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
     }
 
-    func runtimePartyState(party: CachedParty, characters: [CharacterInput]) throws -> RuntimePartyState {
+    func runtimePartyState(party: CachedParty, characters: [CharacterInput], pandoraBoxItems: Set<UInt64>) throws -> RuntimePartyState {
         try PartyAssembler.assembleState(masterData: masterData,
                                          party: party,
-                                         characters: characters)
+                                         characters: characters,
+                                         pandoraBoxItems: pandoraBoxItems)
     }
 
     func raceDefinition(withId raceId: UInt8) -> RaceDefinition? {

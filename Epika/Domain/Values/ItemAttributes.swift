@@ -34,7 +34,7 @@ struct CachedInventoryItem: Sendable, Identifiable, Hashable {
     let baseValue: Int
     let sellValue: Int
     let statBonuses: ItemDefinition.StatBonuses
-    let combatBonuses: ItemDefinition.CombatBonuses
+    var combatBonuses: ItemDefinition.CombatBonuses  // パンドラ変更時に更新可能
     let grantedSkillIds: [UInt16]
 
     var id: String { stackKey }

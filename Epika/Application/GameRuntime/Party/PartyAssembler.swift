@@ -19,14 +19,16 @@ import Foundation
 enum PartyAssembler {
     static func assembleState(masterData: MasterDataCache,
                               party: CachedParty,
-                              characters: [CharacterInput]) throws -> RuntimePartyState {
+                              characters: [CharacterInput],
+                              pandoraBoxItems: Set<UInt64>) throws -> RuntimePartyState {
         let characterMap = Dictionary(uniqueKeysWithValues: characters.map { ($0.id, $0) })
         var assembled: [CachedCharacter] = []
         for characterId in party.memberIds {
             guard let input = characterMap[characterId] else { continue }
             let runtimeCharacter = try CachedCharacterFactory.make(
                 from: input,
-                masterData: masterData
+                masterData: masterData,
+                pandoraBoxItems: pandoraBoxItems
             )
             assembled.append(runtimeCharacter)
         }

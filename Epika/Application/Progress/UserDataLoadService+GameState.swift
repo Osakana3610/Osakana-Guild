@@ -94,8 +94,47 @@ extension UserDataLoadService {
         if let partySlots = change.partySlots {
             playerPartySlots = partySlots
         }
-        if let pandoraBoxItems = change.pandoraBoxItems {
-            self.pandoraBoxItems = pandoraBoxItems
+        if let newPandoraItems = change.pandoraBoxItems {
+            updatePandoraAffectedItems(oldPandora: Set(self.pandoraBoxItems), newPandora: Set(newPandoraItems))
+            self.pandoraBoxItems = newPandoraItems
+            invalidateCharacters()
         }
+    }
+
+    /// パンドラボックス変更で影響を受けるアイテムのcombatBonusesを更新
+    @MainActor
+    private func updatePandoraAffectedItems(oldPandora: Set<UInt64>, newPandora: Set<UInt64>) {
+        // 状態が変わったパックキーを特定
+        let added = newPandora.subtracting(oldPandora)    // 新たにパンドラに入った
+        let removed = oldPandora.subtracting(newPandora)  // パンドラから外れた
+        let affectedKeys = added.union(removed)
+        guard !affectedKeys.isEmpty else { return }
+
+        // 全キャッシュアイテムをスキャンして該当アイテムを更新
+        for (subcategory, items) in subcategorizedItems {
+            for (index, item) in items.enumerated() {
+                let packed = packedStackKey(
+                    superRareTitleId: item.superRareTitleId,
+                    normalTitleId: item.normalTitleId,
+                    itemId: item.itemId,
+                    socketSuperRareTitleId: item.socketSuperRareTitleId,
+                    socketNormalTitleId: item.socketNormalTitleId,
+                    socketItemId: item.socketItemId
+                )
+                guard affectedKeys.contains(packed) else { continue }
+
+                // マスターデータから元のcombatBonusesを取得
+                guard let definition = masterDataCache.item(item.itemId) else { continue }
+
+                // 新しいパンドラ状態に基づいてcombatBonusesを再計算
+                let newCombatBonuses = newPandora.contains(packed)
+                    ? definition.combatBonuses.scaled(by: 1.5)
+                    : definition.combatBonuses
+
+                // キャッシュを更新
+                subcategorizedItems[subcategory]?[index].combatBonuses = newCombatBonuses
+            }
+        }
+        itemCacheVersion &+= 1
     }
 }

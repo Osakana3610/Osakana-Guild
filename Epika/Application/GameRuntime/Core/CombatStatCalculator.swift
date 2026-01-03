@@ -32,8 +32,8 @@
 //   - 称号倍率（statMultiplier/negativeMultiplier）
 //   - 超レア倍率（×2）
 //   - カテゴリ倍率（スキル効果）
-//   - パンドラボックス倍率（×1.5）
 //   - ソケット宝石（係数0.5、魔防0.25）
+//   - パンドラボックス倍率（×1.5）: キャッシュ構築時に適用済み
 //
 // 【使用箇所】
 //   - CachedCharacterFactory: CachedCharacter生成
@@ -65,10 +65,6 @@ struct CombatStatCalculator {
         let learnedSkills: [SkillDefinition]
         let loadout: CachedCharacter.Loadout
 
-        // オプション
-        /// パンドラボックス内アイテム（StackKeyをUInt64にパック）
-        let pandoraBoxItems: Set<UInt64>
-
         nonisolated init(raceId: UInt8,
                          jobId: UInt8,
                          level: Int,
@@ -78,8 +74,7 @@ struct CombatStatCalculator {
                          job: JobDefinition,
                          personalitySecondary: PersonalitySecondaryDefinition?,
                          learnedSkills: [SkillDefinition],
-                         loadout: CachedCharacter.Loadout,
-                         pandoraBoxItems: Set<UInt64> = []) {
+                         loadout: CachedCharacter.Loadout) {
             self.raceId = raceId
             self.jobId = jobId
             self.level = level
@@ -90,7 +85,6 @@ struct CombatStatCalculator {
             self.personalitySecondary = personalitySecondary
             self.learnedSkills = learnedSkills
             self.loadout = loadout
-            self.pandoraBoxItems = pandoraBoxItems
         }
     }
 
@@ -116,8 +110,7 @@ struct CombatStatCalculator {
         try base.apply(equipment: context.equippedItems,
                        definitions: context.loadout.items,
                        titleDefinitions: context.loadout.titles,
-                       equipmentMultipliers: skillEffects.equipmentMultipliers,
-                       pandoraBoxItems: context.pandoraBoxItems)
+                       equipmentMultipliers: skillEffects.equipmentMultipliers)
 
         var attributes = base.makeAttributes()
 
@@ -145,8 +138,7 @@ struct CombatStatCalculator {
                                              statConversions: skillEffects.statConversions,
                                              forcedToOne: skillEffects.forcedToOne,
                                              equipmentMultipliers: skillEffects.equipmentMultipliers,
-                                             itemStatMultipliers: skillEffects.itemStatMultipliers,
-                                             pandoraBoxItems: context.pandoraBoxItems)
+                                             itemStatMultipliers: skillEffects.itemStatMultipliers)
 
         var combat = try combatResult.makeCombat()
         // 結果の切り捨て
@@ -202,8 +194,7 @@ private struct BaseStatAccumulator {
     mutating func apply(equipment: [CharacterValues.EquippedItem],
                         definitions: [ItemDefinition],
                         titleDefinitions: [TitleDefinition],
-                        equipmentMultipliers: [Int: Double],
-                        pandoraBoxItems: Set<UInt64>) throws {
+                        equipmentMultipliers: [Int: Double]) throws {
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         let titlesById = Dictionary(uniqueKeysWithValues: titleDefinitions.map { ($0.id, $0) })
         for item in equipment {
@@ -211,7 +202,6 @@ private struct BaseStatAccumulator {
                 throw CombatStatCalculator.CalculationError.missingItemDefinition(Int16(item.itemId))
             }
             let categoryMultiplier = equipmentMultipliers[Int(definition.category)] ?? 1.0
-            let pandoraMultiplier = pandoraBoxItems.contains(item.packedStackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
             let title = titlesById[item.normalTitleId]
             let statMultiplier = title?.statMultiplier ?? 1.0
@@ -220,7 +210,7 @@ private struct BaseStatAccumulator {
             let superRareMultiplier: Double = item.superRareTitleId > 0 ? 2.0 : 1.0
             definition.statBonuses.forEachNonZero { stat, value in
                 let titleMult = value > 0 ? statMultiplier : negativeMultiplier
-                let scaled = Double(value) * categoryMultiplier * pandoraMultiplier * titleMult * superRareMultiplier
+                let scaled = Double(value) * categoryMultiplier * titleMult * superRareMultiplier
                 assign(stat, delta: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity)
             }
             // ソケット宝石の基礎ステータス（宝石自体の称号倍率を適用）
@@ -576,7 +566,6 @@ private struct CombatAccumulator {
     private let forcedToOne: Set<CombatStatKey>
     private let equipmentMultipliers: [Int: Double]
     private let itemStatMultipliers: [CombatStatKey: Double]
-    private let pandoraBoxItems: Set<UInt64>
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
     init(raceId: UInt8,
@@ -596,8 +585,7 @@ private struct CombatAccumulator {
          statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]],
          forcedToOne: Set<CombatStatKey>,
          equipmentMultipliers: [Int: Double],
-         itemStatMultipliers: [CombatStatKey: Double],
-         pandoraBoxItems: Set<UInt64>) {
+         itemStatMultipliers: [CombatStatKey: Double]) {
         self.raceId = raceId
         self.level = level
         self.attributes = attributes
@@ -616,7 +604,6 @@ private struct CombatAccumulator {
         self.forcedToOne = forcedToOne
         self.equipmentMultipliers = equipmentMultipliers
         self.itemStatMultipliers = itemStatMultipliers
-        self.pandoraBoxItems = pandoraBoxItems
         self.hasPositivePhysicalAttackEquipment = CombatAccumulator.containsPositivePhysicalAttack(equipment: equipment,
                                                                                                    definitions: itemDefinitions)
     }
@@ -920,7 +907,6 @@ private struct CombatAccumulator {
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
             let categoryMultiplier = equipmentMultipliers[Int(definition.category)] ?? 1.0
-            let pandoraMultiplier = pandoraBoxItems.contains(item.packedStackKey) ? 1.5 : 1.0
             // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
             let title = titlesById[item.normalTitleId]
             let titleStatMult = title?.statMultiplier ?? 1.0
@@ -932,14 +918,14 @@ private struct CombatAccumulator {
                 guard let stat = CombatStatKey(statName) else { return }
                 let statMultiplier = itemStatMultipliers[stat] ?? 1.0
                 let titleMult = value > 0 ? titleStatMult : titleNegMult
-                let scaled = Double(value) * categoryMultiplier * statMultiplier * pandoraMultiplier * titleMult * superRareMult
+                let scaled = Double(value) * categoryMultiplier * statMultiplier * titleMult * superRareMult
                 apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity, to: stat, combat: &combat)
             }
             // attackCount（Double）
             if definition.combatBonuses.attackCount != 0 {
                 let atkTitleMult = definition.combatBonuses.attackCount > 0 ? titleStatMult : titleNegMult
                 let atkStatMultiplier = itemStatMultipliers[.attackCount] ?? 1.0
-                let scaledAtk = definition.combatBonuses.attackCount * categoryMultiplier * atkStatMultiplier * pandoraMultiplier * atkTitleMult * superRareMult
+                let scaledAtk = definition.combatBonuses.attackCount * categoryMultiplier * atkStatMultiplier * atkTitleMult * superRareMult
                 combat.attackCount += scaledAtk * Double(item.quantity)
             }
             // ソケット宝石の戦闘ステータス（係数: 通常0.5、魔法防御0.25、宝石自体の称号倍率を適用）

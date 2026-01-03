@@ -276,12 +276,14 @@ actor CharacterProgressService {
     /// 既存のCachedCharacterからマスターデータを再利用し、装備関連のみを再計算する
     nonisolated func runtimeCharacterWithEquipmentChange(
         current: CachedCharacter,
-        newEquippedItems: [CharacterInput.EquippedItem]
+        newEquippedItems: [CharacterInput.EquippedItem],
+        pandoraBoxItems: Set<UInt64>
     ) throws -> CachedCharacter {
         try CachedCharacterFactory.withEquipmentChange(
             current: current,
             newEquippedItems: newEquippedItems,
-            masterData: masterData
+            masterData: masterData,
+            pandoraBoxItems: pandoraBoxItems
         )
     }
 

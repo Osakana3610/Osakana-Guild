@@ -667,9 +667,11 @@ struct EquipmentEditorView: View {
                 skipNotification: true
             )
             // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
+            let pandoraBoxItems = Set(displayService.pandoraBoxItems)
             let runtime = try characterService.runtimeCharacterWithEquipmentChange(
                 current: currentCharacter,
-                newEquippedItems: result.equippedItems
+                newEquippedItems: result.equippedItems,
+                pandoraBoxItems: pandoraBoxItems
             )
             currentCharacter = runtime
 
@@ -706,9 +708,11 @@ struct EquipmentEditorView: View {
             skipNotification: true
         )
         // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
+        let pandoraBoxItems = Set(displayService.pandoraBoxItems)
         let runtime = try characterService.runtimeCharacterWithEquipmentChange(
             current: currentCharacter,
-            newEquippedItems: result.equippedItems
+            newEquippedItems: result.equippedItems,
+            pandoraBoxItems: pandoraBoxItems
         )
         currentCharacter = runtime
 
