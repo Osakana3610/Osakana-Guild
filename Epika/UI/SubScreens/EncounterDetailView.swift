@@ -96,16 +96,24 @@ struct EncounterDetailView: View {
 
         var states: [String: ParticipantState] = [:]
 
+        // 現在のキャラクターからmaxHPを取得するためのマップを作成
+        let currentCharacters = appServices.userDataLoad.characters
+        let characterMaxHPs: [UInt8: Int] = Dictionary(
+            uniqueKeysWithValues: currentCharacters.map { ($0.id, $0.combat.maxHP) }
+        )
+
         for (index, participant) in archive.playerSnapshots.enumerated() {
             guard let memberId = participant.partyMemberId else { continue }
             let actorIndex = UInt16(memberId)
             let initialHP = Int(archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP))
+            // 現在のキャラクターからmaxHPを取得、見つからなければスナップショットを使用
+            let currentMaxHP = characterMaxHPs[memberId] ?? participant.maxHP
             states[participant.actorId] = ParticipantState(
                 id: participant.actorId,
                 name: participant.name,
                 currentHP: initialHP,
                 previousHP: initialHP,
-                maxHP: participant.maxHP,
+                maxHP: currentMaxHP,
                 level: participant.level,
                 jobName: nil,
                 partyMemberId: memberId,
