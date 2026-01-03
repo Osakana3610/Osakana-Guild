@@ -113,7 +113,7 @@ actor GameRuntimeService {
                         experienceByMember[memberId, default: 0] += value
                     }
 
-                    let dropResults = makeItemDropResults(from: outcome.entry.drops)
+                    let dropResults = makeItemDropResults(from: outcome.entry.drops, partyId: party.party.id)
                     if !dropResults.isEmpty {
                         await dropNotifier(dropResults)
                     }
@@ -371,7 +371,7 @@ actor GameRuntimeService {
                         experienceByMember[memberId, default: 0] += value
                     }
 
-                    let dropResults = makeItemDropResults(from: outcome.entry.drops)
+                    let dropResults = makeItemDropResults(from: outcome.entry.drops, partyId: party.party.id)
                     if !dropResults.isEmpty {
                         await dropNotifier(dropResults)
                     }
@@ -485,12 +485,13 @@ struct ExplorationRunPreparationData: Sendable {
     let explorationInterval: TimeInterval
 }
 
-func makeItemDropResults(from rewards: [ExplorationDropReward]) -> [ItemDropResult] {
+func makeItemDropResults(from rewards: [ExplorationDropReward], partyId: UInt8? = nil) -> [ItemDropResult] {
     rewards.map { drop in
         ItemDropResult(item: drop.item,
                        quantity: drop.quantity,
                        sourceEnemyId: drop.sourceEnemyId,
                        normalTitleId: drop.normalTitleId,
-                       superRareTitleId: drop.superRareTitleId)
+                       superRareTitleId: drop.superRareTitleId,
+                       partyId: partyId)
     }
 }

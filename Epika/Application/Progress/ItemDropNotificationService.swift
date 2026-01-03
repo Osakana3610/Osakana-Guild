@@ -109,9 +109,13 @@ final class ItemDropNotificationService {
         let normalTitleId: UInt8?
         let normalTitleName: String?
         let superRareTitleName: String?
+        let partyId: UInt8?
 
         var displayText: String {
             var result = ""
+            if let pid = partyId {
+                result += "PT\(pid)："
+            }
             if let superRare = superRareTitleName {
                 result += superRare
             }
@@ -158,7 +162,8 @@ final class ItemDropNotificationService {
                                             timestamp: now,
                                             normalTitleId: normalTitleId,
                                             normalTitleName: normalTitleName,
-                                            superRareTitleName: superRareTitleName)
+                                            superRareTitleName: superRareTitleName,
+                                            partyId: result.partyId)
                 )
             }
         }

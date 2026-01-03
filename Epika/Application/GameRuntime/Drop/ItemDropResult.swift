@@ -24,17 +24,20 @@ struct ItemDropResult: Sendable, Hashable {
     let sourceEnemyId: UInt16?
     let normalTitleId: UInt8?
     let superRareTitleId: UInt8?
+    let partyId: UInt8?
 
     init(item: ItemDefinition,
          quantity: Int,
          sourceEnemyId: UInt16? = nil,
          normalTitleId: UInt8? = nil,
-         superRareTitleId: UInt8? = nil) {
+         superRareTitleId: UInt8? = nil,
+         partyId: UInt8? = nil) {
         self.item = item
         self.quantity = max(0, quantity)
         self.sourceEnemyId = sourceEnemyId
         self.normalTitleId = normalTitleId
         self.superRareTitleId = superRareTitleId
+        self.partyId = partyId
     }
 
     static func == (lhs: ItemDropResult, rhs: ItemDropResult) -> Bool {
@@ -42,7 +45,8 @@ struct ItemDropResult: Sendable, Hashable {
         lhs.quantity == rhs.quantity &&
         lhs.sourceEnemyId == rhs.sourceEnemyId &&
         lhs.normalTitleId == rhs.normalTitleId &&
-        lhs.superRareTitleId == rhs.superRareTitleId
+        lhs.superRareTitleId == rhs.superRareTitleId &&
+        lhs.partyId == rhs.partyId
     }
 
     func hash(into hasher: inout Hasher) {
@@ -51,5 +55,6 @@ struct ItemDropResult: Sendable, Hashable {
         hasher.combine(sourceEnemyId)
         hasher.combine(normalTitleId)
         hasher.combine(superRareTitleId)
+        hasher.combine(partyId)
     }
 }
