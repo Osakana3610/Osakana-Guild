@@ -421,9 +421,9 @@ private struct PartyEquipmentListView: View {
                                 if equipment.isEmpty {
                                     Text("装備なし").foregroundColor(.secondary)
                                 } else {
-                                    let itemsById = Dictionary(uniqueKeysWithValues: character.loadout.items.map { ($0.id, $0) })
-                                    ForEach(equipment, id: \.stackKey) { entry in
-                                        Text("• \(itemDisplayName(entry: entry, itemsById: itemsById))")
+                                    ForEach(equipment, id: \.stackKey) { item in
+                                        let displayText = item.quantity > 1 ? "\(item.displayName) x\(item.quantity)" : item.displayName
+                                        Text("• \(displayText)")
                                     }
                                 }
                             }
@@ -459,16 +459,6 @@ private struct PartyEquipmentListView: View {
         }
     }
 
-    private func itemDisplayName(entry: CharacterInput.EquippedItem, itemsById: [UInt16: ItemDefinition]) -> String {
-        var result = appServices.userDataLoad.fullDisplayName(
-            for: entry,
-            itemName: itemsById[entry.itemId]?.name
-        )
-        if entry.quantity > 1 {
-            result += " x\(entry.quantity)"
-        }
-        return result
-    }
 
     private func slotUsageText(for character: CachedCharacter) -> String {
         let usedSlots = character.equippedItems.reduce(into: 0) { result, item in

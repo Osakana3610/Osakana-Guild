@@ -73,7 +73,7 @@ extension CharacterInput {
             actionRateBreath: character.actionRateBreath,
             updatedAt: character.updatedAt,
             displayOrder: character.displayOrder,
-            equippedItems: character.equippedItems
+            equippedItems: character.equippedItems.map { $0.toEquippedItem() }
         )
     }
 

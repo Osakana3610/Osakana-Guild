@@ -57,7 +57,7 @@ struct CachedCharacter: Identifiable, Sendable, Hashable {
     let level: Int
     let experience: Int
     var currentHP: Int
-    let equippedItems: [CharacterInput.EquippedItem]
+    let equippedItems: [CachedInventoryItem]
     let primaryPersonalityId: UInt8
     let secondaryPersonalityId: UInt8
     let actionRateAttack: Int

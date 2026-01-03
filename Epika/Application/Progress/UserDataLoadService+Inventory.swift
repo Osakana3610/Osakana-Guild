@@ -106,6 +106,13 @@ extension UserDataLoadService {
                 multiplierMap: priceMultiplierMap
             )) ?? definition.sellValue
 
+            // スキルIDを収集（ベース + 超レア称号）
+            var grantedSkillIds = definition.grantedSkillIds
+            if record.superRareTitleId > 0,
+               let superRareSkillIds = masterDataCache.superRareTitle(record.superRareTitleId)?.skillIds {
+                grantedSkillIds.append(contentsOf: superRareSkillIds)
+            }
+
             // 軽量な値型に変換してキャッシュ
             let cachedItem = CachedInventoryItem(
                 stackKey: record.stackKey,
@@ -122,7 +129,8 @@ extension UserDataLoadService {
                 baseValue: definition.basePrice,
                 sellValue: sellValue,
                 statBonuses: definition.statBonuses,
-                combatBonuses: definition.combatBonuses
+                combatBonuses: definition.combatBonuses,
+                grantedSkillIds: grantedSkillIds
             )
 
             grouped[subcategory, default: []].append(cachedItem)
@@ -349,6 +357,13 @@ extension UserDataLoadService {
                     enhancement: enhancement
                 )
 
+                // スキルIDを収集（ベース + 超レア称号）
+                var grantedSkillIds = definition.grantedSkillIds
+                if item.superRareTitleId > 0,
+                   let superRareSkillIds = masterDataCache.superRareTitle(item.superRareTitleId)?.skillIds {
+                    grantedSkillIds.append(contentsOf: superRareSkillIds)
+                }
+
                 let category = ItemSaleCategory(rawValue: definition.category) ?? .other
                 let cachedItem = CachedInventoryItem(
                     stackKey: item.stackKey,
@@ -365,7 +380,8 @@ extension UserDataLoadService {
                     baseValue: definition.basePrice,
                     sellValue: sellPrice,
                     statBonuses: definition.statBonuses,
-                    combatBonuses: definition.combatBonuses
+                    combatBonuses: definition.combatBonuses,
+                    grantedSkillIds: grantedSkillIds
                 )
                 upsertItem(cachedItem)
             }
@@ -493,6 +509,13 @@ extension UserDataLoadService {
                     enhancement: enhancement
                 )
 
+                // スキルIDを収集（ベース + 超レア称号）
+                var grantedSkillIds = definition.grantedSkillIds
+                if enhancement.superRareTitleId > 0,
+                   let superRareSkillIds = masterDataCache.superRareTitle(enhancement.superRareTitleId)?.skillIds {
+                    grantedSkillIds.append(contentsOf: superRareSkillIds)
+                }
+
                 let category = ItemSaleCategory(rawValue: definition.category) ?? .other
                 let cachedItem = CachedInventoryItem(
                     stackKey: stackKey,
@@ -509,7 +532,8 @@ extension UserDataLoadService {
                     baseValue: definition.basePrice,
                     sellValue: sellPrice,
                     statBonuses: definition.statBonuses,
-                    combatBonuses: definition.combatBonuses
+                    combatBonuses: definition.combatBonuses,
+                    grantedSkillIds: grantedSkillIds
                 )
                 insertItemWithoutVersion(cachedItem)
                 needsRebuild = true
@@ -560,6 +584,13 @@ extension UserDataLoadService {
             enhancement: enhancement
         )
 
+        // スキルIDを収集（ベース + 超レア称号）
+        var grantedSkillIds = definition.grantedSkillIds
+        if equippedItem.superRareTitleId > 0,
+           let superRareSkillIds = masterDataCache.superRareTitle(equippedItem.superRareTitleId)?.skillIds {
+            grantedSkillIds.append(contentsOf: superRareSkillIds)
+        }
+
         let cachedItem = CachedInventoryItem(
             stackKey: stackKey,
             itemId: equippedItem.itemId,
@@ -575,7 +606,8 @@ extension UserDataLoadService {
             baseValue: definition.basePrice,
             sellValue: sellPrice,
             statBonuses: definition.statBonuses,
-            combatBonuses: definition.combatBonuses
+            combatBonuses: definition.combatBonuses,
+            grantedSkillIds: grantedSkillIds
         )
 
         insertItemWithoutVersion(cachedItem)

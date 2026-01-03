@@ -35,6 +35,7 @@ struct CachedInventoryItem: Sendable, Identifiable, Hashable {
     let sellValue: Int
     let statBonuses: ItemDefinition.StatBonuses
     let combatBonuses: ItemDefinition.CombatBonuses
+    let grantedSkillIds: [UInt16]
 
     var id: String { stackKey }
 
@@ -51,6 +52,19 @@ struct CachedInventoryItem: Sendable, Identifiable, Hashable {
     /// 宝石改造が施されているか
     var hasGemModification: Bool {
         socketItemId != 0
+    }
+
+    /// CharacterInput.EquippedItemへ変換（永続化用）
+    func toEquippedItem() -> CharacterInput.EquippedItem {
+        CharacterInput.EquippedItem(
+            superRareTitleId: superRareTitleId,
+            normalTitleId: normalTitleId,
+            itemId: itemId,
+            socketSuperRareTitleId: socketSuperRareTitleId,
+            socketNormalTitleId: socketNormalTitleId,
+            socketItemId: socketItemId,
+            quantity: Int(quantity)
+        )
     }
 }
 

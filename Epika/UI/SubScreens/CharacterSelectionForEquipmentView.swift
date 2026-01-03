@@ -118,7 +118,7 @@ private struct CharacterRowForEquipment: View {
 
             Spacer()
 
-            let equipCount = character.equippedItems.reduce(0) { $0 + $1.quantity }
+            let equipCount = character.equippedItems.reduce(0) { $0 + Int($1.quantity) }
             Text("\(equipCount)/\(character.equipmentCapacity)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -130,63 +130,22 @@ private struct CharacterRowForEquipment: View {
 /// 装備画面で表示するアイテムの種類
 enum EquipmentDisplayItem: Identifiable, Hashable {
     case inventory(CachedInventoryItem)
-    case equipped(CharacterInput.EquippedItem, avatarId: UInt16, displayName: String)
+    case equipped(CachedInventoryItem, avatarId: UInt16)
 
     var id: String {
         switch self {
         case .inventory(let item): return item.stackKey
-        case .equipped(let item, _, _): return item.stackKey + "_equipped"
+        case .equipped(let item, _): return item.stackKey + "_equipped"
         }
     }
 
-    var stackKey: String {
-        switch self {
-        case .inventory(let item): return item.stackKey
-        case .equipped(let item, _, _): return item.stackKey
-        }
-    }
-
-    var itemId: UInt16 {
-        switch self {
-        case .inventory(let item): return item.itemId
-        case .equipped(let item, _, _): return item.itemId
-        }
-    }
-
-    var quantity: Int {
-        switch self {
-        case .inventory(let item): return Int(item.quantity)
-        case .equipped(let item, _, _): return Int(item.quantity)
-        }
-    }
-
-    var normalTitleId: UInt8 {
-        switch self {
-        case .inventory(let item): return item.normalTitleId
-        case .equipped(let item, _, _): return item.normalTitleId
-        }
-    }
-
-    var superRareTitleId: UInt8 {
-        switch self {
-        case .inventory(let item): return item.superRareTitleId
-        case .equipped(let item, _, _): return item.superRareTitleId
-        }
-    }
-
-    var socketItemId: UInt16 {
-        switch self {
-        case .inventory(let item): return item.socketItemId
-        case .equipped(let item, _, _): return item.socketItemId
-        }
-    }
-
-    var displayName: String {
-        switch self {
-        case .inventory(let item): return item.displayName
-        case .equipped(_, _, let name): return name
-        }
-    }
+    var stackKey: String { cachedItem.stackKey }
+    var itemId: UInt16 { cachedItem.itemId }
+    var quantity: Int { Int(cachedItem.quantity) }
+    var normalTitleId: UInt8 { cachedItem.normalTitleId }
+    var superRareTitleId: UInt8 { cachedItem.superRareTitleId }
+    var socketItemId: UInt16 { cachedItem.socketItemId }
+    var displayName: String { cachedItem.displayName }
 
     var isEquipped: Bool {
         if case .equipped = self { return true }
@@ -194,18 +153,15 @@ enum EquipmentDisplayItem: Identifiable, Hashable {
     }
 
     var equippedAvatarId: UInt16? {
-        if case .equipped(_, let avatarId, _) = self { return avatarId }
+        if case .equipped(_, let avatarId) = self { return avatarId }
         return nil
     }
 
-    var equippedItem: CharacterInput.EquippedItem? {
-        if case .equipped(let item, _, _) = self { return item }
-        return nil
-    }
-
-    var cachedItem: CachedInventoryItem? {
-        if case .inventory(let item) = self { return item }
-        return nil
+    var cachedItem: CachedInventoryItem {
+        switch self {
+        case .inventory(let item): return item
+        case .equipped(let item, _): return item
+        }
     }
 }
 
@@ -334,8 +290,8 @@ struct EquipmentEditorView: View {
                             equippedItems: sortedEquippedItemsForDisplay,
                             equipmentCapacity: currentCharacter.equipmentCapacity,
                             onUnequip: { displayItem in
-                                if let equipped = displayItem.equippedItem {
-                                    try? await performUnequip(equipped)
+                                if displayItem.isEquipped {
+                                    try? await performUnequip(displayItem.cachedItem)
                                 }
                             },
                             onDetail: { displayItem in
@@ -398,26 +354,14 @@ struct EquipmentEditorView: View {
         }
         .sheet(item: $selectedItemForDetail) { displayItem in
             NavigationStack {
-                // CachedInventoryItemならcachedItem版、EquippedItemならitemId版
-                if let cachedItem = displayItem.cachedItem {
-                    ItemDetailView(cachedItem: cachedItem)
-                        .toolbar {
-                            ToolbarItem(placement: .confirmationAction) {
-                                Button("閉じる") {
-                                    selectedItemForDetail = nil
-                                }
+                ItemDetailView(cachedItem: displayItem.cachedItem)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("閉じる") {
+                                selectedItemForDetail = nil
                             }
                         }
-                } else {
-                    ItemDetailView(itemId: displayItem.itemId)
-                        .toolbar {
-                            ToolbarItem(placement: .confirmationAction) {
-                                Button("閉じる") {
-                                    selectedItemForDetail = nil
-                                }
-                            }
-                        }
-                }
+                    }
             }
         }
     }
@@ -562,10 +506,10 @@ struct EquipmentEditorView: View {
 
         return HStack(spacing: 8) {
             // 装備中アイテムにはキャラ画像を表示（タップで装備解除）
-            if let avatarId = item.equippedAvatarId, let equipped = item.equippedItem {
+            if let avatarId = item.equippedAvatarId, item.isEquipped {
                 Button {
                     Task {
-                        try? await performUnequip(equipped)
+                        try? await performUnequip(item.cachedItem)
                     }
                 } label: {
                     CharacterImageView(avatarIndex: avatarId, size: 36)
@@ -578,10 +522,10 @@ struct EquipmentEditorView: View {
 
             Button {
                 Task {
-                    if let equipped = item.equippedItem {
-                        try? await performUnequip(equipped)
-                    } else if validation.canEquip, let cachedItem = item.cachedItem {
-                        await performEquip(cachedItem)
+                    if item.isEquipped {
+                        try? await performUnequip(item.cachedItem)
+                    } else if validation.canEquip {
+                        await performEquip(item.cachedItem)
                     }
                 }
             } label: {
@@ -669,19 +613,13 @@ struct EquipmentEditorView: View {
         let avatarId = currentCharacter.resolvedAvatarId
 
         for equipped in currentCharacter.equippedItems {
-            guard let definition = itemDefinitions[equipped.itemId],
-                  let category = ItemSaleCategory(rawValue: definition.category) else { continue }
-
+            let category = equipped.category
             let subcategory = ItemDisplaySubcategory(
                 mainCategory: category,
-                subcategory: definition.rarity
+                subcategory: equipped.rarity
             )
 
-            // 表示名を計算
-            let itemName = definition.name
-            let name = displayService.fullDisplayName(for: equipped, itemName: itemName)
-
-            let displayItem = EquipmentDisplayItem.equipped(equipped, avatarId: avatarId, displayName: name)
+            let displayItem = EquipmentDisplayItem.equipped(equipped, avatarId: avatarId)
 
             // サブカテゴリ別に分類
             if result[subcategory] == nil {
@@ -702,7 +640,7 @@ struct EquipmentEditorView: View {
             return (false, "キャラクターデータが不完全です")
         }
 
-        let currentCount = currentCharacter.equippedItems.reduce(0) { $0 + $1.quantity }
+        let currentCount = currentCharacter.equippedItems.reduce(0) { $0 + Int($1.quantity) }
 
         let result = EquipmentProgressService.validateEquipment(
             itemDefinition: definition,
@@ -757,7 +695,7 @@ struct EquipmentEditorView: View {
     }
 
     @MainActor
-    private func performUnequip(_ item: CharacterInput.EquippedItem) async throws {
+    private func performUnequip(_ item: CachedInventoryItem) async throws {
         equipError = nil
         let oldCharacter = currentCharacter
 
@@ -789,14 +727,14 @@ struct EquipmentEditorView: View {
     }
 
     /// 解除時にインベントリキャッシュを更新（存在すれば数量増加、なければ新規追加）
-    private func updateInventoryCacheForUnequip(item: CharacterInput.EquippedItem, newQuantity: Int) {
+    private func updateInventoryCacheForUnequip(item: CachedInventoryItem, newQuantity: Int) {
         // キャッシュに存在するか確認（O(1)）
         if displayService.containsItem(stackKey: item.stackKey) {
             // 存在する場合は数量更新を通知
             displayService.incrementQuantity(stackKey: item.stackKey, by: 1)
         } else {
-            // 存在しない場合はEquippedItemから直接キャッシュに追加
-            displayService.addItemFromEquipped(item)
+            // 存在しない場合は直接キャッシュに追加
+            displayService.insertItemWithoutVersion(item)
         }
     }
 

@@ -198,7 +198,7 @@ enum CachedCharacterFactory {
             level: input.level,
             experience: input.experience,
             currentHP: resolvedCurrentHP,
-            equippedItems: sortedEquippedItems(input.equippedItems),
+            equippedItems: makeCachedEquippedItems(from: input.equippedItems, masterData: masterData),
             primaryPersonalityId: input.primaryPersonalityId,
             secondaryPersonalityId: input.secondaryPersonalityId,
             actionRateAttack: input.actionRateAttack,
@@ -364,7 +364,7 @@ enum CachedCharacterFactory {
             level: current.level,
             experience: current.experience,
             currentHP: resolvedCurrentHP,
-            equippedItems: sortedEquippedItems(newEquippedItems),
+            equippedItems: makeCachedEquippedItems(from: newEquippedItems, masterData: masterData),
             primaryPersonalityId: current.primaryPersonalityId,
             secondaryPersonalityId: current.secondaryPersonalityId,
             actionRateAttack: current.actionRateAttack,
@@ -391,11 +391,84 @@ enum CachedCharacterFactory {
 
     // MARK: - Private
 
-    /// 装備アイテムをインベントリと同じソート順で並べ替え
-    private static func sortedEquippedItems(
-        _ items: [CharacterInput.EquippedItem]
-    ) -> [CharacterInput.EquippedItem] {
-        items.sorted { lhs, rhs in
+    /// 装備アイテムからCachedInventoryItemのリストを構築
+    private static func makeCachedEquippedItems(
+        from items: [CharacterInput.EquippedItem],
+        masterData: MasterDataCache
+    ) -> [CachedInventoryItem] {
+        let allTitles = masterData.allTitles
+        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
+
+        let cachedItems: [CachedInventoryItem] = items.compactMap { item in
+            guard let definition = masterData.item(item.itemId) else { return nil }
+
+            let category = ItemSaleCategory(rawValue: definition.category) ?? .other
+
+            // 称号名を構築
+            var displayName = ""
+            if item.superRareTitleId > 0,
+               let superRareTitle = masterData.superRareTitle(item.superRareTitleId) {
+                displayName += superRareTitle.name
+            }
+            if item.normalTitleId > 0,
+               let title = masterData.title(item.normalTitleId) {
+                displayName += title.name
+            }
+            displayName += definition.name
+
+            // ソケット名を追加
+            if item.socketItemId > 0,
+               let socketDef = masterData.item(item.socketItemId) {
+                var socketName = ""
+                if item.socketSuperRareTitleId > 0,
+                   let socketSuperRare = masterData.superRareTitle(item.socketSuperRareTitleId) {
+                    socketName += socketSuperRare.name
+                }
+                if item.socketNormalTitleId > 0,
+                   let socketTitle = masterData.title(item.socketNormalTitleId) {
+                    socketName += socketTitle.name
+                }
+                socketName += socketDef.name
+                displayName += "[\(socketName)]"
+            }
+
+            // 売却価格を計算
+            let sellValue = (try? ItemPriceCalculator.sellPrice(
+                baseSellValue: definition.sellValue,
+                normalTitleId: item.normalTitleId,
+                hasSuperRare: item.superRareTitleId != 0,
+                multiplierMap: priceMultiplierMap
+            )) ?? definition.sellValue
+
+            // スキルIDを収集（ベース + 超レア称号）
+            var grantedSkillIds = definition.grantedSkillIds
+            if item.superRareTitleId > 0,
+               let superRareSkillIds = masterData.superRareTitle(item.superRareTitleId)?.skillIds {
+                grantedSkillIds.append(contentsOf: superRareSkillIds)
+            }
+
+            return CachedInventoryItem(
+                stackKey: item.stackKey,
+                itemId: item.itemId,
+                quantity: UInt16(item.quantity),
+                normalTitleId: item.normalTitleId,
+                superRareTitleId: item.superRareTitleId,
+                socketItemId: item.socketItemId,
+                socketNormalTitleId: item.socketNormalTitleId,
+                socketSuperRareTitleId: item.socketSuperRareTitleId,
+                category: category,
+                rarity: definition.rarity,
+                displayName: displayName,
+                baseValue: definition.basePrice,
+                sellValue: sellValue,
+                statBonuses: definition.statBonuses,
+                combatBonuses: definition.combatBonuses,
+                grantedSkillIds: grantedSkillIds
+            )
+        }
+
+        // インベントリと同じソート順で並べ替え
+        return cachedItems.sorted { lhs, rhs in
             // itemId の昇順
             if lhs.itemId != rhs.itemId {
                 return lhs.itemId < rhs.itemId
