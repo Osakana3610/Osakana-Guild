@@ -57,6 +57,8 @@ struct CombatStatCalculator {
         let level: Int
         let currentHP: Int
         let equippedItems: [CharacterValues.EquippedItem]
+        /// 装備アイテムのキャッシュ（combatBonusesに称号・超レア・宝石改造・パンドラ適用済み）
+        let cachedEquippedItems: [CachedInventoryItem]
 
         // マスターデータ（必須 - 欠落時は呼び出し元でthrow）
         let race: RaceDefinition
@@ -70,6 +72,7 @@ struct CombatStatCalculator {
                          level: Int,
                          currentHP: Int,
                          equippedItems: [CharacterValues.EquippedItem],
+                         cachedEquippedItems: [CachedInventoryItem],
                          race: RaceDefinition,
                          job: JobDefinition,
                          personalitySecondary: PersonalitySecondaryDefinition?,
@@ -80,6 +83,7 @@ struct CombatStatCalculator {
             self.level = level
             self.currentHP = currentHP
             self.equippedItems = equippedItems
+            self.cachedEquippedItems = cachedEquippedItems
             self.race = race
             self.job = job
             self.personalitySecondary = personalitySecondary
@@ -131,6 +135,7 @@ struct CombatStatCalculator {
                                              additives: skillEffects.additives,
                                              critical: skillEffects.critical,
                                              equipment: context.equippedItems,
+                                             cachedEquippedItems: context.cachedEquippedItems,
                                              itemDefinitions: context.loadout.items,
                                              titleDefinitions: context.loadout.titles,
                                              martial: skillEffects.martialBonuses,
@@ -558,6 +563,7 @@ private struct CombatAccumulator {
     private let additives: SkillEffectAggregator.AdditiveBonuses
     private let criticalParams: SkillEffectAggregator.CriticalParameters
     private let equipment: [CharacterValues.EquippedItem]
+    private let cachedEquippedItems: [CachedInventoryItem]
     private let itemDefinitions: [ItemDefinition]
     private let titleDefinitions: [TitleDefinition]
     private let martialBonuses: SkillEffectAggregator.MartialBonuses
@@ -578,6 +584,7 @@ private struct CombatAccumulator {
          additives: SkillEffectAggregator.AdditiveBonuses,
          critical: SkillEffectAggregator.CriticalParameters,
          equipment: [CharacterValues.EquippedItem],
+         cachedEquippedItems: [CachedInventoryItem],
          itemDefinitions: [ItemDefinition],
          titleDefinitions: [TitleDefinition],
          martial: SkillEffectAggregator.MartialBonuses,
@@ -596,6 +603,7 @@ private struct CombatAccumulator {
         self.additives = additives
         self.criticalParams = critical
         self.equipment = equipment
+        self.cachedEquippedItems = cachedEquippedItems
         self.itemDefinitions = itemDefinitions
         self.titleDefinitions = titleDefinitions
         self.martialBonuses = martial
@@ -900,55 +908,27 @@ private struct CombatAccumulator {
         return result
     }
 
+    /// 装備の戦闘ボーナスを適用
+    /// - Note: cachedEquippedItemsのcombatBonusesには称号・超レア・宝石改造・パンドラが適用済み。
+    ///         ここではカテゴリ倍率とアイテムステータス倍率のみを適用する。
     private func applyEquipmentCombatBonuses(to combat: inout CharacterValues.Combat) {
-        let definitionsById = Dictionary(uniqueKeysWithValues: itemDefinitions.map { ($0.id, $0) })
-        let titlesById = Dictionary(uniqueKeysWithValues: titleDefinitions.map { ($0.id, $0) })
+        for item in cachedEquippedItems {
+            let categoryMultiplier = equipmentMultipliers[Int(item.category.rawValue)] ?? 1.0
+            let quantity = Int(item.quantity)
 
-        for item in equipment {
-            guard let definition = definitionsById[item.itemId] else { continue }
-            let categoryMultiplier = equipmentMultipliers[Int(definition.category)] ?? 1.0
-            // 称号倍率を取得（statMultiplier: 正の値用、negativeMultiplier: 負の値用）
-            let title = titlesById[item.normalTitleId]
-            let titleStatMult = title?.statMultiplier ?? 1.0
-            let titleNegMult = title?.negativeMultiplier ?? 1.0
-            // 超レアがついている場合はさらに2倍
-            let superRareMult: Double = item.superRareTitleId > 0 ? 2.0 : 1.0
-            // attackCount以外の戦闘ボーナス
-            definition.combatBonuses.forEachNonZero { statName, value in
+            // attackCount以外の戦闘ボーナス（キャッシュ済み値にカテゴリ倍率とアイテムステータス倍率を適用）
+            item.combatBonuses.forEachNonZero { statName, value in
                 guard let stat = CombatStatKey(statName) else { return }
                 let statMultiplier = itemStatMultipliers[stat] ?? 1.0
-                let titleMult = value > 0 ? titleStatMult : titleNegMult
-                let scaled = Double(value) * categoryMultiplier * statMultiplier * titleMult * superRareMult
-                apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * item.quantity, to: stat, combat: &combat)
+                let scaled = Double(value) * categoryMultiplier * statMultiplier
+                apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)) * quantity, to: stat, combat: &combat)
             }
-            // attackCount（Double）
-            if definition.combatBonuses.attackCount != 0 {
-                let atkTitleMult = definition.combatBonuses.attackCount > 0 ? titleStatMult : titleNegMult
+
+            // attackCount（Double、キャッシュ済み値にカテゴリ倍率とアイテムステータス倍率を適用）
+            if item.combatBonuses.attackCount != 0 {
                 let atkStatMultiplier = itemStatMultipliers[.attackCount] ?? 1.0
-                let scaledAtk = definition.combatBonuses.attackCount * categoryMultiplier * atkStatMultiplier * atkTitleMult * superRareMult
-                combat.attackCount += scaledAtk * Double(item.quantity)
-            }
-            // ソケット宝石の戦闘ステータス（係数: 通常0.5、魔法防御0.25、宝石自体の称号倍率を適用）
-            if item.socketItemId != 0,
-               let gemDefinition = definitionsById[item.socketItemId] {
-                let gemTitle = titlesById[item.socketNormalTitleId]
-                let gemStatMult = gemTitle?.statMultiplier ?? 1.0
-                let gemNegMult = gemTitle?.negativeMultiplier ?? 1.0
-                let gemSuperRareMult: Double = item.socketSuperRareTitleId > 0 ? 2.0 : 1.0
-                gemDefinition.combatBonuses.forEachNonZero { statName, value in
-                    guard let stat = CombatStatKey(statName) else { return }
-                    let gemCoefficient: Double = (stat == .magicalDefense) ? 0.25 : 0.5
-                    let titleMult = value > 0 ? gemStatMult : gemNegMult
-                    let scaled = Double(value) * gemCoefficient * titleMult * gemSuperRareMult
-                    apply(bonus: Int(scaled.rounded(FloatingPointRoundingRule.towardZero)), to: stat, combat: &combat)
-                }
-                // ソケット宝石のattackCount
-                if gemDefinition.combatBonuses.attackCount != 0 {
-                    let gemAtkTitleMult = gemDefinition.combatBonuses.attackCount > 0 ? gemStatMult : gemNegMult
-                    let gemAtkCoefficient: Double = 0.5
-                    let scaledGemAtk = gemDefinition.combatBonuses.attackCount * gemAtkCoefficient * gemAtkTitleMult * gemSuperRareMult
-                    combat.attackCount += scaledGemAtk
-                }
+                let scaledAtk = item.combatBonuses.attackCount * categoryMultiplier * atkStatMultiplier
+                combat.attackCount += scaledAtk * Double(quantity)
             }
         }
     }

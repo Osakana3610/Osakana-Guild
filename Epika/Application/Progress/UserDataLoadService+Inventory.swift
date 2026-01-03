@@ -130,18 +130,23 @@ extension UserDataLoadService {
                 grantedSkillIds.append(contentsOf: superRareSkillIds)
             }
 
-            // パンドラボックス効果: combatBonuses を1.5倍
-            let packed = packedStackKey(
-                superRareTitleId: record.superRareTitleId,
+            // 戦闘ステータスを計算（称号 × 超レア × 宝石改造 × パンドラ）
+            let combatBonuses = calculateFinalCombatBonuses(
+                definition: definition,
                 normalTitleId: record.normalTitleId,
-                itemId: record.itemId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                superRareTitleId: record.superRareTitleId,
+                socketItemId: record.socketItemId,
                 socketNormalTitleId: record.socketNormalTitleId,
-                socketItemId: record.socketItemId
+                socketSuperRareTitleId: record.socketSuperRareTitleId,
+                isPandora: pandoraBoxItems.contains(packedStackKey(
+                    superRareTitleId: record.superRareTitleId,
+                    normalTitleId: record.normalTitleId,
+                    itemId: record.itemId,
+                    socketSuperRareTitleId: record.socketSuperRareTitleId,
+                    socketNormalTitleId: record.socketNormalTitleId,
+                    socketItemId: record.socketItemId
+                ))
             )
-            let combatBonuses = pandoraBoxItems.contains(packed)
-                ? definition.combatBonuses.scaled(by: 1.5)
-                : definition.combatBonuses
 
             // 軽量な値型に変換してキャッシュ
             let cachedItem = CachedInventoryItem(
@@ -394,18 +399,23 @@ extension UserDataLoadService {
                     grantedSkillIds.append(contentsOf: superRareSkillIds)
                 }
 
-                // パンドラボックス効果: combatBonuses を1.5倍
-                let packed = packedStackKey(
-                    superRareTitleId: item.superRareTitleId,
+                // 戦闘ステータスを計算（称号 × 超レア × 宝石改造 × パンドラ）
+                let combatBonuses = calculateFinalCombatBonuses(
+                    definition: definition,
                     normalTitleId: item.normalTitleId,
-                    itemId: item.itemId,
-                    socketSuperRareTitleId: item.socketSuperRareTitleId,
+                    superRareTitleId: item.superRareTitleId,
+                    socketItemId: item.socketItemId,
                     socketNormalTitleId: item.socketNormalTitleId,
-                    socketItemId: item.socketItemId
+                    socketSuperRareTitleId: item.socketSuperRareTitleId,
+                    isPandora: pandoraBoxItems.contains(packedStackKey(
+                        superRareTitleId: item.superRareTitleId,
+                        normalTitleId: item.normalTitleId,
+                        itemId: item.itemId,
+                        socketSuperRareTitleId: item.socketSuperRareTitleId,
+                        socketNormalTitleId: item.socketNormalTitleId,
+                        socketItemId: item.socketItemId
+                    ))
                 )
-                let combatBonuses = pandoraBoxItems.contains(packed)
-                    ? definition.combatBonuses.scaled(by: 1.5)
-                    : definition.combatBonuses
 
                 let category = ItemSaleCategory(rawValue: definition.category) ?? .other
                 let cachedItem = CachedInventoryItem(
@@ -559,18 +569,23 @@ extension UserDataLoadService {
                     grantedSkillIds.append(contentsOf: superRareSkillIds)
                 }
 
-                // パンドラボックス効果: combatBonuses を1.5倍
-                let packed = packedStackKey(
-                    superRareTitleId: enhancement.superRareTitleId,
+                // 戦闘ステータスを計算（称号 × 超レア × 宝石改造 × パンドラ）
+                let combatBonuses = calculateFinalCombatBonuses(
+                    definition: definition,
                     normalTitleId: enhancement.normalTitleId,
-                    itemId: seed.itemId,
-                    socketSuperRareTitleId: enhancement.socketSuperRareTitleId,
+                    superRareTitleId: enhancement.superRareTitleId,
+                    socketItemId: enhancement.socketItemId,
                     socketNormalTitleId: enhancement.socketNormalTitleId,
-                    socketItemId: enhancement.socketItemId
+                    socketSuperRareTitleId: enhancement.socketSuperRareTitleId,
+                    isPandora: pandoraBoxItems.contains(packedStackKey(
+                        superRareTitleId: enhancement.superRareTitleId,
+                        normalTitleId: enhancement.normalTitleId,
+                        itemId: seed.itemId,
+                        socketSuperRareTitleId: enhancement.socketSuperRareTitleId,
+                        socketNormalTitleId: enhancement.socketNormalTitleId,
+                        socketItemId: enhancement.socketItemId
+                    ))
                 )
-                let combatBonuses = pandoraBoxItems.contains(packed)
-                    ? definition.combatBonuses.scaled(by: 1.5)
-                    : definition.combatBonuses
 
                 let category = ItemSaleCategory(rawValue: definition.category) ?? .other
                 let cachedItem = CachedInventoryItem(
@@ -647,18 +662,23 @@ extension UserDataLoadService {
             grantedSkillIds.append(contentsOf: superRareSkillIds)
         }
 
-        // パンドラボックス効果: combatBonuses を1.5倍
-        let packed = packedStackKey(
-            superRareTitleId: equippedItem.superRareTitleId,
+        // 戦闘ステータスを計算（称号 × 超レア × 宝石改造 × パンドラ）
+        let combatBonuses = calculateFinalCombatBonuses(
+            definition: definition,
             normalTitleId: equippedItem.normalTitleId,
-            itemId: equippedItem.itemId,
-            socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
+            superRareTitleId: equippedItem.superRareTitleId,
+            socketItemId: equippedItem.socketItemId,
             socketNormalTitleId: equippedItem.socketNormalTitleId,
-            socketItemId: equippedItem.socketItemId
+            socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
+            isPandora: pandoraBoxItems.contains(packedStackKey(
+                superRareTitleId: equippedItem.superRareTitleId,
+                normalTitleId: equippedItem.normalTitleId,
+                itemId: equippedItem.itemId,
+                socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
+                socketNormalTitleId: equippedItem.socketNormalTitleId,
+                socketItemId: equippedItem.socketItemId
+            ))
         )
-        let combatBonuses = pandoraBoxItems.contains(packed)
-            ? definition.combatBonuses.scaled(by: 1.5)
-            : definition.combatBonuses
 
         let cachedItem = CachedInventoryItem(
             stackKey: stackKey,
@@ -830,5 +850,56 @@ extension UserDataLoadService {
         case "breathdamage": return "ブレス"
         default: return stat
         }
+    }
+}
+
+// MARK: - Combat Bonuses Calculation
+
+extension UserDataLoadService {
+    /// 最終的なcombatBonusesを計算（称号 × 超レア × 宝石改造 × パンドラ）
+    func calculateFinalCombatBonuses(
+        definition: ItemDefinition,
+        normalTitleId: UInt8,
+        superRareTitleId: UInt8,
+        socketItemId: UInt16,
+        socketNormalTitleId: UInt8,
+        socketSuperRareTitleId: UInt8,
+        isPandora: Bool
+    ) -> ItemDefinition.CombatBonuses {
+        // 親装備の称号倍率
+        let title = masterDataCache.title(normalTitleId)
+        let statMult = title?.statMultiplier ?? 1.0
+        let negMult = title?.negativeMultiplier ?? 1.0
+        let superRareMult: Double = superRareTitleId > 0 ? 2.0 : 1.0
+
+        // 親装備のcombatBonuses（称号 × 超レア）
+        var result = definition.combatBonuses.scaledWithTitle(
+            statMult: statMult,
+            negMult: negMult,
+            superRare: superRareMult
+        )
+
+        // ソケット宝石があれば加算
+        if socketItemId > 0,
+           let gemDefinition = masterDataCache.item(socketItemId) {
+            let gemTitle = masterDataCache.title(socketNormalTitleId)
+            let gemStatMult = gemTitle?.statMultiplier ?? 1.0
+            let gemNegMult = gemTitle?.negativeMultiplier ?? 1.0
+            let gemSuperRareMult: Double = socketSuperRareTitleId > 0 ? 2.0 : 1.0
+
+            let gemBonus = gemDefinition.combatBonuses.scaledForGem(
+                statMult: gemStatMult,
+                negMult: gemNegMult,
+                superRare: gemSuperRareMult
+            )
+            result = result.adding(gemBonus)
+        }
+
+        // パンドラ効果
+        if isPandora {
+            result = result.scaled(by: 1.5)
+        }
+
+        return result
     }
 }

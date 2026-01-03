@@ -36,6 +36,7 @@ struct CombatSnapshotBuilder {
             level: level,
             currentHP: 1,  // 計算後に maxHP で上書きされる
             equippedItems: [],
+            cachedEquippedItems: [],
             race: raceDefinition,
             job: jobDefinition,
             personalitySecondary: nil,

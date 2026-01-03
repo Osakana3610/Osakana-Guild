@@ -151,6 +151,9 @@ enum CachedCharacterFactory {
             )
         }
 
+        // キャッシュ済み装備アイテムを作成（combatBonusesに称号・超レア・宝石改造・パンドラ適用済み）
+        let cachedEquippedItems = makeCachedEquippedItems(from: input.equippedItems, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
+
         // 戦闘ステータス計算
         let calcContext = CombatStatCalculator.Context(
             raceId: input.raceId,
@@ -158,6 +161,7 @@ enum CachedCharacterFactory {
             level: input.level,
             currentHP: input.currentHP,
             equippedItems: equippedItemsValues,
+            cachedEquippedItems: cachedEquippedItems,
             race: race,
             job: job,
             personalitySecondary: secondaryPersonality,
@@ -197,7 +201,7 @@ enum CachedCharacterFactory {
             level: input.level,
             experience: input.experience,
             currentHP: resolvedCurrentHP,
-            equippedItems: makeCachedEquippedItems(from: input.equippedItems, masterData: masterData, pandoraBoxItems: pandoraBoxItems),
+            equippedItems: cachedEquippedItems,
             primaryPersonalityId: input.primaryPersonalityId,
             secondaryPersonalityId: input.secondaryPersonalityId,
             actionRateAttack: input.actionRateAttack,
@@ -322,6 +326,9 @@ enum CachedCharacterFactory {
             )
         }
 
+        // キャッシュ済み装備アイテムを作成（combatBonusesに称号・超レア・宝石改造・パンドラ適用済み）
+        let cachedEquippedItems = makeCachedEquippedItems(from: newEquippedItems, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
+
         // 戦闘ステータス計算
         let calcContext = CombatStatCalculator.Context(
             raceId: current.raceId,
@@ -329,6 +336,7 @@ enum CachedCharacterFactory {
             level: current.level,
             currentHP: current.currentHP,
             equippedItems: equippedItemsValues,
+            cachedEquippedItems: cachedEquippedItems,
             race: race,
             job: job,
             personalitySecondary: secondaryPersonality,
@@ -363,7 +371,7 @@ enum CachedCharacterFactory {
             level: current.level,
             experience: current.experience,
             currentHP: resolvedCurrentHP,
-            equippedItems: makeCachedEquippedItems(from: newEquippedItems, masterData: masterData, pandoraBoxItems: pandoraBoxItems),
+            equippedItems: cachedEquippedItems,
             primaryPersonalityId: current.primaryPersonalityId,
             secondaryPersonalityId: current.secondaryPersonalityId,
             actionRateAttack: current.actionRateAttack,
@@ -447,10 +455,17 @@ enum CachedCharacterFactory {
                 grantedSkillIds.append(contentsOf: superRareSkillIds)
             }
 
-            // パンドラボックス効果: combatBonuses を1.5倍
-            let combatBonuses = pandoraBoxItems.contains(item.packedStackKey)
-                ? definition.combatBonuses.scaled(by: 1.5)
-                : definition.combatBonuses
+            // 戦闘ステータスを計算（称号 × 超レア × 宝石改造 × パンドラ）
+            let combatBonuses = calculateFinalCombatBonuses(
+                definition: definition,
+                normalTitleId: item.normalTitleId,
+                superRareTitleId: item.superRareTitleId,
+                socketItemId: item.socketItemId,
+                socketNormalTitleId: item.socketNormalTitleId,
+                socketSuperRareTitleId: item.socketSuperRareTitleId,
+                isPandora: pandoraBoxItems.contains(item.packedStackKey),
+                masterData: masterData
+            )
 
             return CachedInventoryItem(
                 stackKey: item.stackKey,
@@ -550,6 +565,54 @@ enum CachedCharacterFactory {
             if definition.combatBonuses.physicalAttack * equipment.quantity > 0 { return true }
         }
         return false
+    }
+
+    /// 最終的なcombatBonusesを計算（称号 × 超レア × 宝石改造 × パンドラ）
+    private static func calculateFinalCombatBonuses(
+        definition: ItemDefinition,
+        normalTitleId: UInt8,
+        superRareTitleId: UInt8,
+        socketItemId: UInt16,
+        socketNormalTitleId: UInt8,
+        socketSuperRareTitleId: UInt8,
+        isPandora: Bool,
+        masterData: MasterDataCache
+    ) -> ItemDefinition.CombatBonuses {
+        // 親装備の称号倍率
+        let title = masterData.title(normalTitleId)
+        let statMult = title?.statMultiplier ?? 1.0
+        let negMult = title?.negativeMultiplier ?? 1.0
+        let superRareMult: Double = superRareTitleId > 0 ? 2.0 : 1.0
+
+        // 親装備のcombatBonuses（称号 × 超レア）
+        var result = definition.combatBonuses.scaledWithTitle(
+            statMult: statMult,
+            negMult: negMult,
+            superRare: superRareMult
+        )
+
+        // ソケット宝石があれば加算
+        if socketItemId > 0,
+           let gemDefinition = masterData.item(socketItemId) {
+            let gemTitle = masterData.title(socketNormalTitleId)
+            let gemStatMult = gemTitle?.statMultiplier ?? 1.0
+            let gemNegMult = gemTitle?.negativeMultiplier ?? 1.0
+            let gemSuperRareMult: Double = socketSuperRareTitleId > 0 ? 2.0 : 1.0
+
+            let gemBonus = gemDefinition.combatBonuses.scaledForGem(
+                statMult: gemStatMult,
+                negMult: gemNegMult,
+                superRare: gemSuperRareMult
+            )
+            result = result.adding(gemBonus)
+        }
+
+        // パンドラ効果
+        if isPandora {
+            result = result.scaled(by: 1.5)
+        }
+
+        return result
     }
 }
 

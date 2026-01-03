@@ -114,6 +114,79 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
                 breathDamage: Int(Double(breathDamage) * multiplier)
             )
         }
+
+        /// 称号倍率を適用（正の値と負の値で異なる倍率）
+        nonisolated func scaledWithTitle(statMult: Double, negMult: Double, superRare: Double) -> CombatBonuses {
+            func apply(_ value: Int) -> Int {
+                let mult = value > 0 ? statMult : negMult
+                return Int((Double(value) * mult * superRare).rounded(.towardZero))
+            }
+            func applyDouble(_ value: Double) -> Double {
+                let mult = value > 0 ? statMult : negMult
+                return value * mult * superRare
+            }
+            return CombatBonuses(
+                maxHP: apply(maxHP),
+                physicalAttack: apply(physicalAttack),
+                magicalAttack: apply(magicalAttack),
+                physicalDefense: apply(physicalDefense),
+                magicalDefense: apply(magicalDefense),
+                hitRate: apply(hitRate),
+                evasionRate: apply(evasionRate),
+                criticalRate: apply(criticalRate),
+                attackCount: applyDouble(attackCount),
+                magicalHealing: apply(magicalHealing),
+                trapRemoval: apply(trapRemoval),
+                additionalDamage: apply(additionalDamage),
+                breathDamage: apply(breathDamage)
+            )
+        }
+
+        /// 宝石改造用スケール（魔法防御0.25、その他0.5）
+        nonisolated func scaledForGem(statMult: Double, negMult: Double, superRare: Double) -> CombatBonuses {
+            func apply(_ value: Int, coefficient: Double) -> Int {
+                let mult = value > 0 ? statMult : negMult
+                return Int((Double(value) * coefficient * mult * superRare).rounded(.towardZero))
+            }
+            func applyDouble(_ value: Double, coefficient: Double) -> Double {
+                let mult = value > 0 ? statMult : negMult
+                return value * coefficient * mult * superRare
+            }
+            return CombatBonuses(
+                maxHP: apply(maxHP, coefficient: 0.5),
+                physicalAttack: apply(physicalAttack, coefficient: 0.5),
+                magicalAttack: apply(magicalAttack, coefficient: 0.5),
+                physicalDefense: apply(physicalDefense, coefficient: 0.5),
+                magicalDefense: apply(magicalDefense, coefficient: 0.25),
+                hitRate: apply(hitRate, coefficient: 0.5),
+                evasionRate: apply(evasionRate, coefficient: 0.5),
+                criticalRate: apply(criticalRate, coefficient: 0.5),
+                attackCount: applyDouble(attackCount, coefficient: 0.5),
+                magicalHealing: apply(magicalHealing, coefficient: 0.5),
+                trapRemoval: apply(trapRemoval, coefficient: 0.5),
+                additionalDamage: apply(additionalDamage, coefficient: 0.5),
+                breathDamage: apply(breathDamage, coefficient: 0.5)
+            )
+        }
+
+        /// 2つのCombatBonusesを合算
+        nonisolated func adding(_ other: CombatBonuses) -> CombatBonuses {
+            CombatBonuses(
+                maxHP: maxHP + other.maxHP,
+                physicalAttack: physicalAttack + other.physicalAttack,
+                magicalAttack: magicalAttack + other.magicalAttack,
+                physicalDefense: physicalDefense + other.physicalDefense,
+                magicalDefense: magicalDefense + other.magicalDefense,
+                hitRate: hitRate + other.hitRate,
+                evasionRate: evasionRate + other.evasionRate,
+                criticalRate: criticalRate + other.criticalRate,
+                attackCount: attackCount + other.attackCount,
+                magicalHealing: magicalHealing + other.magicalHealing,
+                trapRemoval: trapRemoval + other.trapRemoval,
+                additionalDamage: additionalDamage + other.additionalDamage,
+                breathDamage: breathDamage + other.breathDamage
+            )
+        }
     }
 
     let id: UInt16
