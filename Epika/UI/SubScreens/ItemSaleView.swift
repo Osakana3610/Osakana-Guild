@@ -31,7 +31,6 @@ struct ItemSaleView: View {
     @State private var selectedStackKeys: Set<String> = []
     @State private var selectedItems: [CachedInventoryItem] = []
     @State private var selectedTotalSellPrice: Int = 0
-    @State private var cacheVersion: Int = 0
     @State private var didLoadOnce = false
     @State private var detailItem: CachedInventoryItem?
     @State private var saleWarningContext: SaleWarningContext?
@@ -84,7 +83,6 @@ struct ItemSaleView: View {
         .onAppear { Task { await loadIfNeeded() } }
         .onChange(of: appServices.userDataLoad.itemCacheVersion) {
             refreshSelectionFromCache()
-            cacheVersion = appServices.userDataLoad.itemCacheVersion
         }
         .sheet(item: $detailItem) { item in
             NavigationStack {
@@ -152,7 +150,6 @@ struct ItemSaleView: View {
                     }
                 }
             }
-            .id(cacheVersion)
             .avoidBottomGameInfo()
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
             .toolbar {
@@ -308,10 +305,6 @@ struct ItemSaleView: View {
 
         do {
             player = try await appServices.gameState.loadCurrentPlayer()
-
-            // 起動時に既にロード済み（UserDataLoadService.loadAllで）
-            let service = appServices.userDataLoad
-            cacheVersion = service.itemCacheVersion
             showError = false
             didLoadOnce = true
         } catch {
@@ -326,7 +319,6 @@ struct ItemSaleView: View {
         do {
             let stackKeys = items.map { $0.stackKey }
             _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
-            cacheVersion = appServices.userDataLoad.itemCacheVersion
             removeSelection(forKeys: stackKeys)
         } catch {
             showError = true
@@ -355,7 +347,6 @@ struct ItemSaleView: View {
             try await registerAutoTradeRules(for: items)
             let stackKeys = items.map { $0.stackKey }
             _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
-            cacheVersion = appServices.userDataLoad.itemCacheVersion
             removeSelection(forKeys: stackKeys)
         } catch {
             showError = true
@@ -420,9 +411,7 @@ struct ItemSaleView: View {
     private func sellItem(_ item: CachedInventoryItem, quantity: Int) async {
         do {
             _ = try await appServices.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
-            let service = appServices.userDataLoad
-            let newQuantity = try service.decrementQuantity(stackKey: item.stackKey, by: quantity)
-            cacheVersion = service.itemCacheVersion
+            let newQuantity = try appServices.userDataLoad.decrementQuantity(stackKey: item.stackKey, by: quantity)
 
             if newQuantity <= 0 {
                 // 数量が0になった場合は選択から削除
@@ -446,7 +435,6 @@ struct ItemSaleView: View {
         do {
             try await registerAutoTradeRules(for: [item])
             _ = try await appServices.sellItemsToShop(stackKeys: [item.stackKey])
-            cacheVersion = appServices.userDataLoad.itemCacheVersion
             removeSelection(forKeys: [item.stackKey])
         } catch {
             showError = true
