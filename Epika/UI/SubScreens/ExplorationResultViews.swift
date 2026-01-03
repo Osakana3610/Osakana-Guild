@@ -150,8 +150,7 @@ struct ExplorationRunResultSummaryView: View {
                !title.isEmpty {
                 name += title
             }
-            if summary.normalTitleId > 0,
-               let title = cache.title(summary.normalTitleId)?.name,
+            if let title = cache.title(summary.normalTitleId)?.name,
                !title.isEmpty {
                 name += title
             }
@@ -232,8 +231,7 @@ struct ExplorationRunResultSummaryView: View {
            !title.isEmpty {
             result += title
         }
-        if entry.normalTitleId != 0,
-           let title = cache.title(entry.normalTitleId)?.name,
+        if let title = cache.title(entry.normalTitleId)?.name,
            !title.isEmpty {
             result += title
         }
