@@ -410,8 +410,8 @@ enum CachedCharacterFactory {
                let superRareTitle = masterData.superRareTitle(item.superRareTitleId) {
                 displayName += superRareTitle.name
             }
-            if item.normalTitleId > 0,
-               let title = masterData.title(item.normalTitleId) {
+            if let title = masterData.title(item.normalTitleId),
+               !title.name.isEmpty {
                 displayName += title.name
             }
             displayName += definition.name
@@ -424,8 +424,8 @@ enum CachedCharacterFactory {
                    let socketSuperRare = masterData.superRareTitle(item.socketSuperRareTitleId) {
                     socketName += socketSuperRare.name
                 }
-                if item.socketNormalTitleId > 0,
-                   let socketTitle = masterData.title(item.socketNormalTitleId) {
+                if let socketTitle = masterData.title(item.socketNormalTitleId),
+                   !socketTitle.name.isEmpty {
                     socketName += socketTitle.name
                 }
                 socketName += socketDef.name

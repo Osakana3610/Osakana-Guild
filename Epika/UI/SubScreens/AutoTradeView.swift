@@ -162,7 +162,7 @@ struct AutoTradeView: View {
             if rule.superRareTitleId > 0, let name = superRareTitleNames[rule.superRareTitleId] {
                 parts.append(name)
             }
-            if rule.normalTitleId > 0, let name = normalTitleNames[rule.normalTitleId] {
+            if let name = normalTitleNames[rule.normalTitleId], !name.isEmpty {
                 parts.append(name)
             }
             if let itemName = itemNames[rule.itemId] {
