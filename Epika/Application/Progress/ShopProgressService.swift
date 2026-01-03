@@ -389,10 +389,9 @@ private extension ShopProgressService {
         let reducedQuantity = remaining - targetQuantity
         let stackUnit = Int(Self.stockDisplayLimit)
         let stackCount = Int(reducedQuantity) / stackUnit
-        guard stackCount > 0 else { return nil }
-
         let ticketsPerStack = max(1, definition.basePrice / 4_000_000)
-        return CleanupComputation(tickets: ticketsPerStack * stackCount)
+        let tickets = max(1, ticketsPerStack * stackCount)  // 最低1枚を保証
+        return CleanupComputation(tickets: tickets)
     }
 
     func loadShopSnapshot(masterItems: [MasterShopItem]) async throws -> CachedShopStock {
