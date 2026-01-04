@@ -416,14 +416,17 @@ private struct PartyEquipmentListView: View {
                             EquipmentEditorView(character: character)
                                 .environment(appServices)
                         } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                let equipment = character.equippedItems
-                                if equipment.isEmpty {
-                                    Text("装備なし").foregroundColor(.secondary)
-                                } else {
-                                    ForEach(equipment, id: \.stackKey) { item in
-                                        let displayText = item.quantity > 1 ? "\(item.displayName) x\(item.quantity)" : item.displayName
-                                        Text("• \(displayText)")
+                            HStack(alignment: .center, spacing: 12) {
+                                CharacterImageView(avatarIndex: character.resolvedAvatarId, size: 44)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    let equipment = character.equippedItems
+                                    if equipment.isEmpty {
+                                        Text("装備なし").foregroundColor(.secondary)
+                                    } else {
+                                        ForEach(equipment, id: \.stackKey) { item in
+                                            let displayText = item.quantity > 1 ? "\(item.displayName) x\(item.quantity)" : item.displayName
+                                            Text(displayText)
+                                        }
                                     }
                                 }
                             }
