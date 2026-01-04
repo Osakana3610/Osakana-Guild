@@ -26,8 +26,6 @@ extension BattleActor.SkillEffects.Reaction {
         guard payload.effectType == .reaction else { return nil }
         guard let triggerRaw = payload.parameters[.trigger],
               let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: UInt8(triggerRaw)) else { return nil }
-        // action: 2 = counterAttack (EnumMappings.effectActionType)
-        guard payload.parameters[.action] == 2 else { return nil }
         let targetRaw = payload.parameters[.target] ?? Int(BattleActor.SkillEffects.Reaction.Target.attacker.rawValue)
         let target = BattleActor.SkillEffects.Reaction.Target(rawValue: UInt8(targetRaw)) ?? .attacker
         let requiresMartial = (payload.parameters[.requiresMartial] == 1)

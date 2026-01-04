@@ -13169,7 +13169,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfDamagedPhysical",
-          "action": "physicalCounter"
+          "action": "physicalCounter",
+          "damageType": "physical"
         },
         "variants": [
           {
@@ -13204,7 +13205,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfKilledEnemy",
-          "action": "extraAttack"
+          "action": "extraAttack",
+          "damageType": "physical"
         },
         "variants": [
           {
@@ -13223,7 +13225,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "allyMagicAttack",
-          "action": "physicalPursuit"
+          "action": "physicalPursuit",
+          "damageType": "physical"
         },
         "variants": [
           {
@@ -13242,7 +13245,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfDamagedPhysical",
-          "action": "magicCounter"
+          "action": "magicCounter",
+          "damageType": "magical"
         },
         "variants": [
           {
@@ -13386,7 +13390,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfDamagedPhysical",
-          "action": "breathCounter"
+          "action": "breathCounter",
+          "damageType": "breath"
         },
         "variants": [
           {
@@ -13422,7 +13427,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfDamagedMagical",
-          "action": "physicalCounter"
+          "action": "physicalCounter",
+          "damageType": "physical"
         },
         "variants": [
           {
@@ -13621,7 +13627,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfAttackNoKill",
-          "action": "extraAttack"
+          "action": "extraAttack",
+          "damageType": "physical"
         },
         "variants": [
           {
