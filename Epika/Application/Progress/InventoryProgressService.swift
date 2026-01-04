@@ -677,20 +677,13 @@ actor InventoryProgressService {
 
     // MARK: - Inventory Change Notification
 
-    /// インベントリ変更通知を送信
+    /// インベントリ変更通知を送信（stackKeyと数量のみ）
     private func postInventoryChange(upserted: [InventoryItemRecord] = [], removed: [String] = []) {
         guard !upserted.isEmpty || !removed.isEmpty else { return }
-        // レコードから詳細情報を抽出（actorの境界を超える前に）
         let upsertedItems = upserted.map { record in
             UserDataLoadService.InventoryChange.UpsertedItem(
                 stackKey: record.stackKey,
-                itemId: record.itemId,
-                quantity: record.quantity,
-                normalTitleId: record.normalTitleId,
-                superRareTitleId: record.superRareTitleId,
-                socketItemId: record.socketItemId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId
+                quantity: record.quantity
             )
         }
         let change = UserDataLoadService.InventoryChange(upserted: upsertedItems, removed: removed)

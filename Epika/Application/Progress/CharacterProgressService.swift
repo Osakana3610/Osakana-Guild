@@ -201,20 +201,13 @@ actor CharacterProgressService {
         }
     }
 
-    /// インベントリ変更通知を送信（装備のつけ外し時に使用）
+    /// インベントリ変更通知を送信（装備のつけ外し時に使用、stackKeyと数量のみ）
     private func postInventoryChange(upserted: [InventoryItemRecord] = [], removed: [String] = []) {
         guard !upserted.isEmpty || !removed.isEmpty else { return }
-        // レコードから詳細情報を抽出（actorの境界を超える前に）
         let upsertedItems = upserted.map { record in
             UserDataLoadService.InventoryChange.UpsertedItem(
                 stackKey: record.stackKey,
-                itemId: record.itemId,
-                quantity: record.quantity,
-                normalTitleId: record.normalTitleId,
-                superRareTitleId: record.superRareTitleId,
-                socketItemId: record.socketItemId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId
+                quantity: record.quantity
             )
         }
         let change = UserDataLoadService.InventoryChange(upserted: upsertedItems, removed: removed)
@@ -871,26 +864,15 @@ actor CharacterProgressService {
             context.insert(equipmentRecord)
         }
 
-        // インベントリから減算
+        // インベントリから減算（数量0でも削除しない）
         let stackKey = inventoryRecord.stackKey
         inventoryRecord.quantity -= UInt16(quantity)
-        let wasDeleted = inventoryRecord.quantity <= 0
-        if wasDeleted {
-            context.delete(inventoryRecord)
-        }
 
         try context.save()
 
-        let newQuantity = wasDeleted ? 0 : inventoryRecord.quantity
-
-        // キャッシュ更新のためインベントリ変更通知を送信（スキップオプションがない場合のみ）
-        // （characterProgressDidChange通知は送らない。全キャラクター再構築でUIをブロックするため）
+        // キャッシュ更新のためインベントリ変更通知を送信
         if !skipNotification {
-            if wasDeleted {
-                postInventoryChange(removed: [stackKey])
-            } else {
-                postInventoryChange(upserted: [inventoryRecord])
-            }
+            postInventoryChange(upserted: [inventoryRecord])
         }
 
         // 更新後の装備リストを返す（軽量版）
@@ -898,8 +880,8 @@ actor CharacterProgressService {
         return EquipResult(
             equippedItems: equippedItems,
             inventoryStackKey: stackKey,
-            wasDeleted: wasDeleted,
-            newQuantity: newQuantity
+            wasDeleted: false,
+            newQuantity: inventoryRecord.quantity
         )
     }
 
@@ -971,14 +953,14 @@ actor CharacterProgressService {
         })
         inventoryDescriptor.fetchLimit = 1
 
-        var inventoryRecordForNotification: InventoryItemRecord?
+        // インベントリレコードの数量を+1（装備時に削除しないので必ず存在するはず）
+        let inventoryRecord: InventoryItemRecord
         if let existingInventory = try context.fetch(inventoryDescriptor).first {
-            // 既存スタックに追加
             existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
-            inventoryRecordForNotification = existingInventory
+            inventoryRecord = existingInventory
         } else if let firstEquip = matchingEquipment.first {
-            // 新規インベントリレコード作成
-            let inventoryRecord = InventoryItemRecord(
+            // フォールバック：過去データとの互換性のため新規作成
+            let newRecord = InventoryItemRecord(
                 superRareTitleId: firstEquip.superRareTitleId,
                 normalTitleId: firstEquip.normalTitleId,
                 itemId: firstEquip.itemId,
@@ -988,8 +970,10 @@ actor CharacterProgressService {
                 quantity: UInt16(quantity),
                 storage: storage
             )
-            context.insert(inventoryRecord)
-            inventoryRecordForNotification = inventoryRecord
+            context.insert(newRecord)
+            inventoryRecord = newRecord
+        } else {
+            throw ProgressError.invalidInput(description: "インベントリレコードが見つかりません")
         }
 
         // 装備レコードを削除（quantity個）
@@ -999,21 +983,17 @@ actor CharacterProgressService {
 
         try context.save()
 
-        let stackKey = inventoryRecordForNotification?.stackKey ?? equipmentStackKey
-        let newQuantity = inventoryRecordForNotification?.quantity ?? UInt16(quantity)
-
-        // キャッシュ更新のためインベントリ変更通知を送信（スキップオプションがない場合のみ）
-        // （characterProgressDidChange通知は送らない。全キャラクター再構築でUIをブロックするため）
-        if !skipNotification, let record = inventoryRecordForNotification {
-            postInventoryChange(upserted: [record])
+        // キャッシュ更新のためインベントリ変更通知を送信
+        if !skipNotification {
+            postInventoryChange(upserted: [inventoryRecord])
         }
 
         // 更新後の装備リストを返す（軽量版）
         let equippedItems = try fetchEquippedItems(characterId: characterId, context: context)
         return UnequipResult(
             equippedItems: equippedItems,
-            inventoryStackKey: stackKey,
-            newQuantity: newQuantity
+            inventoryStackKey: inventoryRecord.stackKey,
+            newQuantity: inventoryRecord.quantity
         )
     }
 

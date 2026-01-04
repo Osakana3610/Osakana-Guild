@@ -20,20 +20,14 @@ import SwiftUI
 extension UserDataLoadService {
     /// インベントリ変更通知用の構造体
     struct InventoryChange: Sendable {
-        /// 追加または更新されたアイテムの詳細情報
+        /// 追加または更新されたアイテム（stackKeyと数量のみ）
         struct UpsertedItem: Sendable {
             let stackKey: String
-            let itemId: UInt16
             let quantity: UInt16
-            let normalTitleId: UInt8
-            let superRareTitleId: UInt8
-            let socketItemId: UInt16
-            let socketNormalTitleId: UInt8
-            let socketSuperRareTitleId: UInt8
         }
 
         let upserted: [UpsertedItem]  // 追加または更新されたアイテム
-        let removed: [String]         // 完全削除されたstackKey
+        let removed: [String]         // 完全削除されたstackKey（売却時のみ）
     }
 }
 
@@ -222,10 +216,10 @@ extension UserDataLoadService {
         isItemsLoaded = false
     }
 
-    /// サブカテゴリ別にグループ化されたアイテムを取得
+    /// サブカテゴリ別アイテムを取得（数量0は除外）
     @MainActor
     func getSubcategorizedItems() -> [ItemDisplaySubcategory: [CachedInventoryItem]] {
-        subcategorizedItems
+        subcategorizedItems.mapValues { $0.filter { $0.quantity > 0 } }
     }
 
     /// サブカテゴリのソート済み順序を取得
@@ -234,25 +228,27 @@ extension UserDataLoadService {
         orderedSubcategories
     }
 
-    /// 指定カテゴリのアイテムをフラット配列で取得
+    /// 指定カテゴリのアイテムをフラット配列で取得（数量0は除外）
     @MainActor
     func getItems(categories: Set<ItemSaleCategory>) -> [CachedInventoryItem] {
         orderedSubcategories
             .filter { categories.contains($0.mainCategory) }
             .flatMap { subcategorizedItems[$0] ?? [] }
+            .filter { $0.quantity > 0 }
     }
 
-    /// 全アイテムをフラット配列で取得
+    /// 全アイテムをフラット配列で取得（数量0は除外）
     @MainActor
     func getAllItems() -> [CachedInventoryItem] {
         orderedSubcategories.flatMap { subcategorizedItems[$0] ?? [] }
+            .filter { $0.quantity > 0 }
     }
 
-    /// stackKeyからアイテムを取得
+    /// stackKeyからアイテムを取得（数量0は除外）
     @MainActor
     func getItem(stackKey: String) -> CachedInventoryItem? {
         guard let subcategory = stackKeyIndex[stackKey] else { return nil }
-        return subcategorizedItems[subcategory]?.first { $0.stackKey == stackKey }
+        return subcategorizedItems[subcategory]?.first { $0.stackKey == stackKey && $0.quantity > 0 }
     }
 
     /// stackKeyからサブカテゴリを取得
@@ -357,97 +353,111 @@ extension UserDataLoadService {
     }
 
     /// インベントリ変更をキャッシュへ適用
-    /// - Note: 通知に含まれる詳細情報から直接キャッシュを更新。SwiftDataへのアクセスは行わない。
+    /// - キャッシュに存在するアイテム: 数量のみ更新（軽量）
+    /// - キャッシュに存在しないアイテム: stackKeyからマスターデータを引いて新規作成
     @MainActor
     private func applyInventoryChange(_ change: InventoryChange) {
-        // upsertedアイテムをキャッシュに反映
-        if !change.upserted.isEmpty {
-            let itemIds = change.upserted.map { $0.itemId }
-            let definitions = masterDataCache.items(itemIds)
-            let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+        var needsSort = false
 
-            let allTitles = masterDataCache.allTitles
-            let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
-
-            for item in change.upserted {
-                guard let definition = definitionMap[item.itemId] else { continue }
-
-                let enhancement = ItemEnhancement(
-                    superRareTitleId: item.superRareTitleId,
-                    normalTitleId: item.normalTitleId,
-                    socketSuperRareTitleId: item.socketSuperRareTitleId,
-                    socketNormalTitleId: item.socketNormalTitleId,
-                    socketItemId: item.socketItemId
-                )
-
-                let sellPrice = (try? ItemPriceCalculator.sellPrice(
-                    baseSellValue: definition.sellValue,
-                    normalTitleId: item.normalTitleId,
-                    hasSuperRare: item.superRareTitleId != 0,
-                    multiplierMap: priceMultiplierMap
-                )) ?? definition.sellValue
-
-                let fullDisplayName = buildFullDisplayName(
-                    itemName: definition.name,
-                    enhancement: enhancement
-                )
-
-                // スキルIDを収集（ベース + 超レア称号）
-                var grantedSkillIds = definition.grantedSkillIds
-                if item.superRareTitleId > 0,
-                   let superRareSkillIds = masterDataCache.superRareTitle(item.superRareTitleId)?.skillIds {
-                    grantedSkillIds.append(contentsOf: superRareSkillIds)
+        for item in change.upserted {
+            // キャッシュに存在する場合は数量のみ更新（O(1)）
+            if let subcategory = stackKeyIndex[item.stackKey],
+               let index = subcategorizedItems[subcategory]?.firstIndex(where: { $0.stackKey == item.stackKey }) {
+                subcategorizedItems[subcategory]![index].quantity = item.quantity
+            } else {
+                // キャッシュに存在しない場合はstackKeyからマスターデータを引いて新規作成
+                if let cachedItem = createCachedItemFromStackKey(item.stackKey, quantity: item.quantity) {
+                    upsertItem(cachedItem)
+                    needsSort = true
                 }
-
-                // 戦闘ステータスを計算（称号 × 超レア × 宝石改造 × パンドラ）
-                let combatBonuses = calculateFinalCombatBonuses(
-                    definition: definition,
-                    normalTitleId: item.normalTitleId,
-                    superRareTitleId: item.superRareTitleId,
-                    socketItemId: item.socketItemId,
-                    socketNormalTitleId: item.socketNormalTitleId,
-                    socketSuperRareTitleId: item.socketSuperRareTitleId,
-                    isPandora: pandoraBoxItems.contains(packedStackKey(
-                        superRareTitleId: item.superRareTitleId,
-                        normalTitleId: item.normalTitleId,
-                        itemId: item.itemId,
-                        socketSuperRareTitleId: item.socketSuperRareTitleId,
-                        socketNormalTitleId: item.socketNormalTitleId,
-                        socketItemId: item.socketItemId
-                    ))
-                )
-
-                let category = ItemSaleCategory(rawValue: definition.category) ?? .other
-                let cachedItem = CachedInventoryItem(
-                    stackKey: item.stackKey,
-                    itemId: item.itemId,
-                    quantity: item.quantity,
-                    normalTitleId: item.normalTitleId,
-                    superRareTitleId: item.superRareTitleId,
-                    socketItemId: item.socketItemId,
-                    socketNormalTitleId: item.socketNormalTitleId,
-                    socketSuperRareTitleId: item.socketSuperRareTitleId,
-                    category: category,
-                    rarity: definition.rarity,
-                    displayName: fullDisplayName,
-                    baseValue: definition.basePrice,
-                    sellValue: sellPrice,
-                    statBonuses: definition.statBonuses,
-                    combatBonuses: combatBonuses,
-                    grantedSkillIds: grantedSkillIds
-                )
-                upsertItem(cachedItem)
             }
         }
 
-        // removedアイテムをキャッシュから削除
+        // removedアイテムをキャッシュから削除（売却時のみ）
         for stackKey in change.removed {
             removeItemWithoutVersion(stackKey: stackKey)
         }
 
-        sortCacheItems()
-        rebuildOrderedSubcategories()
+        if needsSort {
+            sortCacheItems()
+            rebuildOrderedSubcategories()
+        }
         itemCacheVersion &+= 1
+    }
+
+    /// stackKeyからCachedInventoryItemを作成
+    @MainActor
+    private func createCachedItemFromStackKey(_ stackKey: String, quantity: UInt16) -> CachedInventoryItem? {
+        guard let components = StackKeyComponents(stackKey: stackKey),
+              let definition = masterDataCache.item(components.itemId) else {
+            return nil
+        }
+
+        let enhancement = ItemEnhancement(
+            superRareTitleId: components.superRareTitleId,
+            normalTitleId: components.normalTitleId,
+            socketSuperRareTitleId: components.socketSuperRareTitleId,
+            socketNormalTitleId: components.socketNormalTitleId,
+            socketItemId: components.socketItemId
+        )
+
+        let allTitles = masterDataCache.allTitles
+        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
+
+        let sellPrice = (try? ItemPriceCalculator.sellPrice(
+            baseSellValue: definition.sellValue,
+            normalTitleId: components.normalTitleId,
+            hasSuperRare: components.superRareTitleId != 0,
+            multiplierMap: priceMultiplierMap
+        )) ?? definition.sellValue
+
+        let fullDisplayName = buildFullDisplayName(
+            itemName: definition.name,
+            enhancement: enhancement
+        )
+
+        var grantedSkillIds = definition.grantedSkillIds
+        if components.superRareTitleId > 0,
+           let superRareSkillIds = masterDataCache.superRareTitle(components.superRareTitleId)?.skillIds {
+            grantedSkillIds.append(contentsOf: superRareSkillIds)
+        }
+
+        let combatBonuses = calculateFinalCombatBonuses(
+            definition: definition,
+            normalTitleId: components.normalTitleId,
+            superRareTitleId: components.superRareTitleId,
+            socketItemId: components.socketItemId,
+            socketNormalTitleId: components.socketNormalTitleId,
+            socketSuperRareTitleId: components.socketSuperRareTitleId,
+            isPandora: pandoraBoxItems.contains(packedStackKey(
+                superRareTitleId: components.superRareTitleId,
+                normalTitleId: components.normalTitleId,
+                itemId: components.itemId,
+                socketSuperRareTitleId: components.socketSuperRareTitleId,
+                socketNormalTitleId: components.socketNormalTitleId,
+                socketItemId: components.socketItemId
+            ))
+        )
+
+        let category = ItemSaleCategory(rawValue: definition.category) ?? .other
+        return CachedInventoryItem(
+            stackKey: stackKey,
+            itemId: components.itemId,
+            quantity: quantity,
+            normalTitleId: components.normalTitleId,
+            superRareTitleId: components.superRareTitleId,
+            socketItemId: components.socketItemId,
+            socketNormalTitleId: components.socketNormalTitleId,
+            socketSuperRareTitleId: components.socketSuperRareTitleId,
+            category: category,
+            rarity: definition.rarity,
+            displayName: fullDisplayName,
+            baseValue: definition.basePrice,
+            sellValue: sellPrice,
+            statBonuses: definition.statBonuses,
+            combatBonuses: combatBonuses,
+            grantedSkillIds: grantedSkillIds
+        )
     }
 
     /// アイテムをキャッシュにupsert

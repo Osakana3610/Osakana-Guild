@@ -659,12 +659,11 @@ struct EquipmentEditorView: View {
         let oldCharacter = currentCharacter
 
         do {
-            // 通知をスキップして装備処理を実行（手動でキャッシュを一括更新するため）
+            // 装備処理を実行（通知経由でキャッシュが自動更新される）
             let result = try await characterService.equipItem(
                 characterId: currentCharacter.id,
                 inventoryItemStackKey: item.stackKey,
-                equipmentCapacity: currentCharacter.equipmentCapacity,
-                skipNotification: true
+                equipmentCapacity: currentCharacter.equipmentCapacity
             )
             // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
             let pandoraBoxItems = Set(displayService.pandoraBoxItems)
@@ -684,12 +683,6 @@ struct EquipmentEditorView: View {
             // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
             displayService.updateCharacter(runtime)
 
-            // インベントリキャッシュと装備中アイテムを同時に更新（1回の再描画で完了）
-            if result.wasDeleted {
-                displayService.removeItems(stackKeys: [result.inventoryStackKey])
-            } else {
-                _ = try? displayService.decrementQuantity(stackKey: result.inventoryStackKey, by: 1)
-            }
             rebuildEquippedItemsAndRefresh()
         } catch {
             equipError = error.localizedDescription
@@ -701,11 +694,10 @@ struct EquipmentEditorView: View {
         equipError = nil
         let oldCharacter = currentCharacter
 
-        // 通知をスキップして解除処理を実行（手動でキャッシュを一括更新するため）
+        // 解除処理を実行（通知経由でキャッシュが自動更新される）
         let result = try await characterService.unequipItem(
             characterId: currentCharacter.id,
-            equipmentStackKey: item.stackKey,
-            skipNotification: true
+            equipmentStackKey: item.stackKey
         )
         // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
         let pandoraBoxItems = Set(displayService.pandoraBoxItems)
@@ -725,21 +717,7 @@ struct EquipmentEditorView: View {
         // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
         displayService.updateCharacter(runtime)
 
-        // つける時と同じ順序で更新（キャッシュ変更 → @State変更）
-        updateInventoryCacheForUnequip(item: item, newQuantity: Int(result.newQuantity))
         rebuildEquippedItemsAndRefresh()
-    }
-
-    /// 解除時にインベントリキャッシュを更新（存在すれば数量増加、なければ新規追加）
-    private func updateInventoryCacheForUnequip(item: CachedInventoryItem, newQuantity: Int) {
-        // キャッシュに存在するか確認（O(1)）
-        if displayService.containsItem(stackKey: item.stackKey) {
-            // 存在する場合は数量更新を通知
-            displayService.incrementQuantity(stackKey: item.stackKey, by: 1)
-        } else {
-            // 存在しない場合は直接キャッシュに追加
-            displayService.insertItemWithoutVersion(item)
-        }
     }
 
     /// 装備中アイテムを再構築（filteredSectionsはcomputed propertyなので自動更新）
