@@ -7,12 +7,10 @@
 //   - キャラクターCRUD操作
 //   - 装備管理（装着・解除）
 //   - 転職処理
-//   - 戦闘結果適用（経験値・HP）
 //   - CachedCharacter生成
 //
 // 【公開API - 読み取り】
 //   - allCharacters() → [CachedCharacter]
-//   - character(withId:) → CachedCharacter?
 //   - characters(withIds:) → [CachedCharacter]
 //
 // 【公開API - 書き込み】
@@ -25,19 +23,14 @@
 //   - changeJob(characterId:newJobId:) → CachedCharacter
 //   - equipItem(characterId:inventoryItemStackKey:) → EquipResult
 //   - unequipItem(characterId:equipmentStackKey:) → UnequipResult
-//   - applyBattleResults(_:) - 経験値・HP変更を一括適用
 //   - healToFull(characterIds:) - HP全回復
 //   - reviveCharacter(id:) - HP 0のキャラクター蘇生
 //
 // 【補助型】
 //   - CharacterCreationRequest: 作成リクエスト
-//   - BattleResultUpdate: 戦闘結果更新
+//   - BattleResultUpdate: 戦闘結果更新（BattleResultSessionで使用）
 //   - EquipResult: 装備処理結果
 //   - UnequipResult: 解除処理結果
-//
-// 【キャッシュ】
-//   - raceLevelCache: 種族別最大レベル
-//   - raceMaxExperienceCache: 種族別最大経験値
 //
 // ==============================================================================
 

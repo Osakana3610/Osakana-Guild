@@ -8,12 +8,12 @@
 //   - 探索レコードの作成・更新・終了処理
 //
 // 【公開API】
-//   - allExplorations() → [CachedExploration] - 全探索履歴
 //   - beginRun(...) → PersistentIdentifier - 探索開始、レコード作成
-//   - appendEvent(...) - イベント追加、乱数状態保存
-//   - finalizeRun(...) - 探索終了処理
+//   - makeEventSession(...) → EventSession - イベント記録セッション
 //   - cancelRun(...) - 探索キャンセル
-//   - fetchRunningRecord(...) → ExplorationRunRecord? - 実行中レコード取得
+//   - recentExplorationSummaries(...) - 最新探索サマリー取得
+//   - runningExplorationSummaries() - 実行中探索サマリー取得
+//   - runningPartyMemberIds() - 実行中パーティメンバーID取得
 //   - encodeItemIds/decodeItemIds - バイナリフォーマットヘルパー
 //   - purgeOldRecordsInBackground() - バックグラウンドで古いレコードを削除
 //
@@ -33,9 +33,6 @@ import SwiftData
 
 private enum CachedExplorationBuildError: Error {
     case dungeonNotFound(UInt16)
-    case itemNotFound(UInt16)
-    case enemyNotFound(UInt16)
-    case statusEffectNotFound(String)
 }
 
 // MARK: - Snapshot Query Actor
@@ -412,11 +409,7 @@ actor CachedExplorationQueryActor {
 
 actor ExplorationProgressService {
     private let contextProvider: SwiftDataContextProvider
-    private let masterDataCache: MasterDataCache
     private let snapshotQuery: CachedExplorationQueryActor
-
-    /// 探索レコードの最大保持件数
-    private static let maxRecordCount = 200
 
     /// 探索履歴のキャッシュ
     private var cachedExplorations: [CachedExploration]?
@@ -607,7 +600,6 @@ actor ExplorationProgressService {
 
     init(contextProvider: SwiftDataContextProvider, masterDataCache: MasterDataCache) {
         self.contextProvider = contextProvider
-        self.masterDataCache = masterDataCache
         self.snapshotQuery = CachedExplorationQueryActor(contextProvider: contextProvider,
                                                            masterDataCache: masterDataCache)
     }
@@ -992,20 +984,6 @@ actor ExplorationProgressService {
 
     // MARK: - Public API
 
-    func allExplorations() async throws -> [CachedExploration] {
-        if let cached = cachedExplorations {
-            return cached
-        }
-        let fetched = try await snapshotQuery.allExplorations()
-        cachedExplorations = fetched
-        return fetched
-    }
-
-    /// 指定パーティの最新探索を取得（UI表示用、最大limit件）
-    func recentExplorations(forPartyId partyId: UInt8, limit: Int = 2) async throws -> [CachedExploration] {
-        try await snapshotQuery.recentExplorations(forPartyId: partyId, limit: limit)
-    }
-
     /// 指定パーティの最新探索サマリーを取得（軽量: encounterLogsなし）
     func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int = 2) async throws -> [CachedExploration] {
         try await snapshotQuery.recentExplorationSummaries(forPartyId: partyId, limit: limit)
@@ -1085,43 +1063,6 @@ actor ExplorationProgressService {
         return results
     }
 
-    /// イベントを追加し、戦闘ログがあればそのIDを返す
-    @discardableResult
-    func appendEvent(runId: PersistentIdentifier,
-                     event: ExplorationEventLogEntry,
-                     battleLog: BattleLogArchive?,
-                     occurredAt: Date,
-                     randomState: UInt64,
-                     superRareState: SuperRareDailyState,
-                     droppedItemIds: Set<UInt16>) throws -> PersistentIdentifier? {
-        let session = try makeEventSession(runId: runId)
-        let battleLogRecord = try session.appendEvent(event: event,
-                                                      battleLog: battleLog,
-                                                      occurredAt: occurredAt,
-                                                      randomState: randomState,
-                                                      superRareState: superRareState,
-                                                      droppedItemIds: droppedItemIds)
-        try session.flushIfNeeded()
-        return battleLogRecord?.persistentModelID
-    }
-
-    func finalizeRun(runId: PersistentIdentifier,
-                     endState: ExplorationEndState,
-                     endedAt: Date,
-                     totalExperience: Int,
-                     totalGold: Int,
-                     autoSellGold: Int = 0,
-                     autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []) async throws {
-        let session = try makeEventSession(runId: runId)
-        session.finalizeRun(endState: endState,
-                            endedAt: endedAt,
-                            totalExperience: totalExperience,
-                            totalGold: totalGold,
-                            autoSellGold: autoSellGold,
-                            autoSoldItems: autoSoldItems)
-        try session.flushIfNeeded()
-    }
-
     func cancelRun(runId: PersistentIdentifier,
                    endedAt: Date = Date()) async throws {
         let session = try makeEventSession(runId: runId)
@@ -1146,16 +1087,6 @@ actor ExplorationProgressService {
 
     func makeEventSession(runId: PersistentIdentifier) throws -> EventSession {
         try EventSession(contextProvider: contextProvider, runId: runId)
-    }
-
-    /// Running状態の探索レコードを取得（再開用）
-    func fetchRunningRecord(partyId: UInt8, startedAt: Date) throws -> ExplorationRunRecord? {
-        let context = contextProvider.makeContext()
-        let runningStatus = ExplorationResult.running.rawValue
-        let descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt && $0.result == runningStatus }
-        )
-        return try context.fetch(descriptor).first
     }
 
     /// 現在探索中の探索サマリーを取得（軽量：encounterLogsなし）
@@ -1200,140 +1131,9 @@ actor ExplorationProgressService {
 // MARK: - Private Helpers
 
 private extension ExplorationProgressService {
-    func fetchRunRecord(runId: PersistentIdentifier, context: ModelContext) throws -> ExplorationRunRecord {
-        guard let record = context.model(for: runId) as? ExplorationRunRecord else {
-            throw ProgressPersistenceError.explorationRunNotFoundByPersistentId
-        }
-        return record
-    }
-
     func saveIfNeeded(_ context: ModelContext) throws {
         if context.hasChanges {
             try context.save()
         }
     }
-
-    func purgeOldRecordsIfNeeded(context: ModelContext) throws {
-        var countDescriptor = FetchDescriptor<ExplorationRunRecord>()
-        countDescriptor.propertiesToFetch = []
-        let count = try context.fetchCount(countDescriptor)
-
-        guard count >= Self.maxRecordCount else { return }
-
-        // 最古の完了済みレコードを削除
-        var oldestDescriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.result != 0 },  // running以外
-            sortBy: [SortDescriptor(\.startedAt, order: .forward)]
-        )
-        oldestDescriptor.fetchLimit = count - Self.maxRecordCount + 1
-
-        let oldRecords = try context.fetch(oldestDescriptor)
-        for record in oldRecords {
-            context.delete(record)
-        }
-    }
-
-    // MARK: - Event Record Building
-
-    /// EventRecordの基本フィールドだけを構築（リレーションは除く）
-    /// iOS 17のSwiftDataバグ対策: @Relationship(inverse:)付きのto-manyリレーションは
-    /// contextに挿入する前にアクセスするとクラッシュするため、リレーション設定は分離
-    func buildBaseEventRecord(from event: ExplorationEventLogEntry,
-                              occurredAt: Date) -> ExplorationEventRecord {
-        let kind: UInt8
-        var enemyId: UInt16?
-        let battleResult: UInt8? = nil  // battleLogがある場合はpopulateEventRecordRelationshipsで設定
-        var scriptedEventId: UInt8?
-
-        switch event.kind {
-        case .nothing:
-            kind = EventKind.nothing.rawValue
-
-        case .combat(let summary):
-            kind = EventKind.combat.rawValue
-            enemyId = summary.enemy.id
-
-        case .scripted(let summary):
-            kind = EventKind.scripted.rawValue
-            scriptedEventId = summary.eventId
-        }
-
-        return ExplorationEventRecord(
-            floor: UInt8(event.floorNumber),
-            kind: kind,
-            enemyId: enemyId,
-            battleResult: battleResult,
-            scriptedEventId: scriptedEventId,
-            exp: UInt32(event.experienceGained),
-            gold: UInt32(event.goldGained),
-            occurredAt: occurredAt
-        )
-    }
-
-    /// contextに挿入済みのEventRecordにリレーションを設定
-    /// イベントレコードのリレーションを構築し、戦闘ログレコードを返す（ID取得は保存後に行う）
-    @discardableResult
-    func populateEventRecordRelationships(eventRecord: ExplorationEventRecord,
-                                          from event: ExplorationEventLogEntry,
-                                          battleLog: BattleLogArchive?,
-                                          context: ModelContext) async throws -> BattleLogRecord? {
-        // ドロップレコードを作成してリレーションに追加
-        for drop in event.drops {
-            let dropRecord = ExplorationDropRecord(
-                superRareTitleId: drop.superRareTitleId,
-                normalTitleId: drop.normalTitleId,
-                itemId: drop.item.id,
-                quantity: UInt16(drop.quantity)
-            )
-            dropRecord.event = eventRecord
-            context.insert(dropRecord)
-        }
-
-        // 戦闘ログレコードを作成してリレーションに追加
-        if let archive = battleLog {
-            // battleResultを設定
-            eventRecord.battleResult = battleResultValue(archive.result)
-
-            let logRecord = BattleLogRecord()
-            logRecord.enemyId = archive.enemyId
-            logRecord.enemyName = archive.enemyName
-            logRecord.result = battleResultValue(archive.result)
-            logRecord.turns = UInt8(archive.turns)
-            logRecord.timestamp = archive.timestamp
-            logRecord.outcome = archive.battleLog.outcome
-            logRecord.event = eventRecord
-
-            // バイナリBLOBで詳細データを保存
-            logRecord.logData = Self.encodeBattleLogData(
-                initialHP: archive.battleLog.initialHP,
-                entries: archive.battleLog.entries,
-                outcome: archive.battleLog.outcome,
-                turns: archive.battleLog.turns,
-                playerSnapshots: archive.playerSnapshots,
-                enemySnapshots: archive.enemySnapshots
-            )
-
-            context.insert(logRecord)
-            return logRecord
-        }
-        return nil
-    }
-
-    func battleResultValue(_ result: BattleService.BattleResult) -> UInt8 {
-        switch result {
-        case .victory: return BattleResult.victory.rawValue
-        case .defeat: return BattleResult.defeat.rawValue
-        case .retreat: return BattleResult.retreat.rawValue
-        }
-    }
-
-    func resultValue(for state: ExplorationEndState) -> UInt8 {
-        switch state {
-        case .completed: return ExplorationResult.completed.rawValue
-        case .defeated: return ExplorationResult.defeated.rawValue
-        }
-    }
-
-    // MARK: - Snapshot Building
-
 }
