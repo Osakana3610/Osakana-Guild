@@ -393,8 +393,32 @@ struct BattleActor: Sendable {
         }
 
         struct ExtraAction: Sendable, Hashable {
+            /// 発動トリガー
+            enum Trigger: UInt8, Sendable {
+                /// 常時（毎行動後に判定）
+                case always = 0
+                /// 戦闘開始時のみ（1ターン目）
+                case battleStart = 1
+                /// 指定ターン以降
+                case afterTurn = 2
+            }
+
             let chancePercent: Double
             let count: Int
+            /// 発動トリガー（デフォルト: always）
+            let trigger: Trigger
+            /// afterTurnトリガー時の開始ターン
+            let triggerTurn: Int
+            /// 効果持続ターン数（nil = 永続）
+            let duration: Int?
+
+            init(chancePercent: Double, count: Int, trigger: Trigger = .always, triggerTurn: Int = 1, duration: Int? = nil) {
+                self.chancePercent = chancePercent
+                self.count = count
+                self.trigger = trigger
+                self.triggerTurn = triggerTurn
+                self.duration = duration
+            }
         }
 
         struct Reaction: Sendable, Hashable {

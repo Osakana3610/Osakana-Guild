@@ -91,7 +91,34 @@ struct ExtraActionHandler: SkillEffectHandler {
         guard chance > 0, clampedCount > 0 else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) extraAction が無効です")
         }
-        accumulator.combat.extraActions.append(.init(chancePercent: chance, count: clampedCount))
+
+        // trigger: 5=battleStart, 1=afterTurn8 (EnumMappings.triggerType)
+        let triggerRaw = payload.parameters[.trigger]
+        let trigger: BattleActor.SkillEffects.ExtraAction.Trigger
+        let triggerTurn: Int
+
+        switch triggerRaw {
+        case 5: // battleStart
+            trigger = .battleStart
+            triggerTurn = 1
+        case 1: // afterTurn8
+            trigger = .afterTurn
+            triggerTurn = 8
+        default:
+            trigger = .always
+            triggerTurn = 1
+        }
+
+        // duration: 効果持続ターン数（省略時はnil = 永続）
+        let duration: Int? = payload.value[.duration].map { Int($0.rounded(.towardZero)) }
+
+        accumulator.combat.extraActions.append(.init(
+            chancePercent: chance,
+            count: clampedCount,
+            trigger: trigger,
+            triggerTurn: triggerTurn,
+            duration: duration
+        ))
     }
 }
 

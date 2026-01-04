@@ -119,6 +119,29 @@ extension BattleTurnEngine {
             var scheduledActions = 0
             for descriptor in extraDescriptors {
                 guard descriptor.count > 0 else { continue }
+
+                // トリガー条件チェック
+                switch descriptor.trigger {
+                case .always:
+                    break
+                case .battleStart:
+                    guard context.turn == 1 else { continue }
+                case .afterTurn:
+                    guard context.turn >= descriptor.triggerTurn else { continue }
+                }
+
+                // duration チェック（設定されている場合、開始ターンからdurationターン以内のみ有効）
+                if let duration = descriptor.duration {
+                    let startTurn: Int
+                    switch descriptor.trigger {
+                    case .always, .battleStart:
+                        startTurn = 1
+                    case .afterTurn:
+                        startTurn = descriptor.triggerTurn
+                    }
+                    guard context.turn < startTurn + duration else { continue }
+                }
+
                 for _ in 0..<descriptor.count {
                     let probability = max(0.0, min(1.0, (descriptor.chancePercent * refreshedActor.skillEffects.combat.procChanceMultiplier) / 100.0))
                     guard probability > 0 else { continue }
