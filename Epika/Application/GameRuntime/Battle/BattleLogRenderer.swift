@@ -298,6 +298,8 @@ struct BattleLogRenderer {
             return effectKind == .physicalEvade
                 || effectKind == .physicalParry
                 || effectKind == .physicalBlock
+                || effectKind == .reactionAttack
+                || effectKind == .followUp
         default:
             return false
         }
@@ -613,9 +615,11 @@ struct BattleLogRenderer {
         case .statusRampage:
             return ("\(actor)の暴走！\(target)に\(amount)のダメージ！", .damage)
         case .reactionAttack:
-            return ("\(actor)の反撃！", .action)
+            let name = actionLabel ?? "反撃"
+            return ("\(actor)の\(name)！", .action)
         case .followUp:
-            return ("\(actor)の追加攻撃！", .action)
+            let name = actionLabel ?? "追撃"
+            return ("\(actor)の\(name)！", .action)
         case .healAbsorb:
             return ("\(actor)は吸収能力で\(amount)回復", .heal)
         case .healVampire:
