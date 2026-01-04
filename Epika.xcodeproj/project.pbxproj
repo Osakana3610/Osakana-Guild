@@ -99,7 +99,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B0E9F1FC2E254D660010C564 /* Build configuration list for PBXNativeTarget "Epika" */;
 			buildPhases = (
-				B0MASTER0D2E254D650010C564 /* Generate MasterData SQLite */,
 				B0E9F1D12E254D650010C564 /* Sources */,
 				B0E9F1D22E254D650010C564 /* Frameworks */,
 				B0E9F1D32E254D650010C564 /* Resources */,
@@ -223,73 +222,6 @@
 			);
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		B0MASTER0D2E254D650010C564 /* Generate MasterData SQLite */ = {
-			isa = PBXShellScriptBuildPhase;
-			inputPaths = (
-				"$(SRCROOT)/MasterData/ItemMaster.json",
-				"$(SRCROOT)/MasterData/SkillMaster.json",
-				"$(SRCROOT)/MasterData/SpellMaster.json",
-				"$(SRCROOT)/MasterData/JobMaster.json",
-				"$(SRCROOT)/MasterData/RaceDataMaster.json",
-				"$(SRCROOT)/MasterData/TitleMaster.json",
-				"$(SRCROOT)/MasterData/SuperRareTitleMaster.json",
-				"$(SRCROOT)/MasterData/StatusEffectMaster.json",
-				"$(SRCROOT)/MasterData/EnemyMaster.json",
-				"$(SRCROOT)/MasterData/DungeonMaster.json",
-				"$(SRCROOT)/MasterData/ShopMaster.json",
-				"$(SRCROOT)/MasterData/SynthesisRecipeMaster.json",
-				"$(SRCROOT)/MasterData/StoryMaster.json",
-				"$(SRCROOT)/MasterData/PersonalityMaster.json",
-				"$(SRCROOT)/MasterData/ExplorationEventMaster.json",
-			);
-			name = "Generate MasterData SQLite";
-			outputPaths = (
-				"$(SRCROOT)/Tools/MasterDataGenerator/output/master_data.db",
-			);
-			shellPath = /bin/bash;
-			shellScript = (
-				"\"${SRCROOT}/Tools/MasterDataGenerator/generate_master_data.sh\"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-			);
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B0E9F1D12E254D650010C564 /* Sources */ = {
