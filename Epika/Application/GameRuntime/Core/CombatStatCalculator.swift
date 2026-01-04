@@ -889,10 +889,8 @@ private struct CombatAccumulator {
             let reduction = CombatFormulas.resistancePercent(value: attributes.vitality)
             result.physicalDefense = Int((Double(result.physicalDefense) * reduction).rounded(.towardZero))
         }
-        if attributes.agility >= 21 {
-            let evasionLimit = CombatFormulas.evasionLimit(value: attributes.agility)
-            result.evasionRate = Int(min(Double(result.evasionRate), evasionLimit).rounded(.towardZero))
-        }
+        // 敏捷21以上ボーナス: 回避には適用しない
+        // evasionLimitは戦闘時の命中判定で使用する（ステータス計算では不要）
         if attributes.luck >= 21 {
             let multiplier = CombatFormulas.statBonusMultiplier(value: attributes.luck)
             result.criticalRate = Int(min(Double(result.criticalRate) * multiplier, 100.0).rounded(.towardZero))
