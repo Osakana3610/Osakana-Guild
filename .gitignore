@@ -32,7 +32,6 @@ MasterData.sqlite
 AGENTS.md
 /Users/licht/Development/Epika/AGENTS.md
 .agent/
-.claude/
 agent_docs/
 
 # Working files (not published)
@@ -47,7 +46,6 @@ Working/
 xcodebuild-*.log
 periphery*.json
 xcodebuild*.log
-CLAUDE.md
 # MasterDataGenerator build artifacts (生成されたDBはEpika/Resources/master_data.dbにコピー)
 Tools/MasterDataGenerator/.build/
 Tools/MasterDataGenerator/output/

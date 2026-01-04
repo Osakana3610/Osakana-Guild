@@ -178,8 +178,6 @@ actor CharacterProgressService {
 
     private let contextProvider: SwiftDataContextProvider
     private let masterData: MasterDataCache
-    private var raceLevelCache: [UInt8: Int] = [:]
-    private var raceMaxExperienceCache: [UInt8: Int] = [:]
 
     init(contextProvider: SwiftDataContextProvider, masterData: MasterDataCache) {
         self.contextProvider = contextProvider
@@ -236,16 +234,6 @@ actor CharacterProgressService {
         descriptor.sortBy = [SortDescriptor(\CharacterRecord.displayOrder, order: .forward)]
         let records = try context.fetch(descriptor)
         return try makeCachedCharacters(records, context: context)
-    }
-
-    func character(withId id: UInt8) throws -> CachedCharacter? {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            return nil
-        }
-        return try makeCachedCharacter(record, context: context)
     }
 
     func characters(withIds ids: [UInt8]) throws -> [CachedCharacter] {
@@ -587,66 +575,6 @@ actor CharacterProgressService {
         notifyCharacterChange(upserted: [id])
     }
 
-    func applyBattleResults(_ updates: [BattleResultUpdate]) throws {
-        guard !updates.isEmpty else { return }
-        let ids = Array(Set(updates.map { $0.characterId }))
-        let session = try makeBattleResultSession(characterIds: ids)
-        try session.applyBattleResults(updates)
-        try session.flushIfNeeded()
-    }
-
-    func makeBattleResultSession(characterIds: [UInt8]) throws -> BattleResultSession {
-        try BattleResultSession(contextProvider: contextProvider,
-                                masterData: masterData,
-                                characterIds: characterIds)
-    }
-
-    @discardableResult
-    fileprivate func applyBattleResultsInternal(
-        _ updates: [BattleResultUpdate],
-        records: [UInt8: CharacterRecord]
-    ) throws -> Bool {
-        guard !updates.isEmpty else { return false }
-        var anyLevelUp = false
-        for update in updates {
-            guard let record = records[update.characterId] else {
-                throw ProgressError.characterNotFound
-            }
-            if update.experienceDelta != 0 {
-                let previousLevel = record.level
-                let addition = Int64(record.experience).addingReportingOverflow(Int64(update.experienceDelta))
-                guard !addition.overflow else {
-                    throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
-                }
-                let updatedExperience = max(0, Int(addition.partialValue))
-                let cappedExperience = try clampExperience(updatedExperience, raceId: record.raceId)
-                record.experience = UInt64(cappedExperience)
-                let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
-                if computedLevel != Int(previousLevel) {
-                    record.level = UInt8(computedLevel)
-                    anyLevelUp = true
-                }
-            }
-            if update.hpDelta != 0 {
-                let newHP = Int64(record.currentHP) + Int64(update.hpDelta)
-                record.currentHP = UInt32(max(0, newHP))
-            }
-        }
-        return anyLevelUp
-    }
-
-    func updateHP(characterId: UInt8, newHP: UInt32) throws {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.characterNotFound
-        }
-        record.currentHP = newHP
-        try context.save()
-        notifyCharacterChange(upserted: [characterId])
-    }
-
     /// HP > 0 のキャラクターを全回復する
     /// - Parameter characterIds: 対象キャラクターID配列
     func healToFull(characterIds: [UInt8]) throws {
@@ -794,9 +722,6 @@ actor CharacterProgressService {
     /// 装備処理の結果
     struct EquipResult {
         let equippedItems: [CharacterValues.EquippedItem]
-        let inventoryStackKey: String
-        let wasDeleted: Bool
-        let newQuantity: UInt16
     }
 
     /// キャラクターにアイテムを装備（軽量版）
@@ -873,7 +798,6 @@ actor CharacterProgressService {
         }
 
         // インベントリから減算（数量0でも削除しない）
-        let stackKey = inventoryRecord.stackKey
         inventoryRecord.quantity -= UInt16(quantity)
 
         try context.save()
@@ -890,19 +814,12 @@ actor CharacterProgressService {
             postInventoryChange(upserted: [inventoryRecord], equippedItemsChange: equippedItemsChange)
         }
 
-        return EquipResult(
-            equippedItems: equippedItems,
-            inventoryStackKey: stackKey,
-            wasDeleted: false,
-            newQuantity: inventoryRecord.quantity
-        )
+        return EquipResult(equippedItems: equippedItems)
     }
 
     /// 解除処理の結果
     struct UnequipResult {
         let equippedItems: [CharacterValues.EquippedItem]
-        let inventoryStackKey: String
-        let newQuantity: UInt16
     }
 
     /// キャラクターからアイテムを解除（軽量版）
@@ -1008,45 +925,11 @@ actor CharacterProgressService {
             postInventoryChange(upserted: [inventoryRecord], equippedItemsChange: equippedItemsChange)
         }
 
-        return UnequipResult(
-            equippedItems: equippedItems,
-            inventoryStackKey: inventoryRecord.stackKey,
-            newQuantity: inventoryRecord.quantity
-        )
+        return UnequipResult(equippedItems: equippedItems)
     }
 
     /// 装備リストを取得（内部ヘルパー、既存contextを使用）
     private func fetchEquippedItems(characterId: UInt8, context: ModelContext) throws -> [CharacterValues.EquippedItem] {
-        let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
-        let records = try context.fetch(descriptor)
-
-        // stackKeyでグループ化してquantityを計算
-        var grouped: [String: (record: CharacterEquipmentRecord, count: Int)] = [:]
-        for record in records {
-            let key = record.stackKey
-            if let existing = grouped[key] {
-                grouped[key] = (existing.record, existing.count + 1)
-            } else {
-                grouped[key] = (record, 1)
-            }
-        }
-
-        return grouped.values.map { (record, count) in
-            CharacterValues.EquippedItem(
-                superRareTitleId: record.superRareTitleId,
-                normalTitleId: record.normalTitleId,
-                itemId: record.itemId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketItemId: record.socketItemId,
-                quantity: count
-            )
-        }
-    }
-
-    /// キャラクターの装備一覧を取得
-    func equippedItems(characterId: UInt8) throws -> [CharacterValues.EquippedItem] {
-        let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let records = try context.fetch(descriptor)
 
@@ -1078,47 +961,6 @@ actor CharacterProgressService {
 // MARK: - Private Helpers
 
 private extension CharacterProgressService {
-    func resolveLevel(for experience: Int, raceId: UInt8) throws -> Int {
-        let maxLevel = try raceMaxLevel(for: raceId)
-        do {
-            return try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
-        } catch CharacterExperienceError.invalidLevel {
-            throw ProgressError.invalidInput(description: "経験値テーブルに無効なレベル要求が行われました")
-        } catch CharacterExperienceError.invalidExperience {
-            throw ProgressError.invalidInput(description: "経験値が負の値になる操作は許可されていません")
-        } catch CharacterExperienceError.overflowedComputation {
-            throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
-        }
-    }
-
-    func raceMaxLevel(for raceId: UInt8) throws -> Int {
-        if let cached = raceLevelCache[raceId] {
-            return cached
-        }
-        guard let definition = masterData.race(raceId) else {
-            throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
-        }
-        let resolved = definition.maxLevel
-        raceLevelCache[raceId] = resolved
-        return resolved
-    }
-
-    func clampExperience(_ experience: Int, raceId: UInt8) throws -> Int {
-        guard experience > 0 else { return 0 }
-        let maximum = try raceMaxExperience(for: raceId)
-        return min(experience, maximum)
-    }
-
-    func raceMaxExperience(for raceId: UInt8) throws -> Int {
-        if let cached = raceMaxExperienceCache[raceId] {
-            return cached
-        }
-        let maxLevel = try raceMaxLevel(for: raceId)
-        let maximumExperience = try CharacterExperienceTable.totalExperience(toReach: maxLevel)
-        raceMaxExperienceCache[raceId] = maximumExperience
-        return maximumExperience
-    }
-
     func makeCachedCharacters(_ records: [CharacterRecord], context: ModelContext) throws -> [CachedCharacter] {
         var characters: [CachedCharacter] = []
         characters.reserveCapacity(records.count)
