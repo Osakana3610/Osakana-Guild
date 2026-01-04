@@ -108,6 +108,9 @@ extension BattleTurnEngine {
                 return
             }
             guard allowsExtraActions else { continue }
+            // 追加行動の判定は通常行動（depth=0）後にのみ行う
+            // +Nスキルは1回の判定でN回の追加行動をスケジュールする
+            guard currentDepth == 0 else { continue }
             guard let refreshedActor = context.actor(for: side, index: actorIndex),
                   refreshedActor.isAlive else { continue }
             let nextDepth = currentDepth + 1
