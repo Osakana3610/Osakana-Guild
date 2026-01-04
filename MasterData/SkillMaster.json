@@ -13747,8 +13747,8 @@
         "familyId": "job.warrior.fortify",
         "effectType": "statConversionPercent",
         "parameters": {
-          "from": "physicalDefense",
-          "to": "maxHP"
+          "sourceStat": "physicalDefense",
+          "targetStat": "maxHP"
         },
         "variants": [
           {
@@ -14994,8 +14994,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "from": "physicalDefense",
-                  "to": "maxHP"
+                  "sourceStat": "physicalDefense",
+                  "targetStat": "maxHP"
                 },
                 "value": {
                   "valuePercent": 20
