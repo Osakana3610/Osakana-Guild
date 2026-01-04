@@ -71,6 +71,8 @@ struct BattleContext {
     var random: GameRandomSource
     /// 敵専用技の使用回数追跡: [actorIdentifier: [skillId: usageCount]]
     var enemySkillUsage: [String: [UInt16: Int]]
+    /// リアクション処理キュー（再帰呼び出しを避けるため）
+    var reactionQueue: [PendingReaction]
 
     // MARK: - 定数
     static let maxTurns = 20
@@ -94,6 +96,7 @@ struct BattleContext {
         self.initialHP = [:]
         self.turn = 0
         self.enemySkillUsage = [:]
+        self.reactionQueue = []
         // 戦闘開始時キャッシュを計算
         self.cached = Self.buildCachedFlags(players: players, enemies: enemies)
     }
@@ -344,6 +347,12 @@ extension BattleContext {
 
     static let maxReactionDepth = 4
     static let maxExtraActionDepth = 5
+
+    /// リアクションキューに積まれる保留イベント
+    struct PendingReaction: Sendable {
+        let event: ReactionEvent
+        let depth: Int
+    }
 
     func actor(for side: ActorSide, index: Int) -> BattleActor? {
         switch side {

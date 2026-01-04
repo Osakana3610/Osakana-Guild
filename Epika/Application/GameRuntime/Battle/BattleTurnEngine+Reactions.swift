@@ -34,6 +34,16 @@ import Foundation
 
 // MARK: - Reactions & Counter Attacks
 extension BattleTurnEngine {
+    /// リアクションキューを処理する（再帰呼び出しを避けるため）
+    static func processReactionQueue(context: inout BattleContext) {
+        while let pending = context.reactionQueue.first {
+            context.reactionQueue.removeFirst()
+            guard pending.depth < BattleContext.maxReactionDepth else { continue }
+            guard !context.isBattleOver else { return }
+            dispatchReactions(for: pending.event, depth: pending.depth, context: &context)
+        }
+    }
+
     static func shouldTriggerParry(defender: inout BattleActor,
                                    attacker: BattleActor,
                                    context: inout BattleContext) -> Bool {
@@ -451,26 +461,26 @@ extension BattleTurnEngine {
         let defenderWasDefeated = currentDefender.map { !$0.isAlive } ?? true
 
         if defenderWasDefeated {
-            let killerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
-            dispatchReactions(for: .allyDefeated(side: defenderSide, fallenIndex: defenderIndex, killer: killerRef),
-                              depth: reactionDepth,
-                              context: &context)
-            currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
-            currentDefender = context.actor(for: defenderSide, index: defenderIndex)
-
-            // 敵を倒した側のリアクション（selfKilledEnemy）
-            let killedRef = BattleContext.reference(for: defenderSide, index: defenderIndex)
-            dispatchReactions(for: .selfKilledEnemy(side: attackerSide, actorIndex: attackerIndex, killedEnemy: killedRef),
-                              depth: reactionDepth,
-                              context: &context)
-            currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
-            currentDefender = context.actor(for: defenderSide, index: defenderIndex)
-
+            // 救出を先に試行（救出→報復→追撃の順序）
             if attemptInstantResurrectionIfNeeded(of: defenderIndex, side: defenderSide, context: &context) {
                 currentDefender = context.actor(for: defenderSide, index: defenderIndex)
             } else if attemptRescue(of: defenderIndex, side: defenderSide, context: &context) {
                 currentDefender = context.actor(for: defenderSide, index: defenderIndex)
             }
+
+            // 報復リアクション（味方が倒された時）
+            let killerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
+            context.reactionQueue.append(.init(
+                event: .allyDefeated(side: defenderSide, fallenIndex: defenderIndex, killer: killerRef),
+                depth: reactionDepth
+            ))
+
+            // 追撃リアクション（敵を倒した時）
+            let killedRef = BattleContext.reference(for: defenderSide, index: defenderIndex)
+            context.reactionQueue.append(.init(
+                event: .selfKilledEnemy(side: attackerSide, actorIndex: attackerIndex, killedEnemy: killedRef),
+                depth: reactionDepth
+            ))
         }
 
         if attackResult.wasParried, let defenderActor = currentDefender, defenderActor.isAlive {
@@ -484,24 +494,25 @@ extension BattleTurnEngine {
         }
 
         if attackResult.wasDodged, let defenderActor = currentDefender, defenderActor.isAlive {
+            // 回避時リアクション
             let attackerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
-            dispatchReactions(for: .selfEvadePhysical(side: defenderSide, actorIndex: defenderIndex, attacker: attackerRef),
-                              depth: reactionDepth,
-                              context: &context)
-            currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
-            currentDefender = context.actor(for: defenderSide, index: defenderIndex)
+            context.reactionQueue.append(.init(
+                event: .selfEvadePhysical(side: defenderSide, actorIndex: defenderIndex, attacker: attackerRef),
+                depth: reactionDepth
+            ))
         }
 
         if attackResult.successfulHits > 0 && !defenderWasDefeated {
+            // 被ダメ時リアクション（反撃）
             let attackerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
-            dispatchReactions(for: .selfDamagedPhysical(side: defenderSide, actorIndex: defenderIndex, attacker: attackerRef),
-                              depth: reactionDepth,
-                              context: &context)
-            dispatchReactions(for: .allyDamagedPhysical(side: defenderSide, defenderIndex: defenderIndex, attacker: attackerRef),
-                              depth: reactionDepth,
-                              context: &context)
-            currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
-            currentDefender = context.actor(for: defenderSide, index: defenderIndex)
+            context.reactionQueue.append(.init(
+                event: .selfDamagedPhysical(side: defenderSide, actorIndex: defenderIndex, attacker: attackerRef),
+                depth: reactionDepth
+            ))
+            context.reactionQueue.append(.init(
+                event: .allyDamagedPhysical(side: defenderSide, defenderIndex: defenderIndex, attacker: attackerRef),
+                depth: reactionDepth
+            ))
         }
 
         return AttackOutcome(attacker: currentAttacker, defender: currentDefender)

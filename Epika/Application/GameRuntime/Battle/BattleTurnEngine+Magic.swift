@@ -175,19 +175,7 @@ extension BattleTurnEngine {
                                     index: targetRef.1,
                                     context: &context,
                                     entryBuilder: entryBuilder)
-                    let killerRef = BattleContext.reference(for: side, index: attackerIndex)
-                    dispatchReactions(for: .allyDefeated(side: targetRef.0,
-                                                         fallenIndex: targetRef.1,
-                                                         killer: killerRef),
-                                      depth: 0,
-                                      context: &context)
-                    // 敵を倒したキャラのリアクション
-                    let killedRef = BattleContext.reference(for: targetRef.0, index: targetRef.1)
-                    dispatchReactions(for: .selfKilledEnemy(side: side,
-                                                            actorIndex: attackerIndex,
-                                                            killedEnemy: killedRef),
-                                      depth: 0,
-                                      context: &context)
+                    // 救出を先に試行（救出→報復→追撃の順序）
                     if let _ = context.actor(for: targetRef.0, index: targetRef.1) {
                         _ = attemptInstantResurrectionIfNeeded(of: targetRef.1,
                                                               side: targetRef.0,
@@ -196,13 +184,31 @@ extension BattleTurnEngine {
                                              side: targetRef.0,
                                              context: &context)
                     }
+                    // 報復リアクション（味方が倒された時）
+                    let killerRef = BattleContext.reference(for: side, index: attackerIndex)
+                    context.reactionQueue.append(.init(
+                        event: .allyDefeated(side: targetRef.0,
+                                             fallenIndex: targetRef.1,
+                                             killer: killerRef),
+                        depth: 0
+                    ))
+                    // 追撃リアクション（敵を倒した時）
+                    let killedRef = BattleContext.reference(for: targetRef.0, index: targetRef.1)
+                    context.reactionQueue.append(.init(
+                        event: .selfKilledEnemy(side: side,
+                                                actorIndex: attackerIndex,
+                                                killedEnemy: killedRef),
+                        depth: 0
+                    ))
                 } else {
+                    // 被ダメ時リアクション（魔法反撃）
                     let attackerRef = BattleContext.reference(for: side, index: attackerIndex)
-                    dispatchReactions(for: .selfDamagedMagical(side: targetRef.0,
-                                                               actorIndex: targetRef.1,
-                                                               attacker: attackerRef),
-                                      depth: 0,
-                                      context: &context)
+                    context.reactionQueue.append(.init(
+                        event: .selfDamagedMagical(side: targetRef.0,
+                                                   actorIndex: targetRef.1,
+                                                   attacker: attackerRef),
+                        depth: 0
+                    ))
                 }
             }
 
@@ -231,11 +237,14 @@ extension BattleTurnEngine {
         }
 
         // 味方が魔法攻撃したイベントを発火（追撃用）
-        dispatchReactions(for: .allyMagicAttack(side: side, casterIndex: attackerIndex),
-                          depth: 0,
-                          context: &context)
+        context.reactionQueue.append(.init(
+            event: .allyMagicAttack(side: side, casterIndex: attackerIndex),
+            depth: 0
+        ))
 
         context.appendActionEntry(entryBuilder.build())
+
+        processReactionQueue(context: &context)
 
         return true
     }
@@ -281,19 +290,7 @@ extension BattleTurnEngine {
                                 index: targetRef.1,
                                 context: &context,
                                 entryBuilder: entryBuilder)
-                let killerRef = BattleContext.reference(for: side, index: attackerIndex)
-                dispatchReactions(for: .allyDefeated(side: targetRef.0,
-                                                     fallenIndex: targetRef.1,
-                                                     killer: killerRef),
-                                  depth: 0,
-                                  context: &context)
-                // 敵を倒したキャラのリアクション
-                let killedRef = BattleContext.reference(for: targetRef.0, index: targetRef.1)
-                dispatchReactions(for: .selfKilledEnemy(side: side,
-                                                        actorIndex: attackerIndex,
-                                                        killedEnemy: killedRef),
-                                  depth: 0,
-                                  context: &context)
+                // 救出を先に試行（救出→報復→追撃の順序）
                 if let _ = context.actor(for: targetRef.0, index: targetRef.1) {
                     _ = attemptInstantResurrectionIfNeeded(of: targetRef.1,
                                                           side: targetRef.0,
@@ -302,15 +299,37 @@ extension BattleTurnEngine {
                                         side: targetRef.0,
                                         context: &context)
                 }
+                // 報復リアクション（味方が倒された時）
+                let killerRef = BattleContext.reference(for: side, index: attackerIndex)
+                context.reactionQueue.append(.init(
+                    event: .allyDefeated(side: targetRef.0,
+                                         fallenIndex: targetRef.1,
+                                         killer: killerRef),
+                    depth: 0
+                ))
+                // 追撃リアクション（敵を倒した時）
+                let killedRef = BattleContext.reference(for: targetRef.0, index: targetRef.1)
+                context.reactionQueue.append(.init(
+                    event: .selfKilledEnemy(side: side,
+                                            actorIndex: attackerIndex,
+                                            killedEnemy: killedRef),
+                    depth: 0
+                ))
             } else {
+                // 被ダメ時リアクション（ブレスも物理として扱う）
                 let attackerRef = BattleContext.reference(for: side, index: attackerIndex)
-                dispatchReactions(for: .selfDamagedPhysical(side: targetRef.0,
-                                                            actorIndex: targetRef.1,
-                                                            attacker: attackerRef),
-                                  depth: 0,
-                                  context: &context)
+                context.reactionQueue.append(.init(
+                    event: .selfDamagedPhysical(side: targetRef.0,
+                                                actorIndex: targetRef.1,
+                                                attacker: attackerRef),
+                    depth: 0
+                ))
             }
         }
+
+        context.appendActionEntry(entryBuilder.build())
+
+        processReactionQueue(context: &context)
 
         return true
     }

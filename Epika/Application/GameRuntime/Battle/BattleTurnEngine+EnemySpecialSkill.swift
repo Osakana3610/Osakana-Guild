@@ -97,6 +97,9 @@ extension BattleTurnEngine {
         }
 
         context.appendActionEntry(entryBuilder.build())
+
+        processReactionQueue(context: &context)
+
         return true
     }
 
@@ -446,19 +449,31 @@ extension BattleTurnEngine {
                         context: &context,
                         entryBuilder: entryBuilder)
 
-        let killerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
-        dispatchReactions(for: .allyDefeated(side: targetSide,
-                                             fallenIndex: targetIndex,
-                                             killer: killerRef),
-                          depth: 0,
-                          context: &context)
-
+        // 救出を先に試行（救出→報復→追撃の順序）
         _ = attemptInstantResurrectionIfNeeded(of: targetIndex,
                                                side: targetSide,
                                                context: &context)
             || attemptRescue(of: targetIndex,
                              side: targetSide,
                              context: &context)
+
+        // 報復リアクション（味方が倒された時）
+        let killerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
+        context.reactionQueue.append(.init(
+            event: .allyDefeated(side: targetSide,
+                                 fallenIndex: targetIndex,
+                                 killer: killerRef),
+            depth: 0
+        ))
+
+        // 追撃リアクション（敵を倒した時）
+        let killedRef = BattleContext.reference(for: targetSide, index: targetIndex)
+        context.reactionQueue.append(.init(
+            event: .selfKilledEnemy(side: attackerSide,
+                                    actorIndex: attackerIndex,
+                                    killedEnemy: killedRef),
+            depth: 0
+        ))
     }
 
     private static func attemptEnemySkillStatusInflict(statusId: UInt8,

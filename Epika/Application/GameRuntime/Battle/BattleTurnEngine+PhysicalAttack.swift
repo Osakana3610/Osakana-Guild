@@ -161,6 +161,8 @@ extension BattleTurnEngine {
                                     descriptor: descriptor,
                                     context: &context)
         }
+
+        processReactionQueue(context: &context)
     }
 
     static func handleVampiricImpulse(attackerSide: ActorSide,
@@ -231,6 +233,8 @@ extension BattleTurnEngine {
         context.updateActor(updatedAttacker, side: attackerSide, index: attackerIndex)
         context.updateActor(updatedDefender, side: targetRef.0, index: targetRef.1)
         context.appendActionEntry(entryBuilder.build())
+
+        processReactionQueue(context: &context)
         return true
     }
 
@@ -658,6 +662,8 @@ extension BattleTurnEngine {
                                    entryBuilder: entryBuilder)
 
             context.appendActionEntry(entryBuilder.build())
+
+            processReactionQueue(context: &context)
 
             if context.isBattleOver { return }
         }
