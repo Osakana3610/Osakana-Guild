@@ -433,8 +433,12 @@ private struct PartyEquipmentListView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     } header: {
-                        Text(characterHeaderText(for: character))
-                            .foregroundStyle(.primary)
+                        HStack(spacing: 0) {
+                            Text(character.name)
+                                .fontWeight(.bold)
+                            Text(characterSubHeaderText(for: character))
+                        }
+                        .foregroundStyle(.primary)
                     }
                 }
             }
@@ -466,21 +470,18 @@ private struct PartyEquipmentListView: View {
         return "装備 \(usedSlots)/\(character.equipmentCapacity)"
     }
 
-    private func characterHeaderText(for character: CachedCharacter) -> String {
+    private func characterSubHeaderText(for character: CachedCharacter) -> String {
         let masterData = appServices.masterDataCache
         let raceName = masterData.race(character.raceId)?.name ?? ""
         let jobName = masterData.job(character.jobId)?.name ?? ""
-        let previousJobName = character.previousJobId > 0
-            ? masterData.job(character.previousJobId)?.name
-            : nil
-
-        var result = "\(character.name)　Lv\(character.level)　\(raceName)　"
-        if let previousJobName {
-            result += "\(jobName)（\(previousJobName)）"
+        let jobText: String
+        if character.previousJobId > 0,
+           let previousJobName = masterData.job(character.previousJobId)?.name {
+            jobText = "\(jobName)（\(previousJobName)）"
         } else {
-            result += jobName
+            jobText = jobName
         }
-        return result
+        return "　Lv\(character.level) / \(raceName) / \(jobText)"
     }
 }
 
