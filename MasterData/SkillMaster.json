@@ -13808,34 +13808,34 @@
       },
       {
         "familyId": "job.swordsman.counter",
-        "effectType": "procRate",
+        "effectType": "reaction",
         "parameters": {
-          "target": "counter",
-          "stacking": "add"
+          "trigger": "selfDamagedPhysical",
+          "damageType": "physical"
         },
         "variants": [
           {
             "id": 65013,
             "label": "[職業:剣士] 反撃 被ダメ時10%反撃",
             "value": {
-              "addPercent": 10
+              "baseChancePercent": 10
             }
           }
         ]
       },
       {
         "familyId": "job.swordsman.followup",
-        "effectType": "procRate",
+        "effectType": "reaction",
         "parameters": {
-          "target": "pursuit",
-          "stacking": "add"
+          "trigger": "allyMagicAttack",
+          "damageType": "physical"
         },
         "variants": [
           {
             "id": 65014,
             "label": "[職業:剣士] 追撃 味方魔法後追撃",
             "value": {
-              "addPercent": 20
+              "baseChancePercent": 20
             }
           }
         ]
@@ -14539,17 +14539,17 @@
       },
       {
         "familyId": "job.blademaster.master",
-        "effectType": "procRate",
+        "effectType": "reaction",
         "parameters": {
-          "target": "counterOnEvade",
-          "stacking": "add"
+          "trigger": "selfEvadePhysical",
+          "damageType": "physical"
         },
         "variants": [
           {
             "id": 65104,
             "label": "[職業:剣聖] 回避反撃",
             "value": {
-              "addPercent": 50
+              "baseChancePercent": 50
             }
           }
         ]
@@ -14772,17 +14772,17 @@
       },
       {
         "familyId": "job.ninja.shadowClone",
-        "effectType": "procRate",
+        "effectType": "reaction",
         "parameters": {
-          "target": "counterOnEvade",
-          "stacking": "add"
+          "trigger": "selfEvadePhysical",
+          "damageType": "physical"
         },
         "variants": [
           {
             "id": 65134,
             "label": "[職業:忍者] 分身 回避時反撃",
             "value": {
-              "addPercent": 40
+              "baseChancePercent": 40
             }
           }
         ]
@@ -15048,34 +15048,34 @@
       },
       {
         "familyId": "master.swordsman.counter",
-        "effectType": "procRate",
+        "effectType": "reaction",
         "parameters": {
-          "target": "counter",
-          "stacking": "add"
+          "trigger": "selfDamagedPhysical",
+          "damageType": "physical"
         },
         "variants": [
           {
             "id": 65173,
             "label": "[マスター:剣士] 反撃 被ダメ時18%反撃",
             "value": {
-              "addPercent": 18
+              "baseChancePercent": 18
             }
           }
         ]
       },
       {
         "familyId": "master.swordsman.followup",
-        "effectType": "procRate",
+        "effectType": "reaction",
         "parameters": {
-          "target": "pursuit",
-          "stacking": "add"
+          "trigger": "allyMagicAttack",
+          "damageType": "physical"
         },
         "variants": [
           {
             "id": 65174,
             "label": "[マスター:剣士] 追撃 味方魔法後追撃35%",
             "value": {
-              "addPercent": 35
+              "baseChancePercent": 35
             }
           }
         ]
@@ -15581,17 +15581,17 @@
       },
       {
         "familyId": "master.blademaster.master",
-        "effectType": "procRate",
+        "effectType": "reaction",
         "parameters": {
-          "target": "counterOnEvade",
-          "stacking": "add"
+          "trigger": "selfEvadePhysical",
+          "damageType": "physical"
         },
         "variants": [
           {
             "id": 65264,
             "label": "[マスター:剣聖] 回避反撃80%",
             "value": {
-              "addPercent": 80
+              "baseChancePercent": 80
             }
           }
         ]
@@ -15720,17 +15720,17 @@
       },
       {
         "familyId": "master.ninja.shadowClone",
-        "effectType": "procRate",
+        "effectType": "reaction",
         "parameters": {
-          "target": "counterOnEvade",
-          "stacking": "add"
+          "trigger": "selfEvadePhysical",
+          "damageType": "physical"
         },
         "variants": [
           {
             "id": 65294,
             "label": "[マスター:忍者] 分身 回避時反撃70%",
             "value": {
-              "addPercent": 70
+              "baseChancePercent": 70
             }
           }
         ]
