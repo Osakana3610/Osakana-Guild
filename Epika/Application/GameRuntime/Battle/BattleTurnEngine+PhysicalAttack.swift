@@ -537,6 +537,7 @@ extension BattleTurnEngine {
         let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
         let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
                                                           kind: .followUp,
+                                                          label: "格闘追撃",
                                                           turnOverride: context.turn)
         entryBuilder.addEffect(kind: .followUp, target: defenderIdx)
 

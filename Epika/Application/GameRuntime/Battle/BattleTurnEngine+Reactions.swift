@@ -321,6 +321,7 @@ extension BattleTurnEngine {
             let targetIdx = context.actorIndex(for: resolvedTarget.0, arrayIndex: resolvedTarget.1)
             let entryBuilder = context.makeActionEntryBuilder(actorId: performerIdx,
                                                               kind: .reactionAttack,
+                                                              label: reaction.displayName,
                                                               turnOverride: context.turn)
             entryBuilder.addEffect(kind: .reactionAttack, target: targetIdx)
 

@@ -511,9 +511,11 @@ struct BattleLogRenderer {
         case .vampireUrge:
             return ("\(actor)は吸血衝動に駆られた", .status)
         case .reactionAttack:
-            return (appendDetails(to: "\(actor)の反撃！"), .action)
+            let name = actionLabel ?? "反撃"
+            return (appendDetails(to: "\(actor)の\(name)！"), .action)
         case .followUp:
-            return (appendDetails(to: "\(actor)の追撃！"), .action)
+            let name = actionLabel ?? "追撃"
+            return (appendDetails(to: "\(actor)の\(name)！"), .action)
         case .healParty:
             let name = actionLabel ?? "回復術"
             return (appendDetails(to: "\(actor)の\(name)！"), .heal)
