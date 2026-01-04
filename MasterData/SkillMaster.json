@@ -15078,16 +15078,16 @@
       },
       {
         "familyId": "race.undead.deathSave",
-        "effectType": "resurrectionSave",
+        "effectType": "resurrectionActive",
         "parameters": {},
         "variants": [
           {
             "id": 64122,
-            "label": "[種族:アンデッドマンLv99] 死亡直後に蘇生判定（最大30%）",
+            "label": "[種族:アンデッドマンLv99] 死亡直後に蘇生判定",
             "value": {
-              "maxChancePercent": 30
+              "chancePercent": 30
             },
-            "description": "戦闘不能になった時、最大30%の確率で蘇生判定を行う。"
+            "description": "戦闘不能になった時、30%の確率で蘇生する。"
           }
         ]
       },
