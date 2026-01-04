@@ -7,6 +7,7 @@
 //   - ゲーム内のランダム性を供給する乱数生成器
 //   - シード付き初期化による決定的な乱数列の提供（テスト用）
 //   - 状態保存・復元による探索再開対応
+//   - ベータテスト用の乱数オーバーライド対応
 //
 // 【公開API】
 //   - nextDouble(): 指定範囲のDouble乱数を生成
@@ -15,6 +16,7 @@
 //   - nextLuckRandom(): 幸運値を下限とした0.00〜99.99の二桁精度乱数
 //   - nextIndex(): 重み付き配列からインデックスを選択
 //   - currentState: RNG状態の取得（保存用）
+//   - resetOverrideRandom(): シード固定モード用の乱数をリセット
 //
 // 【使用箇所】
 //   - DropService（ドロップ抽選）
@@ -25,12 +27,23 @@
 // ==============================================================================
 
 import Foundation
+import os
 
 /// 乱数を提供するシンプルなユーティリティ。暗号学的強度までは求めないが、
 /// 毎回 `RandomNumberGenerator` を用いてゲーム内のランダム性を供給する。
 /// テストではシード付き初期化子で決定的な乱数列を得られる。
 struct GameRandomSource: Sendable {
     private var generator: SendableRandomGenerator
+
+    /// シード固定モード用の共有乱数ソース（ロックで保護）
+    private static let overrideRandomLock = OSAllocatedUnfairLock<SeededRandomNumberGenerator?>(initialState: nil)
+
+    /// シード固定モードの乱数ソースをリセット（探索開始時に呼ぶ）
+    static func resetOverrideRandom() {
+        if BetaTestSettings.randomMode == .fixedSeed {
+            overrideRandomLock.withLock { $0 = SeededRandomNumberGenerator(seed: BetaTestSettings.fixedSeed) }
+        }
+    }
 
     nonisolated init() {
         generator = .system(SystemRandomNumberGenerator())
@@ -54,6 +67,23 @@ struct GameRandomSource: Sendable {
     }
 
     mutating func nextDouble(in range: ClosedRange<Double> = 0.0...1.0) -> Double {
+        switch BetaTestSettings.randomMode {
+        case .normal:
+            return nextDoubleInternal(in: range)
+        case .fixedSeed:
+            let result = Self.overrideRandomLock.withLock { gen -> Double? in
+                guard var seeded = gen else { return nil }
+                let value = Double.random(in: range, using: &seeded)
+                gen = seeded
+                return value
+            }
+            return result ?? nextDoubleInternal(in: range)
+        case .fixedMedian:
+            return (range.lowerBound + range.upperBound) / 2.0
+        }
+    }
+
+    private mutating func nextDoubleInternal(in range: ClosedRange<Double>) -> Double {
         switch generator {
         case .system(var gen):
             let value = Double.random(in: range, using: &gen)
@@ -67,6 +97,23 @@ struct GameRandomSource: Sendable {
     }
 
     mutating func nextInt(in range: ClosedRange<Int>) -> Int {
+        switch BetaTestSettings.randomMode {
+        case .normal:
+            return nextIntInternal(in: range)
+        case .fixedSeed:
+            let result = Self.overrideRandomLock.withLock { gen -> Int? in
+                guard var seeded = gen else { return nil }
+                let value = Int.random(in: range, using: &seeded)
+                gen = seeded
+                return value
+            }
+            return result ?? nextIntInternal(in: range)
+        case .fixedMedian:
+            return (range.lowerBound + range.upperBound) / 2
+        }
+    }
+
+    private mutating func nextIntInternal(in range: ClosedRange<Int>) -> Int {
         switch generator {
         case .system(var gen):
             let value = Int.random(in: range, using: &gen)
@@ -82,7 +129,13 @@ struct GameRandomSource: Sendable {
     mutating func nextBool(probability: Double) -> Bool {
         guard probability > 0 else { return false }
         guard probability < 1 else { return true }
-        return nextDouble() < probability
+
+        switch BetaTestSettings.randomMode {
+        case .normal, .fixedSeed:
+            return nextDouble() < probability
+        case .fixedMedian:
+            return probability >= 0.5
+        }
     }
 
     /// 0.00〜99.99の範囲で二桁精度の値を返す。下限は指定した値でクリップされる。

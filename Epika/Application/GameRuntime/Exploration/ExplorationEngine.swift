@@ -67,6 +67,9 @@ struct ExplorationEngine {
                         superRareState: SuperRareDailyState,
                         scheduler: ExplorationEventScheduler,
                         seed: UInt64) async throws -> (Preparation, RunState) {
+        // ベータテスト用: シード固定モードの乱数をリセット
+        GameRandomSource.resetOverrideRandom()
+
         let bundle = try await provider.dungeonBundle(for: dungeonId)
         let dungeon = bundle.dungeon
         let floors = bundle.floors.sorted { $0.floorNumber < $1.floorNumber }
