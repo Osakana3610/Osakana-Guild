@@ -185,23 +185,48 @@ extension BattleTurnEngine {
                                  depth: Int,
                                  context: inout BattleContext) {
         guard let performer = context.actor(for: side, index: actorIndex), performer.isAlive else { return }
+
+        #if DEBUG
+        let allReactions = performer.skillEffects.combat.reactions
+        if !allReactions.isEmpty {
+            print("[Reaction] \(performer.displayName) has \(allReactions.count) reactions: \(allReactions.map { "\($0.displayName)(\($0.trigger))" }.joined(separator: ", "))")
+            print("[Reaction] Event: \(event)")
+        }
+        #endif
+
         let candidates = performer.skillEffects.combat.reactions.filter { $0.trigger.matches(event: event) }
+
+        #if DEBUG
+        if !allReactions.isEmpty {
+            print("[Reaction] Matching candidates: \(candidates.count)")
+        }
+        #endif
+
         guard !candidates.isEmpty else { return }
 
         for reaction in candidates {
             guard let currentPerformer = context.actor(for: side, index: actorIndex), currentPerformer.isAlive else { break }
             if reaction.requiresMartial && !shouldUseMartialAttack(attacker: currentPerformer) {
+                #if DEBUG
+                print("[Reaction] \(reaction.displayName): SKIP (requiresMartial but not martial)")
+                #endif
                 continue
             }
 
             if case .allyDamagedPhysical(_, let defenderIndex, _) = event,
                defenderIndex == actorIndex {
+                #if DEBUG
+                print("[Reaction] \(reaction.displayName): SKIP (self is defender)")
+                #endif
                 continue
             }
 
             // 自分の魔法に自分で追撃しない
             if case .allyMagicAttack(_, let casterIndex) = event,
                casterIndex == actorIndex {
+                #if DEBUG
+                print("[Reaction] \(reaction.displayName): SKIP (self is caster)")
+                #endif
                 continue
             }
 
@@ -210,6 +235,9 @@ extension BattleTurnEngine {
                       eventSide == side,
                       let attackedActor = context.actor(for: side, index: defenderIndex),
                       currentPerformer.formationSlot.formationRow < attackedActor.formationSlot.formationRow else {
+                    #if DEBUG
+                    print("[Reaction] \(reaction.displayName): SKIP (requiresAllyBehind not met)")
+                    #endif
                     continue
                 }
             }
@@ -222,7 +250,12 @@ extension BattleTurnEngine {
                                                         attacker: currentPerformer,
                                                         forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil))
             }
-            guard var resolvedTarget = targetReference else { continue }
+            guard var resolvedTarget = targetReference else {
+                #if DEBUG
+                print("[Reaction] \(reaction.displayName): SKIP (no target)")
+                #endif
+                continue
+            }
             var needsFallback = false
             if let currentTarget = context.actor(for: resolvedTarget.0, index: resolvedTarget.1) {
                 if !currentTarget.isAlive { needsFallback = true }
@@ -235,21 +268,44 @@ extension BattleTurnEngine {
                                                            allowFriendlyTargets: false,
                                                            attacker: currentPerformer,
                                                            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)) else {
+                    #if DEBUG
+                    print("[Reaction] \(reaction.displayName): SKIP (no fallback target)")
+                    #endif
                     continue
                 }
                 resolvedTarget = fallback
             }
 
             guard let targetActor = context.actor(for: resolvedTarget.0, index: resolvedTarget.1),
-                  targetActor.isAlive else { continue }
+                  targetActor.isAlive else {
+                #if DEBUG
+                print("[Reaction] \(reaction.displayName): SKIP (target dead)")
+                #endif
+                continue
+            }
 
             // statScalingはコンパイル時にbaseChancePercentに計算済み
             let baseChance = max(0.0, reaction.baseChancePercent)
             var chance = baseChance * currentPerformer.skillEffects.combat.procChanceMultiplier
             chance *= targetActor.skillEffects.combat.counterAttackEvasionMultiplier
             let cappedChance = max(0, min(100, Int(floor(chance))))
-            guard cappedChance > 0 else { continue }
-            guard BattleRandomSystem.percentChance(cappedChance, random: &context.random) else { continue }
+
+            #if DEBUG
+            print("[Reaction] \(reaction.displayName): base=\(baseChance)%, final=\(cappedChance)%, damageType=\(reaction.damageType)")
+            #endif
+
+            guard cappedChance > 0 else {
+                #if DEBUG
+                print("[Reaction] \(reaction.displayName): SKIP (chance=0)")
+                #endif
+                continue
+            }
+
+            let rolled = BattleRandomSystem.percentChance(cappedChance, random: &context.random)
+            #if DEBUG
+            print("[Reaction] \(reaction.displayName): roll=\(rolled ? "SUCCESS" : "FAIL")")
+            #endif
+            guard rolled else { continue }
 
             let performerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
             let targetIdx = context.actorIndex(for: resolvedTarget.0, arrayIndex: resolvedTarget.1)
@@ -257,6 +313,10 @@ extension BattleTurnEngine {
                                                               kind: .reactionAttack,
                                                               turnOverride: context.turn)
             entryBuilder.addEffect(kind: .reactionAttack, target: targetIdx)
+
+            #if DEBUG
+            print("[Reaction] \(reaction.displayName): TRIGGERED! -> \(targetActor.displayName)")
+            #endif
 
             executeReactionAttack(from: side,
                                   actorIndex: actorIndex,
