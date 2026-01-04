@@ -50,3 +50,6 @@ xcodebuild*.log
 Tools/MasterDataGenerator/.build/
 Tools/MasterDataGenerator/output/
 .agent
+
+# Generated SQLite database
+Epika/Resources/master_data.db
