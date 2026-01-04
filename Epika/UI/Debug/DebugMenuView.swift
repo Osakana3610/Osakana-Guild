@@ -140,6 +140,10 @@ struct DebugMenuView: View {
     @State private var dropNotificationMode: DropNotificationMode = .bulk
     @State private var isSendingDropNotifications = false
 
+    // 戦闘乱数設定
+    @State private var randomMode: BetaTestSettings.RandomMode = BetaTestSettings.randomMode
+    @State private var fixedSeedText: String = String(BetaTestSettings.fixedSeed)
+
     // データ削除（別画面に移動したため削除）
 
     private var masterData: MasterDataCache { appServices.masterDataCache }
@@ -157,6 +161,7 @@ struct DebugMenuView: View {
                 itemCreationSection
                 characterCreationSection
                 dropNotificationTestSection
+                battleRandomSection
                 dataResetSection
             }
             .avoidBottomGameInfo()
@@ -313,6 +318,45 @@ struct DebugMenuView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(isSendingDropNotifications)
+        }
+    }
+
+    private var battleRandomSection: some View {
+        Section {
+            Picker("乱数モード", selection: $randomMode) {
+                ForEach(BetaTestSettings.RandomMode.allCases, id: \.self) { mode in
+                    Text(mode.displayName).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: randomMode) { _, newValue in
+                BetaTestSettings.randomMode = newValue
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(randomMode.description)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            if randomMode == .fixedSeed {
+                HStack {
+                    Text("シード値")
+                    TextField("シード値", text: $fixedSeedText)
+                        .textFieldStyle(.roundedBorder)
+                        .keyboardType(.numberPad)
+                        .onChange(of: fixedSeedText) { _, newValue in
+                            if let seed = UInt64(newValue) {
+                                BetaTestSettings.fixedSeed = seed
+                            }
+                        }
+                }
+            }
+        } header: {
+            Text("戦闘乱数設定")
+        } footer: {
+            Text("スキル効果の検証用。中央値固定なら乱数による揺れがなくなります。")
+                .font(.caption2)
         }
     }
 

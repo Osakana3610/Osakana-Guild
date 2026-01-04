@@ -75,6 +75,9 @@ enum BattleService {
                               floor: DungeonFloorDefinition,
                               enemySpecs: [EncounteredEnemySpec],
                               random: inout GameRandomSource) throws -> Resolution {
+        // ベータテスト用: シード固定モードの乱数をリセット
+        BattleRandomSystem.resetSeededRandom()
+
         // MasterDataCacheの既存辞書を使用（毎戦闘での辞書作成を回避）
         let skillDictionary = masterData.skillsById
         let enemyDictionary = masterData.enemiesById
