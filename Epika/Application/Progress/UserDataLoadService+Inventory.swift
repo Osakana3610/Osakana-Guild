@@ -26,8 +26,15 @@ extension UserDataLoadService {
             let quantity: UInt16
         }
 
+        /// 装備変更情報（装備のつけ外し時に使用）
+        struct EquippedItemsChange: Sendable {
+            let characterId: UInt8
+            let items: [CharacterValues.EquippedItem]
+        }
+
         let upserted: [UpsertedItem]  // 追加または更新されたアイテム
         let removed: [String]         // 完全削除されたstackKey（売却時のみ）
+        let equippedItemsChange: EquippedItemsChange?  // 装備変更（装備のつけ外し時のみ）
     }
 }
 
@@ -355,6 +362,7 @@ extension UserDataLoadService {
     /// インベントリ変更をキャッシュへ適用
     /// - キャッシュに存在するアイテム: 数量のみ更新（軽量）
     /// - キャッシュに存在しないアイテム: stackKeyからマスターデータを引いて新規作成
+    /// - 装備変更がある場合: 装備中アイテムキャッシュも同時に更新
     @MainActor
     private func applyInventoryChange(_ change: InventoryChange) {
         var needsSort = false
@@ -382,6 +390,16 @@ extension UserDataLoadService {
             sortCacheItems()
             rebuildOrderedSubcategories()
         }
+
+        // 装備変更がある場合は装備中アイテムキャッシュも更新（同一タイミングで更新しグリッチ防止）
+        if let equippedChange = change.equippedItemsChange {
+            let cachedEquippedItems = equippedChange.items.compactMap { item -> CachedInventoryItem? in
+                let stackKey = "\(item.superRareTitleId)|\(item.normalTitleId)|\(item.itemId)|\(item.socketSuperRareTitleId)|\(item.socketNormalTitleId)|\(item.socketItemId)"
+                return createCachedItemFromStackKey(stackKey, quantity: UInt16(item.quantity))
+            }
+            equippedItemsByCharacter[equippedChange.characterId] = cachedEquippedItems
+        }
+
         itemCacheVersion &+= 1
     }
 
@@ -627,92 +645,6 @@ extension UserDataLoadService {
         itemCacheVersion &+= 1
     }
 
-    /// 装備中アイテムからキャッシュに追加する（装備解除時・SwiftDataアクセス不要）
-    @MainActor
-    func addItemFromEquipped(_ equippedItem: CharacterInput.EquippedItem) {
-        let stackKey = equippedItem.stackKey
-
-        // 既にキャッシュにある場合は何もしない
-        guard stackKeyIndex[stackKey] == nil else {
-            itemCacheVersion &+= 1
-            return
-        }
-
-        // マスターデータからカテゴリとレアリティを取得
-        guard let definition = masterDataCache.item(equippedItem.itemId) else { return }
-        let category = ItemSaleCategory(rawValue: definition.category) ?? .other
-
-        // キャッシュに追加
-        let enhancement = ItemEnhancement(
-            superRareTitleId: equippedItem.superRareTitleId,
-            normalTitleId: equippedItem.normalTitleId,
-            socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
-            socketNormalTitleId: equippedItem.socketNormalTitleId,
-            socketItemId: equippedItem.socketItemId
-        )
-
-        let allTitles = masterDataCache.allTitles
-        let priceMultiplierMap = Dictionary(uniqueKeysWithValues: allTitles.map { ($0.id, $0.priceMultiplier) })
-        let sellPrice = (try? ItemPriceCalculator.sellPrice(
-            baseSellValue: definition.sellValue,
-            normalTitleId: enhancement.normalTitleId,
-            hasSuperRare: enhancement.superRareTitleId != 0,
-            multiplierMap: priceMultiplierMap
-        )) ?? definition.sellValue
-
-        let fullDisplayName = buildFullDisplayName(
-            itemName: definition.name,
-            enhancement: enhancement
-        )
-
-        // スキルIDを収集（ベース + 超レア称号）
-        var grantedSkillIds = definition.grantedSkillIds
-        if equippedItem.superRareTitleId > 0,
-           let superRareSkillIds = masterDataCache.superRareTitle(equippedItem.superRareTitleId)?.skillIds {
-            grantedSkillIds.append(contentsOf: superRareSkillIds)
-        }
-
-        // 戦闘ステータスを計算（称号 × 超レア × 宝石改造 × パンドラ）
-        let combatBonuses = calculateFinalCombatBonuses(
-            definition: definition,
-            normalTitleId: equippedItem.normalTitleId,
-            superRareTitleId: equippedItem.superRareTitleId,
-            socketItemId: equippedItem.socketItemId,
-            socketNormalTitleId: equippedItem.socketNormalTitleId,
-            socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
-            isPandora: pandoraBoxItems.contains(packedStackKey(
-                superRareTitleId: equippedItem.superRareTitleId,
-                normalTitleId: equippedItem.normalTitleId,
-                itemId: equippedItem.itemId,
-                socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
-                socketNormalTitleId: equippedItem.socketNormalTitleId,
-                socketItemId: equippedItem.socketItemId
-            ))
-        )
-
-        let cachedItem = CachedInventoryItem(
-            stackKey: stackKey,
-            itemId: equippedItem.itemId,
-            quantity: 1,  // 装備解除時は常に1
-            normalTitleId: equippedItem.normalTitleId,
-            superRareTitleId: equippedItem.superRareTitleId,
-            socketItemId: equippedItem.socketItemId,
-            socketNormalTitleId: equippedItem.socketNormalTitleId,
-            socketSuperRareTitleId: equippedItem.socketSuperRareTitleId,
-            category: category,
-            rarity: definition.rarity,
-            displayName: fullDisplayName,
-            baseValue: definition.basePrice,
-            sellValue: sellPrice,
-            statBonuses: definition.statBonuses,
-            combatBonuses: combatBonuses,
-            grantedSkillIds: grantedSkillIds
-        )
-
-        insertItemWithoutVersion(cachedItem)
-        rebuildOrderedSubcategories()
-        itemCacheVersion &+= 1
-    }
 }
 
 // MARK: - Display Helpers

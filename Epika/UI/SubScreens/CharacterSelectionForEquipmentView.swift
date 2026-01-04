@@ -172,7 +172,6 @@ struct EquipmentEditorView: View {
     @Environment(AppServices.self) private var appServices
     @Environment(StatChangeNotificationService.self) private var statChangeService
     @State private var currentCharacter: CachedCharacter
-    @State private var equippedItemsBySubcategory: [ItemDisplaySubcategory: [EquipmentDisplayItem]] = [:]
     @State private var orderedSubcategories: [ItemDisplaySubcategory] = []
     @State private var itemDefinitions: [UInt16: ItemDefinition] = [:]
     @State private var isLoading = true
@@ -197,9 +196,26 @@ struct EquipmentEditorView: View {
     /// 装備画面で除外するメインカテゴリ（合成素材・魔造素材）
     private static let excludedCategories: Set<ItemSaleCategory> = [.forSynthesis, .mazoMaterial]
 
+    /// 装備中アイテムをサブカテゴリ別に分類（キャッシュから取得）
+    private var equippedItemsBySubcategory: [ItemDisplaySubcategory: [EquipmentDisplayItem]] {
+        let cachedEquipped = displayService.equippedItemsByCharacter[character.id] ?? []
+        let avatarId = currentCharacter.resolvedAvatarId
+        var result: [ItemDisplaySubcategory: [EquipmentDisplayItem]] = [:]
+        for equipped in cachedEquipped {
+            let subcategory = ItemDisplaySubcategory(
+                mainCategory: equipped.category,
+                subcategory: equipped.rarity
+            )
+            let displayItem = EquipmentDisplayItem.equipped(equipped, avatarId: avatarId)
+            result[subcategory, default: []].append(displayItem)
+        }
+        return result
+    }
+
     /// 装備数サマリー
     private var equippedItemsSummary: String {
-        let count = currentCharacter.equippedItems.reduce(0) { $0 + $1.quantity }
+        let cachedEquipped = displayService.equippedItemsByCharacter[character.id] ?? []
+        let count = cachedEquipped.reduce(0) { $0 + Int($1.quantity) }
         return "\(count)/\(currentCharacter.equipmentCapacity)"
     }
 
@@ -586,8 +602,9 @@ struct EquipmentEditorView: View {
         // 装備候補と装備中アイテムの定義を取得（validateEquipmentに必要）
         let cachedItems = displayService.getSubcategorizedItems()
         let availableIds = cachedItems.values.flatMap { $0.map { $0.itemId } }
+        let cachedEquipped = displayService.equippedItemsByCharacter[character.id] ?? []
         let allItemIds = Set(availableIds)
-            .union(Set(currentCharacter.equippedItems.map { $0.itemId }))
+            .union(Set(cachedEquipped.map { $0.itemId }))
         let masterData = appServices.masterDataCache
         var definitions: [UInt16: ItemDefinition] = [:]
         for id in allItemIds {
@@ -597,38 +614,16 @@ struct EquipmentEditorView: View {
         }
         itemDefinitions = definitions
 
-        // 装備中アイテムだけを別変数に保持（キャッシュには挿入しない）
-        buildEquippedItemsBySubcategory()
+        // 装備中アイテムをキャッシュに設定（初期ロード時）
+        if displayService.equippedItemsByCharacter[character.id] == nil {
+            displayService.equippedItemsByCharacter[character.id] = currentCharacter.equippedItems
+        }
 
         // 称号オプションをキャッシュ（毎回ソートを避ける）
         cachedNormalTitleOptions = masterData.allTitles.sorted { $0.id < $1.id }
         cachedAllNormalTitleIds = Set(cachedNormalTitleOptions.map { $0.id })
 
         isLoading = false
-    }
-
-    /// 装備中アイテムをequippedItemsBySubcategoryに構築する
-    private func buildEquippedItemsBySubcategory() {
-        var result: [ItemDisplaySubcategory: [EquipmentDisplayItem]] = [:]
-        let avatarId = currentCharacter.resolvedAvatarId
-
-        for equipped in currentCharacter.equippedItems {
-            let category = equipped.category
-            let subcategory = ItemDisplaySubcategory(
-                mainCategory: category,
-                subcategory: equipped.rarity
-            )
-
-            let displayItem = EquipmentDisplayItem.equipped(equipped, avatarId: avatarId)
-
-            // サブカテゴリ別に分類
-            if result[subcategory] == nil {
-                result[subcategory] = []
-            }
-            result[subcategory]?.append(displayItem)
-        }
-
-        equippedItemsBySubcategory = result
     }
 
     private func validateEquipment(definition: ItemDefinition?) -> (canEquip: Bool, reason: String?) {
@@ -682,8 +677,7 @@ struct EquipmentEditorView: View {
 
             // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
             displayService.updateCharacter(runtime)
-
-            rebuildEquippedItemsAndRefresh()
+            // 装備中アイテムキャッシュはCharacterProgressServiceからの通知経由で自動更新される
         } catch {
             equipError = error.localizedDescription
         }
@@ -716,13 +710,7 @@ struct EquipmentEditorView: View {
 
         // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
         displayService.updateCharacter(runtime)
-
-        rebuildEquippedItemsAndRefresh()
-    }
-
-    /// 装備中アイテムを再構築（filteredSectionsはcomputed propertyなので自動更新）
-    private func rebuildEquippedItemsAndRefresh() {
-        buildEquippedItemsBySubcategory()
+        // 装備中アイテムキャッシュはCharacterProgressServiceからの通知経由で自動更新される
     }
 
     /// 装備変更前後のステータス差分を計算

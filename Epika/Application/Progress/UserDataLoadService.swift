@@ -62,6 +62,9 @@ final class UserDataLoadService: Sendable {
     @MainActor var orderedSubcategories: [ItemDisplaySubcategory] = []
     @MainActor var itemCacheVersion: Int = 0
 
+    // 装備中アイテムキャッシュ（キャラクターID → 装備中アイテム配列）
+    @MainActor var equippedItemsByCharacter: [UInt8: [CachedInventoryItem]] = [:]
+
     // ゲーム状態キャッシュ
     @MainActor var playerGold: UInt32 = 0
     @MainActor var playerCatTickets: UInt16 = 0

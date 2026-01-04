@@ -686,7 +686,7 @@ actor InventoryProgressService {
                 quantity: record.quantity
             )
         }
-        let change = UserDataLoadService.InventoryChange(upserted: upsertedItems, removed: removed)
+        let change = UserDataLoadService.InventoryChange(upserted: upsertedItems, removed: removed, equippedItemsChange: nil)
         Task { @MainActor in
             NotificationCenter.default.post(
                 name: .inventoryDidChange,

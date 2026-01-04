@@ -202,15 +202,23 @@ actor CharacterProgressService {
     }
 
     /// インベントリ変更通知を送信（装備のつけ外し時に使用、stackKeyと数量のみ）
-    private func postInventoryChange(upserted: [InventoryItemRecord] = [], removed: [String] = []) {
-        guard !upserted.isEmpty || !removed.isEmpty else { return }
+    private func postInventoryChange(
+        upserted: [InventoryItemRecord] = [],
+        removed: [String] = [],
+        equippedItemsChange: UserDataLoadService.InventoryChange.EquippedItemsChange? = nil
+    ) {
+        guard !upserted.isEmpty || !removed.isEmpty || equippedItemsChange != nil else { return }
         let upsertedItems = upserted.map { record in
             UserDataLoadService.InventoryChange.UpsertedItem(
                 stackKey: record.stackKey,
                 quantity: record.quantity
             )
         }
-        let change = UserDataLoadService.InventoryChange(upserted: upsertedItems, removed: removed)
+        let change = UserDataLoadService.InventoryChange(
+            upserted: upsertedItems,
+            removed: removed,
+            equippedItemsChange: equippedItemsChange
+        )
         Task { @MainActor in
             NotificationCenter.default.post(
                 name: .inventoryDidChange,
@@ -870,13 +878,18 @@ actor CharacterProgressService {
 
         try context.save()
 
-        // キャッシュ更新のためインベントリ変更通知を送信
+        // 更新後の装備リストを取得
+        let equippedItems = try fetchEquippedItems(characterId: characterId, context: context)
+
+        // キャッシュ更新のためインベントリ変更通知を送信（装備変更も含む）
         if !skipNotification {
-            postInventoryChange(upserted: [inventoryRecord])
+            let equippedItemsChange = UserDataLoadService.InventoryChange.EquippedItemsChange(
+                characterId: characterId,
+                items: equippedItems
+            )
+            postInventoryChange(upserted: [inventoryRecord], equippedItemsChange: equippedItemsChange)
         }
 
-        // 更新後の装備リストを返す（軽量版）
-        let equippedItems = try fetchEquippedItems(characterId: characterId, context: context)
         return EquipResult(
             equippedItems: equippedItems,
             inventoryStackKey: stackKey,
@@ -983,13 +996,18 @@ actor CharacterProgressService {
 
         try context.save()
 
-        // キャッシュ更新のためインベントリ変更通知を送信
+        // 更新後の装備リストを取得
+        let equippedItems = try fetchEquippedItems(characterId: characterId, context: context)
+
+        // キャッシュ更新のためインベントリ変更通知を送信（装備変更も含む）
         if !skipNotification {
-            postInventoryChange(upserted: [inventoryRecord])
+            let equippedItemsChange = UserDataLoadService.InventoryChange.EquippedItemsChange(
+                characterId: characterId,
+                items: equippedItems
+            )
+            postInventoryChange(upserted: [inventoryRecord], equippedItemsChange: equippedItemsChange)
         }
 
-        // 更新後の装備リストを返す（軽量版）
-        let equippedItems = try fetchEquippedItems(characterId: characterId, context: context)
         return UnequipResult(
             equippedItems: equippedItems,
             inventoryStackKey: inventoryRecord.stackKey,
