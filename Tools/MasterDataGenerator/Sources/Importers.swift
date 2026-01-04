@@ -290,6 +290,7 @@ private struct SkillVariant: Decodable {
 
     let id: Int
     let label: String?
+    let description: String?
     let parameters: [String: String]?
     let payload: SkillEffectPayloadValues
     let effects: [CustomEffect]?
@@ -298,6 +299,7 @@ private struct SkillVariant: Decodable {
     private enum CodingKeys: String, CodingKey {
         case id
         case label
+        case description
         case parameters
         case value
         case effects
@@ -308,6 +310,7 @@ private struct SkillVariant: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
         label = try container.decodeIfPresent(String.self, forKey: .label)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
         parameters = try container.decodeIfPresent(FlexibleStringDict.self, forKey: .parameters)?.values
         payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
         effects = try container.decodeIfPresent([CustomEffect].self, forKey: .effects)
@@ -475,7 +478,7 @@ extension Generator {
 
                     entries.append(SkillEntry(id: variant.id,
                                               name: label,
-                                              description: label,
+                                              description: variant.description ?? label,
                                               type: "passive",
                                               category: categoryKey,
                                               effects: effects))
