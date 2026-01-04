@@ -6,13 +6,10 @@
 // 【責務】
 //   - SQLiteデータベース（master_data.db）の基本操作を提供
 //   - データベースの初期化、接続管理、スキーマバージョン検証
-//   - クエリ実行、トランザクション管理、バインド/取得ヘルパー
 //
 // 【公開API】
 //   - initialize(databaseURL:): データベースを開いてスキーマ検証
-//   - prepare(_:), execute(_:), step(_:): クエリ実行の基本操作
-//   - bindText/Int/Double/Bool, optionalString: 値のバインド/取得
-//   - withTransaction(_:): トランザクション実行
+//   - prepare(_:), execute(_:): クエリ実行の基本操作
 //
 // 【使用箇所】
 //   - MasterDataLoader（起動時のデータ読み込み）
@@ -20,25 +17,15 @@
 //
 // 【注意】
 //   - actorなので全クエリは直列実行される
-//   - shared シングルトンは後方互換性のため残存（新規コードでは使用禁止）
 //
 // ==============================================================================
 
 import Foundation
 import SQLite3
-import CryptoKit
 
 actor SQLiteMasterDataManager {
-    /// 後方互換性のため残しているが、新規コードでは使用禁止。
-    /// MasterDataLoaderでインスタンスを生成してDIすること。
-    static let shared = SQLiteMasterDataManager()
-
-    private static let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
-
     private var db: OpaquePointer?
     private var isInitialized = false
-
-    private let databaseFileName = "master_data.db"
     private let schemaVersion: Int32 = 1
 
     init() {}
@@ -110,79 +97,6 @@ actor SQLiteMasterDataManager {
         return unwrapped
     }
 
-    func withTransaction(_ body: () throws -> Void) throws {
-        try execute("BEGIN IMMEDIATE TRANSACTION;")
-        do {
-            try body()
-            try execute("COMMIT TRANSACTION;")
-        } catch {
-            let operationError = error
-            do {
-                try execute("ROLLBACK TRANSACTION;")
-            } catch let rollbackError {
-                let message = "ROLLBACK TRANSACTION failed. original: \(operationError), rollback: \(rollbackError)"
-                throw SQLiteMasterDataError.executionFailed(message)
-            }
-            throw operationError
-        }
-    }
-
-    func bindText(_ statement: OpaquePointer, index: Int32, value: String?) {
-        if let value {
-            sqlite3_bind_text(statement, index, value, -1, Self.sqliteTransient)
-        } else {
-            sqlite3_bind_null(statement, index)
-        }
-    }
-
-    func bindInt(_ statement: OpaquePointer, index: Int32, value: Int?) {
-        if let value {
-            sqlite3_bind_int(statement, index, Int32(value))
-        } else {
-            sqlite3_bind_null(statement, index)
-        }
-    }
-
-    func bindDouble(_ statement: OpaquePointer, index: Int32, value: Double?) {
-        if let value {
-            sqlite3_bind_double(statement, index, value)
-        } else {
-            sqlite3_bind_null(statement, index)
-        }
-    }
-
-    func bindBool(_ statement: OpaquePointer, index: Int32, value: Bool?) {
-        if let value {
-            sqlite3_bind_int(statement, index, value ? 1 : 0)
-        } else {
-            sqlite3_bind_null(statement, index)
-        }
-    }
-
-    func optionalString(_ statement: OpaquePointer, column: Int32) -> String? {
-        guard sqlite3_column_type(statement, column) != SQLITE_NULL,
-              let text = sqlite3_column_text(statement, column) else { return nil }
-        return String(cString: text)
-    }
-
-    func step(_ statement: OpaquePointer) throws {
-        let result = sqlite3_step(statement)
-        if result != SQLITE_DONE {
-            let sql = sqlite3_sql(statement).flatMap { String(cString: $0) } ?? "<unknown sql>"
-            let detail = "\(sqliteMessage()) (code: \(result)) during \(sql)"
-            throw SQLiteMasterDataError.executionFailed(detail)
-        }
-    }
-
-    func reset(_ statement: OpaquePointer) {
-        sqlite3_reset(statement)
-        sqlite3_clear_bindings(statement)
-    }
-
-    func computeSHA256(for data: Data) -> String {
-        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
-    }
-
     // MARK: - Private
 
     private func resolveBundledDatabaseURL(override url: URL?) throws -> URL {
@@ -236,10 +150,6 @@ actor SQLiteMasterDataManager {
         }
         return String(cString: cString)
     }
-
-    private func setUserVersion(_ version: Int32) throws {
-        try execute("PRAGMA user_version = \(version);")
-    }
 }
 
 // MARK: - Errors
@@ -249,7 +159,6 @@ enum SQLiteMasterDataError: Error {
     case failedToOpenDatabase(String)
     case executionFailed(String)
     case statementPrepareFailed(String)
-    case resourceNotFound(String)
     case bundledDatabaseNotFound
     case schemaVersionMismatch(expected: Int32, actual: Int32)
 }
