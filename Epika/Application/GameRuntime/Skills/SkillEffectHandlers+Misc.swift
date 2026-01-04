@@ -58,7 +58,7 @@ struct EndOfTurnHealingHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         let value = try payload.requireValue(.valuePercent, skillId: context.skillId, effectIndex: context.effectIndex)
-        accumulator.misc.endOfTurnHealingPercent = max(accumulator.misc.endOfTurnHealingPercent, value)
+        accumulator.misc.endOfTurnHealingPercent += value
     }
 }
 

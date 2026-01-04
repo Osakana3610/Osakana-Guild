@@ -78,26 +78,24 @@ extension BattleTurnEngine {
     static func applyEndOfTurnPartyHealing(for side: ActorSide, context: inout BattleContext) {
         let actors: [BattleActor] = side == .player ? context.players : context.enemies
         guard !actors.isEmpty else { return }
-        guard let healerIndex = actors.indices.max(by: { lhs, rhs in
-            let left = actors[lhs]
-            let right = actors[rhs]
-            if left.skillEffects.misc.endOfTurnHealingPercent == right.skillEffects.misc.endOfTurnHealingPercent {
-                return lhs < rhs
-            }
-            return left.skillEffects.misc.endOfTurnHealingPercent < right.skillEffects.misc.endOfTurnHealingPercent
-        }) else { return }
 
+        // 生存キャラ全員の回復%を合算
+        let totalPercent = actors
+            .filter { $0.isAlive }
+            .reduce(0.0) { $0 + $1.skillEffects.misc.endOfTurnHealingPercent }
+        guard totalPercent > 0 else { return }
+        let factor = totalPercent / 100.0
+
+        // ログ用: 最も高い%を持つ生存キャラをhealerとする
+        let healerIndex = actors.indices
+            .filter { actors[$0].isAlive && actors[$0].skillEffects.misc.endOfTurnHealingPercent > 0 }
+            .max { actors[$0].skillEffects.misc.endOfTurnHealingPercent < actors[$1].skillEffects.misc.endOfTurnHealingPercent }!
         let healer = actors[healerIndex]
-        guard healer.isAlive else { return }
-        let percent = healer.skillEffects.misc.endOfTurnHealingPercent
-        guard percent > 0 else { return }
-        let factor = percent / 100.0
-        let baseHealing = Double(healer.snapshot.magicalHealing) * factor
-        guard baseHealing > 0 else { return }
 
         for targetIndex in actors.indices {
             guard side == .player ? context.players[targetIndex].isAlive : context.enemies[targetIndex].isAlive else { continue }
             var target = side == .player ? context.players[targetIndex] : context.enemies[targetIndex]
+            let baseHealing = Double(target.snapshot.maxHP) * factor
             let dealt = healingDealtModifier(for: healer)
             let received = healingReceivedModifier(for: target)
             let amount = max(1, Int((baseHealing * dealt * received).rounded()))
