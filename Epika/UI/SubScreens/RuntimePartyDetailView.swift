@@ -435,8 +435,9 @@ private struct PartyEquipmentListView: View {
                     } header: {
                         HStack(spacing: 0) {
                             Text(character.name)
-                                .fontWeight(.bold)
+                                .font(.subheadline.bold())
                             Text(characterSubHeaderText(for: character))
+                                .font(.subheadline)
                         }
                         .foregroundStyle(.primary)
                     }
