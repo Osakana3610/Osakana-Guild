@@ -769,14 +769,17 @@ struct EquipmentEditorView: View {
             }
         }
 
-        // ヘルパー関数（Double用、小数点1桁）
+        // ヘルパー関数（Double用、小数点1桁・切り捨て）
         func addIfChangedDouble(_ kind: StatKind, oldVal: Double, newVal: Double) {
-            if oldVal != newVal {
-                let delta = newVal - oldVal
+            // 表示値は切り捨てで計算（CharacterCombatStatsSectionと統一）
+            let oldDisplay = floor(oldVal * 10) / 10
+            let newDisplay = floor(newVal * 10) / 10
+            if oldDisplay != newDisplay {
+                let delta = newDisplay - oldDisplay
                 let sign = delta >= 0 ? "+" : ""
                 changes.append(Notification(
                     kind: kind,
-                    newValue: String(format: "%.1f", newVal),
+                    newValue: String(format: "%.1f", newDisplay),
                     delta: String(format: "%@%.1f", sign, delta)
                 ))
             }
