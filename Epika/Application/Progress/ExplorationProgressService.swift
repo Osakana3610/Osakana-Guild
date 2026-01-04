@@ -282,8 +282,20 @@ actor CachedExplorationQueryActor {
 
     private func makeItemDropSummaries(from run: ExplorationRunRecord) -> [CachedExploration.Rewards.ItemDropSummary] {
         guard !run.events.isEmpty else { return [] }
-        var summaries: [CachedExploration.Rewards.ItemDropSummary] = []
-        var indexByKey: [ExplorationDropKey: Int] = [:]
+
+        // 自動売却された数量をキーごとに集計
+        var autoSoldQuantities: [ExplorationDropKey: Int] = [:]
+        for autoSell in run.autoSellItems {
+            let key = ExplorationDropKey(
+                itemId: autoSell.itemId,
+                superRareTitleId: autoSell.superRareTitleId,
+                normalTitleId: autoSell.normalTitleId
+            )
+            autoSoldQuantities[key, default: 0] += Int(autoSell.quantity)
+        }
+
+        // 全ドロップを集計
+        var quantityByKey: [ExplorationDropKey: Int] = [:]
         for eventRecord in run.events {
             for drop in eventRecord.drops where drop.itemId > 0 && drop.quantity > 0 {
                 let key = ExplorationDropKey(
@@ -291,19 +303,24 @@ actor CachedExplorationQueryActor {
                     superRareTitleId: drop.superRareTitleId ?? 0,
                     normalTitleId: drop.normalTitleId ?? 2
                 )
-                if let index = indexByKey[key] {
-                    summaries[index].quantity += Int(drop.quantity)
-                } else {
-                    indexByKey[key] = summaries.count
-                    summaries.append(
-                        CachedExploration.Rewards.ItemDropSummary(
-                            itemId: key.itemId,
-                            superRareTitleId: key.superRareTitleId,
-                            normalTitleId: key.normalTitleId,
-                            quantity: Int(drop.quantity)
-                        )
+                quantityByKey[key, default: 0] += Int(drop.quantity)
+            }
+        }
+
+        // 自動売却分を差し引いてサマリーを作成
+        var summaries: [CachedExploration.Rewards.ItemDropSummary] = []
+        for (key, totalQuantity) in quantityByKey {
+            let soldQuantity = autoSoldQuantities[key] ?? 0
+            let remainingQuantity = totalQuantity - soldQuantity
+            if remainingQuantity > 0 {
+                summaries.append(
+                    CachedExploration.Rewards.ItemDropSummary(
+                        itemId: key.itemId,
+                        superRareTitleId: key.superRareTitleId,
+                        normalTitleId: key.normalTitleId,
+                        quantity: remainingQuantity
                     )
-                }
+                )
             }
         }
         return summaries
