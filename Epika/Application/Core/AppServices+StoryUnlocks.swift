@@ -77,7 +77,9 @@ extension AppServices {
         }
 
         if didChange {
-            NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+            await MainActor.run {
+                NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+            }
         }
     }
 
@@ -105,7 +107,9 @@ extension AppServices {
         }
 
         if didChange {
-            NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+            await MainActor.run {
+                NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+            }
         }
     }
 }
@@ -133,7 +137,9 @@ extension AppServices {
         record.updatedAt = Date()
         try context.save()
 
-        NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+        await MainActor.run {
+            NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+        }
     }
 }
 
@@ -181,7 +187,9 @@ extension AppServices {
         try context.save()
 
         // 5. 通知を送信
-        NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+        await MainActor.run {
+            NotificationCenter.default.post(name: .progressUnlocksDidChange, object: nil)
+        }
 
         // 6. スナップショットを返す
         let allNodes = try fetchAllStoryRecords(context: context)
