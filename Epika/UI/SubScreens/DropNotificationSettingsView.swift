@@ -31,6 +31,7 @@ struct DropNotificationSettingsView: View {
             titleFilterSection
             superRareSection
         }
+        .avoidBottomGameInfo()
         .navigationTitle("ドロップ通知設定")
         .navigationBarTitleDisplayMode(.inline)
     }
