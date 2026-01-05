@@ -103,13 +103,23 @@ actor BugReportService {
             body.append("\r\n")
         }
 
-        // 添付ファイル3: ユーザーデータJSON
+        // 添付ファイル3: ユーザーデータJSON（gzip圧縮）
         if let userDataJsonData = report.userDataJson.data(using: .utf8), !report.userDataJson.isEmpty {
-            body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"files[2]\"; filename=\"user_data.json\"\r\n")
-            body.append("Content-Type: application/json; charset=utf-8\r\n\r\n")
-            body.append(userDataJsonData)
-            body.append("\r\n")
+            // gzip圧縮を試みる
+            if let compressedData = try? (userDataJsonData as NSData).compressed(using: .zlib) as Data {
+                body.append("--\(boundary)\r\n")
+                body.append("Content-Disposition: form-data; name=\"files[2]\"; filename=\"user_data.json.gz\"\r\n")
+                body.append("Content-Type: application/gzip\r\n\r\n")
+                body.append(compressedData)
+                body.append("\r\n")
+            } else {
+                // 圧縮失敗時は非圧縮で送信
+                body.append("--\(boundary)\r\n")
+                body.append("Content-Disposition: form-data; name=\"files[2]\"; filename=\"user_data.json\"\r\n")
+                body.append("Content-Type: application/json; charset=utf-8\r\n\r\n")
+                body.append(userDataJsonData)
+                body.append("\r\n")
+            }
         }
 
         body.append("--\(boundary)--\r\n")
