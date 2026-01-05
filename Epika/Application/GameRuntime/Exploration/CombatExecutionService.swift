@@ -200,6 +200,11 @@ struct CombatExecutionService {
                                     goldEarned: rewards.gold,
                                     drops: dropResults)
 
+        // デバッグ用: 戦闘ログをバッファに保存
+        BattleLogBuffer.shared.append(dungeonId: Int(dungeon.id),
+                                       floor: floor.floorNumber,
+                                       battleLog: resolution.battleLog)
+
         return CombatExecutionOutcome(summary: summary,
                                        log: logArchive,
                                        updatedSuperRareState: updatedSuperRareState,

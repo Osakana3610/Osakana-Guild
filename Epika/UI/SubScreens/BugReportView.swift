@@ -141,9 +141,9 @@ struct BugReportView: View {
 
         do {
             let logs = await AppLogCollector.shared.getLogsAsText()
+            let battleLogs = BattleLogBuffer.shared.getLogsAsText()
             let appInfo = BugReportService.gatherAppInfo()
 
-            // プレイヤーIDはデバイス固有のUUID（Keychain保存推奨だが、簡易版として生成）
             let playerId = getOrCreatePlayerId()
 
             let playerData = BugReport.PlayerReportData(
@@ -155,10 +155,14 @@ struct BugReportView: View {
                 currentScreen: "BugReportView"
             )
 
+            let userDataJson = buildUserDataJson(playerId: playerId)
+
             let report = BugReport(
                 description: description,
                 playerData: playerData,
                 logs: logs,
+                battleLogs: battleLogs,
+                userDataJson: userDataJson,
                 appInfo: appInfo
             )
 
@@ -167,6 +171,59 @@ struct BugReportView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func buildUserDataJson(playerId: String) -> String {
+        let userDataLoad = appServices.userDataLoad
+
+        let characterReports = userDataLoad.characters.map { char in
+            UserDataReport.CharacterReport(
+                id: char.id,
+                name: char.displayName,
+                raceId: char.raceId,
+                raceName: char.raceName,
+                jobId: char.jobId,
+                jobName: char.jobName,
+                level: char.level,
+                experience: char.experience,
+                currentHP: char.currentHP,
+                maxHP: char.maxHP,
+                equippedItemCount: char.equippedItems.count,
+                equippedItems: char.equippedItems.map { $0.displayName }
+            )
+        }
+
+        let partyReports = userDataLoad.parties.map { party in
+            UserDataReport.PartyReport(
+                id: party.id,
+                name: party.displayName,
+                memberIds: party.memberCharacterIds,
+                lastSelectedDungeonId: party.lastSelectedDungeonId
+            )
+        }
+
+        let allItems = userDataLoad.subcategorizedItems.values.flatMap { items -> [CachedInventoryItem] in items }
+        let itemReports = allItems.map { item in
+            UserDataReport.ItemReport(
+                itemId: item.itemId,
+                displayName: item.displayName,
+                quantity: item.quantity,
+                category: item.category.identifier,
+                normalTitleId: item.normalTitleId,
+                superRareTitleId: item.superRareTitleId,
+                socketItemId: item.socketItemId
+            )
+        }
+
+        let report = UserDataReport(
+            playerId: playerId,
+            gold: Int(userDataLoad.playerGold),
+            characters: characterReports,
+            parties: partyReports,
+            inventory: itemReports
+        )
+
+        return report.toJsonString()
     }
 
     /// プレイヤーIDを取得または生成（UserDefaults簡易版）

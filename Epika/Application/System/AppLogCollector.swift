@@ -135,6 +135,90 @@ actor AppLogCollector {
     }
 }
 
+// MARK: - Battle Log Buffer (Thread-safe, nonisolated)
+
+/// 直近の戦闘ログを保持するバッファ（同期アクセス用）
+final class BattleLogBuffer: @unchecked Sendable {
+    static let shared = BattleLogBuffer()
+
+    private var logs: [(timestamp: Date, dungeonId: Int, floor: Int, log: Data)] = []
+    private let lock = NSLock()
+    private let maxLogs = 10
+
+    private init() {}
+
+    /// 戦闘ログを追加（BattleLog を JSON エンコードして保存）
+    nonisolated func append(dungeonId: Int, floor: Int, battleLog: BattleLog) {
+        guard let data = try? JSONEncoder().encode(battleLog) else { return }
+
+        lock.lock()
+        defer { lock.unlock() }
+
+        logs.append((timestamp: Date(), dungeonId: dungeonId, floor: floor, log: data))
+
+        // 古いログを削除
+        if logs.count > maxLogs {
+            logs.removeFirst(logs.count - maxLogs)
+        }
+    }
+
+    /// 直近の戦闘ログをテキスト形式で取得
+    func getLogsAsText() -> String {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard !logs.isEmpty else { return "(戦闘ログなし)" }
+
+        let formatter = ISO8601DateFormatter()
+        var result: [String] = []
+
+        for entry in logs.reversed() {
+            let header = "[\(formatter.string(from: entry.timestamp))] Dungeon=\(entry.dungeonId) Floor=\(entry.floor)"
+            if let battleLog = try? JSONDecoder().decode(BattleLog.self, from: entry.log) {
+                let summary = summarizeBattleLog(battleLog)
+                result.append("\(header)\n\(summary)")
+            } else {
+                result.append("\(header) (デコード失敗)")
+            }
+        }
+
+        return result.joined(separator: "\n---\n")
+    }
+
+    private func summarizeBattleLog(_ log: BattleLog) -> String {
+        let outcomeStr: String
+        switch log.outcome {
+        case 0: outcomeStr = "勝利"
+        case 1: outcomeStr = "敗北"
+        case 2: outcomeStr = "撤退"
+        default: outcomeStr = "不明(\(log.outcome))"
+        }
+
+        var lines = [
+            "  結果: \(outcomeStr), ターン数: \(log.turns)",
+            "  アクション数: \(log.entries.count)"
+        ]
+
+        // 主要なイベントを抽出
+        for entry in log.entries.prefix(20) {
+            let actorStr = entry.actor.map { "Actor\($0)" } ?? "System"
+            let kindStr = entry.declaration.kind.rawValue
+            let effectsSummary = entry.effects.map { effect in
+                let targetStr = effect.target.map { "→\($0)" } ?? ""
+                let valueStr = effect.value.map { "=\($0)" } ?? ""
+                return "\(effect.kind)\(targetStr)\(valueStr)"
+            }.joined(separator: ",")
+            lines.append("  T\(entry.turn) \(actorStr) K\(kindStr): [\(effectsSummary)]")
+        }
+
+        if log.entries.count > 20 {
+            lines.append("  ... +\(log.entries.count - 20) more actions")
+        }
+
+        return lines.joined(separator: "\n")
+    }
+}
+
 // MARK: - Convenience Extensions
 
 extension AppLogCollector {

@@ -20,6 +20,8 @@ struct BugReport: Sendable {
     let description: String
     let playerData: PlayerReportData
     let logs: String
+    let battleLogs: String
+    let userDataJson: String
     let appInfo: AppInfo
 
     struct PlayerReportData: Sendable {
@@ -49,15 +51,13 @@ actor BugReportService {
 
     // MARK: - Public API
 
-    /// 不具合報告を送信
+    /// 不具合報告を送信（multipart/form-dataで添付ファイル付き）
     func send(_ report: BugReport) async throws {
-        let payload = buildPayload(report)
-        let data = try JSONSerialization.data(withJSONObject: payload)
-
+        let boundary = UUID().uuidString
         var request = URLRequest(url: webhookURL)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = data
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = buildMultipartBody(report, boundary: boundary)
 
         let (_, response) = try await URLSession.shared.data(for: request)
 
@@ -65,7 +65,6 @@ actor BugReportService {
             throw BugReportError.invalidResponse
         }
 
-        // Discord Webhookは204 No Contentを返す
         guard (200...299).contains(httpResponse.statusCode) else {
             throw BugReportError.serverError(statusCode: httpResponse.statusCode)
         }
@@ -73,14 +72,57 @@ actor BugReportService {
 
     // MARK: - Private
 
+    private func buildMultipartBody(_ report: BugReport, boundary: String) -> Data {
+        var body = Data()
+
+        // payload_json パート（embed情報）
+        let payload = buildPayload(report)
+        if let payloadData = try? JSONSerialization.data(withJSONObject: payload) {
+            body.append("--\(boundary)\r\n")
+            body.append("Content-Disposition: form-data; name=\"payload_json\"\r\n")
+            body.append("Content-Type: application/json\r\n\r\n")
+            body.append(payloadData)
+            body.append("\r\n")
+        }
+
+        // 添付ファイル1: 操作ログ
+        if let logsData = report.logs.data(using: .utf8), !report.logs.isEmpty {
+            body.append("--\(boundary)\r\n")
+            body.append("Content-Disposition: form-data; name=\"files[0]\"; filename=\"operation_logs.txt\"\r\n")
+            body.append("Content-Type: text/plain; charset=utf-8\r\n\r\n")
+            body.append(logsData)
+            body.append("\r\n")
+        }
+
+        // 添付ファイル2: 戦闘ログ
+        if let battleLogsData = report.battleLogs.data(using: .utf8), !report.battleLogs.isEmpty {
+            body.append("--\(boundary)\r\n")
+            body.append("Content-Disposition: form-data; name=\"files[1]\"; filename=\"battle_logs.txt\"\r\n")
+            body.append("Content-Type: text/plain; charset=utf-8\r\n\r\n")
+            body.append(battleLogsData)
+            body.append("\r\n")
+        }
+
+        // 添付ファイル3: ユーザーデータJSON
+        if let userDataJsonData = report.userDataJson.data(using: .utf8), !report.userDataJson.isEmpty {
+            body.append("--\(boundary)\r\n")
+            body.append("Content-Disposition: form-data; name=\"files[2]\"; filename=\"user_data.json\"\r\n")
+            body.append("Content-Type: application/json; charset=utf-8\r\n\r\n")
+            body.append(userDataJsonData)
+            body.append("\r\n")
+        }
+
+        body.append("--\(boundary)--\r\n")
+        return body
+    }
+
     private func buildPayload(_ report: BugReport) -> [String: Any] {
         let formatter = ISO8601DateFormatter()
         let timestamp = formatter.string(from: Date())
 
-        // Discord Embed形式
         let embed: [String: Any] = [
             "title": "不具合報告",
-            "color": 16711680, // 赤色
+            "color": 16711680,
             "timestamp": timestamp,
             "fields": [
                 [
@@ -114,11 +156,6 @@ actor BugReportService {
                     "inline": true
                 ],
                 [
-                    "name": "現在の画面",
-                    "value": report.playerData.currentScreen ?? "不明",
-                    "inline": true
-                ],
-                [
                     "name": "アプリ情報",
                     "value": "\(report.appInfo.appVersion) (\(report.appInfo.buildNumber))",
                     "inline": true
@@ -134,19 +171,76 @@ actor BugReportService {
             ]
         ]
 
-        // ログは別メッセージとして添付（長いため）
-        let logsContent = "```\n\(String(report.logs.prefix(1900)))\n```"
-
-        return [
-            "embeds": [embed],
-            "content": "**操作ログ（直近）**\n\(logsContent)"
-        ]
+        return ["embeds": [embed]]
     }
 
     private func formatNumber(_ n: Int) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         return formatter.string(from: NSNumber(value: n)) ?? String(n)
+    }
+}
+
+// MARK: - Data Extension
+
+private extension Data {
+    mutating func append(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
+}
+
+// MARK: - Report Data Structures
+
+/// レポート用ユーザーデータ（JSON添付用）
+struct UserDataReport: Encodable {
+    let playerId: String
+    let gold: Int
+    let characters: [CharacterReport]
+    let parties: [PartyReport]
+    let inventory: [ItemReport]
+
+    struct CharacterReport: Encodable {
+        let id: UInt8
+        let name: String
+        let raceId: UInt8
+        let raceName: String
+        let jobId: UInt8
+        let jobName: String
+        let level: Int
+        let experience: Int
+        let currentHP: Int
+        let maxHP: Int
+        let equippedItemCount: Int
+        let equippedItems: [String]
+    }
+
+    struct PartyReport: Encodable {
+        let id: UInt8
+        let name: String
+        let memberIds: [UInt8]
+        let lastSelectedDungeonId: UInt16?
+    }
+
+    struct ItemReport: Encodable {
+        let itemId: UInt16
+        let displayName: String
+        let quantity: UInt16
+        let category: String
+        let normalTitleId: UInt8
+        let superRareTitleId: UInt8
+        let socketItemId: UInt16
+    }
+
+    func toJsonString() -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard let data = try? encoder.encode(self),
+              let string = String(data: data, encoding: .utf8) else {
+            return "{}"
+        }
+        return string
     }
 }
 
