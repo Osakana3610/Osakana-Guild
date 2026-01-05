@@ -191,10 +191,10 @@ struct CachedExploration: Sendable, Hashable {
 }
 
 extension CachedExploration {
-    static func resultMessage(for status: Status) -> String {
+    static func resultMessage(for status: Status, isFullClear: Bool = true) -> String {
         switch status {
         case .completed:
-            return "迷宮を制覇しました！"
+            return isFullClear ? "迷宮を制覇しました！" : "パーティは帰還しました。"
         case .defeated:
             return "パーティは全滅しました……"
         case .cancelled:
@@ -207,6 +207,7 @@ extension CachedExploration {
     static func makeSummary(displayDungeonName: String,
                             status: Status,
                             activeFloorNumber: Int,
+                            dungeonTotalFloors: Int,
                             expectedReturnAt: Date?,
                             startedAt: Date,
                             lastUpdatedAt: Date,
@@ -222,6 +223,7 @@ extension CachedExploration {
             timingDate = lastUpdatedAt
         }
 
+        let isFullClear = activeFloorNumber >= dungeonTotalFloors
         let body: String
         switch status {
         case .running:
@@ -233,7 +235,7 @@ extension CachedExploration {
             }
             body = "\(displayDungeonName)：\(eventDescription)"
         case .completed, .defeated, .cancelled:
-            body = "\(displayDungeonName)：\(resultMessage(for: status))"
+            body = "\(displayDungeonName)：\(resultMessage(for: status, isFullClear: isFullClear))"
         }
 
         return Summary(floorNumber: activeFloorNumber,

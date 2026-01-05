@@ -31,7 +31,7 @@ struct ExplorationRunResultSummaryView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("\(snapshot.displayDungeonName)：\(CachedExploration.resultMessage(for: snapshot.status))")
+                    Text("\(snapshot.displayDungeonName)：\(CachedExploration.resultMessage(for: snapshot.status, isFullClear: isFullClear))")
                         .font(.headline)
                         .foregroundStyle(.primary)
 
@@ -133,6 +133,11 @@ struct ExplorationRunResultSummaryView: View {
         let label = snapshot.summary.timingKind == .expected ? "帰還予定" : "帰還日時"
         let value = ExplorationDateFormatters.timestamp.string(from: snapshot.summary.timingDate)
         return (label, value)
+    }
+
+    private var isFullClear: Bool {
+        guard let dungeonDefinition = appServices.masterDataCache.dungeon(snapshot.dungeonId) else { return true }
+        return snapshot.activeFloorNumber >= dungeonDefinition.floorCount
     }
 
     private var actualReturnDate: Date? {

@@ -170,10 +170,12 @@ extension UserDataLoadService {
         explorationSummaries[index].activeFloorNumber = entry.floorNumber
         explorationSummaries[index].lastUpdatedAt = entry.occurredAt
 
+        let dungeonTotalFloors = masterData.dungeon(explorationSummaries[index].dungeonId)?.floorCount ?? 1
         explorationSummaries[index].summary = CachedExploration.makeSummary(
             displayDungeonName: explorationSummaries[index].displayDungeonName,
             status: .running,
             activeFloorNumber: entry.floorNumber,
+            dungeonTotalFloors: dungeonTotalFloors,
             expectedReturnAt: explorationSummaries[index].expectedReturnAt,
             startedAt: explorationSummaries[index].startedAt,
             lastUpdatedAt: entry.occurredAt,
