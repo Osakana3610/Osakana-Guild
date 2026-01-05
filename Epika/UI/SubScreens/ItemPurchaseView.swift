@@ -167,7 +167,7 @@ struct ItemPurchaseView: View {
         defer { isLoading = false }
         do {
             shopItems = try await shopService.loadItems()
-            player = try await appServices.gameState.loadCurrentPlayer()
+            player = try await appServices.gameState.ensurePlayer()
         } catch {
             showError = true
             errorMessage = error.localizedDescription

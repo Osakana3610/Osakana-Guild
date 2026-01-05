@@ -115,7 +115,7 @@ extension AppServices {
     @discardableResult
     func sellItemsToShop(stackKeys: [String]) async throws -> CachedPlayer {
         guard !stackKeys.isEmpty else {
-            return try await gameState.currentPlayer()
+            return try await gameState.ensurePlayer()
         }
 
         // SwiftDataから直接フェッチ
@@ -129,7 +129,7 @@ extension AppServices {
         let targetRecords = records.filter { stackKeySet.contains($0.stackKey) }
 
         guard !targetRecords.isEmpty else {
-            return try await gameState.currentPlayer()
+            return try await gameState.ensurePlayer()
         }
 
         // 売却リストを構築（本体 + ソケット宝石）
@@ -153,7 +153,7 @@ extension AppServices {
         }
 
         // 最新のプレイヤー状態を取得して返す
-        return try await gameState.currentPlayer()
+        return try await gameState.ensurePlayer()
     }
 
     /// 単一アイテムを指定数量売却してショップ在庫に追加する
@@ -166,7 +166,7 @@ extension AppServices {
     @discardableResult
     func sellItemToShop(stackKey: String, quantity: Int) async throws -> CachedPlayer {
         guard quantity > 0 else {
-            return try await gameState.currentPlayer()
+            return try await gameState.ensurePlayer()
         }
 
         // SwiftDataから直接フェッチ
@@ -197,6 +197,6 @@ extension AppServices {
         try await inventory.decrementItem(stackKey: stackKey, quantity: quantity)
 
         // 最新のプレイヤー状態を取得して返す
-        return try await gameState.currentPlayer()
+        return try await gameState.ensurePlayer()
     }
 }

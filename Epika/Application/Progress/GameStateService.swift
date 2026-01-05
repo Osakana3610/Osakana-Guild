@@ -110,16 +110,10 @@ actor GameStateService {
 
     // MARK: - Player Snapshot
 
-    func loadCurrentPlayer(initialGold: UInt32 = 1000) async throws -> CachedPlayer {
+    func ensurePlayer(initialGold: UInt32 = 1000) async throws -> CachedPlayer {
         let context = contextProvider.makeContext()
         let record = try ensureGameState(context: context, initialGold: initialGold)
         try saveIfNeeded(context)
-        return Self.snapshot(from: record)
-    }
-
-    func currentPlayer() async throws -> CachedPlayer {
-        let context = contextProvider.makeContext()
-        let record = try fetchGameState(context: context)
         return Self.snapshot(from: record)
     }
 

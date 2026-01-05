@@ -304,7 +304,7 @@ struct ItemSaleView: View {
         defer { isLoading = false }
 
         do {
-            player = try await appServices.gameState.loadCurrentPlayer()
+            player = try await appServices.gameState.ensurePlayer()
             showError = false
             didLoadOnce = true
         } catch {

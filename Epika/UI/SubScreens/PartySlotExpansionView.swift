@@ -254,7 +254,7 @@ struct PartySlotExpansionView: View {
         defer { isLoading = false }
         errorMessage = nil
         do {
-            async let playerTask = appServices.gameState.currentPlayer()
+            async let playerTask = appServices.gameState.ensurePlayer()
             async let partyTask = appServices.party.allParties()
             let (player, parties) = try await (playerTask, partyTask)
             playerSnapshot = player
@@ -280,7 +280,7 @@ struct PartySlotExpansionView: View {
             }
             do {
                 let updatedParties = try await appServices.party.ensurePartySlots(atLeast: previousSlots + 1)
-                let updatedPlayer = try await appServices.gameState.currentPlayer()
+                let updatedPlayer = try await appServices.gameState.ensurePlayer()
                 playerSnapshot = updatedPlayer
                 partySnapshots = updatedParties
                 successMessage = "ギルド改造完了！パーティスロットが\(previousSlots)から\(updatedParties.count)に増えました！"

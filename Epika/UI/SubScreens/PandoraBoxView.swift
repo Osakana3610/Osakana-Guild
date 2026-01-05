@@ -144,7 +144,7 @@ struct PandoraBoxView: View {
         loadError = nil
 
         do {
-            let player = try await gameStateService.currentPlayer()
+            let player = try await gameStateService.ensurePlayer()
 
             // パンドラアイテムをマスターデータから構築（インベントリに依存しない）
             pandoraItems = player.pandoraBoxItems.compactMap { packed in

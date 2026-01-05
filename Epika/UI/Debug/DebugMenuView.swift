@@ -611,7 +611,7 @@ struct DebugMenuView: View {
     }
 
     private func ensureStorageCapacity() async throws {
-        _ = try await gameStateService.loadCurrentPlayer()
+        _ = try await gameStateService.ensurePlayer()
     }
 
     private func createCharacters() async {

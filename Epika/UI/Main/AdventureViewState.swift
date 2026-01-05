@@ -138,7 +138,7 @@ final class AdventureViewState {
 
     func loadPlayer(using appServices: AppServices) async {
         do {
-            playerProgress = try await appServices.gameState.loadCurrentPlayer()
+            playerProgress = try await appServices.gameState.ensurePlayer()
         } catch {
             present(error: error)
         }
@@ -161,7 +161,7 @@ final class AdventureViewState {
     func ensurePartySlots(using appServices: AppServices) async {
         guard let partyState else { return }
         do {
-            let profile = try await appServices.gameState.loadCurrentPlayer()
+            let profile = try await appServices.gameState.ensurePlayer()
             playerProgress = profile
             _ = try await appServices.party.ensurePartySlots(atLeast: Int(profile.partySlots))
             try await partyState.refresh()
