@@ -29,6 +29,13 @@ struct SettingsView: View {
                         Label("ドロップ通知設定", systemImage: "bell.badge")
                     }
                 }
+                Section("サポート") {
+                    NavigationLink {
+                        BugReportView()
+                    } label: {
+                        Label("不具合を報告", systemImage: "exclamationmark.bubble")
+                    }
+                }
                 Section("図鑑") {
                     NavigationLink {
                         MonsterEncyclopediaView()
