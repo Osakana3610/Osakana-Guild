@@ -62,8 +62,10 @@ extension BattleTurnEngine {
                                       attackerIndex: Int,
                                       target: (ActorSide, Int),
                                       context: inout BattleContext) {
-        guard var attacker = context.actor(for: attackerSide, index: attackerIndex) else { return }
-        guard var defender = context.actor(for: target.0, index: target.1) else { return }
+        guard var attacker = context.actor(for: attackerSide, index: attackerIndex),
+              attacker.isAlive else { return }
+        guard var defender = context.actor(for: target.0, index: target.1),
+              defender.isAlive else { return }
 
         let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
         let actionEntryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
