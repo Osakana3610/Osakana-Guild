@@ -364,8 +364,8 @@ private struct LazyCachedCharacterDetailView: View {
         if trimmed == runtimeCharacter?.name {
             return
         }
-        try await characterService.updateName(characterId: characterId, newName: trimmed)
-        refreshCharacterFromCache()
+        let updated = try await characterService.updateName(characterId: characterId, newName: trimmed)
+        runtimeCharacter = updated
     }
 
     @MainActor

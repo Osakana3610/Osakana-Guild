@@ -489,7 +489,8 @@ actor CharacterProgressService {
     // MARK: - Update
 
     /// 表示名を更新
-    func updateName(characterId: UInt8, newName: String) throws {
+    @discardableResult
+    func updateName(characterId: UInt8, newName: String) throws -> CachedCharacter {
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             throw ProgressError.invalidInput(description: "キャラクター名が設定されていません")
@@ -503,6 +504,7 @@ actor CharacterProgressService {
         record.displayName = trimmed
         try context.save()
         notifyCharacterChange(upserted: [characterId])
+        return try makeCachedCharacter(record, context: context)
     }
 
     /// アバターを更新

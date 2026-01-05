@@ -69,7 +69,9 @@ struct ShopView: View {
                 ShopMenuRow(title: "掘り出し物を見る",
                            icon: "magnifyingglass.circle.fill",
                            tint: .cyan) {
-                    PandoraBoxView()
+                    Text("掘り出し物は準備中です")
+                        .foregroundStyle(.secondary)
+                        .padding()
                 }
 
                 ShopMenuRow(title: "神器交換",
