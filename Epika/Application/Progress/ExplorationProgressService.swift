@@ -764,6 +764,13 @@ actor ExplorationProgressService {
                 data.append(0)
             }
 
+            if let label = entry.declaration.label, let labelData = label.data(using: .utf8), !labelData.isEmpty {
+                data.append(UInt8(labelData.count))
+                data.append(labelData)
+            } else {
+                data.append(0)
+            }
+
             data.append(UInt8(entry.effects.count))
             for effect in entry.effects {
                 data.append(effect.kind.rawValue)
@@ -916,6 +923,15 @@ actor ExplorationProgressService {
             let hasExtra = try readUInt8()
             let declarationExtra: UInt16? = hasExtra == 1 ? try readUInt16() : nil
 
+            let labelLength = try readUInt8()
+            var declarationLabel: String?
+            if labelLength > 0 {
+                guard offset + Int(labelLength) <= data.count else { throw BattleLogArchiveDecodingError.malformedData }
+                let labelData = data[offset..<(offset + Int(labelLength))]
+                offset += Int(labelLength)
+                declarationLabel = String(data: labelData, encoding: .utf8)
+            }
+
             let effectCount = try readUInt8()
             var effects: [BattleActionEntry.Effect] = []
             for _ in 0..<effectCount {
@@ -945,7 +961,8 @@ actor ExplorationProgressService {
 
             let declaration = BattleActionEntry.Declaration(kind: kind,
                                                             skillIndex: skillIndex,
-                                                            extra: declarationExtra)
+                                                            extra: declarationExtra,
+                                                            label: declarationLabel)
             let entry = BattleActionEntry(turn: Int(turn),
                                           actor: actor,
                                           declaration: declaration,

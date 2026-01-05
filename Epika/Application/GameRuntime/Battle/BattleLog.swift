@@ -140,7 +140,7 @@ extension BattleActionEntry {
 
 /// 戦闘ログ全体
 struct BattleLog: Codable, Sendable {
-    static let currentVersion: UInt8 = 2
+    static let currentVersion: UInt8 = 3
 
     var version: UInt8               // battle log schema version
     var initialHP: [UInt16: UInt32]  // actorIndex → 開始時HP
