@@ -219,7 +219,6 @@ extension AppServices {
             continuation.finish()
 
             // バックグラウンドでDB書き込みを実行（帰還通知後）
-            let userDataLoadService = userDataLoad
             let appServices = self
             let capturedDungeonId = artifact.dungeon.id
             let capturedDifficulty = UInt8(runDifficulty)
@@ -237,16 +236,9 @@ extension AppServices {
                         )
                         try await appServices.unlockStoryForDungeonClear(capturedDungeonId)
                     }
-                    // ドロップ報酬永続化
+                    // ドロップ報酬永続化（キャッシュ更新は通知経由で自動実行される）
                     if let calculated = calculatedDropRewards {
-                        let addedStackKeys = try await appServices.persistCalculatedDropRewards(calculated)
-                        await MainActor.run {
-                            userDataLoadService.addDroppedItems(
-                                seeds: calculated.inventorySeeds,
-                                stackKeys: addedStackKeys,
-                                definitions: calculated.definitions
-                            )
-                        }
+                        _ = try await appServices.persistCalculatedDropRewards(calculated)
                     }
                 } catch {
                     // バックグラウンド永続化エラーはログのみ（帰還通知は既に完了）
