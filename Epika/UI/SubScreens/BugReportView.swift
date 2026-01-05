@@ -26,7 +26,7 @@ struct BugReportView: View {
     @Environment(AppServices.self) private var appServices
     @Environment(\.dismiss) private var dismiss
 
-    @State private var reporterName: String = UserDefaults.standard.string(forKey: "BugReport.ReporterName") ?? ""
+    @State private var reporterName: String = ""
     @State private var description: String = ""
     @State private var selectedPhotos: [PhotosPickerItem] = []
     @State private var screenshotImages: [UIImage] = []
@@ -73,6 +73,9 @@ struct BugReportView: View {
             if let error = errorMessage {
                 Text(error)
             }
+        }
+        .onAppear {
+            reporterName = UserDefaults.standard.string(forKey: "BugReport.ReporterName") ?? ""
         }
     }
 
