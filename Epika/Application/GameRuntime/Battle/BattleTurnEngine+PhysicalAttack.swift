@@ -68,7 +68,6 @@ extension BattleTurnEngine {
         let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
         let actionEntryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
                                                                 kind: .physicalAttack)
-        defer { context.appendActionEntry(actionEntryBuilder.build()) }
 
         let useAntiHealing = attacker.skillEffects.misc.antiHealingEnabled && attacker.snapshot.magicalHealing > 0
         let isMartial = shouldUseMartialAttack(attacker: attacker)
@@ -93,7 +92,9 @@ extension BattleTurnEngine {
                                              context: &context,
                                              reactionDepth: 0,
                                              entryBuilder: actionEntryBuilder)
+            context.appendActionEntry(actionEntryBuilder.build())
             guard outcome.attacker != nil, outcome.defender != nil else { return }
+            processReactionQueue(context: &context)
             return
         }
 
@@ -117,7 +118,9 @@ extension BattleTurnEngine {
                                              context: &context,
                                              reactionDepth: 0,
                                              entryBuilder: actionEntryBuilder)
+            context.appendActionEntry(actionEntryBuilder.build())
             guard outcome.attacker != nil, outcome.defender != nil else { return }
+            processReactionQueue(context: &context)
             return
         }
 
@@ -142,6 +145,9 @@ extension BattleTurnEngine {
                                          context: &context,
                                          reactionDepth: 0,
                                          entryBuilder: actionEntryBuilder)
+
+        // 攻撃ログを追加（リアクション処理の前に追加して因果関係を正しく表現）
+        context.appendActionEntry(actionEntryBuilder.build())
 
         guard var updatedAttacker = outcome.attacker else { return }
         guard var updatedDefender = outcome.defender else { return }
