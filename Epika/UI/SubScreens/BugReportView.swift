@@ -30,6 +30,8 @@ struct BugReportView: View {
     @State private var description: String = ""
     @State private var selectedPhotos: [PhotosPickerItem] = []
     @State private var screenshotImages: [UIImage] = []
+    @State private var sendUserData: Bool = true
+    @State private var sendLogs: Bool = true
     @State private var isSending: Bool = false
     @State private var showingSuccess: Bool = false
     @State private var errorMessage: String?
@@ -41,9 +43,11 @@ struct BugReportView: View {
             reporterSection
             descriptionSection
             screenshotSection
+            privacySection
             infoSection
             sendSection
         }
+        .avoidBottomGameInfo()
         .navigationTitle("不具合報告")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: selectedPhotos) { _, newItems in
@@ -148,36 +152,64 @@ struct BugReportView: View {
     }
 
     @ViewBuilder
-    private var infoSection: some View {
+    private var privacySection: some View {
         Section {
-            HStack {
-                Text("ゴールド")
-                Spacer()
-                Text(formatNumber(Int(appServices.userDataLoad.playerGold)))
-                    .foregroundStyle(.secondary)
-            }
-            HStack {
-                Text("キャラクター数")
-                Spacer()
-                Text("\(appServices.userDataLoad.characters.count)")
-                    .foregroundStyle(.secondary)
-            }
-            HStack {
-                Text("パーティ数")
-                Spacer()
-                Text("\(appServices.userDataLoad.parties.count)")
-                    .foregroundStyle(.secondary)
-            }
-            HStack {
-                Text("アイテム数")
-                Spacer()
-                Text("\(inventoryCount)")
-                    .foregroundStyle(.secondary)
-            }
+            Toggle("ユーザーデータを送信", isOn: $sendUserData)
+            Toggle("操作ログを送信", isOn: $sendLogs)
         } header: {
-            Text("自動添付される情報")
+            Text("プライバシー設定")
         } footer: {
-            Text("直近24時間の操作ログも添付されます")
+            Text("不具合の調査に役立ちますが、送信しなくても報告できます")
+        }
+    }
+
+    @ViewBuilder
+    private var infoSection: some View {
+        if sendUserData || sendLogs {
+            Section {
+                if sendUserData {
+                    HStack {
+                        Text("ゴールド")
+                        Spacer()
+                        Text(formatNumber(Int(appServices.userDataLoad.playerGold)))
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("キャラクター数")
+                        Spacer()
+                        Text("\(appServices.userDataLoad.characters.count)")
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("パーティ数")
+                        Spacer()
+                        Text("\(appServices.userDataLoad.parties.count)")
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("アイテム数")
+                        Spacer()
+                        Text("\(inventoryCount)")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                if sendLogs {
+                    HStack {
+                        Text("操作ログ")
+                        Spacer()
+                        Text("直近24時間")
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("戦闘ログ")
+                        Spacer()
+                        Text("直近の戦闘")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                Text("送信される情報")
+            }
         }
     }
 
@@ -225,22 +257,44 @@ struct BugReportView: View {
         defer { isSending = false }
 
         do {
-            let logs = await AppLogCollector.shared.getLogsAsText()
-            let battleLogs = BattleLogBuffer.shared.getLogsAsText()
             let appInfo = BugReportService.gatherAppInfo()
-
             let playerId = getOrCreatePlayerId()
 
-            let playerData = BugReport.PlayerReportData(
-                playerId: playerId,
-                gold: Int(appServices.userDataLoad.playerGold),
-                partyCount: appServices.userDataLoad.parties.count,
-                characterCount: appServices.userDataLoad.characters.count,
-                inventoryCount: inventoryCount,
-                currentScreen: "BugReportView"
-            )
+            // オプションに応じてログを取得
+            let logs: String
+            let battleLogs: String
+            if sendLogs {
+                logs = await AppLogCollector.shared.getLogsAsText()
+                battleLogs = BattleLogBuffer.shared.getLogsAsText()
+            } else {
+                logs = ""
+                battleLogs = ""
+            }
 
-            let userDataJson = buildUserDataJson(playerId: playerId)
+            // オプションに応じてユーザーデータを設定
+            let playerData: BugReport.PlayerReportData
+            let userDataJson: String
+            if sendUserData {
+                playerData = BugReport.PlayerReportData(
+                    playerId: playerId,
+                    gold: Int(appServices.userDataLoad.playerGold),
+                    partyCount: appServices.userDataLoad.parties.count,
+                    characterCount: appServices.userDataLoad.characters.count,
+                    inventoryCount: inventoryCount,
+                    currentScreen: "BugReportView"
+                )
+                userDataJson = buildUserDataJson(playerId: playerId)
+            } else {
+                playerData = BugReport.PlayerReportData(
+                    playerId: playerId,
+                    gold: 0,
+                    partyCount: 0,
+                    characterCount: 0,
+                    inventoryCount: 0,
+                    currentScreen: nil
+                )
+                userDataJson = ""
+            }
 
             // スクリーンショットをPNGデータに変換
             let screenshotData = screenshotImages.compactMap { $0.pngData() }
