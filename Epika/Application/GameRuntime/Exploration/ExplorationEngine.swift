@@ -226,7 +226,7 @@ struct ExplorationEngine {
             gold = combatResult.summary.goldEarned
             combatSummary = combatResult.summary
             battleLog = combatResult.log
-            shouldTerminate = combatResult.summary.result == .defeat
+            shouldTerminate = combatResult.summary.result == .defeat || combatResult.summary.result == .retreat
             entry = ExplorationEventLogEntry(floorNumber: floor.floorNumber,
                                              eventIndex: state.eventIndex,
                                              occurredAt: occurredAt,

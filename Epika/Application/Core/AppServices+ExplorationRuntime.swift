@@ -199,6 +199,11 @@ extension AppServices {
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                         difficulty: UInt8(runDifficulty),
                                                         furthestFloor: UInt8(max(0, floorNumber)))
+            case .cancelled(let floorNumber, _):
+                // 撤退時も部分進捗を更新（報酬なし）
+                try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
+                                                        difficulty: UInt8(runDifficulty),
+                                                        furthestFloor: UInt8(max(0, floorNumber)))
             }
             // 探索記録を保存して帰還通知を発火
             persistenceSession.finalizeRun(endState: artifact.endState,

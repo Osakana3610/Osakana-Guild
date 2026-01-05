@@ -108,6 +108,7 @@ struct ExplorationEventLogEntry: Sendable {
 enum ExplorationEndState: Sendable {
     case completed
     case defeated(floorNumber: Int, eventIndex: Int, enemyId: UInt16)
+    case cancelled(floorNumber: Int, eventIndex: Int)
 }
 
 struct ExplorationRunArtifact: Sendable {

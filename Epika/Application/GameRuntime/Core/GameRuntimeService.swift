@@ -122,9 +122,17 @@ actor GameRuntimeService {
 
                     if outcome.shouldTerminate {
                         if let combat = outcome.combatSummary {
-                            endState = .defeated(floorNumber: outcome.entry.floorNumber,
-                                                 eventIndex: outcome.entry.eventIndex,
-                                                 enemyId: combat.enemy.id)
+                            switch combat.result {
+                            case .defeat:
+                                endState = .defeated(floorNumber: outcome.entry.floorNumber,
+                                                     eventIndex: outcome.entry.eventIndex,
+                                                     enemyId: combat.enemy.id)
+                            case .retreat:
+                                endState = .cancelled(floorNumber: outcome.entry.floorNumber,
+                                                      eventIndex: outcome.entry.eventIndex)
+                            case .victory:
+                                endState = .completed
+                            }
                         } else {
                             endState = .completed
                         }
@@ -381,9 +389,17 @@ actor GameRuntimeService {
 
                     if outcome.shouldTerminate {
                         if let combat = outcome.combatSummary {
-                            endState = .defeated(floorNumber: outcome.entry.floorNumber,
-                                                 eventIndex: outcome.entry.eventIndex,
-                                                 enemyId: combat.enemy.id)
+                            switch combat.result {
+                            case .defeat:
+                                endState = .defeated(floorNumber: outcome.entry.floorNumber,
+                                                     eventIndex: outcome.entry.eventIndex,
+                                                     enemyId: combat.enemy.id)
+                            case .retreat:
+                                endState = .cancelled(floorNumber: outcome.entry.floorNumber,
+                                                      eventIndex: outcome.entry.eventIndex)
+                            case .victory:
+                                endState = .completed
+                            }
                         } else {
                             endState = .completed
                         }

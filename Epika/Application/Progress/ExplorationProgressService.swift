@@ -611,6 +611,7 @@ actor ExplorationProgressService {
             switch state {
             case .completed: return ExplorationResult.completed.rawValue
             case .defeated: return ExplorationResult.defeated.rawValue
+            case .cancelled: return ExplorationResult.cancelled.rawValue
             }
         }
     }
