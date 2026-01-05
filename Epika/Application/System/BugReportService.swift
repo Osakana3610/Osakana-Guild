@@ -17,12 +17,14 @@ import UIKit
 
 /// 不具合報告データ
 struct BugReport: Sendable {
+    let reporterName: String?
     let description: String
     let playerData: PlayerReportData
     let logs: String
     let battleLogs: String
     let userDataJson: String
     let appInfo: AppInfo
+    let screenshots: [Data]
 
     struct PlayerReportData: Sendable {
         let playerId: String
@@ -104,6 +106,7 @@ actor BugReportService {
         }
 
         // 添付ファイル3: ユーザーデータJSON（gzip圧縮）
+        var fileIndex = 3
         if let userDataJsonData = report.userDataJson.data(using: .utf8), !report.userDataJson.isEmpty {
             // gzip圧縮を試みる
             if let compressedData = try? (userDataJsonData as NSData).compressed(using: .zlib) as Data {
@@ -122,6 +125,16 @@ actor BugReportService {
             }
         }
 
+        // 添付ファイル4以降: スクリーンショット
+        for (index, imageData) in report.screenshots.enumerated() {
+            body.append("--\(boundary)\r\n")
+            body.append("Content-Disposition: form-data; name=\"files[\(fileIndex)]\"; filename=\"screenshot_\(index + 1).png\"\r\n")
+            body.append("Content-Type: image/png\r\n\r\n")
+            body.append(imageData)
+            body.append("\r\n")
+            fileIndex += 1
+        }
+
         body.append("--\(boundary)--\r\n")
         return body
     }
@@ -130,52 +143,74 @@ actor BugReportService {
         let formatter = ISO8601DateFormatter()
         let timestamp = formatter.string(from: Date())
 
+        var fields: [[String: Any]] = []
+
+        // 報告者名（あれば）
+        if let name = report.reporterName, !name.isEmpty {
+            fields.append([
+                "name": "報告者",
+                "value": name,
+                "inline": true
+            ])
+        }
+
+        fields.append(contentsOf: [
+            [
+                "name": "報告内容",
+                "value": report.description.isEmpty ? "(説明なし)" : String(report.description.prefix(1024)),
+                "inline": false
+            ],
+            [
+                "name": "プレイヤーID",
+                "value": report.playerData.playerId,
+                "inline": true
+            ],
+            [
+                "name": "ゴールド",
+                "value": formatNumber(report.playerData.gold),
+                "inline": true
+            ],
+            [
+                "name": "パーティ数",
+                "value": String(report.playerData.partyCount),
+                "inline": true
+            ],
+            [
+                "name": "キャラクター数",
+                "value": String(report.playerData.characterCount),
+                "inline": true
+            ],
+            [
+                "name": "アイテム数",
+                "value": String(report.playerData.inventoryCount),
+                "inline": true
+            ],
+            [
+                "name": "アプリ情報",
+                "value": "\(report.appInfo.appVersion) (\(report.appInfo.buildNumber))",
+                "inline": true
+            ],
+            [
+                "name": "端末情報",
+                "value": "\(report.appInfo.deviceModel) / iOS \(report.appInfo.osVersion)",
+                "inline": true
+            ]
+        ])
+
+        // スクショ添付数
+        if !report.screenshots.isEmpty {
+            fields.append([
+                "name": "添付画像",
+                "value": "\(report.screenshots.count)枚",
+                "inline": true
+            ])
+        }
+
         let embed: [String: Any] = [
             "title": "不具合報告",
             "color": 16711680,
             "timestamp": timestamp,
-            "fields": [
-                [
-                    "name": "報告内容",
-                    "value": report.description.isEmpty ? "(説明なし)" : String(report.description.prefix(1024)),
-                    "inline": false
-                ],
-                [
-                    "name": "プレイヤーID",
-                    "value": report.playerData.playerId,
-                    "inline": true
-                ],
-                [
-                    "name": "ゴールド",
-                    "value": formatNumber(report.playerData.gold),
-                    "inline": true
-                ],
-                [
-                    "name": "パーティ数",
-                    "value": String(report.playerData.partyCount),
-                    "inline": true
-                ],
-                [
-                    "name": "キャラクター数",
-                    "value": String(report.playerData.characterCount),
-                    "inline": true
-                ],
-                [
-                    "name": "アイテム数",
-                    "value": String(report.playerData.inventoryCount),
-                    "inline": true
-                ],
-                [
-                    "name": "アプリ情報",
-                    "value": "\(report.appInfo.appVersion) (\(report.appInfo.buildNumber))",
-                    "inline": true
-                ],
-                [
-                    "name": "端末情報",
-                    "value": "\(report.appInfo.deviceModel) / iOS \(report.appInfo.osVersion)",
-                    "inline": true
-                ]
-            ],
+            "fields": fields,
             "footer": [
                 "text": "Epika Bug Report"
             ]

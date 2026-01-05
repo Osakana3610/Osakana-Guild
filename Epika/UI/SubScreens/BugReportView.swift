@@ -8,7 +8,9 @@
 //   - ユーザーデータとログを自動添付
 //
 // 【View構成】
+//   - 報告者名入力
 //   - 報告内容テキストエリア
+//   - スクリーンショット添付
 //   - 送信ボタン
 //   - 送信中・完了・エラー状態表示
 //
@@ -17,25 +19,38 @@
 //
 // ==============================================================================
 
+import PhotosUI
 import SwiftUI
 
 struct BugReportView: View {
     @Environment(AppServices.self) private var appServices
     @Environment(\.dismiss) private var dismiss
 
+    @State private var reporterName: String = UserDefaults.standard.string(forKey: "BugReport.ReporterName") ?? ""
     @State private var description: String = ""
+    @State private var selectedPhotos: [PhotosPickerItem] = []
+    @State private var screenshotImages: [UIImage] = []
     @State private var isSending: Bool = false
     @State private var showingSuccess: Bool = false
     @State private var errorMessage: String?
 
+    private let maxScreenshots = 5
+
     var body: some View {
         Form {
+            reporterSection
             descriptionSection
+            screenshotSection
             infoSection
             sendSection
         }
         .navigationTitle("不具合報告")
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: selectedPhotos) { _, newItems in
+            Task {
+                await loadSelectedPhotos(newItems)
+            }
+        }
         .alert("送信完了", isPresented: $showingSuccess) {
             Button("OK") {
                 dismiss()
@@ -60,6 +75,20 @@ struct BugReportView: View {
     // MARK: - Sections
 
     @ViewBuilder
+    private var reporterSection: some View {
+        Section {
+            TextField("名前（任意）", text: $reporterName)
+                .onChange(of: reporterName) { _, newValue in
+                    UserDefaults.standard.set(newValue, forKey: "BugReport.ReporterName")
+                }
+        } header: {
+            Text("報告者")
+        } footer: {
+            Text("Discord等で連絡を取る際に使用します（空欄可）")
+        }
+    }
+
+    @ViewBuilder
     private var descriptionSection: some View {
         Section {
             TextEditor(text: $description)
@@ -68,6 +97,49 @@ struct BugReportView: View {
             Text("不具合の内容")
         } footer: {
             Text("どのような操作をしたときに、何が起きたかを教えてください")
+        }
+    }
+
+    @ViewBuilder
+    private var screenshotSection: some View {
+        Section {
+            HStack {
+                PhotosPicker(
+                    selection: $selectedPhotos,
+                    maxSelectionCount: maxScreenshots,
+                    matching: .images,
+                    photoLibrary: .shared()
+                ) {
+                    HStack {
+                        Image(systemName: "photo.on.rectangle.angled")
+                        Text("スクリーンショットを選択")
+                    }
+                }
+                Spacer()
+                if !screenshotImages.isEmpty {
+                    Text("\(screenshotImages.count)枚")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if !screenshotImages.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(screenshotImages.indices, id: \.self) { index in
+                            Image(uiImage: screenshotImages[index])
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+        } header: {
+            Text("スクリーンショット（任意）")
+        } footer: {
+            Text("最大\(maxScreenshots)枚まで添付できます。動画はDiscordで直接送信してください")
         }
     }
 
@@ -135,6 +207,19 @@ struct BugReportView: View {
 
     // MARK: - Actions
 
+    private func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
+        var images: [UIImage] = []
+        for item in items {
+            if let data = try? await item.loadTransferable(type: Data.self),
+               let image = UIImage(data: data) {
+                images.append(image)
+            }
+        }
+        await MainActor.run {
+            screenshotImages = images
+        }
+    }
+
     private func sendReport() async {
         isSending = true
         defer { isSending = false }
@@ -157,13 +242,18 @@ struct BugReportView: View {
 
             let userDataJson = buildUserDataJson(playerId: playerId)
 
+            // スクリーンショットをPNGデータに変換
+            let screenshotData = screenshotImages.compactMap { $0.pngData() }
+
             let report = BugReport(
+                reporterName: reporterName.isEmpty ? nil : reporterName,
                 description: description,
                 playerData: playerData,
                 logs: logs,
                 battleLogs: battleLogs,
                 userDataJson: userDataJson,
-                appInfo: appInfo
+                appInfo: appInfo,
+                screenshots: screenshotData
             )
 
             try await BugReportService.shared.send(report)
