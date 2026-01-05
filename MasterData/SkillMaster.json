@@ -14769,18 +14769,18 @@
         "familyId": "race.vampire.magicCounter",
         "effectType": "reaction",
         "parameters": {
-          "trigger": "selfDamagedPhysical",
-          "action": "magicCounter",
-          "damageType": "magical"
+          "trigger": "selfDamagedMagical",
+          "action": "physicalCounter",
+          "damageType": "physical"
         },
         "variants": [
           {
             "id": 64051,
-            "label": "[種族:吸血鬼Lv50] 被攻撃時10%で魔法反撃",
+            "label": "[種族:吸血鬼Lv50] 魔法被弾時10%で物理反撃",
             "value": {
               "chancePercent": 10
             },
-            "description": "物理攻撃を受けた時、10%の確率で魔法反撃をする。"
+            "description": "魔法攻撃を受けた時、10%の確率で物理反撃をする。"
           }
         ]
       },
