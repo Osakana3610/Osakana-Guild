@@ -156,6 +156,7 @@ extension BattleTurnEngine {
 
         if isMartial,
            attackResult.successfulHits > 0,
+           attacker.isAlive,
            defender.isAlive,
            let descriptor = martialFollowUpDescriptor(for: attacker) {
             executeFollowUpSequence(attackerSide: attackerSide,
@@ -537,7 +538,7 @@ extension BattleTurnEngine {
         guard chancePercent > 0 else { return }
 
         // 格闘追撃は1回の攻撃につき1回まで（スタックオーバーフロー防止）
-        guard defender.isAlive && BattleRandomSystem.percentChance(chancePercent, random: &context.random) else { return }
+        guard attacker.isAlive && defender.isAlive && BattleRandomSystem.percentChance(chancePercent, random: &context.random) else { return }
 
         let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
         let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
