@@ -171,6 +171,14 @@ extension BattleTurnEngine {
             return false
         }
 
+        // 救出を行ったアクターは行動回数を1消費する
+        if performer.rescueActionsUsed > 0 {
+            var mutablePerformer = performer
+            mutablePerformer.rescueActionsUsed -= 1
+            context.updateActor(mutablePerformer, side: side, index: actorIndex)
+            return false
+        }
+
         if isActionLocked(actor: performer, context: context) {
             appendStatusLockLog(for: performer, side: side, index: actorIndex, context: &context)
             return false
