@@ -482,7 +482,8 @@ private struct PartyEquipmentListView: View {
         } else {
             jobText = jobName
         }
-        return "　Lv\(character.level) / \(raceName) / \(jobText)"
+        let slotUsage = slotUsageText(for: character)
+        return "　Lv\(character.level) / \(raceName) / \(jobText)　\(slotUsage)"
     }
 }
 
