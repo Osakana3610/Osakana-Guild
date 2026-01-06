@@ -10,7 +10,7 @@
 // 【View構成】
 //   - 2カラムのグリッド（CombatStatRow × 13）
 //   - 表示項目: 最大HP、物理攻撃、魔法攻撃、物理防御、魔法防御、
-//              命中、回避、クリティカル、攻撃回数、魔法治療、
+//              命中、回避、必殺率、攻撃回数、魔法回復力、
 //              罠解除、追加ダメージ、ブレスダメージ
 //   - 格闘適性がある場合は「物理攻撃(格闘)」と表示
 //
@@ -39,9 +39,9 @@ struct CharacterCombatStatsSection: View {
             CombatStatRow(label: "魔法防御", value: stats.magicalDefense)
             CombatStatRow(label: "命中", value: stats.hitRate)
             CombatStatRow(label: "回避", value: stats.evasionRate)
-            CombatStatRow(label: "クリティカル", value: stats.criticalRate)
+            CombatStatRow(label: "必殺率", valueText: "\(stats.criticalRate)%")
             CombatStatRowDouble(label: "攻撃回数", value: stats.attackCount)
-            CombatStatRow(label: "魔法治療", value: stats.magicalHealing)
+            CombatStatRow(label: "魔法回復力", value: stats.magicalHealing)
             CombatStatRow(label: "罠解除", value: stats.trapRemoval)
             CombatStatRow(label: "追加ダメージ", value: stats.additionalDamage)
             CombatStatRow(label: "ブレスダメージ", value: stats.breathDamage)
@@ -51,16 +51,26 @@ struct CharacterCombatStatsSection: View {
 
 struct CombatStatRow: View {
     let label: String
-    let value: Int
+    let valueText: String
+
+    init(label: String, value: Int) {
+        self.label = label
+        self.valueText = "\(value)"
+    }
+
+    init(label: String, valueText: String) {
+        self.label = label
+        self.valueText = valueText
+    }
 
     var body: some View {
         HStack {
             Text(label)
-                .font(.subheadline)
+                .font(.body)
             Spacer()
-            Text("\(value)")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            Text(valueText)
+                .font(.body)
+                .foregroundStyle(.primary)
         }
     }
 }
@@ -72,11 +82,11 @@ struct CombatStatRowDouble: View {
     var body: some View {
         HStack {
             Text(label)
-                .font(.subheadline)
+                .font(.body)
             Spacer()
             Text(String(format: "%.1f", floor(value * 10) / 10))
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                .font(.body)
+                .foregroundStyle(.primary)
         }
     }
 }

@@ -44,12 +44,13 @@ struct EquipmentStatDeltaView: View {
         let isPositive = delta.value > 0
         let sign = isPositive ? "+" : ""
         // 攻撃回数は10倍スケールで保存されているため、0.1倍して表示
-        let valueText: String = if delta.label == "攻撃回数" {
+        let rawValueText: String = if delta.label == "攻撃回数" {
             String(format: "%.1f", Double(delta.value) * 0.1)
         } else {
             "\(delta.value)"
         }
-        let text = "[\(sign)\(valueText)] \(delta.label)"
+        let suffix = delta.label == "必殺率" ? "%" : ""
+        let text = "[\(sign)\(rawValueText)\(suffix)] \(delta.label)"
 
         return Text(text)
             .font(.subheadline)
@@ -80,9 +81,9 @@ struct StatLabelResolver {
         case "magicaldefense": return "魔法防御"
         case "hitrate": return "命中"
         case "evasionrate": return "回避"
-        case "criticalrate": return "クリティカル"
+        case "criticalrate": return "必殺率"
         case "attackcount": return "攻撃回数"
-        case "magicalhealing": return "魔法治療"
+        case "magicalhealing": return "魔法回復力"
         case "trapremoval": return "罠解除"
         case "additionaldamage": return "追加ダメージ"
         case "breathdamage": return "ブレスダメージ"

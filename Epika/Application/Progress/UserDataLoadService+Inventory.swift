@@ -675,7 +675,7 @@ extension UserDataLoadService {
         case "evasionrate": return "回避"
         case "criticalrate": return "必殺"
         case "attackcount": return "攻撃回数"
-        case "magicalhealing": return "魔法治療"
+        case "magicalhealing": return "魔法回復力"
         case "trapremoval": return "罠解除"
         case "additionaldamage": return "追加ダメ"
         case "breathdamage": return "ブレス"

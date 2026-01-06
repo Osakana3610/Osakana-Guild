@@ -287,9 +287,9 @@ struct ItemDetailView: View {
             if combat.magicalDefense != 0 { LabeledContent("魔法防御", value: formatBonus(combat.magicalDefense)) }
             if combat.hitRate != 0 { LabeledContent("命中", value: formatBonus(combat.hitRate)) }
             if combat.evasionRate != 0 { LabeledContent("回避", value: formatBonus(combat.evasionRate)) }
-            if combat.criticalRate != 0 { LabeledContent("クリティカル", value: formatBonus(combat.criticalRate)) }
+            if combat.criticalRate != 0 { LabeledContent("必殺率", value: "\(formatBonus(combat.criticalRate))%") }
             if combat.attackCount != 0 { LabeledContent("攻撃回数", value: formatBonusDouble(combat.attackCount)) }
-            if combat.magicalHealing != 0 { LabeledContent("魔法回復", value: formatBonus(combat.magicalHealing)) }
+            if combat.magicalHealing != 0 { LabeledContent("魔法回復力", value: formatBonus(combat.magicalHealing)) }
             if combat.trapRemoval != 0 { LabeledContent("罠解除", value: formatBonus(combat.trapRemoval)) }
             if combat.additionalDamage != 0 { LabeledContent("追加ダメージ", value: formatBonus(combat.additionalDamage)) }
             if combat.breathDamage != 0 { LabeledContent("ブレスダメージ", value: formatBonus(combat.breathDamage)) }
@@ -303,9 +303,9 @@ struct ItemDetailView: View {
             if combat.magicalDefense != 0 { LabeledContent("魔法防御", value: formatBonus(combat.magicalDefense)) }
             if combat.hitRate != 0 { LabeledContent("命中", value: formatBonus(combat.hitRate)) }
             if combat.evasionRate != 0 { LabeledContent("回避", value: formatBonus(combat.evasionRate)) }
-            if combat.criticalRate != 0 { LabeledContent("クリティカル", value: formatBonus(combat.criticalRate)) }
+            if combat.criticalRate != 0 { LabeledContent("必殺率", value: "\(formatBonus(combat.criticalRate))%") }
             if combat.attackCount != 0 { LabeledContent("攻撃回数", value: formatBonusDouble(combat.attackCount)) }
-            if combat.magicalHealing != 0 { LabeledContent("魔法回復", value: formatBonus(combat.magicalHealing)) }
+            if combat.magicalHealing != 0 { LabeledContent("魔法回復力", value: formatBonus(combat.magicalHealing)) }
             if combat.trapRemoval != 0 { LabeledContent("罠解除", value: formatBonus(combat.trapRemoval)) }
             if combat.additionalDamage != 0 { LabeledContent("追加ダメージ", value: formatBonus(combat.additionalDamage)) }
             if combat.breathDamage != 0 { LabeledContent("ブレスダメージ", value: formatBonus(combat.breathDamage)) }
