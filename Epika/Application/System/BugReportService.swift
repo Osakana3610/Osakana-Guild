@@ -22,7 +22,7 @@ struct BugReport: Sendable {
     let playerData: PlayerReportData
     let logs: String
     let battleLogs: String
-    let userDataJson: String
+    let databaseData: Data?  // SwiftDataのSQLiteファイル
     let appInfo: AppInfo
     let screenshots: [Data]
 
@@ -105,24 +105,14 @@ actor BugReportService {
             body.append("\r\n")
         }
 
-        // 添付ファイル3: ユーザーデータJSON（gzip圧縮）
+        // 添付ファイル3: SwiftDataデータベース（SQLite）
         var fileIndex = 3
-        if let userDataJsonData = report.userDataJson.data(using: .utf8), !report.userDataJson.isEmpty {
-            // gzip圧縮を試みる
-            if let compressedData = try? (userDataJsonData as NSData).compressed(using: .zlib) as Data {
-                body.append("--\(boundary)\r\n")
-                body.append("Content-Disposition: form-data; name=\"files[2]\"; filename=\"user_data.json.gz\"\r\n")
-                body.append("Content-Type: application/gzip\r\n\r\n")
-                body.append(compressedData)
-                body.append("\r\n")
-            } else {
-                // 圧縮失敗時は非圧縮で送信
-                body.append("--\(boundary)\r\n")
-                body.append("Content-Disposition: form-data; name=\"files[2]\"; filename=\"user_data.json\"\r\n")
-                body.append("Content-Type: application/json; charset=utf-8\r\n\r\n")
-                body.append(userDataJsonData)
-                body.append("\r\n")
-            }
+        if let databaseData = report.databaseData {
+            body.append("--\(boundary)\r\n")
+            body.append("Content-Disposition: form-data; name=\"files[2]\"; filename=\"user_data.sqlite\"\r\n")
+            body.append("Content-Type: application/x-sqlite3\r\n\r\n")
+            body.append(databaseData)
+            body.append("\r\n")
         }
 
         // 添付ファイル4以降: スクリーンショット
@@ -236,59 +226,6 @@ private extension Data {
     }
 }
 
-// MARK: - Report Data Structures
-
-/// レポート用ユーザーデータ（JSON添付用）
-struct UserDataReport: Encodable {
-    let playerId: String
-    let gold: Int
-    let characters: [CharacterReport]
-    let parties: [PartyReport]
-    let inventory: [ItemReport]
-
-    struct CharacterReport: Encodable {
-        let id: UInt8
-        let name: String
-        let raceId: UInt8
-        let raceName: String
-        let jobId: UInt8
-        let jobName: String
-        let level: Int
-        let experience: Int
-        let currentHP: Int
-        let maxHP: Int
-        let equippedItemCount: Int
-        let equippedItems: [String]
-    }
-
-    struct PartyReport: Encodable {
-        let id: UInt8
-        let name: String
-        let memberIds: [UInt8]
-        let lastSelectedDungeonId: UInt16?
-    }
-
-    struct ItemReport: Encodable {
-        let itemId: UInt16
-        let displayName: String
-        let quantity: UInt16
-        let category: String
-        let normalTitleId: UInt8
-        let superRareTitleId: UInt8
-        let socketItemId: UInt16
-    }
-
-    func toJsonString() -> String {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        guard let data = try? encoder.encode(self),
-              let string = String(data: data, encoding: .utf8) else {
-            return "{}"
-        }
-        return string
-    }
-}
-
 // MARK: - Errors
 
 enum BugReportError: Error, LocalizedError {
@@ -322,5 +259,29 @@ extension BugReportService {
             osVersion: osVersion,
             deviceModel: deviceModel
         )
+    }
+
+    /// SwiftDataデータベースファイルのデータを取得
+    static func gatherDatabaseData() -> Data? {
+        do {
+            let fileManager = FileManager.default
+            let support = try fileManager.url(
+                for: .applicationSupportDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: false
+            )
+            let storeURL = support
+                .appendingPathComponent("Epika", isDirectory: true)
+                .appendingPathComponent("Progress.store")
+
+            guard fileManager.fileExists(atPath: storeURL.path) else {
+                return nil
+            }
+
+            return try Data(contentsOf: storeURL)
+        } catch {
+            return nil
+        }
     }
 }
