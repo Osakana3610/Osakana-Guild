@@ -15,6 +15,7 @@
 import Foundation
 import SQLite3
 import UIKit
+import zlib
 
 /// 不具合報告データ
 struct BugReport: Sendable {
@@ -100,8 +101,8 @@ actor BugReportService {
         var fileIndex = 2
         if let databaseData = report.databaseData {
             body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"files[1]\"; filename=\"user_data.sqlite\"\r\n")
-            body.append("Content-Type: application/x-sqlite3\r\n\r\n")
+            body.append("Content-Disposition: form-data; name=\"files[1]\"; filename=\"user_data.sqlite.gz\"\r\n")
+            body.append("Content-Type: application/gzip\r\n\r\n")
             body.append(databaseData)
             body.append("\r\n")
         }
@@ -215,6 +216,69 @@ private extension Data {
             append(data)
         }
     }
+
+    func gzipped(level: Int32 = Z_DEFAULT_COMPRESSION) throws -> Data {
+        var stream = z_stream()
+        let initStatus = deflateInit2_(
+            &stream,
+            level,
+            Z_DEFLATED,
+            MAX_WBITS + 16,  // gzipヘッダ付き
+            8,
+            Z_DEFAULT_STRATEGY,
+            ZLIB_VERSION,
+            Int32(MemoryLayout<z_stream>.size)
+        )
+
+        guard initStatus == Z_OK else {
+            throw DataCompressionError.compressionInitFailed(initStatus)
+        }
+
+        var compressed = Data()
+        let chunkSize = 16_384
+        var status: Int32 = Z_OK
+
+        try withUnsafeBytes { buffer in
+            if let baseAddress = buffer.baseAddress?.assumingMemoryBound(to: Bytef.self) {
+                stream.next_in = UnsafeMutablePointer<Bytef>(mutating: baseAddress)
+            } else {
+                stream.next_in = nil
+            }
+            stream.avail_in = uInt(buffer.count)
+
+            repeat {
+                var chunk = [UInt8](repeating: 0, count: chunkSize)
+                chunk.withUnsafeMutableBytes { chunkBuffer in
+                    stream.next_out = chunkBuffer.baseAddress?.assumingMemoryBound(to: Bytef.self)
+                    stream.avail_out = uInt(chunkSize)
+
+                    status = deflate(&stream, stream.avail_in == 0 ? Z_FINISH : Z_NO_FLUSH)
+
+                    let produced = chunkSize - Int(stream.avail_out)
+                    if produced > 0, let baseAddress = chunkBuffer.baseAddress {
+                        compressed.append(baseAddress.assumingMemoryBound(to: UInt8.self), count: produced)
+                    }
+                }
+            } while status == Z_OK
+        }
+
+        guard status == Z_STREAM_END else {
+            throw DataCompressionError.compressionFailed(status)
+        }
+
+        let finalizeStatus = deflateEnd(&stream)
+        guard finalizeStatus == Z_OK else {
+            throw DataCompressionError.compressionFinalizeFailed(finalizeStatus)
+        }
+
+        return compressed
+    }
+}
+
+private enum DataCompressionError: Error {
+    case compressionInitFailed(Int32)
+    case compressionFailed(Int32)
+    case compressionFinalizeFailed(Int32)
 }
 
 // MARK: - Errors
@@ -297,10 +361,16 @@ extension BugReportService {
             // コピーから不要なテーブルを削除してサイズ削減
             try removeInternalTablesFromDatabase(at: tempURL)
 
-            return try Data(contentsOf: tempURL)
+            return try compressDatabaseFile(at: tempURL)
         } catch {
             return nil
         }
+    }
+
+    /// SQLiteファイルをgzip圧縮して返却
+    private static func compressDatabaseFile(at url: URL) throws -> Data {
+        let rawData = try Data(contentsOf: url, options: [.mappedIfSafe])
+        return try rawData.gzipped(level: Z_BEST_COMPRESSION)
     }
 
     /// WALをチェックポイントして最新データを本体ファイルに反映
