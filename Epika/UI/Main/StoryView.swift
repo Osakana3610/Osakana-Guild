@@ -93,8 +93,6 @@ struct StoryView: View {
             Group {
                 if let error = viewModel.error {
                     errorState(error)
-                } else if viewModel.isLoading && viewModel.nodes.isEmpty {
-                    loadingState
                 } else if viewModel.nodes.isEmpty {
                     emptyState
                 } else {
@@ -140,17 +138,6 @@ struct StoryView: View {
             }
         }
         .avoidBottomGameInfo()
-    }
-
-    private var loadingState: some View {
-        VStack(spacing: 12) {
-            ProgressView()
-                .progressViewStyle(.circular)
-            Text("ストーリーを読み込み中…")
-                .font(.body)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var emptyState: some View {

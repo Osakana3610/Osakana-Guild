@@ -173,9 +173,6 @@ final class UserDataLoadService: Sendable {
                 // ダンジョン進行ロード（appServicesが必要）
                 try await loadDungeonSnapshots()
 
-                // ストーリー進行ロード（appServicesが必要）
-                try await loadStorySnapshot()
-
                 // 2. 探索再開（データロード完了後に実行）
                 await resumeOrphanedExplorations()
 
