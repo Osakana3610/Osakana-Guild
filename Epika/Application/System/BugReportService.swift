@@ -268,9 +268,9 @@ extension BugReportService {
         )
     }
 
-    /// SwiftDataデータベースファイルのデータを取得（インベントリ除外版）
+    /// SwiftDataデータベースファイルのデータを取得（内部追跡テーブル除外版）
     ///
-    /// 元のDBをコピーし、インベントリテーブルを削除してサイズを削減する。
+    /// 元のDBをコピーし、SwiftData内部の変更追跡テーブルを削除してサイズを削減する。
     /// 元のDBは一切変更されない。
     static func gatherDatabaseData() -> Data? {
         let fileManager = FileManager.default
@@ -301,8 +301,8 @@ extension BugReportService {
                 try? fileManager.removeItem(at: tempURL)
             }
 
-            // コピーからインベントリを削除してサイズ削減
-            try removeInventoryFromDatabase(at: tempURL)
+            // コピーから不要なテーブルを削除してサイズ削減
+            try removeInternalTablesFromDatabase(at: tempURL)
 
             return try Data(contentsOf: tempURL)
         } catch {
@@ -310,8 +310,8 @@ extension BugReportService {
         }
     }
 
-    /// データベースからインベントリテーブルの内容を削除
-    private static func removeInventoryFromDatabase(at url: URL) throws {
+    /// データベースからSwiftData内部追跡テーブルの内容を削除
+    private static func removeInternalTablesFromDatabase(at url: URL) throws {
         var db: OpaquePointer?
 
         guard sqlite3_open(url.path, &db) == SQLITE_OK else {
@@ -322,13 +322,12 @@ extension BugReportService {
             sqlite3_close(db)
         }
 
-        // インベントリレコードを削除
-        guard sqlite3_exec(db, "DELETE FROM ZINVENTORYITEMRECORD", nil, nil, nil) == SQLITE_OK else {
+        // SwiftData内部の変更追跡テーブルを削除（不具合調査に不要）
+        guard sqlite3_exec(db, "DELETE FROM ACHANGE", nil, nil, nil) == SQLITE_OK else {
             throw BugReportError.databaseQueryFailed
         }
 
-        // 装備レコードも削除（インベントリと関連）
-        guard sqlite3_exec(db, "DELETE FROM ZCHARACTEREQUIPMENTRECORD", nil, nil, nil) == SQLITE_OK else {
+        guard sqlite3_exec(db, "DELETE FROM ATRANSACTION", nil, nil, nil) == SQLITE_OK else {
             throw BugReportError.databaseQueryFailed
         }
 
