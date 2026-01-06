@@ -373,28 +373,19 @@ private struct LazyCachedCharacterDetailView: View {
         if let current = runtimeCharacter, current.avatarId == avatarId {
             return
         }
-        try await characterService.updateAvatar(characterId: characterId, newAvatarId: avatarId)
-        refreshCharacterFromCache()
+        let updated = try await characterService.updateAvatar(characterId: characterId, newAvatarId: avatarId)
+        runtimeCharacter = updated
     }
 
     @MainActor
     private func updateActionPreferences(to newPreferences: CharacterValues.ActionPreferences) async throws {
-        try await characterService.updateActionPreferences(
+        let updated = try await characterService.updateActionPreferences(
             characterId: characterId,
             attack: newPreferences.attack,
             priestMagic: newPreferences.priestMagic,
             mageMagic: newPreferences.mageMagic,
             breath: newPreferences.breath
         )
-        refreshCharacterFromCache()
-    }
-
-    /// キャッシュから最新のキャラクターデータを取得
-    @MainActor
-    private func refreshCharacterFromCache() {
-        let characters = appServices.userDataLoad.characters
-        if let character = characters.first(where: { $0.id == characterId }) {
-            runtimeCharacter = character
-        }
+        runtimeCharacter = updated
     }
 }

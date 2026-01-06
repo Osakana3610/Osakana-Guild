@@ -508,7 +508,7 @@ actor CharacterProgressService {
     }
 
     /// アバターを更新
-    func updateAvatar(characterId: UInt8, newAvatarId: UInt16) throws {
+    func updateAvatar(characterId: UInt8, newAvatarId: UInt16) throws -> CachedCharacter {
         let context = contextProvider.makeContext()
         var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
         descriptor.fetchLimit = 1
@@ -518,6 +518,7 @@ actor CharacterProgressService {
         record.avatarId = newAvatarId
         try context.save()
         notifyCharacterChange(upserted: [characterId])
+        return try makeCachedCharacter(record, context: context)
     }
 
     /// 行動優先度を更新
@@ -527,7 +528,7 @@ actor CharacterProgressService {
         priestMagic: Int,
         mageMagic: Int,
         breath: Int
-    ) throws {
+    ) throws -> CachedCharacter {
         // 値を正規化（0-100にクランプ）
         let normalized = CharacterValues.ActionPreferences.normalized(
             attack: attack,
@@ -548,6 +549,7 @@ actor CharacterProgressService {
         record.actionRateBreath = UInt8(normalized.breath)
         try context.save()
         notifyCharacterChange(upserted: [characterId])
+        return try makeCachedCharacter(record, context: context)
     }
 
     /// HP 0のキャラクターを蘇生（HP = maxHP / 2、最低1）

@@ -53,3 +53,4 @@ Tools/MasterDataGenerator/output/
 
 # Generated SQLite database
 Epika/Resources/master_data.db
+MasterData/master.db
