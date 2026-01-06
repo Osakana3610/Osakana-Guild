@@ -93,8 +93,6 @@ struct StoryView: View {
             Group {
                 if let error = viewModel.error {
                     errorState(error)
-                } else if viewModel.nodes.isEmpty {
-                    emptyState
                 } else {
                     contentList
                 }
@@ -138,18 +136,6 @@ struct StoryView: View {
             }
         }
         .avoidBottomGameInfo()
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "book")
-                .font(.system(size: 40))
-                .foregroundStyle(.secondary)
-            Text("開放済みのストーリーがありません")
-                .font(.body)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func errorState(_ error: Error) -> some View {
