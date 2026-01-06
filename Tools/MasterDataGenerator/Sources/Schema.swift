@@ -427,6 +427,16 @@ extension Generator {
             );
             """,
             """
+            CREATE TABLE IF NOT EXISTS enemy_action_rates (
+                enemy_id INTEGER PRIMARY KEY,
+                attack INTEGER NOT NULL,
+                priest_magic INTEGER NOT NULL,
+                mage_magic INTEGER NOT NULL,
+                breath INTEGER NOT NULL,
+                FOREIGN KEY (enemy_id) REFERENCES enemies(id) ON DELETE CASCADE
+            );
+            """,
+            """
             CREATE TABLE IF NOT EXISTS enemy_races (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL

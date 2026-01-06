@@ -1351,6 +1351,7 @@ extension Generator {
 
         try withTransaction {
             try execute("DELETE FROM enemies;")
+            try execute("DELETE FROM enemy_action_rates;")
 
             let insertEnemySQL = """
                 INSERT INTO enemies (id, name, race_id, category, job_id, base_experience)
@@ -1364,6 +1365,10 @@ extension Generator {
             let insertSkillSQL = "INSERT INTO enemy_skills (enemy_id, order_index, skill_id) VALUES (?, ?, ?);"
             let insertPassiveSkillSQL = "INSERT INTO enemy_passive_skills (enemy_id, order_index, skill_id) VALUES (?, ?, ?);"
             let insertDropSQL = "INSERT INTO enemy_drops (enemy_id, order_index, item_id) VALUES (?, ?, ?);"
+            let insertActionRatesSQL = """
+                INSERT INTO enemy_action_rates (enemy_id, attack, priest_magic, mage_magic, breath)
+                VALUES (?, ?, ?, ?, ?);
+            """
 
             let enemyStatement = try prepare(insertEnemySQL)
             let statsStatement = try prepare(insertStatsSQL)
@@ -1371,6 +1376,7 @@ extension Generator {
             let skillStatement = try prepare(insertSkillSQL)
             let passiveSkillStatement = try prepare(insertPassiveSkillSQL)
             let dropStatement = try prepare(insertDropSQL)
+            let actionRatesStatement = try prepare(insertActionRatesSQL)
             defer {
                 sqlite3_finalize(enemyStatement)
                 sqlite3_finalize(statsStatement)
@@ -1378,6 +1384,7 @@ extension Generator {
                 sqlite3_finalize(skillStatement)
                 sqlite3_finalize(passiveSkillStatement)
                 sqlite3_finalize(dropStatement)
+                sqlite3_finalize(actionRatesStatement)
             }
 
             for enemy in file.enemyTemplates {
@@ -1445,6 +1452,16 @@ extension Generator {
                     bindInt(dropStatement, index: 3, value: itemId)
                     try step(dropStatement)
                     reset(dropStatement)
+                }
+
+                if let actionRates = enemy.actionRates {
+                    bindInt(actionRatesStatement, index: 1, value: enemy.id)
+                    bindInt(actionRatesStatement, index: 2, value: actionRates.attack)
+                    bindInt(actionRatesStatement, index: 3, value: actionRates.priestMagic)
+                    bindInt(actionRatesStatement, index: 4, value: actionRates.mageMagic)
+                    bindInt(actionRatesStatement, index: 5, value: actionRates.breath)
+                    try step(actionRatesStatement)
+                    reset(actionRatesStatement)
                 }
             }
         }

@@ -110,6 +110,21 @@ extension SQLiteMasterDataManager {
             builders[builder.id] = builder
         }
 
+        let actionRatesSQL = "SELECT enemy_id, attack, priest_magic, mage_magic, breath FROM enemy_action_rates;"
+        let actionRatesStatement = try prepare(actionRatesSQL)
+        defer { sqlite3_finalize(actionRatesStatement) }
+        while sqlite3_step(actionRatesStatement) == SQLITE_ROW {
+            let id = UInt16(sqlite3_column_int(actionRatesStatement, 0))
+            guard var builder = builders[id] else { continue }
+            builder.actionRates = EnemyDefinition.ActionRates(
+                attack: Int(sqlite3_column_int(actionRatesStatement, 1)),
+                priestMagic: Int(sqlite3_column_int(actionRatesStatement, 2)),
+                mageMagic: Int(sqlite3_column_int(actionRatesStatement, 3)),
+                breath: Int(sqlite3_column_int(actionRatesStatement, 4))
+            )
+            builders[builder.id] = builder
+        }
+
         // Element enum values (from EnumMappings.element)
         // physical=1, breath=7, critical=15, piercing=16, spell.0=17, spell.2=18, spell.3=19, spell.6=20
         return builders.values.sorted { $0.name < $1.name }.map { builder in
