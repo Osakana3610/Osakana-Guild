@@ -433,11 +433,15 @@ private struct PartyEquipmentListView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     } header: {
-                        HStack(spacing: 0) {
-                            Text(character.name)
-                                .font(.subheadline.bold())
-                            Text(characterSubHeaderText(for: character))
-                                .font(.subheadline)
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 0) {
+                                Text(character.name)
+                                    .font(.subheadline.bold())
+                                Text("　\(slotUsageText(for: character))")
+                                    .font(.subheadline)
+                            }
+                            Text(characterDetailText(for: character))
+                                .font(.caption)
                         }
                         .foregroundStyle(.primary)
                     }
@@ -471,7 +475,7 @@ private struct PartyEquipmentListView: View {
         return "装備 \(usedSlots)/\(character.equipmentCapacity)"
     }
 
-    private func characterSubHeaderText(for character: CachedCharacter) -> String {
+    private func characterDetailText(for character: CachedCharacter) -> String {
         let masterData = appServices.masterDataCache
         let raceName = masterData.race(character.raceId)?.name ?? ""
         let jobName = masterData.job(character.jobId)?.name ?? ""
@@ -482,8 +486,7 @@ private struct PartyEquipmentListView: View {
         } else {
             jobText = jobName
         }
-        let slotUsage = slotUsageText(for: character)
-        return "　Lv\(character.level) / \(raceName) / \(jobText)　\(slotUsage)"
+        return "Lv\(character.level) / \(raceName) / \(jobText)"
     }
 }
 
