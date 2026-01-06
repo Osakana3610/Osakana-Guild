@@ -32,7 +32,7 @@ protocol ExplorationMasterDataProvider: Sendable {
 struct MasterDataCacheExplorationProvider: ExplorationMasterDataProvider, Sendable {
     private let masterData: MasterDataCache
 
-    nonisolated init(masterData: MasterDataCache) {
+    init(masterData: MasterDataCache) {
         self.masterData = masterData
     }
 

@@ -501,12 +501,7 @@ final class DungeonBalanceTests: XCTestCase {
         for index in 0..<count {
             guard let slot = BattleContextBuilder.slot(for: index) else { break }
 
-            let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(
-                from: definition,
-                levelOverride: level,
-                jobDefinitions: jobs,
-                skillDefinitions: skills
-            )
+            let snapshot = try cache.combatStats(for: definition.id, level: level)
 
             let skillDefs = definition.specialSkillIds.compactMap { skills[$0] }
             let skillCompiler = try UnifiedSkillEffectCompiler(skills: skillDefs)

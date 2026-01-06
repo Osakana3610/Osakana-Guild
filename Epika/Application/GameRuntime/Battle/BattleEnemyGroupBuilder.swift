@@ -29,10 +29,9 @@ struct BattleEnemyGroupBuilder {
 
     /// 敵グループを生成（複数種類の敵対応）
     /// nonisolated - 計算処理のためMainActorに縛られない
+    /// MasterDataCacheのletプロパティは読み取りアクセス可能
     nonisolated static func makeEnemies(specs: [EncounteredEnemySpec],
-                            enemyDefinitions: [UInt16: EnemyDefinition],
-                            skillDefinitions: [UInt16: SkillDefinition],
-                            jobDefinitions: [UInt8: JobDefinition],
+                            masterData: MasterDataCache,
                             random: inout GameRandomSource) throws -> ([BattleActor], [EncounteredEnemy]) {
         var skillCache: [UInt16: BattleActor.SkillEffects] = [:]
 
@@ -49,20 +48,17 @@ struct BattleEnemyGroupBuilder {
         var slotIndex = 0
 
         for spec in sortedSpecs {
-            guard let definition = enemyDefinitions[spec.enemyId] else { continue }
+            guard let definition = masterData.enemiesById[spec.enemyId] else { continue }
 
             for _ in 0..<spec.count {
                 guard let slot = BattleContextBuilder.slot(for: slotIndex) else { break }
 
-                let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: definition,
-                                                                           levelOverride: spec.level,
-                                                                           jobDefinitions: jobDefinitions,
-                                                                           skillDefinitions: skillDefinitions)
+                let snapshot = try masterData.combatStats(for: definition.id, level: spec.level)
                 var resources = BattleActionResource.makeDefault(for: snapshot,
                                                                 spellLoadout: .empty)
                 let skillEffects = try cachedSkillEffects(for: definition,
                                                           cache: &skillCache,
-                                                          skillDefinitions: skillDefinitions)
+                                                          masterData: masterData)
                 if skillEffects.spell.breathExtraCharges > 0 {
                     let current = resources.charges(for: .breath)
                     resources.setCharges(for: .breath, value: current + skillEffects.spell.breathExtraCharges)
@@ -80,7 +76,7 @@ struct BattleEnemyGroupBuilder {
                                         luck: definition.luck,
                                         partyMemberId: nil,
                                         level: spec.level,
-                                        jobName: definition.jobId.flatMap { jobDefinitions[$0]?.name } ?? "敵",
+                                        jobName: definition.jobId.flatMap { masterData.jobsById[$0]?.name } ?? "敵",
                                         avatarIndex: nil,
                                         isMartialEligible: false,
                                         raceId: definition.raceId,
@@ -110,23 +106,19 @@ struct BattleEnemyGroupBuilder {
     nonisolated private static func makeActors(for definition: EnemyDefinition,
                                     levelOverride: Int?,
                                     count: Int,
-                                    skillDefinitions: [UInt16: SkillDefinition],
-                                    jobDefinitions: [UInt8: JobDefinition],
+                                    masterData: MasterDataCache,
                                     cache: inout [UInt16: BattleActor.SkillEffects],
                                     random: inout GameRandomSource) throws -> [BattleActor] {
         var actors: [BattleActor] = []
         for index in 0..<count {
             guard let slot = BattleContextBuilder.slot(for: index) else { break }
             let level = levelOverride ?? 1
-            let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(from: definition,
-                                                                       levelOverride: level,
-                                                                       jobDefinitions: jobDefinitions,
-                                                                       skillDefinitions: skillDefinitions)
+            let snapshot = try masterData.combatStats(for: definition.id, level: level)
             var resources = BattleActionResource.makeDefault(for: snapshot,
                                                             spellLoadout: .empty)
             let skillEffects = try cachedSkillEffects(for: definition,
                                                       cache: &cache,
-                                                      skillDefinitions: skillDefinitions)
+                                                      masterData: masterData)
             if skillEffects.spell.breathExtraCharges > 0 {
                 let current = resources.charges(for: .breath)
                 resources.setCharges(for: .breath, value: current + skillEffects.spell.breathExtraCharges)
@@ -144,7 +136,7 @@ struct BattleEnemyGroupBuilder {
                                     luck: definition.luck,
                                     partyMemberId: nil,
                                     level: level,
-                                    jobName: definition.jobId.flatMap { jobDefinitions[$0]?.name } ?? "敵",
+                                    jobName: definition.jobId.flatMap { masterData.jobsById[$0]?.name } ?? "敵",
                                     avatarIndex: nil,
                                     isMartialEligible: false,
                                     raceId: definition.raceId,
@@ -169,11 +161,11 @@ struct BattleEnemyGroupBuilder {
 
     nonisolated private static func cachedSkillEffects(for definition: EnemyDefinition,
                                            cache: inout [UInt16: BattleActor.SkillEffects],
-                                           skillDefinitions: [UInt16: SkillDefinition]) throws -> BattleActor.SkillEffects {
+                                           masterData: MasterDataCache) throws -> BattleActor.SkillEffects {
         if let cached = cache[definition.id] {
             return cached
         }
-        let skills = definition.specialSkillIds.compactMap { skillDefinitions[$0] }
+        let skills = definition.specialSkillIds.compactMap { masterData.skillsById[$0] }
         let skillCompiler = try UnifiedSkillEffectCompiler(skills: skills)
         let effects = skillCompiler.actorEffects
         cache[definition.id] = effects

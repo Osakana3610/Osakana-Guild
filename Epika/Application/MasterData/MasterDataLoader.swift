@@ -7,6 +7,7 @@
 //   - SQLiteMasterDataManagerを使用してMasterDataCacheを構築
 //   - 起動時に1回だけ実行される（約10,700レコード、1.6MB SQLite）
 //   - 全テーブルのデータを順次取得してキャッシュを初期化
+//   - 事前計算データ（dungeonEnemyMap、enemyLevelMap）の構築
 //
 // 【公開API】
 //   - load(manager:) -> MasterDataCache: 全マスターデータをロードして返す
@@ -141,6 +142,16 @@ enum MasterDataLoader {
             let jobMetadata = try await manager.fetchAllJobMetadata()
             let racePassiveSkills = try await manager.fetchAllRacePassiveSkills()
             let raceSkillUnlocks = try await manager.fetchAllRaceSkillUnlocks()
+
+            // 事前計算データを構築
+            #if DEBUG
+            print("[MasterDataLoader] Building pre-calculated data...")
+            #endif
+            let (dungeonEnemyMap, enemyLevelMap) = buildPreCalculatedData(
+                encounterTables: encounterTables,
+                dungeonFloors: dungeonFloors
+            )
+
             #if DEBUG
             print("[MasterDataLoader] All data fetched successfully")
             #endif
@@ -172,12 +183,45 @@ enum MasterDataLoader {
                 jobSkillUnlocks: jobSkillUnlocks,
                 jobMetadata: jobMetadata,
                 racePassiveSkills: racePassiveSkills,
-                raceSkillUnlocks: raceSkillUnlocks
+                raceSkillUnlocks: raceSkillUnlocks,
+                dungeonEnemyMap: dungeonEnemyMap,
+                enemyLevelMap: enemyLevelMap
             )
         } catch let error as LoadError {
             throw error
         } catch {
             throw LoadError.loadFailed(underlying: error)
         }
+    }
+
+    /// 事前計算データを構築
+    /// - dungeonEnemyMap: ダンジョンID → 出現敵IDセット
+    /// - enemyLevelMap: 敵ID → 最大出現レベル
+    private static func buildPreCalculatedData(
+        encounterTables: [EncounterTableDefinition],
+        dungeonFloors: [DungeonFloorDefinition]
+    ) -> (dungeonEnemyMap: [UInt16: Set<UInt16>], enemyLevelMap: [UInt16: Int]) {
+        let tableMap = Dictionary(uniqueKeysWithValues: encounterTables.map { ($0.id, $0) })
+        var dungeonEnemyMap: [UInt16: Set<UInt16>] = [:]
+        var enemyLevelMap: [UInt16: Int] = [:]
+
+        for floor in dungeonFloors {
+            guard let dungeonId = floor.dungeonId,
+                  let table = tableMap[floor.encounterTableId] else { continue }
+
+            var enemySet = dungeonEnemyMap[dungeonId] ?? Set<UInt16>()
+            for event in table.events {
+                if let enemyId = event.enemyId {
+                    enemySet.insert(enemyId)
+                    // Store the level (prefer higher level if already exists)
+                    if let level = event.maxLevel {
+                        enemyLevelMap[enemyId] = max(enemyLevelMap[enemyId] ?? 0, level)
+                    }
+                }
+            }
+            dungeonEnemyMap[dungeonId] = enemySet
+        }
+
+        return (dungeonEnemyMap, enemyLevelMap)
     }
 }

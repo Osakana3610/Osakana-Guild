@@ -13,6 +13,7 @@
 //
 // 【使用箇所】
 //   - BattleEnemyGroupBuilder（敵Actor構築時）
+//   - MasterDataCache（オンデマンドキャッシュ）
 //
 // ==============================================================================
 
@@ -23,16 +24,15 @@ struct CombatSnapshotBuilder {
     /// 味方と同じ `CombatStatCalculator` を使用して計算する。
     static func makeEnemySnapshot(from definition: EnemyDefinition,
                                   levelOverride: Int?,
-                                  jobDefinitions: [UInt8: JobDefinition],
-                                  skillDefinitions: [UInt16: SkillDefinition]) throws -> CharacterValues.Combat {
+                                  masterData: MasterDataCache) throws -> CharacterValues.Combat {
         let level = max(1, levelOverride ?? 1)
 
         // 敵独自のbaseStatsからRaceDefinitionを作成
         let raceDefinition = makeRaceDefinition(for: definition)
-        let jobDefinition = definition.jobId.flatMap { jobDefinitions[$0] } ?? makeJobDefinition(for: definition)
+        let jobDefinition = definition.jobId.flatMap { masterData.jobsById[$0] } ?? makeJobDefinition(for: definition)
 
         // 敵のパッシブスキルを取得
-        let learnedSkills = definition.skillIds.compactMap { skillDefinitions[$0] }
+        let learnedSkills = definition.skillIds.compactMap { masterData.skillsById[$0] }
 
         let context = CombatStatCalculator.Context(
             raceId: definition.raceId,

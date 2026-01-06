@@ -22,22 +22,13 @@ import SwiftUI
 
 struct MonsterEncyclopediaView: View {
     @Environment(AppServices.self) private var appServices
-    @State private var dungeons: [DungeonDefinition] = []
-    @State private var enemies: [EnemyDefinition] = []
-    @State private var enemyRaces: [UInt8: String] = [:]
-    @State private var jobs: [UInt8: String] = [:]
-    @State private var jobDefinitions: [UInt8: JobDefinition] = [:]
-    @State private var enemySkills: [UInt16: EnemySkillDefinition] = [:]
-    @State private var skillDefinitions: [UInt16: SkillDefinition] = [:]
-    @State private var spells: [UInt8: String] = [:]  // spellId → name
-    @State private var items: [UInt16: String] = [:]  // itemId → name
-    @State private var dungeonEnemyMap: [UInt16: Set<UInt16>] = [:]
-    @State private var enemyLevelMap: [UInt16: Int] = [:]  // enemy ID → level
-    @State private var enemyCombatStats: [UInt16: CharacterValues.Combat] = [:]
-    @State private var isLoading = true
+
+    private var masterData: MasterDataCache {
+        appServices.masterDataCache
+    }
 
     private var dungeonsByChapter: [Int: [DungeonDefinition]] {
-        Dictionary(grouping: dungeons) { $0.chapter }
+        Dictionary(grouping: masterData.allDungeons.sorted { $0.id < $1.id }) { $0.chapter }
     }
 
     private var chapterNames: [Int: String] {
@@ -55,133 +46,44 @@ struct MonsterEncyclopediaView: View {
     }
 
     var body: some View {
-        Group {
-            if isLoading {
-                ProgressView("読み込み中...")
-            } else {
-                List {
-                    ForEach(dungeonsByChapter.keys.sorted(), id: \.self) { chapter in
-                        Section(chapterNames[chapter] ?? "第\(chapter)章") {
-                            ForEach(dungeonsByChapter[chapter] ?? [], id: \.id) { dungeon in
-                                NavigationLink {
-                                    DungeonEnemyListView(
-                                        dungeon: dungeon,
-                                        enemies: enemiesForDungeon(dungeon.id),
-                                        enemyRaces: enemyRaces,
-                                        jobs: jobs,
-                                        jobDefinitions: jobDefinitions,
-                                        enemySkills: enemySkills,
-                                        skillDefinitions: skillDefinitions,
-                                        spells: spells,
-                                        items: items,
-                                        enemyLevelMap: enemyLevelMap,
-                                        enemyCombatStats: enemyCombatStats
-                                    )
-                                } label: {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(dungeon.name)
-                                            .font(.body)
-                                        Text("推奨Lv\(dungeon.recommendedLevel) / \(dungeon.floorCount)階層")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
+        List {
+            ForEach(dungeonsByChapter.keys.sorted(), id: \.self) { chapter in
+                Section(chapterNames[chapter] ?? "第\(chapter)章") {
+                    ForEach(dungeonsByChapter[chapter] ?? [], id: \.id) { dungeon in
+                        NavigationLink {
+                            DungeonEnemyListView(
+                                dungeon: dungeon,
+                                masterData: masterData
+                            )
+                        } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(dungeon.name)
+                                    .font(.body)
+                                Text("推奨Lv\(dungeon.recommendedLevel) / \(dungeon.floorCount)階層")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
                         }
                     }
                 }
-                .listStyle(.insetGrouped)
             }
         }
+        .listStyle(.insetGrouped)
         .navigationTitle("モンスター図鑑")
         .avoidBottomGameInfo()
-        .task { await loadData() }
-    }
-
-    private func enemiesForDungeon(_ dungeonId: UInt16) -> [EnemyDefinition] {
-        guard let enemyIds = dungeonEnemyMap[dungeonId] else { return [] }
-        return enemies.filter { enemyIds.contains($0.id) }
-            .sorted { $0.id < $1.id }
-    }
-
-    private func loadData() async {
-        let masterData = appServices.masterDataCache
-
-        dungeons = masterData.allDungeons.sorted { $0.id < $1.id }
-        enemies = masterData.allEnemies
-        jobDefinitions = Dictionary(uniqueKeysWithValues: masterData.allJobs.map { ($0.id, $0) })
-        jobs = Dictionary(uniqueKeysWithValues: jobDefinitions.map { ($0.key, $0.value.name) })
-        enemySkills = Dictionary(uniqueKeysWithValues: masterData.allEnemySkills.map { ($0.id, $0) })
-        skillDefinitions = Dictionary(uniqueKeysWithValues: masterData.allSkills.map { ($0.id, $0) })
-        spells = Dictionary(uniqueKeysWithValues: masterData.allSpells.map { ($0.id, $0.name) })
-        items = Dictionary(uniqueKeysWithValues: masterData.allItems.map { ($0.id, $0.name) })
-
-        // Enemy races
-        enemyRaces = [
-            1: "人型",
-            2: "魔物",
-            3: "不死",
-            4: "竜族",
-            5: "神魔"
-        ]
-
-        // Build dungeon → enemy mapping and enemy → level mapping
-        let tableMap = Dictionary(uniqueKeysWithValues: masterData.allEncounterTables.map { ($0.id, $0) })
-        var mapping: [UInt16: Set<UInt16>] = [:]
-        var levelMap: [UInt16: Int] = [:]
-
-        for floor in masterData.allDungeonFloors {
-            guard let dungeonId = floor.dungeonId,
-                  let table = tableMap[floor.encounterTableId] else { continue }
-
-            var enemySet = mapping[dungeonId] ?? Set<UInt16>()
-            for event in table.events {
-                if let enemyId = event.enemyId {
-                    enemySet.insert(enemyId)
-                    // Store the level (prefer higher level if already exists)
-                    if let level = event.maxLevel {
-                        levelMap[enemyId] = max(levelMap[enemyId] ?? 0, level)
-                    }
-                }
-            }
-            mapping[dungeonId] = enemySet
-        }
-        dungeonEnemyMap = mapping
-        enemyLevelMap = levelMap
-
-        var combatMap: [UInt16: CharacterValues.Combat] = [:]
-        for enemy in enemies {
-            let effectiveLevel = levelMap[enemy.id] ?? 1
-            do {
-                let snapshot = try CombatSnapshotBuilder.makeEnemySnapshot(
-                    from: enemy,
-                    levelOverride: effectiveLevel,
-                    jobDefinitions: jobDefinitions,
-                    skillDefinitions: skillDefinitions
-                )
-                combatMap[enemy.id] = snapshot
-            } catch {
-                fatalError("敵ID\(enemy.id)の戦闘ステータス計算に失敗: \(error)")
-            }
-        }
-        enemyCombatStats = combatMap
-
-        isLoading = false
     }
 }
 
 private struct DungeonEnemyListView: View {
     let dungeon: DungeonDefinition
-    let enemies: [EnemyDefinition]
-    let enemyRaces: [UInt8: String]
-    let jobs: [UInt8: String]
-    let jobDefinitions: [UInt8: JobDefinition]
-    let enemySkills: [UInt16: EnemySkillDefinition]
-    let skillDefinitions: [UInt16: SkillDefinition]
-    let spells: [UInt8: String]
-    let items: [UInt16: String]
-    let enemyLevelMap: [UInt16: Int]
-    let enemyCombatStats: [UInt16: CharacterValues.Combat]
+    let masterData: MasterDataCache
+
+    private var enemies: [EnemyDefinition] {
+        guard let enemyIds = masterData.dungeonEnemyMap[dungeon.id] else { return [] }
+        return masterData.allEnemies
+            .filter { enemyIds.contains($0.id) }
+            .sorted { $0.id < $1.id }
+    }
 
     var body: some View {
         List {
@@ -190,29 +92,13 @@ private struct DungeonEnemyListView: View {
                     NavigationLink {
                         EnemyDetailView(
                             enemy: enemy,
-                            level: enemyLevelMap[enemy.id] ?? 1,
-                            enemyRaces: enemyRaces,
-                            jobs: jobs,
-                            jobDefinitions: jobDefinitions,
-                            enemySkills: enemySkills,
-                            skillDefinitions: skillDefinitions,
-                            spells: spells,
-                            items: items
+                            masterData: masterData
                         )
                     } label: {
-                        if let combat = enemyCombatStats[enemy.id] {
-                            EnemyRowView(
-                                enemy: enemy,
-                                level: enemyLevelMap[enemy.id] ?? 1,
-                                enemyRaces: enemyRaces,
-                                jobs: jobs,
-                                combatStats: combat
-                            )
-                        } else {
-                            Text("敵ID\(enemy.id)の戦闘ステータス未計算")
-                                .font(.body)
-                                .foregroundStyle(.red)
-                        }
+                        EnemyRowView(
+                            enemy: enemy,
+                            masterData: masterData
+                        )
                     }
                 }
             }
@@ -225,10 +111,15 @@ private struct DungeonEnemyListView: View {
 
 private struct EnemyRowView: View {
     let enemy: EnemyDefinition
-    let level: Int
-    let enemyRaces: [UInt8: String]
-    let jobs: [UInt8: String]
-    let combatStats: CharacterValues.Combat
+    let masterData: MasterDataCache
+
+    private var level: Int {
+        masterData.enemyLevelMap[enemy.id] ?? 1
+    }
+
+    private var combatStats: CharacterValues.Combat? {
+        try? masterData.combatStats(for: enemy.id, level: level)
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -241,10 +132,12 @@ private struct EnemyRowView: View {
                 HStack(spacing: 8) {
                     Text("Lv\(level)")
                         .fontWeight(.medium)
-                    Text("HP\(combatStats.maxHP)")
-                    Text("(\(enemyRaces[enemy.raceId] ?? "不明"))")
-                    if let jobId = enemy.jobId, let jobName = jobs[jobId] {
-                        Text(jobName)
+                    if let combat = combatStats {
+                        Text("HP\(combat.maxHP)")
+                    }
+                    Text("(\(masterData.enemyRaceName(for: enemy.raceId)))")
+                    if let jobId = enemy.jobId {
+                        Text(masterData.jobName(for: jobId))
                     }
                 }
                 .font(.caption)
@@ -256,43 +149,17 @@ private struct EnemyRowView: View {
 
 private struct EnemyDetailView: View {
     let enemy: EnemyDefinition
-    let level: Int
-    let enemyRaces: [UInt8: String]
-    let jobs: [UInt8: String]
-    let jobDefinitions: [UInt8: JobDefinition]
-    let enemySkills: [UInt16: EnemySkillDefinition]
-    let skillDefinitions: [UInt16: SkillDefinition]
-    let spells: [UInt8: String]
-    let items: [UInt16: String]
+    let masterData: MasterDataCache
 
-    private let combatStats: CharacterValues.Combat?
-    @State private var dropDetailItem: DropItemDetail?
-
-    init(enemy: EnemyDefinition,
-         level: Int,
-         enemyRaces: [UInt8: String],
-         jobs: [UInt8: String],
-         jobDefinitions: [UInt8: JobDefinition],
-         enemySkills: [UInt16: EnemySkillDefinition],
-         skillDefinitions: [UInt16: SkillDefinition],
-         spells: [UInt8: String],
-         items: [UInt16: String]) {
-        self.enemy = enemy
-        self.level = level
-        self.enemyRaces = enemyRaces
-        self.jobs = jobs
-        self.jobDefinitions = jobDefinitions
-        self.enemySkills = enemySkills
-        self.skillDefinitions = skillDefinitions
-        self.spells = spells
-        self.items = items
-        self.combatStats = try? CombatSnapshotBuilder.makeEnemySnapshot(
-            from: enemy,
-            levelOverride: level,
-            jobDefinitions: jobDefinitions,
-            skillDefinitions: skillDefinitions
-        )
+    private var level: Int {
+        masterData.enemyLevelMap[enemy.id] ?? 1
     }
+
+    private var combatStats: CharacterValues.Combat? {
+        try? masterData.combatStats(for: enemy.id, level: level)
+    }
+
+    @State private var dropDetailItem: DropItemDetail?
 
     var body: some View {
         List {
@@ -305,8 +172,8 @@ private struct EnemyDetailView: View {
 
             Section("プロフィール") {
                 EnemyProfileSection(
-                    raceName: enemyRaces[enemy.raceId] ?? "不明",
-                    jobName: enemy.jobId.flatMap { jobs[$0] },
+                    raceName: masterData.enemyRaceName(for: enemy.raceId),
+                    jobName: enemy.jobId.map { masterData.jobName(for: $0) },
                     level: level,
                     baseExperience: enemy.baseExperience
                 )
@@ -328,7 +195,7 @@ private struct EnemyDetailView: View {
             }
 
             Section("耐性") {
-                EnemyResistanceSection(resistances: enemy.resistances, spells: spells)
+                EnemyResistanceSection(resistances: enemy.resistances, masterData: masterData)
             }
 
             Section("行動優先度") {
@@ -338,7 +205,7 @@ private struct EnemyDetailView: View {
             if !enemy.specialSkillIds.isEmpty {
                 Section("特殊スキル") {
                     ForEach(enemy.specialSkillIds, id: \.self) { skillId in
-                        if let skill = enemySkills[skillId] {
+                        if let skill = masterData.enemySkillsById[skillId] {
                             EnemySkillRow(skill: skill)
                         } else {
                             Text("スキルID: \(skillId)")
@@ -356,7 +223,7 @@ private struct EnemyDetailView: View {
                 Section("ドロップアイテム") {
                     ForEach(enemy.drops, id: \.self) { itemId in
                         EnemyDropRow(
-                            name: items[itemId] ?? "アイテムID: \(itemId)",
+                            name: masterData.itemName(for: itemId),
                             onTap: { dropDetailItem = DropItemDetail(id: itemId) }
                         )
                     }
@@ -380,7 +247,7 @@ private struct EnemyDetailView: View {
     }
 
     private var learnedSkills: [SkillDefinition] {
-        enemy.skillIds.compactMap { skillDefinitions[$0] }
+        enemy.skillIds.compactMap { masterData.skillsById[$0] }
             .sorted { $0.id < $1.id }
     }
 
@@ -587,7 +454,7 @@ private struct EnemyStatProgressBar: View {
 
 private struct EnemyResistanceSection: View {
     let resistances: EnemyDefinition.Resistances
-    let spells: [UInt8: String]
+    let masterData: MasterDataCache
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -597,14 +464,10 @@ private struct EnemyResistanceSection: View {
             EnemyResistanceRow(label: "ブレス", multiplier: resistances.breath)
             ForEach(resistances.spells.keys.sorted(), id: \.self) { spellId in
                 if let multiplier = resistances.spells[spellId] {
-                    EnemyResistanceRow(label: spellName(for: spellId), multiplier: multiplier)
+                    EnemyResistanceRow(label: masterData.spellName(for: spellId), multiplier: multiplier)
                 }
             }
         }
-    }
-
-    private func spellName(for spellId: UInt8) -> String {
-        spells[spellId] ?? "呪文ID:\(spellId)"
     }
 }
 

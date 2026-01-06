@@ -69,19 +69,13 @@ enum BattleService {
 
     /// 戦闘を解決する
     /// nonisolated - 計算処理のためMainActorに縛られない
+    /// MasterDataCacheのletプロパティは直接アクセス可能
     nonisolated static func resolveBattle(masterData: MasterDataCache,
                               party: RuntimePartyState,
                               dungeon: DungeonDefinition,
                               floor: DungeonFloorDefinition,
                               enemySpecs: [EncounteredEnemySpec],
                               random: inout GameRandomSource) throws -> Resolution {
-        // MasterDataCacheの既存辞書を使用（毎戦闘での辞書作成を回避）
-        let skillDictionary = masterData.skillsById
-        let enemyDictionary = masterData.enemiesById
-        let statusDefinitions = masterData.statusEffectsById
-        let jobDictionary = masterData.jobsById
-        let enemySkillDictionary = masterData.enemySkillsById
-
         guard !enemySpecs.isEmpty else {
             throw RuntimeError.invalidConfiguration(reason: "敵が指定されていません")
         }
@@ -89,7 +83,7 @@ enum BattleService {
         let players = try BattleContextBuilder.makePlayerActors(from: party)
         guard !players.isEmpty else {
             guard let firstSpec = enemySpecs.first,
-                  let enemyDefinition = enemyDictionary[firstSpec.enemyId] else {
+                  let enemyDefinition = masterData.enemiesById[firstSpec.enemyId] else {
                 throw RuntimeError.masterDataNotFound(entity: "enemy", identifier: String(enemySpecs.first?.enemyId ?? 0))
             }
             return Resolution(result: .defeat,
@@ -106,9 +100,7 @@ enum BattleService {
 
         var localRandom = random
         let enemyResult = try BattleEnemyGroupBuilder.makeEnemies(specs: enemySpecs,
-                                                                 enemyDefinitions: enemyDictionary,
-                                                                 skillDefinitions: skillDictionary,
-                                                                 jobDefinitions: jobDictionary,
+                                                                 masterData: masterData,
                                                                  random: &localRandom)
         let enemies = enemyResult.0
         let encounteredEnemies = enemyResult.1
@@ -123,9 +115,9 @@ enum BattleService {
         var mutableRandom = random
         let battleResult = BattleTurnEngine.runBattle(players: &mutablePlayers,
                                                       enemies: &mutableEnemies,
-                                                      statusEffects: statusDefinitions,
-                                                      skillDefinitions: skillDictionary,
-                                                      enemySkillDefinitions: enemySkillDictionary,
+                                                      statusEffects: masterData.statusEffectsById,
+                                                      skillDefinitions: masterData.skillsById,
+                                                      enemySkillDefinitions: masterData.enemySkillsById,
                                                       random: &mutableRandom)
         random = mutableRandom
 
