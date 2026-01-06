@@ -157,18 +157,12 @@ final class UserDataLoadService: Sendable {
 
         loadTask = Task {
             do {
-                // 1. データロード（並列実行可能なもの）
-                async let charactersTask: () = loadCharacters()
-                async let partiesTask: () = loadParties()
-                async let explorationTask: () = loadExplorationSummaries()
-                async let gameStateTask: () = loadGameState()
-                async let autoTradeTask: () = loadAutoTradeRules()
-
-                try await charactersTask
-                try await partiesTask
-                try await explorationTask
-                try await gameStateTask
-                try await autoTradeTask
+                // 1. データロード（直列実行: リリースビルドでのレースコンディション回避）
+                try await loadCharacters()
+                try await loadParties()
+                try await loadExplorationSummaries()
+                try await loadGameState()
+                try await loadAutoTradeRules()
 
                 // アイテムロードはMainActorで実行
                 try await MainActor.run { try self.loadItems() }
