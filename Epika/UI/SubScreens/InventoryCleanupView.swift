@@ -66,6 +66,12 @@ struct InventoryCleanupView: View {
 
     private var candidateList: some View {
         List {
+            Section {
+                Text("店の在庫がいっぱいになると自動的にキャット・チケットへ変換されます。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             if let player {
                 Section {
                     HStack {
