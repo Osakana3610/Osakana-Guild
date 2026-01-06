@@ -648,6 +648,13 @@ actor CharacterProgressService {
         // 装備を全てインベントリに戻す（レベルが1にリセットされるため）
         try unequipAllItems(characterId: characterId, context: context)
 
+        // 装備キャッシュを空にする通知を送信
+        let equippedItemsChange = UserDataLoadService.InventoryChange.EquippedItemsChange(
+            characterId: characterId,
+            items: []
+        )
+        postInventoryChange(equippedItemsChange: equippedItemsChange)
+
         // 転職実行
         record.previousJobId = record.jobId
         record.jobId = newJobId
