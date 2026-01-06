@@ -13,6 +13,7 @@
 // ==============================================================================
 
 import Foundation
+import SQLite3
 import UIKit
 
 /// 不具合報告データ
@@ -231,6 +232,8 @@ private extension Data {
 enum BugReportError: Error, LocalizedError {
     case invalidResponse
     case serverError(statusCode: Int)
+    case databaseOpenFailed
+    case databaseQueryFailed
 
     var errorDescription: String? {
         switch self {
@@ -238,6 +241,10 @@ enum BugReportError: Error, LocalizedError {
             return "サーバーからの応答が不正です"
         case .serverError(let code):
             return "サーバーエラー: \(code)"
+        case .databaseOpenFailed:
+            return "データベースを開けませんでした"
+        case .databaseQueryFailed:
+            return "データベース操作に失敗しました"
         }
     }
 }
@@ -261,27 +268,73 @@ extension BugReportService {
         )
     }
 
-    /// SwiftDataデータベースファイルのデータを取得
+    /// SwiftDataデータベースファイルのデータを取得（インベントリ除外版）
+    ///
+    /// 元のDBをコピーし、インベントリテーブルを削除してサイズを削減する。
+    /// 元のDBは一切変更されない。
     static func gatherDatabaseData() -> Data? {
+        let fileManager = FileManager.default
+
         do {
-            let fileManager = FileManager.default
             let support = try fileManager.url(
                 for: .applicationSupportDirectory,
                 in: .userDomainMask,
                 appropriateFor: nil,
                 create: false
             )
-            let storeURL = support
+            let originalURL = support
                 .appendingPathComponent("Epika", isDirectory: true)
                 .appendingPathComponent("Progress.store")
 
-            guard fileManager.fileExists(atPath: storeURL.path) else {
+            guard fileManager.fileExists(atPath: originalURL.path) else {
                 return nil
             }
 
-            return try Data(contentsOf: storeURL)
+            // 一時ファイルにコピー（元DBは触らない）
+            let tempURL = fileManager.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString + ".sqlite")
+
+            try fileManager.copyItem(at: originalURL, to: tempURL)
+
+            defer {
+                // 最後に一時ファイルを削除
+                try? fileManager.removeItem(at: tempURL)
+            }
+
+            // コピーからインベントリを削除してサイズ削減
+            try removeInventoryFromDatabase(at: tempURL)
+
+            return try Data(contentsOf: tempURL)
         } catch {
             return nil
+        }
+    }
+
+    /// データベースからインベントリテーブルの内容を削除
+    private static func removeInventoryFromDatabase(at url: URL) throws {
+        var db: OpaquePointer?
+
+        guard sqlite3_open(url.path, &db) == SQLITE_OK else {
+            throw BugReportError.databaseOpenFailed
+        }
+
+        defer {
+            sqlite3_close(db)
+        }
+
+        // インベントリレコードを削除
+        guard sqlite3_exec(db, "DELETE FROM ZINVENTORYITEMRECORD", nil, nil, nil) == SQLITE_OK else {
+            throw BugReportError.databaseQueryFailed
+        }
+
+        // 装備レコードも削除（インベントリと関連）
+        guard sqlite3_exec(db, "DELETE FROM ZCHARACTEREQUIPMENTRECORD", nil, nil, nil) == SQLITE_OK else {
+            throw BugReportError.databaseQueryFailed
+        }
+
+        // VACUUMで空き領域を回収
+        guard sqlite3_exec(db, "VACUUM", nil, nil, nil) == SQLITE_OK else {
+            throw BugReportError.databaseQueryFailed
         }
     }
 }
