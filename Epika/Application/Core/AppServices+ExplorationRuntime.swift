@@ -200,10 +200,18 @@ extension AppServices {
                                                         difficulty: UInt8(runDifficulty),
                                                         furthestFloor: UInt8(max(0, floorNumber)))
             case .cancelled(let floorNumber, _):
-                // 撤退時も部分進捗を更新（報酬なし）
+                // 撤退時も部分進捗を更新
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                         difficulty: UInt8(runDifficulty),
                                                         furthestFloor: UInt8(max(0, floorNumber)))
+                // 撤退時もドロップ報酬を計算（目標階層到達、任意帰還、20ターン経過による撤退を含む）
+                // 20ターン経過で撤退した場合、その戦闘のドロップは既に除外されているため、
+                // それまでのドロップのみが報酬として計算される
+                let drops = makeItemDropResults(from: artifact.totalDrops)
+                let calculated = try await calculateDropRewards(drops)
+                calculatedDropRewards = calculated
+                autoSellGold = calculated.autoSellGold
+                autoSoldItems = calculated.autoSellEntries
             }
             // 探索記録を保存して帰還通知を発火
             persistenceSession.finalizeRun(endState: artifact.endState,

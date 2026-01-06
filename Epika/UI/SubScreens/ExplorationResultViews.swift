@@ -49,7 +49,7 @@ struct ExplorationRunResultSummaryView: View {
                         Text("獲得ゴールド：\(formatNumber(snapshot.rewards.gold))")
                     }
 
-                    if snapshot.status == .completed {
+                    if snapshot.status == .completed || snapshot.status == .cancelled {
                         if itemRows.isEmpty {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("入手アイテム：")
@@ -145,7 +145,7 @@ struct ExplorationRunResultSummaryView: View {
     }
 
     private var itemRows: [DropRow] {
-        guard snapshot.status == .completed else { return [] }
+        guard snapshot.status == .completed || snapshot.status == .cancelled else { return [] }
         let cache = appServices.masterDataCache
         return snapshot.rewards.itemDrops.compactMap { summary -> DropRow? in
             guard let definition = cache.item(summary.itemId) else { return nil }
@@ -173,9 +173,7 @@ struct ExplorationRunResultSummaryView: View {
             return "探索中のためまだアイテムは持ち帰っていません。"
         case .defeated:
             return "探索に失敗したためアイテムは持ち帰れません。"
-        case .cancelled:
-            return "探索を中断したためアイテムは持ち帰れません。"
-        case .completed:
+        case .cancelled, .completed:
             return ""
         }
     }
