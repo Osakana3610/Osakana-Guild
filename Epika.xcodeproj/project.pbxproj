@@ -33,22 +33,9 @@
 		B0E9F1F32E254D660010C564 /* EpikaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EpikaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		B0E9F2072E254D660010C564 /* Exceptions for "Epika" folder in "Epika" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = B0E9F1D42E254D650010C564 /* Epika */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B0E9F1D72E254D650010C564 /* Epika */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				B0E9F2072E254D660010C564 /* Exceptions for "Epika" folder in "Epika" target */,
-			);
 			path = Epika;
 			sourceTree = "<group>";
 		};
@@ -282,10 +269,10 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_APP_INTENTS_METADATA = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Epika/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "おさかなギルド";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.role-playing-games";
+				INFOPLIST_KEY_LSSupportsGameMode = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -322,10 +309,10 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_APP_INTENTS_METADATA = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Epika/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "おさかなギルド";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.role-playing-games";
+				INFOPLIST_KEY_LSSupportsGameMode = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
