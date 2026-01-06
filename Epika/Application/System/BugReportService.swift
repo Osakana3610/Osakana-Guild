@@ -22,8 +22,7 @@ struct BugReport: Sendable {
     let description: String
     let playerData: PlayerReportData
     let logs: String
-    let battleLogs: String
-    let databaseData: Data?  // SwiftDataのSQLiteファイル
+    let databaseData: Data?  // SwiftDataのSQLiteファイル（戦闘ログ含む）
     let appInfo: AppInfo
     let screenshots: [Data]
 
@@ -97,20 +96,11 @@ actor BugReportService {
             body.append("\r\n")
         }
 
-        // 添付ファイル2: 戦闘ログ
-        if let battleLogsData = report.battleLogs.data(using: .utf8), !report.battleLogs.isEmpty {
-            body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"files[1]\"; filename=\"battle_logs.txt\"\r\n")
-            body.append("Content-Type: text/plain; charset=utf-8\r\n\r\n")
-            body.append(battleLogsData)
-            body.append("\r\n")
-        }
-
-        // 添付ファイル3: SwiftDataデータベース（SQLite）
-        var fileIndex = 3
+        // 添付ファイル2: SwiftDataデータベース（SQLite、戦闘ログ含む）
+        var fileIndex = 2
         if let databaseData = report.databaseData {
             body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"files[2]\"; filename=\"user_data.sqlite\"\r\n")
+            body.append("Content-Disposition: form-data; name=\"files[1]\"; filename=\"user_data.sqlite\"\r\n")
             body.append("Content-Type: application/x-sqlite3\r\n\r\n")
             body.append(databaseData)
             body.append("\r\n")

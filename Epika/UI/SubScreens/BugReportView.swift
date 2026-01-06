@@ -206,7 +206,7 @@ struct BugReportView: View {
                     HStack {
                         Text("戦闘ログ")
                         Spacer()
-                        Text("直近の戦闘")
+                        Text("直近200件")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -263,15 +263,12 @@ struct BugReportView: View {
             let appInfo = BugReportService.gatherAppInfo()
             let playerId = getOrCreatePlayerId()
 
-            // オプションに応じてログを取得
+            // オプションに応じてログを取得（戦闘ログはSQLiteに含まれる）
             let logs: String
-            let battleLogs: String
             if sendLogs {
                 logs = await AppLogCollector.shared.getLogsAsText()
-                battleLogs = BattleLogBuffer.shared.getLogsAsText()
             } else {
                 logs = ""
-                battleLogs = ""
             }
 
             // オプションに応じてユーザーデータを設定
@@ -307,7 +304,6 @@ struct BugReportView: View {
                 description: description,
                 playerData: playerData,
                 logs: logs,
-                battleLogs: battleLogs,
                 databaseData: databaseData,
                 appInfo: appInfo,
                 screenshots: screenshotData
