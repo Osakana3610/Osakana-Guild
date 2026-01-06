@@ -157,28 +157,45 @@ final class UserDataLoadService: Sendable {
 
         loadTask = Task {
             do {
+                await AppLogCollector.shared.log(.system, action: "loadAll_start")
+
                 // 1. データロード（直列実行: リリースビルドでのレースコンディション回避）
                 try await loadCharacters()
+                await AppLogCollector.shared.log(.system, action: "loadCharacters_done")
+
                 try await loadParties()
+                await AppLogCollector.shared.log(.system, action: "loadParties_done")
+
                 try await loadExplorationSummaries()
+                await AppLogCollector.shared.log(.system, action: "loadExplorationSummaries_done")
+
                 try await loadGameState()
+                await AppLogCollector.shared.log(.system, action: "loadGameState_done")
+
                 try await loadAutoTradeRules()
+                await AppLogCollector.shared.log(.system, action: "loadAutoTradeRules_done")
 
                 // アイテムロードはMainActorで実行
                 try await MainActor.run { try self.loadItems() }
+                await AppLogCollector.shared.log(.system, action: "loadItems_done")
 
                 // 商店在庫ロード（appServicesが必要）
                 try await loadShopItems()
+                await AppLogCollector.shared.log(.system, action: "loadShopItems_done")
 
                 // ダンジョン進行ロード（appServicesが必要）
                 try await loadDungeonSnapshots()
+                await AppLogCollector.shared.log(.system, action: "loadDungeonSnapshots_done")
 
                 // 2. 探索再開（データロード完了後に実行）
                 await resumeOrphanedExplorations()
+                await AppLogCollector.shared.log(.system, action: "resumeOrphanedExplorations_done")
 
                 // 3. 全成功後にフラグ設定
                 await MainActor.run { self.isLoaded = true }
+                await AppLogCollector.shared.log(.system, action: "loadAll_complete")
             } catch {
+                await AppLogCollector.shared.logError(error.localizedDescription, location: "loadAll")
                 // 失敗時はloadTaskをクリアしてリトライ可能に
                 await MainActor.run { self.loadTask = nil }
                 throw error
