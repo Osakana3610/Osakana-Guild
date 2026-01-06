@@ -238,7 +238,7 @@ private extension Data {
         let chunkSize = 16_384
         var status: Int32 = Z_OK
 
-        try withUnsafeBytes { buffer in
+        withUnsafeBytes { buffer in
             if let baseAddress = buffer.baseAddress?.assumingMemoryBound(to: Bytef.self) {
                 stream.next_in = UnsafeMutablePointer<Bytef>(mutating: baseAddress)
             } else {
