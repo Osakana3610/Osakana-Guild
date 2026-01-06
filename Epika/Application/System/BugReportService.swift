@@ -290,7 +290,10 @@ extension BugReportService {
                 return nil
             }
 
-            // 一時ファイルにコピー（元DBは触らない）
+            // WALをチェックポイントして最新データを本体に反映
+            try checkpointDatabase(at: originalURL)
+
+            // 一時ファイルにコピー
             let tempURL = fileManager.temporaryDirectory
                 .appendingPathComponent(UUID().uuidString + ".sqlite")
 
@@ -307,6 +310,24 @@ extension BugReportService {
             return try Data(contentsOf: tempURL)
         } catch {
             return nil
+        }
+    }
+
+    /// WALをチェックポイントして最新データを本体ファイルに反映
+    private static func checkpointDatabase(at url: URL) throws {
+        var db: OpaquePointer?
+
+        guard sqlite3_open(url.path, &db) == SQLITE_OK else {
+            throw BugReportError.databaseOpenFailed
+        }
+
+        defer {
+            sqlite3_close(db)
+        }
+
+        // WALの内容を本体に書き込み、WALファイルを切り詰め
+        guard sqlite3_exec(db, "PRAGMA wal_checkpoint(TRUNCATE)", nil, nil, nil) == SQLITE_OK else {
+            throw BugReportError.databaseQueryFailed
         }
     }
 
