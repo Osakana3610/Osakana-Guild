@@ -362,10 +362,12 @@ extension BattleTurnEngine {
         }
 
         let hitCount = max(1, hitCountOverride ?? Int(attackerCopy.snapshot.attackCount))
+        let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
         var totalDamage = 0
         var successfulHits = 0
         var criticalHits = 0
         var defenderEvaded = false
+        var accumulatedAbsorptionDamage = 0
 
         let defenderIdx: UInt16
         if let defSide = defenderSide, let defIndex = defenderIndex {
@@ -426,7 +428,7 @@ extension BattleTurnEngine {
             let applied = applyDamage(amount: pendingDamage, to: &defenderCopy)
             applyPhysicalDegradation(to: &defenderCopy)
             applySpellChargeGainOnPhysicalHit(for: &attackerCopy, damageDealt: applied)
-            applyAbsorptionIfNeeded(for: &attackerCopy, damageDealt: applied, damageType: .physical, context: &context)
+            accumulatedAbsorptionDamage += applied
             attemptInflictStatuses(from: attackerCopy, to: &defenderCopy, context: &context)
 
             // autoStatusCureOnAlly判定（物理攻撃からの状態異常付与後）
@@ -450,6 +452,16 @@ extension BattleTurnEngine {
                                     entryBuilder: entryBuilder)
                 }
                 break
+            }
+        }
+
+        if accumulatedAbsorptionDamage > 0 {
+            let absorbed = applyAbsorptionIfNeeded(for: &attackerCopy,
+                                                   damageDealt: accumulatedAbsorptionDamage,
+                                                   damageType: .physical,
+                                                   context: &context)
+            if absorbed > 0 {
+                entryBuilder.addEffect(kind: .healAbsorb, target: attackerIdx, value: UInt32(absorbed))
             }
         }
 

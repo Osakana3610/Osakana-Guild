@@ -68,27 +68,29 @@ extension BattleTurnEngine {
         return true
     }
 
+    @discardableResult
     static func applyAbsorptionIfNeeded(for attacker: inout BattleActor,
                                         damageDealt: Int,
                                         damageType: BattleDamageType,
-                                        context: inout BattleContext) {
-        guard damageDealt > 0 else { return }
-        guard damageType == .physical else { return }
+                                        context: inout BattleContext) -> Int {
+        guard damageDealt > 0 else { return 0 }
+        guard damageType == .physical else { return 0 }
         let percent = attacker.skillEffects.misc.absorptionPercent
-        guard percent > 0 else { return }
+        guard percent > 0 else { return 0 }
         let capPercent = attacker.skillEffects.misc.absorptionCapPercent
         let baseHeal = Double(damageDealt) * percent / 100.0
         let scaledHeal = baseHeal * healingDealtModifier(for: attacker) * healingReceivedModifier(for: attacker)
         let rawHeal = Int(scaledHeal.rounded())
         let cap = Int((Double(attacker.snapshot.maxHP) * capPercent / 100.0).rounded())
         let healAmount = max(0, min(rawHeal, cap > 0 ? cap : rawHeal))
-        guard healAmount > 0 else { return }
+        guard healAmount > 0 else { return 0 }
         let missing = attacker.snapshot.maxHP - attacker.currentHP
         let applied = min(healAmount, missing)
-        guard applied > 0 else { return }
+        guard applied > 0 else { return 0 }
         attacker.currentHP += applied
         // 吸収回復のログは呼び出し元でperformAttack経由で記録される
         // actor indexがない状態ではappendActionを呼べないため、ここではログ出力しない
+        return applied
     }
 
     static func applySpellChargeGainOnPhysicalHit(for attacker: inout BattleActor,
@@ -196,47 +198,24 @@ extension BattleTurnEngine {
                                  context: inout BattleContext) {
         guard let performer = context.actor(for: side, index: actorIndex), performer.isAlive else { return }
 
-        #if DEBUG
-        let allReactions = performer.skillEffects.combat.reactions
-        if !allReactions.isEmpty {
-            print("[Reaction] \(performer.displayName) has \(allReactions.count) reactions: \(allReactions.map { "\($0.displayName)(\($0.trigger))" }.joined(separator: ", "))")
-            print("[Reaction] Event: \(event)")
-        }
-        #endif
-
         let candidates = performer.skillEffects.combat.reactions.filter { $0.trigger.matches(event: event) }
-
-        #if DEBUG
-        if !allReactions.isEmpty {
-            print("[Reaction] Matching candidates: \(candidates.count)")
-        }
-        #endif
 
         guard !candidates.isEmpty else { return }
 
         for reaction in candidates {
             guard let currentPerformer = context.actor(for: side, index: actorIndex), currentPerformer.isAlive else { break }
             if reaction.requiresMartial && !shouldUseMartialAttack(attacker: currentPerformer) {
-                #if DEBUG
-                print("[Reaction] \(reaction.displayName): SKIP (requiresMartial but not martial)")
-                #endif
                 continue
             }
 
             if case .allyDamagedPhysical(_, let defenderIndex, _) = event,
                defenderIndex == actorIndex {
-                #if DEBUG
-                print("[Reaction] \(reaction.displayName): SKIP (self is defender)")
-                #endif
                 continue
             }
 
             // 自分の魔法に自分で追撃しない
             if case .allyMagicAttack(_, let casterIndex) = event,
                casterIndex == actorIndex {
-                #if DEBUG
-                print("[Reaction] \(reaction.displayName): SKIP (self is caster)")
-                #endif
                 continue
             }
 
@@ -245,9 +224,6 @@ extension BattleTurnEngine {
                       eventSide == side,
                       let attackedActor = context.actor(for: side, index: defenderIndex),
                       currentPerformer.formationSlot.formationRow < attackedActor.formationSlot.formationRow else {
-                    #if DEBUG
-                    print("[Reaction] \(reaction.displayName): SKIP (requiresAllyBehind not met)")
-                    #endif
                     continue
                 }
             }
@@ -261,9 +237,6 @@ extension BattleTurnEngine {
                                                         forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil))
             }
             guard var resolvedTarget = targetReference else {
-                #if DEBUG
-                print("[Reaction] \(reaction.displayName): SKIP (no target)")
-                #endif
                 continue
             }
             var needsFallback = false
@@ -278,9 +251,6 @@ extension BattleTurnEngine {
                                                            allowFriendlyTargets: false,
                                                            attacker: currentPerformer,
                                                            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)) else {
-                    #if DEBUG
-                    print("[Reaction] \(reaction.displayName): SKIP (no fallback target)")
-                    #endif
                     continue
                 }
                 resolvedTarget = fallback
@@ -288,9 +258,6 @@ extension BattleTurnEngine {
 
             guard let targetActor = context.actor(for: resolvedTarget.0, index: resolvedTarget.1),
                   targetActor.isAlive else {
-                #if DEBUG
-                print("[Reaction] \(reaction.displayName): SKIP (target dead)")
-                #endif
                 continue
             }
 
@@ -300,21 +267,11 @@ extension BattleTurnEngine {
             chance *= targetActor.skillEffects.combat.counterAttackEvasionMultiplier
             let cappedChance = max(0, min(100, Int(floor(chance))))
 
-            #if DEBUG
-            print("[Reaction] \(reaction.displayName): base=\(baseChance)%, final=\(cappedChance)%, damageType=\(reaction.damageType)")
-            #endif
-
             guard cappedChance > 0 else {
-                #if DEBUG
-                print("[Reaction] \(reaction.displayName): SKIP (chance=0)")
-                #endif
                 continue
             }
 
             let rolled = BattleRandomSystem.percentChance(cappedChance, random: &context.random)
-            #if DEBUG
-            print("[Reaction] \(reaction.displayName): roll=\(rolled ? "SUCCESS" : "FAIL")")
-            #endif
             guard rolled else { continue }
 
             let performerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
@@ -324,10 +281,6 @@ extension BattleTurnEngine {
                                                               label: reaction.displayName,
                                                               turnOverride: context.turn)
             entryBuilder.addEffect(kind: .reactionAttack, target: targetIdx)
-
-            #if DEBUG
-            print("[Reaction] \(reaction.displayName): TRIGGERED! -> \(targetActor.displayName)")
-            #endif
 
             executeReactionAttack(from: side,
                                   actorIndex: actorIndex,
@@ -357,6 +310,7 @@ extension BattleTurnEngine {
         modifiedAttacker.snapshot.criticalRate = max(0, min(100, scaledCritical))
 
         let targetIdx = context.actorIndex(for: target.0, arrayIndex: target.1)
+        let attackerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
 
         let attackResult: AttackResult
         switch reaction.damageType {
@@ -383,10 +337,16 @@ extension BattleTurnEngine {
                                                   spellId: nil,
                                                   context: &context)
                 let applied = applyDamage(amount: damage, to: &targetCopy)
-                applyAbsorptionIfNeeded(for: &attackerCopy, damageDealt: applied, damageType: .magical, context: &context)
+                let absorbed = applyAbsorptionIfNeeded(for: &attackerCopy,
+                                                       damageDealt: applied,
+                                                       damageType: .magical,
+                                                       context: &context)
                 totalDamage += applied
                 if applied > 0 {
                     entryBuilder.addEffect(kind: .magicDamage, target: targetIdx, value: UInt32(applied))
+                }
+                if absorbed > 0 {
+                    entryBuilder.addEffect(kind: .healAbsorb, target: attackerIdx, value: UInt32(absorbed))
                 }
                 if !targetCopy.isAlive {
                     break

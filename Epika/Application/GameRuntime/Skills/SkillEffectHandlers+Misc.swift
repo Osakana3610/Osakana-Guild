@@ -181,10 +181,10 @@ struct AbsorptionHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         if let percent = payload.value[.percent] {
-            accumulator.misc.absorptionPercent = max(accumulator.misc.absorptionPercent, percent)
+            accumulator.misc.absorptionPercent += percent
         }
         if let cap = payload.value[.capPercent] {
-            accumulator.misc.absorptionCapPercent = max(accumulator.misc.absorptionCapPercent, cap)
+            accumulator.misc.absorptionCapPercent += cap
         }
         if accumulator.misc.absorptionPercent == 0.0, accumulator.misc.absorptionCapPercent == 0.0 {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) absorption が空です")
