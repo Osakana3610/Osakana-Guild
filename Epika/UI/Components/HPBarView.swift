@@ -102,7 +102,7 @@ struct HPBarView: View {
 
                 // 数値表示（バーの上に重ねる）
                 if showNumbers {
-                    Text("\(currentHP)/\(maxHP)")
+                    Text("\(currentHP.formattedWithComma())/\(maxHP.formattedWithComma())")
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(Color.primary)
                         .shadow(color: Color(.systemBackground), radius: 1, x: 0, y: 0.5)

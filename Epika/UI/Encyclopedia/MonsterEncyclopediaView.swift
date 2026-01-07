@@ -133,7 +133,7 @@ private struct EnemyRowView: View {
                     Text("Lv\(level)")
                         .fontWeight(.medium)
                     if let combat = combatStats {
-                        Text("HP\(combat.maxHP)")
+                        Text("HP\(combat.maxHP.formattedWithComma())")
                     }
                     Text("(\(masterData.enemyRaceName(for: enemy.raceId)))")
                     if let jobId = enemy.jobId {
@@ -300,18 +300,8 @@ private struct EnemyProfileSection: View {
     }
 
     private func formattedExperience(_ value: Int) -> String {
-        if let formatted = Self.numberFormatter.string(from: NSNumber(value: value)) {
-            return formatted
-        }
-        return "\(value)"
+        value.formattedWithComma()
     }
-
-    private static let numberFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.locale = Locale(identifier: "ja_JP")
-        return formatter
-    }()
 }
 
 private struct EnemyBaseStatsSection: View {
@@ -334,19 +324,19 @@ private struct EnemyCombatStatsSection: View {
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            CombatRow(label: "最大HP", value: "\(combat.maxHP)")
-            CombatRow(label: "物理攻撃", value: "\(combat.physicalAttack)")
-            CombatRow(label: "魔法攻撃", value: "\(combat.magicalAttack)")
-            CombatRow(label: "物理防御", value: "\(combat.physicalDefense)")
-            CombatRow(label: "魔法防御", value: "\(combat.magicalDefense)")
-            CombatRow(label: "命中", value: "\(combat.hitRate)")
-            CombatRow(label: "回避", value: "\(combat.evasionRate)")
+            CombatRow(label: "最大HP", value: combat.maxHP.formattedWithComma())
+            CombatRow(label: "物理攻撃", value: combat.physicalAttack.formattedWithComma())
+            CombatRow(label: "魔法攻撃", value: combat.magicalAttack.formattedWithComma())
+            CombatRow(label: "物理防御", value: combat.physicalDefense.formattedWithComma())
+            CombatRow(label: "魔法防御", value: combat.magicalDefense.formattedWithComma())
+            CombatRow(label: "命中", value: combat.hitRate.formattedWithComma())
+            CombatRow(label: "回避", value: combat.evasionRate.formattedWithComma())
             CombatRow(label: "必殺率", value: "\(combat.criticalRate)%")
-            CombatRow(label: "攻撃回数", value: String(format: "%.1f", combat.attackCount))
-            CombatRow(label: "魔法回復力", value: "\(combat.magicalHealing)")
-            CombatRow(label: "罠解除", value: "\(combat.trapRemoval)")
-            CombatRow(label: "追加ダメージ", value: "\(combat.additionalDamage)")
-            CombatRow(label: "ブレスダメージ", value: "\(combat.breathDamage)")
+            CombatRow(label: "攻撃回数", value: combat.attackCount.formattedWithComma(maximumFractionDigits: 1))
+            CombatRow(label: "魔法回復力", value: combat.magicalHealing.formattedWithComma())
+            CombatRow(label: "罠解除", value: combat.trapRemoval.formattedWithComma())
+            CombatRow(label: "追加ダメージ", value: combat.additionalDamage.formattedWithComma())
+            CombatRow(label: "ブレスダメージ", value: combat.breathDamage.formattedWithComma())
         }
     }
 

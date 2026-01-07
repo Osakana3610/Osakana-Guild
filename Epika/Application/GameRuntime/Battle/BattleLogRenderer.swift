@@ -13,6 +13,8 @@ import Foundation
 
 /// BattleLog（ActionEntryベース）を UI 表示用にレンダリングする
 struct BattleLogRenderer {
+    private static let jaJPDecimalStyle = IntegerFormatStyle<Int>.number.locale(Locale(identifier: "ja_JP"))
+
     private struct PhysicalSummary {
         var totalDamage: Int
         var defeated: Bool
@@ -402,7 +404,7 @@ struct BattleLogRenderer {
         var components: [String] = []
 
         if summary.totalDamage > 0 {
-            components.append("\(actor)の攻撃！\(targetName)に\(summary.totalDamage)のダメージ！")
+            components.append("\(actor)の攻撃！\(targetName)に\(formatAmount(summary.totalDamage))のダメージ！")
         } else {
             components.append("\(actor)の攻撃！")
         }
@@ -579,11 +581,12 @@ struct BattleLogRenderer {
                                       actionLabel: String?) -> (String, BattleLogEntry.LogType) {
         let actor = actorName ?? "不明"
         let target = targetName ?? "対象"
-        let amount = value ?? 0
+        let rawAmount = value ?? 0
+        let amountText = formatAmount(rawAmount)
 
         switch kind {
         case .physicalDamage:
-            return ("\(actor)の攻撃！\(target)に\(amount)のダメージ！", .damage)
+            return ("\(actor)の攻撃！\(target)に\(amountText)のダメージ！", .damage)
         case .physicalEvade:
             return ("\(actor)の攻撃！\(target)は攻撃をかわした！", .miss)
         case .physicalParry:
@@ -595,13 +598,13 @@ struct BattleLogRenderer {
         case .martialArts:
             return ("\(actor)の格闘戦！", .action)
         case .magicDamage:
-            return ("\(actor)の魔法！\(target)に\(amount)のダメージ！", .damage)
+            return ("\(actor)の魔法！\(target)に\(amountText)のダメージ！", .damage)
         case .magicHeal:
-            return ("\(target)のHPが\(amount)回復！", .heal)
+            return ("\(target)のHPが\(amountText)回復！", .heal)
         case .magicMiss:
             return ("しかし効かなかった", .miss)
         case .breathDamage:
-            return ("\(actor)のブレス！\(target)に\(amount)のダメージ！", .damage)
+            return ("\(actor)のブレス！\(target)に\(amountText)のダメージ！", .damage)
         case .statusInflict:
             return ("\(target)は状態異常になった！", .status)
         case .statusResist:
@@ -609,11 +612,11 @@ struct BattleLogRenderer {
         case .statusRecover:
             return ("\(target)の状態異常が治った", .status)
         case .statusTick:
-            return ("\(target)は継続ダメージで\(amount)のダメージ！", .damage)
+            return ("\(target)は継続ダメージで\(amountText)のダメージ！", .damage)
         case .statusConfusion:
             return ("\(actor)は暴走して混乱した！", .status)
         case .statusRampage:
-            return ("\(actor)の暴走！\(target)に\(amount)のダメージ！", .damage)
+            return ("\(actor)の暴走！\(target)に\(amountText)のダメージ！", .damage)
         case .reactionAttack:
             let name = actionLabel ?? "反撃"
             return ("\(actor)の\(name)！", .action)
@@ -621,13 +624,13 @@ struct BattleLogRenderer {
             let name = actionLabel ?? "追撃"
             return ("\(actor)の\(name)！", .action)
         case .healAbsorb:
-            return ("\(actor)は吸収能力で\(amount)回復", .heal)
+            return ("\(actor)は吸収能力で\(amountText)回復", .heal)
         case .healVampire:
-            return ("\(actor)は吸血で\(amount)回復", .heal)
+            return ("\(actor)は吸血で\(amountText)回復", .heal)
         case .healParty, .healSelf:
-            return ("\(target)のHPが\(amount)回復！", .heal)
+            return ("\(target)のHPが\(amountText)回復！", .heal)
         case .damageSelf:
-            return ("\(target)は自身の効果で\(amount)ダメージ", .damage)
+            return ("\(target)は自身の効果で\(amountText)ダメージ", .damage)
         case .buffApply:
             if let label = actionLabel {
                 return ("\(label)が\(target)に付与された", .status)
@@ -657,9 +660,9 @@ struct BattleLogRenderer {
         case .vampireUrge:
             return ("\(actor)は吸血衝動に駆られた", .status)
         case .enemySpecialDamage:
-            return ("\(target)に\(amount)のダメージ！", .damage)
+            return ("\(target)に\(amountText)のダメージ！", .damage)
         case .enemySpecialHeal:
-            return ("\(actor)は\(amount)回復した！", .heal)
+            return ("\(actor)は\(amountText)回復した！", .heal)
         case .enemySpecialBuff:
             return ("\(actor)は能力を強化した！", .status)
         case .spellChargeRecover:
@@ -667,5 +670,9 @@ struct BattleLogRenderer {
         case .enemyAppear, .logOnly:
             return ("", .system)
         }
+    }
+
+    private static func formatAmount(_ value: Int) -> String {
+        value.formatted(jaJPDecimalStyle)
     }
 }

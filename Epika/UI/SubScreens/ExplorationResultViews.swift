@@ -42,11 +42,11 @@ struct ExplorationRunResultSummaryView: View {
                     Text("最終到達階層：\(snapshot.summary.floorNumber)F")
 
                     if snapshot.rewards.experience > 0 {
-                        Text("獲得経験値：\(formatNumber(snapshot.rewards.experience))")
+                        Text("獲得経験値：\(snapshot.rewards.experience.formattedWithComma())")
                     }
 
                     if snapshot.rewards.gold > 0 {
-                        Text("獲得ゴールド：\(formatNumber(snapshot.rewards.gold))")
+                        Text("獲得ゴールド：\(snapshot.rewards.gold.formattedWithComma())")
                     }
 
                     if snapshot.status == .completed || snapshot.status == .cancelled {
@@ -99,10 +99,10 @@ struct ExplorationRunResultSummaryView: View {
                                     .foregroundStyle(.secondary)
                             } else {
                                 ForEach(autoSellRows) { row in
-                                    Text("・\(row.name) x\(formatNumber(row.quantity))")
+                                    Text("・\(row.name) x\(row.quantity.formattedWithComma())")
                                 }
                             }
-                            Text("合計 \(formatNumber(snapshot.rewards.autoSellGold)) GP を入手しました。")
+                            Text("合計 \(snapshot.rewards.autoSellGold.formattedWithComma()) GP を入手しました。")
                                 .padding(.top, 4)
                         }
                     }
@@ -162,7 +162,7 @@ struct ExplorationRunResultSummaryView: View {
             name += definition.name
             return DropRow(id: summary.id,
                            displayName: name,
-                           count: formatNumber(summary.quantity),
+                           count: summary.quantity.formattedWithComma(),
                            isSuperRare: summary.isSuperRare)
         }
     }
@@ -199,14 +199,6 @@ struct ExplorationRunResultSummaryView: View {
         !snapshot.rewards.autoSoldItems.isEmpty || snapshot.rewards.autoSellGold > 0
     }
 
-    private static let numberFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.locale = Locale(identifier: "ja_JP")
-        formatter.groupingSeparator = ","
-        return formatter
-    }()
-
     private func durationString(from start: Date, to end: Date) -> String {
         let interval = max(0, Int(end.timeIntervalSince(start)))
         let hours = interval / 3600
@@ -219,10 +211,6 @@ struct ExplorationRunResultSummaryView: View {
         } else {
             return String(format: "%d秒", seconds)
         }
-    }
-
-    private func formatNumber(_ value: Int) -> String {
-        Self.numberFormatter.string(from: NSNumber(value: value)) ?? "\(value)"
     }
 
     private func autoSellDisplayName(for entry: CachedExploration.Rewards.AutoSellEntry,

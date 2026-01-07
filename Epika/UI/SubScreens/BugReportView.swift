@@ -174,25 +174,25 @@ struct BugReportView: View {
                     HStack {
                         Text("ゴールド")
                         Spacer()
-                        Text(formatNumber(Int(appServices.userDataLoad.playerGold)))
+                        Text(Int(appServices.userDataLoad.playerGold).formattedWithComma())
                             .foregroundStyle(.secondary)
                     }
                     HStack {
                         Text("キャラクター数")
                         Spacer()
-                        Text("\(appServices.userDataLoad.characters.count)")
+                        Text(appServices.userDataLoad.characters.count.formattedWithComma())
                             .foregroundStyle(.secondary)
                     }
                     HStack {
                         Text("パーティ数")
                         Spacer()
-                        Text("\(appServices.userDataLoad.parties.count)")
+                        Text(appServices.userDataLoad.parties.count.formattedWithComma())
                             .foregroundStyle(.secondary)
                     }
                     HStack {
                         Text("アイテム数")
                         Spacer()
-                        Text("\(inventoryCount)")
+                        Text(inventoryCount.formattedWithComma())
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -328,10 +328,4 @@ struct BugReportView: View {
     }
 
     // MARK: - Helpers
-
-    private func formatNumber(_ n: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return formatter.string(from: NSNumber(value: n)) ?? String(n)
-    }
 }

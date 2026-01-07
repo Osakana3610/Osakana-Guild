@@ -52,7 +52,7 @@ struct BattleStatsView: View {
     private func statItem(label: String, value: Int) -> some View {
         HStack(spacing: 4) {
             Text(label)
-            Text("\(value)")
+            Text(value.formattedWithComma())
         }
     }
 }

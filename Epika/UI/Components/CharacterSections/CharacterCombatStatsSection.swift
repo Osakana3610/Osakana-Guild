@@ -55,7 +55,7 @@ struct CombatStatRow: View {
 
     init(label: String, value: Int) {
         self.label = label
-        self.valueText = "\(value)"
+        self.valueText = value.formattedWithComma()
     }
 
     init(label: String, valueText: String) {
@@ -84,7 +84,7 @@ struct CombatStatRowDouble: View {
             Text(label)
                 .font(.body)
             Spacer()
-            Text(String(format: "%.1f", floor(value * 10) / 10))
+            Text(value.formattedWithComma(maximumFractionDigits: 1))
                 .font(.body)
                 .foregroundStyle(.primary)
         }

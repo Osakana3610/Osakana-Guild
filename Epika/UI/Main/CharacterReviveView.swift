@@ -71,7 +71,7 @@ struct CharacterReviveView: View {
                                     Text("Lv.\(character.level) / \(character.jobName)")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
-                                    Text("HP: 0/\(character.maxHP)")
+                                    Text("HP: 0/\(character.maxHP.formattedWithComma())")
                                         .font(.caption)
                                         .foregroundColor(.primary)
                                 }

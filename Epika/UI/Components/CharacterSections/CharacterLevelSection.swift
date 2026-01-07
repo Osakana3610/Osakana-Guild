@@ -11,7 +11,7 @@
 //   - 1行表示: "Lv{N} Exp {累計経験値} (×{倍率}) 次のLvまで{残り経験値}"
 //   - CharacterExperienceTableで経験値計算
 //   - SkillRuntimeEffectCompilerで経験値倍率を計算
-//   - カンマ区切りのNumberFormatterで数値を整形
+//   - FormatStyleを使って数値を3桁区切りで整形
 //   - レベルキャップ到達時は「次のLvまで0」
 //
 // 【使用箇所】
@@ -97,8 +97,8 @@ private extension CharacterLevelSection {
     }
 
     func summaryLine(from data: ExperienceData) -> String {
-        let remainingText = data.remainingToNext.map(formatNumber) ?? "0"
-        return "Lv\(data.level) Exp \(formatNumber(data.totalExperience)) (×\(formatMultiplier(data.multiplier))) 次のLvまで\(remainingText)"
+        let remainingText = data.remainingToNext.map { $0.formattedWithComma() } ?? "0"
+        return "Lv\(data.level) Exp \(data.totalExperience.formattedWithComma()) (×\(formatMultiplier(data.multiplier))) 次のLvまで\(remainingText)"
     }
 
     func experienceMultiplier() throws -> Double {
@@ -108,22 +108,8 @@ private extension CharacterLevelSection {
         return components.experienceScale()
     }
 
-    func formatNumber(_ value: Int) -> String {
-        if let formatted = Self.numberFormatter.string(from: NSNumber(value: value)) {
-            return formatted
-        }
-        return "\(value)"
-    }
-
     func formatMultiplier(_ value: Double) -> String {
         let clamped = max(0.0, value)
         return String(format: "%.2f", clamped)
     }
-
-    static let numberFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.locale = Locale(identifier: "ja_JP")
-        return formatter
-    }()
 }

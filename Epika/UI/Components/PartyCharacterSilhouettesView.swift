@@ -85,7 +85,7 @@ struct PartyCharacterSilhouettesView: View {
                 Text("Lv.\(member.level)")
                     .font(.caption2)
                     .foregroundStyle(.primary)
-                Text("HP\(member.currentHP)")
+                Text("HP\(member.currentHP.formattedWithComma())")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
