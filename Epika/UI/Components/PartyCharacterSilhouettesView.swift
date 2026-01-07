@@ -26,6 +26,7 @@ struct PartyCharacterSilhouettesView: View {
     let party: CachedParty
     let characters: [CachedCharacter]
     let onMemberTap: ((CachedCharacter) -> Void)?
+    private let slotWidth: CGFloat = 56
 
     init(party: CachedParty, characters: [CachedCharacter], onMemberTap: ((CachedCharacter) -> Void)? = nil) {
         self.party = party
@@ -61,7 +62,7 @@ struct PartyCharacterSilhouettesView: View {
                                 memberSilhouette(member)
                             } else {
                                 Spacer()
-                                    .frame(width: 48)
+                                    .frame(width: slotWidth)
                             }
                         }
                         if index < 5 {
@@ -87,9 +88,11 @@ struct PartyCharacterSilhouettesView: View {
                 Text("HP\(member.currentHP)")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
         }
-        .frame(width: 48)
+        .frame(width: slotWidth)
 
         if let onMemberTap {
             Button(action: { onMemberTap(member) }) {
