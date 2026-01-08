@@ -22,28 +22,39 @@ final class PhysicalDamageCalculationTests: XCTestCase {
 
     /// 基本的な物理ダメージ計算を検証
     ///
-    /// 入力:
-    ///   - 攻撃力: 5000
-    ///   - 防御力: 2000
-    ///   - luck: 35（statMultiplier=0.75〜1.00）
-    ///   - seed: 42（決定的乱数）
-    ///   - criticalRate: 0（クリティカル無効）
+    /// 検証方法: 乱数を先読みして期待値を計算し、実測値と比較
     ///
-    /// 期待値: 3120（seed=42での実測黄金値）
-    /// ※乱数はSwift標準Int.random()で生成されるため手計算は困難
-    ///   シード固定で決定的な値が得られることをテスト
+    /// 計算式:
+    ///   attackPower = physicalAttack × attackRoll
+    ///   defensePower = physicalDefense × defenseRoll
+    ///   baseDamage = max(1, attackPower - defensePower)
     func testBasicPhysicalDamage() {
+        let seed: UInt64 = 42
+        let physicalAttack = 5000
+        let physicalDefense = 2000
+        let luck = 35
+
+        // 乱数を先読みして期待値を計算
+        var preRng = GameRandomSource(seed: seed)
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
+        let defenseRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
+
+        let attackPower = Double(physicalAttack) * attackRoll
+        let defensePower = Double(physicalDefense) * defenseRoll
+        let expectedDamage = Int(max(1.0, attackPower - defensePower).rounded())
+
+        // テスト実行
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
-            luck: 35,
+            physicalAttack: physicalAttack,
+            luck: luck,
             criticalRate: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
-            luck: 35
+            physicalDefense: physicalDefense,
+            luck: luck
         )
         var context = TestActorBuilder.makeContext(
-            seed: 42,
+            seed: seed,
             attacker: attacker,
             defender: defender
         )
@@ -55,9 +66,10 @@ final class PhysicalDamageCalculationTests: XCTestCase {
             context: &context
         )
 
-        // seed=42 での黄金値（実測で確認）
-        XCTAssertEqual(damage, 3120,
-            "seed=42での黄金値: 期待3120, 実測\(damage)")
+        // 計算式から導出した期待値と比較
+        XCTAssertEqual(damage, expectedDamage,
+            "基本ダメージ: attackPower=\(attackPower), defensePower=\(defensePower), " +
+            "期待\(expectedDamage), 実測\(damage)")
         XCTAssertFalse(isCritical, "criticalRate=0でクリティカルが発動した")
     }
 
@@ -309,29 +321,56 @@ final class PhysicalDamageCalculationTests: XCTestCase {
 
     /// initialStrikeBonusが適用されるケースを検証
     ///
-    /// 検証方法: 同じシードでinitialStrikeBonusが適用される/されないケースを比較
+    /// 検証方法: 乱数を先読みして期待比率を計算し、実測比率と比較
     ///
     /// initialStrikeBonus計算式:
     ///   difference = attackValue - defenseValue×3
     ///   steps = Int(difference / 1000)
     ///   multiplier = 1.0 + steps × 0.1
     ///   return min(3.4, max(1.0, multiplier))
-    ///
-    /// 期待: 攻撃力が防御力×3を超えた分だけボーナスが付く
     func testInitialStrikeBonus() {
-        // ベースライン: initialStrikeBonusが適用されないケース（攻撃力5000, 防御力2000）
+        let seed: UInt64 = 42
+        let baselineAttack = 5000
+        let bonusAttack = 10000
+        let defense = 2000
+        let luck = 35
+
+        // 乱数を先読みして期待比率を計算
+        // 同じシードなので、両方のテスト実行で同じ attackRoll, defenseRoll が使われる
+        var preRng = GameRandomSource(seed: seed)
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
+        let defenseRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
+
+        // ベースラインの期待ダメージ（initialStrikeBonus = 1.0）
         // difference = 5000 - 2000×3 = -1000 < 0 → bonus = 1.0
+        let baselineAttackPower = Double(baselineAttack) * attackRoll
+        let baselineDefensePower = Double(defense) * defenseRoll
+        let baselineBaseDamage = max(1.0, baselineAttackPower - baselineDefensePower)
+        let baselineExpected = Int(baselineBaseDamage.rounded())
+
+        // ボーナスの期待ダメージ（initialStrikeBonus = 1.4）
+        // difference = 10000 - 2000×3 = 4000, steps = 4, bonus = 1.4
+        let bonusAttackPower = Double(bonusAttack) * attackRoll
+        let bonusDefensePower = Double(defense) * defenseRoll
+        let bonusBaseDamage = max(1.0, bonusAttackPower - bonusDefensePower)
+        let initialStrikeBonus = 1.4
+        let bonusExpected = Int((bonusBaseDamage * initialStrikeBonus).rounded())
+
+        // 期待比率
+        let expectedRatio = Double(bonusExpected) / Double(baselineExpected)
+
+        // テスト実行: ベースライン
         let baseAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
-            luck: 35,
+            physicalAttack: baselineAttack,
+            luck: luck,
             criticalRate: 0
         )
         var baseDefender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
-            luck: 35
+            physicalDefense: defense,
+            luck: luck
         )
         var baseContext = TestActorBuilder.makeContext(
-            seed: 42,
+            seed: seed,
             attacker: baseAttacker,
             defender: baseDefender
         )
@@ -342,20 +381,18 @@ final class PhysicalDamageCalculationTests: XCTestCase {
             context: &baseContext
         )
 
-        // initialStrikeBonusが適用されるケース（攻撃力10000, 防御力2000）
-        // difference = 10000 - 2000×3 = 4000
-        // steps = 4, multiplier = 1.4
+        // テスト実行: ボーナス
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 10000,
-            luck: 35,
+            physicalAttack: bonusAttack,
+            luck: luck,
             criticalRate: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
-            luck: 35
+            physicalDefense: defense,
+            luck: luck
         )
         var context = TestActorBuilder.makeContext(
-            seed: 42,
+            seed: seed,
             attacker: attacker,
             defender: defender
         )
@@ -366,12 +403,11 @@ final class PhysicalDamageCalculationTests: XCTestCase {
             context: &context
         )
 
-        // 攻撃力2倍でダメージは2倍以上になるはず（initialStrikeBonusのおかげ）
-        // baseDamage比: (10000 - 2000) / (5000 - 2000) = 8000/3000 ≈ 2.67
-        // さらに initialStrikeBonus 1.4 がかかる: 2.67 × 1.4 ≈ 3.73
-        let ratio = Double(bonusDamage) / Double(baselineDamage)
-        XCTAssertGreaterThan(ratio, 2.5,
-            "initialStrikeBonus: 期待比率2.5以上, 実測\(ratio) (baseline=\(baselineDamage), bonus=\(bonusDamage))")
+        // 比率検証
+        let actualRatio = Double(bonusDamage) / Double(baselineDamage)
+        XCTAssertEqual(actualRatio, expectedRatio, accuracy: 0.01,
+            "initialStrikeBonus: 期待比率\(expectedRatio), 実測\(actualRatio) " +
+            "(baseline=\(baselineDamage), bonus=\(bonusDamage))")
     }
 
     // MARK: - hitIndex による damageModifier
