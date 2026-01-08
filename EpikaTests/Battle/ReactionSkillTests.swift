@@ -41,8 +41,8 @@ final class ReactionSkillTests: XCTestCase {
         var playerSkillEffects = BattleActor.SkillEffects.neutral
         playerSkillEffects.combat.reactions = [reaction]
 
-        let player = makeReactionTestPlayer(skillEffects: playerSkillEffects)
-        let enemy = makeReactionTestEnemy()
+        let player = TestActorBuilder.makeReactionTestPlayer(skillEffects: playerSkillEffects)
+        let enemy = TestActorBuilder.makeReactionTestEnemy()
 
         var players = [player]
         var enemies = [enemy]
@@ -102,10 +102,14 @@ final class ReactionSkillTests: XCTestCase {
         )
 
         // multiplier=1.0 での戦闘
+        // 戦闘構成: 味方が確実に勝ち、複数回反撃できるようにする
+        // - 味方HP=50000、敵攻撃力=3000 → 約16ターン生存
+        // - 敵HP=30000、味方攻撃力=5000 → 約6ターンで撃破
+        // → 味方が勝利し、6ターン分の反撃機会がある
         var fullSkillEffects = BattleActor.SkillEffects.neutral
         fullSkillEffects.combat.reactions = [fullReaction]
-        let fullPlayer = makeReactionTestPlayer(skillEffects: fullSkillEffects, attackCount: 10)
-        let fullEnemy = makeReactionTestEnemy(hp: 100000)  // 高HPで複数ターン戦闘
+        let fullPlayer = TestActorBuilder.makeReactionTestPlayer(skillEffects: fullSkillEffects, attackCount: 10)
+        let fullEnemy = TestActorBuilder.makeReactionTestEnemy(hp: 30000)  // 味方が勝てるHP
         var fullPlayers = [fullPlayer]
         var fullEnemies = [fullEnemy]
         var fullRandom = GameRandomSource(seed: 42)
@@ -118,11 +122,11 @@ final class ReactionSkillTests: XCTestCase {
             random: &fullRandom
         )
 
-        // multiplier=0.3 での戦闘
+        // multiplier=0.3 での戦闘（同じ構成で比較）
         var reducedSkillEffects = BattleActor.SkillEffects.neutral
         reducedSkillEffects.combat.reactions = [reducedReaction]
-        let reducedPlayer = makeReactionTestPlayer(skillEffects: reducedSkillEffects, attackCount: 10)
-        let reducedEnemy = makeReactionTestEnemy(hp: 100000)
+        let reducedPlayer = TestActorBuilder.makeReactionTestPlayer(skillEffects: reducedSkillEffects, attackCount: 10)
+        let reducedEnemy = TestActorBuilder.makeReactionTestEnemy(hp: 30000)  // 同じHP
         var reducedPlayers = [reducedPlayer]
         var reducedEnemies = [reducedEnemy]
         var reducedRandom = GameRandomSource(seed: 42)
@@ -135,18 +139,25 @@ final class ReactionSkillTests: XCTestCase {
             random: &reducedRandom
         )
 
-        // 反撃によるダメージを集計
-        let fullReactionDamage = sumReactionDamage(from: fullResult.battleLog)
-        let reducedReactionDamage = sumReactionDamage(from: reducedResult.battleLog)
+        // 反撃によるダメージと回数を集計
+        let fullStats = analyzeReactionDamage(from: fullResult.battleLog)
+        let reducedStats = analyzeReactionDamage(from: reducedResult.battleLog)
 
-        // multiplier=0.3 の方がダメージが少ないはず
+        // 両方で反撃が発生していること
+        XCTAssertGreaterThan(fullStats.count, 0,
+            "multiplier=1.0で反撃が発生しているべき")
+        XCTAssertGreaterThan(reducedStats.count, 0,
+            "multiplier=0.3で反撃が発生しているべき")
+
+        // 1回あたりの平均ダメージで比較
+        // （戦闘が長引くほど反撃回数が増えるため、総ダメージではなく平均で比較）
+        let fullAverage = Double(fullStats.totalDamage) / Double(fullStats.count)
+        let reducedAverage = Double(reducedStats.totalDamage) / Double(reducedStats.count)
+
+        // multiplier=0.3 の方が1回あたりのダメージが少ないはず
         // 攻撃回数10回 × 0.3 = 3回なので、約30%のダメージ
-        XCTAssertGreaterThan(fullReactionDamage, 0,
-            "multiplier=1.0で反撃ダメージが発生しているべき")
-        XCTAssertGreaterThan(reducedReactionDamage, 0,
-            "multiplier=0.3で反撃ダメージが発生しているべき")
-        XCTAssertLessThan(reducedReactionDamage, fullReactionDamage,
-            "multiplier=0.3の方がダメージが少ないべき (full=\(fullReactionDamage), reduced=\(reducedReactionDamage))")
+        XCTAssertLessThan(reducedAverage, fullAverage,
+            "multiplier=0.3の方が1回あたりのダメージが少ないべき (full平均=\(Int(fullAverage)), reduced平均=\(Int(reducedAverage)), full回数=\(fullStats.count), reduced回数=\(reducedStats.count))")
     }
 
     // MARK: - 発動確率の統計テスト
@@ -298,101 +309,24 @@ final class ReactionSkillTests: XCTestCase {
 
     // MARK: - ヘルパーメソッド
 
-    /// 反撃テスト用のプレイヤーを生成
-    private func makeReactionTestPlayer(
-        skillEffects: BattleActor.SkillEffects = .neutral,
-        attackCount: Double = 1.0
-    ) -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 50000,
-            physicalAttack: 5000,
-            magicalAttack: 1000,
-            physicalDefense: 2000,
-            magicalDefense: 1000,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: attackCount,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.reaction_player",
-            displayName: "反撃テスト味方",
-            kind: .player,
-            formationSlot: 1,
-            strength: 100,
-            wisdom: 50,
-            spirit: 50,
-            vitality: 100,
-            agility: 20,
-            luck: 35,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: skillEffects
-        )
-    }
-
-    /// 反撃テスト用の敵を生成
-    private func makeReactionTestEnemy(hp: Int = 10000) -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: hp,
-            physicalAttack: 3000,
-            magicalAttack: 500,
-            physicalDefense: 1000,
-            magicalDefense: 500,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.reaction_enemy",
-            displayName: "反撃テスト敵",
-            kind: .enemy,
-            formationSlot: 1,
-            strength: 50,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 50,
-            agility: 20,
-            luck: 35,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// バトルログから反撃によるダメージを集計
-    private func sumReactionDamage(from log: BattleLog) -> Int {
-        var total = 0
+    /// バトルログから反撃によるダメージと回数を集計
+    private func analyzeReactionDamage(from log: BattleLog) -> (totalDamage: Int, count: Int) {
+        var totalDamage = 0
+        var count = 0
 
         for entry in log.entries {
             // reactionAttackのエントリを見つけたら、その中のphysicalDamageを集計
             let isReactionEntry = entry.declaration.kind == .reactionAttack
             if isReactionEntry {
+                count += 1
                 for effect in entry.effects {
                     if effect.kind == .physicalDamage {
-                        total += Int(effect.value ?? 0)
+                        totalDamage += Int(effect.value ?? 0)
                     }
                 }
             }
         }
 
-        return total
+        return (totalDamage, count)
     }
 }

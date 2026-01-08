@@ -447,4 +447,95 @@ enum TestActorBuilder {
             agility: 1
         )
     }
+
+    // MARK: - 反撃/追撃テスト用
+
+    /// 反撃テスト用プレイヤーを生成
+    ///
+    /// 特徴: 高HP、反撃スキル装備可能、反撃ダメージ検証用
+    ///
+    /// - Parameters:
+    ///   - skillEffects: スキル効果（反撃スキルを含む）
+    ///   - attackCount: 攻撃回数（反撃のattackCountMultiplier検証用）
+    static func makeReactionTestPlayer(
+        skillEffects: BattleActor.SkillEffects = .neutral,
+        attackCount: Double = 1.0
+    ) -> BattleActor {
+        let snapshot = CharacterValues.Combat(
+            maxHP: 50000,
+            physicalAttack: 5000,
+            magicalAttack: 1000,
+            physicalDefense: 2000,
+            magicalDefense: 1000,
+            hitRate: 100,
+            evasionRate: 0,
+            criticalRate: 0,
+            attackCount: attackCount,
+            magicalHealing: 0,
+            trapRemoval: 0,
+            additionalDamage: 0,
+            breathDamage: 0,
+            isMartialEligible: false
+        )
+
+        return BattleActor(
+            identifier: "test.reaction_player",
+            displayName: "反撃テスト味方",
+            kind: .player,
+            formationSlot: 1,
+            strength: 100,
+            wisdom: 50,
+            spirit: 50,
+            vitality: 100,
+            agility: 20,
+            luck: 35,
+            isMartialEligible: false,
+            snapshot: snapshot,
+            currentHP: snapshot.maxHP,
+            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
+            skillEffects: skillEffects
+        )
+    }
+
+    /// 反撃テスト用敵を生成
+    ///
+    /// 特徴: 指定HP、攻撃力あり（反撃を誘発）
+    ///
+    /// - Parameter hp: 最大HP（デフォルト: 10000）
+    static func makeReactionTestEnemy(hp: Int = 10000) -> BattleActor {
+        let snapshot = CharacterValues.Combat(
+            maxHP: hp,
+            physicalAttack: 3000,
+            magicalAttack: 500,
+            physicalDefense: 1000,
+            magicalDefense: 500,
+            hitRate: 100,
+            evasionRate: 0,
+            criticalRate: 0,
+            attackCount: 1.0,
+            magicalHealing: 0,
+            trapRemoval: 0,
+            additionalDamage: 0,
+            breathDamage: 0,
+            isMartialEligible: false
+        )
+
+        return BattleActor(
+            identifier: "test.reaction_enemy",
+            displayName: "反撃テスト敵",
+            kind: .enemy,
+            formationSlot: 1,
+            strength: 50,
+            wisdom: 20,
+            spirit: 20,
+            vitality: 50,
+            agility: 20,
+            luck: 35,
+            isMartialEligible: false,
+            snapshot: snapshot,
+            currentHP: snapshot.maxHP,
+            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
+            skillEffects: .neutral
+        )
+    }
 }

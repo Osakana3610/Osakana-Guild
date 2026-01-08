@@ -59,7 +59,7 @@ final class BarrierGuardTests: XCTestCase {
         // バリアで1/3に軽減
         let expectedRatio = 1.0 / 3.0
         let actualRatio = Double(damageWithBarrier) / Double(damageNoBarrier)
-        let tolerance = 0.05  // 丸め誤差許容
+        let tolerance = 0.02  // ±2%許容
 
         XCTAssertTrue(
             abs(actualRatio - expectedRatio) < tolerance,
@@ -107,7 +107,7 @@ final class BarrierGuardTests: XCTestCase {
 
         let expectedRatio = 1.0 / 3.0
         let actualRatio = Double(damageWithBarrier) / Double(damageNoBarrier)
-        let tolerance = 0.05
+        let tolerance = 0.02  // ±2%許容
 
         XCTAssertTrue(
             abs(actualRatio - expectedRatio) < tolerance,
@@ -152,7 +152,7 @@ final class BarrierGuardTests: XCTestCase {
 
         let expectedRatio = 1.0 / 3.0
         let actualRatio = Double(damageWithBarrier) / Double(damageNoBarrier)
-        let tolerance = 0.05
+        let tolerance = 0.02  // ±2%許容
 
         XCTAssertTrue(
             abs(actualRatio - expectedRatio) < tolerance,
@@ -305,7 +305,7 @@ final class BarrierGuardTests: XCTestCase {
         // ガードで1/2に軽減
         let expectedRatio = 0.5
         let actualRatio = Double(damageWithGuard) / Double(damageNoGuard)
-        let tolerance = 0.05
+        let tolerance = 0.02  // ±2%許容
 
         XCTAssertTrue(
             abs(actualRatio - expectedRatio) < tolerance,
@@ -419,7 +419,7 @@ final class BarrierGuardTests: XCTestCase {
         // ダメージは1/3に軽減される
         let expectedRatio = 1.0 / 3.0
         let actualRatio = Double(damageWithGuard) / Double(damageNoGuard)
-        let tolerance = 0.05
+        let tolerance = 0.02  // ±2%許容
 
         XCTAssertTrue(
             abs(actualRatio - expectedRatio) < tolerance,
@@ -499,7 +499,7 @@ final class BarrierGuardTests: XCTestCase {
 
         let expectedRatio = 0.5
         let actualRatio = Double(damageWithGuard) / Double(damageNoGuard)
-        let tolerance = 0.05
+        let tolerance = 0.02  // ±2%許容
 
         XCTAssertTrue(
             abs(actualRatio - expectedRatio) < tolerance,
@@ -544,7 +544,7 @@ final class BarrierGuardTests: XCTestCase {
 
         let expectedRatio = 0.5
         let actualRatio = Double(damageWithGuard) / Double(damageNoGuard)
-        let tolerance = 0.05
+        let tolerance = 0.02  // ±2%許容
 
         XCTAssertTrue(
             abs(actualRatio - expectedRatio) < tolerance,
