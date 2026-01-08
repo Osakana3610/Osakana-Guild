@@ -36,60 +36,54 @@ final class BattleRandomSystemTests: XCTestCase {
     }
 
     // MARK: - statMultiplier の範囲検証
+    //
+    // 境界値テストの観点から luck は 1, 18, 35 のみを使用（testing-principles.md）
 
-    /// luck=60以上でstatMultiplierが1.0固定になることを検証
+    /// luck=1（下限境界）でstatMultiplierが0.41〜1.00の範囲になることを検証
     ///
     /// 計算式:
-    ///   lowerPercent = min(100, max(40 + luck, 0))
-    ///   luck=60 → lowerPercent = min(100, 100) = 100
-    ///   random.nextInt(in: 100...100) = 100（唯一の選択肢）
-    ///   return 100 / 100.0 = 1.0
-    func testStatMultiplier_Luck60OrHigher_Returns1() {
-        var rng = GameRandomSource(seed: 42)
-
-        // luck=60で10回試行、すべて1.0になるはず
-        for _ in 0..<10 {
-            let result = BattleRandomSystem.statMultiplier(luck: 60, random: &rng)
-            XCTAssertEqual(result, 1.0, accuracy: 0.0001, "luck=60でstatMultiplierが1.0でない")
-        }
-
-        // luck=99でも同様
-        for _ in 0..<10 {
-            let result = BattleRandomSystem.statMultiplier(luck: 99, random: &rng)
-            XCTAssertEqual(result, 1.0, accuracy: 0.0001, "luck=99でstatMultiplierが1.0でない")
-        }
-    }
-
-    /// luck=0でstatMultiplierが0.40〜1.00の範囲になることを検証
-    ///
-    /// 計算式:
-    ///   lowerPercent = min(100, max(40 + 0, 0)) = 40
-    ///   random.nextInt(in: 40...100) → 40〜100のいずれか
-    ///   return percent / 100.0 → 0.40〜1.00
-    func testStatMultiplier_Luck0_ReturnsRange40To100() {
-        var rng = GameRandomSource(seed: 42)
-
-        // 100回試行して範囲を確認
-        for i in 0..<100 {
-            let result = BattleRandomSystem.statMultiplier(luck: 0, random: &rng)
-            XCTAssertGreaterThanOrEqual(result, 0.40, "luck=0で下限0.40を下回った（試行\(i+1)）")
-            XCTAssertLessThanOrEqual(result, 1.00, "luck=0で上限1.00を超えた（試行\(i+1)）")
-        }
-    }
-
-    /// luck=50でstatMultiplierが0.90〜1.00の範囲になることを検証
-    ///
-    /// 計算式:
-    ///   lowerPercent = min(100, max(40 + 50, 0)) = 90
-    ///   random.nextInt(in: 90...100) → 90〜100のいずれか
-    ///   return percent / 100.0 → 0.90〜1.00
-    func testStatMultiplier_Luck50_ReturnsRange90To100() {
+    ///   lowerPercent = min(100, max(40 + 1, 0)) = 41
+    ///   random.nextInt(in: 41...100) → 41〜100のいずれか
+    ///   return percent / 100.0 → 0.41〜1.00
+    func testStatMultiplier_Luck1_ReturnsRange41To100() {
         var rng = GameRandomSource(seed: 42)
 
         for i in 0..<100 {
-            let result = BattleRandomSystem.statMultiplier(luck: 50, random: &rng)
-            XCTAssertGreaterThanOrEqual(result, 0.90, "luck=50で下限0.90を下回った（試行\(i+1)）")
-            XCTAssertLessThanOrEqual(result, 1.00, "luck=50で上限1.00を超えた（試行\(i+1)）")
+            let result = BattleRandomSystem.statMultiplier(luck: 1, random: &rng)
+            XCTAssertGreaterThanOrEqual(result, 0.41, "luck=1で下限0.41を下回った（試行\(i+1)）")
+            XCTAssertLessThanOrEqual(result, 1.00, "luck=1で上限1.00を超えた（試行\(i+1)）")
+        }
+    }
+
+    /// luck=18（中間境界）でstatMultiplierが0.58〜1.00の範囲になることを検証
+    ///
+    /// 計算式:
+    ///   lowerPercent = min(100, max(40 + 18, 0)) = 58
+    ///   random.nextInt(in: 58...100) → 58〜100のいずれか
+    ///   return percent / 100.0 → 0.58〜1.00
+    func testStatMultiplier_Luck18_ReturnsRange58To100() {
+        var rng = GameRandomSource(seed: 42)
+
+        for i in 0..<100 {
+            let result = BattleRandomSystem.statMultiplier(luck: 18, random: &rng)
+            XCTAssertGreaterThanOrEqual(result, 0.58, "luck=18で下限0.58を下回った（試行\(i+1)）")
+            XCTAssertLessThanOrEqual(result, 1.00, "luck=18で上限1.00を超えた（試行\(i+1)）")
+        }
+    }
+
+    /// luck=35（上限境界）でstatMultiplierが0.75〜1.00の範囲になることを検証
+    ///
+    /// 計算式:
+    ///   lowerPercent = min(100, max(40 + 35, 0)) = 75
+    ///   random.nextInt(in: 75...100) → 75〜100のいずれか
+    ///   return percent / 100.0 → 0.75〜1.00
+    func testStatMultiplier_Luck35_ReturnsRange75To100() {
+        var rng = GameRandomSource(seed: 42)
+
+        for i in 0..<100 {
+            let result = BattleRandomSystem.statMultiplier(luck: 35, random: &rng)
+            XCTAssertGreaterThanOrEqual(result, 0.75, "luck=35で下限0.75を下回った（試行\(i+1)）")
+            XCTAssertLessThanOrEqual(result, 1.00, "luck=35で上限1.00を超えた（試行\(i+1)）")
         }
     }
 
