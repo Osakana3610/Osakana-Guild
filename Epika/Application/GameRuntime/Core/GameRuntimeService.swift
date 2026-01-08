@@ -94,69 +94,72 @@ actor GameRuntimeService {
                 continuation.finish()
             }
 
-            while true {
-                try Task.checkCancellation()
+            do {
+                while true {
+                    try Task.checkCancellation()
 
-                if let outcome = try ExplorationEngine.nextEvent(preparation: preparation,
-                                                                  state: &state,
-                                                                  masterData: masterData,
-                                                                  party: party) {
-                    events.append(outcome.entry)
-                    if let battleLog = outcome.battleLog {
-                        battleLogs.append(battleLog)
-                    }
+                    if let outcome = try ExplorationEngine.nextEvent(preparation: preparation,
+                                                                      state: &state,
+                                                                      masterData: masterData,
+                                                                      party: party) {
+                        events.append(outcome.entry)
+                        if let battleLog = outcome.battleLog {
+                            battleLogs.append(battleLog)
+                        }
 
-                    totalExperience += outcome.accumulatedExperience
-                    totalGold += outcome.accumulatedGold
-                    totalDrops.append(contentsOf: outcome.drops)
-                    for (memberId, value) in outcome.experienceByMember {
-                        experienceByMember[memberId, default: 0] += value
-                    }
+                        totalExperience += outcome.accumulatedExperience
+                        totalGold += outcome.accumulatedGold
+                        totalDrops.append(contentsOf: outcome.drops)
+                        for (memberId, value) in outcome.experienceByMember {
+                            experienceByMember[memberId, default: 0] += value
+                        }
 
-                    let dropResults = makeItemDropResults(from: outcome.entry.drops, partyId: party.party.id)
-                    if !dropResults.isEmpty {
-                        await dropNotifier(dropResults)
-                    }
+                        let dropResults = makeItemDropResults(from: outcome.entry.drops, partyId: party.party.id)
+                        if !dropResults.isEmpty {
+                            await dropNotifier(dropResults)
+                        }
 
-                    continuation.yield(outcome)
+                        continuation.yield(outcome)
 
-                    if outcome.shouldTerminate {
-                        if let combat = outcome.combatSummary {
-                            switch combat.result {
-                            case .defeat:
-                                endState = .defeated(floorNumber: outcome.entry.floorNumber,
-                                                     eventIndex: outcome.entry.eventIndex,
-                                                     enemyId: combat.enemy.id)
-                            case .retreat:
-                                endState = .cancelled(floorNumber: outcome.entry.floorNumber,
-                                                      eventIndex: outcome.entry.eventIndex)
-                            case .victory:
+                        if outcome.shouldTerminate {
+                            if let combat = outcome.combatSummary {
+                                switch combat.result {
+                                case .defeat:
+                                    endState = .defeated(floorNumber: outcome.entry.floorNumber,
+                                                         eventIndex: outcome.entry.eventIndex,
+                                                         enemyId: combat.enemy.id)
+                                case .retreat:
+                                    endState = .cancelled(floorNumber: outcome.entry.floorNumber,
+                                                          eventIndex: outcome.entry.eventIndex)
+                                case .victory:
+                                    endState = .completed
+                                }
+                            } else {
                                 endState = .completed
                             }
-                        } else {
-                            endState = .completed
+                            break
                         }
-                        break
+
+                        if interval > 0 {
+                            let totalEventCount = events.count
+                            let expectedTime = startedAt.addingTimeInterval(TimeInterval(totalEventCount) * interval)
+                            let now = Date()
+                            let waitSeconds = expectedTime.timeIntervalSince(now)
+                            if waitSeconds > 0 {
+                                try await Task.sleep(for: .milliseconds(Int(waitSeconds * 1000)))
+                            }
+                        }
+                        continue
                     }
 
-                    // 経過時間ベースの待機: 次のイベント予定時刻まで待機
-                    // startedAtから累積イベント数 * interval後に次イベント
-                    // (eventIndexはフロアごとにリセットされるため、累積のevents.countを使用)
-                    if interval > 0 {
-                        let totalEventCount = events.count  // 現在のイベントを含む累積数
-                        let expectedTime = startedAt.addingTimeInterval(TimeInterval(totalEventCount) * interval)
-                        let now = Date()
-                        let waitSeconds = expectedTime.timeIntervalSince(now)
-                        if waitSeconds > 0 {
-                            try await Task.sleep(for: .milliseconds(Int(waitSeconds * 1000)))
-                        }
-                        // waitSeconds <= 0 の場合は既に予定時刻を過ぎているので即座に次へ
-                    }
-                    continue
+                    endState = .completed
+                    break
                 }
-
-                endState = .completed
-                break
+            } catch is CancellationError {
+                let lastEntry = events.last
+                let floorNumber = lastEntry?.floorNumber ?? 0
+                let eventIndex = lastEntry?.eventIndex ?? 0
+                endState = .cancelled(floorNumber: floorNumber, eventIndex: eventIndex)
             }
 
             let artifact = ExplorationRunArtifact(dungeon: preparation.dungeon,
@@ -279,7 +282,8 @@ actor GameRuntimeService {
     }
 
     func cancelExploration(runId: UUID) async {
-        await cancelActiveRun(runId)
+        guard let active = activeRuns[runId] else { return }
+        active.task.cancel()
     }
 
     /// 探索を再開（アプリ再起動後の孤立探索用）
