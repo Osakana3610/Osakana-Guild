@@ -471,4 +471,276 @@ final class PhysicalDamageCalculationTests: XCTestCase {
         XCTAssertEqual(ratio, 0.9, accuracy: 0.01,
             "hitIndex=3減衰: 期待比率0.9, 実測\(ratio) (baseline=\(baselineDamage), reduced=\(reducedDamage))")
     }
+
+    // MARK: - エッジケース
+
+    /// 攻撃力0で最低ダメージ1を保証
+    ///
+    /// 入力:
+    ///   - 攻撃力: 0
+    ///   - 防御力: 2000
+    ///
+    /// 期待: ダメージは1（最低ダメージ保証）
+    func testZeroAttackPower_MinimumDamage() {
+        let attacker = TestActorBuilder.makeAttacker(
+            physicalAttack: 0,
+            luck: 35,
+            criticalRate: 0
+        )
+        var defender = TestActorBuilder.makeDefender(
+            physicalDefense: 2000,
+            luck: 35
+        )
+        var context = TestActorBuilder.makeContext(
+            seed: 42,
+            attacker: attacker,
+            defender: defender
+        )
+
+        let (damage, _) = BattleTurnEngine.computePhysicalDamage(
+            attacker: attacker,
+            defender: &defender,
+            hitIndex: 1,
+            context: &context
+        )
+
+        XCTAssertEqual(damage, 1,
+            "攻撃力0: 最低ダメージ1を保証, 実測\(damage)")
+    }
+
+    /// 防御力0でフルダメージ
+    ///
+    /// 入力:
+    ///   - 攻撃力: 5000
+    ///   - 防御力: 0
+    ///   - luck: 35
+    ///
+    /// 計算:
+    ///   attackPower = 5000 × statMultiplier (0.75〜1.00)
+    ///   defensePower = 0
+    ///   baseDamage = attackPower - 0 = 3750〜5000
+    ///   initialStrikeBonus = 1.0 + floor(5000 / 1000) × 0.1 = 1.5
+    ///   finalDamage = baseDamage × 1.5
+    func testZeroDefense_FullDamage() {
+        let seed: UInt64 = 42
+        let physicalAttack = 5000
+        let luck = 35
+
+        // 乱数を先読みして期待値を計算
+        var preRng = GameRandomSource(seed: seed)
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
+        // initialStrikeBonus: difference = 5000 - 0*3 = 5000, steps = 5, bonus = 1.5
+        let initialStrikeBonus = 1.5
+        let expectedDamage = Int((Double(physicalAttack) * attackRoll * initialStrikeBonus).rounded())
+
+        let attacker = TestActorBuilder.makeAttacker(
+            physicalAttack: physicalAttack,
+            luck: luck,
+            criticalRate: 0
+        )
+        var defender = TestActorBuilder.makeDefender(
+            physicalDefense: 0,
+            luck: luck
+        )
+        var context = TestActorBuilder.makeContext(
+            seed: seed,
+            attacker: attacker,
+            defender: defender
+        )
+
+        let (damage, _) = BattleTurnEngine.computePhysicalDamage(
+            attacker: attacker,
+            defender: &defender,
+            hitIndex: 1,
+            context: &context
+        )
+
+        XCTAssertEqual(damage, expectedDamage,
+            "防御力0: 期待\(expectedDamage), 実測\(damage)")
+    }
+
+    /// 両方0で最低ダメージ1を保証
+    func testZeroAttackAndDefense_MinimumDamage() {
+        let attacker = TestActorBuilder.makeAttacker(
+            physicalAttack: 0,
+            luck: 35,
+            criticalRate: 0
+        )
+        var defender = TestActorBuilder.makeDefender(
+            physicalDefense: 0,
+            luck: 35
+        )
+        var context = TestActorBuilder.makeContext(
+            seed: 42,
+            attacker: attacker,
+            defender: defender
+        )
+
+        let (damage, _) = BattleTurnEngine.computePhysicalDamage(
+            attacker: attacker,
+            defender: &defender,
+            hitIndex: 1,
+            context: &context
+        )
+
+        XCTAssertEqual(damage, 1,
+            "攻撃力0・防御力0: 最低ダメージ1を保証, 実測\(damage)")
+    }
+
+    /// additionalDamageが正しく加算される
+    ///
+    /// 検証方法: 同じシードでadditionalDamage有無を比較
+    ///
+    /// 入力:
+    ///   - additionalDamage: 500
+    ///
+    /// 期待: ダメージが500増加
+    func testAdditionalDamage() {
+        let seed: UInt64 = 42
+
+        // ベースライン（additionalDamage=0）
+        let baseAttacker = TestActorBuilder.makeAttacker(
+            physicalAttack: 5000,
+            luck: 35,
+            criticalRate: 0,
+            additionalDamage: 0
+        )
+        var baseDefender = TestActorBuilder.makeDefender(
+            physicalDefense: 2000,
+            luck: 35
+        )
+        var baseContext = TestActorBuilder.makeContext(
+            seed: seed,
+            attacker: baseAttacker,
+            defender: baseDefender
+        )
+        let (baselineDamage, _) = BattleTurnEngine.computePhysicalDamage(
+            attacker: baseAttacker,
+            defender: &baseDefender,
+            hitIndex: 1,
+            context: &baseContext
+        )
+
+        // additionalDamage=500
+        let attacker = TestActorBuilder.makeAttacker(
+            physicalAttack: 5000,
+            luck: 35,
+            criticalRate: 0,
+            additionalDamage: 500
+        )
+        var defender = TestActorBuilder.makeDefender(
+            physicalDefense: 2000,
+            luck: 35
+        )
+        var context = TestActorBuilder.makeContext(
+            seed: seed,
+            attacker: attacker,
+            defender: defender
+        )
+        let (additionalDamageResult, _) = BattleTurnEngine.computePhysicalDamage(
+            attacker: attacker,
+            defender: &defender,
+            hitIndex: 1,
+            context: &context
+        )
+
+        // additionalDamageは最終ダメージに加算される
+        let difference = additionalDamageResult - baselineDamage
+        XCTAssertEqual(difference, 500,
+            "additionalDamage+500: 期待差分500, 実測差分\(difference) " +
+            "(baseline=\(baselineDamage), with=\(additionalDamageResult))")
+    }
+
+    /// 極端に大きい値でオーバーフローしない
+    ///
+    /// 入力:
+    ///   - 攻撃力: 999999
+    ///   - 防御力: 1
+    ///
+    /// 計算:
+    ///   initialStrikeBonus = min(3.4, 1.0 + floor((999999 - 3) / 1000) × 0.1) = 3.4
+    ///
+    /// 期待: 正の整数ダメージ（オーバーフローしない）
+    func testExtremeHighAttack_NoOverflow() {
+        let attacker = TestActorBuilder.makeAttacker(
+            physicalAttack: 999999,
+            luck: 35,
+            criticalRate: 0
+        )
+        var defender = TestActorBuilder.makeDefender(
+            physicalDefense: 1,
+            luck: 35
+        )
+        var context = TestActorBuilder.makeContext(
+            seed: 42,
+            attacker: attacker,
+            defender: defender
+        )
+
+        let (damage, _) = BattleTurnEngine.computePhysicalDamage(
+            attacker: attacker,
+            defender: &defender,
+            hitIndex: 1,
+            context: &context
+        )
+
+        XCTAssertGreaterThan(damage, 0,
+            "極端に大きい攻撃力: ダメージは正の整数, 実測\(damage)")
+        // initialStrikeBonusが最大3.4なので、ダメージは攻撃力の3.4倍以下
+        XCTAssertLessThanOrEqual(damage, 999999 * 4,
+            "極端に大きい攻撃力: ダメージは攻撃力の4倍以下（クリティカルなしinitialStrikeBonus最大3.4）, 実測\(damage)")
+    }
+
+    /// hitIndex=1とhitIndex=2ではダメージが同じ（減衰なし）
+    ///
+    /// damageModifier計算式:
+    ///   hitIndex <= 2: return 1.0
+    func testDamageModifierAtHitIndex1And2_NoReduction() {
+        // hitIndex=1
+        let attacker1 = TestActorBuilder.makeAttacker(
+            physicalAttack: 5000,
+            luck: 35,
+            criticalRate: 0
+        )
+        var defender1 = TestActorBuilder.makeDefender(
+            physicalDefense: 2000,
+            luck: 35
+        )
+        var context1 = TestActorBuilder.makeContext(
+            seed: 42,
+            attacker: attacker1,
+            defender: defender1
+        )
+        let (damage1, _) = BattleTurnEngine.computePhysicalDamage(
+            attacker: attacker1,
+            defender: &defender1,
+            hitIndex: 1,
+            context: &context1
+        )
+
+        // hitIndex=2
+        let attacker2 = TestActorBuilder.makeAttacker(
+            physicalAttack: 5000,
+            luck: 35,
+            criticalRate: 0
+        )
+        var defender2 = TestActorBuilder.makeDefender(
+            physicalDefense: 2000,
+            luck: 35
+        )
+        var context2 = TestActorBuilder.makeContext(
+            seed: 42,
+            attacker: attacker2,
+            defender: defender2
+        )
+        let (damage2, _) = BattleTurnEngine.computePhysicalDamage(
+            attacker: attacker2,
+            defender: &defender2,
+            hitIndex: 2,
+            context: &context2
+        )
+
+        XCTAssertEqual(damage1, damage2,
+            "hitIndex=1と2: ダメージ同じ, hitIndex=1=\(damage1), hitIndex=2=\(damage2)")
+    }
 }

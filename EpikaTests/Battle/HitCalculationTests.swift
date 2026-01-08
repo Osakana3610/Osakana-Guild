@@ -333,4 +333,84 @@ final class HitCalculationTests: XCTestCase {
         XCTAssertLessThan(hitChance, 0.5,
             "運不利: 期待<0.5, 実測\(hitChance)")
     }
+
+    // MARK: - 命中成功率の統計テスト
+    //
+    // computeHitChanceで計算された確率で、実際に命中判定が成功するかを検証
+    // BattleRandomSystem.probability(hitChance) を使用
+
+    /// 命中率95%（上限クランプ）での命中成功率
+    ///
+    /// 試行回数の導出: n = (2.576 × 0.5 / 0.02)² ≈ 4148
+    /// （二項分布、99%CI、±2%許容）
+    func testHitSuccessRate95Percent() {
+        var hitCount = 0
+        let trials = 4148
+
+        for seed in 0..<trials {
+            var random = GameRandomSource(seed: UInt64(seed))
+            let hitChance = 0.95  // 上限クランプ値
+
+            if BattleRandomSystem.probability(hitChance, random: &random) {
+                hitCount += 1
+            }
+        }
+
+        let successRate = Double(hitCount) / Double(trials)
+        let expected = 0.95
+        let tolerance = 0.02  // ±2%
+
+        XCTAssertTrue(
+            (expected - tolerance...expected + tolerance).contains(successRate),
+            "命中成功率95%: 期待\(expected)±2%, 実測\(successRate) (\(trials)回試行)"
+        )
+    }
+
+    /// 命中率50%での命中成功率
+    func testHitSuccessRate50Percent() {
+        var hitCount = 0
+        let trials = 4148
+
+        for seed in 0..<trials {
+            var random = GameRandomSource(seed: UInt64(seed))
+            let hitChance = 0.50
+
+            if BattleRandomSystem.probability(hitChance, random: &random) {
+                hitCount += 1
+            }
+        }
+
+        let successRate = Double(hitCount) / Double(trials)
+        let expected = 0.50
+        let tolerance = 0.02  // ±2%
+
+        XCTAssertTrue(
+            (expected - tolerance...expected + tolerance).contains(successRate),
+            "命中成功率50%: 期待\(expected)±2%, 実測\(successRate) (\(trials)回試行)"
+        )
+    }
+
+    /// 命中率5%（下限クランプ）での命中成功率
+    func testHitSuccessRate5Percent() {
+        var hitCount = 0
+        let trials = 4148
+
+        for seed in 0..<trials {
+            var random = GameRandomSource(seed: UInt64(seed))
+            let hitChance = 0.05  // 下限クランプ値
+
+            if BattleRandomSystem.probability(hitChance, random: &random) {
+                hitCount += 1
+            }
+        }
+
+        let successRate = Double(hitCount) / Double(trials)
+        let expected = 0.05
+        let tolerance = 0.02  // ±2%
+
+        XCTAssertTrue(
+            (expected - tolerance...expected + tolerance).contains(successRate),
+            "命中成功率5%: 期待\(expected)±2%, 実測\(successRate) (\(trials)回試行)"
+        )
+    }
 }

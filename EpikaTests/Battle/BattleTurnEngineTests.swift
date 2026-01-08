@@ -24,8 +24,8 @@ final class BattleTurnEngineTests: XCTestCase {
     ///
     /// 期待: 敵を倒して勝利（outcome=0）
     func testVictory_EnemyDefeated() {
-        var player = makeStrongPlayer()
-        var enemy = makeWeakEnemy()
+        let player = TestActorBuilder.makeStrongPlayer()
+        let enemy = TestActorBuilder.makeWeakEnemy()
         var random = GameRandomSource(seed: 42)
 
         var players = [player]
@@ -55,8 +55,8 @@ final class BattleTurnEngineTests: XCTestCase {
     ///
     /// 期待: 味方を倒して敗北（outcome=1）
     func testDefeat_PlayerDefeated() {
-        var player = makeWeakPlayer()
-        var enemy = makeStrongEnemy()
+        let player = TestActorBuilder.makeWeakPlayer()
+        let enemy = TestActorBuilder.makeStrongEnemy()
         var random = GameRandomSource(seed: 42)
 
         var players = [player]
@@ -87,8 +87,8 @@ final class BattleTurnEngineTests: XCTestCase {
     /// 期待: 戦闘後、少なくとも一方がダメージを受けている
     ///       （勝者は無傷の可能性あり、敗者はHP<=0）
     func testHP_AccumulatesDuringBattle() {
-        var player = makeBalancedPlayer()
-        var enemy = makeBalancedEnemy()
+        let player = TestActorBuilder.makeBalancedPlayer()
+        let enemy = TestActorBuilder.makeBalancedEnemy()
         var random = GameRandomSource(seed: 42)
 
         let initialPlayerHP = player.currentHP
@@ -141,8 +141,8 @@ final class BattleTurnEngineTests: XCTestCase {
     ///
     /// 期待: 20ターン経過後に撤退（outcome=2）
     func testRetreat_MaxTurnsReached() {
-        var player = makeImmortalPlayer()
-        var enemy = makeImmortalEnemy()
+        let player = TestActorBuilder.makeImmortalPlayer()
+        let enemy = TestActorBuilder.makeImmortalEnemy()
         var random = GameRandomSource(seed: 42)
 
         var players = [player]
@@ -187,8 +187,8 @@ final class BattleTurnEngineTests: XCTestCase {
         let testSeeds: [UInt64] = [0, 1, 2, 3, 42, 100, 12345]
 
         for seed in testSeeds {
-            let player = makeDeterministicPlayer()
-            let enemy = makeDeterministicEnemy()
+            let player = TestActorBuilder.makeDeterministicPlayer()
+            let enemy = TestActorBuilder.makeDeterministicEnemy()
             var random = GameRandomSource(seed: seed)
 
             let initialEnemyHP = enemy.currentHP  // 1000
@@ -234,8 +234,8 @@ final class BattleTurnEngineTests: XCTestCase {
     /// 構成: 両者がダメージを与え合い、複数ターン戦闘
     /// 検証: 各ターンのダメージが累積してHPに反映される
     func testMultipleTurnBattle_HPAccumulatesCorrectly() {
-        var player = makeDeterministicPlayer()
-        var enemy = makeDeterministicEnemyWithAttack()  // 攻撃力を持つ敵
+        let player = TestActorBuilder.makeDeterministicPlayer()
+        let enemy = TestActorBuilder.makeDeterministicEnemyWithAttack()  // 攻撃力を持つ敵
         var random = GameRandomSource(seed: 42)
 
         let initialPlayerHP = player.currentHP
@@ -284,8 +284,8 @@ final class BattleTurnEngineTests: XCTestCase {
     ///   - 2回目の戦闘: 1回目終了時のHPで開始（HP引き継ぎ確認）
     func testConsecutiveBattles_HPCarriesOver() {
         // 1回目の戦闘
-        let player = makeDeterministicPlayer()  // HP=50000
-        let enemy1 = makeWeakEnemyWithAttack()  // HP=3000, 攻撃力低め
+        let player = TestActorBuilder.makeDeterministicPlayer()  // HP=50000
+        let enemy1 = TestActorBuilder.makeWeakEnemyWithAttack()  // HP=3000, 攻撃力低め
         var random = GameRandomSource(seed: 42)
 
         let initialHP = player.currentHP
@@ -321,7 +321,7 @@ final class BattleTurnEngineTests: XCTestCase {
 
         // 2回目の戦闘（1回目の結果を引き継ぐ）
         // runBattleはinoutでplayers配列を更新するので、そのまま使える
-        let enemy2 = makeWeakEnemyWithAttack()
+        let enemy2 = TestActorBuilder.makeWeakEnemyWithAttack()
         var enemies2 = [enemy2]
 
         let hpBeforeSecondBattle = players[0].currentHP
@@ -353,8 +353,8 @@ final class BattleTurnEngineTests: XCTestCase {
     ///
     /// 期待: 戦闘が複数ターン続く（1ターンで終わらない）
     func testBattle_MultiplesTurns() {
-        var player = makeBalancedPlayer()
-        var enemy = makeBalancedEnemy()
+        let player = TestActorBuilder.makeBalancedPlayer()
+        let enemy = TestActorBuilder.makeBalancedEnemy()
         var random = GameRandomSource(seed: 12345)
 
         var players = [player]
@@ -370,492 +370,5 @@ final class BattleTurnEngineTests: XCTestCase {
 
         XCTAssertGreaterThan(result.battleLog.turns, 1,
             "戦闘は複数ターン続くべき（実測=\(result.battleLog.turns)ターン）")
-    }
-
-    // MARK: - ヘルパーメソッド
-
-    /// 強い味方を生成
-    private func makeStrongPlayer() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 50000,
-            physicalAttack: 5000,
-            magicalAttack: 1000,
-            physicalDefense: 2000,
-            magicalDefense: 1000,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.strong_player",
-            displayName: "強い味方",
-            kind: .player,
-            formationSlot: 1,
-            strength: 20,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 20,
-            agility: 20,
-            luck: 35,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// 弱い敵を生成
-    private func makeWeakEnemy() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 1000,
-            physicalAttack: 100,
-            magicalAttack: 0,
-            physicalDefense: 100,
-            magicalDefense: 100,
-            hitRate: 50,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.weak_enemy",
-            displayName: "弱い敵",
-            kind: .enemy,
-            formationSlot: 1,
-            strength: 20,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 20,
-            agility: 20,
-            luck: 1,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// 弱い味方を生成
-    private func makeWeakPlayer() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 500,
-            physicalAttack: 100,
-            magicalAttack: 0,
-            physicalDefense: 100,
-            magicalDefense: 100,
-            hitRate: 50,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.weak_player",
-            displayName: "弱い味方",
-            kind: .player,
-            formationSlot: 1,
-            strength: 20,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 20,
-            agility: 20,
-            luck: 1,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// 強い敵を生成
-    private func makeStrongEnemy() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 50000,
-            physicalAttack: 5000,
-            magicalAttack: 1000,
-            physicalDefense: 2000,
-            magicalDefense: 1000,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.strong_enemy",
-            displayName: "強い敵",
-            kind: .enemy,
-            formationSlot: 1,
-            strength: 20,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 20,
-            agility: 20,
-            luck: 35,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// バランスの取れた味方を生成
-    private func makeBalancedPlayer() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 10000,
-            physicalAttack: 1000,
-            magicalAttack: 500,
-            physicalDefense: 500,
-            magicalDefense: 500,
-            hitRate: 80,
-            evasionRate: 10,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.balanced_player",
-            displayName: "バランス味方",
-            kind: .player,
-            formationSlot: 1,
-            strength: 20,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 20,
-            agility: 20,
-            luck: 18,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// バランスの取れた敵を生成
-    private func makeBalancedEnemy() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 10000,
-            physicalAttack: 1000,
-            magicalAttack: 500,
-            physicalDefense: 500,
-            magicalDefense: 500,
-            hitRate: 80,
-            evasionRate: 10,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.balanced_enemy",
-            displayName: "バランス敵",
-            kind: .enemy,
-            formationSlot: 1,
-            strength: 20,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 20,
-            agility: 20,
-            luck: 18,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// 不死身の味方を生成（攻撃力0、超高HP）
-    private func makeImmortalPlayer() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 999999,
-            physicalAttack: 0,
-            magicalAttack: 0,
-            physicalDefense: 99999,
-            magicalDefense: 99999,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.immortal_player",
-            displayName: "不死身味方",
-            kind: .player,
-            formationSlot: 1,
-            strength: 20,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 20,
-            agility: 20,
-            luck: 18,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// 不死身の敵を生成（攻撃力0、超高HP）
-    private func makeImmortalEnemy() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 999999,
-            physicalAttack: 0,
-            magicalAttack: 0,
-            physicalDefense: 99999,
-            magicalDefense: 99999,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.immortal_enemy",
-            displayName: "不死身敵",
-            kind: .enemy,
-            formationSlot: 1,
-            strength: 20,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 20,
-            agility: 20,
-            luck: 18,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// 決定的テスト用の味方を生成
-    ///
-    /// 特徴:
-    ///   - physicalAttack=5000: 高攻撃力
-    ///   - hitRate=100: 高命中率
-    ///   - agility=35: 敵より先に行動
-    ///   - luck=35: 境界値使用
-    ///   - criticalRate=0: クリティカル無効
-    private func makeDeterministicPlayer() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 50000,
-            physicalAttack: 5000,
-            magicalAttack: 1000,
-            physicalDefense: 2000,
-            magicalDefense: 1000,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.deterministic_player",
-            displayName: "決定的味方",
-            kind: .player,
-            formationSlot: 1,
-            strength: 100,
-            wisdom: 50,
-            spirit: 50,
-            vitality: 100,
-            agility: 35,
-            luck: 35,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// 決定的テスト用の敵を生成（攻撃力なし、低HP）
-    ///
-    /// 特徴:
-    ///   - HP=1000: 1回の攻撃で倒せる（ダメージ範囲1600〜4400）
-    ///   - physicalDefense=2000: ダメージ計算が検証しやすい
-    ///   - evasionRate=0: 回避なし
-    ///   - agility=1: 味方より後に行動
-    ///   - luck=35: 境界値使用
-    ///   - physicalAttack=0: 攻撃しない
-    private func makeDeterministicEnemy() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 1000,
-            physicalAttack: 0,
-            magicalAttack: 0,
-            physicalDefense: 2000,
-            magicalDefense: 1000,
-            hitRate: 50,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.deterministic_enemy",
-            displayName: "決定的敵",
-            kind: .enemy,
-            formationSlot: 1,
-            strength: 20,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 20,
-            agility: 1,
-            luck: 35,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// 決定的テスト用の敵を生成（攻撃力あり）
-    ///
-    /// 特徴:
-    ///   - HP=20000: 複数ターン戦闘ができる
-    ///   - physicalAttack=3000: 味方にダメージを与える
-    ///   - hitRate=100: 高命中率
-    ///   - agility=1: 味方より後に行動
-    ///   - luck=35: 境界値使用
-    private func makeDeterministicEnemyWithAttack() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 20000,
-            physicalAttack: 3000,
-            magicalAttack: 500,
-            physicalDefense: 2000,
-            magicalDefense: 1000,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.deterministic_enemy_with_attack",
-            displayName: "攻撃的敵",
-            kind: .enemy,
-            formationSlot: 1,
-            strength: 50,
-            wisdom: 20,
-            spirit: 20,
-            vitality: 50,
-            agility: 1,
-            luck: 35,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
-    }
-
-    /// 弱い敵（攻撃力あり）を生成（HP引き継ぎテスト用）
-    ///
-    /// 特徴:
-    ///   - HP=3000: 味方が2回で倒せる（ダメージ範囲1600〜4400）
-    ///   - physicalAttack=1500: 低ダメージ（味方防御2000で実質0〜数百）
-    ///   - hitRate=100: 高命中率（命中しても低ダメージ）
-    ///   - agility=1: 味方より後に行動
-    ///   - luck=35: 境界値使用
-    private func makeWeakEnemyWithAttack() -> BattleActor {
-        let snapshot = CharacterValues.Combat(
-            maxHP: 3000,
-            physicalAttack: 1500,
-            magicalAttack: 0,
-            physicalDefense: 500,
-            magicalDefense: 500,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
-            attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
-            isMartialEligible: false
-        )
-
-        return BattleActor(
-            identifier: "test.weak_enemy_with_attack",
-            displayName: "弱い攻撃敵",
-            kind: .enemy,
-            formationSlot: 1,
-            strength: 30,
-            wisdom: 10,
-            spirit: 10,
-            vitality: 30,
-            agility: 1,
-            luck: 35,
-            isMartialEligible: false,
-            snapshot: snapshot,
-            currentHP: snapshot.maxHP,
-            actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: .neutral
-        )
     }
 }

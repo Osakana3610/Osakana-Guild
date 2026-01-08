@@ -87,6 +87,93 @@ final class BattleRandomSystemTests: XCTestCase {
         }
     }
 
+    // MARK: - statMultiplier の期待値検証（統計的テスト）
+    //
+    // 一様分布 U(a,b) の期待値: E[X] = (a+b)/2
+    // 標準偏差: σ = (b-a) / √12
+    // 99%CI・±2%許容誤差で必要な試行回数: n = (2.576 × σ / ε)²
+
+    /// luck=1でstatMultiplierの平均が期待値0.705に収束することを検証
+    ///
+    /// 計算:
+    ///   範囲: 0.41〜1.00
+    ///   期待値: (0.41 + 1.00) / 2 = 0.705
+    ///   σ = (1.00 - 0.41) / √12 ≈ 0.170
+    ///   ε = 0.705 × 0.02 ≈ 0.0141
+    ///   n = (2.576 × 0.170 / 0.0141)² ≈ 964
+    func testStatMultiplier_Luck1_ExpectedValue() {
+        var rng = GameRandomSource(seed: 42)
+        var total = 0.0
+        let trials = 964
+
+        for _ in 0..<trials {
+            total += BattleRandomSystem.statMultiplier(luck: 1, random: &rng)
+        }
+
+        let average = total / Double(trials)
+        let expected = 0.705
+        let tolerance = expected * 0.02  // ±2%
+
+        XCTAssertTrue(
+            (expected - tolerance...expected + tolerance).contains(average),
+            "statMultiplier(luck=1): 期待\(expected)±2%, 実測\(average) (\(trials)回試行, 99%CI)"
+        )
+    }
+
+    /// luck=18でstatMultiplierの平均が期待値0.79に収束することを検証
+    ///
+    /// 計算:
+    ///   範囲: 0.58〜1.00
+    ///   期待値: (0.58 + 1.00) / 2 = 0.79
+    ///   σ = (1.00 - 0.58) / √12 ≈ 0.121
+    ///   ε = 0.79 × 0.02 ≈ 0.0158
+    ///   n = (2.576 × 0.121 / 0.0158)² ≈ 389
+    func testStatMultiplier_Luck18_ExpectedValue() {
+        var rng = GameRandomSource(seed: 42)
+        var total = 0.0
+        let trials = 389
+
+        for _ in 0..<trials {
+            total += BattleRandomSystem.statMultiplier(luck: 18, random: &rng)
+        }
+
+        let average = total / Double(trials)
+        let expected = 0.79
+        let tolerance = expected * 0.02  // ±2%
+
+        XCTAssertTrue(
+            (expected - tolerance...expected + tolerance).contains(average),
+            "statMultiplier(luck=18): 期待\(expected)±2%, 実測\(average) (\(trials)回試行, 99%CI)"
+        )
+    }
+
+    /// luck=35でstatMultiplierの平均が期待値0.875に収束することを検証
+    ///
+    /// 計算:
+    ///   範囲: 0.75〜1.00
+    ///   期待値: (0.75 + 1.00) / 2 = 0.875
+    ///   σ = (1.00 - 0.75) / √12 ≈ 0.072
+    ///   ε = 0.875 × 0.02 ≈ 0.0175
+    ///   n = (2.576 × 0.072 / 0.0175)² ≈ 115
+    func testStatMultiplier_Luck35_ExpectedValue() {
+        var rng = GameRandomSource(seed: 42)
+        var total = 0.0
+        let trials = 115
+
+        for _ in 0..<trials {
+            total += BattleRandomSystem.statMultiplier(luck: 35, random: &rng)
+        }
+
+        let average = total / Double(trials)
+        let expected = 0.875
+        let tolerance = expected * 0.02  // ±2%
+
+        XCTAssertTrue(
+            (expected - tolerance...expected + tolerance).contains(average),
+            "statMultiplier(luck=35): 期待\(expected)±2%, 実測\(average) (\(trials)回試行, 99%CI)"
+        )
+    }
+
     // MARK: - percentChance の検証
 
     /// percentChance(0)は常にfalseを返すことを検証
