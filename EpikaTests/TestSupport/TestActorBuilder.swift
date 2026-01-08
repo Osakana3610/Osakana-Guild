@@ -6,7 +6,7 @@ import Foundation
 /// 設計原則:
 /// - マスターデータに依存しない固定値を使用
 /// - 計算が検証しやすい値（1000, 2000, 5000など）を使用
-/// - luck=60でstatMultiplier=1.0固定（乱数を排除）
+/// - luck は必須パラメータ（境界値 1, 18, 35 を使用、60は禁止）
 /// - criticalRate=0でクリティカル判定を無効化
 enum TestActorBuilder {
 
@@ -14,31 +14,37 @@ enum TestActorBuilder {
     ///
     /// - Parameters:
     ///   - physicalAttack: 物理攻撃力（デフォルト: 5000）
-    ///   - luck: 運（デフォルト: 60、statMultiplier=1.0固定）
+    ///   - magicalAttack: 魔力（デフォルト: 1000）
+    ///   - hitRate: 命中率（デフォルト: 100）
+    ///   - luck: 運（必須、境界値 1, 18, 35 を使用）
     ///   - criticalRate: 必殺率（デフォルト: 0、クリティカル無効）
     ///   - additionalDamage: 追加ダメージ（デフォルト: 0）
+    ///   - breathDamage: ブレスダメージ（デフォルト: 0）
     ///   - skillEffects: スキル効果（デフォルト: neutral）
     static func makeAttacker(
         physicalAttack: Int = 5000,
-        luck: Int = 60,
+        magicalAttack: Int = 1000,
+        hitRate: Int = 100,
+        luck: Int,
         criticalRate: Int = 0,
         additionalDamage: Int = 0,
+        breathDamage: Int = 0,
         skillEffects: BattleActor.SkillEffects = .neutral
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 10000,
             physicalAttack: physicalAttack,
-            magicalAttack: 1000,
+            magicalAttack: magicalAttack,
             physicalDefense: 1000,
             magicalDefense: 1000,
-            hitRate: 100,
+            hitRate: hitRate,
             evasionRate: 0,
             criticalRate: criticalRate,
             attackCount: 1.0,
             magicalHealing: 500,
             trapRemoval: 0,
             additionalDamage: additionalDamage,
-            breathDamage: 0,
+            breathDamage: breathDamage,
             isMartialEligible: false
         )
 
@@ -65,21 +71,33 @@ enum TestActorBuilder {
     ///
     /// - Parameters:
     ///   - physicalDefense: 物理防御力（デフォルト: 2000）
-    ///   - luck: 運（デフォルト: 60、statMultiplier=1.0固定）
+    ///   - magicalDefense: 魔法防御力（デフォルト: 1000）
+    ///   - evasionRate: 回避率（デフォルト: 0）
+    ///   - luck: 運（必須、境界値 1, 18, 35 を使用）
     ///   - skillEffects: スキル効果（デフォルト: neutral）
+    ///   - innateResistances: 固有耐性（デフォルト: neutral）
+    ///   - guardActive: ガード状態（デフォルト: false）
+    ///   - barrierCharges: バリアチャージ（デフォルト: 空）
+    ///   - guardBarrierCharges: ガード時バリアチャージ（デフォルト: 空）
     static func makeDefender(
         physicalDefense: Int = 2000,
-        luck: Int = 60,
-        skillEffects: BattleActor.SkillEffects = .neutral
+        magicalDefense: Int = 1000,
+        evasionRate: Int = 0,
+        luck: Int,
+        skillEffects: BattleActor.SkillEffects = .neutral,
+        innateResistances: BattleInnateResistances = .neutral,
+        guardActive: Bool = false,
+        barrierCharges: [UInt8: Int] = [:],
+        guardBarrierCharges: [UInt8: Int] = [:]
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 50000,
             physicalAttack: 1000,
             magicalAttack: 500,
             physicalDefense: physicalDefense,
-            magicalDefense: 1000,
+            magicalDefense: magicalDefense,
             hitRate: 50,
-            evasionRate: 0,
+            evasionRate: evasionRate,
             criticalRate: 0,
             attackCount: 1.0,
             magicalHealing: 0,
@@ -104,7 +122,11 @@ enum TestActorBuilder {
             snapshot: snapshot,
             currentHP: snapshot.maxHP,
             actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
-            skillEffects: skillEffects
+            guardActive: guardActive,
+            barrierCharges: barrierCharges,
+            guardBarrierCharges: guardBarrierCharges,
+            skillEffects: skillEffects,
+            innateResistances: innateResistances
         )
     }
 
