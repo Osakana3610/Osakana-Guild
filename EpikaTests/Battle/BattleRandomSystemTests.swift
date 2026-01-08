@@ -117,22 +117,26 @@ final class BattleRandomSystemTests: XCTestCase {
 
     /// percentChance(50)は約50%の確率で発動することを検証（統計的テスト）
     ///
-    /// 1000回試行、99%信頼区間で460〜540回の発動を期待
+    /// 試行回数の導出: n = (2.576 × σ / ε)² = (2.576 × 0.5 / 0.02)² ≈ 4148
+    /// 99%信頼区間・±2%許容誤差
     func testPercentChance_50Percent_StatisticalVerification() {
         var rng = GameRandomSource(seed: 42)
         var triggerCount = 0
 
-        let trials = 1000
+        let trials = 4148
         for _ in 0..<trials {
             if BattleRandomSystem.percentChance(50, random: &rng) {
                 triggerCount += 1
             }
         }
 
-        // 二項分布の99%信頼区間: 50% ± 約4% → 460〜540
+        // 期待値: 4148 × 0.5 = 2074
+        // 許容範囲: 確率0.48〜0.52（±2%許容誤差）→ 1991〜2157回
+        let lowerBound = Int(floor(Double(trials) * 0.48))  // 1991
+        let upperBound = Int(ceil(Double(trials) * 0.52))   // 2157
         XCTAssertTrue(
-            (460...540).contains(triggerCount),
-            "発動率50%: 期待460〜540回, 実測\(triggerCount)回 (\(trials)回試行)"
+            (lowerBound...upperBound).contains(triggerCount),
+            "発動率50%: 期待\(lowerBound)〜\(upperBound)回, 実測\(triggerCount)回 (\(trials)回試行)"
         )
     }
 }

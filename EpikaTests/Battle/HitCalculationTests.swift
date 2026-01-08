@@ -49,13 +49,13 @@ final class HitCalculationTests: XCTestCase {
     ///
     /// 入力:
     ///   - 攻撃者: hitRate=0, luck=1
-    ///   - 防御者: evasionRate=100, luck=35
+    ///   - 防御者: evasionRate=100, luck=35, agility=20
     ///
     /// 計算:
     ///   baseRatio = 1 / (1 + 100) = 0.0099
     ///   攻撃者luck=1（乱数弱）、防御者luck=35（乱数強）
     ///   rawChanceは非常に低い
-    ///   → clamp下限で0.05
+    ///   → clamp下限で0.05（agility<=20でclampProbabilityの補正なし）
     func testHitChanceLowerBound() {
         let attacker = TestActorBuilder.makeAttacker(hitRate: 0, luck: 1)
         let defender = TestActorBuilder.makeDefender(evasionRate: 100, luck: 35)
@@ -69,7 +69,7 @@ final class HitCalculationTests: XCTestCase {
             context: &context
         )
 
-        // 命中率下限は5%
+        // 命中率下限は5%（agility<=20の場合）
         XCTAssertGreaterThanOrEqual(hitChance, 0.05,
             "命中率下限: 期待>=0.05, 実測\(hitChance)")
     }
@@ -108,21 +108,51 @@ final class HitCalculationTests: XCTestCase {
 
     // MARK: - 統計的テスト（luck境界値）
 
+    // MARK: E[X/Y]の導出
+    //
+    // statMultiplierはU[a,b]の一様分布（a = (40+luck)/100, b = 1.0）
+    // randomFactor = attackerRoll / defenderRoll
+    // X, Yが独立で同じU[a,b]分布の場合:
+    //   E[X/Y] = E[X] × E[1/Y]
+    //          = ((a+b)/2) × (ln(b/a) / (b-a))
+    //
+    // expectedHitChance = baseRatio × E[X/Y]
+    //                   = 0.5 × E[X/Y]
+
+    /// E[X/Y]を計算するヘルパー関数
+    private func expectedRatioForLuck(_ luck: Int) -> Double {
+        let a = Double(40 + luck) / 100.0  // statMultiplierの下限
+        let b = 1.0                         // statMultiplierの上限
+        // E[X/Y] = ((a+b)/2) × (ln(b/a) / (b-a))
+        let expectedX = (a + b) / 2.0
+        let expectedInverseY = log(b / a) / (b - a)
+        return expectedX * expectedInverseY
+    }
+
     /// luck=1での命中率分布テスト
     ///
-    /// 条件: hitRate=100, evasionRate=100, 両者luck=1
-    /// 期待: baseRatio=0.5、乱数幅が広いため分散大
+    /// 条件: hitRate=70, evasionRate=130, 両者luck=1
+    ///
+    /// 期待値の導出:
+    ///   baseRatio = 70 / (70 + 130) = 0.35
+    ///   luck=1 → a = 0.41, b = 1.0
+    ///   E[X/Y] = ((0.41+1.0)/2) × (ln(1.0/0.41) / 0.59) ≈ 1.065
+    ///   expected = 0.35 × 1.065 ≈ 0.373
+    ///
+    /// 注: baseRatio=0.5だとrandomFactorの上振れで
+    ///     rawChance > 0.95となりclampされるため、
+    ///     baseRatioを0.35に下げてclampを回避
+    ///     最大rawChance = 0.35 × (1.0/0.41) = 0.854 < 0.95
     ///
     /// 統計計算:
     ///   - 試行回数: 964回（99%CI、±2%許容）
-    ///   - 期待値: 約0.5（乱数次第で変動）
     func testHitChanceDistributionLuck1() {
         let trials = 964
         var totalHitChance = 0.0
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(hitRate: 100, luck: 1)
-            let defender = TestActorBuilder.makeDefender(evasionRate: 100, luck: 1)
+            let attacker = TestActorBuilder.makeAttacker(hitRate: 70, luck: 1)
+            let defender = TestActorBuilder.makeDefender(evasionRate: 130, luck: 1)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
                 attacker: attacker,
@@ -141,10 +171,9 @@ final class HitCalculationTests: XCTestCase {
 
         let average = totalHitChance / Double(trials)
 
-        // hitRate=100, evasionRate=100でbaseRatio=0.5
-        // 両者luck=1で乱数期待値は同じなのでrandomFactor期待値≈1.0
-        // 期待命中率≈0.5（clamp範囲内）
-        let expected = 0.5
+        // baseRatio = 0.35, E[X/Y] ≈ 1.065
+        let baseRatio = 0.35
+        let expected = baseRatio * expectedRatioForLuck(1)
         let tolerance = expected * 0.02  // ±2%
 
         XCTAssertTrue(
@@ -156,7 +185,14 @@ final class HitCalculationTests: XCTestCase {
     /// luck=18での命中率分布テスト
     ///
     /// 条件: hitRate=100, evasionRate=100, 両者luck=18
-    /// 試行回数: 389回（99%CI、±2%許容）
+    ///
+    /// 期待値の導出:
+    ///   luck=18 → a = 0.58, b = 1.0
+    ///   E[X/Y] = ((0.58+1.0)/2) × (ln(1.0/0.58) / 0.42) ≈ 1.025
+    ///   expected = 0.5 × 1.025 ≈ 0.513
+    ///
+    /// 統計計算:
+    ///   - 試行回数: 389回（99%CI、±2%許容）
     func testHitChanceDistributionLuck18() {
         let trials = 389
         var totalHitChance = 0.0
@@ -181,8 +217,11 @@ final class HitCalculationTests: XCTestCase {
         }
 
         let average = totalHitChance / Double(trials)
-        let expected = 0.5
-        let tolerance = expected * 0.02
+
+        // baseRatio = 0.5, E[X/Y] ≈ 1.025
+        let baseRatio = 0.5
+        let expected = baseRatio * expectedRatioForLuck(18)
+        let tolerance = expected * 0.02  // ±2%
 
         XCTAssertTrue(
             (expected - tolerance...expected + tolerance).contains(average),
@@ -193,7 +232,14 @@ final class HitCalculationTests: XCTestCase {
     /// luck=35での命中率分布テスト
     ///
     /// 条件: hitRate=100, evasionRate=100, 両者luck=35
-    /// 試行回数: 115回（99%CI、±2%許容）
+    ///
+    /// 期待値の導出:
+    ///   luck=35 → a = 0.75, b = 1.0
+    ///   E[X/Y] = ((0.75+1.0)/2) × (ln(1.0/0.75) / 0.25) ≈ 1.007
+    ///   expected = 0.5 × 1.007 ≈ 0.504
+    ///
+    /// 統計計算:
+    ///   - 試行回数: 115回（99%CI、±2%許容）
     func testHitChanceDistributionLuck35() {
         let trials = 115
         var totalHitChance = 0.0
@@ -218,8 +264,11 @@ final class HitCalculationTests: XCTestCase {
         }
 
         let average = totalHitChance / Double(trials)
-        let expected = 0.5
-        let tolerance = expected * 0.02
+
+        // baseRatio = 0.5, E[X/Y] ≈ 1.007
+        let baseRatio = 0.5
+        let expected = baseRatio * expectedRatioForLuck(35)
+        let tolerance = expected * 0.02  // ±2%
 
         XCTAssertTrue(
             (expected - tolerance...expected + tolerance).contains(average),

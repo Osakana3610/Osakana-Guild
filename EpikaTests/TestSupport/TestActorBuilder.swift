@@ -74,6 +74,7 @@ enum TestActorBuilder {
     ///   - magicalDefense: 魔法防御力（デフォルト: 1000）
     ///   - evasionRate: 回避率（デフォルト: 0）
     ///   - luck: 運（必須、境界値 1, 18, 35 を使用）
+    ///   - agility: 敏捷（デフォルト: 20）clampProbabilityで>20だと最小命中率が下がる
     ///   - skillEffects: スキル効果（デフォルト: neutral）
     ///   - innateResistances: 固有耐性（デフォルト: neutral）
     ///   - guardActive: ガード状態（デフォルト: false）
@@ -84,6 +85,7 @@ enum TestActorBuilder {
         magicalDefense: Int = 1000,
         evasionRate: Int = 0,
         luck: Int,
+        agility: Int = 20,
         skillEffects: BattleActor.SkillEffects = .neutral,
         innateResistances: BattleInnateResistances = .neutral,
         guardActive: Bool = false,
@@ -112,11 +114,11 @@ enum TestActorBuilder {
             displayName: "テスト防御者",
             kind: .enemy,
             formationSlot: 1,
-            strength: 80,
-            wisdom: 40,
-            spirit: 40,
-            vitality: 120,
-            agility: 40,
+            strength: 20,
+            wisdom: 20,
+            spirit: 20,
+            vitality: 20,
+            agility: agility,
             luck: luck,
             isMartialEligible: false,
             snapshot: snapshot,
