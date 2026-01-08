@@ -35,7 +35,7 @@ struct CombatExecutionService {
     func runCombat(enemySpecs: [EncounteredEnemySpec],
                    dungeon: DungeonDefinition,
                    floor: DungeonFloorDefinition,
-                   party: RuntimePartyState,
+                   party: inout RuntimePartyState,
                    droppedItemIds: Set<UInt16>,
                    superRareState: SuperRareDailyState,
                    random: inout GameRandomSource) throws -> CombatExecutionOutcome {
@@ -47,6 +47,14 @@ struct CombatExecutionService {
                                                          enemySpecs: enemySpecs,
                                                          random: &battleRandom)
         random = battleRandom
+
+        // 戦闘後のHP状態をパーティに反映
+        for playerActor in resolution.playerActors {
+            guard let partyMemberId = playerActor.partyMemberId else { continue }
+            if let memberIndex = party.members.firstIndex(where: { $0.characterId == partyMemberId }) {
+                party.members[memberIndex].character.currentHP = playerActor.currentHP
+            }
+        }
 
         let rewards = try BattleRewardCalculator.calculateRewards(party: party,
                                                                   survivingMemberIds: resolution.survivingAllyIds,

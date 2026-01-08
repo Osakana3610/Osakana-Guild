@@ -82,12 +82,13 @@ actor GameRuntimeService {
         let interval = preparationData.explorationInterval
 
         let task = Task<ExplorationRunArtifact, Error> { [self] in
+            var mutableParty = party
             var events: [ExplorationEventLogEntry] = []
             var battleLogs: [BattleLogArchive] = []
             var totalExperience = 0
             var totalGold = 0
             var totalDrops: [ExplorationDropReward] = []
-            var experienceByMember = Dictionary(uniqueKeysWithValues: party.members.map { ($0.characterId, 0) })
+            var experienceByMember = Dictionary(uniqueKeysWithValues: mutableParty.members.map { ($0.characterId, 0) })
             var endState: ExplorationEndState = .completed
 
             defer {
@@ -101,7 +102,7 @@ actor GameRuntimeService {
                     if let outcome = try ExplorationEngine.nextEvent(preparation: preparation,
                                                                       state: &state,
                                                                       masterData: masterData,
-                                                                      party: party) {
+                                                                      party: &mutableParty) {
                         events.append(outcome.entry)
                         if let battleLog = outcome.battleLog {
                             battleLogs.append(battleLog)
@@ -114,7 +115,7 @@ actor GameRuntimeService {
                             experienceByMember[memberId, default: 0] += value
                         }
 
-                        let dropResults = makeItemDropResults(from: outcome.entry.drops, partyId: party.party.id)
+                        let dropResults = makeItemDropResults(from: outcome.entry.drops, partyId: mutableParty.party.id)
                         if !dropResults.isEmpty {
                             await dropNotifier(dropResults)
                         }
@@ -353,12 +354,13 @@ actor GameRuntimeService {
         let (stream, continuation) = AsyncStream.makeStream(of: ExplorationEngine.StepOutcome.self)
 
         let task = Task<ExplorationRunArtifact, Error> { [self] in
+            var mutableParty = party
             var events: [ExplorationEventLogEntry] = []
             var battleLogs: [BattleLogArchive] = []
             var totalExperience = 0
             var totalGold = 0
             var totalDrops: [ExplorationDropReward] = []
-            var experienceByMember = Dictionary(uniqueKeysWithValues: party.members.map { ($0.characterId, 0) })
+            var experienceByMember = Dictionary(uniqueKeysWithValues: mutableParty.members.map { ($0.characterId, 0) })
             var endState: ExplorationEndState = .completed
 
             defer {
@@ -371,7 +373,7 @@ actor GameRuntimeService {
                 if let outcome = try ExplorationEngine.nextEvent(preparation: preparation,
                                                                   state: &state,
                                                                   masterData: masterData,
-                                                                  party: party) {
+                                                                  party: &mutableParty) {
                     events.append(outcome.entry)
                     if let battleLog = outcome.battleLog {
                         battleLogs.append(battleLog)
@@ -384,7 +386,7 @@ actor GameRuntimeService {
                         experienceByMember[memberId, default: 0] += value
                     }
 
-                    let dropResults = makeItemDropResults(from: outcome.entry.drops, partyId: party.party.id)
+                    let dropResults = makeItemDropResults(from: outcome.entry.drops, partyId: mutableParty.party.id)
                     if !dropResults.isEmpty {
                         await dropNotifier(dropResults)
                     }

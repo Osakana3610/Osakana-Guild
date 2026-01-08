@@ -103,7 +103,7 @@ struct ExplorationEngine {
     static func nextEvent(preparation: Preparation,
                           state: inout RunState,
                           masterData: MasterDataCache,
-                          party: RuntimePartyState) throws -> StepOutcome? {
+                          party: inout RuntimePartyState) throws -> StepOutcome? {
         guard state.floorIndex < preparation.targetFloorNumber else {
             return nil
         }
@@ -212,12 +212,12 @@ struct ExplorationEngine {
 
             let combatService = CombatExecutionService(masterData: masterData)
             let combatResult = try combatService.runCombat(enemySpecs: enemySpecs,
-                                                                 dungeon: preparation.dungeon,
-                                                                 floor: floor,
-                                                                 party: party,
-                                                                 droppedItemIds: state.droppedItemIds,
-                                                                 superRareState: state.superRareState,
-                                                                 random: &state.random)
+                                                           dungeon: preparation.dungeon,
+                                                           floor: floor,
+                                                           party: &party,
+                                                           droppedItemIds: state.droppedItemIds,
+                                                           superRareState: state.superRareState,
+                                                           random: &state.random)
             state.superRareState = combatResult.updatedSuperRareState
             state.droppedItemIds.formUnion(combatResult.newlyDroppedItemIds)
             drops = combatResult.summary.drops
