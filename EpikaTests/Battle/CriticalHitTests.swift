@@ -114,70 +114,84 @@ final class CriticalHitTests: XCTestCase {
 
     /// クリティカル時の防御力半減を検証
     ///
-    /// 入力:
-    ///   - 攻撃者: physicalAttack=5000, criticalRate=100, luck=35
-    ///   - 防御者: physicalDefense=2000, luck=35
+    /// 検証方法: 乱数を先読みして期待値を計算し、実測値と比較
     ///
-    /// luck=35: statMultiplier範囲0.75〜1.00
-    /// 期待: 防御が半減してダメージ増加
+    /// クリティカル時の計算式:
+    ///   effectiveDefense = physicalDefense × defenseRoll × 0.5（防御半減）
+    ///   damage = attackPower - effectiveDefense
     func testCriticalDefenseReduction() {
-        let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
-            luck: 35,
-            criticalRate: 100
-        )
-        var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
-            luck: 35
-        )
-        var context = TestActorBuilder.makeContext(
-            seed: 42,
-            attacker: attacker,
-            defender: defender
-        )
+        let seed: UInt64 = 42
+        let physicalAttack = 5000
+        let physicalDefense = 2000
+        let luck = 35
 
-        let (damage, isCritical) = BattleTurnEngine.computePhysicalDamage(
-            attacker: attacker,
-            defender: &defender,
-            hitIndex: 1,
-            context: &context
-        )
+        // 乱数を先読みして期待値を計算
+        var preRng = GameRandomSource(seed: seed)
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
+        let defenseRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
 
-        XCTAssertTrue(isCritical, "criticalRate=100なのでクリティカル発動すべき")
-        // luck=35で乱数あり、防御半減で期待ダメージ増加
-        // 非クリティカルなら5000-2000=3000付近、クリティカルなら5000-1000=4000付近
-        XCTAssertGreaterThan(damage, 3500,
-            "クリティカル時ダメージ: 防御半減で期待>3500, 実測\(damage)")
-    }
+        // 非クリティカル期待ダメージ
+        let baseAttackPower = Double(physicalAttack) * attackRoll
+        let baseDefensePower = Double(physicalDefense) * defenseRoll
+        let baseExpectedDamage = Int(max(1.0, baseAttackPower - baseDefensePower).rounded())
 
-    /// 非クリティカル時のダメージを検証（比較用）
-    func testNonCriticalDamage() {
-        let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
-            luck: 35,
+        // クリティカル期待ダメージ（防御半減）
+        let critDefensePower = baseDefensePower * 0.5
+        let critExpectedDamage = Int(max(1.0, baseAttackPower - critDefensePower).rounded())
+
+        // 非クリティカルテスト
+        let baseAttacker = TestActorBuilder.makeAttacker(
+            physicalAttack: physicalAttack,
+            luck: luck,
             criticalRate: 0
         )
-        var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
-            luck: 35
+        var baseDefender = TestActorBuilder.makeDefender(
+            physicalDefense: physicalDefense,
+            luck: luck
         )
-        var context = TestActorBuilder.makeContext(
-            seed: 42,
-            attacker: attacker,
-            defender: defender
+        var baseContext = TestActorBuilder.makeContext(
+            seed: seed,
+            attacker: baseAttacker,
+            defender: baseDefender
         )
-
-        let (damage, isCritical) = BattleTurnEngine.computePhysicalDamage(
-            attacker: attacker,
-            defender: &defender,
+        let (baselineDamage, baseIsCritical) = BattleTurnEngine.computePhysicalDamage(
+            attacker: baseAttacker,
+            defender: &baseDefender,
             hitIndex: 1,
-            context: &context
+            context: &baseContext
         )
+        XCTAssertFalse(baseIsCritical, "criticalRate=0なのでクリティカル発動しないべき")
+        XCTAssertEqual(baselineDamage, baseExpectedDamage,
+            "非クリティカルダメージ: 期待\(baseExpectedDamage), 実測\(baselineDamage)")
 
-        XCTAssertFalse(isCritical, "criticalRate=0なのでクリティカル発動しないべき")
-        // luck=35で乱数あり、期待ダメージは3000付近
-        XCTAssertLessThan(damage, 3500,
-            "非クリティカル時ダメージ: 期待<3500, 実測\(damage)")
+        // クリティカルテスト
+        let critAttacker = TestActorBuilder.makeAttacker(
+            physicalAttack: physicalAttack,
+            luck: luck,
+            criticalRate: 100
+        )
+        var critDefender = TestActorBuilder.makeDefender(
+            physicalDefense: physicalDefense,
+            luck: luck
+        )
+        var critContext = TestActorBuilder.makeContext(
+            seed: seed,
+            attacker: critAttacker,
+            defender: critDefender
+        )
+        let (critDamage, critIsCritical) = BattleTurnEngine.computePhysicalDamage(
+            attacker: critAttacker,
+            defender: &critDefender,
+            hitIndex: 1,
+            context: &critContext
+        )
+        XCTAssertTrue(critIsCritical, "criticalRate=100なのでクリティカル発動すべき")
+        XCTAssertEqual(critDamage, critExpectedDamage,
+            "クリティカルダメージ: 期待\(critExpectedDamage), 実測\(critDamage)")
+
+        // 防御半減による増加を確認
+        XCTAssertGreaterThan(critDamage, baselineDamage,
+            "クリティカルはダメージが増加すべき: crit=\(critDamage), base=\(baselineDamage)")
     }
 
     // MARK: - クリティカルダメージボーナス
@@ -252,9 +266,42 @@ final class CriticalHitTests: XCTestCase {
 
     // MARK: - クリティカル耐性
 
-    /// criticalTakenMultiplier=0.5でダメージ半減
+    /// criticalTakenMultiplier=0.5でクリティカルダメージが半減
+    ///
+    /// 検証方法: 同じシードで耐性あり/なしを比較し、比率を検証
+    ///
+    /// criticalTakenMultiplier の効果:
+    ///   クリティカル時のダメージボーナス部分に乗算される
+    ///
+    /// 期待比率: 0.5（耐性ありのダメージ ÷ 耐性なしのダメージ）
     func testCriticalResistance() {
-        let attacker = TestActorBuilder.makeAttacker(
+        let seed: UInt64 = 42
+
+        // ベースライン（耐性なし）
+        let baseAttacker = TestActorBuilder.makeAttacker(
+            physicalAttack: 5000,
+            luck: 35,
+            criticalRate: 100
+        )
+        var baseDefender = TestActorBuilder.makeDefender(
+            physicalDefense: 2000,
+            luck: 35
+        )
+        var baseContext = TestActorBuilder.makeContext(
+            seed: seed,
+            attacker: baseAttacker,
+            defender: baseDefender
+        )
+        let (baselineDamage, baseIsCritical) = BattleTurnEngine.computePhysicalDamage(
+            attacker: baseAttacker,
+            defender: &baseDefender,
+            hitIndex: 1,
+            context: &baseContext
+        )
+        XCTAssertTrue(baseIsCritical, "criticalRate=100なのでクリティカル発動すべき")
+
+        // 耐性あり（criticalTakenMultiplier=0.5）
+        let resistAttacker = TestActorBuilder.makeAttacker(
             physicalAttack: 5000,
             luck: 35,
             criticalRate: 100
@@ -262,28 +309,29 @@ final class CriticalHitTests: XCTestCase {
         var defenderSkillEffects = BattleActor.SkillEffects.neutral
         defenderSkillEffects.damage.criticalTakenMultiplier = 0.5
 
-        var defender = TestActorBuilder.makeDefender(
+        var resistDefender = TestActorBuilder.makeDefender(
             physicalDefense: 2000,
             luck: 35,
             skillEffects: defenderSkillEffects
         )
-        var context = TestActorBuilder.makeContext(
-            seed: 42,
-            attacker: attacker,
-            defender: defender
+        var resistContext = TestActorBuilder.makeContext(
+            seed: seed,
+            attacker: resistAttacker,
+            defender: resistDefender
         )
-
-        let (damage, isCritical) = BattleTurnEngine.computePhysicalDamage(
-            attacker: attacker,
-            defender: &defender,
+        let (resistDamage, resistIsCritical) = BattleTurnEngine.computePhysicalDamage(
+            attacker: resistAttacker,
+            defender: &resistDefender,
             hitIndex: 1,
-            context: &context
+            context: &resistContext
         )
+        XCTAssertTrue(resistIsCritical, "criticalRate=100なのでクリティカル発動すべき")
 
-        XCTAssertTrue(isCritical, "criticalRate=100なのでクリティカル発動すべき")
-        // クリティカル耐性50%でダメージ軽減
-        // 基本クリティカルダメージ（4000付近）× 0.5 = 2000付近
-        XCTAssertLessThan(damage, 2500,
-            "クリティカル耐性50%: 期待<2500, 実測\(damage)")
+        // 比率検証: 耐性50%でダメージが半減
+        let expectedRatio = 0.5
+        let actualRatio = Double(resistDamage) / Double(baselineDamage)
+        XCTAssertEqual(actualRatio, expectedRatio, accuracy: 0.02,
+            "クリティカル耐性50%: 期待比率\(expectedRatio), 実測\(actualRatio) " +
+            "(baseline=\(baselineDamage), resist=\(resistDamage))")
     }
 }

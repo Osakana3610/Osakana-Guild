@@ -14,22 +14,26 @@ import XCTest
 /// 境界値テスト: luck=1, 18, 35（ルール遵守）
 final class HitCalculationTests: XCTestCase {
 
-    // MARK: - 決定的テスト（境界値）
+    // MARK: - 決定的テスト（境界値クランプ）
 
-    /// 命中率上限（95%）のテスト
+    /// 命中率上限（95%）クランプのテスト
+    ///
+    /// 検証方法: 理論上0.95を超える条件を作り、結果が0.95にクランプされることを確認
     ///
     /// 入力:
-    ///   - 攻撃者: hitRate=100, luck=35
-    ///   - 防御者: evasionRate=0, luck=35
+    ///   - 攻撃者: hitRate=200, luck=35（極端に高い命中）
+    ///   - 防御者: evasionRate=0, luck=1（極端に低い回避）
     ///
-    /// 計算:
-    ///   baseRatio = 100 / (100 + 1) = 0.99
-    ///   両者luck=35なので乱数幅は同程度
-    ///   rawChanceは0.95以上になるケースが多い
-    ///   → clamp上限で0.95
-    func testHitChanceUpperBound() {
-        let attacker = TestActorBuilder.makeAttacker(hitRate: 100, luck: 35)
-        let defender = TestActorBuilder.makeDefender(evasionRate: 0, luck: 35)
+    /// 理論値（クランプ前）:
+    ///   baseRatio = 200 / (200 + 1) ≈ 0.995
+    ///   攻撃者luck=35（乱数強）、防御者luck=1（乱数弱）
+    ///   randomFactor = attackRoll(高) / defenderRoll(低) > 1.0
+    ///   rawChance > 0.995（確実に0.95を超える）
+    ///
+    /// 期待: クランプにより0.95
+    func testHitChanceUpperBoundClamp() {
+        let attacker = TestActorBuilder.makeAttacker(hitRate: 200, luck: 35)
+        let defender = TestActorBuilder.makeDefender(evasionRate: 0, luck: 1)
         var context = TestActorBuilder.makeContext(seed: 42, attacker: attacker, defender: defender)
 
         let hitChance = BattleTurnEngine.computeHitChance(
@@ -40,25 +44,29 @@ final class HitCalculationTests: XCTestCase {
             context: &context
         )
 
-        // 命中率上限は95%
-        XCTAssertLessThanOrEqual(hitChance, 0.95,
-            "命中率上限: 期待<=0.95, 実測\(hitChance)")
+        // クランプにより正確に0.95になるはず
+        XCTAssertEqual(hitChance, 0.95, accuracy: 0.001,
+            "命中率上限クランプ: 期待0.95, 実測\(hitChance)")
     }
 
-    /// 命中率下限（5%）のテスト
+    /// 命中率下限（5%）クランプのテスト
+    ///
+    /// 検証方法: 理論上0.05を下回る条件を作り、結果が0.05にクランプされることを確認
     ///
     /// 入力:
-    ///   - 攻撃者: hitRate=0, luck=1
-    ///   - 防御者: evasionRate=100, luck=35, agility=20
+    ///   - 攻撃者: hitRate=1, luck=1（極端に低い命中）
+    ///   - 防御者: evasionRate=200, luck=35, agility=20（極端に高い回避）
     ///
-    /// 計算:
-    ///   baseRatio = 1 / (1 + 100) = 0.0099
+    /// 理論値（クランプ前）:
+    ///   baseRatio = 1 / (1 + 200) ≈ 0.005
     ///   攻撃者luck=1（乱数弱）、防御者luck=35（乱数強）
-    ///   rawChanceは非常に低い
-    ///   → clamp下限で0.05（agility<=20でclampProbabilityの補正なし）
-    func testHitChanceLowerBound() {
-        let attacker = TestActorBuilder.makeAttacker(hitRate: 0, luck: 1)
-        let defender = TestActorBuilder.makeDefender(evasionRate: 100, luck: 35)
+    ///   randomFactor = attackRoll(低) / defenderRoll(高) < 1.0
+    ///   rawChance < 0.005（確実に0.05を下回る）
+    ///
+    /// 期待: クランプにより0.05（agility<=20でclampProbabilityの補正なし）
+    func testHitChanceLowerBoundClamp() {
+        let attacker = TestActorBuilder.makeAttacker(hitRate: 1, luck: 1)
+        let defender = TestActorBuilder.makeDefender(evasionRate: 200, luck: 35)
         var context = TestActorBuilder.makeContext(seed: 42, attacker: attacker, defender: defender)
 
         let hitChance = BattleTurnEngine.computeHitChance(
@@ -69,9 +77,9 @@ final class HitCalculationTests: XCTestCase {
             context: &context
         )
 
-        // 命中率下限は5%（agility<=20の場合）
-        XCTAssertGreaterThanOrEqual(hitChance, 0.05,
-            "命中率下限: 期待>=0.05, 実測\(hitChance)")
+        // クランプにより正確に0.05になるはず
+        XCTAssertEqual(hitChance, 0.05, accuracy: 0.001,
+            "命中率下限クランプ: 期待0.05, 実測\(hitChance)")
     }
 
     // MARK: - hitAccuracyModifier（ヒット減衰）
