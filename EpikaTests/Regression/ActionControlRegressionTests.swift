@@ -248,4 +248,79 @@ final class ActionControlRegressionTests: XCTestCase {
         XCTAssertGreaterThan(reactionCount, 0,
             "追加行動(4f86076): テスト条件として反撃が発生していること")
     }
+
+    // MARK: - FB0013: 敵が複数回攻撃に見える
+
+    /// バグ: 敵が1ターンに複数回攻撃を行っているように見える
+    ///
+    /// 原因: physicalEvadeエフェクトのactor/targetが逆に記録されていた
+    ///       味方が敵を攻撃して敵が回避した場合に「敵の攻撃！味方は攻撃をかわした！」と
+    ///       表示され、敵が何度も攻撃しているように見えていた
+    /// 修正: physicalEvadeのactor/targetをphysicalDamageと同様に統一
+    ///
+    /// 仮説:
+    ///   - 敵が味方を攻撃して味方が回避した場合
+    ///   - declarationのactorは敵（攻撃側）
+    ///   - physicalEvadeのtargetは味方（回避側）
+    ///
+    /// 検証: physicalEvade発生時のactor/target関係が正しいことを確認
+    func testPhysicalEvadeActorTarget_FB0013() {
+        // 高回避率の味方（後攻）
+        let player = TestActorBuilder.makePlayer(
+            maxHP: 50000,
+            physicalAttack: 100,  // 低攻撃力
+            evasionRate: 100,     // 100%回避
+            luck: 35,
+            agility: 1            // 後攻
+        )
+
+        // 敵は先攻で攻撃
+        let enemy = TestActorBuilder.makeEnemy(
+            maxHP: 50000,
+            physicalAttack: 1000,
+            hitRate: 50,          // 命中率50%（回避が発生しやすく）
+            luck: 35,
+            agility: 35           // 先攻
+        )
+
+        var players = [player]
+        var enemies = [enemy]
+        var random = GameRandomSource(seed: 42)
+
+        let result = BattleTurnEngine.runBattle(
+            players: &players,
+            enemies: &enemies,
+            statusEffects: [:],
+            skillDefinitions: [:],
+            random: &random
+        )
+
+        // physicalEvadeエフェクトを含むエントリを検索
+        let evadeEntries = result.battleLog.entries.filter { entry in
+            entry.effects.contains { $0.kind == .physicalEvade }
+        }
+
+        // 仮説1: 回避が発生していること（テスト条件の妥当性）
+        XCTAssertFalse(evadeEntries.isEmpty,
+            "回避判定(FB0013): 高回避率なので回避が発生すべき")
+
+        // 仮説2: 回避時のactor/target関係が正しいこと
+        // actor = 攻撃者（敵）、physicalEvadeのtarget = 回避者（味方）
+        for entry in evadeEntries {
+            // entryのactorが敵側（enemy）であることを確認
+            // actorが128以上なら敵（BattleContext.actorIndexの仕様）
+            let actorValue = entry.actor ?? 0
+            let actorIsEnemy = actorValue >= 128
+
+            // physicalEvadeのtargetが味方側（player）であることを確認
+            let evadeEffect = entry.effects.first { $0.kind == .physicalEvade }
+            let targetIsPlayer = (evadeEffect?.target ?? 128) < 128
+
+            if actorIsEnemy {
+                // 敵が攻撃して回避が発生した場合、targetは味方であるべき
+                XCTAssertTrue(targetIsPlayer,
+                    "回避判定(FB0013): 敵の攻撃を味方が回避した場合、evadeのtargetは味方(actor=\(actorValue), target=\(evadeEffect?.target ?? 0))")
+            }
+        }
+    }
 }

@@ -291,4 +291,111 @@ final class SkillActivationRegressionTests: XCTestCase {
         XCTAssertTrue(hasPursuitAttack,
             "追撃発動: 敵を倒した時に追撃が発動する")
     }
+
+    // MARK: - FB0008: 魔法が発動しない
+
+    /// バグ: 魔法使い/僧侶魔法を習得していても戦闘中に発動しない
+    ///
+    /// 原因: 行動選択ロジックが重み付きランダムで、100%設定でも確実に発動しなかった
+    ///       また、spellSchoolのマッピングが逆になっていた
+    /// 修正: 行動選択ロジックとspellSchoolマッピングを修正
+    ///
+    /// 仮説:
+    ///   - mageMagic=100の場合、攻撃魔法が発動するはず
+    ///   - 戦闘ログにmageMagicのdeclarationが含まれる
+    ///
+    /// 検証: battleLogでmageMagic declarationの存在を確認
+    func testMagicActivation_FB0008() {
+        // テスト用の魔法使い呪文を定義
+        let testSpell = SpellDefinition(
+            id: 1,
+            name: "テスト魔法",
+            school: .mage,
+            tier: 1,
+            unlockLevel: 1,
+            category: .damage,
+            targeting: .singleEnemy,
+            maxTargetsBase: 1,
+            extraTargetsPerLevels: nil,
+            hitsPerCast: 1,
+            basePowerMultiplier: 1.0,
+            statusId: nil,
+            buffs: [],
+            healMultiplier: nil,
+            healPercentOfMaxHP: nil,
+            castCondition: .none,
+            description: "テスト用魔法"
+        )
+
+        // 呪文ロードアウトを作成
+        let spellLoadout = SkillRuntimeEffects.SpellLoadout(mage: [testSpell], priest: [])
+
+        // actionResourcesで呪文チャージを設定
+        var actionResources = BattleActionResource()
+        actionResources.setSpellCharges(for: testSpell.id, current: 10, max: 10)
+
+        // 魔法使い魔法100%のプレイヤー（攻撃は0%）
+        let snapshot = CharacterValues.Combat(
+            maxHP: 50000,
+            physicalAttack: 100,
+            magicalAttack: 5000,
+            physicalDefense: 1000,
+            magicalDefense: 1000,
+            hitRate: 100,
+            evasionRate: 0,
+            criticalRate: 0,
+            attackCount: 1.0,
+            magicalHealing: 0,
+            trapRemoval: 0,
+            additionalDamage: 0,
+            breathDamage: 0,
+            isMartialEligible: false
+        )
+
+        let player = BattleActor(
+            identifier: "test.mage",
+            displayName: "魔法使い",
+            kind: .player,
+            formationSlot: 1,
+            strength: 20,
+            wisdom: 100,
+            spirit: 50,
+            vitality: 50,
+            agility: 35,
+            luck: 35,
+            isMartialEligible: false,
+            snapshot: snapshot,
+            currentHP: snapshot.maxHP,
+            actionRates: BattleActionRates(attack: 0, priestMagic: 0, mageMagic: 100, breath: 0),
+            actionResources: actionResources,
+            spells: spellLoadout
+        )
+
+        let enemy = TestActorBuilder.makeEnemy(
+            maxHP: 50000,
+            physicalAttack: 100,
+            luck: 35,
+            agility: 1
+        )
+
+        var players = [player]
+        var enemies = [enemy]
+        var random = GameRandomSource(seed: 42)
+
+        let result = BattleTurnEngine.runBattle(
+            players: &players,
+            enemies: &enemies,
+            statusEffects: [:],
+            skillDefinitions: [:],
+            random: &random
+        )
+
+        // 仮説: mageMagic declarationが存在する
+        let hasMageMagic = result.battleLog.entries.contains { entry in
+            entry.declaration.kind == ActionKind.mageMagic
+        }
+
+        XCTAssertTrue(hasMageMagic,
+            "魔法発動(FB0008): mageMagic=100なら魔法使い魔法が発動する")
+    }
 }
