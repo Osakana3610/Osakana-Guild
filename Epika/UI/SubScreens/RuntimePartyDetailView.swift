@@ -281,7 +281,7 @@ struct RuntimePartyDetailView: View {
                 if let dungeon = selectedDungeon,
                    updated.lastSelectedDifficulty > dungeon.highestUnlockedDifficulty {
                     do {
-                        _ = try await partyService.setLastSelectedDifficulty(persistentIdentifier: updated.persistentIdentifier,
+                        _ = try await partyService.setLastSelectedDifficulty(partyId: updated.id,
                                                                               difficulty: dungeon.highestUnlockedDifficulty)
                         try await partyState.refresh()
                         if let adjusted = partyState.parties.first(where: { $0.id == updated.id }) {
@@ -335,7 +335,7 @@ struct RuntimePartyDetailView: View {
 
     private func updateDungeonSelection(dungeonId: UInt16) async -> Bool {
         do {
-            _ = try await partyService.setLastSelectedDungeon(persistentIdentifier: currentParty.persistentIdentifier, dungeonId: dungeonId)
+            _ = try await partyService.setLastSelectedDungeon(partyId: currentParty.id, dungeonId: dungeonId)
             await refreshCachedParty()
             return true
         } catch {
@@ -346,7 +346,7 @@ struct RuntimePartyDetailView: View {
 
     private func updateTargetFloor(_ floor: Int) async {
         do {
-            _ = try await partyService.setTargetFloor(persistentIdentifier: currentParty.persistentIdentifier, floor: UInt8(floor))
+            _ = try await partyService.setTargetFloor(partyId: currentParty.id, floor: UInt8(floor))
             await refreshCachedParty()
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
@@ -355,7 +355,7 @@ struct RuntimePartyDetailView: View {
 
     private func updateDifficultySelection(_ difficulty: UInt8) async -> Bool {
         do {
-            _ = try await partyService.setLastSelectedDifficulty(persistentIdentifier: currentParty.persistentIdentifier,
+            _ = try await partyService.setLastSelectedDifficulty(partyId: currentParty.id,
                                                                  difficulty: difficulty)
             await refreshCachedParty()
             return true
@@ -737,7 +737,7 @@ private struct PartyNameEditorView: View {
 
     private func save() async {
         do {
-            _ = try await partyService.updatePartyName(persistentIdentifier: party.persistentIdentifier, name: name.trimmingCharacters(in: .whitespaces))
+            _ = try await partyService.updatePartyName(partyId: party.id, name: name.trimmingCharacters(in: .whitespaces))
             await onComplete()
             dismiss()
         } catch {

@@ -47,7 +47,7 @@ extension AppServices {
         }
         let highestDifficulty = max(0, dungeonSnapshot.highestUnlockedDifficulty)
         if partySnapshot.lastSelectedDifficulty > highestDifficulty {
-            partySnapshot = try await party.setLastSelectedDifficulty(persistentIdentifier: partySnapshot.persistentIdentifier,
+            partySnapshot = try await party.setLastSelectedDifficulty(partyId: partySnapshot.id,
                                                                       difficulty: UInt8(highestDifficulty))
         }
         let runDifficulty = partySnapshot.lastSelectedDifficulty
@@ -252,7 +252,7 @@ extension AppServices {
         let highestDifficulty = max(0, dungeonSnapshot.highestUnlockedDifficulty)
         if partySnapshot.lastSelectedDifficulty > highestDifficulty {
             partySnapshot = try await party.setLastSelectedDifficulty(
-                persistentIdentifier: partySnapshot.persistentIdentifier,
+                partyId: partySnapshot.id,
                 difficulty: UInt8(highestDifficulty)
             )
         }

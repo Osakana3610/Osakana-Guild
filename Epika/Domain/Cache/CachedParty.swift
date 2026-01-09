@@ -9,7 +9,6 @@
 //
 // 【データ構造】
 //   - CachedParty: パーティ情報
-//     - persistentIdentifier: SwiftData永続化ID
 //     - id: パーティID（1〜8）
 //     - displayName: 表示名
 //     - lastSelectedDungeonId: 最後に選択したダンジョン（nil=未選択）
@@ -29,10 +28,8 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 
 struct CachedParty: Identifiable, Sendable, Hashable {
-    let persistentIdentifier: PersistentIdentifier
     var id: UInt8                              // 1〜8
     var displayName: String
     var lastSelectedDungeonId: UInt16?         // nil=未選択

@@ -50,7 +50,7 @@ final class PartyViewState {
     }
 
     func updatePartyMembers(party: CachedParty, memberIds: [UInt8]) async throws {
-        _ = try await appServices.party.updatePartyMembers(persistentIdentifier: party.persistentIdentifier, memberIds: memberIds)
+        _ = try await appServices.party.updatePartyMembers(partyId: party.id, memberIds: memberIds)
         try await refresh()
     }
 }

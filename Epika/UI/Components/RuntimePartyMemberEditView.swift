@@ -134,7 +134,7 @@ struct RuntimePartyMemberEditView: View {
 
     private func loadCharactersInOtherParties() async {
         do {
-            let ids = try await partyService.characterIdsInOtherParties(excluding: party.persistentIdentifier)
+            let ids = try await partyService.characterIdsInOtherParties(excluding: party.id)
             await MainActor.run { characterIdsInOtherParties = ids }
         } catch {
             await MainActor.run {
