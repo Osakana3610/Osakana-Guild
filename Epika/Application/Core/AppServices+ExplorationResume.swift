@@ -108,7 +108,7 @@ extension AppServices {
         // 8. 通常の探索フローに合流
         let runtimeMap = Dictionary(uniqueKeysWithValues: partyState.members.map { ($0.character.id, $0.character) })
         let memberIds = partySnapshot.memberCharacterIds
-        let recordId = record.persistentModelID
+        let runId = ExplorationProgressService.RunIdentifier(partyId: partyId, startedAt: startedAt)
         let runDifficulty = Int(record.difficulty)
         let dungeonId = record.dungeonId
 
@@ -119,7 +119,7 @@ extension AppServices {
                     return
                 }
                 await self.processExplorationStream(session: session,
-                                                    recordId: recordId,
+                                                    runId: runId,
                                                     memberIds: memberIds,
                                                     runtimeMap: runtimeMap,
                                                     runDifficulty: runDifficulty,

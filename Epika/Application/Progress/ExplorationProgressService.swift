@@ -8,8 +8,9 @@
 //   - 探索レコードの作成・更新・終了処理
 //
 // 【公開API】
-//   - beginRun(...) → PersistentIdentifier - 探索開始、レコード作成
-//   - makeEventSession(...) → EventSession - イベント記録セッション
+//   - beginRun(...) → RunIdentifier - 探索開始、レコード作成
+//   - appendEvent(...) - イベント追加
+//   - finalizeRun(...) - 探索終了（完了・全滅）
 //   - cancelRun(...) - 探索キャンセル
 //   - recentExplorationSummaries(...) - 最新探索サマリー取得
 //   - runningExplorationSummaries() - 実行中探索サマリー取得
@@ -20,6 +21,7 @@
 // 【データ管理】
 //   - 最大200件を保持（超過時は古いものから削除）
 //   - スカラフィールドとリレーションで永続化（JSONは使用しない）
+//   - RunIdentifier(partyId, startedAt)で探索を一意に識別
 //
 // 【使用箇所】
 //   - AppServices.ExplorationRun: 探索開始時のレコード作成
@@ -432,191 +434,6 @@ actor ExplorationProgressService {
 
     /// 探索履歴のキャッシュ
     private var cachedExplorations: [CachedExploration]?
-
-    /// 探索イベントを記録するためのセッション
-    /// サービスへの参照を持たず、必要な依存のみ受け取る
-    /// バックグラウンドスレッドで作成・使用することを想定
-    final class EventSession {
-        private let context: ModelContext
-        private let runRecord: ExplorationRunRecord
-        private var needsCacheInvalidation = false
-
-        init(contextProvider: SwiftDataContextProvider, runId: PersistentIdentifier) throws {
-            self.context = contextProvider.makeContext()
-            guard let record = context.model(for: runId) as? ExplorationRunRecord else {
-                throw ProgressPersistenceError.explorationRunNotFoundByPersistentId
-            }
-            self.runRecord = record
-        }
-
-        /// キャッシュの無効化が必要かどうか
-        /// セッション終了後に呼び出し側でサービスの invalidateCache() を呼ぶ
-        var shouldInvalidateCache: Bool { needsCacheInvalidation }
-
-        @discardableResult
-        func appendEvent(event: ExplorationEventLogEntry,
-                         battleLog: BattleLogArchive?,
-                         occurredAt: Date,
-                         randomState: UInt64,
-                         superRareState: SuperRareDailyState,
-                         droppedItemIds: Set<UInt16>) throws -> BattleLogRecord? {
-            let eventRecord = buildBaseEventRecord(from: event, occurredAt: occurredAt)
-            eventRecord.run = runRecord
-            context.insert(eventRecord)
-            let battleLogRecord = try populateEventRecordRelationships(eventRecord: eventRecord,
-                                                                       from: event,
-                                                                       battleLog: battleLog)
-            runRecord.totalExp += eventRecord.exp
-            runRecord.totalGold += eventRecord.gold
-            runRecord.finalFloor = eventRecord.floor
-            runRecord.randomState = Int64(bitPattern: randomState)
-            runRecord.superRareJstDate = superRareState.jstDate
-            runRecord.superRareHasTriggered = superRareState.hasTriggered
-            runRecord.droppedItemIdsData = ExplorationProgressService.encodeItemIds(droppedItemIds)
-            return battleLogRecord
-        }
-
-        func finalizeRun(endState: ExplorationEndState,
-                         endedAt: Date,
-                         totalExperience: Int,
-                         totalGold: Int,
-                         autoSellGold: Int = 0,
-                         autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []) {
-            runRecord.endedAt = endedAt
-            runRecord.result = resultValue(for: endState)
-            runRecord.totalExp = UInt32(totalExperience)
-            runRecord.totalGold = UInt32(totalGold)
-            runRecord.autoSellGold = UInt32(clamping: max(0, autoSellGold))
-            updateAutoSellRecords(autoSoldItems)
-            if case let .defeated(floorNumber, _, _) = endState {
-                runRecord.finalFloor = UInt8(floorNumber)
-            }
-            needsCacheInvalidation = true
-        }
-
-        func cancelRun(endedAt: Date = Date()) {
-            runRecord.endedAt = endedAt
-            runRecord.result = ExplorationResult.cancelled.rawValue
-            needsCacheInvalidation = true
-        }
-
-        func flushIfNeeded() throws {
-            guard context.hasChanges else { return }
-            try context.save()
-        }
-
-        // MARK: - Private
-
-        private func updateAutoSellRecords(_ entries: [CachedExploration.Rewards.AutoSellEntry]) {
-            if !runRecord.autoSellItems.isEmpty {
-                for record in runRecord.autoSellItems {
-                    context.delete(record)
-                }
-                runRecord.autoSellItems.removeAll()
-            }
-            guard !entries.isEmpty else { return }
-            for entry in entries where entry.quantity > 0 {
-                let record = ExplorationAutoSellRecord(
-                    superRareTitleId: entry.superRareTitleId,
-                    normalTitleId: entry.normalTitleId,
-                    itemId: entry.itemId,
-                    quantity: UInt16(clamping: entry.quantity)
-                )
-                record.run = runRecord
-                runRecord.autoSellItems.append(record)
-                context.insert(record)
-            }
-        }
-
-        private func buildBaseEventRecord(from event: ExplorationEventLogEntry,
-                                          occurredAt: Date) -> ExplorationEventRecord {
-            let kind: UInt8
-            var enemyId: UInt16?
-            let battleResult: UInt8? = nil
-            var scriptedEventId: UInt8?
-
-            switch event.kind {
-            case .nothing:
-                kind = EventKind.nothing.rawValue
-
-            case .combat(let summary):
-                kind = EventKind.combat.rawValue
-                enemyId = summary.enemy.id
-
-            case .scripted(let summary):
-                kind = EventKind.scripted.rawValue
-                scriptedEventId = summary.eventId
-            }
-
-            return ExplorationEventRecord(
-                floor: UInt8(event.floorNumber),
-                kind: kind,
-                enemyId: enemyId,
-                battleResult: battleResult,
-                scriptedEventId: scriptedEventId,
-                exp: UInt32(event.experienceGained),
-                gold: UInt32(event.goldGained),
-                occurredAt: occurredAt
-            )
-        }
-
-        private func populateEventRecordRelationships(eventRecord: ExplorationEventRecord,
-                                                      from event: ExplorationEventLogEntry,
-                                                      battleLog: BattleLogArchive?) throws -> BattleLogRecord? {
-            for drop in event.drops {
-                let dropRecord = ExplorationDropRecord(
-                    superRareTitleId: drop.superRareTitleId,
-                    normalTitleId: drop.normalTitleId,
-                    itemId: drop.item.id,
-                    quantity: UInt16(drop.quantity)
-                )
-                dropRecord.event = eventRecord
-                context.insert(dropRecord)
-            }
-
-            if let archive = battleLog {
-                eventRecord.battleResult = battleResultValue(archive.result)
-
-                let logRecord = BattleLogRecord()
-                logRecord.enemyId = archive.enemyId
-                logRecord.enemyName = archive.enemyName
-                logRecord.result = battleResultValue(archive.result)
-                logRecord.turns = UInt8(archive.turns)
-                logRecord.timestamp = archive.timestamp
-                logRecord.outcome = archive.battleLog.outcome
-                logRecord.event = eventRecord
-
-                logRecord.logData = ExplorationProgressService.encodeBattleLogData(
-                    initialHP: archive.battleLog.initialHP,
-                    entries: archive.battleLog.entries,
-                    outcome: archive.battleLog.outcome,
-                    turns: archive.battleLog.turns,
-                    playerSnapshots: archive.playerSnapshots,
-                    enemySnapshots: archive.enemySnapshots
-                )
-
-                context.insert(logRecord)
-                return logRecord
-            }
-            return nil
-        }
-
-        private func battleResultValue(_ result: BattleService.BattleResult) -> UInt8 {
-            switch result {
-            case .victory: return BattleResult.victory.rawValue
-            case .defeat: return BattleResult.defeat.rawValue
-            case .retreat: return BattleResult.retreat.rawValue
-            }
-        }
-
-        private func resultValue(for state: ExplorationEndState) -> UInt8 {
-            switch state {
-            case .completed: return ExplorationResult.completed.rawValue
-            case .defeated: return ExplorationResult.defeated.rawValue
-            case .cancelled: return ExplorationResult.cancelled.rawValue
-            }
-        }
-    }
 
     init(contextProvider: SwiftDataContextProvider, masterDataCache: MasterDataCache) {
         self.contextProvider = contextProvider
@@ -1043,12 +860,18 @@ actor ExplorationProgressService {
         let seed: UInt64
     }
 
+    /// 探索レコードの識別子（partyIdとstartedAtで一意に識別）
+    struct RunIdentifier: Sendable, Hashable {
+        let partyId: UInt8
+        let startedAt: Date
+    }
+
     func beginRun(party: CachedParty,
                   dungeon: DungeonDefinition,
                   difficulty: Int,
                   targetFloor: Int,
                   startedAt: Date,
-                  seed: UInt64) async throws -> PersistentIdentifier {
+                  seed: UInt64) throws -> RunIdentifier {
         let context = contextProvider.makeContext()
 
         let runRecord = ExplorationRunRecord(
@@ -1061,18 +884,17 @@ actor ExplorationProgressService {
         )
         context.insert(runRecord)
         try saveIfNeeded(context)
-        invalidateCache()  // パージや新規レコードでキャッシュが古くなる可能性
-        return runRecord.persistentModelID
+        invalidateCache()
+        return RunIdentifier(partyId: party.id, startedAt: startedAt)
     }
 
     /// 複数の探索を一括で開始（1回のsaveで済ませる）
-    func beginRunsBatch(_ params: [BeginRunParams]) throws -> [UInt8: PersistentIdentifier] {
+    func beginRunsBatch(_ params: [BeginRunParams]) throws -> [UInt8: RunIdentifier] {
         guard !params.isEmpty else { return [:] }
 
         let context = contextProvider.makeContext()
 
-        // レコードを作成してinsert（IDはsave後に取得）
-        var records: [(partyId: UInt8, record: ExplorationRunRecord)] = []
+        var identifiers: [(partyId: UInt8, startedAt: Date)] = []
         for param in params {
             let runRecord = ExplorationRunRecord(
                 partyId: param.party.id,
@@ -1083,29 +905,21 @@ actor ExplorationProgressService {
                 seed: Int64(bitPattern: param.seed)
             )
             context.insert(runRecord)
-            records.append((param.party.id, runRecord))
+            identifiers.append((param.party.id, param.startedAt))
         }
 
-        // save後にIDを取得（save前は一時IDになるため）
         try saveIfNeeded(context)
         invalidateCache()
 
-        var results: [UInt8: PersistentIdentifier] = [:]
-        for (partyId, record) in records {
-            results[partyId] = record.persistentModelID
+        var results: [UInt8: RunIdentifier] = [:]
+        for (partyId, startedAt) in identifiers {
+            results[partyId] = RunIdentifier(partyId: partyId, startedAt: startedAt)
         }
         return results
     }
 
-    func cancelRun(runId: PersistentIdentifier,
-                   endedAt: Date = Date()) async throws {
-        let session = try makeEventSession(runId: runId)
-        session.cancelRun(endedAt: endedAt)
-        try session.flushIfNeeded()
-    }
-
     /// partyIdとstartedAtで特定のRunをキャンセル
-    func cancelRun(partyId: UInt8, startedAt: Date, endedAt: Date = Date()) async throws {
+    func cancelRun(partyId: UInt8, startedAt: Date, endedAt: Date = Date()) throws {
         let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
@@ -1119,8 +933,80 @@ actor ExplorationProgressService {
         invalidateCache()
     }
 
-    func makeEventSession(runId: PersistentIdentifier) throws -> EventSession {
-        try EventSession(contextProvider: contextProvider, runId: runId)
+    // MARK: - Event Recording Methods
+
+    /// 探索イベントを追加
+    @discardableResult
+    func appendEvent(partyId: UInt8,
+                     startedAt: Date,
+                     event: ExplorationEventLogEntry,
+                     battleLog: BattleLogArchive?,
+                     occurredAt: Date,
+                     randomState: UInt64,
+                     superRareState: SuperRareDailyState,
+                     droppedItemIds: Set<UInt16>) throws -> PersistentIdentifier? {
+        let context = contextProvider.makeContext()
+        let descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+        )
+        guard let runRecord = try context.fetch(descriptor).first else {
+            throw ProgressPersistenceError.explorationRunNotFound(runId: UUID())
+        }
+
+        let eventRecord = buildBaseEventRecord(from: event, occurredAt: occurredAt)
+        eventRecord.run = runRecord
+        context.insert(eventRecord)
+
+        let battleLogRecord = try populateEventRecordRelationships(
+            context: context,
+            eventRecord: eventRecord,
+            from: event,
+            battleLog: battleLog
+        )
+
+        runRecord.totalExp += eventRecord.exp
+        runRecord.totalGold += eventRecord.gold
+        runRecord.finalFloor = eventRecord.floor
+        runRecord.randomState = Int64(bitPattern: randomState)
+        runRecord.superRareJstDate = superRareState.jstDate
+        runRecord.superRareHasTriggered = superRareState.hasTriggered
+        runRecord.droppedItemIdsData = Self.encodeItemIds(droppedItemIds)
+
+        try saveIfNeeded(context)
+        return battleLogRecord?.persistentModelID
+    }
+
+    /// 探索を終了（完了・全滅）
+    func finalizeRun(partyId: UInt8,
+                     startedAt: Date,
+                     endState: ExplorationEndState,
+                     endedAt: Date,
+                     totalExperience: Int,
+                     totalGold: Int,
+                     autoSellGold: Int = 0,
+                     autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []) throws {
+        let context = contextProvider.makeContext()
+        let descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+        )
+        guard let runRecord = try context.fetch(descriptor).first else {
+            throw ProgressPersistenceError.explorationRunNotFound(runId: UUID())
+        }
+
+        runRecord.endedAt = endedAt
+        runRecord.result = resultValue(for: endState)
+        runRecord.totalExp = UInt32(totalExperience)
+        runRecord.totalGold = UInt32(totalGold)
+        runRecord.autoSellGold = UInt32(clamping: max(0, autoSellGold))
+
+        updateAutoSellRecords(context: context, runRecord: runRecord, entries: autoSoldItems)
+
+        if case let .defeated(floorNumber, _, _) = endState {
+            runRecord.finalFloor = UInt8(floorNumber)
+        }
+
+        try saveIfNeeded(context)
+        invalidateCache()
     }
 
     /// 現在探索中の探索サマリーを取得（軽量：encounterLogsなし）
@@ -1168,6 +1054,119 @@ private extension ExplorationProgressService {
     func saveIfNeeded(_ context: ModelContext) throws {
         if context.hasChanges {
             try context.save()
+        }
+    }
+
+    func buildBaseEventRecord(from event: ExplorationEventLogEntry,
+                              occurredAt: Date) -> ExplorationEventRecord {
+        let kind: UInt8
+        var enemyId: UInt16?
+        let battleResult: UInt8? = nil
+        var scriptedEventId: UInt8?
+
+        switch event.kind {
+        case .nothing:
+            kind = EventKind.nothing.rawValue
+
+        case .combat(let summary):
+            kind = EventKind.combat.rawValue
+            enemyId = summary.enemy.id
+
+        case .scripted(let summary):
+            kind = EventKind.scripted.rawValue
+            scriptedEventId = summary.eventId
+        }
+
+        return ExplorationEventRecord(
+            floor: UInt8(event.floorNumber),
+            kind: kind,
+            enemyId: enemyId,
+            battleResult: battleResult,
+            scriptedEventId: scriptedEventId,
+            exp: UInt32(event.experienceGained),
+            gold: UInt32(event.goldGained),
+            occurredAt: occurredAt
+        )
+    }
+
+    func populateEventRecordRelationships(context: ModelContext,
+                                          eventRecord: ExplorationEventRecord,
+                                          from event: ExplorationEventLogEntry,
+                                          battleLog: BattleLogArchive?) throws -> BattleLogRecord? {
+        for drop in event.drops {
+            let dropRecord = ExplorationDropRecord(
+                superRareTitleId: drop.superRareTitleId,
+                normalTitleId: drop.normalTitleId,
+                itemId: drop.item.id,
+                quantity: UInt16(drop.quantity)
+            )
+            dropRecord.event = eventRecord
+            context.insert(dropRecord)
+        }
+
+        if let archive = battleLog {
+            eventRecord.battleResult = battleResultValue(archive.result)
+
+            let logRecord = BattleLogRecord()
+            logRecord.enemyId = archive.enemyId
+            logRecord.enemyName = archive.enemyName
+            logRecord.result = battleResultValue(archive.result)
+            logRecord.turns = UInt8(archive.turns)
+            logRecord.timestamp = archive.timestamp
+            logRecord.outcome = archive.battleLog.outcome
+            logRecord.event = eventRecord
+
+            logRecord.logData = Self.encodeBattleLogData(
+                initialHP: archive.battleLog.initialHP,
+                entries: archive.battleLog.entries,
+                outcome: archive.battleLog.outcome,
+                turns: archive.battleLog.turns,
+                playerSnapshots: archive.playerSnapshots,
+                enemySnapshots: archive.enemySnapshots
+            )
+
+            context.insert(logRecord)
+            return logRecord
+        }
+        return nil
+    }
+
+    func updateAutoSellRecords(context: ModelContext,
+                               runRecord: ExplorationRunRecord,
+                               entries: [CachedExploration.Rewards.AutoSellEntry]) {
+        if !runRecord.autoSellItems.isEmpty {
+            for record in runRecord.autoSellItems {
+                context.delete(record)
+            }
+            runRecord.autoSellItems.removeAll()
+        }
+        guard !entries.isEmpty else { return }
+        for entry in entries where entry.quantity > 0 {
+            let record = ExplorationAutoSellRecord(
+                superRareTitleId: entry.superRareTitleId,
+                normalTitleId: entry.normalTitleId,
+                itemId: entry.itemId,
+                quantity: UInt16(clamping: entry.quantity)
+            )
+            record.run = runRecord
+            runRecord.autoSellItems.append(record)
+            context.insert(record)
+        }
+    }
+
+    func battleResultValue(_ result: BattleService.BattleResult) -> UInt8 {
+        switch result {
+        case .victory: return BattleResult.victory.rawValue
+        case .defeat: return BattleResult.defeat.rawValue
+        case .retreat: return BattleResult.retreat.rawValue
+        }
+    }
+
+    func resultValue(for state: ExplorationEndState) -> UInt8 {
+        switch state {
+        case .completed: return ExplorationResult.completed.rawValue
+        case .defeated: return ExplorationResult.defeated.rawValue
+        case .cancelled: return ExplorationResult.cancelled.rawValue
         }
     }
 }

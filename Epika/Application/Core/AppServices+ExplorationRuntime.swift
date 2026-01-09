@@ -32,18 +32,18 @@ import SwiftData
 // MARK: - Exploration Stream Processing & Rewards
 extension AppServices {
     func processExplorationStream(session: ExplorationRuntimeSession,
-                                  recordId: PersistentIdentifier,
+                                  runId: ExplorationProgressService.RunIdentifier,
                                   memberIds: [UInt8],
                                   runtimeMap: [UInt8: CachedCharacter],
                                   runDifficulty: Int,
                                   dungeonId: UInt16,
                                   continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
         await processExplorationStreamCore(
-            runId: session.runId,
+            sessionRunId: session.runId,
             events: session.events,
             waitForCompletion: session.waitForCompletion,
             cancel: session.cancel,
-            recordId: recordId,
+            runId: runId,
             memberIds: memberIds,
             runtimeMap: runtimeMap,
             runDifficulty: runDifficulty,
@@ -53,18 +53,18 @@ extension AppServices {
     }
 
     func processExplorationStream(session: ExplorationRunSession,
-                                  recordId: PersistentIdentifier,
+                                  runId: ExplorationProgressService.RunIdentifier,
                                   memberIds: [UInt8],
                                   runtimeMap: [UInt8: CachedCharacter],
                                   runDifficulty: Int,
                                   dungeonId: UInt16,
                                   continuation: AsyncThrowingStream<ExplorationRunUpdate, Error>.Continuation) async {
         await processExplorationStreamCore(
-            runId: session.runId,
+            sessionRunId: session.runId,
             events: session.events,
             waitForCompletion: session.waitForCompletion,
             cancel: session.cancel,
-            recordId: recordId,
+            runId: runId,
             memberIds: memberIds,
             runtimeMap: runtimeMap,
             runDifficulty: runDifficulty,
@@ -74,11 +74,11 @@ extension AppServices {
     }
 
     private func processExplorationStreamCore(
-        runId: UUID,
+        sessionRunId: UUID,
         events: AsyncStream<ExplorationEngine.StepOutcome>,
         waitForCompletion: @escaping @Sendable () async throws -> ExplorationRunArtifact,
         cancel: @escaping @Sendable () async -> Void,
-        recordId: PersistentIdentifier,
+        runId: ExplorationProgressService.RunIdentifier,
         memberIds: [UInt8],
         runtimeMap: [UInt8: CachedCharacter],
         runDifficulty: Int,
@@ -88,38 +88,9 @@ extension AppServices {
         var totalExperience = 0
         var totalGold = 0
         var totalDrops: [ExplorationDropReward] = []
-        let persistenceSession: ExplorationProgressService.EventSession
-        let characterSession: CharacterProgressService.BattleResultSession
-        do {
-            persistenceSession = try ExplorationProgressService.EventSession(
-                contextProvider: contextProvider,
-                runId: recordId
-            )
-            characterSession = try CharacterProgressService.BattleResultSession(
-                contextProvider: contextProvider,
-                masterData: masterDataCache,
-                characterIds: memberIds
-            )
-        } catch {
-            continuation.finish(throwing: error)
-            return
-        }
-        var pendingExplorationFlush = 0
-        var pendingCharacterFlush = 0
-        let explorationFlushThreshold = 8
-        let characterFlushThreshold = 3
 
         // 探索サービスへの参照をローカルにキャプチャ（asyncクロージャ内で使用）
         let explorationService = exploration
-
-        // セッションクリーンアップ用ヘルパー（deferでasyncが使えないため関数を抽出）
-        func cleanupSessions() async {
-            try? characterSession.flushIfNeeded()
-            try? persistenceSession.flushIfNeeded()
-            if persistenceSession.shouldInvalidateCache {
-                await explorationService.invalidateCache()
-            }
-        }
 
         do {
             for await outcome in events {
@@ -129,42 +100,25 @@ extension AppServices {
                     totalDrops.append(contentsOf: outcome.drops)
                 }
 
-                let battleLogRecord = try persistenceSession.appendEvent(event: outcome.entry,
-                                                                         battleLog: outcome.battleLog,
-                                                                         occurredAt: outcome.entry.occurredAt,
-                                                                         randomState: outcome.randomState,
-                                                                         superRareState: outcome.superRareState,
-                                                                         droppedItemIds: outcome.droppedItemIds)
+                let battleLogId = try await explorationService.appendEvent(
+                    partyId: runId.partyId,
+                    startedAt: runId.startedAt,
+                    event: outcome.entry,
+                    battleLog: outcome.battleLog,
+                    occurredAt: outcome.entry.occurredAt,
+                    randomState: outcome.randomState,
+                    superRareState: outcome.superRareState,
+                    droppedItemIds: outcome.droppedItemIds
+                )
 
-                var battleLogId: PersistentIdentifier?
-                if let logRecord = battleLogRecord {
-                    try persistenceSession.flushIfNeeded()
-                    battleLogId = logRecord.persistentModelID
-                    pendingExplorationFlush = 0
-                } else {
-                    pendingExplorationFlush += 1
-                    if pendingExplorationFlush >= explorationFlushThreshold {
-                        try persistenceSession.flushIfNeeded()
-                        pendingExplorationFlush = 0
-                    }
-                }
-
-                let mutatedCharacters = try await handleExplorationEvent(memberIds: memberIds,
-                                                                         runtimeCharactersById: runtimeMap,
-                                                                         outcome: outcome,
-                                                                         battleResultSession: characterSession)
-                if mutatedCharacters {
-                    pendingCharacterFlush += 1
-                    if pendingCharacterFlush >= characterFlushThreshold {
-                        try characterSession.flushIfNeeded()
-                        pendingCharacterFlush = 0
-                    }
-                }
+                try await handleExplorationEvent(memberIds: memberIds,
+                                                runtimeCharactersById: runtimeMap,
+                                                outcome: outcome)
 
                 let totals = ExplorationRunTotals(totalExperience: totalExperience,
                                                   totalGold: totalGold,
                                                   drops: totalDrops)
-                let update = ExplorationRunUpdate(runId: runId,
+                let update = ExplorationRunUpdate(runId: sessionRunId,
                                                   stage: .step(entry: outcome.entry,
                                                                totals: totals,
                                                                battleLogId: battleLogId))
@@ -172,8 +126,6 @@ extension AppServices {
             }
 
             let artifact = try await waitForCompletion()
-            try persistenceSession.flushIfNeeded()
-            try characterSession.flushIfNeeded()
 
             var autoSellGold = 0
             var autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []
@@ -184,12 +136,10 @@ extension AppServices {
                 let dungeonFloorCount = max(1, artifact.dungeon.floorCount)
                 isFullClear = artifact.floorCount >= dungeonFloorCount
                 if !isFullClear {
-                    // 途中帰還の場合のみ即時更新（クリア処理はバックグラウンドで行う）
                     try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                             difficulty: UInt8(runDifficulty),
                                                             furthestFloor: UInt8(artifact.floorCount))
                 }
-                // 帰還時にドロップ報酬を計算（DB書き込みなし、並列実行可能）
                 let drops = makeItemDropResults(from: artifact.totalDrops)
                 let calculated = try await calculateDropRewards(drops)
                 calculatedDropRewards = calculated
@@ -200,28 +150,28 @@ extension AppServices {
                                                         difficulty: UInt8(runDifficulty),
                                                         furthestFloor: UInt8(max(0, floorNumber)))
             case .cancelled(let floorNumber, _):
-                // 撤退時も部分進捗を更新
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                         difficulty: UInt8(runDifficulty),
                                                         furthestFloor: UInt8(max(0, floorNumber)))
-                // 撤退時もドロップ報酬を計算（目標階層到達、任意帰還、20ターン経過による撤退を含む）
-                // 20ターン経過で撤退した場合、その戦闘のドロップは既に除外されているため、
-                // それまでのドロップのみが報酬として計算される
                 let drops = makeItemDropResults(from: artifact.totalDrops)
                 let calculated = try await calculateDropRewards(drops)
                 calculatedDropRewards = calculated
                 autoSellGold = calculated.autoSellGold
                 autoSoldItems = calculated.autoSellEntries
             }
-            // 探索記録を保存して帰還通知を発火
-            persistenceSession.finalizeRun(endState: artifact.endState,
-                                           endedAt: artifact.endedAt,
-                                           totalExperience: artifact.totalExperience,
-                                           totalGold: artifact.totalGold,
-                                           autoSellGold: autoSellGold,
-                                           autoSoldItems: autoSoldItems)
-            try persistenceSession.flushIfNeeded()
-            let finalUpdate = ExplorationRunUpdate(runId: runId,
+
+            try await explorationService.finalizeRun(
+                partyId: runId.partyId,
+                startedAt: runId.startedAt,
+                endState: artifact.endState,
+                endedAt: artifact.endedAt,
+                totalExperience: artifact.totalExperience,
+                totalGold: artifact.totalGold,
+                autoSellGold: autoSellGold,
+                autoSoldItems: autoSoldItems
+            )
+
+            let finalUpdate = ExplorationRunUpdate(runId: sessionRunId,
                                                    stage: .completed(artifact))
             continuation.yield(finalUpdate)
             continuation.finish()
@@ -233,7 +183,6 @@ extension AppServices {
             let capturedFloorCount = UInt8(artifact.floorCount)
             Task {
                 do {
-                    // ダンジョンクリア処理とストーリー解放（完全クリア時のみ）
                     if isFullClear,
                        let dungeonDef = appServices.masterDataCache.dungeon(capturedDungeonId) {
                         _ = try await appServices.dungeon.markClearedAndUnlockNext(
@@ -244,32 +193,25 @@ extension AppServices {
                         )
                         try await appServices.unlockStoryForDungeonClear(capturedDungeonId)
                     }
-                    // ドロップ報酬永続化（キャッシュ更新は通知経由で自動実行される）
                     if let calculated = calculatedDropRewards {
                         _ = try await appServices.persistCalculatedDropRewards(calculated)
                     }
                 } catch {
-                    // バックグラウンド永続化エラーはログのみ（帰還通知は既に完了）
                     print("[ExplorationRuntime] Background persist error: \(error)")
                 }
             }
-            await cleanupSessions()
         } catch {
             let originalError = error
             await cancel()
             do {
-                persistenceSession.cancelRun(endedAt: Date())
-                try persistenceSession.flushIfNeeded()
+                try await explorationService.cancelRun(partyId: runId.partyId,
+                                                       startedAt: runId.startedAt,
+                                                       endedAt: Date())
             } catch is CancellationError {
-                await cleanupSessions()
-                continuation.finish(throwing: originalError)
-                return
-            } catch let cleanupError {
-                await cleanupSessions()
-                continuation.finish(throwing: cleanupError)
-                return
+                // キャンセル済み
+            } catch {
+                print("[ExplorationRuntime] Cancel cleanup error: \(error)")
             }
-            await cleanupSessions()
             continuation.finish(throwing: originalError)
         }
     }
@@ -277,31 +219,27 @@ extension AppServices {
 
     func handleExplorationEvent(memberIds: [UInt8],
                                 runtimeCharactersById: [UInt8: CachedCharacter],
-                                outcome: ExplorationEngine.StepOutcome,
-                                battleResultSession: CharacterProgressService.BattleResultSession) async throws -> Bool {
+                                outcome: ExplorationEngine.StepOutcome) async throws {
         switch outcome.entry.kind {
         case .nothing:
-            return false
+            return
         case .scripted:
-            return try await applyNonBattleRewards(memberIds: memberIds,
-                                                   runtimeCharactersById: runtimeCharactersById,
-                                                   totalExperience: outcome.entry.experienceGained,
-                                                   goldBase: outcome.entry.goldGained,
-                                                   battleResultSession: battleResultSession)
+            try await applyNonBattleRewards(memberIds: memberIds,
+                                            runtimeCharactersById: runtimeCharactersById,
+                                            totalExperience: outcome.entry.experienceGained,
+                                            goldBase: outcome.entry.goldGained)
         case .combat(let summary):
-            return try await applyCombatRewards(memberIds: memberIds,
-                                                runtimeCharactersById: runtimeCharactersById,
-                                                summary: summary,
-                                                battleResultSession: battleResultSession)
+            try await applyCombatRewards(memberIds: memberIds,
+                                         runtimeCharactersById: runtimeCharactersById,
+                                         summary: summary)
         }
     }
 
     func applyCombatRewards(memberIds: [UInt8],
                             runtimeCharactersById: [UInt8: CachedCharacter],
-                            summary: CombatSummary,
-                            battleResultSession: CharacterProgressService.BattleResultSession) async throws -> Bool {
+                            summary: CombatSummary) async throws {
         let participants = uniqueOrdered(memberIds)
-        guard !participants.isEmpty else { return false }
+        guard !participants.isEmpty else { return }
 
         var updates: [CharacterProgressService.BattleResultUpdate] = []
         for characterId in participants {
@@ -313,7 +251,7 @@ extension AppServices {
                                  experienceDelta: gained,
                                  hpDelta: 0))
         }
-        try battleResultSession.applyBattleResults(updates)
+        _ = try await character.applyBattleResults(updates)
 
         if summary.goldEarned > 0 {
             let multiplier = partyGoldMultiplier(for: runtimeCharactersById.values)
@@ -322,15 +260,12 @@ extension AppServices {
                 _ = try await gameState.addGold(UInt32(reward))
             }
         }
-        return !updates.isEmpty
     }
 
     func applyNonBattleRewards(memberIds: [UInt8],
                                runtimeCharactersById: [UInt8: CachedCharacter],
                                totalExperience: Int,
-                               goldBase: Int,
-                               battleResultSession: CharacterProgressService.BattleResultSession) async throws -> Bool {
-        var mutated = false
+                               goldBase: Int) async throws {
         if totalExperience > 0 {
             let share = distributeFlatExperience(total: totalExperience,
                                                  recipients: memberIds,
@@ -339,14 +274,12 @@ extension AppServices {
                                                                                   experienceDelta: $0.value,
                                                                                   hpDelta: 0) }
             if !updates.isEmpty {
-                try battleResultSession.applyBattleResults(updates)
-                mutated = true
+                _ = try await character.applyBattleResults(updates)
             }
         }
         if goldBase > 0 {
             _ = try await gameState.addGold(UInt32(goldBase))
         }
-        return mutated
     }
 
     /// ドロップ報酬適用結果

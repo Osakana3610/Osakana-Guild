@@ -28,7 +28,7 @@
 //
 // 【補助型】
 //   - CharacterCreationRequest: 作成リクエスト
-//   - BattleResultUpdate: 戦闘結果更新（BattleResultSessionで使用）
+//   - BattleResultUpdate: 戦闘結果更新
 //   - EquipResult: 装備処理結果
 //   - UnequipResult: 解除処理結果
 //
@@ -59,116 +59,6 @@ actor CharacterProgressService {
         let hpDelta: Int32
     }
 
-    /// 戦闘結果を一括適用するためのセッション
-    /// サービスへの参照を持たず、必要な依存のみ受け取る
-    /// バックグラウンドスレッドで作成・使用することを想定
-    final class BattleResultSession {
-        private let context: ModelContext
-        private let records: [UInt8: CharacterRecord]
-        private let masterData: MasterDataCache
-        private var levelUpCharacterIds: [UInt8] = []
-
-        init(contextProvider: SwiftDataContextProvider,
-             masterData: MasterDataCache,
-             characterIds: [UInt8]) throws {
-            self.context = contextProvider.makeContext()
-            self.masterData = masterData
-            if characterIds.isEmpty {
-                self.records = [:]
-                return
-            }
-
-            let ids = Array(Set(characterIds))
-            let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { ids.contains($0.id) })
-            let fetched = try context.fetch(descriptor)
-            self.records = Dictionary(uniqueKeysWithValues: fetched.map { ($0.id, $0) })
-        }
-
-        func applyBattleResults(_ updates: [BattleResultUpdate]) throws {
-            guard !updates.isEmpty else { return }
-            let leveledUpIds = try applyBattleResultsInternal(updates)
-            levelUpCharacterIds.append(contentsOf: leveledUpIds)
-        }
-
-        func flushIfNeeded() throws {
-            guard context.hasChanges else { return }
-            try context.save()
-            if !levelUpCharacterIds.isEmpty {
-                let change = UserDataLoadService.CharacterChange(upserted: levelUpCharacterIds, removed: [])
-                Task { @MainActor in
-                    NotificationCenter.default.post(
-                        name: .characterProgressDidChange,
-                        object: nil,
-                        userInfo: ["change": change]
-                    )
-                }
-                levelUpCharacterIds = []
-            }
-        }
-
-        // MARK: - Private
-
-        private func applyBattleResultsInternal(_ updates: [BattleResultUpdate]) throws -> [UInt8] {
-            var leveledUpIds: [UInt8] = []
-            for update in updates {
-                guard let record = records[update.characterId] else {
-                    throw ProgressError.characterNotFound
-                }
-                if update.experienceDelta != 0 {
-                    let previousLevel = record.level
-                    let addition = Int64(record.experience).addingReportingOverflow(Int64(update.experienceDelta))
-                    guard !addition.overflow else {
-                        throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
-                    }
-                    let updatedExperience = max(0, Int(addition.partialValue))
-                    let cappedExperience = try clampExperience(updatedExperience, raceId: record.raceId)
-                    record.experience = UInt64(cappedExperience)
-                    let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
-                    if computedLevel != Int(previousLevel) {
-                        record.level = UInt8(computedLevel)
-                        leveledUpIds.append(update.characterId)
-                    }
-                }
-                if update.hpDelta != 0 {
-                    let newHP = Int64(record.currentHP) + Int64(update.hpDelta)
-                    record.currentHP = UInt32(max(0, newHP))
-                }
-            }
-            return leveledUpIds
-        }
-
-        private func resolveLevel(for experience: Int, raceId: UInt8) throws -> Int {
-            let maxLevel = try raceMaxLevel(for: raceId)
-            do {
-                return try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
-            } catch CharacterExperienceError.invalidLevel {
-                throw ProgressError.invalidInput(description: "経験値テーブルに無効なレベル要求が行われました")
-            } catch CharacterExperienceError.invalidExperience {
-                throw ProgressError.invalidInput(description: "経験値が負の値になる操作は許可されていません")
-            } catch CharacterExperienceError.overflowedComputation {
-                throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
-            }
-        }
-
-        private func raceMaxLevel(for raceId: UInt8) throws -> Int {
-            guard let definition = masterData.race(raceId) else {
-                throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
-            }
-            return definition.maxLevel
-        }
-
-        private func clampExperience(_ experience: Int, raceId: UInt8) throws -> Int {
-            guard experience > 0 else { return 0 }
-            let maximum = try raceMaxExperience(for: raceId)
-            return min(experience, maximum)
-        }
-
-        private func raceMaxExperience(for raceId: UInt8) throws -> Int {
-            let maxLevel = try raceMaxLevel(for: raceId)
-            return try CharacterExperienceTable.totalExperience(toReach: maxLevel)
-        }
-    }
-
     private let contextProvider: SwiftDataContextProvider
     private let masterData: MasterDataCache
 
@@ -190,6 +80,87 @@ actor CharacterProgressService {
                 userInfo: ["change": change]
             )
         }
+    }
+
+    // MARK: - Battle Results
+
+    /// 戦闘結果を適用する（経験値・HP変動）
+    /// - Parameter updates: 適用する更新の配列
+    /// - Returns: レベルアップしたキャラクターのID配列
+    @discardableResult
+    func applyBattleResults(_ updates: [BattleResultUpdate]) throws -> [UInt8] {
+        guard !updates.isEmpty else { return [] }
+
+        let context = contextProvider.makeContext()
+        let characterIds = Array(Set(updates.map(\.characterId)))
+        let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { characterIds.contains($0.id) })
+        let records = try context.fetch(descriptor)
+        let recordsById = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
+
+        var leveledUpIds: [UInt8] = []
+        for update in updates {
+            guard let record = recordsById[update.characterId] else {
+                throw ProgressError.characterNotFound
+            }
+            if update.experienceDelta != 0 {
+                let previousLevel = record.level
+                let addition = Int64(record.experience).addingReportingOverflow(Int64(update.experienceDelta))
+                guard !addition.overflow else {
+                    throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
+                }
+                let updatedExperience = max(0, Int(addition.partialValue))
+                let cappedExperience = try clampExperience(updatedExperience, raceId: record.raceId)
+                record.experience = UInt64(cappedExperience)
+                let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
+                if computedLevel != Int(previousLevel) {
+                    record.level = UInt8(computedLevel)
+                    leveledUpIds.append(update.characterId)
+                }
+            }
+            if update.hpDelta != 0 {
+                let newHP = Int64(record.currentHP) + Int64(update.hpDelta)
+                record.currentHP = UInt32(max(0, newHP))
+            }
+        }
+
+        if context.hasChanges {
+            try context.save()
+            if !leveledUpIds.isEmpty {
+                notifyCharacterChange(upserted: leveledUpIds)
+            }
+        }
+        return leveledUpIds
+    }
+
+    private func resolveLevel(for experience: Int, raceId: UInt8) throws -> Int {
+        let maxLevel = try raceMaxLevel(for: raceId)
+        do {
+            return try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
+        } catch CharacterExperienceError.invalidLevel {
+            throw ProgressError.invalidInput(description: "経験値テーブルに無効なレベル要求が行われました")
+        } catch CharacterExperienceError.invalidExperience {
+            throw ProgressError.invalidInput(description: "経験値が負の値になる操作は許可されていません")
+        } catch CharacterExperienceError.overflowedComputation {
+            throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
+        }
+    }
+
+    private func raceMaxLevel(for raceId: UInt8) throws -> Int {
+        guard let definition = masterData.race(raceId) else {
+            throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
+        }
+        return definition.maxLevel
+    }
+
+    private func clampExperience(_ experience: Int, raceId: UInt8) throws -> Int {
+        guard experience > 0 else { return 0 }
+        let maximum = try raceMaxExperience(for: raceId)
+        return min(experience, maximum)
+    }
+
+    private func raceMaxExperience(for raceId: UInt8) throws -> Int {
+        let maxLevel = try raceMaxLevel(for: raceId)
+        return try CharacterExperienceTable.totalExperience(toReach: maxLevel)
     }
 
     /// インベントリ変更通知を送信（装備のつけ外し時に使用、stackKeyと数量のみ）

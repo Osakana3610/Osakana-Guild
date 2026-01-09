@@ -25,7 +25,6 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 
 // MARK: - Exploration Run Management
 extension AppServices {
@@ -58,14 +57,14 @@ extension AppServices {
                                                             dungeonId: dungeonId,
                                                             targetFloorNumber: targetFloor)
 
-        let recordId: PersistentIdentifier
+        let runId: ExplorationProgressService.RunIdentifier
         do {
-            recordId = try await exploration.beginRun(party: partySnapshot,
-                                                      dungeon: session.preparation.dungeon,
-                                                      difficulty: Int(runDifficulty),
-                                                      targetFloor: session.preparation.targetFloorNumber,
-                                                      startedAt: session.startedAt,
-                                                      seed: session.seed)
+            runId = try await exploration.beginRun(party: partySnapshot,
+                                                   dungeon: session.preparation.dungeon,
+                                                   difficulty: Int(runDifficulty),
+                                                   targetFloor: session.preparation.targetFloorNumber,
+                                                   startedAt: session.startedAt,
+                                                   seed: session.seed)
         } catch {
             let originalError = error
             await session.cancel()
@@ -82,7 +81,7 @@ extension AppServices {
                     return
                 }
                 await self.processExplorationStream(session: session,
-                                                    recordId: recordId,
+                                                    runId: runId,
                                                     memberIds: memberIds,
                                                     runtimeMap: runtimeMap,
                                                     runDifficulty: Int(runDifficulty),
@@ -97,7 +96,8 @@ extension AppServices {
                 Task { await session.cancel() }
                 Task {
                     do {
-                        try await explorationService.cancelRun(runId: recordId)
+                        try await explorationService.cancelRun(partyId: runId.partyId,
+                                                               startedAt: runId.startedAt)
                     } catch is CancellationError {
                         // キャンセル済みであれば問題なし
                     } catch {
@@ -112,11 +112,8 @@ extension AppServices {
                                     cancel: { await session.cancel() })
     }
 
-    func cancelExplorationRun(runId: UUID) async throws {
+    func cancelExplorationRun(runId: UUID) async {
         await runtime.cancelExploration(runId: runId)
-        // Note: cancelRun now requires PersistentIdentifier,
-        // but runtime cancellation handles the active session.
-        // The persistence record will be cleaned up by purge logic.
     }
 
     /// partyIdとstartedAtで永続化Runをキャンセル
@@ -167,9 +164,9 @@ extension AppServices {
         }
 
         // 3. 一括でレコード作成（1回のsave）
-        let recordIds: [UInt8: PersistentIdentifier]
+        let runIds: [UInt8: ExplorationProgressService.RunIdentifier]
         do {
-            recordIds = try await exploration.beginRunsBatch(beginRunParams)
+            runIds = try await exploration.beginRunsBatch(beginRunParams)
         } catch {
             // レコード作成に失敗したら全セッションをキャンセル
             for prep in preparations {
@@ -182,7 +179,7 @@ extension AppServices {
         var handles: [UInt8: ExplorationRunHandle] = [:]
         for prep in preparations {
             let partyId = prep.partySnapshot.id
-            guard let recordId = recordIds[partyId] else { continue }
+            guard let runId = runIds[partyId] else { continue }
 
             let runtimeMap = Dictionary(uniqueKeysWithValues: prep.session.runtimeCharacters.map { ($0.id, $0) })
             let memberIds = prep.partySnapshot.memberCharacterIds
@@ -197,7 +194,7 @@ extension AppServices {
                         return
                     }
                     await self.processExplorationStream(session: session,
-                                                        recordId: recordId,
+                                                        runId: runId,
                                                         memberIds: memberIds,
                                                         runtimeMap: runtimeMap,
                                                         runDifficulty: runDifficulty,
@@ -212,7 +209,8 @@ extension AppServices {
                     Task { await session.cancel() }
                     Task {
                         do {
-                            try await explorationService.cancelRun(runId: recordId)
+                            try await explorationService.cancelRun(partyId: runId.partyId,
+                                                                   startedAt: runId.startedAt)
                         } catch is CancellationError {
                             // キャンセル済みであれば問題なし
                         } catch {
