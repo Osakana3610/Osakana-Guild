@@ -35,6 +35,9 @@ struct RecentExplorationLogsView: View {
     @State private var isFetchingDetail = false
     @State private var detailErrorMessage: String?
 
+    /// シート内のナビゲーション状態を親で管理（バックグラウンド復帰時の状態維持のため）
+    @State private var selectedEncounterForRun: CachedExploration.EncounterLog?
+
     private let maxDisplayCount = 2
 
     private var partyRuns: [CachedExploration] {
@@ -79,8 +82,15 @@ struct RecentExplorationLogsView: View {
         .sheet(item: $selectedRunForSummary) { snapshot in
             ExplorationRunSummaryView(
                 snapshot: snapshot,
-                party: party
+                party: party,
+                selectedEncounter: $selectedEncounterForRun
             )
+        }
+        .onChange(of: selectedRunForSummary) { _, newValue in
+            // シートが閉じたらナビゲーション状態もクリア
+            if newValue == nil {
+                selectedEncounterForRun = nil
+            }
         }
         .sheet(item: $selectedRunForResultSummary) { snapshot in
             ExplorationRunResultSummaryView(snapshot: snapshot,
@@ -221,8 +231,10 @@ private struct ExplorationRunSummaryView: View {
     let snapshot: CachedExploration
     let party: CachedParty
 
+    /// 親ビューから渡されるナビゲーション状態（バックグラウンド復帰時も維持される）
+    @Binding var selectedEncounter: CachedExploration.EncounterLog?
+
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedEncounter: CachedExploration.EncounterLog?
     @State private var showingResultSummary = false
 
     private var eventsByFloor: [(floor: Int, events: [CachedExploration.EncounterLog])] {
