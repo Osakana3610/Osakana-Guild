@@ -24,19 +24,7 @@ final class ReactionSkillTests: XCTestCase {
     /// 期待: 物理ダメージを受けた後、反撃が発動してダメージを与える
     func testReactionAttackTriggersAndDealsDamage() {
         // 反撃スキル（100%発動）
-        let reaction = BattleActor.SkillEffects.Reaction(
-            identifier: "test.counter",
-            displayName: "テスト反撃",
-            trigger: .selfDamagedPhysical,
-            target: .attacker,
-            damageType: .physical,
-            baseChancePercent: 100,
-            attackCountMultiplier: 1.0,
-            criticalRateMultiplier: 1.0,
-            accuracyMultiplier: 1.0,
-            requiresMartial: false,
-            requiresAllyBehind: false
-        )
+        let reaction = makeReaction()
 
         var playerSkillEffects = BattleActor.SkillEffects.neutral
         playerSkillEffects.combat.reactions = [reaction]
@@ -72,33 +60,17 @@ final class ReactionSkillTests: XCTestCase {
     ///   - multiplier=0.3 の方がダメージが少ない（攻撃回数が減るため）
     func testAttackCountMultiplierReducesDamage() {
         // 反撃スキル（multiplier=1.0）
-        let fullReaction = BattleActor.SkillEffects.Reaction(
-            identifier: "test.counter.full",
-            displayName: "フル反撃",
-            trigger: .selfDamagedPhysical,
-            target: .attacker,
-            damageType: .physical,
-            baseChancePercent: 100,
+        let fullReaction = makeReaction(
             attackCountMultiplier: 1.0,
             criticalRateMultiplier: 0.0,  // クリティカル無効
-            accuracyMultiplier: 1.0,
-            requiresMartial: false,
-            requiresAllyBehind: false
+            displayName: "フル反撃"
         )
 
         // 反撃スキル（multiplier=0.3）
-        let reducedReaction = BattleActor.SkillEffects.Reaction(
-            identifier: "test.counter.reduced",
-            displayName: "軽減反撃",
-            trigger: .selfDamagedPhysical,
-            target: .attacker,
-            damageType: .physical,
-            baseChancePercent: 100,
+        let reducedReaction = makeReaction(
             attackCountMultiplier: 0.3,
             criticalRateMultiplier: 0.0,  // クリティカル無効
-            accuracyMultiplier: 1.0,
-            requiresMartial: false,
-            requiresAllyBehind: false
+            displayName: "軽減反撃"
         )
 
         // multiplier=1.0 での戦闘
@@ -256,58 +228,56 @@ final class ReactionSkillTests: XCTestCase {
         XCTAssertEqual(reaction.target, .attacker)
     }
 
-    /// トリガー種別の検証
+    /// トリガー種別ごとにReactionが正しく構築されることを検証
+    ///
+    /// 注: このテストは構造体の値を確認するだけ。
+    ///     実際の発動検証は各トリガーの統合テストで行う。
     func testReactionTriggers() {
         // selfDamagedPhysical: 自分が物理ダメージを受けた時
-        let physicalReaction = BattleActor.SkillEffects.Reaction(
-            identifier: "test",
-            displayName: "物理被弾反撃",
-            trigger: .selfDamagedPhysical,
-            target: .attacker,
-            damageType: .physical,
-            baseChancePercent: 100,
-            attackCountMultiplier: 0.3,
-            criticalRateMultiplier: 0.5,
-            accuracyMultiplier: 1.0,
-            requiresMartial: false,
-            requiresAllyBehind: false
-        )
+        let physicalReaction = makeReaction(trigger: .selfDamagedPhysical)
         XCTAssertEqual(physicalReaction.trigger, .selfDamagedPhysical)
 
         // selfEvadePhysical: 自分が物理攻撃を回避した時
-        let evadeReaction = BattleActor.SkillEffects.Reaction(
-            identifier: "test",
-            displayName: "回避反撃",
-            trigger: .selfEvadePhysical,
-            target: .attacker,
-            damageType: .physical,
-            baseChancePercent: 100,
-            attackCountMultiplier: 0.3,
-            criticalRateMultiplier: 0.5,
-            accuracyMultiplier: 1.0,
-            requiresMartial: false,
-            requiresAllyBehind: false
-        )
+        let evadeReaction = makeReaction(trigger: .selfEvadePhysical)
         XCTAssertEqual(evadeReaction.trigger, .selfEvadePhysical)
 
         // allyDefeated: 味方が倒された時
-        let allyDefeatReaction = BattleActor.SkillEffects.Reaction(
-            identifier: "test",
-            displayName: "仲間撃破反撃",
-            trigger: .allyDefeated,
-            target: .killer,
-            damageType: .physical,
-            baseChancePercent: 100,
-            attackCountMultiplier: 0.3,
-            criticalRateMultiplier: 0.5,
-            accuracyMultiplier: 1.0,
-            requiresMartial: false,
-            requiresAllyBehind: false
-        )
+        let allyDefeatReaction = makeReaction(trigger: .allyDefeated, target: .killer)
         XCTAssertEqual(allyDefeatReaction.trigger, .allyDefeated)
     }
 
     // MARK: - ヘルパーメソッド
+
+    /// テスト用のReactionを生成
+    /// - Parameters:
+    ///   - trigger: 発動トリガー（デフォルト: .selfDamagedPhysical）
+    ///   - target: 攻撃対象（デフォルト: .attacker）
+    ///   - chancePercent: 発動率%（デフォルト: 100.0）
+    ///   - attackCountMultiplier: 攻撃回数乗数（デフォルト: 1.0）
+    ///   - criticalRateMultiplier: 必殺率乗数（デフォルト: 1.0）
+    ///   - displayName: 表示名（デフォルト: "テスト反撃"）
+    private func makeReaction(
+        trigger: BattleActor.SkillEffects.Reaction.Trigger = .selfDamagedPhysical,
+        target: BattleActor.SkillEffects.Reaction.Target = .attacker,
+        chancePercent: Double = 100,
+        attackCountMultiplier: Double = 1.0,
+        criticalRateMultiplier: Double = 1.0,
+        displayName: String = "テスト反撃"
+    ) -> BattleActor.SkillEffects.Reaction {
+        BattleActor.SkillEffects.Reaction(
+            identifier: "test.reaction",
+            displayName: displayName,
+            trigger: trigger,
+            target: target,
+            damageType: .physical,
+            baseChancePercent: chancePercent,
+            attackCountMultiplier: attackCountMultiplier,
+            criticalRateMultiplier: criticalRateMultiplier,
+            accuracyMultiplier: 1.0,
+            requiresMartial: false,
+            requiresAllyBehind: false
+        )
+    }
 
     /// バトルログから反撃によるダメージと回数を集計
     private func analyzeReactionDamage(from log: BattleLog) -> (totalDamage: Int, count: Int) {

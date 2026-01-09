@@ -46,15 +46,18 @@ struct TestRunRecord: Codable {
 ///     XCTAssertTrue(result.isValid)
 /// }
 /// ```
+@MainActor
 final class ObservationRecorder {
     static let shared = ObservationRecorder()
+
+    private static let dateFormatter = ISO8601DateFormatter()
 
     private var results: [ObservationResult] = []
     private let runId: String
     private let startTime: Date
 
     private init() {
-        self.runId = ISO8601DateFormatter().string(from: Date())
+        self.runId = Self.dateFormatter.string(from: Date())
         self.startTime = Date()
     }
 
@@ -74,17 +77,7 @@ final class ObservationRecorder {
     ) {
         let expectedRange = ObservationResult.ExpectedRange(min: expected.min, max: expected.max)
         let passed = expectedRange.contains(measured)
-
-        let result = ObservationResult(
-            id: id,
-            timestamp: ISO8601DateFormatter().string(from: Date()),
-            expected: expectedRange,
-            measured: measured,
-            passed: passed,
-            rawData: rawData
-        )
-
-        results.append(result)
+        appendResult(id: id, expected: expectedRange, measured: measured, passed: passed, rawData: rawData)
     }
 
     /// 相対比較の観点を記録する（A < B の検証など）
@@ -99,15 +92,25 @@ final class ObservationRecorder {
         passed: Bool,
         rawData: [String: Double]
     ) {
+        let expectedRange = ObservationResult.ExpectedRange(min: nil, max: nil)
+        appendResult(id: id, expected: expectedRange, measured: passed ? 1 : 0, passed: passed, rawData: rawData)
+    }
+
+    private func appendResult(
+        id: String,
+        expected: ObservationResult.ExpectedRange,
+        measured: Double,
+        passed: Bool,
+        rawData: [String: Double]
+    ) {
         let result = ObservationResult(
             id: id,
-            timestamp: ISO8601DateFormatter().string(from: Date()),
-            expected: ObservationResult.ExpectedRange(min: nil, max: nil),
-            measured: passed ? 1 : 0,
+            timestamp: Self.dateFormatter.string(from: Date()),
+            expected: expected,
+            measured: measured,
             passed: passed,
             rawData: rawData
         )
-
         results.append(result)
     }
 
@@ -124,8 +127,8 @@ final class ObservationRecorder {
 
         let record = TestRunRecord(
             runId: runId,
-            startTime: ISO8601DateFormatter().string(from: startTime),
-            endTime: ISO8601DateFormatter().string(from: Date()),
+            startTime: Self.dateFormatter.string(from: startTime),
+            endTime: Self.dateFormatter.string(from: Date()),
             results: results
         )
 
