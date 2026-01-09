@@ -460,26 +460,24 @@ extension BattleTurnEngine {
     }
 
     static func upsert(buff: TimedBuff, into buffs: inout [TimedBuff]) {
-        var replaced = false
-        for index in buffs.indices {
-            if buffs[index].id == buff.id {
-                let currentLevel = buffs[index].baseDuration
-                let incomingLevel = buff.baseDuration
-                if incomingLevel > currentLevel {
-                    buffs[index] = buff
-                } else if incomingLevel == currentLevel {
-                    let remaining = max(buffs[index].remainingTurns, buff.remainingTurns)
-                    var merged = buff
-                    merged.remainingTurns = remaining
-                    buffs[index] = merged
-                }
-                replaced = true
-                break
-            }
-        }
-        if !replaced {
+        guard let index = buffs.firstIndex(where: { $0.id == buff.id }) else {
             buffs.append(buff)
+            return
         }
+
+        let currentLevel = buffs[index].baseDuration
+        let incomingLevel = buff.baseDuration
+
+        if incomingLevel > currentLevel {
+            // 高レベルで上書き
+            buffs[index] = buff
+        } else if incomingLevel == currentLevel {
+            // 同レベルなら残りターン数の長い方を採用
+            var merged = buff
+            merged.remainingTurns = max(buffs[index].remainingTurns, buff.remainingTurns)
+            buffs[index] = merged
+        }
+        // 低レベルは無視（何もしない）
     }
 
     static func updateTimedBuffs(for side: ActorSide,

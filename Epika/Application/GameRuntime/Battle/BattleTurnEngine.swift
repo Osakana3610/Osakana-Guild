@@ -93,7 +93,7 @@ struct BattleTurnEngine {
 
         context.appendSimpleEntry(kind: .battleStart)
 
-        for (index, _) in context.enemies.enumerated() {
+        for index in context.enemies.indices {
             let actorIdx = context.actorIndex(for: .enemy, arrayIndex: index)
             context.appendSimpleEntry(kind: .enemyAppear,
                                       actorId: actorIdx,

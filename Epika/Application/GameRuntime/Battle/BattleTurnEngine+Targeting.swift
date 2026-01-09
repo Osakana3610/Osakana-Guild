@@ -29,6 +29,19 @@
 
 import Foundation
 
+// MARK: - Hit Probability Constants
+
+private enum HitProbabilityConstants {
+    /// 基本最低命中率（5%）- どんなに回避が高くても最低限当たる確率
+    static let baseMinHitRate = 0.05
+    /// 基本最高命中率（95%）- どんなに命中が高くても最大でこの確率
+    static let baseMaxHitRate = 0.95
+    /// 敏捷による最低命中率の減衰係数（12%減少/敏捷1ポイント）
+    static let agilityDecayFactor = 0.88
+    /// 敏捷による減衰が開始する閾値
+    static let agilityDecayThreshold = 20
+}
+
 // MARK: - Targeting
 extension BattleTurnEngine {
     static func selectOffensiveTarget(attackerSide: ActorSide,
@@ -121,6 +134,8 @@ extension BattleTurnEngine {
             return pool[random.nextInt(in: 0...(pool.count - 1))]
         }
 
+        // roll < cumulative で判定するため、roll == totalWeight だと全要素を通過してしまう
+        // 0.0001 を引くことで、必ずいずれかの要素で条件を満たすようにする
         let roll = random.nextDouble(in: 0.0...max(0.0, totalWeight - 0.0001))
         var cumulative = 0.0
         for (index, weight) in weights.enumerated() {
@@ -157,6 +172,7 @@ extension BattleTurnEngine {
         guard !coverCandidates.isEmpty else { return nil }
 
         // 複数のかばうキャラがいる場合は重み付きで選択
+        // 0.0001を引く理由は selectWeightedTarget と同じ（roll == totalWeight 対策）
         let totalWeight = coverCandidates.reduce(0.0) { $0 + $1.1 }
         let roll = random.nextDouble(in: 0.0...max(0.0, totalWeight - 0.0001))
         var cumulative = 0.0
@@ -275,21 +291,20 @@ extension BattleTurnEngine {
     }
 
     static func clampProbability(_ value: Double, defender: BattleActor? = nil) -> Double {
-        let baseMinHit = 0.05
-        var minHit = baseMinHit
+        var minHit = HitProbabilityConstants.baseMinHitRate
 
         if let defender {
             if let minScale = defender.skillEffects.damage.minHitScale {
                 minHit *= minScale
             }
-            if defender.agility > 20 {
-                let delta = defender.agility - 20
-                minHit *= pow(0.88, Double(delta))
+            if defender.agility > HitProbabilityConstants.agilityDecayThreshold {
+                let delta = defender.agility - HitProbabilityConstants.agilityDecayThreshold
+                minHit *= pow(HitProbabilityConstants.agilityDecayFactor, Double(delta))
             }
         }
 
         minHit = max(0.0, min(1.0, minHit))
-        var maxHit = min(1.0 - minHit, 0.95)
+        var maxHit = min(1.0 - minHit, HitProbabilityConstants.baseMaxHitRate)
 
         if let capPercent = defender?.skillEffects.misc.dodgeCapMax {
             let hitUpper = max(0.0, 1.0 - capPercent / 100.0)
@@ -298,27 +313,4 @@ extension BattleTurnEngine {
 
         return min(maxHit, max(minHit, value))
     }
-
-    // MARK: - Category Keywords
-    private static let humanoidKeywords: [String] = [
-        "human", "humanoid", "elf", "darkelf", "dwarf", "amazon", "pygmy", "gnome",
-        "orc", "orcish", "goblin", "goblinoid", "tengu", "cyborg", "machine", "psychic",
-        "giant", "workingcat"
-    ]
-
-    private static let monsterKeywords: [String] = [
-        "beast", "demon", "monster", "golem", "treant", "ooze", "slime", "construct"
-    ]
-
-    private static let undeadKeywords: [String] = [
-        "undead", "vampire", "skeleton", "zombie", "ghost", "lich", "ghoul"
-    ]
-
-    private static let dragonKeywords: [String] = [
-        "dragon", "dragonewt", "wyrm"
-    ]
-
-    private static let divineKeywords: [String] = [
-        "divine", "angel", "deity", "god", "spirit", "mythical"
-    ]
 }

@@ -296,9 +296,17 @@ extension BattleTurnEngine {
             return [.defend]
         }
 
-        // 順番に抽選（ブレス > 僧侶魔法 > 魔法使い魔法 > 物理攻撃）
-        // 当選したカテゴリと、それ以降のカテゴリをリストで返す
-        var result: [ActionKind] = []
+        let result = rollActionLottery(candidates: candidates, random: &context.random)
+        return result.isEmpty ? [.defend] : result
+    }
+
+    /// 行動候補から重み付き抽選を行い、当選カテゴリ以降のリストを返す
+    /// - Parameters:
+    ///   - candidates: 行動候補リスト（優先度順）
+    ///   - random: 乱数生成器
+    /// - Returns: 当選カテゴリ以降の行動種別リスト
+    private static func rollActionLottery(candidates: [ActionCandidate],
+                                          random: inout GameRandomSource) -> [ActionKind] {
         var hitIndex: Int? = nil
 
         for (index, candidate) in candidates.enumerated() {
@@ -308,7 +316,7 @@ extension BattleTurnEngine {
                 break
             }
             if weight > 0 {
-                let roll = context.random.nextInt(in: 1...100)
+                let roll = random.nextInt(in: 1...100)
                 if roll <= weight {
                     hitIndex = index
                     break
@@ -316,14 +324,10 @@ extension BattleTurnEngine {
             }
         }
 
-        if let hitIndex {
-            // 当選したカテゴリ以降を返す
-            for i in hitIndex..<candidates.count {
-                result.append(candidates[i].category)
-            }
-        }
+        guard let hitIndex else { return [] }
 
-        return result.isEmpty ? [.defend] : result
+        // 当選したカテゴリ以降を返す
+        return candidates[hitIndex...].map(\.category)
     }
 
     /// 敵専用技を選択（発動判定込み）
@@ -440,32 +444,32 @@ extension BattleTurnEngine {
     private static func applyRetreatForSide(_ side: ActorSide, context: inout BattleContext) {
         let actors: [BattleActor] = side == .player ? context.players : context.enemies
         for index in actors.indices where actors[index].isAlive {
-            var actor = actors[index]
+            let actor = actors[index]
+            let retreatChance: Double?
+
             if let forcedTurn = actor.skillEffects.misc.retreatTurn,
                context.turn >= forcedTurn {
-                let probability = max(0.0, min(1.0, (actor.skillEffects.misc.retreatChancePercent ?? 100.0) / 100.0))
-                if context.random.nextBool(probability: probability) {
-                    actor.currentHP = 0
-                    context.updateActor(actor, side: side, index: index)
-                    let actorIdx = context.actorIndex(for: side, arrayIndex: index)
-                    context.appendSimpleEntry(kind: .withdraw,
-                                              actorId: actorIdx,
-                                              effectKind: .withdraw)
-                }
-                continue
+                // 指定ターン以降は撤退判定
+                retreatChance = actor.skillEffects.misc.retreatChancePercent ?? 100.0
+            } else if actor.skillEffects.misc.retreatTurn == nil,
+                      let chance = actor.skillEffects.misc.retreatChancePercent {
+                // 毎ターン撤退判定
+                retreatChance = chance
+            } else {
+                retreatChance = nil
             }
-            if let chance = actor.skillEffects.misc.retreatChancePercent,
-               actor.skillEffects.misc.retreatTurn == nil {
-                let probability = max(0.0, min(1.0, chance / 100.0))
-                if context.random.nextBool(probability: probability) {
-                    actor.currentHP = 0
-                    context.updateActor(actor, side: side, index: index)
-                    let actorIdx = context.actorIndex(for: side, arrayIndex: index)
-                    context.appendSimpleEntry(kind: .withdraw,
-                                              actorId: actorIdx,
-                                              effectKind: .withdraw)
-                }
-            }
+
+            guard let chance = retreatChance else { continue }
+            let probability = max(0.0, min(1.0, chance / 100.0))
+            guard context.random.nextBool(probability: probability) else { continue }
+
+            var withdrawnActor = actor
+            withdrawnActor.currentHP = 0
+            context.updateActor(withdrawnActor, side: side, index: index)
+            let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+            context.appendSimpleEntry(kind: .withdraw,
+                                      actorId: actorIdx,
+                                      effectKind: .withdraw)
         }
     }
 

@@ -228,43 +228,22 @@ extension BattleTurnEngine {
                 }
             }
 
-            var targetReference = reaction.preferredTarget(for: event).flatMap { referenceToSideIndex($0) }
-            if targetReference == nil {
-                targetReference = selectOffensiveTarget(attackerSide: side,
-                                                        context: &context,
-                                                        allowFriendlyTargets: false,
-                                                        attacker: currentPerformer,
-                                                        forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil))
-            }
-            guard var resolvedTarget = targetReference else {
-                continue
-            }
-            var needsFallback = false
-            if let currentTarget = context.actor(for: resolvedTarget.0, index: resolvedTarget.1) {
-                if !currentTarget.isAlive { needsFallback = true }
-            } else {
-                needsFallback = true
-            }
-            if needsFallback {
-                guard let fallback = selectOffensiveTarget(attackerSide: side,
-                                                           context: &context,
-                                                           allowFriendlyTargets: false,
-                                                           attacker: currentPerformer,
-                                                           forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)) else {
-                    continue
-                }
-                resolvedTarget = fallback
-            }
-
-            guard let targetActor = context.actor(for: resolvedTarget.0, index: resolvedTarget.1),
-                  targetActor.isAlive else {
+            guard let resolvedTarget = resolveReactionTarget(
+                reaction: reaction,
+                event: event,
+                attackerSide: side,
+                attacker: currentPerformer,
+                context: &context
+            ) else {
                 continue
             }
 
             // statScalingはコンパイル時にbaseChancePercentに計算済み
             let baseChance = max(0.0, reaction.baseChancePercent)
             var chance = baseChance * currentPerformer.skillEffects.combat.procChanceMultiplier
-            chance *= targetActor.skillEffects.combat.counterAttackEvasionMultiplier
+            if let targetActor = context.actor(for: resolvedTarget.0, index: resolvedTarget.1) {
+                chance *= targetActor.skillEffects.combat.counterAttackEvasionMultiplier
+            }
             let cappedChance = max(0, min(100, Int(floor(chance))))
 
             guard cappedChance > 0 else {
@@ -291,6 +270,63 @@ extension BattleTurnEngine {
                                   entryBuilder: entryBuilder)
             context.appendActionEntry(entryBuilder.build())
         }
+    }
+
+    /// リアクションのターゲットを解決する
+    /// - Parameters:
+    ///   - reaction: リアクション定義
+    ///   - event: トリガーイベント
+    ///   - attackerSide: 攻撃者の陣営
+    ///   - attacker: 攻撃者
+    ///   - context: 戦闘コンテキスト
+    /// - Returns: 解決されたターゲット（陣営, インデックス）、解決できない場合はnil
+    private static func resolveReactionTarget(reaction: BattleActor.SkillEffects.Reaction,
+                                              event: ReactionEvent,
+                                              attackerSide: ActorSide,
+                                              attacker: BattleActor,
+                                              context: inout BattleContext) -> (ActorSide, Int)? {
+        let emptyTargets = BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+
+        // 優先ターゲットを取得
+        var resolved = reaction.preferredTarget(for: event).flatMap { referenceToSideIndex($0) }
+
+        // 優先ターゲットがない場合はランダム選択
+        if resolved == nil {
+            resolved = selectOffensiveTarget(attackerSide: attackerSide,
+                                             context: &context,
+                                             allowFriendlyTargets: false,
+                                             attacker: attacker,
+                                             forcedTargets: emptyTargets)
+        }
+
+        guard var target = resolved else { return nil }
+
+        // ターゲットが無効な場合はフォールバック
+        let needsFallback: Bool
+        if let currentTarget = context.actor(for: target.0, index: target.1) {
+            needsFallback = !currentTarget.isAlive
+        } else {
+            needsFallback = true
+        }
+
+        if needsFallback {
+            guard let fallback = selectOffensiveTarget(attackerSide: attackerSide,
+                                                       context: &context,
+                                                       allowFriendlyTargets: false,
+                                                       attacker: attacker,
+                                                       forcedTargets: emptyTargets) else {
+                return nil
+            }
+            target = fallback
+        }
+
+        // 最終確認：ターゲットが生存しているか
+        guard let targetActor = context.actor(for: target.0, index: target.1),
+              targetActor.isAlive else {
+            return nil
+        }
+
+        return target
     }
 
     static func executeReactionAttack(from side: ActorSide,
@@ -422,26 +458,13 @@ extension BattleTurnEngine {
         let defenderWasDefeated = currentDefender.map { !$0.isAlive } ?? true
 
         if defenderWasDefeated {
-            // 救出を先に試行（救出→報復→追撃の順序）
-            if attemptInstantResurrectionIfNeeded(of: defenderIndex, side: defenderSide, context: &context) {
-                currentDefender = context.actor(for: defenderSide, index: defenderIndex)
-            } else if attemptRescue(of: defenderIndex, side: defenderSide, context: &context) {
-                currentDefender = context.actor(for: defenderSide, index: defenderIndex)
-            }
-
-            // 報復リアクション（味方が倒された時）
-            let killerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
-            context.reactionQueue.append(.init(
-                event: .allyDefeated(side: defenderSide, fallenIndex: defenderIndex, killer: killerRef),
-                depth: reactionDepth
-            ))
-
-            // 追撃リアクション（敵を倒した時）
-            let killedRef = BattleContext.reference(for: defenderSide, index: defenderIndex)
-            context.reactionQueue.append(.init(
-                event: .selfKilledEnemy(side: attackerSide, actorIndex: attackerIndex, killedEnemy: killedRef),
-                depth: reactionDepth
-            ))
+            handleDefeatReactions(targetSide: defenderSide,
+                                  targetIndex: defenderIndex,
+                                  killerSide: attackerSide,
+                                  killerIndex: attackerIndex,
+                                  context: &context,
+                                  reactionDepth: reactionDepth)
+            currentDefender = context.actor(for: defenderSide, index: defenderIndex)
         }
 
         if attackResult.wasParried, let defenderActor = currentDefender, defenderActor.isAlive {
@@ -477,6 +500,41 @@ extension BattleTurnEngine {
         }
 
         return AttackOutcome(attacker: currentAttacker, defender: currentDefender)
+    }
+
+    // MARK: - Defeat Handling
+
+    /// 撃破時の共通処理（救出試行 + リアクションキュー追加）
+    /// - Parameters:
+    ///   - targetSide: 倒されたアクターの陣営
+    ///   - targetIndex: 倒されたアクターのインデックス
+    ///   - killerSide: 倒したアクターの陣営
+    ///   - killerIndex: 倒したアクターのインデックス
+    ///   - context: 戦闘コンテキスト
+    ///   - reactionDepth: リアクションの深さ（デフォルト0）
+    static func handleDefeatReactions(targetSide: ActorSide,
+                                      targetIndex: Int,
+                                      killerSide: ActorSide,
+                                      killerIndex: Int,
+                                      context: inout BattleContext,
+                                      reactionDepth: Int = 0) {
+        // 救出を先に試行（救出→報復→追撃の順序）
+        _ = attemptInstantResurrectionIfNeeded(of: targetIndex, side: targetSide, context: &context)
+            || attemptRescue(of: targetIndex, side: targetSide, context: &context)
+
+        // 報復リアクション（味方が倒された時）
+        let killerRef = BattleContext.reference(for: killerSide, index: killerIndex)
+        context.reactionQueue.append(.init(
+            event: .allyDefeated(side: targetSide, fallenIndex: targetIndex, killer: killerRef),
+            depth: reactionDepth
+        ))
+
+        // 追撃リアクション（敵を倒した時）
+        let killedRef = BattleContext.reference(for: targetSide, index: targetIndex)
+        context.reactionQueue.append(.init(
+            event: .selfKilledEnemy(side: killerSide, actorIndex: killerIndex, killedEnemy: killedRef),
+            depth: reactionDepth
+        ))
     }
 }
 
