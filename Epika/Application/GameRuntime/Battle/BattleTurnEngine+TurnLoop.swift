@@ -413,26 +413,14 @@ extension BattleTurnEngine {
     static func activateGuard(for side: ActorSide,
                               actorIndex: Int,
                               context: inout BattleContext) {
-        switch side {
-        case .player:
-            guard context.players.indices.contains(actorIndex) else { return }
-            var actor = context.players[actorIndex]
-            guard actor.isAlive else { return }
-            actor.guardActive = true
-            actor.guardBarrierCharges = actor.skillEffects.combat.guardBarrierCharges
-            applyDegradationRepairIfAvailable(to: &actor, context: &context)
-            context.players[actorIndex] = actor
-            appendActionLog(for: actor, side: .player, index: actorIndex, category: .defend, context: &context)
-        case .enemy:
-            guard context.enemies.indices.contains(actorIndex) else { return }
-            var actor = context.enemies[actorIndex]
-            guard actor.isAlive else { return }
-            actor.guardActive = true
-            actor.guardBarrierCharges = actor.skillEffects.combat.guardBarrierCharges
-            applyDegradationRepairIfAvailable(to: &actor, context: &context)
-            context.enemies[actorIndex] = actor
-            appendActionLog(for: actor, side: .enemy, index: actorIndex, category: .defend, context: &context)
-        }
+        guard var actor = context.actor(for: side, index: actorIndex),
+              actor.isAlive else { return }
+
+        actor.guardActive = true
+        actor.guardBarrierCharges = actor.skillEffects.combat.guardBarrierCharges
+        applyDegradationRepairIfAvailable(to: &actor, context: &context)
+        context.updateActor(actor, side: side, index: actorIndex)
+        appendActionLog(for: actor, side: side, index: actorIndex, category: .defend, context: &context)
     }
 
     static func resetRescueUsage(_ context: inout BattleContext) {

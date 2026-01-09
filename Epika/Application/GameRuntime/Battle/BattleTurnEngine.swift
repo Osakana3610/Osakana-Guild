@@ -104,24 +104,14 @@ struct BattleTurnEngine {
         executePreemptiveAttacks(&context)
 
         // 先制攻撃後の勝敗判定
-        if context.isVictory {
-            context.appendSimpleEntry(kind: .victory)
-            return context.makeResult(BattleLog.outcomeVictory)
-        }
-        if context.isDefeat {
-            context.appendSimpleEntry(kind: .defeat)
-            return context.makeResult(BattleLog.outcomeDefeat)
+        if let result = checkBattleEnd(&context) {
+            return result
         }
 
         while context.turn < BattleContext.maxTurns {
             // 勝敗判定
-            if context.isVictory {
-                context.appendSimpleEntry(kind: .victory)
-                return context.makeResult(BattleLog.outcomeVictory)
-            }
-            if context.isDefeat {
-                context.appendSimpleEntry(kind: .defeat)
-                return context.makeResult(BattleLog.outcomeDefeat)
+            if let result = checkBattleEnd(&context) {
+                return result
             }
 
             context.turn += 1
@@ -142,13 +132,8 @@ struct BattleTurnEngine {
                 executeAction(reference, context: &context, sacrificeTargets: sacrificeTargets)
 
                 // アクション後の勝敗判定
-                if context.isVictory {
-                    context.appendSimpleEntry(kind: .victory)
-                    return context.makeResult(BattleLog.outcomeVictory)
-                }
-                if context.isDefeat {
-                    context.appendSimpleEntry(kind: .defeat)
-                    return context.makeResult(BattleLog.outcomeDefeat)
+                if let result = checkBattleEnd(&context) {
+                    return result
                 }
             }
 
@@ -157,6 +142,19 @@ struct BattleTurnEngine {
 
         context.appendSimpleEntry(kind: .retreat)
         return context.makeResult(BattleLog.outcomeRetreat)
+    }
+
+    /// 勝敗判定を行い、決着がついていれば結果を返す
+    private static func checkBattleEnd(_ context: inout BattleContext) -> Result? {
+        if context.isVictory {
+            context.appendSimpleEntry(kind: .victory)
+            return context.makeResult(BattleLog.outcomeVictory)
+        }
+        if context.isDefeat {
+            context.appendSimpleEntry(kind: .defeat)
+            return context.makeResult(BattleLog.outcomeDefeat)
+        }
+        return nil
     }
 
     /// ターン開始時の準備処理
