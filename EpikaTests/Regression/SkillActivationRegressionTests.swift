@@ -154,13 +154,17 @@ final class SkillActivationRegressionTests: XCTestCase {
     ///
     /// 原因: absorptionPercentスキル効果の適用漏れ
     ///
-    /// 検証: absorptionPercentを持つキャラが攻撃するとHP回復する
+    /// 仮説:
+    ///   - 攻撃力5000、敵防御力1000 → 期待ダメージ ≈ 4000（乱数幅あり）
+    ///   - absorptionPercent=50% → 回復量 ≈ 2000
+    ///   - 開始HP5000 → 1回攻撃後のHP ≈ 7000
+    ///
+    /// 検証: battleLogのhealAbsorbエフェクトで回復量を直接確認
     func testVampiricAbsorption_80() {
         var playerSkillEffects = BattleActor.SkillEffects.neutral
         playerSkillEffects.misc.absorptionPercent = 50  // 与ダメの50%回復
         playerSkillEffects.misc.absorptionCapPercent = 100  // 最大HPの100%まで回復可能
 
-        // 最初からダメージを受けた状態
         let snapshot = CharacterValues.Combat(
             maxHP: 10000,
             physicalAttack: 5000,
@@ -198,17 +202,17 @@ final class SkillActivationRegressionTests: XCTestCase {
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 50000,
-            physicalAttack: 100,  // 低攻撃力
+            physicalAttack: 100,  // 低攻撃力（プレイヤーを倒さない）
             physicalDefense: 1000,
             luck: 35,
-            agility: 1
+            agility: 1  // 後攻
         )
 
         var players = [player]
         var enemies = [enemy]
         var random = GameRandomSource(seed: 42)
 
-        _ = BattleTurnEngine.runBattle(
+        let result = BattleTurnEngine.runBattle(
             players: &players,
             enemies: &enemies,
             statusEffects: [:],
@@ -216,9 +220,20 @@ final class SkillActivationRegressionTests: XCTestCase {
             random: &random
         )
 
-        // 戦闘後のHPが初期HP(5000)より増えているか、または最大HPに達している
-        XCTAssertGreaterThan(players[0].currentHP, 5000,
-            "吸収能力(#80): 吸血鬼の攻撃でHP回復する (開始5000, 終了\(players[0].currentHP))")
+        // 仮説1: healAbsorbエフェクトが発生している（吸収が機能している）
+        let healAbsorbEffects = result.battleLog.entries.flatMap { $0.effects }.filter { $0.kind == .healAbsorb }
+        XCTAssertFalse(healAbsorbEffects.isEmpty,
+            "吸収能力(#80): healAbsorbエフェクトが発生すべき")
+
+        // 仮説2: 回復量は与ダメージの50%
+        // 期待ダメージ: 5000 - 1000 = 4000（基本値、乱数で±20%程度）
+        // 期待回復量: 4000 × 50% = 2000（基本値）
+        // 許容範囲: 乱数とクリティカルを考慮して 1000〜3000
+        if let firstHeal = healAbsorbEffects.first, let healValue = firstHeal.value {
+            let healAmount = Int(healValue)
+            XCTAssertTrue((1000...3000).contains(healAmount),
+                "吸収能力(#80): 回復量は期待値2000±1000の範囲内 (実測\(healAmount))")
+        }
     }
 
     // MARK: - 追撃スキルのテスト

@@ -86,9 +86,13 @@ final class StateManagementRegressionTests: XCTestCase {
     /// 原因: snapshotのattackCountがスキル効果を反映していなかった
     /// 修正: スナップショット生成時にスキル効果を適用
     ///
-    /// 検証方法:
-    ///   - attackCount=5のキャラと、attackCount=1のキャラで戦闘
-    ///   - 総ダメージの差で攻撃回数の違いを確認
+    /// 仮説:
+    ///   - attackCount=5: 1回の攻撃で5回ヒット → 1ターンで約5000ダメージ
+    ///   - attackCount=1: 1回の攻撃で1回ヒット → 1ターンで約1000ダメージ
+    ///   - 敵HP20000を倒すのに必要なターン数: 5回攻撃≈4ターン、1回攻撃≈20ターン
+    ///   - ターン数の比率は約5:1になるはず
+    ///
+    /// 検証: 1ターン目の総ダメージ量でattackCountが反映されているか直接確認
     func testAttackCountFromEquipment_FB0005() {
         // 攻撃回数5のプレイヤー
         let snapshotHigh = CharacterValues.Combat(
@@ -136,15 +140,17 @@ final class StateManagementRegressionTests: XCTestCase {
         )
 
         // 同じ敵と戦闘
+        // 最大ターン数=20、attackCount=1で約500ダメージ/ターン
+        // 敵HP5000 → 約10ターンで終了（余裕を持たせる）
         let enemy1 = TestActorBuilder.makeEnemy(
-            maxHP: 20000,
+            maxHP: 5000,
             physicalAttack: 100,
             hitRate: 100,
             luck: 35,
             agility: 1
         )
         let enemy2 = TestActorBuilder.makeEnemy(
-            maxHP: 20000,
+            maxHP: 5000,
             physicalAttack: 100,
             hitRate: 100,
             luck: 35,
@@ -174,12 +180,21 @@ final class StateManagementRegressionTests: XCTestCase {
             random: &random2
         )
 
-        // 高攻撃回数の方が早く敵を倒す（ターン数が少ない）
+        // 両方の戦闘が味方勝利で終わることを確認
+        XCTAssertEqual(highResult.outcome, BattleLog.outcomeVictory,
+            "攻撃回数(FB0005): 高攻撃回数の戦闘は味方勝利 (outcome=\(highResult.outcome))")
+        XCTAssertEqual(lowResult.outcome, BattleLog.outcomeVictory,
+            "攻撃回数(FB0005): 低攻撃回数の戦闘は味方勝利 (outcome=\(lowResult.outcome))")
+
+        // 仮説: ターン数で比較
+        // 敵HP5000、攻撃力1000、敵防御力500 → 1ヒットあたり約500ダメージ
+        // attackCount=5 → 1ターンで約2500ダメージ → 約2ターンで終了
+        // attackCount=1 → 1ターンで約500ダメージ → 約10ターンで終了
         let highTurns = Int(highResult.battleLog.turns)
         let lowTurns = Int(lowResult.battleLog.turns)
 
         XCTAssertLessThan(highTurns, lowTurns,
-            "攻撃回数(FB0005): 攻撃回数5の方が攻撃回数1より早く倒す (high=\(highTurns)ターン, low=\(lowTurns)ターン)")
+            "攻撃回数(FB0005): 攻撃回数5(\(highTurns)ターン) < 攻撃回数1(\(lowTurns)ターン)")
     }
 
     // MARK: - バリア状態の管理

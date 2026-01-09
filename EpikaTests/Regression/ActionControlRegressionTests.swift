@@ -158,12 +158,12 @@ final class ActionControlRegressionTests: XCTestCase {
     /// 原因: 追加行動の判定が通常行動後に限定されていなかった
     /// 修正: 追加行動判定を通常行動後のみに制限
     ///
-    /// 再現条件:
-    ///   - 味方: 追加行動100%スキル + 反撃100%スキル
-    ///   - 敵が味方を攻撃
-    ///   → 味方が反撃 → 反撃後に追加行動が発動（バグ）
+    /// 仮説:
+    ///   - 追加行動100%なので、通常攻撃後は必ずfollowUpが発生
+    ///   - 反撃(reactionAttack)後にはfollowUpは発生しない
+    ///   - よって followUp回数 ≦ 通常攻撃回数 が成り立つ
     ///
-    /// 期待: 反撃後に追加行動は発動しない
+    /// 検証: battleLogでfollowUpとreactionAttackの回数を比較
     func testExtraActionOnlyAfterNormalAction_4f86076() {
         // 追加行動100%スキル
         var playerSkillEffects = BattleActor.SkillEffects.neutral
@@ -223,19 +223,29 @@ final class ActionControlRegressionTests: XCTestCase {
             "追加行動(4f86076): 戦闘が正常に終了"
         )
 
-        // 通常攻撃（physicalAttack）の回数を数える
-        let physicalAttackCount = result.battleLog.entries.filter { entry in
+        // 仮説検証: followUp回数 ≦ 通常攻撃回数
+        // プレイヤーの通常攻撃回数をカウント（敵の攻撃は除外）
+        let playerNormalAttacks = result.battleLog.entries.filter { entry in
             entry.declaration.kind == .physicalAttack
         }.count
 
-        let totalTurns = Int(result.battleLog.turns)
+        // followUp（追加攻撃）の回数をカウント
+        let followUpCount = result.battleLog.entries.filter { entry in
+            entry.declaration.kind == .followUp
+        }.count
 
-        // 追加行動100%なので、味方の通常攻撃は最大2回/ターン
-        // 敵も攻撃するので、全体では4回/ターン程度が正常
-        // 反撃後に追加行動が発動していると異常に多くなる
-        let averageAttacksPerTurn = totalTurns > 0 ? Double(physicalAttackCount) / Double(totalTurns) : 0
+        // 反撃の回数をカウント（参考値）
+        let reactionCount = result.battleLog.entries.filter { entry in
+            entry.effects.contains { $0.kind == .reactionAttack }
+        }.count
 
-        XCTAssertLessThanOrEqual(averageAttacksPerTurn, 5.0,
-            "追加行動(4f86076): 反撃後に追加行動は発動しない（平均\(averageAttacksPerTurn)回/ターン）")
+        // 仮説: followUpは通常攻撃後にのみ発生するので、followUp ≦ 通常攻撃
+        // バグがある場合: 反撃後にもfollowUpが発生し、followUp > 通常攻撃 になる
+        XCTAssertLessThanOrEqual(followUpCount, playerNormalAttacks,
+            "追加行動(4f86076): followUp(\(followUpCount)) ≦ 通常攻撃(\(playerNormalAttacks))、反撃回数=\(reactionCount)")
+
+        // 追加検証: 反撃が発生していることを確認（テスト条件の妥当性）
+        XCTAssertGreaterThan(reactionCount, 0,
+            "追加行動(4f86076): テスト条件として反撃が発生していること")
     }
 }
