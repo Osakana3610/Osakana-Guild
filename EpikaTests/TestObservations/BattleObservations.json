@@ -1,0 +1,238 @@
+{
+  "version": "1.0",
+  "description": "戦闘システムのテスト観点一覧",
+  "confidenceInterval": "99%",
+  "defaultTolerance": "±2%",
+  "observations": [
+    {
+      "id": "BATTLE-RANDOM-001",
+      "category": ["戦闘", "乱数", "statMultiplier"],
+      "description": "luck=1のstatMultiplier平均値が期待範囲内か",
+      "formula": "(0.41 + 1.00) / 2 = 0.705",
+      "expectedRange": { "min": 0.691, "max": 0.719 },
+      "toleranceBasis": "期待値0.705の±2%、99%信頼区間、964回試行",
+      "testFile": "BattleRandomSystemTests.swift",
+      "testMethod": "testStatMultiplierAverageLuck1"
+    },
+    {
+      "id": "BATTLE-RANDOM-002",
+      "category": ["戦闘", "乱数", "statMultiplier"],
+      "description": "luck=18のstatMultiplier平均値が期待範囲内か",
+      "formula": "(0.58 + 1.00) / 2 = 0.79",
+      "expectedRange": { "min": 0.774, "max": 0.806 },
+      "toleranceBasis": "期待値0.79の±2%、99%信頼区間、389回試行",
+      "testFile": "BattleRandomSystemTests.swift",
+      "testMethod": "testStatMultiplierAverageLuck18"
+    },
+    {
+      "id": "BATTLE-RANDOM-003",
+      "category": ["戦闘", "乱数", "statMultiplier"],
+      "description": "luck=35のstatMultiplier平均値が期待範囲内か",
+      "formula": "(0.75 + 1.00) / 2 = 0.875",
+      "expectedRange": { "min": 0.858, "max": 0.893 },
+      "toleranceBasis": "期待値0.875の±2%、99%信頼区間、115回試行",
+      "testFile": "BattleRandomSystemTests.swift",
+      "testMethod": "testStatMultiplierAverageLuck35"
+    },
+    {
+      "id": "BATTLE-RANDOM-004",
+      "category": ["戦闘", "乱数", "percentChance"],
+      "description": "発動率100%で必ず発動するか",
+      "formula": "100回中100回発動",
+      "expectedRange": { "min": 100, "max": 100 },
+      "toleranceBasis": "決定的（100%は100%）",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionChance100Percent"
+    },
+    {
+      "id": "BATTLE-RANDOM-005",
+      "category": ["戦闘", "乱数", "percentChance"],
+      "description": "発動率0%で発動しないか",
+      "formula": "100回中0回発動",
+      "expectedRange": { "min": 0, "max": 0 },
+      "toleranceBasis": "決定的（0%は0%）",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionChance0Percent"
+    },
+    {
+      "id": "BATTLE-RANDOM-006",
+      "category": ["戦闘", "乱数", "percentChance"],
+      "description": "発動率50%の発動回数が統計的に妥当か",
+      "formula": "4148回中約2074回発動",
+      "expectedRange": { "min": 1991, "max": 2157 },
+      "toleranceBasis": "99%信頼区間、4148回試行、±2%許容",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionChance50PercentStatistical"
+    },
+    {
+      "id": "BATTLE-PHYS-001",
+      "category": ["戦闘", "ダメージ計算", "物理"],
+      "description": "物理ダメージの平均値が期待範囲内か（luck=1）",
+      "formula": "attack×0.705 - defense×0.705 = (attack-defense)×0.705",
+      "expectedRange": { "min": 2073, "max": 2157 },
+      "toleranceBasis": "期待値2115の±2%、99%信頼区間",
+      "testFile": "PhysicalDamageCalculationTests.swift",
+      "testMethod": "testPhysicalDamageAverageLuck1"
+    },
+    {
+      "id": "BATTLE-PHYS-002",
+      "category": ["戦闘", "ダメージ計算", "物理"],
+      "description": "物理ダメージの平均値が期待範囲内か（luck=18）",
+      "formula": "attack×0.79 - defense×0.79 = (attack-defense)×0.79",
+      "expectedRange": { "min": 2323, "max": 2417 },
+      "toleranceBasis": "期待値2370の±2%、99%信頼区間",
+      "testFile": "PhysicalDamageCalculationTests.swift",
+      "testMethod": "testPhysicalDamageAverageLuck18"
+    },
+    {
+      "id": "BATTLE-PHYS-003",
+      "category": ["戦闘", "ダメージ計算", "物理"],
+      "description": "物理ダメージの平均値が期待範囲内か（luck=35）",
+      "formula": "attack×0.875 - defense×0.875 = (attack-defense)×0.875",
+      "expectedRange": { "min": 2573, "max": 2678 },
+      "toleranceBasis": "期待値2625の±2%、99%信頼区間",
+      "testFile": "PhysicalDamageCalculationTests.swift",
+      "testMethod": "testPhysicalDamageAverageLuck35"
+    },
+    {
+      "id": "BATTLE-PHYS-004",
+      "category": ["戦闘", "ダメージ計算", "物理", "エッジケース"],
+      "description": "防御力0の時にフルダメージが出るか",
+      "formula": "attack × statMultiplier（防御による軽減なし）",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "ダメージ > 0 であること",
+      "testFile": "PhysicalDamageCalculationTests.swift",
+      "testMethod": "testZeroDefense_FullDamage"
+    },
+    {
+      "id": "BATTLE-PHYS-005",
+      "category": ["戦闘", "ダメージ計算", "物理", "エッジケース"],
+      "description": "防御力が攻撃力を上回る時に最低ダメージが出るか",
+      "formula": "max(1, 計算結果)",
+      "expectedRange": { "min": 1, "max": 1 },
+      "toleranceBasis": "最低ダメージ保証",
+      "testFile": "PhysicalDamageCalculationTests.swift",
+      "testMethod": "testHighDefense_MinimumDamage"
+    },
+    {
+      "id": "BATTLE-MAGIC-001",
+      "category": ["戦闘", "ダメージ計算", "魔法"],
+      "description": "魔法ダメージの平均値が期待範囲内か",
+      "formula": "magicPower × spellPower × statMultiplier",
+      "expectedRange": { "min": null, "max": null },
+      "toleranceBasis": "期待値の±2%、99%信頼区間",
+      "testFile": "MagicalDamageCalculationTests.swift",
+      "testMethod": "testMagicalDamageAverage"
+    },
+    {
+      "id": "BATTLE-BREATH-001",
+      "category": ["戦闘", "ダメージ計算", "ブレス"],
+      "description": "ブレスダメージの平均値が期待範囲内か",
+      "formula": "breathPower × statMultiplier",
+      "expectedRange": { "min": null, "max": null },
+      "toleranceBasis": "期待値の±2%、99%信頼区間",
+      "testFile": "BreathDamageCalculationTests.swift",
+      "testMethod": "testBreathDamageAverage"
+    },
+    {
+      "id": "BATTLE-BARRIER-001",
+      "category": ["戦闘", "防御", "バリア"],
+      "description": "物理バリアがダメージを無効化するか",
+      "formula": "バリア回数分のダメージが0になる",
+      "expectedRange": { "min": 0, "max": 0 },
+      "toleranceBasis": "決定的（バリア発動中はダメージ0）",
+      "testFile": "BarrierGuardTests.swift",
+      "testMethod": "testPhysicalBarrierBlocksDamage"
+    },
+    {
+      "id": "BATTLE-BARRIER-002",
+      "category": ["戦闘", "防御", "バリア"],
+      "description": "魔法バリアがダメージを無効化するか",
+      "formula": "バリア回数分のダメージが0になる",
+      "expectedRange": { "min": 0, "max": 0 },
+      "toleranceBasis": "決定的（バリア発動中はダメージ0）",
+      "testFile": "BarrierGuardTests.swift",
+      "testMethod": "testMagicalBarrierBlocksDamage"
+    },
+    {
+      "id": "BATTLE-GUARD-001",
+      "category": ["戦闘", "防御", "ガード"],
+      "description": "物理ガードがダメージを軽減するか",
+      "formula": "ダメージ × (1 - guardRate)",
+      "expectedRange": { "min": null, "max": null },
+      "toleranceBasis": "期待値の±2%",
+      "testFile": "BarrierGuardTests.swift",
+      "testMethod": "testPhysicalGuardReducesDamage"
+    },
+    {
+      "id": "BATTLE-CRIT-001",
+      "category": ["戦闘", "クリティカル", "発動率"],
+      "description": "クリティカル発動率が期待範囲内か",
+      "formula": "criticalRate / 100",
+      "expectedRange": { "min": null, "max": null },
+      "toleranceBasis": "99%信頼区間、±2%許容",
+      "testFile": "CriticalHitTests.swift",
+      "testMethod": "testCriticalRateStatistical"
+    },
+    {
+      "id": "BATTLE-CRIT-002",
+      "category": ["戦闘", "クリティカル", "ダメージ倍率"],
+      "description": "クリティカルダメージが正しく増加するか",
+      "formula": "baseDamage × criticalMultiplier",
+      "expectedRange": { "min": null, "max": null },
+      "toleranceBasis": "期待値の±2%",
+      "testFile": "CriticalHitTests.swift",
+      "testMethod": "testCriticalDamageMultiplier"
+    },
+    {
+      "id": "BATTLE-HIT-001",
+      "category": ["戦闘", "命中", "命中率"],
+      "description": "命中率が期待範囲内か",
+      "formula": "hitChance - evasion",
+      "expectedRange": { "min": null, "max": null },
+      "toleranceBasis": "99%信頼区間、±2%許容",
+      "testFile": "HitCalculationTests.swift",
+      "testMethod": "testHitRateStatistical"
+    },
+    {
+      "id": "BATTLE-REACTION-001",
+      "category": ["戦闘", "スキル", "反撃"],
+      "description": "反撃が発動してダメージを与えるか",
+      "formula": "被弾時に100%発動、ダメージ > 0",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "反撃ダメージが発生すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionAttackTriggersAndDealsDamage"
+    },
+    {
+      "id": "BATTLE-REACTION-002",
+      "category": ["戦闘", "スキル", "反撃"],
+      "description": "attackCountMultiplier=0.3で1回あたりのダメージが減少するか",
+      "formula": "multiplier=0.3の平均ダメージ < multiplier=1.0の平均ダメージ",
+      "expectedRange": { "min": null, "max": null },
+      "toleranceBasis": "相対比較（0.3 < 1.0）",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testAttackCountMultiplierReducesDamage"
+    },
+    {
+      "id": "BATTLE-STATUS-001",
+      "category": ["戦闘", "状態異常", "付与"],
+      "description": "状態異常が正しく付与されるか",
+      "formula": "付与率に応じた確率で付与",
+      "expectedRange": { "min": null, "max": null },
+      "toleranceBasis": "99%信頼区間、±2%許容",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testStatusEffectApplication"
+    },
+    {
+      "id": "BATTLE-STATUS-002",
+      "category": ["戦闘", "状態異常", "持続"],
+      "description": "状態異常が指定ターン後に解除されるか",
+      "formula": "duration ターン後に解除",
+      "expectedRange": { "min": null, "max": null },
+      "toleranceBasis": "決定的（指定ターンで解除）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testStatusEffectDuration"
+    }
+  ]
+}
