@@ -21,7 +21,6 @@
 
 import Foundation
 import Observation
-import SwiftData
 
 @MainActor
 @Observable
@@ -269,11 +268,11 @@ final class AdventureViewState {
             for try await update in handle.updates {
                 try Task.checkCancellation()
                 switch update.stage {
-                case .step(let entry, let totals, let battleLogId):
+                case .step(let entry, let totals):
                     // 差分更新: 新しいイベントだけ追加（DBアクセスなし）
-                    appendEncounterLog(entry: entry, totals: totals, battleLogId: battleLogId, partyId: partyId, masterData: appServices.masterDataCache)
+                    appendEncounterLog(entry: entry, totals: totals, partyId: partyId, masterData: appServices.masterDataCache)
                 case .completed:
-                    // 完了時はDBから最新を取得（battleLogIdなど反映のため）
+                    // 完了時はDBから最新を取得
                     await updateExplorationProgress(forPartyId: partyId, using: appServices)
                 }
             }
@@ -294,14 +293,12 @@ final class AdventureViewState {
     private func appendEncounterLog(
         entry: ExplorationEventLogEntry,
         totals: AppServices.ExplorationRunTotals,
-        battleLogId: PersistentIdentifier?,
         partyId: UInt8,
         masterData: MasterDataCache
     ) {
         appServicesRef?.userDataLoad.appendEncounterLog(
             entry: entry,
             totals: totals,
-            battleLogId: battleLogId,
             partyId: partyId,
             masterData: masterData
         )

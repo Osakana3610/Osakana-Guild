@@ -357,8 +357,7 @@ actor CachedExplorationQueryActor {
                         enemyId: enemyId,
                         enemyName: enemy.name,
                         result: result,
-                        turns: turns,
-                        battleLogId: eventRecord.battleLog?.persistentModelID
+                        turns: turns
                     )
                 }
             }
@@ -936,7 +935,6 @@ actor ExplorationProgressService {
     // MARK: - Event Recording Methods
 
     /// 探索イベントを追加
-    @discardableResult
     func appendEvent(partyId: UInt8,
                      startedAt: Date,
                      event: ExplorationEventLogEntry,
@@ -944,7 +942,7 @@ actor ExplorationProgressService {
                      occurredAt: Date,
                      randomState: UInt64,
                      superRareState: SuperRareDailyState,
-                     droppedItemIds: Set<UInt16>) throws -> PersistentIdentifier? {
+                     droppedItemIds: Set<UInt16>) throws {
         let context = contextProvider.makeContext()
         let descriptor = FetchDescriptor<ExplorationRunRecord>(
             predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
@@ -957,7 +955,7 @@ actor ExplorationProgressService {
         eventRecord.run = runRecord
         context.insert(eventRecord)
 
-        let battleLogRecord = try populateEventRecordRelationships(
+        try populateEventRecordRelationships(
             context: context,
             eventRecord: eventRecord,
             from: event,
@@ -973,7 +971,6 @@ actor ExplorationProgressService {
         runRecord.droppedItemIdsData = Self.encodeItemIds(droppedItemIds)
 
         try saveIfNeeded(context)
-        return battleLogRecord?.persistentModelID
     }
 
     /// 探索を終了（完了・全滅）
@@ -1092,7 +1089,7 @@ private extension ExplorationProgressService {
     func populateEventRecordRelationships(context: ModelContext,
                                           eventRecord: ExplorationEventRecord,
                                           from event: ExplorationEventLogEntry,
-                                          battleLog: BattleLogArchive?) throws -> BattleLogRecord? {
+                                          battleLog: BattleLogArchive?) throws {
         for drop in event.drops {
             let dropRecord = ExplorationDropRecord(
                 superRareTitleId: drop.superRareTitleId,
@@ -1126,9 +1123,7 @@ private extension ExplorationProgressService {
             )
 
             context.insert(logRecord)
-            return logRecord
         }
-        return nil
     }
 
     func updateAutoSellRecords(context: ModelContext,

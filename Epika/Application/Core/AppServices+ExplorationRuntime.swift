@@ -100,7 +100,7 @@ extension AppServices {
                     totalDrops.append(contentsOf: outcome.drops)
                 }
 
-                let battleLogId = try await explorationService.appendEvent(
+                try await explorationService.appendEvent(
                     partyId: runId.partyId,
                     startedAt: runId.startedAt,
                     event: outcome.entry,
@@ -120,8 +120,7 @@ extension AppServices {
                                                   drops: totalDrops)
                 let update = ExplorationRunUpdate(runId: sessionRunId,
                                                   stage: .step(entry: outcome.entry,
-                                                               totals: totals,
-                                                               battleLogId: battleLogId))
+                                                               totals: totals))
                 continuation.yield(update)
             }
 

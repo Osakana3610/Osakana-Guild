@@ -195,7 +195,7 @@ struct EncounterDetailView: View {
 
     @MainActor
     private func loadBattleLogIfNeeded() async {
-        guard encounter.combatSummary?.battleLogId != nil else { return }
+        guard encounter.combatSummary != nil else { return }
         guard renderedActions.isEmpty, !isLoadingBattleLog, battleLogError == nil else { return }
 
         isLoadingBattleLog = true
@@ -280,11 +280,25 @@ struct EncounterDetailView: View {
     }
 
     private func fetchBattleLogArchive() throws -> BattleLogArchive? {
-        guard let id = encounter.combatSummary?.battleLogId,
-              let record = modelContext.model(for: id) as? BattleLogRecord else {
+        // (partyId, startedAt, occurredAt)でExplorationEventRecordを特定し、.battleLogを取得
+        let partyId = snapshot.party.partyId
+        let startedAt = snapshot.startedAt
+        let occurredAt = encounter.occurredAt
+
+        let runDescriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+        )
+        guard let runRecord = try modelContext.fetch(runDescriptor).first else {
             return nil
         }
-        return try restoreBattleLogArchive(from: record)
+
+        // occurredAtで該当イベントを特定
+        guard let eventRecord = runRecord.events.first(where: { $0.occurredAt == occurredAt }),
+              let battleLogRecord = eventRecord.battleLog else {
+            return nil
+        }
+
+        return try restoreBattleLogArchive(from: battleLogRecord)
     }
 
     private func restoreBattleLogArchive(from record: BattleLogRecord) throws -> BattleLogArchive? {

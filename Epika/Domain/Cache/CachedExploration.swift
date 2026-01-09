@@ -41,7 +41,6 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 
 struct CachedExploration: Sendable, Hashable {
     enum Status: UInt8, Sendable, Hashable {
@@ -136,7 +135,6 @@ struct CachedExploration: Sendable, Hashable {
             var enemyName: String
             var result: String
             var turns: Int
-            var battleLogId: PersistentIdentifier?
         }
 
         /// イベントの付加情報（表示用）
@@ -290,7 +288,7 @@ extension CachedExploration {
 
 extension CachedExploration.EncounterLog {
     /// ランタイムのイベントログエントリから EncounterLog を生成
-    init(from entry: ExplorationEventLogEntry, battleLogId: PersistentIdentifier?, masterData: MasterDataCache) {
+    init(from entry: ExplorationEventLogEntry, masterData: MasterDataCache) {
         let kind: Kind
         var referenceId: String?
         var combatSummary: CombatSummary?
@@ -306,8 +304,7 @@ extension CachedExploration.EncounterLog {
                 enemyId: combat.enemy.id,
                 enemyName: combat.enemy.name,
                 result: combat.result.identifier,
-                turns: combat.turns,
-                battleLogId: battleLogId
+                turns: combat.turns
             )
 
         case .scripted(let scripted):

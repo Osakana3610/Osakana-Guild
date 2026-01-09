@@ -11,7 +11,6 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 
 extension UserDataLoadService {
     // MARK: - Exploration Loading
@@ -115,11 +114,10 @@ extension UserDataLoadService {
             for try await update in handle.updates {
                 try Task.checkCancellation()
                 switch update.stage {
-                case .step(let entry, let totals, let battleLogId):
+                case .step(let entry, let totals):
                     await appendEncounterLog(
                         entry: entry,
                         totals: totals,
-                        battleLogId: battleLogId,
                         partyId: partyId,
                         masterData: masterDataCache
                     )
@@ -157,7 +155,6 @@ extension UserDataLoadService {
     func appendEncounterLog(
         entry: ExplorationEventLogEntry,
         totals: AppServices.ExplorationRunTotals,
-        battleLogId: PersistentIdentifier?,
         partyId: UInt8,
         masterData: MasterDataCache
     ) {
@@ -165,7 +162,7 @@ extension UserDataLoadService {
             $0.party.partyId == partyId && $0.status == .running
         }) else { return }
 
-        let newLog = CachedExploration.EncounterLog(from: entry, battleLogId: battleLogId, masterData: masterData)
+        let newLog = CachedExploration.EncounterLog(from: entry, masterData: masterData)
         explorationSummaries[index].encounterLogs.append(newLog)
         explorationSummaries[index].activeFloorNumber = entry.floorNumber
         explorationSummaries[index].lastUpdatedAt = entry.occurredAt
