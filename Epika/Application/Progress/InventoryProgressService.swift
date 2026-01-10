@@ -397,33 +397,77 @@ actor InventoryProgressService {
             throw ProgressError.invalidInput(description: "提供アイテムは所持品から選択してください")
         }
 
-        targetRecord.superRareTitleId = newEnhancement.superRareTitleId
-        targetRecord.normalTitleId = newEnhancement.normalTitleId
-        targetRecord.socketSuperRareTitleId = newEnhancement.socketSuperRareTitleId
-        targetRecord.socketNormalTitleId = newEnhancement.socketNormalTitleId
-        targetRecord.socketItemId = newEnhancement.socketItemId
+        // 通知用の追跡
+        var upsertedRecords: [InventoryItemRecord] = []
+        var removedKeys: [String] = []
 
+        let inheritedRecord: InventoryItemRecord
+        if targetRecord.quantity > 1 {
+            // 数量2以上：1個減らし、新しい称号付きレコードを作成/追加
+            targetRecord.quantity -= 1
+            upsertedRecords.append(targetRecord)
+
+            // 既存の同一称号レコードを検索（同じstorageのみ）
+            let newSuperRare = newEnhancement.superRareTitleId
+            let newNormal = newEnhancement.normalTitleId
+            let newSocketSuperRare = newEnhancement.socketSuperRareTitleId
+            let newSocketNormal = newEnhancement.socketNormalTitleId
+            let newSocketItem = newEnhancement.socketItemId
+            let targetStorage = targetRecord.storage
+            var inheritedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.superRareTitleId == newSuperRare &&
+                $0.normalTitleId == newNormal &&
+                $0.itemId == tMaster &&
+                $0.socketSuperRareTitleId == newSocketSuperRare &&
+                $0.socketNormalTitleId == newSocketNormal &&
+                $0.socketItemId == newSocketItem &&
+                $0.storage == targetStorage
+            })
+            inheritedDescriptor.fetchLimit = 1
+            if let existingInherited = try context.fetch(inheritedDescriptor).first {
+                existingInherited.quantity += 1
+                inheritedRecord = existingInherited
+            } else {
+                let newRecord = InventoryItemRecord(
+                    superRareTitleId: newEnhancement.superRareTitleId,
+                    normalTitleId: newEnhancement.normalTitleId,
+                    itemId: tMaster,
+                    socketSuperRareTitleId: newEnhancement.socketSuperRareTitleId,
+                    socketNormalTitleId: newEnhancement.socketNormalTitleId,
+                    socketItemId: newEnhancement.socketItemId,
+                    quantity: 1,
+                    storage: targetRecord.storage
+                )
+                context.insert(newRecord)
+                inheritedRecord = newRecord
+            }
+        } else {
+            // 数量1：称号情報を直接更新（stackKeyが変わる）
+            removedKeys.append(targetStackKey)
+            targetRecord.superRareTitleId = newEnhancement.superRareTitleId
+            targetRecord.normalTitleId = newEnhancement.normalTitleId
+            targetRecord.socketSuperRareTitleId = newEnhancement.socketSuperRareTitleId
+            targetRecord.socketNormalTitleId = newEnhancement.socketNormalTitleId
+            targetRecord.socketItemId = newEnhancement.socketItemId
+            inheritedRecord = targetRecord
+        }
+
+        // 提供元を1個減算
         let sourceWasDeleted = sourceRecord.quantity <= 1
         if sourceWasDeleted {
             context.delete(sourceRecord)
-        } else {
-            sourceRecord.quantity -= 1
-        }
-
-        try context.save()
-
-        // 通知: 対象は旧stackKeyが削除され、新stackKeyで追加
-        var upsertedRecords: [InventoryItemRecord] = [targetRecord]
-        var removedKeys: [String] = [targetStackKey]
-        // ソースは削除または更新
-        if sourceWasDeleted {
             removedKeys.append(sourceStackKey)
         } else {
+            sourceRecord.quantity -= 1
             upsertedRecords.append(sourceRecord)
         }
+
+        upsertedRecords.append(inheritedRecord)
+
+        try context.save()
         postInventoryChange(upserted: upsertedRecords, removed: removedKeys)
 
-        return targetRecord.stackKey
+        return inheritedRecord.stackKey
     }
 
     /// 宝石をアイテムにソケットとして装着

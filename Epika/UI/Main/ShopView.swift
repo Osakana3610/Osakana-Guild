@@ -91,7 +91,9 @@ struct ShopView: View {
                 ShopMenuRow(title: "称号を継承",
                            icon: "crown.fill",
                            tint: .indigo) {
-                    TitleInheritanceView()
+                    Text("称号継承は準備中です")
+                        .foregroundStyle(.secondary)
+                        .padding()
                 }
 
                 ShopMenuRow(title: "宝石改造",
