@@ -26,7 +26,7 @@ import Foundation
 
 // MARK: - Resurrection Handlers (7)
 
-struct ResurrectionSaveHandler: SkillEffectHandler {
+enum ResurrectionSaveHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.resurrectionSave
 
     static func apply(
@@ -45,7 +45,7 @@ struct ResurrectionSaveHandler: SkillEffectHandler {
     }
 }
 
-struct ResurrectionActiveHandler: SkillEffectHandler {
+enum ResurrectionActiveHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.resurrectionActive
 
     static func apply(
@@ -69,7 +69,7 @@ struct ResurrectionActiveHandler: SkillEffectHandler {
     }
 }
 
-struct ResurrectionBuffHandler: SkillEffectHandler {
+enum ResurrectionBuffHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.resurrectionBuff
 
     static func apply(
@@ -86,7 +86,7 @@ struct ResurrectionBuffHandler: SkillEffectHandler {
     }
 }
 
-struct ResurrectionVitalizeHandler: SkillEffectHandler {
+enum ResurrectionVitalizeHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.resurrectionVitalize
 
     static func apply(
@@ -108,7 +108,7 @@ struct ResurrectionVitalizeHandler: SkillEffectHandler {
     }
 }
 
-struct ResurrectionSummonHandler: SkillEffectHandler {
+enum ResurrectionSummonHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.resurrectionSummon
 
     static func apply(
@@ -124,7 +124,7 @@ struct ResurrectionSummonHandler: SkillEffectHandler {
     }
 }
 
-struct ResurrectionPassiveHandler: SkillEffectHandler {
+enum ResurrectionPassiveHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.resurrectionPassive
 
     static func apply(
@@ -146,7 +146,7 @@ struct ResurrectionPassiveHandler: SkillEffectHandler {
     }
 }
 
-struct SacrificeRiteHandler: SkillEffectHandler {
+enum SacrificeRiteHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.sacrificeRite
 
     static func apply(

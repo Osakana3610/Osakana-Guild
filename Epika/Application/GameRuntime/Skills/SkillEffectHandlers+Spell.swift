@@ -29,7 +29,7 @@ import Foundation
 
 // MARK: - Spell Handlers (8)
 
-struct SpellPowerPercentHandler: SkillEffectHandler {
+enum SpellPowerPercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.spellPowerPercent
 
     static func apply(
@@ -43,7 +43,7 @@ struct SpellPowerPercentHandler: SkillEffectHandler {
     }
 }
 
-struct SpellPowerMultiplierHandler: SkillEffectHandler {
+enum SpellPowerMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.spellPowerMultiplier
 
     static func apply(
@@ -55,7 +55,7 @@ struct SpellPowerMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct SpellSpecificMultiplierHandler: SkillEffectHandler {
+enum SpellSpecificMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.spellSpecificMultiplier
 
     static func apply(
@@ -70,7 +70,7 @@ struct SpellSpecificMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct SpellSpecificTakenMultiplierHandler: SkillEffectHandler {
+enum SpellSpecificTakenMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.spellSpecificTakenMultiplier
 
     static func apply(
@@ -85,7 +85,7 @@ struct SpellSpecificTakenMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct SpellChargesHandler: SkillEffectHandler {
+enum SpellChargesHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.spellCharges
 
     static func apply(
@@ -152,7 +152,7 @@ struct SpellChargesHandler: SkillEffectHandler {
     }
 }
 
-struct SpellAccessHandler: SkillEffectHandler {
+enum SpellAccessHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.spellAccess
 
     static func apply(
@@ -164,7 +164,7 @@ struct SpellAccessHandler: SkillEffectHandler {
     }
 }
 
-struct SpellTierUnlockHandler: SkillEffectHandler {
+enum SpellTierUnlockHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.spellTierUnlock
 
     static func apply(
@@ -176,7 +176,7 @@ struct SpellTierUnlockHandler: SkillEffectHandler {
     }
 }
 
-struct TacticSpellAmplifyHandler: SkillEffectHandler {
+enum TacticSpellAmplifyHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.tacticSpellAmplify
 
     static func apply(
@@ -207,7 +207,7 @@ struct TacticSpellAmplifyHandler: SkillEffectHandler {
     }
 }
 
-struct MagicCriticalChancePercentHandler: SkillEffectHandler {
+enum MagicCriticalChancePercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.magicCriticalChancePercent
 
     static func apply(
@@ -224,7 +224,7 @@ struct MagicCriticalChancePercentHandler: SkillEffectHandler {
     }
 }
 
-struct SpellChargeRecoveryChanceHandler: SkillEffectHandler {
+enum SpellChargeRecoveryChanceHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.spellChargeRecoveryChance
 
     static func apply(

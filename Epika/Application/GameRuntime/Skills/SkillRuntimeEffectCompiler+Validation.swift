@@ -29,7 +29,7 @@ import Foundation
 
 // MARK: - Payload Decoding & Validation
 extension SkillRuntimeEffectCompiler {
-    static func decodePayload(from effect: SkillDefinition.Effect, skillId: UInt16) throws -> DecodedSkillEffectPayload {
+    nonisolated static func decodePayload(from effect: SkillDefinition.Effect, skillId: UInt16) throws -> DecodedSkillEffectPayload {
         return DecodedSkillEffectPayload(
             familyId: effect.familyId,
             effectType: effect.effectType,
@@ -45,9 +45,9 @@ extension SkillRuntimeEffectCompiler {
         .equipmentType: [.equipmentCategory]
     ]
 
-    static func validatePayload(_ payload: DecodedSkillEffectPayload,
-                                skillId: UInt16,
-                                effectIndex: Int) throws {
+    nonisolated static func validatePayload(_ payload: DecodedSkillEffectPayload,
+                                           skillId: UInt16,
+                                           effectIndex: Int) throws {
         // requiredFieldsはString baseのため、現時点ではバリデーションをスキップ
         // Int化完了後、requiredFieldsもEffectParamKey/EffectValueKey baseに変更予定
 
@@ -191,21 +191,21 @@ struct DecodedSkillEffectPayload: Sendable, Hashable {
     let value: [EffectValueKey: Double]
     let arrays: [EffectArrayKey: [Int]]
 
-    func requireParam(_ key: EffectParamKey, skillId: UInt16, effectIndex: Int) throws -> Int {
+    nonisolated func requireParam(_ key: EffectParamKey, skillId: UInt16, effectIndex: Int) throws -> Int {
         guard let value = parameters[key] else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.identifier) の必須パラメータ \(key) がありません")
         }
         return value
     }
 
-    func requireValue(_ key: EffectValueKey, skillId: UInt16, effectIndex: Int) throws -> Double {
+    nonisolated func requireValue(_ key: EffectValueKey, skillId: UInt16, effectIndex: Int) throws -> Double {
         guard let value = self.value[key] else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.identifier) の必須値 \(key) がありません")
         }
         return value
     }
 
-    func requireArray(_ key: EffectArrayKey, skillId: UInt16, effectIndex: Int) throws -> [Int] {
+    nonisolated func requireArray(_ key: EffectArrayKey, skillId: UInt16, effectIndex: Int) throws -> [Int] {
         guard let array = self.arrays[key], !array.isEmpty else {
             throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) \(effectType.identifier) の必須配列 \(key) がありません")
         }

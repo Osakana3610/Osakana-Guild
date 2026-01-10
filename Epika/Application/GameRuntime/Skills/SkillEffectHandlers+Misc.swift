@@ -37,7 +37,7 @@ import Foundation
 
 // MARK: - Misc Handlers
 
-struct RowProfileHandler: SkillEffectHandler {
+enum RowProfileHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.rowProfile
 
     static func apply(
@@ -49,7 +49,7 @@ struct RowProfileHandler: SkillEffectHandler {
     }
 }
 
-struct EndOfTurnHealingHandler: SkillEffectHandler {
+enum EndOfTurnHealingHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.endOfTurnHealing
 
     static func apply(
@@ -62,7 +62,7 @@ struct EndOfTurnHealingHandler: SkillEffectHandler {
     }
 }
 
-struct EndOfTurnSelfHPPercentHandler: SkillEffectHandler {
+enum EndOfTurnSelfHPPercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.endOfTurnSelfHPPercent
 
     static func apply(
@@ -74,7 +74,7 @@ struct EndOfTurnSelfHPPercentHandler: SkillEffectHandler {
     }
 }
 
-struct PartyAttackFlagHandler: SkillEffectHandler {
+enum PartyAttackFlagHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.partyAttackFlag
 
     static func apply(
@@ -94,7 +94,7 @@ struct PartyAttackFlagHandler: SkillEffectHandler {
     }
 }
 
-struct PartyAttackTargetHandler: SkillEffectHandler {
+enum PartyAttackTargetHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.partyAttackTarget
 
     static func apply(
@@ -113,7 +113,7 @@ struct PartyAttackTargetHandler: SkillEffectHandler {
     }
 }
 
-struct AntiHealingHandler: SkillEffectHandler {
+enum AntiHealingHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.antiHealing
 
     static func apply(
@@ -125,7 +125,7 @@ struct AntiHealingHandler: SkillEffectHandler {
     }
 }
 
-struct BreathVariantHandler: SkillEffectHandler {
+enum BreathVariantHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.breathVariant
 
     static func apply(
@@ -138,7 +138,7 @@ struct BreathVariantHandler: SkillEffectHandler {
     }
 }
 
-struct EquipmentStatMultiplierHandler: SkillEffectHandler {
+enum EquipmentStatMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.equipmentStatMultiplier
 
     static func apply(
@@ -155,7 +155,7 @@ struct EquipmentStatMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct DodgeCapHandler: SkillEffectHandler {
+enum DodgeCapHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.dodgeCap
 
     static func apply(
@@ -172,7 +172,7 @@ struct DodgeCapHandler: SkillEffectHandler {
     }
 }
 
-struct AbsorptionHandler: SkillEffectHandler {
+enum AbsorptionHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.absorption
 
     static func apply(
@@ -192,7 +192,7 @@ struct AbsorptionHandler: SkillEffectHandler {
     }
 }
 
-struct DegradationRepairHandler: SkillEffectHandler {
+enum DegradationRepairHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.degradationRepair
 
     static func apply(
@@ -207,7 +207,7 @@ struct DegradationRepairHandler: SkillEffectHandler {
     }
 }
 
-struct DegradationRepairBoostHandler: SkillEffectHandler {
+enum DegradationRepairBoostHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.degradationRepairBoost
 
     static func apply(
@@ -219,7 +219,7 @@ struct DegradationRepairBoostHandler: SkillEffectHandler {
     }
 }
 
-struct AutoDegradationRepairHandler: SkillEffectHandler {
+enum AutoDegradationRepairHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.autoDegradationRepair
 
     static func apply(
@@ -231,7 +231,7 @@ struct AutoDegradationRepairHandler: SkillEffectHandler {
     }
 }
 
-struct RunawayMagicHandler: SkillEffectHandler {
+enum RunawayMagicHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.runawayMagic
 
     static func apply(
@@ -245,7 +245,7 @@ struct RunawayMagicHandler: SkillEffectHandler {
     }
 }
 
-struct RunawayDamageHandler: SkillEffectHandler {
+enum RunawayDamageHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.runawayDamage
 
     static func apply(
@@ -259,7 +259,7 @@ struct RunawayDamageHandler: SkillEffectHandler {
     }
 }
 
-struct RetreatAtTurnHandler: SkillEffectHandler {
+enum RetreatAtTurnHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.retreatAtTurn
 
     static func apply(
@@ -282,7 +282,7 @@ struct RetreatAtTurnHandler: SkillEffectHandler {
     }
 }
 
-struct TargetingWeightHandler: SkillEffectHandler {
+enum TargetingWeightHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.targetingWeight
 
     static func apply(
@@ -295,7 +295,7 @@ struct TargetingWeightHandler: SkillEffectHandler {
     }
 }
 
-struct CoverRowsBehindHandler: SkillEffectHandler {
+enum CoverRowsBehindHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.coverRowsBehind
 
     static func apply(

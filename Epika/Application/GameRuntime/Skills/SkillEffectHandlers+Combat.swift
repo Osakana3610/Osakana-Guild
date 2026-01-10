@@ -40,7 +40,7 @@ import Foundation
 
 // MARK: - Combat Handlers (15)
 
-struct ProcMultiplierHandler: SkillEffectHandler {
+enum ProcMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.procMultiplier
 
     static func apply(
@@ -52,7 +52,7 @@ struct ProcMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct ProcRateHandler: SkillEffectHandler {
+enum ProcRateHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.procRate
 
     static func apply(
@@ -76,7 +76,7 @@ struct ProcRateHandler: SkillEffectHandler {
     }
 }
 
-struct ExtraActionHandler: SkillEffectHandler {
+enum ExtraActionHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.extraAction
 
     static func apply(
@@ -122,7 +122,7 @@ struct ExtraActionHandler: SkillEffectHandler {
     }
 }
 
-struct ReactionNextTurnHandler: SkillEffectHandler {
+enum ReactionNextTurnHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.reactionNextTurn
 
     static func apply(
@@ -138,7 +138,7 @@ struct ReactionNextTurnHandler: SkillEffectHandler {
     }
 }
 
-struct ActionOrderMultiplierHandler: SkillEffectHandler {
+enum ActionOrderMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.actionOrderMultiplier
 
     static func apply(
@@ -150,7 +150,7 @@ struct ActionOrderMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct ActionOrderShuffleHandler: SkillEffectHandler {
+enum ActionOrderShuffleHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.actionOrderShuffle
 
     static func apply(
@@ -162,7 +162,7 @@ struct ActionOrderShuffleHandler: SkillEffectHandler {
     }
 }
 
-struct CounterAttackEvasionMultiplierHandler: SkillEffectHandler {
+enum CounterAttackEvasionMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.counterAttackEvasionMultiplier
 
     static func apply(
@@ -174,7 +174,7 @@ struct CounterAttackEvasionMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct ReactionHandler: SkillEffectHandler {
+enum ReactionHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.reaction
 
     static func apply(
@@ -193,7 +193,7 @@ struct ReactionHandler: SkillEffectHandler {
     }
 }
 
-struct ParryHandler: SkillEffectHandler {
+enum ParryHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.parry
 
     static func apply(
@@ -210,7 +210,7 @@ struct ParryHandler: SkillEffectHandler {
     }
 }
 
-struct ShieldBlockHandler: SkillEffectHandler {
+enum ShieldBlockHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.shieldBlock
 
     static func apply(
@@ -227,7 +227,7 @@ struct ShieldBlockHandler: SkillEffectHandler {
     }
 }
 
-struct SpecialAttackHandler: SkillEffectHandler {
+enum SpecialAttackHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.specialAttack
 
     static func apply(
@@ -262,7 +262,7 @@ struct SpecialAttackHandler: SkillEffectHandler {
     }
 }
 
-struct BarrierHandler: SkillEffectHandler {
+enum BarrierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.barrier
 
     static func apply(
@@ -284,7 +284,7 @@ struct BarrierHandler: SkillEffectHandler {
     }
 }
 
-struct BarrierOnGuardHandler: SkillEffectHandler {
+enum BarrierOnGuardHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.barrierOnGuard
 
     static func apply(
@@ -306,7 +306,7 @@ struct BarrierOnGuardHandler: SkillEffectHandler {
     }
 }
 
-struct AttackCountAdditiveHandler: SkillEffectHandler {
+enum AttackCountAdditiveHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.attackCountAdditive
 
     static func apply(
@@ -319,7 +319,7 @@ struct AttackCountAdditiveHandler: SkillEffectHandler {
     }
 }
 
-struct AttackCountMultiplierHandler: SkillEffectHandler {
+enum AttackCountMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.attackCountMultiplier
 
     static func apply(
@@ -332,7 +332,7 @@ struct AttackCountMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct EnemyActionDebuffChanceHandler: SkillEffectHandler {
+enum EnemyActionDebuffChanceHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.enemyActionDebuffChance
 
     static func apply(
@@ -347,7 +347,7 @@ struct EnemyActionDebuffChanceHandler: SkillEffectHandler {
     }
 }
 
-struct CumulativeHitDamageBonusHandler: SkillEffectHandler {
+enum CumulativeHitDamageBonusHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.cumulativeHitDamageBonus
 
     static func apply(
@@ -363,7 +363,7 @@ struct CumulativeHitDamageBonusHandler: SkillEffectHandler {
 
 // MARK: - Jester Skills (道化師)
 
-struct EnemySingleActionSkipChanceHandler: SkillEffectHandler {
+enum EnemySingleActionSkipChanceHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.enemySingleActionSkipChance
 
     static func apply(
@@ -376,7 +376,7 @@ struct EnemySingleActionSkipChanceHandler: SkillEffectHandler {
     }
 }
 
-struct ActionOrderShuffleEnemyHandler: SkillEffectHandler {
+enum ActionOrderShuffleEnemyHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.actionOrderShuffleEnemy
 
     static func apply(
@@ -388,7 +388,7 @@ struct ActionOrderShuffleEnemyHandler: SkillEffectHandler {
     }
 }
 
-struct FirstStrikeHandler: SkillEffectHandler {
+enum FirstStrikeHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.firstStrike
 
     static func apply(
@@ -402,7 +402,7 @@ struct FirstStrikeHandler: SkillEffectHandler {
 
 // MARK: - Enemy Stat Debuff
 
-struct StatDebuffHandler: SkillEffectHandler {
+enum StatDebuffHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.statDebuff
 
     static func apply(

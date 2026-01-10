@@ -28,26 +28,26 @@ struct SkillRuntimeEffects {
         var forgottenSpellIds: Set<UInt8>
         var tierUnlocks: [UInt8: Int]
 
-        static let empty = Spellbook(learnedSpellIds: [],
-                                     forgottenSpellIds: [],
-                                     tierUnlocks: [:])
+        nonisolated static let empty = Spellbook(learnedSpellIds: [],
+                                               forgottenSpellIds: [],
+                                               tierUnlocks: [:])
     }
 
     struct SpellLoadout: Sendable, Hashable {
         var mage: [SpellDefinition]
         var priest: [SpellDefinition]
 
-        static let empty = SpellLoadout(mage: [], priest: [])
+        nonisolated static let empty = SpellLoadout(mage: [], priest: [])
     }
 
-    static let emptySpellbook = Spellbook.empty
-    static let emptySpellLoadout = SpellLoadout.empty
+    nonisolated static let emptySpellbook = Spellbook.empty
+    nonisolated static let emptySpellLoadout = SpellLoadout.empty
 
     struct EquipmentSlots: Sendable, Hashable {
         var additive: Int
         var multiplier: Double
 
-        static let neutral = EquipmentSlots(additive: 0, multiplier: 1.0)
+        nonisolated static let neutral = EquipmentSlots(additive: 0, multiplier: 1.0)
     }
 
     struct RewardComponents: Sendable, Hashable {
@@ -92,7 +92,7 @@ struct SkillRuntimeEffects {
             return max(0.0, multiplier) * bonusComponent
         }
 
-        static let neutral = RewardComponents()
+        nonisolated static let neutral = RewardComponents()
     }
 
     struct ExplorationModifiers: Sendable, Hashable {
@@ -129,7 +129,7 @@ struct SkillRuntimeEffects {
             }
         }
 
-        static let neutral = ExplorationModifiers(entries: [])
+        nonisolated static let neutral = ExplorationModifiers(entries: [])
     }
 }
 

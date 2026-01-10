@@ -36,7 +36,7 @@ import Foundation
 
 // MARK: - Damage Handlers (14)
 
-struct DamageDealtPercentHandler: SkillEffectHandler {
+enum DamageDealtPercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.damageDealtPercent
 
     static func apply(
@@ -51,7 +51,7 @@ struct DamageDealtPercentHandler: SkillEffectHandler {
     }
 }
 
-struct DamageDealtMultiplierHandler: SkillEffectHandler {
+enum DamageDealtMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.damageDealtMultiplier
 
     static func apply(
@@ -65,7 +65,7 @@ struct DamageDealtMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct DamageTakenPercentHandler: SkillEffectHandler {
+enum DamageTakenPercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.damageTakenPercent
 
     static func apply(
@@ -80,7 +80,7 @@ struct DamageTakenPercentHandler: SkillEffectHandler {
     }
 }
 
-struct DamageTakenMultiplierHandler: SkillEffectHandler {
+enum DamageTakenMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.damageTakenMultiplier
 
     static func apply(
@@ -94,7 +94,7 @@ struct DamageTakenMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct DamageDealtMultiplierAgainstHandler: SkillEffectHandler {
+enum DamageDealtMultiplierAgainstHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.damageDealtMultiplierAgainst
 
     static func apply(
@@ -111,7 +111,7 @@ struct DamageDealtMultiplierAgainstHandler: SkillEffectHandler {
     }
 }
 
-struct CriticalDamagePercentHandler: SkillEffectHandler {
+enum CriticalDamagePercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.criticalDamagePercent
 
     static func apply(
@@ -125,7 +125,7 @@ struct CriticalDamagePercentHandler: SkillEffectHandler {
     }
 }
 
-struct CriticalDamageMultiplierHandler: SkillEffectHandler {
+enum CriticalDamageMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.criticalDamageMultiplier
 
     static func apply(
@@ -137,7 +137,7 @@ struct CriticalDamageMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct CriticalDamageTakenMultiplierHandler: SkillEffectHandler {
+enum CriticalDamageTakenMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.criticalDamageTakenMultiplier
 
     static func apply(
@@ -149,7 +149,7 @@ struct CriticalDamageTakenMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct PenetrationDamageTakenMultiplierHandler: SkillEffectHandler {
+enum PenetrationDamageTakenMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.penetrationDamageTakenMultiplier
 
     static func apply(
@@ -161,7 +161,7 @@ struct PenetrationDamageTakenMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct MartialBonusPercentHandler: SkillEffectHandler {
+enum MartialBonusPercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.martialBonusPercent
 
     static func apply(
@@ -175,7 +175,7 @@ struct MartialBonusPercentHandler: SkillEffectHandler {
     }
 }
 
-struct MartialBonusMultiplierHandler: SkillEffectHandler {
+enum MartialBonusMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.martialBonusMultiplier
 
     static func apply(
@@ -187,7 +187,7 @@ struct MartialBonusMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct AdditionalDamageAdditiveHandler: SkillEffectHandler {
+enum AdditionalDamageAdditiveHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.additionalDamageAdditive
 
     static func apply(
@@ -200,7 +200,7 @@ struct AdditionalDamageAdditiveHandler: SkillEffectHandler {
     }
 }
 
-struct AdditionalDamageMultiplierHandler: SkillEffectHandler {
+enum AdditionalDamageMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.additionalDamageMultiplier
 
     static func apply(
@@ -213,7 +213,7 @@ struct AdditionalDamageMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct MinHitScaleHandler: SkillEffectHandler {
+enum MinHitScaleHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.minHitScale
 
     static func apply(
@@ -229,7 +229,7 @@ struct MinHitScaleHandler: SkillEffectHandler {
     }
 }
 
-struct MagicNullifyChancePercentHandler: SkillEffectHandler {
+enum MagicNullifyChancePercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.magicNullifyChancePercent
 
     static func apply(
@@ -243,7 +243,7 @@ struct MagicNullifyChancePercentHandler: SkillEffectHandler {
     }
 }
 
-struct LevelComparisonDamageTakenHandler: SkillEffectHandler {
+enum LevelComparisonDamageTakenHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.levelComparisonDamageTaken
 
     static func apply(
@@ -259,7 +259,7 @@ struct LevelComparisonDamageTakenHandler: SkillEffectHandler {
 
 // MARK: - Assassin Skills (暗殺者)
 
-struct DamageDealtMultiplierByTargetHPHandler: SkillEffectHandler {
+enum DamageDealtMultiplierByTargetHPHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.damageDealtMultiplierByTargetHP
 
     static func apply(

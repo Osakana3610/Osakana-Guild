@@ -27,7 +27,7 @@ import Foundation
 
 // MARK: - Status Handlers (7)
 
-struct StatusResistanceMultiplierHandler: SkillEffectHandler {
+enum StatusResistanceMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.statusResistanceMultiplier
 
     static func apply(
@@ -48,7 +48,7 @@ struct StatusResistanceMultiplierHandler: SkillEffectHandler {
     }
 }
 
-struct StatusResistancePercentHandler: SkillEffectHandler {
+enum StatusResistancePercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.statusResistancePercent
 
     static func apply(
@@ -69,7 +69,7 @@ struct StatusResistancePercentHandler: SkillEffectHandler {
     }
 }
 
-struct StatusInflictHandler: SkillEffectHandler {
+enum StatusInflictHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.statusInflict
 
     static func apply(
@@ -84,7 +84,7 @@ struct StatusInflictHandler: SkillEffectHandler {
     }
 }
 
-struct BerserkHandler: SkillEffectHandler {
+enum BerserkHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.berserk
 
     static func apply(
@@ -101,7 +101,7 @@ struct BerserkHandler: SkillEffectHandler {
     }
 }
 
-struct TimedBuffTriggerHandler: SkillEffectHandler {
+enum TimedBuffTriggerHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.timedBuffTrigger
 
     static func apply(
@@ -170,7 +170,7 @@ struct TimedBuffTriggerHandler: SkillEffectHandler {
     }
 }
 
-struct TimedMagicPowerAmplifyHandler: SkillEffectHandler {
+enum TimedMagicPowerAmplifyHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.timedMagicPowerAmplify
 
     static func apply(
@@ -199,7 +199,7 @@ struct TimedMagicPowerAmplifyHandler: SkillEffectHandler {
     }
 }
 
-struct TimedBreathPowerAmplifyHandler: SkillEffectHandler {
+enum TimedBreathPowerAmplifyHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.timedBreathPowerAmplify
 
     static func apply(
@@ -228,7 +228,7 @@ struct TimedBreathPowerAmplifyHandler: SkillEffectHandler {
     }
 }
 
-struct AutoStatusCureOnAllyHandler: SkillEffectHandler {
+enum AutoStatusCureOnAllyHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.autoStatusCureOnAlly
 
     static func apply(

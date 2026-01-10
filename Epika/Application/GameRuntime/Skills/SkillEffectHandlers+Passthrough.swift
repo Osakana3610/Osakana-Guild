@@ -46,122 +46,122 @@ import Foundation
 // Actor.swift では処理しないが、レジストリ登録は必要なハンドラ
 // これらは他のCompiler（Equipment, Exploration, Reward, Spell等）で処理される
 
-struct CriticalRateAdditiveHandler: SkillEffectHandler {
+enum CriticalRateAdditiveHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.criticalRateAdditive
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct CriticalRateCapHandler: SkillEffectHandler {
+enum CriticalRateCapHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.criticalRateCap
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct CriticalRateMaxAbsoluteHandler: SkillEffectHandler {
+enum CriticalRateMaxAbsoluteHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.criticalRateMaxAbsolute
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct CriticalRateMaxDeltaHandler: SkillEffectHandler {
+enum CriticalRateMaxDeltaHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.criticalRateMaxDelta
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct EquipmentSlotAdditiveHandler: SkillEffectHandler {
+enum EquipmentSlotAdditiveHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.equipmentSlotAdditive
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct EquipmentSlotMultiplierHandler: SkillEffectHandler {
+enum EquipmentSlotMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.equipmentSlotMultiplier
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct ExplorationTimeMultiplierHandler: SkillEffectHandler {
+enum ExplorationTimeMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.explorationTimeMultiplier
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct GrowthMultiplierHandler: SkillEffectHandler {
+enum GrowthMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.growthMultiplier
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct IncompetenceStatHandler: SkillEffectHandler {
+enum IncompetenceStatHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.incompetenceStat
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct ItemStatMultiplierHandler: SkillEffectHandler {
+enum ItemStatMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.itemStatMultiplier
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct RewardExperienceMultiplierHandler: SkillEffectHandler {
+enum RewardExperienceMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.rewardExperienceMultiplier
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct RewardExperiencePercentHandler: SkillEffectHandler {
+enum RewardExperiencePercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.rewardExperiencePercent
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct RewardGoldMultiplierHandler: SkillEffectHandler {
+enum RewardGoldMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.rewardGoldMultiplier
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct RewardGoldPercentHandler: SkillEffectHandler {
+enum RewardGoldPercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.rewardGoldPercent
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct RewardItemMultiplierHandler: SkillEffectHandler {
+enum RewardItemMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.rewardItemMultiplier
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct RewardItemPercentHandler: SkillEffectHandler {
+enum RewardItemPercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.rewardItemPercent
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct RewardTitleMultiplierHandler: SkillEffectHandler {
+enum RewardTitleMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.rewardTitleMultiplier
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct RewardTitlePercentHandler: SkillEffectHandler {
+enum RewardTitlePercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.rewardTitlePercent
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct StatAdditiveHandler: SkillEffectHandler {
+enum StatAdditiveHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.statAdditive
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct StatConversionLinearHandler: SkillEffectHandler {
+enum StatConversionLinearHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.statConversionLinear
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct StatConversionPercentHandler: SkillEffectHandler {
+enum StatConversionPercentHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.statConversionPercent
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct StatFixedToOneHandler: SkillEffectHandler {
+enum StatFixedToOneHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.statFixedToOne
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct StatMultiplierHandler: SkillEffectHandler {
+enum StatMultiplierHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.statMultiplier
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-struct TalentStatHandler: SkillEffectHandler {
+enum TalentStatHandler: SkillEffectHandler {
     static let effectType = SkillEffectType.talentStat
     static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
