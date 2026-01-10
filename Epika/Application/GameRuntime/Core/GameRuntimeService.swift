@@ -277,7 +277,10 @@ actor GameRuntimeService {
     }
 
     private func cancelActiveRun(_ runId: UUID) async {
-        guard let active = activeRuns.removeValue(forKey: runId) else { return }
+        // エントリを削除しない。削除はawaitRunArtifactで行う。
+        // ここで削除するとawaitRunArtifactがエラーになり、
+        // 正常な終了フロー（ドロップ処理）がスキップされてしまう。
+        guard let active = activeRuns[runId] else { return }
         active.task.cancel()
         active.continuation.finish()
     }

@@ -75,7 +75,7 @@ extension AppServices {
         let memberIds = partySnapshot.memberCharacterIds
 
         let updates = AsyncThrowingStream<ExplorationRunUpdate, Error> { continuation in
-            let processingTask = Task { [weak self] in
+            Task { [weak self] in
                 guard let self else {
                     continuation.finish(throwing: CancellationError())
                     return
@@ -89,21 +89,14 @@ extension AppServices {
                                                     continuation: continuation)
             }
 
-            let explorationService = exploration
+            // session.cancel()だけを呼ぶ。これによりGameRuntimeServiceのタスクが
+            // CancellationErrorをキャッチし、.cancelled状態のartifactを生成する。
+            // processExplorationStreamCoreはwaitForCompletion()でartifactを受け取り、
+            // 正常な終了フロー（ドロップ処理→finalizeRun）を実行する。
+            // cancelRun()を直接呼ぶとドロップ処理がスキップされるので禁止。
             continuation.onTermination = { termination in
                 guard case .cancelled = termination else { return }
-                processingTask.cancel()
                 Task { await session.cancel() }
-                Task {
-                    do {
-                        try await explorationService.cancelRun(partyId: runId.partyId,
-                                                               startedAt: runId.startedAt)
-                    } catch is CancellationError {
-                        // キャンセル済みであれば問題なし
-                    } catch {
-                        assertionFailure("Exploration cancel failed: \(error)")
-                    }
-                }
             }
         }
 
@@ -188,7 +181,7 @@ extension AppServices {
             let dungeonId = prep.dungeonId
 
             let updates = AsyncThrowingStream<ExplorationRunUpdate, Error> { continuation in
-                let processingTask = Task { [weak self] in
+                Task { [weak self] in
                     guard let self else {
                         continuation.finish(throwing: CancellationError())
                         return
@@ -202,21 +195,9 @@ extension AppServices {
                                                         continuation: continuation)
                 }
 
-                let explorationService = exploration
                 continuation.onTermination = { termination in
                     guard case .cancelled = termination else { return }
-                    processingTask.cancel()
                     Task { await session.cancel() }
-                    Task {
-                        do {
-                            try await explorationService.cancelRun(partyId: runId.partyId,
-                                                                   startedAt: runId.startedAt)
-                        } catch is CancellationError {
-                            // キャンセル済みであれば問題なし
-                        } catch {
-                            assertionFailure("Exploration cancel failed: \(error)")
-                        }
-                    }
                 }
             }
 

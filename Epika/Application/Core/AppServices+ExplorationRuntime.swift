@@ -126,9 +126,7 @@ extension AppServices {
 
             let artifact = try await waitForCompletion()
 
-            var autoSellGold = 0
-            var autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []
-            var calculatedDropRewards: CalculatedDropRewards?
+            // endStateごとの個別処理（進捗更新、isFullClear判定）
             var isFullClear = false
             switch artifact.endState {
             case .completed:
@@ -139,11 +137,6 @@ extension AppServices {
                                                             difficulty: UInt8(runDifficulty),
                                                             furthestFloor: UInt8(artifact.floorCount))
                 }
-                let drops = makeItemDropResults(from: artifact.totalDrops)
-                let calculated = try await calculateDropRewards(drops)
-                calculatedDropRewards = calculated
-                autoSellGold = calculated.autoSellGold
-                autoSoldItems = calculated.autoSellEntries
             case .defeated(let floorNumber, _, _):
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                         difficulty: UInt8(runDifficulty),
@@ -152,6 +145,15 @@ extension AppServices {
                 try await dungeon.updatePartialProgress(dungeonId: artifact.dungeon.id,
                                                         difficulty: UInt8(runDifficulty),
                                                         furthestFloor: UInt8(max(0, floorNumber)))
+            }
+
+            // 敗北以外は共通のドロップ処理
+            var autoSellGold = 0
+            var autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []
+            var calculatedDropRewards: CalculatedDropRewards?
+            if case .defeated = artifact.endState {
+                // 敗北時はドロップ処理なし
+            } else {
                 let drops = makeItemDropResults(from: artifact.totalDrops)
                 let calculated = try await calculateDropRewards(drops)
                 calculatedDropRewards = calculated
