@@ -18,7 +18,7 @@ enum BattleLogEffectImpact {
 }
 
 struct BattleLogEffectInterpreter {
-    static func impact(for effect: BattleActionEntry.Effect) -> BattleLogEffectImpact? {
+    nonisolated static func impact(for effect: BattleActionEntry.Effect) -> BattleLogEffectImpact? {
         guard let target = effect.target else {
             return nil
         }

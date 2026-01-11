@@ -12,6 +12,7 @@
 //   - appendEvent(...) - イベント追加
 //   - finalizeRun(...) - 探索終了（完了・全滅）
 //   - cancelRun(...) - 探索キャンセル
+//   - resumeSnapshot(...) → ExplorationResumeSnapshot - 探索再開用の値型取得
 //   - recentExplorationSummaries(...) - 最新探索サマリー取得
 //   - runningExplorationSummaries() - 実行中探索サマリー取得
 //   - runningPartyMemberIds() - 実行中パーティメンバーID取得
@@ -1012,6 +1013,20 @@ actor ExplorationProgressService {
         var startedAt: Date
     }
 
+    /// 探索再開用の値型スナップショット
+    struct ExplorationResumeSnapshot: Sendable {
+        let partyId: UInt8
+        let dungeonId: UInt16
+        let targetFloor: UInt8
+        let difficulty: UInt8
+        let startedAt: Date
+        let randomState: Int64
+        let superRareState: SuperRareDailyState
+        let droppedItemIds: Set<UInt16>
+        let eventCount: Int
+        let restoredPartyHPByCharacterId: [UInt8: Int]
+    }
+
     func runningExplorationSummaries() throws -> [RunningExplorationSummary] {
         let context = contextProvider.makeContext()
         let runningStatus = ExplorationResult.running.rawValue
@@ -1020,6 +1035,40 @@ actor ExplorationProgressService {
         )
         let records = try context.fetch(descriptor)
         return records.map { RunningExplorationSummary(partyId: $0.partyId, startedAt: $0.startedAt) }
+    }
+
+    /// 探索再開に必要な値をスナップショットとして取得
+    func resumeSnapshot(partyId: UInt8, startedAt: Date) throws -> ExplorationResumeSnapshot {
+        let context = contextProvider.makeContext()
+        let runningStatus = ExplorationResult.running.rawValue
+        let descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt && $0.result == runningStatus }
+        )
+        guard let record = try context.fetch(descriptor).first else {
+            throw ExplorationResumeError.recordNotFound
+        }
+
+        let eventRecords = record.events.sorted { $0.occurredAt < $1.occurredAt }
+        let droppedItemIds = try decodeDroppedItemIds(record.droppedItemIdsData)
+        let restoredHP = try restorePartyHP(from: eventRecords)
+
+        let superRareState = SuperRareDailyState(
+            jstDate: record.superRareJstDate,
+            hasTriggered: record.superRareHasTriggered
+        )
+
+        return ExplorationResumeSnapshot(
+            partyId: record.partyId,
+            dungeonId: record.dungeonId,
+            targetFloor: record.targetFloor,
+            difficulty: record.difficulty,
+            startedAt: record.startedAt,
+            randomState: record.randomState,
+            superRareState: superRareState,
+            droppedItemIds: droppedItemIds,
+            eventCount: eventRecords.count,
+            restoredPartyHPByCharacterId: restoredHP
+        )
     }
 
     /// 現在探索中の全パーティメンバーIDを取得
@@ -1048,6 +1097,78 @@ actor ExplorationProgressService {
 // MARK: - Private Helpers
 
 private extension ExplorationProgressService {
+    func decodeDroppedItemIds(_ data: Data) throws -> Set<UInt16> {
+        guard !data.isEmpty else { return [] }
+        guard data.count >= 2 else {
+            throw ExplorationResumeError.corruptedDroppedItemIds(reason: "count bytes missing")
+        }
+
+        let count = data.withUnsafeBytes { $0.load(as: UInt16.self) }
+        let expectedSize = 2 + Int(count) * 2
+        guard data.count == expectedSize else {
+            throw ExplorationResumeError.corruptedDroppedItemIds(
+                reason: "size mismatch: expected \(expectedSize), actual \(data.count)"
+            )
+        }
+
+        var result = Set<UInt16>()
+        for i in 0..<Int(count) {
+            let offset = 2 + i * 2
+            let id = data.withUnsafeBytes { $0.load(fromByteOffset: offset, as: UInt16.self) }
+            result.insert(id)
+        }
+        return result
+    }
+
+    func restorePartyHP(from eventRecords: [ExplorationEventRecord]) throws -> [UInt8: Int] {
+        // 戦闘ログを持つ最後のイベントを探す
+        guard let lastBattleEvent = eventRecords.last(where: { $0.battleLog != nil }),
+              let logRecord = lastBattleEvent.battleLog else {
+            // 戦闘なし = 全員フルHP（空辞書を返し、呼び出し側でmaxHPを使う）
+            return [:]
+        }
+
+        // バイナリBLOBからデコード
+        let decoded: ExplorationProgressService.DecodedBattleLogData
+        do {
+            decoded = try ExplorationProgressService.decodeBattleLogData(logRecord.logData)
+        } catch {
+            throw ExplorationResumeError.battleLogDecodeFailed(reason: error.localizedDescription)
+        }
+
+        var hp: [UInt16: Int] = [:]
+
+        // 1. 初期HP設定
+        for (actorIndex, initialHP) in decoded.initialHP {
+            hp[actorIndex] = Int(initialHP)
+        }
+
+        // 2. entriesを順に処理
+        for entry in decoded.entries {
+            for effect in entry.effects {
+                guard let impact = BattleLogEffectInterpreter.impact(for: effect) else { continue }
+                switch impact {
+                case .damage(let target, let amount):
+                    hp[target, default: 0] -= amount
+                case .heal(let target, let amount):
+                    hp[target, default: 0] += amount
+                case .setHP(let target, let amount):
+                    hp[target] = amount
+                }
+            }
+        }
+
+        // 3. characterId → HPに変換、クランプ
+        var result: [UInt8: Int] = [:]
+        for snapshot in decoded.playerSnapshots {
+            guard let characterId = snapshot.characterId, characterId != 0 else { continue }
+            let actorIndex = UInt16(snapshot.partyMemberId ?? characterId)
+            let currentHP = hp[actorIndex] ?? 0
+            result[characterId] = max(0, min(currentHP, snapshot.maxHP))
+        }
+        return result
+    }
+
     func saveIfNeeded(_ context: ModelContext) throws {
         if context.hasChanges {
             try context.save()
