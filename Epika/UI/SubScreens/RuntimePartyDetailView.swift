@@ -24,7 +24,9 @@
 import SwiftUI
 
 struct RuntimePartyDetailView: View {
-    @State private var currentParty: CachedParty
+    @State private var currentPartyId: UInt8
+    @State private var lastSelectedDungeonId: UInt16?
+    @State private var lastSelectedDifficulty: UInt8
     @Binding private var selectedDungeon: CachedDungeonProgress?
     let dungeons: [CachedDungeonProgress]
 
@@ -36,118 +38,132 @@ struct RuntimePartyDetailView: View {
     @State private var errorMessage: String?
     @State private var showDungeonPicker = false
     @State private var targetFloorSelection: Int
-    @State private var selectedCharacter: CachedCharacter?
+    @State private var selectedCharacterId: UInt8?
 
-    init(party: CachedParty, selectedDungeon: Binding<CachedDungeonProgress?>, dungeons: [CachedDungeonProgress]) {
-        _currentParty = State(initialValue: party)
+    init(partyId: UInt8,
+         initialTargetFloor: UInt8,
+         initialLastSelectedDungeonId: UInt16?,
+         initialLastSelectedDifficulty: UInt8,
+         selectedDungeon: Binding<CachedDungeonProgress?>,
+         dungeons: [CachedDungeonProgress]) {
+        _currentPartyId = State(initialValue: partyId)
+        _lastSelectedDungeonId = State(initialValue: initialLastSelectedDungeonId)
+        _lastSelectedDifficulty = State(initialValue: initialLastSelectedDifficulty)
         _selectedDungeon = selectedDungeon
-        _targetFloorSelection = State(initialValue: Int(party.targetFloor))
+        _targetFloorSelection = State(initialValue: Int(initialTargetFloor))
         self.dungeons = dungeons
     }
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    PartySlotCardView(
-                        party: currentParty,
-                        members: membersOfCurrentParty,
-                        bonuses: PartyDropBonuses(members: membersOfCurrentParty),
-                        isExploring: adventureState.isExploring(partyId: currentParty.id),
-                        canStartExploration: canStartExploration(for: currentParty),
-                        onPrimaryAction: {
-                            handlePrimaryAction(isExploring: adventureState.isExploring(partyId: currentParty.id),
-                                                canDepart: canStartExploration(for: currentParty))
-                        },
-                        onMemberTap: { character in
-                            selectedCharacter = character
+            Group {
+                if let currentParty {
+                    List {
+                        Section {
+                            PartySlotCardView(
+                                party: currentParty,
+                                members: membersOfCurrentParty,
+                                bonuses: PartyDropBonuses(members: membersOfCurrentParty),
+                                isExploring: adventureState.isExploring(partyId: currentParty.id),
+                                canStartExploration: canStartExploration(for: currentParty),
+                                onPrimaryAction: {
+                                    handlePrimaryAction(party: currentParty,
+                                                        isExploring: adventureState.isExploring(partyId: currentParty.id),
+                                                        canDepart: canStartExploration(for: currentParty))
+                                },
+                                onMemberTap: { character in
+                                    selectedCharacterId = character.id
+                                }
+                            )
+                            .padding(.vertical, 4)
+                            .frame(maxWidth: .infinity)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                            .overlay(alignment: .bottom) {
+                                Rectangle()
+                                    .fill(Color(.separator))
+                                    .frame(height: 0.5)
+                                    .padding(.horizontal, 16)
+                            }
+
+                            NavigationLink {
+                                PartySkillsListView(characters: membersOfCurrentParty)
+                            } label: {
+                                Text("パーティーのスキルを見る")
+                                    .foregroundColor(.primary)
+                                    .frame(height: listRowHeight)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+
+                            NavigationLink {
+                                RuntimePartyMemberEditView(
+                                    party: currentParty,
+                                    allCharacters: allCharacters
+                                )
+                                .onDisappear {
+                                    Task { await refreshCachedParty() }
+                                }
+                            } label: {
+                                Text("メンバーを変更する (6名まで)")
+                                    .foregroundColor(.primary)
+                                    .frame(height: listRowHeight)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .disabled(adventureState.isExploring(partyId: currentParty.id))
+
+                            NavigationLink {
+                                PartyEquipmentListView(memberIds: currentParty.memberIds)
+                            } label: {
+                                Text("装備アイテムの一覧")
+                                    .foregroundColor(.primary)
+                                    .frame(height: listRowHeight)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+
+                            NavigationLink {
+                                PartyNameEditorView(party: currentParty) {
+                                    await refreshCachedParty()
+                                }
+                            } label: {
+                                Text("パーティ名を変更する")
+                                    .foregroundColor(.primary)
+                                    .frame(height: listRowHeight)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
                         }
-                    )
-                    .padding(.vertical, 4)
-                    .frame(maxWidth: .infinity)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                    .overlay(alignment: .bottom) {
-                        Rectangle()
-                            .fill(Color(.separator))
-                            .frame(height: 0.5)
-                            .padding(.horizontal, 16)
-                    }
+                        .contentMargins(.vertical, 8)
 
-                NavigationLink {
-                    PartySkillsListView(characters: membersOfCurrentParty)
-                } label: {
-                    Text("パーティーのスキルを見る")
-                        .foregroundColor(.primary)
-                        .frame(height: listRowHeight)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                        Section("出撃先迷宮") {
+                            Button(action: { Task { await openDungeonPicker() } }) {
+                                HStack {
+                                    Text(selectedDungeonName)
+                                        .foregroundColor(.primary)
+                                        .lineLimit(1)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundStyle(Color(.tertiaryLabel))
+                                        .font(.footnote.weight(.semibold))
+                                }
+                                .frame(height: listRowHeight)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
 
-                NavigationLink {
-                    RuntimePartyMemberEditView(
-                        party: currentParty,
-                        allCharacters: allCharacters
-                    )
-                    .onDisappear {
-                        Task { await refreshCachedParty() }
-                    }
-                } label: {
-                    Text("メンバーを変更する (6名まで)")
-                        .foregroundColor(.primary)
-                        .frame(height: listRowHeight)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .disabled(adventureState.isExploring(partyId: currentParty.id))
+                            if let dungeon = activeDungeon {
+                                let displayedDifficulty = min(resolvedLastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
+                                DifficultyPickerMenu(dungeon: dungeon,
+                                                     currentDifficulty: displayedDifficulty,
+                                                     onSelect: { await updateDifficultySelection($0) },
+                                                     rowHeight: listRowHeight)
+                                .disabled(dungeon.availableDifficulties.count <= 1)
+                            }
 
-                NavigationLink {
-                    PartyEquipmentListView(memberIds: currentParty.memberIds)
-                } label: {
-                    Text("装備アイテムの一覧")
-                        .foregroundColor(.primary)
-                        .frame(height: listRowHeight)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-
-                NavigationLink {
-                    PartyNameEditorView(party: currentParty) {
-                        await refreshCachedParty()
-                    }
-                } label: {
-                    Text("パーティ名を変更する")
-                        .foregroundColor(.primary)
-                        .frame(height: listRowHeight)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
-            .contentMargins(.vertical, 8)
-
-                Section("出撃先迷宮") {
-                    Button(action: { Task { await openDungeonPicker() } }) {
-                        HStack {
-                            Text(selectedDungeonName)
-                                .foregroundColor(.primary)
-                                .lineLimit(1)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundStyle(Color(.tertiaryLabel))
-                                .font(.footnote.weight(.semibold))
+                            TargetFloorPickerMenu(selection: $targetFloorSelection,
+                                                  maxFloor: activeDungeon?.floorCount ?? 1,
+                                                  rowHeight: listRowHeight)
                         }
-                        .frame(height: listRowHeight)
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
-
-                    if let dungeon = activeDungeon {
-                        let displayedDifficulty = min(currentParty.lastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
-                        DifficultyPickerMenu(dungeon: dungeon,
-                                             currentDifficulty: displayedDifficulty,
-                                             onSelect: { await updateDifficultySelection($0) },
-                                             rowHeight: listRowHeight)
-                        .disabled(dungeon.availableDifficulties.count <= 1)
-                    }
-
-                    TargetFloorPickerMenu(selection: $targetFloorSelection,
-                                          maxFloor: selectedDungeon?.floorCount ?? 1,
-                                          rowHeight: listRowHeight)
+                } else {
+                    List {}
                 }
             }
             .listStyle(.insetGrouped)
@@ -156,13 +172,15 @@ struct RuntimePartyDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .overlay { if let errorMessage { errorView(errorMessage) } }
             .task { await refreshData() }
-            .onChange(of: currentParty.targetFloor) { _, newValue in
+            .onChange(of: currentPartyTargetFloor) { _, newValue in
+                guard let newValue else { return }
                 let updatedValue = Int(newValue)
                 if targetFloorSelection != updatedValue {
                     targetFloorSelection = updatedValue
                 }
             }
             .onChange(of: targetFloorSelection) { _, newValue in
+                guard let currentParty else { return }
                 if Int(currentParty.targetFloor) != newValue {
                     Task { await updateTargetFloor(newValue) }
                 }
@@ -170,8 +188,8 @@ struct RuntimePartyDetailView: View {
             .sheet(isPresented: $showDungeonPicker) {
                 DungeonPickerView(
                     dungeons: adventureState.dungeons,
-                    currentSelection: selectedDungeon?.dungeonId ?? currentParty.lastSelectedDungeonId,
-                    currentDifficulty: currentParty.lastSelectedDifficulty,
+                    currentSelection: selectedDungeon?.dungeonId ?? resolvedLastSelectedDungeonId,
+                    currentDifficulty: resolvedLastSelectedDifficulty,
                     onSelectDungeon: { dungeon in
                         await updateDungeonSelection(dungeonId: dungeon.dungeonId)
                     },
@@ -195,19 +213,45 @@ struct RuntimePartyDetailView: View {
 
     private var partyService: PartyProgressService { appServices.party }
 
+    private var currentParty: CachedParty? {
+        partyState.parties.first { $0.id == currentPartyId }
+    }
+
+    private var resolvedLastSelectedDungeonId: UInt16? {
+        currentParty?.lastSelectedDungeonId ?? lastSelectedDungeonId
+    }
+
+    private var resolvedLastSelectedDifficulty: UInt8 {
+        currentParty?.lastSelectedDifficulty ?? lastSelectedDifficulty
+    }
+
+    private var currentPartyTargetFloor: UInt8? {
+        currentParty?.targetFloor
+    }
+
+    private var selectedCharacter: CachedCharacter? {
+        guard let selectedCharacterId else { return nil }
+        return allCharacters.first { $0.id == selectedCharacterId }
+    }
+
     private var membersOfCurrentParty: [CachedCharacter] {
-        currentParty.memberIds.compactMap { memberId in
+        guard let currentParty else { return [] }
+        return currentParty.memberIds.compactMap { memberId in
             allCharacters.first { $0.id == memberId }
         }
     }
 
     private var activeDungeon: CachedDungeonProgress? {
-        selectedDungeon ?? dungeons.first { $0.dungeonId == currentParty.lastSelectedDungeonId }
+        if let selectedDungeon {
+            return selectedDungeon
+        }
+        guard let dungeonId = resolvedLastSelectedDungeonId else { return nil }
+        return dungeons.first { $0.dungeonId == dungeonId }
     }
 
     private var selectedDungeonName: String {
         if let dungeon = activeDungeon {
-            let clampedDifficulty = min(currentParty.lastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
+            let clampedDifficulty = min(resolvedLastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
             return formattedDifficultyLabel(for: dungeon, difficulty: clampedDifficulty, masterData: appServices.masterDataCache)
         }
         return "未選択"
@@ -220,9 +264,9 @@ struct RuntimePartyDetailView: View {
 
     private var isCharacterDetailPresented: Binding<Bool> {
         Binding(
-            get: { selectedCharacter != nil },
+            get: { selectedCharacterId != nil },
             set: { isPresented in
-                if !isPresented { selectedCharacter = nil }
+                if !isPresented { selectedCharacterId = nil }
             }
         )
     }
@@ -251,6 +295,10 @@ struct RuntimePartyDetailView: View {
     private func refreshData() async {
         errorMessage = nil
         do {
+            if partyState.parties.isEmpty {
+                try await partyState.loadAllParties()
+            }
+            guard let currentParty else { return }
             // パーティメンバーのHP全回復（HP > 0 のキャラクターのみ）
             try await appServices.character.healToFull(characterIds: currentParty.memberIds)
             // HP変更後にキャッシュを無効化
@@ -271,26 +319,35 @@ struct RuntimePartyDetailView: View {
     private func refreshCachedParty() async {
         do {
             try await partyState.refresh()
-            if let updated = partyState.parties.first(where: { $0.id == currentParty.id }) {
-                currentParty = updated
-                if let dungeon = dungeons.first(where: { $0.dungeonId == updated.lastSelectedDungeonId }) {
-                    selectedDungeon = dungeon
-                } else {
-                    selectedDungeon = nil
-                }
-                if let dungeon = selectedDungeon,
-                   updated.lastSelectedDifficulty > dungeon.highestUnlockedDifficulty {
-                    do {
-                        _ = try await partyService.setLastSelectedDifficulty(partyId: updated.id,
-                                                                              difficulty: dungeon.highestUnlockedDifficulty)
-                        try await partyState.refresh()
-                        if let adjusted = partyState.parties.first(where: { $0.id == updated.id }) {
-                            currentParty = adjusted
-                            selectedDungeon = dungeons.first(where: { $0.dungeonId == adjusted.lastSelectedDungeonId })
+            guard let updated = partyState.parties.first(where: { $0.id == currentPartyId }) else { return }
+            lastSelectedDungeonId = updated.lastSelectedDungeonId
+            lastSelectedDifficulty = updated.lastSelectedDifficulty
+            let updatedTargetFloor = Int(updated.targetFloor)
+            if targetFloorSelection != updatedTargetFloor {
+                targetFloorSelection = updatedTargetFloor
+            }
+            if let dungeon = dungeons.first(where: { $0.dungeonId == updated.lastSelectedDungeonId }) {
+                selectedDungeon = dungeon
+            } else {
+                selectedDungeon = nil
+            }
+            if let dungeon = selectedDungeon,
+               updated.lastSelectedDifficulty > dungeon.highestUnlockedDifficulty {
+                do {
+                    _ = try await partyService.setLastSelectedDifficulty(partyId: updated.id,
+                                                                        difficulty: dungeon.highestUnlockedDifficulty)
+                    try await partyState.refresh()
+                    if let adjusted = partyState.parties.first(where: { $0.id == updated.id }) {
+                        lastSelectedDungeonId = adjusted.lastSelectedDungeonId
+                        lastSelectedDifficulty = adjusted.lastSelectedDifficulty
+                        let adjustedTargetFloor = Int(adjusted.targetFloor)
+                        if targetFloorSelection != adjustedTargetFloor {
+                            targetFloorSelection = adjustedTargetFloor
                         }
-                    } catch {
-                        errorMessage = error.localizedDescription
+                        selectedDungeon = dungeons.first(where: { $0.dungeonId == adjusted.lastSelectedDungeonId })
                     }
+                } catch {
+                    errorMessage = error.localizedDescription
                 }
             }
         } catch {
@@ -298,26 +355,26 @@ struct RuntimePartyDetailView: View {
         }
     }
 
-    private func handlePrimaryAction(isExploring: Bool, canDepart: Bool) {
+    private func handlePrimaryAction(party: CachedParty, isExploring: Bool, canDepart: Bool) {
         if isExploring {
-            Task { await adventureState.cancelExploration(for: currentParty, using: appServices) }
+            Task { await adventureState.cancelExploration(for: party, using: appServices) }
             return
         }
 
         guard canDepart else { return }
 
         Task {
-            await startExplorationFromDetail()
+            await startExplorationFromDetail(party: party)
         }
     }
 
-    private func startExplorationFromDetail() async {
+    private func startExplorationFromDetail(party: CachedParty) async {
         guard let dungeon = activeDungeon else {
             await MainActor.run { showDungeonPicker = true }
             return
         }
         do {
-            try await adventureState.startExploration(party: currentParty, dungeon: dungeon, using: appServices)
+            try await adventureState.startExploration(party: party, dungeon: dungeon, using: appServices)
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
         }
@@ -335,7 +392,7 @@ struct RuntimePartyDetailView: View {
 
     private func updateDungeonSelection(dungeonId: UInt16) async -> Bool {
         do {
-            _ = try await partyService.setLastSelectedDungeon(partyId: currentParty.id, dungeonId: dungeonId)
+            _ = try await partyService.setLastSelectedDungeon(partyId: currentPartyId, dungeonId: dungeonId)
             await refreshCachedParty()
             return true
         } catch {
@@ -346,7 +403,7 @@ struct RuntimePartyDetailView: View {
 
     private func updateTargetFloor(_ floor: Int) async {
         do {
-            _ = try await partyService.setTargetFloor(partyId: currentParty.id, floor: UInt8(floor))
+            _ = try await partyService.setTargetFloor(partyId: currentPartyId, floor: UInt8(floor))
             await refreshCachedParty()
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
@@ -355,7 +412,7 @@ struct RuntimePartyDetailView: View {
 
     private func updateDifficultySelection(_ difficulty: UInt8) async -> Bool {
         do {
-            _ = try await partyService.setLastSelectedDifficulty(partyId: currentParty.id,
+            _ = try await partyService.setLastSelectedDifficulty(partyId: currentPartyId,
                                                                  difficulty: difficulty)
             await refreshCachedParty()
             return true

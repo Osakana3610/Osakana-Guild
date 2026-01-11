@@ -73,7 +73,10 @@ struct AdventureView: View {
             }
             .sheet(item: $partyDetailContext, onDismiss: { Task { await reload() } }) { context in
                 RuntimePartyDetailView(
-                    party: context.party,
+                    partyId: context.partyId,
+                    initialTargetFloor: context.initialTargetFloor,
+                    initialLastSelectedDungeonId: context.initialLastSelectedDungeonId,
+                    initialLastSelectedDifficulty: context.initialLastSelectedDifficulty,
                     selectedDungeon: Binding(
                         get: { partyDetailContext?.selectedDungeon },
                         set: { newValue in
@@ -273,7 +276,11 @@ struct AdventureView: View {
 
     private func showPartyDetail(for party: CachedParty) {
         let selected = selectedDungeon(for: party)
-        partyDetailContext = PartyDetailContext(party: party, selectedDungeon: selected)
+        partyDetailContext = PartyDetailContext(partyId: party.id,
+                                                initialTargetFloor: party.targetFloor,
+                                                initialLastSelectedDungeonId: party.lastSelectedDungeonId,
+                                                initialLastSelectedDifficulty: party.lastSelectedDifficulty,
+                                                selectedDungeon: selected)
     }
 
     @MainActor
@@ -304,7 +311,11 @@ struct AdventureView: View {
 }
 
 private struct PartyDetailContext: Identifiable {
-    var party: CachedParty
+    var partyId: UInt8
+    var initialTargetFloor: UInt8
+    var initialLastSelectedDungeonId: UInt16?
+    var initialLastSelectedDifficulty: UInt8
     var selectedDungeon: CachedDungeonProgress?
-    var id: UInt8 { party.id }
+
+    var id: UInt8 { partyId }
 }
