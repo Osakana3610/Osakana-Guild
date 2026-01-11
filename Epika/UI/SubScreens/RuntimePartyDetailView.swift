@@ -57,113 +57,109 @@ struct RuntimePartyDetailView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
+            List {
                 if let currentParty {
-                    List {
-                        Section {
-                            PartySlotCardView(
-                                party: currentParty,
-                                members: partyMembers,
-                                bonuses: partyBonuses,
-                                isExploring: adventureState.isExploring(partyId: currentParty.id),
-                                canStartExploration: canStartExploration(for: currentParty),
-                                onPrimaryAction: {
-                                    handlePrimaryAction(party: currentParty,
-                                                        isExploring: adventureState.isExploring(partyId: currentParty.id),
-                                                        canDepart: canStartExploration(for: currentParty))
-                                },
-                                onMemberTap: { memberId in
-                                    selectedCharacterId = memberId
-                                }
-                            )
-                            .padding(.vertical, 4)
-                            .frame(maxWidth: .infinity)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                            .overlay(alignment: .bottom) {
-                                Rectangle()
-                                    .fill(Color(.separator))
-                                    .frame(height: 0.5)
-                                    .padding(.horizontal, 16)
+                    Section {
+                        PartySlotCardView(
+                            party: currentParty,
+                            members: partyMembers,
+                            bonuses: partyBonuses,
+                            isExploring: adventureState.isExploring(partyId: currentParty.id),
+                            canStartExploration: canStartExploration(for: currentParty),
+                            onPrimaryAction: {
+                                handlePrimaryAction(party: currentParty,
+                                                    isExploring: adventureState.isExploring(partyId: currentParty.id),
+                                                    canDepart: canStartExploration(for: currentParty))
+                            },
+                            onMemberTap: { memberId in
+                                selectedCharacterId = memberId
                             }
-
-                            NavigationLink {
-                                PartySkillsListView(memberIds: currentParty.memberIds)
-                            } label: {
-                                Text("パーティーのスキルを見る")
-                                    .foregroundColor(.primary)
-                                    .frame(height: listRowHeight)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-
-                            NavigationLink {
-                                RuntimePartyMemberEditView(
-                                    party: currentParty
-                                )
-                                .onDisappear {
-                                    Task { await refreshCachedParty() }
-                                }
-                            } label: {
-                                Text("メンバーを変更する (6名まで)")
-                                    .foregroundColor(.primary)
-                                    .frame(height: listRowHeight)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                            .disabled(adventureState.isExploring(partyId: currentParty.id))
-
-                            NavigationLink {
-                                PartyEquipmentListView(memberIds: currentParty.memberIds)
-                            } label: {
-                                Text("装備アイテムの一覧")
-                                    .foregroundColor(.primary)
-                                    .frame(height: listRowHeight)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-
-                            NavigationLink {
-                                PartyNameEditorView(party: currentParty) {
-                                    await refreshCachedParty()
-                                }
-                            } label: {
-                                Text("パーティ名を変更する")
-                                    .foregroundColor(.primary)
-                                    .frame(height: listRowHeight)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
+                        )
+                        .padding(.vertical, 4)
+                        .frame(maxWidth: .infinity)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .overlay(alignment: .bottom) {
+                            Rectangle()
+                                .fill(Color(.separator))
+                                .frame(height: 0.5)
+                                .padding(.horizontal, 16)
                         }
-                        .contentMargins(.vertical, 8)
 
-                        Section("出撃先迷宮") {
-                            Button(action: { Task { await openDungeonPicker() } }) {
-                                HStack {
-                                    Text(selectedDungeonName)
-                                        .foregroundColor(.primary)
-                                        .lineLimit(1)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .foregroundStyle(Color(.tertiaryLabel))
-                                        .font(.footnote.weight(.semibold))
-                                }
+                        NavigationLink {
+                            PartySkillsListView(memberIds: currentParty.memberIds)
+                        } label: {
+                            Text("パーティーのスキルを見る")
+                                .foregroundColor(.primary)
                                 .frame(height: listRowHeight)
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
 
-                            if let dungeon = activeDungeon {
-                                let displayedDifficulty = min(resolvedLastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
-                                DifficultyPickerMenu(dungeon: dungeon,
-                                                     currentDifficulty: displayedDifficulty,
-                                                     onSelect: { await updateDifficultySelection($0) },
-                                                     rowHeight: listRowHeight)
-                                .disabled(dungeon.availableDifficulties.count <= 1)
+                        NavigationLink {
+                            RuntimePartyMemberEditView(
+                                party: currentParty
+                            )
+                            .onDisappear {
+                                Task { await refreshCachedParty() }
                             }
+                        } label: {
+                            Text("メンバーを変更する (6名まで)")
+                                .foregroundColor(.primary)
+                                .frame(height: listRowHeight)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .disabled(adventureState.isExploring(partyId: currentParty.id))
 
-                            TargetFloorPickerMenu(selection: $targetFloorSelection,
-                                                  maxFloor: activeDungeon?.floorCount ?? 1,
-                                                  rowHeight: listRowHeight)
+                        NavigationLink {
+                            PartyEquipmentListView(memberIds: currentParty.memberIds)
+                        } label: {
+                            Text("装備アイテムの一覧")
+                                .foregroundColor(.primary)
+                                .frame(height: listRowHeight)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+
+                        NavigationLink {
+                            PartyNameEditorView(party: currentParty) {
+                                await refreshCachedParty()
+                            }
+                        } label: {
+                            Text("パーティ名を変更する")
+                                .foregroundColor(.primary)
+                                .frame(height: listRowHeight)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                } else {
-                    List {}
+                    .contentMargins(.vertical, 8)
+
+                    Section("出撃先迷宮") {
+                        Button(action: { Task { await openDungeonPicker() } }) {
+                            HStack {
+                                Text(selectedDungeonName)
+                                    .foregroundColor(.primary)
+                                    .lineLimit(1)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(Color(.tertiaryLabel))
+                                    .font(.footnote.weight(.semibold))
+                            }
+                            .frame(height: listRowHeight)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+
+                        if let dungeon = activeDungeon {
+                            let displayedDifficulty = min(resolvedLastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
+                            DifficultyPickerMenu(dungeon: dungeon,
+                                                 currentDifficulty: displayedDifficulty,
+                                                 onSelect: { await updateDifficultySelection($0) },
+                                                 rowHeight: listRowHeight)
+                            .disabled(dungeon.availableDifficulties.count <= 1)
+                        }
+
+                        TargetFloorPickerMenu(selection: $targetFloorSelection,
+                                              maxFloor: activeDungeon?.floorCount ?? 1,
+                                              rowHeight: listRowHeight)
+                    }
                 }
             }
             .listStyle(.insetGrouped)
