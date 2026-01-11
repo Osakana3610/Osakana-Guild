@@ -57,3 +57,6 @@ MasterData/master.db
 
 # Test observation output (runtime artifacts, not source)
 .test-output/
+
+# Regression test data (local merge of user_data.sqlite + wal/shm)
+EpikaTests/TestData/
