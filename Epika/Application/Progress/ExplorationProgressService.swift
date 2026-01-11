@@ -1092,6 +1092,24 @@ actor ExplorationProgressService {
         }
         return memberIds
     }
+
+    /// 指定した遭遇の戦闘ログを取得
+    func battleLogArchive(partyId: UInt8, startedAt: Date, occurredAt: Date) throws -> BattleLogArchive? {
+        let context = contextProvider.makeContext()
+        let descriptor = FetchDescriptor<ExplorationRunRecord>(
+            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+        )
+        guard let runRecord = try context.fetch(descriptor).first else {
+            return nil
+        }
+
+        guard let eventRecord = runRecord.events.first(where: { $0.occurredAt == occurredAt }),
+              let battleLogRecord = eventRecord.battleLog else {
+            return nil
+        }
+
+        return try makeBattleLogArchive(from: battleLogRecord)
+    }
 }
 
 // MARK: - Private Helpers
@@ -1167,6 +1185,33 @@ private extension ExplorationProgressService {
             result[characterId] = max(0, min(currentHP, snapshot.maxHP))
         }
         return result
+    }
+
+    func makeBattleLogArchive(from record: BattleLogRecord) throws -> BattleLogArchive {
+        let decoded: ExplorationProgressService.DecodedBattleLogData
+        do {
+            decoded = try ExplorationProgressService.decodeBattleLogData(record.logData)
+        } catch {
+            throw error
+        }
+
+        let battleLog = BattleLog(
+            initialHP: decoded.initialHP,
+            entries: decoded.entries,
+            outcome: decoded.outcome,
+            turns: decoded.turns
+        )
+
+        return BattleLogArchive(
+            enemyId: record.enemyId,
+            enemyName: record.enemyName,
+            result: BattleService.BattleResult(rawValue: record.result) ?? .victory,
+            turns: Int(record.turns),
+            timestamp: record.timestamp,
+            battleLog: battleLog,
+            playerSnapshots: decoded.playerSnapshots,
+            enemySnapshots: decoded.enemySnapshots
+        )
     }
 
     func saveIfNeeded(_ context: ModelContext) throws {

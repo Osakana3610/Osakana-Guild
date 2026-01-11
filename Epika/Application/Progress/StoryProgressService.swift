@@ -67,15 +67,21 @@ actor StoryProgressService {
         return Self.snapshot(from: nodes, updatedAt: now)
     }
 
-    func setUnlocked(_ isUnlocked: Bool, nodeId: UInt16) async throws {
+    @discardableResult
+    func setUnlocked(_ isUnlocked: Bool, nodeId: UInt16) async throws -> Bool {
         let context = contextProvider.makeContext()
         let node = try ensureNodeProgress(nodeId: nodeId, context: context)
+        var didChange = false
         if node.isUnlocked != isUnlocked {
             node.isUnlocked = isUnlocked
             node.updatedAt = Date()
+            didChange = true
         }
         try saveIfNeeded(context)
-        notifyStoryChange(nodeIds: [nodeId])
+        if didChange {
+            notifyStoryChange(nodeIds: [nodeId])
+        }
+        return didChange
     }
 }
 

@@ -18,14 +18,11 @@
 // ==============================================================================
 
 import SwiftUI
-import SwiftData
-
 struct EncounterDetailView: View {
     let snapshot: CachedExploration
     let party: CachedParty
     let encounter: CachedExploration.EncounterLog
 
-    @Environment(\.modelContext) private var modelContext
     @Environment(AppServices.self) private var appServices
 
     @State private var battleLogArchive: BattleLogArchive?
@@ -201,7 +198,7 @@ struct EncounterDetailView: View {
         isLoadingBattleLog = true
         battleLogError = nil
         do {
-            guard let archive = try fetchBattleLogArchive() else {
+            guard let archive = try await fetchBattleLogArchive() else {
                 battleLogError = EncounterDetailError.battleLogNotAvailable.errorDescription
                 isLoadingBattleLog = false
                 return
@@ -279,56 +276,25 @@ struct EncounterDetailView: View {
         isLoadingBattleLog = false
     }
 
-    private func fetchBattleLogArchive() throws -> BattleLogArchive? {
+    private var explorationService: ExplorationProgressService { appServices.exploration }
+
+    private func fetchBattleLogArchive() async throws -> BattleLogArchive? {
         // (partyId, startedAt, occurredAt)でExplorationEventRecordを特定し、.battleLogを取得
         let partyId = snapshot.party.partyId
         let startedAt = snapshot.startedAt
         let occurredAt = encounter.occurredAt
 
-        let runDescriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
-        )
-        guard let runRecord = try modelContext.fetch(runDescriptor).first else {
-            return nil
-        }
-
-        // occurredAtで該当イベントを特定
-        guard let eventRecord = runRecord.events.first(where: { $0.occurredAt == occurredAt }),
-              let battleLogRecord = eventRecord.battleLog else {
-            return nil
-        }
-
-        return try restoreBattleLogArchive(from: battleLogRecord)
-    }
-
-    private func restoreBattleLogArchive(from record: BattleLogRecord) throws -> BattleLogArchive? {
-        // バイナリBLOBからデコード
-        let decoded: ExplorationProgressService.DecodedBattleLogData
         do {
-            decoded = try ExplorationProgressService.decodeBattleLogData(record.logData)
+            return try await explorationService.battleLogArchive(
+                partyId: partyId,
+                startedAt: startedAt,
+                occurredAt: occurredAt
+            )
         } catch ExplorationProgressService.BattleLogArchiveDecodingError.unsupportedVersion {
             throw EncounterDetailError.unsupportedBattleLogVersion
         } catch {
             throw EncounterDetailError.decodingFailed
         }
-
-        let battleLog = BattleLog(
-            initialHP: decoded.initialHP,
-            entries: decoded.entries,
-            outcome: decoded.outcome,
-            turns: decoded.turns
-        )
-
-        return BattleLogArchive(
-            enemyId: record.enemyId,
-            enemyName: record.enemyName,
-            result: BattleService.BattleResult(rawValue: record.result) ?? .victory,
-            turns: Int(record.turns),
-            timestamp: record.timestamp,
-            battleLog: battleLog,
-            playerSnapshots: decoded.playerSnapshots,
-            enemySnapshots: decoded.enemySnapshots
-        )
     }
 
     enum EncounterDetailError: LocalizedError {

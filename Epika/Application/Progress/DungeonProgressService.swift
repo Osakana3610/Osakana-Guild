@@ -61,15 +61,21 @@ actor DungeonProgressService {
         return Self.snapshot(from: record, definition: definition)
     }
 
-    func setUnlocked(_ isUnlocked: Bool, dungeonId: UInt16) async throws {
+    @discardableResult
+    func setUnlocked(_ isUnlocked: Bool, dungeonId: UInt16) async throws -> Bool {
         let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
+        var didChange = false
         if record.isUnlocked != isUnlocked {
             record.isUnlocked = isUnlocked
             record.updatedAt = Date()
+            didChange = true
         }
         try saveIfNeeded(context)
-        notifyDungeonChange(dungeonIds: [dungeonId])
+        if didChange {
+            notifyDungeonChange(dungeonIds: [dungeonId])
+        }
+        return didChange
     }
 
     /// ダンジョンをクリア済みとしてマーク
@@ -99,16 +105,22 @@ actor DungeonProgressService {
         return isFirstClear
     }
 
-    func unlockDifficulty(dungeonId: UInt16, difficulty: UInt8) async throws {
+    @discardableResult
+    func unlockDifficulty(dungeonId: UInt16, difficulty: UInt8) async throws -> Bool {
         let context = contextProvider.makeContext()
         let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
+        var didChange = false
         if record.highestUnlockedDifficulty < difficulty {
             record.highestUnlockedDifficulty = difficulty
             record.furthestClearedFloor = 0
             record.updatedAt = Date()
+            didChange = true
         }
         try saveIfNeeded(context)
-        notifyDungeonChange(dungeonIds: [dungeonId])
+        if didChange {
+            notifyDungeonChange(dungeonIds: [dungeonId])
+        }
+        return didChange
     }
 
     func updatePartialProgress(dungeonId: UInt16, difficulty: UInt8, furthestFloor: UInt8) async throws {
