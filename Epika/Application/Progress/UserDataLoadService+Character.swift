@@ -62,7 +62,7 @@ extension UserDataLoadService {
         if needsLoad {
             try await loadCharacters()
         }
-        return await characters
+        return await MainActor.run { characters }
     }
 }
 

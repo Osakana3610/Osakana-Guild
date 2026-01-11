@@ -37,7 +37,7 @@ extension UserDataLoadService {
         if needsLoad {
             try await loadExplorationSummaries()
         }
-        return await explorationSummaries
+        return await MainActor.run { explorationSummaries }
     }
 
     /// 指定パーティの探索サマリーを更新
@@ -115,12 +115,14 @@ extension UserDataLoadService {
                 try Task.checkCancellation()
                 switch update.stage {
                 case .step(let entry, let totals):
-                    await appendEncounterLog(
-                        entry: entry,
-                        totals: totals,
-                        partyId: partyId,
-                        masterData: masterDataCache
-                    )
+                    await MainActor.run {
+                        self.appendEncounterLog(
+                            entry: entry,
+                            totals: totals,
+                            partyId: partyId,
+                            masterData: masterDataCache
+                        )
+                    }
                 case .completed:
                     do {
                         try await updateExplorationSummaries(forPartyId: partyId)
@@ -140,7 +142,7 @@ extension UserDataLoadService {
             }
         }
 
-        await clearExplorationTask(partyId: partyId)
+        await MainActor.run { self.clearExplorationTask(partyId: partyId) }
         do {
             try await updateExplorationSummaries(forPartyId: partyId)
         } catch {

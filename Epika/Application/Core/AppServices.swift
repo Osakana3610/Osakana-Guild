@@ -93,7 +93,7 @@ final class AppServices: Sendable {
         let contextProvider = SwiftDataContextProvider(container: container)
         self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
-        let gameStateService = GameStateService(contextProvider: contextProvider)
+        let gameStateService = GameStateService(modelContainer: container)
         self.gameState = gameStateService
         let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)
         self.dropNotifications = dropNotifications

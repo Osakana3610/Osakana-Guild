@@ -54,7 +54,7 @@ extension UserDataLoadService {
         if needsLoad {
             try await loadParties()
         }
-        return await parties
+        return await MainActor.run { parties }
     }
 }
 
