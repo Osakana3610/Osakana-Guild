@@ -118,6 +118,7 @@ struct AdventureView: View {
     @ViewBuilder
     private func partySection(for party: CachedParty, index: Int) -> some View {
         let members = runtimeMembers(for: party)
+        let memberSummaries = members.map { PartyMemberSummary(character: $0) }
         let bonuses = PartyDropBonuses(members: members)
         let runs = adventureState.explorationProgress
             .filter { $0.party.partyId == party.id }
@@ -125,7 +126,7 @@ struct AdventureView: View {
         Section {
             PartySlotCardView(
                 party: party,
-                members: members,
+                members: memberSummaries,
                 bonuses: bonuses,
                 isExploring: adventureState.isExploring(partyId: party.id),
                 canStartExploration: canStartExploration(for: party),

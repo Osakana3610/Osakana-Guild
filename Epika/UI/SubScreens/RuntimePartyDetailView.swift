@@ -34,7 +34,8 @@ struct RuntimePartyDetailView: View {
     @Environment(AdventureViewState.self) private var adventureState
     @Environment(AppServices.self) private var appServices
 
-    @State private var allCharacters: [CachedCharacter] = []
+    @State private var partyMembers: [PartyMemberSummary] = []
+    @State private var partyBonuses: PartyDropBonuses = .neutral
     @State private var errorMessage: String?
     @State private var showDungeonPicker = false
     @State private var targetFloorSelection: Int
@@ -62,8 +63,8 @@ struct RuntimePartyDetailView: View {
                         Section {
                             PartySlotCardView(
                                 party: currentParty,
-                                members: membersOfCurrentParty,
-                                bonuses: PartyDropBonuses(members: membersOfCurrentParty),
+                                members: partyMembers,
+                                bonuses: partyBonuses,
                                 isExploring: adventureState.isExploring(partyId: currentParty.id),
                                 canStartExploration: canStartExploration(for: currentParty),
                                 onPrimaryAction: {
@@ -71,8 +72,8 @@ struct RuntimePartyDetailView: View {
                                                         isExploring: adventureState.isExploring(partyId: currentParty.id),
                                                         canDepart: canStartExploration(for: currentParty))
                                 },
-                                onMemberTap: { character in
-                                    selectedCharacterId = character.id
+                                onMemberTap: { memberId in
+                                    selectedCharacterId = memberId
                                 }
                             )
                             .padding(.vertical, 4)
@@ -86,7 +87,7 @@ struct RuntimePartyDetailView: View {
                             }
 
                             NavigationLink {
-                                PartySkillsListView(characters: membersOfCurrentParty)
+                                PartySkillsListView(memberIds: currentParty.memberIds)
                             } label: {
                                 Text("パーティーのスキルを見る")
                                     .foregroundColor(.primary)
@@ -96,8 +97,7 @@ struct RuntimePartyDetailView: View {
 
                             NavigationLink {
                                 RuntimePartyMemberEditView(
-                                    party: currentParty,
-                                    allCharacters: allCharacters
+                                    party: currentParty
                                 )
                                 .onDisappear {
                                     Task { await refreshCachedParty() }
@@ -199,8 +199,8 @@ struct RuntimePartyDetailView: View {
                 )
             }
             .sheet(isPresented: isCharacterDetailPresented) {
-                if let character = selectedCharacter {
-                    CachedCharacterDetailSheetView(character: character)
+                if let selectedCharacterId {
+                    CharacterDetailSheetLoader(characterId: selectedCharacterId)
                 }
             }
         }
@@ -227,18 +227,6 @@ struct RuntimePartyDetailView: View {
 
     private var currentPartyTargetFloor: UInt8? {
         currentParty?.targetFloor
-    }
-
-    private var selectedCharacter: CachedCharacter? {
-        guard let selectedCharacterId else { return nil }
-        return allCharacters.first { $0.id == selectedCharacterId }
-    }
-
-    private var membersOfCurrentParty: [CachedCharacter] {
-        guard let currentParty else { return [] }
-        return currentParty.memberIds.compactMap { memberId in
-            allCharacters.first { $0.id == memberId }
-        }
     }
 
     private var activeDungeon: CachedDungeonProgress? {
@@ -301,7 +289,6 @@ struct RuntimePartyDetailView: View {
             try await appServices.character.healToFull(characterIds: currentParty.memberIds)
             // HP変更後にキャッシュを無効化
             appServices.userDataLoad.invalidateCharacters()
-            try await loadAllCharacters()
             await refreshCachedParty()
         } catch {
             errorMessage = error.localizedDescription
@@ -309,15 +296,29 @@ struct RuntimePartyDetailView: View {
     }
 
     @MainActor
-    private func loadAllCharacters() async throws {
-        allCharacters = try await appServices.userDataLoad.getCharacters()
+    private func loadPartyMembers(memberIds: [UInt8]) async throws {
+        guard !memberIds.isEmpty else {
+            partyMembers = []
+            partyBonuses = .neutral
+            return
+        }
+        let allCharacters = try await appServices.userDataLoad.getCharacters()
+        let map = Dictionary(uniqueKeysWithValues: allCharacters.map { ($0.id, $0) })
+        let members = memberIds.compactMap { map[$0] }
+        partyMembers = members.map { PartyMemberSummary(character: $0) }
+        partyBonuses = PartyDropBonuses(members: members)
     }
 
     @MainActor
     private func refreshCachedParty() async {
         do {
             try await partyState.refresh()
-            guard let updated = partyState.parties.first(where: { $0.id == currentPartyId }) else { return }
+            guard let updated = partyState.parties.first(where: { $0.id == currentPartyId }) else {
+                partyMembers = []
+                partyBonuses = .neutral
+                return
+            }
+            try await loadPartyMembers(memberIds: updated.memberIds)
             lastSelectedDungeonId = updated.lastSelectedDungeonId
             lastSelectedDifficulty = updated.lastSelectedDifficulty
             let updatedTargetFloor = Int(updated.targetFloor)
@@ -389,7 +390,7 @@ struct RuntimePartyDetailView: View {
         guard let dungeon = activeDungeon else { return false }
         guard dungeon.isUnlocked else { return false }
         guard party.lastSelectedDifficulty <= dungeon.highestUnlockedDifficulty else { return false }
-        guard !membersOfCurrentParty.isEmpty else { return false }
+        guard !partyMembers.isEmpty else { return false }
         return !adventureState.isExploring(partyId: party.id)
     }
 
@@ -434,21 +435,67 @@ struct RuntimePartyDetailView: View {
 
 }
 
+private struct CharacterDetailSheetLoader: View {
+    let characterId: UInt8
+    @Environment(AppServices.self) private var appServices
+    @State private var character: CachedCharacter?
+    @State private var errorMessage: String?
+
+    var body: some View {
+        Group {
+            if let character {
+                CachedCharacterDetailSheetView(character: character)
+            } else if let errorMessage {
+                VStack {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .task { await loadCharacter() }
+    }
+
+    @MainActor
+    private func loadCharacter() async {
+        errorMessage = nil
+        do {
+            let allCharacters = try await appServices.userDataLoad.getCharacters()
+            guard let found = allCharacters.first(where: { $0.id == characterId }) else {
+                errorMessage = "キャラクターが見つかりません"
+                return
+            }
+            character = found
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+
 private struct PartySkillsListView: View {
-    let characters: [CachedCharacter]
+    let memberIds: [UInt8]
+    @Environment(AppServices.self) private var appServices
+    @State private var members: [PartyMemberSkillSummary] = []
+    @State private var errorMessage: String?
 
     var body: some View {
         List {
-            if characters.isEmpty {
+            if let errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.secondary)
+            } else if members.isEmpty {
                 Text("メンバーがいません").foregroundColor(.secondary)
             } else {
-                ForEach(characters) { character in
-                    Section(character.name) {
-                        let skills = character.learnedSkills
-                        if skills.isEmpty {
+                ForEach(members) { member in
+                    Section(member.name) {
+                        if member.skills.isEmpty {
                             Text("習得スキルなし").foregroundColor(.secondary)
                         } else {
-                            ForEach(skills, id: \.id) { skill in
+                            ForEach(member.skills) { skill in
                                 Text(skill.name)
                             }
                         }
@@ -459,7 +506,42 @@ private struct PartySkillsListView: View {
         .avoidBottomGameInfo()
         .navigationTitle("パーティスキル")
         .navigationBarTitleDisplayMode(.inline)
+        .task { await loadMembers() }
     }
+
+    @MainActor
+    private func loadMembers() async {
+        errorMessage = nil
+        guard !memberIds.isEmpty else {
+            members = []
+            return
+        }
+        do {
+            let allCharacters = try await appServices.userDataLoad.getCharacters()
+            let map = Dictionary(uniqueKeysWithValues: allCharacters.map { ($0.id, $0) })
+            let summaries = memberIds.compactMap { map[$0] }.map { PartyMemberSkillSummary(character: $0) }
+            members = summaries
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+
+private struct PartyMemberSkillSummary: Identifiable, Hashable {
+    let id: UInt8
+    let name: String
+    let skills: [PartySkillSummary]
+
+    init(character: CachedCharacter) {
+        id = character.id
+        name = character.name
+        skills = character.learnedSkills.map { PartySkillSummary(id: $0.id, name: $0.name) }
+    }
+}
+
+private struct PartySkillSummary: Identifiable, Hashable {
+    let id: UInt16
+    let name: String
 }
 
 private struct PartyEquipmentListView: View {

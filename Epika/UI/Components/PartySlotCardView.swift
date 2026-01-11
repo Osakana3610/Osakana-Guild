@@ -22,23 +22,37 @@
 
 import SwiftUI
 
+struct PartyMemberSummary: Identifiable, Sendable, Hashable {
+    let id: UInt8
+    let resolvedAvatarId: UInt16
+    let level: Int
+    let currentHP: Int
+
+    init(character: CachedCharacter) {
+        id = character.id
+        resolvedAvatarId = character.resolvedAvatarId
+        level = character.level
+        currentHP = character.currentHP
+    }
+}
+
 struct PartySlotCardView<Footer: View>: View {
     let party: CachedParty
-    let members: [CachedCharacter]
+    let members: [PartyMemberSummary]
     let bonuses: PartyDropBonuses
     let isExploring: Bool
     let canStartExploration: Bool
     let onPrimaryAction: () -> Void
-    let onMemberTap: ((CachedCharacter) -> Void)?
+    let onMemberTap: ((UInt8) -> Void)?
     let onMembersTap: (() -> Void)?
     private let footerBuilder: (() -> Footer)?
     init(party: CachedParty,
-         members: [CachedCharacter],
+         members: [PartyMemberSummary],
          bonuses: PartyDropBonuses,
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
-         onMemberTap: ((CachedCharacter) -> Void)? = nil,
+         onMemberTap: ((UInt8) -> Void)? = nil,
          onMembersTap: (() -> Void)? = nil,
          @ViewBuilder footer: @escaping () -> Footer) {
         self.party = party
@@ -53,12 +67,12 @@ struct PartySlotCardView<Footer: View>: View {
     }
 
     init(party: CachedParty,
-         members: [CachedCharacter],
+         members: [PartyMemberSummary],
          bonuses: PartyDropBonuses,
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
-         onMemberTap: ((CachedCharacter) -> Void)? = nil,
+         onMemberTap: ((UInt8) -> Void)? = nil,
          onMembersTap: (() -> Void)? = nil)
     where Footer == EmptyView {
         self.party = party
@@ -141,15 +155,15 @@ struct PartySlotCardView<Footer: View>: View {
     @ViewBuilder
     private var membersRow: some View {
         if let onMemberTap {
-            PartyCharacterSilhouettesView(party: party, characters: members, onMemberTap: onMemberTap)
+            PartyCharacterSilhouettesView(party: party, members: members, onMemberTap: onMemberTap)
         } else if let onMembersTap {
             Button(action: onMembersTap) {
-                PartyCharacterSilhouettesView(party: party, characters: members)
+                PartyCharacterSilhouettesView(party: party, members: members)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
         } else {
-            PartyCharacterSilhouettesView(party: party, characters: members)
+            PartyCharacterSilhouettesView(party: party, members: members)
         }
     }
 

@@ -24,9 +24,9 @@ import SwiftUI
 
 struct RuntimePartyMemberEditView: View {
     var party: CachedParty
-    let allCharacters: [CachedCharacter]
     @Environment(PartyViewState.self) private var partyState
     @Environment(AppServices.self) private var appServices
+    @State private var allCharacters: [CachedCharacter] = []
     @State private var currentMemberIds: [UInt8] = []
     @State private var selectedMemberId: UInt8?
     @State private var searchText = ""
@@ -129,7 +129,18 @@ struct RuntimePartyMemberEditView: View {
 
     private func initialise() async {
         await MainActor.run { currentMemberIds = party.memberIds }
+        await loadCharacters()
         await loadCharactersInOtherParties()
+    }
+
+    @MainActor
+    private func loadCharacters() async {
+        do {
+            allCharacters = try await appServices.userDataLoad.getCharacters()
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+        }
     }
 
     private func loadCharactersInOtherParties() async {
@@ -273,4 +284,3 @@ private struct AvailableCharacterRow: View {
         .buttonStyle(.plain)
     }
 }
-
