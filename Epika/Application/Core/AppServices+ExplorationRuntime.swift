@@ -87,6 +87,8 @@ extension AppServices {
     ) async {
         var totalExperience = 0
         var totalGold = 0
+        var totalCombatGoldBase = 0
+        var totalScriptedGoldBase = 0
         var totalDrops: [ExplorationDropReward] = []
 
         // 探索サービスへの参照をローカルにキャプチャ（asyncクロージャ内で使用）
@@ -96,6 +98,14 @@ extension AppServices {
             for await outcome in events {
                 totalExperience += outcome.accumulatedExperience
                 totalGold += outcome.accumulatedGold
+                switch outcome.entry.kind {
+                case .combat(let summary):
+                    totalCombatGoldBase += summary.goldEarned
+                case .scripted:
+                    totalScriptedGoldBase += outcome.entry.goldGained
+                case .nothing:
+                    break
+                }
                 if !outcome.drops.isEmpty {
                     totalDrops.append(contentsOf: outcome.drops)
                 }
@@ -172,6 +182,18 @@ extension AppServices {
                 autoSoldItems: autoSoldItems
             )
 
+            switch artifact.endState {
+            case .defeated:
+                break
+            case .completed, .cancelled:
+                let multiplier = partyGoldMultiplier(for: runtimeMap.values)
+                let combatReward = Int((Double(totalCombatGoldBase) * multiplier).rounded(.down))
+                let totalReward = combatReward + totalScriptedGoldBase
+                if totalReward > 0 {
+                    _ = try await gameState.addGold(UInt32(clamping: totalReward))
+                }
+            }
+
             let finalUpdate = ExplorationRunUpdate(runId: sessionRunId,
                                                    stage: .completed(artifact))
             continuation.yield(finalUpdate)
@@ -227,8 +249,7 @@ extension AppServices {
         case .scripted:
             try await applyNonBattleRewards(memberIds: memberIds,
                                             runtimeCharactersById: runtimeCharactersById,
-                                            totalExperience: outcome.entry.experienceGained,
-                                            goldBase: outcome.entry.goldGained)
+                                            totalExperience: outcome.entry.experienceGained)
         case .combat(let summary):
             try await applyCombatRewards(memberIds: memberIds,
                                          runtimeCharactersById: runtimeCharactersById,
@@ -254,19 +275,11 @@ extension AppServices {
         }
         _ = try await character.applyBattleResults(updates)
 
-        if summary.goldEarned > 0 {
-            let multiplier = partyGoldMultiplier(for: runtimeCharactersById.values)
-            let reward = Int((Double(summary.goldEarned) * multiplier).rounded(.down))
-            if reward > 0 {
-                _ = try await gameState.addGold(UInt32(reward))
-            }
-        }
     }
 
     func applyNonBattleRewards(memberIds: [UInt8],
                                runtimeCharactersById: [UInt8: CachedCharacter],
-                               totalExperience: Int,
-                               goldBase: Int) async throws {
+                               totalExperience: Int) async throws {
         if totalExperience > 0 {
             let share = distributeFlatExperience(total: totalExperience,
                                                  recipients: memberIds,
@@ -277,9 +290,6 @@ extension AppServices {
             if !updates.isEmpty {
                 _ = try await character.applyBattleResults(updates)
             }
-        }
-        if goldBase > 0 {
-            _ = try await gameState.addGold(UInt32(goldBase))
         }
     }
 
