@@ -27,7 +27,7 @@ struct RuntimePartyDetailView: View {
     @State private var currentPartyId: UInt8
     @State private var lastSelectedDungeonId: UInt16?
     @State private var lastSelectedDifficulty: UInt8
-    @Binding private var selectedDungeon: CachedDungeonProgress?
+    @Binding private var selectedDungeonId: UInt16?
     let dungeons: [CachedDungeonProgress]
 
     @Environment(PartyViewState.self) private var partyState
@@ -44,12 +44,12 @@ struct RuntimePartyDetailView: View {
          initialTargetFloor: UInt8,
          initialLastSelectedDungeonId: UInt16?,
          initialLastSelectedDifficulty: UInt8,
-         selectedDungeon: Binding<CachedDungeonProgress?>,
+         selectedDungeonId: Binding<UInt16?>,
          dungeons: [CachedDungeonProgress]) {
         _currentPartyId = State(initialValue: partyId)
         _lastSelectedDungeonId = State(initialValue: initialLastSelectedDungeonId)
         _lastSelectedDifficulty = State(initialValue: initialLastSelectedDifficulty)
-        _selectedDungeon = selectedDungeon
+        _selectedDungeonId = selectedDungeonId
         _targetFloorSelection = State(initialValue: Int(initialTargetFloor))
         self.dungeons = dungeons
     }
@@ -188,7 +188,7 @@ struct RuntimePartyDetailView: View {
             .sheet(isPresented: $showDungeonPicker) {
                 DungeonPickerView(
                     dungeons: adventureState.dungeons,
-                    currentSelection: selectedDungeon?.dungeonId ?? resolvedLastSelectedDungeonId,
+                    currentSelection: selectedDungeonId ?? resolvedLastSelectedDungeonId,
                     currentDifficulty: resolvedLastSelectedDifficulty,
                     onSelectDungeon: { dungeon in
                         await updateDungeonSelection(dungeonId: dungeon.dungeonId)
@@ -242,10 +242,8 @@ struct RuntimePartyDetailView: View {
     }
 
     private var activeDungeon: CachedDungeonProgress? {
-        if let selectedDungeon {
-            return selectedDungeon
-        }
-        guard let dungeonId = resolvedLastSelectedDungeonId else { return nil }
+        let resolvedId = selectedDungeonId ?? resolvedLastSelectedDungeonId
+        guard let dungeonId = resolvedId else { return nil }
         return dungeons.first { $0.dungeonId == dungeonId }
     }
 
@@ -326,12 +324,14 @@ struct RuntimePartyDetailView: View {
             if targetFloorSelection != updatedTargetFloor {
                 targetFloorSelection = updatedTargetFloor
             }
-            if let dungeon = dungeons.first(where: { $0.dungeonId == updated.lastSelectedDungeonId }) {
-                selectedDungeon = dungeon
+            if let dungeonId = updated.lastSelectedDungeonId,
+               dungeons.contains(where: { $0.dungeonId == dungeonId }) {
+                selectedDungeonId = dungeonId
             } else {
-                selectedDungeon = nil
+                selectedDungeonId = nil
             }
-            if let dungeon = selectedDungeon,
+            if let dungeonId = selectedDungeonId,
+               let dungeon = dungeons.first(where: { $0.dungeonId == dungeonId }),
                updated.lastSelectedDifficulty > dungeon.highestUnlockedDifficulty {
                 do {
                     _ = try await partyService.setLastSelectedDifficulty(partyId: updated.id,
@@ -344,7 +344,12 @@ struct RuntimePartyDetailView: View {
                         if targetFloorSelection != adjustedTargetFloor {
                             targetFloorSelection = adjustedTargetFloor
                         }
-                        selectedDungeon = dungeons.first(where: { $0.dungeonId == adjusted.lastSelectedDungeonId })
+                        if let adjustedDungeonId = adjusted.lastSelectedDungeonId,
+                           dungeons.contains(where: { $0.dungeonId == adjustedDungeonId }) {
+                            selectedDungeonId = adjustedDungeonId
+                        } else {
+                            selectedDungeonId = nil
+                        }
                     }
                 } catch {
                     errorMessage = error.localizedDescription
@@ -629,7 +634,7 @@ private struct DungeonPickerView: View {
     let onSelectDungeon: (CachedDungeonProgress) async -> Bool
     let onSelectDifficulty: (CachedDungeonProgress, UInt8) async -> Bool
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedDungeonForDifficulty: CachedDungeonProgress?
+    @State private var selectedDungeonIdForDifficulty: UInt16?
 
     var body: some View {
         NavigationStack {
@@ -663,21 +668,33 @@ private struct DungeonPickerView: View {
             .avoidBottomGameInfo()
             .navigationTitle("迷宮を選択")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(item: $selectedDungeonForDifficulty) { dungeon in
-                DifficultyPickerView(
-                    dungeon: dungeon,
-                    currentDifficulty: currentDifficulty(for: dungeon),
-                    onSelect: { difficulty in
-                        await selectDifficulty(for: dungeon, difficulty: difficulty)
-                    }
-                )
-                .onDisappear {
-                    if selectedDungeonForDifficulty?.id == dungeon.id {
-                        selectedDungeonForDifficulty = nil
+            .navigationDestination(isPresented: isDifficultyPickerPresented) {
+                if let dungeonId = selectedDungeonIdForDifficulty,
+                   let dungeon = dungeons.first(where: { $0.dungeonId == dungeonId }) {
+                    DifficultyPickerView(
+                        dungeon: dungeon,
+                        currentDifficulty: currentDifficulty(for: dungeon),
+                        onSelect: { difficulty in
+                            await selectDifficulty(for: dungeon, difficulty: difficulty)
+                        }
+                    )
+                    .onDisappear {
+                        if selectedDungeonIdForDifficulty == dungeonId {
+                            selectedDungeonIdForDifficulty = nil
+                        }
                     }
                 }
             }
         }
+    }
+
+    private var isDifficultyPickerPresented: Binding<Bool> {
+        Binding(
+            get: { selectedDungeonIdForDifficulty != nil },
+            set: { isPresented in
+                if !isPresented { selectedDungeonIdForDifficulty = nil }
+            }
+        )
     }
 
     private var groupedDungeons: [Int: [CachedDungeonProgress]] {
@@ -700,7 +717,7 @@ private struct DungeonPickerView: View {
             let success = await onSelectDungeon(dungeon)
             if success {
                 await MainActor.run {
-                    selectedDungeonForDifficulty = dungeon
+                    selectedDungeonIdForDifficulty = dungeon.dungeonId
                 }
             }
         }
@@ -710,7 +727,7 @@ private struct DungeonPickerView: View {
         let success = await onSelectDifficulty(dungeon, difficulty)
         if success {
             await MainActor.run {
-                selectedDungeonForDifficulty = nil
+                selectedDungeonIdForDifficulty = nil
                 dismiss()
             }
         }

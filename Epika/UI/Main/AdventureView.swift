@@ -77,11 +77,11 @@ struct AdventureView: View {
                     initialTargetFloor: context.initialTargetFloor,
                     initialLastSelectedDungeonId: context.initialLastSelectedDungeonId,
                     initialLastSelectedDifficulty: context.initialLastSelectedDifficulty,
-                    selectedDungeon: Binding(
-                        get: { partyDetailContext?.selectedDungeon },
+                    selectedDungeonId: Binding(
+                        get: { partyDetailContext?.selectedDungeonId },
                         set: { newValue in
                             if var current = partyDetailContext {
-                                current.selectedDungeon = newValue
+                                current.selectedDungeonId = newValue
                                 partyDetailContext = current
                             }
                         }
@@ -280,7 +280,7 @@ struct AdventureView: View {
                                                 initialTargetFloor: party.targetFloor,
                                                 initialLastSelectedDungeonId: party.lastSelectedDungeonId,
                                                 initialLastSelectedDifficulty: party.lastSelectedDifficulty,
-                                                selectedDungeon: selected)
+                                                selectedDungeonId: selected?.dungeonId)
     }
 
     @MainActor
@@ -315,7 +315,7 @@ private struct PartyDetailContext: Identifiable {
     var initialTargetFloor: UInt8
     var initialLastSelectedDungeonId: UInt16?
     var initialLastSelectedDifficulty: UInt8
-    var selectedDungeon: CachedDungeonProgress?
+    var selectedDungeonId: UInt16?
 
     var id: UInt8 { partyId }
 }
