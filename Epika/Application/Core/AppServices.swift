@@ -71,15 +71,10 @@ final class AppServices: Sendable {
         let drops: [ExplorationDropReward]
     }
 
-    struct ExplorationRunCompletionKey: Sendable {
-        let partyId: UInt8
-        let startedAt: Date
-    }
-
     struct ExplorationRunUpdate: Sendable {
         enum Stage: Sendable {
             case step(entry: ExplorationEventLogEntry, totals: ExplorationRunTotals)
-            case completed(ExplorationRunCompletionKey)
+            case completed(ExplorationRunArtifact)
         }
 
         let runId: UUID
@@ -98,7 +93,7 @@ final class AppServices: Sendable {
         let contextProvider = SwiftDataContextProvider(container: container)
         self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
-        let gameStateService = GameStateService(contextProvider: contextProvider)
+        let gameStateService = GameStateService(modelContainer: container)
         self.gameState = gameStateService
         let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)
         self.dropNotifications = dropNotifications

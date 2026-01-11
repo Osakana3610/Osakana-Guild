@@ -194,10 +194,8 @@ extension AppServices {
                 }
             }
 
-            let completionKey = ExplorationRunCompletionKey(partyId: runId.partyId,
-                                                            startedAt: runId.startedAt)
             let finalUpdate = ExplorationRunUpdate(runId: sessionRunId,
-                                                   stage: .completed(completionKey))
+                                                   stage: .completed(artifact))
             continuation.yield(finalUpdate)
             continuation.finish()
 

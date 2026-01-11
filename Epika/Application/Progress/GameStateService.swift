@@ -29,12 +29,9 @@ import Foundation
 import SwiftData
 
 /// ゲーム状態（プレイヤー資産・メタ情報）を管理するService
+@ModelActor
 actor GameStateService {
-    private let contextProvider: SwiftDataContextProvider
-
-    init(contextProvider: SwiftDataContextProvider) {
-        self.contextProvider = contextProvider
-    }
+    private var isContextConfigured = false
 
     /// ゲーム状態変更通知を送信
     private func notifyGameStateChange(_ change: UserDataLoadService.GameStateChange) {
@@ -50,28 +47,28 @@ actor GameStateService {
     // MARK: - Reset
 
     func resetAllProgress() async throws {
-        let context = contextProvider.makeContext()
-        try deleteAll(GameStateRecord.self, context: context)
-        try deleteAll(InventoryItemRecord.self, context: context)
-        try deleteAll(CharacterRecord.self, context: context)
-        try deleteAll(CharacterEquipmentRecord.self, context: context)
-        try deleteAll(PartyRecord.self, context: context)
-        try deleteAll(StoryNodeProgressRecord.self, context: context)
-        try deleteAll(DungeonRecord.self, context: context)
-        try deleteAll(ExplorationRunRecord.self, context: context)
-        try deleteAll(ShopStockRecord.self, context: context)
-        try deleteAll(AutoTradeRuleRecord.self, context: context)
+        configureContextIfNeeded()
+        try deleteAll(GameStateRecord.self)
+        try deleteAll(InventoryItemRecord.self)
+        try deleteAll(CharacterRecord.self)
+        try deleteAll(CharacterEquipmentRecord.self)
+        try deleteAll(PartyRecord.self)
+        try deleteAll(StoryNodeProgressRecord.self)
+        try deleteAll(DungeonRecord.self)
+        try deleteAll(ExplorationRunRecord.self)
+        try deleteAll(ShopStockRecord.self)
+        try deleteAll(AutoTradeRuleRecord.self)
 
         let gameState = GameStateRecord()
-        context.insert(gameState)
-        try saveIfNeeded(context)
+        modelContext.insert(gameState)
+        try saveIfNeeded()
     }
 
     // MARK: - Super Rare Daily State
 
     func loadSuperRareDailyState(currentDate: Date = Date()) async throws -> SuperRareDailyState {
-        let context = contextProvider.makeContext()
-        let record = try ensureGameState(context: context)
+        configureContextIfNeeded()
+        let record = try ensureGameState()
         let today = JSTDateUtility.dateAsInt(from: currentDate)
 
         // 日付が変わったらリセット
@@ -83,53 +80,53 @@ actor GameStateService {
     }
 
     func updateSuperRareDailyState(_ state: SuperRareDailyState) async throws {
-        let context = contextProvider.makeContext()
-        let record = try ensureGameState(context: context)
+        configureContextIfNeeded()
+        let record = try ensureGameState()
         if state.hasTriggered {
             record.superRareLastTriggeredDate = state.jstDate
         }
         record.updatedAt = Date()
-        try saveIfNeeded(context)
+        try saveIfNeeded()
     }
 
     // MARK: - Daily Processing
 
     func lastDailyProcessedDate() async throws -> UInt32? {
-        let context = contextProvider.makeContext()
-        let record = try ensureGameState(context: context)
+        configureContextIfNeeded()
+        let record = try ensureGameState()
         return record.lastDailyProcessedDate
     }
 
     func markDailyProcessed(date: UInt32) async throws {
-        let context = contextProvider.makeContext()
-        let record = try ensureGameState(context: context)
+        configureContextIfNeeded()
+        let record = try ensureGameState()
         record.lastDailyProcessedDate = date
         record.updatedAt = Date()
-        try saveIfNeeded(context)
+        try saveIfNeeded()
     }
 
     // MARK: - Player Snapshot
 
     func ensurePlayer(initialGold: UInt32 = 1000) async throws -> CachedPlayer {
-        let context = contextProvider.makeContext()
-        let record = try ensureGameState(context: context, initialGold: initialGold)
-        try saveIfNeeded(context)
+        configureContextIfNeeded()
+        let record = try ensureGameState(initialGold: initialGold)
+        try saveIfNeeded()
         return try snapshot(from: record)
     }
 
     // MARK: - Gold Operations
 
     func addGold(_ amount: UInt32) async throws -> CachedPlayer {
-        let context = contextProvider.makeContext()
-        return try await mutateWallet(context: context) { wallet in
+        configureContextIfNeeded()
+        return try await mutateWallet { wallet in
             let newGold = UInt64(wallet.gold) + UInt64(amount)
             wallet.gold = UInt32(min(newGold, UInt64(AppConstants.Progress.maximumGold)))
         }
     }
 
     func spendGold(_ amount: UInt32) async throws -> CachedPlayer {
-        let context = contextProvider.makeContext()
-        return try await mutateWallet(context: context) { wallet in
+        configureContextIfNeeded()
+        return try await mutateWallet { wallet in
             guard wallet.gold >= amount else {
                 throw ProgressError.insufficientFunds(required: Int(amount), available: Int(wallet.gold))
             }
@@ -140,8 +137,8 @@ actor GameStateService {
     // MARK: - Cat Tickets
 
     func addCatTickets(_ amount: UInt16) async throws -> CachedPlayer {
-        let context = contextProvider.makeContext()
-        return try await mutateWallet(context: context) { wallet in
+        configureContextIfNeeded()
+        return try await mutateWallet { wallet in
             let newTickets = UInt32(wallet.catTickets) + UInt32(amount)
             wallet.catTickets = UInt16(min(newTickets, UInt32(AppConstants.Progress.maximumCatTickets)))
         }
@@ -151,8 +148,8 @@ actor GameStateService {
 
     /// パンドラボックス内のアイテム（UInt64にパック済み）
     func pandoraBoxItems() async throws -> [UInt64] {
-        let context = contextProvider.makeContext()
-        let record = try fetchGameState(context: context)
+        configureContextIfNeeded()
+        let record = try fetchGameState()
         return try PandoraBoxStorage.decode(record.pandoraBoxItemsData)
     }
 
@@ -164,10 +161,10 @@ actor GameStateService {
         stackKey: StackKey,
         inventoryService: InventoryProgressService
     ) async throws -> CachedPlayer {
-        let context = contextProvider.makeContext()
+        configureContextIfNeeded()
         let packed = stackKey.packed
 
-        let record = try fetchGameState(context: context)
+        let record = try fetchGameState()
         var items = try PandoraBoxStorage.decode(record.pandoraBoxItemsData)
 
         // 既に登録済みなら何もしない
@@ -187,7 +184,7 @@ actor GameStateService {
         items.append(packed)
         record.pandoraBoxItemsData = PandoraBoxStorage.encode(items)
         record.updatedAt = Date()
-        try saveIfNeeded(context)
+        try saveIfNeeded()
         let change = UserDataLoadService.GameStateChange(
             gold: nil,
             catTickets: nil,
@@ -206,10 +203,10 @@ actor GameStateService {
         stackKey: StackKey,
         inventoryService: InventoryProgressService
     ) async throws -> CachedPlayer {
-        let context = contextProvider.makeContext()
+        configureContextIfNeeded()
         let packed = stackKey.packed
 
-        let record = try fetchGameState(context: context)
+        let record = try fetchGameState()
         var items = try PandoraBoxStorage.decode(record.pandoraBoxItemsData)
 
         // パンドラから削除
@@ -234,7 +231,7 @@ actor GameStateService {
 
         record.pandoraBoxItemsData = PandoraBoxStorage.encode(items)
         record.updatedAt = Date()
-        try saveIfNeeded(context)
+        try saveIfNeeded()
         let change = UserDataLoadService.GameStateChange(
             gold: nil,
             catTickets: nil,
@@ -249,10 +246,16 @@ actor GameStateService {
 // MARK: - Private Helpers
 
 private extension GameStateService {
-    func ensureGameState(context: ModelContext, initialGold: UInt32 = 1000) throws -> GameStateRecord {
+    func configureContextIfNeeded() {
+        guard !isContextConfigured else { return }
+        modelContext.autosaveEnabled = false
+        isContextConfigured = true
+    }
+
+    func ensureGameState(initialGold: UInt32 = 1000) throws -> GameStateRecord {
         var descriptor = FetchDescriptor<GameStateRecord>()
         descriptor.fetchLimit = 1
-        if let existing = try context.fetch(descriptor).first {
+        if let existing = try modelContext.fetch(descriptor).first {
             // 上限を超えていたら切り詰める
             var needsSave = false
             if existing.gold > AppConstants.Progress.maximumGold {
@@ -269,22 +272,21 @@ private extension GameStateService {
             return existing
         }
         let record = GameStateRecord(gold: initialGold)
-        context.insert(record)
+        modelContext.insert(record)
         return record
     }
 
-    func fetchGameState(context: ModelContext) throws -> GameStateRecord {
+    func fetchGameState() throws -> GameStateRecord {
         var descriptor = FetchDescriptor<GameStateRecord>()
         descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
+        guard let record = try modelContext.fetch(descriptor).first else {
             throw ProgressError.playerNotFound
         }
         return record
     }
 
-    func mutateWallet(context: ModelContext,
-                      _ mutate: @Sendable (inout PlayerWallet) throws -> Void) async throws -> CachedPlayer {
-        let record = try ensureGameState(context: context)
+    func mutateWallet(_ mutate: @Sendable (inout PlayerWallet) throws -> Void) async throws -> CachedPlayer {
+        let record = try ensureGameState()
         var wallet = PlayerWallet(gold: record.gold, catTickets: record.catTickets)
         try mutate(&wallet)
         // 上限を適用
@@ -293,7 +295,7 @@ private extension GameStateService {
         record.gold = newGold
         record.catTickets = newCatTickets
         record.updatedAt = Date()
-        try saveIfNeeded(context)
+        try saveIfNeeded()
         let change = UserDataLoadService.GameStateChange(
             gold: newGold,
             catTickets: newCatTickets,
@@ -304,17 +306,17 @@ private extension GameStateService {
         return try snapshot(from: record)
     }
 
-    func deleteAll<T: PersistentModel>(_ type: T.Type, context: ModelContext) throws {
+    func deleteAll<T: PersistentModel>(_ type: T.Type) throws {
         let descriptor = FetchDescriptor<T>()
-        let records = try context.fetch(descriptor)
+        let records = try modelContext.fetch(descriptor)
         for record in records {
-            context.delete(record)
+            modelContext.delete(record)
         }
     }
 
-    func saveIfNeeded(_ context: ModelContext) throws {
-        guard context.hasChanges else { return }
-        try context.save()
+    func saveIfNeeded() throws {
+        guard modelContext.hasChanges else { return }
+        try modelContext.save()
     }
 
     func snapshot(from record: GameStateRecord) throws -> CachedPlayer {
