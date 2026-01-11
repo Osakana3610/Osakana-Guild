@@ -119,8 +119,11 @@ struct RuntimePartyDetailView: View {
                         }
 
                         NavigationLink {
-                            PartyNameEditorView(party: currentParty) {
-                                await refreshCachedParty()
+                            PartyNameEditorView(party: currentParty) { completion in
+                                Task {
+                                    await refreshCachedParty()
+                                    await MainActor.run { completion() }
+                                }
                             }
                         } label: {
                             Text("パーティ名を変更する")
@@ -151,7 +154,9 @@ struct RuntimePartyDetailView: View {
                             let displayedDifficulty = min(resolvedLastSelectedDifficulty, dungeon.highestUnlockedDifficulty)
                             DifficultyPickerMenu(dungeon: dungeon,
                                                  currentDifficulty: displayedDifficulty,
-                                                 onSelect: { await updateDifficultySelection($0) },
+                                                 onSelect: { difficulty in
+                                                     Task { _ = await updateDifficultySelection(difficulty) }
+                                                 },
                                                  rowHeight: listRowHeight)
                             .disabled(dungeon.availableDifficulties.count <= 1)
                         }
@@ -186,11 +191,17 @@ struct RuntimePartyDetailView: View {
                     dungeons: adventureState.dungeons,
                     currentSelection: selectedDungeonId ?? resolvedLastSelectedDungeonId,
                     currentDifficulty: resolvedLastSelectedDifficulty,
-                    onSelectDungeon: { dungeon in
-                        await updateDungeonSelection(dungeonId: dungeon.dungeonId)
+                    onSelectDungeon: { dungeon, completion in
+                        Task {
+                            let success = await updateDungeonSelection(dungeonId: dungeon.dungeonId)
+                            await MainActor.run { completion(success) }
+                        }
                     },
-                    onSelectDifficulty: { dungeon, difficulty in
-                        await updateDifficultySelectionFromDungeonPicker(dungeon: dungeon, difficulty: difficulty)
+                    onSelectDifficulty: { dungeon, difficulty, completion in
+                        Task {
+                            let success = await updateDifficultySelectionFromDungeonPicker(dungeon: dungeon, difficulty: difficulty)
+                            await MainActor.run { completion(success) }
+                        }
                     }
                 )
             }
@@ -636,7 +647,7 @@ private struct DifficultyPickerMenu: View {
     @Environment(AppServices.self) private var appServices
     let dungeon: CachedDungeonProgress
     let currentDifficulty: UInt8
-    let onSelect: (UInt8) async -> Bool
+    let onSelect: (UInt8) -> Void
     let rowHeight: CGFloat?
 
     var body: some View {
@@ -675,7 +686,7 @@ private struct DifficultyPickerMenu: View {
     }
 
     private func select(_ difficulty: UInt8) {
-        Task { _ = await onSelect(difficulty) }
+        onSelect(difficulty)
     }
 }
 
@@ -709,8 +720,8 @@ private struct DungeonPickerView: View {
     let dungeons: [CachedDungeonProgress]
     let currentSelection: UInt16?
     let currentDifficulty: UInt8
-    let onSelectDungeon: (CachedDungeonProgress) async -> Bool
-    let onSelectDifficulty: (CachedDungeonProgress, UInt8) async -> Bool
+    let onSelectDungeon: (CachedDungeonProgress, @escaping (Bool) -> Void) -> Void
+    let onSelectDifficulty: (CachedDungeonProgress, UInt8, @escaping (Bool) -> Void) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var selectedDungeonIdForDifficulty: UInt16?
 
@@ -752,8 +763,8 @@ private struct DungeonPickerView: View {
                     DifficultyPickerView(
                         dungeon: dungeon,
                         currentDifficulty: currentDifficulty(for: dungeon),
-                        onSelect: { difficulty in
-                            await selectDifficulty(for: dungeon, difficulty: difficulty)
+                        onSelect: { difficulty, completion in
+                            selectDifficulty(for: dungeon, difficulty: difficulty, completion: completion)
                         }
                     )
                     .onDisappear {
@@ -791,32 +802,28 @@ private struct DungeonPickerView: View {
     }
 
     private func handleDungeonTap(_ dungeon: CachedDungeonProgress) {
-        Task {
-            let success = await onSelectDungeon(dungeon)
+        onSelectDungeon(dungeon) { success in
             if success {
-                await MainActor.run {
-                    selectedDungeonIdForDifficulty = dungeon.dungeonId
-                }
+                selectedDungeonIdForDifficulty = dungeon.dungeonId
             }
         }
     }
 
-    private func selectDifficulty(for dungeon: CachedDungeonProgress, difficulty: UInt8) async -> Bool {
-        let success = await onSelectDifficulty(dungeon, difficulty)
-        if success {
-            await MainActor.run {
+    private func selectDifficulty(for dungeon: CachedDungeonProgress, difficulty: UInt8, completion: @escaping (Bool) -> Void) {
+        onSelectDifficulty(dungeon, difficulty) { success in
+            if success {
                 selectedDungeonIdForDifficulty = nil
                 dismiss()
             }
+            completion(success)
         }
-        return success
     }
 }
 
 private struct DifficultyPickerView: View {
     let dungeon: CachedDungeonProgress
     let currentDifficulty: UInt8
-    let onSelect: (UInt8) async -> Bool
+    let onSelect: (UInt8, @escaping (Bool) -> Void) -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(AppServices.self) private var appServices
 
@@ -842,8 +849,7 @@ private struct DifficultyPickerView: View {
     }
 
     private func choose(_ difficulty: UInt8) {
-        Task {
-            let success = await onSelect(difficulty)
+        onSelect(difficulty) { success in
             if success {
                 dismiss()
             }
@@ -853,7 +859,7 @@ private struct DifficultyPickerView: View {
 
 private struct PartyNameEditorView: View {
     let party: CachedParty
-    let onComplete: () async -> Void
+    let onComplete: (@escaping () -> Void) -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(AppServices.self) private var appServices
     @State private var name: String = ""
@@ -890,8 +896,9 @@ private struct PartyNameEditorView: View {
     private func save() async {
         do {
             _ = try await partyService.updatePartyName(partyId: party.id, name: name.trimmingCharacters(in: .whitespaces))
-            await onComplete()
-            dismiss()
+            onComplete {
+                dismiss()
+            }
         } catch {
             await MainActor.run {
                 errorMessage = error.localizedDescription
