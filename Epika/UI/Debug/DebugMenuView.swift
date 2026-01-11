@@ -1209,8 +1209,8 @@ struct DangerousOperationsView: View {
             NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
 
             // インベントリキャッシュをリロードしてUI更新
-            try await MainActor.run {
-                try appServices.userDataLoad.reloadItems()
+            try await appServices.userDataLoad.reloadItems()
+            await MainActor.run {
                 isUnequippingAll = false
                 unequipResultMessage = "\(unequippedCount)人のキャラクターから\(totalItemCount)個の装備を外しました"
                 showUnequipCompleteAlert = true

@@ -40,6 +40,31 @@ actor InventoryProgressService {
         let socketItemId: UInt16
     }
 
+    /// SwiftDataのInventoryItemRecordを値型で転送するためのデータ構造
+    struct ItemRecordData: Sendable {
+        let stackKey: String
+        let itemId: UInt16
+        let quantity: UInt16
+        let storage: ItemStorage
+        let superRareTitleId: UInt8
+        let normalTitleId: UInt8
+        let socketSuperRareTitleId: UInt8
+        let socketNormalTitleId: UInt8
+        let socketItemId: UInt16
+
+        init(record: InventoryItemRecord) {
+            self.stackKey = record.stackKey
+            self.itemId = record.itemId
+            self.quantity = record.quantity
+            self.storage = record.storage
+            self.superRareTitleId = record.superRareTitleId
+            self.normalTitleId = record.normalTitleId
+            self.socketSuperRareTitleId = record.socketSuperRareTitleId
+            self.socketNormalTitleId = record.socketNormalTitleId
+            self.socketItemId = record.socketItemId
+        }
+    }
+
     struct BatchSeed: Sendable {
         let itemId: UInt16
         let quantity: Int
@@ -61,6 +86,15 @@ actor InventoryProgressService {
         gameStateService: GameStateService) {
         self.contextProvider = contextProvider
         self.gameStateService = gameStateService
+    }
+
+    /// 指定した保管場所のレコードをSwiftDataから取得し、値型に変換して返す
+    func inventoryRecordData(storage: ItemStorage) async throws -> [ItemRecordData] {
+        let context = contextProvider.makeContext()
+        let descriptor = fetchDescriptor(for: storage)
+        let records = try context.fetch(descriptor)
+        guard !records.isEmpty else { return [] }
+        return records.map(ItemRecordData.init)
     }
 
     /// プレイヤーインベントリのスナップショットを取得

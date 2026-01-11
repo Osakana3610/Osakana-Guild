@@ -33,14 +33,12 @@
 
 import Foundation
 import Observation
-import SwiftData
 import SwiftUI
 
 @Observable
 final class UserDataLoadService: Sendable {
     // MARK: - Dependencies
 
-    let contextProvider: SwiftDataContextProvider
     let masterDataCache: MasterDataCache
     let characterService: CharacterProgressService
     let partyService: PartyProgressService
@@ -110,7 +108,6 @@ final class UserDataLoadService: Sendable {
 
     @MainActor
     init(
-        contextProvider: SwiftDataContextProvider,
         masterDataCache: MasterDataCache,
         characterService: CharacterProgressService,
         partyService: PartyProgressService,
@@ -119,7 +116,6 @@ final class UserDataLoadService: Sendable {
         gameStateService: GameStateService,
         autoTradeService: AutoTradeProgressService
     ) {
-        self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
         self.characterService = characterService
         self.partyService = partyService
@@ -175,8 +171,8 @@ final class UserDataLoadService: Sendable {
                 try await loadAutoTradeRules()
                 await AppLogCollector.shared.log(.system, action: "loadAutoTradeRules_done")
 
-                // アイテムロードはMainActorで実行
-                try await MainActor.run { try self.loadItems() }
+                // アイテムロードはMainActorでキャッシュ構築
+                try await loadItems()
                 await AppLogCollector.shared.log(.system, action: "loadItems_done")
 
                 // 商店在庫ロード（appServicesが必要）

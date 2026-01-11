@@ -12,7 +12,6 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 import SwiftUI
 
 // MARK: - Inventory Change Notification
@@ -42,8 +41,8 @@ extension UserDataLoadService {
 
 extension UserDataLoadService {
     @MainActor
-    func loadItems() throws {
-        try buildItemCacheFromSwiftData(storage: .playerItem)
+    func loadItems() async throws {
+        try await buildItemCacheFromSwiftData(storage: .playerItem)
         self.isItemsLoaded = true
     }
 
@@ -66,19 +65,8 @@ extension UserDataLoadService {
 
     /// SwiftDataから直接フェッチしてキャッシュを構築
     @MainActor
-    private func buildItemCacheFromSwiftData(storage: ItemStorage) throws {
-        let context = contextProvider.makeContext()
-        let storageTypeValue = storage.rawValue
-        var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue
-        })
-        descriptor.sortBy = [
-            SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),
-            SortDescriptor(\InventoryItemRecord.normalTitleId, order: .forward),
-            SortDescriptor(\InventoryItemRecord.itemId, order: .forward),
-            SortDescriptor(\InventoryItemRecord.socketItemId, order: .forward)
-        ]
-        let records = try context.fetch(descriptor)
+    private func buildItemCacheFromSwiftData(storage: ItemStorage) async throws {
+        let records = try await inventoryService.inventoryRecordData(storage: storage)
 
         guard !records.isEmpty else {
             subcategorizedItems.removeAll()
@@ -276,9 +264,9 @@ extension UserDataLoadService {
 
     /// アイテムキャッシュを再読み込み
     @MainActor
-    func reloadItems() throws {
+    func reloadItems() async throws {
         clearItemCache()
-        try loadItems()
+        try await loadItems()
     }
 
     /// キャッシュからアイテムを削除する（完全売却時）

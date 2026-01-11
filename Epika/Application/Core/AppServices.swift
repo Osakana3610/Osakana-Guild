@@ -141,7 +141,6 @@ final class AppServices: Sendable {
         self.itemSynthesis = ItemSynthesisProgressService(inventoryService: self.inventory,
                                                           gameStateService: gameStateService)
         self.userDataLoad = UserDataLoadService(
-            contextProvider: contextProvider,
             masterDataCache: masterDataCache,
             characterService: self.character,
             partyService: self.party,
