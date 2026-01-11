@@ -17,7 +17,7 @@
 import Foundation
 
 enum PartyAssembler {
-    static func assembleState(masterData: MasterDataCache,
+    nonisolated static func assembleState(masterData: MasterDataCache,
                               party: CachedParty,
                               characters: [CharacterInput],
                               pandoraBoxItems: Set<UInt64>) throws -> RuntimePartyState {

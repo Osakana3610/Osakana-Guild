@@ -29,14 +29,14 @@ import Foundation
 /// 静的メソッドのみで状態を持たないためSendable
 protocol SkillEffectHandler: Sendable {
     /// このハンドラが処理する SkillEffectType
-    static var effectType: SkillEffectType { get }
+    nonisolated static var effectType: SkillEffectType { get }
 
     /// ペイロードを解析し、Accumulator に効果を適用する
     /// - Parameters:
     ///   - payload: デコード済みのペイロード
     ///   - accumulator: 効果を蓄積する Accumulator
     ///   - context: スキル情報を含むコンテキスト
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -45,24 +45,24 @@ protocol SkillEffectHandler: Sendable {
 
 /// ハンドラに渡すスキル情報のコンテキスト
 struct SkillEffectContext: Sendable {
-    let skillId: UInt16
-    let skillName: String
-    let effectIndex: Int
-    let actorStats: ActorStats?
+    nonisolated let skillId: UInt16
+    nonisolated let skillName: String
+    nonisolated let effectIndex: Int
+    nonisolated let actorStats: ActorStats?
 }
 
 /// コンパイル時に参照可能なアクターのステータス
 struct ActorStats: Sendable {
-    let strength: Int
-    let wisdom: Int
-    let spirit: Int
-    let vitality: Int
-    let agility: Int
-    let luck: Int
+    nonisolated let strength: Int
+    nonisolated let wisdom: Int
+    nonisolated let spirit: Int
+    nonisolated let vitality: Int
+    nonisolated let agility: Int
+    nonisolated let luck: Int
 
     /// EnumMappings.baseStat のrawValueでステータス値を取得
     /// strength=1, wisdom=2, spirit=3, vitality=4, agility=5, luck=6
-    func value(for statRawValue: Int) -> Int {
+    nonisolated func value(for statRawValue: Int) -> Int {
         switch statRawValue {
         case 1: return strength
         case 2: return wisdom
@@ -78,7 +78,7 @@ struct ActorStats: Sendable {
 /// statScaling計算のヘルパー
 extension DecodedSkillEffectPayload {
     /// statScalingが指定されている場合、ステータス値×係数を返す
-    func scaledValue(from stats: ActorStats?) -> Double {
+    nonisolated func scaledValue(from stats: ActorStats?) -> Double {
         guard let scalingStatInt = parameters[.scalingStat],
               let coefficient = value[.scalingCoefficient],
               let stats = stats else {
@@ -95,7 +95,7 @@ extension DecodedSkillEffectPayload {
 /// ハンドラは静的メソッドのみでSendable、辞書もSendable
 enum SkillEffectHandlerRegistry {
     /// 全ハンドラの辞書（遅延初期化）
-    static let handlers: [SkillEffectType: any SkillEffectHandler.Type] = {
+    nonisolated static let handlers: [SkillEffectType: any SkillEffectHandler.Type] = {
         var dict: [SkillEffectType: any SkillEffectHandler.Type] = [:]
 
         let allHandlers: [any SkillEffectHandler.Type] = [
@@ -231,7 +231,7 @@ enum SkillEffectHandlerRegistry {
     /// 指定された effectType に対応するハンドラを取得
     /// - Parameter effectType: 検索する SkillEffectType
     /// - Returns: 対応するハンドラ、未登録の場合は nil
-    static func handler(for effectType: SkillEffectType) -> (any SkillEffectHandler.Type)? {
+    nonisolated static func handler(for effectType: SkillEffectType) -> (any SkillEffectHandler.Type)? {
         handlers[effectType]
     }
 }

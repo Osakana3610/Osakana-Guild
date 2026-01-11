@@ -33,7 +33,7 @@ struct ExplorationDropReward: Sendable {
     let normalTitleId: UInt8?
     let superRareTitleId: UInt8?
 
-    init(item: ItemDefinition,
+    nonisolated init(item: ItemDefinition,
          quantity: Int,
          trapDifficulty: Int? = nil,
          sourceEnemyId: UInt16? = nil,

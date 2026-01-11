@@ -30,7 +30,7 @@ import Foundation
 // MARK: - Magic (Priest & Mage)
 extension BattleTurnEngine {
     @discardableResult
-    static func executePriestMagic(for side: ActorSide,
+    nonisolated static func executePriestMagic(for side: ActorSide,
                                    casterIndex: Int,
                                    context: inout BattleContext,
                                    forcedTargets: BattleContext.SacrificeTargets) -> Bool {
@@ -76,7 +76,7 @@ extension BattleTurnEngine {
         return true
     }
 
-    static func performPriestMagic(casterSide: ActorSide,
+    nonisolated static func performPriestMagic(casterSide: ActorSide,
                                    casterIndex: Int,
                                    targetIndex: Int,
                                    spell: SpellDefinition,
@@ -109,7 +109,7 @@ extension BattleTurnEngine {
     }
 
     @discardableResult
-    static func executeMageMagic(for side: ActorSide,
+    nonisolated static func executeMageMagic(for side: ActorSide,
                                  attackerIndex: Int,
                                  context: inout BattleContext,
                                  forcedTargets: BattleContext.SacrificeTargets) -> Bool {
@@ -230,7 +230,7 @@ extension BattleTurnEngine {
     }
 
     @discardableResult
-    static func executeBreath(for side: ActorSide,
+    nonisolated static func executeBreath(for side: ActorSide,
                               attackerIndex: Int,
                               context: inout BattleContext,
                               forcedTargets: BattleContext.SacrificeTargets) -> Bool {
@@ -294,26 +294,26 @@ extension BattleTurnEngine {
         return true
     }
 
-    static func selectMageSpell(for actor: BattleActor) -> SpellDefinition? {
+    nonisolated static func selectMageSpell(for actor: BattleActor) -> SpellDefinition? {
         let available = actor.spells.mage.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
         guard !available.isEmpty else { return nil }
         return highestTierSpell(in: available)
     }
 
-    static func selectPriestSpell(for actor: BattleActor) -> SpellDefinition? {
+    nonisolated static func selectPriestSpell(for actor: BattleActor) -> SpellDefinition? {
         let available = actor.spells.priest.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
         guard !available.isEmpty else { return nil }
         return highestTierSpell(in: available)
     }
 
     /// 回復呪文のみを選択（救出処理用）
-    static func selectPriestHealingSpell(for actor: BattleActor) -> SpellDefinition? {
+    nonisolated static func selectPriestHealingSpell(for actor: BattleActor) -> SpellDefinition? {
         let available = actor.spells.priest.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
         guard !available.isEmpty else { return nil }
         return highestTierSpell(in: available) { $0.category == .healing }
     }
 
-    static func highestTierSpell(in spells: [SpellDefinition],
+    nonisolated static func highestTierSpell(in spells: [SpellDefinition],
                                  matching predicate: ((SpellDefinition) -> Bool)? = nil) -> SpellDefinition? {
         let filtered: [SpellDefinition]
         if let predicate {
@@ -329,7 +329,7 @@ extension BattleTurnEngine {
     }
 
     /// tierを重みとした抽選で呪文を選択（高tierほど選ばれやすい）
-    static func selectSpellByTierWeight(in spells: [SpellDefinition],
+    nonisolated static func selectSpellByTierWeight(in spells: [SpellDefinition],
                                         matching predicate: ((SpellDefinition) -> Bool)? = nil,
                                         random: inout GameRandomSource) -> SpellDefinition? {
         let filtered: [SpellDefinition]
@@ -356,7 +356,7 @@ extension BattleTurnEngine {
         return filtered.last
     }
 
-    static func statusTargetCount(for caster: BattleActor, spell: SpellDefinition) -> Int {
+    nonisolated static func statusTargetCount(for caster: BattleActor, spell: SpellDefinition) -> Int {
         let base = spell.maxTargetsBase ?? 1
         guard base > 0 else { return 1 }
         let extraPerLevel = spell.extraTargetsPerLevels ?? 0.0
@@ -365,7 +365,7 @@ extension BattleTurnEngine {
         return max(1, Int(total.rounded(.down)))
     }
 
-    static func baseStatusChancePercent(spell: SpellDefinition, caster: BattleActor, target: BattleActor) -> Double {
+    nonisolated static func baseStatusChancePercent(spell: SpellDefinition, caster: BattleActor, target: BattleActor) -> Double {
         let magicAttack = max(0, caster.snapshot.magicalAttack)
         let magicDefense = max(1, target.snapshot.magicalDefense)
         let ratio = Double(magicAttack) / Double(magicDefense)
@@ -375,7 +375,7 @@ extension BattleTurnEngine {
         return max(0.0, base * (luckScalePercent / 100.0))
     }
 
-    static func spellPowerModifier(for attacker: BattleActor, spellId: UInt8? = nil) -> Double {
+    nonisolated static func spellPowerModifier(for attacker: BattleActor, spellId: UInt8? = nil) -> Double {
         let percentScale = max(0.0, 1.0 + attacker.skillEffects.spell.power.percent / 100.0)
         var modifier = percentScale * attacker.skillEffects.spell.power.multiplier
         if let spellId,
@@ -388,7 +388,7 @@ extension BattleTurnEngine {
     // MARK: - Buff Spell
 
     /// バフ呪文を味方全体に適用
-    static func performBuffSpell(casterSide: ActorSide,
+    nonisolated static func performBuffSpell(casterSide: ActorSide,
                                  casterIndex: Int,
                                  spell: SpellDefinition,
                                  context: inout BattleContext) {
@@ -429,7 +429,7 @@ extension BattleTurnEngine {
 
     /// 状態異常を持つ味方1人の状態異常を1つ除去
     /// - Returns: 対象がいなければfalse
-    static func performCleanseSpell(casterSide: ActorSide,
+    nonisolated static func performCleanseSpell(casterSide: ActorSide,
                                     casterIndex: Int,
                                     spell: SpellDefinition,
                                     context: inout BattleContext) -> Bool {
@@ -467,7 +467,7 @@ extension BattleTurnEngine {
     // MARK: - Spell Condition Checks
 
     /// 呪文の発動条件をチェック
-    static func canCastSpell(_ spell: SpellDefinition,
+    nonisolated static func canCastSpell(_ spell: SpellDefinition,
                              caster: BattleActor,
                              allies: [BattleActor],
                              opponents: [BattleActor]) -> Bool {
@@ -489,7 +489,7 @@ extension BattleTurnEngine {
         }
     }
 
-    private static func shouldCastBuffSpell(spell: SpellDefinition,
+    private nonisolated static func shouldCastBuffSpell(spell: SpellDefinition,
                                             allies: [BattleActor]) -> Bool {
         guard spell.targeting == .partyAllies, !spell.buffs.isEmpty else { return true }
         let buffId = "spell.\(spell.id)"

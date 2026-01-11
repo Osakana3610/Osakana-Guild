@@ -35,7 +35,7 @@ struct AppLogEntry: Sendable, Codable {
         case error           // エラー発生
     }
 
-    init(category: Category, action: String, context: [String: String]? = nil) {
+    nonisolated init(category: Category, action: String, context: [String: String]? = nil) {
         self.timestamp = Date()
         self.category = category
         self.action = action
@@ -138,7 +138,7 @@ actor AppLogCollector {
 // MARK: - Battle Log Buffer (Thread-safe, nonisolated)
 
 /// 直近の戦闘ログを保持するバッファ（同期アクセス用）
-final class BattleLogBuffer: @unchecked Sendable {
+nonisolated final class BattleLogBuffer: @unchecked Sendable {
     static let shared = BattleLogBuffer()
 
     private var logs: [(timestamp: Date, dungeonId: Int, floor: Int, log: Data)] = []
@@ -163,7 +163,7 @@ final class BattleLogBuffer: @unchecked Sendable {
     }
 
     /// 直近の戦闘ログをテキスト形式で取得
-    func getLogsAsText() -> String {
+    nonisolated func getLogsAsText() -> String {
         lock.lock()
         defer { lock.unlock() }
 
@@ -185,7 +185,7 @@ final class BattleLogBuffer: @unchecked Sendable {
         return result.joined(separator: "\n---\n")
     }
 
-    private func summarizeBattleLog(_ log: BattleLog) -> String {
+    nonisolated private func summarizeBattleLog(_ log: BattleLog) -> String {
         let outcomeStr: String
         switch log.outcome {
         case 0: outcomeStr = "勝利"

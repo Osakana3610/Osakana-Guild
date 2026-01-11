@@ -32,29 +32,29 @@ import Foundation
 /// CharacterRecordからCachedCharacterへの変換用中間データ。
 /// 計算結果は含まない。Progress層からRuntime層へデータを渡すために使用。
 struct CharacterInput: Sendable, Hashable {
-    let id: UInt8
-    let displayName: String
-    let raceId: UInt8
-    let jobId: UInt8
-    let previousJobId: UInt8
-    let avatarId: UInt16
-    let level: Int
-    let experience: Int
-    let currentHP: Int
-    let primaryPersonalityId: UInt8
-    let secondaryPersonalityId: UInt8
-    let actionRateAttack: Int
-    let actionRatePriestMagic: Int
-    let actionRateMageMagic: Int
-    let actionRateBreath: Int
-    let updatedAt: Date
-    let displayOrder: UInt8
-    let equippedItems: [EquippedItem]
+    nonisolated let id: UInt8
+    nonisolated let displayName: String
+    nonisolated let raceId: UInt8
+    nonisolated let jobId: UInt8
+    nonisolated let previousJobId: UInt8
+    nonisolated let avatarId: UInt16
+    nonisolated let level: Int
+    nonisolated let experience: Int
+    nonisolated let currentHP: Int
+    nonisolated let primaryPersonalityId: UInt8
+    nonisolated let secondaryPersonalityId: UInt8
+    nonisolated let actionRateAttack: Int
+    nonisolated let actionRatePriestMagic: Int
+    nonisolated let actionRateMageMagic: Int
+    nonisolated let actionRateBreath: Int
+    nonisolated let updatedAt: Date
+    nonisolated let displayOrder: UInt8
+    nonisolated let equippedItems: [EquippedItem]
 }
 
 extension CharacterInput {
     /// CachedCharacterからCharacterInputを生成
-    init(from character: CachedCharacter) {
+    nonisolated init(from character: CachedCharacter) {
         self.init(
             id: character.id,
             displayName: character.displayName,

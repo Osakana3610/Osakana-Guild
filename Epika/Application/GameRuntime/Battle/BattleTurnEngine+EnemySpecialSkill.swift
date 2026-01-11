@@ -28,7 +28,7 @@ import Foundation
 // MARK: - Enemy Special Skills
 extension BattleTurnEngine {
     @discardableResult
-    static func executeEnemySpecialSkill(for side: ActorSide,
+    nonisolated static func executeEnemySpecialSkill(for side: ActorSide,
                                          actorIndex: Int,
                                          context: inout BattleContext,
                                          forcedTargets: BattleContext.SacrificeTargets) -> Bool {
@@ -105,7 +105,7 @@ extension BattleTurnEngine {
 
     // MARK: - Physical Skill
 
-    private static func executeEnemyPhysicalSkill(skill: EnemySkillDefinition,
+    private nonisolated static func executeEnemyPhysicalSkill(skill: EnemySkillDefinition,
                                                   attackerSide: ActorSide,
                                                   attackerIndex: Int,
                                                   context: inout BattleContext,
@@ -187,7 +187,7 @@ extension BattleTurnEngine {
 
     // MARK: - Magical Skill
 
-    private static func executeEnemyMagicalSkill(skill: EnemySkillDefinition,
+    private nonisolated static func executeEnemyMagicalSkill(skill: EnemySkillDefinition,
                                                  attackerSide: ActorSide,
                                                  attackerIndex: Int,
                                                  context: inout BattleContext,
@@ -244,7 +244,7 @@ extension BattleTurnEngine {
 
     // MARK: - Breath Skill
 
-    private static func executeEnemyBreathSkill(skill: EnemySkillDefinition,
+    private nonisolated static func executeEnemyBreathSkill(skill: EnemySkillDefinition,
                                                 attackerSide: ActorSide,
                                                 attackerIndex: Int,
                                                 context: inout BattleContext,
@@ -287,7 +287,7 @@ extension BattleTurnEngine {
 
     // MARK: - Status Skill
 
-    private static func executeEnemyStatusSkill(skill: EnemySkillDefinition,
+    private nonisolated static func executeEnemyStatusSkill(skill: EnemySkillDefinition,
                                                 attackerSide: ActorSide,
                                                 attackerIndex: Int,
                                                 context: inout BattleContext,
@@ -314,7 +314,7 @@ extension BattleTurnEngine {
 
     // MARK: - Heal Skill
 
-    private static func executeEnemyHealSkill(skill: EnemySkillDefinition,
+    private nonisolated static func executeEnemyHealSkill(skill: EnemySkillDefinition,
                                               casterSide: ActorSide,
                                               casterIndex: Int,
                                               context: inout BattleContext,
@@ -351,7 +351,7 @@ extension BattleTurnEngine {
 
     // MARK: - Buff Skill
 
-    private static func executeEnemyBuffSkill(skill: EnemySkillDefinition,
+    private nonisolated static func executeEnemyBuffSkill(skill: EnemySkillDefinition,
                                               casterSide: ActorSide,
                                               casterIndex: Int,
                                               context: inout BattleContext,
@@ -390,7 +390,7 @@ extension BattleTurnEngine {
 
     // MARK: - Helper Functions
 
-    private static func selectEnemySkillTargets(skill: EnemySkillDefinition,
+    private nonisolated static func selectEnemySkillTargets(skill: EnemySkillDefinition,
                                                 attackerSide: ActorSide,
                                                 attackerIndex: Int,
                                                 context: inout BattleContext) -> [(ActorSide, Int)] {
@@ -434,7 +434,7 @@ extension BattleTurnEngine {
         }
     }
 
-    private static func handleEnemySkillDefeat(targetSide: ActorSide,
+    private nonisolated static func handleEnemySkillDefeat(targetSide: ActorSide,
                                                targetIndex: Int,
                                                attackerSide: ActorSide,
                                                attackerIndex: Int,
@@ -456,7 +456,7 @@ extension BattleTurnEngine {
                               context: &context)
     }
 
-    private static func attemptEnemySkillStatusInflict(statusId: UInt8,
+    private nonisolated static func attemptEnemySkillStatusInflict(statusId: UInt8,
                                                        chancePercent: Int,
                                                        targetSide: ActorSide,
                                                        targetIndex: Int,
@@ -485,7 +485,7 @@ extension BattleTurnEngine {
         }
     }
 
-    private static func applyEnemyBuff(buffType: UInt8, multiplier: Double, to actor: inout BattleActor) {
+    private nonisolated static func applyEnemyBuff(buffType: UInt8, multiplier: Double, to actor: inout BattleActor) {
         guard let type = SpellBuffType(rawValue: buffType) else { return }
         switch type {
         case .physicalDamageDealt, .combat, .damage:

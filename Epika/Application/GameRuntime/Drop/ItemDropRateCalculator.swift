@@ -19,7 +19,7 @@ import Foundation
 
 /// ドロップ率計算を担当するユーティリティ。旧 `ItemDropRateService` を非決定論向けに再構築。
 struct ItemDropRateCalculator {
-    static func roll(category: DropItemCategory,
+    nonisolated static func roll(category: DropItemCategory,
                      rareMultiplier: Double,
                      isRabiTicketActive: Bool,
                      partyLuck: Double,
@@ -37,7 +37,7 @@ struct ItemDropRateCalculator {
                               finalThreshold: finalThreshold)
     }
 
-    private static func baseThreshold(for category: DropItemCategory,
+    private nonisolated static func baseThreshold(for category: DropItemCategory,
                                       rareMultiplier: Double,
                                       isRabiTicketActive: Bool) -> Double {
         switch category {
@@ -53,7 +53,7 @@ struct ItemDropRateCalculator {
         }
     }
 
-    private static func clamp(_ value: Double) -> Double {
+    private nonisolated static func clamp(_ value: Double) -> Double {
         min(100.0, max(0.0, value))
     }
 }

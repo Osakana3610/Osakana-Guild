@@ -24,11 +24,11 @@ import Foundation
 /// アイテム売却価格を計算する純関数。
 /// 通常称号と超レア称号に応じた価格倍率を適用する。
 enum ItemPriceCalculator {
-    private static let maxPrice = 99_999_999
-    private static let superRareBaseAddition = 500_000
+    private nonisolated static let maxPrice = 99_999_999
+    private nonisolated static let superRareBaseAddition = 500_000
 
     /// 超レア称号の倍率（通常称号id 0〜5に対応、id>=6は即座にカンスト）
-    private static let superRareMultipliers: [Double] = [1.0, 4.0, 8.0, 16.0, 32.0, 64.0]
+    private nonisolated static let superRareMultipliers: [Double] = [1.0, 4.0, 8.0, 16.0, 32.0, 64.0]
 
     /// 売却価格を計算する。
     /// - Parameters:
@@ -38,7 +38,7 @@ enum ItemPriceCalculator {
     ///   - multiplierMap: 通常称号IDごとの価格倍率マップ
     /// - Returns: 計算された売却価格（maxPriceでクリップ）
     /// - Throws: タイトルIDに対応する倍率が見つからない場合
-    static func sellPrice(
+    nonisolated static func sellPrice(
         baseSellValue: Int,
         normalTitleId: UInt8,
         hasSuperRare: Bool,

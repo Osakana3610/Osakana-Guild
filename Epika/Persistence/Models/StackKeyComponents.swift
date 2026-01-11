@@ -33,20 +33,20 @@ import Foundation
 
 /// stackKey文字列をパースした結果
 struct StackKeyComponents: Sendable {
-    let superRareTitleId: UInt8
-    let normalTitleId: UInt8
-    let itemId: UInt16
-    let socketSuperRareTitleId: UInt8
-    let socketNormalTitleId: UInt8
-    let socketItemId: UInt16
+    nonisolated let superRareTitleId: UInt8
+    nonisolated let normalTitleId: UInt8
+    nonisolated let itemId: UInt16
+    nonisolated let socketSuperRareTitleId: UInt8
+    nonisolated let socketNormalTitleId: UInt8
+    nonisolated let socketItemId: UInt16
 
     /// コンポーネントからstackKeyを生成
-    var stackKey: String {
+    nonisolated var stackKey: String {
         "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
     }
 
     /// 指定された値からstackKeyを生成（静的メソッド）
-    static func makeStackKey(
+    nonisolated static func makeStackKey(
         superRareTitleId: UInt8,
         normalTitleId: UInt8,
         itemId: UInt16,
@@ -58,7 +58,7 @@ struct StackKeyComponents: Sendable {
     }
 
     /// memberwise init
-    init(
+    nonisolated init(
         superRareTitleId: UInt8,
         normalTitleId: UInt8,
         itemId: UInt16,

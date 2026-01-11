@@ -25,18 +25,18 @@ struct ExplorationDungeonBundle: Sendable {
 }
 
 protocol ExplorationMasterDataProvider: Sendable {
-    func dungeonBundle(for dungeonId: UInt16) async throws -> ExplorationDungeonBundle
-    func explorationEvents() async throws -> [ExplorationEventDefinition]
+    nonisolated func dungeonBundle(for dungeonId: UInt16) async throws -> ExplorationDungeonBundle
+    nonisolated func explorationEvents() async throws -> [ExplorationEventDefinition]
 }
 
 struct MasterDataCacheExplorationProvider: ExplorationMasterDataProvider, Sendable {
     private let masterData: MasterDataCache
 
-    init(masterData: MasterDataCache) {
+    nonisolated init(masterData: MasterDataCache) {
         self.masterData = masterData
     }
 
-    func dungeonBundle(for dungeonId: UInt16) async throws -> ExplorationDungeonBundle {
+    nonisolated func dungeonBundle(for dungeonId: UInt16) async throws -> ExplorationDungeonBundle {
         guard let dungeon = masterData.dungeon(dungeonId) else {
             throw RuntimeError.masterDataNotFound(entity: "dungeon", identifier: String(dungeonId))
         }
@@ -55,7 +55,7 @@ struct MasterDataCacheExplorationProvider: ExplorationMasterDataProvider, Sendab
                                         encounterTablesById: tablesById)
     }
 
-    func explorationEvents() async throws -> [ExplorationEventDefinition] {
+    nonisolated func explorationEvents() async throws -> [ExplorationEventDefinition] {
         masterData.allExplorationEvents
     }
 }

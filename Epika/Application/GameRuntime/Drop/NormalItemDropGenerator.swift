@@ -21,7 +21,7 @@ import Foundation
 /// 敵種族・レベルに基づいてノーマルアイテム（rarity=1）の候補を生成する。
 enum NormalItemDropGenerator {
     /// 敵レベルから売値上限を計算
-    static func sellValueLimit(forLevel level: Int) -> Int {
+    nonisolated static func sellValueLimit(forLevel level: Int) -> Int {
         switch level {
         case ...20: return 250
         case 21...50: return 6_250
@@ -33,7 +33,7 @@ enum NormalItemDropGenerator {
 
     /// 種族ごとのカテゴリ重み（ノーマルアイテムがある12カテゴリのみ）
     /// 魔道書（grimoire）にはノーマルアイテムがないため除外
-    static let raceCategoryWeights: [UInt8: [(category: UInt8, weight: Int)]] = [
+    nonisolated static let raceCategoryWeights: [UInt8: [(category: UInt8, weight: Int)]] = [
         1: [  // 人型
             (ItemSaleCategory.sword.rawValue, 30),
             (ItemSaleCategory.armor.rawValue, 25),
@@ -76,7 +76,7 @@ enum NormalItemDropGenerator {
     ///   - droppedItemIds: 既にドロップ済みのアイテムID
     ///   - random: 乱数生成器
     /// - Returns: ノーマルアイテム候補のリスト（アイテムIDと元の敵ID）
-    static func candidates(
+    nonisolated static func candidates(
         for enemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
         masterData: MasterDataCache,
         droppedItemIds: Set<UInt16>,
@@ -131,7 +131,7 @@ enum NormalItemDropGenerator {
     }
 
     /// 重み付きでカテゴリを選択
-    private static func selectCategory(
+    private nonisolated static func selectCategory(
         from weights: [(category: UInt8, weight: Int)],
         raceId: UInt8,
         random: inout GameRandomSource

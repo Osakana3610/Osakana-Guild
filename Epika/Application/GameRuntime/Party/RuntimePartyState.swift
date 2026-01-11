@@ -22,20 +22,20 @@ import Foundation
 
 struct RuntimePartyState: Sendable {
     struct Member: Identifiable, Sendable {
-        var id: UInt8 { characterId }
-        let characterId: UInt8
-        let order: Int
-        var character: CachedCharacter
+        nonisolated var id: UInt8 { characterId }
+        nonisolated let characterId: UInt8
+        nonisolated let order: Int
+        nonisolated var character: CachedCharacter
     }
 
-    let party: CachedParty
-    var members: [Member]
+    nonisolated let party: CachedParty
+    nonisolated var members: [Member]
     /// 探索時間モディファイア（事前計算）
-    let explorationModifiers: SkillRuntimeEffects.ExplorationModifiers
+    nonisolated let explorationModifiers: SkillRuntimeEffects.ExplorationModifiers
 
-    init(party: CachedParty,
-         characters: [CachedCharacter],
-         explorationModifiers: SkillRuntimeEffects.ExplorationModifiers = .neutral) throws {
+    nonisolated init(party: CachedParty,
+                     characters: [CachedCharacter],
+                     explorationModifiers: SkillRuntimeEffects.ExplorationModifiers = .neutral) throws {
         self.party = party
         self.explorationModifiers = explorationModifiers
         let characterMap = Dictionary(uniqueKeysWithValues: characters.map { ($0.id, $0) })
@@ -52,7 +52,7 @@ struct RuntimePartyState: Sendable {
     }
 
     /// 指定ダンジョンに対する探索時間倍率を取得
-    func explorationTimeMultiplier(forDungeon dungeon: DungeonDefinition) -> Double {
+    nonisolated func explorationTimeMultiplier(forDungeon dungeon: DungeonDefinition) -> Double {
         max(0.0, explorationModifiers.multiplier(forDungeonId: dungeon.id, dungeonName: dungeon.name))
     }
 }

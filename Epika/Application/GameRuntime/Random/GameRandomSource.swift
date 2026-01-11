@@ -33,13 +33,13 @@ import os
 /// 毎回 `RandomNumberGenerator` を用いてゲーム内のランダム性を供給する。
 /// テストではシード付き初期化子で決定的な乱数列を得られる。
 struct GameRandomSource: Sendable {
-    private var generator: SendableRandomGenerator
+    nonisolated private var generator: SendableRandomGenerator
 
     /// シード固定モード用の共有乱数ソース（ロックで保護）
-    private static let overrideRandomLock = OSAllocatedUnfairLock<SeededRandomNumberGenerator?>(initialState: nil)
+    nonisolated private static let overrideRandomLock = OSAllocatedUnfairLock<SeededRandomNumberGenerator?>(initialState: nil)
 
     /// シード固定モードの乱数ソースをリセット（探索開始時に呼ぶ）
-    static func resetOverrideRandom() {
+    nonisolated static func resetOverrideRandom() {
         if BetaTestSettings.randomMode == .fixedSeed {
             overrideRandomLock.withLock { $0 = SeededRandomNumberGenerator(seed: BetaTestSettings.fixedSeed) }
         }
@@ -59,14 +59,14 @@ struct GameRandomSource: Sendable {
     }
 
     /// 現在のRNG状態を取得（SeededRandomNumberGenerator以外はnil）
-    var currentState: UInt64? {
+    nonisolated var currentState: UInt64? {
         switch generator {
         case .seeded(let gen): gen.currentState
         case .system: nil
         }
     }
 
-    mutating func nextDouble(in range: ClosedRange<Double> = 0.0...1.0) -> Double {
+    nonisolated mutating func nextDouble(in range: ClosedRange<Double> = 0.0...1.0) -> Double {
         switch BetaTestSettings.randomMode {
         case .normal:
             return nextDoubleInternal(in: range)
@@ -83,7 +83,7 @@ struct GameRandomSource: Sendable {
         }
     }
 
-    private mutating func nextDoubleInternal(in range: ClosedRange<Double>) -> Double {
+    private nonisolated mutating func nextDoubleInternal(in range: ClosedRange<Double>) -> Double {
         switch generator {
         case .system(var gen):
             let value = Double.random(in: range, using: &gen)
@@ -96,7 +96,7 @@ struct GameRandomSource: Sendable {
         }
     }
 
-    mutating func nextInt(in range: ClosedRange<Int>) -> Int {
+    nonisolated mutating func nextInt(in range: ClosedRange<Int>) -> Int {
         switch BetaTestSettings.randomMode {
         case .normal:
             return nextIntInternal(in: range)
@@ -113,7 +113,7 @@ struct GameRandomSource: Sendable {
         }
     }
 
-    private mutating func nextIntInternal(in range: ClosedRange<Int>) -> Int {
+    private nonisolated mutating func nextIntInternal(in range: ClosedRange<Int>) -> Int {
         switch generator {
         case .system(var gen):
             let value = Int.random(in: range, using: &gen)
@@ -126,7 +126,7 @@ struct GameRandomSource: Sendable {
         }
     }
 
-    mutating func nextBool(probability: Double) -> Bool {
+    nonisolated mutating func nextBool(probability: Double) -> Bool {
         guard probability > 0 else { return false }
         guard probability < 1 else { return true }
 
@@ -139,14 +139,14 @@ struct GameRandomSource: Sendable {
     }
 
     /// 0.00〜99.99の範囲で二桁精度の値を返す。下限は指定した値でクリップされる。
-    mutating func nextLuckRandom(lowerBound: Double) -> Double {
+    nonisolated mutating func nextLuckRandom(lowerBound: Double) -> Double {
         let lower = max(0.0, min(99.99, lowerBound))
         let raw = nextDouble(in: lower...99.99)
         return (raw * 100).rounded() / 100
     }
 
     /// 重み付きランダム選択を行い、選択されたインデックスを返す。
-    mutating func nextIndex(weights: [Double]) -> Int? {
+    nonisolated mutating func nextIndex(weights: [Double]) -> Int? {
         guard weights.contains(where: { $0 > 0 }) else {
             return weights.isEmpty ? nil : weights.indices.last
         }
@@ -171,7 +171,7 @@ private enum SendableRandomGenerator: Sendable {
 }
 
 private struct SeededRandomNumberGenerator: RandomNumberGenerator, Sendable {
-    private(set) var state: UInt64
+    nonisolated private(set) var state: UInt64
 
     nonisolated init(seed: UInt64) {
         // 0は避ける
@@ -184,9 +184,9 @@ private struct SeededRandomNumberGenerator: RandomNumberGenerator, Sendable {
     }
 
     /// 外部から現在の状態を取得
-    var currentState: UInt64 { state }
+    nonisolated var currentState: UInt64 { state }
 
-    mutating func next() -> UInt64 {
+    nonisolated mutating func next() -> UInt64 {
         // SplitMix64
         state &+= 0x9E3779B97F4A7C15
         var z = state

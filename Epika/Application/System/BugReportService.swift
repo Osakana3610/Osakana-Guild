@@ -211,13 +211,13 @@ actor BugReportService {
 // MARK: - Data Extension
 
 private extension Data {
-    mutating func append(_ string: String) {
+    nonisolated mutating func append(_ string: String) {
         if let data = string.data(using: .utf8) {
             append(data)
         }
     }
 
-    func gzipped(level: Int32 = Z_DEFAULT_COMPRESSION) throws -> Data {
+    nonisolated func gzipped(level: Int32 = Z_DEFAULT_COMPRESSION) throws -> Data {
         var stream = z_stream()
         let initStatus = deflateInit2_(
             &stream,

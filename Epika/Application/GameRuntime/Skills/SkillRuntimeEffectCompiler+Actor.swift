@@ -19,10 +19,10 @@ import Foundation
 
 // MARK: - Helper Extensions for Actor Effects
 extension BattleActor.SkillEffects.Reaction {
-    static func make(from payload: DecodedSkillEffectPayload,
-                     skillName: String,
-                     skillId: UInt16,
-                     stats: ActorStats?) -> BattleActor.SkillEffects.Reaction? {
+    nonisolated static func make(from payload: DecodedSkillEffectPayload,
+                                 skillName: String,
+                                 skillId: UInt16,
+                                 stats: ActorStats?) -> BattleActor.SkillEffects.Reaction? {
         guard payload.effectType == .reaction else { return nil }
         guard let triggerRaw = payload.parameters[.trigger],
               let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: UInt8(triggerRaw)) else { return nil }
@@ -54,7 +54,7 @@ extension BattleActor.SkillEffects.Reaction {
 }
 
 extension BattleActor.SkillEffects.RowProfile {
-    mutating func applyParameters(_ parameters: [EffectParamKey: Int]?) {
+    nonisolated mutating func applyParameters(_ parameters: [EffectParamKey: Int]?) {
         guard let parameters else { return }
         if let profileRaw = parameters[.profile],
            let parsedBase = Base(rawValue: UInt8(profileRaw)) {

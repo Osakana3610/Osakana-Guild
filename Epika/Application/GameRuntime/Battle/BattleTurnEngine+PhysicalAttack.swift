@@ -34,7 +34,7 @@ import Foundation
 // MARK: - Physical Attack
 extension BattleTurnEngine {
     @discardableResult
-    static func executePhysicalAttack(for side: ActorSide,
+    nonisolated static func executePhysicalAttack(for side: ActorSide,
                                       attackerIndex: Int,
                                       context: inout BattleContext,
                                       forcedTargets: BattleContext.SacrificeTargets) -> Bool {
@@ -58,7 +58,7 @@ extension BattleTurnEngine {
         return true
     }
 
-    static func resolvePhysicalAction(attackerSide: ActorSide,
+    nonisolated static func resolvePhysicalAction(attackerSide: ActorSide,
                                       attackerIndex: Int,
                                       target: (ActorSide, Int),
                                       context: inout BattleContext) {
@@ -174,7 +174,7 @@ extension BattleTurnEngine {
         processReactionQueue(context: &context)
     }
 
-    static func handleVampiricImpulse(attackerSide: ActorSide,
+    nonisolated static func handleVampiricImpulse(attackerSide: ActorSide,
                                       attackerIndex: Int,
                                       attacker: BattleActor,
                                       context: inout BattleContext) -> Bool {
@@ -247,7 +247,7 @@ extension BattleTurnEngine {
         return true
     }
 
-    static func selectSpecialAttack(for attacker: BattleActor,
+    nonisolated static func selectSpecialAttack(for attacker: BattleActor,
                                     context: inout BattleContext) -> BattleActor.SkillEffects.SpecialAttack? {
         // 通常行動時は先制攻撃を除外（プリ分類済み）
         let specials = attacker.skillEffects.combat.specialAttacks.normal
@@ -261,7 +261,7 @@ extension BattleTurnEngine {
         return nil
     }
 
-    static func performSpecialAttack(_ descriptor: BattleActor.SkillEffects.SpecialAttack,
+    nonisolated static func performSpecialAttack(_ descriptor: BattleActor.SkillEffects.SpecialAttack,
                                      attackerSide: ActorSide,
                                      attackerIndex: Int,
                                      attacker: BattleActor,
@@ -312,7 +312,7 @@ extension BattleTurnEngine {
                              entryBuilder: entryBuilder)
     }
 
-    static func performAttack(attackerSide: ActorSide,
+    nonisolated static func performAttack(attackerSide: ActorSide,
                               attackerIndex: Int,
                               attacker: BattleActor,
                               defender: BattleActor,
@@ -475,7 +475,7 @@ extension BattleTurnEngine {
                             wasBlocked: false)
     }
 
-    static func performAntiHealingAttack(attackerSide: ActorSide,
+    nonisolated static func performAntiHealingAttack(attackerSide: ActorSide,
                                          attackerIndex: Int,
                                          attacker: BattleActor,
                                          defenderSide: ActorSide,
@@ -539,7 +539,7 @@ extension BattleTurnEngine {
                             wasBlocked: false)
     }
 
-    static func executeFollowUpSequence(attackerSide: ActorSide,
+    nonisolated static func executeFollowUpSequence(attackerSide: ActorSide,
                                         attackerIndex: Int,
                                         defenderSide: ActorSide,
                                         defenderIndex: Int,
@@ -594,11 +594,11 @@ extension BattleTurnEngine {
         }
     }
 
-    static func shouldUseMartialAttack(attacker: BattleActor) -> Bool {
+    nonisolated static func shouldUseMartialAttack(attacker: BattleActor) -> Bool {
         attacker.isMartialEligible && attacker.isAlive && attacker.snapshot.physicalAttack > 0
     }
 
-    static func martialFollowUpDescriptor(for attacker: BattleActor) -> FollowUpDescriptor? {
+    nonisolated static func martialFollowUpDescriptor(for attacker: BattleActor) -> FollowUpDescriptor? {
         let chance = martialChancePercent(for: attacker)
         guard chance > 0 else { return nil }
         let hits = martialFollowUpHitCount(for: attacker)
@@ -606,13 +606,13 @@ extension BattleTurnEngine {
         return FollowUpDescriptor(hitCount: hits, damageMultiplier: Double(chance) / 100.0)
     }
 
-    static func martialFollowUpHitCount(for attacker: BattleActor) -> Int {
+    nonisolated static func martialFollowUpHitCount(for attacker: BattleActor) -> Int {
         let baseHits = max(1.0, attacker.snapshot.attackCount)
         let scaled = Int(baseHits * 0.3)
         return max(1, scaled)
     }
 
-    static func martialChancePercent(for attacker: BattleActor) -> Int {
+    nonisolated static func martialChancePercent(for attacker: BattleActor) -> Int {
         let clampedStrength = max(0, attacker.strength)
         return min(100, clampedStrength)
     }
@@ -620,7 +620,7 @@ extension BattleTurnEngine {
     // MARK: - Preemptive Attacks
 
     /// 戦闘開始時の先制攻撃を実行
-    static func executePreemptiveAttacks(_ context: inout BattleContext) {
+    nonisolated static func executePreemptiveAttacks(_ context: inout BattleContext) {
         // プレイヤー側の先制攻撃
         for index in context.players.indices {
             guard context.players[index].isAlive else { continue }
@@ -636,7 +636,7 @@ extension BattleTurnEngine {
         }
     }
 
-    private static func executePreemptiveAttacksForActor(side: ActorSide, index: Int, context: inout BattleContext) {
+    private nonisolated static func executePreemptiveAttacksForActor(side: ActorSide, index: Int, context: inout BattleContext) {
         guard let attacker = context.actor(for: side, index: index), attacker.isAlive else { return }
 
         // プリ分類済みの先制攻撃リストを使用

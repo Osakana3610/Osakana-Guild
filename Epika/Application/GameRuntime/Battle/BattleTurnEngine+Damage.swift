@@ -31,17 +31,17 @@ import Foundation
 
 // MARK: - Damage Calculation
 extension BattleTurnEngine {
-    static let criticalDefenseRetainedFactor: Double = 0.5
+    nonisolated static let criticalDefenseRetainedFactor: Double = 0.5
 
     // MARK: - Modifier Key Constants (avoid string concatenation per hit)
-    private static let physicalDamageDealtKey = "physicalDamageDealtMultiplier"
-    private static let physicalDamageTakenKey = "physicalDamageTakenMultiplier"
-    private static let magicalDamageDealtKey = "magicalDamageDealtMultiplier"
-    private static let magicalDamageTakenKey = "magicalDamageTakenMultiplier"
-    private static let breathDamageDealtKey = "breathDamageDealtMultiplier"
-    private static let breathDamageTakenKey = "breathDamageTakenMultiplier"
+    private nonisolated static let physicalDamageDealtKey = "physicalDamageDealtMultiplier"
+    private nonisolated static let physicalDamageTakenKey = "physicalDamageTakenMultiplier"
+    private nonisolated static let magicalDamageDealtKey = "magicalDamageDealtMultiplier"
+    private nonisolated static let magicalDamageTakenKey = "magicalDamageTakenMultiplier"
+    private nonisolated static let breathDamageDealtKey = "breathDamageDealtMultiplier"
+    private nonisolated static let breathDamageTakenKey = "breathDamageTakenMultiplier"
 
-    static func computeHitChance(attacker: BattleActor,
+    nonisolated static func computeHitChance(attacker: BattleActor,
                                  defender: BattleActor,
                                  hitIndex: Int,
                                  accuracyMultiplier: Double,
@@ -66,7 +66,7 @@ extension BattleTurnEngine {
         return clampProbability(rawChance, defender: defender)
     }
 
-    static func computePhysicalDamage(attacker: BattleActor,
+    nonisolated static func computePhysicalDamage(attacker: BattleActor,
                                       defender: inout BattleActor,
                                       hitIndex: Int,
                                       context: inout BattleContext) -> (damage: Int, critical: Bool) {
@@ -123,7 +123,7 @@ extension BattleTurnEngine {
         return (finalDamage, isCritical)
     }
 
-    static func computeMagicalDamage(attacker: BattleActor,
+    nonisolated static func computeMagicalDamage(attacker: BattleActor,
                                      defender: inout BattleActor,
                                      spellId: UInt8?,
                                      context: inout BattleContext) -> Int {
@@ -170,7 +170,7 @@ extension BattleTurnEngine {
         return max(1, Int(adjusted.rounded()))
     }
 
-    static func computeAntiHealingDamage(attacker: BattleActor,
+    nonisolated static func computeAntiHealingDamage(attacker: BattleActor,
                                          defender: inout BattleActor,
                                          context: inout BattleContext) -> (damage: Int, critical: Bool) {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
@@ -199,7 +199,7 @@ extension BattleTurnEngine {
         return (max(1, Int(damage.rounded())), isCritical)
     }
 
-    static func computeBreathDamage(attacker: BattleActor,
+    nonisolated static func computeBreathDamage(attacker: BattleActor,
                                     defender: inout BattleActor,
                                     context: inout BattleContext) -> Int {
         let variance = BattleRandomSystem.speedMultiplier(luck: attacker.luck, random: &context.random)
@@ -218,7 +218,7 @@ extension BattleTurnEngine {
         return max(1, Int(adjusted.rounded()))
     }
 
-    static func computeHealingAmount(caster: BattleActor,
+    nonisolated static func computeHealingAmount(caster: BattleActor,
                                      target: BattleActor,
                                      spellId: UInt8?,
                                      context: inout BattleContext) -> Int {
@@ -231,25 +231,25 @@ extension BattleTurnEngine {
     }
 
     @discardableResult
-    static func applyDamage(amount: Int, to defender: inout BattleActor) -> Int {
+    nonisolated static func applyDamage(amount: Int, to defender: inout BattleActor) -> Int {
         let applied = min(amount, defender.currentHP)
         defender.currentHP = max(0, defender.currentHP - applied)
         return applied
     }
 
-    static func hitAccuracyModifier(for hitIndex: Int) -> Double {
+    nonisolated static func hitAccuracyModifier(for hitIndex: Int) -> Double {
         guard hitIndex > 1 else { return 1.0 }
         let adjustedIndex = max(0, hitIndex - 2)
         return 0.6 * pow(0.9, Double(adjustedIndex))
     }
 
-    static func damageModifier(for hitIndex: Int) -> Double {
+    nonisolated static func damageModifier(for hitIndex: Int) -> Double {
         guard hitIndex > 2 else { return 1.0 }
         let adjustedIndex = max(0, hitIndex - 2)
         return pow(0.9, Double(adjustedIndex))
     }
 
-    static func initialStrikeBonus(attacker: BattleActor, defender: BattleActor) -> Double {
+    nonisolated static func initialStrikeBonus(attacker: BattleActor, defender: BattleActor) -> Double {
         let attackValue = Double(attacker.snapshot.physicalAttack)
         let defenseValue = Double(defender.snapshot.physicalDefense) * 3.0
         let difference = attackValue - defenseValue
@@ -259,7 +259,7 @@ extension BattleTurnEngine {
         return min(3.4, max(1.0, multiplier))
     }
 
-    static func rowDamageModifier(for attacker: BattleActor, damageType: BattleDamageType) -> Double {
+    nonisolated static func rowDamageModifier(for attacker: BattleActor, damageType: BattleDamageType) -> Double {
         guard damageType == .physical else { return 1.0 }
         let row = max(0, min(5, attacker.rowIndex))
         let profile = attacker.skillEffects.misc.rowProfile
@@ -282,7 +282,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func damageDealtModifier(for attacker: BattleActor,
+    nonisolated static func damageDealtModifier(for attacker: BattleActor,
                                     against defender: BattleActor,
                                     damageType: BattleDamageType) -> Double {
         let key = modifierDealtKey(for: damageType)
@@ -301,13 +301,13 @@ extension BattleTurnEngine {
         return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: damageType) * raceMultiplier * hpThresholdMultiplier
     }
 
-    static func antiHealingDamageDealtModifier(for attacker: BattleActor) -> Double {
+    nonisolated static func antiHealingDamageDealtModifier(for attacker: BattleActor) -> Double {
         let key = modifierDealtKey(for: .magical)
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
         return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: .magical)
     }
 
-    static func damageTakenModifier(for defender: BattleActor,
+    nonisolated static func damageTakenModifier(for defender: BattleActor,
                                     damageType: BattleDamageType,
                                     spellId: UInt8? = nil,
                                     attacker: BattleActor? = nil) -> Double {
@@ -334,17 +334,17 @@ extension BattleTurnEngine {
         return result
     }
 
-    static func healingDealtModifier(for caster: BattleActor) -> Double {
+    nonisolated static func healingDealtModifier(for caster: BattleActor) -> Double {
         let buffMultiplier = aggregateModifier(from: caster.timedBuffs, key: "healingDealtMultiplier")
         return buffMultiplier * caster.skillEffects.misc.healingGiven
     }
 
-    static func healingReceivedModifier(for target: BattleActor) -> Double {
+    nonisolated static func healingReceivedModifier(for target: BattleActor) -> Double {
         let buffMultiplier = aggregateModifier(from: target.timedBuffs, key: "healingReceivedMultiplier")
         return buffMultiplier * target.skillEffects.misc.healingReceived
     }
 
-    static func shouldTriggerCritical(attacker: BattleActor,
+    nonisolated static func shouldTriggerCritical(attacker: BattleActor,
                                       defender: BattleActor,
                                       context: inout BattleContext) -> Bool {
         let chance = max(0, min(100, attacker.snapshot.criticalRate))
@@ -352,18 +352,18 @@ extension BattleTurnEngine {
         return BattleRandomSystem.percentChance(chance, random: &context.random)
     }
 
-    static func criticalDamageBonus(for attacker: BattleActor) -> Double {
+    nonisolated static func criticalDamageBonus(for attacker: BattleActor) -> Double {
         let percentBonus = max(0.0, 1.0 + attacker.skillEffects.damage.criticalPercent / 100.0)
         let multiplierBonus = max(0.0, attacker.skillEffects.damage.criticalMultiplier)
         return percentBonus * multiplierBonus
     }
 
-    static func barrierKey(for damageType: BattleDamageType) -> UInt8 {
+    nonisolated static func barrierKey(for damageType: BattleDamageType) -> UInt8 {
         // BattleDamageType.rawValue と一致させる (physical=1, magical=2, breath=3)
         damageType.rawValue
     }
 
-    static func applyBarrierIfAvailable(for damageType: BattleDamageType,
+    nonisolated static func applyBarrierIfAvailable(for damageType: BattleDamageType,
                                         defender: inout BattleActor) -> Double {
         let key = barrierKey(for: damageType)
         if defender.guardActive {
@@ -379,22 +379,22 @@ extension BattleTurnEngine {
         return 1.0
     }
 
-    static func degradedPhysicalDefense(for defender: BattleActor) -> Double {
+    nonisolated static func degradedPhysicalDefense(for defender: BattleActor) -> Double {
         let factor = max(0.0, 1.0 - defender.degradationPercent / 100.0)
         return Double(defender.snapshot.physicalDefense) * factor
     }
 
-    static func degradedMagicalDefense(for defender: BattleActor) -> Double {
+    nonisolated static func degradedMagicalDefense(for defender: BattleActor) -> Double {
         let factor = max(0.0, 1.0 - defender.degradationPercent / 100.0)
         return Double(defender.snapshot.magicalDefense) * factor
     }
 
-    static func degradedEvasionRate(for defender: BattleActor) -> Double {
+    nonisolated static func degradedEvasionRate(for defender: BattleActor) -> Double {
         let factor = max(0.0, 1.0 - defender.degradationPercent / 100.0)
         return Double(defender.snapshot.evasionRate) * factor
     }
 
-    static func applyPhysicalDegradation(to defender: inout BattleActor) {
+    nonisolated static func applyPhysicalDegradation(to defender: inout BattleActor) {
         let degradation = defender.degradationPercent
         let increment: Double
         if degradation < 10.0 {
@@ -408,9 +408,9 @@ extension BattleTurnEngine {
     }
 
     // 既知のスペルID定数（Definition層で確定後に更新）
-    static let magicArrowSpellId: UInt8 = 1
+    nonisolated static let magicArrowSpellId: UInt8 = 1
 
-    static func applyMagicDegradation(to defender: inout BattleActor,
+    nonisolated static func applyMagicDegradation(to defender: inout BattleActor,
                                       spellId: UInt8,
                                       caster: BattleActor) {
         let master = (caster.jobName?.contains("マスター") == true) || (caster.jobName?.lowercased().contains("master") == true)
@@ -427,7 +427,7 @@ extension BattleTurnEngine {
         defender.degradationPercent = min(100.0, defender.degradationPercent + increment)
     }
 
-    static func applyDegradationRepairIfAvailable(to actor: inout BattleActor, context: inout BattleContext) {
+    nonisolated static func applyDegradationRepairIfAvailable(to actor: inout BattleActor, context: inout BattleContext) {
         let minP = actor.skillEffects.misc.degradationRepairMinPercent
         let maxP = actor.skillEffects.misc.degradationRepairMaxPercent
         guard minP > 0, maxP >= minP else { return }
@@ -438,7 +438,7 @@ extension BattleTurnEngine {
         actor.degradationPercent = max(0.0, actor.degradationPercent - repaired)
     }
 
-    static func modifierDealtKey(for damageType: BattleDamageType) -> String {
+    nonisolated static func modifierDealtKey(for damageType: BattleDamageType) -> String {
         switch damageType {
         case .physical: return physicalDamageDealtKey
         case .magical: return magicalDamageDealtKey
@@ -446,7 +446,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func modifierTakenKey(for damageType: BattleDamageType) -> String {
+    nonisolated static func modifierTakenKey(for damageType: BattleDamageType) -> String {
         switch damageType {
         case .physical: return physicalDamageTakenKey
         case .magical: return magicalDamageTakenKey
@@ -454,7 +454,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func aggregateModifier(from buffs: [TimedBuff], key: String) -> Double {
+    nonisolated static func aggregateModifier(from buffs: [TimedBuff], key: String) -> Double {
         var total = 1.0
         for buff in buffs {
             if let value = buff.statModifiers[key] {
@@ -465,16 +465,16 @@ extension BattleTurnEngine {
     }
 
     // MARK: - Row Modifier Tables
-    private static let meleeBaseRow: [Double] = [1.0, 0.85, 0.72, 0.61, 0.52, 0.44]
-    private static let meleeAptRow: [Double] = [1.28, 1.03, 0.84, 0.68, 0.55, 0.44]
-    private static let rangedBaseRow: [Double] = meleeBaseRow
-    private static let rangedAptRow: [Double] = meleeAptRow
-    private static let mixedBaseRow: [Double] = Array(repeating: 0.44, count: 6)
-    private static let mixedMeleeAptRow: [Double] = [0.57, 0.54, 0.51, 0.49, 0.47, 0.44]
-    private static let mixedRangedAptRow: [Double] = mixedMeleeAptRow.reversed()
-    private static let mixedDualAptRow: [Double] = Array(repeating: 0.57, count: 6)
-    private static let balancedBaseRow: [Double] = Array(repeating: 0.80, count: 6)
-    private static let balancedMeleeAptRow: [Double] = [1.02, 0.97, 0.93, 0.88, 0.84, 0.80]
-    private static let balancedRangedAptRow: [Double] = balancedMeleeAptRow.reversed()
-    private static let balancedDualAptRow: [Double] = Array(repeating: 1.02, count: 6)
+    private nonisolated static let meleeBaseRow: [Double] = [1.0, 0.85, 0.72, 0.61, 0.52, 0.44]
+    private nonisolated static let meleeAptRow: [Double] = [1.28, 1.03, 0.84, 0.68, 0.55, 0.44]
+    private nonisolated static let rangedBaseRow: [Double] = meleeBaseRow
+    private nonisolated static let rangedAptRow: [Double] = meleeAptRow
+    private nonisolated static let mixedBaseRow: [Double] = Array(repeating: 0.44, count: 6)
+    private nonisolated static let mixedMeleeAptRow: [Double] = [0.57, 0.54, 0.51, 0.49, 0.47, 0.44]
+    private nonisolated static let mixedRangedAptRow: [Double] = mixedMeleeAptRow.reversed()
+    private nonisolated static let mixedDualAptRow: [Double] = Array(repeating: 0.57, count: 6)
+    private nonisolated static let balancedBaseRow: [Double] = Array(repeating: 0.80, count: 6)
+    private nonisolated static let balancedMeleeAptRow: [Double] = [1.02, 0.97, 0.93, 0.88, 0.84, 0.80]
+    private nonisolated static let balancedRangedAptRow: [Double] = balancedMeleeAptRow.reversed()
+    private nonisolated static let balancedDualAptRow: [Double] = Array(repeating: 1.02, count: 6)
 }

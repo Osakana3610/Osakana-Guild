@@ -59,7 +59,7 @@ struct ExplorationEngine {
         let droppedItemIds: Set<UInt16>
     }
 
-    static func prepare(provider: ExplorationMasterDataProvider,
+    nonisolated static func prepare(provider: ExplorationMasterDataProvider,
                         dungeonId: UInt16,
                         targetFloorNumber: Int,
                         difficultyTitleId: UInt8,
@@ -100,7 +100,7 @@ struct ExplorationEngine {
         return (preparation, state)
     }
 
-    static func nextEvent(preparation: Preparation,
+    nonisolated static func nextEvent(preparation: Preparation,
                           state: inout RunState,
                           masterData: MasterDataCache,
                           party: inout RuntimePartyState) throws -> StepOutcome? {
@@ -254,7 +254,7 @@ struct ExplorationEngine {
 }
 
 private extension ExplorationEngine {
-    static func advance(preparation: Preparation,
+    nonisolated static func advance(preparation: Preparation,
                         state: inout RunState) {
         state.eventIndex += 1
         if state.eventIndex >= preparation.eventsPerFloor {
@@ -263,7 +263,7 @@ private extension ExplorationEngine {
         }
     }
 
-    static func organizeScriptedEvents(_ events: [ExplorationEventDefinition],
+    nonisolated static func organizeScriptedEvents(_ events: [ExplorationEventDefinition],
                                        floorCount: Int) -> [Int: [ExplorationEventDefinition]] {
         var map: [Int: [ExplorationEventDefinition]] = [:]
         for event in events {
@@ -276,7 +276,7 @@ private extension ExplorationEngine {
     }
 
     /// 通常敵のエンカウントイベントを取得（ボス敵を除く）
-    static func normalEncounterEventsForFloor(_ floor: DungeonFloorDefinition,
+    nonisolated static func normalEncounterEventsForFloor(_ floor: DungeonFloorDefinition,
                                               tables: [UInt16: EncounterTableDefinition]) -> [EncounterTableDefinition.Event] {
         guard let table = tables[floor.encounterTableId] else { return [] }
         return table.events.filter { event in
@@ -287,7 +287,7 @@ private extension ExplorationEngine {
     }
 
     /// ボス敵のエンカウントイベントを取得
-    static func bossEncounterEventsForFloor(_ floor: DungeonFloorDefinition,
+    nonisolated static func bossEncounterEventsForFloor(_ floor: DungeonFloorDefinition,
                                             tables: [UInt16: EncounterTableDefinition]) -> [EncounterTableDefinition.Event] {
         guard let table = tables[floor.encounterTableId] else { return [] }
         return table.events.filter { event in
@@ -297,7 +297,7 @@ private extension ExplorationEngine {
         }
     }
 
-    static func selectEncounter(from events: [EncounterTableDefinition.Event],
+    nonisolated static func selectEncounter(from events: [EncounterTableDefinition.Event],
                                 random: inout GameRandomSource) -> EncounterTableDefinition.Event? {
         guard !events.isEmpty else { return nil }
         let totalWeight = events.reduce(0.0) { partial, event in
@@ -316,7 +316,7 @@ private extension ExplorationEngine {
     }
 
     /// ボス戦用：全敵グループをgroupMin〜groupMax体ずつ生成
-    static func generateBossEncounter(events: [EncounterTableDefinition.Event],
+    nonisolated static func generateBossEncounter(events: [EncounterTableDefinition.Event],
                                       levelMultiplier: Double,
                                       random: inout GameRandomSource) -> [EncounteredEnemySpec] {
         var specs: [EncounteredEnemySpec] = []
@@ -335,7 +335,7 @@ private extension ExplorationEngine {
     }
 
     /// 通常戦用：totalMin〜totalMaxの範囲でweightに基づいて抽選
-    static func generateNormalEncounter(events: [EncounterTableDefinition.Event],
+    nonisolated static func generateNormalEncounter(events: [EncounterTableDefinition.Event],
                                         totalMin: Int,
                                         totalMax: Int,
                                         levelMultiplier: Double,
@@ -384,7 +384,7 @@ private extension ExplorationEngine {
         return Array(grouped.values)
     }
 
-    static func resolveScriptedEvent(for dungeon: DungeonDefinition,
+    nonisolated static func resolveScriptedEvent(for dungeon: DungeonDefinition,
                                      floor: DungeonFloorDefinition,
                                      candidates: [ExplorationEventDefinition],
                                      masterData: MasterDataCache,
@@ -409,7 +409,7 @@ private extension ExplorationEngine {
         return (summary, rewards.experience, rewards.gold, rewards.drops, rewards.statusEffects)
     }
 
-    static func selectScriptedEvent(from candidates: [ExplorationEventDefinition],
+    nonisolated static func selectScriptedEvent(from candidates: [ExplorationEventDefinition],
                                     dungeon: DungeonDefinition,
                                     random: inout GameRandomSource) -> ExplorationEventDefinition? {
         guard !candidates.isEmpty else { return nil }
@@ -429,10 +429,10 @@ private extension ExplorationEngine {
 
     // EnumMappings.explorationEventContext:
     // "any": 1, "early_floor": 2, "mid_floor": 3, "late_floor": 4, "boss_floor": 5, "default": 6
-    private static let contextDefault: UInt8 = 6
-    private static let contextAny: UInt8 = 1
+    private nonisolated static let contextDefault: UInt8 = 6
+    private nonisolated static let contextAny: UInt8 = 1
 
-    static func weight(for event: ExplorationEventDefinition,
+    nonisolated static func weight(for event: ExplorationEventDefinition,
                        dungeon: DungeonDefinition) -> Double {
         // "any" コンテキストを優先
         if let anyEntry = event.weights.first(where: { $0.context == contextAny }) {
@@ -446,7 +446,7 @@ private extension ExplorationEngine {
         return 1.0
     }
 
-    static func parseScriptedRewards(masterData: MasterDataCache,
+    nonisolated static func parseScriptedRewards(masterData: MasterDataCache,
                                      from event: ExplorationEventDefinition,
                                      dungeon: DungeonDefinition,
                                      floor: DungeonFloorDefinition) throws -> (experience: Int,

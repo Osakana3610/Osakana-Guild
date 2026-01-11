@@ -152,7 +152,7 @@ enum BattleService {
 }
 
 private extension BattleService {
-    static func applyBetweenFloorsResurrection(to actors: [BattleActor]) -> [BattleActor] {
+    nonisolated static func applyBetweenFloorsResurrection(to actors: [BattleActor]) -> [BattleActor] {
         actors.map { actor in
             guard !actor.isAlive,
                   actor.skillEffects.resurrection.passiveBetweenFloors else {

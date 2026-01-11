@@ -40,27 +40,27 @@ import Foundation
 // MARK: - Combat Formulas
 
 enum CombatFormulas {
-    static let maxHPCoefficient: Double = 10.0
-    static let physicalAttackCoefficient: Double = 1.0
-    static let magicalAttackCoefficient: Double = 1.0
-    static let physicalDefenseCoefficient: Double = 1.0
-    static let magicalDefenseCoefficient: Double = 1.0
-    static let hitRateCoefficient: Double = 2.0
-    static let hitRateBaseBonus: Double = 50.0
-    static let evasionRateCoefficient: Double = 1.0
-    static let criticalRateCoefficient: Double = 0.16
-    static let magicalHealingCoefficient: Double = 2.0
-    static let trapRemovalCoefficient: Double = 0.5
-    static let additionalDamageScale: Double = 0.32
-    static let additionalDamageLevelCoefficient: Double = 0.125
-    static let attackCountCoefficient: Double = 0.025
-    static let attackCountLevelCoefficient: Double = 0.025
-    static let breathDamageCoefficient: Double = 1.0
+    nonisolated static let maxHPCoefficient: Double = 10.0
+    nonisolated static let physicalAttackCoefficient: Double = 1.0
+    nonisolated static let magicalAttackCoefficient: Double = 1.0
+    nonisolated static let physicalDefenseCoefficient: Double = 1.0
+    nonisolated static let magicalDefenseCoefficient: Double = 1.0
+    nonisolated static let hitRateCoefficient: Double = 2.0
+    nonisolated static let hitRateBaseBonus: Double = 50.0
+    nonisolated static let evasionRateCoefficient: Double = 1.0
+    nonisolated static let criticalRateCoefficient: Double = 0.16
+    nonisolated static let magicalHealingCoefficient: Double = 2.0
+    nonisolated static let trapRemovalCoefficient: Double = 0.5
+    nonisolated static let additionalDamageScale: Double = 0.32
+    nonisolated static let additionalDamageLevelCoefficient: Double = 0.125
+    nonisolated static let attackCountCoefficient: Double = 0.025
+    nonisolated static let attackCountLevelCoefficient: Double = 0.025
+    nonisolated static let breathDamageCoefficient: Double = 1.0
 
     /// humanカテゴリに属するraceId（人間男、人間女、アマゾネス）
-    private static let humanRaceIds: Set<UInt8> = [1, 2, 12]
+    private nonisolated static let humanRaceIds: Set<UInt8> = [1, 2, 12]
 
-    static func levelDependentValue(raceId: UInt8,
+    nonisolated static func levelDependentValue(raceId: UInt8,
                                     level: Int) -> Double {
         let levelDouble = Double(level)
         let isHuman = humanRaceIds.contains(raceId)
@@ -99,17 +99,17 @@ enum CombatFormulas {
         }
     }
 
-    static func statBonusMultiplier(value: Int) -> Double {
+    nonisolated static func statBonusMultiplier(value: Int) -> Double {
         guard value >= 21 else { return 1.0 }
         return pow(1.04, Double(value - 20))
     }
 
-    static func resistancePercent(value: Int) -> Double {
+    nonisolated static func resistancePercent(value: Int) -> Double {
         guard value >= 21 else { return 1.0 }
         return pow(0.96, Double(value - 20))
     }
 
-    static func strengthDependency(value: Int) -> Double {
+    nonisolated static func strengthDependency(value: Int) -> Double {
         let valueDouble = Double(value)
         let dependency: Double
         switch value {
@@ -133,7 +133,7 @@ enum CombatFormulas {
 
     /// 攻撃回数用の敏捷依存式。定義済みの代表点を線形補間し、20以下は20で打ち止め、
     /// 末尾区間の傾きで外挿する。
-    static func agilityDependency(value: Int) -> Double {
+    nonisolated static func agilityDependency(value: Int) -> Double {
         if value <= 20 { return 20.0 }
 
         let table: [(Int, Double)] = [
@@ -163,19 +163,19 @@ enum CombatFormulas {
         return Double(value) // フォールバック（ここには来ない想定）
     }
 
-    static func additionalDamageGrowth(level: Int,
+    nonisolated static func additionalDamageGrowth(level: Int,
                                        jobCoefficient: Double,
                                        growthMultiplier: Double) -> Double {
         return (Double(level) / 5.0) * additionalDamageLevelCoefficient * jobCoefficient * growthMultiplier
     }
 
-    static func evasionLimit(value: Int) -> Double {
+    nonisolated static func evasionLimit(value: Int) -> Double {
         guard value >= 21 else { return 95.0 }
         let failure = 5.0 * pow(0.88, Double(value - 20))
         return 100.0 - failure
     }
 
-    static func finalAttackCount(agility: Int,
+    nonisolated static func finalAttackCount(agility: Int,
                                  levelFactor: Double,
                                  jobCoefficient: Double,
                                  talentMultiplier: Double,

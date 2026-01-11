@@ -511,7 +511,7 @@ struct ExplorationRunPreparationData: Sendable {
     let explorationInterval: TimeInterval
 }
 
-func makeItemDropResults(from rewards: [ExplorationDropReward], partyId: UInt8? = nil) -> [ItemDropResult] {
+nonisolated func makeItemDropResults(from rewards: [ExplorationDropReward], partyId: UInt8? = nil) -> [ItemDropResult] {
     rewards.map { drop in
         ItemDropResult(item: drop.item,
                        quantity: drop.quantity,

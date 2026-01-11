@@ -60,7 +60,7 @@ struct SkillRuntimeEffects {
         var titleMultiplierProduct: Double = 1.0
         var titleBonusSum: Double = 0.0
 
-        mutating func merge(_ other: RewardComponents) {
+        nonisolated mutating func merge(_ other: RewardComponents) {
             experienceMultiplierProduct *= other.experienceMultiplierProduct
             experienceBonusSum += other.experienceBonusSum
             goldMultiplierProduct *= other.goldMultiplierProduct
@@ -71,23 +71,23 @@ struct SkillRuntimeEffects {
             titleBonusSum += other.titleBonusSum
         }
 
-        func experienceScale() -> Double {
+        nonisolated func experienceScale() -> Double {
             scale(multiplier: experienceMultiplierProduct, bonusFraction: experienceBonusSum)
         }
 
-        func goldScale() -> Double {
+        nonisolated func goldScale() -> Double {
             scale(multiplier: goldMultiplierProduct, bonusFraction: goldBonusSum)
         }
 
-        func itemDropScale() -> Double {
+        nonisolated func itemDropScale() -> Double {
             scale(multiplier: itemDropMultiplierProduct, bonusFraction: itemDropBonusSum)
         }
 
-        func titleScale() -> Double {
+        nonisolated func titleScale() -> Double {
             scale(multiplier: titleMultiplierProduct, bonusFraction: titleBonusSum)
         }
 
-        private func scale(multiplier: Double, bonusFraction: Double) -> Double {
+        private nonisolated func scale(multiplier: Double, bonusFraction: Double) -> Double {
             let bonusComponent = max(0.0, 1.0 + bonusFraction)
             return max(0.0, multiplier) * bonusComponent
         }
@@ -104,7 +104,7 @@ struct SkillRuntimeEffects {
 
         private(set) var entries: [Entry] = []
 
-        mutating func addEntry(multiplier: Double,
+        nonisolated mutating func addEntry(multiplier: Double,
                                dungeonId: UInt16?,
                                dungeonName: String?) {
             guard multiplier != 1.0 else { return }
@@ -113,11 +113,11 @@ struct SkillRuntimeEffects {
                                  dungeonName: dungeonName))
         }
 
-        mutating func merge(_ other: ExplorationModifiers) {
+        nonisolated mutating func merge(_ other: ExplorationModifiers) {
             entries.append(contentsOf: other.entries)
         }
 
-        func multiplier(forDungeonId dungeonId: UInt16, dungeonName: String) -> Double {
+        nonisolated func multiplier(forDungeonId dungeonId: UInt16, dungeonName: String) -> Double {
             entries.reduce(1.0) { result, entry in
                 if let scopedId = entry.dungeonId, scopedId != dungeonId {
                     return result
@@ -132,4 +132,3 @@ struct SkillRuntimeEffects {
         nonisolated static let neutral = ExplorationModifiers(entries: [])
     }
 }
-

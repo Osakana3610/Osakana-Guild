@@ -37,7 +37,7 @@ struct UnifiedSkillEffectCompiler: Sendable {
 
     // MARK: - Initialization
 
-    init(skills: [SkillDefinition], stats: ActorStats? = nil) throws {
+    nonisolated init(skills: [SkillDefinition], stats: ActorStats? = nil) throws {
         guard !skills.isEmpty else {
             self.equipmentSlots = .neutral
             self.spellbook = SkillRuntimeEffects.emptySpellbook
@@ -99,20 +99,22 @@ private struct EquipmentSlotsAccumulator {
     private var additive: Int = 0
     private var multiplier: Double = 1.0
 
-    mutating func addSlotAdditive(_ payload: DecodedSkillEffectPayload) {
+    nonisolated init() {}
+
+    nonisolated mutating func addSlotAdditive(_ payload: DecodedSkillEffectPayload) {
         if let value = payload.value[.add] {
             let intValue = Int(value.rounded(.towardZero))
             additive &+= max(0, intValue)
         }
     }
 
-    mutating func addSlotMultiplier(_ payload: DecodedSkillEffectPayload) {
+    nonisolated mutating func addSlotMultiplier(_ payload: DecodedSkillEffectPayload) {
         if let mult = payload.value[.multiplier] {
             multiplier *= mult
         }
     }
 
-    func build() -> SkillRuntimeEffects.EquipmentSlots {
+    nonisolated func build() -> SkillRuntimeEffects.EquipmentSlots {
         SkillRuntimeEffects.EquipmentSlots(additive: additive, multiplier: multiplier)
     }
 }
@@ -124,7 +126,9 @@ private struct SpellbookAccumulator {
     private var forgottenSpellIds: Set<UInt8> = []
     private var tierUnlocks: [UInt8: Int] = [:]
 
-    mutating func addSpellAccess(
+    nonisolated init() {}
+
+    nonisolated mutating func addSpellAccess(
         _ payload: DecodedSkillEffectPayload,
         skillId: UInt16,
         effectIndex: Int
@@ -139,7 +143,7 @@ private struct SpellbookAccumulator {
         }
     }
 
-    mutating func addTierUnlock(
+    nonisolated mutating func addTierUnlock(
         _ payload: DecodedSkillEffectPayload,
         skillId: UInt16,
         effectIndex: Int
@@ -156,7 +160,7 @@ private struct SpellbookAccumulator {
         }
     }
 
-    func build() -> SkillRuntimeEffects.Spellbook {
+    nonisolated func build() -> SkillRuntimeEffects.Spellbook {
         SkillRuntimeEffects.Spellbook(
             learnedSpellIds: learnedSpellIds,
             forgottenSpellIds: forgottenSpellIds,

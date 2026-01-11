@@ -27,9 +27,9 @@ import Foundation
 // MARK: - Resurrection Handlers (7)
 
 enum ResurrectionSaveHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.resurrectionSave
+    nonisolated static let effectType = SkillEffectType.resurrectionSave
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -46,9 +46,9 @@ enum ResurrectionSaveHandler: SkillEffectHandler {
 }
 
 enum ResurrectionActiveHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.resurrectionActive
+    nonisolated static let effectType = SkillEffectType.resurrectionActive
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -70,9 +70,9 @@ enum ResurrectionActiveHandler: SkillEffectHandler {
 }
 
 enum ResurrectionBuffHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.resurrectionBuff
+    nonisolated static let effectType = SkillEffectType.resurrectionBuff
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -87,9 +87,9 @@ enum ResurrectionBuffHandler: SkillEffectHandler {
 }
 
 enum ResurrectionVitalizeHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.resurrectionVitalize
+    nonisolated static let effectType = SkillEffectType.resurrectionVitalize
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -109,9 +109,9 @@ enum ResurrectionVitalizeHandler: SkillEffectHandler {
 }
 
 enum ResurrectionSummonHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.resurrectionSummon
+    nonisolated static let effectType = SkillEffectType.resurrectionSummon
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -125,9 +125,9 @@ enum ResurrectionSummonHandler: SkillEffectHandler {
 }
 
 enum ResurrectionPassiveHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.resurrectionPassive
+    nonisolated static let effectType = SkillEffectType.resurrectionPassive
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -147,9 +147,9 @@ enum ResurrectionPassiveHandler: SkillEffectHandler {
 }
 
 enum SacrificeRiteHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.sacrificeRite
+    nonisolated static let effectType = SkillEffectType.sacrificeRite
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext

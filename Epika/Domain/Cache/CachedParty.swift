@@ -30,17 +30,17 @@
 import Foundation
 
 struct CachedParty: Identifiable, Sendable, Hashable {
-    var id: UInt8                              // 1〜8
-    var displayName: String
-    var lastSelectedDungeonId: UInt16?         // nil=未選択
-    var lastSelectedDifficulty: UInt8
-    var targetFloor: UInt8
-    var memberCharacterIds: [UInt8]            // 順序=配列index
-    var updatedAt: Date
+    nonisolated var id: UInt8                              // 1〜8
+    nonisolated var displayName: String
+    nonisolated var lastSelectedDungeonId: UInt16?         // nil=未選択
+    nonisolated var lastSelectedDifficulty: UInt8
+    nonisolated var targetFloor: UInt8
+    nonisolated var memberCharacterIds: [UInt8]            // 順序=配列index
+    nonisolated var updatedAt: Date
 
     /// memberCharacterIdsのエイリアス
-    var memberIds: [UInt8] { memberCharacterIds }
+    nonisolated var memberIds: [UInt8] { memberCharacterIds }
 
     /// displayNameのエイリアス
-    var name: String { displayName }
+    nonisolated var name: String { displayName }
 }

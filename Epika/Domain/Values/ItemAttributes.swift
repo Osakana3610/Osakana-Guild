@@ -20,26 +20,26 @@ import Foundation
 /// UserDataLoadServiceがキャッシュとして保持する軽量なアイテム型
 /// SwiftDataのマネージドオブジェクトではなく、値型としてメモリ効率が良い
 struct CachedInventoryItem: Sendable, Identifiable, Hashable {
-    let stackKey: String
-    let itemId: UInt16
-    var quantity: UInt16
-    let normalTitleId: UInt8
-    let superRareTitleId: UInt8
-    let socketItemId: UInt16
-    let socketNormalTitleId: UInt8
-    let socketSuperRareTitleId: UInt8
-    let category: ItemSaleCategory
-    let rarity: UInt8?
-    let displayName: String
-    let baseValue: Int
-    let sellValue: Int
-    let statBonuses: ItemDefinition.StatBonuses
-    var combatBonuses: ItemDefinition.CombatBonuses  // パンドラ変更時に更新可能
-    let grantedSkillIds: [UInt16]
+    nonisolated let stackKey: String
+    nonisolated let itemId: UInt16
+    nonisolated var quantity: UInt16
+    nonisolated let normalTitleId: UInt8
+    nonisolated let superRareTitleId: UInt8
+    nonisolated let socketItemId: UInt16
+    nonisolated let socketNormalTitleId: UInt8
+    nonisolated let socketSuperRareTitleId: UInt8
+    nonisolated let category: ItemSaleCategory
+    nonisolated let rarity: UInt8?
+    nonisolated let displayName: String
+    nonisolated let baseValue: Int
+    nonisolated let sellValue: Int
+    nonisolated let statBonuses: ItemDefinition.StatBonuses
+    nonisolated var combatBonuses: ItemDefinition.CombatBonuses  // パンドラ変更時に更新可能
+    nonisolated let grantedSkillIds: [UInt16]
 
-    var id: String { stackKey }
+    nonisolated var id: String { stackKey }
 
-    var enhancement: ItemEnhancement {
+    nonisolated var enhancement: ItemEnhancement {
         ItemEnhancement(
             superRareTitleId: superRareTitleId,
             normalTitleId: normalTitleId,
@@ -50,12 +50,12 @@ struct CachedInventoryItem: Sendable, Identifiable, Hashable {
     }
 
     /// 宝石改造が施されているか
-    var hasGemModification: Bool {
+    nonisolated var hasGemModification: Bool {
         socketItemId != 0
     }
 
     /// CharacterInput.EquippedItemへ変換（永続化用）
-    func toEquippedItem() -> CharacterInput.EquippedItem {
+    nonisolated func toEquippedItem() -> CharacterInput.EquippedItem {
         CharacterInput.EquippedItem(
             superRareTitleId: superRareTitleId,
             normalTitleId: normalTitleId,
@@ -81,17 +81,17 @@ enum CurrencyType: Sendable {
 
 /// アイテムの強化情報（称号・ソケット）
 struct ItemEnhancement: Sendable, Equatable, Hashable {
-    var superRareTitleId: UInt8
-    var normalTitleId: UInt8
-    var socketSuperRareTitleId: UInt8
-    var socketNormalTitleId: UInt8
-    var socketItemId: UInt16
+    nonisolated var superRareTitleId: UInt8
+    nonisolated var normalTitleId: UInt8
+    nonisolated var socketSuperRareTitleId: UInt8
+    nonisolated var socketNormalTitleId: UInt8
+    nonisolated var socketItemId: UInt16
 
-    init(superRareTitleId: UInt8 = 0,
-         normalTitleId: UInt8 = 0,
-         socketSuperRareTitleId: UInt8 = 0,
-         socketNormalTitleId: UInt8 = 0,
-         socketItemId: UInt16 = 0) {
+    nonisolated init(superRareTitleId: UInt8 = 0,
+                     normalTitleId: UInt8 = 0,
+                     socketSuperRareTitleId: UInt8 = 0,
+                     socketNormalTitleId: UInt8 = 0,
+                     socketItemId: UInt16 = 0) {
         self.superRareTitleId = superRareTitleId
         self.normalTitleId = normalTitleId
         self.socketSuperRareTitleId = socketSuperRareTitleId
@@ -100,7 +100,7 @@ struct ItemEnhancement: Sendable, Equatable, Hashable {
     }
 
     /// 宝石改造が施されているか
-    var hasSocket: Bool {
+    nonisolated var hasSocket: Bool {
         socketItemId != 0
     }
 }

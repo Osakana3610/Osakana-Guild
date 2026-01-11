@@ -86,14 +86,14 @@ struct BattleContextBuilder {
         return actors
     }
 
-    static func slot(for index: Int) -> BattleFormationSlot? {
+    nonisolated static func slot(for index: Int) -> BattleFormationSlot? {
         // BattleFormationSlot は 1始まりの整数（上限なし、マスターデータで制御）
         let slot = index + 1
         guard slot >= 1 else { return nil }
         return slot
     }
 
-    private static func playerActionRates(for character: CachedCharacter) -> BattleActionRates {
+    private nonisolated static func playerActionRates(for character: CachedCharacter) -> BattleActionRates {
         let preferences = character.actionPreferences
         let breath = character.combat.breathDamage > 0 ? preferences.breath : 0
         return BattleActionRates(attack: preferences.attack,
@@ -105,9 +105,9 @@ struct BattleContextBuilder {
 }
 
 private extension BattleContextBuilder {
-    static func applySpellChargeModifiers(skillEffects: BattleActor.SkillEffects,
-                                          loadout: SkillRuntimeEffects.SpellLoadout,
-                                          resources: inout BattleActionResource) {
+    nonisolated static func applySpellChargeModifiers(skillEffects: BattleActor.SkillEffects,
+                                                      loadout: SkillRuntimeEffects.SpellLoadout,
+                                                      resources: inout BattleActionResource) {
         let spells = loadout.mage + loadout.priest
         guard !spells.isEmpty else { return }
         for spell in spells {

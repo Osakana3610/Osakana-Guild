@@ -28,7 +28,7 @@ import Foundation
 extension BattleTurnEngine {
     // appendInitialStateLogs は削除（buildInitialHP で代替）
 
-    static func appendActionLog(for actor: BattleActor,
+    nonisolated static func appendActionLog(for actor: BattleActor,
                                 side: ActorSide,
                                 index: Int,
                                 category: ActionKind,
@@ -39,7 +39,7 @@ extension BattleTurnEngine {
                                   effectKind: .logOnly)
     }
 
-    static func appendDefeatLog(for target: BattleActor,
+    nonisolated static func appendDefeatLog(for target: BattleActor,
                                 side: ActorSide,
                                 index: Int,
                                 context: inout BattleContext,
@@ -54,7 +54,7 @@ extension BattleTurnEngine {
                                   effectKind: .physicalKill)
     }
 
-    static func appendStatusLockLog(for actor: BattleActor,
+    nonisolated static func appendStatusLockLog(for actor: BattleActor,
                                     side: ActorSide,
                                     index: Int,
                                     context: inout BattleContext) {
@@ -65,7 +65,7 @@ extension BattleTurnEngine {
                                   effectKind: .actionLocked)
     }
 
-    static func appendStatusExpireLog(for actor: BattleActor,
+    nonisolated static func appendStatusExpireLog(for actor: BattleActor,
                                       side: ActorSide,
                                       index: Int,
                                       definition: StatusEffectDefinition,

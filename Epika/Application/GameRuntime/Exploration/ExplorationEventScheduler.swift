@@ -40,7 +40,7 @@ struct ExplorationEventScheduler: Sendable {
                                     combat: combat)
     }
 
-    func nextCategory(hasScriptedEvents: Bool,
+    nonisolated func nextCategory(hasScriptedEvents: Bool,
                       hasCombatEvents: Bool,
                       random: inout GameRandomSource) throws -> Category {
         var entries: [(Category, Double)] = []

@@ -28,9 +28,9 @@ import Foundation
 // MARK: - Status Handlers (7)
 
 enum StatusResistanceMultiplierHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.statusResistanceMultiplier
+    nonisolated static let effectType = SkillEffectType.statusResistanceMultiplier
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -49,9 +49,9 @@ enum StatusResistanceMultiplierHandler: SkillEffectHandler {
 }
 
 enum StatusResistancePercentHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.statusResistancePercent
+    nonisolated static let effectType = SkillEffectType.statusResistancePercent
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -70,9 +70,9 @@ enum StatusResistancePercentHandler: SkillEffectHandler {
 }
 
 enum StatusInflictHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.statusInflict
+    nonisolated static let effectType = SkillEffectType.statusInflict
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -85,9 +85,9 @@ enum StatusInflictHandler: SkillEffectHandler {
 }
 
 enum BerserkHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.berserk
+    nonisolated static let effectType = SkillEffectType.berserk
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -102,9 +102,9 @@ enum BerserkHandler: SkillEffectHandler {
 }
 
 enum TimedBuffTriggerHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.timedBuffTrigger
+    nonisolated static let effectType = SkillEffectType.timedBuffTrigger
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -171,9 +171,9 @@ enum TimedBuffTriggerHandler: SkillEffectHandler {
 }
 
 enum TimedMagicPowerAmplifyHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.timedMagicPowerAmplify
+    nonisolated static let effectType = SkillEffectType.timedMagicPowerAmplify
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -200,9 +200,9 @@ enum TimedMagicPowerAmplifyHandler: SkillEffectHandler {
 }
 
 enum TimedBreathPowerAmplifyHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.timedBreathPowerAmplify
+    nonisolated static let effectType = SkillEffectType.timedBreathPowerAmplify
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -229,9 +229,9 @@ enum TimedBreathPowerAmplifyHandler: SkillEffectHandler {
 }
 
 enum AutoStatusCureOnAllyHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.autoStatusCureOnAlly
+    nonisolated static let effectType = SkillEffectType.autoStatusCureOnAlly
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext

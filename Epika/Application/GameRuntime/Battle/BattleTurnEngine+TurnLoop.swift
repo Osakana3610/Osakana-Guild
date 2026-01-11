@@ -36,7 +36,7 @@ import Foundation
 // MARK: - Turn Loop & Action Selection
 extension BattleTurnEngine {
     /// 行動順序を決定
-    static func actionOrder(_ context: inout BattleContext) -> [ActorReference] {
+    nonisolated static func actionOrder(_ context: inout BattleContext) -> [ActorReference] {
         // 戦闘開始時にキャッシュ済み
         let shuffleEnemyOrder = context.cached.hasShuffleEnemyOrderSkill
 
@@ -88,7 +88,7 @@ extension BattleTurnEngine {
     }
 
     /// アクションを実行
-    static func performAction(for side: ActorSide,
+    nonisolated static func performAction(for side: ActorSide,
                               actorIndex: Int,
                               context: inout BattleContext,
                               forcedTargets: BattleContext.SacrificeTargets,
@@ -162,7 +162,7 @@ extension BattleTurnEngine {
     }
 
     @discardableResult
-    private static func executeSingleAction(for side: ActorSide,
+    private nonisolated static func executeSingleAction(for side: ActorSide,
                                             actorIndex: Int,
                                             context: inout BattleContext,
                                             forcedTargets: BattleContext.SacrificeTargets) -> Bool {
@@ -254,7 +254,7 @@ extension BattleTurnEngine {
     }
 
     /// 行動カテゴリを選択（単一のカテゴリを返す、後方互換用）
-    static func selectAction(for side: ActorSide,
+    nonisolated static func selectAction(for side: ActorSide,
                              actorIndex: Int,
                              context: inout BattleContext) -> ActionKind {
         selectActionCandidates(for: side, actorIndex: actorIndex, context: &context).first ?? .defend
@@ -262,7 +262,7 @@ extension BattleTurnEngine {
 
     /// 抽選を行い、当選したカテゴリを順番に返す
     /// 失敗時は次のカテゴリを試せるようにリストで返す
-    static func selectActionCandidates(for side: ActorSide,
+    nonisolated static func selectActionCandidates(for side: ActorSide,
                                        actorIndex: Int,
                                        context: inout BattleContext) -> [ActionKind] {
         let actor: BattleActor
@@ -305,7 +305,7 @@ extension BattleTurnEngine {
     ///   - candidates: 行動候補リスト（優先度順）
     ///   - random: 乱数生成器
     /// - Returns: 当選カテゴリ以降の行動種別リスト
-    private static func rollActionLottery(candidates: [ActionCandidate],
+    private nonisolated static func rollActionLottery(candidates: [ActionCandidate],
                                           random: inout GameRandomSource) -> [ActionKind] {
         var hitIndex: Int? = nil
 
@@ -332,7 +332,7 @@ extension BattleTurnEngine {
 
     /// 敵専用技を選択（発動判定込み）
     /// - Returns: 発動するスキルID（nilの場合は通常行動）
-    static func selectEnemySpecialSkill(for actor: BattleActor,
+    nonisolated static func selectEnemySpecialSkill(for actor: BattleActor,
                                         allies: [BattleActor],
                                         opponents: [BattleActor],
                                         context: inout BattleContext) -> UInt16? {
@@ -371,7 +371,7 @@ extension BattleTurnEngine {
     }
 
     /// 行動候補を構築
-    static func buildCandidates(for actor: BattleActor,
+    nonisolated static func buildCandidates(for actor: BattleActor,
                                 allies: [BattleActor],
                                 opponents: [BattleActor]) -> [ActionCandidate] {
         let rates = actor.actionRates
@@ -393,28 +393,28 @@ extension BattleTurnEngine {
         return candidates
     }
 
-    static func canPerformBreath(actor: BattleActor, opponents: [BattleActor]) -> Bool {
+    nonisolated static func canPerformBreath(actor: BattleActor, opponents: [BattleActor]) -> Bool {
         actor.isAlive && actor.snapshot.breathDamage > 0 && actor.actionResources.charges(for: .breath) > 0 && opponents.contains(where: { $0.isAlive })
     }
 
-    static func canPerformPriest(actor: BattleActor, allies: [BattleActor]) -> Bool {
+    nonisolated static func canPerformPriest(actor: BattleActor, allies: [BattleActor]) -> Bool {
         actor.isAlive &&
         actor.snapshot.magicalHealing > 0 &&
         actor.actionResources.hasAvailableSpell(in: actor.spells.priest)
     }
 
-    static func canPerformMage(actor: BattleActor, opponents: [BattleActor]) -> Bool {
+    nonisolated static func canPerformMage(actor: BattleActor, opponents: [BattleActor]) -> Bool {
         actor.isAlive &&
         actor.snapshot.magicalAttack > 0 &&
         actor.actionResources.hasAvailableSpell(in: actor.spells.mage) &&
         opponents.contains(where: { $0.isAlive })
     }
 
-    static func canPerformPhysical(actor: BattleActor, opponents: [BattleActor]) -> Bool {
+    nonisolated static func canPerformPhysical(actor: BattleActor, opponents: [BattleActor]) -> Bool {
         actor.isAlive && opponents.contains(where: { $0.isAlive })
     }
 
-    static func activateGuard(for side: ActorSide,
+    nonisolated static func activateGuard(for side: ActorSide,
                               actorIndex: Int,
                               context: inout BattleContext) {
         guard var actor = context.actor(for: side, index: actorIndex),
@@ -427,7 +427,7 @@ extension BattleTurnEngine {
         appendActionLog(for: actor, side: side, index: actorIndex, category: .defend, context: &context)
     }
 
-    static func resetRescueUsage(_ context: inout BattleContext) {
+    nonisolated static func resetRescueUsage(_ context: inout BattleContext) {
         for index in context.players.indices {
             context.players[index].rescueActionsUsed = 0
         }
@@ -436,12 +436,12 @@ extension BattleTurnEngine {
         }
     }
 
-    static func applyRetreatIfNeeded(_ context: inout BattleContext) {
+    nonisolated static func applyRetreatIfNeeded(_ context: inout BattleContext) {
         applyRetreatForSide(.player, context: &context)
         applyRetreatForSide(.enemy, context: &context)
     }
 
-    private static func applyRetreatForSide(_ side: ActorSide, context: inout BattleContext) {
+    private nonisolated static func applyRetreatForSide(_ side: ActorSide, context: inout BattleContext) {
         let actors: [BattleActor] = side == .player ? context.players : context.enemies
         for index in actors.indices where actors[index].isAlive {
             let actor = actors[index]
@@ -473,7 +473,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func computeSacrificeTargets(_ context: inout BattleContext) -> BattleContext.SacrificeTargets {
+    nonisolated static func computeSacrificeTargets(_ context: inout BattleContext) -> BattleContext.SacrificeTargets {
         func pickTarget(from group: [BattleActor],
                         sacrifices: [Int],
                         random: inout GameRandomSource,

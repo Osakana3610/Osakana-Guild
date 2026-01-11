@@ -35,7 +35,7 @@ import Foundation
 
 // MARK: - Turn End Processing
 extension BattleTurnEngine {
-    static func endOfTurn(_ context: inout BattleContext) {
+    nonisolated static func endOfTurn(_ context: inout BattleContext) {
         for index in context.players.indices {
             var actor = context.players[index]
             processEndOfTurn(for: .player, index: index, actor: &actor, context: &context)
@@ -54,7 +54,7 @@ extension BattleTurnEngine {
         applyNecromancerIfNeeded(for: .enemy, context: &context)
     }
 
-    static func processEndOfTurn(for side: ActorSide,
+    nonisolated static func processEndOfTurn(for side: ActorSide,
                                  index: Int,
                                  actor: inout BattleActor,
                                  context: inout BattleContext) {
@@ -75,7 +75,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func applyEndOfTurnPartyHealing(for side: ActorSide, context: inout BattleContext) {
+    nonisolated static func applyEndOfTurnPartyHealing(for side: ActorSide, context: inout BattleContext) {
         let actors: [BattleActor] = side == .player ? context.players : context.enemies
         guard !actors.isEmpty else { return }
 
@@ -114,7 +114,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func applyEndOfTurnSelfHPDeltaIfNeeded(for side: ActorSide,
+    nonisolated static func applyEndOfTurnSelfHPDeltaIfNeeded(for side: ActorSide,
                                                    index: Int,
                                                    actor: inout BattleActor,
                                                    context: inout BattleContext) {
@@ -152,7 +152,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func applyEndOfTurnResurrectionIfNeeded(for side: ActorSide,
+    nonisolated static func applyEndOfTurnResurrectionIfNeeded(for side: ActorSide,
                                                    index: Int,
                                                    actor: inout BattleActor,
                                                    context: inout BattleContext,
@@ -221,7 +221,7 @@ extension BattleTurnEngine {
                                   effectKind: .resurrection)
     }
 
-    static func rebuildSkillsAfterResurrection(for actor: inout BattleActor, context: BattleContext) {
+    nonisolated static func rebuildSkillsAfterResurrection(for actor: inout BattleActor, context: BattleContext) {
         var skillIds = actor.baseSkillIds
         if !actor.suppressedSkillIds.isEmpty {
             skillIds.subtract(actor.suppressedSkillIds)
@@ -266,7 +266,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func applySpellChargeRegenIfNeeded(for actor: inout BattleActor, context: BattleContext) {
+    nonisolated static func applySpellChargeRegenIfNeeded(for actor: inout BattleActor, context: BattleContext) {
         let spells = actor.spells.mage + actor.spells.priest
         guard !spells.isEmpty else { return }
         var usage = actor.spellChargeRegenUsage
@@ -291,7 +291,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func applyNecromancerIfNeeded(for side: ActorSide, context: inout BattleContext) {
+    nonisolated static func applyNecromancerIfNeeded(for side: ActorSide, context: inout BattleContext) {
         guard context.turn >= 2 else { return }
         let actors: [BattleActor] = side == .player ? context.players : context.enemies
         guard actors.contains(where: { $0.skillEffects.resurrection.necromancerInterval != nil }) else { return }
@@ -322,12 +322,12 @@ extension BattleTurnEngine {
         }
     }
 
-    static func applyTimedBuffTriggers(_ context: inout BattleContext) {
+    nonisolated static func applyTimedBuffTriggers(_ context: inout BattleContext) {
         applyTimedBuffTriggersForSide(.player, context: &context)
         applyTimedBuffTriggersForSide(.enemy, context: &context)
     }
 
-    private static func applyTimedBuffTriggersForSide(_ side: ActorSide, context: inout BattleContext) {
+    private nonisolated static func applyTimedBuffTriggersForSide(_ side: ActorSide, context: inout BattleContext) {
         var actors: [BattleActor] = side == .player ? context.players : context.enemies
         guard !actors.isEmpty else { return }
 
@@ -428,7 +428,7 @@ extension BattleTurnEngine {
         }
     }
 
-    private static func applyPerTurnModifiers(_ modifiers: [String: Double], to actor: inout BattleActor) {
+    private nonisolated static func applyPerTurnModifiers(_ modifiers: [String: Double], to actor: inout BattleActor) {
         guard !modifiers.isEmpty else { return }
 
         // 毎ターン固定値を加算（スナップショットが永続するため自然に累積）
@@ -459,7 +459,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func upsert(buff: TimedBuff, into buffs: inout [TimedBuff]) {
+    nonisolated static func upsert(buff: TimedBuff, into buffs: inout [TimedBuff]) {
         guard let index = buffs.firstIndex(where: { $0.id == buff.id }) else {
             buffs.append(buff)
             return
@@ -480,7 +480,7 @@ extension BattleTurnEngine {
         // 低レベルは無視（何もしない）
     }
 
-    static func updateTimedBuffs(for side: ActorSide,
+    nonisolated static func updateTimedBuffs(for side: ActorSide,
                                   index: Int,
                                   actor: inout BattleActor,
                                   context: inout BattleContext) {
@@ -502,7 +502,7 @@ extension BattleTurnEngine {
     }
 
     @discardableResult
-    static func attemptRescue(of fallenIndex: Int,
+    nonisolated static func attemptRescue(of fallenIndex: Int,
                               side: ActorSide,
                               context: inout BattleContext) -> Bool {
         guard let fallen = context.actor(for: side, index: fallenIndex) else { return false }
@@ -564,7 +564,7 @@ extension BattleTurnEngine {
     }
 
     @discardableResult
-    static func attemptInstantResurrectionIfNeeded(of fallenIndex: Int,
+    nonisolated static func attemptInstantResurrectionIfNeeded(of fallenIndex: Int,
                                                    side: ActorSide,
                                                    context: inout BattleContext) -> Bool {
         guard var target = context.actor(for: side, index: fallenIndex), !target.isAlive else {
@@ -578,16 +578,16 @@ extension BattleTurnEngine {
         return true
     }
 
-    static func availableRescueCapabilities(for actor: BattleActor) -> [BattleActor.SkillEffects.RescueCapability] {
+    nonisolated static func availableRescueCapabilities(for actor: BattleActor) -> [BattleActor.SkillEffects.RescueCapability] {
         let level = actor.level ?? 0
         return actor.skillEffects.resurrection.rescueCapabilities.filter { level >= $0.minLevel }
     }
 
-    static func rescueChance(for actor: BattleActor) -> Int {
+    nonisolated static func rescueChance(for actor: BattleActor) -> Int {
         return max(0, min(100, actor.actionRates.priestMagic))
     }
 
-    static func canAttemptRescue(_ actor: BattleActor, turn: Int) -> Bool {
+    nonisolated static func canAttemptRescue(_ actor: BattleActor, turn: Int) -> Bool {
         guard actor.isAlive else { return false }
         guard actor.rescueActionCapacity > 0 else { return false }
         if actor.rescueActionsUsed >= actor.rescueActionCapacity,
@@ -599,12 +599,12 @@ extension BattleTurnEngine {
 
     // MARK: - Spell Charge Recovery
 
-    static func applySpellChargeRecovery(_ context: inout BattleContext) {
+    nonisolated static func applySpellChargeRecovery(_ context: inout BattleContext) {
         applySpellChargeRecoveryForSide(.player, context: &context)
         applySpellChargeRecoveryForSide(.enemy, context: &context)
     }
 
-    private static func applySpellChargeRecoveryForSide(_ side: ActorSide, context: inout BattleContext) {
+    private nonisolated static func applySpellChargeRecoveryForSide(_ side: ActorSide, context: inout BattleContext) {
         var actors: [BattleActor] = side == .player ? context.players : context.enemies
         guard !actors.isEmpty else { return }
 

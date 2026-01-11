@@ -35,8 +35,10 @@ struct ActorEffectsAccumulator {
     var resurrection = ResurrectionAccumulator()
     var misc = MiscAccumulator()
 
+    nonisolated init() {}
+
     /// 蓄積した値から BattleActor.SkillEffects を構築
-    func build() -> BattleActor.SkillEffects {
+    nonisolated func build() -> BattleActor.SkillEffects {
         let dealt = BattleActor.SkillEffects.DamageMultipliers(
             physical: damage.totalMultiplier(for: BattleDamageType.physical.rawValue),
             magical: damage.totalMultiplier(for: BattleDamageType.magical.rawValue),
@@ -196,14 +198,14 @@ struct DamageAccumulator {
     var levelComparisonDamageTakenPercent: Double = 0.0
     var hpThresholdMultipliers: [BattleActor.SkillEffects.HPThresholdMultiplier] = []
 
-    func totalMultiplier(for damageType: UInt8) -> Double {
+    nonisolated func totalMultiplier(for damageType: UInt8) -> Double {
         let key = Int(damageType)
         let percent = dealtPercentByType[key] ?? 0.0
         let multiplier = dealtMultiplierByType[key] ?? 1.0
         return max(0.0, 1.0 + percent / 100.0) * multiplier
     }
 
-    func totalTakenMultiplier(for damageType: UInt8) -> Double {
+    nonisolated func totalTakenMultiplier(for damageType: UInt8) -> Double {
         let key = Int(damageType)
         let percent = takenPercentByType[key] ?? 0.0
         let multiplier = takenMultiplierByType[key] ?? 1.0

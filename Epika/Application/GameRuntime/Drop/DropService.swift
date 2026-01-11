@@ -20,7 +20,7 @@ import Foundation
 
 /// 敵撃破時の戦利品計算を担当するサービス。
 enum DropService {
-    static func drops(masterData: MasterDataCache,
+    nonisolated static func drops(masterData: MasterDataCache,
                       for encounteredEnemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
                       party: RuntimePartyState,
                       dungeonId: UInt16? = nil,
@@ -139,7 +139,7 @@ enum DropService {
     }
 
     /// 称号付与ロジック（レアアイテム・ノーマルアイテム共通）
-    private static func assignTitles(
+    private nonisolated static func assignTitles(
         category: DropItemCategory,
         partyBonuses: PartyDropBonuses,
         isRabiTicketActive: Bool,
@@ -179,7 +179,7 @@ enum DropService {
         return (normalTitleId, superRareTitleId)
     }
 
-    private static func categorize(item: ItemDefinition) -> DropItemCategory {
+    private nonisolated static func categorize(item: ItemDefinition) -> DropItemCategory {
         switch item.category {
         case ItemSaleCategory.gem.rawValue, ItemSaleCategory.mazoMaterial.rawValue:
             return .gem
@@ -198,7 +198,7 @@ enum DropService {
         return .normal
     }
 
-    private static func evaluateSuperRare(for category: DropItemCategory,
+    private nonisolated static func evaluateSuperRare(for category: DropItemCategory,
                                           title: TitleDefinition,
                                           enemyTitle: TitleDefinition?,
                                           masterData: MasterDataCache,
@@ -256,7 +256,7 @@ enum DropService {
         return (normalTitleId, superRareTitleId)
     }
 
-    private static func superRareEnemyMultiplier(for category: DropItemCategory,
+    private nonisolated static func superRareEnemyMultiplier(for category: DropItemCategory,
                                                  enemyTitle: TitleDefinition?) -> Double {
         guard let titleId = enemyTitle?.id, titleId >= 6 else { return 1.0 }
         switch category {

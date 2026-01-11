@@ -22,7 +22,7 @@ import Foundation
 
 // MARK: - Spell Loadout Compilation
 extension SkillRuntimeEffectCompiler {
-    static func spellLoadout(from spellbook: SkillRuntimeEffects.Spellbook,
+    nonisolated static func spellLoadout(from spellbook: SkillRuntimeEffects.Spellbook,
                              definitions: [SpellDefinition],
                              characterLevel: Int) -> SkillRuntimeEffects.SpellLoadout {
         guard !definitions.isEmpty else { return SkillRuntimeEffects.emptySpellLoadout }

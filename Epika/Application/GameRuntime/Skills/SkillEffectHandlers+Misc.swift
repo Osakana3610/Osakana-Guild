@@ -38,9 +38,9 @@ import Foundation
 // MARK: - Misc Handlers
 
 enum RowProfileHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.rowProfile
+    nonisolated static let effectType = SkillEffectType.rowProfile
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -50,9 +50,9 @@ enum RowProfileHandler: SkillEffectHandler {
 }
 
 enum EndOfTurnHealingHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.endOfTurnHealing
+    nonisolated static let effectType = SkillEffectType.endOfTurnHealing
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -63,9 +63,9 @@ enum EndOfTurnHealingHandler: SkillEffectHandler {
 }
 
 enum EndOfTurnSelfHPPercentHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.endOfTurnSelfHPPercent
+    nonisolated static let effectType = SkillEffectType.endOfTurnSelfHPPercent
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -75,9 +75,9 @@ enum EndOfTurnSelfHPPercentHandler: SkillEffectHandler {
 }
 
 enum PartyAttackFlagHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.partyAttackFlag
+    nonisolated static let effectType = SkillEffectType.partyAttackFlag
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -95,9 +95,9 @@ enum PartyAttackFlagHandler: SkillEffectHandler {
 }
 
 enum PartyAttackTargetHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.partyAttackTarget
+    nonisolated static let effectType = SkillEffectType.partyAttackTarget
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -114,9 +114,9 @@ enum PartyAttackTargetHandler: SkillEffectHandler {
 }
 
 enum AntiHealingHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.antiHealing
+    nonisolated static let effectType = SkillEffectType.antiHealing
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -126,9 +126,9 @@ enum AntiHealingHandler: SkillEffectHandler {
 }
 
 enum BreathVariantHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.breathVariant
+    nonisolated static let effectType = SkillEffectType.breathVariant
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -139,9 +139,9 @@ enum BreathVariantHandler: SkillEffectHandler {
 }
 
 enum EquipmentStatMultiplierHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.equipmentStatMultiplier
+    nonisolated static let effectType = SkillEffectType.equipmentStatMultiplier
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -156,9 +156,9 @@ enum EquipmentStatMultiplierHandler: SkillEffectHandler {
 }
 
 enum DodgeCapHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.dodgeCap
+    nonisolated static let effectType = SkillEffectType.dodgeCap
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -173,9 +173,9 @@ enum DodgeCapHandler: SkillEffectHandler {
 }
 
 enum AbsorptionHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.absorption
+    nonisolated static let effectType = SkillEffectType.absorption
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -193,9 +193,9 @@ enum AbsorptionHandler: SkillEffectHandler {
 }
 
 enum DegradationRepairHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.degradationRepair
+    nonisolated static let effectType = SkillEffectType.degradationRepair
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -208,9 +208,9 @@ enum DegradationRepairHandler: SkillEffectHandler {
 }
 
 enum DegradationRepairBoostHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.degradationRepairBoost
+    nonisolated static let effectType = SkillEffectType.degradationRepairBoost
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -220,9 +220,9 @@ enum DegradationRepairBoostHandler: SkillEffectHandler {
 }
 
 enum AutoDegradationRepairHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.autoDegradationRepair
+    nonisolated static let effectType = SkillEffectType.autoDegradationRepair
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -232,9 +232,9 @@ enum AutoDegradationRepairHandler: SkillEffectHandler {
 }
 
 enum RunawayMagicHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.runawayMagic
+    nonisolated static let effectType = SkillEffectType.runawayMagic
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -246,9 +246,9 @@ enum RunawayMagicHandler: SkillEffectHandler {
 }
 
 enum RunawayDamageHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.runawayDamage
+    nonisolated static let effectType = SkillEffectType.runawayDamage
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -260,9 +260,9 @@ enum RunawayDamageHandler: SkillEffectHandler {
 }
 
 enum RetreatAtTurnHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.retreatAtTurn
+    nonisolated static let effectType = SkillEffectType.retreatAtTurn
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -283,9 +283,9 @@ enum RetreatAtTurnHandler: SkillEffectHandler {
 }
 
 enum TargetingWeightHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.targetingWeight
+    nonisolated static let effectType = SkillEffectType.targetingWeight
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -296,9 +296,9 @@ enum TargetingWeightHandler: SkillEffectHandler {
 }
 
 enum CoverRowsBehindHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.coverRowsBehind
+    nonisolated static let effectType = SkillEffectType.coverRowsBehind
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext

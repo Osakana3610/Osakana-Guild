@@ -99,7 +99,7 @@ struct CombatStatCalculator {
         case invalidSkillPayload(String)
     }
 
-    static func calculate(for context: Context) throws -> Result {
+    nonisolated static func calculate(for context: Context) throws -> Result {
         let race = context.race
         let job = context.job
 
@@ -170,7 +170,7 @@ private struct BaseStatAccumulator {
     private var agility: Int = 0
     private var luck: Int = 0
 
-    mutating func apply(raceBase race: RaceDefinition) {
+    nonisolated mutating func apply(raceBase race: RaceDefinition) {
         strength = race.baseStats.strength
         wisdom = race.baseStats.wisdom
         spirit = race.baseStats.spirit
@@ -179,7 +179,7 @@ private struct BaseStatAccumulator {
         luck = race.baseStats.luck
     }
 
-    mutating func applyLevelBonus(level: Int) {
+    nonisolated mutating func applyLevelBonus(level: Int) {
         let bonus = max(0, min(level / 5, 10))
         strength += bonus
         wisdom += bonus
@@ -189,14 +189,14 @@ private struct BaseStatAccumulator {
         luck += bonus
     }
 
-    mutating func apply(personality: PersonalitySecondaryDefinition) {
+    nonisolated mutating func apply(personality: PersonalitySecondaryDefinition) {
         for bonus in personality.statBonuses {
             guard let stat = BaseStat(rawValue: bonus.stat) else { continue }
             assign(stat, delta: bonus.value)
         }
     }
 
-    mutating func apply(equipment: [CharacterValues.EquippedItem],
+    nonisolated mutating func apply(equipment: [CharacterValues.EquippedItem],
                         definitions: [ItemDefinition],
                         titleDefinitions: [TitleDefinition],
                         equipmentMultipliers: [Int: Double]) throws {
@@ -235,7 +235,7 @@ private struct BaseStatAccumulator {
         }
     }
 
-    func makeAttributes() -> CharacterValues.CoreAttributes {
+    nonisolated func makeAttributes() -> CharacterValues.CoreAttributes {
         CharacterValues.CoreAttributes(strength: strength,
                                        wisdom: wisdom,
                                        spirit: spirit,
@@ -244,7 +244,7 @@ private struct BaseStatAccumulator {
                                        luck: luck)
     }
 
-    private mutating func assign(_ name: String, value: Int) {
+    private nonisolated mutating func assign(_ name: String, value: Int) {
         switch name {
         case "strength": strength = value
         case "wisdom": wisdom = value
@@ -256,7 +256,7 @@ private struct BaseStatAccumulator {
         }
     }
 
-    private mutating func assign(_ name: String, delta: Int) {
+    private nonisolated mutating func assign(_ name: String, delta: Int) {
         switch name {
         case "strength": strength += delta
         case "wisdom": wisdom += delta
@@ -268,7 +268,7 @@ private struct BaseStatAccumulator {
         }
     }
 
-    private mutating func assign(_ stat: BaseStat, delta: Int) {
+    private nonisolated mutating func assign(_ stat: BaseStat, delta: Int) {
         switch stat {
         case .strength: strength += delta
         case .wisdom: wisdom += delta
@@ -288,34 +288,34 @@ private struct SkillEffectAggregator {
         private var talentFlags: Set<CombatStatKey> = []
         private var incompetenceFlags: Set<CombatStatKey> = []
 
-        init() {
+        nonisolated init() {
             for key in CombatStatKey.allCases {
                 multipliers[key] = 1.0
             }
         }
 
-        mutating func applyTalent(stat: CombatStatKey, value: Double) {
+        nonisolated mutating func applyTalent(stat: CombatStatKey, value: Double) {
             talentFlags.insert(stat)
             multipliers[stat, default: 1.0] *= value
         }
 
-        mutating func applyIncompetence(stat: CombatStatKey, value: Double) {
+        nonisolated mutating func applyIncompetence(stat: CombatStatKey, value: Double) {
             incompetenceFlags.insert(stat)
             multipliers[stat, default: 1.0] *= value
         }
 
-        func multiplier(for stat: CombatStatKey) -> Double {
+        nonisolated func multiplier(for stat: CombatStatKey) -> Double {
             if talentFlags.contains(stat) && incompetenceFlags.contains(stat) {
                 return 1.0
             }
             return multipliers[stat, default: 1.0]
         }
 
-        func hasTalent(for stat: CombatStatKey) -> Bool {
+        nonisolated func hasTalent(for stat: CombatStatKey) -> Bool {
             talentFlags.contains(stat)
         }
 
-        func hasIncompetence(for stat: CombatStatKey) -> Bool {
+        nonisolated func hasIncompetence(for stat: CombatStatKey) -> Bool {
             incompetenceFlags.contains(stat)
         }
     }
@@ -323,17 +323,17 @@ private struct SkillEffectAggregator {
     struct PassiveMultipliers {
         private var multipliers: [CombatStatKey: Double] = [:]
 
-        init() {
+        nonisolated init() {
             for key in CombatStatKey.allCases {
                 multipliers[key] = 1.0
             }
         }
 
-        mutating func multiply(stat: CombatStatKey, value: Double) {
+        nonisolated mutating func multiply(stat: CombatStatKey, value: Double) {
             multipliers[stat, default: 1.0] *= value
         }
 
-        func multiplier(for stat: CombatStatKey) -> Double {
+        nonisolated func multiplier(for stat: CombatStatKey) -> Double {
             multipliers[stat, default: 1.0]
         }
     }
@@ -341,11 +341,11 @@ private struct SkillEffectAggregator {
     struct AdditiveBonuses {
         private var bonuses: [CombatStatKey: Double] = [:]
 
-        mutating func add(stat: CombatStatKey, value: Double) {
+        nonisolated mutating func add(stat: CombatStatKey, value: Double) {
             bonuses[stat, default: 0.0] += value
         }
 
-        func value(for stat: CombatStatKey) -> Double {
+        nonisolated func value(for stat: CombatStatKey) -> Double {
             bonuses[stat, default: 0.0]
         }
     }
@@ -369,7 +369,7 @@ private struct SkillEffectAggregator {
     let equipmentMultipliers: [Int: Double]
     let itemStatMultipliers: [CombatStatKey: Double]
 
-    init(skills: [SkillDefinition]) throws {
+    nonisolated init(skills: [SkillDefinition]) throws {
         var talents = TalentModifiers()
         var passives = PassiveMultipliers()
         var additives = AdditiveBonuses()
@@ -537,7 +537,7 @@ private struct SkillEffectAggregator {
 }
 
 private extension SkillEffectAggregator {
-    static func payload(from effect: SkillDefinition.Effect) -> Payload {
+    nonisolated static func payload(from effect: SkillDefinition.Effect) -> Payload {
         return Payload(effectType: effect.effectType,
                        parameters: effect.parameters,
                        value: effect.values)
@@ -574,7 +574,7 @@ private struct CombatAccumulator {
     private let itemStatMultipliers: [CombatStatKey: Double]
     private var hasPositivePhysicalAttackEquipment: Bool = false
 
-    init(raceId: UInt8,
+    nonisolated init(raceId: UInt8,
          level: Int,
          attributes: CharacterValues.CoreAttributes,
          race: RaceDefinition,
@@ -616,7 +616,7 @@ private struct CombatAccumulator {
                                                                                                    definitions: itemDefinitions)
     }
 
-    func makeCombat() throws -> CharacterValues.Combat {
+    nonisolated func makeCombat() throws -> CharacterValues.Combat {
         let baseLevelFactor = CombatFormulas.levelDependentValue(raceId: raceId,
                                                                  level: level)
         let levelFactor = baseLevelFactor * growthMultiplier
@@ -725,7 +725,7 @@ private struct CombatAccumulator {
 
         let convertedStats = try applyStatConversions(to: stats)
 
-        func resolvedValue(_ key: CombatStatKey) -> Double {
+        nonisolated func resolvedValue(_ key: CombatStatKey) -> Double {
             convertedStats[key] ?? stats[key] ?? 0.0
         }
 
@@ -798,7 +798,7 @@ private struct CombatAccumulator {
         return combat
     }
 
-    private func applyStatConversions(to stats: [CombatStatKey: Double]) throws -> [CombatStatKey: Double] {
+    private nonisolated func applyStatConversions(to stats: [CombatStatKey: Double]) throws -> [CombatStatKey: Double] {
         guard !statConversions.isEmpty else { return stats }
 
         var result = stats
@@ -821,7 +821,7 @@ private struct CombatAccumulator {
         return result
     }
 
-    private func conversionProcessingOrder(initialStats: [CombatStatKey: Double]) throws -> [CombatStatKey] {
+    private nonisolated func conversionProcessingOrder(initialStats: [CombatStatKey: Double]) throws -> [CombatStatKey] {
         var nodes = Set(initialStats.keys)
         var incoming: [CombatStatKey: Int] = [:]
         var adjacency: [CombatStatKey: Set<CombatStatKey>] = [:]
@@ -867,7 +867,7 @@ private struct CombatAccumulator {
         return ordered
     }
 
-    func applyTwentyOneBonuses(to combat: CharacterValues.Combat,
+    nonisolated func applyTwentyOneBonuses(to combat: CharacterValues.Combat,
                                attributes: CharacterValues.CoreAttributes) -> CharacterValues.Combat {
         var result = combat
         if attributes.strength >= 21 {
@@ -898,7 +898,7 @@ private struct CombatAccumulator {
         return result
     }
 
-    func clampCombat(_ combat: CharacterValues.Combat) -> CharacterValues.Combat {
+    nonisolated func clampCombat(_ combat: CharacterValues.Combat) -> CharacterValues.Combat {
         var result = combat
         result.maxHP = max(1, result.maxHP)
         result.attackCount = max(1, result.attackCount)
@@ -909,7 +909,7 @@ private struct CombatAccumulator {
     /// 装備の戦闘ボーナスを適用
     /// - Note: cachedEquippedItemsのcombatBonusesには称号・超レア・宝石改造・パンドラが適用済み。
     ///         ここではカテゴリ倍率とアイテムステータス倍率のみを適用する。
-    private func applyEquipmentCombatBonuses(to combat: inout CharacterValues.Combat) {
+    private nonisolated func applyEquipmentCombatBonuses(to combat: inout CharacterValues.Combat) {
         for item in cachedEquippedItems {
             let categoryMultiplier = equipmentMultipliers[Int(item.category.rawValue)] ?? 1.0
             let quantity = Int(item.quantity)
@@ -931,11 +931,11 @@ private struct CombatAccumulator {
         }
     }
 
-    private var shouldApplyMartialBonuses: Bool {
+    private nonisolated var shouldApplyMartialBonuses: Bool {
         !hasPositivePhysicalAttackEquipment
     }
 
-    private static func containsPositivePhysicalAttack(equipment: [CharacterValues.EquippedItem],
+    private nonisolated static func containsPositivePhysicalAttack(equipment: [CharacterValues.EquippedItem],
                                                        definitions: [ItemDefinition]) -> Bool {
         guard !equipment.isEmpty else { return false }
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
@@ -948,7 +948,7 @@ private struct CombatAccumulator {
         return false
     }
 
-    private func apply(bonus: Int, to stat: CombatStatKey, combat: inout CharacterValues.Combat) {
+    private nonisolated func apply(bonus: Int, to stat: CombatStatKey, combat: inout CharacterValues.Combat) {
         switch stat {
         case .maxHP: combat.maxHP += bonus
         case .physicalAttack: combat.physicalAttack += bonus
@@ -987,7 +987,7 @@ private enum CombatStatKey: UInt8, CaseIterable {
     case breathDamage = 13
 
     /// EnumMappings.combatStat のInt値から初期化
-    init?(_ intValue: Int) {
+    nonisolated init?(_ intValue: Int) {
         switch intValue {
         case 10: self = .maxHP
         case 11: self = .physicalAttack
@@ -1007,7 +1007,7 @@ private enum CombatStatKey: UInt8, CaseIterable {
     }
 
     /// レガシー用: String識別子から初期化（forEachNonZero互換用、Step 10で削除予定）
-    init?(_ raw: String?) {
+    nonisolated init?(_ raw: String?) {
         guard let raw else { return nil }
         switch raw {
         case "maxHP": self = .maxHP
@@ -1027,7 +1027,7 @@ private enum CombatStatKey: UInt8, CaseIterable {
         }
     }
 
-    var identifier: String {
+    nonisolated var identifier: String {
         switch self {
         case .maxHP: return "maxHP"
         case .physicalAttack: return "physicalAttack"
@@ -1049,11 +1049,11 @@ private enum CombatStatKey: UInt8, CaseIterable {
 private struct JobCoefficientLookup {
     private let coefficients: JobDefinition.CombatCoefficients
 
-    init(definition: JobDefinition) {
+    nonisolated init(definition: JobDefinition) {
         self.coefficients = definition.combatCoefficients
     }
 
-    func value(for stat: CombatStatKey) -> Double {
+    nonisolated func value(for stat: CombatStatKey) -> Double {
         switch stat {
         case .maxHP: return coefficients.maxHP
         case .physicalAttack: return coefficients.physicalAttack

@@ -473,7 +473,7 @@ extension AppServices {
 }
 
 extension ItemDropResult {
-    var autoTradeStackKey: String {
+    nonisolated var autoTradeStackKey: String {
         let superRare = superRareTitleId ?? 0
         let normal = normalTitleId ?? 2
         return StackKeyComponents.makeStackKey(superRareTitleId: superRare,

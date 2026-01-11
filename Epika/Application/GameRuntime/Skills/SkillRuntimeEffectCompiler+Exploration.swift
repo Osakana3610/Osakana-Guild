@@ -20,7 +20,7 @@ import Foundation
 
 // MARK: - Exploration Modifiers Compilation
 extension SkillRuntimeEffectCompiler {
-    static func explorationModifiers(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.ExplorationModifiers {
+    nonisolated static func explorationModifiers(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.ExplorationModifiers {
         guard !skills.isEmpty else { return .neutral }
 
         var modifiers = SkillRuntimeEffects.ExplorationModifiers.neutral

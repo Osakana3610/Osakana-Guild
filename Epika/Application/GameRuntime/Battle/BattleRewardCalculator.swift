@@ -30,7 +30,7 @@ struct BattleRewards: Sendable {
 }
 
 enum BattleRewardCalculator {
-    static func calculateRewards(party: RuntimePartyState,
+    nonisolated static func calculateRewards(party: RuntimePartyState,
                                  survivingMemberIds: [UInt8],
                                  enemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
                                  result: BattleService.BattleResult) throws -> BattleRewards {
@@ -83,7 +83,7 @@ enum BattleRewardCalculator {
                              gold: gold)
     }
 
-    static func trapDifficulty(for item: ItemDefinition,
+    nonisolated static func trapDifficulty(for item: ItemDefinition,
                                dungeon: DungeonDefinition,
                                floor: DungeonFloorDefinition) -> Int {
         let base = baseItemDifficulty(price: item.basePrice)
@@ -91,7 +91,7 @@ enum BattleRewardCalculator {
         return max(0, base + modifier)
     }
 
-    private static func computeExperience(for member: RuntimePartyState.Member,
+    private nonisolated static func computeExperience(for member: RuntimePartyState.Member,
                                           survivors: Set<UInt8>,
                                           aliveCount: Int,
                                           enemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
@@ -112,7 +112,7 @@ enum BattleRewardCalculator {
         return max(0, Int(adjusted.rounded()))
     }
 
-    private static func computeGold(enemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
+    private nonisolated static func computeGold(enemies: [BattleEnemyGroupBuilder.EncounteredEnemy],
                                     survivorLevels: [Int],
                                     aliveCount: Int,
                                     result: BattleService.BattleResult) -> Int {
@@ -130,7 +130,7 @@ enum BattleRewardCalculator {
         return max(0, Int(total.rounded()))
     }
 
-    private static func levelDifferenceMultiplier(enemyLevel: Int, characterLevel: Int) -> Double {
+    private nonisolated static func levelDifferenceMultiplier(enemyLevel: Int, characterLevel: Int) -> Double {
         let diff = enemyLevel - characterLevel
         if diff <= -50 {
             return 0.5
@@ -143,7 +143,7 @@ enum BattleRewardCalculator {
         }
     }
 
-    private static func levelRatioMultiplier(enemyLevel: Int, characterLevel: Int) -> Double {
+    private nonisolated static func levelRatioMultiplier(enemyLevel: Int, characterLevel: Int) -> Double {
         guard characterLevel > 0 else { return 1.0 }
         let ratio = Double(enemyLevel) / Double(characterLevel)
         if ratio <= 2.0 {
@@ -155,7 +155,7 @@ enum BattleRewardCalculator {
         }
     }
 
-    private static func baseItemDifficulty(price: Int) -> Int {
+    private nonisolated static func baseItemDifficulty(price: Int) -> Int {
         guard price > 0 else { return 0 }
         if price <= 1_000 {
             let value = 0.033 * Double(price) + 32.6

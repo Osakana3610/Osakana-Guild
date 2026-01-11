@@ -46,7 +46,7 @@ import Foundation
 /// マスターデータ取得と戦闘ステータス計算を行う。
 enum CachedCharacterFactory {
 
-    static func make(
+    nonisolated static func make(
         from input: CharacterInput,
         masterData: MasterDataCache,
         pandoraBoxItems: Set<UInt64> = []
@@ -231,7 +231,7 @@ enum CachedCharacterFactory {
     /// 装備変更時の高速再構築
     /// 既存のCachedCharacterからマスターデータ（種族/職業/性格）を再利用し、
     /// 装備関連のみを再計算する
-    static func withEquipmentChange(
+    nonisolated static func withEquipmentChange(
         current: CachedCharacter,
         newEquippedItems: [CharacterInput.EquippedItem],
         masterData: MasterDataCache,
@@ -399,7 +399,7 @@ enum CachedCharacterFactory {
     // MARK: - Private
 
     /// 装備アイテムからCachedInventoryItemのリストを構築
-    private static func makeCachedEquippedItems(
+    private nonisolated static func makeCachedEquippedItems(
         from items: [CharacterInput.EquippedItem],
         masterData: MasterDataCache,
         pandoraBoxItems: Set<UInt64>
@@ -518,7 +518,7 @@ enum CachedCharacterFactory {
         }
     }
 
-    private static func assembleLoadout(
+    private nonisolated static func assembleLoadout(
         masterData: MasterDataCache,
         from equippedItems: [CharacterInput.EquippedItem]
     ) -> CachedCharacter.Loadout {
@@ -547,14 +547,14 @@ enum CachedCharacterFactory {
         )
     }
 
-    private static func hasPositivePhysicalAttackBonus(
+    private nonisolated static func hasPositivePhysicalAttackBonus(
         input: CharacterInput,
         loadout: CachedCharacter.Loadout
     ) -> Bool {
         hasPositivePhysicalAttackBonus(equippedItems: input.equippedItems, loadout: loadout)
     }
 
-    private static func hasPositivePhysicalAttackBonus(
+    private nonisolated static func hasPositivePhysicalAttackBonus(
         equippedItems: [CharacterInput.EquippedItem],
         loadout: CachedCharacter.Loadout
     ) -> Bool {
@@ -568,7 +568,7 @@ enum CachedCharacterFactory {
     }
 
     /// 最終的なcombatBonusesを計算（称号 × 超レア × 宝石改造 × パンドラ）
-    private static func calculateFinalCombatBonuses(
+    private nonisolated static func calculateFinalCombatBonuses(
         definition: ItemDefinition,
         normalTitleId: UInt8,
         superRareTitleId: UInt8,

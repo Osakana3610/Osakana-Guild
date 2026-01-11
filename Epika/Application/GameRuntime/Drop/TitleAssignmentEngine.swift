@@ -23,7 +23,7 @@ import Foundation
 
 /// 通常称号抽選と超レア称号処理をまとめたエンジン。
 struct TitleAssignmentEngine {
-    static func shouldAssignTitle(category: DropItemCategory,
+    nonisolated static func shouldAssignTitle(category: DropItemCategory,
                                   partyBonuses: PartyDropBonuses,
                                   isRabiTicketActive: Bool,
                                   random: inout GameRandomSource) -> Bool {
@@ -38,7 +38,7 @@ struct TitleAssignmentEngine {
         return threshold < luckRandom
     }
 
-    static func determineNormalTitle(masterData: MasterDataCache,
+    nonisolated static func determineNormalTitle(masterData: MasterDataCache,
                                      enemyTitleId: UInt8?,
                                      hasTitleTreasure: Bool,
                                      category: DropItemCategory,
@@ -67,11 +67,11 @@ struct TitleAssignmentEngine {
         return title
     }
 
-    static func shouldRemoveNormalTitleAfterSuperRare(random: inout GameRandomSource) -> Bool {
+    nonisolated static func shouldRemoveNormalTitleAfterSuperRare(random: inout GameRandomSource) -> Bool {
         random.nextBool(probability: 0.12)
     }
 
-    static func selectSuperRareTitle(masterData: MasterDataCache,
+    nonisolated static func selectSuperRareTitle(masterData: MasterDataCache,
                                      random: inout GameRandomSource) -> UInt8? {
         let titles = masterData.allSuperRareTitles
         guard !titles.isEmpty else { return nil }
@@ -79,7 +79,7 @@ struct TitleAssignmentEngine {
         return titles[index].id
     }
 
-    private static func normalTitleCandidates(masterData: MasterDataCache,
+    private nonisolated static func normalTitleCandidates(masterData: MasterDataCache,
                                               hasTitleTreasure: Bool) -> [TitleDefinition] {
         masterData.allTitles.filter { definition in
             guard let probability = definition.dropProbability, probability > 0 else { return false }
@@ -90,7 +90,7 @@ struct TitleAssignmentEngine {
         }
     }
 
-    private static func rollNormalTitle(from candidates: [TitleDefinition],
+    private nonisolated static func rollNormalTitle(from candidates: [TitleDefinition],
                                         random: inout GameRandomSource) -> TitleDefinition? {
         let weights = candidates.map { $0.dropProbability ?? 0.0 }
         guard let index = random.nextIndex(weights: weights) else {
@@ -99,7 +99,7 @@ struct TitleAssignmentEngine {
         return candidates[index]
     }
 
-    private static func shouldRemoveLowTitle(title: TitleDefinition,
+    private nonisolated static func shouldRemoveLowTitle(title: TitleDefinition,
                                              category: DropItemCategory) -> Bool {
         let rank = titleRank(of: title)
         switch category {
@@ -110,11 +110,11 @@ struct TitleAssignmentEngine {
         }
     }
 
-    private static func titleRank(of title: TitleDefinition) -> Int {
+    private nonisolated static func titleRank(of title: TitleDefinition) -> Int {
         Int(title.id)
     }
 
-    private static func judgmentCountForEnemyTitle(masterData: MasterDataCache,
+    private nonisolated static func judgmentCountForEnemyTitle(masterData: MasterDataCache,
                                                     titleId: UInt8?) -> Int {
         guard let titleId else { return 1 }
         if let definition = masterData.title(titleId),

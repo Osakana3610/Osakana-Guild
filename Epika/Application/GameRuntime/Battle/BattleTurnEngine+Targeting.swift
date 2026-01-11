@@ -33,18 +33,18 @@ import Foundation
 
 private enum HitProbabilityConstants {
     /// 基本最低命中率（5%）- どんなに回避が高くても最低限当たる確率
-    static let baseMinHitRate = 0.05
+    nonisolated static let baseMinHitRate = 0.05
     /// 基本最高命中率（95%）- どんなに命中が高くても最大でこの確率
-    static let baseMaxHitRate = 0.95
+    nonisolated static let baseMaxHitRate = 0.95
     /// 敏捷による最低命中率の減衰係数（12%減少/敏捷1ポイント）
-    static let agilityDecayFactor = 0.88
+    nonisolated static let agilityDecayFactor = 0.88
     /// 敏捷による減衰が開始する閾値
-    static let agilityDecayThreshold = 20
+    nonisolated static let agilityDecayThreshold = 20
 }
 
 // MARK: - Targeting
 extension BattleTurnEngine {
-    static func selectOffensiveTarget(attackerSide: ActorSide,
+    nonisolated static func selectOffensiveTarget(attackerSide: ActorSide,
                                       context: inout BattleContext,
                                       allowFriendlyTargets: Bool,
                                       attacker: BattleActor?,
@@ -116,7 +116,7 @@ extension BattleTurnEngine {
     }
 
     /// 重み付きランダムターゲット選択
-    private static func selectWeightedTarget(from pool: [ActorReference],
+    private nonisolated static func selectWeightedTarget(from pool: [ActorReference],
                                              context: BattleContext,
                                              random: inout GameRandomSource) -> ActorReference? {
         guard !pool.isEmpty else { return nil }
@@ -148,7 +148,7 @@ extension BattleTurnEngine {
     }
 
     /// 「かばう」対象を探す
-    private static func findCoveringAlly(for targetSide: ActorSide,
+    private nonisolated static func findCoveringAlly(for targetSide: ActorSide,
                                          targetIndex: Int,
                                          context: BattleContext,
                                          random: inout GameRandomSource) -> (ActorSide, Int)? {
@@ -186,7 +186,7 @@ extension BattleTurnEngine {
         return (targetSide, last.0)
     }
 
-    static func filterAlliedTargets(for attacker: BattleActor,
+    nonisolated static func filterAlliedTargets(for attacker: BattleActor,
                                     allies: [ActorReference],
                                     context: BattleContext) -> [ActorReference] {
         let protected = attacker.skillEffects.misc.partyProtectedTargets
@@ -207,13 +207,13 @@ extension BattleTurnEngine {
     }
 
     /// targetId（raceId）がアクターにマッチするかチェック
-    static func matchTargetId(_ targetId: Int, to actor: BattleActor) -> Bool {
+    nonisolated static func matchTargetId(_ targetId: Int, to actor: BattleActor) -> Bool {
         // targetId は EnumMappings.targetIdValue で定義された種族ID
         if let raceId = actor.raceId, Int(raceId) == targetId { return true }
         return false
     }
 
-    static func referenceToSideIndex(_ reference: ActorReference) -> (ActorSide, Int) {
+    nonisolated static func referenceToSideIndex(_ reference: ActorReference) -> (ActorSide, Int) {
         switch reference {
         case .player(let index):
             return (.player, index)
@@ -222,7 +222,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func selectHealingTargetIndex(in actors: [BattleActor], requireHalfHP: Bool = false) -> Int? {
+    nonisolated static func selectHealingTargetIndex(in actors: [BattleActor], requireHalfHP: Bool = false) -> Int? {
         var bestIndex: Int?
         var lowestRatio = Double.greatestFiniteMagnitude
         for (index, actor) in actors.enumerated() where actor.isAlive && actor.currentHP < actor.snapshot.maxHP {
@@ -239,7 +239,7 @@ extension BattleTurnEngine {
         return bestIndex
     }
 
-    static func selectStatusTargets(attackerSide: ActorSide,
+    nonisolated static func selectStatusTargets(attackerSide: ActorSide,
                                     context: inout BattleContext,
                                     allowFriendlyTargets: Bool,
                                     maxTargets: Int,
@@ -281,7 +281,7 @@ extension BattleTurnEngine {
         return Array(pool.prefix(count))
     }
 
-    static func actorIndices(for side: ActorSide, context: BattleContext) -> [Int] {
+    nonisolated static func actorIndices(for side: ActorSide, context: BattleContext) -> [Int] {
         switch side {
         case .player:
             return Array(context.players.indices)
@@ -290,7 +290,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func clampProbability(_ value: Double, defender: BattleActor? = nil) -> Double {
+    nonisolated static func clampProbability(_ value: Double, defender: BattleActor? = nil) -> Double {
         var minHit = HitProbabilityConstants.baseMinHitRate
 
         if let defender {

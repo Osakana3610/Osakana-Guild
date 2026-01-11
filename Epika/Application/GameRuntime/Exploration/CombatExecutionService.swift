@@ -28,11 +28,11 @@ struct EncounteredEnemySpec: Sendable {
 struct CombatExecutionService {
     private let masterData: MasterDataCache
 
-    init(masterData: MasterDataCache) {
+    nonisolated init(masterData: MasterDataCache) {
         self.masterData = masterData
     }
 
-    func runCombat(enemySpecs: [EncounteredEnemySpec],
+    nonisolated func runCombat(enemySpecs: [EncounteredEnemySpec],
                    dungeon: DungeonDefinition,
                    floor: DungeonFloorDefinition,
                    party: inout RuntimePartyState,

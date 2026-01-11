@@ -20,7 +20,7 @@ import Foundation
 
 // MARK: - Reward Components Compilation
 extension SkillRuntimeEffectCompiler {
-    static func rewardComponents(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.RewardComponents {
+    nonisolated static func rewardComponents(from skills: [SkillDefinition]) throws -> SkillRuntimeEffects.RewardComponents {
         guard !skills.isEmpty else { return .neutral }
 
         var components = SkillRuntimeEffects.RewardComponents.neutral

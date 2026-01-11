@@ -24,7 +24,7 @@ import SwiftData
 /// このプロバイダ経由でコンテキストを取得する。
 /// これにより、コンテキスト生成時の設定（autosave無効化など）を統一できる。
 struct SwiftDataContextProvider: Sendable {
-    let container: ModelContainer
+    nonisolated let container: ModelContainer
 
     /// 新しいコンテキストを生成する
     ///
@@ -32,7 +32,7 @@ struct SwiftDataContextProvider: Sendable {
     ///
     /// このメソッドで生成されたコンテキストは自動保存されないため、
     /// 変更を永続化するには明示的に `context.save()` を呼ぶ必要がある。
-    func makeContext() -> ModelContext {
+    nonisolated func makeContext() -> ModelContext {
         let context = ModelContext(container)
         context.autosaveEnabled = false
         return context

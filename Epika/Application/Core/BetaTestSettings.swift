@@ -48,16 +48,16 @@ struct BetaTestSettings {
         var fixedSeed: UInt64 = 12345
     }
 
-    private static let lock = OSAllocatedUnfairLock(initialState: State())
+    nonisolated private static let lock = OSAllocatedUnfairLock(initialState: State())
 
     /// 現在の乱数モード
-    static var randomMode: RandomMode {
+    nonisolated static var randomMode: RandomMode {
         get { lock.withLock { $0.randomMode } }
         set { lock.withLock { $0.randomMode = newValue } }
     }
 
     /// シード固定モード時に使用するシード値
-    static var fixedSeed: UInt64 {
+    nonisolated static var fixedSeed: UInt64 {
         get { lock.withLock { $0.fixedSeed } }
         set { lock.withLock { $0.fixedSeed = newValue } }
     }

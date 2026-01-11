@@ -44,15 +44,15 @@ struct RaceDefinition: Identifiable, Sendable, Hashable {
         let luck: Int
     }
 
-    let id: UInt8
-    let name: String
-    let genderCode: UInt8
-    let description: String
-    let baseStats: BaseStats
-    let maxLevel: Int
+    nonisolated let id: UInt8
+    nonisolated let name: String
+    nonisolated let genderCode: UInt8
+    nonisolated let description: String
+    nonisolated let baseStats: BaseStats
+    nonisolated let maxLevel: Int
 
     /// 性別の表示名（genderCodeから導出、表示用はここ一箇所のみ）
-    var genderDisplayName: String {
+    nonisolated var genderDisplayName: String {
         switch genderCode {
         case 1: return "男性"
         case 2: return "女性"
@@ -93,7 +93,7 @@ enum BaseStat: UInt8, CaseIterable, Sendable {
         }
     }
 
-    var displayName: String {
+    nonisolated var displayName: String {
         switch self {
         case .strength: return "力"
         case .wisdom: return "知恵"
@@ -104,7 +104,7 @@ enum BaseStat: UInt8, CaseIterable, Sendable {
         }
     }
 
-    func value(from stats: RaceDefinition.BaseStats) -> Int {
+    nonisolated func value(from stats: RaceDefinition.BaseStats) -> Int {
         switch self {
         case .strength: return stats.strength
         case .wisdom: return stats.wisdom

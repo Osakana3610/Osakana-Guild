@@ -48,51 +48,51 @@ import Foundation
 /// CharacterInput + マスターデータ + 計算結果を統合。
 struct CachedCharacter: Identifiable, Sendable, Hashable {
     // === 永続化データ（CharacterInputから） ===
-    let id: UInt8
-    var displayName: String
-    let raceId: UInt8
-    let jobId: UInt8
-    let previousJobId: UInt8
-    let avatarId: UInt16
-    let level: Int
-    let experience: Int
-    var currentHP: Int
-    let equippedItems: [CachedInventoryItem]
-    let primaryPersonalityId: UInt8
-    let secondaryPersonalityId: UInt8
-    let actionRateAttack: Int
-    let actionRatePriestMagic: Int
-    let actionRateMageMagic: Int
-    let actionRateBreath: Int
-    let updatedAt: Date
-    let displayOrder: UInt8
+    nonisolated let id: UInt8
+    nonisolated var displayName: String
+    nonisolated let raceId: UInt8
+    nonisolated let jobId: UInt8
+    nonisolated let previousJobId: UInt8
+    nonisolated let avatarId: UInt16
+    nonisolated let level: Int
+    nonisolated let experience: Int
+    nonisolated var currentHP: Int
+    nonisolated let equippedItems: [CachedInventoryItem]
+    nonisolated let primaryPersonalityId: UInt8
+    nonisolated let secondaryPersonalityId: UInt8
+    nonisolated let actionRateAttack: Int
+    nonisolated let actionRatePriestMagic: Int
+    nonisolated let actionRateMageMagic: Int
+    nonisolated let actionRateBreath: Int
+    nonisolated let updatedAt: Date
+    nonisolated let displayOrder: UInt8
 
     // === 計算結果 ===
-    let attributes: CoreAttributes
-    let maxHP: Int
-    let combat: Combat
-    let equipmentCapacity: Int
+    nonisolated let attributes: CoreAttributes
+    nonisolated let maxHP: Int
+    nonisolated let combat: Combat
+    nonisolated let equipmentCapacity: Int
 
     // isMartialEligibleはcombatから取得
-    var isMartialEligible: Bool { combat.isMartialEligible }
+    nonisolated var isMartialEligible: Bool { combat.isMartialEligible }
 
     // === マスターデータ ===
-    let race: RaceDefinition?
-    let job: JobDefinition?
-    let previousJob: JobDefinition?
-    let personalityPrimary: PersonalityPrimaryDefinition?
-    let personalitySecondary: PersonalitySecondaryDefinition?
-    let learnedSkills: [SkillDefinition]
-    let loadout: Loadout
-    let spellbook: SkillRuntimeEffects.Spellbook
-    let spellLoadout: SkillRuntimeEffects.SpellLoadout
+    nonisolated let race: RaceDefinition?
+    nonisolated let job: JobDefinition?
+    nonisolated let previousJob: JobDefinition?
+    nonisolated let personalityPrimary: PersonalityPrimaryDefinition?
+    nonisolated let personalitySecondary: PersonalitySecondaryDefinition?
+    nonisolated let learnedSkills: [SkillDefinition]
+    nonisolated let loadout: Loadout
+    nonisolated let spellbook: SkillRuntimeEffects.Spellbook
+    nonisolated let spellLoadout: SkillRuntimeEffects.SpellLoadout
 
     // === 導出プロパティ ===
-    var name: String { displayName }
-    var isAlive: Bool { currentHP > 0 }
-    var raceName: String { race?.name ?? "種族\(raceId)" }
-    var gender: String { race?.genderDisplayName ?? "不明" }
-    var jobName: String {
+    nonisolated var name: String { displayName }
+    nonisolated var isAlive: Bool { currentHP > 0 }
+    nonisolated var raceName: String { race?.name ?? "種族\(raceId)" }
+    nonisolated var gender: String { race?.genderDisplayName ?? "不明" }
+    nonisolated var jobName: String {
         let currentJobName = job?.name ?? "職業\(jobId)"
         // マスター職（ID 100以上）は前職表示不要
         if jobId < 100, let previousJobName = previousJob?.name {
@@ -101,14 +101,14 @@ struct CachedCharacter: Identifiable, Sendable, Hashable {
         return currentJobName
     }
     /// 職業表示名（CharacterSummary互換）
-    var displayJobName: String { jobName }
+    nonisolated var displayJobName: String { jobName }
 
-    var resolvedAvatarId: UInt16 {
+    nonisolated var resolvedAvatarId: UInt16 {
         avatarId == 0 ? UInt16(raceId) : avatarId
     }
 
     /// 行動優先度
-    var actionPreferences: CharacterValues.ActionPreferences {
+    nonisolated var actionPreferences: CharacterValues.ActionPreferences {
         CharacterValues.ActionPreferences(
             attack: actionRateAttack,
             priestMagic: actionRatePriestMagic,
@@ -118,7 +118,7 @@ struct CachedCharacter: Identifiable, Sendable, Hashable {
     }
 
     /// HP互換プロパティ
-    var hitPoints: CharacterValues.HitPoints {
+    nonisolated var hitPoints: CharacterValues.HitPoints {
         CharacterValues.HitPoints(current: currentHP, maximum: maxHP)
     }
 }
@@ -128,8 +128,8 @@ extension CachedCharacter {
     typealias Combat = CharacterValues.Combat
 
     struct Loadout: Sendable, Hashable {
-        var items: [ItemDefinition]
-        var titles: [TitleDefinition]
-        var superRareTitles: [SuperRareTitleDefinition]
+        nonisolated var items: [ItemDefinition]
+        nonisolated var titles: [TitleDefinition]
+        nonisolated var superRareTitles: [SuperRareTitleDefinition]
     }
 }

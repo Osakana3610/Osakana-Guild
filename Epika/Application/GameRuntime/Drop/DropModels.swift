@@ -53,20 +53,20 @@ enum DropItemCategory: UInt8, Sendable {
 
 /// パーティのドロップ系補正値を集計したもの。
 struct PartyDropBonuses: Sendable {
-    let goldMultiplier: Double
-    let rareDropMultiplier: Double
-    let titleGrantRateMultiplier: Double
-    let averageLuck: Double
-    let fortune: Int
+    nonisolated let goldMultiplier: Double
+    nonisolated let rareDropMultiplier: Double
+    nonisolated let titleGrantRateMultiplier: Double
+    nonisolated let averageLuck: Double
+    nonisolated let fortune: Int
 
-    static let neutral = PartyDropBonuses(goldMultiplier: 1.0,
+    nonisolated static let neutral = PartyDropBonuses(goldMultiplier: 1.0,
                                           rareDropMultiplier: 1.0,
                                           titleGrantRateMultiplier: 1.0,
                                           averageLuck: 0.0,
                                           fortune: 0)
 
     /// CachedCharacter配列からボーナスを計算する。
-    init(members: [CachedCharacter]) {
+    nonisolated init(members: [CachedCharacter]) {
         guard !members.isEmpty else {
             self = .neutral
             return
@@ -101,7 +101,7 @@ struct PartyDropBonuses: Sendable {
         self.fortune = Int(averageLuck.rounded())
     }
 
-    private init(goldMultiplier: Double, rareDropMultiplier: Double, titleGrantRateMultiplier: Double, averageLuck: Double, fortune: Int) {
+    private nonisolated init(goldMultiplier: Double, rareDropMultiplier: Double, titleGrantRateMultiplier: Double, averageLuck: Double, fortune: Int) {
         self.goldMultiplier = goldMultiplier
         self.rareDropMultiplier = rareDropMultiplier
         self.titleGrantRateMultiplier = titleGrantRateMultiplier
@@ -139,7 +139,7 @@ struct DropOutcome: Sendable {
 
 extension RuntimePartyState {
     /// パーティメンバーのステータスからドロップ倍率を集計する。
-    func makeDropBonuses() -> PartyDropBonuses {
+    nonisolated func makeDropBonuses() -> PartyDropBonuses {
         PartyDropBonuses(members: members.map(\.character))
     }
 }

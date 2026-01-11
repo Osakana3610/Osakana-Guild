@@ -30,9 +30,9 @@ import Foundation
 // MARK: - Spell Handlers (8)
 
 enum SpellPowerPercentHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.spellPowerPercent
+    nonisolated static let effectType = SkillEffectType.spellPowerPercent
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -44,9 +44,9 @@ enum SpellPowerPercentHandler: SkillEffectHandler {
 }
 
 enum SpellPowerMultiplierHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.spellPowerMultiplier
+    nonisolated static let effectType = SkillEffectType.spellPowerMultiplier
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -56,9 +56,9 @@ enum SpellPowerMultiplierHandler: SkillEffectHandler {
 }
 
 enum SpellSpecificMultiplierHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.spellSpecificMultiplier
+    nonisolated static let effectType = SkillEffectType.spellSpecificMultiplier
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -71,9 +71,9 @@ enum SpellSpecificMultiplierHandler: SkillEffectHandler {
 }
 
 enum SpellSpecificTakenMultiplierHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.spellSpecificTakenMultiplier
+    nonisolated static let effectType = SkillEffectType.spellSpecificTakenMultiplier
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -86,9 +86,9 @@ enum SpellSpecificTakenMultiplierHandler: SkillEffectHandler {
 }
 
 enum SpellChargesHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.spellCharges
+    nonisolated static let effectType = SkillEffectType.spellCharges
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -153,9 +153,9 @@ enum SpellChargesHandler: SkillEffectHandler {
 }
 
 enum SpellAccessHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.spellAccess
+    nonisolated static let effectType = SkillEffectType.spellAccess
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -165,9 +165,9 @@ enum SpellAccessHandler: SkillEffectHandler {
 }
 
 enum SpellTierUnlockHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.spellTierUnlock
+    nonisolated static let effectType = SkillEffectType.spellTierUnlock
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -177,9 +177,9 @@ enum SpellTierUnlockHandler: SkillEffectHandler {
 }
 
 enum TacticSpellAmplifyHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.tacticSpellAmplify
+    nonisolated static let effectType = SkillEffectType.tacticSpellAmplify
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -208,9 +208,9 @@ enum TacticSpellAmplifyHandler: SkillEffectHandler {
 }
 
 enum MagicCriticalChancePercentHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.magicCriticalChancePercent
+    nonisolated static let effectType = SkillEffectType.magicCriticalChancePercent
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
@@ -225,9 +225,9 @@ enum MagicCriticalChancePercentHandler: SkillEffectHandler {
 }
 
 enum SpellChargeRecoveryChanceHandler: SkillEffectHandler {
-    static let effectType = SkillEffectType.spellChargeRecoveryChance
+    nonisolated static let effectType = SkillEffectType.spellChargeRecoveryChance
 
-    static func apply(
+    nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
