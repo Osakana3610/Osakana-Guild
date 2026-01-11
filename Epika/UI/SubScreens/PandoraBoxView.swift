@@ -144,10 +144,11 @@ struct PandoraBoxView: View {
         loadError = nil
 
         do {
-            let player = try await gameStateService.ensurePlayer()
+            try await displayService.loadGameState()
+            let cachedItems = await MainActor.run { displayService.pandoraBoxItems }
 
             // パンドラアイテムをマスターデータから構築（インベントリに依存しない）
-            pandoraItems = player.pandoraBoxItems.compactMap { packed in
+            pandoraItems = cachedItems.compactMap { packed in
                 let stackKey = StackKey(packed: packed)
                 return makePandoraDisplayItem(stackKey: stackKey)
             }

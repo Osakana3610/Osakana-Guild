@@ -32,6 +32,7 @@
 // ==============================================================================
 
 import Foundation
+import SQLite3
 import SwiftData
 
 @MainActor
@@ -92,6 +93,8 @@ final class ProgressBootstrapper {
 #endif
         }
 
+        try migratePandoraBoxItemsIfNeeded(container: container, storeURL: storeURL)
+
         cachedContainer = container
 #if DEBUG
         print("[ProgressStore][DEBUG] boot finished")
@@ -138,5 +141,120 @@ final class ProgressBootstrapper {
             try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
         }
         return directory.appendingPathComponent("Progress.store")
+    }
+}
+
+// MARK: - Pandora Box Migration
+
+private extension ProgressBootstrapper {
+    /// 2026-01-20 に撤去予定: pandoraBoxItems(JSON) → pandoraBoxItemsData(バイナリ) への移行
+    func migratePandoraBoxItemsIfNeeded(container: ModelContainer, storeURL: URL) throws {
+        let migrationKey = "PandoraBoxItemsMigration_20260120"
+        if UserDefaults.standard.bool(forKey: migrationKey) {
+            return
+        }
+
+        guard let legacyData = try PandoraBoxMigration.readLegacyPandoraBoxItems(from: storeURL) else {
+            UserDefaults.standard.set(true, forKey: migrationKey)
+            return
+        }
+
+        let legacyItems = try PandoraBoxMigration.decodeLegacyPandoraBoxItems(from: legacyData)
+        if legacyItems.isEmpty {
+            UserDefaults.standard.set(true, forKey: migrationKey)
+            return
+        }
+
+        let context = ModelContext(container)
+        var descriptor = FetchDescriptor<GameStateRecord>()
+        descriptor.fetchLimit = 1
+        let record: GameStateRecord
+        if let existing = try context.fetch(descriptor).first {
+            record = existing
+        } else {
+            record = GameStateRecord()
+            context.insert(record)
+        }
+
+        record.pandoraBoxItemsData = PandoraBoxStorage.encode(legacyItems)
+        try context.save()
+        UserDefaults.standard.set(true, forKey: migrationKey)
+    }
+}
+
+private enum PandoraBoxMigrationError: Error {
+    case unsupportedLegacyFormat
+    case invalidStackKey(String)
+}
+
+private enum PandoraBoxMigration {
+    static func readLegacyPandoraBoxItems(from storeURL: URL) throws -> Data? {
+        var db: OpaquePointer?
+        if sqlite3_open(storeURL.path, &db) != SQLITE_OK {
+            throw ProgressError.invalidInput(description: "Progress.store を開けません")
+        }
+        defer { sqlite3_close(db) }
+
+        guard tableHasColumn(db: db, table: "ZGAMESTATERECORD", column: "ZPANDORABOXITEMS") else {
+            return nil
+        }
+
+        let query = "SELECT ZPANDORABOXITEMS FROM ZGAMESTATERECORD LIMIT 1;"
+        var statement: OpaquePointer?
+        defer { sqlite3_finalize(statement) }
+        if sqlite3_prepare_v2(db, query, -1, &statement, nil) != SQLITE_OK {
+            throw ProgressError.invalidInput(description: "Pandora移行のSQL準備に失敗しました")
+        }
+
+        guard sqlite3_step(statement) == SQLITE_ROW else { return nil }
+        let type = sqlite3_column_type(statement, 0)
+        guard type != SQLITE_NULL else { return nil }
+
+        if type == SQLITE_BLOB {
+            guard let bytes = sqlite3_column_blob(statement, 0) else { return nil }
+            let length = Int(sqlite3_column_bytes(statement, 0))
+            return Data(bytes: bytes, count: length)
+        }
+
+        if type == SQLITE_TEXT, let text = sqlite3_column_text(statement, 0) {
+            let length = Int(sqlite3_column_bytes(statement, 0))
+            return Data(bytes: text, count: length)
+        }
+
+        return nil
+    }
+
+    /// 2026-01-20 に撤去予定: 旧JSON/KeyedArchiverの読み取り
+    static func decodeLegacyPandoraBoxItems(from data: Data) throws -> [UInt64] {
+        do {
+            return try JSONDecoder().decode([UInt64].self, from: data)
+        } catch {
+            let allowedClasses: [AnyClass] = [NSArray.self, NSString.self]
+            let object = try NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data)
+            if let strings = object as? [String] {
+                var items: [UInt64] = []
+                items.reserveCapacity(strings.count)
+                for value in strings {
+                    guard let stackKey = StackKey(stringValue: value) else {
+                        throw PandoraBoxMigrationError.invalidStackKey(value)
+                    }
+                    items.append(stackKey.packed)
+                }
+                return items
+            }
+            throw PandoraBoxMigrationError.unsupportedLegacyFormat
+        }
+    }
+
+    private static func tableHasColumn(db: OpaquePointer?, table: String, column: String) -> Bool {
+        let query = "PRAGMA table_info(\(table));"
+        var statement: OpaquePointer?
+        defer { sqlite3_finalize(statement) }
+        guard sqlite3_prepare_v2(db, query, -1, &statement, nil) == SQLITE_OK else { return false }
+        while sqlite3_step(statement) == SQLITE_ROW {
+            guard let name = sqlite3_column_text(statement, 1) else { continue }
+            if String(cString: name) == column { return true }
+        }
+        return false
     }
 }

@@ -111,7 +111,7 @@ actor GameStateService {
         configureContextIfNeeded()
         let record = try ensureGameState(initialGold: initialGold)
         try saveIfNeeded()
-        return snapshot(from: record)
+        return try snapshot(from: record)
     }
 
     // MARK: - Gold Operations
@@ -150,7 +150,7 @@ actor GameStateService {
     func pandoraBoxItems() async throws -> [UInt64] {
         configureContextIfNeeded()
         let record = try fetchGameState()
-        return record.pandoraBoxItems
+        return try PandoraBoxStorage.decode(record.pandoraBoxItemsData)
     }
 
     /// パンドラボックスにアイテムを追加（インベントリから1個減らす）
@@ -165,14 +165,15 @@ actor GameStateService {
         let packed = stackKey.packed
 
         let record = try fetchGameState()
+        var items = try PandoraBoxStorage.decode(record.pandoraBoxItemsData)
 
         // 既に登録済みなら何もしない
-        guard !record.pandoraBoxItems.contains(packed) else {
-            return snapshot(from: record)
+        guard !items.contains(packed) else {
+            return try snapshot(from: record)
         }
 
         // 満杯チェック
-        guard record.pandoraBoxItems.count < 5 else {
+        guard items.count < 5 else {
             throw ProgressError.invalidInput(description: "パンドラボックスは既に満杯です")
         }
 
@@ -180,17 +181,18 @@ actor GameStateService {
         try await inventoryService.decrementItem(stackKey: stackKey.stringValue, quantity: 1)
 
         // パンドラに追加
-        record.pandoraBoxItems.append(packed)
+        items.append(packed)
+        record.pandoraBoxItemsData = PandoraBoxStorage.encode(items)
         record.updatedAt = Date()
         try saveIfNeeded()
         let change = UserDataLoadService.GameStateChange(
             gold: nil,
             catTickets: nil,
             partySlots: nil,
-            pandoraBoxItems: record.pandoraBoxItems
+            pandoraBoxItems: items
         )
         notifyGameStateChange(change)
-        return snapshot(from: record)
+        return try snapshot(from: record)
     }
 
     /// パンドラボックスからアイテムを解除（インベントリに1個戻す）
@@ -205,13 +207,14 @@ actor GameStateService {
         let packed = stackKey.packed
 
         let record = try fetchGameState()
+        var items = try PandoraBoxStorage.decode(record.pandoraBoxItemsData)
 
         // パンドラから削除
-        let originalCount = record.pandoraBoxItems.count
-        record.pandoraBoxItems.removeAll { $0 == packed }
+        let originalCount = items.count
+        items.removeAll { $0 == packed }
 
         // 実際に削除された場合のみインベントリに戻す
-        if record.pandoraBoxItems.count < originalCount {
+        if items.count < originalCount {
             _ = try await inventoryService.addItem(
                 itemId: stackKey.itemId,
                 quantity: 1,
@@ -226,16 +229,17 @@ actor GameStateService {
             )
         }
 
+        record.pandoraBoxItemsData = PandoraBoxStorage.encode(items)
         record.updatedAt = Date()
         try saveIfNeeded()
         let change = UserDataLoadService.GameStateChange(
             gold: nil,
             catTickets: nil,
             partySlots: nil,
-            pandoraBoxItems: record.pandoraBoxItems
+            pandoraBoxItems: items
         )
         notifyGameStateChange(change)
-        return snapshot(from: record)
+        return try snapshot(from: record)
     }
 }
 
@@ -299,7 +303,7 @@ private extension GameStateService {
             pandoraBoxItems: nil
         )
         notifyGameStateChange(change)
-        return snapshot(from: record)
+        return try snapshot(from: record)
     }
 
     func deleteAll<T: PersistentModel>(_ type: T.Type) throws {
@@ -315,12 +319,13 @@ private extension GameStateService {
         try modelContext.save()
     }
 
-    func snapshot(from record: GameStateRecord) -> CachedPlayer {
-        CachedPlayer(
+    func snapshot(from record: GameStateRecord) throws -> CachedPlayer {
+        let pandoraItems = try PandoraBoxStorage.decode(record.pandoraBoxItemsData)
+        return CachedPlayer(
             gold: record.gold,
             catTickets: record.catTickets,
             partySlots: record.partySlots,
-            pandoraBoxItems: record.pandoraBoxItems
+            pandoraBoxItems: pandoraItems
         )
     }
 }

@@ -16,7 +16,7 @@
 //     - gold: 所持金
 //     - catTickets: 猫チケット
 //     - partySlots: 解放済みパーティスロット数
-//     - pandoraBoxItems: パンドラボックス内アイテム（UInt64パック配列）
+//     - pandoraBoxItemsData: パンドラボックス内アイテム（UInt64配列のバイナリ）
 //
 //   - PlayerWallet (Codable): プレイヤー財布（gold/catTickets）
 //
@@ -57,9 +57,9 @@ final class GameStateRecord {
     var partySlots: UInt8 = UInt8(AppConstants.Progress.defaultPartySlotCount)
 
     // MARK: - パンドラボックス
-    /// パンドラボックスに登録されたアイテム（最大5件）- StackKeyをUInt64にパックした配列
+    /// パンドラボックスに登録されたアイテム（最大5件）- UInt64配列をバイナリで保持
     /// パンドラに入れたアイテムはインベントリから1個減らされ、ここに実体として保持される
-    var pandoraBoxItems: [UInt64] = []
+    var pandoraBoxItemsData: Data = Data()
 
     init(schemaVersion: UInt8 = 1,
          updatedAt: Date = Date(),
@@ -68,7 +68,7 @@ final class GameStateRecord {
          gold: UInt32 = 0,
          catTickets: UInt16 = 0,
          partySlots: UInt8 = UInt8(AppConstants.Progress.defaultPartySlotCount),
-         pandoraBoxItems: [UInt64] = []) {
+         pandoraBoxItemsData: Data = Data()) {
         self.schemaVersion = schemaVersion
         self.updatedAt = updatedAt
         self.lastDailyProcessedDate = lastDailyProcessedDate
@@ -76,7 +76,42 @@ final class GameStateRecord {
         self.gold = gold
         self.catTickets = catTickets
         self.partySlots = partySlots
-        self.pandoraBoxItems = pandoraBoxItems
+        self.pandoraBoxItemsData = pandoraBoxItemsData
+    }
+}
+
+// MARK: - Pandora Box Binary Storage
+
+enum PandoraBoxStorageError: Error {
+    case malformedData
+}
+
+enum PandoraBoxStorage {
+    /// フォーマット: 2バイト件数 + 各8バイトID（登録順を維持）
+    static func encode(_ items: [UInt64]) -> Data {
+        var data = Data(capacity: 2 + items.count * 8)
+        var count = UInt16(items.count)
+        withUnsafeBytes(of: &count) { data.append(contentsOf: $0) }
+        for var item in items {
+            withUnsafeBytes(of: &item) { data.append(contentsOf: $0) }
+        }
+        return data
+    }
+
+    static func decode(_ data: Data) throws -> [UInt64] {
+        if data.isEmpty { return [] }
+        guard data.count >= 2 else { throw PandoraBoxStorageError.malformedData }
+        let count = data.withUnsafeBytes { $0.load(as: UInt16.self) }
+        let expectedLength = 2 + Int(count) * 8
+        guard data.count == expectedLength else { throw PandoraBoxStorageError.malformedData }
+        var items: [UInt64] = []
+        items.reserveCapacity(Int(count))
+        for index in 0..<Int(count) {
+            let offset = 2 + index * 8
+            let value = data.withUnsafeBytes { $0.load(fromByteOffset: offset, as: UInt64.self) }
+            items.append(value)
+        }
+        return items
     }
 }
 

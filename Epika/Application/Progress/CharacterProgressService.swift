@@ -1072,6 +1072,7 @@ private extension CharacterProgressService {
         guard let gameState = try context.fetch(descriptor).first else {
             throw ProgressError.playerNotFound
         }
-        return Set(gameState.pandoraBoxItems)
+        let items = try PandoraBoxStorage.decode(gameState.pandoraBoxItemsData)
+        return Set(items)
     }
 }
