@@ -642,6 +642,7 @@ private struct PartyEquipmentListView: View {
 }
 
 // MARK: - Inline Selection Menus
+// iOS 17のAttributeGraphクラッシュ回避のため、Viewがasyncクロージャを保持しない（commit: 535a42b）。
 
 private struct DifficultyPickerMenu: View {
     @Environment(AppServices.self) private var appServices

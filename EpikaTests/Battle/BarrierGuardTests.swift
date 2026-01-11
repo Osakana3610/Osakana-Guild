@@ -14,7 +14,7 @@ import XCTest
 ///   - 1: physical（物理）
 ///   - 2: magical（魔法）
 ///   - 3: breath（ブレス）
-final class BarrierGuardTests: XCTestCase {
+nonisolated final class BarrierGuardTests: XCTestCase {
 
     // MARK: - バリア基本動作
 

@@ -4,7 +4,7 @@ import XCTest
 /// 乱数システムのテスト
 ///
 /// 目的: 戦闘で使用する乱数が仕様通りに動作することを証明する
-final class BattleRandomSystemTests: XCTestCase {
+nonisolated final class BattleRandomSystemTests: XCTestCase {
 
     // MARK: - GameRandomSource の決定性
 

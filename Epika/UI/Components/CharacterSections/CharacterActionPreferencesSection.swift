@@ -25,7 +25,7 @@ import SwiftUI
 @MainActor
 struct CharacterActionPreferencesSection: View {
     let character: CachedCharacter
-    let onActionPreferencesChange: ((CharacterValues.ActionPreferences) async throws -> Void)?
+    let onActionPreferencesChange: ((CharacterValues.ActionPreferences, @escaping (Result<Void, Error>) -> Void) -> Void)?
 
     @State private var actionPreferenceAttack: Double
     @State private var actionPreferencePriest: Double
@@ -34,7 +34,7 @@ struct CharacterActionPreferencesSection: View {
     @State private var actionPreferenceError: String?
 
     init(character: CachedCharacter,
-         onActionPreferencesChange: ((CharacterValues.ActionPreferences) async throws -> Void)? = nil) {
+         onActionPreferencesChange: ((CharacterValues.ActionPreferences, @escaping (Result<Void, Error>) -> Void) -> Void)? = nil) {
         self.character = character
         self.onActionPreferencesChange = onActionPreferencesChange
         let preferences = character.actionPreferences
@@ -201,11 +201,9 @@ private extension CharacterActionPreferencesSection {
         guard let onActionPreferencesChange else { return }
         guard actionPreferencesDirty else { return }
         let newPreferences = editedActionPreferences
-        Task {
-            do {
-                try await onActionPreferencesChange(newPreferences)
-            } catch {
-                await MainActor.run {
+        onActionPreferencesChange(newPreferences) { result in
+            Task { @MainActor in
+                if case .failure(let error) = result {
                     actionPreferenceError = error.localizedDescription
                 }
             }

@@ -16,7 +16,7 @@ import XCTest
 ///   - シード固定で乱数シーケンスを決定的に
 ///   - 期待値は実際の乱数から計算した黄金値
 ///   - criticalRate=0 → クリティカル判定をスキップ
-final class PhysicalDamageCalculationTests: XCTestCase {
+nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
 
     // MARK: - 基本ダメージ計算
 

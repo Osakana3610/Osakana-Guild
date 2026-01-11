@@ -8,7 +8,7 @@ import Foundation
 /// - 計算が検証しやすい値（1000, 2000, 5000など）を使用
 /// - luck は必須パラメータ（境界値 1, 18, 35 を使用、60は禁止）
 /// - criticalRate=0でクリティカル判定を無効化
-enum TestActorBuilder {
+nonisolated enum TestActorBuilder {
 
     /// 基本的な攻撃者を生成
     ///

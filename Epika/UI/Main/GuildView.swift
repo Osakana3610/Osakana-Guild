@@ -302,14 +302,35 @@ private struct LazyCachedCharacterDetailView: View {
         Group {
             if let runtimeCharacter {
                 CharacterDetailContent(character: runtimeCharacter,
-                                      onRename: { newName in
-                                          try await renameCharacter(to: newName)
+                                      onRename: { newName, completion in
+                                          Task {
+                                              do {
+                                                  try await renameCharacter(to: newName)
+                                                  await MainActor.run { completion(.success(())) }
+                                              } catch {
+                                                  await MainActor.run { completion(.failure(error)) }
+                                              }
+                                          }
                                       },
-                                      onAvatarChange: { identifier in
-                                          try await changeAvatar(to: identifier)
+                                      onAvatarChange: { identifier, completion in
+                                          Task {
+                                              do {
+                                                  try await changeAvatar(to: identifier)
+                                                  await MainActor.run { completion(.success(())) }
+                                              } catch {
+                                                  await MainActor.run { completion(.failure(error)) }
+                                              }
+                                          }
                                       },
-                                      onActionPreferencesChange: { preferences in
-                                          try await updateActionPreferences(to: preferences)
+                                      onActionPreferencesChange: { preferences, completion in
+                                          Task {
+                                              do {
+                                                  try await updateActionPreferences(to: preferences)
+                                                  await MainActor.run { completion(.success(())) }
+                                              } catch {
+                                                  await MainActor.run { completion(.failure(error)) }
+                                              }
+                                          }
                                       })
                     .navigationTitle(runtimeCharacter.name)
                     .navigationBarTitleDisplayMode(.inline)

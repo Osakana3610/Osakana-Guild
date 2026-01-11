@@ -5,7 +5,7 @@ import XCTest
 ///
 /// このファイルは過去に発生したバグの再発防止を目的とする。
 /// 各テストにはバグIDと「何が壊れていたか」を明記する。
-final class BoundaryConditionRegressionTests: XCTestCase {
+nonisolated final class BoundaryConditionRegressionTests: XCTestCase {
 
     // MARK: - cf89ec9: 敏捷21以上の回避計算
 

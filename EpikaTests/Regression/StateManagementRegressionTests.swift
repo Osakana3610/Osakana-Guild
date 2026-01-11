@@ -5,7 +5,7 @@ import XCTest
 ///
 /// このファイルは過去に発生したバグの再発防止を目的とする。
 /// 各テストにはバグIDと「何が壊れていたか」を明記する。
-final class StateManagementRegressionTests: XCTestCase {
+nonisolated final class StateManagementRegressionTests: XCTestCase {
 
     // MARK: - #95, aab6389: 戦闘後のHP状態がリセットされる
 

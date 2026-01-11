@@ -305,9 +305,18 @@ struct EquipmentEditorView: View {
                         CharacterEquippedItemsSection(
                             equippedItems: sortedEquippedItemsForDisplay,
                             equipmentCapacity: currentCharacter.equipmentCapacity,
-                            onUnequip: { displayItem in
-                                if displayItem.isEquipped {
-                                    try? await performUnequip(displayItem.cachedItem)
+                            onUnequip: { displayItem, completion in
+                                Task {
+                                    if displayItem.isEquipped {
+                                        do {
+                                            try await performUnequip(displayItem.cachedItem)
+                                            await MainActor.run { completion(.success(())) }
+                                        } catch {
+                                            await MainActor.run { completion(.failure(error)) }
+                                        }
+                                    } else {
+                                        await MainActor.run { completion(.success(())) }
+                                    }
                                 }
                             },
                             onDetail: { displayItem in

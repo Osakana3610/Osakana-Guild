@@ -16,7 +16,7 @@ import XCTest
 ///   - resistant: 50%（軽減）
 ///   - neutral: 100%（通常）
 ///   - vulnerable: 150%（脆弱）
-final class StatusEffectTests: XCTestCase {
+nonisolated final class StatusEffectTests: XCTestCase {
 
     // MARK: - テスト用StatusDefinition
 

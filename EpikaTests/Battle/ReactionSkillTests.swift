@@ -11,7 +11,7 @@ import XCTest
 ///   scaledAccuracy = hitChance × accuracyMultiplier
 ///
 /// 発動判定: percentChance(baseChancePercent)
-final class ReactionSkillTests: XCTestCase {
+nonisolated final class ReactionSkillTests: XCTestCase {
 
     // MARK: - 反撃の実行テスト（統合テスト）
 

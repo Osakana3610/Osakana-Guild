@@ -15,7 +15,7 @@ import XCTest
 ///   7. 反撃/追撃判定: percentChance(baseChancePercent)
 ///
 /// 境界値テスト: luck=1, 18, 35（ルール遵守）
-final class BattleIntegrationTests: XCTestCase {
+nonisolated final class BattleIntegrationTests: XCTestCase {
 
     // MARK: - 物理攻撃フロー
 

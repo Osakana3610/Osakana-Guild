@@ -12,7 +12,7 @@ import XCTest
 ///   - HP蓄積: 戦闘中のダメージがHPに正しく反映される
 ///
 /// 境界値テスト: luck=1, 18, 35（ルール遵守）
-final class BattleTurnEngineTests: XCTestCase {
+nonisolated final class BattleTurnEngineTests: XCTestCase {
 
     // MARK: - 勝利条件
 

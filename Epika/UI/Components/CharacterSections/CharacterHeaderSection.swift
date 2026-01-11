@@ -25,8 +25,8 @@ import SwiftUI
 @MainActor
 struct CharacterHeaderSection: View {
     let character: CachedCharacter
-    let onRename: ((String) async throws -> Void)?
-    let onAvatarChange: ((UInt16) async throws -> Void)?
+    let onRename: ((String, @escaping (Result<Void, Error>) -> Void) -> Void)?
+    let onAvatarChange: ((UInt16, @escaping (Result<Void, Error>) -> Void) -> Void)?
 
     @State private var nameText: String
     @State private var renameError: String?
@@ -37,8 +37,8 @@ struct CharacterHeaderSection: View {
     @State private var isChangingAvatar = false
 
     init(character: CachedCharacter,
-         onRename: ((String) async throws -> Void)? = nil,
-         onAvatarChange: ((UInt16) async throws -> Void)? = nil) {
+         onRename: ((String, @escaping (Result<Void, Error>) -> Void) -> Void)? = nil,
+         onAvatarChange: ((UInt16, @escaping (Result<Void, Error>) -> Void) -> Void)? = nil) {
         self.character = character
         self.onRename = onRename
         self.onAvatarChange = onAvatarChange
@@ -146,20 +146,17 @@ struct CharacterHeaderSection: View {
         }
         renameError = nil
         isRenaming = true
-        Task {
-            do {
-                try await onRename(trimmed)
-                await MainActor.run {
+        onRename(trimmed) { result in
+            Task { @MainActor in
+                switch result {
+                case .success:
                     nameText = trimmed
                     renameError = nil
-                    isRenaming = false
-                }
-            } catch {
-                await MainActor.run {
+                case .failure(let error):
                     renameError = error.localizedDescription
                     nameText = character.name
-                    isRenaming = false
                 }
+                isRenaming = false
             }
         }
     }
@@ -168,15 +165,13 @@ struct CharacterHeaderSection: View {
         guard let onAvatarChange else { return }
         avatarChangeError = nil
         isChangingAvatar = true
-        Task {
-            do {
-                try await onAvatarChange(avatarIndex)
-                await MainActor.run {
+        onAvatarChange(avatarIndex) { result in
+            Task { @MainActor in
+                switch result {
+                case .success:
                     isChangingAvatar = false
                     isAvatarSheetPresented = false
-                }
-            } catch {
-                await MainActor.run {
+                case .failure(let error):
                     isChangingAvatar = false
                     avatarChangeError = error.localizedDescription
                 }

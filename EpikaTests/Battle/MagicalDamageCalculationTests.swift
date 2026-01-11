@@ -11,7 +11,7 @@ import XCTest
 ///   baseDamage = max(1.0, attackPower - defensePower)
 ///
 /// 境界値テスト: luck=1, 18, 35（ルール遵守）
-final class MagicalDamageCalculationTests: XCTestCase {
+nonisolated final class MagicalDamageCalculationTests: XCTestCase {
 
     // MARK: - 基本ダメージ計算
 

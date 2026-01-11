@@ -5,7 +5,7 @@
 
 import XCTest
 
-final class EpikaUITests: XCTestCase {
+nonisolated final class EpikaUITests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false

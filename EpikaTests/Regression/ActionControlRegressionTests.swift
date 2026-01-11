@@ -5,7 +5,7 @@ import XCTest
 ///
 /// このファイルは過去に発生したバグの再発防止を目的とする。
 /// 各テストにはバグIDと「何が壊れていたか」を明記する。
-final class ActionControlRegressionTests: XCTestCase {
+nonisolated final class ActionControlRegressionTests: XCTestCase {
 
     // MARK: - 7083662: リアクションの無限ループ
 

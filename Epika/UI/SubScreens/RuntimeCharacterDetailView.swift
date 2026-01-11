@@ -60,15 +60,16 @@ struct CachedCharacterDetailSheetView: View {
 
 struct CharacterDetailContent: View {
     let character: CachedCharacter
-    let onRename: ((String) async throws -> Void)?
-    let onAvatarChange: ((UInt16) async throws -> Void)?
-    let onActionPreferencesChange: ((CharacterValues.ActionPreferences) async throws -> Void)?
+    // iOS 17のAttributeGraphクラッシュ回避のため、Viewがasyncクロージャを保持しない（commit: 535a42b）。
+    let onRename: ((String, @escaping (Result<Void, Error>) -> Void) -> Void)?
+    let onAvatarChange: ((UInt16, @escaping (Result<Void, Error>) -> Void) -> Void)?
+    let onActionPreferencesChange: ((CharacterValues.ActionPreferences, @escaping (Result<Void, Error>) -> Void) -> Void)?
     @Environment(AppServices.self) private var appServices
 
     init(character: CachedCharacter,
-         onRename: ((String) async throws -> Void)? = nil,
-         onAvatarChange: ((UInt16) async throws -> Void)? = nil,
-         onActionPreferencesChange: ((CharacterValues.ActionPreferences) async throws -> Void)? = nil) {
+         onRename: ((String, @escaping (Result<Void, Error>) -> Void) -> Void)? = nil,
+         onAvatarChange: ((UInt16, @escaping (Result<Void, Error>) -> Void) -> Void)? = nil,
+         onActionPreferencesChange: ((CharacterValues.ActionPreferences, @escaping (Result<Void, Error>) -> Void) -> Void)? = nil) {
         self.character = character
         self.onRename = onRename
         self.onAvatarChange = onAvatarChange

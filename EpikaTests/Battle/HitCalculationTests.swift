@@ -12,7 +12,7 @@ import XCTest
 ///   finalChance = clamp(rawChance, 0.05, 0.95)
 ///
 /// 境界値テスト: luck=1, 18, 35（ルール遵守）
-final class HitCalculationTests: XCTestCase {
+nonisolated final class HitCalculationTests: XCTestCase {
 
     // MARK: - 決定的テスト（境界値クランプ）
 

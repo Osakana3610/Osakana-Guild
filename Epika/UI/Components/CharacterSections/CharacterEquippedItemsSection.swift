@@ -26,7 +26,7 @@ import SwiftUI
 struct CharacterEquippedItemsSection: View {
     let equippedItems: [EquipmentDisplayItem]
     let equipmentCapacity: Int
-    let onUnequip: ((EquipmentDisplayItem) async throws -> Void)?
+    let onUnequip: ((EquipmentDisplayItem, @escaping (Result<Void, Error>) -> Void) -> Void)?
     let onDetail: ((EquipmentDisplayItem) -> Void)?
 
     @State private var unequipError: String?
@@ -35,7 +35,7 @@ struct CharacterEquippedItemsSection: View {
     init(
         equippedItems: [EquipmentDisplayItem],
         equipmentCapacity: Int,
-        onUnequip: ((EquipmentDisplayItem) async throws -> Void)? = nil,
+        onUnequip: ((EquipmentDisplayItem, @escaping (Result<Void, Error>) -> Void) -> Void)? = nil,
         onDetail: ((EquipmentDisplayItem) -> Void)? = nil
     ) {
         self.equippedItems = equippedItems
@@ -113,13 +113,15 @@ struct CharacterEquippedItemsSection: View {
         isUnequipping = true
         unequipError = nil
 
-        Task { @MainActor in
-            do {
-                try await onUnequip(item)
-                isUnequipping = false
-            } catch {
-                unequipError = error.localizedDescription
-                isUnequipping = false
+        onUnequip(item) { result in
+            Task { @MainActor in
+                switch result {
+                case .success:
+                    isUnequipping = false
+                case .failure(let error):
+                    unequipError = error.localizedDescription
+                    isUnequipping = false
+                }
             }
         }
     }

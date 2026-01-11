@@ -13,7 +13,7 @@ import XCTest
 ///     percentBonus = max(0.0, 1.0 + criticalPercent / 100.0)
 ///     multiplierBonus = max(0.0, criticalMultiplier)
 ///     bonus = percentBonus × multiplierBonus
-final class CriticalHitTests: XCTestCase {
+nonisolated final class CriticalHitTests: XCTestCase {
 
     // MARK: - クリティカル発動判定
 

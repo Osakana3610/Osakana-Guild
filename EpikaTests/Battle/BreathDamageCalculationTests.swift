@@ -23,7 +23,7 @@ import XCTest
 ///   luck=1:  σ=0.2887, ε=0.01   → 5535回
 ///   luck=18: σ=0.2425, ε=0.0116 → 2897回
 ///   luck=35: σ=0.1443, ε=0.015  → 615回
-final class BreathDamageCalculationTests: XCTestCase {
+nonisolated final class BreathDamageCalculationTests: XCTestCase {
 
     // MARK: - 基本ダメージ計算（luck=35）
 

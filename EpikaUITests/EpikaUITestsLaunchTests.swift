@@ -5,7 +5,7 @@
 
 import XCTest
 
-final class EpikaUITestsLaunchTests: XCTestCase {
+nonisolated final class EpikaUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
