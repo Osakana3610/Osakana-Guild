@@ -34,7 +34,6 @@ final class AdventureViewState {
     var showError: Bool = false
     var errorMessage: String = ""
 
-    var showCharacterDetail: CachedCharacter?
     var showDungeonSelection: Bool = false
     var showPartyDetail: Bool = false
 
@@ -145,7 +144,6 @@ final class AdventureViewState {
 
     func selectParty(at index: Int) {
         selectedPartyIndex = max(0, index)
-        showCharacterDetail = nil
         showPartyDetail = false
     }
 

@@ -32,7 +32,7 @@ struct AdventureView: View {
     @State private var didLoadOnce = false
 
     @State private var partyDetailContext: PartyDetailContext?
-    @State private var logsContext: CachedParty?
+    @State private var logsPartyId: UInt8?
 
     private var parties: [CachedParty] {
         partyState.parties.sorted { $0.id < $1.id }
@@ -91,10 +91,12 @@ struct AdventureView: View {
                 .environment(adventureState)
                 .environment(appServices.statChangeNotifications)
             }
-            .sheet(item: $logsContext) { party in
-                let runs = adventureState.explorationProgress
-                    .filter { $0.party.partyId == party.id }
-                RecentExplorationLogsView(party: party, runs: runs)
+            .sheet(isPresented: isLogsPresented) {
+                if let party = logsParty {
+                    let runs = adventureState.explorationProgress
+                        .filter { $0.party.partyId == party.id }
+                    RecentExplorationLogsView(party: party, runs: runs)
+                }
             }
         }
         .onAppear {
@@ -281,6 +283,20 @@ struct AdventureView: View {
                                                 initialLastSelectedDungeonId: party.lastSelectedDungeonId,
                                                 initialLastSelectedDifficulty: party.lastSelectedDifficulty,
                                                 selectedDungeonId: selected?.dungeonId)
+    }
+
+    private var logsParty: CachedParty? {
+        guard let logsPartyId else { return nil }
+        return parties.first { $0.id == logsPartyId }
+    }
+
+    private var isLogsPresented: Binding<Bool> {
+        Binding(
+            get: { logsParty != nil },
+            set: { isPresented in
+                if !isPresented { logsPartyId = nil }
+            }
+        )
     }
 
     @MainActor
