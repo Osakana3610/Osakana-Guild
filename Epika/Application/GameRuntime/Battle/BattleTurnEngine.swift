@@ -45,7 +45,7 @@ import Foundation
 /// 戦闘ごとにBattleContextを生成し、並行実行時のデータ競合を防ぐ
 /// nonisolated - 計算処理のためMainActorに縛られない
 struct BattleTurnEngine {
-    struct Result {
+    nonisolated struct Result {
         let outcome: UInt8
         let battleLog: BattleLog
         let players: [BattleActor]
@@ -61,7 +61,7 @@ struct BattleTurnEngine {
     ///   - enemySkillDefinitions: 敵専用技定義
     ///   - random: 乱数生成器（inout）
     /// - Returns: 戦闘結果
-    static func runBattle(players: inout [BattleActor],
+    nonisolated static func runBattle(players: inout [BattleActor],
                           enemies: inout [BattleActor],
                           statusEffects: [UInt8: StatusEffectDefinition],
                           skillDefinitions: [UInt16: SkillDefinition],
@@ -87,7 +87,7 @@ struct BattleTurnEngine {
     }
 
     /// メインの戦闘ループ
-    private static func executeMainLoop(_ context: inout BattleContext) -> Result {
+    private nonisolated static func executeMainLoop(_ context: inout BattleContext) -> Result {
         // 初期HP記録
         context.buildInitialHP()
 
@@ -145,7 +145,7 @@ struct BattleTurnEngine {
     }
 
     /// 勝敗判定を行い、決着がついていれば結果を返す
-    private static func checkBattleEnd(_ context: inout BattleContext) -> Result? {
+    private nonisolated static func checkBattleEnd(_ context: inout BattleContext) -> Result? {
         if context.isVictory {
             context.appendSimpleEntry(kind: .victory)
             return context.makeResult(BattleLog.outcomeVictory)
@@ -158,7 +158,7 @@ struct BattleTurnEngine {
     }
 
     /// ターン開始時の準備処理
-    private static func prepareTurnActions(_ context: inout BattleContext, sacrificeTargets: BattleContext.SacrificeTargets) {
+    private nonisolated static func prepareTurnActions(_ context: inout BattleContext, sacrificeTargets: BattleContext.SacrificeTargets) {
         for index in context.players.indices {
             context.players[index].extraActionsNextTurn = 0
             context.players[index].isSacrificeTarget = sacrificeTargets.playerTarget == index
@@ -178,7 +178,7 @@ struct BattleTurnEngine {
     }
 
     /// 味方のスキルによる敵行動回数減少
-    private static func applyEnemyActionDebuffs(_ context: inout BattleContext) {
+    private nonisolated static func applyEnemyActionDebuffs(_ context: inout BattleContext) {
         // 戦闘開始時にキャッシュ済みの敵行動減少スキル一覧を使用
         let debuffs = context.cached.enemyActionDebuffs
         guard !debuffs.isEmpty else { return }
@@ -196,7 +196,7 @@ struct BattleTurnEngine {
     }
 
     /// 道化師スキルによる敵行動スキップの判定
-    private static func applyEnemyActionSkip(_ context: inout BattleContext) {
+    private nonisolated static func applyEnemyActionSkip(_ context: inout BattleContext) {
         // 生存している敵のインデックスを取得
         let aliveEnemyIndices = context.enemies.enumerated()
             .filter { $0.element.isAlive }
@@ -218,7 +218,7 @@ struct BattleTurnEngine {
     }
 
     /// 単一アクションの実行
-    private static func executeAction(_ reference: BattleContext.ActorReference,
+    private nonisolated static func executeAction(_ reference: BattleContext.ActorReference,
                                        context: inout BattleContext,
                                        sacrificeTargets: BattleContext.SacrificeTargets) {
         guard !context.isBattleOver else { return }
@@ -264,7 +264,7 @@ extension BattleTurnEngine {
         var wasBlocked: Bool
     }
 
-    struct PhysicalAttackOverrides {
+    nonisolated struct PhysicalAttackOverrides {
         var physicalAttackOverride: Int?
         var ignoreDefense: Bool
         var forceHit: Bool
@@ -272,7 +272,7 @@ extension BattleTurnEngine {
         var maxAttackMultiplier: Double
         var doubleDamageAgainstRaceIds: Set<UInt8>
 
-        init(physicalAttackOverride: Int? = nil,
+        nonisolated init(physicalAttackOverride: Int? = nil,
              ignoreDefense: Bool = false,
              forceHit: Bool = false,
              criticalRateMultiplier: Double = 1.0,

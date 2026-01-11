@@ -19,10 +19,10 @@
 
 import Foundation
 
-struct CombatSnapshotBuilder {
+nonisolated struct CombatSnapshotBuilder {
     /// 敵のCombatスナップショットを生成する。
     /// 味方と同じ `CombatStatCalculator` を使用して計算する。
-    static func makeEnemySnapshot(from definition: EnemyDefinition,
+    nonisolated static func makeEnemySnapshot(from definition: EnemyDefinition,
                                   levelOverride: Int?,
                                   masterData: MasterDataCache) throws -> CharacterValues.Combat {
         let level = max(1, levelOverride ?? 1)
@@ -55,7 +55,7 @@ struct CombatSnapshotBuilder {
 
 private extension CombatSnapshotBuilder {
     /// 敵独自のbaseStatsからRaceDefinitionを作成
-    static func makeRaceDefinition(for definition: EnemyDefinition) -> RaceDefinition {
+    nonisolated static func makeRaceDefinition(for definition: EnemyDefinition) -> RaceDefinition {
         let baseStats = RaceDefinition.BaseStats(
             strength: definition.strength,
             wisdom: definition.wisdom,
@@ -73,7 +73,7 @@ private extension CombatSnapshotBuilder {
     }
 
     /// 敵のjobIdに対応するJobDefinitionがない場合のデフォルト（係数0）
-    static func makeJobDefinition(for definition: EnemyDefinition) -> JobDefinition {
+    nonisolated static func makeJobDefinition(for definition: EnemyDefinition) -> JobDefinition {
         let coefficients = JobDefinition.CombatCoefficients(
             maxHP: 0.0,
             physicalAttack: 0.0,

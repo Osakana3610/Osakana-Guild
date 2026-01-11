@@ -33,7 +33,7 @@
 
 import Foundation
 
-struct SpellDefinition: Identifiable, Sendable, Hashable {
+nonisolated struct SpellDefinition: Identifiable, Sendable, Hashable {
     enum School: UInt8, Sendable, Hashable {
         case mage = 1
         case priest = 2

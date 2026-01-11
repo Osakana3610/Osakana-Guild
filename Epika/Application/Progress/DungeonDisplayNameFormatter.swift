@@ -31,30 +31,30 @@
 
 import Foundation
 
-enum DungeonDisplayNameFormatter {
+nonisolated enum DungeonDisplayNameFormatter {
     /// 難易度として使用する TitleMaster の normalTitle ID（昇順）
     /// - 2: 無称号 (statMultiplier: 1.0)
     /// - 4: 魔性の (statMultiplier: 1.7411)
     /// - 5: 宿った (statMultiplier: 2.2974)
     /// - 6: 伝説の (statMultiplier: 3.0314)
     /// ※ id=3（名工の）は statMultiplier の差が小さいためスキップ
-    static let difficultyTitleIds: [UInt8] = [2, 4, 5, 6]
+    nonisolated static let difficultyTitleIds: [UInt8] = [2, 4, 5, 6]
 
     /// 初期難易度（無称号）
-    static let initialDifficulty: UInt8 = 2
+    nonisolated static let initialDifficulty: UInt8 = 2
 
     /// 最高難易度
-    static let maxDifficulty: UInt8 = 6
+    nonisolated static let maxDifficulty: UInt8 = 6
 
     /// 指定した難易度の次の難易度を返す（最高難易度の場合は nil）
-    static func nextDifficulty(after current: UInt8) -> UInt8? {
+    nonisolated static func nextDifficulty(after current: UInt8) -> UInt8? {
         guard let index = difficultyTitleIds.firstIndex(of: current),
               index + 1 < difficultyTitleIds.count else { return nil }
         return difficultyTitleIds[index + 1]
     }
 
     /// ダンジョン名に難易度プレフィックスを付けた表示名を返す
-    static func displayName(for dungeon: DungeonDefinition, difficultyTitleId: UInt8, masterData: MasterDataCache) -> String {
+    nonisolated static func displayName(for dungeon: DungeonDefinition, difficultyTitleId: UInt8, masterData: MasterDataCache) -> String {
         if let prefix = difficultyPrefix(for: difficultyTitleId, masterData: masterData) {
             return "\(prefix)\(dungeon.name)"
         }
@@ -62,13 +62,13 @@ enum DungeonDisplayNameFormatter {
     }
 
     /// 難易度 title ID からプレフィックス（"魔性の" など）を取得
-    static func difficultyPrefix(for titleId: UInt8, masterData: MasterDataCache) -> String? {
+    nonisolated static func difficultyPrefix(for titleId: UInt8, masterData: MasterDataCache) -> String? {
         guard let title = masterData.title(titleId), !title.name.isEmpty else { return nil }
         return title.name
     }
 
     /// 難易度 title ID から statMultiplier を取得（敵レベル計算用）
-    static func statMultiplier(for titleId: UInt8, masterData: MasterDataCache) -> Double {
+    nonisolated static func statMultiplier(for titleId: UInt8, masterData: MasterDataCache) -> Double {
         masterData.title(titleId)?.statMultiplier ?? 1.0
     }
 }

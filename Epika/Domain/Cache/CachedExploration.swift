@@ -189,7 +189,7 @@ struct CachedExploration: Sendable, Hashable {
 }
 
 extension CachedExploration {
-    static func resultMessage(for status: Status, isFullClear: Bool = true) -> String {
+    nonisolated static func resultMessage(for status: Status, isFullClear: Bool = true) -> String {
         switch status {
         case .completed:
             return isFullClear ? "迷宮を制覇しました！" : "パーティは帰還しました。"
@@ -202,7 +202,7 @@ extension CachedExploration {
         }
     }
 
-    static func makeSummary(displayDungeonName: String,
+    nonisolated static func makeSummary(displayDungeonName: String,
                             status: Status,
                             activeFloorNumber: Int,
                             dungeonTotalFloors: Int,
@@ -242,7 +242,7 @@ extension CachedExploration {
                        body: body)
     }
 
-    static func eventTitle(for encounter: EncounterLog, status: Status) -> String {
+    nonisolated static func eventTitle(for encounter: EncounterLog, status: Status) -> String {
         let base: String
         switch encounter.kind {
         case .nothing:
@@ -270,7 +270,7 @@ extension CachedExploration {
         return base
     }
 
-    static func localizedCombatResult(_ raw: String) -> String {
+    nonisolated static func localizedCombatResult(_ raw: String) -> String {
         switch raw.lowercased() {
         case "victory":
             return "勝利"

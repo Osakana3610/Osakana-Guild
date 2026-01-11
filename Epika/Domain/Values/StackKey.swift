@@ -34,7 +34,7 @@
 
 import Foundation
 
-struct StackKey: Sendable, Hashable {
+nonisolated struct StackKey: Sendable, Hashable {
     let superRareTitleId: UInt8
     let normalTitleId: UInt8
     let itemId: UInt16
@@ -44,7 +44,7 @@ struct StackKey: Sendable, Hashable {
 
     // MARK: - Init
 
-    init(
+    nonisolated init(
         superRareTitleId: UInt8 = 0,
         normalTitleId: UInt8 = 0,
         itemId: UInt16,
@@ -63,7 +63,7 @@ struct StackKey: Sendable, Hashable {
     // MARK: - UInt64 Pack/Unpack
 
     /// 6つのIDをUInt64にパック
-    var packed: UInt64 {
+    nonisolated var packed: UInt64 {
         UInt64(superRareTitleId) << 56 |
         UInt64(normalTitleId) << 48 |
         UInt64(itemId) << 32 |
@@ -73,7 +73,7 @@ struct StackKey: Sendable, Hashable {
     }
 
     /// UInt64からアンパック
-    init(packed: UInt64) {
+    nonisolated init(packed: UInt64) {
         self.superRareTitleId = UInt8(packed >> 56)
         self.normalTitleId = UInt8((packed >> 48) & 0xFF)
         self.itemId = UInt16((packed >> 32) & 0xFFFF)
@@ -87,12 +87,12 @@ struct StackKey: Sendable, Hashable {
     // インベントリ全体をUInt64に統一すれば削除可能。
 
     /// 既存の文字列形式（"superRare|normal|item|sockSR|sockNorm|sockItem"）
-    var stringValue: String {
+    nonisolated var stringValue: String {
         "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
     }
 
     /// 文字列形式からパース
-    init?(stringValue: String) {
+    nonisolated init?(stringValue: String) {
         let parts = stringValue.split(separator: "|")
         guard parts.count == 6,
               let superRare = UInt8(parts[0]),
@@ -114,7 +114,7 @@ struct StackKey: Sendable, Hashable {
     // MARK: - StackKeyComponents Compatibility
 
     /// StackKeyComponentsから生成
-    init(components: StackKeyComponents) {
+    nonisolated init(components: StackKeyComponents) {
         self.superRareTitleId = components.superRareTitleId
         self.normalTitleId = components.normalTitleId
         self.itemId = components.itemId
@@ -124,7 +124,7 @@ struct StackKey: Sendable, Hashable {
     }
 
     /// StackKeyComponentsに変換
-    var components: StackKeyComponents {
+    nonisolated var components: StackKeyComponents {
         StackKeyComponents(
             superRareTitleId: superRareTitleId,
             normalTitleId: normalTitleId,

@@ -25,7 +25,7 @@ import Foundation
 
 /// 行動宣言と結果を1レコードにまとめた新版ログ構造
 /// 移行期間はBattleActionと併存させ、順次こちらへ置き換える
-struct BattleActionEntry: Codable, Sendable {
+nonisolated struct BattleActionEntry: Codable, Sendable {
     struct Declaration: Codable, Sendable {
         var kind: ActionKind
         var skillIndex: UInt16?
@@ -88,7 +88,7 @@ struct BattleActionEntry: Codable, Sendable {
     var declaration: Declaration
     var effects: [Effect]
 
-    init(turn: Int,
+    nonisolated init(turn: Int,
          actor: UInt16?,
          declaration: Declaration,
          effects: [Effect] = []) {
@@ -100,24 +100,24 @@ struct BattleActionEntry: Codable, Sendable {
 }
 
 extension BattleActionEntry {
-    final class Builder {
+    nonisolated final class Builder {
         let turn: Int
         let actor: UInt16?
         let declaration: Declaration
         private var effects: [Effect]
 
-        init(turn: Int, actor: UInt16?, declaration: Declaration) {
+        nonisolated init(turn: Int, actor: UInt16?, declaration: Declaration) {
             self.turn = turn
             self.actor = actor
             self.declaration = declaration
             self.effects = []
         }
 
-        func addEffect(_ effect: Effect) {
+        nonisolated func addEffect(_ effect: Effect) {
             effects.append(effect)
         }
 
-        func addEffect(kind: Effect.Kind,
+        nonisolated func addEffect(kind: Effect.Kind,
                        target: UInt16?,
                        value: UInt32? = nil,
                        statusId: UInt16? = nil,
@@ -125,7 +125,7 @@ extension BattleActionEntry {
             addEffect(Effect(kind: kind, target: target, value: value, statusId: statusId, extra: extra))
         }
 
-        func build() -> BattleActionEntry {
+        nonisolated func build() -> BattleActionEntry {
             BattleActionEntry(
                 turn: turn,
                 actor: actor,
@@ -139,7 +139,7 @@ extension BattleActionEntry {
 // MARK: - BattleLog
 
 /// 戦闘ログ全体
-struct BattleLog: Codable, Sendable {
+nonisolated struct BattleLog: Codable, Sendable {
     static let currentVersion: UInt8 = 3
 
     var version: UInt8               // battle log schema version
@@ -285,9 +285,9 @@ enum ActionKind: UInt8, Codable, Sendable {
 // MARK: - Outcome Values
 
 extension BattleLog {
-    static let outcomeVictory: UInt8 = 0
-    static let outcomeDefeat: UInt8 = 1
-    static let outcomeRetreat: UInt8 = 2
+    nonisolated static let outcomeVictory: UInt8 = 0
+    nonisolated static let outcomeDefeat: UInt8 = 1
+    nonisolated static let outcomeRetreat: UInt8 = 2
 }
 
 // MARK: - PartyMemberSnapshot

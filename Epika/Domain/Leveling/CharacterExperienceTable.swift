@@ -31,9 +31,9 @@ enum CharacterExperienceError: Error {
     case overflowedComputation
 }
 
-enum CharacterExperienceTable {
-    static let maxExperienceDelta = 99_999_999
-    private static let baseExperienceDeltas: [Int] = [
+nonisolated enum CharacterExperienceTable {
+    nonisolated static let maxExperienceDelta = 99_999_999
+    nonisolated private static let baseExperienceDeltas: [Int] = [
         19, 34, 59, 99, 156, 240, 355, 507, 704,
         949, 1247, 1599, 2005, 2465, 2971, 3523, 4110, 4726, 5365,
         6018, 6676, 7333, 7983, 8620, 9239, 9836, 10408, 10952, 11496,
@@ -45,14 +45,14 @@ enum CharacterExperienceTable {
         1_480_905, 1_628_996, 1_791_895, 1_971_085, 2_168_193, 2_385_013, 2_623_514, 2_885_865, 3_174_452, 3_491_897,
         3_841_087, 4_225_195, 4_647_715, 5_112_486, 5_623_735, 6_186_109, 6_804_719, 7_485_191, 8_233_711, 9_057_082
     ]
-    private static let lowerSegmentCoefficients: [Double] = [
+    nonisolated private static let lowerSegmentCoefficients: [Double] = [
         -2.216_981_36e-06,
         4.191_743_70e-04,
         -2.473_976_42e-02,
         6.642_777_48e-01,
         2.297_479_69
     ]
-    private static let upperSegmentCoefficients: [Double] = [
+    nonisolated private static let upperSegmentCoefficients: [Double] = [
         1.258_341_81e-11,
         -3.676_782_80e-09,
         3.949_070_50e-07,
@@ -60,7 +60,7 @@ enum CharacterExperienceTable {
         6.583_665_67
     ]
 
-    static func experienceDelta(for level: Int) throws -> Int {
+    nonisolated static func experienceDelta(for level: Int) throws -> Int {
         guard level >= 1 else {
             throw CharacterExperienceError.invalidLevel(level)
         }
@@ -70,7 +70,7 @@ enum CharacterExperienceTable {
         return approximateDelta(for: level)
     }
 
-    static func totalExperience(toReach level: Int) throws -> Int {
+    nonisolated static func totalExperience(toReach level: Int) throws -> Int {
         guard level >= 1 else {
             throw CharacterExperienceError.invalidLevel(level)
         }
@@ -87,7 +87,7 @@ enum CharacterExperienceTable {
         return total
     }
 
-    static func level(forTotalExperience experience: Int, maximumLevel: Int = 200) throws -> Int {
+    nonisolated static func level(forTotalExperience experience: Int, maximumLevel: Int = 200) throws -> Int {
         guard experience >= 0 else {
             throw CharacterExperienceError.invalidExperience(experience)
         }
@@ -107,7 +107,7 @@ enum CharacterExperienceTable {
         return currentLevel
     }
 
-    static func experienceIntoCurrentLevel(accumulatedExperience: Int, level: Int) throws -> Int {
+    nonisolated static func experienceIntoCurrentLevel(accumulatedExperience: Int, level: Int) throws -> Int {
         let floorExperience = try totalExperience(toReach: level)
         guard accumulatedExperience >= floorExperience else {
             throw CharacterExperienceError.invalidExperience(accumulatedExperience)
@@ -115,13 +115,13 @@ enum CharacterExperienceTable {
         return accumulatedExperience - floorExperience
     }
 
-    static func experienceToNextLevel(from level: Int) throws -> Int {
+    nonisolated static func experienceToNextLevel(from level: Int) throws -> Int {
         try experienceDelta(for: level)
     }
 }
 
 private extension CharacterExperienceTable {
-    static func approximateDelta(for level: Int) -> Int {
+    nonisolated static func approximateDelta(for level: Int) -> Int {
         let logValue = evaluatePolynomial(level > 40 ? upperSegmentCoefficients : lowerSegmentCoefficients,
                                           at: Double(level))
         let raw = exp(logValue)
@@ -130,7 +130,7 @@ private extension CharacterExperienceTable {
         return max(1, Int(rounded))
     }
 
-    static func evaluatePolynomial(_ coefficients: [Double], at level: Double) -> Double {
+    nonisolated static func evaluatePolynomial(_ coefficients: [Double], at level: Double) -> Double {
         var result = 0.0
         for coefficient in coefficients {
             result = result * level + coefficient

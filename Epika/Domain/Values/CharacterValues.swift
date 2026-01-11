@@ -37,7 +37,7 @@ import Foundation
 
 /// CachedCharacterとCharacterInputで共有される値型の名前空間。
 /// インスタンス化は意図しない（enumとして定義）。
-enum CharacterValues {
+nonisolated enum CharacterValues {
     struct CoreAttributes: Sendable, Hashable {
         var strength: Int
         var wisdom: Int
@@ -52,7 +52,7 @@ enum CharacterValues {
         var maximum: Int
     }
 
-    struct Combat: Sendable, Hashable {
+    nonisolated struct Combat: Sendable, Hashable {
         var maxHP: Int
         var physicalAttack: Int
         var magicalAttack: Int
@@ -87,23 +87,23 @@ enum CharacterValues {
 
     struct EquippedItem: Sendable, Hashable {
         // アイテム本体
-        var superRareTitleId: UInt8
-        var normalTitleId: UInt8
-        var itemId: UInt16
+        nonisolated var superRareTitleId: UInt8
+        nonisolated var normalTitleId: UInt8
+        nonisolated var itemId: UInt16
         // ソケット（宝石改造）
-        var socketSuperRareTitleId: UInt8
-        var socketNormalTitleId: UInt8
-        var socketItemId: UInt16
+        nonisolated var socketSuperRareTitleId: UInt8
+        nonisolated var socketNormalTitleId: UInt8
+        nonisolated var socketItemId: UInt16
         // 数量（グループ化後）
-        var quantity: Int
+        nonisolated var quantity: Int
 
         /// スタック識別キー（文字列形式）
-        var stackKey: String {
+        nonisolated var stackKey: String {
             "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
         }
 
         /// スタック識別キー（UInt64にパック、高速比較用）
-        var packedStackKey: UInt64 {
+        nonisolated var packedStackKey: UInt64 {
             UInt64(superRareTitleId) << 56 |
             UInt64(normalTitleId) << 48 |
             UInt64(itemId) << 32 |
@@ -125,11 +125,11 @@ enum CharacterValues {
         var mageMagic: Int
         var breath: Int
 
-        static func clamped(_ value: Int) -> Int {
+        nonisolated static func clamped(_ value: Int) -> Int {
             max(0, min(100, value))
         }
 
-        static func normalized(attack: Int,
+        nonisolated static func normalized(attack: Int,
                                priestMagic: Int,
                                mageMagic: Int,
                                breath: Int) -> ActionPreferences {

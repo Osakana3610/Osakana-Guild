@@ -35,7 +35,7 @@ import Foundation
 // MARK: - Reactions & Counter Attacks
 extension BattleTurnEngine {
     /// リアクションキューを処理する（再帰呼び出しを避けるため）
-    static func processReactionQueue(context: inout BattleContext) {
+    nonisolated static func processReactionQueue(context: inout BattleContext) {
         while let pending = context.reactionQueue.first {
             context.reactionQueue.removeFirst()
             guard pending.depth < BattleContext.maxReactionDepth else { continue }
@@ -44,7 +44,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func shouldTriggerParry(defender: inout BattleActor,
+    nonisolated static func shouldTriggerParry(defender: inout BattleActor,
                                    attacker: BattleActor,
                                    context: inout BattleContext) -> Bool {
         guard defender.skillEffects.combat.parryEnabled else { return false }
@@ -57,7 +57,7 @@ extension BattleTurnEngine {
         return true
     }
 
-    static func shouldTriggerShieldBlock(defender: inout BattleActor,
+    nonisolated static func shouldTriggerShieldBlock(defender: inout BattleActor,
                                          attacker: BattleActor,
                                          context: inout BattleContext) -> Bool {
         guard defender.skillEffects.combat.shieldBlockEnabled else { return false }
@@ -69,7 +69,7 @@ extension BattleTurnEngine {
     }
 
     @discardableResult
-    static func applyAbsorptionIfNeeded(for attacker: inout BattleActor,
+    nonisolated static func applyAbsorptionIfNeeded(for attacker: inout BattleActor,
                                         damageDealt: Int,
                                         damageType: BattleDamageType,
                                         context: inout BattleContext) -> Int {
@@ -93,7 +93,7 @@ extension BattleTurnEngine {
         return applied
     }
 
-    static func applySpellChargeGainOnPhysicalHit(for attacker: inout BattleActor,
+    nonisolated static func applySpellChargeGainOnPhysicalHit(for attacker: inout BattleActor,
                                                   damageDealt: Int) {
         guard damageDealt > 0 else { return }
         let spells = attacker.spells.mage + attacker.spells.priest
@@ -114,7 +114,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func attemptRunawayIfNeeded(for defenderSide: ActorSide,
+    nonisolated static func attemptRunawayIfNeeded(for defenderSide: ActorSide,
                                        defenderIndex: Int,
                                        damage: Int,
                                        context: inout BattleContext,
@@ -165,7 +165,7 @@ extension BattleTurnEngine {
         trigger(runaway: defender.skillEffects.misc.damageRunaway, isMagic: false)
     }
 
-    static func dispatchReactions(for event: ReactionEvent,
+    nonisolated static func dispatchReactions(for event: ReactionEvent,
                                   depth: Int,
                                   context: inout BattleContext) {
         guard depth < BattleContext.maxReactionDepth else { return }
@@ -191,7 +191,7 @@ extension BattleTurnEngine {
         }
     }
 
-    static func attemptReactions(on side: ActorSide,
+    nonisolated static func attemptReactions(on side: ActorSide,
                                  actorIndex: Int,
                                  event: ReactionEvent,
                                  depth: Int,
@@ -280,7 +280,7 @@ extension BattleTurnEngine {
     ///   - attacker: 攻撃者
     ///   - context: 戦闘コンテキスト
     /// - Returns: 解決されたターゲット（陣営, インデックス）、解決できない場合はnil
-    private static func resolveReactionTarget(reaction: BattleActor.SkillEffects.Reaction,
+    private nonisolated static func resolveReactionTarget(reaction: BattleActor.SkillEffects.Reaction,
                                               event: ReactionEvent,
                                               attackerSide: ActorSide,
                                               attacker: BattleActor,
@@ -329,7 +329,7 @@ extension BattleTurnEngine {
         return target
     }
 
-    static func executeReactionAttack(from side: ActorSide,
+    nonisolated static func executeReactionAttack(from side: ActorSide,
                                       actorIndex: Int,
                                       target: (ActorSide, Int),
                                       reaction: BattleActor.SkillEffects.Reaction,
@@ -431,7 +431,7 @@ extension BattleTurnEngine {
         var defender: BattleActor?
     }
 
-    static func applyAttackOutcome(attackerSide: ActorSide,
+    nonisolated static func applyAttackOutcome(attackerSide: ActorSide,
                                    attackerIndex: Int,
                                    defenderSide: ActorSide,
                                    defenderIndex: Int,
@@ -512,7 +512,7 @@ extension BattleTurnEngine {
     ///   - killerIndex: 倒したアクターのインデックス
     ///   - context: 戦闘コンテキスト
     ///   - reactionDepth: リアクションの深さ（デフォルト0）
-    static func handleDefeatReactions(targetSide: ActorSide,
+    nonisolated static func handleDefeatReactions(targetSide: ActorSide,
                                       targetIndex: Int,
                                       killerSide: ActorSide,
                                       killerIndex: Int,
@@ -540,7 +540,7 @@ extension BattleTurnEngine {
 
 // MARK: - Reaction Trigger Matching
 private extension BattleActor.SkillEffects.Reaction.Trigger {
-    func matches(event: BattleTurnEngine.ReactionEvent) -> Bool {
+    nonisolated func matches(event: BattleTurnEngine.ReactionEvent) -> Bool {
         switch (self, event) {
         case (.allyDefeated, .allyDefeated): return true
         case (.selfEvadePhysical, .selfEvadePhysical): return true
@@ -555,7 +555,7 @@ private extension BattleActor.SkillEffects.Reaction.Trigger {
 }
 
 private extension BattleActor.SkillEffects.Reaction {
-    func preferredTarget(for event: BattleTurnEngine.ReactionEvent) -> BattleTurnEngine.ActorReference? {
+    nonisolated func preferredTarget(for event: BattleTurnEngine.ReactionEvent) -> BattleTurnEngine.ActorReference? {
         switch (target, event) {
         case (.killer, .allyDefeated(_, _, let killer)): return killer
         case (.attacker, .allyDefeated(_, _, let killer)): return killer

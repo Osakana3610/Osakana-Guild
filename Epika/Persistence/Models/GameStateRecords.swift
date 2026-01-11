@@ -86,9 +86,9 @@ enum PandoraBoxStorageError: Error {
     case malformedData
 }
 
-enum PandoraBoxStorage {
+nonisolated enum PandoraBoxStorage {
     /// フォーマット: 2バイト件数 + 各8バイトID（登録順を維持）
-    static func encode(_ items: [UInt64]) -> Data {
+    nonisolated static func encode(_ items: [UInt64]) -> Data {
         var data = Data(capacity: 2 + items.count * 8)
         var count = UInt16(items.count)
         withUnsafeBytes(of: &count) { data.append(contentsOf: $0) }
@@ -98,7 +98,7 @@ enum PandoraBoxStorage {
         return data
     }
 
-    static func decode(_ data: Data) throws -> [UInt64] {
+    nonisolated static func decode(_ data: Data) throws -> [UInt64] {
         if data.isEmpty { return [] }
         guard data.count >= 2 else { throw PandoraBoxStorageError.malformedData }
         let count = data.withUnsafeBytes { $0.load(as: UInt16.self) }

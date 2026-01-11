@@ -41,14 +41,14 @@ struct BattleActionRates: Sendable, Hashable {
     var mageMagic: Int
     var breath: Int
 
-    init(attack: Int, priestMagic: Int, mageMagic: Int, breath: Int) {
+    nonisolated init(attack: Int, priestMagic: Int, mageMagic: Int, breath: Int) {
         self.attack = BattleActionRates.clamp(attack)
         self.priestMagic = BattleActionRates.clamp(priestMagic)
         self.mageMagic = BattleActionRates.clamp(mageMagic)
         self.breath = BattleActionRates.clamp(breath)
     }
 
-    private static func clamp(_ value: Int) -> Int {
+    private nonisolated static func clamp(_ value: Int) -> Int {
         return max(0, min(100, value))
     }
 }
@@ -63,7 +63,7 @@ typealias BattleFormationSlot = Int
 
 extension Int {
     /// 陣形スロットの列インデックス（0=前列, 1=中列, 2=後列）
-    var formationRow: Int {
+    nonisolated var formationRow: Int {
         switch self {
         case 1, 2: return 0  // 前列
         case 3, 4: return 1  // 中列
@@ -82,7 +82,7 @@ struct BattleActionResource: Sendable, Hashable {
     private var storage: [UInt8: Int]
     private var spellCharges: [UInt8: SpellChargeState]
 
-    init(initialValues: [UInt8: Int] = [:],
+    nonisolated init(initialValues: [UInt8: Int] = [:],
          spellCharges: [UInt8: SpellChargeState] = [:]) {
         self.storage = initialValues
         self.spellCharges = spellCharges
@@ -111,15 +111,15 @@ struct BattleActionResource: Sendable, Hashable {
         }
     }
 
-    func charges(for key: Key) -> Int {
+    nonisolated func charges(for key: Key) -> Int {
         storage[key.rawValue, default: 0]
     }
 
-    mutating func setCharges(for key: Key, value: Int) {
+    nonisolated mutating func setCharges(for key: Key, value: Int) {
         storage[key.rawValue] = value
     }
 
-    mutating func consume(_ key: Key, amount: Int = 1) -> Bool {
+    nonisolated mutating func consume(_ key: Key, amount: Int = 1) -> Bool {
         guard amount > 0 else { return true }
         let current = storage[key.rawValue, default: 0]
         guard current >= amount else { return false }
@@ -127,29 +127,29 @@ struct BattleActionResource: Sendable, Hashable {
         return true
     }
 
-    mutating func addCharges(for key: Key, amount: Int, cap: Int) {
+    nonisolated mutating func addCharges(for key: Key, amount: Int, cap: Int) {
         guard amount > 0 else { return }
         let current = charges(for: key)
         let updated = min(cap, current + amount)
         storage[key.rawValue] = updated
     }
 
-    func charges(forSpellId spellId: UInt8) -> Int {
+    nonisolated func charges(forSpellId spellId: UInt8) -> Int {
         spellCharges[spellId]?.current ?? 0
     }
 
-    func maxCharges(forSpellId spellId: UInt8) -> Int? {
+    nonisolated func maxCharges(forSpellId spellId: UInt8) -> Int? {
         spellCharges[spellId]?.max
     }
 
-    mutating func setSpellCharges(for spellId: UInt8, current: Int, max maxValue: Int) {
+    nonisolated mutating func setSpellCharges(for spellId: UInt8, current: Int, max maxValue: Int) {
         let normalizedMax = Swift.max(0, maxValue)
         let normalizedCurrent = Swift.max(0, current)
         spellCharges[spellId] = SpellChargeState(current: normalizedCurrent, max: normalizedMax)
     }
 
-    mutating func initializeSpellCharges(from loadout: SkillRuntimeEffects.SpellLoadout,
-                                         defaultCharges: Int = 1) {
+    nonisolated mutating func initializeSpellCharges(from loadout: SkillRuntimeEffects.SpellLoadout,
+                                                     defaultCharges: Int = 1) {
         let sanitized = max(0, defaultCharges)
         for spell in loadout.mage {
             setSpellCharges(for: spell.id, current: sanitized, max: sanitized)
@@ -159,7 +159,7 @@ struct BattleActionResource: Sendable, Hashable {
         }
     }
 
-    mutating func consume(spellId: UInt8, amount: Int = 1) -> Bool {
+    nonisolated mutating func consume(spellId: UInt8, amount: Int = 1) -> Bool {
         guard amount > 0, var state = spellCharges[spellId], state.current >= amount else {
             return false
         }
@@ -168,7 +168,7 @@ struct BattleActionResource: Sendable, Hashable {
         return true
     }
 
-    mutating func addCharges(forSpellId spellId: UInt8, amount: Int, cap: Int?) -> Bool {
+    nonisolated mutating func addCharges(forSpellId spellId: UInt8, amount: Int, cap: Int?) -> Bool {
         guard amount > 0, var state = spellCharges[spellId] else { return false }
         let limit = max(cap ?? state.max, 0)
         let updated = limit > 0 ? min(limit, state.current + amount) : state.current
@@ -178,20 +178,20 @@ struct BattleActionResource: Sendable, Hashable {
         return true
     }
 
-    func hasAvailableCharges(for spellId: UInt8) -> Bool {
+    nonisolated func hasAvailableCharges(for spellId: UInt8) -> Bool {
         charges(forSpellId: spellId) > 0
     }
 
-    func hasAvailableSpell(in spells: [SpellDefinition]) -> Bool {
+    nonisolated func hasAvailableSpell(in spells: [SpellDefinition]) -> Bool {
         spells.contains { hasAvailableCharges(for: $0.id) }
     }
 
-    func spellChargeState(for spellId: UInt8) -> SpellChargeState? {
+    nonisolated func spellChargeState(for spellId: UInt8) -> SpellChargeState? {
         spellCharges[spellId]
     }
 
-    static func makeDefault(for snapshot: CharacterValues.Combat,
-                            spellLoadout: SkillRuntimeEffects.SpellLoadout = .empty) -> BattleActionResource {
+    nonisolated static func makeDefault(for snapshot: CharacterValues.Combat,
+                                        spellLoadout: SkillRuntimeEffects.SpellLoadout = .empty) -> BattleActionResource {
         // ブレスチャージはスキル（breathVariant）で付与されるため、ここではデフォルト設定しない
         var resource = BattleActionResource(initialValues: [:])
         resource.initializeSpellCharges(from: spellLoadout)
@@ -199,14 +199,14 @@ struct BattleActionResource: Sendable, Hashable {
     }
 }
 
-struct AppliedStatusEffect: Sendable, Hashable {
+nonisolated struct AppliedStatusEffect: Sendable, Hashable {
     let id: UInt8
     var remainingTurns: Int
     let source: String?
     var stackValue: Double
 }
 
-struct TimedBuff: Sendable, Hashable {
+nonisolated struct TimedBuff: Sendable, Hashable {
     let id: String
     let baseDuration: Int
     var remainingTurns: Int
@@ -217,12 +217,12 @@ struct BattleAttackHistory: Sendable, Hashable {
     var firstHitDone: Bool
     var consecutiveHits: Int
 
-    init(firstHitDone: Bool = false, consecutiveHits: Int = 0) {
+    nonisolated init(firstHitDone: Bool = false, consecutiveHits: Int = 0) {
         self.firstHitDone = firstHitDone
         self.consecutiveHits = consecutiveHits
     }
 
-    mutating func registerHit() {
+    nonisolated mutating func registerHit() {
         if firstHitDone {
             consecutiveHits += 1
         } else {
@@ -231,7 +231,7 @@ struct BattleAttackHistory: Sendable, Hashable {
         }
     }
 
-    mutating func reset() {
+    nonisolated mutating func reset() {
         firstHitDone = false
         consecutiveHits = 0
     }
@@ -245,11 +245,11 @@ struct BattleInnateResistances: Sendable, Hashable {
     let breath: Double        // ブレス
     let spells: [UInt8: Double]  // 個別魔法（spellId → 倍率）
 
-    static let neutral = BattleInnateResistances(
+    nonisolated static let neutral = BattleInnateResistances(
         physical: 1.0, piercing: 1.0, critical: 1.0, breath: 1.0, spells: [:]
     )
 
-    init(physical: Double = 1.0,
+    nonisolated init(physical: Double = 1.0,
          piercing: Double = 1.0,
          critical: Double = 1.0,
          breath: Double = 1.0,
@@ -261,7 +261,7 @@ struct BattleInnateResistances: Sendable, Hashable {
         self.spells = spells
     }
 
-    init(from definition: EnemyDefinition.Resistances) {
+    nonisolated init(from definition: EnemyDefinition.Resistances) {
         self.physical = definition.physical
         self.piercing = definition.piercing
         self.critical = definition.critical
@@ -270,8 +270,8 @@ struct BattleInnateResistances: Sendable, Hashable {
     }
 }
 
-struct BattleActor: Sendable {
-    struct SkillEffects: Sendable, Hashable {
+nonisolated struct BattleActor: Sendable {
+    nonisolated struct SkillEffects: Sendable, Hashable {
         // MARK: - Shared Types
 
         struct DamageMultipliers: Sendable, Hashable {
@@ -279,7 +279,7 @@ struct BattleActor: Sendable {
             var magical: Double
             var breath: Double
 
-            func value(for key: BattleDamageType) -> Double {
+            nonisolated func value(for key: BattleDamageType) -> Double {
                 switch key {
                 case .physical: return physical
                 case .magical: return magical
@@ -287,22 +287,22 @@ struct BattleActor: Sendable {
                 }
             }
 
-            static let neutral = DamageMultipliers(physical: 1.0, magical: 1.0, breath: 1.0)
+            nonisolated static let neutral = DamageMultipliers(physical: 1.0, magical: 1.0, breath: 1.0)
         }
 
         struct TargetMultipliers: Sendable, Hashable {
             private var storage: [UInt8: Double]
 
-            init(storage: [UInt8: Double] = [:]) {
+            nonisolated init(storage: [UInt8: Double] = [:]) {
                 self.storage = storage
             }
 
-            func value(for raceId: UInt8?) -> Double {
+            nonisolated func value(for raceId: UInt8?) -> Double {
                 guard let id = raceId else { return 1.0 }
                 return storage[id, default: 1.0]
             }
 
-            static let neutral = TargetMultipliers()
+            nonisolated static let neutral = TargetMultipliers()
         }
 
         /// HP閾値に応じたダメージ倍率（暗殺者スキル用）
@@ -315,7 +315,7 @@ struct BattleActor: Sendable {
             var percent: Double
             var multiplier: Double
 
-            static let neutral = SpellPower(percent: 0.0, multiplier: 1.0)
+            nonisolated static let neutral = SpellPower(percent: 0.0, multiplier: 1.0)
         }
 
         struct SpellChargeRegen: Sendable, Hashable {
@@ -332,11 +332,11 @@ struct BattleActor: Sendable {
             var regen: SpellChargeRegen?
             var gainOnPhysicalHit: Int?
 
-            init(initialOverride: Int? = nil,
-                 initialBonus: Int = 0,
-                 maxOverride: Int? = nil,
-                 regen: SpellChargeRegen? = nil,
-                 gainOnPhysicalHit: Int? = nil) {
+            nonisolated init(initialOverride: Int? = nil,
+                             initialBonus: Int = 0,
+                             maxOverride: Int? = nil,
+                             regen: SpellChargeRegen? = nil,
+                             gainOnPhysicalHit: Int? = nil) {
                 self.initialOverride = initialOverride
                 self.initialBonus = initialBonus
                 self.maxOverride = maxOverride
@@ -344,11 +344,11 @@ struct BattleActor: Sendable {
                 self.gainOnPhysicalHit = gainOnPhysicalHit
             }
 
-            var isEmpty: Bool {
+            nonisolated var isEmpty: Bool {
                 initialOverride == nil && initialBonus == 0 && maxOverride == nil && regen == nil && (gainOnPhysicalHit ?? 0) == 0
             }
 
-            mutating func merge(_ other: SpellChargeModifier) {
+            nonisolated mutating func merge(_ other: SpellChargeModifier) {
                 if let value = other.initialOverride {
                     if let current = initialOverride {
                         initialOverride = max(current, value)
@@ -383,7 +383,7 @@ struct BattleActor: Sendable {
             var multipliers: [Int: Double]
             var additives: [Int: Double]
 
-            static let neutral = ProcRateModifier(multipliers: [:], additives: [:])
+            nonisolated static let neutral = ProcRateModifier(multipliers: [:], additives: [:])
 
             func adjustedChance(base: Double, target: Int) -> Double {
                 let added = additives[target, default: 0.0]
@@ -412,7 +412,7 @@ struct BattleActor: Sendable {
             /// 効果持続ターン数（nil = 永続）
             let duration: Int?
 
-            init(chancePercent: Double, count: Int, trigger: Trigger = .always, triggerTurn: Int = 1, duration: Int? = nil) {
+            nonisolated init(chancePercent: Double, count: Int, trigger: Trigger = .always, triggerTurn: Int = 1, duration: Int? = nil) {
                 self.chancePercent = chancePercent
                 self.count = count
                 self.trigger = trigger
@@ -485,7 +485,7 @@ struct BattleActor: Sendable {
             let chancePercent: Int
             let preemptive: Bool  // 先制攻撃フラグ
 
-            init(kind: Kind, chancePercent: Int, preemptive: Bool = false) {
+            nonisolated init(kind: Kind, chancePercent: Int, preemptive: Bool = false) {
                 self.kind = kind
                 self.chancePercent = max(0, min(100, chancePercent))
                 self.preemptive = preemptive
@@ -497,16 +497,16 @@ struct BattleActor: Sendable {
             let preemptive: [SpecialAttack]
             let normal: [SpecialAttack]
 
-            static let empty = SpecialAttacks(preemptive: [], normal: [])
+            nonisolated static let empty = SpecialAttacks(preemptive: [], normal: [])
 
             /// 両方の配列が空かどうか
-            var isEmpty: Bool { preemptive.isEmpty && normal.isEmpty }
+            nonisolated var isEmpty: Bool { preemptive.isEmpty && normal.isEmpty }
 
             /// 全ての特殊攻撃を取得（テスト・検証用）
-            var all: [SpecialAttack] { preemptive + normal }
+            nonisolated var all: [SpecialAttack] { preemptive + normal }
 
             /// 配列から分類して構築
-            init(from attacks: [SpecialAttack]) {
+            nonisolated init(from attacks: [SpecialAttack]) {
                 var preemptive: [SpecialAttack] = []
                 var normal: [SpecialAttack] = []
                 for attack in attacks {
@@ -520,7 +520,7 @@ struct BattleActor: Sendable {
                 self.normal = normal
             }
 
-            private init(preemptive: [SpecialAttack], normal: [SpecialAttack]) {
+            private nonisolated init(preemptive: [SpecialAttack], normal: [SpecialAttack]) {
                 self.preemptive = preemptive
                 self.normal = normal
             }
@@ -530,7 +530,7 @@ struct BattleActor: Sendable {
             var multiplier: Double
             var additivePercent: Double
 
-            static let neutral = StatusResistance(multiplier: 1.0, additivePercent: 0.0)
+            nonisolated static let neutral = StatusResistance(multiplier: 1.0, additivePercent: 0.0)
         }
 
         struct TimedBuffTrigger: Sendable, Hashable {
@@ -584,7 +584,7 @@ struct BattleActor: Sendable {
         struct RescueModifiers: Sendable, Hashable {
             var ignoreActionCost: Bool = false
 
-            static let neutral = RescueModifiers(ignoreActionCost: false)
+            nonisolated static let neutral = RescueModifiers(ignoreActionCost: false)
         }
 
         struct ResurrectionActive: Sendable, Hashable {
@@ -678,7 +678,7 @@ struct BattleActor: Sendable {
             var levelComparisonDamageTakenPercent: Double  // 低Lv敵からの被ダメ軽減%
             var hpThresholdMultipliers: [HPThresholdMultiplier]  // HP閾値ダメージ倍率（暗殺者スキル用）
 
-            static let neutral = Damage(
+            nonisolated static let neutral = Damage(
                 taken: DamageMultipliers.neutral,
                 dealt: DamageMultipliers.neutral,
                 dealtAgainst: TargetMultipliers.neutral,
@@ -713,11 +713,11 @@ struct BattleActor: Sendable {
             var magicCriticalMultiplier: Double     // 必殺魔法倍率
             var chargeRecoveries: [SpellChargeRecovery]  // ターン開始時呪文回復
 
-            func chargeModifier(for spellId: UInt8) -> SpellChargeModifier? {
+            nonisolated func chargeModifier(for spellId: UInt8) -> SpellChargeModifier? {
                 chargeModifiers[spellId] ?? defaultChargeModifier
             }
 
-            static let neutral = Spell(
+            nonisolated static let neutral = Spell(
                 power: SpellPower.neutral,
                 specificMultipliers: [:],
                 specificTakenMultipliers: [:],
@@ -770,7 +770,7 @@ struct BattleActor: Sendable {
             var firstStrike: Bool  // 道化師スキル: 先制攻撃
             var enemyStatDebuffs: [EnemyStatDebuff]  // 敵ステータス弱体化
 
-            static let neutral = Combat(
+            nonisolated static let neutral = Combat(
                 procChanceMultiplier: 1.0,
                 procRateModifier: .neutral,
                 extraActions: [],
@@ -804,7 +804,7 @@ struct BattleActor: Sendable {
             var timedBuffTriggers: [TimedBuffTrigger]
             var autoStatusCureOnAlly: Bool  // 味方が異常状態になった時、自動でキュア発動
 
-            static let neutral = Status(
+            nonisolated static let neutral = Status(
                 resistances: [:],
                 inflictions: [],
                 berserkChancePercent: nil,
@@ -825,7 +825,7 @@ struct BattleActor: Sendable {
             var passiveBetweenFloors: Bool
             var sacrificeInterval: Int?
 
-            static let neutral = Resurrection(
+            nonisolated static let neutral = Resurrection(
                 rescueCapabilities: [],
                 rescueModifiers: .neutral,
                 actives: [],
@@ -867,7 +867,7 @@ struct BattleActor: Sendable {
             var targetingWeight: Double  // 狙われ率の重み（デフォルト1.0、高いほど狙われやすい）
             var coverRowsBehind: Bool    // 後列の味方をかばう（前列にいる場合）
 
-            static let neutral = Misc(
+            nonisolated static let neutral = Misc(
                 healingGiven: 1.0,
                 healingReceived: 1.0,
                 endOfTurnHealingPercent: 0.0,
@@ -906,7 +906,7 @@ struct BattleActor: Sendable {
         var resurrection: Resurrection
         var misc: Misc
 
-        static let neutral = SkillEffects(
+        nonisolated static let neutral = SkillEffects(
             damage: .neutral,
             spell: .neutral,
             combat: .neutral,
@@ -971,7 +971,7 @@ struct BattleActor: Sendable {
         var skipActionThisTurn: Bool  // 道化師スキルによる行動スキップ
         var innateResistances: BattleInnateResistances
 
-    init(identifier: String,
+    nonisolated init(identifier: String,
          displayName: String,
          kind: BattleActorKind,
          formationSlot: BattleFormationSlot,
@@ -1079,6 +1079,6 @@ struct BattleActor: Sendable {
         self.innateResistances = innateResistances
     }
 
-    var isAlive: Bool { currentHP > 0 }
-    var rowIndex: Int { formationSlot.formationRow }
+    nonisolated var isAlive: Bool { currentHP > 0 }
+    nonisolated var rowIndex: Int { formationSlot.formationRow }
 }

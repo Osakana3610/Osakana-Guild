@@ -38,7 +38,7 @@
 import Foundation
 
 /// 戦闘実行時のコンテキスト。戦闘ごとにインスタンスを生成し、並行実行時のデータ競合を防ぐ。
-struct BattleContext {
+nonisolated struct BattleContext {
     // MARK: - 参照データ（不変）
     let statusDefinitions: [UInt8: StatusEffectDefinition]
     let skillDefinitions: [UInt16: SkillDefinition]
@@ -75,11 +75,11 @@ struct BattleContext {
     var reactionQueue: [PendingReaction]
 
     // MARK: - 定数
-    static let maxTurns = 20
-    static let martialAccuracyMultiplier: Double = 1.6
+    nonisolated static let maxTurns = 20
+    nonisolated static let martialAccuracyMultiplier: Double = 1.6
 
     // MARK: - 初期化
-    init(players: [BattleActor],
+    nonisolated init(players: [BattleActor],
          enemies: [BattleActor],
          statusDefinitions: [UInt8: StatusEffectDefinition],
          skillDefinitions: [UInt16: SkillDefinition],
@@ -102,7 +102,7 @@ struct BattleContext {
     }
 
     /// 戦闘開始時キャッシュを構築
-    private static func buildCachedFlags(players: [BattleActor], enemies: [BattleActor]) -> CachedFlags {
+    private nonisolated static func buildCachedFlags(players: [BattleActor], enemies: [BattleActor]) -> CachedFlags {
         // 敵行動順シャッフルスキル保有者チェック
         let hasShuffleEnemyOrderSkill = players.contains { $0.skillEffects.combat.actionOrderShuffleEnemy }
 
@@ -157,7 +157,7 @@ struct BattleContext {
     }
 
     // MARK: - 初期HP記録
-    mutating func buildInitialHP() {
+    nonisolated mutating func buildInitialHP() {
         for (index, player) in players.enumerated() {
             let playerActorIndex = actorIndex(for: .player, arrayIndex: index)
             initialHP[playerActorIndex] = UInt32(player.currentHP)
@@ -169,7 +169,7 @@ struct BattleContext {
     }
 
     // MARK: - actorIndex生成
-    func actorIndex(for side: ActorSide, arrayIndex: Int) -> UInt16 {
+    nonisolated func actorIndex(for side: ActorSide, arrayIndex: Int) -> UInt16 {
         switch side {
         case .player:
             return UInt16(players[arrayIndex].partyMemberId ?? 0)
@@ -181,7 +181,7 @@ struct BattleContext {
     }
 
     // MARK: - 結果生成
-    func makeResult(_ outcome: UInt8) -> BattleTurnEngine.Result {
+    nonisolated func makeResult(_ outcome: UInt8) -> BattleTurnEngine.Result {
         BattleTurnEngine.Result(
             outcome: outcome,
             battleLog: makeBattleLog(outcome: outcome),
@@ -190,7 +190,7 @@ struct BattleContext {
         )
     }
 
-    func makeBattleLog(outcome: UInt8) -> BattleLog {
+    nonisolated func makeBattleLog(outcome: UInt8) -> BattleLog {
         BattleLog(initialHP: initialHP,
                   entries: actionEntries,
                   outcome: outcome,
@@ -198,41 +198,41 @@ struct BattleContext {
     }
 
     // MARK: - 勝敗判定
-    var isVictory: Bool {
+    nonisolated var isVictory: Bool {
         enemies.allSatisfy { !$0.isAlive }
     }
 
-    var isDefeat: Bool {
+    nonisolated var isDefeat: Bool {
         players.allSatisfy { !$0.isAlive }
     }
 
-    var isBattleOver: Bool {
+    nonisolated var isBattleOver: Bool {
         isVictory || isDefeat
     }
 
     // MARK: - ステータス定義参照
-    func statusDefinition(for effect: AppliedStatusEffect) -> StatusEffectDefinition? {
+    nonisolated func statusDefinition(for effect: AppliedStatusEffect) -> StatusEffectDefinition? {
         statusDefinitions[effect.id]
     }
 
-    func skillDefinition(for skillId: UInt16) -> SkillDefinition? {
+    nonisolated func skillDefinition(for skillId: UInt16) -> SkillDefinition? {
         skillDefinitions[skillId]
     }
 
-    func enemySkillDefinition(for skillId: UInt16) -> EnemySkillDefinition? {
+    nonisolated func enemySkillDefinition(for skillId: UInt16) -> EnemySkillDefinition? {
         enemySkillDefinitions[skillId]
     }
 
     // MARK: - 敵専用技使用回数管理
-    mutating func incrementEnemySkillUsage(actorIdentifier: String, skillId: UInt16) {
+    nonisolated mutating func incrementEnemySkillUsage(actorIdentifier: String, skillId: UInt16) {
         enemySkillUsage[actorIdentifier, default: [:]][skillId, default: 0] += 1
     }
 
-    func enemySkillUsageCount(actorIdentifier: String, skillId: UInt16) -> Int {
+    nonisolated func enemySkillUsageCount(actorIdentifier: String, skillId: UInt16) -> Int {
         enemySkillUsage[actorIdentifier]?[skillId] ?? 0
     }
 
-    mutating func appendActionEntry(_ entry: BattleActionEntry) {
+    nonisolated mutating func appendActionEntry(_ entry: BattleActionEntry) {
         actionEntries.append(entry)
         if !pendingPostActionEntries.isEmpty {
             actionEntries.append(contentsOf: pendingPostActionEntries)
@@ -240,11 +240,11 @@ struct BattleContext {
         }
     }
 
-    mutating func appendPostActionEntry(_ entry: BattleActionEntry) {
+    nonisolated mutating func appendPostActionEntry(_ entry: BattleActionEntry) {
         pendingPostActionEntries.append(entry)
     }
 
-    mutating func appendSimpleEntry(kind: ActionKind,
+    nonisolated mutating func appendSimpleEntry(kind: ActionKind,
                                     actorId: UInt16? = nil,
                                     targetId: UInt16? = nil,
                                     value: UInt32? = nil,
@@ -276,7 +276,7 @@ struct BattleContext {
         }
     }
 
-    func makeActionEntryBuilder(actorId: UInt16?,
+    nonisolated func makeActionEntryBuilder(actorId: UInt16?,
                                 kind: ActionKind,
                                 skillIndex: UInt16? = nil,
                                 extra: UInt16? = nil,
@@ -296,17 +296,17 @@ struct BattleContext {
 
 // MARK: - 型定義
 extension BattleContext {
-    enum ActorSide: Sendable {
+    nonisolated enum ActorSide: Sendable {
         case player
         case enemy
     }
 
-    enum ActorReference: Sendable {
+    nonisolated enum ActorReference: Sendable {
         case player(Int)
         case enemy(Int)
     }
 
-    enum ReactionEvent: Sendable {
+    nonisolated enum ReactionEvent: Sendable {
         case allyDefeated(side: ActorSide, fallenIndex: Int, killer: ActorReference?)
         case selfEvadePhysical(side: ActorSide, actorIndex: Int, attacker: ActorReference)
         case selfDamagedPhysical(side: ActorSide, actorIndex: Int, attacker: ActorReference)
@@ -340,21 +340,21 @@ extension BattleContext {
         }
     }
 
-    struct SacrificeTargets: Sendable {
+    nonisolated struct SacrificeTargets: Sendable {
         let playerTarget: Int?
         let enemyTarget: Int?
     }
 
-    static let maxReactionDepth = 4
-    static let maxExtraActionDepth = 5
+    nonisolated static let maxReactionDepth = 4
+    nonisolated static let maxExtraActionDepth = 5
 
     /// リアクションキューに積まれる保留イベント
-    struct PendingReaction: Sendable {
+    nonisolated struct PendingReaction: Sendable {
         let event: ReactionEvent
         let depth: Int
     }
 
-    func actor(for side: ActorSide, index: Int) -> BattleActor? {
+    nonisolated func actor(for side: ActorSide, index: Int) -> BattleActor? {
         switch side {
         case .player:
             guard players.indices.contains(index) else { return nil }
@@ -365,7 +365,7 @@ extension BattleContext {
         }
     }
 
-    mutating func updateActor(_ actor: BattleActor, side: ActorSide, index: Int) {
+    nonisolated mutating func updateActor(_ actor: BattleActor, side: ActorSide, index: Int) {
         switch side {
         case .player:
             guard players.indices.contains(index) else { return }
@@ -376,21 +376,21 @@ extension BattleContext {
         }
     }
 
-    func opponents(for side: ActorSide) -> [BattleActor] {
+    nonisolated func opponents(for side: ActorSide) -> [BattleActor] {
         switch side {
         case .player: return enemies
         case .enemy: return players
         }
     }
 
-    func allies(for side: ActorSide) -> [BattleActor] {
+    nonisolated func allies(for side: ActorSide) -> [BattleActor] {
         switch side {
         case .player: return players
         case .enemy: return enemies
         }
     }
 
-    static func reference(for side: ActorSide, index: Int) -> ActorReference {
+    nonisolated static func reference(for side: ActorSide, index: Int) -> ActorReference {
         switch side {
         case .player: return .player(index)
         case .enemy: return .enemy(index)

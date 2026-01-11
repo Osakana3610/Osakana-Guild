@@ -23,6 +23,7 @@
 
 import Foundation
 import SwiftUI
+import os
 
 /// 起動時にロードされるマスターデータのメモリキャッシュ
 /// @Observable classで、UIの自動更新をサポート
@@ -32,95 +33,90 @@ import SwiftUI
 final class MasterDataCache: @unchecked Sendable {
     // MARK: - 全件データ（配列）
 
-    let allItems: [ItemDefinition]
-    let allJobs: [JobDefinition]
-    let allRaces: [RaceDefinition]
-    let allSkills: [SkillDefinition]
-    let allSpells: [SpellDefinition]
-    let allEnemies: [EnemyDefinition]
-    let allEnemySkills: [EnemySkillDefinition]
-    let allTitles: [TitleDefinition]
-    let allSuperRareTitles: [SuperRareTitleDefinition]
-    let allStatusEffects: [StatusEffectDefinition]
-    let allDungeons: [DungeonDefinition]
-    let allEncounterTables: [EncounterTableDefinition]
-    let allDungeonFloors: [DungeonFloorDefinition]
-    let allExplorationEvents: [ExplorationEventDefinition]
-    let allStoryNodes: [StoryNodeDefinition]
-    let allSynthesisRecipes: [SynthesisRecipeDefinition]
-    let allShopItems: [MasterShopItem]
-    let allCharacterNames: [CharacterNameDefinition]
+    nonisolated let allItems: [ItemDefinition]
+    nonisolated let allJobs: [JobDefinition]
+    nonisolated let allRaces: [RaceDefinition]
+    nonisolated let allSkills: [SkillDefinition]
+    nonisolated let allSpells: [SpellDefinition]
+    nonisolated let allEnemies: [EnemyDefinition]
+    nonisolated let allEnemySkills: [EnemySkillDefinition]
+    nonisolated let allTitles: [TitleDefinition]
+    nonisolated let allSuperRareTitles: [SuperRareTitleDefinition]
+    nonisolated let allStatusEffects: [StatusEffectDefinition]
+    nonisolated let allDungeons: [DungeonDefinition]
+    nonisolated let allEncounterTables: [EncounterTableDefinition]
+    nonisolated let allDungeonFloors: [DungeonFloorDefinition]
+    nonisolated let allExplorationEvents: [ExplorationEventDefinition]
+    nonisolated let allStoryNodes: [StoryNodeDefinition]
+    nonisolated let allSynthesisRecipes: [SynthesisRecipeDefinition]
+    nonisolated let allShopItems: [MasterShopItem]
+    nonisolated let allCharacterNames: [CharacterNameDefinition]
 
     // MARK: - Personality関連
 
-    let allPersonalityPrimary: [PersonalityPrimaryDefinition]
-    let allPersonalitySecondary: [PersonalitySecondaryDefinition]
-    let allPersonalitySkills: [PersonalitySkillDefinition]
-    let allPersonalityCancellations: [PersonalityCancellation]
-    let allPersonalityBattleEffects: [PersonalityBattleEffect]
+    nonisolated let allPersonalityPrimary: [PersonalityPrimaryDefinition]
+    nonisolated let allPersonalitySecondary: [PersonalitySecondaryDefinition]
+    nonisolated let allPersonalitySkills: [PersonalitySkillDefinition]
+    nonisolated let allPersonalityCancellations: [PersonalityCancellation]
+    nonisolated let allPersonalityBattleEffects: [PersonalityBattleEffect]
 
     // MARK: - Job/Race拡張データ
 
-    let jobSkillUnlocks: [UInt8: [(level: Int, skillId: UInt16)]]
-    let jobMetadata: [UInt8: (category: UInt8, growthTendency: UInt8?)]
-    let racePassiveSkills: [UInt8: [UInt16]]
-    let raceSkillUnlocks: [UInt8: [(level: Int, skillId: UInt16)]]
+    nonisolated let jobSkillUnlocks: [UInt8: [(level: Int, skillId: UInt16)]]
+    nonisolated let jobMetadata: [UInt8: (category: UInt8, growthTendency: UInt8?)]
+    nonisolated let racePassiveSkills: [UInt8: [UInt16]]
+    nonisolated let raceSkillUnlocks: [UInt8: [(level: Int, skillId: UInt16)]]
 
     // MARK: - インデックス（Dictionary）
     // 戦闘システム等で辞書アクセスが必要な場合はinternalで公開
 
-    let itemsById: [UInt16: ItemDefinition]
-    let jobsById: [UInt8: JobDefinition]
-    let racesById: [UInt8: RaceDefinition]
-    let skillsById: [UInt16: SkillDefinition]
-    let spellsById: [UInt8: SpellDefinition]
-    let enemiesById: [UInt16: EnemyDefinition]
-    let enemySkillsById: [UInt16: EnemySkillDefinition]
-    let titlesById: [UInt8: TitleDefinition]
-    let superRareTitlesById: [UInt8: SuperRareTitleDefinition]
-    let statusEffectsById: [UInt8: StatusEffectDefinition]
-    let dungeonsById: [UInt16: DungeonDefinition]
-    let explorationEventsById: [UInt8: ExplorationEventDefinition]
-    let personalityPrimaryById: [UInt8: PersonalityPrimaryDefinition]
-    let personalitySecondaryById: [UInt8: PersonalitySecondaryDefinition]
-    let personalitySkillsById: [UInt8: PersonalitySkillDefinition]
-    let personalityBattleEffectsById: [UInt8: PersonalityBattleEffect]
-    let characterNamesByGender: [UInt8: [CharacterNameDefinition]]
-    let storyNodesById: [UInt16: StoryNodeDefinition]
+    nonisolated let itemsById: [UInt16: ItemDefinition]
+    nonisolated let jobsById: [UInt8: JobDefinition]
+    nonisolated let racesById: [UInt8: RaceDefinition]
+    nonisolated let skillsById: [UInt16: SkillDefinition]
+    nonisolated let spellsById: [UInt8: SpellDefinition]
+    nonisolated let enemiesById: [UInt16: EnemyDefinition]
+    nonisolated let enemySkillsById: [UInt16: EnemySkillDefinition]
+    nonisolated let titlesById: [UInt8: TitleDefinition]
+    nonisolated let superRareTitlesById: [UInt8: SuperRareTitleDefinition]
+    nonisolated let statusEffectsById: [UInt8: StatusEffectDefinition]
+    nonisolated let dungeonsById: [UInt16: DungeonDefinition]
+    nonisolated let explorationEventsById: [UInt8: ExplorationEventDefinition]
+    nonisolated let personalityPrimaryById: [UInt8: PersonalityPrimaryDefinition]
+    nonisolated let personalitySecondaryById: [UInt8: PersonalitySecondaryDefinition]
+    nonisolated let personalitySkillsById: [UInt8: PersonalitySkillDefinition]
+    nonisolated let personalityBattleEffectsById: [UInt8: PersonalityBattleEffect]
+    nonisolated let characterNamesByGender: [UInt8: [CharacterNameDefinition]]
+    nonisolated let storyNodesById: [UInt16: StoryNodeDefinition]
 
     // MARK: - 事前計算データ（起動時に1回だけ計算）
 
     /// ダンジョンID → 出現敵IDセット
-    let dungeonEnemyMap: [UInt16: Set<UInt16>]
+    nonisolated let dungeonEnemyMap: [UInt16: Set<UInt16>]
     /// 敵ID → 最大出現レベル
-    let enemyLevelMap: [UInt16: Int]
+    nonisolated let enemyLevelMap: [UInt16: Int]
 
     // MARK: - 敵種族名辞書
 
-    let enemyRaceNames: [UInt8: String]
+    nonisolated let enemyRaceNames: [UInt8: String]
 
     // MARK: - オンデマンドキャッシュ（combatStats）
 
-    private struct CombatCacheKey: Hashable, Sendable {
+    nonisolated private struct CombatCacheKey: Hashable, Sendable {
         let enemyId: UInt16
         let level: Int
     }
 
     @ObservationIgnored
-    private let combatCacheLock = NSLock()
-    @ObservationIgnored
-    private var combatCache: [CombatCacheKey: CharacterValues.Combat] = [:]
+    nonisolated private let combatCache = OSAllocatedUnfairLock<[CombatCacheKey: CharacterValues.Combat]>(initialState: [:])
 
     /// 敵の戦闘ステータスを取得（オンデマンドでキャッシュ）
-    func combatStats(for enemyId: UInt16, level: Int) throws -> CharacterValues.Combat {
+    nonisolated func combatStats(for enemyId: UInt16, level: Int) throws -> CharacterValues.Combat {
         let key = CombatCacheKey(enemyId: enemyId, level: level)
 
-        combatCacheLock.lock()
-        if let cached = combatCache[key] {
-            combatCacheLock.unlock()
+        if let cached = combatCache.withLock({ $0[key] }) {
             return cached
         }
-        combatCacheLock.unlock()
 
         // キャッシュミス - 計算する
         guard let enemy = enemiesById[enemyId] else {
@@ -133,9 +129,9 @@ final class MasterDataCache: @unchecked Sendable {
             masterData: self
         )
 
-        combatCacheLock.lock()
-        combatCache[key] = snapshot
-        combatCacheLock.unlock()
+        combatCache.withLock { cache in
+            cache[key] = snapshot
+        }
 
         return snapshot
     }
@@ -143,66 +139,66 @@ final class MasterDataCache: @unchecked Sendable {
     // MARK: - ヘルパーメソッド（UIでよく使う）
 
     /// 呪文名を取得
-    func spellName(for spellId: UInt8) -> String {
+    nonisolated func spellName(for spellId: UInt8) -> String {
         spellsById[spellId]?.name ?? "呪文ID:\(spellId)"
     }
 
     /// アイテム名を取得
-    func itemName(for itemId: UInt16) -> String {
+    nonisolated func itemName(for itemId: UInt16) -> String {
         itemsById[itemId]?.name ?? "アイテムID:\(itemId)"
     }
 
     /// 職業名を取得
-    func jobName(for jobId: UInt8) -> String {
+    nonisolated func jobName(for jobId: UInt8) -> String {
         jobsById[jobId]?.name ?? "職業ID:\(jobId)"
     }
 
     /// 敵種族名を取得
-    func enemyRaceName(for raceId: UInt8) -> String {
+    nonisolated func enemyRaceName(for raceId: UInt8) -> String {
         enemyRaceNames[raceId] ?? "種族ID:\(raceId)"
     }
 
     // MARK: - 単一ID取得
 
-    func item(_ id: UInt16) -> ItemDefinition? { itemsById[id] }
-    func job(_ id: UInt8) -> JobDefinition? { jobsById[id] }
-    func race(_ id: UInt8) -> RaceDefinition? { racesById[id] }
-    func skill(_ id: UInt16) -> SkillDefinition? { skillsById[id] }
-    func spell(_ id: UInt8) -> SpellDefinition? { spellsById[id] }
-    func enemy(_ id: UInt16) -> EnemyDefinition? { enemiesById[id] }
-    func enemySkill(_ id: UInt16) -> EnemySkillDefinition? { enemySkillsById[id] }
-    func title(_ id: UInt8) -> TitleDefinition? { titlesById[id] }
-    func superRareTitle(_ id: UInt8) -> SuperRareTitleDefinition? { superRareTitlesById[id] }
-    func statusEffect(_ id: UInt8) -> StatusEffectDefinition? { statusEffectsById[id] }
-    func dungeon(_ id: UInt16) -> DungeonDefinition? { dungeonsById[id] }
-    func explorationEvent(_ id: UInt8) -> ExplorationEventDefinition? { explorationEventsById[id] }
-    func personalityPrimary(_ id: UInt8) -> PersonalityPrimaryDefinition? { personalityPrimaryById[id] }
-    func personalitySecondary(_ id: UInt8) -> PersonalitySecondaryDefinition? { personalitySecondaryById[id] }
-    func personalitySkill(_ id: UInt8) -> PersonalitySkillDefinition? { personalitySkillsById[id] }
-    func personalityBattleEffect(_ id: UInt8) -> PersonalityBattleEffect? { personalityBattleEffectsById[id] }
-    func storyNode(_ id: UInt16) -> StoryNodeDefinition? { storyNodesById[id] }
+    nonisolated func item(_ id: UInt16) -> ItemDefinition? { itemsById[id] }
+    nonisolated func job(_ id: UInt8) -> JobDefinition? { jobsById[id] }
+    nonisolated func race(_ id: UInt8) -> RaceDefinition? { racesById[id] }
+    nonisolated func skill(_ id: UInt16) -> SkillDefinition? { skillsById[id] }
+    nonisolated func spell(_ id: UInt8) -> SpellDefinition? { spellsById[id] }
+    nonisolated func enemy(_ id: UInt16) -> EnemyDefinition? { enemiesById[id] }
+    nonisolated func enemySkill(_ id: UInt16) -> EnemySkillDefinition? { enemySkillsById[id] }
+    nonisolated func title(_ id: UInt8) -> TitleDefinition? { titlesById[id] }
+    nonisolated func superRareTitle(_ id: UInt8) -> SuperRareTitleDefinition? { superRareTitlesById[id] }
+    nonisolated func statusEffect(_ id: UInt8) -> StatusEffectDefinition? { statusEffectsById[id] }
+    nonisolated func dungeon(_ id: UInt16) -> DungeonDefinition? { dungeonsById[id] }
+    nonisolated func explorationEvent(_ id: UInt8) -> ExplorationEventDefinition? { explorationEventsById[id] }
+    nonisolated func personalityPrimary(_ id: UInt8) -> PersonalityPrimaryDefinition? { personalityPrimaryById[id] }
+    nonisolated func personalitySecondary(_ id: UInt8) -> PersonalitySecondaryDefinition? { personalitySecondaryById[id] }
+    nonisolated func personalitySkill(_ id: UInt8) -> PersonalitySkillDefinition? { personalitySkillsById[id] }
+    nonisolated func personalityBattleEffect(_ id: UInt8) -> PersonalityBattleEffect? { personalityBattleEffectsById[id] }
+    nonisolated func storyNode(_ id: UInt16) -> StoryNodeDefinition? { storyNodesById[id] }
 
     // MARK: - 複数ID取得
 
-    func items(_ ids: [UInt16]) -> [ItemDefinition] {
+    nonisolated func items(_ ids: [UInt16]) -> [ItemDefinition] {
         ids.map { itemsById[$0]! }
     }
 
-    func skills(_ ids: [UInt16]) -> [SkillDefinition] {
+    nonisolated func skills(_ ids: [UInt16]) -> [SkillDefinition] {
         ids.map { skillsById[$0]! }
     }
 
-    func spells(_ ids: [UInt8]) -> [SpellDefinition] {
+    nonisolated func spells(_ ids: [UInt8]) -> [SpellDefinition] {
         ids.map { spellsById[$0]! }
     }
 
     // MARK: - フィルタ取得
 
-    func characterNames(forGenderCode genderCode: UInt8) -> [CharacterNameDefinition] {
+    nonisolated func characterNames(forGenderCode genderCode: UInt8) -> [CharacterNameDefinition] {
         characterNamesByGender[genderCode]!
     }
 
-    func randomCharacterName(forGenderCode genderCode: UInt8) -> String {
+    nonisolated func randomCharacterName(forGenderCode genderCode: UInt8) -> String {
         let names = characterNames(forGenderCode: genderCode)
         assert(!names.isEmpty, "Character names for gender code \(genderCode) is empty")
         return names.randomElement()?.name ?? "名無し"
@@ -210,7 +206,7 @@ final class MasterDataCache: @unchecked Sendable {
 
     // MARK: - イニシャライザ
 
-    init(
+    nonisolated init(
         allItems: [ItemDefinition],
         allJobs: [JobDefinition],
         allRaces: [RaceDefinition],
