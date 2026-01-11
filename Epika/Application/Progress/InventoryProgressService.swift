@@ -33,6 +33,13 @@ actor InventoryProgressService {
     private let gameStateService: GameStateService
     private let maxStackSize: UInt16 = 99
 
+    struct PlayerItemSnapshot: Sendable {
+        let stackKey: String
+        let itemId: UInt16
+        let quantity: Int
+        let socketItemId: UInt16
+    }
+
     struct BatchSeed: Sendable {
         let itemId: UInt16
         let quantity: Int
@@ -51,9 +58,32 @@ actor InventoryProgressService {
     }
 
     init(contextProvider: SwiftDataContextProvider,
-         gameStateService: GameStateService) {
+        gameStateService: GameStateService) {
         self.contextProvider = contextProvider
         self.gameStateService = gameStateService
+    }
+
+    /// プレイヤーインベントリのスナップショットを取得
+    /// - Parameter stackKeys: nilの場合は全件。指定時は対象stackKeyのみ
+    func playerItemSnapshots(stackKeys: Set<String>? = nil) async throws -> [PlayerItemSnapshot] {
+        let context = contextProvider.makeContext()
+        let descriptor = fetchDescriptor(for: .playerItem)
+        let records = try context.fetch(descriptor)
+        let filtered: [InventoryItemRecord]
+        if let stackKeys, !stackKeys.isEmpty {
+            filtered = records.filter { stackKeys.contains($0.stackKey) }
+        } else {
+            filtered = records
+        }
+        guard !filtered.isEmpty else { return [] }
+        return filtered.map {
+            PlayerItemSnapshot(
+                stackKey: $0.stackKey,
+                itemId: $0.itemId,
+                quantity: Int($0.quantity),
+                socketItemId: $0.socketItemId
+            )
+        }
     }
 
     // MARK: - Public API

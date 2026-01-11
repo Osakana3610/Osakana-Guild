@@ -29,7 +29,6 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 
 // MARK: - Item Sale with Shop Stock
 extension AppServices {
@@ -77,29 +76,24 @@ extension AppServices {
         let autoTradeKeys = try await autoTrade.registeredStackKeys()
         guard !autoTradeKeys.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
 
-        // SwiftDataから直接フェッチ
-        let context = contextProvider.makeContext()
-        let storageTypeValue = ItemStorage.playerItem.rawValue
-        let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue
-        })
-        let records = try context.fetch(descriptor)
-        guard !records.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
-
+        let inventorySnapshots = try await inventory.playerItemSnapshots()
+        guard !inventorySnapshots.isEmpty else {
+            return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: [])
+        }
         let autoTradeKeySet = Set(autoTradeKeys)
-        let targets = records.filter { autoTradeKeySet.contains($0.stackKey) }
+        let targets = inventorySnapshots.filter { autoTradeKeySet.contains($0.stackKey) }
         guard !targets.isEmpty else { return AutoTradeSellResult(gold: 0, tickets: 0, destroyed: []) }
 
         var aggregated: [UInt16: Int] = [:]
         for record in targets {
-            aggregated[record.itemId, default: 0] += Int(record.quantity)
+            aggregated[record.itemId, default: 0] += record.quantity
         }
 
         // ゴールド・チケット加算はShopProgressService内で完結
         let sellResult = try await shop.addPlayerSoldItemsBatch(aggregated.map { ($0.key, $0.value) })
 
         for record in targets {
-            try await inventory.decrementItem(stackKey: record.stackKey, quantity: Int(record.quantity))
+            try await inventory.decrementItem(stackKey: record.stackKey, quantity: record.quantity)
         }
 
         return AutoTradeSellResult(gold: sellResult.totalGold,
@@ -118,15 +112,8 @@ extension AppServices {
             return try await gameState.ensurePlayer()
         }
 
-        // SwiftDataから直接フェッチ
-        let context = contextProvider.makeContext()
-        let storageTypeValue = ItemStorage.playerItem.rawValue
-        let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue
-        })
-        let records = try context.fetch(descriptor)
         let stackKeySet = Set(stackKeys)
-        let targetRecords = records.filter { stackKeySet.contains($0.stackKey) }
+        let targetRecords = try await inventory.playerItemSnapshots(stackKeys: stackKeySet)
 
         guard !targetRecords.isEmpty else {
             return try await gameState.ensurePlayer()
@@ -136,10 +123,10 @@ extension AppServices {
         var sellItems: [(itemId: UInt16, quantity: Int)] = []
         for record in targetRecords {
             // 本体を売却リストに追加
-            sellItems.append((itemId: record.itemId, quantity: Int(record.quantity)))
+            sellItems.append((itemId: record.itemId, quantity: record.quantity))
             // ソケット宝石がある場合、宝石も売却リストに追加
             if record.socketItemId != 0 {
-                sellItems.append((itemId: record.socketItemId, quantity: Int(record.quantity)))
+                sellItems.append((itemId: record.socketItemId, quantity: record.quantity))
             }
         }
 
@@ -149,7 +136,7 @@ extension AppServices {
 
         // インベントリからアイテムを削除（全量）
         for record in targetRecords {
-            try await inventory.decrementItem(stackKey: record.stackKey, quantity: Int(record.quantity))
+            try await inventory.decrementItem(stackKey: record.stackKey, quantity: record.quantity)
         }
 
         // 最新のプレイヤー状態を取得して返す
@@ -169,14 +156,8 @@ extension AppServices {
             return try await gameState.ensurePlayer()
         }
 
-        // SwiftDataから直接フェッチ
-        let context = contextProvider.makeContext()
-        let storageTypeValue = ItemStorage.playerItem.rawValue
-        let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue
-        })
-        let records = try context.fetch(descriptor)
-        guard let record = records.first(where: { $0.stackKey == stackKey }) else {
+        let snapshots = try await inventory.playerItemSnapshots(stackKeys: Set([stackKey]))
+        guard let record = snapshots.first else {
             throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
         }
         guard record.quantity >= quantity else {
