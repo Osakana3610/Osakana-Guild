@@ -101,6 +101,7 @@ final class UserDataLoadService: Sendable {
     @MainActor var isStorySnapshotLoaded = false
 
     @MainActor private var loadTask: Task<Void, Error>?
+    private let loadSerialExecutor = LoadSerialExecutor()
 
     // MARK: - Exploration Resume State
 
@@ -158,33 +159,33 @@ final class UserDataLoadService: Sendable {
             do {
                 await AppLogCollector.shared.log(.system, action: "loadAll_start")
 
-                // 1. データロード（直列実行: リリースビルドでのレースコンディション回避）
+                // 1. データロード（直列実行: SwiftDataアクセスのレース回避）
                 // GameState を最優先で読み込み、その後は値型キャッシュのみ参照する
-                try await loadGameState()
+                try await loadSerialExecutor.run { try await loadGameState() }
                 await AppLogCollector.shared.log(.system, action: "loadGameState_done")
 
-                try await loadCharacters()
+                try await loadSerialExecutor.run { try await loadCharacters() }
                 await AppLogCollector.shared.log(.system, action: "loadCharacters_done")
 
-                try await loadParties()
+                try await loadSerialExecutor.run { try await loadParties() }
                 await AppLogCollector.shared.log(.system, action: "loadParties_done")
 
-                try await loadExplorationSummaries()
+                try await loadSerialExecutor.run { try await loadExplorationSummaries() }
                 await AppLogCollector.shared.log(.system, action: "loadExplorationSummaries_done")
 
-                try await loadAutoTradeRules()
+                try await loadSerialExecutor.run { try await loadAutoTradeRules() }
                 await AppLogCollector.shared.log(.system, action: "loadAutoTradeRules_done")
 
                 // アイテムロードはMainActorでキャッシュ構築
-                try await loadItems()
+                try await loadSerialExecutor.run { try await loadItems() }
                 await AppLogCollector.shared.log(.system, action: "loadItems_done")
 
                 // 商店在庫ロード（appServicesが必要）
-                try await loadShopItems()
+                try await loadSerialExecutor.run { try await loadShopItems() }
                 await AppLogCollector.shared.log(.system, action: "loadShopItems_done")
 
                 // ダンジョン進行ロード（appServicesが必要）
-                try await loadDungeonSnapshots()
+                try await loadSerialExecutor.run { try await loadDungeonSnapshots() }
                 await AppLogCollector.shared.log(.system, action: "loadDungeonSnapshots_done")
 
                 // 2. 探索再開（データロード完了後に実行）
@@ -218,5 +219,13 @@ enum UserDataLoadError: Error, LocalizedError {
         case .unsupportedBattleLogVersion:
             return "旧形式の戦闘ログのため表示できません"
         }
+    }
+}
+
+// MARK: - Serial Executor for SwiftData Loads
+
+private actor LoadSerialExecutor {
+    func run<T>(_ operation: @Sendable () async throws -> T) async rethrows -> T {
+        try await operation()
     }
 }
