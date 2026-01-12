@@ -30,8 +30,7 @@ extension UserDataLoadService {
 
 extension UserDataLoadService {
     func loadGameState() async throws {
-        let recordData = try await gameStateService.ensurePlayerData()
-        let snapshot = recordData.asCachedPlayer
+        let snapshot = try await gameStateService.refreshCurrentPlayer()
         await MainActor.run {
             self.playerGold = snapshot.gold
             self.playerCatTickets = snapshot.catTickets

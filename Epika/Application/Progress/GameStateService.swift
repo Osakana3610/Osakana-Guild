@@ -38,6 +38,7 @@ actor GameStateService {
         let pandoraBoxItems: [UInt64]
     }
     private var isContextConfigured = false
+    private var cachedPlayerSnapshot: CachedPlayer?
 
     /// ゲーム状態変更通知を送信
     private func notifyGameStateChange(_ change: UserDataLoadService.GameStateChange) {
@@ -72,6 +73,7 @@ actor GameStateService {
         let gameState = GameStateRecord()
         modelContext.insert(gameState)
         try saveIfNeeded()
+        cachedPlayerSnapshot = nil
     }
 
     // MARK: - Super Rare Daily State
@@ -117,9 +119,23 @@ actor GameStateService {
 
     // MARK: - Player Snapshot
 
+    func currentPlayer(initialGold: UInt32 = 1000) async throws -> CachedPlayer {
+        if let cachedPlayerSnapshot {
+            return cachedPlayerSnapshot
+        }
+        return try await ensurePlayer(initialGold: initialGold)
+    }
+
+    func refreshCurrentPlayer(initialGold: UInt32 = 1000) async throws -> CachedPlayer {
+        cachedPlayerSnapshot = nil
+        return try await ensurePlayer(initialGold: initialGold)
+    }
+
     func ensurePlayer(initialGold: UInt32 = 1000) async throws -> CachedPlayer {
         let data = try await ensurePlayerData(initialGold: initialGold)
-        return data.asCachedPlayer
+        let snapshot = data.asCachedPlayer
+        cachePlayerSnapshot(snapshot)
+        return snapshot
     }
 
     /// SwiftDataモデルから値型データのみを取り出すAPI（UserDataLoadService用）
@@ -138,7 +154,9 @@ actor GameStateService {
             let newGold = UInt64(wallet.gold) + UInt64(amount)
             wallet.gold = UInt32(min(newGold, UInt64(AppConstants.Progress.maximumGold)))
         }
-        return data.asCachedPlayer
+        let snapshot = data.asCachedPlayer
+        cachePlayerSnapshot(snapshot)
+        return snapshot
     }
 
     func spendGold(_ amount: UInt32) async throws -> CachedPlayer {
@@ -149,7 +167,9 @@ actor GameStateService {
             }
             wallet.gold -= amount
         }
-        return data.asCachedPlayer
+        let snapshot = data.asCachedPlayer
+        cachePlayerSnapshot(snapshot)
+        return snapshot
     }
 
     // MARK: - Cat Tickets
@@ -160,16 +180,20 @@ actor GameStateService {
             let newTickets = UInt32(wallet.catTickets) + UInt32(amount)
             wallet.catTickets = UInt16(min(newTickets, UInt32(AppConstants.Progress.maximumCatTickets)))
         }
-        return data.asCachedPlayer
+        let snapshot = data.asCachedPlayer
+        cachePlayerSnapshot(snapshot)
+        return snapshot
     }
 
     // MARK: - Pandora Box
 
     /// パンドラボックス内のアイテム（UInt64にパック済み）
     func pandoraBoxItems() async throws -> [UInt64] {
-        configureContextIfNeeded()
-        let record = try fetchGameState()
-        return try PandoraBoxStorage.decode(record.pandoraBoxItemsData)
+        if let cachedPlayerSnapshot {
+            return cachedPlayerSnapshot.pandoraBoxItems
+        }
+        let snapshot = try await ensurePlayer()
+        return snapshot.pandoraBoxItems
     }
 
     /// パンドラボックスにアイテムを追加（インベントリから1個減らす）
@@ -188,7 +212,9 @@ actor GameStateService {
 
         // 既に登録済みなら何もしない
         guard !items.contains(packed) else {
-            return try playerData(from: record).asCachedPlayer
+            let snapshot = try playerData(from: record).asCachedPlayer
+            cachePlayerSnapshot(snapshot)
+            return snapshot
         }
 
         // 満杯チェック
@@ -211,7 +237,9 @@ actor GameStateService {
             pandoraBoxItems: items
         )
         notifyGameStateChange(change)
-        return try playerData(from: record).asCachedPlayer
+        let snapshot = try playerData(from: record).asCachedPlayer
+        cachePlayerSnapshot(snapshot)
+        return snapshot
     }
 
     /// パンドラボックスからアイテムを解除（インベントリに1個戻す）
@@ -258,7 +286,9 @@ actor GameStateService {
             pandoraBoxItems: items
         )
         notifyGameStateChange(change)
-        return try playerData(from: record).asCachedPlayer
+        let snapshot = try playerData(from: record).asCachedPlayer
+        cachePlayerSnapshot(snapshot)
+        return snapshot
     }
 }
 
@@ -346,6 +376,10 @@ private extension GameStateService {
             partySlots: record.partySlots,
             pandoraBoxItems: pandoraItems
         )
+    }
+
+    func cachePlayerSnapshot(_ snapshot: CachedPlayer) {
+        cachedPlayerSnapshot = snapshot
     }
 }
 
