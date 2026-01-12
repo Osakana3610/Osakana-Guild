@@ -18,7 +18,6 @@
 // ==============================================================================
 
 import SwiftUI
-import SwiftData
 
 extension CachedExploration: Identifiable {}
 extension CachedExploration.EncounterLog: Identifiable {}
@@ -150,7 +149,7 @@ struct RecentExplorationLogsView: View {
         defer { isFetchingDetail = false }
 
         do {
-            guard let snapshot = try await appServices.exploration.explorationSnapshot(
+            guard let snapshot = try await appServices.userDataLoad.explorationSnapshot(
                 partyId: run.party.partyId,
                 startedAt: run.startedAt
             ) else {

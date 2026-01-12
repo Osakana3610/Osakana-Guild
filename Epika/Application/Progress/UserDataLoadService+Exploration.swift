@@ -49,6 +49,11 @@ extension UserDataLoadService {
         }
     }
 
+    /// 指定パーティ・開始日時の探索詳細（ログ込み）を取得
+    func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> CachedExploration? {
+        try await explorationService.explorationSnapshot(partyId: partyId, startedAt: startedAt)
+    }
+
     // MARK: - Exploration Resume
 
     /// 孤立した探索を再開（起動時にloadAll内で呼ばれる）
