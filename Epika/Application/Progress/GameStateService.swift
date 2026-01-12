@@ -31,6 +31,12 @@ import SwiftData
 /// ゲーム状態（プレイヤー資産・メタ情報）を管理するService
 @ModelActor
 actor GameStateService {
+    struct PlayerRecordData: Sendable, Equatable {
+        let gold: UInt32
+        let catTickets: UInt16
+        let partySlots: UInt8
+        let pandoraBoxItems: [UInt64]
+    }
     private var isContextConfigured = false
 
     /// ゲーム状態変更通知を送信
@@ -112,40 +118,49 @@ actor GameStateService {
     // MARK: - Player Snapshot
 
     func ensurePlayer(initialGold: UInt32 = 1000) async throws -> CachedPlayer {
+        let data = try await ensurePlayerData(initialGold: initialGold)
+        return data.asCachedPlayer
+    }
+
+    /// SwiftDataモデルから値型データのみを取り出すAPI（UserDataLoadService用）
+    func ensurePlayerData(initialGold: UInt32 = 1000) async throws -> PlayerRecordData {
         configureContextIfNeeded()
         let record = try ensureGameState(initialGold: initialGold)
         try saveIfNeeded()
-        return try snapshot(from: record)
+        return try playerData(from: record)
     }
 
     // MARK: - Gold Operations
 
     func addGold(_ amount: UInt32) async throws -> CachedPlayer {
         configureContextIfNeeded()
-        return try await mutateWallet { wallet in
+        let data = try await mutateWallet { wallet in
             let newGold = UInt64(wallet.gold) + UInt64(amount)
             wallet.gold = UInt32(min(newGold, UInt64(AppConstants.Progress.maximumGold)))
         }
+        return data.asCachedPlayer
     }
 
     func spendGold(_ amount: UInt32) async throws -> CachedPlayer {
         configureContextIfNeeded()
-        return try await mutateWallet { wallet in
+        let data = try await mutateWallet { wallet in
             guard wallet.gold >= amount else {
                 throw ProgressError.insufficientFunds(required: Int(amount), available: Int(wallet.gold))
             }
             wallet.gold -= amount
         }
+        return data.asCachedPlayer
     }
 
     // MARK: - Cat Tickets
 
     func addCatTickets(_ amount: UInt16) async throws -> CachedPlayer {
         configureContextIfNeeded()
-        return try await mutateWallet { wallet in
+        let data = try await mutateWallet { wallet in
             let newTickets = UInt32(wallet.catTickets) + UInt32(amount)
             wallet.catTickets = UInt16(min(newTickets, UInt32(AppConstants.Progress.maximumCatTickets)))
         }
+        return data.asCachedPlayer
     }
 
     // MARK: - Pandora Box
@@ -173,7 +188,7 @@ actor GameStateService {
 
         // 既に登録済みなら何もしない
         guard !items.contains(packed) else {
-            return try snapshot(from: record)
+            return try playerData(from: record).asCachedPlayer
         }
 
         // 満杯チェック
@@ -196,7 +211,7 @@ actor GameStateService {
             pandoraBoxItems: items
         )
         notifyGameStateChange(change)
-        return try snapshot(from: record)
+        return try playerData(from: record).asCachedPlayer
     }
 
     /// パンドラボックスからアイテムを解除（インベントリに1個戻す）
@@ -243,7 +258,7 @@ actor GameStateService {
             pandoraBoxItems: items
         )
         notifyGameStateChange(change)
-        return try snapshot(from: record)
+        return try playerData(from: record).asCachedPlayer
     }
 }
 
@@ -289,7 +304,7 @@ private extension GameStateService {
         return record
     }
 
-    func mutateWallet(_ mutate: @Sendable (inout PlayerWallet) throws -> Void) async throws -> CachedPlayer {
+    func mutateWallet(_ mutate: @Sendable (inout PlayerWallet) throws -> Void) async throws -> PlayerRecordData {
         let record = try ensureGameState()
         var wallet = PlayerWallet(gold: record.gold, catTickets: record.catTickets)
         try mutate(&wallet)
@@ -307,7 +322,7 @@ private extension GameStateService {
             pandoraBoxItems: nil
         )
         notifyGameStateChange(change)
-        return try snapshot(from: record)
+        return try playerData(from: record)
     }
 
     func deleteAll<T: PersistentModel>(_ type: T.Type) throws {
@@ -323,13 +338,24 @@ private extension GameStateService {
         try modelContext.save()
     }
 
-    func snapshot(from record: GameStateRecord) throws -> CachedPlayer {
+    func playerData(from record: GameStateRecord) throws -> PlayerRecordData {
         let pandoraItems = try PandoraBoxStorage.decode(record.pandoraBoxItemsData)
-        return CachedPlayer(
+        return PlayerRecordData(
             gold: record.gold,
             catTickets: record.catTickets,
             partySlots: record.partySlots,
             pandoraBoxItems: pandoraItems
+        )
+    }
+}
+
+extension GameStateService.PlayerRecordData {
+    nonisolated var asCachedPlayer: CachedPlayer {
+        CachedPlayer(
+            gold: gold,
+            catTickets: catTickets,
+            partySlots: partySlots,
+            pandoraBoxItems: pandoraBoxItems
         )
     }
 }
