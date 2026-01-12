@@ -254,11 +254,10 @@ struct PartySlotExpansionView: View {
         defer { isLoading = false }
         errorMessage = nil
         do {
-            async let playerTask = appServices.gameState.ensurePlayer()
-            async let partyTask = appServices.party.allParties()
-            let (player, parties) = try await (playerTask, partyTask)
-            playerSnapshot = player
-            partySnapshots = parties
+            try await appServices.userDataLoad.loadParties()
+            try await appServices.userDataLoad.loadGameState()
+            playerSnapshot = appServices.userDataLoad.cachedPlayer
+            partySnapshots = appServices.userDataLoad.parties
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -275,21 +274,23 @@ struct PartySlotExpansionView: View {
         errorMessage = nil
         successMessage = nil
         do {
+            var spentSnapshot: CachedPlayer?
             if cost > 0 {
-                _ = try await appServices.gameState.spendGold(UInt32(cost))
+                spentSnapshot = try await appServices.gameState.spendGold(UInt32(cost))
+                playerSnapshot = spentSnapshot
             }
             do {
-                let updatedParties = try await appServices.party.ensurePartySlots(atLeast: previousSlots + 1)
-                let updatedPlayer = try await appServices.gameState.ensurePlayer()
-                playerSnapshot = updatedPlayer
-                partySnapshots = updatedParties
-                successMessage = "ギルド改造完了！パーティスロットが\(previousSlots)から\(updatedParties.count)に増えました！"
+                _ = try await appServices.party.ensurePartySlots(atLeast: previousSlots + 1)
+                try await appServices.userDataLoad.loadParties()
+                partySnapshots = appServices.userDataLoad.parties
+                successMessage = "ギルド改造完了！パーティスロットが\(previousSlots)から\(partySnapshots.count)に増えました！"
                 onComplete()
                 return
             } catch {
                 if cost > 0 {
                     do {
-                        _ = try await appServices.gameState.addGold(UInt32(cost))
+                        let refundSnapshot = try await appServices.gameState.addGold(UInt32(cost))
+                        playerSnapshot = refundSnapshot
                     } catch let refundError {
                         throw PartySlotExpansionError.rollbackFailed(original: error, rollback: refundError)
                     }

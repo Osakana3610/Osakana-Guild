@@ -32,10 +32,7 @@ extension UserDataLoadService {
     func loadGameState() async throws {
         let snapshot = try await gameStateService.refreshCurrentPlayer()
         await MainActor.run {
-            self.playerGold = snapshot.gold
-            self.playerCatTickets = snapshot.catTickets
-            self.playerPartySlots = snapshot.partySlots
-            self.pandoraBoxItems = snapshot.pandoraBoxItems
+            self.cachedPlayer = snapshot
         }
     }
 }
@@ -46,16 +43,9 @@ extension UserDataLoadService {
     /// ゲーム状態を更新（CachedPlayerから）
     @MainActor
     func applyGameStateSnapshot(_ snapshot: CachedPlayer) {
-        playerGold = snapshot.gold
-        playerCatTickets = snapshot.catTickets
-        playerPartySlots = snapshot.partySlots
-        pandoraBoxItems = snapshot.pandoraBoxItems
+        cachedPlayer = snapshot
     }
-}
 
-// MARK: - GameState Change Notification Handling
-
-extension UserDataLoadService {
     /// ゲーム状態変更通知を購読開始
     @MainActor
     func subscribeGameStateChanges() {
@@ -84,21 +74,25 @@ extension UserDataLoadService {
             return
         }
 
+        var updated = cachedPlayer
+        let oldPandora = Set(updated.pandoraBoxItems)
+
         // 差分更新
         if let gold = change.gold {
-            playerGold = gold
+            updated.gold = gold
         }
         if let catTickets = change.catTickets {
-            playerCatTickets = catTickets
+            updated.catTickets = catTickets
         }
         if let partySlots = change.partySlots {
-            playerPartySlots = partySlots
+            updated.partySlots = partySlots
         }
         if let newPandoraItems = change.pandoraBoxItems {
-            updatePandoraAffectedItems(oldPandora: Set(self.pandoraBoxItems), newPandora: Set(newPandoraItems))
-            self.pandoraBoxItems = newPandoraItems
+            updatePandoraAffectedItems(oldPandora: oldPandora, newPandora: Set(newPandoraItems))
+            updated.pandoraBoxItems = newPandoraItems
             invalidateCharacters()
         }
+        cachedPlayer = updated
     }
 
     /// パンドラボックス変更で影響を受けるアイテムのcombatBonusesを更新

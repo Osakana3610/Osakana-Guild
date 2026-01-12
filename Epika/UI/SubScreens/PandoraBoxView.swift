@@ -145,7 +145,7 @@ struct PandoraBoxView: View {
 
         do {
             try await displayService.loadGameState()
-            let cachedItems = await MainActor.run { displayService.pandoraBoxItems }
+            let cachedItems = await MainActor.run { displayService.cachedPlayer.pandoraBoxItems }
 
             // パンドラアイテムをマスターデータから構築（インベントリに依存しない）
             pandoraItems = cachedItems.compactMap { packed in

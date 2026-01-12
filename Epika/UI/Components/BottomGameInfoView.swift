@@ -72,6 +72,10 @@ struct BottomGameInfoView: View {
         sizeCategory > .large ? "プレミアム" : "Premium Time"
     }
 
+    private var player: CachedPlayer {
+        appServices.userDataLoad.cachedPlayer
+    }
+
     var body: some View {
         VStack(spacing: 2) {
             HStack {
@@ -80,7 +84,7 @@ struct BottomGameInfoView: View {
                         .font(.subheadline)
                         .foregroundColor(.primary)
 
-                    Text("\(appServices.userDataLoad.playerCatTickets)枚")
+                    Text("\(player.catTickets)枚")
                         .font(.subheadline.bold())
                         .foregroundColor(.primary)
                 }
@@ -108,7 +112,7 @@ struct BottomGameInfoView: View {
                 Spacer()
 
                 HStack(spacing: 2) {
-                    Text("\(formatGold(Int(appServices.userDataLoad.playerGold)))GP")
+                    Text("\(formatGold(Int(player.gold)))GP")
                         .font(.footnote)
                         .foregroundColor(.primary)
                 }

@@ -174,7 +174,7 @@ struct BugReportView: View {
                     HStack {
                         Text("ゴールド")
                         Spacer()
-                        Text(Int(appServices.userDataLoad.playerGold).formattedWithComma())
+                        Text(Int(appServices.userDataLoad.cachedPlayer.gold).formattedWithComma())
                             .foregroundStyle(.secondary)
                     }
                     HStack {
@@ -277,7 +277,7 @@ struct BugReportView: View {
             if sendUserData {
                 playerData = BugReport.PlayerReportData(
                     playerId: playerId,
-                    gold: Int(appServices.userDataLoad.playerGold),
+                    gold: Int(appServices.userDataLoad.cachedPlayer.gold),
                     partyCount: appServices.userDataLoad.parties.count,
                     characterCount: appServices.userDataLoad.characters.count,
                     inventoryCount: inventoryCount,

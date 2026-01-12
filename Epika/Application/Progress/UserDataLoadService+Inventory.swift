@@ -87,6 +87,8 @@ extension UserDataLoadService {
         var grouped: [ItemDisplaySubcategory: [CachedInventoryItem]] = [:]
         var newStackKeyIndex: [String: ItemDisplaySubcategory] = [:]
 
+        let pandoraItems = Set(cachedPlayer.pandoraBoxItems)
+
         for record in records {
             guard let definition = definitionMap[record.itemId] else { continue }
 
@@ -127,7 +129,7 @@ extension UserDataLoadService {
                 socketItemId: record.socketItemId,
                 socketNormalTitleId: record.socketNormalTitleId,
                 socketSuperRareTitleId: record.socketSuperRareTitleId,
-                isPandora: pandoraBoxItems.contains(packedStackKey(
+                isPandora: pandoraItems.contains(packedStackKey(
                     superRareTitleId: record.superRareTitleId,
                     normalTitleId: record.normalTitleId,
                     itemId: record.itemId,
@@ -428,6 +430,8 @@ extension UserDataLoadService {
             grantedSkillIds.append(contentsOf: superRareSkillIds)
         }
 
+        let pandoraItems = Set(cachedPlayer.pandoraBoxItems)
+
         let combatBonuses = calculateFinalCombatBonuses(
             definition: definition,
             normalTitleId: components.normalTitleId,
@@ -435,7 +439,7 @@ extension UserDataLoadService {
             socketItemId: components.socketItemId,
             socketNormalTitleId: components.socketNormalTitleId,
             socketSuperRareTitleId: components.socketSuperRareTitleId,
-            isPandora: pandoraBoxItems.contains(packedStackKey(
+            isPandora: pandoraItems.contains(packedStackKey(
                 superRareTitleId: components.superRareTitleId,
                 normalTitleId: components.normalTitleId,
                 itemId: components.itemId,

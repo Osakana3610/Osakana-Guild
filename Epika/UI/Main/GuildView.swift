@@ -198,7 +198,6 @@ struct GuildView: View {
         do {
             async let summariesTask: Void = characterState.loadCharacterSummaries(using: appServices)
             async let allCharactersTask: Void = characterState.loadAllCharacters(using: appServices)
-            _ = try await appServices.gameState.ensurePlayer()
             try await summariesTask
             try await allCharactersTask
             maxCharacterSlots = AppConstants.Progress.defaultCharacterSlotCount

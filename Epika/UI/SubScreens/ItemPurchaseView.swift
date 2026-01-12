@@ -22,7 +22,6 @@ import SwiftUI
 
 struct ItemPurchaseView: View {
     @Environment(AppServices.self) private var appServices
-    @State private var shopItems: [ShopProgressService.ShopItem] = []
     @State private var player: CachedPlayer?
     @State private var showError = false
     @State private var errorMessage = ""
@@ -33,6 +32,10 @@ struct ItemPurchaseView: View {
     @State private var purchaseErrorMessage: String?
 
     private var shopService: ShopProgressService { appServices.shop }
+    @MainActor
+    private var shopItems: [ShopProgressService.ShopItem] {
+        appServices.userDataLoad.shopItems
+    }
     private var playerGold: Int { Int(player?.gold ?? 0) }
 
     /// カテゴリ別にグループ化した商品
@@ -166,8 +169,9 @@ struct ItemPurchaseView: View {
         showError = false
         defer { isLoading = false }
         do {
-            shopItems = try await shopService.loadItems()
-            player = try await appServices.gameState.ensurePlayer()
+            try await appServices.userDataLoad.loadShopItems()
+            try await appServices.userDataLoad.loadGameState()
+            player = appServices.userDataLoad.cachedPlayer
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -178,25 +182,9 @@ struct ItemPurchaseView: View {
     private func confirmPurchase(quantity: Int) async {
         guard let item = selectedItem else { return }
         do {
-            _ = try await shopService.purchase(itemId: item.id, quantity: quantity)
-            // 在庫を即時更新
-            if let index = shopItems.firstIndex(where: { $0.id == item.id }) {
-                let oldItem = shopItems[index]
-                if let oldStock = oldItem.stockQuantity {
-                    let newStock = oldStock > UInt16(quantity) ? oldStock - UInt16(quantity) : 0
-                    if newStock == 0 {
-                        shopItems.remove(at: index)
-                    } else {
-                        shopItems[index] = ShopProgressService.ShopItem(
-                            id: oldItem.id,
-                            definition: oldItem.definition,
-                            price: oldItem.price,
-                            stockQuantity: newStock,
-                            updatedAt: Date()
-                        )
-                    }
-                }
-            }
+            let snapshot = try await shopService.purchase(itemId: item.id, quantity: quantity)
+            player = snapshot
+            try await appServices.userDataLoad.loadShopItems()
             selectedItem = nil
         } catch {
             purchaseErrorMessage = error.localizedDescription

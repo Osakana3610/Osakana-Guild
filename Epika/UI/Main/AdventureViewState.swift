@@ -79,37 +79,18 @@ final class AdventureViewState {
     /// 同期せずにダンジョンリストを再読み込み（通知ハンドラ用、無限ループ防止）
     func reloadDungeonList(using appServices: AppServices) async {
         do {
-            // 初期ダンジョン（unlockConditions: []）を解放
             try await appServices.ensureInitialDungeonsUnlocked()
-
-            let dungeonService = appServices.dungeon
-            let definitions = appServices.masterDataCache.allDungeons
-            let definitionMap = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
-            let progressSnapshots = try await dungeonService.allDungeonSnapshots(definitions: definitionMap)
-            var progressCache = Dictionary(progressSnapshots.map { ($0.dungeonId, $0) },
-                                           uniquingKeysWith: { _, latest in latest })
-            var built: [CachedDungeonProgress] = []
-            built.reserveCapacity(definitions.count)
-            for definition in definitions {
-                let snapshot = try await resolveDungeonProgress(
-                    id: definition.id,
-                    definition: definition,
-                    cache: &progressCache,
-                    using: appServices
-                )
-                built.append(snapshot)
-            }
-            dungeons = built
-                .filter { $0.isUnlocked }
-                .sorted { lhs, rhs in
-                    if lhs.chapter != rhs.chapter {
-                        return lhs.chapter < rhs.chapter
-                    }
-                    if lhs.stage != rhs.stage {
-                        return lhs.stage < rhs.stage
-                    }
-                    return lhs.name < rhs.name
+            try await appServices.userDataLoad.loadDungeonSnapshots()
+            let unlocked = appServices.userDataLoad.unlockedDungeonSnapshots()
+            dungeons = unlocked.sorted { lhs, rhs in
+                if lhs.chapter != rhs.chapter {
+                    return lhs.chapter < rhs.chapter
                 }
+                if lhs.stage != rhs.stage {
+                    return lhs.stage < rhs.stage
+                }
+                return lhs.name < rhs.name
+            }
         } catch {
             present(error: error)
         }
@@ -135,11 +116,7 @@ final class AdventureViewState {
     }
 
     func loadPlayer(using appServices: AppServices) async {
-        do {
-            playerProgress = try await appServices.gameState.ensurePlayer()
-        } catch {
-            present(error: error)
-        }
+        playerProgress = appServices.userDataLoad.cachedPlayer
     }
 
     func selectParty(at index: Int) {
@@ -158,9 +135,9 @@ final class AdventureViewState {
     func ensurePartySlots(using appServices: AppServices) async {
         guard let partyState else { return }
         do {
-            let profile = try await appServices.gameState.ensurePlayer()
-            playerProgress = profile
-            _ = try await appServices.party.ensurePartySlots(atLeast: Int(profile.partySlots))
+            let snapshot = appServices.userDataLoad.cachedPlayer
+            playerProgress = snapshot
+            _ = try await appServices.party.ensurePartySlots(atLeast: Int(snapshot.partySlots))
             try await partyState.refresh()
         } catch {
             present(error: error)
@@ -317,20 +294,6 @@ final class AdventureViewState {
         } catch {
             present(error: error)
         }
-    }
-
-    private func resolveDungeonProgress(
-        id: UInt16,
-        definition: DungeonDefinition,
-        cache: inout [UInt16: CachedDungeonProgress],
-        using appServices: AppServices
-    ) async throws -> CachedDungeonProgress {
-        if let cached = cache[id] {
-            return cached
-        }
-        let ensured = try await appServices.dungeon.ensureDungeonSnapshot(for: id, definition: definition)
-        cache[id] = ensured
-        return ensured
     }
 
     private func present(error: Error) {

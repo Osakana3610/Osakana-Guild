@@ -670,7 +670,7 @@ struct EquipmentEditorView: View {
                 equipmentCapacity: currentCharacter.equipmentCapacity
             )
             // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
-            let pandoraBoxItems = Set(displayService.pandoraBoxItems)
+            let pandoraBoxItems = Set(displayService.cachedPlayer.pandoraBoxItems)
             let runtime = try characterService.runtimeCharacterWithEquipmentChange(
                 current: currentCharacter,
                 newEquippedItems: result.equippedItems,
@@ -703,7 +703,7 @@ struct EquipmentEditorView: View {
             equipmentStackKey: item.stackKey
         )
         // 装備変更専用の高速パスを使用（マスターデータ再取得をスキップ）
-        let pandoraBoxItems = Set(displayService.pandoraBoxItems)
+        let pandoraBoxItems = Set(displayService.cachedPlayer.pandoraBoxItems)
         let runtime = try characterService.runtimeCharacterWithEquipmentChange(
             current: currentCharacter,
             newEquippedItems: result.equippedItems,

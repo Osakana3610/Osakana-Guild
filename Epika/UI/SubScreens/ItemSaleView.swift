@@ -304,7 +304,8 @@ struct ItemSaleView: View {
         defer { isLoading = false }
 
         do {
-            player = try await appServices.gameState.ensurePlayer()
+            try await appServices.userDataLoad.loadGameState()
+            player = appServices.userDataLoad.cachedPlayer
             showError = false
             didLoadOnce = true
         } catch {
@@ -318,7 +319,7 @@ struct ItemSaleView: View {
         guard !items.isEmpty else { return }
         do {
             let stackKeys = items.map { $0.stackKey }
-            _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
+            player = try await appServices.sellItemsToShop(stackKeys: stackKeys)
             removeSelection(forKeys: stackKeys)
         } catch {
             showError = true
@@ -346,7 +347,7 @@ struct ItemSaleView: View {
         do {
             try await registerAutoTradeRules(for: items)
             let stackKeys = items.map { $0.stackKey }
-            _ = try await appServices.sellItemsToShop(stackKeys: stackKeys)
+            player = try await appServices.sellItemsToShop(stackKeys: stackKeys)
             removeSelection(forKeys: stackKeys)
         } catch {
             showError = true
@@ -410,7 +411,7 @@ struct ItemSaleView: View {
     @MainActor
     private func sellItem(_ item: CachedInventoryItem, quantity: Int) async {
         do {
-            _ = try await appServices.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
+            player = try await appServices.sellItemToShop(stackKey: item.stackKey, quantity: quantity)
             let newQuantity = try appServices.userDataLoad.decrementQuantity(stackKey: item.stackKey, by: quantity)
 
             if newQuantity <= 0 {
@@ -434,7 +435,7 @@ struct ItemSaleView: View {
     private func addToAutoTrade(_ item: CachedInventoryItem) async {
         do {
             try await registerAutoTradeRules(for: [item])
-            _ = try await appServices.sellItemsToShop(stackKeys: [item.stackKey])
+            player = try await appServices.sellItemsToShop(stackKeys: [item.stackKey])
             removeSelection(forKeys: [item.stackKey])
         } catch {
             showError = true

@@ -125,8 +125,10 @@ struct InventoryCleanupView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            candidates = try await appServices.shop.loadCleanupCandidates()
-            player = try await appServices.gameState.ensurePlayer()
+            try await appServices.userDataLoad.loadShopItems()
+            try await appServices.userDataLoad.loadGameState()
+            candidates = appServices.userDataLoad.shopCleanupCandidates()
+            player = appServices.userDataLoad.cachedPlayer
             showError = false
         } catch {
             showError = true
@@ -138,11 +140,11 @@ struct InventoryCleanupView: View {
     private func cleanupItem(_ item: ShopProgressService.ShopItem) async {
         do {
             let result = try await appServices.cleanupStockAndAutoSell(itemId: item.id)
-            // キャット・チケットはcleanupStockAndAutoSell内で加算済み
-            // 自動売却でゴールドも獲得
-            _ = result // 結果をログ表示等で使う場合はここで
-            player = try await appServices.gameState.ensurePlayer()
-            candidates = try await appServices.shop.loadCleanupCandidates()
+            _ = result
+            try await appServices.userDataLoad.loadGameState()
+            try await appServices.userDataLoad.loadShopItems()
+            player = appServices.userDataLoad.cachedPlayer
+            candidates = appServices.userDataLoad.shopCleanupCandidates()
         } catch {
             showError = true
             errorMessage = error.localizedDescription

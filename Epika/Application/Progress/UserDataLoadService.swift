@@ -64,10 +64,12 @@ final class UserDataLoadService: Sendable {
     @MainActor var equippedItemsByCharacter: [UInt8: [CachedInventoryItem]] = [:]
 
     // ゲーム状態キャッシュ
-    @MainActor var playerGold: UInt32 = 0
-    @MainActor var playerCatTickets: UInt16 = 0
-    @MainActor var playerPartySlots: UInt8 = 0
-    @MainActor var pandoraBoxItems: [UInt64] = []
+    @MainActor var cachedPlayer: CachedPlayer = CachedPlayer(
+        gold: 0,
+        catTickets: 0,
+        partySlots: 0,
+        pandoraBoxItems: []
+    )
 
     // 自動売却ルールキャッシュ
     @MainActor var autoTradeStackKeys: Set<String> = []

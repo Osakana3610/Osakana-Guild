@@ -25,7 +25,7 @@ nonisolated final class UserDataLoadServiceRegressionTests: XCTestCase {
         try await services.userDataLoad.loadAll()
 
         XCTAssertTrue(services.userDataLoad.isLoaded, "ロード完了フラグがfalseです")
-        XCTAssertGreaterThan(services.userDataLoad.playerPartySlots, 0, "パーティスロット数が0です")
+        XCTAssertGreaterThan(services.userDataLoad.cachedPlayer.partySlots, 0, "パーティスロット数が0です")
 
         let hasAnyData = !services.userDataLoad.characters.isEmpty ||
             !services.userDataLoad.parties.isEmpty ||
