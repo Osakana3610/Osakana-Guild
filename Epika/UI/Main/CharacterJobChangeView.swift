@@ -139,7 +139,7 @@ struct CharacterJobChangeView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            exploringCharacterIds = try await appServices.exploration.runningPartyMemberIds()
+            exploringCharacterIds = try await appServices.userDataLoad.runningCharacterIds()
             // キャッシュからキャラクターを取得（DB直接アクセスではなく）
             let cachedCharacters = try await appServices.userDataLoad.getCharacters()
             characters = cachedCharacters.sorted { $0.id < $1.id }

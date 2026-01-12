@@ -144,7 +144,7 @@ struct LazyDismissCharacterView: View {
             // キャッシュからキャラクターを取得（DB直接アクセスではなく）
             let characters = try await appServices.userDataLoad.getCharacters()
             fullCharacters = characters.sorted { $0.id < $1.id }
-            exploringIds = try await appServices.exploration.runningPartyMemberIds()
+            exploringIds = try await appServices.userDataLoad.runningCharacterIds()
         } catch {
             errorMessage = error.localizedDescription
             showError = true

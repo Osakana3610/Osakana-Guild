@@ -27,7 +27,6 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 
 // MARK: - Exploration Stream Processing & Rewards
 extension AppServices {

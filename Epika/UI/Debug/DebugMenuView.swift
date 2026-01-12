@@ -22,7 +22,6 @@
 // ==============================================================================
 
 import SwiftUI
-import SwiftData
 
 enum DropNotificationMode: String, CaseIterable {
     case bulk = "一気に表示"
@@ -147,7 +146,6 @@ struct DebugMenuView: View {
     // データ削除（別画面に移動したため削除）
 
     private var masterData: MasterDataCache { appServices.masterDataCache }
-    private var inventoryService: InventoryProgressService { appServices.inventory }
     private var gameStateService: GameStateService { appServices.gameState }
     private var characterService: CharacterProgressService { appServices.character }
 
@@ -599,7 +597,7 @@ struct DebugMenuView: View {
                                                enhancements: seed.enhancement)
         }
         // デバッグ用高速INSERT（既存チェックなし）
-        try await inventoryService.addItemsUnchecked(batchSeeds, chunkSize: chunkSize)
+        try await appServices.inventory.addItemsUnchecked(batchSeeds, chunkSize: chunkSize)
     }
 
     private func updateProgress(current: Int, total: Int, message: String) async {
@@ -1137,20 +1135,14 @@ struct DangerousOperationsView: View {
         }
     }
 
-    /// 装備バグ復旧用：全キャラクターの装備を直接DBから解除
-    /// 通常のunequipItemはCachedCharacterFactory経由で装備枠チェックが入るため、
-    /// 装備枠を超過した状態では使用できない。この処理は直接DBを操作してバイパスする。
+    /// 装備バグ復旧用
     private func unequipAllCharacters() async {
         if isUnequippingAll { return }
         await MainActor.run { isUnequippingAll = true }
 
         do {
-            let context = ModelContext(appServices.container)
-            context.autosaveEnabled = false
-
-            // 全キャラクターの装備を取得
-            let allEquipment = try context.fetch(FetchDescriptor<CharacterEquipmentRecord>())
-            guard !allEquipment.isEmpty else {
+            let result = try await appServices.inventory.restoreAllEquippedItemsToInventory()
+            if result.1 == 0 {
                 await MainActor.run {
                     isUnequippingAll = false
                     unequipResultMessage = "解除する装備がありませんでした"
@@ -1158,61 +1150,10 @@ struct DangerousOperationsView: View {
                 }
                 return
             }
-
-            // インベントリを取得
-            let storage = ItemStorage.playerItem
-            let storageTypeValue = storage.rawValue
-            let allInventory = try context.fetch(FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-                $0.storageType == storageTypeValue
-            }))
-
-            // stackKeyでグループ化
-            var groupedEquipment: [String: [CharacterEquipmentRecord]] = [:]
-            for equip in allEquipment {
-                groupedEquipment[equip.stackKey, default: []].append(equip)
-            }
-
-            // 装備を持っていたキャラクター数をカウント
-            let characterIds = Set(allEquipment.map(\.characterId))
-            let unequippedCount = characterIds.count
-            let totalItemCount = allEquipment.count
-
-            // 各グループをインベントリに戻す
-            for (stackKey, equipments) in groupedEquipment {
-                let quantity = equipments.count
-
-                if let existingInventory = allInventory.first(where: { $0.stackKey == stackKey }) {
-                    existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
-                } else if let firstEquip = equipments.first {
-                    let inventoryRecord = InventoryItemRecord(
-                        superRareTitleId: firstEquip.superRareTitleId,
-                        normalTitleId: firstEquip.normalTitleId,
-                        itemId: firstEquip.itemId,
-                        socketSuperRareTitleId: firstEquip.socketSuperRareTitleId,
-                        socketNormalTitleId: firstEquip.socketNormalTitleId,
-                        socketItemId: firstEquip.socketItemId,
-                        quantity: UInt16(quantity),
-                        storage: storage
-                    )
-                    context.insert(inventoryRecord)
-                }
-
-                // 装備レコードを削除
-                for equip in equipments {
-                    context.delete(equip)
-                }
-            }
-
-            try context.save()
-
-            // 通知を送信
-            NotificationCenter.default.post(name: .characterProgressDidChange, object: nil)
-
-            // インベントリキャッシュをリロードしてUI更新
             try await appServices.userDataLoad.reloadItems()
             await MainActor.run {
                 isUnequippingAll = false
-                unequipResultMessage = "\(unequippedCount)人のキャラクターから\(totalItemCount)個の装備を外しました"
+                unequipResultMessage = "\(result.0)人のキャラクターから\(result.1)個の装備を外しました"
                 showUnequipCompleteAlert = true
             }
         } catch {
@@ -1224,34 +1165,20 @@ struct DangerousOperationsView: View {
         }
     }
 
-    /// 探索ログ削除：ExplorationRunRecordとExplorationEventRecordを明示的に全削除
+    /// 探索ログ削除
     private func purgeExplorationLogs() async {
         if isPurgingExplorationLogs { return }
         await MainActor.run { isPurgingExplorationLogs = true }
 
         do {
-            let context = ModelContext(appServices.container)
-            context.autosaveEnabled = false
-
-            // ExplorationEventRecordを先に全取得・削除（cascade削除に頼らない）
-            let allEvents = try context.fetch(FetchDescriptor<ExplorationEventRecord>())
-            let eventCount = allEvents.count
-            for event in allEvents {
-                context.delete(event)
+            let result = try await appServices.exploration.purgeAllExplorationLogs()
+            await MainActor.run {
+                appServices.userDataLoad.invalidateExplorationSummaries()
             }
-
-            // ExplorationRunRecordを全取得・削除
-            let allRuns = try context.fetch(FetchDescriptor<ExplorationRunRecord>())
-            let runCount = allRuns.count
-            for run in allRuns {
-                context.delete(run)
-            }
-
-            try context.save()
-
+            try await appServices.userDataLoad.loadExplorationSummaries()
             await MainActor.run {
                 isPurgingExplorationLogs = false
-                purgeExplorationLogsResultMessage = "探索ログを削除しました（\(runCount)件の探索、\(eventCount)件のイベント）"
+                purgeExplorationLogsResultMessage = "探索ログを削除しました（\(result.runCount)件の探索、\(result.eventCount)件のイベント）"
                 showPurgeExplorationLogsCompleteAlert = true
             }
         } catch {

@@ -85,7 +85,7 @@ struct CharacterSelectionForEquipmentView: View {
         do {
             // キャッシュからキャラクターを取得（DB直接アクセスではなく）
             characters = try await appServices.userDataLoad.getCharacters()
-            exploringIds = try await appServices.exploration.runningPartyMemberIds()
+            exploringIds = try await appServices.userDataLoad.runningCharacterIds()
         } catch {
             loadError = error.localizedDescription
         }

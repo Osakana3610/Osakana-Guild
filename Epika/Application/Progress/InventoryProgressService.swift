@@ -754,6 +754,57 @@ actor InventoryProgressService {
         return amount - addable
     }
 
+    /// 全キャラクターの装備をインベントリに戻す（デバッグ復旧用）
+    /// - Returns: (装備を外したキャラクター数, 戻した装備数)
+    func restoreAllEquippedItemsToInventory() async throws -> (Int, Int) {
+        let context = contextProvider.makeContext()
+        context.autosaveEnabled = false
+
+        let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>()
+        let allEquipment = try context.fetch(equipmentDescriptor)
+        guard !allEquipment.isEmpty else { return (0, 0) }
+
+        let storage = ItemStorage.playerItem
+        let storageTypeValue = storage.rawValue
+        let inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            $0.storageType == storageTypeValue
+        })
+        let inventoryRecords = try context.fetch(inventoryDescriptor)
+        var inventoryByStackKey: [String: InventoryItemRecord] = Dictionary(
+            uniqueKeysWithValues: inventoryRecords.map { ($0.stackKey, $0) }
+        )
+
+        var updatedRecords: [String: InventoryItemRecord] = [:]
+        let characterIds = Set(allEquipment.map(\.characterId))
+
+        for equip in allEquipment {
+            if let existing = inventoryByStackKey[equip.stackKey] {
+                _ = applyIncrement(to: existing, amount: 1)
+                updatedRecords[equip.stackKey] = existing
+            } else {
+                let record = InventoryItemRecord(
+                    superRareTitleId: equip.superRareTitleId,
+                    normalTitleId: equip.normalTitleId,
+                    itemId: equip.itemId,
+                    socketSuperRareTitleId: equip.socketSuperRareTitleId,
+                    socketNormalTitleId: equip.socketNormalTitleId,
+                    socketItemId: equip.socketItemId,
+                    quantity: 1,
+                    storage: storage
+                )
+                context.insert(record)
+                inventoryByStackKey[equip.stackKey] = record
+                updatedRecords[equip.stackKey] = record
+            }
+            context.delete(equip)
+        }
+
+        try context.save()
+        postInventoryChange(upserted: Array(updatedRecords.values))
+
+        return (characterIds.count, allEquipment.count)
+    }
+
     /// TODO(Build 16): repairDuplicateStackKeys削除時に一緒に破棄予定
     private struct DeduplicationResult {
         let recordsByStackKey: [String: InventoryItemRecord]

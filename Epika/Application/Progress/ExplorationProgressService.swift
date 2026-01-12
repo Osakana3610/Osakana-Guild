@@ -481,6 +481,28 @@ actor ExplorationProgressService {
         }
     }
 
+    /// 全探索ログを削除（Debug/復旧用）。削除件数を返す。
+    func purgeAllExplorationLogs() async throws -> (runCount: Int, eventCount: Int) {
+        let context = contextProvider.makeContext()
+        context.autosaveEnabled = false
+
+        let eventDescriptor = FetchDescriptor<ExplorationEventRecord>()
+        let events = try context.fetch(eventDescriptor)
+        for event in events {
+            context.delete(event)
+        }
+
+        let runDescriptor = FetchDescriptor<ExplorationRunRecord>()
+        let runs = try context.fetch(runDescriptor)
+        for run in runs {
+            context.delete(run)
+        }
+
+        try context.save()
+        cachedExplorations = nil
+        return (runs.count, events.count)
+    }
+
     // MARK: - Binary Format Helpers
 
     /// Set<UInt16>をバイナリフォーマットにエンコード

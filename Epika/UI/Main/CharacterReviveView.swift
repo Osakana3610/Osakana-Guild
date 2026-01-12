@@ -31,7 +31,6 @@ struct CharacterReviveView: View {
     @State private var errorMessage: String?
 
     private var characterService: CharacterProgressService { appServices.character }
-    private var explorationService: ExplorationProgressService { appServices.exploration }
 
     var body: some View {
         NavigationStack {
@@ -101,7 +100,7 @@ struct CharacterReviveView: View {
         errorMessage = nil
         defer { isLoading = false }
         do {
-            let exploringIds = try await explorationService.runningPartyMemberIds()
+            let exploringIds = try await appServices.userDataLoad.runningCharacterIds()
             // キャッシュからキャラクターを取得（DB直接アクセスではなく）
             let allCharacters = try await appServices.userDataLoad.getCharacters()
             // HP 0 かつ 探索中でないキャラクターをフィルタ

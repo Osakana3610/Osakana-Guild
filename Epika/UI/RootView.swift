@@ -21,7 +21,6 @@ import Observation
 import SwiftData
 
 struct RootView: View {
-    @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
 
     private let appServices: AppServices
@@ -34,7 +33,6 @@ struct RootView: View {
 
     var body: some View {
         MainTabView()
-            .environment(\.modelContext, modelContext)
             .environment(partyViewState)
             .environment(appServices)
             .environment(appServices.dropNotifications)

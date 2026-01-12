@@ -49,6 +49,28 @@ extension UserDataLoadService {
         }
     }
 
+    /// 実行中のパーティID一覧を取得（キャッシュ + アクティブタスク）
+    func runningPartyIds() async throws -> Set<UInt8> {
+        let summaries = try await getExplorationSummaries()
+        let ids = Set(summaries.compactMap { summary in
+            summary.status == .running ? summary.party.partyId : nil
+        })
+        let activeIds = await MainActor.run { Set(activeExplorationTasks.keys) }
+        var merged = ids
+        merged.formUnion(activeIds)
+        return merged
+    }
+
+    /// 実行中のキャラクターID一覧を取得
+    func runningCharacterIds() async throws -> Set<UInt8> {
+        let summaries = try await getExplorationSummaries()
+        var ids = Set<UInt8>()
+        for summary in summaries where summary.status == .running {
+            summary.party.memberCharacterIds.forEach { ids.insert($0) }
+        }
+        return ids
+    }
+
     /// 指定パーティ・開始日時の探索詳細（ログ込み）を取得
     func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> CachedExploration? {
         try await explorationService.explorationSnapshot(partyId: partyId, startedAt: startedAt)
