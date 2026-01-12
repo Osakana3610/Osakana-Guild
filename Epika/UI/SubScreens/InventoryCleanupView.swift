@@ -126,9 +126,8 @@ struct InventoryCleanupView: View {
         defer { isLoading = false }
         do {
             try await appServices.userDataLoad.loadShopItems()
-            try await appServices.userDataLoad.loadGameState()
+            player = try await appServices.userDataLoad.refreshCachedPlayer()
             candidates = appServices.userDataLoad.shopCleanupCandidates()
-            player = appServices.userDataLoad.cachedPlayer
             showError = false
         } catch {
             showError = true
@@ -141,9 +140,8 @@ struct InventoryCleanupView: View {
         do {
             let result = try await appServices.cleanupStockAndAutoSell(itemId: item.id)
             _ = result
-            try await appServices.userDataLoad.loadGameState()
+            player = try await appServices.userDataLoad.refreshCachedPlayer(forceReload: true)
             try await appServices.userDataLoad.loadShopItems()
-            player = appServices.userDataLoad.cachedPlayer
             candidates = appServices.userDataLoad.shopCleanupCandidates()
         } catch {
             showError = true

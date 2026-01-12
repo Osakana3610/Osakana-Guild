@@ -170,8 +170,7 @@ struct ItemPurchaseView: View {
         defer { isLoading = false }
         do {
             try await appServices.userDataLoad.loadShopItems()
-            try await appServices.userDataLoad.loadGameState()
-            player = appServices.userDataLoad.cachedPlayer
+            player = try await appServices.userDataLoad.refreshCachedPlayer()
         } catch {
             showError = true
             errorMessage = error.localizedDescription

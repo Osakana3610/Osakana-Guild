@@ -30,20 +30,36 @@ extension UserDataLoadService {
 
 extension UserDataLoadService {
     func loadGameState() async throws {
-        let snapshot = try await gameStateService.refreshCurrentPlayer()
-        await MainActor.run {
-            self.cachedPlayer = snapshot
+        // 既にロード済みなら何もしない（重複してSwiftDataへアクセスしない）
+        if await MainActor.run(body: { isGameStateLoaded }) {
+            return
         }
+        _ = try await refreshCachedPlayer(forceReload: true)
     }
 }
 
 // MARK: - GameState Cache API
 
 extension UserDataLoadService {
+    /// キャッシュされたプレイヤー情報を取得（必要に応じて再読み込み）
+    @MainActor
+    func refreshCachedPlayer(forceReload: Bool = false) async throws -> CachedPlayer {
+        if !forceReload, isGameStateLoaded {
+            return cachedPlayer
+        }
+
+        let data = try await gameStateService.ensurePlayerData()
+        let snapshot = data.asCachedPlayer
+        cachedPlayer = snapshot
+        isGameStateLoaded = true
+        return snapshot
+    }
+
     /// ゲーム状態を更新（CachedPlayerから）
     @MainActor
     func applyGameStateSnapshot(_ snapshot: CachedPlayer) {
         cachedPlayer = snapshot
+        isGameStateLoaded = true
     }
 
     /// ゲーム状態変更通知を購読開始

@@ -255,8 +255,7 @@ struct PartySlotExpansionView: View {
         errorMessage = nil
         do {
             try await appServices.userDataLoad.loadParties()
-            try await appServices.userDataLoad.loadGameState()
-            playerSnapshot = appServices.userDataLoad.cachedPlayer
+            playerSnapshot = try await appServices.userDataLoad.refreshCachedPlayer()
             partySnapshots = appServices.userDataLoad.parties
         } catch {
             errorMessage = error.localizedDescription

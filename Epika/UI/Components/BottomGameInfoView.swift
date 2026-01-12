@@ -126,7 +126,7 @@ struct BottomGameInfoView: View {
     }
 
     private func formatCurrentTime(_ date: Date) -> String {
-        Self.ymdHmsFormatter.string(from: date)
+        date.formatted(Self.timeStyle)
     }
 
     private func formatGold(_ amount: Int) -> String {
@@ -150,12 +150,16 @@ struct BottomGameInfoView: View {
 }
 
 private extension BottomGameInfoView {
-    static let ymdHmsFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP_POSIX")
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.timeZone = .current
-        formatter.dateFormat = "yyyy/M/d HH:mm:ss"
-        return formatter
+    @MainActor
+    static let timeStyle: Date.FormatStyle = {
+        var style = Date.FormatStyle(date: .omitted,
+                                     time: .standard,
+                                     locale: Locale(identifier: "ja_JP"),
+                                     calendar: .init(identifier: .gregorian),
+                                     timeZone: .current)
+        style = style.hour(.twoDigits(amPM: .abbreviated))
+                     .minute(.twoDigits)
+                     .second(.twoDigits)
+        return style
     }()
 }

@@ -87,6 +87,7 @@ final class UserDataLoadService: Sendable {
         rewardedNodeIds: [],
         updatedAt: Date()
     )
+    @MainActor var isGameStateLoaded = false
 
     // MARK: - State
 
@@ -158,6 +159,10 @@ final class UserDataLoadService: Sendable {
                 await AppLogCollector.shared.log(.system, action: "loadAll_start")
 
                 // 1. データロード（直列実行: リリースビルドでのレースコンディション回避）
+                // GameState を最優先で読み込み、その後は値型キャッシュのみ参照する
+                try await loadGameState()
+                await AppLogCollector.shared.log(.system, action: "loadGameState_done")
+
                 try await loadCharacters()
                 await AppLogCollector.shared.log(.system, action: "loadCharacters_done")
 
@@ -166,9 +171,6 @@ final class UserDataLoadService: Sendable {
 
                 try await loadExplorationSummaries()
                 await AppLogCollector.shared.log(.system, action: "loadExplorationSummaries_done")
-
-                try await loadGameState()
-                await AppLogCollector.shared.log(.system, action: "loadGameState_done")
 
                 try await loadAutoTradeRules()
                 await AppLogCollector.shared.log(.system, action: "loadAutoTradeRules_done")
