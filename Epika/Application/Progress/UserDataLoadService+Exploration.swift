@@ -71,6 +71,21 @@ extension UserDataLoadService {
         return ids
     }
 
+    /// 指定した遭遇の戦闘ログアーカイブを取得（UIは直接SwiftDataに触れない）
+    func battleLogArchive(partyId: UInt8,
+                          startedAt: Date,
+                          occurredAt: Date) async throws -> BattleLogArchive? {
+        do {
+            return try await explorationService.battleLogArchive(
+                partyId: partyId,
+                startedAt: startedAt,
+                occurredAt: occurredAt
+            )
+        } catch ExplorationProgressService.BattleLogArchiveDecodingError.unsupportedVersion {
+            throw UserDataLoadError.unsupportedBattleLogVersion
+        }
+    }
+
     /// 指定パーティ・開始日時の探索詳細（ログ込み）を取得
     func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> CachedExploration? {
         try await explorationService.explorationSnapshot(partyId: partyId, startedAt: startedAt)

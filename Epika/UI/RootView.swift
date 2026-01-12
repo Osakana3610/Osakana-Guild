@@ -75,7 +75,7 @@ private struct PreviewRootView: View {
                 let manager = SQLiteMasterDataManager()
                 let cache = try await MasterDataLoader.load(manager: manager)
                 let bootstrap = try await ProgressBootstrapper.shared.boot()
-                let service = AppServices(container: bootstrap.container,
+                let service = AppServices(progressHandle: bootstrap.handle,
                                           masterDataCache: cache)
                 self.appServices = service
                 self.container = bootstrap.container

@@ -38,3 +38,9 @@ struct SwiftDataContextProvider: Sendable {
         return context
     }
 }
+
+extension SwiftDataContextProvider {
+    init(handle: ProgressContainerHandle) {
+        self.init(container: handle.container)
+    }
+}

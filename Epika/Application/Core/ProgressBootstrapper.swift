@@ -35,24 +35,30 @@ import Foundation
 import SQLite3
 import SwiftData
 
+struct ProgressContainerHandle: Sendable {
+    nonisolated let container: ModelContainer
+}
+
 @MainActor
 final class ProgressBootstrapper {
     struct BootstrapResult {
         let container: ModelContainer
+        let handle: ProgressContainerHandle
     }
 
     static let shared = ProgressBootstrapper()
 
     private var cachedContainer: ModelContainer?
+    private var cachedHandle: ProgressContainerHandle?
 
     private init() {}
 
     func boot(cloudKitEnabled: Bool = false) async throws -> BootstrapResult {
-        if let container = cachedContainer {
+        if let container = cachedContainer, let handle = cachedHandle {
 #if DEBUG
             print("[ProgressStore][DEBUG] reuse cached container")
 #endif
-            return BootstrapResult(container: container)
+            return BootstrapResult(container: container, handle: handle)
         }
 
 #if DEBUG
@@ -96,14 +102,17 @@ final class ProgressBootstrapper {
         try migratePandoraBoxItemsIfNeeded(container: container, storeURL: storeURL)
 
         cachedContainer = container
+        let handle = ProgressContainerHandle(container: container)
+        cachedHandle = handle
 #if DEBUG
         print("[ProgressStore][DEBUG] boot finished")
 #endif
-        return BootstrapResult(container: container)
+        return BootstrapResult(container: container, handle: handle)
     }
 
     func resetStore() throws {
         cachedContainer = nil
+        cachedHandle = nil
         let storeURL = try progressStoreURL()
         do {
             try FileManager.default.removeItem(at: storeURL)

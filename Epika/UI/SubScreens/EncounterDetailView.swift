@@ -276,8 +276,6 @@ struct EncounterDetailView: View {
         isLoadingBattleLog = false
     }
 
-    private var explorationService: ExplorationProgressService { appServices.exploration }
-
     private func fetchBattleLogArchive() async throws -> BattleLogArchive? {
         // (partyId, startedAt, occurredAt)でExplorationEventRecordを特定し、.battleLogを取得
         let partyId = snapshot.party.partyId
@@ -285,12 +283,12 @@ struct EncounterDetailView: View {
         let occurredAt = encounter.occurredAt
 
         do {
-            return try await explorationService.battleLogArchive(
+            return try await appServices.userDataLoad.battleLogArchive(
                 partyId: partyId,
                 startedAt: startedAt,
                 occurredAt: occurredAt
             )
-        } catch ExplorationProgressService.BattleLogArchiveDecodingError.unsupportedVersion {
+        } catch UserDataLoadError.unsupportedBattleLogVersion {
             throw EncounterDetailError.unsupportedBattleLogVersion
         } catch {
             throw EncounterDetailError.decodingFailed

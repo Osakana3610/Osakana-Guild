@@ -39,12 +39,10 @@
 // ==============================================================================
 
 import Foundation
-import SwiftData
 import Observation
 
 @Observable
 final class AppServices: Sendable {
-    let container: ModelContainer
     let contextProvider: SwiftDataContextProvider
     let masterDataCache: MasterDataCache
     let gameState: GameStateService
@@ -88,12 +86,11 @@ final class AppServices: Sendable {
     }
 
     @MainActor
-    init(container: ModelContainer, masterDataCache: MasterDataCache) {
-        self.container = container
-        let contextProvider = SwiftDataContextProvider(container: container)
+    init(progressHandle: ProgressContainerHandle, masterDataCache: MasterDataCache) {
+        let contextProvider = SwiftDataContextProvider(handle: progressHandle)
         self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
-        let gameStateService = GameStateService(modelContainer: container)
+        let gameStateService = GameStateService(containerHandle: progressHandle)
         self.gameState = gameStateService
         let dropNotifications = ItemDropNotificationService(masterDataCache: masterDataCache)
         self.dropNotifications = dropNotifications

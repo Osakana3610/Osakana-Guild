@@ -19,8 +19,9 @@ nonisolated final class UserDataLoadServiceRegressionTests: XCTestCase {
         let schema = Schema(ProgressModelSchema.modelTypes)
         let configuration = ModelConfiguration(schema: schema, url: storeURL)
         let container = try ModelContainer(for: schema, configurations: [configuration])
+        let handle = ProgressContainerHandle(container: container)
 
-        let services = AppServices(container: container, masterDataCache: masterData)
+        let services = AppServices(progressHandle: handle, masterDataCache: masterData)
         try await services.userDataLoad.loadAll()
 
         XCTAssertTrue(services.userDataLoad.isLoaded, "ロード完了フラグがfalseです")

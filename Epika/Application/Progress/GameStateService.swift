@@ -44,6 +44,10 @@ actor GameStateService {
         }
     }
 
+    init(containerHandle: ProgressContainerHandle) {
+        self.init(modelContainer: containerHandle.container)
+    }
+
     // MARK: - Reset
 
     func resetAllProgress() async throws {

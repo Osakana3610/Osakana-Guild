@@ -101,8 +101,8 @@ struct EpikaApp: App {
         do {
             let bootstrap = try await ProgressBootstrapper.shared.boot()
             sharedModelContainer = bootstrap.container
-            let services = AppServices(container: bootstrap.container,
-                                        masterDataCache: cache)
+            let services = AppServices(progressHandle: bootstrap.handle,
+                                       masterDataCache: cache)
             // TODO(Build 16): 重複レコード修復処理が不要になったら削除する
             let removedDuplicates = try await services.inventory.repairDuplicateStackKeys()
 #if DEBUG
