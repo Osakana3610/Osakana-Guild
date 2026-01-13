@@ -57,8 +57,8 @@ enum CombatFormulas {
     nonisolated static let attackCountLevelCoefficient: Double = 0.025
     nonisolated static let breathDamageCoefficient: Double = 1.0
 
-    /// humanカテゴリに属するraceId（人間男、人間女、アマゾネス）
-    private nonisolated static let humanRaceIds: Set<UInt8> = [1, 2, 12]
+    /// humanカテゴリに属するraceId（人間男、人間女）
+    private nonisolated static let humanRaceIds: Set<UInt8> = [1, 2]
 
     nonisolated static func levelDependentValue(raceId: UInt8,
                                     level: Int) -> Double {
