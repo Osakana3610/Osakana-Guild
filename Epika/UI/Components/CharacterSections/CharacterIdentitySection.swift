@@ -28,14 +28,14 @@ import TipKit
 @MainActor
 struct CharacterIdentitySection: View {
     let character: CachedCharacter
-    @State private var showRaceDetail = false
+    @State private var selectedRace: RaceDefinition?
     @State private var selectedJob: JobDefinition?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             LabeledContent("種族") {
                 Text(character.raceName)
-                    .onTapGesture { showRaceDetail = true }
+                    .onTapGesture { selectedRace = character.race }
             }
             .popoverTip(CharacterDetailTip())
             if let currentJob = character.job {
@@ -54,10 +54,8 @@ struct CharacterIdentitySection: View {
             }
             LabeledContent("性別", value: character.race?.genderDisplayName ?? "不明")
         }
-        .sheet(isPresented: $showRaceDetail) {
-            if let race = character.race {
-                RaceDetailSheet(race: race)
-            }
+        .sheet(item: $selectedRace) { race in
+            RaceDetailSheet(race: race)
         }
         .sheet(item: $selectedJob) { job in
             JobDetailSheet(job: job, genderCode: character.race?.genderCode)

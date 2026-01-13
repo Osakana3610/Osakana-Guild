@@ -91,12 +91,10 @@ struct AdventureView: View {
                 .environment(adventureState)
                 .environment(appServices.statChangeNotifications)
             }
-            .sheet(isPresented: isLogsPresented) {
-                if let party = logsParty {
-                    let runs = adventureState.explorationProgress
-                        .filter { $0.party.partyId == party.id }
-                    RecentExplorationLogsView(party: party, runs: runs)
-                }
+            .sheet(item: logsPartySheetItem) { party in
+                let runs = adventureState.explorationProgress
+                    .filter { $0.party.partyId == party.id }
+                RecentExplorationLogsView(party: party, runs: runs)
             }
         }
         .onAppear {
@@ -286,16 +284,14 @@ struct AdventureView: View {
                                                 selectedDungeonId: selected?.dungeonId)
     }
 
-    private var logsParty: CachedParty? {
-        guard let logsPartyId else { return nil }
-        return parties.first { $0.id == logsPartyId }
-    }
-
-    private var isLogsPresented: Binding<Bool> {
+    private var logsPartySheetItem: Binding<CachedParty?> {
         Binding(
-            get: { logsParty != nil },
-            set: { isPresented in
-                if !isPresented { logsPartyId = nil }
+            get: {
+                guard let logsPartyId else { return nil }
+                return parties.first { $0.id == logsPartyId }
+            },
+            set: { newValue in
+                logsPartyId = newValue?.id
             }
         )
     }
