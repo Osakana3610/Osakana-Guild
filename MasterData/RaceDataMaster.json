@@ -362,7 +362,7 @@
       "name": "アマゾネス",
       "gender": "female",
       "genderCode": 2,
-      "category": "human",
+      "category": "demi_human",
       "baseStats": {
         "strength": 12,
         "wisdom": 8,
