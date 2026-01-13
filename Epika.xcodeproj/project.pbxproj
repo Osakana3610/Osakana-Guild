@@ -114,6 +114,7 @@
 			buildPhases = (
 				B0E9F1D12E254D650010C564 /* Sources */,
 				B0E9F1D22E254D650010C564 /* Frameworks */,
+				C13C660229700EE93B9AFC31 /* Generate MasterData */,
 				B0E9F1D32E254D650010C564 /* Resources */,
 			);
 			buildRules = (
@@ -235,6 +236,31 @@
 			);
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C13C660229700EE93B9AFC31 /* Generate MasterData */ = {
+			isa = PBXShellScriptBuildPhase;
+			basedOnDependencyAnalysis = 0;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Generate MasterData";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Tools/MasterDataGenerator/output/master_data.db",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/master_data.db",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Tools/MasterDataGenerator/generate_master_data.sh\"";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B0E9F1D12E254D650010C564 /* Sources */ = {

@@ -2,27 +2,14 @@
 .DS_Store
 
 # Xcode build artifacts
-DerivedData/
-build/
-build/XCBuildData/
 *.xcuserstate
 *.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcarchive
 
-# App artifacts
-*.ipa
-*.dSYM
-*.dSYM.zip
-
 # Temp files
 tmp/
-Temp/
-*.orig
-
-# Generated SQLite databases
-MasterData.sqlite
 
 # Coverage
 *.xccovreport
@@ -30,30 +17,16 @@ MasterData.sqlite
 
 # Agents
 AGENTS.md
-/Users/licht/Development/Epika/AGENTS.md
 .agent/
-agent_docs/
+.claude/
+.local/
 
-# Working files (not published)
-Working/
-
-# Local agent workspace
-.serena/
-
-# Local git hooks (untracked)
+# Local git hooks
 .githooks/
-.derived_*
-xcodebuild-*.log
-periphery*.json
-xcodebuild*.log
-# MasterDataGenerator build artifacts (生成されたDBはEpika/Resources/master_data.dbにコピー)
+
+# MasterDataGenerator build artifacts
 Tools/MasterDataGenerator/.build/
 Tools/MasterDataGenerator/output/
-.agent
-
-# Generated SQLite database
-Epika/Resources/master_data.db
-MasterData/master.db
 
 # Test observation output (runtime artifacts, not source)
 .test-output/
