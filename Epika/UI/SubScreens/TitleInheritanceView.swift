@@ -26,7 +26,6 @@ struct TitleInheritanceView: View {
     @State private var selectedSource: CachedInventoryItem?
     @State private var preview: TitleInheritanceProgressService.TitleInheritancePreview?
     @State private var resultStackKey: String?
-    @State private var showResult = false
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var isLoading = false
@@ -58,6 +57,15 @@ struct TitleInheritanceView: View {
         return allItems.first { $0.stackKey == stackKey }
     }
 
+    private var resultItemSheet: Binding<CachedInventoryItem?> {
+        Binding(
+            get: { resultItem },
+            set: { newValue in
+                resultStackKey = newValue?.stackKey
+            }
+        )
+    }
+
     var body: some View {
         Group {
             if showError {
@@ -70,10 +78,8 @@ struct TitleInheritanceView: View {
         }
         .navigationTitle("称号継承")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showResult) {
-            if let item = resultItem {
-                TitleInheritanceResultView(item: item)
-            }
+        .sheet(item: resultItemSheet) { item in
+            TitleInheritanceResultView(item: item)
         }
         .sheet(isPresented: $showTargetPicker) {
             ItemPickerView(
@@ -183,7 +189,6 @@ struct TitleInheritanceView: View {
             selectedTarget = allItems.first { $0.stackKey == newStackKey }
             selectedSource = nil
             preview = nil
-            showResult = true
         } catch {
             showError = true
             errorMessage = error.localizedDescription
