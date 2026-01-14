@@ -236,8 +236,7 @@ struct AdventureView: View {
     }
 
     private func runtimeMembers(for party: CachedParty) -> [CachedCharacter] {
-        let map = Dictionary(uniqueKeysWithValues: characterState.allCharacters.map { ($0.id, $0) })
-        return party.memberIds.compactMap { map[$0] }
+        appServices.userDataLoad.cachedCharacters(for: party.memberIds)
     }
 
     private func selectedDungeon(for party: CachedParty) -> CachedDungeonProgress? {
