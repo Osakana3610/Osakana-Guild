@@ -6,7 +6,7 @@
 // 【責務】
 //   - ダメージ計算全般（物理、魔法、ブレス、回復）
 //   - 命中判定と回避計算
-//   - クリティカル判定とダメージ倍率
+//   - 必殺判定とダメージ倍率
 //   - 防御力劣化システム
 //   - バリア消費処理
 //
@@ -46,8 +46,13 @@ extension BattleTurnEngine {
                                  hitIndex: Int,
                                  accuracyMultiplier: Double,
                                  context: inout BattleContext) -> Double {
-        let attackerScore = max(1.0, Double(attacker.snapshot.hitRate))
-        let defenderScore = max(1.0, degradedEvasionRate(for: defender))
+        var attackerScore = max(1.0, Double(attacker.snapshot.hitScore))
+        // 累積ヒットボーナス（命中スコア）
+        if let bonus = attacker.skillEffects.combat.cumulativeHitBonus {
+            let consecutiveHits = attacker.attackHistory.consecutiveHits
+            attackerScore = max(1.0, attackerScore + bonus.hitScorePerHit * Double(consecutiveHits))
+        }
+        let defenderScore = max(1.0, degradedEvasionScore(for: defender))
         let baseRatio = attackerScore / (attackerScore + defenderScore)
         let attackerRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
         let defenderRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
@@ -55,14 +60,7 @@ extension BattleTurnEngine {
         let luckModifier = Double(attacker.luck - defender.luck) * 0.002
         let accuracyMod = hitAccuracyModifier(for: hitIndex)
 
-        // 累積ヒットボーナス（命中率）
-        var cumulativeHitRateBonus = 0.0
-        if let bonus = attacker.skillEffects.combat.cumulativeHitBonus {
-            let consecutiveHits = attacker.attackHistory.consecutiveHits
-            cumulativeHitRateBonus = bonus.hitRatePercentPerHit * Double(consecutiveHits) / 100.0
-        }
-
-        let rawChance = (baseRatio * randomFactor + luckModifier + cumulativeHitRateBonus) * accuracyMod * accuracyMultiplier
+        let rawChance = (baseRatio * randomFactor + luckModifier) * accuracyMod * accuracyMultiplier
         return clampProbability(rawChance, defender: defender)
     }
 
@@ -73,12 +71,12 @@ extension BattleTurnEngine {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
         let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
 
-        let attackPower = Double(attacker.snapshot.physicalAttack) * attackRoll
+        let attackPower = Double(attacker.snapshot.physicalAttackScore) * attackRoll
         let defensePower = degradedPhysicalDefense(for: defender) * defenseRoll
         let isCritical = shouldTriggerCritical(attacker: attacker, defender: defender, context: &context)
         let effectiveDefensePower = isCritical ? defensePower * criticalDefenseRetainedFactor : defensePower
         let baseDifference = max(1.0, attackPower - effectiveDefensePower)
-        let additionalDamage = Double(attacker.snapshot.additionalDamage)
+        let additionalDamageScore = Double(attacker.snapshot.additionalDamageScore)
 
         let damageMultiplier = damageModifier(for: hitIndex)
         let rowMultiplier = rowDamageModifier(for: attacker, damageType: .physical)
@@ -103,13 +101,13 @@ extension BattleTurnEngine {
         let innatePhysical = defender.innateResistances.physical
         let innatePiercing = defender.innateResistances.piercing
 
-        let bonusDamage = additionalDamage * damageMultiplier * penetrationTakenMultiplier * innatePiercing
+        let bonusDamage = additionalDamageScore * damageMultiplier * penetrationTakenMultiplier * innatePiercing
         var totalDamage = (coreDamage * innatePhysical + bonusDamage) * rowMultiplier * dealtMultiplier * takenMultiplier * cumulativeDamageMultiplier
 
         if isCritical {
             totalDamage *= criticalDamageBonus(for: attacker)
             totalDamage *= defender.skillEffects.damage.criticalTakenMultiplier
-            totalDamage *= defender.innateResistances.critical  // クリティカル耐性
+            totalDamage *= defender.innateResistances.critical  // 必殺耐性
         }
 
         let barrierMultiplier = applyBarrierIfAvailable(for: .physical, defender: &defender)
@@ -139,7 +137,7 @@ extension BattleTurnEngine {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
         let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
 
-        let attackPower = Double(attacker.snapshot.magicalAttack) * attackRoll
+        let attackPower = Double(attacker.snapshot.magicalAttackScore) * attackRoll
         let defensePower = degradedMagicalDefense(for: defender) * defenseRoll * 0.5
         var damage = max(1.0, attackPower - defensePower)
 
@@ -147,7 +145,7 @@ extension BattleTurnEngine {
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .magical)
         damage *= damageTakenModifier(for: defender, damageType: .magical, spellId: spellId, attacker: attacker)
 
-        // 必殺魔法（魔法クリティカル）判定
+        // 必殺魔法（魔法必殺）判定
         let criticalChance = attacker.skillEffects.spell.magicCriticalChancePercent
         if criticalChance > 0 {
             let cappedChance = max(0, min(100, Int(criticalChance.rounded())))
@@ -175,7 +173,7 @@ extension BattleTurnEngine {
                                          context: inout BattleContext) -> (damage: Int, critical: Bool) {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
         let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
-        let attackPower = Double(attacker.snapshot.magicalHealing) * attackRoll
+        let attackPower = Double(attacker.snapshot.magicalHealingScore) * attackRoll
         let defensePower = degradedMagicalDefense(for: defender) * defenseRoll * 0.5
         let isCritical = shouldTriggerCritical(attacker: attacker, defender: defender, context: &context)
         let effectiveDefense = isCritical ? defensePower * criticalDefenseRetainedFactor : defensePower
@@ -203,7 +201,7 @@ extension BattleTurnEngine {
                                     defender: inout BattleActor,
                                     context: inout BattleContext) -> Int {
         let variance = BattleRandomSystem.speedMultiplier(luck: attacker.luck, random: &context.random)
-        var damage = Double(attacker.snapshot.breathDamage) * variance
+        var damage = Double(attacker.snapshot.breathDamageScore) * variance
 
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .breath)
         damage *= damageTakenModifier(for: defender, damageType: .breath, attacker: attacker)
@@ -223,7 +221,7 @@ extension BattleTurnEngine {
                                      spellId: UInt8?,
                                      context: inout BattleContext) -> Int {
         let multiplier = BattleRandomSystem.statMultiplier(luck: caster.luck, random: &context.random)
-        var amount = Double(caster.snapshot.magicalHealing) * multiplier
+        var amount = Double(caster.snapshot.magicalHealingScore) * multiplier
         amount *= spellPowerModifier(for: caster, spellId: spellId)
         amount *= healingDealtModifier(for: caster)
         amount *= healingReceivedModifier(for: target)
@@ -250,8 +248,8 @@ extension BattleTurnEngine {
     }
 
     nonisolated static func initialStrikeBonus(attacker: BattleActor, defender: BattleActor) -> Double {
-        let attackValue = Double(attacker.snapshot.physicalAttack)
-        let defenseValue = Double(defender.snapshot.physicalDefense) * 3.0
+        let attackValue = Double(attacker.snapshot.physicalAttackScore)
+        let defenseValue = Double(defender.snapshot.physicalDefenseScore) * 3.0
         let difference = attackValue - defenseValue
         guard difference > 0 else { return 1.0 }
         let steps = Int(difference / 1000.0)
@@ -264,20 +262,20 @@ extension BattleTurnEngine {
         let row = max(0, min(5, attacker.rowIndex))
         let profile = attacker.skillEffects.misc.rowProfile
         switch profile.base {
-        case .melee:
-            return profile.hasMeleeApt ? meleeAptRow[row] : meleeBaseRow[row]
-        case .ranged:
+        case .near:
+            return profile.hasNearApt ? nearAptRow[row] : nearBaseRow[row]
+        case .far:
             let index = 5 - row
-            return profile.hasRangedApt ? rangedAptRow[index] : rangedBaseRow[index]
+            return profile.hasFarApt ? farAptRow[index] : farBaseRow[index]
         case .mixed:
-            if profile.hasMeleeApt && profile.hasRangedApt { return mixedDualAptRow[row] }
-            if profile.hasMeleeApt { return mixedMeleeAptRow[row] }
-            if profile.hasRangedApt { return mixedRangedAptRow[row] }
+            if profile.hasNearApt && profile.hasFarApt { return mixedDualAptRow[row] }
+            if profile.hasNearApt { return mixedNearAptRow[row] }
+            if profile.hasFarApt { return mixedFarAptRow[row] }
             return mixedBaseRow[row]
         case .balanced:
-            if profile.hasMeleeApt && profile.hasRangedApt { return balancedDualAptRow[row] }
-            if profile.hasMeleeApt { return balancedMeleeAptRow[row] }
-            if profile.hasRangedApt { return balancedRangedAptRow[row] }
+            if profile.hasNearApt && profile.hasFarApt { return balancedDualAptRow[row] }
+            if profile.hasNearApt { return balancedNearAptRow[row] }
+            if profile.hasFarApt { return balancedFarAptRow[row] }
             return balancedBaseRow[row]
         }
     }
@@ -347,7 +345,7 @@ extension BattleTurnEngine {
     nonisolated static func shouldTriggerCritical(attacker: BattleActor,
                                       defender: BattleActor,
                                       context: inout BattleContext) -> Bool {
-        let chance = max(0, min(100, attacker.snapshot.criticalRate))
+        let chance = max(0, min(100, attacker.snapshot.criticalChancePercent))
         guard chance > 0 else { return false }
         return BattleRandomSystem.percentChance(chance, random: &context.random)
     }
@@ -381,17 +379,17 @@ extension BattleTurnEngine {
 
     nonisolated static func degradedPhysicalDefense(for defender: BattleActor) -> Double {
         let factor = max(0.0, 1.0 - defender.degradationPercent / 100.0)
-        return Double(defender.snapshot.physicalDefense) * factor
+        return Double(defender.snapshot.physicalDefenseScore) * factor
     }
 
     nonisolated static func degradedMagicalDefense(for defender: BattleActor) -> Double {
         let factor = max(0.0, 1.0 - defender.degradationPercent / 100.0)
-        return Double(defender.snapshot.magicalDefense) * factor
+        return Double(defender.snapshot.magicalDefenseScore) * factor
     }
 
-    nonisolated static func degradedEvasionRate(for defender: BattleActor) -> Double {
+    nonisolated static func degradedEvasionScore(for defender: BattleActor) -> Double {
         let factor = max(0.0, 1.0 - defender.degradationPercent / 100.0)
-        return Double(defender.snapshot.evasionRate) * factor
+        return Double(defender.snapshot.evasionScore) * factor
     }
 
     nonisolated static func applyPhysicalDegradation(to defender: inout BattleActor) {
@@ -465,16 +463,16 @@ extension BattleTurnEngine {
     }
 
     // MARK: - Row Modifier Tables
-    private nonisolated static let meleeBaseRow: [Double] = [1.0, 0.85, 0.72, 0.61, 0.52, 0.44]
-    private nonisolated static let meleeAptRow: [Double] = [1.28, 1.03, 0.84, 0.68, 0.55, 0.44]
-    private nonisolated static let rangedBaseRow: [Double] = meleeBaseRow
-    private nonisolated static let rangedAptRow: [Double] = meleeAptRow
+    private nonisolated static let nearBaseRow: [Double] = [1.0, 0.85, 0.72, 0.61, 0.52, 0.44]
+    private nonisolated static let nearAptRow: [Double] = [1.28, 1.03, 0.84, 0.68, 0.55, 0.44]
+    private nonisolated static let farBaseRow: [Double] = nearBaseRow
+    private nonisolated static let farAptRow: [Double] = nearAptRow
     private nonisolated static let mixedBaseRow: [Double] = Array(repeating: 0.44, count: 6)
-    private nonisolated static let mixedMeleeAptRow: [Double] = [0.57, 0.54, 0.51, 0.49, 0.47, 0.44]
-    private nonisolated static let mixedRangedAptRow: [Double] = mixedMeleeAptRow.reversed()
+    private nonisolated static let mixedNearAptRow: [Double] = [0.57, 0.54, 0.51, 0.49, 0.47, 0.44]
+    private nonisolated static let mixedFarAptRow: [Double] = mixedNearAptRow.reversed()
     private nonisolated static let mixedDualAptRow: [Double] = Array(repeating: 0.57, count: 6)
     private nonisolated static let balancedBaseRow: [Double] = Array(repeating: 0.80, count: 6)
-    private nonisolated static let balancedMeleeAptRow: [Double] = [1.02, 0.97, 0.93, 0.88, 0.84, 0.80]
-    private nonisolated static let balancedRangedAptRow: [Double] = balancedMeleeAptRow.reversed()
+    private nonisolated static let balancedNearAptRow: [Double] = [1.02, 0.97, 0.93, 0.88, 0.84, 0.80]
+    private nonisolated static let balancedFarAptRow: [Double] = balancedNearAptRow.reversed()
     private nonisolated static let balancedDualAptRow: [Double] = Array(repeating: 1.02, count: 6)
 }

@@ -58,8 +58,8 @@ enum ResurrectionActiveHandler: SkillEffectHandler {
         }
         let chance = Int((try payload.requireValue(.chancePercent, skillId: context.skillId, effectIndex: context.effectIndex)).rounded(.towardZero))
         // hpScale: パラメータからIntで取得し、rawValueで初期化
-        let hpScaleRaw = payload.parameters[.hpScale] ?? 1 // デフォルトは magicalHealing = 1
-        let hpScale = BattleActor.SkillEffects.ResurrectionActive.HPScale(rawValue: UInt8(hpScaleRaw)) ?? .magicalHealing
+        let hpScaleRaw = payload.parameters[.hpScale] ?? 1 // デフォルトは magicalHealingScore = 1
+        let hpScale = BattleActor.SkillEffects.ResurrectionActive.HPScale(rawValue: UInt8(hpScaleRaw)) ?? .magicalHealingScore
         let maxTriggers = payload.value[.maxTriggers].map { Int($0.rounded(.towardZero)) }
         accumulator.resurrection.resurrectionActives.append(.init(
             chancePercent: max(0, chance),

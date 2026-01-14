@@ -7,7 +7,7 @@ import XCTest
 ///
 /// 検証する計算式（BattleTurnEngine.executeReactionAttack）:
 ///   scaledHits = max(1, Int(baseHits × attackCountMultiplier))
-///   scaledCritical = Int((criticalRate × criticalRateMultiplier).rounded(.down))
+///   scaledCritical = Int((criticalChancePercent × criticalChancePercentMultiplier).rounded(.down))
 ///   scaledAccuracy = hitChance × accuracyMultiplier
 ///
 /// 発動判定: percentChance(baseChancePercent)
@@ -18,7 +18,7 @@ nonisolated final class ReactionSkillTests: XCTestCase {
     /// 反撃が正しく発動し、ダメージを与えることを検証
     ///
     /// 構成:
-    ///   - 攻撃者（敵）: physicalAttack=3000
+    ///   - 攻撃者（敵）: physicalAttackScore=3000
     ///   - 防御者（味方）: 反撃スキル付き（100%発動、attackCountMultiplier=1.0）
     ///
     /// 期待: 物理ダメージを受けた後、反撃が発動してダメージを与える
@@ -62,14 +62,14 @@ nonisolated final class ReactionSkillTests: XCTestCase {
         // 反撃スキル（multiplier=1.0）
         let fullReaction = makeReaction(
             attackCountMultiplier: 1.0,
-            criticalRateMultiplier: 0.0,  // クリティカル無効
+            criticalChancePercentMultiplier: 0.0,  // 必殺無効
             displayName: "フル反撃"
         )
 
         // 反撃スキル（multiplier=0.3）
         let reducedReaction = makeReaction(
             attackCountMultiplier: 0.3,
-            criticalRateMultiplier: 0.0,  // クリティカル無効
+            criticalChancePercentMultiplier: 0.0,  // 必殺無効
             displayName: "軽減反撃"
         )
 
@@ -213,7 +213,7 @@ nonisolated final class ReactionSkillTests: XCTestCase {
             damageType: .physical,
             baseChancePercent: 100,
             attackCountMultiplier: 0.3,
-            criticalRateMultiplier: 0.5,
+            criticalChancePercentMultiplier: 0.5,
             accuracyMultiplier: 1.0,
             requiresMartial: false,
             requiresAllyBehind: false
@@ -221,7 +221,7 @@ nonisolated final class ReactionSkillTests: XCTestCase {
 
         XCTAssertEqual(reaction.baseChancePercent, 100)
         XCTAssertEqual(reaction.attackCountMultiplier, 0.3, accuracy: 0.001)
-        XCTAssertEqual(reaction.criticalRateMultiplier, 0.5, accuracy: 0.001)
+        XCTAssertEqual(reaction.criticalChancePercentMultiplier, 0.5, accuracy: 0.001)
         XCTAssertEqual(reaction.accuracyMultiplier, 1.0, accuracy: 0.001)
         XCTAssertEqual(reaction.damageType, .physical)
         XCTAssertEqual(reaction.trigger, .selfDamagedPhysical)
@@ -254,14 +254,14 @@ nonisolated final class ReactionSkillTests: XCTestCase {
     ///   - target: 攻撃対象（デフォルト: .attacker）
     ///   - chancePercent: 発動率%（デフォルト: 100.0）
     ///   - attackCountMultiplier: 攻撃回数乗数（デフォルト: 1.0）
-    ///   - criticalRateMultiplier: 必殺率乗数（デフォルト: 1.0）
+    ///   - criticalChancePercentMultiplier: 必殺率乗数（デフォルト: 1.0）
     ///   - displayName: 表示名（デフォルト: "テスト反撃"）
     private func makeReaction(
         trigger: BattleActor.SkillEffects.Reaction.Trigger = .selfDamagedPhysical,
         target: BattleActor.SkillEffects.Reaction.Target = .attacker,
         chancePercent: Double = 100,
         attackCountMultiplier: Double = 1.0,
-        criticalRateMultiplier: Double = 1.0,
+        criticalChancePercentMultiplier: Double = 1.0,
         displayName: String = "テスト反撃"
     ) -> BattleActor.SkillEffects.Reaction {
         BattleActor.SkillEffects.Reaction(
@@ -272,7 +272,7 @@ nonisolated final class ReactionSkillTests: XCTestCase {
             damageType: .physical,
             baseChancePercent: chancePercent,
             attackCountMultiplier: attackCountMultiplier,
-            criticalRateMultiplier: criticalRateMultiplier,
+            criticalChancePercentMultiplier: criticalChancePercentMultiplier,
             accuracyMultiplier: 1.0,
             requiresMartial: false,
             requiresAllyBehind: false

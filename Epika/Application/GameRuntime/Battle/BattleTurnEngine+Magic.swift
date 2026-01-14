@@ -366,8 +366,8 @@ extension BattleTurnEngine {
     }
 
     nonisolated static func baseStatusChancePercent(spell: SpellDefinition, caster: BattleActor, target: BattleActor) -> Double {
-        let magicAttack = max(0, caster.snapshot.magicalAttack)
-        let magicDefense = max(1, target.snapshot.magicalDefense)
+        let magicAttack = max(0, caster.snapshot.magicalAttackScore)
+        let magicDefense = max(1, target.snapshot.magicalDefenseScore)
         let ratio = Double(magicAttack) / Double(magicDefense)
         let base = min(95.0, 50.0 * ratio)
         let luckPenalty = max(0, target.luck - 10)

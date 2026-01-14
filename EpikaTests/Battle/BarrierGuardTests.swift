@@ -21,8 +21,8 @@ nonisolated final class BarrierGuardTests: XCTestCase {
     /// 物理バリアでダメージが1/3になる
     func testPhysicalBarrierReducesDamage() {
         // バリアなし
-        let attackerNoBarrier = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
-        var defenderNoBarrier = TestActorBuilder.makeDefender(physicalDefense: 2000, luck: 35)
+        let attackerNoBarrier = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
+        var defenderNoBarrier = TestActorBuilder.makeDefender(physicalDefenseScore: 2000, luck: 35)
         var contextNoBarrier = TestActorBuilder.makeContext(
             seed: 42,
             attacker: attackerNoBarrier,
@@ -37,9 +37,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
         )
 
         // バリアあり（物理バリアキー = 1）
-        let attackerWithBarrier = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
+        let attackerWithBarrier = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
         var defenderWithBarrier = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             barrierCharges: [1: 3]  // 物理バリア3回
         )
@@ -70,8 +70,8 @@ nonisolated final class BarrierGuardTests: XCTestCase {
     /// 魔法バリアでダメージが1/3になる
     func testMagicalBarrierReducesDamage() {
         // バリアなし
-        let attackerNoBarrier = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 35)
-        var defenderNoBarrier = TestActorBuilder.makeDefender(magicalDefense: 1000, luck: 35)
+        let attackerNoBarrier = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 35)
+        var defenderNoBarrier = TestActorBuilder.makeDefender(magicalDefenseScore: 1000, luck: 35)
         var contextNoBarrier = TestActorBuilder.makeContext(
             seed: 42,
             attacker: attackerNoBarrier,
@@ -86,9 +86,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
         )
 
         // バリアあり（魔法バリアキー = 2）
-        let attackerWithBarrier = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 35)
+        let attackerWithBarrier = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 35)
         var defenderWithBarrier = TestActorBuilder.makeDefender(
-            magicalDefense: 1000,
+            magicalDefenseScore: 1000,
             luck: 35,
             barrierCharges: [2: 3]  // 魔法バリア3回
         )
@@ -118,7 +118,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
     /// ブレスバリアでダメージが1/3になる
     func testBreathBarrierReducesDamage() {
         // バリアなし
-        let attackerNoBarrier = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+        let attackerNoBarrier = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
         var defenderNoBarrier = TestActorBuilder.makeDefender(luck: 35)
         var contextNoBarrier = TestActorBuilder.makeContext(
             seed: 42,
@@ -133,7 +133,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
         )
 
         // バリアあり（ブレスバリアキー = 3）
-        let attackerWithBarrier = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+        let attackerWithBarrier = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
         var defenderWithBarrier = TestActorBuilder.makeDefender(
             luck: 35,
             barrierCharges: [3: 3]  // ブレスバリア3回
@@ -164,9 +164,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
 
     /// バリアチャージが消費される
     func testBarrierChargeConsumption() {
-        let attacker = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
+        let attacker = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             barrierCharges: [1: 3]
         )
@@ -208,10 +208,10 @@ nonisolated final class BarrierGuardTests: XCTestCase {
 
     /// バリアチャージが0になると通常ダメージを受ける
     func testNoBarrierAfterChargesDepleted() {
-        let attacker = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
+        let attacker = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
 
         // バリアなしのダメージを計測
-        var defenderNoBarrier = TestActorBuilder.makeDefender(physicalDefense: 2000, luck: 35)
+        var defenderNoBarrier = TestActorBuilder.makeDefender(physicalDefenseScore: 2000, luck: 35)
         var contextNoBarrier = TestActorBuilder.makeContext(
             seed: 100,
             attacker: attacker,
@@ -226,7 +226,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
 
         // バリア1回のみ
         var defenderWithBarrier = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             barrierCharges: [1: 1]
         )
@@ -267,8 +267,8 @@ nonisolated final class BarrierGuardTests: XCTestCase {
     /// ガード状態でバリアなしの場合ダメージが半減
     func testGuardReducesDamageByHalf() {
         // ガードなし
-        let attackerNoGuard = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
-        var defenderNoGuard = TestActorBuilder.makeDefender(physicalDefense: 2000, luck: 35)
+        let attackerNoGuard = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
+        var defenderNoGuard = TestActorBuilder.makeDefender(physicalDefenseScore: 2000, luck: 35)
         var contextNoGuard = TestActorBuilder.makeContext(
             seed: 42,
             attacker: attackerNoGuard,
@@ -283,9 +283,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
         )
 
         // ガードあり
-        let attackerWithGuard = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
+        let attackerWithGuard = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
         var defenderWithGuard = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             guardActive: true
         )
@@ -316,9 +316,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
     /// ガード状態でバリアがある場合はバリアが優先（ガードは適用されない）
     func testBarrierPrioritizedOverGuard() {
         // バリアのみ
-        let attackerBarrier = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
+        let attackerBarrier = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
         var defenderBarrier = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             barrierCharges: [1: 3]
         )
@@ -336,9 +336,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
         )
 
         // バリア + ガード
-        let attackerBoth = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
+        let attackerBoth = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
         var defenderBoth = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             guardActive: true,
             barrierCharges: [1: 3]
@@ -367,9 +367,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
     /// ガード時限定バリアはガード中のみ発動
     func testGuardBarrierOnlyDuringGuard() {
         // ガードなし（ガードバリアあるが発動しない）
-        let attackerNoGuard = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
+        let attackerNoGuard = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
         var defenderNoGuard = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             guardActive: false,
             guardBarrierCharges: [1: 3]
@@ -392,9 +392,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
             "ガードなし時、ガードバリア未消費: 期待3, 実測\(defenderNoGuard.guardBarrierCharges[1] ?? -1)")
 
         // ガードあり（ガードバリア発動）
-        let attackerWithGuard = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
+        let attackerWithGuard = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
         var defenderWithGuard = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             guardActive: true,
             guardBarrierCharges: [1: 3]
@@ -429,9 +429,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
 
     /// ガードバリアが通常バリアより優先される
     func testGuardBarrierPrioritizedOverRegularBarrier() {
-        let attacker = TestActorBuilder.makeAttacker(physicalAttack: 5000, luck: 35)
+        let attacker = TestActorBuilder.makeAttacker(physicalAttackScore: 5000, luck: 35)
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             guardActive: true,
             barrierCharges: [1: 3],
@@ -462,8 +462,8 @@ nonisolated final class BarrierGuardTests: XCTestCase {
     /// 魔法ダメージにガードが適用される
     func testGuardAppliesToMagicalDamage() {
         // ガードなし
-        let attackerNoGuard = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 35)
-        var defenderNoGuard = TestActorBuilder.makeDefender(magicalDefense: 1000, luck: 35)
+        let attackerNoGuard = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 35)
+        var defenderNoGuard = TestActorBuilder.makeDefender(magicalDefenseScore: 1000, luck: 35)
         var contextNoGuard = TestActorBuilder.makeContext(
             seed: 42,
             attacker: attackerNoGuard,
@@ -478,9 +478,9 @@ nonisolated final class BarrierGuardTests: XCTestCase {
         )
 
         // ガードあり
-        let attackerWithGuard = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 35)
+        let attackerWithGuard = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 35)
         var defenderWithGuard = TestActorBuilder.makeDefender(
-            magicalDefense: 1000,
+            magicalDefenseScore: 1000,
             luck: 35,
             guardActive: true
         )
@@ -510,7 +510,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
     /// ブレスダメージにガードが適用される
     func testGuardAppliesToBreathDamage() {
         // ガードなし
-        let attackerNoGuard = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+        let attackerNoGuard = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
         var defenderNoGuard = TestActorBuilder.makeDefender(luck: 35)
         var contextNoGuard = TestActorBuilder.makeContext(
             seed: 42,
@@ -525,7 +525,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
         )
 
         // ガードあり
-        let attackerWithGuard = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+        let attackerWithGuard = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
         var defenderWithGuard = TestActorBuilder.makeDefender(
             luck: 35,
             guardActive: true

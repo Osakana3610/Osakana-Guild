@@ -7,44 +7,44 @@ import Foundation
 /// - マスターデータに依存しない固定値を使用
 /// - 計算が検証しやすい値（1000, 2000, 5000など）を使用
 /// - luck は必須パラメータ（境界値 1, 18, 35 を使用、60は禁止）
-/// - criticalRate=0でクリティカル判定を無効化
+/// - criticalChancePercent=0で必殺判定を無効化
 nonisolated enum TestActorBuilder {
 
     /// 基本的な攻撃者を生成
     ///
     /// - Parameters:
-    ///   - physicalAttack: 物理攻撃力（デフォルト: 5000）
-    ///   - magicalAttack: 魔力（デフォルト: 1000）
-    ///   - hitRate: 命中率（デフォルト: 100）
+    ///   - physicalAttackScore: 物理攻撃力（デフォルト: 5000）
+    ///   - magicalAttackScore: 魔力（デフォルト: 1000）
+    ///   - hitScore: 命中率（デフォルト: 100）
     ///   - luck: 運（必須、境界値 1, 18, 35 を使用）
-    ///   - criticalRate: 必殺率（デフォルト: 0、クリティカル無効）
-    ///   - additionalDamage: 追加ダメージ（デフォルト: 0）
-    ///   - breathDamage: ブレスダメージ（デフォルト: 0）
+    ///   - criticalChancePercent: 必殺率（デフォルト: 0、必殺無効）
+    ///   - additionalDamageScore: 追加ダメージ（デフォルト: 0）
+    ///   - breathDamageScore: ブレスダメージ（デフォルト: 0）
     ///   - skillEffects: スキル効果（デフォルト: neutral）
     static func makeAttacker(
-        physicalAttack: Int = 5000,
-        magicalAttack: Int = 1000,
-        hitRate: Int = 100,
+        physicalAttackScore: Int = 5000,
+        magicalAttackScore: Int = 1000,
+        hitScore: Int = 100,
         luck: Int,
-        criticalRate: Int = 0,
-        additionalDamage: Int = 0,
-        breathDamage: Int = 0,
+        criticalChancePercent: Int = 0,
+        additionalDamageScore: Int = 0,
+        breathDamageScore: Int = 0,
         skillEffects: BattleActor.SkillEffects = .neutral
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 10000,
-            physicalAttack: physicalAttack,
-            magicalAttack: magicalAttack,
-            physicalDefense: 1000,
-            magicalDefense: 1000,
-            hitRate: hitRate,
-            evasionRate: 0,
-            criticalRate: criticalRate,
+            physicalAttackScore: physicalAttackScore,
+            magicalAttackScore: magicalAttackScore,
+            physicalDefenseScore: 1000,
+            magicalDefenseScore: 1000,
+            hitScore: hitScore,
+            evasionScore: 0,
+            criticalChancePercent: criticalChancePercent,
             attackCount: 1.0,
-            magicalHealing: 500,
-            trapRemoval: 0,
-            additionalDamage: additionalDamage,
-            breathDamage: breathDamage,
+            magicalHealingScore: 500,
+            trapRemovalScore: 0,
+            additionalDamageScore: additionalDamageScore,
+            breathDamageScore: breathDamageScore,
             isMartialEligible: false
         )
 
@@ -70,9 +70,9 @@ nonisolated enum TestActorBuilder {
     /// 基本的な防御者を生成
     ///
     /// - Parameters:
-    ///   - physicalDefense: 物理防御力（デフォルト: 2000）
-    ///   - magicalDefense: 魔法防御力（デフォルト: 1000）
-    ///   - evasionRate: 回避率（デフォルト: 0）
+    ///   - physicalDefenseScore: 物理防御力（デフォルト: 2000）
+    ///   - magicalDefenseScore: 魔法防御力（デフォルト: 1000）
+    ///   - evasionScore: 回避率（デフォルト: 0）
     ///   - luck: 運（必須、境界値 1, 18, 35 を使用）
     ///   - agility: 敏捷（デフォルト: 20）clampProbabilityで>20だと最小命中率が下がる
     ///   - skillEffects: スキル効果（デフォルト: neutral）
@@ -81,9 +81,9 @@ nonisolated enum TestActorBuilder {
     ///   - barrierCharges: バリアチャージ（デフォルト: 空）
     ///   - guardBarrierCharges: ガード時バリアチャージ（デフォルト: 空）
     static func makeDefender(
-        physicalDefense: Int = 2000,
-        magicalDefense: Int = 1000,
-        evasionRate: Int = 0,
+        physicalDefenseScore: Int = 2000,
+        magicalDefenseScore: Int = 1000,
+        evasionScore: Int = 0,
         luck: Int,
         agility: Int = 20,
         skillEffects: BattleActor.SkillEffects = .neutral,
@@ -94,18 +94,18 @@ nonisolated enum TestActorBuilder {
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 50000,
-            physicalAttack: 1000,
-            magicalAttack: 500,
-            physicalDefense: physicalDefense,
-            magicalDefense: magicalDefense,
-            hitRate: 50,
-            evasionRate: evasionRate,
-            criticalRate: 0,
+            physicalAttackScore: 1000,
+            magicalAttackScore: 500,
+            physicalDefenseScore: physicalDefenseScore,
+            magicalDefenseScore: magicalDefenseScore,
+            hitScore: 50,
+            evasionScore: evasionScore,
+            criticalChancePercent: 0,
             attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
             isMartialEligible: false
         )
 
@@ -157,39 +157,39 @@ nonisolated enum TestActorBuilder {
     ///
     /// - Parameters:
     ///   - maxHP: 最大HP（デフォルト: 10000）
-    ///   - physicalAttack: 物理攻撃力（デフォルト: 1000）
-    ///   - physicalDefense: 物理防御力（デフォルト: 500）
-    ///   - hitRate: 命中率（デフォルト: 80）
-    ///   - evasionRate: 回避率（デフォルト: 10）
-    ///   - criticalRate: 必殺率（デフォルト: 0）
+    ///   - physicalAttackScore: 物理攻撃力（デフォルト: 1000）
+    ///   - physicalDefenseScore: 物理防御力（デフォルト: 500）
+    ///   - hitScore: 命中率（デフォルト: 80）
+    ///   - evasionScore: 回避率（デフォルト: 10）
+    ///   - criticalChancePercent: 必殺率（デフォルト: 0）
     ///   - luck: 運（必須、境界値 1, 18, 35 を使用）
     ///   - agility: 敏捷（デフォルト: 20）
     ///   - skillEffects: スキル効果（デフォルト: neutral）
     static func makePlayer(
         maxHP: Int = 10000,
-        physicalAttack: Int = 1000,
-        physicalDefense: Int = 500,
-        hitRate: Int = 80,
-        evasionRate: Int = 10,
-        criticalRate: Int = 0,
+        physicalAttackScore: Int = 1000,
+        physicalDefenseScore: Int = 500,
+        hitScore: Int = 80,
+        evasionScore: Int = 10,
+        criticalChancePercent: Int = 0,
         luck: Int,
         agility: Int = 20,
         skillEffects: BattleActor.SkillEffects = .neutral
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: maxHP,
-            physicalAttack: physicalAttack,
-            magicalAttack: 500,
-            physicalDefense: physicalDefense,
-            magicalDefense: 500,
-            hitRate: hitRate,
-            evasionRate: evasionRate,
-            criticalRate: criticalRate,
+            physicalAttackScore: physicalAttackScore,
+            magicalAttackScore: 500,
+            physicalDefenseScore: physicalDefenseScore,
+            magicalDefenseScore: 500,
+            hitScore: hitScore,
+            evasionScore: evasionScore,
+            criticalChancePercent: criticalChancePercent,
             attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
             isMartialEligible: false
         )
 
@@ -219,39 +219,39 @@ nonisolated enum TestActorBuilder {
     ///
     /// - Parameters:
     ///   - maxHP: 最大HP（デフォルト: 10000）
-    ///   - physicalAttack: 物理攻撃力（デフォルト: 1000）
-    ///   - physicalDefense: 物理防御力（デフォルト: 500）
-    ///   - hitRate: 命中率（デフォルト: 80）
-    ///   - evasionRate: 回避率（デフォルト: 10）
-    ///   - criticalRate: 必殺率（デフォルト: 0）
+    ///   - physicalAttackScore: 物理攻撃力（デフォルト: 1000）
+    ///   - physicalDefenseScore: 物理防御力（デフォルト: 500）
+    ///   - hitScore: 命中率（デフォルト: 80）
+    ///   - evasionScore: 回避率（デフォルト: 10）
+    ///   - criticalChancePercent: 必殺率（デフォルト: 0）
     ///   - luck: 運（必須、境界値 1, 18, 35 を使用）
     ///   - agility: 敏捷（デフォルト: 20）
     ///   - skillEffects: スキル効果（デフォルト: neutral）
     static func makeEnemy(
         maxHP: Int = 10000,
-        physicalAttack: Int = 1000,
-        physicalDefense: Int = 500,
-        hitRate: Int = 80,
-        evasionRate: Int = 10,
-        criticalRate: Int = 0,
+        physicalAttackScore: Int = 1000,
+        physicalDefenseScore: Int = 500,
+        hitScore: Int = 80,
+        evasionScore: Int = 10,
+        criticalChancePercent: Int = 0,
         luck: Int,
         agility: Int = 20,
         skillEffects: BattleActor.SkillEffects = .neutral
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: maxHP,
-            physicalAttack: physicalAttack,
-            magicalAttack: 500,
-            physicalDefense: physicalDefense,
-            magicalDefense: 500,
-            hitRate: hitRate,
-            evasionRate: evasionRate,
-            criticalRate: criticalRate,
+            physicalAttackScore: physicalAttackScore,
+            magicalAttackScore: 500,
+            physicalDefenseScore: physicalDefenseScore,
+            magicalDefenseScore: 500,
+            hitScore: hitScore,
+            evasionScore: evasionScore,
+            criticalChancePercent: criticalChancePercent,
             attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
             isMartialEligible: false
         )
 
@@ -282,10 +282,10 @@ nonisolated enum TestActorBuilder {
     static func makeStrongPlayer() -> BattleActor {
         makePlayer(
             maxHP: 50000,
-            physicalAttack: 5000,
-            physicalDefense: 2000,
-            hitRate: 100,
-            evasionRate: 0,
+            physicalAttackScore: 5000,
+            physicalDefenseScore: 2000,
+            hitScore: 100,
+            evasionScore: 0,
             luck: 35
         )
     }
@@ -296,10 +296,10 @@ nonisolated enum TestActorBuilder {
     static func makeWeakEnemy() -> BattleActor {
         makeEnemy(
             maxHP: 1000,
-            physicalAttack: 100,
-            physicalDefense: 100,
-            hitRate: 50,
-            evasionRate: 0,
+            physicalAttackScore: 100,
+            physicalDefenseScore: 100,
+            hitScore: 50,
+            evasionScore: 0,
             luck: 1
         )
     }
@@ -310,10 +310,10 @@ nonisolated enum TestActorBuilder {
     static func makeWeakPlayer() -> BattleActor {
         makePlayer(
             maxHP: 500,
-            physicalAttack: 100,
-            physicalDefense: 100,
-            hitRate: 50,
-            evasionRate: 0,
+            physicalAttackScore: 100,
+            physicalDefenseScore: 100,
+            hitScore: 50,
+            evasionScore: 0,
             luck: 1
         )
     }
@@ -324,10 +324,10 @@ nonisolated enum TestActorBuilder {
     static func makeStrongEnemy() -> BattleActor {
         makeEnemy(
             maxHP: 50000,
-            physicalAttack: 5000,
-            physicalDefense: 2000,
-            hitRate: 100,
-            evasionRate: 0,
+            physicalAttackScore: 5000,
+            physicalDefenseScore: 2000,
+            hitScore: 100,
+            evasionScore: 0,
             luck: 35
         )
     }
@@ -338,10 +338,10 @@ nonisolated enum TestActorBuilder {
     static func makeBalancedPlayer() -> BattleActor {
         makePlayer(
             maxHP: 10000,
-            physicalAttack: 1000,
-            physicalDefense: 500,
-            hitRate: 80,
-            evasionRate: 10,
+            physicalAttackScore: 1000,
+            physicalDefenseScore: 500,
+            hitScore: 80,
+            evasionScore: 10,
             luck: 18
         )
     }
@@ -352,10 +352,10 @@ nonisolated enum TestActorBuilder {
     static func makeBalancedEnemy() -> BattleActor {
         makeEnemy(
             maxHP: 10000,
-            physicalAttack: 1000,
-            physicalDefense: 500,
-            hitRate: 80,
-            evasionRate: 10,
+            physicalAttackScore: 1000,
+            physicalDefenseScore: 500,
+            hitScore: 80,
+            evasionScore: 10,
             luck: 18
         )
     }
@@ -366,10 +366,10 @@ nonisolated enum TestActorBuilder {
     static func makeImmortalPlayer() -> BattleActor {
         makePlayer(
             maxHP: 999999,
-            physicalAttack: 0,
-            physicalDefense: 99999,
-            hitRate: 100,
-            evasionRate: 0,
+            physicalAttackScore: 0,
+            physicalDefenseScore: 99999,
+            hitScore: 100,
+            evasionScore: 0,
             luck: 18
         )
     }
@@ -380,10 +380,10 @@ nonisolated enum TestActorBuilder {
     static func makeImmortalEnemy() -> BattleActor {
         makeEnemy(
             maxHP: 999999,
-            physicalAttack: 0,
-            physicalDefense: 99999,
-            hitRate: 100,
-            evasionRate: 0,
+            physicalAttackScore: 0,
+            physicalDefenseScore: 99999,
+            hitScore: 100,
+            evasionScore: 0,
             luck: 18
         )
     }
@@ -394,10 +394,10 @@ nonisolated enum TestActorBuilder {
     static func makeDeterministicPlayer() -> BattleActor {
         makePlayer(
             maxHP: 50000,
-            physicalAttack: 5000,
-            physicalDefense: 2000,
-            hitRate: 100,
-            evasionRate: 0,
+            physicalAttackScore: 5000,
+            physicalDefenseScore: 2000,
+            hitScore: 100,
+            evasionScore: 0,
             luck: 35,
             agility: 35
         )
@@ -409,10 +409,10 @@ nonisolated enum TestActorBuilder {
     static func makeDeterministicEnemy() -> BattleActor {
         makeEnemy(
             maxHP: 1000,
-            physicalAttack: 0,
-            physicalDefense: 2000,
-            hitRate: 50,
-            evasionRate: 0,
+            physicalAttackScore: 0,
+            physicalDefenseScore: 2000,
+            hitScore: 50,
+            evasionScore: 0,
             luck: 35,
             agility: 1
         )
@@ -424,10 +424,10 @@ nonisolated enum TestActorBuilder {
     static func makeDeterministicEnemyWithAttack() -> BattleActor {
         makeEnemy(
             maxHP: 20000,
-            physicalAttack: 3000,
-            physicalDefense: 2000,
-            hitRate: 100,
-            evasionRate: 0,
+            physicalAttackScore: 3000,
+            physicalDefenseScore: 2000,
+            hitScore: 100,
+            evasionScore: 0,
             luck: 35,
             agility: 1
         )
@@ -439,10 +439,10 @@ nonisolated enum TestActorBuilder {
     static func makeWeakEnemyWithAttack() -> BattleActor {
         makeEnemy(
             maxHP: 3000,
-            physicalAttack: 1500,
-            physicalDefense: 500,
-            hitRate: 100,
-            evasionRate: 0,
+            physicalAttackScore: 1500,
+            physicalDefenseScore: 500,
+            hitScore: 100,
+            evasionScore: 0,
             luck: 35,
             agility: 1
         )
@@ -463,18 +463,18 @@ nonisolated enum TestActorBuilder {
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 50000,
-            physicalAttack: 5000,
-            magicalAttack: 1000,
-            physicalDefense: 2000,
-            magicalDefense: 1000,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
+            physicalAttackScore: 5000,
+            magicalAttackScore: 1000,
+            physicalDefenseScore: 2000,
+            magicalDefenseScore: 1000,
+            hitScore: 100,
+            evasionScore: 0,
+            criticalChancePercent: 0,
             attackCount: attackCount,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
             isMartialEligible: false
         )
 
@@ -505,18 +505,18 @@ nonisolated enum TestActorBuilder {
     static func makeReactionTestEnemy(hp: Int = 10000) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: hp,
-            physicalAttack: 3000,
-            magicalAttack: 500,
-            physicalDefense: 1000,
-            magicalDefense: 500,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
+            physicalAttackScore: 3000,
+            magicalAttackScore: 500,
+            physicalDefenseScore: 1000,
+            magicalDefenseScore: 500,
+            hitScore: 100,
+            evasionScore: 0,
+            criticalChancePercent: 0,
             attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
             isMartialEligible: false
         )
 

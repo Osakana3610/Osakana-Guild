@@ -95,7 +95,7 @@ struct BattleContextBuilder {
 
     private nonisolated static func playerActionRates(for character: CachedCharacter) -> BattleActionRates {
         let preferences = character.actionPreferences
-        let breath = character.combat.breathDamage > 0 ? preferences.breath : 0
+        let breath = character.combat.breathDamageScore > 0 ? preferences.breath : 0
         return BattleActionRates(attack: preferences.attack,
                                  priestMagic: preferences.priestMagic,
                                  mageMagic: preferences.mageMagic,

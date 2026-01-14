@@ -7,12 +7,12 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 14,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 14,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 5
+        "evasionScore": 6,
+        "additionalDamageScore": 5
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -27,12 +27,12 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 21,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 21,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 6
+        "evasionScore": 6,
+        "additionalDamageScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -47,12 +47,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -67,12 +67,12 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 42,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 42,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 8
+        "evasionScore": 6,
+        "additionalDamageScore": 8
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -87,12 +87,12 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -107,12 +107,12 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 84,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 84,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 10
+        "evasionScore": 6,
+        "additionalDamageScore": 10
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -127,12 +127,12 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 112,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 112,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 11
+        "evasionScore": 6,
+        "additionalDamageScore": 11
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -147,12 +147,12 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 168,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 168,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 12
+        "evasionScore": 6,
+        "additionalDamageScore": 12
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -167,12 +167,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -188,12 +188,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -209,12 +209,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -230,12 +230,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -251,12 +251,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -272,12 +272,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -293,12 +293,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -314,12 +314,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -335,12 +335,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -356,12 +356,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -377,12 +377,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -398,12 +398,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -419,12 +419,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -440,12 +440,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -461,12 +461,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -482,12 +482,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -503,12 +503,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -524,12 +524,12 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 28,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 28,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 7
+        "evasionScore": 6,
+        "additionalDamageScore": 7
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -545,12 +545,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -566,12 +566,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -587,12 +587,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -608,12 +608,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -629,12 +629,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -650,12 +650,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -671,12 +671,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -692,12 +692,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -713,12 +713,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -734,12 +734,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -755,12 +755,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -776,12 +776,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -797,12 +797,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -818,12 +818,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -839,12 +839,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -860,12 +860,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -881,12 +881,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -902,12 +902,12 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 4,
-        "hitRate": 56,
-        "criticalRate": 3,
+        "physicalAttackScore": 4,
+        "hitScore": 56,
+        "criticalChancePercent": 3,
         "attackCount": 0.3,
-        "evasionRate": 6,
-        "additionalDamage": 9
+        "evasionScore": 6,
+        "additionalDamageScore": 9
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1169,10 +1169,10 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 8,
+        "physicalAttackScore": 14,
+        "hitScore": 8,
         "attackCount": -0.2,
-        "physicalDefense": 5
+        "physicalDefenseScore": 5
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -1186,10 +1186,10 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "physicalAttack": 21,
-        "hitRate": 12,
+        "physicalAttackScore": 21,
+        "hitScore": 12,
         "attackCount": -0.2,
-        "physicalDefense": 7
+        "physicalDefenseScore": 7
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -1203,10 +1203,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -1220,10 +1220,10 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "physicalAttack": 42,
-        "hitRate": 24,
+        "physicalAttackScore": 42,
+        "hitScore": 24,
         "attackCount": -0.2,
-        "physicalDefense": 14
+        "physicalDefenseScore": 14
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -1237,10 +1237,10 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -1254,10 +1254,10 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "physicalAttack": 84,
-        "hitRate": 48,
+        "physicalAttackScore": 84,
+        "hitScore": 48,
         "attackCount": -0.4,
-        "physicalDefense": 28
+        "physicalDefenseScore": 28
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -1271,10 +1271,10 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -1288,10 +1288,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -1305,10 +1305,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1323,10 +1323,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1341,10 +1341,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1359,10 +1359,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1377,10 +1377,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1395,10 +1395,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1413,10 +1413,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1431,10 +1431,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1449,10 +1449,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1467,10 +1467,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1485,10 +1485,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1503,10 +1503,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1521,10 +1521,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1539,10 +1539,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1557,10 +1557,10 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 16,
+        "physicalAttackScore": 28,
+        "hitScore": 16,
         "attackCount": -0.2,
-        "physicalDefense": 10
+        "physicalDefenseScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -1575,10 +1575,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1593,10 +1593,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1611,10 +1611,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1629,10 +1629,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1647,10 +1647,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1665,10 +1665,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1683,10 +1683,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1701,10 +1701,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1719,10 +1719,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1737,10 +1737,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1755,10 +1755,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1773,10 +1773,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1791,10 +1791,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1809,10 +1809,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1827,10 +1827,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1845,10 +1845,10 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 32,
+        "physicalAttackScore": 56,
+        "hitScore": 32,
         "attackCount": -0.3,
-        "physicalDefense": 18
+        "physicalDefenseScore": 18
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -1863,10 +1863,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -1882,10 +1882,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -1901,10 +1901,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -1920,10 +1920,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -1939,10 +1939,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -1958,10 +1958,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -1977,10 +1977,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -1996,10 +1996,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2015,10 +2015,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2034,10 +2034,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2053,10 +2053,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2072,10 +2072,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2091,10 +2091,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2110,10 +2110,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2129,10 +2129,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2148,10 +2148,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2167,10 +2167,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2186,10 +2186,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2205,10 +2205,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2224,10 +2224,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2243,10 +2243,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2262,10 +2262,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2281,10 +2281,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2300,10 +2300,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2319,10 +2319,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2338,10 +2338,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2357,10 +2357,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2376,10 +2376,10 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 112,
-        "hitRate": 64,
+        "physicalAttackScore": 112,
+        "hitScore": 64,
         "attackCount": -0.5,
-        "physicalDefense": 40
+        "physicalDefenseScore": 40
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -2395,10 +2395,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2414,10 +2414,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2433,10 +2433,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2452,10 +2452,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2471,10 +2471,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2490,10 +2490,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2509,10 +2509,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2528,10 +2528,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2547,10 +2547,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2566,10 +2566,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2585,10 +2585,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2604,10 +2604,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2623,10 +2623,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2642,10 +2642,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2661,10 +2661,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2680,10 +2680,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2699,10 +2699,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2718,10 +2718,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -2737,10 +2737,10 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalAttack": 168,
-        "hitRate": 96,
+        "physicalAttackScore": 168,
+        "hitScore": 96,
         "attackCount": -0.7,
-        "physicalDefense": 56
+        "physicalDefenseScore": 56
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -3307,8 +3307,8 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "physicalAttack": 26,
-        "hitRate": 8,
+        "physicalAttackScore": 26,
+        "hitScore": 8,
         "attackCount": -1.6
       },
       "rarity": "ノーマル",
@@ -3323,8 +3323,8 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "physicalAttack": 39,
-        "hitRate": 12,
+        "physicalAttackScore": 39,
+        "hitScore": 12,
         "attackCount": -1.6
       },
       "rarity": "ノーマル",
@@ -3339,8 +3339,8 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "ノーマル",
@@ -3355,8 +3355,8 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "physicalAttack": 82,
-        "hitRate": 26,
+        "physicalAttackScore": 82,
+        "hitScore": 26,
         "attackCount": -2.2
       },
       "rarity": "ノーマル",
@@ -3371,8 +3371,8 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "ノーマル",
@@ -3387,8 +3387,8 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "physicalAttack": 156,
-        "hitRate": 52,
+        "physicalAttackScore": 156,
+        "hitScore": 52,
         "attackCount": -3.2
       },
       "rarity": "ノーマル",
@@ -3403,8 +3403,8 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "physicalAttack": 210,
-        "hitRate": 70,
+        "physicalAttackScore": 210,
+        "hitScore": 70,
         "attackCount": -4.2
       },
       "rarity": "ノーマル",
@@ -3419,8 +3419,8 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "ノーマル",
@@ -3435,8 +3435,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "Tier1",
@@ -3452,8 +3452,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "Tier1",
@@ -3469,8 +3469,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "Tier1",
@@ -3486,8 +3486,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "Tier1",
@@ -3503,8 +3503,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "Tier1",
@@ -3520,8 +3520,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "Tier1",
@@ -3537,8 +3537,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "Tier1",
@@ -3554,8 +3554,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "Tier1",
@@ -3571,8 +3571,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 52,
-        "hitRate": 16,
+        "physicalAttackScore": 52,
+        "hitScore": 16,
         "attackCount": -1.6
       },
       "rarity": "Tier1",
@@ -3588,8 +3588,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3605,8 +3605,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3622,8 +3622,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3639,8 +3639,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3656,8 +3656,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3673,8 +3673,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3690,8 +3690,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3707,8 +3707,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3724,8 +3724,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3741,8 +3741,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3758,8 +3758,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3775,8 +3775,8 @@
       "basePrice": 1500000,
       "sellValue": 750000,
       "combatBonuses": {
-        "physicalAttack": 140,
-        "hitRate": 35,
+        "physicalAttackScore": 140,
+        "hitScore": 35,
         "attackCount": -2.8
       },
       "rarity": "Tier2",
@@ -3792,8 +3792,8 @@
       "basePrice": 12000000,
       "sellValue": 6000000,
       "combatBonuses": {
-        "physicalAttack": 210,
-        "hitRate": 70,
+        "physicalAttackScore": 210,
+        "hitScore": 70,
         "attackCount": -4.2
       },
       "rarity": "Tier3",
@@ -3810,8 +3810,8 @@
       "basePrice": 12000000,
       "sellValue": 6000000,
       "combatBonuses": {
-        "physicalAttack": 210,
-        "hitRate": 70,
+        "physicalAttackScore": 210,
+        "hitScore": 70,
         "attackCount": -4.2
       },
       "rarity": "Tier3",
@@ -3828,8 +3828,8 @@
       "basePrice": 12000000,
       "sellValue": 6000000,
       "combatBonuses": {
-        "physicalAttack": 210,
-        "hitRate": 70,
+        "physicalAttackScore": 210,
+        "hitScore": 70,
         "attackCount": -4.2
       },
       "rarity": "Tier3",
@@ -3846,8 +3846,8 @@
       "basePrice": 12000000,
       "sellValue": 6000000,
       "combatBonuses": {
-        "physicalAttack": 210,
-        "hitRate": 70,
+        "physicalAttackScore": 210,
+        "hitScore": 70,
         "attackCount": -4.2
       },
       "rarity": "Tier3",
@@ -3864,8 +3864,8 @@
       "basePrice": 12000000,
       "sellValue": 6000000,
       "combatBonuses": {
-        "physicalAttack": 210,
-        "hitRate": 70,
+        "physicalAttackScore": 210,
+        "hitScore": 70,
         "attackCount": -4.2
       },
       "rarity": "Tier3",
@@ -3882,8 +3882,8 @@
       "basePrice": 12000000,
       "sellValue": 6000000,
       "combatBonuses": {
-        "physicalAttack": 210,
-        "hitRate": 70,
+        "physicalAttackScore": 210,
+        "hitScore": 70,
         "attackCount": -4.2
       },
       "rarity": "Tier3",
@@ -3900,8 +3900,8 @@
       "basePrice": 12000000,
       "sellValue": 6000000,
       "combatBonuses": {
-        "physicalAttack": 210,
-        "hitRate": 70,
+        "physicalAttackScore": 210,
+        "hitScore": 70,
         "attackCount": -4.2
       },
       "rarity": "Tier3",
@@ -3918,8 +3918,8 @@
       "basePrice": 12000000,
       "sellValue": 6000000,
       "combatBonuses": {
-        "physicalAttack": 210,
-        "hitRate": 70,
+        "physicalAttackScore": 210,
+        "hitScore": 70,
         "attackCount": -4.2
       },
       "rarity": "Tier3",
@@ -3936,8 +3936,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -3954,8 +3954,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -3972,8 +3972,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -3990,8 +3990,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4008,8 +4008,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4026,8 +4026,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4044,8 +4044,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4062,8 +4062,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4080,8 +4080,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4098,8 +4098,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4116,8 +4116,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4134,8 +4134,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4152,8 +4152,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4170,8 +4170,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4188,8 +4188,8 @@
       "basePrice": 22500000,
       "sellValue": 11250000,
       "combatBonuses": {
-        "physicalAttack": 315,
-        "hitRate": 105,
+        "physicalAttackScore": 315,
+        "hitScore": 105,
         "attackCount": -6.4
       },
       "rarity": "Tier4・斧系",
@@ -4206,11 +4206,11 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "physicalAttack": 7,
-        "hitRate": 18,
+        "physicalAttackScore": 7,
+        "hitScore": 18,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 2
+        "evasionScore": 3,
+        "additionalDamageScore": 2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -4224,11 +4224,11 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "physicalAttack": 10,
-        "hitRate": 25,
+        "physicalAttackScore": 10,
+        "hitScore": 25,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 3
+        "evasionScore": 3,
+        "additionalDamageScore": 3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -4242,11 +4242,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -4260,11 +4260,11 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "physicalAttack": 21,
-        "hitRate": 42,
+        "physicalAttackScore": 21,
+        "hitScore": 42,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 5
+        "evasionScore": 3,
+        "additionalDamageScore": 5
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -4278,11 +4278,11 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "physicalAttack": 28,
-        "hitRate": 52,
+        "physicalAttackScore": 28,
+        "hitScore": 52,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 6
+        "evasionScore": 3,
+        "additionalDamageScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -4296,11 +4296,11 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "physicalAttack": 42,
-        "hitRate": 74,
+        "physicalAttackScore": 42,
+        "hitScore": 74,
         "attackCount": 0.1,
-        "evasionRate": 3,
-        "additionalDamage": 7
+        "evasionScore": 3,
+        "additionalDamageScore": 7
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -4314,11 +4314,11 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "physicalAttack": 56,
-        "hitRate": 98,
+        "physicalAttackScore": 56,
+        "hitScore": 98,
         "attackCount": 0.0,
-        "evasionRate": 3,
-        "additionalDamage": 8
+        "evasionScore": 3,
+        "additionalDamageScore": 8
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -4332,11 +4332,11 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalAttack": 84,
-        "hitRate": 147,
+        "physicalAttackScore": 84,
+        "hitScore": 147,
         "attackCount": -0.1,
-        "evasionRate": 3,
-        "additionalDamage": 9
+        "evasionScore": 3,
+        "additionalDamageScore": 9
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -4350,11 +4350,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4369,11 +4369,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4388,11 +4388,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4407,11 +4407,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4426,11 +4426,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4445,11 +4445,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4464,11 +4464,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4483,11 +4483,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4502,11 +4502,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4521,11 +4521,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4540,11 +4540,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4559,11 +4559,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -4578,11 +4578,11 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalAttack": 14,
-        "hitRate": 32,
+        "physicalAttackScore": 14,
+        "hitScore": 32,
         "attackCount": 0.2,
-        "evasionRate": 3,
-        "additionalDamage": 4
+        "evasionScore": 3,
+        "additionalDamageScore": 4
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5047,9 +5047,9 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "physicalDefense": 5,
+        "physicalDefenseScore": 5,
         "maxHP": 18,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5063,9 +5063,9 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "physicalDefense": 7,
+        "physicalDefenseScore": 7,
         "maxHP": 27,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5079,9 +5079,9 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalDefense": 10,
+        "physicalDefenseScore": 10,
         "maxHP": 36,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5095,9 +5095,9 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "physicalDefense": 14,
+        "physicalDefenseScore": 14,
         "maxHP": 54,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5111,9 +5111,9 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5127,9 +5127,9 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "physicalDefense": 28,
+        "physicalDefenseScore": 28,
         "maxHP": 144,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5143,9 +5143,9 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "physicalDefense": 40,
+        "physicalDefenseScore": 40,
         "maxHP": 216,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5159,9 +5159,9 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalDefense": 56,
+        "physicalDefenseScore": 56,
         "maxHP": 288,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5175,9 +5175,9 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalDefense": 10,
+        "physicalDefenseScore": 10,
         "maxHP": 36,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5191,9 +5191,9 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalDefense": 10,
+        "physicalDefenseScore": 10,
         "maxHP": 36,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5207,9 +5207,9 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalDefense": 10,
+        "physicalDefenseScore": 10,
         "maxHP": 36,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5223,9 +5223,9 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalDefense": 10,
+        "physicalDefenseScore": 10,
         "maxHP": 36,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5239,9 +5239,9 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalDefense": 10,
+        "physicalDefenseScore": 10,
         "maxHP": 36,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5255,9 +5255,9 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalDefense": 10,
+        "physicalDefenseScore": 10,
         "maxHP": 36,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5271,9 +5271,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5287,9 +5287,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5303,9 +5303,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5319,9 +5319,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5335,9 +5335,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5351,9 +5351,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5367,9 +5367,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5383,9 +5383,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5399,9 +5399,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5415,9 +5415,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5431,9 +5431,9 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "physicalDefense": 18,
+        "physicalDefenseScore": 18,
         "maxHP": 72,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -5447,9 +5447,9 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalDefense": 40,
+        "physicalDefenseScore": 40,
         "maxHP": 216,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -5463,9 +5463,9 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalDefense": 40,
+        "physicalDefenseScore": 40,
         "maxHP": 216,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -5479,9 +5479,9 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalDefense": 40,
+        "physicalDefenseScore": 40,
         "maxHP": 216,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -5495,9 +5495,9 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalDefense": 40,
+        "physicalDefenseScore": 40,
         "maxHP": 216,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -5511,9 +5511,9 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalDefense": 40,
+        "physicalDefenseScore": 40,
         "maxHP": 216,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -5527,9 +5527,9 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalDefense": 40,
+        "physicalDefenseScore": 40,
         "maxHP": 216,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -5543,9 +5543,9 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalDefense": 56,
+        "physicalDefenseScore": 56,
         "maxHP": 288,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -5559,9 +5559,9 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalDefense": 56,
+        "physicalDefenseScore": 56,
         "maxHP": 288,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -5575,9 +5575,9 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalDefense": 56,
+        "physicalDefenseScore": 56,
         "maxHP": 288,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -5591,9 +5591,9 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalDefense": 56,
+        "physicalDefenseScore": 56,
         "maxHP": 288,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -5607,9 +5607,9 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalDefense": 56,
+        "physicalDefenseScore": 56,
         "maxHP": 288,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -5623,9 +5623,9 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalDefense": 56,
+        "physicalDefenseScore": 56,
         "maxHP": 288,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -5639,9 +5639,9 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalDefense": 56,
+        "physicalDefenseScore": 56,
         "maxHP": 288,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -5655,9 +5655,9 @@
       "basePrice": 3600000,
       "sellValue": 1800000,
       "combatBonuses": {
-        "physicalDefense": 56,
+        "physicalDefenseScore": 56,
         "maxHP": 288,
-        "evasionRate": 6
+        "evasionScore": 6
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -5783,8 +5783,8 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "physicalDefense": 18,
-        "evasionRate": -18
+        "physicalDefenseScore": 18,
+        "evasionScore": -18
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5798,8 +5798,8 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "physicalDefense": 27,
-        "evasionRate": -27
+        "physicalDefenseScore": 27,
+        "evasionScore": -27
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5813,8 +5813,8 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5828,8 +5828,8 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "physicalDefense": 50,
-        "evasionRate": -50
+        "physicalDefenseScore": 50,
+        "evasionScore": -50
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5843,8 +5843,8 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5858,8 +5858,8 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "physicalDefense": 86,
-        "evasionRate": -86
+        "physicalDefenseScore": 86,
+        "evasionScore": -86
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5873,8 +5873,8 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "physicalDefense": 115,
-        "evasionRate": -115
+        "physicalDefenseScore": 115,
+        "evasionScore": -115
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5888,8 +5888,8 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalDefense": 144,
-        "evasionRate": -144
+        "physicalDefenseScore": 144,
+        "evasionScore": -144
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -5903,8 +5903,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5918,8 +5918,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5933,8 +5933,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5948,8 +5948,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5963,8 +5963,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5978,8 +5978,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -5993,8 +5993,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6008,8 +6008,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6023,8 +6023,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6038,8 +6038,8 @@
       "basePrice": 10000,
       "sellValue": 5000,
       "combatBonuses": {
-        "physicalDefense": 36,
-        "evasionRate": -36
+        "physicalDefenseScore": 36,
+        "evasionScore": -36
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6053,8 +6053,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6068,8 +6068,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6083,8 +6083,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6098,8 +6098,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6113,8 +6113,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6128,8 +6128,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6143,8 +6143,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6158,8 +6158,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6173,8 +6173,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6188,8 +6188,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6203,8 +6203,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6218,8 +6218,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6233,8 +6233,8 @@
       "basePrice": 375000,
       "sellValue": 187500,
       "combatBonuses": {
-        "physicalDefense": 65,
-        "evasionRate": -65
+        "physicalDefenseScore": 65,
+        "evasionScore": -65
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -6360,7 +6360,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6374,7 +6374,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6388,7 +6388,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6402,7 +6402,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6416,7 +6416,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6430,7 +6430,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6444,7 +6444,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6458,7 +6458,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6472,7 +6472,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6486,7 +6486,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6500,7 +6500,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6514,7 +6514,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6528,7 +6528,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6542,7 +6542,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6556,9 +6556,9 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "physicalDefense": 7,
-        "magicalDefense": 7,
-        "evasionRate": 10
+        "physicalDefenseScore": 7,
+        "magicalDefenseScore": 7,
+        "evasionScore": 10
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -6572,9 +6572,9 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "physicalDefense": 10,
-        "magicalDefense": 10,
-        "evasionRate": 14
+        "physicalDefenseScore": 10,
+        "magicalDefenseScore": 10,
+        "evasionScore": 14
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -6588,9 +6588,9 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -6604,9 +6604,9 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "physicalDefense": 18,
-        "magicalDefense": 18,
-        "evasionRate": 22
+        "physicalDefenseScore": 18,
+        "magicalDefenseScore": 18,
+        "evasionScore": 22
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -6620,9 +6620,9 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "physicalDefense": 25,
-        "magicalDefense": 25,
-        "evasionRate": 32
+        "physicalDefenseScore": 25,
+        "magicalDefenseScore": 25,
+        "evasionScore": 32
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -6636,9 +6636,9 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "physicalDefense": 32,
-        "magicalDefense": 32,
-        "evasionRate": 45
+        "physicalDefenseScore": 32,
+        "magicalDefenseScore": 32,
+        "evasionScore": 45
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -6652,9 +6652,9 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "physicalDefense": 43,
-        "magicalDefense": 43,
-        "evasionRate": 68
+        "physicalDefenseScore": 43,
+        "magicalDefenseScore": 43,
+        "evasionScore": 68
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -6668,9 +6668,9 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -6866,9 +6866,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6882,9 +6882,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6898,9 +6898,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6914,9 +6914,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6930,9 +6930,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6946,9 +6946,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6962,9 +6962,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6978,9 +6978,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -6994,9 +6994,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -7010,9 +7010,9 @@
       "basePrice": 2000,
       "sellValue": 1000,
       "combatBonuses": {
-        "physicalDefense": 14,
-        "magicalDefense": 14,
-        "evasionRate": 18
+        "physicalDefenseScore": 14,
+        "magicalDefenseScore": 14,
+        "evasionScore": 18
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -7026,9 +7026,9 @@
       "basePrice": 75000,
       "sellValue": 37500,
       "combatBonuses": {
-        "physicalDefense": 25,
-        "magicalDefense": 25,
-        "evasionRate": 32
+        "physicalDefenseScore": 25,
+        "magicalDefenseScore": 25,
+        "evasionScore": 32
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7042,9 +7042,9 @@
       "basePrice": 75000,
       "sellValue": 37500,
       "combatBonuses": {
-        "physicalDefense": 25,
-        "magicalDefense": 25,
-        "evasionRate": 32
+        "physicalDefenseScore": 25,
+        "magicalDefenseScore": 25,
+        "evasionScore": 32
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7058,9 +7058,9 @@
       "basePrice": 75000,
       "sellValue": 37500,
       "combatBonuses": {
-        "physicalDefense": 25,
-        "magicalDefense": 25,
-        "evasionRate": 32
+        "physicalDefenseScore": 25,
+        "magicalDefenseScore": 25,
+        "evasionScore": 32
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7074,9 +7074,9 @@
       "basePrice": 75000,
       "sellValue": 37500,
       "combatBonuses": {
-        "physicalDefense": 25,
-        "magicalDefense": 25,
-        "evasionRate": 32
+        "physicalDefenseScore": 25,
+        "magicalDefenseScore": 25,
+        "evasionScore": 32
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7090,9 +7090,9 @@
       "basePrice": 75000,
       "sellValue": 37500,
       "combatBonuses": {
-        "physicalDefense": 25,
-        "magicalDefense": 25,
-        "evasionRate": 32
+        "physicalDefenseScore": 25,
+        "magicalDefenseScore": 25,
+        "evasionScore": 32
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -7106,9 +7106,9 @@
       "basePrice": 1200000,
       "sellValue": 600000,
       "combatBonuses": {
-        "physicalDefense": 43,
-        "magicalDefense": 43,
-        "evasionRate": 68
+        "physicalDefenseScore": 43,
+        "magicalDefenseScore": 43,
+        "evasionScore": 68
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7122,9 +7122,9 @@
       "basePrice": 1200000,
       "sellValue": 600000,
       "combatBonuses": {
-        "physicalDefense": 43,
-        "magicalDefense": 43,
-        "evasionRate": 68
+        "physicalDefenseScore": 43,
+        "magicalDefenseScore": 43,
+        "evasionScore": 68
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7138,9 +7138,9 @@
       "basePrice": 1200000,
       "sellValue": 600000,
       "combatBonuses": {
-        "physicalDefense": 43,
-        "magicalDefense": 43,
-        "evasionRate": 68
+        "physicalDefenseScore": 43,
+        "magicalDefenseScore": 43,
+        "evasionScore": 68
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -7154,9 +7154,9 @@
       "basePrice": 3000000,
       "sellValue": 1500000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -7170,9 +7170,9 @@
       "basePrice": 3000000,
       "sellValue": 1500000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -7186,9 +7186,9 @@
       "basePrice": 3000000,
       "sellValue": 1500000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -7202,9 +7202,9 @@
       "basePrice": 3000000,
       "sellValue": 1500000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -7218,9 +7218,9 @@
       "basePrice": 3000000,
       "sellValue": 1500000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -7234,9 +7234,9 @@
       "basePrice": 3000000,
       "sellValue": 1500000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -7250,9 +7250,9 @@
       "basePrice": 3000000,
       "sellValue": 1500000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -7266,9 +7266,9 @@
       "basePrice": 3000000,
       "sellValue": 1500000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -7282,9 +7282,9 @@
       "basePrice": 3000000,
       "sellValue": 1500000,
       "combatBonuses": {
-        "physicalDefense": 54,
-        "magicalDefense": 54,
-        "evasionRate": 100
+        "physicalDefenseScore": 54,
+        "magicalDefenseScore": 54,
+        "evasionScore": 100
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -7298,8 +7298,8 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "hitRate": 9,
-        "criticalRate": 2,
+        "hitScore": 9,
+        "criticalChancePercent": 2,
         "attackCount": 0.7
       },
       "rarity": "ノーマル",
@@ -7314,8 +7314,8 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "hitRate": 18,
-        "criticalRate": 2,
+        "hitScore": 18,
+        "criticalChancePercent": 2,
         "attackCount": 0.4
       },
       "rarity": "ノーマル",
@@ -7330,8 +7330,8 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "hitRate": 27,
-        "criticalRate": 2,
+        "hitScore": 27,
+        "criticalChancePercent": 2,
         "attackCount": 0.4
       },
       "rarity": "ノーマル",
@@ -7346,8 +7346,8 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "hitRate": 36,
-        "criticalRate": 2,
+        "hitScore": 36,
+        "criticalChancePercent": 2,
         "attackCount": 0.4
       },
       "rarity": "ノーマル",
@@ -7362,8 +7362,8 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "hitRate": 45,
-        "criticalRate": 2,
+        "hitScore": 45,
+        "criticalChancePercent": 2,
         "attackCount": 0.3
       },
       "rarity": "ノーマル",
@@ -7378,8 +7378,8 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "hitRate": 54,
-        "criticalRate": 2,
+        "hitScore": 54,
+        "criticalChancePercent": 2,
         "attackCount": 0.2
       },
       "rarity": "ノーマル",
@@ -7394,8 +7394,8 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "hitRate": 63,
-        "criticalRate": 2,
+        "hitScore": 63,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "ノーマル",
@@ -7410,8 +7410,8 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "hitRate": 72,
-        "criticalRate": 2,
+        "hitScore": 72,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "ノーマル",
@@ -7426,8 +7426,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "hitRate": 27,
-        "criticalRate": 2,
+        "hitScore": 27,
+        "criticalChancePercent": 2,
         "attackCount": 0.4
       },
       "rarity": "Tier1",
@@ -7442,8 +7442,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "hitRate": 27,
-        "criticalRate": 2,
+        "hitScore": 27,
+        "criticalChancePercent": 2,
         "attackCount": 0.4
       },
       "rarity": "Tier1",
@@ -7458,8 +7458,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "hitRate": 27,
-        "criticalRate": 2,
+        "hitScore": 27,
+        "criticalChancePercent": 2,
         "attackCount": 0.4
       },
       "rarity": "Tier1",
@@ -7474,8 +7474,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "hitRate": 27,
-        "criticalRate": 2,
+        "hitScore": 27,
+        "criticalChancePercent": 2,
         "attackCount": 0.4
       },
       "rarity": "Tier1",
@@ -7490,8 +7490,8 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "hitRate": 27,
-        "criticalRate": 2,
+        "hitScore": 27,
+        "criticalChancePercent": 2,
         "attackCount": 0.4
       },
       "rarity": "Tier1",
@@ -7506,8 +7506,8 @@
       "basePrice": 1875000,
       "sellValue": 937500,
       "combatBonuses": {
-        "hitRate": 45,
-        "criticalRate": 2,
+        "hitScore": 45,
+        "criticalChancePercent": 2,
         "attackCount": 0.3
       },
       "rarity": "Tier2",
@@ -7522,8 +7522,8 @@
       "basePrice": 1875000,
       "sellValue": 937500,
       "combatBonuses": {
-        "hitRate": 45,
-        "criticalRate": 2,
+        "hitScore": 45,
+        "criticalChancePercent": 2,
         "attackCount": 0.3
       },
       "rarity": "Tier2",
@@ -7538,8 +7538,8 @@
       "basePrice": 1875000,
       "sellValue": 937500,
       "combatBonuses": {
-        "hitRate": 45,
-        "criticalRate": 2,
+        "hitScore": 45,
+        "criticalChancePercent": 2,
         "attackCount": 0.3
       },
       "rarity": "Tier2",
@@ -7554,8 +7554,8 @@
       "basePrice": 1875000,
       "sellValue": 937500,
       "combatBonuses": {
-        "hitRate": 45,
-        "criticalRate": 2,
+        "hitScore": 45,
+        "criticalChancePercent": 2,
         "attackCount": 0.3
       },
       "rarity": "Tier2",
@@ -7570,8 +7570,8 @@
       "basePrice": 1875000,
       "sellValue": 937500,
       "combatBonuses": {
-        "hitRate": 45,
-        "criticalRate": 2,
+        "hitScore": 45,
+        "criticalChancePercent": 2,
         "attackCount": 0.3
       },
       "rarity": "Tier2",
@@ -7586,8 +7586,8 @@
       "basePrice": 1875000,
       "sellValue": 937500,
       "combatBonuses": {
-        "hitRate": 45,
-        "criticalRate": 2,
+        "hitScore": 45,
+        "criticalChancePercent": 2,
         "attackCount": 0.3
       },
       "rarity": "Tier2",
@@ -7602,8 +7602,8 @@
       "basePrice": 10000000,
       "sellValue": 5000000,
       "combatBonuses": {
-        "hitRate": 63,
-        "criticalRate": 2,
+        "hitScore": 63,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "Tier3",
@@ -7618,8 +7618,8 @@
       "basePrice": 10000000,
       "sellValue": 5000000,
       "combatBonuses": {
-        "hitRate": 63,
-        "criticalRate": 2,
+        "hitScore": 63,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "Tier3",
@@ -7634,8 +7634,8 @@
       "basePrice": 10000000,
       "sellValue": 5000000,
       "combatBonuses": {
-        "hitRate": 63,
-        "criticalRate": 2,
+        "hitScore": 63,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "Tier3",
@@ -7650,8 +7650,8 @@
       "basePrice": 10000000,
       "sellValue": 5000000,
       "combatBonuses": {
-        "hitRate": 63,
-        "criticalRate": 2,
+        "hitScore": 63,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "Tier3",
@@ -7666,8 +7666,8 @@
       "basePrice": 10000000,
       "sellValue": 5000000,
       "combatBonuses": {
-        "hitRate": 63,
-        "criticalRate": 2,
+        "hitScore": 63,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "Tier3",
@@ -7682,8 +7682,8 @@
       "basePrice": 10000000,
       "sellValue": 5000000,
       "combatBonuses": {
-        "hitRate": 63,
-        "criticalRate": 2,
+        "hitScore": 63,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "Tier3",
@@ -7698,8 +7698,8 @@
       "basePrice": 10000000,
       "sellValue": 5000000,
       "combatBonuses": {
-        "hitRate": 63,
-        "criticalRate": 2,
+        "hitScore": 63,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "Tier3",
@@ -7714,8 +7714,8 @@
       "basePrice": 10000000,
       "sellValue": 5000000,
       "combatBonuses": {
-        "hitRate": 63,
-        "criticalRate": 2,
+        "hitScore": 63,
+        "criticalChancePercent": 2,
         "attackCount": 0.1
       },
       "rarity": "Tier3",
@@ -7878,8 +7878,8 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "magicalAttack": 18,
-        "criticalRate": -3
+        "magicalAttackScore": 18,
+        "criticalChancePercent": -3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7893,8 +7893,8 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "magicalAttack": 27,
-        "criticalRate": -3
+        "magicalAttackScore": 27,
+        "criticalChancePercent": -3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7908,8 +7908,8 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalAttack": 36,
-        "criticalRate": -3
+        "magicalAttackScore": 36,
+        "criticalChancePercent": -3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7923,8 +7923,8 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "magicalAttack": 45,
-        "criticalRate": -3
+        "magicalAttackScore": 45,
+        "criticalChancePercent": -3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7938,8 +7938,8 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7953,8 +7953,8 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "magicalAttack": 72,
-        "criticalRate": -3
+        "magicalAttackScore": 72,
+        "criticalChancePercent": -3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7968,8 +7968,8 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "magicalAttack": 99,
-        "criticalRate": -3
+        "magicalAttackScore": 99,
+        "criticalChancePercent": -3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -7983,8 +7983,8 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalAttack": 122,
-        "criticalRate": -3
+        "magicalAttackScore": 122,
+        "criticalChancePercent": -3
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -8264,8 +8264,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalAttack": 36,
-        "criticalRate": -3
+        "magicalAttackScore": 36,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8279,8 +8279,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalAttack": 36,
-        "criticalRate": -3
+        "magicalAttackScore": 36,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8294,8 +8294,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalAttack": 36,
-        "criticalRate": -3
+        "magicalAttackScore": 36,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8309,8 +8309,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalAttack": 36,
-        "criticalRate": -3
+        "magicalAttackScore": 36,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8324,8 +8324,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalAttack": 36,
-        "criticalRate": -3
+        "magicalAttackScore": 36,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8339,8 +8339,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalAttack": 36,
-        "criticalRate": -3
+        "magicalAttackScore": 36,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8354,8 +8354,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalAttack": 36,
-        "criticalRate": -3
+        "magicalAttackScore": 36,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8369,8 +8369,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8384,8 +8384,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8399,8 +8399,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8414,8 +8414,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8429,8 +8429,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8444,8 +8444,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8459,8 +8459,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8474,8 +8474,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8489,8 +8489,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8504,8 +8504,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8519,8 +8519,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8534,8 +8534,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8549,8 +8549,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalAttack": 54,
-        "criticalRate": -3
+        "magicalAttackScore": 54,
+        "criticalChancePercent": -3
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8564,8 +8564,8 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "magicalHealing": 18,
-        "criticalRate": -2
+        "magicalHealingScore": 18,
+        "criticalChancePercent": -2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -8579,8 +8579,8 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "magicalHealing": 27,
-        "criticalRate": -2
+        "magicalHealingScore": 27,
+        "criticalChancePercent": -2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -8594,8 +8594,8 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalHealing": 40,
-        "criticalRate": -2
+        "magicalHealingScore": 40,
+        "criticalChancePercent": -2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -8609,8 +8609,8 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "magicalHealing": 54,
-        "criticalRate": -2
+        "magicalHealingScore": 54,
+        "criticalChancePercent": -2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -8624,8 +8624,8 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -8639,8 +8639,8 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "magicalHealing": 162,
-        "criticalRate": -2
+        "magicalHealingScore": 162,
+        "criticalChancePercent": -2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -8654,8 +8654,8 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "magicalHealing": 216,
-        "criticalRate": -2
+        "magicalHealingScore": 216,
+        "criticalChancePercent": -2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -8669,8 +8669,8 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalHealing": 324,
-        "criticalRate": -2
+        "magicalHealingScore": 324,
+        "criticalChancePercent": -2
       },
       "rarity": "ノーマル",
       "grantedSkillIds": [
@@ -8810,8 +8810,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalHealing": 40,
-        "criticalRate": -2
+        "magicalHealingScore": 40,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8825,8 +8825,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalHealing": 40,
-        "criticalRate": -2
+        "magicalHealingScore": 40,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8840,8 +8840,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalHealing": 40,
-        "criticalRate": -2
+        "magicalHealingScore": 40,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8855,8 +8855,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalHealing": 40,
-        "criticalRate": -2
+        "magicalHealingScore": 40,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8870,8 +8870,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalHealing": 40,
-        "criticalRate": -2
+        "magicalHealingScore": 40,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8885,8 +8885,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalHealing": 40,
-        "criticalRate": -2
+        "magicalHealingScore": 40,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8900,8 +8900,8 @@
       "basePrice": 5000,
       "sellValue": 2500,
       "combatBonuses": {
-        "magicalHealing": 40,
-        "criticalRate": -2
+        "magicalHealingScore": 40,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -8915,8 +8915,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8930,8 +8930,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8945,8 +8945,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8960,8 +8960,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8975,8 +8975,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -8990,8 +8990,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9005,8 +9005,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9020,8 +9020,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9035,8 +9035,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9050,8 +9050,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9065,8 +9065,8 @@
       "basePrice": 187500,
       "sellValue": 93750,
       "combatBonuses": {
-        "magicalHealing": 108,
-        "criticalRate": -2
+        "magicalHealingScore": 108,
+        "criticalChancePercent": -2
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9290,7 +9290,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -9304,7 +9304,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -9318,7 +9318,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -9332,7 +9332,7 @@
       "basePrice": 50000,
       "sellValue": 25000,
       "combatBonuses": {
-        "physicalAttack": 10
+        "physicalAttackScore": 10
       },
       "rarity": "Tier1",
       "grantedSkillIds": [
@@ -9346,7 +9346,7 @@
       "basePrice": 100000,
       "sellValue": 50000,
       "combatBonuses": {
-        "physicalAttack": 20
+        "physicalAttackScore": 20
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9360,7 +9360,7 @@
       "basePrice": 100000,
       "sellValue": 50000,
       "combatBonuses": {
-        "physicalAttack": 20
+        "physicalAttackScore": 20
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9374,7 +9374,7 @@
       "basePrice": 100000,
       "sellValue": 50000,
       "combatBonuses": {
-        "physicalAttack": 20
+        "physicalAttackScore": 20
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9388,7 +9388,7 @@
       "basePrice": 100000,
       "sellValue": 50000,
       "combatBonuses": {
-        "physicalAttack": 20
+        "physicalAttackScore": 20
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9402,7 +9402,7 @@
       "basePrice": 100000,
       "sellValue": 50000,
       "combatBonuses": {
-        "physicalAttack": 20
+        "physicalAttackScore": 20
       },
       "rarity": "Tier2",
       "grantedSkillIds": [
@@ -9416,7 +9416,7 @@
       "basePrice": 150000,
       "sellValue": 75000,
       "combatBonuses": {
-        "physicalAttack": 30
+        "physicalAttackScore": 30
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -9430,7 +9430,7 @@
       "basePrice": 150000,
       "sellValue": 75000,
       "combatBonuses": {
-        "physicalAttack": 30
+        "physicalAttackScore": 30
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -9444,7 +9444,7 @@
       "basePrice": 150000,
       "sellValue": 75000,
       "combatBonuses": {
-        "physicalAttack": 30
+        "physicalAttackScore": 30
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -9458,7 +9458,7 @@
       "basePrice": 150000,
       "sellValue": 75000,
       "combatBonuses": {
-        "physicalAttack": 30
+        "physicalAttackScore": 30
       },
       "rarity": "Tier3",
       "grantedSkillIds": [
@@ -9472,7 +9472,7 @@
       "basePrice": 200000,
       "sellValue": 100000,
       "combatBonuses": {
-        "physicalAttack": 40
+        "physicalAttackScore": 40
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -9486,7 +9486,7 @@
       "basePrice": 200000,
       "sellValue": 100000,
       "combatBonuses": {
-        "physicalAttack": 40
+        "physicalAttackScore": 40
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -9500,7 +9500,7 @@
       "basePrice": 200000,
       "sellValue": 100000,
       "combatBonuses": {
-        "physicalAttack": 40
+        "physicalAttackScore": 40
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -9514,7 +9514,7 @@
       "basePrice": 200000,
       "sellValue": 100000,
       "combatBonuses": {
-        "physicalAttack": 40
+        "physicalAttackScore": 40
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -9528,7 +9528,7 @@
       "basePrice": 200000,
       "sellValue": 100000,
       "combatBonuses": {
-        "physicalAttack": 40
+        "physicalAttackScore": 40
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -9542,7 +9542,7 @@
       "basePrice": 200000,
       "sellValue": 100000,
       "combatBonuses": {
-        "physicalAttack": 40
+        "physicalAttackScore": 40
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -9556,7 +9556,7 @@
       "basePrice": 200000,
       "sellValue": 100000,
       "combatBonuses": {
-        "physicalAttack": 40
+        "physicalAttackScore": 40
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -9570,7 +9570,7 @@
       "basePrice": 200000,
       "sellValue": 100000,
       "combatBonuses": {
-        "physicalAttack": 40
+        "physicalAttackScore": 40
       },
       "rarity": "Tier4",
       "grantedSkillIds": [
@@ -10032,7 +10032,7 @@
       "basePrice": 100,
       "sellValue": 50,
       "combatBonuses": {
-        "magicalDefense": 5,
+        "magicalDefenseScore": 5,
         "maxHP": 18
       },
       "rarity": "ノーマル",
@@ -10047,7 +10047,7 @@
       "basePrice": 500,
       "sellValue": 250,
       "combatBonuses": {
-        "magicalDefense": 7,
+        "magicalDefenseScore": 7,
         "maxHP": 27
       },
       "rarity": "ノーマル",
@@ -10062,7 +10062,7 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalDefense": 10,
+        "magicalDefenseScore": 10,
         "maxHP": 36
       },
       "rarity": "ノーマル",
@@ -10077,7 +10077,7 @@
       "basePrice": 12500,
       "sellValue": 6250,
       "combatBonuses": {
-        "magicalDefense": 14,
+        "magicalDefenseScore": 14,
         "maxHP": 45
       },
       "rarity": "ノーマル",
@@ -10092,7 +10092,7 @@
       "basePrice": 60000,
       "sellValue": 30000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "ノーマル",
@@ -10107,7 +10107,7 @@
       "basePrice": 240000,
       "sellValue": 120000,
       "combatBonuses": {
-        "magicalDefense": 28,
+        "magicalDefenseScore": 28,
         "maxHP": 72
       },
       "rarity": "ノーマル",
@@ -10122,7 +10122,7 @@
       "basePrice": 720000,
       "sellValue": 360000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "ノーマル",
@@ -10137,7 +10137,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 56,
+        "magicalDefenseScore": 56,
         "maxHP": 108
       },
       "rarity": "ノーマル",
@@ -10152,7 +10152,7 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalDefense": 10,
+        "magicalDefenseScore": 10,
         "maxHP": 36
       },
       "rarity": "Tier1",
@@ -10167,7 +10167,7 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalDefense": 10,
+        "magicalDefenseScore": 10,
         "maxHP": 36
       },
       "rarity": "Tier1",
@@ -10182,7 +10182,7 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalDefense": 10,
+        "magicalDefenseScore": 10,
         "maxHP": 36
       },
       "rarity": "Tier1",
@@ -10197,7 +10197,7 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalDefense": 10,
+        "magicalDefenseScore": 10,
         "maxHP": 36
       },
       "rarity": "Tier1",
@@ -10212,7 +10212,7 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalDefense": 10,
+        "magicalDefenseScore": 10,
         "maxHP": 36
       },
       "rarity": "Tier1",
@@ -10227,7 +10227,7 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalDefense": 10,
+        "magicalDefenseScore": 10,
         "maxHP": 36
       },
       "rarity": "Tier1",
@@ -10242,7 +10242,7 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalDefense": 10,
+        "magicalDefenseScore": 10,
         "maxHP": 36
       },
       "rarity": "Tier1",
@@ -10257,7 +10257,7 @@
       "basePrice": 2500,
       "sellValue": 1250,
       "combatBonuses": {
-        "magicalDefense": 10,
+        "magicalDefenseScore": 10,
         "maxHP": 36
       },
       "rarity": "Tier1",
@@ -10272,7 +10272,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10287,7 +10287,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10302,7 +10302,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10317,7 +10317,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10332,7 +10332,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10347,7 +10347,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10362,7 +10362,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10377,7 +10377,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10392,7 +10392,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10407,7 +10407,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10422,7 +10422,7 @@
       "basePrice": 90000,
       "sellValue": 45000,
       "combatBonuses": {
-        "magicalDefense": 18,
+        "magicalDefenseScore": 18,
         "maxHP": 54
       },
       "rarity": "Tier2",
@@ -10437,7 +10437,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10452,7 +10452,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10467,7 +10467,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10482,7 +10482,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10497,7 +10497,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10512,7 +10512,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10527,7 +10527,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10542,7 +10542,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10557,7 +10557,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10572,7 +10572,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10587,7 +10587,7 @@
       "basePrice": 1440000,
       "sellValue": 720000,
       "combatBonuses": {
-        "magicalDefense": 40,
+        "magicalDefenseScore": 40,
         "maxHP": 90
       },
       "rarity": "Tier3",
@@ -10602,9 +10602,9 @@
       "basePrice": 32000000,
       "sellValue": 16000000,
       "combatBonuses": {
-        "magicalDefense": 250,
+        "magicalDefenseScore": 250,
         "maxHP": 100,
-        "trapDisarm": 150
+        "trapRemovalScore": 150
       },
       "rarity": "最高級",
       "grantedSkillIds": [
@@ -10619,8 +10619,8 @@
       "basePrice": 32000000,
       "sellValue": 16000000,
       "combatBonuses": {
-        "physicalAttack": 120,
-        "magicalDefense": 250,
+        "physicalAttackScore": 120,
+        "magicalDefenseScore": 250,
         "maxHP": 80
       },
       "rarity": "最高級",
@@ -10636,9 +10636,9 @@
       "basePrice": 32000000,
       "sellValue": 16000000,
       "combatBonuses": {
-        "magicalAttack": 100,
-        "hitRate": 100,
-        "magicalDefense": 250
+        "magicalAttackScore": 100,
+        "hitScore": 100,
+        "magicalDefenseScore": 250
       },
       "rarity": "最高級",
       "grantedSkillIds": [
@@ -10653,8 +10653,8 @@
       "basePrice": 32000000,
       "sellValue": 16000000,
       "combatBonuses": {
-        "magicalHealing": 350,
-        "magicalDefense": 250,
+        "magicalHealingScore": 350,
+        "magicalDefenseScore": 250,
         "maxHP": 100
       },
       "rarity": "最高級",
@@ -10670,8 +10670,8 @@
       "basePrice": 32000000,
       "sellValue": 16000000,
       "combatBonuses": {
-        "magicalAttack": 150,
-        "magicalDefense": 250,
+        "magicalAttackScore": 150,
+        "magicalDefenseScore": 250,
         "maxHP": 80
       },
       "rarity": "最高級",
@@ -10687,8 +10687,8 @@
       "basePrice": 32000000,
       "sellValue": 16000000,
       "combatBonuses": {
-        "physicalDefense": 120,
-        "magicalDefense": 250,
+        "physicalDefenseScore": 120,
+        "magicalDefenseScore": 250,
         "maxHP": 100
       },
       "rarity": "最高級",
@@ -10704,9 +10704,9 @@
       "basePrice": 16000000,
       "sellValue": 8000000,
       "combatBonuses": {
-        "physicalAttack": 50,
-        "physicalDefense": 50,
-        "magicalDefense": 180
+        "physicalAttackScore": 50,
+        "physicalDefenseScore": 50,
+        "magicalDefenseScore": 180
       },
       "rarity": "高級",
       "grantedSkillIds": [
@@ -10720,9 +10720,9 @@
       "basePrice": 16000000,
       "sellValue": 8000000,
       "combatBonuses": {
-        "magicalAttack": 50,
-        "magicalHealing": 70,
-        "magicalDefense": 180
+        "magicalAttackScore": 50,
+        "magicalHealingScore": 70,
+        "magicalDefenseScore": 180
       },
       "rarity": "高級",
       "grantedSkillIds": [
@@ -10736,9 +10736,9 @@
       "basePrice": 16000000,
       "sellValue": 8000000,
       "combatBonuses": {
-        "magicalAttack": 60,
-        "magicalHealing": 60,
-        "magicalDefense": 180
+        "magicalAttackScore": 60,
+        "magicalHealingScore": 60,
+        "magicalDefenseScore": 180
       },
       "rarity": "高級",
       "grantedSkillIds": [
@@ -10752,9 +10752,9 @@
       "basePrice": 16000000,
       "sellValue": 8000000,
       "combatBonuses": {
-        "physicalDefense": 50,
-        "magicalAttack": 50,
-        "magicalDefense": 180
+        "physicalDefenseScore": 50,
+        "magicalAttackScore": 50,
+        "magicalDefenseScore": 180
       },
       "rarity": "高級",
       "grantedSkillIds": [
@@ -10768,9 +10768,9 @@
       "basePrice": 16000000,
       "sellValue": 8000000,
       "combatBonuses": {
-        "physicalAttack": 50,
-        "magicalAttack": 50,
-        "magicalDefense": 180
+        "physicalAttackScore": 50,
+        "magicalAttackScore": 50,
+        "magicalDefenseScore": 180
       },
       "rarity": "高級",
       "grantedSkillIds": [
@@ -10784,10 +10784,10 @@
       "basePrice": 16000000,
       "sellValue": 8000000,
       "combatBonuses": {
-        "hitRate": 50,
-        "physicalDefense": 50,
-        "evasionRate": 50,
-        "magicalDefense": 180
+        "hitScore": 50,
+        "physicalDefenseScore": 50,
+        "evasionScore": 50,
+        "magicalDefenseScore": 180
       },
       "rarity": "高級",
       "grantedSkillIds": []
@@ -10799,7 +10799,7 @@
       "basePrice": 8000000,
       "sellValue": 4000000,
       "combatBonuses": {
-        "magicalDefense": 120,
+        "magicalDefenseScore": 120,
         "maxHP": 60
       },
       "rarity": "中級",
@@ -10815,8 +10815,8 @@
       "basePrice": 8000000,
       "sellValue": 4000000,
       "combatBonuses": {
-        "hitRate": 40,
-        "magicalDefense": 120
+        "hitScore": 40,
+        "magicalDefenseScore": 120
       },
       "rarity": "中級",
       "grantedSkillIds": [
@@ -10830,9 +10830,9 @@
       "basePrice": 8000000,
       "sellValue": 4000000,
       "combatBonuses": {
-        "physicalDefense": 50,
+        "physicalDefenseScore": 50,
         "maxHP": 80,
-        "magicalDefense": 120
+        "magicalDefenseScore": 120
       },
       "rarity": "中級",
       "grantedSkillIds": [
@@ -10846,8 +10846,8 @@
       "basePrice": 8000000,
       "sellValue": 4000000,
       "combatBonuses": {
-        "physicalAttack": 50,
-        "magicalDefense": 120
+        "physicalAttackScore": 50,
+        "magicalDefenseScore": 120
       },
       "rarity": "中級",
       "grantedSkillIds": [
@@ -10861,9 +10861,9 @@
       "basePrice": 8000000,
       "sellValue": 4000000,
       "combatBonuses": {
-        "magicalAttack": 50,
-        "magicalHealing": 50,
-        "magicalDefense": 120
+        "magicalAttackScore": 50,
+        "magicalHealingScore": 50,
+        "magicalDefenseScore": 120
       },
       "rarity": "中級",
       "grantedSkillIds": [
@@ -10878,7 +10878,7 @@
       "sellValue": 4000000,
       "combatBonuses": {
         "maxHP": 50,
-        "magicalDefense": 120
+        "magicalDefenseScore": 120
       },
       "rarity": "中級",
       "grantedSkillIds": [
@@ -10892,8 +10892,8 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "magicalAttack": 30,
-        "magicalDefense": 70
+        "magicalAttackScore": 30,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -10905,8 +10905,8 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "physicalAttack": 30,
-        "magicalDefense": 70
+        "physicalAttackScore": 30,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -10919,7 +10919,7 @@
       "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 40,
-        "magicalDefense": 70
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -10931,8 +10931,8 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "magicalHealing": 30,
-        "magicalDefense": 70
+        "magicalHealingScore": 30,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -10944,8 +10944,8 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "physicalDefense": 30,
-        "magicalDefense": 70
+        "physicalDefenseScore": 30,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -10957,8 +10957,8 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "hitRate": 30,
-        "magicalDefense": 70
+        "hitScore": 30,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -10970,8 +10970,8 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "evasionRate": 30,
-        "magicalDefense": 70
+        "evasionScore": 30,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -10983,9 +10983,9 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "magicalAttack": 20,
-        "magicalHealing": 20,
-        "magicalDefense": 70
+        "magicalAttackScore": 20,
+        "magicalHealingScore": 20,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -10998,7 +10998,7 @@
       "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 30,
-        "magicalDefense": 70
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -11010,9 +11010,9 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "physicalAttack": 20,
-        "physicalDefense": 20,
-        "magicalDefense": 70
+        "physicalAttackScore": 20,
+        "physicalDefenseScore": 20,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -11024,9 +11024,9 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "physicalDefense": 25,
+        "physicalDefenseScore": 25,
         "maxHP": 30,
-        "magicalDefense": 70
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -11038,8 +11038,8 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "magicalAttack": 25,
-        "magicalDefense": 70
+        "magicalAttackScore": 25,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -11052,7 +11052,7 @@
       "sellValue": 2000000,
       "combatBonuses": {
         "maxHP": 35,
-        "magicalDefense": 70
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -11064,8 +11064,8 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "magicalHealing": 25,
-        "magicalDefense": 70
+        "magicalHealingScore": 25,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -11077,9 +11077,9 @@
       "basePrice": 4000000,
       "sellValue": 2000000,
       "combatBonuses": {
-        "hitRate": 25,
-        "evasionRate": 25,
-        "magicalDefense": 70
+        "hitScore": 25,
+        "evasionScore": 25,
+        "magicalDefenseScore": 70
       },
       "rarity": "低級",
       "grantedSkillIds": []
@@ -11092,7 +11092,7 @@
       "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 15,
-        "magicalDefense": 40
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11104,8 +11104,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "magicalHealing": 15,
-        "magicalDefense": 40
+        "magicalHealingScore": 15,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11117,8 +11117,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "physicalAttack": 15,
-        "magicalDefense": 40
+        "physicalAttackScore": 15,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11130,8 +11130,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "physicalDefense": 15,
-        "magicalDefense": 40
+        "physicalDefenseScore": 15,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11143,8 +11143,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "magicalAttack": 15,
-        "magicalDefense": 40
+        "magicalAttackScore": 15,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11156,8 +11156,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "hitRate": 15,
-        "magicalDefense": 40
+        "hitScore": 15,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11169,8 +11169,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "evasionRate": 15,
-        "magicalDefense": 40
+        "evasionScore": 15,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11183,7 +11183,7 @@
       "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 20,
-        "magicalDefense": 40
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11195,9 +11195,9 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "physicalAttack": 10,
-        "hitRate": 10,
-        "magicalDefense": 40
+        "physicalAttackScore": 10,
+        "hitScore": 10,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11209,8 +11209,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "physicalDefense": 20,
-        "magicalDefense": 40
+        "physicalDefenseScore": 20,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11222,8 +11222,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "physicalAttack": 20,
-        "magicalDefense": 40
+        "physicalAttackScore": 20,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11235,8 +11235,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "magicalAttack": 20,
-        "magicalDefense": 40
+        "magicalAttackScore": 20,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11248,8 +11248,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "magicalHealing": 20,
-        "magicalDefense": 40
+        "magicalHealingScore": 20,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11262,8 +11262,8 @@
       "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 10,
-        "physicalAttack": 10,
-        "magicalDefense": 40
+        "physicalAttackScore": 10,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11275,9 +11275,9 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "magicalAttack": 10,
-        "magicalHealing": 10,
-        "magicalDefense": 40
+        "magicalAttackScore": 10,
+        "magicalHealingScore": 10,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11290,7 +11290,7 @@
       "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 18,
-        "magicalDefense": 40
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11302,8 +11302,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "magicalAttack": 18,
-        "magicalDefense": 40
+        "magicalAttackScore": 18,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11315,8 +11315,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "physicalDefense": 18,
-        "magicalDefense": 40
+        "physicalDefenseScore": 18,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11328,8 +11328,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "hitRate": 18,
-        "magicalDefense": 40
+        "hitScore": 18,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11341,8 +11341,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "evasionRate": 18,
-        "magicalDefense": 40
+        "evasionScore": 18,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11354,8 +11354,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "magicalHealing": 18,
-        "magicalDefense": 40
+        "magicalHealingScore": 18,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11367,8 +11367,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "physicalAttack": 18,
-        "magicalDefense": 40
+        "physicalAttackScore": 18,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11381,7 +11381,7 @@
       "sellValue": 1000000,
       "combatBonuses": {
         "maxHP": 12,
-        "magicalDefense": 40
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []
@@ -11393,8 +11393,8 @@
       "basePrice": 2000000,
       "sellValue": 1000000,
       "combatBonuses": {
-        "magicalAttack": 12,
-        "magicalDefense": 40
+        "magicalAttackScore": 12,
+        "magicalDefenseScore": 40
       },
       "rarity": "最下級",
       "grantedSkillIds": []

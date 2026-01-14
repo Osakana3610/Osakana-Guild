@@ -255,11 +255,11 @@ struct ItemDetailView: View {
 
     private func hasCombatBonuses(_ item: ItemDefinition) -> Bool {
         let combat = item.combatBonuses
-        return combat.maxHP != 0 || combat.physicalAttack != 0 || combat.magicalAttack != 0 ||
-               combat.physicalDefense != 0 || combat.magicalDefense != 0 ||
-               combat.hitRate != 0 || combat.evasionRate != 0 || combat.criticalRate != 0 ||
-               combat.attackCount != 0 || combat.magicalHealing != 0 || combat.trapRemoval != 0 ||
-               combat.additionalDamage != 0 || combat.breathDamage != 0
+        return combat.maxHP != 0 || combat.physicalAttackScore != 0 || combat.magicalAttackScore != 0 ||
+               combat.physicalDefenseScore != 0 || combat.magicalDefenseScore != 0 ||
+               combat.hitScore != 0 || combat.evasionScore != 0 || combat.criticalChancePercent != 0 ||
+               combat.attackCount != 0 || combat.magicalHealingScore != 0 || combat.trapRemovalScore != 0 ||
+               combat.additionalDamageScore != 0 || combat.breathDamageScore != 0
     }
 
     @ViewBuilder
@@ -280,35 +280,35 @@ struct ItemDetailView: View {
         if let cachedItem {
             // キャッシュには全ての倍率が適用済みなのでそのまま表示
             let combat = cachedItem.combatBonuses
-            if combat.maxHP != 0 { LabeledContent("最大HP", value: formatBonus(combat.maxHP)) }
-            if combat.physicalAttack != 0 { LabeledContent("物理攻撃", value: formatBonus(combat.physicalAttack)) }
-            if combat.magicalAttack != 0 { LabeledContent("魔法攻撃", value: formatBonus(combat.magicalAttack)) }
-            if combat.physicalDefense != 0 { LabeledContent("物理防御", value: formatBonus(combat.physicalDefense)) }
-            if combat.magicalDefense != 0 { LabeledContent("魔法防御", value: formatBonus(combat.magicalDefense)) }
-            if combat.hitRate != 0 { LabeledContent("命中", value: formatBonus(combat.hitRate)) }
-            if combat.evasionRate != 0 { LabeledContent("回避", value: formatBonus(combat.evasionRate)) }
-            if combat.criticalRate != 0 { LabeledContent("必殺率", value: "\(formatBonus(combat.criticalRate))%") }
-            if combat.attackCount != 0 { LabeledContent("攻撃回数", value: formatBonusDouble(combat.attackCount)) }
-            if combat.magicalHealing != 0 { LabeledContent("魔法回復力", value: formatBonus(combat.magicalHealing)) }
-            if combat.trapRemoval != 0 { LabeledContent("罠解除", value: formatBonus(combat.trapRemoval)) }
-            if combat.additionalDamage != 0 { LabeledContent("追加ダメージ", value: formatBonus(combat.additionalDamage)) }
-            if combat.breathDamage != 0 { LabeledContent("ブレスダメージ", value: formatBonus(combat.breathDamage)) }
+            if combat.maxHP != 0 { LabeledContent(CombatStat.maxHP.displayName, value: formatBonus(combat.maxHP)) }
+            if combat.physicalAttackScore != 0 { LabeledContent(CombatStat.physicalAttackScore.displayName, value: formatBonus(combat.physicalAttackScore)) }
+            if combat.magicalAttackScore != 0 { LabeledContent(CombatStat.magicalAttackScore.displayName, value: formatBonus(combat.magicalAttackScore)) }
+            if combat.physicalDefenseScore != 0 { LabeledContent(CombatStat.physicalDefenseScore.displayName, value: formatBonus(combat.physicalDefenseScore)) }
+            if combat.magicalDefenseScore != 0 { LabeledContent(CombatStat.magicalDefenseScore.displayName, value: formatBonus(combat.magicalDefenseScore)) }
+            if combat.hitScore != 0 { LabeledContent(CombatStat.hitScore.displayName, value: formatBonus(combat.hitScore)) }
+            if combat.evasionScore != 0 { LabeledContent(CombatStat.evasionScore.displayName, value: formatBonus(combat.evasionScore)) }
+            if combat.criticalChancePercent != 0 { LabeledContent(CombatStat.criticalChancePercent.displayName, value: "\(formatBonus(combat.criticalChancePercent))%") }
+            if combat.attackCount != 0 { LabeledContent(CombatStat.attackCount.displayName, value: formatBonusDouble(combat.attackCount)) }
+            if combat.magicalHealingScore != 0 { LabeledContent(CombatStat.magicalHealingScore.displayName, value: formatBonus(combat.magicalHealingScore)) }
+            if combat.trapRemovalScore != 0 { LabeledContent(CombatStat.trapRemovalScore.displayName, value: formatBonus(combat.trapRemovalScore)) }
+            if combat.additionalDamageScore != 0 { LabeledContent(CombatStat.additionalDamageScore.displayName, value: formatBonus(combat.additionalDamageScore)) }
+            if combat.breathDamageScore != 0 { LabeledContent(CombatStat.breathDamageScore.displayName, value: formatBonus(combat.breathDamageScore)) }
         } else {
             // 図鑑表示: ベース値をそのまま表示
             let combat = item.combatBonuses
-            if combat.maxHP != 0 { LabeledContent("最大HP", value: formatBonus(combat.maxHP)) }
-            if combat.physicalAttack != 0 { LabeledContent("物理攻撃", value: formatBonus(combat.physicalAttack)) }
-            if combat.magicalAttack != 0 { LabeledContent("魔法攻撃", value: formatBonus(combat.magicalAttack)) }
-            if combat.physicalDefense != 0 { LabeledContent("物理防御", value: formatBonus(combat.physicalDefense)) }
-            if combat.magicalDefense != 0 { LabeledContent("魔法防御", value: formatBonus(combat.magicalDefense)) }
-            if combat.hitRate != 0 { LabeledContent("命中", value: formatBonus(combat.hitRate)) }
-            if combat.evasionRate != 0 { LabeledContent("回避", value: formatBonus(combat.evasionRate)) }
-            if combat.criticalRate != 0 { LabeledContent("必殺率", value: "\(formatBonus(combat.criticalRate))%") }
-            if combat.attackCount != 0 { LabeledContent("攻撃回数", value: formatBonusDouble(combat.attackCount)) }
-            if combat.magicalHealing != 0 { LabeledContent("魔法回復力", value: formatBonus(combat.magicalHealing)) }
-            if combat.trapRemoval != 0 { LabeledContent("罠解除", value: formatBonus(combat.trapRemoval)) }
-            if combat.additionalDamage != 0 { LabeledContent("追加ダメージ", value: formatBonus(combat.additionalDamage)) }
-            if combat.breathDamage != 0 { LabeledContent("ブレスダメージ", value: formatBonus(combat.breathDamage)) }
+            if combat.maxHP != 0 { LabeledContent(CombatStat.maxHP.displayName, value: formatBonus(combat.maxHP)) }
+            if combat.physicalAttackScore != 0 { LabeledContent(CombatStat.physicalAttackScore.displayName, value: formatBonus(combat.physicalAttackScore)) }
+            if combat.magicalAttackScore != 0 { LabeledContent(CombatStat.magicalAttackScore.displayName, value: formatBonus(combat.magicalAttackScore)) }
+            if combat.physicalDefenseScore != 0 { LabeledContent(CombatStat.physicalDefenseScore.displayName, value: formatBonus(combat.physicalDefenseScore)) }
+            if combat.magicalDefenseScore != 0 { LabeledContent(CombatStat.magicalDefenseScore.displayName, value: formatBonus(combat.magicalDefenseScore)) }
+            if combat.hitScore != 0 { LabeledContent(CombatStat.hitScore.displayName, value: formatBonus(combat.hitScore)) }
+            if combat.evasionScore != 0 { LabeledContent(CombatStat.evasionScore.displayName, value: formatBonus(combat.evasionScore)) }
+            if combat.criticalChancePercent != 0 { LabeledContent(CombatStat.criticalChancePercent.displayName, value: "\(formatBonus(combat.criticalChancePercent))%") }
+            if combat.attackCount != 0 { LabeledContent(CombatStat.attackCount.displayName, value: formatBonusDouble(combat.attackCount)) }
+            if combat.magicalHealingScore != 0 { LabeledContent(CombatStat.magicalHealingScore.displayName, value: formatBonus(combat.magicalHealingScore)) }
+            if combat.trapRemovalScore != 0 { LabeledContent(CombatStat.trapRemovalScore.displayName, value: formatBonus(combat.trapRemovalScore)) }
+            if combat.additionalDamageScore != 0 { LabeledContent(CombatStat.additionalDamageScore.displayName, value: formatBonus(combat.additionalDamageScore)) }
+            if combat.breathDamageScore != 0 { LabeledContent(CombatStat.breathDamageScore.displayName, value: formatBonus(combat.breathDamageScore)) }
         }
     }
 

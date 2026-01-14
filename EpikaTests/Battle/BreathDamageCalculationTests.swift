@@ -7,7 +7,7 @@ import XCTest
 ///
 /// 検証する計算式:
 ///   variance = speedMultiplier(luck)
-///   baseDamage = breathDamage × variance
+///   baseDamage = breathDamageScore × variance
 ///   damage = baseDamage × damageDealtModifier × damageTakenModifier × breathResistance
 ///   finalDamage = max(1, round(damage))
 ///
@@ -30,7 +30,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
     /// luck=35でのブレスダメージ分布テスト
     ///
     /// 入力:
-    ///   - 攻撃者: breathDamage=3000, luck=35
+    ///   - 攻撃者: breathDamageScore=3000, luck=35
     ///   - 防御者: breathResistance=1.0
     ///
     /// 計算:
@@ -42,7 +42,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
         let trials = 615
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
             var defender = TestActorBuilder.makeDefender(luck: 35)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
@@ -82,7 +82,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
         let trials = 5535
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(luck: 1, breathDamage: 3000)
+            let attacker = TestActorBuilder.makeAttacker(luck: 1, breathDamageScore: 3000)
             var defender = TestActorBuilder.makeDefender(luck: 1)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
@@ -122,7 +122,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
         let trials = 2897
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(luck: 18, breathDamage: 3000)
+            let attacker = TestActorBuilder.makeAttacker(luck: 18, breathDamageScore: 3000)
             var defender = TestActorBuilder.makeDefender(luck: 18)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
@@ -155,8 +155,8 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
 
     /// ブレスダメージの最低保証は1
     func testMinimumDamageGuarantee() {
-        // breathDamage=1でvariance最小でも1ダメージ保証
-        let attacker = TestActorBuilder.makeAttacker(luck: 1, breathDamage: 1)
+        // breathDamageScore=1でvariance最小でも1ダメージ保証
+        let attacker = TestActorBuilder.makeAttacker(luck: 1, breathDamageScore: 1)
         var defender = TestActorBuilder.makeDefender(luck: 35)
         var context = TestActorBuilder.makeContext(
             seed: 42,
@@ -184,7 +184,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
         let resistances = BattleInnateResistances(breath: 0.5)
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
             var defender = TestActorBuilder.makeDefender(
                 luck: 35,
                 innateResistances: resistances
@@ -220,7 +220,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
         let resistances = BattleInnateResistances(breath: 0.0)
 
         for seed in 0..<100 {
-            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
             var defender = TestActorBuilder.makeDefender(
                 luck: 35,
                 innateResistances: resistances
@@ -247,24 +247,24 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
 
     // MARK: - 物理/魔法との違い
 
-    /// ブレスはクリティカルが発生しない
+    /// ブレスは必殺が発生しない
     ///
-    /// 物理/魔法と異なり、ブレスにはクリティカル判定がない
+    /// 物理/魔法と異なり、ブレスには必殺判定がない
     func testBreathNoCritical() {
-        // criticalRate=100でもブレスダメージには影響しない
+        // criticalChancePercent=100でもブレスダメージには影響しない
         var skillEffects = BattleActor.SkillEffects.neutral
-        skillEffects.damage.criticalPercent = 100  // 通常のクリティカルダメージ+100%
+        skillEffects.damage.criticalPercent = 100  // 通常の必殺ダメージ+100%
 
         var totalDamageWithCrit = 0
         var totalDamageNoCrit = 0
         let trials = 615  // luck=35
 
         for seed in 0..<trials {
-            // クリティカル設定あり
+            // 必殺設定あり
             let attackerCrit = TestActorBuilder.makeAttacker(
                 luck: 35,
-                criticalRate: 100,
-                breathDamage: 3000,
+                criticalChancePercent: 100,
+                breathDamageScore: 3000,
                 skillEffects: skillEffects
             )
             var defenderCrit = TestActorBuilder.makeDefender(luck: 35)
@@ -281,8 +281,8 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
             )
             totalDamageWithCrit += damageCrit
 
-            // クリティカル設定なし
-            let attackerNoCrit = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+            // 必殺設定なし
+            let attackerNoCrit = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
             var defenderNoCrit = TestActorBuilder.makeDefender(luck: 35)
             var contextNoCrit = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
@@ -301,9 +301,9 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
         let avgCrit = Double(totalDamageWithCrit) / Double(trials)
         let avgNoCrit = Double(totalDamageNoCrit) / Double(trials)
 
-        // ブレスはクリティカルがないので、両者は同じ値になるはず
+        // ブレスは必殺がないので、両者は同じ値になるはず
         XCTAssertEqual(avgCrit, avgNoCrit, accuracy: 0.001,
-            "ブレスにクリティカルなし: クリ設定有\(avgCrit), 無\(avgNoCrit)")
+            "ブレスに必殺なし: クリ設定有\(avgCrit), 無\(avgNoCrit)")
     }
 
     /// ブレスは防御力の影響を受けない
@@ -316,10 +316,10 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
 
         for seed in 0..<trials {
             // 高防御
-            let attackerHigh = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+            let attackerHigh = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
             var defenderHigh = TestActorBuilder.makeDefender(
-                physicalDefense: 10000,
-                magicalDefense: 10000,
+                physicalDefenseScore: 10000,
+                magicalDefenseScore: 10000,
                 luck: 35
             )
             var contextHigh = TestActorBuilder.makeContext(
@@ -336,10 +336,10 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
             totalDamageHighDef += damageHigh
 
             // 低防御
-            let attackerLow = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+            let attackerLow = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
             var defenderLow = TestActorBuilder.makeDefender(
-                physicalDefense: 0,
-                magicalDefense: 0,
+                physicalDefenseScore: 0,
+                magicalDefenseScore: 0,
                 luck: 35
             )
             var contextLow = TestActorBuilder.makeContext(

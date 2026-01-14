@@ -187,8 +187,8 @@ extension BattleTurnEngine {
 
         let healAmount: Int
         switch best.hpScale {
-        case .magicalHealing:
-            let base = max(actor.snapshot.magicalHealing, Int(Double(actor.snapshot.maxHP) * 0.05))
+        case .magicalHealingScore:
+            let base = max(actor.snapshot.magicalHealingScore, Int(Double(actor.snapshot.maxHP) * 0.05))
             healAmount = max(1, base)
         case .maxHP5Percent:
             let raw = Double(actor.snapshot.maxHP) * 0.05
@@ -434,16 +434,16 @@ extension BattleTurnEngine {
         // 毎ターン固定値を加算（スナップショットが永続するため自然に累積）
         for (key, value) in modifiers {
             switch key {
-            case "hitRatePercent":
-                actor.snapshot.hitRate += Int(value.rounded(.towardZero))
-            case "evasionRatePercent":
-                actor.snapshot.evasionRate += Int(value.rounded(.towardZero))
+            case "hitScoreAdditive":
+                actor.snapshot.hitScore += Int(value.rounded(.towardZero))
+            case "evasionScoreAdditive":
+                actor.snapshot.evasionScore += Int(value.rounded(.towardZero))
             case "attackPercent":
-                let bonus = Int((Double(actor.snapshot.physicalAttack) * value / 100.0).rounded(.towardZero))
-                actor.snapshot.physicalAttack += bonus
+                let bonus = Int((Double(actor.snapshot.physicalAttackScore) * value / 100.0).rounded(.towardZero))
+                actor.snapshot.physicalAttackScore += bonus
             case "defensePercent":
-                let bonus = Int((Double(actor.snapshot.physicalDefense) * value / 100.0).rounded(.towardZero))
-                actor.snapshot.physicalDefense += bonus
+                let bonus = Int((Double(actor.snapshot.physicalDefenseScore) * value / 100.0).rounded(.towardZero))
+                actor.snapshot.physicalDefenseScore += bonus
             case "attackCountPercent":
                 let bonus = actor.snapshot.attackCount * value / 100.0
                 actor.snapshot.attackCount = max(1.0, actor.snapshot.attackCount + bonus)

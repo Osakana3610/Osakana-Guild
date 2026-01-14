@@ -595,7 +595,7 @@ struct BattleLogRenderer {
             return ("\(target)は大盾で防いだ！", .action)
         case .physicalKill:
             return ("\(target)を倒した！", .defeat)
-        case .martialArts:
+        case .martial:
             return ("\(actor)の格闘戦！", .action)
         case .magicDamage:
             return ("\(actor)の魔法！\(target)に\(amountText)のダメージ！", .damage)

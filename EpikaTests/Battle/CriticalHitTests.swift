@@ -1,12 +1,12 @@
 import XCTest
 @testable import Epika
 
-/// クリティカル判定のテスト
+/// 必殺判定のテスト
 ///
-/// 目的: クリティカル判定と効果が仕様通りに動作することを証明する
+/// 目的: 必殺判定と効果が仕様通りに動作することを証明する
 ///
 /// 検証する計算式:
-///   chance = clamp(criticalRate, 0, 100)
+///   chance = clamp(criticalChancePercent, 0, 100)
 ///   発動判定: percentChance(chance)
 ///
 ///   criticalDamageBonus:
@@ -15,11 +15,11 @@ import XCTest
 ///     bonus = percentBonus × multiplierBonus
 nonisolated final class CriticalHitTests: XCTestCase {
 
-    // MARK: - クリティカル発動判定
+    // MARK: - 必殺発動判定
 
-    /// criticalRate=100で必ずクリティカルが発動することを検証
+    /// criticalChancePercent=100で必ず必殺が発動することを検証
     func testCriticalRate100AlwaysTriggers() {
-        let attacker = TestActorBuilder.makeAttacker(luck: 1, criticalRate: 100)
+        let attacker = TestActorBuilder.makeAttacker(luck: 1, criticalChancePercent: 100)
         let defender = TestActorBuilder.makeDefender(luck: 1)
 
         var triggerCount = 0
@@ -40,12 +40,12 @@ nonisolated final class CriticalHitTests: XCTestCase {
         }
 
         XCTAssertEqual(triggerCount, 100,
-            "criticalRate=100: 100回中100回発動すべき, 実測\(triggerCount)回")
+            "criticalChancePercent=100: 100回中100回発動すべき, 実測\(triggerCount)回")
     }
 
-    /// criticalRate=0でクリティカルが発動しないことを検証
+    /// criticalChancePercent=0で必殺が発動しないことを検証
     func testCriticalRate0NeverTriggers() {
-        let attacker = TestActorBuilder.makeAttacker(luck: 1, criticalRate: 0)
+        let attacker = TestActorBuilder.makeAttacker(luck: 1, criticalChancePercent: 0)
         let defender = TestActorBuilder.makeDefender(luck: 1)
 
         var triggerCount = 0
@@ -66,10 +66,10 @@ nonisolated final class CriticalHitTests: XCTestCase {
         }
 
         XCTAssertEqual(triggerCount, 0,
-            "criticalRate=0: 100回中0回発動すべき, 実測\(triggerCount)回")
+            "criticalChancePercent=0: 100回中0回発動すべき, 実測\(triggerCount)回")
     }
 
-    /// criticalRate=50の統計的検証
+    /// criticalChancePercent=50の統計的検証
     ///
     /// 統計計算:
     ///   - 二項分布: n=4148, p=0.5
@@ -77,7 +77,7 @@ nonisolated final class CriticalHitTests: XCTestCase {
     ///   - n = (2.576 × 0.5 / 0.02)² = 4147.36 → 4148
     ///   - 99%CI: 2074 ± 83 → 1991〜2157回
     func testCriticalRate50Statistical() {
-        let attacker = TestActorBuilder.makeAttacker(luck: 1, criticalRate: 50)
+        let attacker = TestActorBuilder.makeAttacker(luck: 1, criticalChancePercent: 50)
         let defender = TestActorBuilder.makeDefender(luck: 1)
 
         var triggerCount = 0
@@ -106,23 +106,23 @@ nonisolated final class CriticalHitTests: XCTestCase {
 
         XCTAssertTrue(
             (lowerBound...upperBound).contains(triggerCount),
-            "criticalRate=50: 期待1991〜2157回, 実測\(triggerCount)回 (\(trials)回試行, 99%CI, ±2%)"
+            "criticalChancePercent=50: 期待1991〜2157回, 実測\(triggerCount)回 (\(trials)回試行, 99%CI, ±2%)"
         )
     }
 
-    // MARK: - クリティカル効果（防御力半減）
+    // MARK: - 必殺効果（防御力半減）
 
-    /// クリティカル時の防御力半減を検証
+    /// 必殺時の防御力半減を検証
     ///
     /// 検証方法: 乱数を先読みして期待値を計算し、実測値と比較
     ///
-    /// クリティカル時の計算式:
-    ///   effectiveDefense = physicalDefense × defenseRoll × 0.5（防御半減）
+    /// 必殺時の計算式:
+    ///   effectiveDefense = physicalDefenseScore × defenseRoll × 0.5（防御半減）
     ///   damage = attackPower - effectiveDefense
     func testCriticalDefenseReduction() {
         let seed: UInt64 = 42
-        let physicalAttack = 5000
-        let physicalDefense = 2000
+        let physicalAttackScore = 5000
+        let physicalDefenseScore = 2000
         let luck = 35
 
         // 乱数を先読みして期待値を計算
@@ -130,23 +130,23 @@ nonisolated final class CriticalHitTests: XCTestCase {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
         let defenseRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
 
-        // 非クリティカル期待ダメージ
-        let baseAttackPower = Double(physicalAttack) * attackRoll
-        let baseDefensePower = Double(physicalDefense) * defenseRoll
+        // 非必殺期待ダメージ
+        let baseAttackPower = Double(physicalAttackScore) * attackRoll
+        let baseDefensePower = Double(physicalDefenseScore) * defenseRoll
         let baseExpectedDamage = Int(max(1.0, baseAttackPower - baseDefensePower).rounded())
 
-        // クリティカル期待ダメージ（防御半減）
+        // 必殺期待ダメージ（防御半減）
         let critDefensePower = baseDefensePower * 0.5
         let critExpectedDamage = Int(max(1.0, baseAttackPower - critDefensePower).rounded())
 
-        // 非クリティカルテスト
+        // 非必殺テスト
         let baseAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: physicalAttack,
+            physicalAttackScore: physicalAttackScore,
             luck: luck,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var baseDefender = TestActorBuilder.makeDefender(
-            physicalDefense: physicalDefense,
+            physicalDefenseScore: physicalDefenseScore,
             luck: luck
         )
         var baseContext = TestActorBuilder.makeContext(
@@ -160,18 +160,18 @@ nonisolated final class CriticalHitTests: XCTestCase {
             hitIndex: 1,
             context: &baseContext
         )
-        XCTAssertFalse(baseIsCritical, "criticalRate=0なのでクリティカル発動しないべき")
+        XCTAssertFalse(baseIsCritical, "criticalChancePercent=0なので必殺発動しないべき")
         XCTAssertEqual(baselineDamage, baseExpectedDamage,
-            "非クリティカルダメージ: 期待\(baseExpectedDamage), 実測\(baselineDamage)")
+            "非必殺ダメージ: 期待\(baseExpectedDamage), 実測\(baselineDamage)")
 
-        // クリティカルテスト
+        // 必殺テスト
         let critAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: physicalAttack,
+            physicalAttackScore: physicalAttackScore,
             luck: luck,
-            criticalRate: 100
+            criticalChancePercent: 100
         )
         var critDefender = TestActorBuilder.makeDefender(
-            physicalDefense: physicalDefense,
+            physicalDefenseScore: physicalDefenseScore,
             luck: luck
         )
         var critContext = TestActorBuilder.makeContext(
@@ -185,16 +185,16 @@ nonisolated final class CriticalHitTests: XCTestCase {
             hitIndex: 1,
             context: &critContext
         )
-        XCTAssertTrue(critIsCritical, "criticalRate=100なのでクリティカル発動すべき")
+        XCTAssertTrue(critIsCritical, "criticalChancePercent=100なので必殺発動すべき")
         XCTAssertEqual(critDamage, critExpectedDamage,
-            "クリティカルダメージ: 期待\(critExpectedDamage), 実測\(critDamage)")
+            "必殺ダメージ: 期待\(critExpectedDamage), 実測\(critDamage)")
 
         // 防御半減による増加を確認
         XCTAssertGreaterThan(critDamage, baselineDamage,
-            "クリティカルはダメージが増加すべき: crit=\(critDamage), base=\(baselineDamage)")
+            "必殺はダメージが増加すべき: crit=\(critDamage), base=\(baselineDamage)")
     }
 
-    // MARK: - クリティカルダメージボーナス
+    // MARK: - 必殺ダメージボーナス
 
     /// デフォルト値（スキル効果なし）でボーナス=1.0
     func testCriticalDamageBonusDefault() {
@@ -264,14 +264,14 @@ nonisolated final class CriticalHitTests: XCTestCase {
             "criticalPercent=50, multiplier=1.2: 期待1.8, 実測\(bonus)")
     }
 
-    // MARK: - クリティカル耐性
+    // MARK: - 必殺耐性
 
-    /// criticalTakenMultiplier=0.5でクリティカルダメージが半減
+    /// criticalTakenMultiplier=0.5で必殺ダメージが半減
     ///
     /// 検証方法: 同じシードで耐性あり/なしを比較し、比率を検証
     ///
     /// criticalTakenMultiplier の効果:
-    ///   クリティカル時のダメージボーナス部分に乗算される
+    ///   必殺時のダメージボーナス部分に乗算される
     ///
     /// 期待比率: 0.5（耐性ありのダメージ ÷ 耐性なしのダメージ）
     func testCriticalResistance() {
@@ -279,12 +279,12 @@ nonisolated final class CriticalHitTests: XCTestCase {
 
         // ベースライン（耐性なし）
         let baseAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 100
+            criticalChancePercent: 100
         )
         var baseDefender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var baseContext = TestActorBuilder.makeContext(
@@ -298,19 +298,19 @@ nonisolated final class CriticalHitTests: XCTestCase {
             hitIndex: 1,
             context: &baseContext
         )
-        XCTAssertTrue(baseIsCritical, "criticalRate=100なのでクリティカル発動すべき")
+        XCTAssertTrue(baseIsCritical, "criticalChancePercent=100なので必殺発動すべき")
 
         // 耐性あり（criticalTakenMultiplier=0.5）
         let resistAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 100
+            criticalChancePercent: 100
         )
         var defenderSkillEffects = BattleActor.SkillEffects.neutral
         defenderSkillEffects.damage.criticalTakenMultiplier = 0.5
 
         var resistDefender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             skillEffects: defenderSkillEffects
         )
@@ -325,13 +325,13 @@ nonisolated final class CriticalHitTests: XCTestCase {
             hitIndex: 1,
             context: &resistContext
         )
-        XCTAssertTrue(resistIsCritical, "criticalRate=100なのでクリティカル発動すべき")
+        XCTAssertTrue(resistIsCritical, "criticalChancePercent=100なので必殺発動すべき")
 
         // 比率検証: 耐性50%でダメージが半減
         let expectedRatio = 0.5
         let actualRatio = Double(resistDamage) / Double(baselineDamage)
         XCTAssertEqual(actualRatio, expectedRatio, accuracy: 0.02,
-            "クリティカル耐性50%: 期待比率\(expectedRatio), 実測\(actualRatio) " +
+            "必殺耐性50%: 期待比率\(expectedRatio), 実測\(actualRatio) " +
             "(baseline=\(baselineDamage), resist=\(resistDamage))")
     }
 }

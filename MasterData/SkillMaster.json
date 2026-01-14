@@ -1146,7 +1146,7 @@
         ]
       },
       {
-        "familyId": "rowProfile.melee",
+        "familyId": "rowProfile.near",
         "effectType": "rowProfile",
         "variants": [
           {
@@ -1154,7 +1154,7 @@
             "label": "[隊列] 近距離攻撃",
             "value": {},
             "parameters": {
-              "profile": "melee"
+              "profile": "near"
             },
             "description": "近接攻撃に適性を持つ。前列での攻撃力が上がる。"
           },
@@ -1163,7 +1163,7 @@
             "label": "[隊列] 近距離攻撃適正",
             "value": {},
             "parameters": {
-              "profile": "melee",
+              "profile": "near",
               "nearApt": "true"
             },
             "description": "近接攻撃に適性を持つ。前列での攻撃力が上がる。"
@@ -1171,7 +1171,7 @@
         ]
       },
       {
-        "familyId": "rowProfile.ranged",
+        "familyId": "rowProfile.far",
         "effectType": "rowProfile",
         "variants": [
           {
@@ -1179,7 +1179,7 @@
             "label": "[隊列] 遠距離攻撃",
             "value": {},
             "parameters": {
-              "profile": "ranged"
+              "profile": "far"
             },
             "description": "遠距離攻撃に適性を持つ。後列からでも攻撃力が下がらない。"
           },
@@ -1188,7 +1188,7 @@
             "label": "[隊列] 遠距離攻撃適正",
             "value": {},
             "parameters": {
-              "profile": "ranged",
+              "profile": "far",
               "farApt": "true"
             },
             "description": "遠距離攻撃に適性を持つ。後列からでも攻撃力が下がらない。"
@@ -1288,8 +1288,8 @@
         ]
       },
       {
-        "familyId": "additionalDamage.additive",
-        "effectType": "additionalDamageAdditive",
+        "familyId": "additionalDamageScore.additive",
+        "effectType": "additionalDamageScoreAdditive",
         "variants": [
           {
             "id": 138,
@@ -1462,8 +1462,8 @@
         ]
       },
       {
-        "familyId": "additionalDamage.multiplier",
-        "effectType": "additionalDamageMultiplier",
+        "familyId": "additionalDamageScore.multiplier",
+        "effectType": "additionalDamageScoreMultiplier",
         "variants": [
           {
             "id": 159,
@@ -2454,8 +2454,8 @@
         ]
       },
       {
-        "familyId": "criticalRate.add",
-        "effectType": "criticalRateAdditive",
+        "familyId": "criticalChancePercent.add",
+        "effectType": "criticalChancePercentAdditive",
         "variants": [
           {
             "id": 263,
@@ -2556,8 +2556,8 @@
         ]
       },
       {
-        "familyId": "criticalRate.cap",
-        "effectType": "criticalRateCap",
+        "familyId": "criticalChancePercent.cap",
+        "effectType": "criticalChancePercentCap",
         "variants": [
           {
             "id": 275,
@@ -2854,8 +2854,8 @@
         ]
       },
       {
-        "familyId": "criticalRate.max",
-        "effectType": "criticalRateMaxAbsolute",
+        "familyId": "criticalChancePercent.max",
+        "effectType": "criticalChancePercentMaxAbsolute",
         "variants": [
           {
             "id": 310,
@@ -2900,8 +2900,8 @@
         ]
       },
       {
-        "familyId": "criticalRate.maxDelta",
-        "effectType": "criticalRateMaxDelta",
+        "familyId": "criticalChancePercent.maxDelta",
+        "effectType": "criticalChancePercentMaxDelta",
         "variants": [
           {
             "id": 315,
@@ -2946,7 +2946,7 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.physicalDefense.attackAndHit",
+        "familyId": "statConversionPercent.physicalDefenseScore.attackAndHit",
         "effectType": "statConversionPercent",
         "variants": [
           {
@@ -2956,8 +2956,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "physicalAttack"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "physicalAttackScore"
                 },
                 "value": {
                   "valuePercent": 10.0
@@ -2966,8 +2966,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "hitRate"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "hitScore"
                 },
                 "value": {
                   "valuePercent": 10.0
@@ -2983,8 +2983,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "physicalAttack"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "physicalAttackScore"
                 },
                 "value": {
                   "valuePercent": 15.0
@@ -2993,8 +2993,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "hitRate"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "hitScore"
                 },
                 "value": {
                   "valuePercent": 15.0
@@ -3010,8 +3010,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "physicalAttack"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "physicalAttackScore"
                 },
                 "value": {
                   "valuePercent": 20.0
@@ -3020,8 +3020,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "hitRate"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "hitScore"
                 },
                 "value": {
                   "valuePercent": 20.0
@@ -3037,8 +3037,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "physicalAttack"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "physicalAttackScore"
                 },
                 "value": {
                   "valuePercent": 25.0
@@ -3047,8 +3047,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "hitRate"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "hitScore"
                 },
                 "value": {
                   "valuePercent": 25.0
@@ -3064,8 +3064,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "physicalAttack"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "physicalAttackScore"
                 },
                 "value": {
                   "valuePercent": 30.0
@@ -3074,8 +3074,8 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
-                  "targetStat": "hitRate"
+                  "sourceStat": "physicalDefenseScore",
+                  "targetStat": "hitScore"
                 },
                 "value": {
                   "valuePercent": 30.0
@@ -3087,7 +3087,7 @@
         ]
       },
       {
-        "familyId": "statConversionLinear.attackCount.criticalRate",
+        "familyId": "statConversionLinear.attackCount.criticalChancePercent",
         "effectType": "statConversionLinear",
         "variants": [
           {
@@ -3098,7 +3098,7 @@
                 "effectType": "statConversionLinear",
                 "parameters": {
                   "sourceStat": "attackCount",
-                  "targetStat": "criticalRate"
+                  "targetStat": "criticalChancePercent"
                 },
                 "value": {
                   "valuePerUnit": 1.0
@@ -3116,7 +3116,7 @@
         ]
       },
       {
-        "familyId": "statConversionLinear.attackCount.physicalDefense",
+        "familyId": "statConversionLinear.attackCount.physicalDefenseScore",
         "effectType": "statConversionLinear",
         "variants": [
           {
@@ -3127,7 +3127,7 @@
                 "effectType": "statConversionLinear",
                 "parameters": {
                   "sourceStat": "attackCount",
-                  "targetStat": "physicalDefense"
+                  "targetStat": "physicalDefenseScore"
                 },
                 "value": {
                   "valuePerUnit": 40.0
@@ -3145,7 +3145,7 @@
         ]
       },
       {
-        "familyId": "statConversionLinear.attackCount.evasionRate",
+        "familyId": "statConversionLinear.attackCount.evasionScore",
         "effectType": "statConversionLinear",
         "variants": [
           {
@@ -3156,7 +3156,7 @@
                 "effectType": "statConversionLinear",
                 "parameters": {
                   "sourceStat": "attackCount",
-                  "targetStat": "evasionRate"
+                  "targetStat": "evasionScore"
                 },
                 "value": {
                   "valuePerUnit": 40.0
@@ -3174,7 +3174,7 @@
         ]
       },
       {
-        "familyId": "statConversionLinear.attackCount.magicalAttack",
+        "familyId": "statConversionLinear.attackCount.magicalAttackScore",
         "effectType": "statConversionLinear",
         "variants": [
           {
@@ -3185,7 +3185,7 @@
                 "effectType": "statConversionLinear",
                 "parameters": {
                   "sourceStat": "attackCount",
-                  "targetStat": "magicalAttack"
+                  "targetStat": "magicalAttackScore"
                 },
                 "value": {
                   "valuePerUnit": 40.0
@@ -3203,7 +3203,7 @@
         ]
       },
       {
-        "familyId": "statConversionLinear.attackCount.magicalDefense",
+        "familyId": "statConversionLinear.attackCount.magicalDefenseScore",
         "effectType": "statConversionLinear",
         "variants": [
           {
@@ -3214,7 +3214,7 @@
                 "effectType": "statConversionLinear",
                 "parameters": {
                   "sourceStat": "attackCount",
-                  "targetStat": "magicalDefense"
+                  "targetStat": "magicalDefenseScore"
                 },
                 "value": {
                   "valuePerUnit": 40.0
@@ -3232,7 +3232,7 @@
         ]
       },
       {
-        "familyId": "statConversionLinear.attackCount.magicalHealing",
+        "familyId": "statConversionLinear.attackCount.magicalHealingScore",
         "effectType": "statConversionLinear",
         "variants": [
           {
@@ -3243,7 +3243,7 @@
                 "effectType": "statConversionLinear",
                 "parameters": {
                   "sourceStat": "attackCount",
-                  "targetStat": "magicalHealing"
+                  "targetStat": "magicalHealingScore"
                 },
                 "value": {
                   "valuePerUnit": 60.0
@@ -4991,7 +4991,7 @@
             "id": 505,
             "label": "[才能] 攻撃",
             "parameters": {
-              "stat": "physicalAttack"
+              "stat": "physicalAttackScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5002,7 +5002,7 @@
             "id": 506,
             "label": "[才能] 魔法攻撃",
             "parameters": {
-              "stat": "magicalAttack"
+              "stat": "magicalAttackScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5013,7 +5013,7 @@
             "id": 507,
             "label": "[才能] 防御",
             "parameters": {
-              "stat": "physicalDefense"
+              "stat": "physicalDefenseScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5024,7 +5024,7 @@
             "id": 508,
             "label": "[才能] 魔法防御",
             "parameters": {
-              "stat": "magicalDefense"
+              "stat": "magicalDefenseScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5035,7 +5035,7 @@
             "id": 509,
             "label": "[才能] 命中",
             "parameters": {
-              "stat": "hitRate"
+              "stat": "hitScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5046,7 +5046,7 @@
             "id": 510,
             "label": "[才能] 回避",
             "parameters": {
-              "stat": "evasionRate"
+              "stat": "evasionScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5057,7 +5057,7 @@
             "id": 511,
             "label": "[才能] 必殺",
             "parameters": {
-              "stat": "criticalRate"
+              "stat": "criticalChancePercent"
             },
             "value": {
               "multiplier": 1.5
@@ -5079,7 +5079,7 @@
             "id": 513,
             "label": "[才能] 回復力",
             "parameters": {
-              "stat": "magicalHealing"
+              "stat": "magicalHealingScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5090,7 +5090,7 @@
             "id": 514,
             "label": "[才能] 追加ダメージ",
             "parameters": {
-              "stat": "additionalDamage"
+              "stat": "additionalDamageScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5101,7 +5101,7 @@
             "id": 515,
             "label": "[才能] ブレス",
             "parameters": {
-              "stat": "breathDamage"
+              "stat": "breathDamageScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5112,7 +5112,7 @@
             "id": 516,
             "label": "[才能] 罠解除",
             "parameters": {
-              "stat": "trapRemoval"
+              "stat": "trapRemovalScore"
             },
             "value": {
               "multiplier": 1.5
@@ -5140,7 +5140,7 @@
             "id": 518,
             "label": "[無能] 攻撃",
             "parameters": {
-              "stat": "physicalAttack"
+              "stat": "physicalAttackScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5151,7 +5151,7 @@
             "id": 519,
             "label": "[無能] 魔法攻撃",
             "parameters": {
-              "stat": "magicalAttack"
+              "stat": "magicalAttackScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5162,7 +5162,7 @@
             "id": 520,
             "label": "[無能] 防御",
             "parameters": {
-              "stat": "physicalDefense"
+              "stat": "physicalDefenseScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5173,7 +5173,7 @@
             "id": 521,
             "label": "[無能] 魔法防御",
             "parameters": {
-              "stat": "magicalDefense"
+              "stat": "magicalDefenseScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5184,7 +5184,7 @@
             "id": 522,
             "label": "[無能] 命中",
             "parameters": {
-              "stat": "hitRate"
+              "stat": "hitScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5195,7 +5195,7 @@
             "id": 523,
             "label": "[無能] 回避",
             "parameters": {
-              "stat": "evasionRate"
+              "stat": "evasionScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5206,7 +5206,7 @@
             "id": 524,
             "label": "[無能] 必殺",
             "parameters": {
-              "stat": "criticalRate"
+              "stat": "criticalChancePercent"
             },
             "value": {
               "multiplier": 0.5
@@ -5228,7 +5228,7 @@
             "id": 526,
             "label": "[無能] 回復力",
             "parameters": {
-              "stat": "magicalHealing"
+              "stat": "magicalHealingScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5239,7 +5239,7 @@
             "id": 527,
             "label": "[無能] 追加ダメージ",
             "parameters": {
-              "stat": "additionalDamage"
+              "stat": "additionalDamageScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5250,7 +5250,7 @@
             "id": 528,
             "label": "[無能] ブレス",
             "parameters": {
-              "stat": "breathDamage"
+              "stat": "breathDamageScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5261,7 +5261,7 @@
             "id": 529,
             "label": "[無能] 罠解除",
             "parameters": {
-              "stat": "trapRemoval"
+              "stat": "trapRemovalScore"
             },
             "value": {
               "multiplier": 0.5
@@ -5289,7 +5289,7 @@
             "id": 531,
             "label": "皆無: 攻撃",
             "parameters": {
-              "stat": "physicalAttack"
+              "stat": "physicalAttackScore"
             },
             "value": {
               "valuePercent": 0
@@ -5300,7 +5300,7 @@
             "id": 532,
             "label": "皆無: 魔法攻撃",
             "parameters": {
-              "stat": "magicalAttack"
+              "stat": "magicalAttackScore"
             },
             "value": {
               "valuePercent": 0
@@ -5311,7 +5311,7 @@
             "id": 533,
             "label": "皆無: 防御",
             "parameters": {
-              "stat": "physicalDefense"
+              "stat": "physicalDefenseScore"
             },
             "value": {
               "valuePercent": 0
@@ -5322,7 +5322,7 @@
             "id": 534,
             "label": "皆無: 魔法防御",
             "parameters": {
-              "stat": "magicalDefense"
+              "stat": "magicalDefenseScore"
             },
             "value": {
               "valuePercent": 0
@@ -5333,7 +5333,7 @@
             "id": 535,
             "label": "皆無: 命中",
             "parameters": {
-              "stat": "hitRate"
+              "stat": "hitScore"
             },
             "value": {
               "valuePercent": 0
@@ -5344,7 +5344,7 @@
             "id": 536,
             "label": "皆無: 回避",
             "parameters": {
-              "stat": "evasionRate"
+              "stat": "evasionScore"
             },
             "value": {
               "valuePercent": 0
@@ -5355,7 +5355,7 @@
             "id": 537,
             "label": "皆無: 必殺",
             "parameters": {
-              "stat": "criticalRate"
+              "stat": "criticalChancePercent"
             },
             "value": {
               "valuePercent": 0
@@ -5377,7 +5377,7 @@
             "id": 539,
             "label": "皆無: 回復力",
             "parameters": {
-              "stat": "magicalHealing"
+              "stat": "magicalHealingScore"
             },
             "value": {
               "valuePercent": 0
@@ -5388,7 +5388,7 @@
             "id": 540,
             "label": "皆無: 追加ダメージ",
             "parameters": {
-              "stat": "additionalDamage"
+              "stat": "additionalDamageScore"
             },
             "value": {
               "valuePercent": 0
@@ -5399,7 +5399,7 @@
             "id": 541,
             "label": "皆無: ブレス",
             "parameters": {
-              "stat": "breathDamage"
+              "stat": "breathDamageScore"
             },
             "value": {
               "valuePercent": 0
@@ -5410,7 +5410,7 @@
             "id": 542,
             "label": "皆無: 罠解除",
             "parameters": {
-              "stat": "trapRemoval"
+              "stat": "trapRemovalScore"
             },
             "value": {
               "valuePercent": 0
@@ -8488,7 +8488,7 @@
             "value": {
               "chancePercent": 50
             },
-            "description": "50%の確率でクリティカルを発動する。"
+            "description": "50%の確率で必殺を発動する。"
           }
         ]
       },
@@ -10497,10 +10497,10 @@
         ]
       },
       {
-        "familyId": "statAdditive.physicalAttack",
+        "familyId": "statAdditive.physicalAttackScore",
         "effectType": "statAdditive",
         "parameters": {
-          "stat": "physicalAttack"
+          "stat": "physicalAttackScore"
         },
         "variants": [
           {
@@ -10666,10 +10666,10 @@
         ]
       },
       {
-        "familyId": "statAdditive.hitRate",
+        "familyId": "statAdditive.hitScore",
         "effectType": "statAdditive",
         "parameters": {
-          "stat": "hitRate"
+          "stat": "hitScore"
         },
         "variants": [
           {
@@ -10819,10 +10819,10 @@
         ]
       },
       {
-        "familyId": "statAdditive.physicalDefense",
+        "familyId": "statAdditive.physicalDefenseScore",
         "effectType": "statAdditive",
         "parameters": {
-          "stat": "physicalDefense"
+          "stat": "physicalDefenseScore"
         },
         "variants": [
           {
@@ -10988,10 +10988,10 @@
         ]
       },
       {
-        "familyId": "statAdditive.evasionRate",
+        "familyId": "statAdditive.evasionScore",
         "effectType": "statAdditive",
         "parameters": {
-          "stat": "evasionRate"
+          "stat": "evasionScore"
         },
         "variants": [
           {
@@ -11157,10 +11157,10 @@
         ]
       },
       {
-        "familyId": "statAdditive.magicalAttack",
+        "familyId": "statAdditive.magicalAttackScore",
         "effectType": "statAdditive",
         "parameters": {
-          "stat": "magicalAttack"
+          "stat": "magicalAttackScore"
         },
         "variants": [
           {
@@ -11326,10 +11326,10 @@
         ]
       },
       {
-        "familyId": "statAdditive.magicalHealing",
+        "familyId": "statAdditive.magicalHealingScore",
         "effectType": "statAdditive",
         "parameters": {
-          "stat": "magicalHealing"
+          "stat": "magicalHealingScore"
         },
         "variants": [
           {
@@ -11495,10 +11495,10 @@
         ]
       },
       {
-        "familyId": "statAdditive.magicalDefense",
+        "familyId": "statAdditive.magicalDefenseScore",
         "effectType": "statAdditive",
         "parameters": {
-          "stat": "magicalDefense"
+          "stat": "magicalDefenseScore"
         },
         "variants": [
           {
@@ -11841,10 +11841,10 @@
         ]
       },
       {
-        "familyId": "statMultiplier.physicalAttack",
+        "familyId": "statMultiplier.physicalAttackScore",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "physicalAttack"
+          "stat": "physicalAttackScore"
         },
         "variants": [
           {
@@ -11906,10 +11906,10 @@
         ]
       },
       {
-        "familyId": "statMultiplier.hitRate",
+        "familyId": "statMultiplier.hitScore",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "hitRate"
+          "stat": "hitScore"
         },
         "variants": [
           {
@@ -11971,10 +11971,10 @@
         ]
       },
       {
-        "familyId": "statMultiplier.magicalAttack",
+        "familyId": "statMultiplier.magicalAttackScore",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "magicalAttack"
+          "stat": "magicalAttackScore"
         },
         "variants": [
           {
@@ -12036,10 +12036,10 @@
         ]
       },
       {
-        "familyId": "statMultiplier.magicalHealing",
+        "familyId": "statMultiplier.magicalHealingScore",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "magicalHealing"
+          "stat": "magicalHealingScore"
         },
         "variants": [
           {
@@ -12217,10 +12217,10 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.physicalAttack.maxHP",
+        "familyId": "statConversionPercent.physicalAttackScore.maxHP",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "physicalAttack",
+          "sourceStat": "physicalAttackScore",
           "targetStat": "maxHP"
         },
         "variants": [
@@ -12259,10 +12259,10 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.physicalDefense.maxHP",
+        "familyId": "statConversionPercent.physicalDefenseScore.maxHP",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "physicalDefense",
+          "sourceStat": "physicalDefenseScore",
           "targetStat": "maxHP"
         },
         "variants": [
@@ -12365,10 +12365,10 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.magicalAttack.maxHP",
+        "familyId": "statConversionPercent.magicalAttackScore.maxHP",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "magicalAttack",
+          "sourceStat": "magicalAttackScore",
           "targetStat": "maxHP"
         },
         "variants": [
@@ -12423,10 +12423,10 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.magicalHealing.maxHP",
+        "familyId": "statConversionPercent.magicalHealingScore.maxHP",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "magicalHealing",
+          "sourceStat": "magicalHealingScore",
           "targetStat": "maxHP"
         },
         "variants": [
@@ -12537,11 +12537,11 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.magicalAttack.physicalAttack",
+        "familyId": "statConversionPercent.magicalAttackScore.physicalAttackScore",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "magicalAttack",
-          "targetStat": "physicalAttack"
+          "sourceStat": "magicalAttackScore",
+          "targetStat": "physicalAttackScore"
         },
         "variants": [
           {
@@ -12587,11 +12587,11 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.magicalHealing.physicalAttack",
+        "familyId": "statConversionPercent.magicalHealingScore.physicalAttackScore",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "magicalHealing",
-          "targetStat": "physicalAttack"
+          "sourceStat": "magicalHealingScore",
+          "targetStat": "physicalAttackScore"
         },
         "variants": [
           {
@@ -12637,11 +12637,11 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.magicalAttack.hitRate",
+        "familyId": "statConversionPercent.magicalAttackScore.hitScore",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "magicalAttack",
-          "targetStat": "hitRate"
+          "sourceStat": "magicalAttackScore",
+          "targetStat": "hitScore"
         },
         "variants": [
           {
@@ -12679,11 +12679,11 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.magicalHealing.hitRate",
+        "familyId": "statConversionPercent.magicalHealingScore.hitScore",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "magicalHealing",
-          "targetStat": "hitRate"
+          "sourceStat": "magicalHealingScore",
+          "targetStat": "hitScore"
         },
         "variants": [
           {
@@ -12737,11 +12737,11 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.magicalHealing.magicalAttack",
+        "familyId": "statConversionPercent.magicalHealingScore.magicalAttackScore",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "magicalHealing",
-          "targetStat": "magicalAttack"
+          "sourceStat": "magicalHealingScore",
+          "targetStat": "magicalAttackScore"
         },
         "variants": [
           {
@@ -12779,11 +12779,11 @@
         ]
       },
       {
-        "familyId": "statConversionPercent.magicalHealing.magicalDefense",
+        "familyId": "statConversionPercent.magicalHealingScore.magicalDefenseScore",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "magicalHealing",
-          "targetStat": "magicalDefense"
+          "sourceStat": "magicalHealingScore",
+          "targetStat": "magicalDefenseScore"
         },
         "variants": [
           {
@@ -13433,7 +13433,7 @@
         ]
       },
       {
-        "familyId": "martialBonusPercent.unarmed",
+        "familyId": "martialBonusPercent.martial",
         "effectType": "martialBonusPercent",
         "parameters": {},
         "variants": [
@@ -13512,7 +13512,7 @@
         ]
       },
       {
-        "familyId": "martialBonusMultiplier.unarmed",
+        "familyId": "martialBonusMultiplier.martial",
         "effectType": "martialBonusMultiplier",
         "parameters": {},
         "variants": [
@@ -13567,10 +13567,10 @@
         ]
       },
       {
-        "familyId": "statMultiplier.physicalDefense",
+        "familyId": "statMultiplier.physicalDefenseScore",
         "effectType": "statMultiplier",
         "parameters": {
-          "statType": "physicalDefense"
+          "statType": "physicalDefenseScore"
         },
         "variants": [
           {
@@ -13632,10 +13632,10 @@
         ]
       },
       {
-        "familyId": "statMultiplier.evasionRate",
+        "familyId": "statMultiplier.evasionScore",
         "effectType": "statMultiplier",
         "parameters": {
-          "statType": "evasionRate"
+          "statType": "evasionScore"
         },
         "variants": [
           {
@@ -13697,10 +13697,10 @@
         ]
       },
       {
-        "familyId": "statMultiplier.magicalDefense",
+        "familyId": "statMultiplier.magicalDefenseScore",
         "effectType": "statMultiplier",
         "parameters": {
-          "statType": "magicalDefense"
+          "statType": "magicalDefenseScore"
         },
         "variants": [
           {
@@ -13762,10 +13762,10 @@
         ]
       },
       {
-        "familyId": "statMultiplier.trapDisarm",
+        "familyId": "statMultiplier.trapRemovalScore",
         "effectType": "statMultiplier",
         "parameters": {
-          "statType": "trapDisarm"
+          "statType": "trapRemovalScore"
         },
         "variants": [
           {
@@ -13852,10 +13852,10 @@
         ]
       },
       {
-        "familyId": "itemStatMultiplier.physicalAttack",
+        "familyId": "itemStatMultiplier.physicalAttackScore",
         "effectType": "itemStatMultiplier",
         "parameters": {
-          "statType": "physicalAttack"
+          "statType": "physicalAttackScore"
         },
         "variants": [
           {
@@ -13877,10 +13877,10 @@
         ]
       },
       {
-        "familyId": "itemStatMultiplier.hitRate",
+        "familyId": "itemStatMultiplier.hitScore",
         "effectType": "itemStatMultiplier",
         "parameters": {
-          "statType": "hitRate"
+          "statType": "hitScore"
         },
         "variants": [
           {
@@ -13902,10 +13902,10 @@
         ]
       },
       {
-        "familyId": "itemStatMultiplier.criticalRate",
+        "familyId": "itemStatMultiplier.criticalChancePercent",
         "effectType": "itemStatMultiplier",
         "parameters": {
-          "statType": "criticalRate"
+          "statType": "criticalChancePercent"
         },
         "variants": [
           {
@@ -13927,10 +13927,10 @@
         ]
       },
       {
-        "familyId": "itemStatMultiplier.physicalDefense",
+        "familyId": "itemStatMultiplier.physicalDefenseScore",
         "effectType": "itemStatMultiplier",
         "parameters": {
-          "statType": "physicalDefense"
+          "statType": "physicalDefenseScore"
         },
         "variants": [
           {
@@ -13952,10 +13952,10 @@
         ]
       },
       {
-        "familyId": "itemStatMultiplier.evasionRate",
+        "familyId": "itemStatMultiplier.evasionScore",
         "effectType": "itemStatMultiplier",
         "parameters": {
-          "statType": "evasionRate"
+          "statType": "evasionScore"
         },
         "variants": [
           {
@@ -13977,10 +13977,10 @@
         ]
       },
       {
-        "familyId": "itemStatMultiplier.magicalAttack",
+        "familyId": "itemStatMultiplier.magicalAttackScore",
         "effectType": "itemStatMultiplier",
         "parameters": {
-          "statType": "magicalAttack"
+          "statType": "magicalAttackScore"
         },
         "variants": [
           {
@@ -14002,10 +14002,10 @@
         ]
       },
       {
-        "familyId": "itemStatMultiplier.magicalHealing",
+        "familyId": "itemStatMultiplier.magicalHealingScore",
         "effectType": "itemStatMultiplier",
         "parameters": {
-          "statType": "magicalHealing"
+          "statType": "magicalHealingScore"
         },
         "variants": [
           {
@@ -14027,10 +14027,10 @@
         ]
       },
       {
-        "familyId": "itemStatMultiplier.magicalDefense",
+        "familyId": "itemStatMultiplier.magicalDefenseScore",
         "effectType": "itemStatMultiplier",
         "parameters": {
-          "statType": "magicalDefense"
+          "statType": "magicalDefenseScore"
         },
         "variants": [
           {
@@ -14052,10 +14052,10 @@
         ]
       },
       {
-        "familyId": "itemStatMultiplier.trapRemoval",
+        "familyId": "itemStatMultiplier.trapRemovalScore",
         "effectType": "itemStatMultiplier",
         "parameters": {
-          "statType": "trapRemoval"
+          "statType": "trapRemovalScore"
         },
         "variants": [
           {
@@ -14096,7 +14096,7 @@
             "value": {
               "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
-              "criticalRateMultiplier": 0.5,
+              "criticalChancePercentMultiplier": 0.5,
               "accuracyMultiplier": 1.0
             },
             "description": "味方が倒された時、倒した敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
@@ -14119,7 +14119,7 @@
             "value": {
               "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
-              "criticalRateMultiplier": 0.5,
+              "criticalChancePercentMultiplier": 0.5,
               "accuracyMultiplier": 1.0
             },
             "description": "物理攻撃を受けた時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
@@ -14130,7 +14130,7 @@
             "value": {
               "baseChancePercent": 100,
               "attackCountMultiplier": 0.4,
-              "criticalRateMultiplier": 0.7,
+              "criticalChancePercentMultiplier": 0.7,
               "accuracyMultiplier": 1.0
             },
             "description": "物理攻撃を受けた時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の40%、必殺率は通常の70%。"
@@ -14153,7 +14153,7 @@
             "value": {
               "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
-              "criticalRateMultiplier": 0.5,
+              "criticalChancePercentMultiplier": 0.5,
               "accuracyMultiplier": 1.0
             },
             "description": "魔法攻撃を受けた時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
@@ -14177,7 +14177,7 @@
             "value": {
               "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
-              "criticalRateMultiplier": 0.5,
+              "criticalChancePercentMultiplier": 0.5,
               "accuracyMultiplier": 1.0
             },
             "description": "後列の味方が物理攻撃を受けた時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
@@ -14200,7 +14200,7 @@
             "value": {
               "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
-              "criticalRateMultiplier": 0.5,
+              "criticalChancePercentMultiplier": 0.5,
               "accuracyMultiplier": 1.0
             },
             "description": "物理攻撃を回避した時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
@@ -14221,7 +14221,7 @@
                 "value": {
                   "baseChancePercent": 100,
                   "attackCountMultiplier": 0.3,
-                  "criticalRateMultiplier": 0.5,
+                  "criticalChancePercentMultiplier": 0.5,
                   "accuracyMultiplier": 1.0
                 }
               }
@@ -14272,7 +14272,7 @@
             "label": "[不死Lv50] 即時蘇生",
             "value": {
               "chancePercent": 50,
-              "hpScale": "magicalHealing"
+              "hpScale": "magicalHealingScore"
             },
             "description": "戦闘不能になった時、50%の確率で蘇生する。蘇生時のHP回復量は魔法回復力に依存する。"
           },
@@ -14281,7 +14281,7 @@
             "label": "[不死Lv50] 即時蘇生100%",
             "value": {
               "chancePercent": 100,
-              "hpScale": "magicalHealing"
+              "hpScale": "magicalHealingScore"
             },
             "description": "戦闘不能になった時に蘇生する。蘇生時のHP回復量は魔法回復力に依存する。"
           }
@@ -14573,8 +14573,8 @@
             "id": 64003,
             "label": "[種族:人間Lv150] ターン経過で命中/回避+2%/ターン",
             "value": {
-              "hitRatePerTurn": 2,
-              "evasionRatePerTurn": 2
+              "hitScoreAdditivePerTurn": 2,
+              "evasionScoreAdditivePerTurn": 2
             },
             "description": "毎ターン終了時に命中が2%と回避が2%ずつ上昇する。効果は戦闘終了まで累積する。"
           }
@@ -14887,7 +14887,7 @@
       },
       {
         "familyId": "race.werecat.critCap",
-        "effectType": "criticalRateCap",
+        "effectType": "criticalChancePercentCap",
         "parameters": {},
         "variants": [
           {
@@ -14912,7 +14912,7 @@
             "id": 64083,
             "label": "[種族:ワーキャットLv99] 1ターン目命中+50%",
             "value": {
-              "hitRatePercent": 50,
+              "hitScoreAdditive": 50,
               "duration": 1
             },
             "description": "戦闘開始時に命中が50%上昇する。そのターンのみ有効。"
@@ -15030,8 +15030,8 @@
         ]
       },
       {
-        "familyId": "race.homunculus.additionalDamage",
-        "effectType": "additionalDamageAdditive",
+        "familyId": "race.homunculus.additionalDamageScore",
+        "effectType": "additionalDamageScoreAdditive",
         "parameters": {},
         "variants": [
           {
@@ -15125,7 +15125,7 @@
         "familyId": "race.tengu.evasionBoost",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "evasionRate"
+          "stat": "evasionScore"
         },
         "variants": [
           {
@@ -15303,7 +15303,7 @@
         "familyId": "job.warrior.fortify",
         "effectType": "statConversionPercent",
         "parameters": {
-          "sourceStat": "physicalDefense",
+          "sourceStat": "physicalDefenseScore",
           "targetStat": "maxHP"
         },
         "variants": [
@@ -15423,7 +15423,7 @@
         "familyId": "job.thief.evasion",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "evasionRate"
+          "stat": "evasionScore"
         },
         "variants": [
           {
@@ -15437,8 +15437,8 @@
         ]
       },
       {
-        "familyId": "job.thief.critRate",
-        "effectType": "criticalRateAdditive",
+        "familyId": "job.thief.criticalChancePercent",
+        "effectType": "criticalChancePercentAdditive",
         "parameters": {},
         "variants": [
           {
@@ -15520,7 +15520,7 @@
         "familyId": "job.assassin.accuracy",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "hitRate"
+          "stat": "hitScore"
         },
         "variants": [
           {
@@ -15685,7 +15685,7 @@
         "familyId": "job.priest.healBonus",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "magicalHealing"
+          "stat": "magicalHealingScore"
         },
         "variants": [
           {
@@ -15694,7 +15694,7 @@
             "value": {
               "multiplier": 1.2
             },
-            "description": "magicalHealingが1.2倍になる"
+            "description": "magicalHealingScoreが1.2倍になる"
           }
         ]
       },
@@ -15834,7 +15834,7 @@
         "familyId": "job.mage.destroy",
         "effectType": "statDebuff",
         "parameters": {
-          "stat": "magicalDefense",
+          "stat": "magicalDefenseScore",
           "target": "enemy"
         },
         "variants": [
@@ -15869,7 +15869,7 @@
         "familyId": "job.hunter.accuracy",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "hitRate"
+          "stat": "hitScore"
         },
         "variants": [
           {
@@ -15884,7 +15884,7 @@
       },
       {
         "familyId": "job.hunter.precision",
-        "effectType": "criticalRateAdditive",
+        "effectType": "criticalChancePercentAdditive",
         "parameters": {},
         "variants": [
           {
@@ -15899,7 +15899,7 @@
       },
       {
         "familyId": "job.hunter.pierce",
-        "effectType": "additionalDamageAdditive",
+        "effectType": "additionalDamageScoreAdditive",
         "parameters": {},
         "variants": [
           {
@@ -15965,7 +15965,7 @@
         "familyId": "job.monk.meditate",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "magicalHealing"
+          "stat": "magicalHealingScore"
         },
         "variants": [
           {
@@ -15974,7 +15974,7 @@
             "value": {
               "multiplier": 1.12
             },
-            "description": "magicalHealingが1.12倍になる"
+            "description": "magicalHealingScoreが1.12倍になる"
           }
         ]
       },
@@ -16081,7 +16081,7 @@
       },
       {
         "familyId": "job.samurai.spirit",
-        "effectType": "criticalRateAdditive",
+        "effectType": "criticalChancePercentAdditive",
         "parameters": {},
         "variants": [
           {
@@ -16115,7 +16115,7 @@
         "familyId": "job.blademaster.accuracy",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "hitRate"
+          "stat": "hitScore"
         },
         "variants": [
           {
@@ -16284,7 +16284,7 @@
         "familyId": "job.sage.healBonus",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "magicalHealing"
+          "stat": "magicalHealingScore"
         },
         "variants": [
           {
@@ -16293,7 +16293,7 @@
             "value": {
               "multiplier": 1.15
             },
-            "description": "magicalHealingが1.15倍になる"
+            "description": "magicalHealingScoreが1.15倍になる"
           }
         ]
       },
@@ -16348,7 +16348,7 @@
         "familyId": "job.ninja.evasion",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "evasionRate"
+          "stat": "evasionScore"
         },
         "variants": [
           {
@@ -16362,8 +16362,8 @@
         ]
       },
       {
-        "familyId": "job.ninja.critRate",
-        "effectType": "criticalRateAdditive",
+        "familyId": "job.ninja.criticalChancePercent",
+        "effectType": "criticalChancePercentAdditive",
         "parameters": {},
         "variants": [
           {
@@ -16411,7 +16411,7 @@
       },
       {
         "familyId": "job.ninja.deathblow",
-        "effectType": "criticalRateMaxDelta",
+        "effectType": "criticalChancePercentMaxDelta",
         "parameters": {},
         "variants": [
           {
@@ -16567,7 +16567,7 @@
         "familyId": "job.royalline.aura",
         "effectType": "statDebuff",
         "parameters": {
-          "stat": "physicalAttack",
+          "stat": "physicalAttackScore",
           "target": "enemy"
         },
         "variants": [
@@ -16628,7 +16628,7 @@
               {
                 "effectType": "statConversionPercent",
                 "parameters": {
-                  "sourceStat": "physicalDefense",
+                  "sourceStat": "physicalDefenseScore",
                   "targetStat": "maxHP"
                 },
                 "value": {
@@ -16866,7 +16866,7 @@
               {
                 "effectType": "statDebuff",
                 "parameters": {
-                  "stat": "hitRate",
+                  "stat": "hitScore",
                   "target": "enemy"
                 },
                 "value": {
@@ -16895,7 +16895,7 @@
               {
                 "effectType": "statDebuff",
                 "parameters": {
-                  "stat": "physicalAttack",
+                  "stat": "physicalAttackScore",
                   "target": "enemy"
                 },
                 "value": {
@@ -17048,7 +17048,7 @@
               {
                 "effectType": "statDebuff",
                 "parameters": {
-                  "stat": "magicalDefense",
+                  "stat": "magicalDefenseScore",
                   "target": "enemy"
                 },
                 "value": {
@@ -17071,7 +17071,7 @@
       },
       {
         "familyId": "master.hunter.precision",
-        "effectType": "criticalRateAdditive",
+        "effectType": "criticalChancePercentAdditive",
         "parameters": {},
         "variants": [
           {
@@ -17086,7 +17086,7 @@
       },
       {
         "familyId": "master.hunter.pierce",
-        "effectType": "additionalDamageAdditive",
+        "effectType": "additionalDamageScoreAdditive",
         "parameters": {},
         "variants": [
           {
@@ -17118,7 +17118,7 @@
         "familyId": "master.monk.meditate",
         "effectType": "statMultiplier",
         "parameters": {
-          "stat": "magicalHealing"
+          "stat": "magicalHealingScore"
         },
         "variants": [
           {
@@ -17127,7 +17127,7 @@
             "value": {
               "multiplier": 1.22
             },
-            "description": "magicalHealingが1.22倍になる"
+            "description": "magicalHealingScoreが1.22倍になる"
           }
         ]
       },
@@ -17210,7 +17210,7 @@
             "label": "[マスター:侍] 剣気 必殺率+25+必殺威力+15%",
             "effects": [
               {
-                "effectType": "criticalRateAdditive",
+                "effectType": "criticalChancePercentAdditive",
                 "parameters": {},
                 "value": {
                   "additive": 25
@@ -17411,7 +17411,7 @@
       },
       {
         "familyId": "master.ninja.deathblow",
-        "effectType": "criticalRateMaxDelta",
+        "effectType": "criticalChancePercentMaxDelta",
         "parameters": {},
         "variants": [
           {
@@ -17499,7 +17499,7 @@
         "familyId": "master.royalline.aura",
         "effectType": "statDebuff",
         "parameters": {
-          "stat": "physicalAttack",
+          "stat": "physicalAttackScore",
           "target": "enemy"
         },
         "variants": [

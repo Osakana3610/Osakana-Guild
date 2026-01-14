@@ -5,7 +5,7 @@
 //
 // 【責務】
 //   - ダメージ関連のスキルエフェクトハンドラ実装
-//   - 与ダメージ・被ダメージ・クリティカル・武術・特殊ダメージの処理
+//   - 与ダメージ・被ダメージ・必殺・格闘・特殊ダメージの処理
 //
 // 【公開API】
 //   - DamageDealtPercentHandler: 与ダメージのパーセント増減
@@ -13,12 +13,12 @@
 //   - DamageTakenPercentHandler: 被ダメージのパーセント増減
 //   - DamageTakenMultiplierHandler: 被ダメージの倍率調整
 //   - DamageDealtMultiplierAgainstHandler: 特定種族への与ダメージ倍率
-//   - CriticalDamagePercentHandler: クリティカルダメージのパーセント増減
-//   - CriticalDamageMultiplierHandler: クリティカルダメージの倍率調整
-//   - CriticalDamageTakenMultiplierHandler: クリティカル被ダメージ倍率
+//   - CriticalDamagePercentHandler: 必殺ダメージのパーセント増減
+//   - CriticalDamageMultiplierHandler: 必殺ダメージの倍率調整
+//   - CriticalDamageTakenMultiplierHandler: 必殺被ダメージ倍率
 //   - PenetrationDamageTakenMultiplierHandler: 貫通ダメージ被ダメージ倍率
-//   - MartialBonusPercentHandler: 武術ボーナスのパーセント増減
-//   - MartialBonusMultiplierHandler: 武術ボーナスの倍率調整
+//   - MartialBonusPercentHandler: 格闘ボーナスのパーセント増減
+//   - MartialBonusMultiplierHandler: 格闘ボーナスの倍率調整
 //   - AdditionalDamageAdditiveHandler: 追加ダメージ加算（パススルー）
 //   - AdditionalDamageMultiplierHandler: 追加ダメージ倍率（パススルー）
 //   - MinHitScaleHandler: 最低命中率の設定
@@ -188,7 +188,7 @@ enum MartialBonusMultiplierHandler: SkillEffectHandler {
 }
 
 enum AdditionalDamageAdditiveHandler: SkillEffectHandler {
-    nonisolated static let effectType = SkillEffectType.additionalDamageAdditive
+    nonisolated static let effectType = SkillEffectType.additionalDamageScoreAdditive
 
     nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
@@ -201,7 +201,7 @@ enum AdditionalDamageAdditiveHandler: SkillEffectHandler {
 }
 
 enum AdditionalDamageMultiplierHandler: SkillEffectHandler {
-    nonisolated static let effectType = SkillEffectType.additionalDamageMultiplier
+    nonisolated static let effectType = SkillEffectType.additionalDamageScoreMultiplier
 
     nonisolated static func apply(
         payload: DecodedSkillEffectPayload,

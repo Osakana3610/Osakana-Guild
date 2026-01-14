@@ -156,7 +156,7 @@ final class ObservationRecorder {
     static func outputDirectory() throws -> URL {
         // テスト実行時のBundle.mainはテストバンドル
         // __FILE__からプロジェクトルートを推定
-        let thisFile = URL(fileURLWithPath: #file)
+        let thisFile = URL(fileURLWithPath: #filePath)
 
         // EpikaTests/TestObservations/ObservationRecorder.swift
         // → プロジェクトルートは3階層上

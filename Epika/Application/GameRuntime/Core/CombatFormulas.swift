@@ -9,15 +9,15 @@
 //
 // 【係数定義】
 //   - maxHPCoefficient: 10.0
-//   - physicalAttack/Defense/magicalAttack/DefenseCoefficient: 1.0
-//   - hitRateCoefficient: 2.0, hitRateBaseBonus: 50.0
-//   - evasionRateCoefficient: 1.0
-//   - criticalRateCoefficient: 0.16
-//   - magicalHealingCoefficient: 2.0
-//   - trapRemovalCoefficient: 0.5
-//   - additionalDamageScale: 0.32
+//   - physicalAttackScore/magicalAttackScore/physicalDefenseScore/magicalDefenseScoreCoefficient: 1.0
+//   - hitScoreCoefficient: 2.0, hitScoreBaseBonus: 50.0
+//   - evasionScoreCoefficient: 1.0
+//   - criticalChanceCoefficient: 0.16
+//   - magicalHealingScoreCoefficient: 2.0
+//   - trapRemovalScoreCoefficient: 0.5
+//   - additionalDamageScoreScale: 0.32
 //   - attackCountCoefficient/LevelCoefficient: 0.025
-//   - breathDamageCoefficient: 1.0
+//   - breathDamageScoreCoefficient: 1.0
 //
 // 【公開API】
 //   - levelDependentValue(raceId:level:) → Double: レベル成長値
@@ -41,21 +41,21 @@ import Foundation
 
 enum CombatFormulas {
     nonisolated static let maxHPCoefficient: Double = 10.0
-    nonisolated static let physicalAttackCoefficient: Double = 1.0
-    nonisolated static let magicalAttackCoefficient: Double = 1.0
-    nonisolated static let physicalDefenseCoefficient: Double = 1.0
-    nonisolated static let magicalDefenseCoefficient: Double = 1.0
-    nonisolated static let hitRateCoefficient: Double = 2.0
-    nonisolated static let hitRateBaseBonus: Double = 50.0
-    nonisolated static let evasionRateCoefficient: Double = 1.0
-    nonisolated static let criticalRateCoefficient: Double = 0.16
-    nonisolated static let magicalHealingCoefficient: Double = 2.0
-    nonisolated static let trapRemovalCoefficient: Double = 0.5
-    nonisolated static let additionalDamageScale: Double = 0.32
+    nonisolated static let physicalAttackScoreCoefficient: Double = 1.0
+    nonisolated static let magicalAttackScoreCoefficient: Double = 1.0
+    nonisolated static let physicalDefenseScoreCoefficient: Double = 1.0
+    nonisolated static let magicalDefenseScoreCoefficient: Double = 1.0
+    nonisolated static let hitScoreCoefficient: Double = 2.0
+    nonisolated static let hitScoreBaseBonus: Double = 50.0
+    nonisolated static let evasionScoreCoefficient: Double = 1.0
+    nonisolated static let criticalChanceCoefficient: Double = 0.16
+    nonisolated static let magicalHealingScoreCoefficient: Double = 2.0
+    nonisolated static let trapRemovalScoreCoefficient: Double = 0.5
+    nonisolated static let additionalDamageScoreScale: Double = 0.32
     nonisolated static let additionalDamageLevelCoefficient: Double = 0.125
     nonisolated static let attackCountCoefficient: Double = 0.025
     nonisolated static let attackCountLevelCoefficient: Double = 0.025
-    nonisolated static let breathDamageCoefficient: Double = 1.0
+    nonisolated static let breathDamageScoreCoefficient: Double = 1.0
 
     /// humanカテゴリに属するraceId（人間男、人間女）
     private nonisolated static let humanRaceIds: Set<UInt8> = [1, 2]

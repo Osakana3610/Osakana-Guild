@@ -95,12 +95,23 @@ enum BaseStat: UInt8, CaseIterable, Sendable {
 
     nonisolated var displayName: String {
         switch self {
-        case .strength: return "力"
-        case .wisdom: return "知恵"
-        case .spirit: return "精神"
-        case .vitality: return "体力"
-        case .agility: return "敏捷"
-        case .luck: return "運"
+        case .strength: return L10n.BaseStat.strength
+        case .wisdom: return L10n.BaseStat.wisdom
+        case .spirit: return L10n.BaseStat.spirit
+        case .vitality: return L10n.BaseStat.vitality
+        case .agility: return L10n.BaseStat.agility
+        case .luck: return L10n.BaseStat.luck
+        }
+    }
+
+    nonisolated var shortDisplayName: String {
+        switch self {
+        case .strength: return L10n.BaseStat.strengthShort
+        case .wisdom: return L10n.BaseStat.wisdomShort
+        case .spirit: return L10n.BaseStat.spiritShort
+        case .vitality: return L10n.BaseStat.vitalityShort
+        case .agility: return L10n.BaseStat.agilityShort
+        case .luck: return L10n.BaseStat.luckShort
         }
     }
 

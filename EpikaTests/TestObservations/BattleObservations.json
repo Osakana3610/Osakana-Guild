@@ -166,9 +166,9 @@
     },
     {
       "id": "BATTLE-CRIT-001",
-      "category": ["戦闘", "クリティカル", "発動率"],
-      "description": "クリティカル発動率が期待範囲内か",
-      "formula": "criticalRate / 100",
+      "category": ["戦闘", "必殺", "発動率"],
+      "description": "必殺発動率が期待範囲内か",
+      "formula": "criticalChancePercent / 100",
       "expectedRange": { "min": null, "max": null },
       "toleranceBasis": "99%信頼区間、±2%許容",
       "testFile": "CriticalHitTests.swift",
@@ -176,8 +176,8 @@
     },
     {
       "id": "BATTLE-CRIT-002",
-      "category": ["戦闘", "クリティカル", "ダメージ倍率"],
-      "description": "クリティカルダメージが正しく増加するか",
+      "category": ["戦闘", "必殺", "ダメージ倍率"],
+      "description": "必殺ダメージが正しく増加するか",
       "formula": "baseDamage × criticalMultiplier",
       "expectedRange": { "min": null, "max": null },
       "toleranceBasis": "期待値の±2%",
@@ -233,6 +233,246 @@
       "toleranceBasis": "決定的（指定ターンで解除）",
       "testFile": "StatusEffectTests.swift",
       "testMethod": "testStatusEffectDuration"
+    },
+    {
+      "id": "BATTLE-STAT-001",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline maxHP が計算式通りか",
+      "formula": "VIT16 × (1 + 0.1 × c_maxHP=1) × 10 = 176",
+      "expectedRange": { "min": 176, "max": 176 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-002",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline physicalAttackScore が計算式通りか",
+      "formula": "STR10 × (1 + 0.1 × c_physicalAttackScore=1) = 11",
+      "expectedRange": { "min": 11, "max": 11 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-003",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline magicalAttackScore が計算式通りか",
+      "formula": "WIS12 × 1.1 = 13.2 → trunc 13",
+      "expectedRange": { "min": 13, "max": 13 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-004",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline physicalDefenseScore が計算式通りか",
+      "formula": "VIT16 × 1.1 = 17.6 → trunc 17",
+      "expectedRange": { "min": 17, "max": 17 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-005",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline magicalDefenseScore が計算式通りか",
+      "formula": "SPR14 × 1.1 = 15.4 → trunc 15",
+      "expectedRange": { "min": 15, "max": 15 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-006",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline hitScore が計算式通りか",
+      "formula": "((STR10+AGI18)/2 × 1.1 + 50) × 2 = 130.8 → trunc 130",
+      "expectedRange": { "min": 130, "max": 130 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-007",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline evasionScore が計算式通りか",
+      "formula": "((AGI18+LUK20)/2 × 1.1) = 20.9 → trunc 20",
+      "expectedRange": { "min": 20, "max": 20 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-008",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline criticalChancePercent が計算式通りか",
+      "formula": "max(AGI18 + LUK20×2 - 45, 0) × 0.16 = 2.08 → trunc 2",
+      "expectedRange": { "min": 2, "max": 2 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-009",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline attackCount が計算式通りか",
+      "formula": "AGI18 → finalAttackCount = 1",
+      "expectedRange": { "min": 1, "max": 1 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-010",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline magicalHealingScore が計算式通りか",
+      "formula": "SPR14 × 1.1 × 2 = 30.8 → trunc 30",
+      "expectedRange": { "min": 30, "max": 30 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-011",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline trapRemovalScore が計算式通りか",
+      "formula": "((AGI18+LUK20)/2 × 1.1 × 0.5) = 10.45 → trunc 10",
+      "expectedRange": { "min": 10, "max": 10 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-012",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline additionalDamageScore が計算式通りか",
+      "formula": "dependency 5.0 × (1 + 0.025) × 0.32 = 1.64 → trunc 1",
+      "expectedRange": { "min": 1, "max": 1 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-013",
+      "category": ["戦闘", "ステータス", "基礎"],
+      "description": "baseline breathDamageScore が計算式通りか",
+      "formula": "WIS12 × 1.1 = 13.2 → trunc 13",
+      "expectedRange": { "min": 13, "max": 13 },
+      "toleranceBasis": "決定的（固定入力の算出値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatBaselineScenario"
+    },
+    {
+      "id": "BATTLE-STAT-101",
+      "category": ["戦闘", "ステータス", "21以上ボーナス"],
+      "description": "STR35のphysicalAttackScore増幅が正しいか",
+      "formula": "trunc(35×1.1)=38; bonus=trunc(38×1.04^15)=68",
+      "expectedRange": { "min": 68, "max": 68 },
+      "toleranceBasis": "決定的（21以上ボーナス）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatTwentyOneBonuses"
+    },
+    {
+      "id": "BATTLE-STAT-102",
+      "category": ["戦闘", "ステータス", "21以上ボーナス"],
+      "description": "STR35のadditionalDamageScore増幅が正しいか",
+      "formula": "raw 19.68 → trunc 19; bonus=trunc(19×1.04^15)=34",
+      "expectedRange": { "min": 34, "max": 34 },
+      "toleranceBasis": "決定的（21以上ボーナス）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatTwentyOneBonuses"
+    },
+    {
+      "id": "BATTLE-STAT-103",
+      "category": ["戦闘", "ステータス", "21以上ボーナス"],
+      "description": "WIS35のmagicalAttackScore増幅が正しいか",
+      "formula": "trunc(35×1.1)=38; bonus=trunc(38×1.04^15)=68",
+      "expectedRange": { "min": 68, "max": 68 },
+      "toleranceBasis": "決定的（21以上ボーナス）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatTwentyOneBonuses"
+    },
+    {
+      "id": "BATTLE-STAT-104",
+      "category": ["戦闘", "ステータス", "21以上ボーナス"],
+      "description": "知恵35の21以上ボーナスが精神14由来の魔法回復力に適用されるか",
+      "formula": "trunc(14×1.1×2)=30; bonus=trunc(30×1.04^15)=54",
+      "expectedRange": { "min": 54, "max": 54 },
+      "toleranceBasis": "決定的（21以上ボーナス）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatTwentyOneBonuses"
+    },
+    {
+      "id": "BATTLE-STAT-105",
+      "category": ["戦闘", "ステータス", "21以上ボーナス"],
+      "description": "WIS35のbreathDamageScore増幅が正しいか",
+      "formula": "trunc(35×1.1)=38; bonus=trunc(38×1.04^15)=68",
+      "expectedRange": { "min": 68, "max": 68 },
+      "toleranceBasis": "決定的（21以上ボーナス）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatTwentyOneBonuses"
+    },
+    {
+      "id": "BATTLE-STAT-106",
+      "category": ["戦闘", "ステータス", "21以上ボーナス"],
+      "description": "VIT35のphysicalDefenseScore耐性補正が正しいか",
+      "formula": "trunc(35×1.1)=38; resistance=trunc(38×0.96^15)=20",
+      "expectedRange": { "min": 20, "max": 20 },
+      "toleranceBasis": "決定的（21以上ボーナス）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatTwentyOneBonuses"
+    },
+    {
+      "id": "BATTLE-STAT-107",
+      "category": ["戦闘", "ステータス", "21以上ボーナス"],
+      "description": "SPR35のmagicalDefenseScore耐性補正が正しいか",
+      "formula": "trunc(35×1.1)=38; resistance=trunc(38×0.96^15)=20",
+      "expectedRange": { "min": 20, "max": 20 },
+      "toleranceBasis": "決定的（21以上ボーナス）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatTwentyOneBonuses"
+    },
+    {
+      "id": "BATTLE-STAT-108",
+      "category": ["戦闘", "ステータス", "21以上ボーナス"],
+      "description": "LUK35のcriticalChancePercent増幅が正しいか",
+      "formula": "critSource=43, raw=6.88→trunc6; bonus=trunc(6×1.04^15)=10",
+      "expectedRange": { "min": 10, "max": 10 },
+      "toleranceBasis": "決定的（21以上ボーナス）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCombatStatTwentyOneBonuses"
+    },
+    {
+      "id": "BATTLE-STAT-201",
+      "category": ["戦闘", "ステータス", "必殺上限"],
+      "description": "criticalChancePercentのcap/capDeltaが適用されるか",
+      "formula": "(AGI35+LUK20×2-45)×0.16×10=48; cap=50-10=40 → trunc 40",
+      "expectedRange": { "min": 40, "max": 40 },
+      "toleranceBasis": "決定的（cap適用）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCriticalChancePercentCapDelta"
+    },
+    {
+      "id": "BATTLE-STAT-301",
+      "category": ["戦闘", "ステータス", "変換"],
+      "description": "statConversionPercentでhitScoreに加算されるか",
+      "formula": "hitScore=130.8 + physicalAttackScore11×0.5 = 136.3 → trunc 136",
+      "expectedRange": { "min": 136, "max": 136 },
+      "toleranceBasis": "決定的（変換加算）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStatConversionPercent"
+    },
+    {
+      "id": "BATTLE-STAT-302",
+      "category": ["戦闘", "ステータス", "固定"],
+      "description": "statFixedToOneでphysicalAttackScoreとattackCountが1になるか",
+      "formula": "fixedToOne(physicalAttackScore, attackCount) → 1",
+      "expectedRange": { "min": 1, "max": 1 },
+      "toleranceBasis": "決定的（固定値1）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStatFixedToOne"
     }
   ]
 }
