@@ -594,10 +594,9 @@ private func partitionResults(_ results: [BattleLogEntry]) -> (byTarget: [String
     for entry in results {
         if let targetId = entry.targetId {
             if dictionary[targetId] == nil {
-                dictionary[targetId] = []
                 order.append(targetId)
             }
-            dictionary[targetId]?.append(entry)
+            dictionary[targetId, default: []].append(entry)
         } else {
             untargeted.append(entry)
         }

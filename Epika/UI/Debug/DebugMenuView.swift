@@ -650,21 +650,20 @@ struct DebugMenuView: View {
                 // 転職後職業決定
                 let jobId: UInt8
                 let previousJobId: UInt8
-                if let selected = selectedPreviousJobId {
-                    if selected == 0 {
-                        // ランダム（baseJob以外を現職に）
-                        let candidates = allJobs.filter { $0.id != baseJobId }
-                        jobId = candidates.randomElement()?.id ?? baseJobId
-                        previousJobId = baseJobId
-                    } else {
-                        // 指定された職業を現職に、baseJobを前職に
-                        jobId = selected
-                        previousJobId = baseJobId
-                    }
-                } else {
+                switch selectedPreviousJobId {
+                case nil:
                     // 転職なし
                     jobId = baseJobId
                     previousJobId = 0
+                case 0?:
+                    // ランダム（baseJob以外を現職に）
+                    let candidates = allJobs.filter { $0.id != baseJobId }
+                    jobId = candidates.randomElement()?.id ?? baseJobId
+                    previousJobId = baseJobId
+                case let selected?:
+                    // 指定された職業を現職に、baseJobを前職に
+                    jobId = selected
+                    previousJobId = baseJobId
                 }
 
                 let name = "デバッグ\(i + 1)"

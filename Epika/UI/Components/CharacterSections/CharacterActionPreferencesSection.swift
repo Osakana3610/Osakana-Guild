@@ -136,40 +136,26 @@ private extension CharacterActionPreferencesSection {
     }
 
     var attackSliderBinding: Binding<Double> {
-        Binding(
-            get: { actionPreferenceAttack },
-            set: { newValue in
-                actionPreferenceAttack = newValue
-                actionPreferenceError = nil
-            }
-        )
+        clearingErrorBinding($actionPreferenceAttack)
     }
 
     var priestSliderBinding: Binding<Double> {
-        Binding(
-            get: { actionPreferencePriest },
-            set: { newValue in
-                actionPreferencePriest = newValue
-                actionPreferenceError = nil
-            }
-        )
+        clearingErrorBinding($actionPreferencePriest)
     }
 
     var mageSliderBinding: Binding<Double> {
-        Binding(
-            get: { actionPreferenceMage },
-            set: { newValue in
-                actionPreferenceMage = newValue
-                actionPreferenceError = nil
-            }
-        )
+        clearingErrorBinding($actionPreferenceMage)
     }
 
     var breathSliderBinding: Binding<Double> {
+        clearingErrorBinding($actionPreferenceBreath)
+    }
+
+    func clearingErrorBinding(_ value: Binding<Double>) -> Binding<Double> {
         Binding(
-            get: { actionPreferenceBreath },
+            get: { value.wrappedValue },
             set: { newValue in
-                actionPreferenceBreath = newValue
+                value.wrappedValue = newValue
                 actionPreferenceError = nil
             }
         )

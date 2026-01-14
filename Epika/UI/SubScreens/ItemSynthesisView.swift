@@ -57,7 +57,9 @@ struct ItemSynthesisView: View {
     /// 子アイテム候補（選択された親とレシピでマッチ）
     private var childItems: [CachedInventoryItem] {
         guard let parent = selectedParent else { return [] }
-        let childIds = Set(recipes.filter { $0.parentItemId == parent.itemId }.map { $0.childItemId })
+        let childIds = Set(recipes.compactMap { recipe in
+            recipe.parentItemId == parent.itemId ? recipe.childItemId : nil
+        })
         guard !childIds.isEmpty else { return [] }
         return allItems.filter { $0.stackKey != parent.stackKey && childIds.contains($0.itemId) }
     }
@@ -74,6 +76,27 @@ struct ItemSynthesisView: View {
     private var resultItem: CachedInventoryItem? {
         guard let stackKey = resultStackKey else { return nil }
         return allItems.first { $0.stackKey == stackKey }
+    }
+
+    private var parentSelectionBinding: Binding<CachedInventoryItem?> {
+        Binding(
+            get: { selectedParent },
+            set: { newValue in
+                selectedParent = newValue
+                selectedChild = nil
+                preview = nil
+            }
+        )
+    }
+
+    private var childSelectionBinding: Binding<CachedInventoryItem?> {
+        Binding(
+            get: { selectedChild },
+            set: { newValue in
+                selectedChild = newValue
+                updatePreview()
+            }
+        )
     }
 
     var body: some View {
@@ -97,27 +120,14 @@ struct ItemSynthesisView: View {
             ItemPickerView(
                 title: "親アイテム選択",
                 items: parentItems,
-                selectedItem: Binding(
-                    get: { selectedParent },
-                    set: { newValue in
-                        selectedParent = newValue
-                        selectedChild = nil
-                        preview = nil
-                    }
-                )
+                selectedItem: parentSelectionBinding
             )
         }
         .sheet(isPresented: $showChildPicker) {
             ItemPickerView(
                 title: "子アイテム選択",
                 items: childItems,
-                selectedItem: Binding(
-                    get: { selectedChild },
-                    set: { newValue in
-                        selectedChild = newValue
-                        updatePreview()
-                    }
-                )
+                selectedItem: childSelectionBinding
             )
         }
     }

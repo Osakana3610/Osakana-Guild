@@ -477,23 +477,14 @@ struct EquipmentEditorView: View {
         if !selectedCategories.contains(category) { return false }
         let normalTitleSet = selectedNormalTitleIds ?? cachedAllNormalTitleIds
         if !normalTitleSet.contains(item.normalTitleId) { return false }
-        if !searchText.isEmpty {
-            if !item.displayName.localizedCaseInsensitiveContains(searchText) {
-                return false
-            }
-        }
+        if !searchText.isEmpty && !item.displayName.localizedCaseInsensitiveContains(searchText) { return false }
         if showSuperRareOnly && item.superRareTitleId == 0 {
             return false
         }
         if showGemModifiedOnly && item.socketItemId == 0 {
             return false
         }
-        if showEquippableOnly {
-            let definition = itemDefinitions[item.itemId]
-            if !validateEquipment(definition: definition).canEquip {
-                return false
-            }
-        }
+        if showEquippableOnly && !validateEquipment(definition: itemDefinitions[item.itemId]).canEquip { return false }
         return true
     }
 
