@@ -761,18 +761,18 @@ struct EquipmentEditorView: View {
 
         // 戦闘ステータス
         addIfChanged(.maxHP, oldVal: old.combat.maxHP, newVal: new.combat.maxHP)
-        addIfChanged(.physicalAttack, oldVal: old.combat.physicalAttack, newVal: new.combat.physicalAttack)
-        addIfChanged(.magicalAttack, oldVal: old.combat.magicalAttack, newVal: new.combat.magicalAttack)
-        addIfChanged(.physicalDefense, oldVal: old.combat.physicalDefense, newVal: new.combat.physicalDefense)
-        addIfChanged(.magicalDefense, oldVal: old.combat.magicalDefense, newVal: new.combat.magicalDefense)
-        addIfChanged(.hitRate, oldVal: old.combat.hitRate, newVal: new.combat.hitRate)
-        addIfChanged(.evasionRate, oldVal: old.combat.evasionRate, newVal: new.combat.evasionRate)
-        addIfChanged(.criticalRate, oldVal: old.combat.criticalRate, newVal: new.combat.criticalRate)
+        addIfChanged(.physicalAttackScore, oldVal: old.combat.physicalAttackScore, newVal: new.combat.physicalAttackScore)
+        addIfChanged(.magicalAttackScore, oldVal: old.combat.magicalAttackScore, newVal: new.combat.magicalAttackScore)
+        addIfChanged(.physicalDefenseScore, oldVal: old.combat.physicalDefenseScore, newVal: new.combat.physicalDefenseScore)
+        addIfChanged(.magicalDefenseScore, oldVal: old.combat.magicalDefenseScore, newVal: new.combat.magicalDefenseScore)
+        addIfChanged(.hitScore, oldVal: old.combat.hitScore, newVal: new.combat.hitScore)
+        addIfChanged(.evasionScore, oldVal: old.combat.evasionScore, newVal: new.combat.evasionScore)
+        addIfChanged(.criticalChancePercent, oldVal: old.combat.criticalChancePercent, newVal: new.combat.criticalChancePercent)
         addIfChangedDouble(.attackCount, oldVal: old.combat.attackCount, newVal: new.combat.attackCount)
-        addIfChanged(.magicalHealing, oldVal: old.combat.magicalHealing, newVal: new.combat.magicalHealing)
-        addIfChanged(.trapRemoval, oldVal: old.combat.trapRemoval, newVal: new.combat.trapRemoval)
-        addIfChanged(.additionalDamage, oldVal: old.combat.additionalDamage, newVal: new.combat.additionalDamage)
-        addIfChanged(.breathDamage, oldVal: old.combat.breathDamage, newVal: new.combat.breathDamage)
+        addIfChanged(.magicalHealingScore, oldVal: old.combat.magicalHealingScore, newVal: new.combat.magicalHealingScore)
+        addIfChanged(.trapRemovalScore, oldVal: old.combat.trapRemovalScore, newVal: new.combat.trapRemovalScore)
+        addIfChanged(.additionalDamageScore, oldVal: old.combat.additionalDamageScore, newVal: new.combat.additionalDamageScore)
+        addIfChanged(.breathDamageScore, oldVal: old.combat.breathDamageScore, newVal: new.combat.breathDamageScore)
 
         return changes
     }

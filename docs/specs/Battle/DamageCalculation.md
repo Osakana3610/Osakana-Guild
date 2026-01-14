@@ -9,11 +9,11 @@
 ```
 attackPower = 攻撃力 × attackRoll
 defensePower = 劣化後防御力 × defenseRoll
-effectiveDefensePower = クリティカル時 ? defensePower × 0.5 : defensePower
+effectiveDefensePower = 必殺時 ? defensePower × 0.5 : defensePower
 baseDamage = max(1, attackPower - effectiveDefensePower)
 ```
 
-クリティカル判定は baseDamage 計算前に行われ、防御力半減が先に適用される。
+必殺判定は baseDamage 計算前に行われ、防御力半減が先に適用される。
 
 ### attackRoll / defenseRoll
 
@@ -46,14 +46,14 @@ totalDamage = (coreDamage × 物理耐性 + bonusDamage)
             × 列補正 × dealt乗数 × taken乗数 × 累積ヒットボーナス
 ```
 
-クリティカル時は追加で:
+必殺時は追加で:
 ```
-totalDamage *= クリティカルダメージボーナス
-totalDamage *= クリティカル被ダメ乗数
-totalDamage *= クリティカル耐性
+totalDamage *= 必殺ダメージボーナス
+totalDamage *= 必殺被ダメ乗数
+totalDamage *= 必殺耐性
 ```
 
-※クリティカルによる防御力半減は baseDamage 計算時に既に適用済み
+※必殺による防御力半減は baseDamage 計算時に既に適用済み
 
 最終ダメージ:
 ```
@@ -111,21 +111,21 @@ hitIndex > 2: pow(0.9, hitIndex - 2)
 - デフォルト: 1.0
 - 例: 0.8 = -20%ダメージ（軽減）
 
-## クリティカル
+## 必殺
 
 ### 発動条件
 
 ```
 発動確率 = min(100, max(0, criticalRate))
-発動確率 > 0 かつ random(1...100) ≤ 発動確率 → クリティカル
+発動確率 > 0 かつ random(1...100) ≤ 発動確率 → 必殺
 ```
 
-### クリティカル時の効果
+### 必殺時の効果
 
 1. 防御力が半減（baseDamage計算前に適用）
 2. ダメージボーナス適用（totalDamage計算後）
-3. 被クリティカル乗数適用
-4. クリティカル耐性適用
+3. 被必殺乗数適用
+4. 必殺耐性適用
 
 ## 最低ダメージ保証
 

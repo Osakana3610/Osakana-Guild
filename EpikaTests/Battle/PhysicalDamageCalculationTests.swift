@@ -6,8 +6,8 @@ import XCTest
 /// 目的: 物理ダメージ計算式が仕様通りに動作することを証明する
 ///
 /// 検証する計算式:
-///   attackPower = physicalAttack × attackRoll
-///   defensePower = physicalDefense × defenseRoll
+///   attackPower = physicalAttackScore × attackRoll
+///   defensePower = physicalDefenseScore × defenseRoll
 ///   baseDamage = max(1, attackPower - defensePower)
 ///   finalDamage = baseDamage × 各種乗数
 ///
@@ -15,7 +15,7 @@ import XCTest
 ///   - luck=35（上限境界値、testing-principles.md準拠）
 ///   - シード固定で乱数シーケンスを決定的に
 ///   - 期待値は実際の乱数から計算した黄金値
-///   - criticalRate=0 → クリティカル判定をスキップ
+///   - criticalChancePercent=0 → 必殺判定をスキップ
 nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
 
     // MARK: - 基本ダメージ計算
@@ -25,13 +25,13 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     /// 検証方法: 乱数を先読みして期待値を計算し、実測値と比較
     ///
     /// 計算式:
-    ///   attackPower = physicalAttack × attackRoll
-    ///   defensePower = physicalDefense × defenseRoll
+    ///   attackPower = physicalAttackScore × attackRoll
+    ///   defensePower = physicalDefenseScore × defenseRoll
     ///   baseDamage = max(1, attackPower - defensePower)
     func testBasicPhysicalDamage() {
         let seed: UInt64 = 42
-        let physicalAttack = 5000
-        let physicalDefense = 2000
+        let physicalAttackScore = 5000
+        let physicalDefenseScore = 2000
         let luck = 35
 
         // 乱数を先読みして期待値を計算
@@ -39,18 +39,18 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
         let defenseRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
 
-        let attackPower = Double(physicalAttack) * attackRoll
-        let defensePower = Double(physicalDefense) * defenseRoll
+        let attackPower = Double(physicalAttackScore) * attackRoll
+        let defensePower = Double(physicalDefenseScore) * defenseRoll
         let expectedDamage = Int(max(1.0, attackPower - defensePower).rounded())
 
         // テスト実行
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: physicalAttack,
+            physicalAttackScore: physicalAttackScore,
             luck: luck,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: physicalDefense,
+            physicalDefenseScore: physicalDefenseScore,
             luck: luck
         )
         var context = TestActorBuilder.makeContext(
@@ -70,7 +70,7 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
         XCTAssertEqual(damage, expectedDamage,
             "基本ダメージ: attackPower=\(attackPower), defensePower=\(defensePower), " +
             "期待\(expectedDamage), 実測\(damage)")
-        XCTAssertFalse(isCritical, "criticalRate=0でクリティカルが発動した")
+        XCTAssertFalse(isCritical, "criticalChancePercent=0で必殺が発動した")
     }
 
     /// 攻撃力が防御力を下回る場合の最低ダメージ検証
@@ -89,12 +89,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     /// 期待値: 1（最低ダメージ保証）
     func testMinimumDamage() {
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 1000,
+            physicalAttackScore: 1000,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 5000,
+            physicalDefenseScore: 5000,
             luck: 35
         )
         var context = TestActorBuilder.makeContext(
@@ -131,12 +131,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     func testDealtMultiplier() {
         // ベースライン（乗数なし）
         let baseAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var baseDefender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var baseContext = TestActorBuilder.makeContext(
@@ -156,13 +156,13 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
         skillEffects.damage.dealt.physical = 1.5
 
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0,
+            criticalChancePercent: 0,
             skillEffects: skillEffects
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var context = TestActorBuilder.makeContext(
@@ -194,12 +194,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     func testTakenMultiplier() {
         // ベースライン（乗数なし）
         let baseAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var baseDefender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var baseContext = TestActorBuilder.makeContext(
@@ -216,16 +216,16 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
 
         // 乗数あり（taken.physical = 0.8）
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
 
         var defenderSkillEffects = BattleActor.SkillEffects.neutral
         defenderSkillEffects.damage.taken.physical = 0.8
 
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             skillEffects: defenderSkillEffects
         )
@@ -259,12 +259,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     func testDealtAndTakenCombined() {
         // ベースライン（乗数なし）
         let baseAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var baseDefender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var baseContext = TestActorBuilder.makeContext(
@@ -284,9 +284,9 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
         attackerSkillEffects.damage.dealt.physical = 1.5
 
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0,
+            criticalChancePercent: 0,
             skillEffects: attackerSkillEffects
         )
 
@@ -294,7 +294,7 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
         defenderSkillEffects.damage.taken.physical = 0.8
 
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35,
             skillEffects: defenderSkillEffects
         )
@@ -361,12 +361,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
 
         // テスト実行: ベースライン
         let baseAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: baselineAttack,
+            physicalAttackScore: baselineAttack,
             luck: luck,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var baseDefender = TestActorBuilder.makeDefender(
-            physicalDefense: defense,
+            physicalDefenseScore: defense,
             luck: luck
         )
         var baseContext = TestActorBuilder.makeContext(
@@ -383,12 +383,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
 
         // テスト実行: ボーナス
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: bonusAttack,
+            physicalAttackScore: bonusAttack,
             luck: luck,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: defense,
+            physicalDefenseScore: defense,
             luck: luck
         )
         var context = TestActorBuilder.makeContext(
@@ -424,12 +424,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     func testDamageModifierAtHitIndex3() {
         // hitIndex=1 のベースライン
         let baseAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var baseDefender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var baseContext = TestActorBuilder.makeContext(
@@ -446,12 +446,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
 
         // hitIndex=3 で減衰
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var context = TestActorBuilder.makeContext(
@@ -483,12 +483,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     /// 期待: ダメージは1（最低ダメージ保証）
     func testZeroAttackPower_MinimumDamage() {
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 0,
+            physicalAttackScore: 0,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var context = TestActorBuilder.makeContext(
@@ -523,7 +523,7 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     ///   finalDamage = baseDamage × 1.5
     func testZeroDefense_FullDamage() {
         let seed: UInt64 = 42
-        let physicalAttack = 5000
+        let physicalAttackScore = 5000
         let luck = 35
 
         // 乱数を先読みして期待値を計算
@@ -531,15 +531,15 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: luck, random: &preRng)
         // initialStrikeBonus: difference = 5000 - 0*3 = 5000, steps = 5, bonus = 1.5
         let initialStrikeBonus = 1.5
-        let expectedDamage = Int((Double(physicalAttack) * attackRoll * initialStrikeBonus).rounded())
+        let expectedDamage = Int((Double(physicalAttackScore) * attackRoll * initialStrikeBonus).rounded())
 
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: physicalAttack,
+            physicalAttackScore: physicalAttackScore,
             luck: luck,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 0,
+            physicalDefenseScore: 0,
             luck: luck
         )
         var context = TestActorBuilder.makeContext(
@@ -562,12 +562,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     /// 両方0で最低ダメージ1を保証
     func testZeroAttackAndDefense_MinimumDamage() {
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 0,
+            physicalAttackScore: 0,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 0,
+            physicalDefenseScore: 0,
             luck: 35
         )
         var context = TestActorBuilder.makeContext(
@@ -587,26 +587,26 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
             "攻撃力0・防御力0: 最低ダメージ1を保証, 実測\(damage)")
     }
 
-    /// additionalDamageが正しく加算される
+    /// additionalDamageScoreが正しく加算される
     ///
-    /// 検証方法: 同じシードでadditionalDamage有無を比較
+    /// 検証方法: 同じシードでadditionalDamageScore有無を比較
     ///
     /// 入力:
-    ///   - additionalDamage: 500
+    ///   - additionalDamageScore: 500
     ///
     /// 期待: ダメージが500増加
     func testAdditionalDamage() {
         let seed: UInt64 = 42
 
-        // ベースライン（additionalDamage=0）
+        // ベースライン（additionalDamageScore=0）
         let baseAttacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0,
-            additionalDamage: 0
+            criticalChancePercent: 0,
+            additionalDamageScore: 0
         )
         var baseDefender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var baseContext = TestActorBuilder.makeContext(
@@ -621,15 +621,15 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
             context: &baseContext
         )
 
-        // additionalDamage=500
+        // additionalDamageScore=500
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0,
-            additionalDamage: 500
+            criticalChancePercent: 0,
+            additionalDamageScore: 500
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var context = TestActorBuilder.makeContext(
@@ -637,18 +637,18 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
             attacker: attacker,
             defender: defender
         )
-        let (additionalDamageResult, _) = BattleTurnEngine.computePhysicalDamage(
+        let (additionalDamageScoreResult, _) = BattleTurnEngine.computePhysicalDamage(
             attacker: attacker,
             defender: &defender,
             hitIndex: 1,
             context: &context
         )
 
-        // additionalDamageは最終ダメージに加算される
-        let difference = additionalDamageResult - baselineDamage
+        // additionalDamageScoreは最終ダメージに加算される
+        let difference = additionalDamageScoreResult - baselineDamage
         XCTAssertEqual(difference, 500,
-            "additionalDamage+500: 期待差分500, 実測差分\(difference) " +
-            "(baseline=\(baselineDamage), with=\(additionalDamageResult))")
+            "additionalDamageScore+500: 期待差分500, 実測差分\(difference) " +
+            "(baseline=\(baselineDamage), with=\(additionalDamageScoreResult))")
     }
 
     /// 極端に大きい値でオーバーフローしない
@@ -663,12 +663,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     /// 期待: 正の整数ダメージ（オーバーフローしない）
     func testExtremeHighAttack_NoOverflow() {
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 999999,
+            physicalAttackScore: 999999,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 1,
+            physicalDefenseScore: 1,
             luck: 35
         )
         var context = TestActorBuilder.makeContext(
@@ -688,7 +688,7 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
             "極端に大きい攻撃力: ダメージは正の整数, 実測\(damage)")
         // initialStrikeBonusが最大3.4なので、ダメージは攻撃力の3.4倍以下
         XCTAssertLessThanOrEqual(damage, 999999 * 4,
-            "極端に大きい攻撃力: ダメージは攻撃力の4倍以下（クリティカルなしinitialStrikeBonus最大3.4）, 実測\(damage)")
+            "極端に大きい攻撃力: ダメージは攻撃力の4倍以下（必殺なしinitialStrikeBonus最大3.4）, 実測\(damage)")
     }
 
     /// hitIndex=1とhitIndex=2ではダメージが同じ（減衰なし）
@@ -698,12 +698,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
     func testDamageModifierAtHitIndex1And2_NoReduction() {
         // hitIndex=1
         let attacker1 = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender1 = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var context1 = TestActorBuilder.makeContext(
@@ -720,12 +720,12 @@ nonisolated final class PhysicalDamageCalculationTests: XCTestCase {
 
         // hitIndex=2
         let attacker2 = TestActorBuilder.makeAttacker(
-            physicalAttack: 5000,
+            physicalAttackScore: 5000,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender2 = TestActorBuilder.makeDefender(
-            physicalDefense: 2000,
+            physicalDefenseScore: 2000,
             luck: 35
         )
         var context2 = TestActorBuilder.makeContext(

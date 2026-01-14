@@ -98,5 +98,5 @@ damage × innateResistances.breath
 | 防御力 | あり | なし |
 | 乱数乗数 | statMultiplier | speedMultiplier |
 | 乱数範囲（luck=35） | 0.75〜1.00 | 0.50〜1.00 |
-| クリティカル | あり | なし |
+| 必殺 | あり | なし |
 | 追加ダメージ | 物理のみ | なし |

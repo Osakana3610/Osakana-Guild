@@ -48,8 +48,8 @@ extension BattleTurnEngine {
                                    attacker: BattleActor,
                                    context: inout BattleContext) -> Bool {
         guard defender.skillEffects.combat.parryEnabled else { return false }
-        let defenderBonus = Double(defender.snapshot.additionalDamage) * 0.25
-        let attackerPenalty = Double(attacker.snapshot.additionalDamage) * 0.5
+        let defenderBonus = Double(defender.snapshot.additionalDamageScore) * 0.25
+        let attackerPenalty = Double(attacker.snapshot.additionalDamageScore) * 0.5
         let base = 10.0 + defenderBonus - attackerPenalty + defender.skillEffects.combat.parryBonusPercent
         let chance = max(0, min(100, Int((base * defender.skillEffects.combat.procChanceMultiplier).rounded())))
         guard BattleRandomSystem.percentChance(chance, random: &context.random) else { return false }
@@ -61,7 +61,7 @@ extension BattleTurnEngine {
                                          attacker: BattleActor,
                                          context: inout BattleContext) -> Bool {
         guard defender.skillEffects.combat.shieldBlockEnabled else { return false }
-        let base = 30.0 - Double(attacker.snapshot.additionalDamage) / 2.0 + defender.skillEffects.combat.shieldBlockBonusPercent
+        let base = 30.0 - Double(attacker.snapshot.additionalDamageScore) / 2.0 + defender.skillEffects.combat.shieldBlockBonusPercent
         let chance = max(0, min(100, Int((base * defender.skillEffects.combat.procChanceMultiplier).rounded())))
         guard BattleRandomSystem.percentChance(chance, random: &context.random) else { return false }
         // シールドブロックのログはapplyAttackOutcomeで追加される
@@ -342,8 +342,8 @@ extension BattleTurnEngine {
         let baseHits = max(1.0, attacker.snapshot.attackCount)
         let scaledHits = max(1, Int(baseHits * reaction.attackCountMultiplier))
         var modifiedAttacker = attacker
-        let scaledCritical = Int((Double(modifiedAttacker.snapshot.criticalRate) * reaction.criticalRateMultiplier).rounded(.down))
-        modifiedAttacker.snapshot.criticalRate = max(0, min(100, scaledCritical))
+        let scaledCritical = Int((Double(modifiedAttacker.snapshot.criticalChancePercent) * reaction.criticalChancePercentMultiplier).rounded(.down))
+        modifiedAttacker.snapshot.criticalChancePercent = max(0, min(100, scaledCritical))
 
         let targetIdx = context.actorIndex(for: target.0, arrayIndex: target.1)
         let attackerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)

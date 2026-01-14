@@ -1,0 +1,57 @@
+"baseStat.strength" = "力";
+"baseStat.wisdom" = "知恵";
+"baseStat.spirit" = "精神";
+"baseStat.vitality" = "体力";
+"baseStat.agility" = "敏捷";
+"baseStat.luck" = "運";
+
+"baseStat.strength.short" = "力";
+"baseStat.wisdom.short" = "知";
+"baseStat.spirit.short" = "精";
+"baseStat.vitality.short" = "体";
+"baseStat.agility.short" = "速";
+"baseStat.luck.short" = "運";
+
+"combatStat.maxHP" = "最大HP";
+"combatStat.physicalAttack" = "物理攻撃";
+"combatStat.physicalAttack.martial" = "物理攻撃(格闘)";
+"combatStat.magicalAttack" = "魔法攻撃";
+"combatStat.physicalDefense" = "物理防御";
+"combatStat.magicalDefense" = "魔法防御";
+"combatStat.hit" = "命中";
+"combatStat.evasion" = "回避";
+"combatStat.criticalChancePercent" = "必殺率";
+"combatStat.attackCount" = "攻撃回数";
+"combatStat.magicalHealing" = "魔法回復力";
+"combatStat.trapRemoval" = "罠解除";
+"combatStat.additionalDamage" = "追加ダメージ";
+"combatStat.breathDamage" = "ブレスダメージ";
+
+"combatStat.maxHP.short" = "HP";
+"combatStat.physicalAttack.short" = "物攻";
+"combatStat.magicalAttack.short" = "魔攻";
+"combatStat.physicalDefense.short" = "物防";
+"combatStat.magicalDefense.short" = "魔防";
+"combatStat.hit.short" = "命中";
+"combatStat.evasion.short" = "回避";
+"combatStat.criticalChancePercent.short" = "必殺率";
+"combatStat.attackCount.short" = "攻撃回数";
+"combatStat.magicalHealing.short" = "魔法回復力";
+"combatStat.trapRemoval.short" = "罠解除";
+"combatStat.additionalDamage.short" = "追加ダメージ";
+"combatStat.breathDamage.short" = "ブレスダメージ";
+
+"actionPreference.attack" = "物理攻撃";
+"actionPreference.priestMagic" = "僧侶魔法";
+"actionPreference.mageMagic" = "魔法使い魔法";
+"actionPreference.breath" = "ブレス";
+
+"resistance.physical" = "物理";
+"resistance.piercing" = "貫通";
+"resistance.critical" = "必殺";
+"resistance.breath" = "ブレス";
+
+"damageModifier.physicalDamageDealt" = "与物理ダメージ";
+"damageModifier.physicalDamageTaken" = "被物理ダメージ";
+"damageModifier.magicalDamageTaken" = "被魔法ダメージ";
+"damageModifier.breathDamageTaken" = "被ブレスダメージ";

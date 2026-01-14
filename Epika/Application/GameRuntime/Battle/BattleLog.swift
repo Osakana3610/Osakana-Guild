@@ -40,7 +40,7 @@ nonisolated struct BattleActionEntry: Codable, Sendable {
             case physicalParry
             case physicalBlock
             case physicalKill
-            case martialArts
+            case martial
             case magicDamage
             case magicHeal
             case magicMiss
@@ -224,7 +224,7 @@ enum ActionKind: UInt8, Codable, Sendable {
     case physicalParry = 22       // "{actor}の受け流し！"
     case physicalBlock = 23       // "{actor}は大盾で防いだ！"
     case physicalKill = 24        // "{target}を倒した！"
-    case martialArts = 25         // "{actor}の格闘戦！"
+    case martial = 25             // "{actor}の格闘戦！"
 
     // 魔法結果
     case magicDamage = 30         // "{target}に{value}のダメージ！"

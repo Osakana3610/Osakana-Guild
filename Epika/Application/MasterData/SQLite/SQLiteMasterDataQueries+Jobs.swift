@@ -24,52 +24,52 @@ extension SQLiteMasterDataManager {
     func fetchAllJobs() throws -> [JobDefinition] {
         struct CoefficientBuilder {
             var maxHP: Double = 0.0
-            var physicalAttack: Double = 0.0
-            var magicalAttack: Double = 0.0
-            var physicalDefense: Double = 0.0
-            var magicalDefense: Double = 0.0
-            var hitRate: Double = 0.0
-            var evasionRate: Double = 0.0
-            var criticalRate: Double = 0.0
+            var physicalAttackScore: Double = 0.0
+            var magicalAttackScore: Double = 0.0
+            var physicalDefenseScore: Double = 0.0
+            var magicalDefenseScore: Double = 0.0
+            var hitScore: Double = 0.0
+            var evasionScore: Double = 0.0
+            var criticalChancePercent: Double = 0.0
             var attackCount: Double = 0.0
-            var magicalHealing: Double = 0.0
-            var trapRemoval: Double = 0.0
-            var additionalDamage: Double = 0.0
-            var breathDamage: Double = 0.0
+            var magicalHealingScore: Double = 0.0
+            var trapRemovalScore: Double = 0.0
+            var additionalDamageScore: Double = 0.0
+            var breathDamageScore: Double = 0.0
 
             mutating func set(stat: CombatStat, value: Double) {
                 switch stat {
                 case .maxHP: maxHP = value
-                case .physicalAttack: physicalAttack = value
-                case .magicalAttack: magicalAttack = value
-                case .physicalDefense: physicalDefense = value
-                case .magicalDefense: magicalDefense = value
-                case .hitRate: hitRate = value
-                case .evasionRate: evasionRate = value
-                case .criticalRate: criticalRate = value
+                case .physicalAttackScore: physicalAttackScore = value
+                case .magicalAttackScore: magicalAttackScore = value
+                case .physicalDefenseScore: physicalDefenseScore = value
+                case .magicalDefenseScore: magicalDefenseScore = value
+                case .hitScore: hitScore = value
+                case .evasionScore: evasionScore = value
+                case .criticalChancePercent: criticalChancePercent = value
                 case .attackCount: attackCount = value
-                case .magicalHealing: magicalHealing = value
-                case .trapRemoval: trapRemoval = value
-                case .additionalDamage: additionalDamage = value
-                case .breathDamage: breathDamage = value
+                case .magicalHealingScore: magicalHealingScore = value
+                case .trapRemovalScore: trapRemovalScore = value
+                case .additionalDamageScore: additionalDamageScore = value
+                case .breathDamageScore: breathDamageScore = value
                 }
             }
 
             func build() -> JobDefinition.CombatCoefficients {
                 JobDefinition.CombatCoefficients(
                     maxHP: maxHP,
-                    physicalAttack: physicalAttack,
-                    magicalAttack: magicalAttack,
-                    physicalDefense: physicalDefense,
-                    magicalDefense: magicalDefense,
-                    hitRate: hitRate,
-                    evasionRate: evasionRate,
-                    criticalRate: criticalRate,
+                    physicalAttackScore: physicalAttackScore,
+                    magicalAttackScore: magicalAttackScore,
+                    physicalDefenseScore: physicalDefenseScore,
+                    magicalDefenseScore: magicalDefenseScore,
+                    hitScore: hitScore,
+                    evasionScore: evasionScore,
+                    criticalChancePercent: criticalChancePercent,
                     attackCount: attackCount,
-                    magicalHealing: magicalHealing,
-                    trapRemoval: trapRemoval,
-                    additionalDamage: additionalDamage,
-                    breathDamage: breathDamage
+                    magicalHealingScore: magicalHealingScore,
+                    trapRemovalScore: trapRemovalScore,
+                    additionalDamageScore: additionalDamageScore,
+                    breathDamageScore: breathDamageScore
                 )
             }
         }

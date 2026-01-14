@@ -71,7 +71,7 @@ extension BattleTurnEngine {
         let actionEntryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
                                                                 kind: .physicalAttack)
 
-        let useAntiHealing = attacker.skillEffects.misc.antiHealingEnabled && attacker.snapshot.magicalHealing > 0
+        let useAntiHealing = attacker.skillEffects.misc.antiHealingEnabled && attacker.snapshot.magicalHealingScore > 0
         let isMartial = shouldUseMartialAttack(attacker: attacker)
         let accuracyMultiplier = isMartial ? BattleContext.martialAccuracyMultiplier : 1.0
 
@@ -276,24 +276,24 @@ extension BattleTurnEngine {
 
         switch descriptor.kind {
         case .specialA:
-            let combined = attacker.snapshot.physicalAttack + attacker.snapshot.magicalAttack
-            overrides = PhysicalAttackOverrides(physicalAttackOverride: combined, maxAttackMultiplier: 3.0)
+            let combined = attacker.snapshot.physicalAttackScore + attacker.snapshot.magicalAttackScore
+            overrides = PhysicalAttackOverrides(physicalAttackScoreOverride: combined, maxAttackMultiplier: 3.0)
         case .specialB:
             overrides = PhysicalAttackOverrides(ignoreDefense: true)
             hitCountOverride = 3
         case .specialC:
-            let combined = attacker.snapshot.physicalAttack + attacker.snapshot.hitRate
-            overrides = PhysicalAttackOverrides(physicalAttackOverride: combined, forceHit: true)
+            let combined = attacker.snapshot.physicalAttackScore + attacker.snapshot.hitScore
+            overrides = PhysicalAttackOverrides(physicalAttackScoreOverride: combined, forceHit: true)
             hitCountOverride = 4
         case .specialD:
-            let doubled = attacker.snapshot.physicalAttack * 2
-            overrides = PhysicalAttackOverrides(physicalAttackOverride: doubled, criticalRateMultiplier: 2.0)
+            let doubled = attacker.snapshot.physicalAttackScore * 2
+            overrides = PhysicalAttackOverrides(physicalAttackScoreOverride: doubled, criticalChancePercentMultiplier: 2.0)
             hitCountOverride = max(1, Int(attacker.snapshot.attackCount * 2))
             specialAccuracyMultiplier = 2.0
         case .specialE:
-            let scaled = attacker.snapshot.physicalAttack * max(1, Int(attacker.snapshot.attackCount))
+            let scaled = attacker.snapshot.physicalAttackScore * max(1, Int(attacker.snapshot.attackCount))
             // 現在divineカテゴリに相当するraceIdは未定義（将来的に追加可能）
-            overrides = PhysicalAttackOverrides(physicalAttackOverride: scaled, doubleDamageAgainstRaceIds: [])
+            overrides = PhysicalAttackOverrides(physicalAttackScoreOverride: scaled, doubleDamageAgainstRaceIds: [])
             hitCountOverride = 1
         }
 
@@ -327,25 +327,25 @@ extension BattleTurnEngine {
         var defenderCopy = defender
 
         if let overrides {
-            if let overrideAttack = overrides.physicalAttackOverride {
+            if let overrideAttack = overrides.physicalAttackScoreOverride {
                 var snapshot = attackerCopy.snapshot
                 var adjusted = overrideAttack
                 if overrides.maxAttackMultiplier > 1.0 {
-                    let cap = Int((Double(attacker.snapshot.physicalAttack) * overrides.maxAttackMultiplier).rounded(.down))
+                    let cap = Int((Double(attacker.snapshot.physicalAttackScore) * overrides.maxAttackMultiplier).rounded(.down))
                     adjusted = min(adjusted, cap)
                 }
-                snapshot.physicalAttack = max(0, adjusted)
+                snapshot.physicalAttackScore = max(0, adjusted)
                 attackerCopy.snapshot = snapshot
             }
             if overrides.ignoreDefense {
                 var snapshot = defenderCopy.snapshot
-                snapshot.physicalDefense = 0
+                snapshot.physicalDefenseScore = 0
                 defenderCopy.snapshot = snapshot
             }
-            if overrides.criticalRateMultiplier > 1.0 {
+            if overrides.criticalChancePercentMultiplier > 1.0 {
                 var snapshot = attackerCopy.snapshot
-                let scaled = Double(snapshot.criticalRate) * overrides.criticalRateMultiplier
-                snapshot.criticalRate = max(0, min(100, Int(scaled.rounded())))
+                let scaled = Double(snapshot.criticalChancePercent) * overrides.criticalChancePercentMultiplier
+                snapshot.criticalChancePercent = max(0, min(100, Int(scaled.rounded())))
                 attackerCopy.snapshot = snapshot
             }
         }
@@ -595,7 +595,7 @@ extension BattleTurnEngine {
     }
 
     nonisolated static func shouldUseMartialAttack(attacker: BattleActor) -> Bool {
-        attacker.isMartialEligible && attacker.isAlive && attacker.snapshot.physicalAttack > 0
+        attacker.isMartialEligible && attacker.isAlive && attacker.snapshot.physicalAttackScore > 0
     }
 
     nonisolated static func martialFollowUpDescriptor(for attacker: BattleActor) -> FollowUpDescriptor? {

@@ -62,20 +62,20 @@ enum EffectValueKey: Int, Sendable, Hashable, CaseIterable {
     case chancePercent = 12
     case charges = 13
     case count = 14
-    case criticalRateMultiplier = 15
+    case criticalChancePercentMultiplier = 15
     case damageDealtPercent = 16
     case damagePercent = 17
     case defensePercentPerTurn = 18
     case deltaPercent = 19
     case duration = 20
     case enabled = 21
-    case evasionRatePerTurn = 22
+    case evasionScoreAdditivePerTurn = 22
     case everyTurns = 23
     case extraCharges = 24
     case gainOnPhysicalHit = 25
     case guaranteed = 26
-    case hitRatePerTurn = 27
-    case hitRatePercent = 28
+    case hitScoreAdditivePerTurn = 27
+    case hitScoreAdditive = 28
     case hostile = 29
     case hostileAll = 30
     // 31: hpPercent 削除済み

@@ -21,8 +21,8 @@ nonisolated final class HitCalculationTests: XCTestCase {
     /// 検証方法: 理論上0.95を超える条件を作り、結果が0.95にクランプされることを確認
     ///
     /// 入力:
-    ///   - 攻撃者: hitRate=200, luck=35（極端に高い命中）
-    ///   - 防御者: evasionRate=0, luck=1（極端に低い回避）
+    ///   - 攻撃者: hitScore=200, luck=35（極端に高い命中）
+    ///   - 防御者: evasionScore=0, luck=1（極端に低い回避）
     ///
     /// 理論値（クランプ前）:
     ///   baseRatio = 200 / (200 + 1) ≈ 0.995
@@ -32,8 +32,8 @@ nonisolated final class HitCalculationTests: XCTestCase {
     ///
     /// 期待: クランプにより0.95
     func testHitChanceUpperBoundClamp() {
-        let attacker = TestActorBuilder.makeAttacker(hitRate: 200, luck: 35)
-        let defender = TestActorBuilder.makeDefender(evasionRate: 0, luck: 1)
+        let attacker = TestActorBuilder.makeAttacker(hitScore: 200, luck: 35)
+        let defender = TestActorBuilder.makeDefender(evasionScore: 0, luck: 1)
         var context = TestActorBuilder.makeContext(seed: 42, attacker: attacker, defender: defender)
 
         let hitChance = BattleTurnEngine.computeHitChance(
@@ -54,8 +54,8 @@ nonisolated final class HitCalculationTests: XCTestCase {
     /// 検証方法: 理論上0.05を下回る条件を作り、結果が0.05にクランプされることを確認
     ///
     /// 入力:
-    ///   - 攻撃者: hitRate=1, luck=1（極端に低い命中）
-    ///   - 防御者: evasionRate=200, luck=35, agility=20（極端に高い回避）
+    ///   - 攻撃者: hitScore=1, luck=1（極端に低い命中）
+    ///   - 防御者: evasionScore=200, luck=35, agility=20（極端に高い回避）
     ///
     /// 理論値（クランプ前）:
     ///   baseRatio = 1 / (1 + 200) ≈ 0.005
@@ -65,8 +65,8 @@ nonisolated final class HitCalculationTests: XCTestCase {
     ///
     /// 期待: クランプにより0.05（agility<=20でclampProbabilityの補正なし）
     func testHitChanceLowerBoundClamp() {
-        let attacker = TestActorBuilder.makeAttacker(hitRate: 1, luck: 1)
-        let defender = TestActorBuilder.makeDefender(evasionRate: 200, luck: 35)
+        let attacker = TestActorBuilder.makeAttacker(hitScore: 1, luck: 1)
+        let defender = TestActorBuilder.makeDefender(evasionScore: 200, luck: 35)
         var context = TestActorBuilder.makeContext(seed: 42, attacker: attacker, defender: defender)
 
         let hitChance = BattleTurnEngine.computeHitChance(
@@ -139,7 +139,7 @@ nonisolated final class HitCalculationTests: XCTestCase {
 
     /// luck=1での命中率分布テスト
     ///
-    /// 条件: hitRate=70, evasionRate=130, 両者luck=1
+    /// 条件: hitScore=70, evasionScore=130, 両者luck=1
     ///
     /// 期待値の導出:
     ///   baseRatio = 70 / (70 + 130) = 0.35
@@ -159,8 +159,8 @@ nonisolated final class HitCalculationTests: XCTestCase {
         var totalHitChance = 0.0
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(hitRate: 70, luck: 1)
-            let defender = TestActorBuilder.makeDefender(evasionRate: 130, luck: 1)
+            let attacker = TestActorBuilder.makeAttacker(hitScore: 70, luck: 1)
+            let defender = TestActorBuilder.makeDefender(evasionScore: 130, luck: 1)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
                 attacker: attacker,
@@ -192,7 +192,7 @@ nonisolated final class HitCalculationTests: XCTestCase {
 
     /// luck=18での命中率分布テスト
     ///
-    /// 条件: hitRate=100, evasionRate=100, 両者luck=18
+    /// 条件: hitScore=100, evasionScore=100, 両者luck=18
     ///
     /// 期待値の導出:
     ///   luck=18 → a = 0.58, b = 1.0
@@ -206,8 +206,8 @@ nonisolated final class HitCalculationTests: XCTestCase {
         var totalHitChance = 0.0
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(hitRate: 100, luck: 18)
-            let defender = TestActorBuilder.makeDefender(evasionRate: 100, luck: 18)
+            let attacker = TestActorBuilder.makeAttacker(hitScore: 100, luck: 18)
+            let defender = TestActorBuilder.makeDefender(evasionScore: 100, luck: 18)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
                 attacker: attacker,
@@ -239,7 +239,7 @@ nonisolated final class HitCalculationTests: XCTestCase {
 
     /// luck=35での命中率分布テスト
     ///
-    /// 条件: hitRate=100, evasionRate=100, 両者luck=35
+    /// 条件: hitScore=100, evasionScore=100, 両者luck=35
     ///
     /// 期待値の導出:
     ///   luck=35 → a = 0.75, b = 1.0
@@ -253,8 +253,8 @@ nonisolated final class HitCalculationTests: XCTestCase {
         var totalHitChance = 0.0
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(hitRate: 100, luck: 35)
-            let defender = TestActorBuilder.makeDefender(evasionRate: 100, luck: 35)
+            let attacker = TestActorBuilder.makeAttacker(hitScore: 100, luck: 35)
+            let defender = TestActorBuilder.makeDefender(evasionScore: 100, luck: 35)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
                 attacker: attacker,
@@ -290,8 +290,8 @@ nonisolated final class HitCalculationTests: XCTestCase {
     ///
     /// luck差=34（35-1）→ luckModifier = 34 × 0.002 = 0.068
     func testLuckModifierAdvantage() {
-        let attacker = TestActorBuilder.makeAttacker(hitRate: 50, luck: 35)
-        let defender = TestActorBuilder.makeDefender(evasionRate: 50, luck: 1)
+        let attacker = TestActorBuilder.makeAttacker(hitScore: 50, luck: 35)
+        let defender = TestActorBuilder.makeDefender(evasionScore: 50, luck: 1)
         var context = TestActorBuilder.makeContext(seed: 42, attacker: attacker, defender: defender)
 
         let hitChance = BattleTurnEngine.computeHitChance(
@@ -314,8 +314,8 @@ nonisolated final class HitCalculationTests: XCTestCase {
     ///
     /// luck差=-34（1-35）→ luckModifier = -34 × 0.002 = -0.068
     func testLuckModifierDisadvantage() {
-        let attacker = TestActorBuilder.makeAttacker(hitRate: 50, luck: 1)
-        let defender = TestActorBuilder.makeDefender(evasionRate: 50, luck: 35)
+        let attacker = TestActorBuilder.makeAttacker(hitScore: 50, luck: 1)
+        let defender = TestActorBuilder.makeDefender(evasionScore: 50, luck: 35)
         var context = TestActorBuilder.makeContext(seed: 42, attacker: attacker, defender: defender)
 
         let hitChance = BattleTurnEngine.computeHitChance(

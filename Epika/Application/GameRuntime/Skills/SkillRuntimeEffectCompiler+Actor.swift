@@ -35,7 +35,7 @@ extension BattleActor.SkillEffects.Reaction {
         // statScalingをコンパイル時に計算してbaseChanceに加算
         baseChance += payload.scaledValue(from: stats)
         let attackCountMultiplier = payload.value[.attackCountMultiplier] ?? 0.3
-        let criticalRateMultiplier = payload.value[.criticalRateMultiplier] ?? 0.5
+        let criticalChancePercentMultiplier = payload.value[.criticalChancePercentMultiplier] ?? 0.5
         let accuracyMultiplier = payload.value[.accuracyMultiplier] ?? 1.0
         let requiresAllyBehind = (payload.parameters[.requiresAllyBehind] == 1)
 
@@ -46,7 +46,7 @@ extension BattleActor.SkillEffects.Reaction {
                                                  damageType: damageType,
                                                  baseChancePercent: baseChance,
                                                  attackCountMultiplier: attackCountMultiplier,
-                                                 criticalRateMultiplier: criticalRateMultiplier,
+                                                 criticalChancePercentMultiplier: criticalChancePercentMultiplier,
                                                  accuracyMultiplier: accuracyMultiplier,
                                                  requiresMartial: requiresMartial,
                                                  requiresAllyBehind: requiresAllyBehind)
@@ -61,10 +61,10 @@ extension BattleActor.SkillEffects.RowProfile {
             base = parsedBase
         }
         if parameters[.nearApt] == 1 {
-            hasMeleeApt = true
+            hasNearApt = true
         }
         if parameters[.farApt] == 1 {
-            hasRangedApt = true
+            hasFarApt = true
         }
     }
 }

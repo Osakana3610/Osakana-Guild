@@ -241,7 +241,7 @@ struct BattleAttackHistory: Sendable, Hashable {
 struct BattleInnateResistances: Sendable, Hashable {
     let physical: Double      // 物理攻撃
     let piercing: Double      // 追加ダメージ（貫通）
-    let critical: Double      // クリティカルダメージ
+    let critical: Double      // 必殺ダメージ
     let breath: Double        // ブレス
     let spells: [UInt8: Double]  // 個別魔法（spellId → 倍率）
 
@@ -471,7 +471,7 @@ nonisolated struct BattleActor: Sendable {
             let damageType: BattleDamageType
             let baseChancePercent: Double  // statScalingはコンパイル時に計算済み
             let attackCountMultiplier: Double
-            let criticalRateMultiplier: Double
+            let criticalChancePercentMultiplier: Double
             let accuracyMultiplier: Double
             let requiresMartial: Bool
             let requiresAllyBehind: Bool
@@ -589,12 +589,12 @@ nonisolated struct BattleActor: Sendable {
 
         struct ResurrectionActive: Sendable, Hashable {
             enum HPScale: UInt8, Sendable {
-                case magicalHealing = 1
+                case magicalHealingScore = 1
                 case maxHP5Percent = 2
 
                 nonisolated init?(identifier: String) {
                     switch identifier {
-                    case "magicalHealing": self = .magicalHealing
+                    case "magicalHealingScore": self = .magicalHealingScore
                     case "maxHP5Percent": self = .maxHP5Percent
                     default: return nil
                     }
@@ -602,7 +602,7 @@ nonisolated struct BattleActor: Sendable {
 
                 nonisolated var identifier: String {
                     switch self {
-                    case .magicalHealing: return "magicalHealing"
+                    case .magicalHealingScore: return "magicalHealingScore"
                     case .maxHP5Percent: return "maxHP5Percent"
                     }
                 }
@@ -626,34 +626,34 @@ nonisolated struct BattleActor: Sendable {
 
         struct RowProfile: Sendable, Hashable {
             enum Base: UInt8, Sendable {
-                case melee = 1
-                case ranged = 2
+                case balanced = 1
+                case near = 2
                 case mixed = 3
-                case balanced = 4
+                case far = 4
 
                 nonisolated init?(identifier: String) {
                     switch identifier {
-                    case "melee": self = .melee
-                    case "ranged": self = .ranged
-                    case "mixed": self = .mixed
                     case "balanced": self = .balanced
+                    case "near": self = .near
+                    case "mixed": self = .mixed
+                    case "far": self = .far
                     default: return nil
                     }
                 }
 
                 nonisolated var identifier: String {
                     switch self {
-                    case .melee: return "melee"
-                    case .ranged: return "ranged"
-                    case .mixed: return "mixed"
                     case .balanced: return "balanced"
+                    case .near: return "near"
+                    case .mixed: return "mixed"
+                    case .far: return "far"
                     }
                 }
             }
 
-            var base: Base = .melee
-            var hasMeleeApt: Bool = false
-            var hasRangedApt: Bool = false
+            var base: Base = .near
+            var hasNearApt: Bool = false
+            var hasFarApt: Bool = false
         }
 
         struct Runaway: Sendable, Hashable {
@@ -739,7 +739,7 @@ nonisolated struct BattleActor: Sendable {
 
         struct CumulativeHitBonus: Sendable, Hashable {
             let damagePercentPerHit: Double  // 命中ごとの追加ダメージ%
-            let hitRatePercentPerHit: Double // 命中ごとの命中率上昇%
+            let hitScorePerHit: Double // 命中ごとの命中スコア加算
         }
 
         struct EnemyStatDebuff: Sendable, Hashable {

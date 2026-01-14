@@ -30,21 +30,21 @@ struct CharacterCombatStatsSection: View {
     var body: some View {
         let stats = character.combat
         let isMartial = character.isMartialEligible
-        let physicalLabel = isMartial ? "物理攻撃(格闘)" : "物理攻撃"
+        let physicalLabel = isMartial ? L10n.CombatStat.physicalAttackMartial : CombatStat.physicalAttackScore.displayName
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            CombatStatRow(label: "最大HP", value: stats.maxHP)
-            CombatStatRow(label: physicalLabel, value: stats.physicalAttack)
-            CombatStatRow(label: "魔法攻撃", value: stats.magicalAttack)
-            CombatStatRow(label: "物理防御", value: stats.physicalDefense)
-            CombatStatRow(label: "魔法防御", value: stats.magicalDefense)
-            CombatStatRow(label: "命中", value: stats.hitRate)
-            CombatStatRow(label: "回避", value: stats.evasionRate)
-            CombatStatRow(label: "必殺率", valueText: "\(stats.criticalRate)%")
-            CombatStatRowDouble(label: "攻撃回数", value: stats.attackCount)
-            CombatStatRow(label: "魔法回復力", value: stats.magicalHealing)
-            CombatStatRow(label: "罠解除", value: stats.trapRemoval)
-            CombatStatRow(label: "追加ダメージ", value: stats.additionalDamage)
-            CombatStatRow(label: "ブレスダメージ", value: stats.breathDamage)
+            CombatStatRow(label: CombatStat.maxHP.displayName, value: stats.maxHP)
+            CombatStatRow(label: physicalLabel, value: stats.physicalAttackScore)
+            CombatStatRow(label: CombatStat.magicalAttackScore.displayName, value: stats.magicalAttackScore)
+            CombatStatRow(label: CombatStat.physicalDefenseScore.displayName, value: stats.physicalDefenseScore)
+            CombatStatRow(label: CombatStat.magicalDefenseScore.displayName, value: stats.magicalDefenseScore)
+            CombatStatRow(label: CombatStat.hitScore.displayName, value: stats.hitScore)
+            CombatStatRow(label: CombatStat.evasionScore.displayName, value: stats.evasionScore)
+            CombatStatRow(label: CombatStat.criticalChancePercent.displayName, valueText: "\(stats.criticalChancePercent)%")
+            CombatStatRowDouble(label: CombatStat.attackCount.displayName, value: stats.attackCount)
+            CombatStatRow(label: CombatStat.magicalHealingScore.displayName, value: stats.magicalHealingScore)
+            CombatStatRow(label: CombatStat.trapRemovalScore.displayName, value: stats.trapRemovalScore)
+            CombatStatRow(label: CombatStat.additionalDamageScore.displayName, value: stats.additionalDamageScore)
+            CombatStatRow(label: CombatStat.breathDamageScore.displayName, value: stats.breathDamageScore)
         }
     }
 }

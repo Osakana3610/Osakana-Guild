@@ -48,14 +48,14 @@ percentChance(nullifyChance) が成功 → ダメージ0
 
 魔法無効化スキルを持つ場合、確率でダメージを完全に無効化する。
 
-### 必殺魔法（魔法クリティカル）
+### 必殺魔法（魔法必殺）
 
 ```
 criticalChance = magicCriticalChancePercent（0-100にクランプ）
 percentChance(criticalChance) が成功 → damage × magicCriticalMultiplier
 ```
 
-物理のクリティカルとは別の判定。発動時に`magicCriticalMultiplier`が乗算される。
+物理の必殺とは別の判定。発動時に`magicCriticalMultiplier`が乗算される。
 
 ### 個別魔法耐性
 
@@ -124,8 +124,8 @@ damage × innateResistances.spells[spellId, default: 1.0]
 | 項目 | 物理 | 魔法 |
 |------|------|------|
 | 防御力効果 | 100% | 50% |
-| クリティカル判定 | shouldTriggerCritical | magicCriticalChancePercent |
-| 防御力半減（クリティカル） | あり | なし（魔法クリティカルは乗数のみ） |
+| 必殺判定 | shouldTriggerCritical | magicCriticalChancePercent |
+| 防御力半減（必殺） | あり | なし（魔法必殺は乗数のみ） |
 | 追加ダメージ | あり | なし |
 | 累積ヒットボーナス | あり | なし |
 | 初撃ボーナス | あり | なし |

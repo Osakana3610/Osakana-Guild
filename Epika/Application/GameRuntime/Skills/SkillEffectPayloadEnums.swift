@@ -199,13 +199,13 @@ enum SkillEffectValueType: UInt8, CaseIterable, Sendable, Hashable {
     case initialBonus = 49
     case accuracyMultiplier = 50
     case attackCountMultiplier = 51
-    case criticalRateMultiplier = 52
+    case criticalChancePercentMultiplier = 52
     case attackCountPercentPerTurn = 53
     case attackPercentPerTurn = 54
     case defensePercentPerTurn = 55
-    case hitRatePerTurn = 56
-    case evasionRatePerTurn = 57
-    case hitRatePercent = 58
+    case hitScoreAdditivePerTurn = 56
+    case evasionScoreAdditivePerTurn = 57
+    case hitScoreAdditive = 58
     case gainOnPhysicalHit = 59
     case regenAmount = 60
     case regenCap = 61
@@ -265,13 +265,13 @@ enum SkillEffectValueType: UInt8, CaseIterable, Sendable, Hashable {
         case "initialBonus": self = .initialBonus
         case "accuracyMultiplier": self = .accuracyMultiplier
         case "attackCountMultiplier": self = .attackCountMultiplier
-        case "criticalRateMultiplier": self = .criticalRateMultiplier
+        case "criticalChancePercentMultiplier": self = .criticalChancePercentMultiplier
         case "attackCountPercentPerTurn": self = .attackCountPercentPerTurn
         case "attackPercentPerTurn": self = .attackPercentPerTurn
         case "defensePercentPerTurn": self = .defensePercentPerTurn
-        case "hitRatePerTurn": self = .hitRatePerTurn
-        case "evasionRatePerTurn": self = .evasionRatePerTurn
-        case "hitRatePercent": self = .hitRatePercent
+        case "hitScoreAdditivePerTurn": self = .hitScoreAdditivePerTurn
+        case "evasionScoreAdditivePerTurn": self = .evasionScoreAdditivePerTurn
+        case "hitScoreAdditive": self = .hitScoreAdditive
         case "gainOnPhysicalHit": self = .gainOnPhysicalHit
         case "regenAmount": self = .regenAmount
         case "regenCap": self = .regenCap
@@ -334,13 +334,13 @@ enum SkillEffectValueType: UInt8, CaseIterable, Sendable, Hashable {
         case .initialBonus: return "initialBonus"
         case .accuracyMultiplier: return "accuracyMultiplier"
         case .attackCountMultiplier: return "attackCountMultiplier"
-        case .criticalRateMultiplier: return "criticalRateMultiplier"
+        case .criticalChancePercentMultiplier: return "criticalChancePercentMultiplier"
         case .attackCountPercentPerTurn: return "attackCountPercentPerTurn"
         case .attackPercentPerTurn: return "attackPercentPerTurn"
         case .defensePercentPerTurn: return "defensePercentPerTurn"
-        case .hitRatePerTurn: return "hitRatePerTurn"
-        case .evasionRatePerTurn: return "evasionRatePerTurn"
-        case .hitRatePercent: return "hitRatePercent"
+        case .hitScoreAdditivePerTurn: return "hitScoreAdditivePerTurn"
+        case .evasionScoreAdditivePerTurn: return "evasionScoreAdditivePerTurn"
+        case .hitScoreAdditive: return "hitScoreAdditive"
         case .gainOnPhysicalHit: return "gainOnPhysicalHit"
         case .regenAmount: return "regenAmount"
         case .regenCap: return "regenCap"

@@ -43,7 +43,7 @@ struct EnemyDefinition: Identifiable, Sendable {
     struct Resistances: Sendable, Hashable {
         let physical: Double      // 物理攻撃
         let piercing: Double      // 追加ダメージ（貫通）
-        let critical: Double      // クリティカルダメージ
+        let critical: Double      // 必殺ダメージ
         let breath: Double        // ブレス
         let spells: [UInt8: Double]  // 個別魔法（spellId → 倍率）
 

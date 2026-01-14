@@ -240,24 +240,15 @@
 /* Begin PBXShellScriptBuildPhase section */
 		C13C660229700EE93B9AFC31 /* Generate MasterData */ = {
 			isa = PBXShellScriptBuildPhase;
-			basedOnDependencyAnalysis = 0;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
 			name = "Generate MasterData";
-			outputFileListPaths = (
-			);
 			outputPaths = (
 				"$(SRCROOT)/Tools/MasterDataGenerator/output/master_data.db",
 				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/master_data.db",
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Tools/MasterDataGenerator/generate_master_data.sh\"";
+			shellScript = (
+				"\"${SRCROOT}/Tools/MasterDataGenerator/generate_master_data.sh\"",
+			);
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

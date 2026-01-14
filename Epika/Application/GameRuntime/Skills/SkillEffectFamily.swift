@@ -28,8 +28,8 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case absorptionGeneral = 2
     case actionOrderShuffle = 3
     case actionOrderMultiplierGeneral = 4
-    case additionalDamageAdditive = 5
-    case additionalDamageMultiplier = 6
+    case additionalDamageScoreAdditive = 5
+    case additionalDamageScoreMultiplier = 6
     case antiHealingGeneral = 7
     case attackCountAdditive = 8
     case attackCountMultiplier = 9
@@ -41,10 +41,10 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case criticalDamageMultiplier = 15
     case criticalDamagePercent = 16
     case criticalDamageTakenMultiplierGeneral = 17
-    case criticalRateAdd = 18
-    case criticalRateCap = 19
-    case criticalRateMax = 20
-    case criticalRateMaxDelta = 21
+    case criticalChancePercentAdd = 18
+    case criticalChancePercentCap = 19
+    case criticalChancePercentMax = 20
+    case criticalChancePercentMaxDelta = 21
     case damageDealtMultiplierBreath = 22
     case damageDealtMultiplierMagical = 23
     case damageDealtMultiplierPhysical = 24
@@ -92,16 +92,16 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case extraActionGeneral = 66
     case growthMultiplierGeneral = 67
     case incompetenceStat = 68
-    case itemStatMultiplierCriticalRate = 69
-    case itemStatMultiplierEvasionRate = 70
-    case itemStatMultiplierHitRate = 71
-    case itemStatMultiplierMagicalAttack = 72
-    case itemStatMultiplierMagicalDefense = 73
-    case itemStatMultiplierMagicalHealing = 74
+    case itemStatMultiplierCriticalChancePercent = 69
+    case itemStatMultiplierEvasionScore = 70
+    case itemStatMultiplierHitScore = 71
+    case itemStatMultiplierMagicalAttackScore = 72
+    case itemStatMultiplierMagicalDefenseScore = 73
+    case itemStatMultiplierMagicalHealingScore = 74
     case itemStatMultiplierMaxHP = 75
-    case itemStatMultiplierPhysicalAttack = 76
-    case itemStatMultiplierPhysicalDefense = 77
-    case itemStatMultiplierTrapRemoval = 78
+    case itemStatMultiplierPhysicalAttackScore = 76
+    case itemStatMultiplierPhysicalDefenseScore = 77
+    case itemStatMultiplierTrapRemovalScore = 78
     case jobAssassinAccuracy = 79
     case jobAssassinCritDamage = 80
     case jobAssassinLethalBlow = 81
@@ -137,7 +137,7 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case jobMonkMeditate = 111
     case jobMonkSpirit = 112
     case jobMonkWard = 113
-    case jobNinjaCritRate = 114
+    case jobNinjaCriticalChancePercent = 114
     case jobNinjaDeathblow = 115
     case jobNinjaEvasion = 116
     case jobNinjaShadowClone = 117
@@ -172,7 +172,7 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case jobSwordsmanFollowup = 146
     case jobSwordsmanMultiAttack = 147
     case jobSwordsmanPhysPower = 148
-    case jobThiefCritRate = 149
+    case jobThiefCriticalChancePercent = 149
     case jobThiefDoubleAction = 150
     case jobThiefEvasion = 151
     case jobThiefFortune = 152
@@ -182,8 +182,8 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case jobWarriorGuardian = 156
     case jobWarriorMaxHP = 157
     case jobWarriorPhysResist = 158
-    case martialBonusMultiplierUnarmed = 159
-    case martialBonusPercentUnarmed = 160
+    case martialBonusMultiplierMartial = 159
+    case martialBonusPercentMartial = 160
     case masterAssassinLethal = 161
     case masterAssassinMastery = 162
     case masterAssassinWeakpoint = 163
@@ -266,7 +266,7 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case raceGiantTurnHealing = 240
     case raceGnomeMagicPower = 241
     case raceGnomeSpellRecovery = 242
-    case raceHomunculusAdditionalDamage = 243
+    case raceHomunculusAdditionalDamageScore = 243
     case raceHomunculusAllStatBoost = 244
     case raceHomunculusEquipSlot = 245
     case raceHomunculusHealBonus = 246
@@ -314,9 +314,9 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case rewardTitleMultiplier = 288
     case rewardTitlePercent = 289
     case rowProfileBalanced = 290
-    case rowProfileMelee = 291
+    case rowProfileNear = 291
     case rowProfileMixed = 292
-    case rowProfileRanged = 293
+    case rowProfileFar = 293
     case runawayDamage = 294
     case runawayMagic = 295
     case sacrificeRiteGeneral = 296
@@ -349,39 +349,39 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case spellSpecificTakenMultiplierThunderBolt = 323
     case spellTierUnlockMage = 324
     case spellTierUnlockPriest = 325
-    case statAdditiveEvasionRate = 326
-    case statAdditiveHitRate = 327
-    case statAdditiveMagicalAttack = 328
-    case statAdditiveMagicalDefense = 329
-    case statAdditiveMagicalHealing = 330
-    case statAdditivePhysicalAttack = 331
-    case statAdditivePhysicalDefense = 332
-    case statConversionLinearAttackCountCriticalRate = 333
-    case statConversionLinearAttackCountEvasionRate = 334
-    case statConversionLinearAttackCountMagicalAttack = 335
-    case statConversionLinearAttackCountMagicalDefense = 336
-    case statConversionLinearAttackCountMagicalHealing = 337
-    case statConversionLinearAttackCountPhysicalDefense = 338
-    case statConversionPercentMagicalAttackHitRate = 339
-    case statConversionPercentMagicalAttackMaxHP = 340
-    case statConversionPercentMagicalAttackPhysicalAttack = 341
-    case statConversionPercentMagicalHealingHitRate = 342
-    case statConversionPercentMagicalHealingMagicalAttack = 343
-    case statConversionPercentMagicalHealingMagicalDefense = 344
-    case statConversionPercentMagicalHealingMaxHP = 345
-    case statConversionPercentMagicalHealingPhysicalAttack = 346
-    case statConversionPercentPhysicalAttackMaxHP = 347
-    case statConversionPercentPhysicalDefenseAttackAndHit = 348
-    case statConversionPercentPhysicalDefenseMaxHP = 349
-    case statMultiplierEvasionRate = 350
-    case statMultiplierHitRate = 351
-    case statMultiplierMagicalAttack = 352
-    case statMultiplierMagicalDefense = 353
-    case statMultiplierMagicalHealing = 354
+    case statAdditiveEvasionScore = 326
+    case statAdditiveHitScore = 327
+    case statAdditiveMagicalAttackScore = 328
+    case statAdditiveMagicalDefenseScore = 329
+    case statAdditiveMagicalHealingScore = 330
+    case statAdditivePhysicalAttackScore = 331
+    case statAdditivePhysicalDefenseScore = 332
+    case statConversionLinearAttackCountCriticalChancePercent = 333
+    case statConversionLinearAttackCountEvasionScore = 334
+    case statConversionLinearAttackCountMagicalAttackScore = 335
+    case statConversionLinearAttackCountMagicalDefenseScore = 336
+    case statConversionLinearAttackCountMagicalHealingScore = 337
+    case statConversionLinearAttackCountPhysicalDefenseScore = 338
+    case statConversionPercentMagicalAttackScoreHitScore = 339
+    case statConversionPercentMagicalAttackScoreMaxHP = 340
+    case statConversionPercentMagicalAttackScorePhysicalAttackScore = 341
+    case statConversionPercentMagicalHealingScoreHitScore = 342
+    case statConversionPercentMagicalHealingScoreMagicalAttackScore = 343
+    case statConversionPercentMagicalHealingScoreMagicalDefenseScore = 344
+    case statConversionPercentMagicalHealingScoreMaxHP = 345
+    case statConversionPercentMagicalHealingScorePhysicalAttackScore = 346
+    case statConversionPercentPhysicalAttackScoreMaxHP = 347
+    case statConversionPercentPhysicalDefenseScoreAttackAndHit = 348
+    case statConversionPercentPhysicalDefenseScoreMaxHP = 349
+    case statMultiplierEvasionScore = 350
+    case statMultiplierHitScore = 351
+    case statMultiplierMagicalAttackScore = 352
+    case statMultiplierMagicalDefenseScore = 353
+    case statMultiplierMagicalHealingScore = 354
     case statMultiplierMaxHP = 355
-    case statMultiplierPhysicalAttack = 356
-    case statMultiplierPhysicalDefense = 357
-    case statMultiplierTrapDisarm = 358
+    case statMultiplierPhysicalAttackScore = 356
+    case statMultiplierPhysicalDefenseScore = 357
+    case statMultiplierTrapRemovalScore = 358
     case statusInflictConfusion = 359
     case statusResistanceMultiplierConfusion = 360
     case statusResistanceMultiplierInstantDeath = 361
@@ -438,8 +438,8 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .absorptionGeneral: return "absorption.general"
         case .actionOrderShuffle: return "actionOrder.shuffle"
         case .actionOrderMultiplierGeneral: return "actionOrderMultiplier.general"
-        case .additionalDamageAdditive: return "additionalDamage.additive"
-        case .additionalDamageMultiplier: return "additionalDamage.multiplier"
+        case .additionalDamageScoreAdditive: return "additionalDamageScore.additive"
+        case .additionalDamageScoreMultiplier: return "additionalDamageScore.multiplier"
         case .antiHealingGeneral: return "antiHealing.general"
         case .attackCountAdditive: return "attackCount.additive"
         case .attackCountMultiplier: return "attackCount.multiplier"
@@ -451,10 +451,10 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .criticalDamageMultiplier: return "criticalDamageMultiplier"
         case .criticalDamagePercent: return "criticalDamagePercent"
         case .criticalDamageTakenMultiplierGeneral: return "criticalDamageTakenMultiplier.general"
-        case .criticalRateAdd: return "criticalRate.add"
-        case .criticalRateCap: return "criticalRate.cap"
-        case .criticalRateMax: return "criticalRate.max"
-        case .criticalRateMaxDelta: return "criticalRate.maxDelta"
+        case .criticalChancePercentAdd: return "criticalChancePercent.add"
+        case .criticalChancePercentCap: return "criticalChancePercent.cap"
+        case .criticalChancePercentMax: return "criticalChancePercent.max"
+        case .criticalChancePercentMaxDelta: return "criticalChancePercent.maxDelta"
         case .damageDealtMultiplierBreath: return "damageDealtMultiplier.breath"
         case .damageDealtMultiplierMagical: return "damageDealtMultiplier.magical"
         case .damageDealtMultiplierPhysical: return "damageDealtMultiplier.physical"
@@ -502,16 +502,16 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .extraActionGeneral: return "extraAction.general"
         case .growthMultiplierGeneral: return "growthMultiplier.general"
         case .incompetenceStat: return "incompetence.stat"
-        case .itemStatMultiplierCriticalRate: return "itemStatMultiplier.criticalRate"
-        case .itemStatMultiplierEvasionRate: return "itemStatMultiplier.evasionRate"
-        case .itemStatMultiplierHitRate: return "itemStatMultiplier.hitRate"
-        case .itemStatMultiplierMagicalAttack: return "itemStatMultiplier.magicalAttack"
-        case .itemStatMultiplierMagicalDefense: return "itemStatMultiplier.magicalDefense"
-        case .itemStatMultiplierMagicalHealing: return "itemStatMultiplier.magicalHealing"
+        case .itemStatMultiplierCriticalChancePercent: return "itemStatMultiplier.criticalChancePercent"
+        case .itemStatMultiplierEvasionScore: return "itemStatMultiplier.evasionScore"
+        case .itemStatMultiplierHitScore: return "itemStatMultiplier.hitScore"
+        case .itemStatMultiplierMagicalAttackScore: return "itemStatMultiplier.magicalAttackScore"
+        case .itemStatMultiplierMagicalDefenseScore: return "itemStatMultiplier.magicalDefenseScore"
+        case .itemStatMultiplierMagicalHealingScore: return "itemStatMultiplier.magicalHealingScore"
         case .itemStatMultiplierMaxHP: return "itemStatMultiplier.maxHP"
-        case .itemStatMultiplierPhysicalAttack: return "itemStatMultiplier.physicalAttack"
-        case .itemStatMultiplierPhysicalDefense: return "itemStatMultiplier.physicalDefense"
-        case .itemStatMultiplierTrapRemoval: return "itemStatMultiplier.trapRemoval"
+        case .itemStatMultiplierPhysicalAttackScore: return "itemStatMultiplier.physicalAttackScore"
+        case .itemStatMultiplierPhysicalDefenseScore: return "itemStatMultiplier.physicalDefenseScore"
+        case .itemStatMultiplierTrapRemovalScore: return "itemStatMultiplier.trapRemovalScore"
         case .jobAssassinAccuracy: return "job.assassin.accuracy"
         case .jobAssassinCritDamage: return "job.assassin.critDamage"
         case .jobAssassinLethalBlow: return "job.assassin.lethalBlow"
@@ -547,7 +547,7 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .jobMonkMeditate: return "job.monk.meditate"
         case .jobMonkSpirit: return "job.monk.spirit"
         case .jobMonkWard: return "job.monk.ward"
-        case .jobNinjaCritRate: return "job.ninja.critRate"
+        case .jobNinjaCriticalChancePercent: return "job.ninja.criticalChancePercent"
         case .jobNinjaDeathblow: return "job.ninja.deathblow"
         case .jobNinjaEvasion: return "job.ninja.evasion"
         case .jobNinjaShadowClone: return "job.ninja.shadowClone"
@@ -582,7 +582,7 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .jobSwordsmanFollowup: return "job.swordsman.followup"
         case .jobSwordsmanMultiAttack: return "job.swordsman.multiAttack"
         case .jobSwordsmanPhysPower: return "job.swordsman.physPower"
-        case .jobThiefCritRate: return "job.thief.critRate"
+        case .jobThiefCriticalChancePercent: return "job.thief.criticalChancePercent"
         case .jobThiefDoubleAction: return "job.thief.doubleAction"
         case .jobThiefEvasion: return "job.thief.evasion"
         case .jobThiefFortune: return "job.thief.fortune"
@@ -592,8 +592,8 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .jobWarriorGuardian: return "job.warrior.guardian"
         case .jobWarriorMaxHP: return "job.warrior.maxHP"
         case .jobWarriorPhysResist: return "job.warrior.physResist"
-        case .martialBonusMultiplierUnarmed: return "martialBonusMultiplier.unarmed"
-        case .martialBonusPercentUnarmed: return "martialBonusPercent.unarmed"
+        case .martialBonusMultiplierMartial: return "martialBonusMultiplier.martial"
+        case .martialBonusPercentMartial: return "martialBonusPercent.martial"
         case .masterAssassinLethal: return "master.assassin.lethal"
         case .masterAssassinMastery: return "master.assassin.mastery"
         case .masterAssassinWeakpoint: return "master.assassin.weakpoint"
@@ -676,7 +676,7 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .raceGiantTurnHealing: return "race.giant.turnHealing"
         case .raceGnomeMagicPower: return "race.gnome.magicPower"
         case .raceGnomeSpellRecovery: return "race.gnome.spellRecovery"
-        case .raceHomunculusAdditionalDamage: return "race.homunculus.additionalDamage"
+        case .raceHomunculusAdditionalDamageScore: return "race.homunculus.additionalDamageScore"
         case .raceHomunculusAllStatBoost: return "race.homunculus.allStatBoost"
         case .raceHomunculusEquipSlot: return "race.homunculus.equipSlot"
         case .raceHomunculusHealBonus: return "race.homunculus.healBonus"
@@ -724,9 +724,9 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .rewardTitleMultiplier: return "rewardTitle.multiplier"
         case .rewardTitlePercent: return "rewardTitle.percent"
         case .rowProfileBalanced: return "rowProfile.balanced"
-        case .rowProfileMelee: return "rowProfile.melee"
+        case .rowProfileNear: return "rowProfile.near"
         case .rowProfileMixed: return "rowProfile.mixed"
-        case .rowProfileRanged: return "rowProfile.ranged"
+        case .rowProfileFar: return "rowProfile.far"
         case .runawayDamage: return "runaway.damage"
         case .runawayMagic: return "runaway.magic"
         case .sacrificeRiteGeneral: return "sacrificeRite.general"
@@ -759,39 +759,39 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .spellSpecificTakenMultiplierThunderBolt: return "spellSpecificTakenMultiplier.thunder_bolt"
         case .spellTierUnlockMage: return "spellTierUnlock.mage"
         case .spellTierUnlockPriest: return "spellTierUnlock.priest"
-        case .statAdditiveEvasionRate: return "statAdditive.evasionRate"
-        case .statAdditiveHitRate: return "statAdditive.hitRate"
-        case .statAdditiveMagicalAttack: return "statAdditive.magicalAttack"
-        case .statAdditiveMagicalDefense: return "statAdditive.magicalDefense"
-        case .statAdditiveMagicalHealing: return "statAdditive.magicalHealing"
-        case .statAdditivePhysicalAttack: return "statAdditive.physicalAttack"
-        case .statAdditivePhysicalDefense: return "statAdditive.physicalDefense"
-        case .statConversionLinearAttackCountCriticalRate: return "statConversionLinear.attackCount.criticalRate"
-        case .statConversionLinearAttackCountEvasionRate: return "statConversionLinear.attackCount.evasionRate"
-        case .statConversionLinearAttackCountMagicalAttack: return "statConversionLinear.attackCount.magicalAttack"
-        case .statConversionLinearAttackCountMagicalDefense: return "statConversionLinear.attackCount.magicalDefense"
-        case .statConversionLinearAttackCountMagicalHealing: return "statConversionLinear.attackCount.magicalHealing"
-        case .statConversionLinearAttackCountPhysicalDefense: return "statConversionLinear.attackCount.physicalDefense"
-        case .statConversionPercentMagicalAttackHitRate: return "statConversionPercent.magicalAttack.hitRate"
-        case .statConversionPercentMagicalAttackMaxHP: return "statConversionPercent.magicalAttack.maxHP"
-        case .statConversionPercentMagicalAttackPhysicalAttack: return "statConversionPercent.magicalAttack.physicalAttack"
-        case .statConversionPercentMagicalHealingHitRate: return "statConversionPercent.magicalHealing.hitRate"
-        case .statConversionPercentMagicalHealingMagicalAttack: return "statConversionPercent.magicalHealing.magicalAttack"
-        case .statConversionPercentMagicalHealingMagicalDefense: return "statConversionPercent.magicalHealing.magicalDefense"
-        case .statConversionPercentMagicalHealingMaxHP: return "statConversionPercent.magicalHealing.maxHP"
-        case .statConversionPercentMagicalHealingPhysicalAttack: return "statConversionPercent.magicalHealing.physicalAttack"
-        case .statConversionPercentPhysicalAttackMaxHP: return "statConversionPercent.physicalAttack.maxHP"
-        case .statConversionPercentPhysicalDefenseAttackAndHit: return "statConversionPercent.physicalDefense.attackAndHit"
-        case .statConversionPercentPhysicalDefenseMaxHP: return "statConversionPercent.physicalDefense.maxHP"
-        case .statMultiplierEvasionRate: return "statMultiplier.evasionRate"
-        case .statMultiplierHitRate: return "statMultiplier.hitRate"
-        case .statMultiplierMagicalAttack: return "statMultiplier.magicalAttack"
-        case .statMultiplierMagicalDefense: return "statMultiplier.magicalDefense"
-        case .statMultiplierMagicalHealing: return "statMultiplier.magicalHealing"
+        case .statAdditiveEvasionScore: return "statAdditive.evasionScore"
+        case .statAdditiveHitScore: return "statAdditive.hitScore"
+        case .statAdditiveMagicalAttackScore: return "statAdditive.magicalAttackScore"
+        case .statAdditiveMagicalDefenseScore: return "statAdditive.magicalDefenseScore"
+        case .statAdditiveMagicalHealingScore: return "statAdditive.magicalHealingScore"
+        case .statAdditivePhysicalAttackScore: return "statAdditive.physicalAttackScore"
+        case .statAdditivePhysicalDefenseScore: return "statAdditive.physicalDefenseScore"
+        case .statConversionLinearAttackCountCriticalChancePercent: return "statConversionLinear.attackCount.criticalChancePercent"
+        case .statConversionLinearAttackCountEvasionScore: return "statConversionLinear.attackCount.evasionScore"
+        case .statConversionLinearAttackCountMagicalAttackScore: return "statConversionLinear.attackCount.magicalAttackScore"
+        case .statConversionLinearAttackCountMagicalDefenseScore: return "statConversionLinear.attackCount.magicalDefenseScore"
+        case .statConversionLinearAttackCountMagicalHealingScore: return "statConversionLinear.attackCount.magicalHealingScore"
+        case .statConversionLinearAttackCountPhysicalDefenseScore: return "statConversionLinear.attackCount.physicalDefenseScore"
+        case .statConversionPercentMagicalAttackScoreHitScore: return "statConversionPercent.magicalAttackScore.hitScore"
+        case .statConversionPercentMagicalAttackScoreMaxHP: return "statConversionPercent.magicalAttackScore.maxHP"
+        case .statConversionPercentMagicalAttackScorePhysicalAttackScore: return "statConversionPercent.magicalAttackScore.physicalAttackScore"
+        case .statConversionPercentMagicalHealingScoreHitScore: return "statConversionPercent.magicalHealingScore.hitScore"
+        case .statConversionPercentMagicalHealingScoreMagicalAttackScore: return "statConversionPercent.magicalHealingScore.magicalAttackScore"
+        case .statConversionPercentMagicalHealingScoreMagicalDefenseScore: return "statConversionPercent.magicalHealingScore.magicalDefenseScore"
+        case .statConversionPercentMagicalHealingScoreMaxHP: return "statConversionPercent.magicalHealingScore.maxHP"
+        case .statConversionPercentMagicalHealingScorePhysicalAttackScore: return "statConversionPercent.magicalHealingScore.physicalAttackScore"
+        case .statConversionPercentPhysicalAttackScoreMaxHP: return "statConversionPercent.physicalAttackScore.maxHP"
+        case .statConversionPercentPhysicalDefenseScoreAttackAndHit: return "statConversionPercent.physicalDefenseScore.attackAndHit"
+        case .statConversionPercentPhysicalDefenseScoreMaxHP: return "statConversionPercent.physicalDefenseScore.maxHP"
+        case .statMultiplierEvasionScore: return "statMultiplier.evasionScore"
+        case .statMultiplierHitScore: return "statMultiplier.hitScore"
+        case .statMultiplierMagicalAttackScore: return "statMultiplier.magicalAttackScore"
+        case .statMultiplierMagicalDefenseScore: return "statMultiplier.magicalDefenseScore"
+        case .statMultiplierMagicalHealingScore: return "statMultiplier.magicalHealingScore"
         case .statMultiplierMaxHP: return "statMultiplier.maxHP"
-        case .statMultiplierPhysicalAttack: return "statMultiplier.physicalAttack"
-        case .statMultiplierPhysicalDefense: return "statMultiplier.physicalDefense"
-        case .statMultiplierTrapDisarm: return "statMultiplier.trapDisarm"
+        case .statMultiplierPhysicalAttackScore: return "statMultiplier.physicalAttackScore"
+        case .statMultiplierPhysicalDefenseScore: return "statMultiplier.physicalDefenseScore"
+        case .statMultiplierTrapRemovalScore: return "statMultiplier.trapRemovalScore"
         case .statusInflictConfusion: return "status.inflict.confusion"
         case .statusResistanceMultiplierConfusion: return "statusResistanceMultiplier.confusion"
         case .statusResistanceMultiplierInstantDeath: return "statusResistanceMultiplier.instantDeath"

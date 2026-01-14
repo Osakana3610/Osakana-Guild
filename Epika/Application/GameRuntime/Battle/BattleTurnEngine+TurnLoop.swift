@@ -394,18 +394,18 @@ extension BattleTurnEngine {
     }
 
     nonisolated static func canPerformBreath(actor: BattleActor, opponents: [BattleActor]) -> Bool {
-        actor.isAlive && actor.snapshot.breathDamage > 0 && actor.actionResources.charges(for: .breath) > 0 && opponents.contains(where: { $0.isAlive })
+        actor.isAlive && actor.snapshot.breathDamageScore > 0 && actor.actionResources.charges(for: .breath) > 0 && opponents.contains(where: { $0.isAlive })
     }
 
     nonisolated static func canPerformPriest(actor: BattleActor, allies: [BattleActor]) -> Bool {
         actor.isAlive &&
-        actor.snapshot.magicalHealing > 0 &&
+        actor.snapshot.magicalHealingScore > 0 &&
         actor.actionResources.hasAvailableSpell(in: actor.spells.priest)
     }
 
     nonisolated static func canPerformMage(actor: BattleActor, opponents: [BattleActor]) -> Bool {
         actor.isAlive &&
-        actor.snapshot.magicalAttack > 0 &&
+        actor.snapshot.magicalAttackScore > 0 &&
         actor.actionResources.hasAvailableSpell(in: actor.spells.mage) &&
         opponents.contains(where: { $0.isAlive })
     }

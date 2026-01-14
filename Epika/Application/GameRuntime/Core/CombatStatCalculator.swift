@@ -24,7 +24,7 @@
 //   - TalentModifiers: タレント/インコンペテンス乗算
 //   - PassiveMultipliers: パッシブ乗算
 //   - AdditiveBonuses: 加算ボーナス
-//   - CriticalParameters: クリティカル関連
+//   - CriticalParameters: 必殺関連
 //   - MartialBonuses: 格闘ボーナス
 //   - StatConversions: ステータス変換
 //
@@ -385,13 +385,13 @@ private struct SkillEffectAggregator {
             for effect in skill.effects {
                 let payload = SkillEffectAggregator.payload(from: effect)
                 switch payload.effectType {
-                case .additionalDamageAdditive:
+                case .additionalDamageScoreAdditive:
                     if let value = payload.value[.additive] {
-                        additives.add(stat: .additionalDamage, value: value)
+                        additives.add(stat: .additionalDamageScore, value: value)
                     }
-                case .additionalDamageMultiplier:
+                case .additionalDamageScoreMultiplier:
                     if let value = payload.value[.multiplier] {
-                        passives.multiply(stat: .additionalDamage, value: value)
+                        passives.multiply(stat: .additionalDamageScore, value: value)
                     }
                 case .statAdditive:
                     if let statRaw = payload.parameters[.stat],
@@ -449,11 +449,11 @@ private struct SkillEffectAggregator {
                           let ratio = payload.value[.valuePerUnit] else { continue }
                     let entry = StatConversion(source: sourceKey, ratio: ratio)
                     conversions[targetKey, default: []].append(entry)
-                case .criticalRateAdditive:
+                case .criticalChancePercentAdditive:
                     if let points = payload.value[.points] {
                         critical.flatBonus += points
                     }
-                case .criticalRateCap:
+                case .criticalChancePercentCap:
                     if let cap = payload.value[.cap] ?? payload.value[.maxPercent] {
                         if let current = critical.cap {
                             critical.cap = min(current, cap)
@@ -461,7 +461,7 @@ private struct SkillEffectAggregator {
                             critical.cap = cap
                         }
                     }
-                case .criticalRateMaxAbsolute:
+                case .criticalChancePercentMaxAbsolute:
                     if let cap = payload.value[.cap] ?? payload.value[.maxPercent] {
                         if let current = critical.cap {
                             critical.cap = min(current, cap)
@@ -469,7 +469,7 @@ private struct SkillEffectAggregator {
                             critical.cap = cap
                         }
                     }
-                case .criticalRateMaxDelta:
+                case .criticalChancePercentMaxDelta:
                     if let delta = payload.value[.deltaPercent] {
                         critical.capDelta += delta
                     }
@@ -635,85 +635,85 @@ private struct CombatAccumulator {
         maxHP += additives.value(for: .maxHP)
         stats[.maxHP] = maxHP
 
-        let attackBase = strength * (1.0 + levelFactor * coefficients.value(for: .physicalAttack))
-        var physicalAttack = attackBase * talents.multiplier(for: .physicalAttack) * CombatFormulas.physicalAttackCoefficient
-        physicalAttack *= passives.multiplier(for: .physicalAttack)
-        physicalAttack += additives.value(for: .physicalAttack)
+        let attackBase = strength * (1.0 + levelFactor * coefficients.value(for: .physicalAttackScore))
+        var physicalAttackScore = attackBase * talents.multiplier(for: .physicalAttackScore) * CombatFormulas.physicalAttackScoreCoefficient
+        physicalAttackScore *= passives.multiplier(for: .physicalAttackScore)
+        physicalAttackScore += additives.value(for: .physicalAttackScore)
 
         if shouldApplyMartialBonuses {
             if martialBonuses.percent != 0 {
-                physicalAttack *= 1.0 + martialBonuses.percent / 100.0
+                physicalAttackScore *= 1.0 + martialBonuses.percent / 100.0
             }
-            physicalAttack *= martialBonuses.multiplier
+            physicalAttackScore *= martialBonuses.multiplier
         }
-        stats[.physicalAttack] = physicalAttack
+        stats[.physicalAttackScore] = physicalAttackScore
 
-        let magicalAttackBase = wisdom * (1.0 + levelFactor * coefficients.value(for: .magicalAttack))
-        var magicalAttack = magicalAttackBase * talents.multiplier(for: .magicalAttack) * CombatFormulas.magicalAttackCoefficient
-        magicalAttack *= passives.multiplier(for: .magicalAttack)
-        magicalAttack += additives.value(for: .magicalAttack)
-        stats[.magicalAttack] = magicalAttack
+        let magicalAttackBase = wisdom * (1.0 + levelFactor * coefficients.value(for: .magicalAttackScore))
+        var magicalAttackScore = magicalAttackBase * talents.multiplier(for: .magicalAttackScore) * CombatFormulas.magicalAttackScoreCoefficient
+        magicalAttackScore *= passives.multiplier(for: .magicalAttackScore)
+        magicalAttackScore += additives.value(for: .magicalAttackScore)
+        stats[.magicalAttackScore] = magicalAttackScore
 
-        let physicalDefenseBase = vitality * (1.0 + levelFactor * coefficients.value(for: .physicalDefense))
-        var physicalDefense = physicalDefenseBase * talents.multiplier(for: .physicalDefense) * CombatFormulas.physicalDefenseCoefficient
-        physicalDefense *= passives.multiplier(for: .physicalDefense)
-        physicalDefense += additives.value(for: .physicalDefense)
-        stats[.physicalDefense] = physicalDefense
+        let physicalDefenseBase = vitality * (1.0 + levelFactor * coefficients.value(for: .physicalDefenseScore))
+        var physicalDefenseScore = physicalDefenseBase * talents.multiplier(for: .physicalDefenseScore) * CombatFormulas.physicalDefenseScoreCoefficient
+        physicalDefenseScore *= passives.multiplier(for: .physicalDefenseScore)
+        physicalDefenseScore += additives.value(for: .physicalDefenseScore)
+        stats[.physicalDefenseScore] = physicalDefenseScore
 
-        let magicalDefenseBase = spirit * (1.0 + levelFactor * coefficients.value(for: .magicalDefense))
-        var magicalDefense = magicalDefenseBase * talents.multiplier(for: .magicalDefense) * CombatFormulas.magicalDefenseCoefficient
-        magicalDefense *= passives.multiplier(for: .magicalDefense)
-        magicalDefense += additives.value(for: .magicalDefense)
-        stats[.magicalDefense] = magicalDefense
+        let magicalDefenseBase = spirit * (1.0 + levelFactor * coefficients.value(for: .magicalDefenseScore))
+        var magicalDefenseScore = magicalDefenseBase * talents.multiplier(for: .magicalDefenseScore) * CombatFormulas.magicalDefenseScoreCoefficient
+        magicalDefenseScore *= passives.multiplier(for: .magicalDefenseScore)
+        magicalDefenseScore += additives.value(for: .magicalDefenseScore)
+        stats[.magicalDefenseScore] = magicalDefenseScore
 
-        let hitSource = (strength + agility) / 2.0 * (1.0 + levelFactor * coefficients.value(for: .hitRate))
-        var hitRate = (hitSource + CombatFormulas.hitRateBaseBonus) * CombatFormulas.hitRateCoefficient
-        hitRate *= talents.multiplier(for: .hitRate)
-        hitRate *= passives.multiplier(for: .hitRate)
-        hitRate += additives.value(for: .hitRate)
-        stats[.hitRate] = hitRate
+        let hitSource = (strength + agility) / 2.0 * (1.0 + levelFactor * coefficients.value(for: .hitScore))
+        var hitScore = (hitSource + CombatFormulas.hitScoreBaseBonus) * CombatFormulas.hitScoreCoefficient
+        hitScore *= talents.multiplier(for: .hitScore)
+        hitScore *= passives.multiplier(for: .hitScore)
+        hitScore += additives.value(for: .hitScore)
+        stats[.hitScore] = hitScore
 
         let evasionSource = (agility + luck) / 2.0
-        var evasion = evasionSource * (1.0 + levelFactor * coefficients.value(for: .evasionRate)) * CombatFormulas.evasionRateCoefficient
-        evasion *= talents.multiplier(for: .evasionRate)
-        evasion *= passives.multiplier(for: .evasionRate)
-        evasion += additives.value(for: .evasionRate)
-        stats[.evasionRate] = evasion
+        var evasionScore = evasionSource * (1.0 + levelFactor * coefficients.value(for: .evasionScore)) * CombatFormulas.evasionScoreCoefficient
+        evasionScore *= talents.multiplier(for: .evasionScore)
+        evasionScore *= passives.multiplier(for: .evasionScore)
+        evasionScore += additives.value(for: .evasionScore)
+        stats[.evasionScore] = evasionScore
 
-        let healingBase = spirit * (1.0 + levelFactor * coefficients.value(for: .magicalHealing))
-        var magicalHealing = healingBase * talents.multiplier(for: .magicalHealing) * CombatFormulas.magicalHealingCoefficient
-        magicalHealing *= passives.multiplier(for: .magicalHealing)
-        magicalHealing += additives.value(for: .magicalHealing)
-        stats[.magicalHealing] = magicalHealing
+        let healingBase = spirit * (1.0 + levelFactor * coefficients.value(for: .magicalHealingScore))
+        var magicalHealingScore = healingBase * talents.multiplier(for: .magicalHealingScore) * CombatFormulas.magicalHealingScoreCoefficient
+        magicalHealingScore *= passives.multiplier(for: .magicalHealingScore)
+        magicalHealingScore += additives.value(for: .magicalHealingScore)
+        stats[.magicalHealingScore] = magicalHealingScore
 
         let trapBase = (agility + luck) / 2.0
-        var trapRemoval = trapBase * (1.0 + levelFactor * coefficients.value(for: .trapRemoval)) * CombatFormulas.trapRemovalCoefficient
-        trapRemoval *= talents.multiplier(for: .trapRemoval)
-        trapRemoval *= passives.multiplier(for: .trapRemoval)
-        trapRemoval += additives.value(for: .trapRemoval)
-        stats[.trapRemoval] = trapRemoval
+        var trapRemovalScore = trapBase * (1.0 + levelFactor * coefficients.value(for: .trapRemovalScore)) * CombatFormulas.trapRemovalScoreCoefficient
+        trapRemovalScore *= talents.multiplier(for: .trapRemovalScore)
+        trapRemovalScore *= passives.multiplier(for: .trapRemovalScore)
+        trapRemovalScore += additives.value(for: .trapRemovalScore)
+        stats[.trapRemovalScore] = trapRemovalScore
 
         let additionalDependency = CombatFormulas.strengthDependency(value: attributes.strength)
         let additionalGrowth = CombatFormulas.additionalDamageGrowth(level: level,
-                                                                     jobCoefficient: coefficients.value(for: .physicalAttack),
+                                                                     jobCoefficient: coefficients.value(for: .physicalAttackScore),
                                                                      growthMultiplier: growthMultiplier)
-        var additionalDamage = additionalDependency * (1.0 + additionalGrowth)
-        additionalDamage *= talents.multiplier(for: .additionalDamage)
-        additionalDamage *= passives.multiplier(for: .additionalDamage)
-        additionalDamage *= CombatFormulas.additionalDamageScale
-        additionalDamage += additives.value(for: .additionalDamage)
-        stats[.additionalDamage] = additionalDamage
+        var additionalDamageScore = additionalDependency * (1.0 + additionalGrowth)
+        additionalDamageScore *= talents.multiplier(for: .additionalDamageScore)
+        additionalDamageScore *= passives.multiplier(for: .additionalDamageScore)
+        additionalDamageScore *= CombatFormulas.additionalDamageScoreScale
+        additionalDamageScore += additives.value(for: .additionalDamageScore)
+        stats[.additionalDamageScore] = additionalDamageScore
 
-        var breathDamage = wisdom * (1.0 + levelFactor * coefficients.value(for: .magicalAttack)) * CombatFormulas.breathDamageCoefficient
-        breathDamage += additives.value(for: .breathDamage)
-        stats[.breathDamage] = breathDamage
+        var breathDamageScore = wisdom * (1.0 + levelFactor * coefficients.value(for: .magicalAttackScore)) * CombatFormulas.breathDamageScoreCoefficient
+        breathDamageScore += additives.value(for: .breathDamageScore)
+        stats[.breathDamageScore] = breathDamageScore
 
         let critSource = max((agility + luck * 2.0 - 45.0), 0.0)
-        var criticalRate = critSource * CombatFormulas.criticalRateCoefficient * coefficients.value(for: .criticalRate)
-        criticalRate *= talents.multiplier(for: .criticalRate)
-        criticalRate *= passives.multiplier(for: .criticalRate)
-        criticalRate += criticalParams.flatBonus
-        stats[.criticalRate] = criticalRate
+        var criticalChancePercent = critSource * CombatFormulas.criticalChanceCoefficient * coefficients.value(for: .criticalChancePercent)
+        criticalChancePercent *= talents.multiplier(for: .criticalChancePercent)
+        criticalChancePercent *= passives.multiplier(for: .criticalChancePercent)
+        criticalChancePercent += criticalParams.flatBonus
+        stats[.criticalChancePercent] = criticalChancePercent
 
         let baseAttackCount = CombatFormulas.finalAttackCount(agility: attributes.agility,
                                                               levelFactor: levelFactor,
@@ -730,39 +730,39 @@ private struct CombatAccumulator {
         }
 
         maxHP = resolvedValue(.maxHP)
-        physicalAttack = resolvedValue(.physicalAttack)
-        magicalAttack = resolvedValue(.magicalAttack)
-        physicalDefense = resolvedValue(.physicalDefense)
-        magicalDefense = resolvedValue(.magicalDefense)
-        hitRate = resolvedValue(.hitRate)
-        evasion = resolvedValue(.evasionRate)
-        magicalHealing = resolvedValue(.magicalHealing)
-        trapRemoval = resolvedValue(.trapRemoval)
-        additionalDamage = resolvedValue(.additionalDamage)
-        breathDamage = resolvedValue(.breathDamage)
-        criticalRate = resolvedValue(.criticalRate)
+        physicalAttackScore = resolvedValue(.physicalAttackScore)
+        magicalAttackScore = resolvedValue(.magicalAttackScore)
+        physicalDefenseScore = resolvedValue(.physicalDefenseScore)
+        magicalDefenseScore = resolvedValue(.magicalDefenseScore)
+        hitScore = resolvedValue(.hitScore)
+        evasionScore = resolvedValue(.evasionScore)
+        magicalHealingScore = resolvedValue(.magicalHealingScore)
+        trapRemovalScore = resolvedValue(.trapRemovalScore)
+        additionalDamageScore = resolvedValue(.additionalDamageScore)
+        breathDamageScore = resolvedValue(.breathDamageScore)
+        criticalChancePercent = resolvedValue(.criticalChancePercent)
 
         let baseCriticalCap = criticalParams.cap ?? 100.0
         let adjustedCriticalCap = max(0.0, baseCriticalCap + criticalParams.capDelta)
-        criticalRate = min(criticalRate, adjustedCriticalCap)
-        criticalRate = max(0.0, min(criticalRate, 100.0))
+        criticalChancePercent = min(criticalChancePercent, adjustedCriticalCap)
+        criticalChancePercent = max(0.0, min(criticalChancePercent, 100.0))
 
         for key in forcedToOne {
             switch key {
             case .maxHP: maxHP = 1
-            case .physicalAttack: physicalAttack = 1
-            case .magicalAttack: magicalAttack = 1
-            case .physicalDefense: physicalDefense = 1
-            case .magicalDefense: magicalDefense = 1
-            case .hitRate: hitRate = 1
-            case .evasionRate: evasion = 1
+            case .physicalAttackScore: physicalAttackScore = 1
+            case .magicalAttackScore: magicalAttackScore = 1
+            case .physicalDefenseScore: physicalDefenseScore = 1
+            case .magicalDefenseScore: magicalDefenseScore = 1
+            case .hitScore: hitScore = 1
+            case .evasionScore: evasionScore = 1
             case .attackCount: // handled after rounding
                 break
-            case .additionalDamage: additionalDamage = 1
-            case .criticalRate: criticalRate = 1
-            case .breathDamage: breathDamage = 1
-            case .magicalHealing: magicalHealing = 1
-            case .trapRemoval: trapRemoval = 1
+            case .additionalDamageScore: additionalDamageScore = 1
+            case .criticalChancePercent: criticalChancePercent = 1
+            case .breathDamageScore: breathDamageScore = 1
+            case .magicalHealingScore: magicalHealingScore = 1
+            case .trapRemovalScore: trapRemovalScore = 1
             }
         }
 
@@ -776,18 +776,18 @@ private struct CombatAccumulator {
         let finalAttackCount = forcedToOne.contains(.attackCount) ? 1.0 : attackCount
 
         var combat = CharacterValues.Combat(maxHP: Int(maxHP.rounded(.towardZero)),
-                                              physicalAttack: Int(physicalAttack.rounded(.towardZero)),
-                                              magicalAttack: Int(magicalAttack.rounded(.towardZero)),
-                                              physicalDefense: Int(physicalDefense.rounded(.towardZero)),
-                                              magicalDefense: Int(magicalDefense.rounded(.towardZero)),
-                                              hitRate: Int(hitRate.rounded(.towardZero)),
-                                              evasionRate: Int(evasion.rounded(.towardZero)),
-                                              criticalRate: Int(criticalRate.rounded(.towardZero)),
+                                              physicalAttackScore: Int(physicalAttackScore.rounded(.towardZero)),
+                                              magicalAttackScore: Int(magicalAttackScore.rounded(.towardZero)),
+                                              physicalDefenseScore: Int(physicalDefenseScore.rounded(.towardZero)),
+                                              magicalDefenseScore: Int(magicalDefenseScore.rounded(.towardZero)),
+                                              hitScore: Int(hitScore.rounded(.towardZero)),
+                                              evasionScore: Int(evasionScore.rounded(.towardZero)),
+                                              criticalChancePercent: Int(criticalChancePercent.rounded(.towardZero)),
                                               attackCount: finalAttackCount,
-                                              magicalHealing: Int(magicalHealing.rounded(.towardZero)),
-                                              trapRemoval: Int(trapRemoval.rounded(.towardZero)),
-                                              additionalDamage: Int(additionalDamage.rounded(.towardZero)),
-                                              breathDamage: Int(breathDamage.rounded(.towardZero)),
+                                              magicalHealingScore: Int(magicalHealingScore.rounded(.towardZero)),
+                                              trapRemovalScore: Int(trapRemovalScore.rounded(.towardZero)),
+                                              additionalDamageScore: Int(additionalDamageScore.rounded(.towardZero)),
+                                              breathDamageScore: Int(breathDamageScore.rounded(.towardZero)),
                                               isMartialEligible: shouldApplyMartialBonuses)
 
         applyEquipmentCombatBonuses(to: &combat)
@@ -872,28 +872,28 @@ private struct CombatAccumulator {
         var result = combat
         if attributes.strength >= 21 {
             let multiplier = CombatFormulas.statBonusMultiplier(value: attributes.strength)
-            result.physicalAttack = Int((Double(result.physicalAttack) * multiplier).rounded(.towardZero))
-            result.additionalDamage = Int((Double(result.additionalDamage) * multiplier).rounded(.towardZero))
+            result.physicalAttackScore = Int((Double(result.physicalAttackScore) * multiplier).rounded(.towardZero))
+            result.additionalDamageScore = Int((Double(result.additionalDamageScore) * multiplier).rounded(.towardZero))
         }
         if attributes.wisdom >= 21 {
             let multiplier = CombatFormulas.statBonusMultiplier(value: attributes.wisdom)
-            result.magicalAttack = Int((Double(result.magicalAttack) * multiplier).rounded(.towardZero))
-            result.magicalHealing = Int((Double(result.magicalHealing) * multiplier).rounded(.towardZero))
-            result.breathDamage = Int((Double(result.breathDamage) * multiplier).rounded(.towardZero))
+            result.magicalAttackScore = Int((Double(result.magicalAttackScore) * multiplier).rounded(.towardZero))
+            result.magicalHealingScore = Int((Double(result.magicalHealingScore) * multiplier).rounded(.towardZero))
+            result.breathDamageScore = Int((Double(result.breathDamageScore) * multiplier).rounded(.towardZero))
         }
         if attributes.spirit >= 21 {
             let reduction = CombatFormulas.resistancePercent(value: attributes.spirit)
-            result.magicalDefense = Int((Double(result.magicalDefense) * reduction).rounded(.towardZero))
+            result.magicalDefenseScore = Int((Double(result.magicalDefenseScore) * reduction).rounded(.towardZero))
         }
         if attributes.vitality >= 21 {
             let reduction = CombatFormulas.resistancePercent(value: attributes.vitality)
-            result.physicalDefense = Int((Double(result.physicalDefense) * reduction).rounded(.towardZero))
+            result.physicalDefenseScore = Int((Double(result.physicalDefenseScore) * reduction).rounded(.towardZero))
         }
         // 敏捷21以上ボーナス: 回避には適用しない
         // evasionLimitは戦闘時の命中判定で使用する（ステータス計算では不要）
         if attributes.luck >= 21 {
             let multiplier = CombatFormulas.statBonusMultiplier(value: attributes.luck)
-            result.criticalRate = Int(min(Double(result.criticalRate) * multiplier, 100.0).rounded(.towardZero))
+            result.criticalChancePercent = Int(min(Double(result.criticalChancePercent) * multiplier, 100.0).rounded(.towardZero))
         }
         return result
     }
@@ -902,7 +902,7 @@ private struct CombatAccumulator {
         var result = combat
         result.maxHP = max(1, result.maxHP)
         result.attackCount = max(1, result.attackCount)
-        result.criticalRate = max(0, min(100, result.criticalRate))
+        result.criticalChancePercent = max(0, min(100, result.criticalChancePercent))
         return result
     }
 
@@ -941,7 +941,7 @@ private struct CombatAccumulator {
         let definitionsById = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
         for item in equipment {
             guard let definition = definitionsById[item.itemId] else { continue }
-            if definition.combatBonuses.physicalAttack * item.quantity > 0 {
+            if definition.combatBonuses.physicalAttackScore * item.quantity > 0 {
                 return true
             }
         }
@@ -951,18 +951,18 @@ private struct CombatAccumulator {
     private nonisolated func apply(bonus: Int, to stat: CombatStatKey, combat: inout CharacterValues.Combat) {
         switch stat {
         case .maxHP: combat.maxHP += bonus
-        case .physicalAttack: combat.physicalAttack += bonus
-        case .magicalAttack: combat.magicalAttack += bonus
-        case .physicalDefense: combat.physicalDefense += bonus
-        case .magicalDefense: combat.magicalDefense += bonus
-        case .hitRate: combat.hitRate += bonus
-        case .evasionRate: combat.evasionRate += bonus
-        case .criticalRate: combat.criticalRate += bonus
+        case .physicalAttackScore: combat.physicalAttackScore += bonus
+        case .magicalAttackScore: combat.magicalAttackScore += bonus
+        case .physicalDefenseScore: combat.physicalDefenseScore += bonus
+        case .magicalDefenseScore: combat.magicalDefenseScore += bonus
+        case .hitScore: combat.hitScore += bonus
+        case .evasionScore: combat.evasionScore += bonus
+        case .criticalChancePercent: combat.criticalChancePercent += bonus
         case .attackCount: combat.attackCount += Double(bonus)
-        case .magicalHealing: combat.magicalHealing += bonus
-        case .trapRemoval: combat.trapRemoval += bonus
-        case .additionalDamage: combat.additionalDamage += bonus
-        case .breathDamage: combat.breathDamage += bonus
+        case .magicalHealingScore: combat.magicalHealingScore += bonus
+        case .trapRemovalScore: combat.trapRemovalScore += bonus
+        case .additionalDamageScore: combat.additionalDamageScore += bonus
+        case .breathDamageScore: combat.breathDamageScore += bonus
         }
     }
 }
@@ -973,56 +973,56 @@ private struct CombatAccumulator {
 
 private enum CombatStatKey: UInt8, CaseIterable {
     case maxHP = 1
-    case physicalAttack = 2
-    case magicalAttack = 3
-    case physicalDefense = 4
-    case magicalDefense = 5
-    case hitRate = 6
-    case evasionRate = 7
-    case criticalRate = 8
+    case physicalAttackScore = 2
+    case magicalAttackScore = 3
+    case physicalDefenseScore = 4
+    case magicalDefenseScore = 5
+    case hitScore = 6
+    case evasionScore = 7
+    case criticalChancePercent = 8
     case attackCount = 9
-    case magicalHealing = 10
-    case trapRemoval = 11
-    case additionalDamage = 12
-    case breathDamage = 13
+    case magicalHealingScore = 10
+    case trapRemovalScore = 11
+    case additionalDamageScore = 12
+    case breathDamageScore = 13
 
     /// EnumMappings.combatStat のInt値から初期化
     nonisolated init?(_ intValue: Int) {
         switch intValue {
         case 10: self = .maxHP
-        case 11: self = .physicalAttack
-        case 12: self = .magicalAttack
-        case 13: self = .physicalDefense
-        case 14: self = .magicalDefense
-        case 15: self = .hitRate
-        case 16: self = .evasionRate
-        case 17: self = .criticalRate
+        case 11: self = .physicalAttackScore
+        case 12: self = .magicalAttackScore
+        case 13: self = .physicalDefenseScore
+        case 14: self = .magicalDefenseScore
+        case 15: self = .hitScore
+        case 16: self = .evasionScore
+        case 17: self = .criticalChancePercent
         case 18: self = .attackCount
-        case 19: self = .magicalHealing
-        case 20: self = .trapRemoval
-        case 21: self = .additionalDamage
-        case 22: self = .breathDamage
+        case 19: self = .magicalHealingScore
+        case 20: self = .trapRemovalScore
+        case 21: self = .additionalDamageScore
+        case 22: self = .breathDamageScore
         default: return nil
         }
     }
 
-    /// レガシー用: String識別子から初期化（forEachNonZero互換用、Step 10で削除予定）
+    /// String識別子から初期化（CombatStats正本の名称に準拠）
     nonisolated init?(_ raw: String?) {
         guard let raw else { return nil }
         switch raw {
         case "maxHP": self = .maxHP
-        case "attack", "physicalAttack": self = .physicalAttack
-        case "magicAttack", "magicalAttack": self = .magicalAttack
-        case "defense", "physicalDefense": self = .physicalDefense
-        case "magicDefense", "magicalDefense": self = .magicalDefense
-        case "hitRate": self = .hitRate
-        case "evasionRate": self = .evasionRate
-        case "criticalRate": self = .criticalRate
+        case "physicalAttackScore": self = .physicalAttackScore
+        case "magicalAttackScore": self = .magicalAttackScore
+        case "physicalDefenseScore": self = .physicalDefenseScore
+        case "magicalDefenseScore": self = .magicalDefenseScore
+        case "hitScore": self = .hitScore
+        case "evasionScore": self = .evasionScore
+        case "criticalChancePercent": self = .criticalChancePercent
         case "attackCount": self = .attackCount
-        case "magicHealing", "magicalHealing": self = .magicalHealing
-        case "trapRemoval": self = .trapRemoval
-        case "additionalDamage": self = .additionalDamage
-        case "breathDamage": self = .breathDamage
+        case "magicalHealingScore": self = .magicalHealingScore
+        case "trapRemovalScore": self = .trapRemovalScore
+        case "additionalDamageScore": self = .additionalDamageScore
+        case "breathDamageScore": self = .breathDamageScore
         default: return nil
         }
     }
@@ -1030,18 +1030,18 @@ private enum CombatStatKey: UInt8, CaseIterable {
     nonisolated var identifier: String {
         switch self {
         case .maxHP: return "maxHP"
-        case .physicalAttack: return "physicalAttack"
-        case .magicalAttack: return "magicalAttack"
-        case .physicalDefense: return "physicalDefense"
-        case .magicalDefense: return "magicalDefense"
-        case .hitRate: return "hitRate"
-        case .evasionRate: return "evasionRate"
-        case .criticalRate: return "criticalRate"
+        case .physicalAttackScore: return "physicalAttackScore"
+        case .magicalAttackScore: return "magicalAttackScore"
+        case .physicalDefenseScore: return "physicalDefenseScore"
+        case .magicalDefenseScore: return "magicalDefenseScore"
+        case .hitScore: return "hitScore"
+        case .evasionScore: return "evasionScore"
+        case .criticalChancePercent: return "criticalChancePercent"
         case .attackCount: return "attackCount"
-        case .magicalHealing: return "magicalHealing"
-        case .trapRemoval: return "trapRemoval"
-        case .additionalDamage: return "additionalDamage"
-        case .breathDamage: return "breathDamage"
+        case .magicalHealingScore: return "magicalHealingScore"
+        case .trapRemovalScore: return "trapRemovalScore"
+        case .additionalDamageScore: return "additionalDamageScore"
+        case .breathDamageScore: return "breathDamageScore"
         }
     }
 }
@@ -1056,18 +1056,18 @@ private struct JobCoefficientLookup {
     nonisolated func value(for stat: CombatStatKey) -> Double {
         switch stat {
         case .maxHP: return coefficients.maxHP
-        case .physicalAttack: return coefficients.physicalAttack
-        case .magicalAttack: return coefficients.magicalAttack
-        case .physicalDefense: return coefficients.physicalDefense
-        case .magicalDefense: return coefficients.magicalDefense
-        case .hitRate: return coefficients.hitRate
-        case .evasionRate: return coefficients.evasionRate
-        case .criticalRate: return coefficients.criticalRate
+        case .physicalAttackScore: return coefficients.physicalAttackScore
+        case .magicalAttackScore: return coefficients.magicalAttackScore
+        case .physicalDefenseScore: return coefficients.physicalDefenseScore
+        case .magicalDefenseScore: return coefficients.magicalDefenseScore
+        case .hitScore: return coefficients.hitScore
+        case .evasionScore: return coefficients.evasionScore
+        case .criticalChancePercent: return coefficients.criticalChancePercent
         case .attackCount: return coefficients.attackCount
-        case .magicalHealing: return coefficients.magicalHealing
-        case .trapRemoval: return coefficients.trapRemoval
-        case .additionalDamage: return coefficients.additionalDamage
-        case .breathDamage: return coefficients.breathDamage
+        case .magicalHealingScore: return coefficients.magicalHealingScore
+        case .trapRemovalScore: return coefficients.trapRemovalScore
+        case .additionalDamageScore: return coefficients.additionalDamageScore
+        case .breathDamageScore: return coefficients.breathDamageScore
         }
     }
 }

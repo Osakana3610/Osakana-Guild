@@ -8,10 +8,10 @@
 //   - これらは他のCompiler（Equipment, Exploration, Reward, Spell等）で処理される
 //
 // 【公開API】
-//   - CriticalRateAdditiveHandler: クリティカル率加算
-//   - CriticalRateCapHandler: クリティカル率上限
-//   - CriticalRateMaxAbsoluteHandler: クリティカル率絶対最大値
-//   - CriticalRateMaxDeltaHandler: クリティカル率最大値増分
+//   - CriticalChancePercentAdditiveHandler: 必殺率加算
+//   - CriticalChancePercentCapHandler: 必殺率上限
+//   - CriticalChancePercentMaxAbsoluteHandler: 必殺率絶対最大値
+//   - CriticalChancePercentMaxDeltaHandler: 必殺率最大値増分
 //   - EquipmentSlotAdditiveHandler: 装備スロット加算
 //   - EquipmentSlotMultiplierHandler: 装備スロット倍率
 //   - ExplorationTimeMultiplierHandler: 探索時間倍率
@@ -46,23 +46,23 @@ import Foundation
 // Actor.swift では処理しないが、レジストリ登録は必要なハンドラ
 // これらは他のCompiler（Equipment, Exploration, Reward, Spell等）で処理される
 
-enum CriticalRateAdditiveHandler: SkillEffectHandler {
-    nonisolated static let effectType = SkillEffectType.criticalRateAdditive
+enum CriticalChancePercentAdditiveHandler: SkillEffectHandler {
+    nonisolated static let effectType = SkillEffectType.criticalChancePercentAdditive
     nonisolated static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-enum CriticalRateCapHandler: SkillEffectHandler {
-    nonisolated static let effectType = SkillEffectType.criticalRateCap
+enum CriticalChancePercentCapHandler: SkillEffectHandler {
+    nonisolated static let effectType = SkillEffectType.criticalChancePercentCap
     nonisolated static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-enum CriticalRateMaxAbsoluteHandler: SkillEffectHandler {
-    nonisolated static let effectType = SkillEffectType.criticalRateMaxAbsolute
+enum CriticalChancePercentMaxAbsoluteHandler: SkillEffectHandler {
+    nonisolated static let effectType = SkillEffectType.criticalChancePercentMaxAbsolute
     nonisolated static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 
-enum CriticalRateMaxDeltaHandler: SkillEffectHandler {
-    nonisolated static let effectType = SkillEffectType.criticalRateMaxDelta
+enum CriticalChancePercentMaxDeltaHandler: SkillEffectHandler {
+    nonisolated static let effectType = SkillEffectType.criticalChancePercentMaxDelta
     nonisolated static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 

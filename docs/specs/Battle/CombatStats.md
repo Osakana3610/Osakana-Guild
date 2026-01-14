@@ -57,7 +57,7 @@ CharacterValues.Combat の各ステータスについて、意味・単位・合
 - trunc(x): Int(x.rounded(.towardZero))
 - fixedToOne(stat): statFixedToOne に含まれる場合 true
 - conv_stat / E_stat: 対象ステータスに対応する変換加算 / 装備加算
-- criticalFlatBonus / criticalCap / criticalCapDelta: クリティカル関連のスキル効果値
+- criticalFlatBonus / criticalCap / criticalCapDelta: 必殺関連のスキル効果値
 
 変換（statConversion）:
 - Percent変換: ratio = valuePercent / 100.0
@@ -179,7 +179,7 @@ finalAttackCount(AGI, LF, c_attackCount, T_attackCount, P_attackCount, A_attackC
    - wisdom: 魔法攻撃/魔法回復/ブレスの増幅
    - vitality: 物理防御の耐性補正
    - spirit: 魔法防御の耐性補正
-   - luck: クリティカル率の増幅
+   - luck: 必殺率の増幅
 6) **丸め・クランプ**
    - maxHP >= 1
    - attackCount >= 1
@@ -413,10 +413,10 @@ if LUK >= 21: value = trunc(min(value * statBonusMultiplier(LUK), 100.0))
 value = max(0, min(100, value))
 ```
 - **用途**:
-  - 物理クリティカル判定に使用
+  - 物理必殺判定に使用
   - 特殊攻撃・リアクションで倍率補正される場合あり
 - **注意**:
-  - 魔法クリティカルは別系統の Percent として管理
+  - 魔法必殺は別系統の Percent として管理
 
 ### attackCount（攻撃回数）
 - **単位**: 回数（Double）
@@ -573,4 +573,4 @@ if WIS >= 21: value = trunc(value * statBonusMultiplier(WIS))
 - breathDamageScore → **breathDamage**
 - 命中スコア加算 → **hitRatePercent / hitRatePerTurn**
 - 回避スコア加算 → **evasionRatePerTurn**
-- 魔法クリティカルPercent → **magicCriticalChancePercent**
+- 魔法必殺Percent → **magicCriticalChancePercent**

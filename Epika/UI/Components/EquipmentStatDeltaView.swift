@@ -44,12 +44,12 @@ struct EquipmentStatDeltaView: View {
         let isPositive = delta.value > 0
         let sign = isPositive ? "+" : ""
         // 攻撃回数は10倍スケールで保存されているため、0.1倍して表示
-        let rawValueText: String = if delta.label == "攻撃回数" {
+        let rawValueText: String = if delta.label == L10n.CombatStat.attackCount {
             String(format: "%.1f", Double(delta.value) * 0.1)
         } else {
             "\(delta.value)"
         }
-        let suffix = delta.label == "必殺率" ? "%" : ""
+        let suffix = delta.label == L10n.CombatStat.criticalChancePercent ? "%" : ""
         let text = "[\(sign)\(rawValueText)\(suffix)] \(delta.label)"
 
         return Text(text)
@@ -68,25 +68,25 @@ struct EquipmentStatDeltaView: View {
 struct StatLabelResolver {
     static func label(for stat: String) -> String {
         switch stat.lowercased() {
-        case "strength": return "力"
-        case "wisdom": return "知恵"
-        case "spirit": return "精神"
-        case "vitality": return "体力"
-        case "agility": return "敏捷"
-        case "luck": return "運"
-        case "hp", "maxhp": return "最大HP"
-        case "physicalattack": return "物理攻撃"
-        case "magicalattack": return "魔法攻撃"
-        case "physicaldefense": return "物理防御"
-        case "magicaldefense": return "魔法防御"
-        case "hitrate": return "命中"
-        case "evasionrate": return "回避"
-        case "criticalrate": return "必殺率"
-        case "attackcount": return "攻撃回数"
-        case "magicalhealing": return "魔法回復力"
-        case "trapremoval": return "罠解除"
-        case "additionaldamage": return "追加ダメージ"
-        case "breathdamage": return "ブレスダメージ"
+        case "strength": return BaseStat.strength.displayName
+        case "wisdom": return BaseStat.wisdom.displayName
+        case "spirit": return BaseStat.spirit.displayName
+        case "vitality": return BaseStat.vitality.displayName
+        case "agility": return BaseStat.agility.displayName
+        case "luck": return BaseStat.luck.displayName
+        case "hp", "maxhp": return CombatStat.maxHP.displayName
+        case "physicalattack": return CombatStat.physicalAttackScore.displayName
+        case "magicalattack": return CombatStat.magicalAttackScore.displayName
+        case "physicaldefense": return CombatStat.physicalDefenseScore.displayName
+        case "magicaldefense": return CombatStat.magicalDefenseScore.displayName
+        case "hitrate": return CombatStat.hitScore.displayName
+        case "evasionrate": return CombatStat.evasionScore.displayName
+        case "criticalrate": return CombatStat.criticalChancePercent.displayName
+        case "attackcount": return CombatStat.attackCount.displayName
+        case "magicalhealing": return CombatStat.magicalHealingScore.displayName
+        case "trapremoval": return CombatStat.trapRemovalScore.displayName
+        case "additionaldamage": return CombatStat.additionalDamageScore.displayName
+        case "breathdamage": return CombatStat.breathDamageScore.displayName
         default: return stat
         }
     }
