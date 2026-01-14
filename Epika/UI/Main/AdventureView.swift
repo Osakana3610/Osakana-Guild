@@ -77,15 +77,7 @@ struct AdventureView: View {
                     initialTargetFloor: context.initialTargetFloor,
                     initialLastSelectedDungeonId: context.initialLastSelectedDungeonId,
                     initialLastSelectedDifficulty: context.initialLastSelectedDifficulty,
-                    selectedDungeonId: Binding(
-                        get: { partyDetailContext?.selectedDungeonId },
-                        set: { newValue in
-                            if var current = partyDetailContext {
-                                current.selectedDungeonId = newValue
-                                partyDetailContext = current
-                            }
-                        }
-                    ),
+                    selectedDungeonId: partyDetailSelectedDungeonBinding,
                     dungeons: adventureState.dungeons
                 )
                 .environment(adventureState)
@@ -293,6 +285,21 @@ struct AdventureView: View {
                 logsPartyId = newValue?.id
             }
         )
+    }
+
+    private var partyDetailSelectedDungeonBinding: Binding<UInt16?> {
+        Binding(
+            get: { partyDetailContext?.selectedDungeonId },
+            set: { newValue in
+                updatePartyDetailContext { $0.selectedDungeonId = newValue }
+            }
+        )
+    }
+
+    private func updatePartyDetailContext(_ update: (inout PartyDetailContext) -> Void) {
+        guard var current = partyDetailContext else { return }
+        update(&current)
+        partyDetailContext = current
     }
 
     @MainActor

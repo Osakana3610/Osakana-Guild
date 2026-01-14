@@ -90,9 +90,7 @@ struct CharacterCreationView: View {
             .navigationTitle("酒場")
             .navigationBarTitleDisplayMode(.inline)
             .task { await loadMasterData() }
-            .alert("エラー", isPresented: Binding(get: { creationErrorMessage != nil }, set: { value in
-                if !value { creationErrorMessage = nil }
-            })) {
+            .alert("エラー", isPresented: creationErrorAlert) {
                 Button("OK", role: .cancel) { creationErrorMessage = nil }
             } message: {
                 Text(creationErrorMessage ?? "")
@@ -104,6 +102,15 @@ struct CharacterCreationView: View {
                 JobDetailSheet(job: job, genderCode: selectedRace?.genderCode)
             }
         }
+    }
+
+    private var creationErrorAlert: Binding<Bool> {
+        Binding(
+            get: { creationErrorMessage != nil },
+            set: { value in
+                if !value { creationErrorMessage = nil }
+            }
+        )
     }
 
     // MARK: - Sections

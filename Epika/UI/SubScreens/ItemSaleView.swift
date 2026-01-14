@@ -121,11 +121,7 @@ struct ItemSaleView: View {
         if !selectedCategories.contains(item.category) { return false }
         let normalTitleSet = selectedNormalTitleIds ?? allNormalTitleIds
         if !normalTitleSet.contains(item.normalTitleId) { return false }
-        if !searchText.isEmpty {
-            if !item.displayName.localizedCaseInsensitiveContains(searchText) {
-                return false
-            }
-        }
+        if !searchText.isEmpty && !item.displayName.localizedCaseInsensitiveContains(searchText) { return false }
         if showSuperRareOnly && item.superRareTitleId == 0 { return false }
         if showGemModifiedOnly && item.socketItemId == 0 { return false }
         return true

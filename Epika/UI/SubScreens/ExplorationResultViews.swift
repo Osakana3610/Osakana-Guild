@@ -49,7 +49,8 @@ struct ExplorationRunResultSummaryView: View {
                         Text("獲得ゴールド：\(snapshot.rewards.gold.formattedWithComma())")
                     }
 
-                    if snapshot.status == .completed || snapshot.status == .cancelled {
+                    let isCompletedOrCancelled = snapshot.status == .completed || snapshot.status == .cancelled
+                    if isCompletedOrCancelled {
                         if itemRows.isEmpty {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("入手アイテム：")

@@ -66,6 +66,27 @@ struct TitleInheritanceView: View {
         )
     }
 
+    private var targetSelectionBinding: Binding<CachedInventoryItem?> {
+        Binding(
+            get: { selectedTarget },
+            set: { newValue in
+                selectedTarget = newValue
+                selectedSource = nil
+                preview = nil
+            }
+        )
+    }
+
+    private var sourceSelectionBinding: Binding<CachedInventoryItem?> {
+        Binding(
+            get: { selectedSource },
+            set: { newValue in
+                selectedSource = newValue
+                updatePreview()
+            }
+        )
+    }
+
     var body: some View {
         Group {
             if showError {
@@ -85,27 +106,14 @@ struct TitleInheritanceView: View {
             ItemPickerView(
                 title: "対象アイテム選択",
                 items: targetItems,
-                selectedItem: Binding(
-                    get: { selectedTarget },
-                    set: { newValue in
-                        selectedTarget = newValue
-                        selectedSource = nil
-                        preview = nil
-                    }
-                )
+                selectedItem: targetSelectionBinding
             )
         }
         .sheet(isPresented: $showSourcePicker) {
             ItemPickerView(
                 title: "提供アイテム選択",
                 items: sourceItems,
-                selectedItem: Binding(
-                    get: { selectedSource },
-                    set: { newValue in
-                        selectedSource = newValue
-                        updatePreview()
-                    }
-                )
+                selectedItem: sourceSelectionBinding
             )
         }
     }
