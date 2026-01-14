@@ -235,8 +235,21 @@ private struct ExplorationRunSummaryView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var showingResultSummary = false
+    @State private var eventsByFloor: [(floor: Int, events: [CachedExploration.EncounterLog])] = []
 
-    private var eventsByFloor: [(floor: Int, events: [CachedExploration.EncounterLog])] {
+    init(
+        snapshot: CachedExploration,
+        party: CachedParty,
+        selectedEncounter: Binding<CachedExploration.EncounterLog?>
+    ) {
+        self.snapshot = snapshot
+        self.party = party
+        self._selectedEncounter = selectedEncounter
+        _eventsByFloor = State(initialValue: Self.buildEventsByFloor(from: snapshot))
+    }
+
+    private static func buildEventsByFloor(from snapshot: CachedExploration)
+        -> [(floor: Int, events: [CachedExploration.EncounterLog])] {
         let grouped = Dictionary(grouping: snapshot.encounterLogs) { $0.floorNumber }
         return grouped.keys.sorted().map { floor in
             let events = (grouped[floor] ?? []).sorted { lhs, rhs in

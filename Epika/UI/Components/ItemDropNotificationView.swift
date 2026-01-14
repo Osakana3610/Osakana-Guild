@@ -30,7 +30,9 @@ struct GlassEffectModifier: ViewModifier {
         if #available(iOS 26.0, *) {
             // CRITICAL: 絶対削除禁止 - 実機テスト必須　iOS 26以降では本物のLiquid Glassを使用　実機用なので削除禁止
             content
-                .glassEffect(isSuperRare ? .regular.tint(.red.opacity(0.8)) : .regular)
+                .glassEffect(isSuperRare
+                             ? .regular.tint(.red.opacity(0.8)).interactive()
+                             : .regular.interactive())
         } else {
             // iOS 25以下ではブラー + 色オーバーレイ + 影で視認性確保
             content
