@@ -34,6 +34,7 @@ extension UserDataLoadService {
         let loadedCharacters = try await characterService.allCharacters()
         await MainActor.run {
             self.characters = loadedCharacters
+            self.rebuildCharacterIndex()
             self.isCharactersLoaded = true
         }
     }
@@ -44,6 +45,24 @@ extension UserDataLoadService {
     @MainActor
     func invalidateCharacters() {
         isCharactersLoaded = false
+    }
+
+    @MainActor
+    func rebuildCharacterIndex() {
+        characterIndexById = Dictionary(
+            uniqueKeysWithValues: characters.enumerated().map { ($0.element.id, $0.offset) }
+        )
+    }
+
+    @MainActor
+    func cachedCharacter(for id: UInt8) -> CachedCharacter? {
+        guard let index = characterIndexById[id], characters.indices.contains(index) else { return nil }
+        return characters[index]
+    }
+
+    @MainActor
+    func cachedCharacters(for ids: [UInt8]) -> [CachedCharacter] {
+        ids.compactMap { cachedCharacter(for: $0) }
     }
 
     /// 特定のキャラクターをキャッシュで差分更新
@@ -89,6 +108,7 @@ extension UserDataLoadService {
 
     /// キャラクター変更をキャッシュへ適用
     private func applyCharacterChange(_ change: CharacterChange) async {
+        var didMutate = false
         // fullReloadの場合は全件リロード
         if change.upserted.isEmpty && change.removed.isEmpty {
             await MainActor.run { self.invalidateCharacters() }
@@ -100,6 +120,7 @@ extension UserDataLoadService {
             await MainActor.run {
                 self.characters.removeAll { change.removed.contains($0.id) }
             }
+            didMutate = true
         }
 
         // 更新されたキャラクターを再構築
@@ -115,10 +136,15 @@ extension UserDataLoadService {
                         }
                     }
                 }
+                didMutate = true
             } catch {
                 // エラー時は全件リロードにフォールバック
                 await MainActor.run { self.invalidateCharacters() }
             }
+        }
+
+        if didMutate {
+            await MainActor.run { self.rebuildCharacterIndex() }
         }
     }
 }

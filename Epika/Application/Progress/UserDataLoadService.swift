@@ -51,6 +51,7 @@ final class UserDataLoadService: Sendable {
     // MARK: - Cache（UIから観測されるため@MainActor）
 
     @MainActor var characters: [CachedCharacter] = []
+    @MainActor var characterIndexById: [UInt8: Int] = [:]  // O(1)検索用
     @MainActor var parties: [CachedParty] = []
     @MainActor var explorationSummaries: [CachedExploration] = []
 

@@ -83,15 +83,12 @@ struct CharacterJobChangeView: View {
                                     let masterBaseJobId = isMasterJob ? jobId - 100 : 0
 
                                     if isMasterJob {
-                                        if character.jobId == masterBaseJobId {
-                                            // 対応する基本職の場合、Lv50条件を表示
-                                            if character.level >= 50 {
-                                                Text(job.name).tag(UInt8?.some(jobId))
-                                            } else {
-                                                Text("\(job.name) (Lv50必要)").tag(UInt8?.none)
-                                            }
+                                        let isEligibleBase = character.jobId == masterBaseJobId
+                                        if isEligibleBase {
+                                            let canSelect = character.level >= 50
+                                            let label = canSelect ? job.name : "\(job.name) (Lv50必要)"
+                                            Text(label).tag(canSelect ? UInt8?.some(jobId) : UInt8?.none)
                                         }
-                                        // 対応しない職業の場合は表示しない
                                     } else if !isCurrentJob {
                                         Text(job.name).tag(UInt8?.some(jobId))
                                     }

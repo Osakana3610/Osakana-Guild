@@ -93,11 +93,7 @@ struct CharacterAvatarSelectionSheet: View {
                     Task { await importFromPhotos(item: item) }
                 }
             }
-            .alert("画像の読み込みに失敗しました", isPresented: Binding(get: {
-                importError != nil
-            }, set: { value in
-                if !value { importError = nil }
-            })) {
+            .alert("画像の読み込みに失敗しました", isPresented: importErrorAlert) {
                 Button("OK", role: .cancel) { importError = nil }
             } message: {
                 if let message = importError {
@@ -105,6 +101,15 @@ struct CharacterAvatarSelectionSheet: View {
                 }
             }
         }
+    }
+
+    private var importErrorAlert: Binding<Bool> {
+        Binding(
+            get: { importError != nil },
+            set: { value in
+                if !value { importError = nil }
+            }
+        )
     }
 
     private func avatarSection(title: String, indices: [UInt16]) -> some View {

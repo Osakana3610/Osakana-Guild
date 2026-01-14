@@ -36,10 +36,6 @@ private enum HitProbabilityConstants {
     nonisolated static let baseMinHitRate = 0.05
     /// 基本最高命中率（95%）- どんなに命中が高くても最大でこの確率
     nonisolated static let baseMaxHitRate = 0.95
-    /// 敏捷による最低命中率の減衰係数（12%減少/敏捷1ポイント）
-    nonisolated static let agilityDecayFactor = 0.88
-    /// 敏捷による減衰が開始する閾値
-    nonisolated static let agilityDecayThreshold = 20
 }
 
 // MARK: - Targeting
@@ -294,12 +290,10 @@ extension BattleTurnEngine {
         var minHit = HitProbabilityConstants.baseMinHitRate
 
         if let defender {
+            let evasionLimitPercent = CombatFormulas.evasionLimit(value: defender.agility)
+            minHit = max(0.0, min(1.0, 1.0 - evasionLimitPercent / 100.0))
             if let minScale = defender.skillEffects.damage.minHitScale {
                 minHit *= minScale
-            }
-            if defender.agility > HitProbabilityConstants.agilityDecayThreshold {
-                let delta = defender.agility - HitProbabilityConstants.agilityDecayThreshold
-                minHit *= pow(HitProbabilityConstants.agilityDecayFactor, Double(delta))
             }
         }
 

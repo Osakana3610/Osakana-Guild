@@ -126,7 +126,7 @@ enum TimedBuffTriggerHandler: SkillEffectHandler {
             var modifiers: [String: Double] = [:]
 
             if let value = payload.value[.damageDealtPercent] { modifiers["damageDealtPercent"] = value }
-            if let value = payload.value[.hitRatePercent] { modifiers["hitRatePercent"] = value }
+            if let value = payload.value[.hitScoreAdditive] { modifiers["hitScoreAdditive"] = value }
 
             accumulator.status.timedBuffTriggers.append(.init(
                 id: triggerId,
@@ -144,8 +144,8 @@ enum TimedBuffTriggerHandler: SkillEffectHandler {
             // 毎ターン累積
             var perTurnModifiers: [String: Double] = [:]
 
-            if let value = payload.value[.hitRatePerTurn] { perTurnModifiers["hitRatePercent"] = value }
-            if let value = payload.value[.evasionRatePerTurn] { perTurnModifiers["evasionRatePercent"] = value }
+            if let value = payload.value[.hitScoreAdditivePerTurn] { perTurnModifiers["hitScoreAdditive"] = value }
+            if let value = payload.value[.evasionScoreAdditivePerTurn] { perTurnModifiers["evasionScoreAdditive"] = value }
             if let value = payload.value[.attackPercentPerTurn] { perTurnModifiers["attackPercent"] = value }
             if let value = payload.value[.defensePercentPerTurn] { perTurnModifiers["defensePercent"] = value }
             if let value = payload.value[.attackCountPercentPerTurn] { perTurnModifiers["attackCountPercent"] = value }

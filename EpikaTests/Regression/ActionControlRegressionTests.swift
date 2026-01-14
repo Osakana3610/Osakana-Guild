@@ -30,7 +30,7 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
             damageType: .physical,
             baseChancePercent: 100,
             attackCountMultiplier: 1.0,
-            criticalRateMultiplier: 0.0,
+            criticalChancePercentMultiplier: 0.0,
             accuracyMultiplier: 1.0,
             requiresMartial: false,
             requiresAllyBehind: false
@@ -47,7 +47,7 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
             damageType: .physical,
             baseChancePercent: 100,
             attackCountMultiplier: 1.0,
-            criticalRateMultiplier: 0.0,
+            criticalChancePercentMultiplier: 0.0,
             accuracyMultiplier: 1.0,
             requiresMartial: false,
             requiresAllyBehind: false
@@ -57,15 +57,15 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
 
         let player = TestActorBuilder.makePlayer(
             maxHP: 50000,
-            physicalAttack: 3000,
-            hitRate: 100,
+            physicalAttackScore: 3000,
+            hitScore: 100,
             luck: 35,
             skillEffects: playerSkillEffects
         )
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 50000,
-            physicalAttack: 3000,
-            hitRate: 100,
+            physicalAttackScore: 3000,
+            hitScore: 100,
             luck: 35,
             skillEffects: enemySkillEffects
         )
@@ -108,8 +108,8 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
         // 弱いプレイヤー（1撃で倒される）
         let player = TestActorBuilder.makePlayer(
             maxHP: 100,
-            physicalAttack: 1000,
-            hitRate: 100,
+            physicalAttackScore: 1000,
+            hitScore: 100,
             luck: 35,
             agility: 1  // 後攻
         )
@@ -117,8 +117,8 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
         // 強い敵（先制で味方を倒す）
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 50000,
-            physicalAttack: 5000,
-            hitRate: 100,
+            physicalAttackScore: 5000,
+            hitScore: 100,
             luck: 35,
             agility: 35  // 先攻
         )
@@ -179,7 +179,7 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
             damageType: .physical,
             baseChancePercent: 100,
             attackCountMultiplier: 1.0,
-            criticalRateMultiplier: 0.0,
+            criticalChancePercentMultiplier: 0.0,
             accuracyMultiplier: 1.0,
             requiresMartial: false,
             requiresAllyBehind: false
@@ -188,8 +188,8 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
 
         let player = TestActorBuilder.makePlayer(
             maxHP: 50000,
-            physicalAttack: 500,  // 低攻撃力（敵を倒さない）
-            hitRate: 100,
+            physicalAttackScore: 500,  // 低攻撃力（敵を倒さない）
+            hitScore: 100,
             luck: 35,
             agility: 1,  // 後攻
             skillEffects: playerSkillEffects
@@ -197,8 +197,8 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 100000,
-            physicalAttack: 1000,
-            hitRate: 100,
+            physicalAttackScore: 1000,
+            hitScore: 100,
             luck: 35,
             agility: 35  // 先攻
         )
@@ -268,8 +268,8 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
         // 高回避率の味方（後攻）
         let player = TestActorBuilder.makePlayer(
             maxHP: 50000,
-            physicalAttack: 100,  // 低攻撃力
-            evasionRate: 100,     // 100%回避
+            physicalAttackScore: 100,  // 低攻撃力
+            evasionScore: 100,     // 100%回避
             luck: 35,
             agility: 1            // 後攻
         )
@@ -277,8 +277,8 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
         // 敵は先攻で攻撃
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 50000,
-            physicalAttack: 1000,
-            hitRate: 50,          // 命中率50%（回避が発生しやすく）
+            physicalAttackScore: 1000,
+            hitScore: 50,          // 命中率50%（回避が発生しやすく）
             luck: 35,
             agility: 35           // 先攻
         )

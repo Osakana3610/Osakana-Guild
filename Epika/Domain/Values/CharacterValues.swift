@@ -11,11 +11,11 @@
 //   - CoreAttributes: 基礎ステータス（STR/WIS/SPI/VIT/AGI/LUK）
 //   - HitPoints: HP情報（current/maximum）
 //   - Combat: 戦闘ステータス
-//     - maxHP, physicalAttack, magicalAttack
-//     - physicalDefense, magicalDefense
-//     - hitRate, evasionRate, criticalRate
-//     - attackCount, magicalHealing, trapRemoval
-//     - additionalDamage, breathDamage, isMartialEligible
+//     - maxHP, physicalAttackScore, magicalAttackScore
+//     - physicalDefenseScore, magicalDefenseScore
+//     - hitScore, evasionScore, criticalChancePercent
+//     - attackCount, magicalHealingScore, trapRemovalScore
+//     - additionalDamageScore, breathDamageScore, isMartialEligible
 //   - Personality: 性格設定（primary/secondary ID、0=なし）
 //   - LearnedSkill: 習得スキル情報
 //   - EquippedItem: 装備アイテム情報（称号・ソケット含む）
@@ -54,18 +54,18 @@ nonisolated enum CharacterValues {
 
     nonisolated struct Combat: Sendable, Hashable {
         var maxHP: Int
-        var physicalAttack: Int
-        var magicalAttack: Int
-        var physicalDefense: Int
-        var magicalDefense: Int
-        var hitRate: Int
-        var evasionRate: Int
-        var criticalRate: Int
+        var physicalAttackScore: Int
+        var magicalAttackScore: Int
+        var physicalDefenseScore: Int
+        var magicalDefenseScore: Int
+        var hitScore: Int
+        var evasionScore: Int
+        var criticalChancePercent: Int
         var attackCount: Double
-        var magicalHealing: Int
-        var trapRemoval: Int
-        var additionalDamage: Int
-        var breathDamage: Int
+        var magicalHealingScore: Int
+        var trapRemovalScore: Int
+        var additionalDamageScore: Int
+        var breathDamageScore: Int
         var isMartialEligible: Bool
     }
 

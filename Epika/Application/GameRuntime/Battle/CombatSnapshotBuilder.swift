@@ -76,18 +76,18 @@ private extension CombatSnapshotBuilder {
     nonisolated static func makeJobDefinition(for definition: EnemyDefinition) -> JobDefinition {
         let coefficients = JobDefinition.CombatCoefficients(
             maxHP: 0.0,
-            physicalAttack: 0.0,
-            magicalAttack: 0.0,
-            physicalDefense: 0.0,
-            magicalDefense: 0.0,
-            hitRate: 0.0,
-            evasionRate: 0.0,
-            criticalRate: 0.0,
+            physicalAttackScore: 0.0,
+            magicalAttackScore: 0.0,
+            physicalDefenseScore: 0.0,
+            magicalDefenseScore: 0.0,
+            hitScore: 0.0,
+            evasionScore: 0.0,
+            criticalChancePercent: 0.0,
             attackCount: 0.0,
-            magicalHealing: 0.0,
-            trapRemoval: 0.0,
-            additionalDamage: 0.0,
-            breathDamage: 0.0
+            magicalHealingScore: 0.0,
+            trapRemovalScore: 0.0,
+            additionalDamageScore: 0.0,
+            breathDamageScore: 0.0
         )
         return JobDefinition(id: definition.jobId ?? 0,
                              name: definition.name,

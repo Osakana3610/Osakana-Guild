@@ -22,21 +22,21 @@ nonisolated final class BoundaryConditionRegressionTests: XCTestCase {
     func testAgilityEvasionAt21_cf89ec9() {
         // 敏捷20での命中率
         let defender20 = TestActorBuilder.makeDefender(
-            evasionRate: 50,
+            evasionScore: 50,
             luck: 18,
             agility: 20
         )
 
         // 敏捷21での命中率
         let defender21 = TestActorBuilder.makeDefender(
-            evasionRate: 50,
+            evasionScore: 50,
             luck: 18,
             agility: 21
         )
 
         // 敏捷35での命中率
         let defender35 = TestActorBuilder.makeDefender(
-            evasionRate: 50,
+            evasionScore: 50,
             luck: 18,
             agility: 35
         )
@@ -116,12 +116,12 @@ nonisolated final class BoundaryConditionRegressionTests: XCTestCase {
     func testDamageNeverNegative() {
         // 攻撃力100、防御力10000の極端なケース
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 100,
-            hitRate: 100,
+            physicalAttackScore: 100,
+            hitScore: 100,
             luck: 1
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 10000,
+            physicalDefenseScore: 10000,
             luck: 1
         )
 
@@ -153,16 +153,16 @@ nonisolated final class BoundaryConditionRegressionTests: XCTestCase {
         // HPが100のプレイヤーに1000ダメージ
         let player = TestActorBuilder.makePlayer(
             maxHP: 100,
-            physicalAttack: 10,
-            hitRate: 100,
+            physicalAttackScore: 10,
+            hitScore: 100,
             luck: 35,
             agility: 1
         )
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 50000,
-            physicalAttack: 10000,  // 大ダメージ
-            hitRate: 100,
+            physicalAttackScore: 10000,  // 大ダメージ
+            hitScore: 100,
             luck: 35,
             agility: 35
         )
@@ -195,18 +195,18 @@ nonisolated final class BoundaryConditionRegressionTests: XCTestCase {
         // attackCount=0.1 でも最低1回は攻撃する
         let snapshot = CharacterValues.Combat(
             maxHP: 10000,
-            physicalAttack: 5000,
-            magicalAttack: 500,
-            physicalDefense: 1000,
-            magicalDefense: 500,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
+            physicalAttackScore: 5000,
+            magicalAttackScore: 500,
+            physicalDefenseScore: 1000,
+            magicalDefenseScore: 500,
+            hitScore: 100,
+            evasionScore: 0,
+            criticalChancePercent: 0,
             attackCount: 0.1,  // 極端に低い攻撃回数
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
             isMartialEligible: false
         )
 
@@ -230,7 +230,7 @@ nonisolated final class BoundaryConditionRegressionTests: XCTestCase {
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 1000,
-            physicalDefense: 100,
+            physicalDefenseScore: 100,
             luck: 1,
             agility: 1
         )

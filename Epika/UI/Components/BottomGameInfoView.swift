@@ -152,12 +152,12 @@ struct BottomGameInfoView: View {
 private extension BottomGameInfoView {
     @MainActor
     static let timeStyle: Date.FormatStyle = {
-        var style = Date.FormatStyle(date: .omitted,
+        var style = Date.FormatStyle(date: .numeric,
                                      time: .standard,
                                      locale: Locale(identifier: "ja_JP"),
                                      calendar: .init(identifier: .gregorian),
                                      timeZone: .current)
-        style = style.hour(.twoDigits(amPM: .abbreviated))
+        style = style.hour(.defaultDigits(amPM: .omitted))
                      .minute(.twoDigits)
                      .second(.twoDigits)
         return style

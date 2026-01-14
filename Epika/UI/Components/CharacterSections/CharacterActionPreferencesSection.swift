@@ -72,21 +72,21 @@ struct CharacterActionPreferencesSection: View {
 
     private var actionPreferenceEditor: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("行動抽選は「ブレス > 僧侶魔法 > 魔法使い魔法 > 物理攻撃」の順に行われます。各スライダーはカテゴリの重みを0〜100%で指定します。")
+            Text("行動抽選は「\(L10n.ActionPreference.breath) > \(L10n.ActionPreference.priestMagic) > \(L10n.ActionPreference.mageMagic) > \(L10n.ActionPreference.attack)」の順に行われます。各スライダーはカテゴリの重みを0〜100%で指定します。")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            actionSliderRow(label: "ブレス",
+            actionSliderRow(label: L10n.ActionPreference.breath,
                             value: breathSliderBinding,
                             isDisabled: !canEditBreathRate)
 
-            actionSliderRow(label: "僧侶魔法",
+            actionSliderRow(label: L10n.ActionPreference.priestMagic,
                             value: priestSliderBinding)
 
-            actionSliderRow(label: "魔法使い魔法",
+            actionSliderRow(label: L10n.ActionPreference.mageMagic,
                             value: mageSliderBinding)
 
-            actionSliderRow(label: "物理攻撃",
+            actionSliderRow(label: L10n.ActionPreference.attack,
                             value: attackSliderBinding)
 
             if let error = actionPreferenceError {
@@ -103,10 +103,10 @@ struct CharacterActionPreferencesSection: View {
             Text("行動抽選の重みを表示します。")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            LabeledContent("ブレス", value: "\(prefs.breath)%")
-            LabeledContent("僧侶魔法", value: "\(prefs.priestMagic)%")
-            LabeledContent("魔法使い魔法", value: "\(prefs.mageMagic)%")
-            LabeledContent("物理攻撃", value: "\(prefs.attack)%")
+            LabeledContent(L10n.ActionPreference.breath, value: "\(prefs.breath)%")
+            LabeledContent(L10n.ActionPreference.priestMagic, value: "\(prefs.priestMagic)%")
+            LabeledContent(L10n.ActionPreference.mageMagic, value: "\(prefs.mageMagic)%")
+            LabeledContent(L10n.ActionPreference.attack, value: "\(prefs.attack)%")
         }
     }
 }
@@ -132,44 +132,30 @@ private extension CharacterActionPreferencesSection {
     }
 
     var canEditBreathRate: Bool {
-        character.combat.breathDamage > 0
+        character.combat.breathDamageScore > 0
     }
 
     var attackSliderBinding: Binding<Double> {
-        Binding(
-            get: { actionPreferenceAttack },
-            set: { newValue in
-                actionPreferenceAttack = newValue
-                actionPreferenceError = nil
-            }
-        )
+        clearingErrorBinding($actionPreferenceAttack)
     }
 
     var priestSliderBinding: Binding<Double> {
-        Binding(
-            get: { actionPreferencePriest },
-            set: { newValue in
-                actionPreferencePriest = newValue
-                actionPreferenceError = nil
-            }
-        )
+        clearingErrorBinding($actionPreferencePriest)
     }
 
     var mageSliderBinding: Binding<Double> {
-        Binding(
-            get: { actionPreferenceMage },
-            set: { newValue in
-                actionPreferenceMage = newValue
-                actionPreferenceError = nil
-            }
-        )
+        clearingErrorBinding($actionPreferenceMage)
     }
 
     var breathSliderBinding: Binding<Double> {
+        clearingErrorBinding($actionPreferenceBreath)
+    }
+
+    func clearingErrorBinding(_ value: Binding<Double>) -> Binding<Double> {
         Binding(
-            get: { actionPreferenceBreath },
+            get: { value.wrappedValue },
             set: { newValue in
-                actionPreferenceBreath = newValue
+                value.wrappedValue = newValue
                 actionPreferenceError = nil
             }
         )

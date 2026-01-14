@@ -309,12 +309,12 @@ private struct EnemyBaseStatsSection: View {
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
-            EnemyStatRow(label: "力", value: enemy.strength)
-            EnemyStatRow(label: "知", value: enemy.wisdom)
-            EnemyStatRow(label: "精", value: enemy.spirit)
-            EnemyStatRow(label: "体", value: enemy.vitality)
-            EnemyStatRow(label: "速", value: enemy.agility)
-            EnemyStatRow(label: "運", value: enemy.luck)
+            EnemyStatRow(label: BaseStat.strength.shortDisplayName, value: enemy.strength)
+            EnemyStatRow(label: BaseStat.wisdom.shortDisplayName, value: enemy.wisdom)
+            EnemyStatRow(label: BaseStat.spirit.shortDisplayName, value: enemy.spirit)
+            EnemyStatRow(label: BaseStat.vitality.shortDisplayName, value: enemy.vitality)
+            EnemyStatRow(label: BaseStat.agility.shortDisplayName, value: enemy.agility)
+            EnemyStatRow(label: BaseStat.luck.shortDisplayName, value: enemy.luck)
         }
     }
 }
@@ -324,19 +324,19 @@ private struct EnemyCombatStatsSection: View {
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            CombatRow(label: "最大HP", value: combat.maxHP.formattedWithComma())
-            CombatRow(label: "物理攻撃", value: combat.physicalAttack.formattedWithComma())
-            CombatRow(label: "魔法攻撃", value: combat.magicalAttack.formattedWithComma())
-            CombatRow(label: "物理防御", value: combat.physicalDefense.formattedWithComma())
-            CombatRow(label: "魔法防御", value: combat.magicalDefense.formattedWithComma())
-            CombatRow(label: "命中", value: combat.hitRate.formattedWithComma())
-            CombatRow(label: "回避", value: combat.evasionRate.formattedWithComma())
-            CombatRow(label: "必殺率", value: "\(combat.criticalRate)%")
-            CombatRow(label: "攻撃回数", value: combat.attackCount.formattedWithComma(maximumFractionDigits: 1))
-            CombatRow(label: "魔法回復力", value: combat.magicalHealing.formattedWithComma())
-            CombatRow(label: "罠解除", value: combat.trapRemoval.formattedWithComma())
-            CombatRow(label: "追加ダメージ", value: combat.additionalDamage.formattedWithComma())
-            CombatRow(label: "ブレスダメージ", value: combat.breathDamage.formattedWithComma())
+            CombatRow(label: CombatStat.maxHP.displayName, value: combat.maxHP.formattedWithComma())
+            CombatRow(label: CombatStat.physicalAttackScore.displayName, value: combat.physicalAttackScore.formattedWithComma())
+            CombatRow(label: CombatStat.magicalAttackScore.displayName, value: combat.magicalAttackScore.formattedWithComma())
+            CombatRow(label: CombatStat.physicalDefenseScore.displayName, value: combat.physicalDefenseScore.formattedWithComma())
+            CombatRow(label: CombatStat.magicalDefenseScore.displayName, value: combat.magicalDefenseScore.formattedWithComma())
+            CombatRow(label: CombatStat.hitScore.displayName, value: combat.hitScore.formattedWithComma())
+            CombatRow(label: CombatStat.evasionScore.displayName, value: combat.evasionScore.formattedWithComma())
+            CombatRow(label: CombatStat.criticalChancePercent.displayName, value: "\(combat.criticalChancePercent)%")
+            CombatRow(label: CombatStat.attackCount.displayName, value: combat.attackCount.formattedWithComma(maximumFractionDigits: 1))
+            CombatRow(label: CombatStat.magicalHealingScore.displayName, value: combat.magicalHealingScore.formattedWithComma())
+            CombatRow(label: CombatStat.trapRemovalScore.displayName, value: combat.trapRemovalScore.formattedWithComma())
+            CombatRow(label: CombatStat.additionalDamageScore.displayName, value: combat.additionalDamageScore.formattedWithComma())
+            CombatRow(label: CombatStat.breathDamageScore.displayName, value: combat.breathDamageScore.formattedWithComma())
         }
     }
 
@@ -448,10 +448,10 @@ private struct EnemyResistanceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            EnemyResistanceRow(label: "物理", multiplier: resistances.physical)
-            EnemyResistanceRow(label: "貫通", multiplier: resistances.piercing)
-            EnemyResistanceRow(label: "クリティカル", multiplier: resistances.critical)
-            EnemyResistanceRow(label: "ブレス", multiplier: resistances.breath)
+            EnemyResistanceRow(label: L10n.Resistance.physical, multiplier: resistances.physical)
+            EnemyResistanceRow(label: L10n.Resistance.piercing, multiplier: resistances.piercing)
+            EnemyResistanceRow(label: L10n.Resistance.critical, multiplier: resistances.critical)
+            EnemyResistanceRow(label: L10n.Resistance.breath, multiplier: resistances.breath)
             ForEach(resistances.spells.keys.sorted(), id: \.self) { spellId in
                 if let multiplier = resistances.spells[spellId] {
                     EnemyResistanceRow(label: masterData.spellName(for: spellId), multiplier: multiplier)
@@ -486,10 +486,10 @@ private struct EnemyActionRatesSection: View {
             Text("行動抽選の重みを表示します。")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            rateRow(label: "ブレス", value: rates.breath)
-            rateRow(label: "僧侶魔法", value: rates.priestMagic)
-            rateRow(label: "魔法使い魔法", value: rates.mageMagic)
-            rateRow(label: "物理攻撃", value: rates.attack)
+            rateRow(label: L10n.ActionPreference.breath, value: rates.breath)
+            rateRow(label: L10n.ActionPreference.priestMagic, value: rates.priestMagic)
+            rateRow(label: L10n.ActionPreference.mageMagic, value: rates.mageMagic)
+            rateRow(label: L10n.ActionPreference.attack, value: rates.attack)
         }
     }
 

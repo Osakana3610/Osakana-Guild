@@ -23,8 +23,8 @@ nonisolated final class StateManagementRegressionTests: XCTestCase {
         // 戦闘1: 味方がダメージを受ける
         let player = TestActorBuilder.makePlayer(
             maxHP: 10000,
-            physicalAttack: 5000,
-            hitRate: 100,
+            physicalAttackScore: 5000,
+            hitScore: 100,
             luck: 35,
             agility: 35  // 先攻
         )
@@ -32,8 +32,8 @@ nonisolated final class StateManagementRegressionTests: XCTestCase {
         // 敵は攻撃力あり、HPが高い（複数ターン戦闘）
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 5000,
-            physicalAttack: 2000,
-            hitRate: 100,
+            physicalAttackScore: 2000,
+            hitScore: 100,
             luck: 35,
             agility: 1
         )
@@ -97,18 +97,18 @@ nonisolated final class StateManagementRegressionTests: XCTestCase {
         // 攻撃回数5のプレイヤー
         let snapshotHigh = CharacterValues.Combat(
             maxHP: 50000,
-            physicalAttack: 1000,
-            magicalAttack: 500,
-            physicalDefense: 1000,
-            magicalDefense: 500,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
+            physicalAttackScore: 1000,
+            magicalAttackScore: 500,
+            physicalDefenseScore: 1000,
+            magicalDefenseScore: 500,
+            hitScore: 100,
+            evasionScore: 0,
+            criticalChancePercent: 0,
             attackCount: 5.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
             isMartialEligible: false
         )
 
@@ -133,8 +133,8 @@ nonisolated final class StateManagementRegressionTests: XCTestCase {
         // 攻撃回数1のプレイヤー
         let lowAttackPlayer = TestActorBuilder.makePlayer(
             maxHP: 50000,
-            physicalAttack: 1000,
-            hitRate: 100,
+            physicalAttackScore: 1000,
+            hitScore: 100,
             luck: 35,
             agility: 35
         )
@@ -144,15 +144,15 @@ nonisolated final class StateManagementRegressionTests: XCTestCase {
         // 敵HP5000 → 約10ターンで終了（余裕を持たせる）
         let enemy1 = TestActorBuilder.makeEnemy(
             maxHP: 5000,
-            physicalAttack: 100,
-            hitRate: 100,
+            physicalAttackScore: 100,
+            hitScore: 100,
             luck: 35,
             agility: 1
         )
         let enemy2 = TestActorBuilder.makeEnemy(
             maxHP: 5000,
-            physicalAttack: 100,
-            hitRate: 100,
+            physicalAttackScore: 100,
+            hitScore: 100,
             luck: 35,
             agility: 1
         )
@@ -207,15 +207,15 @@ nonisolated final class StateManagementRegressionTests: XCTestCase {
     func testBarrierChargesConsumed() {
         // バリアチャージ3を持つプレイヤー
         let player = TestActorBuilder.makeDefender(
-            physicalDefense: 1000,
+            physicalDefenseScore: 1000,
             luck: 35,
             barrierCharges: [1: 3]  // damageType=1 (physical) に対して3チャージ
         )
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 50000,
-            physicalAttack: 5000,
-            hitRate: 100,
+            physicalAttackScore: 5000,
+            hitScore: 100,
             luck: 35,
             agility: 35
         )

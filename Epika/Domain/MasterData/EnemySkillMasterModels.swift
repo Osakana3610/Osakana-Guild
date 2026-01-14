@@ -7,7 +7,7 @@
 //   - 敵スキル（特殊技）・属性・バフ種別のマスタデータ型定義
 //
 // 【データ構造】
-//   - Element: ダメージ属性（物理/火/氷/雷/聖/闘/ブレス/光/土/風/毒/即死/魅了/魔法/クリティカル/貫通/呪文系）
+//   - Element: ダメージ属性（物理/火/氷/雷/聖/闘/ブレス/光/土/風/毒/即死/魅了/魔法/必殺/貫通/呪文系）
 //     - identifier: DB格納用文字列
 //     - displayName: UI表示用
 //   - SpellBuffType: バフ効果種別（与ダメージ/被ダメージ/攻撃力/防御力/命中/攻撃回数等）
@@ -95,7 +95,7 @@ enum Element: UInt8, Sendable, Hashable, CaseIterable {
         case .death: return "即死"
         case .charm: return "魅了"
         case .magical: return "魔法"
-        case .critical: return "クリティカル"
+        case .critical: return "必殺"
         case .piercing: return "貫通"
         case .spell0: return "呪文0"
         case .spell2: return "呪文2"
@@ -113,10 +113,10 @@ enum SpellBuffType: UInt8, Sendable, Hashable, CaseIterable {
     case physicalDamageTaken = 2
     case magicalDamageTaken = 3
     case breathDamageTaken = 4
-    case physicalAttack = 5
-    case magicalAttack = 6
-    case physicalDefense = 7
-    case accuracy = 8
+    case physicalAttackScore = 5
+    case magicalAttackScore = 6
+    case physicalDefenseScore = 7
+    case hitScore = 8
     case attackCount = 9
     case combat = 10
     case damage = 11
@@ -127,10 +127,10 @@ enum SpellBuffType: UInt8, Sendable, Hashable, CaseIterable {
         case .physicalDamageTaken: return "physicalDamageTaken"
         case .magicalDamageTaken: return "magicalDamageTaken"
         case .breathDamageTaken: return "breathDamageTaken"
-        case .physicalAttack: return "physicalAttack"
-        case .magicalAttack: return "magicalAttack"
-        case .physicalDefense: return "physicalDefense"
-        case .accuracy: return "accuracy"
+        case .physicalAttackScore: return "physicalAttackScore"
+        case .magicalAttackScore: return "magicalAttackScore"
+        case .physicalDefenseScore: return "physicalDefenseScore"
+        case .hitScore: return "hitScore"
         case .attackCount: return "attackCount"
         case .combat: return "combat"
         case .damage: return "damage"
@@ -139,15 +139,15 @@ enum SpellBuffType: UInt8, Sendable, Hashable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .physicalDamageDealt: return "与物理ダメージ"
-        case .physicalDamageTaken: return "被物理ダメージ"
-        case .magicalDamageTaken: return "被魔法ダメージ"
-        case .breathDamageTaken: return "被ブレスダメージ"
-        case .physicalAttack: return "物理攻撃力"
-        case .magicalAttack: return "魔法攻撃力"
-        case .physicalDefense: return "物理防御力"
-        case .accuracy: return "命中率"
-        case .attackCount: return "攻撃回数"
+        case .physicalDamageDealt: return L10n.DamageModifier.physicalDamageDealt
+        case .physicalDamageTaken: return L10n.DamageModifier.physicalDamageTaken
+        case .magicalDamageTaken: return L10n.DamageModifier.magicalDamageTaken
+        case .breathDamageTaken: return L10n.DamageModifier.breathDamageTaken
+        case .physicalAttackScore: return L10n.CombatStat.physicalAttack
+        case .magicalAttackScore: return L10n.CombatStat.magicalAttack
+        case .physicalDefenseScore: return L10n.CombatStat.physicalDefense
+        case .hitScore: return L10n.CombatStat.hit
+        case .attackCount: return L10n.CombatStat.attackCount
         case .combat: return "戦闘全般"
         case .damage: return "ダメージ全般"
         }

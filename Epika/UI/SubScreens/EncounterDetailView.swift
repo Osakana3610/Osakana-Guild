@@ -27,6 +27,7 @@ struct EncounterDetailView: View {
 
     @State private var battleLogArchive: BattleLogArchive?
     @State private var renderedActions: [BattleLogRenderer.RenderedAction] = []
+    @State private var cachedTurnSummaries: [TurnSummary] = []
     @State private var isLoadingBattleLog = false
     @State private var battleLogError: String?
     @State private var actorIdentifierToMemberId: [String: UInt8] = [:]
@@ -82,7 +83,7 @@ struct EncounterDetailView: View {
     }
 
     private var turnSummaries: [TurnSummary] {
-        buildTurnSummaries()
+        cachedTurnSummaries
     }
 
     private func buildTurnSummaries() -> [TurnSummary] {
@@ -197,6 +198,7 @@ struct EncounterDetailView: View {
 
         isLoadingBattleLog = true
         battleLogError = nil
+        cachedTurnSummaries = []
         do {
             guard let archive = try await fetchBattleLogArchive() else {
                 battleLogError = EncounterDetailError.battleLogNotAvailable.errorDescription
@@ -265,6 +267,7 @@ struct EncounterDetailView: View {
                 skillNames: skillNames,
                 actorIdentifiers: actorIdentifiers
             )
+            cachedTurnSummaries = buildTurnSummaries()
 
             actorIdentifierToMemberId = memberMap
             actorIcons = iconMap
@@ -591,10 +594,9 @@ private func partitionResults(_ results: [BattleLogEntry]) -> (byTarget: [String
     for entry in results {
         if let targetId = entry.targetId {
             if dictionary[targetId] == nil {
-                dictionary[targetId] = []
                 order.append(targetId)
             }
-            dictionary[targetId]?.append(entry)
+            dictionary[targetId, default: []].append(entry)
         } else {
             untargeted.append(entry)
         }
