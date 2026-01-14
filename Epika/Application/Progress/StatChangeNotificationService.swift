@@ -39,37 +39,37 @@ final class StatChangeNotificationService {
         case strength, wisdom, spirit, vitality, agility, luck
         // 戦闘ステータス（Combat）
         case maxHP
-        case physicalAttack, magicalAttack
-        case physicalDefense, magicalDefense
-        case hitRate, evasionRate, criticalRate
+        case physicalAttackScore, magicalAttackScore
+        case physicalDefenseScore, magicalDefenseScore
+        case hitScore, evasionScore, criticalChancePercent
         case attackCount  // Double型
-        case magicalHealing, trapRemoval
-        case additionalDamage, breathDamage
+        case magicalHealingScore, trapRemovalScore
+        case additionalDamageScore, breathDamageScore
         // isMartialEligibleはBoolなので除外
 
         var displayName: String {
             switch self {
             // 基本能力値
-            case .strength: return "力"
-            case .wisdom: return "知恵"
-            case .spirit: return "精神"
-            case .vitality: return "体力"
-            case .agility: return "敏捷"
-            case .luck: return "運"
+            case .strength: return L10n.BaseStat.strength
+            case .wisdom: return L10n.BaseStat.wisdom
+            case .spirit: return L10n.BaseStat.spirit
+            case .vitality: return L10n.BaseStat.vitality
+            case .agility: return L10n.BaseStat.agility
+            case .luck: return L10n.BaseStat.luck
             // 戦闘ステータス
-            case .maxHP: return "最大HP"
-            case .physicalAttack: return "物理攻撃"
-            case .magicalAttack: return "魔法攻撃"
-            case .physicalDefense: return "物理防御"
-            case .magicalDefense: return "魔法防御"
-            case .hitRate: return "命中"
-            case .evasionRate: return "回避"
-            case .criticalRate: return "必殺率"
-            case .attackCount: return "攻撃回数"
-            case .magicalHealing: return "魔法回復力"
-            case .trapRemoval: return "罠解除"
-            case .additionalDamage: return "追加ダメージ"
-            case .breathDamage: return "ブレスダメージ"
+            case .maxHP: return L10n.CombatStat.maxHP
+            case .physicalAttackScore: return L10n.CombatStat.physicalAttack
+            case .magicalAttackScore: return L10n.CombatStat.magicalAttack
+            case .physicalDefenseScore: return L10n.CombatStat.physicalDefense
+            case .magicalDefenseScore: return L10n.CombatStat.magicalDefense
+            case .hitScore: return L10n.CombatStat.hit
+            case .evasionScore: return L10n.CombatStat.evasion
+            case .criticalChancePercent: return L10n.CombatStat.criticalChancePercent
+            case .attackCount: return L10n.CombatStat.attackCount
+            case .magicalHealingScore: return L10n.CombatStat.magicalHealing
+            case .trapRemovalScore: return L10n.CombatStat.trapRemoval
+            case .additionalDamageScore: return L10n.CombatStat.additionalDamage
+            case .breathDamageScore: return L10n.CombatStat.breathDamage
             }
         }
     }

@@ -490,24 +490,24 @@ extension BattleTurnEngine {
         switch type {
         case .physicalDamageDealt, .combat, .damage:
             // 与ダメージ倍率は戦闘効果として後で適用されるため、ここでは物理攻撃力を上げる
-            actor.snapshot.physicalAttack = Int(Double(actor.snapshot.physicalAttack) * multiplier)
+            actor.snapshot.physicalAttackScore = Int(Double(actor.snapshot.physicalAttackScore) * multiplier)
         case .physicalDamageTaken:
             // 被物理ダメージ減少 = 防御力上昇
-            actor.snapshot.physicalDefense = Int(Double(actor.snapshot.physicalDefense) * multiplier)
+            actor.snapshot.physicalDefenseScore = Int(Double(actor.snapshot.physicalDefenseScore) * multiplier)
         case .magicalDamageTaken:
             // 被魔法ダメージ減少 = 魔法防御力上昇
-            actor.snapshot.magicalDefense = Int(Double(actor.snapshot.magicalDefense) * multiplier)
+            actor.snapshot.magicalDefenseScore = Int(Double(actor.snapshot.magicalDefenseScore) * multiplier)
         case .breathDamageTaken:
             // ブレス耐性は直接ステータスにないのでスキップ
             break
-        case .physicalAttack:
-            actor.snapshot.physicalAttack = Int(Double(actor.snapshot.physicalAttack) * multiplier)
-        case .magicalAttack:
-            actor.snapshot.magicalAttack = Int(Double(actor.snapshot.magicalAttack) * multiplier)
-        case .physicalDefense:
-            actor.snapshot.physicalDefense = Int(Double(actor.snapshot.physicalDefense) * multiplier)
-        case .accuracy:
-            actor.snapshot.hitRate = Int(Double(actor.snapshot.hitRate) * multiplier)
+        case .physicalAttackScore:
+            actor.snapshot.physicalAttackScore = Int(Double(actor.snapshot.physicalAttackScore) * multiplier)
+        case .magicalAttackScore:
+            actor.snapshot.magicalAttackScore = Int(Double(actor.snapshot.magicalAttackScore) * multiplier)
+        case .physicalDefenseScore:
+            actor.snapshot.physicalDefenseScore = Int(Double(actor.snapshot.physicalDefenseScore) * multiplier)
+        case .hitScore:
+            actor.snapshot.hitScore = Int(Double(actor.snapshot.hitScore) * multiplier)
         case .attackCount:
             actor.snapshot.attackCount = actor.snapshot.attackCount * multiplier
         }

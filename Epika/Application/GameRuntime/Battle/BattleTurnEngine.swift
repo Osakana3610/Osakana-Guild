@@ -265,23 +265,23 @@ extension BattleTurnEngine {
     }
 
     nonisolated struct PhysicalAttackOverrides {
-        var physicalAttackOverride: Int?
+        var physicalAttackScoreOverride: Int?
         var ignoreDefense: Bool
         var forceHit: Bool
-        var criticalRateMultiplier: Double
+        var criticalChancePercentMultiplier: Double
         var maxAttackMultiplier: Double
         var doubleDamageAgainstRaceIds: Set<UInt8>
 
-        nonisolated init(physicalAttackOverride: Int? = nil,
+        nonisolated init(physicalAttackScoreOverride: Int? = nil,
              ignoreDefense: Bool = false,
              forceHit: Bool = false,
-             criticalRateMultiplier: Double = 1.0,
+             criticalChancePercentMultiplier: Double = 1.0,
              maxAttackMultiplier: Double = 1.0,
              doubleDamageAgainstRaceIds: Set<UInt8> = []) {
-            self.physicalAttackOverride = physicalAttackOverride
+            self.physicalAttackScoreOverride = physicalAttackScoreOverride
             self.ignoreDefense = ignoreDefense
             self.forceHit = forceHit
-            self.criticalRateMultiplier = criticalRateMultiplier
+            self.criticalChancePercentMultiplier = criticalChancePercentMultiplier
             self.maxAttackMultiplier = maxAttackMultiplier
             self.doubleDamageAgainstRaceIds = doubleDamageAgainstRaceIds
         }

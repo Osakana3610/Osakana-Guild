@@ -50,44 +50,44 @@ extension SQLiteMasterDataManager {
 
         struct CombatBonusesBuilder {
             var maxHP: Int = 0
-            var physicalAttack: Int = 0
-            var magicalAttack: Int = 0
-            var physicalDefense: Int = 0
-            var magicalDefense: Int = 0
-            var hitRate: Int = 0
-            var evasionRate: Int = 0
-            var criticalRate: Int = 0
+            var physicalAttackScore: Int = 0
+            var magicalAttackScore: Int = 0
+            var physicalDefenseScore: Int = 0
+            var magicalDefenseScore: Int = 0
+            var hitScore: Int = 0
+            var evasionScore: Int = 0
+            var criticalChancePercent: Int = 0
             var attackCount: Double = 0
-            var magicalHealing: Int = 0
-            var trapRemoval: Int = 0
-            var additionalDamage: Int = 0
-            var breathDamage: Int = 0
+            var magicalHealingScore: Int = 0
+            var trapRemovalScore: Int = 0
+            var additionalDamageScore: Int = 0
+            var breathDamageScore: Int = 0
 
             mutating func apply(stat: CombatStat, intValue: Int, doubleValue: Double) {
                 switch stat {
                 case .maxHP: maxHP = intValue
-                case .physicalAttack: physicalAttack = intValue
-                case .magicalAttack: magicalAttack = intValue
-                case .physicalDefense: physicalDefense = intValue
-                case .magicalDefense: magicalDefense = intValue
-                case .hitRate: hitRate = intValue
-                case .evasionRate: evasionRate = intValue
-                case .criticalRate: criticalRate = intValue
+                case .physicalAttackScore: physicalAttackScore = intValue
+                case .magicalAttackScore: magicalAttackScore = intValue
+                case .physicalDefenseScore: physicalDefenseScore = intValue
+                case .magicalDefenseScore: magicalDefenseScore = intValue
+                case .hitScore: hitScore = intValue
+                case .evasionScore: evasionScore = intValue
+                case .criticalChancePercent: criticalChancePercent = intValue
                 case .attackCount: attackCount = doubleValue
-                case .magicalHealing: magicalHealing = intValue
-                case .trapRemoval: trapRemoval = intValue
-                case .additionalDamage: additionalDamage = intValue
-                case .breathDamage: breathDamage = intValue
+                case .magicalHealingScore: magicalHealingScore = intValue
+                case .trapRemovalScore: trapRemovalScore = intValue
+                case .additionalDamageScore: additionalDamageScore = intValue
+                case .breathDamageScore: breathDamageScore = intValue
                 }
             }
 
             func build() -> ItemDefinition.CombatBonuses {
                 ItemDefinition.CombatBonuses(
-                    maxHP: maxHP, physicalAttack: physicalAttack, magicalAttack: magicalAttack,
-                    physicalDefense: physicalDefense, magicalDefense: magicalDefense,
-                    hitRate: hitRate, evasionRate: evasionRate, criticalRate: criticalRate, attackCount: attackCount,
-                    magicalHealing: magicalHealing, trapRemoval: trapRemoval,
-                    additionalDamage: additionalDamage, breathDamage: breathDamage
+                    maxHP: maxHP, physicalAttackScore: physicalAttackScore, magicalAttackScore: magicalAttackScore,
+                    physicalDefenseScore: physicalDefenseScore, magicalDefenseScore: magicalDefenseScore,
+                    hitScore: hitScore, evasionScore: evasionScore, criticalChancePercent: criticalChancePercent, attackCount: attackCount,
+                    magicalHealingScore: magicalHealingScore, trapRemovalScore: trapRemovalScore,
+                    additionalDamageScore: additionalDamageScore, breathDamageScore: breathDamageScore
                 )
             }
         }

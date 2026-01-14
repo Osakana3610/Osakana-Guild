@@ -108,8 +108,8 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .absorption: .init(params: [], values: []),
     .actionOrderMultiplier: .init(params: [], values: ["multiplier"]),
     .actionOrderShuffle: .init(params: [], values: []),
-    .additionalDamageAdditive: .init(params: [], values: ["additive"]),
-    .additionalDamageMultiplier: .init(params: [], values: ["multiplier"]),
+    .additionalDamageScoreAdditive: .init(params: [], values: ["additive"]),
+    .additionalDamageScoreMultiplier: .init(params: [], values: ["multiplier"]),
     .antiHealing: .init(params: [], values: []),
     .barrier: .init(params: ["damageType"], values: ["charges"]),
     .barrierOnGuard: .init(params: ["damageType"], values: ["charges"]),
@@ -212,4 +212,3 @@ struct DecodedSkillEffectPayload: Sendable, Hashable {
         return array
     }
 }
-

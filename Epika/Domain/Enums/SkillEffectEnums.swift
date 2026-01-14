@@ -6,9 +6,9 @@ import Foundation
 /// rawValue: EnumMappings.profileType
 enum RowProfileBase: UInt8, Sendable, Hashable {
     case balanced = 1
-    case melee = 2
+    case near = 2
     case mixed = 3
-    case ranged = 4
+    case far = 4
 }
 
 // MARK: - ReactionTrigger

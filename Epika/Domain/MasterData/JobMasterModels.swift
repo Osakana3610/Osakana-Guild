@@ -14,9 +14,9 @@
 //     - combatCoefficients: 戦闘ステータス係数
 //     - learnedSkillIds: 習得スキルID配列
 //   - JobDefinition.CombatCoefficients: 戦闘係数（Double）
-//     - maxHP, physicalAttack, magicalAttack, physicalDefense, magicalDefense
-//     - hitRate, evasionRate, criticalRate, attackCount
-//     - magicalHealing, trapRemoval, additionalDamage, breathDamage
+//     - maxHP, physicalAttackScore, magicalAttackScore, physicalDefenseScore, magicalDefenseScore
+//     - hitScore, evasionScore, criticalChancePercent, attackCount
+//     - magicalHealingScore, trapRemovalScore, additionalDamageScore, breathDamageScore
 //   - CombatStat: 戦闘ステータス列挙型
 //     - rawValue: EnumMappings.combatStatと一致
 //     - identifier: DB/JSON用文字列
@@ -36,18 +36,18 @@ import Foundation
 struct JobDefinition: Identifiable, Sendable, Hashable {
     struct CombatCoefficients: Sendable, Hashable {
         let maxHP: Double
-        let physicalAttack: Double
-        let magicalAttack: Double
-        let physicalDefense: Double
-        let magicalDefense: Double
-        let hitRate: Double
-        let evasionRate: Double
-        let criticalRate: Double
+        let physicalAttackScore: Double
+        let magicalAttackScore: Double
+        let physicalDefenseScore: Double
+        let magicalDefenseScore: Double
+        let hitScore: Double
+        let evasionScore: Double
+        let criticalChancePercent: Double
         let attackCount: Double
-        let magicalHealing: Double
-        let trapRemoval: Double
-        let additionalDamage: Double
-        let breathDamage: Double
+        let magicalHealingScore: Double
+        let trapRemovalScore: Double
+        let additionalDamageScore: Double
+        let breathDamageScore: Double
     }
 
     let id: UInt8
@@ -60,34 +60,34 @@ struct JobDefinition: Identifiable, Sendable, Hashable {
 /// rawValueはEnumMappings.combatStatと一致させること
 enum CombatStat: UInt8, CaseIterable, Sendable {
     case maxHP = 10
-    case physicalAttack = 11
-    case magicalAttack = 12
-    case physicalDefense = 13
-    case magicalDefense = 14
-    case hitRate = 15
-    case evasionRate = 16
-    case criticalRate = 17
+    case physicalAttackScore = 11
+    case magicalAttackScore = 12
+    case physicalDefenseScore = 13
+    case magicalDefenseScore = 14
+    case hitScore = 15
+    case evasionScore = 16
+    case criticalChancePercent = 17
     case attackCount = 18
-    case magicalHealing = 19
-    case trapRemoval = 20
-    case additionalDamage = 21
-    case breathDamage = 22
+    case magicalHealingScore = 19
+    case trapRemovalScore = 20
+    case additionalDamageScore = 21
+    case breathDamageScore = 22
 
     nonisolated init?(identifier: String) {
         switch identifier {
         case "maxHP": self = .maxHP
-        case "physicalAttack": self = .physicalAttack
-        case "physicalDefense": self = .physicalDefense
-        case "magicalAttack": self = .magicalAttack
-        case "magicalDefense": self = .magicalDefense
-        case "magicalHealing": self = .magicalHealing
-        case "hitRate": self = .hitRate
-        case "evasionRate": self = .evasionRate
-        case "criticalRate": self = .criticalRate
+        case "physicalAttackScore": self = .physicalAttackScore
+        case "physicalDefenseScore": self = .physicalDefenseScore
+        case "magicalAttackScore": self = .magicalAttackScore
+        case "magicalDefenseScore": self = .magicalDefenseScore
+        case "magicalHealingScore": self = .magicalHealingScore
+        case "hitScore": self = .hitScore
+        case "evasionScore": self = .evasionScore
+        case "criticalChancePercent": self = .criticalChancePercent
         case "attackCount": self = .attackCount
-        case "additionalDamage": self = .additionalDamage
-        case "trapRemoval": self = .trapRemoval
-        case "breathDamage": self = .breathDamage
+        case "additionalDamageScore": self = .additionalDamageScore
+        case "trapRemovalScore": self = .trapRemovalScore
+        case "breathDamageScore": self = .breathDamageScore
         default: return nil
         }
     }
@@ -95,54 +95,54 @@ enum CombatStat: UInt8, CaseIterable, Sendable {
     nonisolated var identifier: String {
         switch self {
         case .maxHP: return "maxHP"
-        case .physicalAttack: return "physicalAttack"
-        case .physicalDefense: return "physicalDefense"
-        case .magicalAttack: return "magicalAttack"
-        case .magicalDefense: return "magicalDefense"
-        case .magicalHealing: return "magicalHealing"
-        case .hitRate: return "hitRate"
-        case .evasionRate: return "evasionRate"
-        case .criticalRate: return "criticalRate"
+        case .physicalAttackScore: return "physicalAttackScore"
+        case .physicalDefenseScore: return "physicalDefenseScore"
+        case .magicalAttackScore: return "magicalAttackScore"
+        case .magicalDefenseScore: return "magicalDefenseScore"
+        case .magicalHealingScore: return "magicalHealingScore"
+        case .hitScore: return "hitScore"
+        case .evasionScore: return "evasionScore"
+        case .criticalChancePercent: return "criticalChancePercent"
         case .attackCount: return "attackCount"
-        case .additionalDamage: return "additionalDamage"
-        case .trapRemoval: return "trapRemoval"
-        case .breathDamage: return "breathDamage"
+        case .additionalDamageScore: return "additionalDamageScore"
+        case .trapRemovalScore: return "trapRemovalScore"
+        case .breathDamageScore: return "breathDamageScore"
         }
     }
 
     var displayName: String {
         switch self {
-        case .maxHP: return "最大HP"
-        case .physicalAttack: return "物理攻撃"
-        case .magicalAttack: return "魔法攻撃"
-        case .physicalDefense: return "物理防御"
-        case .magicalDefense: return "魔法防御"
-        case .hitRate: return "命中"
-        case .evasionRate: return "回避"
-        case .criticalRate: return "必殺率"
-        case .attackCount: return "攻撃回数"
-        case .magicalHealing: return "魔法回復力"
-        case .trapRemoval: return "罠解除"
-        case .additionalDamage: return "追加ダメージ"
-        case .breathDamage: return "ブレスダメージ"
+        case .maxHP: return L10n.CombatStat.maxHP
+        case .physicalAttackScore: return L10n.CombatStat.physicalAttack
+        case .magicalAttackScore: return L10n.CombatStat.magicalAttack
+        case .physicalDefenseScore: return L10n.CombatStat.physicalDefense
+        case .magicalDefenseScore: return L10n.CombatStat.magicalDefense
+        case .hitScore: return L10n.CombatStat.hit
+        case .evasionScore: return L10n.CombatStat.evasion
+        case .criticalChancePercent: return L10n.CombatStat.criticalChancePercent
+        case .attackCount: return L10n.CombatStat.attackCount
+        case .magicalHealingScore: return L10n.CombatStat.magicalHealing
+        case .trapRemovalScore: return L10n.CombatStat.trapRemoval
+        case .additionalDamageScore: return L10n.CombatStat.additionalDamage
+        case .breathDamageScore: return L10n.CombatStat.breathDamage
         }
     }
 
     func value(from coefficients: JobDefinition.CombatCoefficients) -> Double {
         switch self {
         case .maxHP: return coefficients.maxHP
-        case .physicalAttack: return coefficients.physicalAttack
-        case .magicalAttack: return coefficients.magicalAttack
-        case .physicalDefense: return coefficients.physicalDefense
-        case .magicalDefense: return coefficients.magicalDefense
-        case .hitRate: return coefficients.hitRate
-        case .evasionRate: return coefficients.evasionRate
-        case .criticalRate: return coefficients.criticalRate
+        case .physicalAttackScore: return coefficients.physicalAttackScore
+        case .magicalAttackScore: return coefficients.magicalAttackScore
+        case .physicalDefenseScore: return coefficients.physicalDefenseScore
+        case .magicalDefenseScore: return coefficients.magicalDefenseScore
+        case .hitScore: return coefficients.hitScore
+        case .evasionScore: return coefficients.evasionScore
+        case .criticalChancePercent: return coefficients.criticalChancePercent
         case .attackCount: return coefficients.attackCount
-        case .magicalHealing: return coefficients.magicalHealing
-        case .trapRemoval: return coefficients.trapRemoval
-        case .additionalDamage: return coefficients.additionalDamage
-        case .breathDamage: return coefficients.breathDamage
+        case .magicalHealingScore: return coefficients.magicalHealingScore
+        case .trapRemovalScore: return coefficients.trapRemovalScore
+        case .additionalDamageScore: return coefficients.additionalDamageScore
+        case .breathDamageScore: return coefficients.breathDamageScore
         }
     }
 }

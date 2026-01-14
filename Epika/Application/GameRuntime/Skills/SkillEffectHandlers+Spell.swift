@@ -5,7 +5,7 @@
 //
 // 【責務】
 //   - 呪文関連のスキルエフェクトハンドラ実装
-//   - 呪文威力・チャージ・習得・魔法クリティカルなどの処理
+//   - 呪文威力・チャージ・習得・魔法必殺などの処理
 //
 // 【公開API】
 //   - SpellPowerPercentHandler: 呪文威力のパーセント増減
@@ -16,7 +16,7 @@
 //   - SpellAccessHandler: 呪文の習得・忘却（Actor.swiftではスキップ）
 //   - SpellTierUnlockHandler: 呪文ティアの解放（Actor.swiftではスキップ）
 //   - TacticSpellAmplifyHandler: タクティク呪文増幅
-//   - MagicCriticalChancePercentHandler: 魔法クリティカル率
+//   - MagicCriticalChancePercentHandler: 魔法必殺率
 //   - SpellChargeRecoveryChanceHandler: 呪文チャージ回復率
 //
 // 【本体ファイルとの関係】

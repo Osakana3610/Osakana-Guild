@@ -177,7 +177,7 @@ enum CachedCharacterFactory {
 
         // isMartialEligible判定
         let isMartialEligible = calcResult.combat.isMartialEligible ||
-            (calcResult.combat.physicalAttack > 0 && !hasPositivePhysicalAttackBonus(input: input, loadout: loadout))
+            (calcResult.combat.physicalAttackScore > 0 && !hasPositivePhysicalAttackBonus(input: input, loadout: loadout))
 
         // 蘇生パッシブチェック
         var resolvedCurrentHP = min(input.currentHP, calcResult.hitPoints.maximum)
@@ -352,7 +352,7 @@ enum CachedCharacterFactory {
 
         // isMartialEligible判定
         let isMartialEligible = calcResult.combat.isMartialEligible ||
-            (calcResult.combat.physicalAttack > 0 && !hasPositivePhysicalAttackBonus(equippedItems: newEquippedItems, loadout: loadout))
+            (calcResult.combat.physicalAttackScore > 0 && !hasPositivePhysicalAttackBonus(equippedItems: newEquippedItems, loadout: loadout))
 
         // 蘇生パッシブチェックはスキップ（装備変更でHPが0になることはない）
         let resolvedCurrentHP = min(current.currentHP, calcResult.hitPoints.maximum)
@@ -562,7 +562,7 @@ enum CachedCharacterFactory {
         let definitionsById = Dictionary(uniqueKeysWithValues: loadout.items.map { ($0.id, $0) })
         for equipment in equippedItems {
             guard let definition = definitionsById[equipment.itemId] else { continue }
-            if definition.combatBonuses.physicalAttack * equipment.quantity > 0 { return true }
+            if definition.combatBonuses.physicalAttackScore * equipment.quantity > 0 { return true }
         }
         return false
     }

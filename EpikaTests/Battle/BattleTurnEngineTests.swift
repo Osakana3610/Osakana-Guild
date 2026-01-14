@@ -167,8 +167,8 @@ nonisolated final class BattleTurnEngineTests: XCTestCase {
     /// 1ターン戦闘でHP変動が正確に反映されることを検証（決定的テスト）
     ///
     /// 構成:
-    ///   - 味方: physicalAttack=5000, hitRate=100, agility=35（先制）, luck=35
-    ///   - 敵: HP=1000, physicalDefense=2000, evasionRate=0, agility=1, luck=35
+    ///   - 味方: physicalAttackScore=5000, hitScore=100, agility=35（先制）, luck=35
+    ///   - 敵: HP=1000, physicalDefenseScore=2000, evasionScore=0, agility=1, luck=35
     ///
     /// ダメージの導出:
     ///   attackPower = 5000 × statMultiplier（0.8〜1.2）
@@ -276,8 +276,8 @@ nonisolated final class BattleTurnEngineTests: XCTestCase {
     /// 連続戦闘でHPが引き継がれることを検証（バグ#047対策）
     ///
     /// 構成（味方が確実に勝利する構成）:
-    ///   - 味方: HP=50000, physicalAttack=5000, physicalDefense=2000
-    ///   - 敵: HP=3000（2回で倒せる）, physicalAttack=1500（低ダメージ）
+    ///   - 味方: HP=50000, physicalAttackScore=5000, physicalDefenseScore=2000
+    ///   - 敵: HP=3000（2回で倒せる）, physicalAttackScore=1500（低ダメージ）
     ///
     /// 期待:
     ///   - 1回目の戦闘: 味方がダメージを受けて勝利

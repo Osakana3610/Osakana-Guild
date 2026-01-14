@@ -356,8 +356,8 @@ enum CumulativeHitDamageBonusHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         let damagePercent = payload.value[.damagePercent] ?? 0.0
-        let hitRatePercent = payload.value[.hitRatePercent] ?? 0.0
-        accumulator.combat.cumulativeHitBonus = .init(damagePercentPerHit: damagePercent, hitRatePercentPerHit: hitRatePercent)
+        let hitScoreAdditive = payload.value[.hitScoreAdditive] ?? 0.0
+        accumulator.combat.cumulativeHitBonus = .init(damagePercentPerHit: damagePercent, hitScorePerHit: hitScoreAdditive)
     }
 }
 

@@ -40,24 +40,17 @@ struct DropNotificationSettingsView: View {
 
     @ViewBuilder
     private var normalItemSection: some View {
-        Section {
-            Toggle("ノーマルアイテムを無視", isOn: Binding(
-                get: { notificationService.settings.ignoreNormalItems },
-                set: { newValue in
-                    notificationService.updateSettings { $0.ignoreNormalItems = newValue }
-                }
-            ))
+        let ignoreNormalItems = notificationService.settings.ignoreNormalItems
+        let alwaysIgnore = notificationService.settings.alwaysIgnore
 
-            if notificationService.settings.ignoreNormalItems {
-                Toggle("常に", isOn: Binding(
-                    get: { notificationService.settings.alwaysIgnore },
-                    set: { newValue in
-                        notificationService.updateSettings { $0.alwaysIgnore = newValue }
-                    }
-                ))
+        Section {
+            Toggle("ノーマルアイテムを無視", isOn: settingsBinding(\.ignoreNormalItems))
+
+            if ignoreNormalItems {
+                Toggle("常に", isOn: settingsBinding(\.alwaysIgnore))
             }
         } footer: {
-            if notificationService.settings.ignoreNormalItems && !notificationService.settings.alwaysIgnore {
+            if ignoreNormalItems && !alwaysIgnore {
                 Text("常にがオフだと、以下のメニューで設定した称号がついた場合は通知が表示されます")
             }
         }
@@ -77,13 +70,10 @@ struct DropNotificationSettingsView: View {
     private var sortedTitles: [TitleOption] {
         masterDataCache.allTitles
             .sorted { $0.id < $1.id }
-            .map { title in
-                if title.id == ItemDropNotificationService.noTitleId {
-                    return TitleOption(id: title.id, name: "無称号")
-                }
-                return TitleOption(id: title.id, name: title.name)
+            .compactMap { title in
+                let name = title.id == ItemDropNotificationService.noTitleId ? "無称号" : title.name
+                return name.isEmpty ? nil : TitleOption(id: title.id, name: name)
             }
-            .filter { !$0.name.isEmpty }
     }
 
     private struct TitleOption: Identifiable {
@@ -120,12 +110,18 @@ struct DropNotificationSettingsView: View {
     @ViewBuilder
     private var superRareSection: some View {
         Section {
-            Toggle("超レアを通知", isOn: Binding(
-                get: { notificationService.settings.notifySuperRare },
-                set: { newValue in
-                    notificationService.updateSettings { $0.notifySuperRare = newValue }
-                }
-            ))
+            Toggle("超レアを通知", isOn: settingsBinding(\.notifySuperRare))
         }
+    }
+
+    private func settingsBinding(
+        _ keyPath: WritableKeyPath<ItemDropNotificationService.Settings, Bool>
+    ) -> Binding<Bool> {
+        Binding(
+            get: { notificationService.settings[keyPath: keyPath] },
+            set: { newValue in
+                notificationService.updateSettings { $0[keyPath: keyPath] = newValue }
+            }
+        )
     }
 }

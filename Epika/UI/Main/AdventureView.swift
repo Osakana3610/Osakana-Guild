@@ -77,26 +77,16 @@ struct AdventureView: View {
                     initialTargetFloor: context.initialTargetFloor,
                     initialLastSelectedDungeonId: context.initialLastSelectedDungeonId,
                     initialLastSelectedDifficulty: context.initialLastSelectedDifficulty,
-                    selectedDungeonId: Binding(
-                        get: { partyDetailContext?.selectedDungeonId },
-                        set: { newValue in
-                            if var current = partyDetailContext {
-                                current.selectedDungeonId = newValue
-                                partyDetailContext = current
-                            }
-                        }
-                    ),
+                    selectedDungeonId: partyDetailSelectedDungeonBinding,
                     dungeons: adventureState.dungeons
                 )
                 .environment(adventureState)
                 .environment(appServices.statChangeNotifications)
             }
-            .sheet(isPresented: isLogsPresented) {
-                if let party = logsParty {
-                    let runs = adventureState.explorationProgress
-                        .filter { $0.party.partyId == party.id }
-                    RecentExplorationLogsView(party: party, runs: runs)
-                }
+            .sheet(item: logsPartySheetItem) { party in
+                let runs = adventureState.explorationProgress
+                    .filter { $0.party.partyId == party.id }
+                RecentExplorationLogsView(party: party, runs: runs)
             }
         }
         .onAppear {
@@ -238,8 +228,7 @@ struct AdventureView: View {
     }
 
     private func runtimeMembers(for party: CachedParty) -> [CachedCharacter] {
-        let map = Dictionary(uniqueKeysWithValues: characterState.allCharacters.map { ($0.id, $0) })
-        return party.memberIds.compactMap { map[$0] }
+        appServices.userDataLoad.cachedCharacters(for: party.memberIds)
     }
 
     private func selectedDungeon(for party: CachedParty) -> CachedDungeonProgress? {
@@ -286,18 +275,31 @@ struct AdventureView: View {
                                                 selectedDungeonId: selected?.dungeonId)
     }
 
-    private var logsParty: CachedParty? {
-        guard let logsPartyId else { return nil }
-        return parties.first { $0.id == logsPartyId }
-    }
-
-    private var isLogsPresented: Binding<Bool> {
+    private var logsPartySheetItem: Binding<CachedParty?> {
         Binding(
-            get: { logsParty != nil },
-            set: { isPresented in
-                if !isPresented { logsPartyId = nil }
+            get: {
+                guard let logsPartyId else { return nil }
+                return parties.first { $0.id == logsPartyId }
+            },
+            set: { newValue in
+                logsPartyId = newValue?.id
             }
         )
+    }
+
+    private var partyDetailSelectedDungeonBinding: Binding<UInt16?> {
+        Binding(
+            get: { partyDetailContext?.selectedDungeonId },
+            set: { newValue in
+                updatePartyDetailContext { $0.selectedDungeonId = newValue }
+            }
+        )
+    }
+
+    private func updatePartyDetailContext(_ update: (inout PartyDetailContext) -> Void) {
+        guard var current = partyDetailContext else { return }
+        update(&current)
+        partyDetailContext = current
     }
 
     @MainActor

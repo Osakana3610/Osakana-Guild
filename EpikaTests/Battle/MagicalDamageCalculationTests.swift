@@ -6,8 +6,8 @@ import XCTest
 /// 目的: 魔法ダメージ計算が仕様通りに動作することを証明する
 ///
 /// 検証する計算式:
-///   attackPower = magicalAttack × attackRoll
-///   defensePower = magicalDefense × defenseRoll × 0.5
+///   attackPower = magicalAttackScore × attackRoll
+///   defensePower = magicalDefenseScore × defenseRoll × 0.5
 ///   baseDamage = max(1.0, attackPower - defensePower)
 ///
 /// 境界値テスト: luck=1, 18, 35（ルール遵守）
@@ -18,8 +18,8 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
     /// 魔法防御が50%効果であることを検証
     ///
     /// 入力:
-    ///   - 攻撃者: magicalAttack=3000, luck=35
-    ///   - 防御者: magicalDefense=2000, luck=35
+    ///   - 攻撃者: magicalAttackScore=3000, luck=35
+    ///   - 防御者: magicalDefenseScore=2000, luck=35
     ///
     /// 計算（luck=35で乱数幅0.75〜1.00）:
     ///   attackPower = 3000 × roll
@@ -30,8 +30,8 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
         let trials = 115  // luck=35の統計テスト試行回数
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 35)
-            var defender = TestActorBuilder.makeDefender(magicalDefense: 2000, luck: 35)
+            let attacker = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 35)
+            var defender = TestActorBuilder.makeDefender(magicalDefenseScore: 2000, luck: 35)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
                 attacker: attacker,
@@ -72,8 +72,8 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
         let trials = 964
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 1)
-            var defender = TestActorBuilder.makeDefender(magicalDefense: 2000, luck: 1)
+            let attacker = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 1)
+            var defender = TestActorBuilder.makeDefender(magicalDefenseScore: 2000, luck: 1)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
                 attacker: attacker,
@@ -110,8 +110,8 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
         let trials = 389
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 18)
-            var defender = TestActorBuilder.makeDefender(magicalDefense: 2000, luck: 18)
+            let attacker = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 18)
+            var defender = TestActorBuilder.makeDefender(magicalDefenseScore: 2000, luck: 18)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
                 attacker: attacker,
@@ -146,8 +146,8 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
 
     /// 魔法防御が高くても最低1ダメージ保証
     func testMinimumDamageGuarantee() {
-        let attacker = TestActorBuilder.makeAttacker(magicalAttack: 1000, luck: 1)
-        var defender = TestActorBuilder.makeDefender(magicalDefense: 10000, luck: 35)
+        let attacker = TestActorBuilder.makeAttacker(magicalAttackScore: 1000, luck: 1)
+        var defender = TestActorBuilder.makeDefender(magicalDefenseScore: 10000, luck: 35)
         var context = TestActorBuilder.makeContext(
             seed: 42,
             attacker: attacker,
@@ -176,9 +176,9 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
         let trials = 100
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 1)
+            let attacker = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 1)
             var defender = TestActorBuilder.makeDefender(
-                magicalDefense: 1000,
+                magicalDefenseScore: 1000,
                 luck: 1,
                 skillEffects: defenderSkillEffects
             )
@@ -212,9 +212,9 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
         let trials = 100
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 35)
+            let attacker = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 35)
             var defender = TestActorBuilder.makeDefender(
-                magicalDefense: 1000,
+                magicalDefenseScore: 1000,
                 luck: 35,
                 skillEffects: defenderSkillEffects
             )
@@ -239,7 +239,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
             "魔法無効化0%: \(trials)回中0回無効化すべき, 実測\(nullifyCount)回")
     }
 
-    // MARK: - 魔法クリティカル
+    // MARK: - 魔法必殺
 
     /// magicCriticalChancePercent=100で必ず発動
     func testMagicCritical100Percent() {
@@ -252,13 +252,13 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
         let trials = 115  // luck=35
 
         for seed in 0..<trials {
-            // クリティカルあり
+            // 必殺あり
             let attackerCrit = TestActorBuilder.makeAttacker(
-                magicalAttack: 3000,
+                magicalAttackScore: 3000,
                 luck: 35,
                 skillEffects: attackerSkillEffects
             )
-            var defenderCrit = TestActorBuilder.makeDefender(magicalDefense: 1000, luck: 35)
+            var defenderCrit = TestActorBuilder.makeDefender(magicalDefenseScore: 1000, luck: 35)
             var contextCrit = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
                 attacker: attackerCrit,
@@ -273,9 +273,9 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
             )
             criticalDamageTotal += critDamage
 
-            // クリティカルなし（比較用）
-            let attackerNormal = TestActorBuilder.makeAttacker(magicalAttack: 3000, luck: 35)
-            var defenderNormal = TestActorBuilder.makeDefender(magicalDefense: 1000, luck: 35)
+            // 必殺なし（比較用）
+            let attackerNormal = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 35)
+            var defenderNormal = TestActorBuilder.makeDefender(magicalDefenseScore: 1000, luck: 35)
             var contextNormal = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
                 attacker: attackerNormal,
@@ -294,14 +294,14 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
         let criticalAverage = Double(criticalDamageTotal) / Double(trials)
         let normalAverage = Double(normalDamageTotal) / Double(trials)
 
-        // 魔法クリティカル2.0倍: クリティカルダメージ ≈ 通常の2倍
+        // 魔法必殺2.0倍: 必殺ダメージ ≈ 通常の2倍
         let ratio = criticalAverage / normalAverage
         let expectedRatio = 2.0
         let tolerance = expectedRatio * 0.02  // ±2%
 
         XCTAssertTrue(
             (expectedRatio - tolerance...expectedRatio + tolerance).contains(ratio),
-            "魔法クリティカル2.0倍: 期待比\(expectedRatio)±2%, 実測比\(ratio)"
+            "魔法必殺2.0倍: 期待比\(expectedRatio)±2%, 実測比\(ratio)"
         )
     }
 }

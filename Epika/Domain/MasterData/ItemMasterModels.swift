@@ -16,9 +16,9 @@
 //     - strength, wisdom, spirit, vitality, agility, luck
 //     - forEachNonZero(): 非ゼロ値のみを列挙するユーティリティ
 //   - ItemDefinition.CombatBonuses: 戦闘ステータスボーナス
-//     - maxHP, physicalAttack, magicalAttack, physicalDefense, magicalDefense
-//     - hitRate, evasionRate, criticalRate, attackCount
-//     - magicalHealing, trapRemoval, additionalDamage, breathDamage
+//     - maxHP, physicalAttackScore, magicalAttackScore, physicalDefenseScore, magicalDefenseScore
+//     - hitScore, evasionScore, criticalChancePercent, attackCount
+//     - magicalHealingScore, trapRemovalScore, additionalDamageScore, breathDamageScore
 //     - forEachNonZero(): 非ゼロ値のみを列挙するユーティリティ
 //
 // 【使用箇所】
@@ -56,62 +56,62 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
         }
     }
 
-    /// 戦闘ステータスボーナス（physicalAttack, hitRate等）
+    /// 戦闘ステータスボーナス（physicalAttackScore, hitScore等）
     struct CombatBonuses: Sendable, Hashable {
         let maxHP: Int
-        let physicalAttack: Int
-        let magicalAttack: Int
-        let physicalDefense: Int
-        let magicalDefense: Int
-        let hitRate: Int
-        let evasionRate: Int
-        let criticalRate: Int
+        let physicalAttackScore: Int
+        let magicalAttackScore: Int
+        let physicalDefenseScore: Int
+        let magicalDefenseScore: Int
+        let hitScore: Int
+        let evasionScore: Int
+        let criticalChancePercent: Int
         let attackCount: Double
-        let magicalHealing: Int
-        let trapRemoval: Int
-        let additionalDamage: Int
-        let breathDamage: Int
+        let magicalHealingScore: Int
+        let trapRemovalScore: Int
+        let additionalDamageScore: Int
+        let breathDamageScore: Int
 
         static let zero = CombatBonuses(
-            maxHP: 0, physicalAttack: 0, magicalAttack: 0,
-            physicalDefense: 0, magicalDefense: 0,
-            hitRate: 0, evasionRate: 0, criticalRate: 0, attackCount: 0,
-            magicalHealing: 0, trapRemoval: 0, additionalDamage: 0, breathDamage: 0
+            maxHP: 0, physicalAttackScore: 0, magicalAttackScore: 0,
+            physicalDefenseScore: 0, magicalDefenseScore: 0,
+            hitScore: 0, evasionScore: 0, criticalChancePercent: 0, attackCount: 0,
+            magicalHealingScore: 0, trapRemovalScore: 0, additionalDamageScore: 0, breathDamageScore: 0
         )
 
         /// 非ゼロの値のみを列挙（stat名文字列と値のペア、attackCount除く）
         @inline(__always)
         nonisolated func forEachNonZero(_ body: (_ stat: String, _ value: Int) -> Void) {
             if maxHP != 0 { body("maxHP", maxHP) }
-            if physicalAttack != 0 { body("physicalAttack", physicalAttack) }
-            if magicalAttack != 0 { body("magicalAttack", magicalAttack) }
-            if physicalDefense != 0 { body("physicalDefense", physicalDefense) }
-            if magicalDefense != 0 { body("magicalDefense", magicalDefense) }
-            if hitRate != 0 { body("hitRate", hitRate) }
-            if evasionRate != 0 { body("evasionRate", evasionRate) }
-            if criticalRate != 0 { body("criticalRate", criticalRate) }
-            if magicalHealing != 0 { body("magicalHealing", magicalHealing) }
-            if trapRemoval != 0 { body("trapRemoval", trapRemoval) }
-            if additionalDamage != 0 { body("additionalDamage", additionalDamage) }
-            if breathDamage != 0 { body("breathDamage", breathDamage) }
+            if physicalAttackScore != 0 { body("physicalAttackScore", physicalAttackScore) }
+            if magicalAttackScore != 0 { body("magicalAttackScore", magicalAttackScore) }
+            if physicalDefenseScore != 0 { body("physicalDefenseScore", physicalDefenseScore) }
+            if magicalDefenseScore != 0 { body("magicalDefenseScore", magicalDefenseScore) }
+            if hitScore != 0 { body("hitScore", hitScore) }
+            if evasionScore != 0 { body("evasionScore", evasionScore) }
+            if criticalChancePercent != 0 { body("criticalChancePercent", criticalChancePercent) }
+            if magicalHealingScore != 0 { body("magicalHealingScore", magicalHealingScore) }
+            if trapRemovalScore != 0 { body("trapRemovalScore", trapRemovalScore) }
+            if additionalDamageScore != 0 { body("additionalDamageScore", additionalDamageScore) }
+            if breathDamageScore != 0 { body("breathDamageScore", breathDamageScore) }
         }
 
         /// 全値を指定倍率でスケール（パンドラボックス効果用）
         nonisolated func scaled(by multiplier: Double) -> CombatBonuses {
             CombatBonuses(
                 maxHP: Int(Double(maxHP) * multiplier),
-                physicalAttack: Int(Double(physicalAttack) * multiplier),
-                magicalAttack: Int(Double(magicalAttack) * multiplier),
-                physicalDefense: Int(Double(physicalDefense) * multiplier),
-                magicalDefense: Int(Double(magicalDefense) * multiplier),
-                hitRate: Int(Double(hitRate) * multiplier),
-                evasionRate: Int(Double(evasionRate) * multiplier),
-                criticalRate: Int(Double(criticalRate) * multiplier),
+                physicalAttackScore: Int(Double(physicalAttackScore) * multiplier),
+                magicalAttackScore: Int(Double(magicalAttackScore) * multiplier),
+                physicalDefenseScore: Int(Double(physicalDefenseScore) * multiplier),
+                magicalDefenseScore: Int(Double(magicalDefenseScore) * multiplier),
+                hitScore: Int(Double(hitScore) * multiplier),
+                evasionScore: Int(Double(evasionScore) * multiplier),
+                criticalChancePercent: Int(Double(criticalChancePercent) * multiplier),
                 attackCount: attackCount * multiplier,
-                magicalHealing: Int(Double(magicalHealing) * multiplier),
-                trapRemoval: Int(Double(trapRemoval) * multiplier),
-                additionalDamage: Int(Double(additionalDamage) * multiplier),
-                breathDamage: Int(Double(breathDamage) * multiplier)
+                magicalHealingScore: Int(Double(magicalHealingScore) * multiplier),
+                trapRemovalScore: Int(Double(trapRemovalScore) * multiplier),
+                additionalDamageScore: Int(Double(additionalDamageScore) * multiplier),
+                breathDamageScore: Int(Double(breathDamageScore) * multiplier)
             )
         }
 
@@ -127,18 +127,18 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
             }
             return CombatBonuses(
                 maxHP: apply(maxHP),
-                physicalAttack: apply(physicalAttack),
-                magicalAttack: apply(magicalAttack),
-                physicalDefense: apply(physicalDefense),
-                magicalDefense: apply(magicalDefense),
-                hitRate: apply(hitRate),
-                evasionRate: apply(evasionRate),
-                criticalRate: apply(criticalRate),
+                physicalAttackScore: apply(physicalAttackScore),
+                magicalAttackScore: apply(magicalAttackScore),
+                physicalDefenseScore: apply(physicalDefenseScore),
+                magicalDefenseScore: apply(magicalDefenseScore),
+                hitScore: apply(hitScore),
+                evasionScore: apply(evasionScore),
+                criticalChancePercent: apply(criticalChancePercent),
                 attackCount: applyDouble(attackCount),
-                magicalHealing: apply(magicalHealing),
-                trapRemoval: apply(trapRemoval),
-                additionalDamage: apply(additionalDamage),
-                breathDamage: apply(breathDamage)
+                magicalHealingScore: apply(magicalHealingScore),
+                trapRemovalScore: apply(trapRemovalScore),
+                additionalDamageScore: apply(additionalDamageScore),
+                breathDamageScore: apply(breathDamageScore)
             )
         }
 
@@ -154,18 +154,18 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
             }
             return CombatBonuses(
                 maxHP: apply(maxHP, coefficient: 0.5),
-                physicalAttack: apply(physicalAttack, coefficient: 0.5),
-                magicalAttack: apply(magicalAttack, coefficient: 0.5),
-                physicalDefense: apply(physicalDefense, coefficient: 0.5),
-                magicalDefense: apply(magicalDefense, coefficient: 0.25),
-                hitRate: apply(hitRate, coefficient: 0.5),
-                evasionRate: apply(evasionRate, coefficient: 0.5),
-                criticalRate: apply(criticalRate, coefficient: 0.5),
+                physicalAttackScore: apply(physicalAttackScore, coefficient: 0.5),
+                magicalAttackScore: apply(magicalAttackScore, coefficient: 0.5),
+                physicalDefenseScore: apply(physicalDefenseScore, coefficient: 0.5),
+                magicalDefenseScore: apply(magicalDefenseScore, coefficient: 0.25),
+                hitScore: apply(hitScore, coefficient: 0.5),
+                evasionScore: apply(evasionScore, coefficient: 0.5),
+                criticalChancePercent: apply(criticalChancePercent, coefficient: 0.5),
                 attackCount: applyDouble(attackCount, coefficient: 0.5),
-                magicalHealing: apply(magicalHealing, coefficient: 0.5),
-                trapRemoval: apply(trapRemoval, coefficient: 0.5),
-                additionalDamage: apply(additionalDamage, coefficient: 0.5),
-                breathDamage: apply(breathDamage, coefficient: 0.5)
+                magicalHealingScore: apply(magicalHealingScore, coefficient: 0.5),
+                trapRemovalScore: apply(trapRemovalScore, coefficient: 0.5),
+                additionalDamageScore: apply(additionalDamageScore, coefficient: 0.5),
+                breathDamageScore: apply(breathDamageScore, coefficient: 0.5)
             )
         }
 
@@ -173,18 +173,18 @@ struct ItemDefinition: Identifiable, Sendable, Hashable {
         nonisolated func adding(_ other: CombatBonuses) -> CombatBonuses {
             CombatBonuses(
                 maxHP: maxHP + other.maxHP,
-                physicalAttack: physicalAttack + other.physicalAttack,
-                magicalAttack: magicalAttack + other.magicalAttack,
-                physicalDefense: physicalDefense + other.physicalDefense,
-                magicalDefense: magicalDefense + other.magicalDefense,
-                hitRate: hitRate + other.hitRate,
-                evasionRate: evasionRate + other.evasionRate,
-                criticalRate: criticalRate + other.criticalRate,
+                physicalAttackScore: physicalAttackScore + other.physicalAttackScore,
+                magicalAttackScore: magicalAttackScore + other.magicalAttackScore,
+                physicalDefenseScore: physicalDefenseScore + other.physicalDefenseScore,
+                magicalDefenseScore: magicalDefenseScore + other.magicalDefenseScore,
+                hitScore: hitScore + other.hitScore,
+                evasionScore: evasionScore + other.evasionScore,
+                criticalChancePercent: criticalChancePercent + other.criticalChancePercent,
                 attackCount: attackCount + other.attackCount,
-                magicalHealing: magicalHealing + other.magicalHealing,
-                trapRemoval: trapRemoval + other.trapRemoval,
-                additionalDamage: additionalDamage + other.additionalDamage,
-                breathDamage: breathDamage + other.breathDamage
+                magicalHealingScore: magicalHealingScore + other.magicalHealingScore,
+                trapRemovalScore: trapRemovalScore + other.trapRemovalScore,
+                additionalDamageScore: additionalDamageScore + other.additionalDamageScore,
+                breathDamageScore: breathDamageScore + other.breathDamageScore
             )
         }
     }

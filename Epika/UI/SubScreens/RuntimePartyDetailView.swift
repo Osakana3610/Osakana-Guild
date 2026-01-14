@@ -39,7 +39,7 @@ struct RuntimePartyDetailView: View {
     @State private var errorMessage: String?
     @State private var showDungeonPicker = false
     @State private var targetFloorSelection: Int
-    @State private var selectedCharacterId: UInt8?
+    @State private var characterDetailContext: CharacterDetailContext?
 
     init(partyId: UInt8,
          initialTargetFloor: UInt8,
@@ -72,7 +72,7 @@ struct RuntimePartyDetailView: View {
                                                     canDepart: canStartExploration(for: currentParty))
                             },
                             onMemberTap: { memberId in
-                                selectedCharacterId = memberId
+                                characterDetailContext = CharacterDetailContext(id: memberId)
                             }
                         )
                         .padding(.vertical, 4)
@@ -205,10 +205,8 @@ struct RuntimePartyDetailView: View {
                     }
                 )
             }
-            .sheet(isPresented: isCharacterDetailPresented) {
-                if let selectedCharacterId {
-                    CharacterDetailSheetLoader(characterId: selectedCharacterId)
-                }
+            .sheet(item: $characterDetailContext) { context in
+                CharacterDetailSheetLoader(characterId: context.id)
             }
         }
         .overlay(alignment: .bottomLeading) {
@@ -253,15 +251,6 @@ struct RuntimePartyDetailView: View {
     private var listRowHeight: CGFloat? {
         let value = AppConstants.UI.listRowHeight
         return value > 0 ? value : nil
-    }
-
-    private var isCharacterDetailPresented: Binding<Bool> {
-        Binding(
-            get: { selectedCharacterId != nil },
-            set: { isPresented in
-                if !isPresented { selectedCharacterId = nil }
-            }
-        )
     }
 
     private func errorView(_ message: String) -> some View {
@@ -440,6 +429,10 @@ struct RuntimePartyDetailView: View {
         return success
     }
 
+}
+
+private struct CharacterDetailContext: Identifiable {
+    let id: UInt8
 }
 
 private struct CharacterDetailSheetLoader: View {

@@ -28,7 +28,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
             damageType: .physical,
             baseChancePercent: 100,
             attackCountMultiplier: 1.0,
-            criticalRateMultiplier: 0.0,
+            criticalChancePercentMultiplier: 0.0,
             accuracyMultiplier: 1.0,
             requiresMartial: false,
             requiresAllyBehind: false
@@ -39,8 +39,8 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
 
         let player = TestActorBuilder.makePlayer(
             maxHP: 50000,
-            physicalAttack: 5000,
-            hitRate: 100,
+            physicalAttackScore: 5000,
+            hitScore: 100,
             luck: 35,
             agility: 1,  // 後攻
             skillEffects: playerSkillEffects
@@ -48,8 +48,8 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 30000,
-            physicalAttack: 3000,
-            hitRate: 100,
+            physicalAttackScore: 3000,
+            hitScore: 100,
             luck: 35,
             agility: 35  // 先攻
         )
@@ -79,7 +79,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
 
     /// バグ: ブレスを習得していないキャラがブレスを発動する
     ///
-    /// 原因: breathDamage > 0 の場合に自動でブレスチャージを付与していた
+    /// 原因: breathDamageScore > 0 の場合に自動でブレスチャージを付与していた
     /// 修正: breathVariantスキルを習得したキャラのみがブレスを使用
     ///
     /// 検証: ブレススキルなしのキャラはブレスを使わない
@@ -87,18 +87,18 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
         // ブレスダメージはあるが、breathVariantスキルがないプレイヤー
         let snapshot = CharacterValues.Combat(
             maxHP: 10000,
-            physicalAttack: 1000,
-            magicalAttack: 500,
-            physicalDefense: 500,
-            magicalDefense: 500,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
+            physicalAttackScore: 1000,
+            magicalAttackScore: 500,
+            physicalDefenseScore: 500,
+            magicalDefenseScore: 500,
+            hitScore: 100,
+            evasionScore: 0,
+            criticalChancePercent: 0,
             attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 5000,  // ブレスダメージは高い
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 5000,  // ブレスダメージは高い
             isMartialEligible: false
         )
 
@@ -122,7 +122,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 5000,
-            physicalAttack: 100,
+            physicalAttackScore: 100,
             luck: 35,
             agility: 1
         )
@@ -167,18 +167,18 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
 
         let snapshot = CharacterValues.Combat(
             maxHP: 10000,
-            physicalAttack: 5000,
-            magicalAttack: 500,
-            physicalDefense: 1000,
-            magicalDefense: 500,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
+            physicalAttackScore: 5000,
+            magicalAttackScore: 500,
+            physicalDefenseScore: 1000,
+            magicalDefenseScore: 500,
+            hitScore: 100,
+            evasionScore: 0,
+            criticalChancePercent: 0,
             attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
             isMartialEligible: false
         )
 
@@ -202,8 +202,8 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 50000,
-            physicalAttack: 100,  // 低攻撃力（プレイヤーを倒さない）
-            physicalDefense: 1000,
+            physicalAttackScore: 100,  // 低攻撃力（プレイヤーを倒さない）
+            physicalDefenseScore: 1000,
             luck: 35,
             agility: 1  // 後攻
         )
@@ -228,7 +228,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
         // 仮説2: 回復量は与ダメージの50%
         // 期待ダメージ: 5000 - 1000 = 4000（基本値、乱数で±20%程度）
         // 期待回復量: 4000 × 50% = 2000（基本値）
-        // 許容範囲: 乱数とクリティカルを考慮して 1000〜3000
+        // 許容範囲: 乱数と必殺を考慮して 1000〜3000
         if let firstHeal = healAbsorbEffects.first, let healValue = firstHeal.value {
             let healAmount = Int(healValue)
             XCTAssertTrue((1000...3000).contains(healAmount),
@@ -249,7 +249,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
             damageType: .physical,
             baseChancePercent: 100,
             attackCountMultiplier: 1.0,
-            criticalRateMultiplier: 0.0,
+            criticalChancePercentMultiplier: 0.0,
             accuracyMultiplier: 1.0,
             requiresMartial: false,
             requiresAllyBehind: false
@@ -260,16 +260,16 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
 
         let player = TestActorBuilder.makePlayer(
             maxHP: 50000,
-            physicalAttack: 10000,  // 高攻撃力（1撃で倒せる）
-            hitRate: 100,
+            physicalAttackScore: 10000,  // 高攻撃力（1撃で倒せる）
+            hitScore: 100,
             luck: 35,
             agility: 35,
             skillEffects: playerSkillEffects
         )
 
         // 複数の弱い敵
-        let enemy1 = TestActorBuilder.makeEnemy(maxHP: 1000, physicalAttack: 100, luck: 35, agility: 1)
-        let enemy2 = TestActorBuilder.makeEnemy(maxHP: 1000, physicalAttack: 100, luck: 35, agility: 1)
+        let enemy1 = TestActorBuilder.makeEnemy(maxHP: 1000, physicalAttackScore: 100, luck: 35, agility: 1)
+        let enemy2 = TestActorBuilder.makeEnemy(maxHP: 1000, physicalAttackScore: 100, luck: 35, agility: 1)
 
         var players = [player]
         var enemies = [enemy1, enemy2]
@@ -337,18 +337,18 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
         // 魔法使い魔法100%のプレイヤー（攻撃は0%）
         let snapshot = CharacterValues.Combat(
             maxHP: 50000,
-            physicalAttack: 100,
-            magicalAttack: 5000,
-            physicalDefense: 1000,
-            magicalDefense: 1000,
-            hitRate: 100,
-            evasionRate: 0,
-            criticalRate: 0,
+            physicalAttackScore: 100,
+            magicalAttackScore: 5000,
+            physicalDefenseScore: 1000,
+            magicalDefenseScore: 1000,
+            hitScore: 100,
+            evasionScore: 0,
+            criticalChancePercent: 0,
             attackCount: 1.0,
-            magicalHealing: 0,
-            trapRemoval: 0,
-            additionalDamage: 0,
-            breathDamage: 0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
             isMartialEligible: false
         )
 
@@ -373,7 +373,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 50000,
-            physicalAttack: 100,
+            physicalAttackScore: 100,
             luck: 35,
             agility: 1
         )

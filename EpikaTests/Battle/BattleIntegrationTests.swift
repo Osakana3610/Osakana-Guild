@@ -6,10 +6,10 @@ import XCTest
 /// 目的: 各戦闘サブシステムが連携して正しく動作することを証明する
 ///
 /// 検証する処理フロー:
-///   1. 命中判定: hitChance = attacker.hitRate - defender.evasionRate
+///   1. 命中判定: hitChance = attacker.hitScore - defender.evasionScore
 ///   2. 回避判定: evadeCheck = percentChance(100 - hitChance)
 ///   3. ダメージ計算: statMultiplier × baseDamage
-///   4. クリティカル判定: percentChance(criticalRate)
+///   4. 必殺判定: percentChance(criticalChancePercent)
 ///   5. バリア/ガード適用: barrier=×(1/3), guard=×0.5
 ///   6. 状態異常付与: basePercent × resistance
 ///   7. 反撃/追撃判定: percentChance(baseChancePercent)
@@ -19,11 +19,11 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
     // MARK: - 物理攻撃フロー
 
-    /// 物理攻撃の完全フロー: 命中 → クリティカル → ダメージ → 適用
+    /// 物理攻撃の完全フロー: 命中 → 必殺 → ダメージ → 適用
     ///
     /// 入力:
-    ///   - 攻撃者: physicalAttack=5000, hitRate=100, criticalRate=0, luck=35
-    ///   - 防御者: physicalDefense=2000, evasionRate=0, luck=35
+    ///   - 攻撃者: physicalAttackScore=5000, hitScore=100, criticalChancePercent=0, luck=35
+    ///   - 防御者: physicalDefenseScore=2000, evasionScore=0, luck=35
     ///
     /// 計算:
     ///   statMultiplier期待値 = 0.875 (luck=35)
@@ -35,14 +35,14 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                physicalAttack: 5000,
-                hitRate: 100,
+                physicalAttackScore: 5000,
+                hitScore: 100,
                 luck: 35,
-                criticalRate: 0
+                criticalChancePercent: 0
             )
             var defender = TestActorBuilder.makeDefender(
-                physicalDefense: 2000,
-                evasionRate: 0,
+                physicalDefenseScore: 2000,
+                evasionScore: 0,
                 luck: 35
             )
             var context = TestActorBuilder.makeContext(
@@ -73,30 +73,30 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
         )
     }
 
-    /// 物理攻撃 + クリティカルのフロー
+    /// 物理攻撃 + 必殺のフロー
     ///
-    /// クリティカル時: 防御力半減で計算後、criticalMultiplier倍
-    /// criticalRate=100で常にクリティカル発生
+    /// 必殺時: 防御力半減で計算後、criticalMultiplier倍
+    /// criticalChancePercent=100で常に必殺発生
     /// criticalMultiplier=1.5で1.5倍ダメージ
     func testPhysicalAttackWithCritical() {
         var totalDamage = 0
         let trials = 115  // luck=35
 
-        // クリティカル倍率1.5を設定
+        // 必殺倍率1.5を設定
         var skillEffects = BattleActor.SkillEffects.neutral
         skillEffects.damage.criticalMultiplier = 1.5
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                physicalAttack: 5000,
-                hitRate: 100,
+                physicalAttackScore: 5000,
+                hitScore: 100,
                 luck: 35,
-                criticalRate: 100,  // 100%クリティカル
+                criticalChancePercent: 100,  // 100%必殺
                 skillEffects: skillEffects
             )
             var defender = TestActorBuilder.makeDefender(
-                physicalDefense: 2000,
-                evasionRate: 0,
+                physicalDefenseScore: 2000,
+                evasionScore: 0,
                 luck: 35
             )
             var context = TestActorBuilder.makeContext(
@@ -111,13 +111,13 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
                 hitIndex: 1,
                 context: &context
             )
-            XCTAssertTrue(critical, "クリティカル発生")
+            XCTAssertTrue(critical, "必殺発生")
             totalDamage += damage
         }
 
         let average = Double(totalDamage) / Double(trials)
 
-        // クリティカル時: 防御力半減で計算後1.5倍
+        // 必殺時: 防御力半減で計算後1.5倍
         // attackPower = 5000 * 0.875 = 4375
         // defensePower = 2000 * 0.875 * 0.5 = 875
         // baseDamage = 4375 - 875 = 3500
@@ -127,7 +127,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         XCTAssertTrue(
             (expected - tolerance...expected + tolerance).contains(average),
-            "物理+クリティカル: 期待\(expected)±2%, 実測\(average) (\(trials)回試行)"
+            "物理+必殺: 期待\(expected)±2%, 実測\(average) (\(trials)回試行)"
         )
     }
 
@@ -142,14 +142,14 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                physicalAttack: 5000,
-                hitRate: 100,
+                physicalAttackScore: 5000,
+                hitScore: 100,
                 luck: 35,
-                criticalRate: 0
+                criticalChancePercent: 0
             )
             var defender = TestActorBuilder.makeDefender(
-                physicalDefense: 2000,
-                evasionRate: 0,
+                physicalDefenseScore: 2000,
+                evasionScore: 0,
                 luck: 35,
                 barrierCharges: [1: 1]  // 物理バリア1回
             )
@@ -189,14 +189,14 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                physicalAttack: 5000,
-                hitRate: 100,
+                physicalAttackScore: 5000,
+                hitScore: 100,
                 luck: 35,
-                criticalRate: 0
+                criticalChancePercent: 0
             )
             var defender = TestActorBuilder.makeDefender(
-                physicalDefense: 2000,
-                evasionRate: 0,
+                physicalDefenseScore: 2000,
+                evasionScore: 0,
                 luck: 35,
                 guardActive: true
             )
@@ -232,8 +232,8 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
     /// 魔法攻撃の完全フロー
     ///
     /// 入力:
-    ///   - 攻撃者: magicalAttack=3000, luck=35
-    ///   - 防御者: magicalDefense=1000, luck=35
+    ///   - 攻撃者: magicalAttackScore=3000, luck=35
+    ///   - 防御者: magicalDefenseScore=1000, luck=35
     ///
     /// 計算（魔法防御は0.5倍で計算）:
     ///   attackPower = 3000 × 0.875 = 2625
@@ -245,11 +245,11 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                magicalAttack: 3000,
+                magicalAttackScore: 3000,
                 luck: 35
             )
             var defender = TestActorBuilder.makeDefender(
-                magicalDefense: 1000,
+                magicalDefenseScore: 1000,
                 luck: 35
             )
             var context = TestActorBuilder.makeContext(
@@ -292,11 +292,11 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                magicalAttack: 3000,
+                magicalAttackScore: 3000,
                 luck: 35
             )
             var defender = TestActorBuilder.makeDefender(
-                magicalDefense: 1000,
+                magicalDefenseScore: 1000,
                 luck: 35,
                 barrierCharges: [2: 1]  // 魔法バリア1回
             )
@@ -338,7 +338,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
         let trials = 615  // luck=35 (speedMultiplier用)
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
             var defender = TestActorBuilder.makeDefender(luck: 35)
             var context = TestActorBuilder.makeContext(
                 seed: UInt64(seed),
@@ -372,7 +372,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
         let trials = 615  // luck=35 (speedMultiplier用)
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
             var defender = TestActorBuilder.makeDefender(
                 luck: 35,
                 barrierCharges: [3: 1]  // ブレスバリア1回
@@ -415,14 +415,14 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                physicalAttack: 5000,
-                hitRate: 100,
+                physicalAttackScore: 5000,
+                hitScore: 100,
                 luck: 35,
-                criticalRate: 0
+                criticalChancePercent: 0
             )
             var defender = TestActorBuilder.makeDefender(
-                physicalDefense: 2000,
-                evasionRate: 0,
+                physicalDefenseScore: 2000,
+                evasionScore: 0,
                 luck: 35,
                 guardActive: true,
                 guardBarrierCharges: [1: 1]  // ガード時物理バリア
@@ -456,30 +456,30 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
         )
     }
 
-    /// クリティカル + ガードの複合効果
+    /// 必殺 + ガードの複合効果
     ///
-    /// クリティカル時: 防御力半減で計算後criticalMultiplier倍、さらにガードで0.5倍
-    /// criticalRate=100で常にクリティカル発生
+    /// 必殺時: 防御力半減で計算後criticalMultiplier倍、さらにガードで0.5倍
+    /// criticalChancePercent=100で常に必殺発生
     /// criticalMultiplier=1.5で1.5倍ダメージ
     func testCriticalWithGuard() {
         var totalDamage = 0
         let trials = 115  // luck=35
 
-        // クリティカル倍率1.5を設定
+        // 必殺倍率1.5を設定
         var skillEffects = BattleActor.SkillEffects.neutral
         skillEffects.damage.criticalMultiplier = 1.5
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                physicalAttack: 5000,
-                hitRate: 100,
+                physicalAttackScore: 5000,
+                hitScore: 100,
                 luck: 35,
-                criticalRate: 100,  // 100%クリティカル
+                criticalChancePercent: 100,  // 100%必殺
                 skillEffects: skillEffects
             )
             var defender = TestActorBuilder.makeDefender(
-                physicalDefense: 2000,
-                evasionRate: 0,
+                physicalDefenseScore: 2000,
+                evasionScore: 0,
                 luck: 35,
                 guardActive: true
             )
@@ -495,13 +495,13 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
                 hitIndex: 1,
                 context: &context
             )
-            XCTAssertTrue(critical, "クリティカル発生")
+            XCTAssertTrue(critical, "必殺発生")
             totalDamage += damage
         }
 
         let average = Double(totalDamage) / Double(trials)
 
-        // クリティカル時: 防御力半減で計算後1.5倍
+        // 必殺時: 防御力半減で計算後1.5倍
         // attackPower = 5000 * 0.875 = 4375
         // defensePower = 2000 * 0.875 * 0.5 = 875
         // baseDamage = 4375 - 875 = 3500
@@ -512,7 +512,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         XCTAssertTrue(
             (expected - tolerance...expected + tolerance).contains(average),
-            "クリティカル+ガード: 期待\(expected)±2%, 実測\(average) (\(trials)回試行)"
+            "必殺+ガード: 期待\(expected)±2%, 実測\(average) (\(trials)回試行)"
         )
     }
 
@@ -527,14 +527,14 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                physicalAttack: 5000,
-                hitRate: 100,
+                physicalAttackScore: 5000,
+                hitScore: 100,
                 luck: 1,
-                criticalRate: 0
+                criticalChancePercent: 0
             )
             var defender = TestActorBuilder.makeDefender(
-                physicalDefense: 2000,
-                evasionRate: 0,
+                physicalDefenseScore: 2000,
+                evasionScore: 0,
                 luck: 1
             )
             var context = TestActorBuilder.makeContext(
@@ -575,14 +575,14 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
 
         for seed in 0..<trials {
             let attacker = TestActorBuilder.makeAttacker(
-                physicalAttack: 5000,
-                hitRate: 100,
+                physicalAttackScore: 5000,
+                hitScore: 100,
                 luck: 18,
-                criticalRate: 0
+                criticalChancePercent: 0
             )
             var defender = TestActorBuilder.makeDefender(
-                physicalDefense: 2000,
-                evasionRate: 0,
+                physicalDefenseScore: 2000,
+                evasionScore: 0,
                 luck: 18
             )
             var context = TestActorBuilder.makeContext(
@@ -617,14 +617,14 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
     /// 攻撃力 < 防御力でも最低1ダメージ
     func testMinimumDamageGuarantee() {
         let attacker = TestActorBuilder.makeAttacker(
-            physicalAttack: 100,
-            hitRate: 100,
+            physicalAttackScore: 100,
+            hitScore: 100,
             luck: 35,
-            criticalRate: 0
+            criticalChancePercent: 0
         )
         var defender = TestActorBuilder.makeDefender(
-            physicalDefense: 10000,  // 攻撃力よりはるかに高い
-            evasionRate: 0,
+            physicalDefenseScore: 10000,  // 攻撃力よりはるかに高い
+            evasionScore: 0,
             luck: 35
         )
         var context = TestActorBuilder.makeContext(
@@ -654,7 +654,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
         let resistances = BattleInnateResistances(breath: 0.5)
 
         for seed in 0..<trials {
-            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamage: 3000)
+            let attacker = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
             var defender = TestActorBuilder.makeDefender(
                 luck: 35,
                 innateResistances: resistances

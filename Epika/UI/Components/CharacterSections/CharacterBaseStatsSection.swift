@@ -28,12 +28,12 @@ struct CharacterBaseStatsSection: View {
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
-            BaseStatRow(label: "力", value: character.attributes.strength)
-            BaseStatRow(label: "知恵", value: character.attributes.wisdom)
-            BaseStatRow(label: "精神", value: character.attributes.spirit)
-            BaseStatRow(label: "体力", value: character.attributes.vitality)
-            BaseStatRow(label: "敏捷", value: character.attributes.agility)
-            BaseStatRow(label: "運", value: character.attributes.luck)
+            BaseStatRow(label: BaseStat.strength.displayName, value: character.attributes.strength)
+            BaseStatRow(label: BaseStat.wisdom.displayName, value: character.attributes.wisdom)
+            BaseStatRow(label: BaseStat.spirit.displayName, value: character.attributes.spirit)
+            BaseStatRow(label: BaseStat.vitality.displayName, value: character.attributes.vitality)
+            BaseStatRow(label: BaseStat.agility.displayName, value: character.attributes.agility)
+            BaseStatRow(label: BaseStat.luck.displayName, value: character.attributes.luck)
         }
     }
 }

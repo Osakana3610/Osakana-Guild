@@ -41,8 +41,8 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
     case penetrationDamageTakenMultiplier = 10
     case martialBonusPercent = 11
     case martialBonusMultiplier = 12
-    case additionalDamageAdditive = 13
-    case additionalDamageMultiplier = 14
+    case additionalDamageScoreAdditive = 13
+    case additionalDamageScoreMultiplier = 14
     case minHitScale = 15
     case magicNullifyChancePercent = 16
     case levelComparisonDamageTaken = 17
@@ -133,10 +133,10 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
     case retreatAtTurn = 133
 
     // MARK: - Passthrough系 (150-199)
-    case criticalRateAdditive = 150
-    case criticalRateCap = 151
-    case criticalRateMaxAbsolute = 152
-    case criticalRateMaxDelta = 153
+    case criticalChancePercentAdditive = 150
+    case criticalChancePercentCap = 151
+    case criticalChancePercentMaxAbsolute = 152
+    case criticalChancePercentMaxDelta = 153
     case equipmentSlotAdditive = 154
     case equipmentSlotMultiplier = 155
     case explorationTimeMultiplier = 156
@@ -167,8 +167,8 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         case "penetrationDamageTakenMultiplier": self = .penetrationDamageTakenMultiplier
         case "martialBonusPercent": self = .martialBonusPercent
         case "martialBonusMultiplier": self = .martialBonusMultiplier
-        case "additionalDamageAdditive": self = .additionalDamageAdditive
-        case "additionalDamageMultiplier": self = .additionalDamageMultiplier
+        case "additionalDamageScoreAdditive": self = .additionalDamageScoreAdditive
+        case "additionalDamageScoreMultiplier": self = .additionalDamageScoreMultiplier
         case "minHitScale": self = .minHitScale
         case "magicNullifyChancePercent": self = .magicNullifyChancePercent
         case "levelComparisonDamageTaken": self = .levelComparisonDamageTaken
@@ -252,10 +252,10 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         case "runawayDamage": self = .runawayDamage
         case "retreatAtTurn": self = .retreatAtTurn
         // Passthrough系
-        case "criticalRateAdditive": self = .criticalRateAdditive
-        case "criticalRateCap": self = .criticalRateCap
-        case "criticalRateMaxAbsolute": self = .criticalRateMaxAbsolute
-        case "criticalRateMaxDelta": self = .criticalRateMaxDelta
+        case "criticalChancePercentAdditive": self = .criticalChancePercentAdditive
+        case "criticalChancePercentCap": self = .criticalChancePercentCap
+        case "criticalChancePercentMaxAbsolute": self = .criticalChancePercentMaxAbsolute
+        case "criticalChancePercentMaxDelta": self = .criticalChancePercentMaxDelta
         case "equipmentSlotAdditive": self = .equipmentSlotAdditive
         case "equipmentSlotMultiplier": self = .equipmentSlotMultiplier
         case "explorationTimeMultiplier": self = .explorationTimeMultiplier
@@ -287,8 +287,8 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         case .penetrationDamageTakenMultiplier: return "penetrationDamageTakenMultiplier"
         case .martialBonusPercent: return "martialBonusPercent"
         case .martialBonusMultiplier: return "martialBonusMultiplier"
-        case .additionalDamageAdditive: return "additionalDamageAdditive"
-        case .additionalDamageMultiplier: return "additionalDamageMultiplier"
+        case .additionalDamageScoreAdditive: return "additionalDamageScoreAdditive"
+        case .additionalDamageScoreMultiplier: return "additionalDamageScoreMultiplier"
         case .minHitScale: return "minHitScale"
         case .magicNullifyChancePercent: return "magicNullifyChancePercent"
         case .levelComparisonDamageTaken: return "levelComparisonDamageTaken"
@@ -372,10 +372,10 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         case .runawayDamage: return "runawayDamage"
         case .retreatAtTurn: return "retreatAtTurn"
         // Passthrough系
-        case .criticalRateAdditive: return "criticalRateAdditive"
-        case .criticalRateCap: return "criticalRateCap"
-        case .criticalRateMaxAbsolute: return "criticalRateMaxAbsolute"
-        case .criticalRateMaxDelta: return "criticalRateMaxDelta"
+        case .criticalChancePercentAdditive: return "criticalChancePercentAdditive"
+        case .criticalChancePercentCap: return "criticalChancePercentCap"
+        case .criticalChancePercentMaxAbsolute: return "criticalChancePercentMaxAbsolute"
+        case .criticalChancePercentMaxDelta: return "criticalChancePercentMaxDelta"
         case .equipmentSlotAdditive: return "equipmentSlotAdditive"
         case .equipmentSlotMultiplier: return "equipmentSlotMultiplier"
         case .explorationTimeMultiplier: return "explorationTimeMultiplier"

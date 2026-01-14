@@ -101,7 +101,7 @@ probability ≥ 1: 常にtrue
 2. ダメージ計算
    - attacker statMultiplier
    - defender statMultiplier
-3. クリティカル判定（criticalRate > 0の場合）
+3. 必殺判定（criticalRate > 0の場合）
    - percentChance
 
 シード固定テストでは、この消費順序を考慮する必要がある。

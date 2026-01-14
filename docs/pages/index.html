@@ -5,163 +5,388 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>おさかなギルド</title>
     <style>
+        :root {
+            --bg: #f7f6f3;
+            --surface: #ffffff;
+            --text: #111111;
+            --muted: #5f6368;
+            --border: #e5e2dd;
+            --accent: #007aff;
+            --shadow: 0 14px 30px rgba(17, 24, 39, 0.06);
+        }
+        * {
+            box-sizing: border-box;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.8;
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            color: #333;
-            background-color: #fafafa;
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.75;
+            color: var(--text);
+            background:
+                radial-gradient(1200px 700px at 10% -10%, #ffffff 0%, rgba(255, 255, 255, 0) 55%),
+                linear-gradient(180deg, #f8f7f4 0%, #eef1f4 100%);
+        }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        a:focus-visible {
+            outline: 2px solid #cdd2d8;
+            outline-offset: 2px;
+        }
+        .page {
+            max-width: 980px;
+            margin: 72px auto 88px;
+            padding: 0 24px;
+        }
+        .sheet {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+            gap: 36px;
+            padding: 40px 48px 32px;
+            align-items: start;
+        }
+        .hero-copy {
+            display: grid;
+            gap: 12px;
         }
         h1 {
-            color: #1a1a1a;
-            border-bottom: 2px solid #4a90d9;
-            padding-bottom: 10px;
-            margin-bottom: 8px;
-        }
-        h2 {
-            color: #2c3e50;
-            margin-top: 40px;
-            margin-bottom: 16px;
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: -0.015em;
         }
         .tagline {
-            color: #666;
-            font-size: 1.1em;
-            margin-bottom: 24px;
+            margin: 0;
+            font-size: 1.05rem;
+            color: var(--muted);
         }
-        p {
-            margin: 16px 0;
+        .lead {
+            margin: 0;
+            max-width: 60ch;
         }
-        .cta {
-            margin: 32px 0;
+        .hero-side {
+            display: grid;
+            gap: 12px;
+            justify-items: start;
         }
-        .cta a {
-            display: inline-block;
-            background: #4a90d9;
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 22px;
+            border-radius: 14px;
+            border: 1px solid var(--accent);
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.16);
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .button:hover {
+            background: #0062cc;
+            box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
+        }
+        .button:focus-visible {
+            outline: 3px solid rgba(0, 122, 255, 0.35);
+            outline-offset: 2px;
         }
         .cta-note {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+        .stats-band {
+            padding: 26px 56px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: #fbfaf8;
         }
         .stats {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin: 24px 0;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px 30px;
         }
         .stat {
-            text-align: center;
-            flex: 1;
-            min-width: 120px;
+            display: grid;
+            gap: 6px;
         }
-        .stat-number {
-            font-size: 1.8em;
+        .stat-value {
+            margin: 0;
+            font-size: 1.5rem;
             font-weight: 700;
-            color: #4a90d9;
+            font-variant-numeric: tabular-nums;
         }
         .stat-label {
-            font-size: 0.9em;
-            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
         }
-        .feature-list {
-            list-style: none;
-            padding: 0;
+        .section {
+            padding: 36px 56px;
         }
-        .feature-list li {
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
+        .section + .section {
+            border-top: 1px solid var(--border);
         }
-        .feature-list li:last-child {
-            border-bottom: none;
+        .section-inner {
+            display: grid;
+            grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
+            gap: 32px;
         }
-        .feature-list strong {
-            color: #2c3e50;
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.1rem;
+            letter-spacing: 0.02em;
+        }
+        .section-note {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px 32px;
+        }
+        .feature {
+            display: grid;
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .feature:nth-child(-n + 2) {
+            border-top: none;
+            padding-top: 0;
+        }
+        .feature h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+        .feature p {
+            margin: 0;
+            color: var(--muted);
+        }
+        .footer {
+            padding: 30px 56px 40px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 24px;
+            align-items: center;
+            justify-content: space-between;
         }
         .links {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
         }
         .links a {
-            color: #4a90d9;
-            text-decoration: none;
-            margin-right: 16px;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
         }
         .links a:hover {
-            text-decoration: underline;
+            opacity: 0.7;
         }
         .copyright {
-            margin-top: 40px;
-            font-size: 0.85em;
-            color: #999;
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+        @media (min-width: 901px) {
+            .stat {
+                border-left: 1px solid var(--border);
+                padding-left: 18px;
+            }
+            .stat:nth-child(3n + 1) {
+                border-left: none;
+                padding-left: 0;
+            }
+        }
+        @media (max-width: 900px) {
+            .page {
+                margin: 56px auto 72px;
+            }
+            .hero {
+                grid-template-columns: 1fr;
+            }
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .stat {
+                border-left: 1px solid var(--border);
+                padding-left: 18px;
+            }
+            .stat:nth-child(2n + 1) {
+                border-left: none;
+                padding-left: 0;
+            }
+        }
+        @media (max-width: 720px) {
+            .section-inner {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            .feature:nth-child(-n + 2) {
+                border-top: 1px solid var(--border);
+                padding-top: 12px;
+            }
+            .feature:first-child {
+                border-top: none;
+                padding-top: 0;
+            }
+        }
+        @media (max-width: 640px) {
+            .page {
+                margin: 40px auto 56px;
+                padding: 0 16px;
+            }
+            .hero {
+                padding: 24px 20px 20px;
+            }
+            .stats-band {
+                padding: 24px;
+            }
+            .section {
+                padding: 28px 24px;
+            }
+            .footer {
+                padding: 24px;
+            }
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 16px 20px;
+            }
+            .stat {
+                border-left: 1px solid var(--border);
+                padding-left: 14px;
+            }
+            .stat:nth-child(2n + 1) {
+                border-left: none;
+                padding-left: 0;
+            }
+            .button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>おさかなギルド</h1>
-    <p class="tagline">放置系ハクスラRPG</p>
+    <main class="page">
+        <article class="sheet">
+            <header class="hero">
+                <div class="hero-copy">
+                    <h1>おさかなギルド</h1>
+                    <p class="tagline">放置で育つ、静かに熱いハクスラRPG</p>
+                    <p class="lead">最小の操作で冒険が進む。戻ったら成果を整理し、次の遠征を整える。育成と探索が淡々と積み上がる放置型ハクスラ。</p>
+                </div>
+                <div class="hero-side">
+                    <a class="button" href="itms-beta://beta.itunes.apple.com/v1/app/6756705558">TestFlightで試す</a>
+                    <p class="cta-note">現在ベータテスト中（iOS 17.1以降）</p>
+                </div>
+            </header>
 
-    <p>個性豊かな冒険者たちを率いて、無数のダンジョンを攻略しよう。放置していても冒険は進む。気づけばレアアイテムが手に入っているかも？</p>
+            <section class="stats-band" aria-label="ゲーム規模">
+                <div class="stats">
+                    <div class="stat">
+                        <p class="stat-value">432</p>
+                        <p class="stat-label">種類の敵</p>
+                    </div>
+                    <div class="stat">
+                        <p class="stat-value">1,023</p>
+                        <p class="stat-label">種類のアイテム</p>
+                    </div>
+                    <div class="stat">
+                        <p class="stat-value">72</p>
+                        <p class="stat-label">ダンジョン</p>
+                    </div>
+                    <div class="stat">
+                        <p class="stat-value">18</p>
+                        <p class="stat-label">種族</p>
+                    </div>
+                    <div class="stat">
+                        <p class="stat-value">16</p>
+                        <p class="stat-label">職業</p>
+                    </div>
+                    <div class="stat">
+                        <p class="stat-value">288</p>
+                        <p class="stat-label">ビルドの組み合わせ</p>
+                    </div>
+                </div>
+            </section>
 
-    <div class="cta">
-        <a href="itms-beta://beta.itunes.apple.com/v1/app/6756705558">TestFlightで試す</a>
-        <p class="cta-note">現在ベータテスト中（iOS 17.1以降）</p>
-    </div>
+            <section class="section">
+                <div class="section-inner">
+                    <div>
+                        <h2>特徴</h2>
+                        <p class="section-note">育成と探索を静かに積み上げる設計。</p>
+                    </div>
+                    <div class="feature-grid">
+                        <article class="feature">
+                            <h3>深いビルド</h3>
+                            <p>装備・宝石・タイトル・個性の組み合わせで手触りが変わる。</p>
+                        </article>
+                        <article class="feature">
+                            <h3>複数パーティ運用</h3>
+                            <p>一斉出撃で同時探索。短い操作で成果を広げる。</p>
+                        </article>
+                        <article class="feature">
+                            <h3>目的のあるドロップ</h3>
+                            <p>敵ごとに狙いがあり、タイトル付きアイテムを掘れる。</p>
+                        </article>
+                        <article class="feature">
+                            <h3>成長の余白</h3>
+                            <p>放置中に進行し、戻れば整理と強化に集中できる。</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
 
-    <div class="stats">
-        <div class="stat">
-            <div class="stat-number">432</div>
-            <div class="stat-label">種類の敵</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">1,023</div>
-            <div class="stat-label">種類のアイテム</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">72</div>
-            <div class="stat-label">ダンジョン</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">18</div>
-            <div class="stat-label">種族</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">16</div>
-            <div class="stat-label">職業</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">288</div>
-            <div class="stat-label">ビルドの組み合わせ</div>
-        </div>
-    </div>
+            <section class="section">
+                <div class="section-inner">
+                    <div>
+                        <h2>ゲームシステム</h2>
+                        <p class="section-note">長期運用を前提にした拡張性。</p>
+                    </div>
+                    <div class="feature-grid">
+                        <article class="feature">
+                            <h3>ギルド運営</h3>
+                            <p>18種族から採用し、役割に合わせて配置。</p>
+                        </article>
+                        <article class="feature">
+                            <h3>ダンジョン探索</h3>
+                            <p>72のダンジョンでイベントと戦利品のリズムを変える。</p>
+                        </article>
+                        <article class="feature">
+                            <h3>装備強化</h3>
+                            <p>合成・宝石改造・タイトル継承で細部を詰める。</p>
+                        </article>
+                        <article class="feature">
+                            <h3>ストーリー</h3>
+                            <p>章ごとに進行し、探索領域が広がる。</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
 
-    <h2>特徴</h2>
-    <ul class="feature-list">
-        <li><strong>本格ハクスラ</strong> - 装備・タイトル・宝石を組み合わせて最強のビルドを目指そう</li>
-        <li><strong>放置で進行</strong> - 一斉出撃で複数パーティが自動探索。忙しくても冒険は止まらない</li>
-        <li><strong>ドロップの快感</strong> - 敵ごとに設定されたレアドロップ。タイトル付きアイテムを狙え</li>
-        <li><strong>個性システム</strong> - 冒険者ごとに異なる個性。長所を活かし、短所を補う編成が鍵</li>
-    </ul>
-
-    <h2>ゲームシステム</h2>
-    <ul class="feature-list">
-        <li><strong>ギルド運営</strong> - 18種族から冒険者を採用し、パーティを編成。死亡した仲間は蘇生で復活できる。</li>
-        <li><strong>ダンジョン探索</strong> - 72のダンジョンを攻略。フロアごとにイベントや敵が待ち受ける。</li>
-        <li><strong>装備強化</strong> - アイテム合成・宝石改造・タイトル継承で装備をカスタマイズ。</li>
-        <li><strong>ストーリー</strong> - 章ごとに語られる物語。進行でダンジョンがアンロックされる。</li>
-    </ul>
-
-    <div class="links">
-        <a href="known-issues.html">既知の問題</a>
-        <a href="privacy-policy.html">プライバシーポリシー</a>
-    </div>
-
-    <p class="copyright">&copy; 2025 おさかなギルド</p>
+            <footer class="footer">
+                <div class="links">
+                    <a href="known-issues.html">既知の問題</a>
+                    <a href="privacy-policy.html">プライバシーポリシー</a>
+                </div>
+                <p class="copyright">&copy; 2025 おさかなギルド</p>
+            </footer>
+        </article>
+    </main>
 </body>
 </html>
