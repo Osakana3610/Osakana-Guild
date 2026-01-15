@@ -275,6 +275,16 @@
       "testMethod": "testReactionTriggersOnAllyMagicAttack"
     },
     {
+      "id": "BATTLE-REACTION-012",
+      "category": ["戦闘", "スキル", "追撃"],
+      "description": "味方の僧侶魔法攻撃で追撃が発動してダメージを与えるか",
+      "formula": "allyMagicAttack(priest) 100%発動、ダメージ > 0",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "追撃ダメージが発生すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionTriggersOnAllyPriestMagicAttack"
+    },
+    {
       "id": "BATTLE-REACTION-009",
       "category": ["戦闘", "スキル", "再攻撃"],
       "description": "行動不能中の反撃では通常行動/追加行動が発生しないか",
