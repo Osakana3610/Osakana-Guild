@@ -53,6 +53,12 @@ enum L10n {
         case damageModifierPhysicalDamageTaken = "damageModifier.physicalDamageTaken"
         case damageModifierMagicalDamageTaken = "damageModifier.magicalDamageTaken"
         case damageModifierBreathDamageTaken = "damageModifier.breathDamageTaken"
+        case battleTermReactionAttack = "battleTerm.reactionAttack"
+        case battleTermFollowUp = "battleTerm.followUp"
+        case battleTermRetaliation = "battleTerm.retaliation"
+        case battleTermExtraAttack = "battleTerm.extraAttack"
+        case battleTermMartialFollowUp = "battleTerm.martialFollowUp"
+        case battleTermRescue = "battleTerm.rescue"
 
         nonisolated var defaultValue: String {
             switch self {
@@ -107,6 +113,12 @@ enum L10n {
             case .damageModifierPhysicalDamageTaken: return "被物理ダメージ"
             case .damageModifierMagicalDamageTaken: return "被魔法ダメージ"
             case .damageModifierBreathDamageTaken: return "被ブレスダメージ"
+            case .battleTermReactionAttack: return "反撃"
+            case .battleTermFollowUp: return "追撃"
+            case .battleTermRetaliation: return "報復"
+            case .battleTermExtraAttack: return "再攻撃"
+            case .battleTermMartialFollowUp: return "格闘追撃"
+            case .battleTermRescue: return "救出"
             }
         }
     }
@@ -181,5 +193,14 @@ enum L10n {
         nonisolated static var physicalDamageTaken: String { L10n.text(.damageModifierPhysicalDamageTaken) }
         nonisolated static var magicalDamageTaken: String { L10n.text(.damageModifierMagicalDamageTaken) }
         nonisolated static var breathDamageTaken: String { L10n.text(.damageModifierBreathDamageTaken) }
+    }
+
+    enum BattleTerm {
+        nonisolated static var reactionAttack: String { L10n.text(.battleTermReactionAttack) }
+        nonisolated static var followUp: String { L10n.text(.battleTermFollowUp) }
+        nonisolated static var retaliation: String { L10n.text(.battleTermRetaliation) }
+        nonisolated static var extraAttack: String { L10n.text(.battleTermExtraAttack) }
+        nonisolated static var martialFollowUp: String { L10n.text(.battleTermMartialFollowUp) }
+        nonisolated static var rescue: String { L10n.text(.battleTermRescue) }
     }
 }

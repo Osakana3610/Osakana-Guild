@@ -52,6 +52,9 @@ extension BattleTurnEngine {
 
         applyEndOfTurnPartyHealing(for: .enemy, context: &context)
         applyNecromancerIfNeeded(for: .enemy, context: &context)
+
+        applyTimedBuffTriggers(&context)
+        applySpellChargeRecovery(&context)
     }
 
     nonisolated static func processEndOfTurn(for side: ActorSide,
@@ -143,12 +146,15 @@ extension BattleTurnEngine {
                                       value: UInt32(applied),
                                       effectKind: .healSelf)
         } else {
-            let applied = applyDamage(amount: amount, to: &actor)
-            context.appendSimpleEntry(kind: .damageSelf,
-                                      actorId: actorIdx,
-                                      targetId: actorIdx,
-                                      value: UInt32(applied),
-                                      effectKind: .damageSelf)
+            let rawDamage = amount
+            let applied = applyDamage(amount: rawDamage, to: &actor)
+            let entryBuilder = context.makeActionEntryBuilder(actorId: actorIdx,
+                                                              kind: .damageSelf)
+            entryBuilder.addEffect(kind: .damageSelf,
+                                   target: actorIdx,
+                                   value: UInt32(applied),
+                                   extra: UInt16(clamping: rawDamage))
+            context.appendActionEntry(entryBuilder.build())
         }
     }
 

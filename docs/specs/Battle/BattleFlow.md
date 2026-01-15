@@ -10,6 +10,7 @@
 1. 戦闘開始
    - 初期HP記録
    - battleStartエントリ追加
+   - 先制攻撃（preemptive）処理
 
 2. メインループ
    while (戦闘継続):
@@ -18,7 +19,7 @@
         - turnStartエントリ追加
 
      b. 行動順決定
-        - 敏捷+乱数でソート
+        - 速度式（敏捷×運乱数×倍率）でソート
 
      c. 各アクターの行動
         - 状態異常チェック
@@ -28,12 +29,11 @@
 
      d. ターン終了
         - 状態異常ターン減少
-        - turnEndエントリ追加
+        - ターン終了時処理（自動回復/蘇生/時限バフなど）
 
      e. 勝敗判定
 
 3. 戦闘終了
-   - battleEndエントリ追加
    - 結果返却
 ```
 
@@ -43,8 +43,16 @@
 |------|------|
 | victory | 敵全員のHP <= 0 |
 | defeat | 味方全員のHP <= 0 |
-| escaped | 逃走成功 |
-| timeout | ターン数上限到達 |
+| retreat | 逃走/撤退が成立、またはターン数上限到達 |
+
+### 撤退（retreat）の扱い
+- 逃走・撤退は outcome を `retreat` に統一する
+- 撤退スキルが成立したアクターは戦線離脱として扱う
+- 撤退成立（撤退/逃走判定により片側が全員戦線離脱）時は victory/defeat より retreat を優先する
+- 表示ログは原因に応じて区別する
+  - 敵が撤退した場合: 「敵は撤退した」など
+  - 味方が撤退した場合: 「パーティは撤退した」など
+  - ターン上限到達: 「戦闘は長期化し、撤退を決断した」など
 
 ## 行動順決定
 
@@ -68,6 +76,9 @@ speedMultiplier(luck):
 
 敏捷と運乱数の積が大きいほど先に行動する。
 
+### 先制（firstStrike）
+- 味方・敵のどちらにも適用可能（同条件で扱う）
+
 ### 計算例（行動順）
 
 入力:
@@ -90,13 +101,13 @@ speedMultiplier(luck):
 maxTurns = 20
 ```
 
-20ターン経過で強制終了（timeout）。
+20ターン経過で強制終了（retreatとして扱う）。
 
 ## 結果構造
 
 ```swift
 struct Result {
-    outcome: Outcome    // victory/defeat/escaped/timeout
+    outcome: Outcome    // victory/defeat/retreat
     log: [ActionEntry]  // 全アクションログ
     turns: Int          // 経過ターン数
 }

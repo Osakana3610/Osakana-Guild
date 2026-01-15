@@ -167,7 +167,10 @@ extension BattleTurnEngine {
                 applyMagicDegradation(to: &target, spellId: spell.id, caster: refreshedAttacker)
 
                 context.updateActor(target, side: targetRef.0, index: targetRef.1)
-                entryBuilder.addEffect(kind: .magicDamage, target: targetIdx, value: UInt32(applied))
+                entryBuilder.addEffect(kind: .magicDamage,
+                                       target: targetIdx,
+                                       value: UInt32(applied),
+                                       extra: UInt16(clamping: damage))
 
                 if !target.isAlive {
                     appendDefeatLog(for: target,
@@ -262,7 +265,10 @@ extension BattleTurnEngine {
             context.updateActor(target, side: targetRef.0, index: targetRef.1)
 
             let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
-            entryBuilder.addEffect(kind: .breathDamage, target: targetIdx, value: UInt32(applied))
+            entryBuilder.addEffect(kind: .breathDamage,
+                                   target: targetIdx,
+                                   value: UInt32(applied),
+                                   extra: UInt16(clamping: damage))
 
             if !target.isAlive {
                 appendDefeatLog(for: target,
@@ -275,15 +281,6 @@ extension BattleTurnEngine {
                                       killerSide: side,
                                       killerIndex: attackerIndex,
                                       context: &context)
-            } else {
-                // 被ダメ時リアクション（ブレスも物理として扱う）
-                let attackerRef = BattleContext.reference(for: side, index: attackerIndex)
-                context.reactionQueue.append(.init(
-                    event: .selfDamagedPhysical(side: targetRef.0,
-                                                actorIndex: targetRef.1,
-                                                attacker: attackerRef),
-                    depth: 0
-                ))
             }
         }
 

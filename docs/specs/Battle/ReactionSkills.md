@@ -4,6 +4,22 @@
 
 反撃・追撃スキル（リアクション）の発動条件と効果を定義する。
 
+## 用語定義（English canonical）
+
+英語名を正本とし、日本語表現は対応関係を固定する。
+
+| 英語 | 日本語 | 定義 |
+|------|--------|------|
+| Reaction (system) | リアクション処理 | ReactionTrigger を条件に発動する追加行動の総称 |
+| CounterAttack | 反撃 | 被ダメージ/回避をトリガーに発動する Reaction |
+| FollowUp | 追撃 | 撃破や味方魔法発動をトリガーに発動する Reaction |
+| Retaliation | 報復 | 味方撃破（allyDefeated）をトリガーに発動する Reaction |
+| ExtraAction | 再攻撃/追加行動 | 通常行動内で発生する追加行動（Reaction とは別系統） |
+| MartialFollowUp | 格闘追撃 | 物理攻撃後の格闘追撃（Reaction とは別系統） |
+| Rescue | 救出 | 味方撃破時の救出処理（Reaction とは別系統） |
+
+※ Rescue は「撃破の取り消し/復帰」に関わるため Reaction とは別構造で扱う（詳細は本末尾）。
+
 ## リアクションの構造
 
 ```swift
@@ -26,11 +42,17 @@ struct Reaction {
 |----------|------|
 | selfDamagedPhysical | 自分が物理ダメージを受けた時 |
 | selfDamagedMagical | 自分が魔法ダメージを受けた時 |
-| selfEvadePhysical | 自分が物理攻撃を回避した時 |
+| selfEvadePhysical | 自分が物理攻撃を回避した時（回避/ミスで命中0） |
 | allyDamagedPhysical | 味方が物理ダメージを受けた時 |
 | allyDefeated | 味方が倒された時 |
-| selfKilledEnemy | 自分が敵を倒した時 |
+| selfKilledEnemy | 自分が敵を倒した時（最後の一撃でHPが0になった時） |
 | allyMagicAttack | 味方が魔法攻撃をした時 |
+
+### トリガーの分類
+
+- CounterAttack: selfDamagedPhysical / selfDamagedMagical / selfEvadePhysical
+- FollowUp: selfKilledEnemy / allyMagicAttack
+- Retaliation: allyDefeated（報復）
 
 ## 発動確率
 
@@ -106,13 +128,47 @@ requiresAllyBehind == true:
 - 自分への攻撃で自分に追撃しない（allyDamagedPhysical）
 - 自分の魔法で自分に追撃しない（allyMagicAttack）
 
-### リアクション深度制限
+### 連鎖の制御ルール
+
+リアクション/追撃/再攻撃の連鎖は、以下のルールで制御する。
+
+- Reaction/FollowUp の結果から新しい ReactionEvent は発生しない
+- ExtraAction（再攻撃）は通常行動の後にのみ判定される
+- ExtraAction は Reaction/FollowUp からは発動しない
+- 連続型の再攻撃/追撃は「同一行動内で条件を満たし続ける場合のみ」連鎖可能
+
+## 再攻撃（ExtraAction）
+
+通常行動の後にのみ判定される追加行動。
+
+- 反撃/追撃（Reaction/FollowUp）からは発動しない
+- 「回避時再攻撃」は攻撃が全て回避/ミス扱いの時のみ判定
+- 連続判定を持つ場合は同ターン内で繰り返し判定する
+
+### 回避・パリィ・盾ブロックの扱い
+
+- 回避: 攻撃が全て回避された状態（命中0）
+- ミス: 回避と同等に扱う（命中0）
+- パリィ/盾ブロック: 命中した上で防御が発生したものとして扱う
+
+## 格闘追撃（MartialFollowUp）
+
+格闘攻撃のヒット後に発生する追加攻撃。ReactionTrigger には含めない。
 
 ```
-depth >= maxReactionDepth: リアクション不発動
+発動判定: percentChance(strength)  // 0〜100にクランプ
+追撃回数: max(1, floor(attackCount × 0.3))
+命中補正: martialAccuracyMultiplier
 ```
 
-リアクションの連鎖を防ぐため、深度制限がある。
+## 救出（Rescue）
+
+救出は Reaction とは別系統とし、リアクション深度に依存せず撃破直後に判定する。
+
+- 味方が撃破された直後に判定される
+- 撃破イベントは発生したものとして扱い、追撃/報復の発動は取り消されない
+- 成功時は復帰（HP回復・状態異常解除など）を行う
+- 行動コストや呪文チャージ消費など、通常攻撃とは異なる資源消費を伴う
 
 ## 計算例
 

@@ -55,3 +55,10 @@
 "damageModifier.physicalDamageTaken" = "被物理ダメージ";
 "damageModifier.magicalDamageTaken" = "被魔法ダメージ";
 "damageModifier.breathDamageTaken" = "被ブレスダメージ";
+
+"battleTerm.reactionAttack" = "反撃";
+"battleTerm.followUp" = "追撃";
+"battleTerm.retaliation" = "報復";
+"battleTerm.extraAttack" = "再攻撃";
+"battleTerm.martialFollowUp" = "格闘追撃";
+"battleTerm.rescue" = "救出";

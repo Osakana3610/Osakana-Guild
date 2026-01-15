@@ -166,10 +166,11 @@ struct BattleLogRenderer {
                                         enemyNames: [UInt16: String],
                                         actorIdentifiers: [UInt16: String]) -> BattleLogEntry? {
         let targetName = resolveName(index: effect.target, allyNames: allyNames, enemyNames: enemyNames)
+        let displayAmount = displayValue(for: effect)
         let (message, type) = effectMessage(kind: effect.kind,
                                             actorName: actorName,
                                             targetName: targetName,
-                                            value: effect.value.map { Int($0) },
+                                            value: displayAmount,
                                             actionLabel: actionLabel)
         guard !message.isEmpty else { return nil }
         let targetId = effect.target.flatMap { actorIdentifiers[$0] } ?? effect.target.map { String($0) }
@@ -196,24 +197,44 @@ struct BattleLogRenderer {
                                            enemySkillNames: [UInt16: String],
                                            skillNames: [UInt16: String]) -> String? {
         if let label = entry.declaration.label, !label.isEmpty {
-            return label
+            return localizedActionLabel(label)
         }
 
         guard let skillIndex = entry.declaration.skillIndex else { return nil }
 
         if entry.declaration.kind == .priestMagic || entry.declaration.kind == .mageMagic {
             if let spellId = UInt8(exactly: skillIndex), let name = spellNames[spellId] {
-                return name
+                return localizedActionLabel(name)
             }
         }
 
         if entry.declaration.kind == .enemySpecialSkill {
             if let name = enemySkillNames[skillIndex] {
-                return name
+                return localizedActionLabel(name)
             }
         }
 
-        return skillNames[skillIndex]
+        return localizedActionLabel(skillNames[skillIndex])
+    }
+
+    private static func localizedActionLabel(_ label: String?) -> String? {
+        guard let label else { return nil }
+        switch label {
+        case L10n.Key.battleTermReactionAttack.defaultValue:
+            return L10n.BattleTerm.reactionAttack
+        case L10n.Key.battleTermFollowUp.defaultValue:
+            return L10n.BattleTerm.followUp
+        case L10n.Key.battleTermRetaliation.defaultValue:
+            return L10n.BattleTerm.retaliation
+        case L10n.Key.battleTermExtraAttack.defaultValue:
+            return L10n.BattleTerm.extraAttack
+        case L10n.Key.battleTermMartialFollowUp.defaultValue:
+            return L10n.BattleTerm.martialFollowUp
+        case L10n.Key.battleTermRescue.defaultValue:
+            return L10n.BattleTerm.rescue
+        default:
+            return label
+        }
     }
 
     private static func summarizeHits(for entry: BattleActionEntry,
@@ -331,13 +352,13 @@ struct BattleLogRenderer {
         for effect in entry.effects {
             switch effect.kind {
             case .physicalDamage:
-                guard let target = effect.target, let value = effect.value else {
+                guard let target = effect.target, let displayAmount = displayValue(for: effect) else {
                     orderedTokens.append(.standard(effect))
                     continue
                 }
                 ensureToken(for: target)
                 var summary = summaries[target] ?? PhysicalSummary()
-                summary.totalDamage += Int(value)
+                summary.totalDamage += displayAmount
                 summary.attempts += 1
                 summary.hits += 1
                 summaries[target] = summary
@@ -515,10 +536,10 @@ struct BattleLogRenderer {
         case .vampireUrge:
             return ("\(actor)は吸血衝動に駆られた", .status)
         case .reactionAttack:
-            let name = actionLabel ?? "反撃"
+            let name = actionLabel ?? L10n.BattleTerm.reactionAttack
             return (appendDetails(to: "\(actor)の\(name)！"), .action)
         case .followUp:
-            let name = actionLabel ?? "追撃"
+            let name = actionLabel ?? L10n.BattleTerm.followUp
             return (appendDetails(to: "\(actor)の\(name)！"), .action)
         case .healParty:
             let name = actionLabel ?? "回復術"
@@ -560,7 +581,7 @@ struct BattleLogRenderer {
             let name = actionLabel ?? "ネクロマンサー"
             return (appendDetails(to: "\(actor)は\(name)で死者を蘇らせた"), .status)
         case .rescue:
-            let name = actionLabel ?? "救出"
+            let name = actionLabel ?? L10n.BattleTerm.rescue
             return (appendDetails(to: "\(actor)は\(name)を行った"), .status)
         case .actionLocked:
             let name = actionLabel ?? "行動不能"
@@ -618,10 +639,10 @@ struct BattleLogRenderer {
         case .statusRampage:
             return ("\(actor)の暴走！\(target)に\(amountText)のダメージ！", .damage)
         case .reactionAttack:
-            let name = actionLabel ?? "反撃"
+            let name = actionLabel ?? L10n.BattleTerm.reactionAttack
             return ("\(actor)の\(name)！", .action)
         case .followUp:
-            let name = actionLabel ?? "追撃"
+            let name = actionLabel ?? L10n.BattleTerm.followUp
             return ("\(actor)の\(name)！", .action)
         case .healAbsorb:
             return ("\(actor)は吸収能力で\(amountText)回復", .heal)
@@ -648,7 +669,7 @@ struct BattleLogRenderer {
         case .necromancer:
             return ("\(actor)のネクロマンサーで\(target)が蘇生した！", .heal)
         case .rescue:
-            return ("\(actor)は\(target)を救出した！", .heal)
+            return ("\(actor)は\(target)を\(L10n.BattleTerm.rescue)した！", .heal)
         case .actionLocked:
             return ("\(actor)は動けない", .status)
         case .noAction:
@@ -669,6 +690,22 @@ struct BattleLogRenderer {
             return ("\(actor)は魔法のチャージを回復した", .status)
         case .enemyAppear, .logOnly:
             return ("", .system)
+        }
+    }
+
+    private static func displayValue(for effect: BattleActionEntry.Effect) -> Int? {
+        let baseValue = effect.value.map { Int($0) }
+        switch effect.kind {
+        case .physicalDamage,
+             .magicDamage,
+             .breathDamage,
+             .statusTick,
+             .statusRampage,
+             .damageSelf,
+             .enemySpecialDamage:
+            return effect.extra.map { Int($0) } ?? baseValue
+        default:
+            return baseValue
         }
     }
 
