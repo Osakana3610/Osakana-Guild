@@ -344,7 +344,9 @@ extension BattleTurnEngine {
                                                      casterIndex: Int,
                                                      context: inout BattleContext) -> (ActorSide, Int)? {
         let casterId = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
-        guard let entry = context.actionEntries.last(where: { $0.actor == casterId && $0.declaration.kind == .mageMagic }) else {
+        guard let entry = context.actionEntries.last(where: {
+            $0.actor == casterId && ($0.declaration.kind == .mageMagic || $0.declaration.kind == .priestMagic)
+        }) else {
             return nil
         }
 
