@@ -215,6 +215,116 @@
       "testMethod": "testAttackCountMultiplierReducesDamage"
     },
     {
+      "id": "BATTLE-REACTION-003",
+      "category": ["戦闘", "スキル", "反撃"],
+      "description": "魔法ダメージ時に反撃が発動してダメージを与えるか",
+      "formula": "selfDamagedMagical 100%発動、ダメージ > 0",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "反撃ダメージが発生すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionTriggersOnMagicalDamage"
+    },
+    {
+      "id": "BATTLE-REACTION-004",
+      "category": ["戦闘", "スキル", "反撃"],
+      "description": "物理回避時に反撃が発動してダメージを与えるか",
+      "formula": "selfEvadePhysical 100%発動、ダメージ > 0",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "反撃ダメージが発生すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionTriggersOnEvade"
+    },
+    {
+      "id": "BATTLE-REACTION-005",
+      "category": ["戦闘", "スキル", "追撃"],
+      "description": "味方が物理ダメージを受けた時に追撃が発動してダメージを与えるか",
+      "formula": "allyDamagedPhysical 100%発動、ダメージ > 0",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "追撃ダメージが発生すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionTriggersOnAllyDamagedPhysical"
+    },
+    {
+      "id": "BATTLE-REACTION-006",
+      "category": ["戦闘", "スキル", "報復"],
+      "description": "味方が倒された時に報復が発動してダメージを与えるか",
+      "formula": "allyDefeated 100%発動、ダメージ > 0",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "報復ダメージが発生すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionTriggersOnAllyDefeated"
+    },
+    {
+      "id": "BATTLE-REACTION-007",
+      "category": ["戦闘", "スキル", "追撃"],
+      "description": "敵撃破時に追撃が発動してダメージを与えるか",
+      "formula": "selfKilledEnemy 100%発動、ダメージ > 0",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "追撃ダメージが発生すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionTriggersOnSelfKilledEnemy"
+    },
+    {
+      "id": "BATTLE-REACTION-008",
+      "category": ["戦闘", "スキル", "追撃"],
+      "description": "味方の魔法攻撃で追撃が発動してダメージを与えるか",
+      "formula": "allyMagicAttack 100%発動、ダメージ > 0",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "追撃ダメージが発生すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionTriggersOnAllyMagicAttack"
+    },
+    {
+      "id": "BATTLE-REACTION-009",
+      "category": ["戦闘", "スキル", "再攻撃"],
+      "description": "行動不能中の反撃では通常行動/追加行動が発生しないか",
+      "formula": "actionLocked + reaction -> normalActionCount == 0",
+      "expectedRange": { "min": 0, "max": 0 },
+      "toleranceBasis": "行動不能中は通常行動が発生しないこと",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testExtraActionDoesNotTriggerFromReaction"
+    },
+    {
+      "id": "BATTLE-REACTION-010",
+      "category": ["戦闘", "スキル", "格闘追撃"],
+      "description": "格闘追撃が発動するか",
+      "formula": "martial eligible + strength=100 -> followUpCount >= 1",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "格闘追撃が発生すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testMartialFollowUpTriggers"
+    },
+    {
+      "id": "BATTLE-REACTION-011",
+      "category": ["戦闘", "スキル", "反撃"],
+      "description": "反撃が反撃を呼ばない（連鎖抑止）",
+      "formula": "reactionCount == 1",
+      "expectedRange": { "min": 1, "max": 1 },
+      "toleranceBasis": "反撃が1回で止まること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionDoesNotChainFromReactionAttack"
+    },
+    {
+      "id": "BATTLE-RESCUE-001",
+      "category": ["戦闘", "救出"],
+      "description": "救出が発動し、報復/追撃が取り消されないか",
+      "formula": "min(rescueCount, enemyReactionCount, playerReactionCount) >= 1",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "救出と双方のリアクションが発動すること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testRescueTriggersAndDoesNotCancelReactions"
+    },
+    {
+      "id": "BATTLE-RESCUE-002",
+      "category": ["戦闘", "救出"],
+      "description": "リアクションによる撃破でも救出が発動するか",
+      "formula": "min(rescueCount, reactionCount) >= 1",
+      "expectedRange": { "min": 1, "max": null },
+      "toleranceBasis": "反撃発生中でも救出が行われること",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testRescueTriggersDuringReactionKill"
+    },
+    {
       "id": "BATTLE-STATUS-001",
       "category": ["戦闘", "状態異常", "付与"],
       "description": "状態異常が正しく付与されるか",

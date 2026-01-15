@@ -162,11 +162,13 @@ extension BattleTurnEngine {
                 let damage = max(1, Int(rawDamage.rounded()))
                 let applied = applyDamage(amount: damage, to: &actor)
                 if applied > 0 {
-                    context.appendSimpleEntry(kind: .statusTick,
-                                              actorId: actorIdx,
-                                              targetId: actorIdx,
-                                              value: UInt32(applied),
-                                              effectKind: .statusTick)
+                    let entryBuilder = context.makeActionEntryBuilder(actorId: actorIdx,
+                                                                      kind: .statusTick)
+                    entryBuilder.addEffect(kind: .statusTick,
+                                           target: actorIdx,
+                                           value: UInt32(applied),
+                                           extra: UInt16(clamping: damage))
+                    context.appendActionEntry(entryBuilder.build())
                 }
             }
 

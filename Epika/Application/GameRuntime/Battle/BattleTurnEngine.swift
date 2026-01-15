@@ -121,9 +121,10 @@ struct BattleTurnEngine {
 
             resetRescueUsage(&context)
             applyRetreatIfNeeded(&context)
+            if let result = checkBattleEnd(&context) {
+                return result
+            }
             let sacrificeTargets = computeSacrificeTargets(&context)
-            applyTimedBuffTriggers(&context)
-            applySpellChargeRecovery(&context)
 
             prepareTurnActions(&context, sacrificeTargets: sacrificeTargets)
             let order = actionOrder(&context)
@@ -146,6 +147,11 @@ struct BattleTurnEngine {
 
     /// 勝敗判定を行い、決着がついていれば結果を返す
     private nonisolated static func checkBattleEnd(_ context: inout BattleContext) -> Result? {
+        if hasFullWithdrawal(on: .player, context: context)
+            || hasFullWithdrawal(on: .enemy, context: context) {
+            context.appendSimpleEntry(kind: .retreat)
+            return context.makeResult(BattleLog.outcomeRetreat)
+        }
         if context.isVictory {
             context.appendSimpleEntry(kind: .victory)
             return context.makeResult(BattleLog.outcomeVictory)
@@ -155,6 +161,26 @@ struct BattleTurnEngine {
             return context.makeResult(BattleLog.outcomeDefeat)
         }
         return nil
+    }
+
+    private nonisolated static func hasFullWithdrawal(on side: ActorSide, context: BattleContext) -> Bool {
+        let actors: [BattleActor] = side == .player ? context.players : context.enemies
+        guard !actors.isEmpty else { return false }
+        guard !actors.contains(where: { $0.isAlive }) else { return false }
+
+        var withdrawnActorIds: Set<UInt16> = []
+        withdrawnActorIds.reserveCapacity(context.actionEntries.count)
+        for entry in context.actionEntries where entry.declaration.kind == .withdraw {
+            guard let actorId = entry.actor else { continue }
+            withdrawnActorIds.insert(actorId)
+        }
+        guard !withdrawnActorIds.isEmpty else { return false }
+
+        for index in actors.indices {
+            let actorId = context.actorIndex(for: side, arrayIndex: index)
+            guard withdrawnActorIds.contains(actorId) else { return false }
+        }
+        return true
     }
 
     /// ターン開始時の準備処理
