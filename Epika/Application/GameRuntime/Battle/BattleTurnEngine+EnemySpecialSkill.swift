@@ -129,6 +129,7 @@ extension BattleTurnEngine {
                   target.isAlive else { continue }
 
             var totalDamage = 0
+            var totalRawDamage = 0
 
             for hitIndex in 1...hitCount {
                 guard target.isAlive else { break }
@@ -147,11 +148,12 @@ extension BattleTurnEngine {
                 }
 
                 // ダメージ計算（通常物理攻撃と同じパイプライン）
-                let (damage, _) = computePhysicalDamage(attacker: attacker,
-                                                       defender: &target,
-                                                       hitIndex: hitIndex,
-                                                       context: &context)
-                let applied = applyDamage(amount: damage, to: &target)
+                let (rawDamage, _) = computePhysicalDamage(attacker: attacker,
+                                                           defender: &target,
+                                                           hitIndex: hitIndex,
+                                                           context: &context)
+                totalRawDamage += rawDamage
+                let applied = applyDamage(amount: rawDamage, to: &target)
                 totalDamage += applied
                 context.updateActor(target, side: targetSide, index: targetIndex)
 
@@ -163,7 +165,10 @@ extension BattleTurnEngine {
 
             if totalDamage > 0 {
                 let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
-                entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(totalDamage))
+                entryBuilder.addEffect(kind: .enemySpecialDamage,
+                                       target: targetIdx,
+                                       value: UInt32(totalDamage),
+                                       extra: UInt16(clamping: totalRawDamage))
             }
 
             handleEnemySkillDefeat(targetSide: targetSide,
@@ -211,15 +216,17 @@ extension BattleTurnEngine {
                   target.isAlive else { continue }
 
             var totalDamage = 0
+            var totalRawDamage = 0
             for _ in 0..<hitCount {
                 guard target.isAlive else { break }
 
                 // ダメージ計算（通常魔法攻撃と同じパイプライン）
-                let damage = computeMagicalDamage(attacker: attacker,
-                                                  defender: &target,
-                                                  spellId: nil,
-                                                  context: &context)
-                let applied = applyDamage(amount: damage, to: &target)
+                let rawDamage = computeMagicalDamage(attacker: attacker,
+                                                     defender: &target,
+                                                     spellId: nil,
+                                                     context: &context)
+                totalRawDamage += rawDamage
+                let applied = applyDamage(amount: rawDamage, to: &target)
                 totalDamage += applied
                 context.updateActor(target, side: targetSide, index: targetIndex)
 
@@ -230,7 +237,10 @@ extension BattleTurnEngine {
 
             if totalDamage > 0 {
                 let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
-                entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(totalDamage))
+                entryBuilder.addEffect(kind: .enemySpecialDamage,
+                                       target: targetIdx,
+                                       value: UInt32(totalDamage),
+                                       extra: UInt16(clamping: totalRawDamage))
             }
 
             handleEnemySkillDefeat(targetSide: targetSide,
@@ -274,7 +284,10 @@ extension BattleTurnEngine {
             context.updateActor(target, side: targetSide, index: targetIndex)
 
             let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
-            entryBuilder.addEffect(kind: .enemySpecialDamage, target: targetIdx, value: UInt32(applied))
+            entryBuilder.addEffect(kind: .enemySpecialDamage,
+                                   target: targetIdx,
+                                   value: UInt32(applied),
+                                   extra: UInt16(clamping: damage))
 
             handleEnemySkillDefeat(targetSide: targetSide,
                                    targetIndex: targetIndex,

@@ -48,7 +48,10 @@ extension BattleTurnEngine {
             if actor.skillEffects.combat.actionOrderShuffle {
                 speed = context.random.nextInt(in: 0...10_000)
             } else {
-                let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.combat.actionOrderMultiplier)
+                let luckMultiplier = BattleRandomSystem.speedMultiplier(luck: actor.luck, random: &context.random)
+                let scaled = Double(actor.agility)
+                    * luckMultiplier
+                    * max(0.0, actor.skillEffects.combat.actionOrderMultiplier)
                 speed = Int(scaled.rounded(.towardZero))
             }
             let slots = max(1, 1 + actor.skillEffects.combat.nextTurnExtraActions + actor.extraActionsNextTurn)
@@ -64,15 +67,18 @@ extension BattleTurnEngine {
             if actor.skillEffects.combat.actionOrderShuffle || shuffleEnemyOrder {
                 speed = context.random.nextInt(in: 0...10_000)
             } else {
-                let scaled = Double(actor.agility) * max(0.0, actor.skillEffects.combat.actionOrderMultiplier)
+                let luckMultiplier = BattleRandomSystem.speedMultiplier(luck: actor.luck, random: &context.random)
+                let scaled = Double(actor.agility)
+                    * luckMultiplier
+                    * max(0.0, actor.skillEffects.combat.actionOrderMultiplier)
                 speed = Int(scaled.rounded(.towardZero))
             }
             let nextExtra = actor.skillEffects.combat.nextTurnExtraActions
             let extraNext = actor.extraActionsNextTurn
             let slots = max(1, 1 + nextExtra + extraNext)
-            // 敵は先制を持たない（味方専用スキル）
+            let hasFirstStrike = actor.skillEffects.combat.firstStrike
             for _ in 0..<slots {
-                entries.append((.enemy(idx), speed, context.random.nextDouble(in: 0.0...1.0), false))
+                entries.append((.enemy(idx), speed, context.random.nextDouble(in: 0.0...1.0), hasFirstStrike))
             }
         }
 
@@ -83,7 +89,7 @@ extension BattleTurnEngine {
             // 速度が高い方が先
             if lhs.1 != rhs.1 { return lhs.1 > rhs.1 }
             // 同速の場合はタイブレーカー
-            return lhs.2 < rhs.2
+            return lhs.2 > rhs.2
         }.map { $0.0 }
     }
 

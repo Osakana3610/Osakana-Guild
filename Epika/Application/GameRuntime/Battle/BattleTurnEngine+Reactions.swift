@@ -142,11 +142,14 @@ extension BattleTurnEngine {
             for ref in targets {
                 guard var target = context.actor(for: ref.0, index: ref.1) else { continue }
                 let modifier = damageTakenModifier(for: target, damageType: isMagic ? .magical : .physical, attacker: defender)
-                let applied = max(1, Int((baseDamage * modifier).rounded()))
-                _ = applyDamage(amount: applied, to: &target)
+                let rawDamage = max(1, Int((baseDamage * modifier).rounded()))
+                let applied = applyDamage(amount: rawDamage, to: &target)
                 context.updateActor(target, side: ref.0, index: ref.1)
                 let targetIdx = context.actorIndex(for: ref.0, arrayIndex: ref.1)
-                entryBuilder?.addEffect(kind: .statusRampage, target: targetIdx, value: UInt32(applied))
+                entryBuilder?.addEffect(kind: .statusRampage,
+                                        target: targetIdx,
+                                        value: UInt32(applied),
+                                        extra: UInt16(clamping: rawDamage))
             }
 
             if !hasStatus(tag: statusTagConfusion, in: defender, context: context) {
@@ -290,6 +293,14 @@ extension BattleTurnEngine {
         // 優先ターゲットを取得
         var resolved = reaction.preferredTarget(for: event).flatMap { referenceToSideIndex($0) }
 
+        if resolved == nil,
+           case .allyMagicAttack(let eventSide, let casterIndex) = event,
+           reaction.target != .randomEnemy {
+            resolved = resolveAllyMagicAttackTarget(casterSide: eventSide,
+                                                    casterIndex: casterIndex,
+                                                    context: &context)
+        }
+
         // 優先ターゲットがない場合はランダム選択
         if resolved == nil {
             resolved = selectOffensiveTarget(attackerSide: attackerSide,
@@ -327,6 +338,56 @@ extension BattleTurnEngine {
         }
 
         return target
+    }
+
+    private nonisolated static func resolveAllyMagicAttackTarget(casterSide: ActorSide,
+                                                     casterIndex: Int,
+                                                     context: inout BattleContext) -> (ActorSide, Int)? {
+        let casterId = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
+        guard let entry = context.actionEntries.last(where: { $0.actor == casterId && $0.declaration.kind == .mageMagic }) else {
+            return nil
+        }
+
+        var candidates: [UInt16] = []
+        var seen: Set<UInt16> = []
+        for effect in entry.effects {
+            switch effect.kind {
+            case .magicDamage, .statusInflict, .statusResist:
+                guard let targetId = effect.target, seen.insert(targetId).inserted else { continue }
+                candidates.append(targetId)
+            default:
+                continue
+            }
+        }
+
+        guard !candidates.isEmpty else { return nil }
+
+        var resolvedTargets: [(ActorSide, Int)] = []
+        for targetId in candidates {
+            guard let (side, index) = resolveSideIndex(for: targetId, context: context) else { continue }
+            guard side != casterSide else { continue }
+            guard let target = context.actor(for: side, index: index), target.isAlive else { continue }
+            resolvedTargets.append((side, index))
+        }
+
+        guard !resolvedTargets.isEmpty else { return nil }
+        let pick = context.random.nextInt(in: 0...(resolvedTargets.count - 1))
+        return resolvedTargets[pick]
+    }
+
+    private nonisolated static func resolveSideIndex(for actorId: UInt16,
+                                         context: BattleContext) -> (ActorSide, Int)? {
+        for index in context.players.indices {
+            if context.actorIndex(for: .player, arrayIndex: index) == actorId {
+                return (.player, index)
+            }
+        }
+        for index in context.enemies.indices {
+            if context.actorIndex(for: .enemy, arrayIndex: index) == actorId {
+                return (.enemy, index)
+            }
+        }
+        return nil
     }
 
     nonisolated static func executeReactionAttack(from side: ActorSide,
@@ -379,7 +440,10 @@ extension BattleTurnEngine {
                                                        context: &context)
                 totalDamage += applied
                 if applied > 0 {
-                    entryBuilder.addEffect(kind: .magicDamage, target: targetIdx, value: UInt32(applied))
+                    entryBuilder.addEffect(kind: .magicDamage,
+                                           target: targetIdx,
+                                           value: UInt32(applied),
+                                           extra: UInt16(clamping: damage))
                 }
                 if absorbed > 0 {
                     entryBuilder.addEffect(kind: .healAbsorb, target: attackerIdx, value: UInt32(absorbed))
@@ -402,7 +466,10 @@ extension BattleTurnEngine {
             let damage = computeBreathDamage(attacker: attackerCopy, defender: &targetCopy, context: &context)
             let applied = applyDamage(amount: damage, to: &targetCopy)
             if applied > 0 {
-                entryBuilder.addEffect(kind: .breathDamage, target: targetIdx, value: UInt32(applied))
+                entryBuilder.addEffect(kind: .breathDamage,
+                                       target: targetIdx,
+                                       value: UInt32(applied),
+                                       extra: UInt16(clamping: damage))
             }
             attackResult = AttackResult(attacker: attackerCopy,
                                         defender: targetCopy,
@@ -423,7 +490,8 @@ extension BattleTurnEngine {
                                attackResult: attackResult,
                                context: &context,
                                reactionDepth: depth,
-                               entryBuilder: entryBuilder)
+                               entryBuilder: entryBuilder,
+                               allowsReactionEvents: false)
     }
 
     struct AttackOutcome {
@@ -440,7 +508,8 @@ extension BattleTurnEngine {
                                    attackResult: AttackResult,
                                    context: inout BattleContext,
                                    reactionDepth: Int,
-                                   entryBuilder: BattleActionEntry.Builder? = nil) -> AttackOutcome {
+                                   entryBuilder: BattleActionEntry.Builder? = nil,
+                                   allowsReactionEvents: Bool = true) -> AttackOutcome {
         context.updateActor(attacker, side: attackerSide, index: attackerIndex)
         context.updateActor(defender, side: defenderSide, index: defenderIndex)
 
@@ -463,7 +532,8 @@ extension BattleTurnEngine {
                                   killerSide: attackerSide,
                                   killerIndex: attackerIndex,
                                   context: &context,
-                                  reactionDepth: reactionDepth)
+                                  reactionDepth: reactionDepth,
+                                  allowsReactionEvents: allowsReactionEvents)
             currentDefender = context.actor(for: defenderSide, index: defenderIndex)
         }
 
@@ -477,7 +547,8 @@ extension BattleTurnEngine {
             entryBuilder?.addEffect(kind: .physicalBlock, target: attackerIdx)
         }
 
-        if attackResult.wasDodged, let defenderActor = currentDefender, defenderActor.isAlive {
+        let didEvade = attackResult.wasDodged && attackResult.successfulHits == 0
+        if allowsReactionEvents, didEvade, let defenderActor = currentDefender, defenderActor.isAlive {
             // 回避時リアクション
             let attackerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
             context.reactionQueue.append(.init(
@@ -486,7 +557,7 @@ extension BattleTurnEngine {
             ))
         }
 
-        if attackResult.successfulHits > 0 && !defenderWasDefeated {
+        if allowsReactionEvents, attackResult.successfulHits > 0 && !defenderWasDefeated {
             // 被ダメ時リアクション（反撃）
             let attackerRef = BattleContext.reference(for: attackerSide, index: attackerIndex)
             context.reactionQueue.append(.init(
@@ -517,24 +588,29 @@ extension BattleTurnEngine {
                                       killerSide: ActorSide,
                                       killerIndex: Int,
                                       context: inout BattleContext,
-                                      reactionDepth: Int = 0) {
-        // 救出を先に試行（救出→報復→追撃の順序）
+                                      reactionDepth: Int = 0,
+                                      allowsReactionEvents: Bool = true) {
+        if allowsReactionEvents {
+            // allyDefeated -> rescue/instant resurrection -> retaliation/follow-up
+            let killerRef = BattleContext.reference(for: killerSide, index: killerIndex)
+            context.reactionQueue.append(.init(
+                event: .allyDefeated(side: targetSide, fallenIndex: targetIndex, killer: killerRef),
+                depth: reactionDepth
+            ))
+        }
+
+        // 救出/即時蘇生はリアクションとは別系統
         _ = attemptInstantResurrectionIfNeeded(of: targetIndex, side: targetSide, context: &context)
             || attemptRescue(of: targetIndex, side: targetSide, context: &context)
 
-        // 報復リアクション（味方が倒された時）
-        let killerRef = BattleContext.reference(for: killerSide, index: killerIndex)
-        context.reactionQueue.append(.init(
-            event: .allyDefeated(side: targetSide, fallenIndex: targetIndex, killer: killerRef),
-            depth: reactionDepth
-        ))
-
-        // 追撃リアクション（敵を倒した時）
-        let killedRef = BattleContext.reference(for: targetSide, index: targetIndex)
-        context.reactionQueue.append(.init(
-            event: .selfKilledEnemy(side: killerSide, actorIndex: killerIndex, killedEnemy: killedRef),
-            depth: reactionDepth
-        ))
+        if allowsReactionEvents {
+            // 追撃リアクション（敵を倒した時）
+            let killedRef = BattleContext.reference(for: targetSide, index: targetIndex)
+            context.reactionQueue.append(.init(
+                event: .selfKilledEnemy(side: killerSide, actorIndex: killerIndex, killedEnemy: killedRef),
+                depth: reactionDepth
+            ))
+        }
     }
 }
 
