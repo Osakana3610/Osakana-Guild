@@ -386,7 +386,7 @@ extension BattleTurnEngine {
                                         totalDamage: totalDamage,
                                         successfulHits: successfulHits,
                                         criticalHits: criticalHits,
-                                        wasDodged: true,
+                                        wasDodged: false,
                                         wasParried: false,
                                         wasBlocked: true)
                 }
@@ -396,7 +396,7 @@ extension BattleTurnEngine {
                                         totalDamage: totalDamage,
                                         successfulHits: successfulHits,
                                         criticalHits: criticalHits,
-                                        wasDodged: true,
+                                        wasDodged: false,
                                         wasParried: true,
                                         wasBlocked: false)
                 }
@@ -425,6 +425,7 @@ extension BattleTurnEngine {
                targetRaceIds.contains(defenderRaceId) {
                 pendingDamage = min(Int.max, pendingDamage * 2)
             }
+            let rawDamage = pendingDamage
             let applied = applyDamage(amount: pendingDamage, to: &defenderCopy)
             applyPhysicalDegradation(to: &defenderCopy)
             applySpellChargeGainOnPhysicalHit(for: &attackerCopy, damageDealt: applied)
@@ -441,7 +442,10 @@ extension BattleTurnEngine {
             successfulHits += 1
             if result.critical { criticalHits += 1 }
 
-            entryBuilder.addEffect(kind: .physicalDamage, target: defenderIdx, value: UInt32(applied))
+            entryBuilder.addEffect(kind: .physicalDamage,
+                                   target: defenderIdx,
+                                   value: UInt32(applied),
+                                   extra: UInt16(clamping: rawDamage))
 
             if !defenderCopy.isAlive {
                 if let defSide = defenderSide, let defIndex = defenderIndex {
@@ -465,12 +469,13 @@ extension BattleTurnEngine {
             }
         }
 
+        let wasDodged = defenderEvaded && successfulHits == 0
         return AttackResult(attacker: attackerCopy,
                             defender: defenderCopy,
                             totalDamage: totalDamage,
                             successfulHits: successfulHits,
                             criticalHits: criticalHits,
-                            wasDodged: defenderEvaded,
+                            wasDodged: wasDodged,
                             wasParried: false,
                             wasBlocked: false)
     }
@@ -519,7 +524,10 @@ extension BattleTurnEngine {
         let result = computeAntiHealingDamage(attacker: attackerCopy, defender: &defenderCopy, context: &context)
         let applied = applyDamage(amount: result.damage, to: &defenderCopy)
 
-        entryBuilder.addEffect(kind: .physicalDamage, target: defenderIdx, value: UInt32(applied))
+        entryBuilder.addEffect(kind: .physicalDamage,
+                               target: defenderIdx,
+                               value: UInt32(applied),
+                               extra: UInt16(clamping: result.damage))
 
         if !defenderCopy.isAlive {
             appendDefeatLog(for: defenderCopy,
@@ -582,7 +590,8 @@ extension BattleTurnEngine {
                                          attackResult: followUpResult,
                                          context: &context,
                                          reactionDepth: 0,
-                                         entryBuilder: entryBuilder)
+                                         entryBuilder: entryBuilder,
+                                         allowsReactionEvents: false)
 
         context.appendActionEntry(entryBuilder.build())
 
