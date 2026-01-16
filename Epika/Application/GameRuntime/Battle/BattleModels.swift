@@ -851,7 +851,7 @@ nonisolated struct BattleActor: Sendable {
             var partyHostileAll: Bool
             var vampiricImpulse: Bool
             var vampiricSuppression: Bool
-            var antiHealingEnabled: Bool
+            var reverseHealingEnabled: Bool
             var equipmentStatMultipliers: [Int: Double]
             var degradationPercent: Double
             var degradationRepairMinPercent: Double
@@ -879,7 +879,7 @@ nonisolated struct BattleActor: Sendable {
                 partyHostileAll: false,
                 vampiricImpulse: false,
                 vampiricSuppression: false,
-                antiHealingEnabled: false,
+                reverseHealingEnabled: false,
                 equipmentStatMultipliers: [:],
                 degradationPercent: 0.0,
                 degradationRepairMinPercent: 0.0,
@@ -948,7 +948,7 @@ nonisolated struct BattleActor: Sendable {
     var partyHostileAll: Bool
     var vampiricImpulse: Bool
     var vampiricSuppression: Bool
-    var antiHealingEnabled: Bool
+    var reverseHealingEnabled: Bool
     var attackHistory: BattleAttackHistory
     var skillEffects: SkillEffects
     var spellbook: SkillRuntimeEffects.Spellbook
@@ -1002,7 +1002,7 @@ nonisolated struct BattleActor: Sendable {
          partyHostileAll: Bool = false,
          vampiricImpulse: Bool = false,
          vampiricSuppression: Bool = false,
-         antiHealingEnabled: Bool = false,
+         reverseHealingEnabled: Bool = false,
          attackHistory: BattleAttackHistory = BattleAttackHistory(),
          skillEffects: SkillEffects = .neutral,
          spellbook: SkillRuntimeEffects.Spellbook = .empty,
@@ -1055,7 +1055,7 @@ nonisolated struct BattleActor: Sendable {
         self.partyHostileAll = partyHostileAll
         self.vampiricImpulse = vampiricImpulse
         self.vampiricSuppression = vampiricSuppression
-        self.antiHealingEnabled = antiHealingEnabled
+        self.reverseHealingEnabled = reverseHealingEnabled
         self.attackHistory = attackHistory
         self.skillEffects = skillEffects
         self.spellbook = spellbook

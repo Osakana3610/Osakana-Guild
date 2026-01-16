@@ -156,8 +156,8 @@ enum LogTemplate: UInt8, Codable, Sendable {
 
     // === 反撃・特殊行動 ===
     case counterAttack = 60           // "{actor}の反撃！"
-    case parry = 61                   // "{actor}は攻撃を受け流した！"
-    case shieldBlock = 62             // "{actor}は盾で防いだ！"
+    case parry = 61                   // "{actor}は攻撃をパリィした！"
+    case shieldBlock = 62             // "{actor}は盾防御で防いだ！"
     case followUp = 63                // "{actor}の追加攻撃！"
 
     // === バフ・デバフ ===

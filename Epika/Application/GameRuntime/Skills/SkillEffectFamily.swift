@@ -30,7 +30,7 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
     case actionOrderMultiplierGeneral = 4
     case additionalDamageScoreAdditive = 5
     case additionalDamageScoreMultiplier = 6
-    case antiHealingGeneral = 7
+    case reverseHealingGeneral = 7
     case attackCountAdditive = 8
     case attackCountMultiplier = 9
     case autoDegradationRepairGeneral = 10
@@ -440,7 +440,7 @@ enum SkillEffectFamily: UInt16, CaseIterable, Sendable, Hashable {
         case .actionOrderMultiplierGeneral: return "actionOrderMultiplier.general"
         case .additionalDamageScoreAdditive: return "additionalDamageScore.additive"
         case .additionalDamageScoreMultiplier: return "additionalDamageScore.multiplier"
-        case .antiHealingGeneral: return "antiHealing.general"
+        case .reverseHealingGeneral: return "reverseHealing.general"
         case .attackCountAdditive: return "attackCount.additive"
         case .attackCountMultiplier: return "attackCount.multiplier"
         case .autoDegradationRepairGeneral: return "autoDegradationRepair.general"

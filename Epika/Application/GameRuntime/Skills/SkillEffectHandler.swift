@@ -178,7 +178,7 @@ enum SkillEffectHandlerRegistry {
             EndOfTurnSelfHPPercentHandler.self,
             PartyAttackFlagHandler.self,
             PartyAttackTargetHandler.self,
-            AntiHealingHandler.self,
+            ReverseHealingHandler.self,
             BreathVariantHandler.self,
             EquipmentStatMultiplierHandler.self,
             DodgeCapHandler.self,

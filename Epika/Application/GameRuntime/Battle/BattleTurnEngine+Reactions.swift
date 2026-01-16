@@ -5,7 +5,7 @@
 //
 // 【責務】
 //   - 反撃と反応スキルの処理
-//   - 受け流し、盾ブロックの判定
+//   - パリィ、盾防御の判定
 //   - ダメージ吸収と呪文チャージ回復
 //   - 攻撃結果の適用とリアクション連鎖
 //   - 暴走処理
@@ -15,8 +15,8 @@
 //   - リアクションシステムに特化した機能を提供
 //
 // 【主要機能】
-//   - shouldTriggerParry: 受け流し判定
-//   - shouldTriggerShieldBlock: 盾ブロック判定
+//   - shouldTriggerParry: パリィ判定
+//   - shouldTriggerShieldBlock: 盾防御判定
 //   - applyAbsorptionIfNeeded: ダメージ吸収処理
 //   - applySpellChargeGainOnPhysicalHit: 物理ヒット時の呪文チャージ回復
 //   - attemptRunawayIfNeeded: 暴走判定

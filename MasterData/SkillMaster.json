@@ -1297,7 +1297,7 @@
             "value": {
               "additive": 1
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で1ダメージを与える。"
           },
           {
             "id": 139,
@@ -1305,7 +1305,7 @@
             "value": {
               "additive": 2
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で2ダメージを与える。"
           },
           {
             "id": 140,
@@ -1313,7 +1313,7 @@
             "value": {
               "additive": 3
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で3ダメージを与える。"
           },
           {
             "id": 141,
@@ -1321,7 +1321,7 @@
             "value": {
               "additive": 4
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で4ダメージを与える。"
           },
           {
             "id": 142,
@@ -1329,7 +1329,7 @@
             "value": {
               "additive": 5
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で5ダメージを与える。"
           },
           {
             "id": 143,
@@ -1337,7 +1337,7 @@
             "value": {
               "additive": 6
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で6ダメージを与える。"
           },
           {
             "id": 144,
@@ -1345,7 +1345,7 @@
             "value": {
               "additive": 7
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で7ダメージを与える。"
           },
           {
             "id": 145,
@@ -1353,7 +1353,7 @@
             "value": {
               "additive": 8
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で8ダメージを与える。"
           },
           {
             "id": 146,
@@ -1361,7 +1361,7 @@
             "value": {
               "additive": 9
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で9ダメージを与える。"
           },
           {
             "id": 147,
@@ -1369,7 +1369,7 @@
             "value": {
               "additive": 10
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で10ダメージを与える。"
           },
           {
             "id": 148,
@@ -1377,7 +1377,7 @@
             "value": {
               "additive": 11
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で11ダメージを与える。"
           },
           {
             "id": 149,
@@ -1385,7 +1385,7 @@
             "value": {
               "additive": 12
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で12ダメージを与える。"
           },
           {
             "id": 150,
@@ -1393,7 +1393,7 @@
             "value": {
               "additive": 13
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で13ダメージを与える。"
           },
           {
             "id": 151,
@@ -1401,7 +1401,7 @@
             "value": {
               "additive": 14
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で14ダメージを与える。"
           },
           {
             "id": 152,
@@ -1409,7 +1409,7 @@
             "value": {
               "additive": 15
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で15ダメージを与える。"
           },
           {
             "id": 153,
@@ -1417,7 +1417,7 @@
             "value": {
               "additive": 16
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で16ダメージを与える。"
           },
           {
             "id": 154,
@@ -1425,7 +1425,7 @@
             "value": {
               "additive": 17
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で17ダメージを与える。"
           },
           {
             "id": 155,
@@ -1433,7 +1433,7 @@
             "value": {
               "additive": 18
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で18ダメージを与える。"
           },
           {
             "id": 156,
@@ -1441,7 +1441,7 @@
             "value": {
               "additive": 19
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で19ダメージを与える。"
           },
           {
             "id": 157,
@@ -1449,7 +1449,7 @@
             "value": {
               "additive": 20
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で20ダメージを与える。"
           },
           {
             "id": 158,
@@ -1457,7 +1457,7 @@
             "value": {
               "additive": 25
             },
-            "description": "攻撃時に追加で0ダメージを与える。"
+            "description": "攻撃時に追加で25ダメージを与える。"
           }
         ]
       },
@@ -2463,7 +2463,7 @@
             "value": {
               "points": 5
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が5増加する。"
           },
           {
             "id": 264,
@@ -2471,7 +2471,7 @@
             "value": {
               "points": 10
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が10増加する。"
           },
           {
             "id": 265,
@@ -2479,7 +2479,7 @@
             "value": {
               "points": 11
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が11増加する。"
           },
           {
             "id": 266,
@@ -2487,7 +2487,7 @@
             "value": {
               "points": 12
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が12増加する。"
           },
           {
             "id": 267,
@@ -2495,7 +2495,7 @@
             "value": {
               "points": 13
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が13増加する。"
           },
           {
             "id": 268,
@@ -2503,7 +2503,7 @@
             "value": {
               "points": 15
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が15増加する。"
           },
           {
             "id": 269,
@@ -2511,7 +2511,7 @@
             "value": {
               "points": 16
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が16増加する。"
           },
           {
             "id": 270,
@@ -2519,7 +2519,7 @@
             "value": {
               "points": 18
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が18増加する。"
           },
           {
             "id": 271,
@@ -2527,7 +2527,7 @@
             "value": {
               "points": 19
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が19増加する。"
           },
           {
             "id": 272,
@@ -2535,7 +2535,7 @@
             "value": {
               "points": 20
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が20増加する。"
           },
           {
             "id": 273,
@@ -2543,7 +2543,7 @@
             "value": {
               "points": 25
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が25増加する。"
           },
           {
             "id": 274,
@@ -2551,7 +2551,7 @@
             "value": {
               "points": 30
             },
-            "description": "必殺率が0上昇する。"
+            "description": "必殺率が30増加する。"
           }
         ]
       },
@@ -2909,7 +2909,7 @@
             "value": {
               "deltaPercent": -35
             },
-            "description": "必殺率の上限が0%変動する。"
+            "description": "必殺率の上限が35%減少する。"
           },
           {
             "id": 316,
@@ -2917,7 +2917,7 @@
             "value": {
               "deltaPercent": 5
             },
-            "description": "必殺率の上限が0%変動する。"
+            "description": "必殺率の上限が5%増加する。"
           },
           {
             "id": 317,
@@ -2925,7 +2925,7 @@
             "value": {
               "deltaPercent": 10
             },
-            "description": "必殺率の上限が0%変動する。"
+            "description": "必殺率の上限が10%増加する。"
           },
           {
             "id": 318,
@@ -2933,7 +2933,7 @@
             "value": {
               "deltaPercent": 15
             },
-            "description": "必殺率の上限が0%変動する。"
+            "description": "必殺率の上限が15%増加する。"
           },
           {
             "id": 319,
@@ -2941,7 +2941,7 @@
             "value": {
               "deltaPercent": 25
             },
-            "description": "必殺率の上限が0%変動する。"
+            "description": "必殺率の上限が25%増加する。"
           }
         ]
       },
@@ -2974,7 +2974,7 @@
                 }
               }
             ],
-            "description": "防御力の一部を攻撃力と命中に変換する。"
+            "description": "攻撃力と命中が防御力の10%だけ増加する。"
           },
           {
             "id": 321,
@@ -3001,7 +3001,7 @@
                 }
               }
             ],
-            "description": "防御力の一部を攻撃力と命中に変換する。"
+            "description": "攻撃力と命中が防御力の15%だけ増加する。"
           },
           {
             "id": 322,
@@ -3028,7 +3028,7 @@
                 }
               }
             ],
-            "description": "防御力の一部を攻撃力と命中に変換する。"
+            "description": "攻撃力と命中が防御力の20%だけ増加する。"
           },
           {
             "id": 323,
@@ -3055,7 +3055,7 @@
                 }
               }
             ],
-            "description": "防御力の一部を攻撃力と命中に変換する。"
+            "description": "攻撃力と命中が防御力の25%だけ増加する。"
           },
           {
             "id": 324,
@@ -3082,7 +3082,7 @@
                 }
               }
             ],
-            "description": "防御力の一部を攻撃力と命中に変換する。"
+            "description": "攻撃力と命中が防御力の30%だけ増加する。"
           }
         ]
       },
@@ -3111,7 +3111,7 @@
                 }
               }
             ],
-            "description": "攻撃回数→必殺率のステータス変換を行う。"
+            "description": "攻撃回数が半分になり、半減後の攻撃回数×1%だけ必殺率が増加する。"
           }
         ]
       },
@@ -3140,7 +3140,7 @@
                 }
               }
             ],
-            "description": "攻撃回数→防御力のステータス変換を行う。"
+            "description": "攻撃回数が半分になり、半減後の攻撃回数×40だけ防御力が増加する。"
           }
         ]
       },
@@ -3169,7 +3169,7 @@
                 }
               }
             ],
-            "description": "攻撃回数→回避能力のステータス変換を行う。"
+            "description": "攻撃回数が半分になり、半減後の攻撃回数×40だけ回避能力が増加する。"
           }
         ]
       },
@@ -3198,7 +3198,7 @@
                 }
               }
             ],
-            "description": "攻撃回数→魔法攻撃力のステータス変換を行う。"
+            "description": "攻撃回数が半分になり、半減後の攻撃回数×40だけ魔法攻撃力が増加する。"
           }
         ]
       },
@@ -3227,7 +3227,7 @@
                 }
               }
             ],
-            "description": "攻撃回数→魔法防御力のステータス変換を行う。"
+            "description": "攻撃回数が半分になり、半減後の攻撃回数×40だけ魔法防御力が増加する。"
           }
         ]
       },
@@ -3256,7 +3256,7 @@
                 }
               }
             ],
-            "description": "攻撃回数→魔法回復量のステータス変換を行う。"
+            "description": "攻撃回数が半分になり、半減後の攻撃回数×60だけ魔法回復量が増加する。"
           }
         ]
       },
@@ -4258,7 +4258,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "マジックアローの最大チャージ数が3になる。"
+            "description": "マジックアローの使用回数の上限が3になる。"
           },
           {
             "id": 439,
@@ -4275,7 +4275,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "ファイヤーボールの最大チャージ数が3になる。"
+            "description": "ファイヤーボールの使用回数の上限が3になる。"
           },
           {
             "id": 440,
@@ -4292,7 +4292,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "ブリザードの最大チャージ数が3になる。"
+            "description": "ブリザードの使用回数の上限が3になる。"
           },
           {
             "id": 441,
@@ -4309,7 +4309,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "サンダーボルトの最大チャージ数が3になる。"
+            "description": "サンダーボルトの使用回数の上限が3になる。"
           },
           {
             "id": 442,
@@ -4326,7 +4326,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "ニュークリアの最大チャージ数が3になる。"
+            "description": "ニュークリアの使用回数の上限が3になる。"
           },
           {
             "id": 443,
@@ -4343,7 +4343,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "ヒールの最大チャージ数が3になる。"
+            "description": "ヒールの使用回数の上限が3になる。"
           },
           {
             "id": 444,
@@ -4360,7 +4360,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "ヒールプラスの最大チャージ数が3になる。"
+            "description": "ヒールプラスの使用回数の上限が3になる。"
           },
           {
             "id": 445,
@@ -4377,7 +4377,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "キュアの最大チャージ数が3になる。"
+            "description": "キュアの使用回数の上限が3になる。"
           },
           {
             "id": 446,
@@ -4394,7 +4394,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "フルヒールの最大チャージ数が3になる。"
+            "description": "フルヒールの使用回数の上限が3になる。"
           },
           {
             "id": 447,
@@ -4411,7 +4411,7 @@
               "maxTriggers": 1,
               "gainOnPhysicalHit": 1
             },
-            "description": "パーティヒールの最大チャージ数が3になる。"
+            "description": "パーティヒールの使用回数の上限が3になる。"
           }
         ]
       },
@@ -4421,11 +4421,11 @@
         "variants": [
           {
             "id": 448,
-            "label": "[戦術] チャージ増加",
+            "label": "[戦術] 魔法の使用回数増加",
             "value": {
               "initialBonus": 1
             },
-            "description": "戦闘開始時の呪文チャージ数が1増加する。"
+            "description": "戦闘開始時の魔法の使用回数が1増加する。"
           }
         ]
       }
@@ -5443,7 +5443,7 @@
             "value": {
               "add": -2
             },
-            "description": "スロットが0個増加する。"
+            "description": "装備枠が2枠減少する。"
           },
           {
             "id": 545,
@@ -5451,7 +5451,7 @@
             "value": {
               "add": 1
             },
-            "description": "スロットが0個増加する。"
+            "description": "装備枠が1枠増加する。"
           },
           {
             "id": 546,
@@ -5459,7 +5459,7 @@
             "value": {
               "add": 2
             },
-            "description": "スロットが0個増加する。"
+            "description": "装備枠が2枠増加する。"
           },
           {
             "id": 547,
@@ -5467,7 +5467,7 @@
             "value": {
               "add": 3
             },
-            "description": "スロットが0個増加する。"
+            "description": "装備枠が3枠増加する。"
           },
           {
             "id": 548,
@@ -5475,7 +5475,7 @@
             "value": {
               "add": 4
             },
-            "description": "スロットが0個増加する。"
+            "description": "装備枠が4枠増加する。"
           },
           {
             "id": 549,
@@ -5483,7 +5483,7 @@
             "value": {
               "add": 5
             },
-            "description": "スロットが0個増加する。"
+            "description": "装備枠が5枠増加する。"
           }
         ]
       },
@@ -8259,7 +8259,7 @@
             "value": {
               "extraCharges": 1
             },
-            "description": "ブレスの追加チャージが1増加する。"
+            "description": "ブレスの使用回数が1増加する。"
           },
           {
             "id": 876,
@@ -8270,7 +8270,7 @@
             "value": {
               "extraCharges": 1
             },
-            "description": "ブレスの追加チャージが1増加する。"
+            "description": "ブレスの使用回数が1増加する。"
           },
           {
             "id": 877,
@@ -8281,7 +8281,7 @@
             "value": {
               "extraCharges": 1
             },
-            "description": "ブレスの追加チャージが1増加する。"
+            "description": "ブレスの使用回数が1増加する。"
           }
         ]
       },
@@ -8369,7 +8369,7 @@
             "value": {
               "chancePercent": 5
             },
-            "description": "5%の確率でバーサーク状態になる。"
+            "description": "5%の確率で暴走状態になる。"
           },
           {
             "id": 886,
@@ -8377,7 +8377,7 @@
             "value": {
               "chancePercent": 10
             },
-            "description": "10%の確率でバーサーク状態になる。"
+            "description": "10%の確率で暴走状態になる。"
           },
           {
             "id": 887,
@@ -8385,7 +8385,7 @@
             "value": {
               "chancePercent": 15
             },
-            "description": "15%の確率でバーサーク状態になる。"
+            "description": "15%の確率で暴走状態になる。"
           },
           {
             "id": 888,
@@ -8393,7 +8393,7 @@
             "value": {
               "chancePercent": 20
             },
-            "description": "20%の確率でバーサーク状態になる。"
+            "description": "20%の確率で暴走状態になる。"
           },
           {
             "id": 889,
@@ -8401,7 +8401,7 @@
             "value": {
               "chancePercent": 25
             },
-            "description": "25%の確率でバーサーク状態になる。"
+            "description": "25%の確率で暴走状態になる。"
           }
         ]
       },
@@ -8428,16 +8428,16 @@
         ]
       },
       {
-        "familyId": "antiHealing.general",
-        "effectType": "antiHealing",
+        "familyId": "reverseHealing.general",
+        "effectType": "reverseHealing",
         "variants": [
           {
             "id": 892,
-            "label": "[戦術] リバース・ヒール",
+            "label": "[戦術] リバース・ヒーリング",
             "value": {
               "enabled": 1
             },
-            "description": "回復を受け付けなくなる。"
+            "description": "通常攻撃は魔法回復量に応じた魔法攻撃に置き換わる。スキル行動では発動しない。"
           }
         ]
       },
@@ -8685,7 +8685,7 @@
               "thresholdPercent": 20,
               "chancePercent": 20
             },
-            "description": "MPが20%以下になると20%の確率で逃走する。"
+            "description": "一撃で最大HPの20%以上のダメージを受けた時、20%の確率で魔力が暴走する。周囲に魔法ダメージを与え、自身が混乱する。"
           },
           {
             "id": 913,
@@ -8694,7 +8694,7 @@
               "thresholdPercent": 30,
               "chancePercent": 25
             },
-            "description": "MPが30%以下になると25%の確率で逃走する。"
+            "description": "一撃で最大HPの30%以上のダメージを受けた時、25%の確率で魔力が暴走する。周囲に魔法ダメージを与え、自身が混乱する。"
           }
         ]
       },
@@ -8709,7 +8709,7 @@
               "thresholdPercent": 20,
               "chancePercent": 20
             },
-            "description": "HPが20%以下になると20%の確率で逃走する。"
+            "description": "一撃で最大HPの20%以上のダメージを受けた時、20%の確率でダメージが暴走する。周囲に物理ダメージを与え、自身が混乱する。"
           },
           {
             "id": 915,
@@ -8718,7 +8718,7 @@
               "thresholdPercent": 30,
               "chancePercent": 25
             },
-            "description": "HPが30%以下になると25%の確率で逃走する。"
+            "description": "一撃で最大HPの30%以上のダメージを受けた時、25%の確率でダメージが暴走する。周囲に物理ダメージを与え、自身が混乱する。"
           }
         ]
       },
@@ -10000,7 +10000,7 @@
             "value": {
               "enabled": 1
             },
-            "description": "探索終了時に装備の劣化を自動で修復する。"
+            "description": "ターン終了時に劣化修復が自動で発動する。回復量は劣化修復機能LvX・[+X%]修復機能強化に応じる。※劣化修復機能が必要。"
           }
         ]
       },
@@ -10010,27 +10010,27 @@
         "variants": [
           {
             "id": 1050,
-            "label": "[戦術] 受け流し",
+            "label": "[戦術] パリィ",
             "value": {
               "enabled": 1
             },
-            "description": "受け流しが可能になる。"
+            "description": "近距離攻撃を受けた時、連続攻撃の1回目に判定があり、成功した場合は1回目のダメージだけになる。追加ダメージが高い攻撃ほど成功率が下がります。"
           },
           {
             "id": 1051,
-            "label": "[+15%] 受け流し成功率上昇",
+            "label": "[+15%] パリィ成功率上昇",
             "value": {
               "bonusPercent": 15
             },
-            "description": "受け流しが可能になる。成功率が15%上昇する。"
+            "description": "スキル【[戦術] パリィ】の成功率が15%増加する。"
           },
           {
             "id": 1052,
-            "label": "[+30%] 受け流し成功率上昇",
+            "label": "[+30%] パリィ成功率上昇",
             "value": {
               "bonusPercent": 30
             },
-            "description": "受け流しが可能になる。成功率が30%上昇する。"
+            "description": "スキル【[戦術] パリィ】の成功率が30%増加する。"
           }
         ]
       },
@@ -10044,7 +10044,7 @@
             "value": {
               "enabled": 1
             },
-            "description": "盾ブロックが可能になる。"
+            "description": "近距離攻撃を受けた時、連続攻撃の1回目に判定があり、成功した場合は1回目のダメージだけになる。追加ダメージが高い攻撃ほど成功率が下がります。"
           },
           {
             "id": 1054,
@@ -10052,7 +10052,7 @@
             "value": {
               "bonusPercent": 15
             },
-            "description": "盾ブロックが可能になる。成功率が15%上昇する。"
+            "description": "スキル【[戦術] 盾防御】の成功率が15%増加する。"
           },
           {
             "id": 1055,
@@ -10060,7 +10060,7 @@
             "value": {
               "bonusPercent": 30
             },
-            "description": "盾ブロックが可能になる。成功率が30%上昇する。"
+            "description": "スキル【[戦術] 盾防御】の成功率が30%増加する。"
           }
         ]
       },
@@ -10162,7 +10162,7 @@
             "value": {
               "multiplier": 1.5
             },
-            "description": "反撃の発動率が0%増加する。"
+            "description": "反撃の発動率が1.5倍になる。"
           },
           {
             "id": 1065,
@@ -10170,7 +10170,7 @@
             "value": {
               "multiplier": 2.0
             },
-            "description": "反撃の発動率が0%増加する。"
+            "description": "反撃の発動率が2.0倍になる。"
           }
         ]
       },
@@ -10188,7 +10188,7 @@
             "value": {
               "multiplier": 1.5
             },
-            "description": "追撃の発動率が0%増加する。"
+            "description": "追撃の発動率が1.5倍になる。"
           },
           {
             "id": 1067,
@@ -10196,7 +10196,7 @@
             "value": {
               "multiplier": 2.0
             },
-            "description": "追撃の発動率が0%増加する。"
+            "description": "追撃の発動率が2.0倍になる。"
           }
         ]
       },
@@ -10214,7 +10214,7 @@
             "value": {
               "multiplier": 1.5
             },
-            "description": "再攻撃の発動率が0%増加する。"
+            "description": "再攻撃の発動率が1.5倍になる。"
           }
         ]
       },
@@ -10232,7 +10232,7 @@
             "value": {
               "multiplier": 2.0
             },
-            "description": "魔法反撃の発動率が0%増加する。"
+            "description": "魔法反撃の発動率が2.0倍になる。"
           }
         ]
       },
@@ -10250,7 +10250,7 @@
             "value": {
               "multiplier": 2.0
             },
-            "description": "breathCounterの発動率が0%増加する。"
+            "description": "ブレス反撃の発動率が2.0倍になる。"
           }
         ]
       },
@@ -10268,7 +10268,7 @@
             "value": {
               "multiplier": 1.5
             },
-            "description": "magicSupportの発動率が0%増加する。"
+            "description": "魔法支援の発動率が1.5倍になる。"
           }
         ]
       },
@@ -10286,7 +10286,7 @@
             "value": {
               "multiplier": 2.0
             },
-            "description": "crisisEvasionの発動率が0%増加する。"
+            "description": "危機回避の発動率が2.0倍になる。"
           }
         ]
       },
@@ -10304,7 +10304,7 @@
             "value": {
               "multiplier": 2.0
             },
-            "description": "instantResurrectionの発動率が0%増加する。"
+            "description": "即時蘇生の発動率が2.0倍になる。"
           }
         ]
       },
@@ -10322,7 +10322,7 @@
             "value": {
               "multiplier": 1.6
             },
-            "description": "reflectionRecoveryの発動率が0%増加する。"
+            "description": "反射回復の発動率が1.6倍になる。"
           }
         ]
       },
@@ -10340,7 +10340,7 @@
             "value": {
               "multiplier": 2.0
             },
-            "description": "manaDecompositionの発動率が0%増加する。"
+            "description": "魔力分解の発動率が2.0倍になる。"
           }
         ]
       },
@@ -10376,7 +10376,7 @@
             "value": {
               "addPercent": 10.0
             },
-            "description": "fightingSpiritの発動率が10.0%増加する。"
+            "description": "戦意高揚の発動率が10.0%増加する。"
           }
         ]
       },
@@ -10394,7 +10394,7 @@
             "value": {
               "addPercent": 10.0
             },
-            "description": "criticalComboの発動率が10.0%増加する。"
+            "description": "会心追撃の発動率が10.0%増加する。"
           }
         ]
       }
@@ -14675,13 +14675,13 @@
         "variants": [
           {
             "id": 64022,
-            "label": "[種族:ノームLv99] 精神依存で呪文回復",
+            "label": "[種族:ノームLv99] 精神依存で魔法の使用回数回復",
             "value": {},
             "statScale": {
               "stat": "spirit",
               "percent": 0.3
             },
-            "description": "精神1につき0.3%の確率で使用した呪文のチャージが回復する。"
+            "description": "精神1につき0.3%の確率で使用した魔法の使用回数が回復する。"
           }
         ]
       },
@@ -15055,7 +15055,7 @@
             "value": {
               "add": 1
             },
-            "description": "装備スロットが1個増加する。"
+            "description": "装備枠が1枠増加する。"
           }
         ]
       },
@@ -15822,11 +15822,11 @@
         "variants": [
           {
             "id": 65064,
-            "label": "[職業:魔法使い] 吸収 魔法使用時MP回復5%",
+            "label": "[職業:魔法使い] 吸収 魔法使用時魔法の使用回数回復5%",
             "value": {
               "chancePercent": 5
             },
-            "description": "魔法使用時5%の確率でMPを回復する"
+            "description": "魔法使用時5%の確率で魔法の使用回数が回復する。"
           }
         ]
       },
@@ -16678,7 +16678,7 @@
                 }
               }
             ],
-            "description": "盾装備のステータスが39%増加する。受け流し率が10%増加する。"
+            "description": "盾装備のステータスが39%増加する。パリィ成功率が10%増加する。"
           }
         ]
       },
@@ -17015,7 +17015,7 @@
         "variants": [
           {
             "id": 65224,
-            "label": "[マスター:魔法使い] 吸収 MP回復10%+チャージ回復+5%",
+            "label": "[マスター:魔法使い] 吸収 魔法の使用回数回復10%+魔法の使用回数回復5%",
             "effects": [
               {
                 "effectType": "spellChargeRecoveryChance",
@@ -17032,7 +17032,7 @@
                 }
               }
             ],
-            "description": "魔法使用時10%の確率でMPを回復する。魔法使用時5%の確率でMPを回復する。"
+            "description": "魔法使用時10%の確率で魔法の使用回数が回復する。魔法使用時5%の確率で魔法の使用回数が回復する。"
           }
         ]
       },

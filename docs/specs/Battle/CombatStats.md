@@ -528,7 +528,7 @@ if STR >= 21: value = trunc(value * statBonusMultiplier(STR))
 ```
 - **用途**:
   - 物理ダメージ計算のボーナス成分
-  - パリィ/盾ブロック判定の増減に影響
+  - パリィ/盾防御判定の増減に影響
 
 ### breathDamageScore（ブレスダメージスコア）
 - **単位**: ブレス攻撃力（整数）

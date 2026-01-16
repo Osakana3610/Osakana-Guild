@@ -122,7 +122,7 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
     case endOfTurnSelfHPPercent = 122
     case partyAttackFlag = 123
     case partyAttackTarget = 124
-    case antiHealing = 125
+    case reverseHealing = 125
     case breathVariant = 126
     case dodgeCap = 127
     case degradationRepair = 128
@@ -242,7 +242,7 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         case "endOfTurnSelfHPPercent": self = .endOfTurnSelfHPPercent
         case "partyAttackFlag": self = .partyAttackFlag
         case "partyAttackTarget": self = .partyAttackTarget
-        case "antiHealing": self = .antiHealing
+        case "reverseHealing": self = .reverseHealing
         case "breathVariant": self = .breathVariant
         case "dodgeCap": self = .dodgeCap
         case "degradationRepair": self = .degradationRepair
@@ -362,7 +362,7 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         case .endOfTurnSelfHPPercent: return "endOfTurnSelfHPPercent"
         case .partyAttackFlag: return "partyAttackFlag"
         case .partyAttackTarget: return "partyAttackTarget"
-        case .antiHealing: return "antiHealing"
+        case .reverseHealing: return "reverseHealing"
         case .breathVariant: return "breathVariant"
         case .dodgeCap: return "dodgeCap"
         case .degradationRepair: return "degradationRepair"

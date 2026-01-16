@@ -583,6 +583,26 @@
       "toleranceBasis": "決定的（固定値1）",
       "testFile": "CombatStatCalculatorObservationTests.swift",
       "testMethod": "testStatFixedToOne"
+    },
+    {
+      "id": "SKILL-ALIGN-001",
+      "category": ["スキル", "整合性", "JSON-TSV"],
+      "description": "SkillMaster.json と SkillFamilyExpectations.tsv が一致しているか",
+      "formula": "全行一致、不一致数=0",
+      "expectedRange": { "min": 0, "max": 0 },
+      "toleranceBasis": "決定的（不一致0件）",
+      "testFile": "MasterDataLoadRegressionTests.swift",
+      "testMethod": "testSkillFamilyExpectationsMatchSkillMasterJSON"
+    },
+    {
+      "id": "SKILL-ALIGN-002",
+      "category": ["スキル", "整合性", "TSV-Runtime"],
+      "description": "SkillFamilyExpectations.tsv とランタイムペイロードが一致しているか",
+      "formula": "全行一致、不一致数=0",
+      "expectedRange": { "min": 0, "max": 0 },
+      "toleranceBasis": "決定的（不一致0件）",
+      "testFile": "MasterDataLoadRegressionTests.swift",
+      "testMethod": "testSkillFamilyExpectationsMatchRuntimePayloads"
     }
   ]
 }

@@ -53,7 +53,7 @@ extension SkillRuntimeEffectCompiler {
                      .attackCountMultiplier,
                      .additionalDamageScoreAdditive,
                      .additionalDamageScoreMultiplier,
-                     .antiHealing,
+                     .reverseHealing,
                      .autoDegradationRepair,
                      .barrier,
                      .barrierOnGuard,

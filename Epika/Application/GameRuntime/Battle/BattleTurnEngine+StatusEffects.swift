@@ -7,7 +7,7 @@
 //   - 状態異常の付与と判定
 //   - 状態異常の継続ダメージ処理
 //   - 状態異常の自然回復
-//   - バーサーク（暴走）判定
+//   - 暴走判定
 //   - 自動状態異常治癒
 //
 // 【本体との関係】
@@ -18,7 +18,7 @@
 //   - attemptApplyStatus: 状態異常の付与試行
 //   - hasStatus: 状態異常の保持判定
 //   - isActionLocked: 行動不能判定
-//   - shouldTriggerBerserk: バーサーク判定
+//   - shouldTriggerBerserk: 暴走判定
 //   - applyStatusTicks: 状態異常の継続効果処理
 //   - attemptInflictStatuses: 状態異常の付与試行
 //   - applyAutoStatusCureIfNeeded: 自動状態異常治癒
