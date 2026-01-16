@@ -351,6 +351,7 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
 
     // MARK: - Runtime Alignment
 
+    @MainActor
     private func resolveParamValue(expectedKey: String, parameters: [EffectParamKey: Int]) -> String? {
         let targetKey = EffectParamKey.allCases.first { String(describing: $0) == expectedKey }
         if let key = targetKey, let value = parameters[key] {
@@ -433,6 +434,7 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
         }
     }
 
+    @MainActor
     private func formatParamValue(key: EffectParamKey, value: Int) -> String {
         switch key {
         case .damageType:
@@ -461,6 +463,13 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
             return Self.conditionByRaw[value] ?? String(value)
         case .type, .variant:
             return Self.effectVariantByRaw[value] ?? String(value)
+        case .hpScale:
+            if let scale = BattleActor.SkillEffects.ResurrectionActive.HPScale(rawValue: UInt8(value)) {
+                return scale.identifier
+            }
+            return String(value)
+        case .targetStatus:
+            return Self.statusTypeByRaw[value] ?? String(value)
         case .targetId:
             return Self.targetIdByRaw[value] ?? String(value)
         case .specialAttackId:

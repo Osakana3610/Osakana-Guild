@@ -585,6 +585,26 @@
       "testMethod": "testStatFixedToOne"
     },
     {
+      "id": "BATTLE-PARRY-001",
+      "category": ["戦闘", "防御", "パリィ"],
+      "description": "パリィ成功時は連続攻撃が1回目のみヒットするか",
+      "formula": "multiHit=3、parry成功 → successfulHits=1",
+      "expectedRange": { "min": 1, "max": 1 },
+      "toleranceBasis": "決定的（パリィ成功時）",
+      "testFile": "ParryShieldBlockObservationTests.swift",
+      "testMethod": "testParryStopsMultiHitAfterFirstHit"
+    },
+    {
+      "id": "BATTLE-SHIELD-001",
+      "category": ["戦闘", "防御", "盾防御"],
+      "description": "盾防御成功時は連続攻撃が1回目のみヒットするか",
+      "formula": "multiHit=3、shieldBlock成功 → successfulHits=1",
+      "expectedRange": { "min": 1, "max": 1 },
+      "toleranceBasis": "決定的（盾防御成功時）",
+      "testFile": "ParryShieldBlockObservationTests.swift",
+      "testMethod": "testShieldBlockStopsMultiHitAfterFirstHit"
+    },
+    {
       "id": "SKILL-ALIGN-001",
       "category": ["スキル", "整合性", "JSON-TSV"],
       "description": "SkillMaster.json と SkillFamilyExpectations.tsv が一致しているか",
