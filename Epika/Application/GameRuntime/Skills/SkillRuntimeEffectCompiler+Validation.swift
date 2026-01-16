@@ -110,7 +110,7 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
     .actionOrderShuffle: .init(params: [], values: []),
     .additionalDamageScoreAdditive: .init(params: [], values: ["additive"]),
     .additionalDamageScoreMultiplier: .init(params: [], values: ["multiplier"]),
-    .antiHealing: .init(params: [], values: []),
+    .reverseHealing: .init(params: [], values: []),
     .barrier: .init(params: ["damageType"], values: ["charges"]),
     .barrierOnGuard: .init(params: ["damageType"], values: ["charges"]),
     .berserk: .init(params: [], values: ["chancePercent"]),

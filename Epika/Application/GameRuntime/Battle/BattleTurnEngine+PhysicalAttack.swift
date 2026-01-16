@@ -18,7 +18,7 @@
 //   - executePhysicalAttack: 物理攻撃の実行
 //   - performAttack: 攻撃処理の実行
 //   - performSpecialAttack: 特殊攻撃の実行
-//   - performAntiHealingAttack: 反回復攻撃の実行
+//   - performReverseHealingAttack: 反回復攻撃の実行
 //   - executeFollowUpSequence: 格闘追撃シーケンス
 //   - executePreemptiveAttacks: 先制攻撃の実行
 //   - handleVampiricImpulse: 吸血衝動の処理
@@ -71,12 +71,12 @@ extension BattleTurnEngine {
         let actionEntryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
                                                                 kind: .physicalAttack)
 
-        let useAntiHealing = attacker.skillEffects.misc.antiHealingEnabled && attacker.snapshot.magicalHealingScore > 0
+        let useReverseHealing = attacker.skillEffects.misc.reverseHealingEnabled && attacker.snapshot.magicalHealingScore > 0
         let isMartial = shouldUseMartialAttack(attacker: attacker)
         let accuracyMultiplier = isMartial ? BattleContext.martialAccuracyMultiplier : 1.0
 
-        if useAntiHealing {
-            let attackResult = performAntiHealingAttack(attackerSide: attackerSide,
+        if useReverseHealing {
+            let attackResult = performReverseHealingAttack(attackerSide: attackerSide,
                                                         attackerIndex: attackerIndex,
                                                         attacker: attacker,
                                                         defenderSide: target.0,
@@ -480,7 +480,7 @@ extension BattleTurnEngine {
                             wasBlocked: false)
     }
 
-    nonisolated static func performAntiHealingAttack(attackerSide: ActorSide,
+    nonisolated static func performReverseHealingAttack(attackerSide: ActorSide,
                                          attackerIndex: Int,
                                          attacker: BattleActor,
                                          defenderSide: ActorSide,
@@ -521,7 +521,7 @@ extension BattleTurnEngine {
                                 wasBlocked: false)
         }
 
-        let result = computeAntiHealingDamage(attacker: attackerCopy, defender: &defenderCopy, context: &context)
+        let result = computeReverseHealingDamage(attacker: attackerCopy, defender: &defenderCopy, context: &context)
         let applied = applyDamage(amount: result.damage, to: &defenderCopy)
 
         entryBuilder.addEffect(kind: .physicalDamage,

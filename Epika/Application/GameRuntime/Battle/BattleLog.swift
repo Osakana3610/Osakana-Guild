@@ -221,8 +221,8 @@ enum ActionKind: UInt8, Codable, Sendable {
     // 物理攻撃結果
     case physicalDamage = 20      // "{target}に{value}のダメージ！"
     case physicalEvade = 21       // "{target}は攻撃をかわした！"
-    case physicalParry = 22       // "{actor}の受け流し！"
-    case physicalBlock = 23       // "{actor}は大盾で防いだ！"
+    case physicalParry = 22       // "{actor}のパリィ！"
+    case physicalBlock = 23       // "{actor}の盾防御！"
     case physicalKill = 24        // "{target}を倒した！"
     case martial = 25             // "{actor}の格闘戦！"
 

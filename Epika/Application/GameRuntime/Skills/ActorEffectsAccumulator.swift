@@ -133,7 +133,7 @@ struct ActorEffectsAccumulator {
             partyHostileAll: misc.partyHostileAll,
             vampiricImpulse: misc.vampiricImpulse,
             vampiricSuppression: misc.vampiricSuppression,
-            antiHealingEnabled: misc.antiHealingEnabled,
+            reverseHealingEnabled: misc.reverseHealingEnabled,
             equipmentStatMultipliers: misc.equipmentStatMultipliers,
             degradationPercent: misc.degradationPercent,
             degradationRepairMinPercent: misc.degradationRepairMinPercent,
@@ -294,7 +294,7 @@ struct MiscAccumulator {
     var partyHostileAll: Bool = false
     var vampiricImpulse: Bool = false
     var vampiricSuppression: Bool = false
-    var antiHealingEnabled: Bool = false
+    var reverseHealingEnabled: Bool = false
     /// targetId (Int) の敵対対象
     var partyHostileTargets: Set<Int> = []
     /// targetId (Int) の保護対象

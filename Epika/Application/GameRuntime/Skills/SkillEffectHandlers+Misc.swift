@@ -13,7 +13,7 @@
 //   - EndOfTurnSelfHPPercentHandler: ターン終了時の自己HP増減
 //   - PartyAttackFlagHandler: パーティ攻撃フラグ（敵対・吸血等）
 //   - PartyAttackTargetHandler: パーティ攻撃対象（敵対・保護）
-//   - AntiHealingHandler: 回復無効化
+//   - ReverseHealingHandler: 通常攻撃を回復依存の魔法攻撃に置換
 //   - BreathVariantHandler: ブレス追加チャージ
 //   - EquipmentStatMultiplierHandler: 装備種別ステータス倍率
 //   - DodgeCapHandler: 回避上限・最低命中率の設定
@@ -113,15 +113,15 @@ enum PartyAttackTargetHandler: SkillEffectHandler {
     }
 }
 
-enum AntiHealingHandler: SkillEffectHandler {
-    nonisolated static let effectType = SkillEffectType.antiHealing
+enum ReverseHealingHandler: SkillEffectHandler {
+    nonisolated static let effectType = SkillEffectType.reverseHealing
 
     nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        accumulator.misc.antiHealingEnabled = true
+        accumulator.misc.reverseHealingEnabled = true
     }
 }
 

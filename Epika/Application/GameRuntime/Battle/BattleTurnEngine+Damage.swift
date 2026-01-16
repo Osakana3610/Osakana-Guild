@@ -168,7 +168,7 @@ extension BattleTurnEngine {
         return max(1, Int(adjusted.rounded()))
     }
 
-    nonisolated static func computeAntiHealingDamage(attacker: BattleActor,
+    nonisolated static func computeReverseHealingDamage(attacker: BattleActor,
                                          defender: inout BattleActor,
                                          context: inout BattleContext) -> (damage: Int, critical: Bool) {
         let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
@@ -179,7 +179,7 @@ extension BattleTurnEngine {
         let effectiveDefense = isCritical ? defensePower * criticalDefenseRetainedFactor : defensePower
         var damage = max(1.0, attackPower - effectiveDefense)
 
-        damage *= antiHealingDamageDealtModifier(for: attacker)
+        damage *= reverseHealingDamageDealtModifier(for: attacker)
         damage *= damageTakenModifier(for: defender, damageType: .magical, attacker: attacker)
 
         if isCritical {
@@ -299,7 +299,7 @@ extension BattleTurnEngine {
         return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: damageType) * raceMultiplier * hpThresholdMultiplier
     }
 
-    nonisolated static func antiHealingDamageDealtModifier(for attacker: BattleActor) -> Double {
+    nonisolated static func reverseHealingDamageDealtModifier(for attacker: BattleActor) -> Double {
         let key = modifierDealtKey(for: .magical)
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
         return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: .magical)

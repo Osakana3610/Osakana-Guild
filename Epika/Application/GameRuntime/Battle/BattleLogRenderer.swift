@@ -611,9 +611,9 @@ struct BattleLogRenderer {
         case .physicalEvade:
             return ("\(actor)の攻撃！\(target)は攻撃をかわした！", .miss)
         case .physicalParry:
-            return ("\(target)の受け流し！", .action)
+            return ("\(target)のパリィ！", .action)
         case .physicalBlock:
-            return ("\(target)は大盾で防いだ！", .action)
+            return ("\(target)の盾防御！", .action)
         case .physicalKill:
             return ("\(target)を倒した！", .defeat)
         case .martial:
