@@ -14735,7 +14735,9 @@
           {
             "id": 64041,
             "label": "[種族:ダークエルフLv50] 敵撃破時、敏捷依存で再攻撃",
-            "value": {},
+            "value": {
+              "baseChancePercent": 0
+            },
             "statScale": {
               "stat": "agility",
               "percent": 0.5
@@ -14756,7 +14758,9 @@
           {
             "id": 64042,
             "label": "[種族:ダークエルフLv99] 味方魔法後、知恵依存で追撃",
-            "value": {},
+            "value": {
+              "baseChancePercent": 0
+            },
             "statScale": {
               "stat": "wisdom",
               "percent": 0.5
@@ -15183,7 +15187,9 @@
           {
             "id": 64151,
             "label": "[種族:鬼Lv50] 未撃破時、力依存で再攻撃",
-            "value": {},
+            "value": {
+              "baseChancePercent": 0
+            },
             "statScale": {
               "stat": "strength",
               "percent": 0.5
@@ -15371,6 +15377,7 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfDamagedPhysical",
+          "action": "counterAttack",
           "damageType": "physical"
         },
         "variants": [
@@ -15389,6 +15396,7 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "allyMagicAttack",
+          "action": "physicalPursuit",
           "damageType": "physical"
         },
         "variants": [
@@ -15445,7 +15453,7 @@
             "id": 65022,
             "label": "[職業:盗賊] 必殺率+15",
             "value": {
-              "additive": 15
+              "points": 15
             },
             "description": "必殺率が15増加する"
           }
@@ -15891,7 +15899,7 @@
             "id": 65073,
             "label": "[職業:狩人] 精密 必殺率+8",
             "value": {
-              "additive": 8
+              "points": 8
             },
             "description": "必殺率が8増加する"
           }
@@ -16088,7 +16096,7 @@
             "id": 65095,
             "label": "[職業:侍] 剣気 必殺率+15",
             "value": {
-              "additive": 15
+              "points": 15
             },
             "description": "必殺率が15増加する"
           }
@@ -16148,6 +16156,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfEvadePhysical",
+          "action": "counterAttack",
+          "target": "attacker",
           "damageType": "physical"
         },
         "variants": [
@@ -16370,7 +16380,7 @@
             "id": 65132,
             "label": "[職業:忍者] 必殺率+25",
             "value": {
-              "additive": 25
+              "points": 25
             },
             "description": "必殺率が25増加する"
           }
@@ -16396,6 +16406,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfEvadePhysical",
+          "action": "counterAttack",
+          "target": "attacker",
           "damageType": "physical"
         },
         "variants": [
@@ -16418,7 +16430,7 @@
             "id": 65135,
             "label": "[職業:忍者] 必殺 必殺率上限+20",
             "value": {
-              "additive": 20
+              "deltaPercent": 20
             },
             "description": "必殺率の上限が0増加する"
           }
@@ -16687,6 +16699,7 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfDamagedPhysical",
+          "action": "counterAttack",
           "damageType": "physical"
         },
         "variants": [
@@ -16705,6 +16718,7 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "allyMagicAttack",
+          "action": "physicalPursuit",
           "damageType": "physical"
         },
         "variants": [
@@ -17078,7 +17092,7 @@
             "id": 65233,
             "label": "[マスター:狩人] 精密 必殺率+15",
             "value": {
-              "additive": 15
+              "points": 15
             },
             "description": "必殺率が15増加する"
           }
@@ -17248,6 +17262,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfEvadePhysical",
+          "action": "counterAttack",
+          "target": "attacker",
           "damageType": "physical"
         },
         "variants": [
@@ -17396,6 +17412,8 @@
         "effectType": "reaction",
         "parameters": {
           "trigger": "selfEvadePhysical",
+          "action": "counterAttack",
+          "target": "attacker",
           "damageType": "physical"
         },
         "variants": [
@@ -17418,7 +17436,7 @@
             "id": 65295,
             "label": "[マスター:忍者] 必殺 必殺率上限+35",
             "value": {
-              "additive": 35
+              "deltaPercent": 35
             },
             "description": "必殺率の上限が0増加する"
           }

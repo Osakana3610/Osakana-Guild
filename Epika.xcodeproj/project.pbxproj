@@ -248,6 +248,7 @@
 			shellPath = /bin/sh;
 			shellScript = (
 				"\"${SRCROOT}/Tools/MasterDataGenerator/generate_master_data.sh\"",
+				"",
 			);
 			showEnvVarsInLog = 0;
 		};
