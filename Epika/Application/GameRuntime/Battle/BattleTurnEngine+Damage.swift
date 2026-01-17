@@ -46,7 +46,8 @@ extension BattleTurnEngine {
                                  hitIndex: Int,
                                  accuracyMultiplier: Double,
                                  context: inout BattleContext) -> Double {
-        var attackerScore = max(1.0, Double(attacker.snapshot.hitScore))
+        let hitBonus = aggregateAdditive(from: attacker.timedBuffs, key: "hitScoreAdditive")
+        var attackerScore = max(1.0, Double(attacker.snapshot.hitScore) + hitBonus)
         // 累積ヒットボーナス（命中スコア）
         if let bonus = attacker.skillEffects.combat.cumulativeHitBonus {
             let consecutiveHits = attacker.attackHistory.consecutiveHits
@@ -389,7 +390,8 @@ extension BattleTurnEngine {
 
     nonisolated static func degradedEvasionScore(for defender: BattleActor) -> Double {
         let factor = max(0.0, 1.0 - defender.degradationPercent / 100.0)
-        return Double(defender.snapshot.evasionScore) * factor
+        let bonus = aggregateAdditive(from: defender.timedBuffs, key: "evasionScoreAdditive")
+        return (Double(defender.snapshot.evasionScore) + bonus) * factor
     }
 
     nonisolated static func applyPhysicalDegradation(to defender: inout BattleActor) {
@@ -457,6 +459,16 @@ extension BattleTurnEngine {
         for buff in buffs {
             if let value = buff.statModifiers[key] {
                 total *= value
+            }
+        }
+        return total
+    }
+
+    nonisolated static func aggregateAdditive(from buffs: [TimedBuff], key: String) -> Double {
+        var total = 0.0
+        for buff in buffs {
+            if let value = buff.statModifiers[key] {
+                total += value
             }
         }
         return total
