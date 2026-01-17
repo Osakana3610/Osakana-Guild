@@ -9957,7 +9957,7 @@
             "value": {
               "multiplier": 0.0
             },
-            "description": "麻痺耐性が無効化される（かかりやすくなる）。"
+            "description": "即死耐性が無効化される（かかりやすくなる）。"
           }
         ]
       },
@@ -16113,7 +16113,7 @@
             "value": {
               "valuePercent": 15
             },
-            "description": "all耐性が15%増加する"
+            "description": "すべての状態異常耐性が15%増加する。"
           }
         ]
       },
@@ -17273,7 +17273,7 @@
             "value": {
               "valuePercent": 28
             },
-            "description": "all耐性が28%増加する"
+            "description": "すべての状態異常耐性が28%増加する。"
           }
         ]
       },
