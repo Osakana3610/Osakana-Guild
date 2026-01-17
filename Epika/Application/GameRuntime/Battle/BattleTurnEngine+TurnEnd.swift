@@ -329,11 +329,17 @@ extension BattleTurnEngine {
     }
 
     nonisolated static func applyTimedBuffTriggers(_ context: inout BattleContext) {
-        applyTimedBuffTriggersForSide(.player, context: &context)
-        applyTimedBuffTriggersForSide(.enemy, context: &context)
+        applyTimedBuffTriggers(&context, includeEveryTurn: true)
     }
 
-    private nonisolated static func applyTimedBuffTriggersForSide(_ side: ActorSide, context: inout BattleContext) {
+    nonisolated static func applyTimedBuffTriggers(_ context: inout BattleContext, includeEveryTurn: Bool) {
+        applyTimedBuffTriggersForSide(.player, includeEveryTurn: includeEveryTurn, context: &context)
+        applyTimedBuffTriggersForSide(.enemy, includeEveryTurn: includeEveryTurn, context: &context)
+    }
+
+    private nonisolated static func applyTimedBuffTriggersForSide(_ side: ActorSide,
+                                                          includeEveryTurn: Bool,
+                                                          context: inout BattleContext) {
         var actors: [BattleActor] = side == .player ? context.players : context.enemies
         guard !actors.isEmpty else { return }
 
@@ -357,7 +363,9 @@ extension BattleTurnEngine {
                         remaining.append(trigger)
                     }
                 case .everyTurn:
-                    fired.append((trigger: trigger, ownerIndex: index))
+                    if includeEveryTurn {
+                        fired.append((trigger: trigger, ownerIndex: index))
+                    }
                     remaining.append(trigger) // 毎ターン発動するので残す
                 }
             }
@@ -402,11 +410,19 @@ extension BattleTurnEngine {
                     }
 
                     let otherMods = trigger.modifiers.filter { !$0.key.hasPrefix("spellSpecific:") }
-                    if !otherMods.isEmpty {
+                    var normalizedMods = otherMods
+                    if let percent = otherMods["damageDealtPercent"] {
+                        let multiplier = 1.0 + percent / 100.0
+                        normalizedMods["physicalDamageDealtMultiplier"] = multiplier
+                        normalizedMods["magicalDamageDealtMultiplier"] = multiplier
+                        normalizedMods["breathDamageDealtMultiplier"] = multiplier
+                        normalizedMods.removeValue(forKey: "damageDealtPercent")
+                    }
+                    if !normalizedMods.isEmpty {
                         let buff = TimedBuff(id: trigger.id,
                                              baseDuration: trigger.duration,
                                              remainingTurns: trigger.duration,
-                                             statModifiers: otherMods)
+                                             statModifiers: normalizedMods)
                         upsert(buff: buff, into: &actor.timedBuffs)
                     }
 

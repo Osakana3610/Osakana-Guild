@@ -119,6 +119,7 @@ struct BattleTurnEngine {
                                       extra: UInt16(clamping: context.turn),
                                       effectKind: .logOnly)
 
+            applyTimedBuffTriggers(&context, includeEveryTurn: false)
             resetRescueUsage(&context)
             applyRetreatIfNeeded(&context)
             if let result = checkBattleEnd(&context) {
