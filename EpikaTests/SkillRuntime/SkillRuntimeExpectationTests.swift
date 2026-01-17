@@ -69,7 +69,8 @@ private extension SkillRuntimeExpectationTests {
                                   segmentIndex: index)
             }
         } catch {
-            let message = (error as? VerificationError)?.message ?? "Verification failed for sampleId=\(row.sampleId): \(error)"
+            let detail = (error as? VerificationError)?.message ?? "\(error)"
+            let message = "sampleId=\(row.sampleId) \(detail)"
             return VerificationResult(passed: false, message: message, rawData: rawData)
         }
 
@@ -993,6 +994,34 @@ private extension SkillRuntimeExpectationTests {
         throw VerificationError.failed("missing \(paramName) in segment/payload")
     }
 
+    func resolveBaseStat(segment: EffectSegment,
+                         payload: DecodedSkillEffectPayload,
+                         paramKey: EffectParamKey,
+                         paramName: String) -> BaseStat? {
+        if let raw = segment.params[paramName], let stat = BaseStat(identifier: raw) {
+            return stat
+        }
+        if let raw = payload.parameters[paramKey],
+           let rawValue = UInt8(exactly: raw),
+           let stat = BaseStat(rawValue: rawValue) {
+            return stat
+        }
+        return nil
+    }
+
+    func isAllCombatStat(segment: EffectSegment,
+                         payload: DecodedSkillEffectPayload,
+                         paramKey: EffectParamKey,
+                         paramName: String) -> Bool {
+        if let raw = segment.params[paramName], raw == "all" {
+            return true
+        }
+        if let raw = payload.parameters[paramKey], raw == 99 {
+            return true
+        }
+        return false
+    }
+
     func resolveStatusResistanceTargets(payload: DecodedSkillEffectPayload) throws -> [UInt8] {
         if let statusIdRaw = payload.parameters[.status] {
             return [UInt8(statusIdRaw)]
@@ -1049,9 +1078,41 @@ private extension SkillRuntimeExpectationTests {
             try assertApproxEqual(modified - base, additive, tolerance: 0.6, message: "statAdditive \(statKey.identifier)")
 
         case .statMultiplier:
-            let statKey = try resolveCombatStat(segment: segment, payload: payload, paramKey: .stat, paramName: "stat")
             let multiplier = segment.values["multiplier"] ?? payload.value[.multiplier] ?? 1.0
             let pair = try computeCombatPair(skills: [segmentSkill])
+            if isAllCombatStat(segment: segment, payload: payload, paramKey: .stat, paramName: "stat") {
+                for stat in CombatStat.allCases {
+                    let base = combatStatValue(pair.base.combat, name: stat.identifier) ?? 0.0
+                    let modified = combatStatValue(pair.modified.combat, name: stat.identifier) ?? 0.0
+                    let expected: Double
+                    if stat == .attackCount {
+                        expected = max(1.0, base * multiplier)
+                    } else {
+                        var value = Double(Int((base * multiplier).rounded(.towardZero)))
+                        if stat == .maxHP {
+                            value = max(1.0, value)
+                        }
+                        expected = value
+                    }
+                    try assertApproxEqual(modified, expected, tolerance: 0.6, message: "statMultiplier \(stat.identifier)")
+                }
+                return
+            }
+
+            if let baseStat = resolveBaseStat(segment: segment, payload: payload, paramKey: .stat, paramName: "stat") {
+                let base = attributeValue(pair.base.attributes, name: baseStat.identifier) ?? 0.0
+                let modified = attributeValue(pair.modified.attributes, name: baseStat.identifier) ?? 0.0
+                let expected = Double(Int((base * multiplier).rounded(.towardZero)))
+                try assertApproxEqual(modified, expected, tolerance: 0.6, message: "statMultiplier \(baseStat.identifier)")
+                return
+            }
+
+            let statKey: CombatStat
+            do {
+                statKey = try resolveCombatStat(segment: segment, payload: payload, paramKey: .stat, paramName: "stat")
+            } catch {
+                statKey = try resolveCombatStat(segment: segment, payload: payload, paramKey: .statType, paramName: "statType")
+            }
             let base = combatStatValue(pair.base.combat, name: statKey.identifier) ?? 0.0
             let modified = combatStatValue(pair.modified.combat, name: statKey.identifier) ?? 0.0
             var expected = Double(Int((base * multiplier).rounded(.towardZero)))
@@ -1556,7 +1617,9 @@ private extension SkillRuntimeExpectationTests {
         let attackerWithLevel = TestActorBuilder.makeAttacker(luck: 1, level: 10)
 
         let percent = segment.values["valuePercent"] ?? payload.value[.valuePercent] ?? 0.0
-        let expectedMultiplier = 1.0 - (percent * Double(defender.level! - attackerWithLevel.level!)) / 100.0
+        let levelDiff = defender.level! - attackerWithLevel.level!
+        let adjustmentPercent = percent * Double(levelDiff)
+        let expectedMultiplier = max(0.0, 1.0 + adjustmentPercent / 100.0)
         let actual = BattleTurnEngine.damageTakenModifier(for: defender, damageType: .physical, attacker: attackerWithLevel)
         rawData["levelComparisonExpected"] = expectedMultiplier
         rawData["levelComparisonActual"] = actual

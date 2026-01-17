@@ -34,6 +34,19 @@
 
 import Foundation
 
+private enum DamageTypeSelector {
+    nonisolated static let allRawValue = 99
+    nonisolated static let allTypes: [Int] = [
+        Int(BattleDamageType.physical.rawValue),
+        Int(BattleDamageType.magical.rawValue),
+        Int(BattleDamageType.breath.rawValue)
+    ]
+
+    nonisolated static func resolvedTypes(from raw: Int) -> [Int] {
+        raw == allRawValue ? allTypes : [raw]
+    }
+}
+
 // MARK: - Damage Handlers (14)
 
 enum DamageDealtPercentHandler: SkillEffectHandler {
@@ -47,7 +60,9 @@ enum DamageDealtPercentHandler: SkillEffectHandler {
         let damageType = try payload.requireParam(.damageType, skillId: context.skillId, effectIndex: context.effectIndex)
         var value = payload.value[.valuePercent] ?? 0.0
         value += payload.scaledValue(from: context.actorStats)
-        accumulator.damage.dealtPercentByType[damageType, default: 0.0] += value
+        for type in DamageTypeSelector.resolvedTypes(from: damageType) {
+            accumulator.damage.dealtPercentByType[type, default: 0.0] += value
+        }
     }
 }
 
@@ -76,7 +91,9 @@ enum DamageTakenPercentHandler: SkillEffectHandler {
         let damageType = try payload.requireParam(.damageType, skillId: context.skillId, effectIndex: context.effectIndex)
         var value = payload.value[.valuePercent] ?? 0.0
         value += payload.scaledValue(from: context.actorStats)
-        accumulator.damage.takenPercentByType[damageType, default: 0.0] += value
+        for type in DamageTypeSelector.resolvedTypes(from: damageType) {
+            accumulator.damage.takenPercentByType[type, default: 0.0] += value
+        }
     }
 }
 
