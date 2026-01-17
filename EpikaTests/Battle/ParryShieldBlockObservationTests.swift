@@ -159,6 +159,281 @@ nonisolated final class ParryShieldBlockObservationTests: XCTestCase {
         XCTAssertTrue(result.wasBlocked, "盾防御が発動していません")
         XCTAssertEqual(result.successfulHits, 1, "盾防御成功時は1回目のみヒットする想定です")
     }
+
+    // MARK: - Timed Buffs
+
+    @MainActor func testTimedBuffBattleStartDamageDealtMultiplier() async throws {
+        let row = try loadExpectationRow(familyId: "race.vampire.openingBuff", selection: "min")
+        let damagePercent = try XCTUnwrap(
+            extractValue(named: "damageDealtPercent", from: row.expectedEffectSummary),
+            "damageDealtPercent が見つかりません (skillId=\(row.sampleId))"
+        )
+        let durationValue = try XCTUnwrap(
+            extractValue(named: "duration", from: row.expectedEffectSummary),
+            "duration が見つかりません (skillId=\(row.sampleId))"
+        )
+        let actorEffects = try await compileActorEffects(skillId: row.sampleId)
+
+        let player = TestActorBuilder.makePlayer(
+            physicalAttackScore: 1000,
+            hitScore: 100,
+            evasionScore: 0,
+            luck: 1,
+            skillEffects: actorEffects
+        )
+        let enemy = TestActorBuilder.makeEnemy(luck: 1)
+        var context = BattleContext(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            random: GameRandomSource(seed: 1)
+        )
+
+        applyBattleStartTimedBuffs(&context)
+
+        let updatedPlayer = context.players[0]
+        let expectedMultiplier = 1.0 + damagePercent / 100.0
+        let physical = BattleTurnEngine.damageDealtModifier(for: updatedPlayer, against: enemy, damageType: .physical)
+        let magical = BattleTurnEngine.damageDealtModifier(for: updatedPlayer, against: enemy, damageType: .magical)
+        let breath = BattleTurnEngine.damageDealtModifier(for: updatedPlayer, against: enemy, damageType: .breath)
+        let duration = Int(durationValue.rounded(.towardZero))
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-TIMED-001",
+            expected: (min: expectedMultiplier, max: expectedMultiplier),
+            measured: physical,
+            rawData: [
+                "damagePercent": damagePercent,
+                "duration": Double(duration),
+                "expectedMultiplier": expectedMultiplier,
+                "physicalMultiplier": physical,
+                "magicalMultiplier": magical,
+                "breathMultiplier": breath
+            ]
+        )
+
+        XCTAssertEqual(physical, expectedMultiplier, accuracy: 0.0001, "physical 倍率が不一致です")
+        XCTAssertEqual(magical, expectedMultiplier, accuracy: 0.0001, "magical 倍率が不一致です")
+        XCTAssertEqual(breath, expectedMultiplier, accuracy: 0.0001, "breath 倍率が不一致です")
+        XCTAssertEqual(updatedPlayer.timedBuffs.first?.remainingTurns, duration, "duration が不一致です")
+    }
+
+    @MainActor func testTimedBuffBattleStartHitScoreAdditive() async throws {
+        let row = try loadExpectationRow(familyId: "race.werecat.firstTurnHit", selection: "min")
+        let hitAdditive = try XCTUnwrap(
+            extractValue(named: "hitScoreAdditive", from: row.expectedEffectSummary),
+            "hitScoreAdditive が見つかりません (skillId=\(row.sampleId))"
+        )
+        let durationValue = try XCTUnwrap(
+            extractValue(named: "duration", from: row.expectedEffectSummary),
+            "duration が見つかりません (skillId=\(row.sampleId))"
+        )
+        let actorEffects = try await compileActorEffects(skillId: row.sampleId)
+
+        let baseHitScore = 100
+        let player = TestActorBuilder.makePlayer(
+            hitScore: baseHitScore,
+            evasionScore: 0,
+            luck: 1,
+            skillEffects: actorEffects
+        )
+        let enemy = TestActorBuilder.makeEnemy(luck: 1)
+        var context = BattleContext(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            random: GameRandomSource(seed: 1)
+        )
+
+        applyBattleStartTimedBuffs(&context)
+
+        let updatedPlayer = context.players[0]
+        let bonus = BattleTurnEngine.aggregateAdditive(from: updatedPlayer.timedBuffs, key: "hitScoreAdditive")
+        let duration = Int(durationValue.rounded(.towardZero))
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-TIMED-002",
+            expected: (min: hitAdditive, max: hitAdditive),
+            measured: bonus,
+            rawData: [
+                "baseHitScore": Double(baseHitScore),
+                "hitScoreAdditive": hitAdditive,
+                "duration": Double(duration),
+                "measuredBonus": bonus
+            ]
+        )
+
+        XCTAssertEqual(bonus, hitAdditive, accuracy: 0.0001, "hitScoreAdditive が不一致です")
+        XCTAssertEqual(updatedPlayer.timedBuffs.first?.remainingTurns, duration, "duration が不一致です")
+    }
+
+    @MainActor func testTimedBuffTurnElapsedHitEvasionAdditive() async throws {
+        let row = try loadExpectationRow(familyId: "race.human.turnBuff", selection: "min")
+        let hitPerTurn = try XCTUnwrap(
+            extractValue(named: "hitScoreAdditivePerTurn", from: row.expectedEffectSummary),
+            "hitScoreAdditivePerTurn が見つかりません (skillId=\(row.sampleId))"
+        )
+        let evasionPerTurn = try XCTUnwrap(
+            extractValue(named: "evasionScoreAdditivePerTurn", from: row.expectedEffectSummary),
+            "evasionScoreAdditivePerTurn が見つかりません (skillId=\(row.sampleId))"
+        )
+        let actorEffects = try await compileActorEffects(skillId: row.sampleId)
+
+        let baseHitScore = 100
+        let baseEvasionScore = 100
+        let player = TestActorBuilder.makePlayer(
+            hitScore: baseHitScore,
+            evasionScore: baseEvasionScore,
+            luck: 1,
+            skillEffects: actorEffects
+        )
+        let enemy = TestActorBuilder.makeEnemy(luck: 1)
+        var context = BattleContext(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            random: GameRandomSource(seed: 1)
+        )
+
+        let turns = 2
+        applyTurnElapsedTimedBuffs(&context, turns: turns)
+
+        let updatedPlayer = context.players[0]
+        let expectedHit = baseHitScore + Int(hitPerTurn.rounded(.towardZero)) * turns
+        let expectedEvasion = baseEvasionScore + Int(evasionPerTurn.rounded(.towardZero)) * turns
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-TIMED-003",
+            expected: (min: Double(expectedHit), max: Double(expectedHit)),
+            measured: Double(updatedPlayer.snapshot.hitScore),
+            rawData: [
+                "baseHitScore": Double(baseHitScore),
+                "hitPerTurn": hitPerTurn,
+                "turns": Double(turns)
+            ]
+        )
+        ObservationRecorder.shared.record(
+            id: "BATTLE-TIMED-004",
+            expected: (min: Double(expectedEvasion), max: Double(expectedEvasion)),
+            measured: Double(updatedPlayer.snapshot.evasionScore),
+            rawData: [
+                "baseEvasionScore": Double(baseEvasionScore),
+                "evasionPerTurn": evasionPerTurn,
+                "turns": Double(turns)
+            ]
+        )
+
+        XCTAssertEqual(updatedPlayer.snapshot.hitScore, expectedHit, "hitScore の累積値が不一致です")
+        XCTAssertEqual(updatedPlayer.snapshot.evasionScore, expectedEvasion, "evasionScore の累積値が不一致です")
+    }
+
+    @MainActor func testTimedBuffTurnElapsedAttackCountPercent() async throws {
+        let row = try loadExpectationRow(familyId: "race.amazoness.turnAttackCount", selection: "min")
+        let percentPerTurn = try XCTUnwrap(
+            extractValue(named: "attackCountPercentPerTurn", from: row.expectedEffectSummary),
+            "attackCountPercentPerTurn が見つかりません (skillId=\(row.sampleId))"
+        )
+        let actorEffects = try await compileActorEffects(skillId: row.sampleId)
+
+        var player = TestActorBuilder.makePlayer(luck: 1, skillEffects: actorEffects)
+        var snapshot = player.snapshot
+        snapshot.attackCount = 1.0
+        player.snapshot = snapshot
+
+        let enemy = TestActorBuilder.makeEnemy(luck: 1)
+        var context = BattleContext(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            random: GameRandomSource(seed: 1)
+        )
+
+        let turns = 2
+        applyTurnElapsedTimedBuffs(&context, turns: turns)
+
+        let updatedPlayer = context.players[0]
+        let expectedCount = expectedAttackCountAfterTurns(base: 1.0, percent: percentPerTurn, turns: turns)
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-TIMED-005",
+            expected: (min: expectedCount, max: expectedCount),
+            measured: updatedPlayer.snapshot.attackCount,
+            rawData: [
+                "baseAttackCount": 1.0,
+                "percentPerTurn": percentPerTurn,
+                "turns": Double(turns)
+            ]
+        )
+
+        XCTAssertEqual(updatedPlayer.snapshot.attackCount, expectedCount, accuracy: 0.0001, "attackCount の累積値が不一致です")
+    }
+
+    @MainActor func testTimedBuffTurnElapsedAttackDefensePercent() async throws {
+        let row = try loadExpectationRow(familyId: "race.oni.turnStatBuff", selection: "min")
+        let attackPercentPerTurn = try XCTUnwrap(
+            extractValue(named: "attackPercentPerTurn", from: row.expectedEffectSummary),
+            "attackPercentPerTurn が見つかりません (skillId=\(row.sampleId))"
+        )
+        let defensePercentPerTurn = try XCTUnwrap(
+            extractValue(named: "defensePercentPerTurn", from: row.expectedEffectSummary),
+            "defensePercentPerTurn が見つかりません (skillId=\(row.sampleId))"
+        )
+        let actorEffects = try await compileActorEffects(skillId: row.sampleId)
+
+        let baseAttackScore = 1000
+        let baseDefenseScore = 500
+        let player = TestActorBuilder.makePlayer(
+            physicalAttackScore: baseAttackScore,
+            physicalDefenseScore: baseDefenseScore,
+            hitScore: 80,
+            evasionScore: 10,
+            luck: 1,
+            skillEffects: actorEffects
+        )
+        let enemy = TestActorBuilder.makeEnemy(luck: 1)
+        var context = BattleContext(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            random: GameRandomSource(seed: 1)
+        )
+
+        let turns = 2
+        applyTurnElapsedTimedBuffs(&context, turns: turns)
+
+        let updatedPlayer = context.players[0]
+        let expectedAttack = expectedStatAfterTurns(base: baseAttackScore, percent: attackPercentPerTurn, turns: turns)
+        let expectedDefense = expectedStatAfterTurns(base: baseDefenseScore, percent: defensePercentPerTurn, turns: turns)
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-TIMED-006",
+            expected: (min: Double(expectedAttack), max: Double(expectedAttack)),
+            measured: Double(updatedPlayer.snapshot.physicalAttackScore),
+            rawData: [
+                "baseAttackScore": Double(baseAttackScore),
+                "percentPerTurn": attackPercentPerTurn,
+                "turns": Double(turns)
+            ]
+        )
+        ObservationRecorder.shared.record(
+            id: "BATTLE-TIMED-007",
+            expected: (min: Double(expectedDefense), max: Double(expectedDefense)),
+            measured: Double(updatedPlayer.snapshot.physicalDefenseScore),
+            rawData: [
+                "baseDefenseScore": Double(baseDefenseScore),
+                "percentPerTurn": defensePercentPerTurn,
+                "turns": Double(turns)
+            ]
+        )
+
+        XCTAssertEqual(updatedPlayer.snapshot.physicalAttackScore, expectedAttack, "physicalAttackScore の累積値が不一致です")
+        XCTAssertEqual(updatedPlayer.snapshot.physicalDefenseScore, expectedDefense, "physicalDefenseScore の累積値が不一致です")
+    }
 }
 
 private extension ParryShieldBlockObservationTests {
@@ -284,5 +559,38 @@ private extension ParryShieldBlockObservationTests {
         }
         XCTFail("SkillFamilyExpectations.tsv が見つかりません")
         throw CocoaError(.fileNoSuchFile)
+    }
+
+    func applyBattleStartTimedBuffs(_ context: inout BattleContext) {
+        context.turn = 1
+        BattleTurnEngine.applyTimedBuffTriggers(&context, includeEveryTurn: false)
+    }
+
+    func applyTurnElapsedTimedBuffs(_ context: inout BattleContext, turns: Int) {
+        guard turns > 0 else { return }
+        for turn in 1...turns {
+            context.turn = turn
+            BattleTurnEngine.applyTimedBuffTriggers(&context, includeEveryTurn: true)
+        }
+    }
+
+    func expectedStatAfterTurns(base: Int, percent: Double, turns: Int) -> Int {
+        guard turns > 0 else { return base }
+        var value = base
+        for _ in 0..<turns {
+            let bonus = Int((Double(value) * percent / 100.0).rounded(.towardZero))
+            value += bonus
+        }
+        return value
+    }
+
+    func expectedAttackCountAfterTurns(base: Double, percent: Double, turns: Int) -> Double {
+        guard turns > 0 else { return base }
+        var value = base
+        for _ in 0..<turns {
+            let bonus = value * percent / 100.0
+            value = max(1.0, value + bonus)
+        }
+        return value
     }
 }
