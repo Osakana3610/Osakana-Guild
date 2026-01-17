@@ -25,6 +25,32 @@
 
 import Foundation
 
+private enum StatusResistanceTargetResolver {
+    nonisolated static func resolveTargets(
+        payload: DecodedSkillEffectPayload,
+        context: SkillEffectContext
+    ) throws -> [UInt8] {
+        if let statusIdRaw = payload.parameters[.status] {
+            return [UInt8(statusIdRaw)]
+        }
+        guard let statusTypeRaw = payload.parameters[.statusType] else {
+            throw RuntimeError.invalidConfiguration(
+                reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistance の statusType/status が無効です"
+            )
+        }
+        switch statusTypeRaw {
+        case 1:
+            return [0, 1, 2, 3]
+        case 2:
+            return [2, 3]
+        default:
+            throw RuntimeError.invalidConfiguration(
+                reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistance の statusType が不正です: \(statusTypeRaw)"
+            )
+        }
+    }
+}
+
 // MARK: - Status Handlers (7)
 
 enum StatusResistanceMultiplierHandler: SkillEffectHandler {
@@ -35,16 +61,13 @@ enum StatusResistanceMultiplierHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // 両方のパラメータ名をサポート: statusType と status
-        let statusIdRaw = payload.parameters[.statusType] ?? payload.parameters[.status]
-        guard let statusIdRaw else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistanceMultiplier の statusType/status が無効です")
-        }
-        let statusId = UInt8(statusIdRaw)
+        let statusIds = try StatusResistanceTargetResolver.resolveTargets(payload: payload, context: context)
         let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
-        var entry = accumulator.status.statusResistances[statusId] ?? .neutral
-        entry.multiplier *= multiplier
-        accumulator.status.statusResistances[statusId] = entry
+        for statusId in statusIds {
+            var entry = accumulator.status.statusResistances[statusId] ?? .neutral
+            entry.multiplier *= multiplier
+            accumulator.status.statusResistances[statusId] = entry
+        }
     }
 }
 
@@ -56,16 +79,13 @@ enum StatusResistancePercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // 両方のパラメータ名をサポート: statusType と status
-        let statusIdRaw = payload.parameters[.statusType] ?? payload.parameters[.status]
-        guard let statusIdRaw else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistancePercent の statusType/status が無効です")
-        }
-        let statusId = UInt8(statusIdRaw)
+        let statusIds = try StatusResistanceTargetResolver.resolveTargets(payload: payload, context: context)
         let value = try payload.requireValue(.valuePercent, skillId: context.skillId, effectIndex: context.effectIndex)
-        var entry = accumulator.status.statusResistances[statusId] ?? .neutral
-        entry.additivePercent += value
-        accumulator.status.statusResistances[statusId] = entry
+        for statusId in statusIds {
+            var entry = accumulator.status.statusResistances[statusId] ?? .neutral
+            entry.additivePercent += value
+            accumulator.status.statusResistances[statusId] = entry
+        }
     }
 }
 
