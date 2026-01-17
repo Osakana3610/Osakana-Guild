@@ -153,6 +153,7 @@ extension BattleTurnEngine {
 
         // 前列以外（row > 0）の場合のみ「かばう」が発動
         guard targetRow > 0 else { return nil }
+        let targetHPPercent = Double(target.currentHP) / Double(max(1, target.snapshot.maxHP)) * 100.0
 
         let allies: [BattleActor] = targetSide == .player ? context.players : context.enemies
         var coverCandidates: [(Int, Double)] = []  // (index, weight)
@@ -160,6 +161,12 @@ extension BattleTurnEngine {
         for (index, ally) in allies.enumerated() {
             guard ally.isAlive else { continue }
             guard ally.skillEffects.misc.coverRowsBehind else { continue }
+            if let condition = ally.skillEffects.misc.coverRowsBehindCondition {
+                switch condition {
+                case .allyHPBelow50:
+                    guard targetHPPercent < 50.0 else { continue }
+                }
+            }
             guard ally.formationSlot.formationRow < targetRow else { continue }  // ターゲットより前列にいる
             let weight = max(0.01, ally.skillEffects.misc.targetingWeight)
             coverCandidates.append((index, weight))

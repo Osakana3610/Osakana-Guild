@@ -868,6 +868,7 @@ nonisolated struct BattleActor: Sendable {
             var retreatChancePercent: Double?
             var targetingWeight: Double  // 狙われ率の重み（デフォルト1.0、高いほど狙われやすい）
             var coverRowsBehind: Bool    // 後列の味方をかばう（前列にいる場合）
+            var coverRowsBehindCondition: SkillConditionType?
 
             nonisolated static let neutral = Misc(
                 healingGiven: 1.0,
@@ -895,7 +896,8 @@ nonisolated struct BattleActor: Sendable {
                 retreatTurn: nil,
                 retreatChancePercent: nil,
                 targetingWeight: 1.0,
-                coverRowsBehind: false
+                coverRowsBehind: false,
+                coverRowsBehindCondition: nil
             )
         }
 

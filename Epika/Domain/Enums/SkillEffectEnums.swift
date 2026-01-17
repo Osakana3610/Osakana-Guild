@@ -73,3 +73,11 @@ enum StackingType: UInt8, Sendable, Hashable {
     case additive = 2
     case multiply = 3
 }
+
+// MARK: - SkillConditionType
+
+/// スキル条件タイプ
+/// rawValue: EnumMappings.conditionType
+enum SkillConditionType: UInt8, Sendable, Hashable {
+    case allyHPBelow50 = 1
+}

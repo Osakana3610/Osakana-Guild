@@ -321,12 +321,12 @@ extension BattleTurnEngine {
         if let attacker,
            let defenderLevel = defender.level,
            let attackerLevel = attacker.level,
-           defender.skillEffects.damage.levelComparisonDamageTakenPercent > 0 {
+           defender.skillEffects.damage.levelComparisonDamageTakenPercent != 0 {
             let levelDiff = defenderLevel - attackerLevel
             if levelDiff > 0 {
-                let reductionPercent = defender.skillEffects.damage.levelComparisonDamageTakenPercent * Double(levelDiff)
-                let reductionMultiplier = max(0.0, 1.0 - reductionPercent / 100.0)
-                result *= reductionMultiplier
+                let adjustmentPercent = defender.skillEffects.damage.levelComparisonDamageTakenPercent * Double(levelDiff)
+                let adjustmentMultiplier = max(0.0, 1.0 + adjustmentPercent / 100.0)
+                result *= adjustmentMultiplier
             }
         }
 

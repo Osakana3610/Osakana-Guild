@@ -148,7 +148,8 @@ struct ActorEffectsAccumulator {
             retreatTurn: misc.retreatTurn,
             retreatChancePercent: misc.retreatChancePercent,
             targetingWeight: misc.targetingWeight,
-            coverRowsBehind: misc.coverRowsBehind
+            coverRowsBehind: misc.coverRowsBehind,
+            coverRowsBehindCondition: misc.coverRowsBehindCondition
         )
 
         return BattleActor.SkillEffects(
@@ -314,4 +315,5 @@ struct MiscAccumulator {
     var retreatChancePercent: Double?
     var targetingWeight: Double = 1.0
     var coverRowsBehind: Bool = false
+    var coverRowsBehindCondition: SkillConditionType?
 }
