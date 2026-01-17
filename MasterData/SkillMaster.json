@@ -9948,7 +9948,7 @@
         "familyId": "statusResistanceMultiplier.instantDeath",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": 3
+          "statusType": "instantDeath"
         },
         "variants": [
           {
@@ -14600,7 +14600,7 @@
         "familyId": "statusResistanceMultiplier.instantDeath",
         "effectType": "statusResistanceMultiplier",
         "parameters": {
-          "status": 3
+          "statusType": "instantDeath"
         },
         "variants": [
           {
