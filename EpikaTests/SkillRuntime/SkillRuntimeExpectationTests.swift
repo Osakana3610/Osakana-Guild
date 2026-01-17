@@ -1267,7 +1267,16 @@ private extension SkillRuntimeExpectationTests {
             let pair = try computeCombatPair(skills: [segmentSkill])
             let base = Double(pair.base.combat.criticalChancePercent)
             let modified = Double(pair.modified.combat.criticalChancePercent)
-            let expectedDelta = Double(Int(points.rounded(.towardZero)))
+            let agility = pair.base.attributes.agility
+            let luck = pair.base.attributes.luck
+            let critSource = max(Double(agility + luck * 2 - 45), 0.0)
+            let baseRaw = critSource * CombatFormulas.criticalChanceCoefficient
+            let baseInt = Int(baseRaw.rounded(.towardZero))
+            let modifiedInt = Int((baseRaw + points).rounded(.towardZero))
+            let luckMultiplier = luck >= 21 ? CombatFormulas.statBonusMultiplier(value: luck) : 1.0
+            let baseFinal = Int(min(Double(baseInt) * luckMultiplier, 100.0).rounded(.towardZero))
+            let modifiedFinal = Int(min(Double(modifiedInt) * luckMultiplier, 100.0).rounded(.towardZero))
+            let expectedDelta = Double(modifiedFinal - baseFinal)
             rawData["criticalDelta"] = modified - base
             try assertApproxEqual(modified - base, expectedDelta, tolerance: 0.6, message: "criticalChancePercentAdditive")
 
