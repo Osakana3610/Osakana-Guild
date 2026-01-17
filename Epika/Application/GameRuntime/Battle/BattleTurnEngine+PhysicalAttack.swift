@@ -368,6 +368,9 @@ extension BattleTurnEngine {
         var criticalHits = 0
         var defenderEvaded = false
         var accumulatedAbsorptionDamage = 0
+        var parryTriggered = false
+        var shieldBlockTriggered = false
+        var stopAfterFirstHit = false
 
         let defenderIdx: UInt16
         if let defSide = defenderSide, let defIndex = defenderIndex {
@@ -381,24 +384,11 @@ extension BattleTurnEngine {
 
             if hitIndex == 1 {
                 if shouldTriggerShieldBlock(defender: &defenderCopy, attacker: attackerCopy, context: &context) {
-                    return AttackResult(attacker: attackerCopy,
-                                        defender: defenderCopy,
-                                        totalDamage: totalDamage,
-                                        successfulHits: successfulHits,
-                                        criticalHits: criticalHits,
-                                        wasDodged: false,
-                                        wasParried: false,
-                                        wasBlocked: true)
-                }
-                if shouldTriggerParry(defender: &defenderCopy, attacker: attackerCopy, context: &context) {
-                    return AttackResult(attacker: attackerCopy,
-                                        defender: defenderCopy,
-                                        totalDamage: totalDamage,
-                                        successfulHits: successfulHits,
-                                        criticalHits: criticalHits,
-                                        wasDodged: false,
-                                        wasParried: true,
-                                        wasBlocked: false)
+                    shieldBlockTriggered = true
+                    stopAfterFirstHit = true
+                } else if shouldTriggerParry(defender: &defenderCopy, attacker: attackerCopy, context: &context) {
+                    parryTriggered = true
+                    stopAfterFirstHit = true
                 }
             }
 
@@ -411,6 +401,7 @@ extension BattleTurnEngine {
             if !forceHit && !BattleRandomSystem.probability(hitChance, random: &context.random) {
                 defenderEvaded = true
                 entryBuilder.addEffect(kind: .physicalEvade, target: defenderIdx)
+                if stopAfterFirstHit { break }
                 continue
             }
 
@@ -457,6 +448,7 @@ extension BattleTurnEngine {
                 }
                 break
             }
+            if stopAfterFirstHit { break }
         }
 
         if accumulatedAbsorptionDamage > 0 {
@@ -476,8 +468,8 @@ extension BattleTurnEngine {
                             successfulHits: successfulHits,
                             criticalHits: criticalHits,
                             wasDodged: wasDodged,
-                            wasParried: false,
-                            wasBlocked: false)
+                            wasParried: parryTriggered,
+                            wasBlocked: shieldBlockTriggered)
     }
 
     nonisolated static func performReverseHealingAttack(attackerSide: ActorSide,
