@@ -84,8 +84,11 @@ enum ExtraActionHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        var chance = payload.value[.chancePercent] ?? payload.value[.valuePercent] ?? 100.0
-        chance += payload.scaledValue(from: context.actorStats)
+        let chance = try payload.resolvedChancePercent(
+            stats: context.actorStats,
+            skillId: context.skillId,
+            effectIndex: context.effectIndex
+        ) ?? 100.0
         let count = Int((payload.value[.count] ?? 1.0).rounded(FloatingPointRoundingRule.towardZero))
         let clampedCount = max(0, count)
         guard chance > 0, clampedCount > 0 else {
@@ -182,11 +185,16 @@ enum ReactionHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
+        let chance = try payload.resolvedChancePercent(
+            stats: context.actorStats,
+            skillId: context.skillId,
+            effectIndex: context.effectIndex
+        ) ?? 100.0
         if let reaction = BattleActor.SkillEffects.Reaction.make(
             from: payload,
             skillName: context.skillName,
             skillId: context.skillId,
-            stats: context.actorStats
+            chancePercent: chance
         ) {
             accumulator.combat.reactions.append(reaction)
         }
@@ -247,8 +255,13 @@ enum SpecialAttackHandler: SkillEffectHandler {
             )
         }
 
-        var chance = payload.value[.chancePercent].map { Int($0.rounded(FloatingPointRoundingRule.towardZero)) } ?? 50
-        chance += Int(payload.scaledValue(from: context.actorStats).rounded(FloatingPointRoundingRule.towardZero))
+        let resolvedChance = try payload.resolvedChancePercent(
+            stats: context.actorStats,
+            skillId: context.skillId,
+            effectIndex: context.effectIndex
+        )
+        let baseChance = resolvedChance.map { Int($0.rounded(.towardZero)) } ?? 50
+        let chance = max(0, min(100, baseChance))
 
         // mode: 1=preemptive (EnumMappings.effectModeType)
         let preemptive = payload.parameters[.mode] == 1
@@ -340,8 +353,11 @@ enum EnemyActionDebuffChanceHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        var baseChance = payload.value[.chancePercent] ?? 0.0
-        baseChance += payload.scaledValue(from: context.actorStats)
+        let baseChance = try payload.resolvedChancePercent(
+            stats: context.actorStats,
+            skillId: context.skillId,
+            effectIndex: context.effectIndex
+        ) ?? 0.0
         let reduction = Int((payload.value[.reduction] ?? 1.0).rounded(FloatingPointRoundingRule.towardZero))
         accumulator.combat.enemyActionDebuffs.append(.init(baseChancePercent: baseChance, reduction: max(1, reduction)))
     }

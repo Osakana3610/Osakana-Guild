@@ -314,6 +314,8 @@ extension BattleContext {
         case allyDamagedPhysical(side: ActorSide, defenderIndex: Int, attacker: ActorReference)
         case selfKilledEnemy(side: ActorSide, actorIndex: Int, killedEnemy: ActorReference)  // 敵を倒した時
         case allyMagicAttack(side: ActorSide, casterIndex: Int)  // 味方が魔法攻撃した時
+        case selfAttackNoKill(side: ActorSide, actorIndex: Int, target: ActorReference)  // 攻撃で敵を倒せなかった時
+        case selfMagicAttack(side: ActorSide, casterIndex: Int)  // 自分が魔法攻撃した時
 
         var defenderIndex: Int? {
             switch self {
@@ -324,6 +326,8 @@ extension BattleContext {
             case .allyDamagedPhysical(_, let defenderIndex, _): return defenderIndex
             case .selfKilledEnemy: return nil
             case .allyMagicAttack: return nil
+            case .selfAttackNoKill: return nil
+            case .selfMagicAttack: return nil
             }
         }
 
@@ -336,6 +340,8 @@ extension BattleContext {
             case .allyDamagedPhysical(_, _, let attacker): return attacker
             case .selfKilledEnemy(_, _, let killedEnemy): return killedEnemy
             case .allyMagicAttack: return nil
+            case .selfAttackNoKill(_, _, let target): return target
+            case .selfMagicAttack: return nil
             }
         }
     }

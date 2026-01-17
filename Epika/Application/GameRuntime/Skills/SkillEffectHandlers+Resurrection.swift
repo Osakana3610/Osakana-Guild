@@ -138,6 +138,18 @@ enum ResurrectionPassiveHandler: SkillEffectHandler {
         switch typeRaw {
         case 1: // betweenFloors
             accumulator.resurrection.resurrectionPassiveBetweenFloors = true
+            let chance = try payload.resolvedChancePercent(
+                stats: context.actorStats,
+                skillId: context.skillId,
+                effectIndex: context.effectIndex
+            )
+            if let chance {
+                if let current = accumulator.resurrection.resurrectionPassiveBetweenFloorsChancePercent {
+                    accumulator.resurrection.resurrectionPassiveBetweenFloorsChancePercent = max(current, chance)
+                } else {
+                    accumulator.resurrection.resurrectionPassiveBetweenFloorsChancePercent = chance
+                }
+            }
         default:
             throw RuntimeError.invalidConfiguration(
                 reason: "Skill \(context.skillId)#\(context.effectIndex) resurrectionPassive の type が不正です: \(typeRaw)"

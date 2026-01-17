@@ -237,9 +237,12 @@ enum MagicNullifyChancePercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        var value = payload.value[.valuePercent] ?? 0.0
-        value += payload.scaledValue(from: context.actorStats)
-        accumulator.damage.magicNullifyChancePercent = max(accumulator.damage.magicNullifyChancePercent, value)
+        let chance = try payload.resolvedChancePercent(
+            stats: context.actorStats,
+            skillId: context.skillId,
+            effectIndex: context.effectIndex
+        ) ?? 0.0
+        accumulator.damage.magicNullifyChancePercent = max(accumulator.damage.magicNullifyChancePercent, chance)
     }
 }
 

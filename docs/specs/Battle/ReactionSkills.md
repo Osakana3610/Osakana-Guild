@@ -25,7 +25,9 @@
 ```swift
 struct Reaction {
     trigger: ReactionTrigger      // 発動トリガー
-    chancePercent: Double         // 発動確率
+    chancePercent: Double?        // 固定発動率（固定確率の時に使用）
+    baseChancePercent: Double?    // 発動率係数（scalingStat とセット）
+    scalingStat: BaseStat?        // 発動率の参照ステータス（例: 力）
     damageType: BattleDamageType  // 物理/魔法/ブレス
     attackCountMultiplier: Double // 攻撃回数乗数
     criticalRateMultiplier: Double // 必殺率乗数
@@ -57,10 +59,17 @@ struct Reaction {
 ## 発動確率
 
 ```
-発動判定: percentChance(chancePercent)
+固定確率: percentChance(chancePercent)
+能力依存: percentChance( scalingStat * baseChancePercent )
 ```
 
 chancePercent が 100 なら必ず発動。
+
+### ルール
+
+- 固定確率は chancePercent を使う。
+- 能力依存は baseChancePercent + scalingStat を使う（baseChancePercent は係数）。
+- chancePercent と baseChancePercent を同時に使わない。
 
 ## 攻撃性能の乗数
 

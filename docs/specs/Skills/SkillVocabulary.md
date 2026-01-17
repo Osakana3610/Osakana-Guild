@@ -24,6 +24,9 @@
 | damage.received | 受けるダメージ | 防御側が受けるダメージの表現 | damage | 被ダメージ,被ダメ,与ダメージ | スキル名の短縮表記として「被ダメ」は許容。説明/ログ/L10nでは禁止。 |
 | chance.expression | X%の確率で | 確率を明示する表現 | chance | 確率で |  |
 | chance.certain | 必ず | 100%の確率を表す表現 | chance | 確定で |  |
+| chance.basePercent | 発動率係数 | baseChancePercent に対応する係数（参照ステータス1につき何%か） | chance | 初期確率,ベース確率 | scalingStat とセットで使用。固定確率には使わない |
+| chance.percent | 発動率 | chancePercent に対応する固定の発動率 | chance | 確率,発動確率 | scalingStat を使わない固定確率 |
+| chance.scalingStat | 発動率の参照ステータス | scalingStat に対応する参照能力値 | chance |  | baseChancePercent とセットで使用（例: 力） |
 | battle.damage.physical | 物理攻撃/物理ダメージ | 物理属性の攻撃・ダメージ表現 | battle | 物理 |  |
 | battle.damage.magical | 魔法攻撃/魔法ダメージ | 魔法属性の攻撃・ダメージ表現 | battle | 魔法 |  |
 | battle.damage.breath | ブレス攻撃/ブレスダメージ | ブレス属性の攻撃・ダメージ表現 | battle | ブレス |  |

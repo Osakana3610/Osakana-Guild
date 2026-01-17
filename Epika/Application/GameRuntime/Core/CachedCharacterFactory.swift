@@ -174,6 +174,15 @@ enum CachedCharacterFactory {
         )
 
         let calcResult = try CombatStatCalculator.calculate(for: calcContext)
+        let actorStats = ActorStats(
+            strength: calcResult.attributes.strength,
+            wisdom: calcResult.attributes.wisdom,
+            spirit: calcResult.attributes.spirit,
+            vitality: calcResult.attributes.vitality,
+            agility: calcResult.attributes.agility,
+            luck: calcResult.attributes.luck
+        )
+        let actorEffects = try UnifiedSkillEffectCompiler(skills: learnedSkills, stats: actorStats).actorEffects
 
         // isMartialEligible判定
         let isMartialEligible = calcResult.combat.isMartialEligible ||
@@ -182,8 +191,16 @@ enum CachedCharacterFactory {
         // 蘇生パッシブチェック
         var resolvedCurrentHP = min(input.currentHP, calcResult.hitPoints.maximum)
         if resolvedCurrentHP <= 0 {
-            if skillCompiler.actorEffects.resurrection.passiveBetweenFloors {
+            let resurrection = actorEffects.resurrection
+            if resurrection.passiveBetweenFloors {
+                if let chance = resurrection.passiveBetweenFloorsChancePercent {
+                    let cappedChance = max(0, min(100, Int(chance.rounded(.down))))
+                    if cappedChance >= 100 {
+                        resolvedCurrentHP = max(1, calcResult.hitPoints.maximum)
+                    }
+                } else {
                 resolvedCurrentHP = max(1, calcResult.hitPoints.maximum)
+                }
             }
         }
 

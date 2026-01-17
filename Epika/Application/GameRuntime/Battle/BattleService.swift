@@ -119,10 +119,9 @@ enum BattleService {
                                                       skillDefinitions: masterData.skillsById,
                                                       enemySkillDefinitions: masterData.enemySkillsById,
                                                       random: &mutableRandom)
-        random = mutableRandom
 
-        let revivedPlayers = applyBetweenFloorsResurrection(to: battleResult.players)
-        let revivedEnemies = applyBetweenFloorsResurrection(to: battleResult.enemies)
+        let revivedPlayers = applyBetweenFloorsResurrection(to: battleResult.players, random: &mutableRandom)
+        let revivedEnemies = applyBetweenFloorsResurrection(to: battleResult.enemies, random: &mutableRandom)
 
         let survivingPartyIds = revivedPlayers
             .filter { $0.isAlive }
@@ -139,6 +138,8 @@ enum BattleService {
         default: result = .defeat
         }
 
+        random = mutableRandom
+
         return Resolution(result: result,
                           survivingAllyIds: survivingPartyIds,
                           turns: Int(battleResult.battleLog.turns),
@@ -152,10 +153,19 @@ enum BattleService {
 }
 
 private extension BattleService {
-    nonisolated static func applyBetweenFloorsResurrection(to actors: [BattleActor]) -> [BattleActor] {
+    nonisolated static func applyBetweenFloorsResurrection(
+        to actors: [BattleActor],
+        random: inout GameRandomSource
+    ) -> [BattleActor] {
         actors.map { actor in
             guard !actor.isAlive,
                   actor.skillEffects.resurrection.passiveBetweenFloors else {
+                return actor
+            }
+
+            let rawChance = actor.skillEffects.resurrection.passiveBetweenFloorsChancePercent ?? 100.0
+            let chance = max(0, min(100, Int(rawChance.rounded(.down))))
+            guard chance > 0, BattleRandomSystem.percentChance(chance, random: &random) else {
                 return actor
             }
 

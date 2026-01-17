@@ -890,7 +890,8 @@
             },
             "description": "人型の敵へのすべての攻撃で与えるダメージが2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "damageDealtMultiplierAgainst.monster",
@@ -957,7 +958,8 @@
             },
             "description": "魔物の敵へのすべての攻撃で与えるダメージが2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "damageDealtMultiplierAgainst.undead",
@@ -1025,7 +1027,8 @@
             },
             "description": "不死の敵へのすべての攻撃で与えるダメージが2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "damageDealtMultiplierAgainst.dragon",
@@ -1092,7 +1095,8 @@
             },
             "description": "竜族の敵へのすべての攻撃で与えるダメージが2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "damageDealtMultiplierAgainst.divine",
@@ -1143,7 +1147,8 @@
             },
             "description": "神魔の敵へのすべての攻撃で与えるダメージが2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rowProfile.near",
@@ -1168,7 +1173,8 @@
             },
             "description": "近接攻撃に適性を持つ。前列での攻撃力が上がる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rowProfile.far",
@@ -1193,7 +1199,8 @@
             },
             "description": "遠距離攻撃に適性を持つ。後列からでも攻撃力が下がらない。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rowProfile.mixed",
@@ -1239,7 +1246,8 @@
             },
             "description": "遠近混合の攻撃特性を持つ。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rowProfile.balanced",
@@ -1285,7 +1293,8 @@
             },
             "description": "遠近両用の攻撃特性を持つ。前列でも後列でも攻撃力が安定する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "additionalDamageScore.additive",
@@ -1459,7 +1468,8 @@
             },
             "description": "攻撃時に追加で25ダメージを与える。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "additionalDamageScore.multiplier",
@@ -1601,7 +1611,8 @@
             },
             "description": "追加ダメージが2.5倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "spellPowerPercent.general",
@@ -1815,7 +1826,8 @@
             },
             "description": "魔法攻撃の威力が50%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "spellPowerMultiplier.general",
@@ -1917,7 +1929,8 @@
             },
             "description": "魔法攻撃の威力が5.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "tacticMagicPowerAmplify",
@@ -1959,7 +1972,8 @@
             },
             "description": "20ターン目に味方全員の魔法攻撃の威力が5.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "tacticBreathPowerAmplify",
@@ -2019,7 +2033,8 @@
             },
             "description": "20ターン目に味方全員のブレス攻撃の威力が10.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "spellSpecificMultiplier.spell.mage.magic_arrow",
@@ -2553,7 +2568,8 @@
             },
             "description": "必殺率が30増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "criticalChancePercent.cap",
@@ -2599,7 +2615,8 @@
             },
             "description": "必殺率の上限が50%になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "criticalDamagePercent",
@@ -2789,7 +2806,8 @@
             },
             "description": "必殺ダメージが50%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "criticalDamageMultiplier",
@@ -2851,7 +2869,8 @@
             },
             "description": "必殺ダメージが2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "criticalChancePercent.max",
@@ -2897,7 +2916,8 @@
             },
             "description": "必殺率の上限が90%になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "criticalChancePercent.maxDelta",
@@ -2943,7 +2963,8 @@
             },
             "description": "必殺率の上限が25%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "statConversionPercent.physicalDefenseScore.attackAndHit",
@@ -3084,7 +3105,8 @@
             ],
             "description": "攻撃力と命中が防御力の30%だけ増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "statConversionLinear.attackCount.criticalChancePercent",
@@ -3113,7 +3135,8 @@
             ],
             "description": "攻撃回数が半分になり、半減後の攻撃回数×1%だけ必殺率が増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "statConversionLinear.attackCount.physicalDefenseScore",
@@ -3142,7 +3165,8 @@
             ],
             "description": "攻撃回数が半分になり、半減後の攻撃回数×40だけ防御力が増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "statConversionLinear.attackCount.evasionScore",
@@ -3171,7 +3195,8 @@
             ],
             "description": "攻撃回数が半分になり、半減後の攻撃回数×40だけ回避能力が増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "statConversionLinear.attackCount.magicalAttackScore",
@@ -3200,7 +3225,8 @@
             ],
             "description": "攻撃回数が半分になり、半減後の攻撃回数×40だけ魔法攻撃力が増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "statConversionLinear.attackCount.magicalDefenseScore",
@@ -3229,7 +3255,8 @@
             ],
             "description": "攻撃回数が半分になり、半減後の攻撃回数×40だけ魔法防御力が増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "statConversionLinear.attackCount.magicalHealingScore",
@@ -3258,7 +3285,8 @@
             ],
             "description": "攻撃回数が半分になり、半減後の攻撃回数×60だけ魔法回復量が増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "explorationTimeMultiplier.general",
@@ -3296,7 +3324,8 @@
             },
             "description": "探索時間が0.8倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "explorationTimeMultiplier.babel",
@@ -3399,7 +3428,8 @@
             },
             "description": "獲得経験値が100.0%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rewardExperience.multiplier",
@@ -3549,7 +3579,8 @@
             },
             "description": "獲得経験値が4.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rewardGold.percent",
@@ -3619,7 +3650,8 @@
             },
             "description": "獲得GPが100.0%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rewardGold.multiplier",
@@ -3729,7 +3761,8 @@
             },
             "description": "獲得GPが4.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rewardTitle.percent",
@@ -3775,7 +3808,8 @@
             },
             "description": "称号付与率が100.0%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rewardTitle.multiplier",
@@ -3877,7 +3911,8 @@
             },
             "description": "称号付与率が10.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rewardItem.percent",
@@ -3955,7 +3990,8 @@
             },
             "description": "アイテム獲得率が40.0%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "rewardItem.multiplier",
@@ -4057,7 +4093,8 @@
             },
             "description": "アイテム獲得率が3.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "tacticSpellAmplify.magic_arrow",
@@ -4413,7 +4450,8 @@
             },
             "description": "パーティヒールの使用回数の上限が3になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "spellCharges.tacticExtra",
@@ -4427,7 +4465,8 @@
             },
             "description": "戦闘開始時の魔法の使用回数が1増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       }
     ]
   },
@@ -4707,7 +4746,8 @@
             },
             "description": "ターン終了時に味方全員のHPが15%回復する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "endOfTurnSelfHP.heal",
@@ -4793,7 +4833,8 @@
             },
             "description": "ターン終了時に自分のHPが50%回復する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "endOfTurnSelfHP.damage",
@@ -4879,7 +4920,8 @@
             },
             "description": "ターン終了時に自分のHPが50%減少する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "partyAttack.flags",
@@ -4909,7 +4951,8 @@
             },
             "description": "吸血衝動を抑制する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "partyAttack.targets",
@@ -4970,7 +5013,8 @@
             },
             "description": "特定の味方（）を保護する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "talent.stat",
@@ -5119,7 +5163,8 @@
             },
             "description": "ステータスの才能補正が1.5倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "incompetence.stat",
@@ -5268,7 +5313,8 @@
             },
             "description": "ステータスが機能しなくなる（無能化）。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "absent.stat",
@@ -5417,7 +5463,8 @@
             },
             "description": "ステータスが1に固定される。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "actionOrder.shuffle",
@@ -5431,7 +5478,8 @@
             },
             "description": "味方の行動順序をシャッフルする。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "equipmentSlots.additive",
@@ -5485,7 +5533,8 @@
             },
             "description": "装備枠が5枠増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "equipmentSlots.multiplier",
@@ -5507,7 +5556,8 @@
             },
             "description": "スロット数が2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "equipmentStatMultiplier.thin_sword",
@@ -8283,7 +8333,8 @@
             },
             "description": "ブレスの使用回数が1増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "breath.power",
@@ -8337,7 +8388,7 @@
             "id": 882,
             "label": "[混乱付与] 小",
             "value": {
-              "baseChancePercent": 10
+              "chancePercent": 10
             },
             "description": "攻撃時に10%の確率で敵を混乱状態にする。"
           },
@@ -8345,7 +8396,7 @@
             "id": 883,
             "label": "[混乱付与] 中",
             "value": {
-              "baseChancePercent": 20
+              "chancePercent": 20
             },
             "description": "攻撃時に20%の確率で敵を混乱状態にする。"
           },
@@ -8353,7 +8404,7 @@
             "id": 884,
             "label": "[混乱付与] 大",
             "value": {
-              "baseChancePercent": 30
+              "chancePercent": 30
             },
             "description": "攻撃時に30%の確率で敵を混乱状態にする。"
           }
@@ -8403,7 +8454,8 @@
             },
             "description": "25%の確率で暴走状態になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "procMultiplier.general",
@@ -8425,7 +8477,8 @@
             },
             "description": "すべての特殊効果の発動率が1.5倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "reverseHealing.general",
@@ -8439,7 +8492,8 @@
             },
             "description": "通常攻撃は魔法回復量に応じた魔法攻撃に置き換わる。スキル行動では発動しない。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "specialAttack.specialA",
@@ -8456,7 +8510,8 @@
             },
             "description": "50%の確率で首狩りを発動する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "specialAttack.specialB",
@@ -8473,7 +8528,8 @@
             },
             "description": "50%の確率で連続攻撃を発動する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "specialAttack.specialC",
@@ -8490,7 +8546,8 @@
             },
             "description": "50%の確率で必殺を発動する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "specialAttack.specialD",
@@ -8507,7 +8564,8 @@
             },
             "description": "50%の確率で会心の一撃を発動する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "spellSpecificTakenMultiplier.fireball",
@@ -8696,7 +8754,8 @@
             },
             "description": "一撃で最大HPの30%以上のダメージを受けた時、25%の確率で魔力が暴走する。周囲に魔法ダメージを与え、自身が混乱する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "runaway.damage",
@@ -8720,7 +8779,8 @@
             },
             "description": "一撃で最大HPの30%以上のダメージを受けた時、25%の確率でダメージが暴走する。周囲に物理ダメージを与え、自身が混乱する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "extraAction.general",
@@ -8753,7 +8813,8 @@
             },
             "description": "20%の確率で行動回数が2回増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "reactionNextTurn.general",
@@ -8775,7 +8836,8 @@
             },
             "description": "次のターンの行動回数が2回増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "sacrificeRite.general",
@@ -8797,7 +8859,8 @@
             },
             "description": "3ターンごとに味方1人を犠牲にして能力を強化する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "retreatAtTurn.general",
@@ -8829,7 +8892,8 @@
             },
             "description": "50%の確率で撤退する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "specialAttack.specialE",
@@ -8846,7 +8910,8 @@
             },
             "description": "50%の確率で魔法攻撃を発動する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "damageTakenPercent.physical",
@@ -9158,7 +9223,8 @@
             },
             "description": "必殺攻撃で受けるダメージが2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "penetrationDamageTakenMultiplier.general",
@@ -9236,7 +9302,8 @@
             },
             "description": "貫通ダメージを受ける割合が5.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "counterAttackEvasionMultiplier.general",
@@ -9282,7 +9349,8 @@
             },
             "description": "反撃に対する回避率が0.5倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "damageTakenPercent.magical",
@@ -9942,7 +10010,8 @@
             },
             "description": "装備の劣化を5%〜15%修復する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "degradationRepairBoost.general",
@@ -9988,7 +10057,8 @@
             },
             "description": "劣化修復量が5%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "autoDegradationRepair.general",
@@ -10002,7 +10072,8 @@
             },
             "description": "ターン終了時に劣化修復が自動で発動する。回復量は劣化修復機能LvX・[+X%]修復機能強化に応じる。※劣化修復機能が必要。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "parry.general",
@@ -10032,7 +10103,8 @@
             },
             "description": "スキル【[戦術] パリィ】の成功率が30%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "shieldBlock.general",
@@ -10062,7 +10134,8 @@
             },
             "description": "スキル【[戦術] 盾防御】の成功率が30%増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "dodgeCap.general",
@@ -10077,7 +10150,8 @@
             },
             "description": "回避率の上限が97%になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "absorption.general",
@@ -10146,7 +10220,8 @@
             },
             "description": "与えたダメージの40%をHPとして吸収する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "procRate.multiplier.counter",
@@ -10494,7 +10569,8 @@
             },
             "description": "キャラクターの成長率が2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "statAdditive.physicalAttackScore",
@@ -12192,7 +12268,8 @@
             },
             "description": "攻撃回数が10回増加する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "attackCount.multiplier",
@@ -12214,7 +12291,8 @@
             },
             "description": "攻撃回数が2.0倍になる。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "statConversionPercent.physicalAttackScore.maxHP",
@@ -13430,7 +13508,8 @@
             },
             "description": "行動順が2.0倍になる（小さいほど遅くなる）。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "martialBonusPercent.martial",
@@ -14094,10 +14173,10 @@
             "id": 1465,
             "label": "[反撃] 仲間撃破時反撃",
             "value": {
-              "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
               "criticalChancePercentMultiplier": 0.5,
-              "accuracyMultiplier": 1.0
+              "accuracyMultiplier": 1.0,
+              "chancePercent": 100
             },
             "description": "味方が倒された時、倒した敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
           }
@@ -14117,10 +14196,10 @@
             "id": 1466,
             "label": "[反撃] 被弾時反撃",
             "value": {
-              "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
               "criticalChancePercentMultiplier": 0.5,
-              "accuracyMultiplier": 1.0
+              "accuracyMultiplier": 1.0,
+              "chancePercent": 100
             },
             "description": "物理攻撃を受けた時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
           },
@@ -14128,10 +14207,10 @@
             "id": 1467,
             "label": "[反撃] 被弾時反撃（上級）",
             "value": {
-              "baseChancePercent": 100,
               "attackCountMultiplier": 0.4,
               "criticalChancePercentMultiplier": 0.7,
-              "accuracyMultiplier": 1.0
+              "accuracyMultiplier": 1.0,
+              "chancePercent": 100
             },
             "description": "物理攻撃を受けた時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の40%、必殺率は通常の70%。"
           }
@@ -14151,10 +14230,10 @@
             "id": 1468,
             "label": "[反撃] 魔法被弾時反撃",
             "value": {
-              "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
               "criticalChancePercentMultiplier": 0.5,
-              "accuracyMultiplier": 1.0
+              "accuracyMultiplier": 1.0,
+              "chancePercent": 100
             },
             "description": "魔法攻撃を受けた時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
           }
@@ -14175,10 +14254,10 @@
             "id": 1469,
             "label": "[反撃] 後列護衛反撃",
             "value": {
-              "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
               "criticalChancePercentMultiplier": 0.5,
-              "accuracyMultiplier": 1.0
+              "accuracyMultiplier": 1.0,
+              "chancePercent": 100
             },
             "description": "後列の味方が物理攻撃を受けた時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
           }
@@ -14198,10 +14277,10 @@
             "id": 1470,
             "label": "[反撃] 回避時反撃",
             "value": {
-              "baseChancePercent": 100,
               "attackCountMultiplier": 0.3,
               "criticalChancePercentMultiplier": 0.5,
-              "accuracyMultiplier": 1.0
+              "accuracyMultiplier": 1.0,
+              "chancePercent": 100
             },
             "description": "物理攻撃を回避した時、攻撃してきた敵へ必ず物理反撃をする。攻撃回数は通常の30%、必殺率は通常の50%。"
           },
@@ -14219,7 +14298,7 @@
                   "requiresMartial": "true"
                 },
                 "value": {
-                  "baseChancePercent": 100,
+                  "chancePercent": 100,
                   "attackCountMultiplier": 0.3,
                   "criticalChancePercentMultiplier": 0.5,
                   "accuracyMultiplier": 1.0
@@ -14246,7 +14325,8 @@
             },
             "description": "階層移動時に自動で蘇生する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "resurrection.forced",
@@ -14261,7 +14341,8 @@
             },
             "description": "戦闘不能になった時、1回だけ蘇生する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "resurrection.active",
@@ -14285,7 +14366,8 @@
             },
             "description": "戦闘不能になった時に蘇生する。蘇生時のHP回復量は魔法回復力に依存する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "resurrection.vitalized",
@@ -14302,7 +14384,8 @@
             },
             "description": "蘇生時に状態異常を解除し、スキルを思い出した状態で復活する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "resurrection.necromancer",
@@ -14317,7 +14400,8 @@
             },
             "description": "3ターンごとに戦闘不能の味方を1人蘇生する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "resurrection.instant",
@@ -14333,7 +14417,8 @@
             },
             "description": "戦闘不能になった瞬間に1回だけ蘇生する。"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "resurrection.save",
@@ -14348,7 +14433,8 @@
             },
             "description": "味方が戦闘不能になった時、僧侶魔法で救出する。"
           }
-        ]
+        ],
+        "parameters": {}
       }
     ]
   },
@@ -14631,7 +14717,8 @@
         "familyId": "race.pygmychum.extraAction",
         "effectType": "extraAction",
         "parameters": {
-          "trigger": "turnStart"
+          "trigger": "turnStart",
+          "scalingStat": "spirit"
         },
         "variants": [
           {
@@ -14639,7 +14726,8 @@
             "label": "[種族:ピグミーチャムLv99] 精神依存で味方行動+1",
             "value": {
               "count": 1,
-              "target": "ally"
+              "target": "ally",
+              "baseChancePercent": 0.5
             },
             "statScale": {
               "stat": "spirit",
@@ -14671,12 +14759,16 @@
       {
         "familyId": "race.gnome.spellRecovery",
         "effectType": "spellChargeRecoveryChance",
-        "parameters": {},
+        "parameters": {
+          "scalingStat": "spirit"
+        },
         "variants": [
           {
             "id": 64022,
             "label": "[種族:ノームLv99] 精神依存で魔法の使用回数回復",
-            "value": {},
+            "value": {
+              "baseChancePercent": 0.3
+            },
             "statScale": {
               "stat": "spirit",
               "percent": 0.3
@@ -14707,13 +14799,16 @@
       {
         "familyId": "race.dwarf.enemyDebuff",
         "effectType": "enemyActionDebuffChance",
-        "parameters": {},
+        "parameters": {
+          "scalingStat": "agility"
+        },
         "variants": [
           {
             "id": 64032,
             "label": "[種族:ドワーフLv99] 敏捷依存で敵行動-1",
             "value": {
-              "reduction": 1
+              "reduction": 1,
+              "baseChancePercent": 0.5
             },
             "statScale": {
               "stat": "agility",
@@ -14729,14 +14824,15 @@
         "parameters": {
           "trigger": "selfKilledEnemy",
           "action": "extraAttack",
-          "damageType": "physical"
+          "damageType": "physical",
+          "scalingStat": "agility"
         },
         "variants": [
           {
             "id": 64041,
             "label": "[種族:ダークエルフLv50] 敵撃破時、敏捷依存で再攻撃",
             "value": {
-              "baseChancePercent": 0
+              "baseChancePercent": 0.5
             },
             "statScale": {
               "stat": "agility",
@@ -14752,14 +14848,15 @@
         "parameters": {
           "trigger": "allyMagicAttack",
           "action": "physicalPursuit",
-          "damageType": "physical"
+          "damageType": "physical",
+          "scalingStat": "wisdom"
         },
         "variants": [
           {
             "id": 64042,
             "label": "[種族:ダークエルフLv99] 味方魔法後、知恵依存で追撃",
             "value": {
-              "baseChancePercent": 0
+              "baseChancePercent": 0.5
             },
             "statScale": {
               "stat": "wisdom",
@@ -14841,12 +14938,16 @@
       {
         "familyId": "race.psychic.magicNullify",
         "effectType": "magicNullifyChancePercent",
-        "parameters": {},
+        "parameters": {
+          "scalingStat": "wisdom"
+        },
         "variants": [
           {
             "id": 64071,
             "label": "[種族:サイキックLv50] 知恵依存で魔法無効",
-            "value": {},
+            "value": {
+              "baseChancePercent": 0.8
+            },
             "statScale": {
               "stat": "wisdom",
               "percent": 0.8
@@ -14858,12 +14959,16 @@
       {
         "familyId": "race.psychic.magicCrit",
         "effectType": "magicCriticalChancePercent",
-        "parameters": {},
+        "parameters": {
+          "scalingStat": "wisdom"
+        },
         "variants": [
           {
             "id": 64072,
             "label": "[種族:サイキックLv99] 知恵依存で魔法必殺率増",
-            "value": {},
+            "value": {
+              "baseChancePercent": 0.3
+            },
             "statScale": {
               "stat": "wisdom",
               "percent": 0.3
@@ -14947,13 +15052,16 @@
         "effectType": "specialAttack",
         "parameters": {
           "mode": "preemptive",
-          "type": "breath"
+          "type": "breath",
+          "scalingStat": "vitality"
         },
         "variants": [
           {
             "id": 64092,
             "label": "[種族:ドラゴニュートLv99] 体力依存で先制ブレス",
-            "value": {},
+            "value": {
+              "baseChancePercent": 0.5
+            },
             "statScale": {
               "stat": "vitality",
               "percent": 0.5
@@ -15066,12 +15174,16 @@
       {
         "familyId": "race.undead.autoResurrection",
         "effectType": "resurrectionPassive",
-        "parameters": {},
+        "parameters": {
+          "scalingStat": "vitality"
+        },
         "variants": [
           {
             "id": 64121,
             "label": "[種族:アンデッドマンLv50] 体力依存で自動蘇生",
-            "value": {},
+            "value": {
+              "baseChancePercent": 0.5
+            },
             "statScale": {
               "stat": "vitality",
               "percent": 0.5
@@ -15181,14 +15293,15 @@
         "parameters": {
           "trigger": "selfAttackNoKill",
           "action": "extraAttack",
-          "damageType": "physical"
+          "damageType": "physical",
+          "scalingStat": "strength"
         },
         "variants": [
           {
             "id": 64151,
             "label": "[種族:鬼Lv50] 未撃破時、力依存で再攻撃",
             "value": {
-              "baseChancePercent": 0
+              "baseChancePercent": 0.5
             },
             "statScale": {
               "stat": "strength",
@@ -15385,7 +15498,7 @@
             "id": 65013,
             "label": "[職業:剣士] 反撃 被ダメ時10%反撃",
             "value": {
-              "baseChancePercent": 10
+              "chancePercent": 10
             },
             "description": "物理攻撃を受けた時、10%の確率で物理反撃をする"
           }
@@ -15404,7 +15517,7 @@
             "id": 65014,
             "label": "[職業:剣士] 追撃 味方魔法後追撃",
             "value": {
-              "baseChancePercent": 20
+              "chancePercent": 20
             },
             "description": "味方が魔法攻撃をした後、20%の確率で物理追撃をする"
           }
@@ -15772,7 +15885,8 @@
             },
             "description": "味方が戦闘不能になった時、0%の確率でHP1%で救出する"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "job.mage.magicPower",
@@ -16165,7 +16279,7 @@
             "id": 65104,
             "label": "[職業:剣聖] 回避反撃",
             "value": {
-              "baseChancePercent": 50
+              "chancePercent": 50
             },
             "description": "物理攻撃を回避した時、50%の確率で物理反撃をする"
           }
@@ -16415,7 +16529,7 @@
             "id": 65134,
             "label": "[職業:忍者] 分身 回避時反撃",
             "value": {
-              "baseChancePercent": 40
+              "chancePercent": 40
             },
             "description": "物理攻撃を回避した時、40%の確率で物理反撃をする"
           }
@@ -16707,7 +16821,7 @@
             "id": 65173,
             "label": "[マスター:剣士] 反撃 被ダメ時18%反撃",
             "value": {
-              "baseChancePercent": 18
+              "chancePercent": 18
             },
             "description": "物理攻撃を受けた時、18%の確率で物理反撃をする"
           }
@@ -16726,7 +16840,7 @@
             "id": 65174,
             "label": "[マスター:剣士] 追撃 味方魔法後追撃35%",
             "value": {
-              "baseChancePercent": 35
+              "chancePercent": 35
             },
             "description": "味方が魔法攻撃をした後、35%の確率で物理追撃をする"
           }
@@ -17005,7 +17119,8 @@
             },
             "description": "味方が戦闘不能になった時、HP1%で救出する"
           }
-        ]
+        ],
+        "parameters": {}
       },
       {
         "familyId": "master.mage.amplify",
@@ -17271,7 +17386,7 @@
             "id": 65264,
             "label": "[マスター:剣聖] 回避反撃80%",
             "value": {
-              "baseChancePercent": 80
+              "chancePercent": 80
             },
             "description": "物理攻撃を回避した時、80%の確率で物理反撃をする"
           }
@@ -17421,7 +17536,7 @@
             "id": 65294,
             "label": "[マスター:忍者] 分身 回避時反撃70%",
             "value": {
-              "baseChancePercent": 70
+              "chancePercent": 70
             },
             "description": "物理攻撃を回避した時、70%の確率で物理反撃をする"
           }
