@@ -623,6 +623,26 @@
       "toleranceBasis": "決定的（不一致0件）",
       "testFile": "MasterDataLoadRegressionTests.swift",
       "testMethod": "testSkillFamilyExpectationsMatchRuntimePayloads"
+    },
+    {
+      "id": "SKILL-ALIGN-003",
+      "category": ["スキル", "整合性", "Runtime-Outputs"],
+      "description": "SkillFamilyExpectations.tsv とランタイム出力（計算・コンパイル結果）が一致しているか",
+      "formula": "全行一致、不一致数=0",
+      "expectedRange": { "min": 0, "max": 0 },
+      "toleranceBasis": "決定的（不一致0件）",
+      "testFile": "MasterDataLoadRegressionTests.swift",
+      "testMethod": "testSkillFamilyExpectationsMatchRuntimeOutputs"
+    },
+    {
+      "id": "SKILL-ALIGN-004",
+      "category": ["スキル", "整合性", "Runtime-Activation"],
+      "description": "SkillFamilyExpectations.tsv とランタイム発動条件/確率が一致しているか",
+      "formula": "全行一致、不一致数=0",
+      "expectedRange": { "min": 0, "max": 0 },
+      "toleranceBasis": "決定的（不一致0件）",
+      "testFile": "MasterDataLoadRegressionTests.swift",
+      "testMethod": "testSkillFamilyExpectationsMatchRuntimeActivations"
     }
   ]
 }

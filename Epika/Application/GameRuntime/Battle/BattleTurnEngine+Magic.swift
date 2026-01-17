@@ -219,6 +219,12 @@ extension BattleTurnEngine {
             }
         }
 
+        // 自分の魔法攻撃イベント
+        context.reactionQueue.append(.init(
+            event: .selfMagicAttack(side: side, casterIndex: attackerIndex),
+            depth: 0
+        ))
+
         // 味方が魔法攻撃したイベントを発火（追撃用）
         context.reactionQueue.append(.init(
             event: .allyMagicAttack(side: side, casterIndex: attackerIndex),

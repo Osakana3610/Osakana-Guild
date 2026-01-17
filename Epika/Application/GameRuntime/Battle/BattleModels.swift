@@ -823,6 +823,7 @@ nonisolated struct BattleActor: Sendable {
             var vitalize: VitalizeResurrection?
             var necromancerInterval: Int?
             var passiveBetweenFloors: Bool
+            var passiveBetweenFloorsChancePercent: Double?
             var sacrificeInterval: Int?
 
             nonisolated static let neutral = Resurrection(
@@ -833,6 +834,7 @@ nonisolated struct BattleActor: Sendable {
                 vitalize: nil,
                 necromancerInterval: nil,
                 passiveBetweenFloors: false,
+                passiveBetweenFloorsChancePercent: nil,
                 sacrificeInterval: nil
             )
         }

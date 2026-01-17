@@ -79,7 +79,15 @@ enum StatusInflictHandler: SkillEffectHandler {
     ) throws {
         let statusIdRaw = try payload.requireParam(.statusId, skillId: context.skillId, effectIndex: context.effectIndex)
         let statusId = UInt8(statusIdRaw)
-        let base = try payload.requireValue(.baseChancePercent, skillId: context.skillId, effectIndex: context.effectIndex)
+        guard let base = try payload.resolvedChancePercent(
+            stats: context.actorStats,
+            skillId: context.skillId,
+            effectIndex: context.effectIndex
+        ) else {
+            throw RuntimeError.invalidConfiguration(
+                reason: "Skill \(context.skillId)#\(context.effectIndex) statusInflict に chancePercent/baseChancePercent がありません"
+            )
+        }
         accumulator.status.statusInflictions.append(.init(statusId: statusId, baseChancePercent: base))
     }
 }

@@ -179,7 +179,9 @@ extension BattleTurnEngine {
             }
         case .selfDamagedPhysical(let side, let actorIndex, _),
              .selfDamagedMagical(let side, let actorIndex, _),
-             .selfEvadePhysical(let side, let actorIndex, _):
+             .selfEvadePhysical(let side, let actorIndex, _),
+             .selfAttackNoKill(let side, let actorIndex, _),
+             .selfMagicAttack(let side, let actorIndex):
             attemptReactions(on: side, actorIndex: actorIndex, event: event, depth: depth, context: &context)
         case .allyDamagedPhysical(let side, _, _):
             for index in actorIndices(for: side, context: context) {
@@ -293,12 +295,16 @@ extension BattleTurnEngine {
         // 優先ターゲットを取得
         var resolved = reaction.preferredTarget(for: event).flatMap { referenceToSideIndex($0) }
 
-        if resolved == nil,
-           case .allyMagicAttack(let eventSide, let casterIndex) = event,
-           reaction.target != .randomEnemy {
-            resolved = resolveAllyMagicAttackTarget(casterSide: eventSide,
-                                                    casterIndex: casterIndex,
-                                                    context: &context)
+        if resolved == nil, reaction.target != .randomEnemy {
+            switch event {
+            case .allyMagicAttack(let eventSide, let casterIndex),
+                 .selfMagicAttack(let eventSide, let casterIndex):
+                resolved = resolveAllyMagicAttackTarget(casterSide: eventSide,
+                                                        casterIndex: casterIndex,
+                                                        context: &context)
+            default:
+                break
+            }
         }
 
         // 優先ターゲットがない場合はランダム選択
@@ -568,6 +574,11 @@ extension BattleTurnEngine {
                 event: .allyDamagedPhysical(side: defenderSide, defenderIndex: defenderIndex, attacker: attackerRef),
                 depth: reactionDepth
             ))
+            let targetRef = BattleContext.reference(for: defenderSide, index: defenderIndex)
+            context.reactionQueue.append(.init(
+                event: .selfAttackNoKill(side: attackerSide, actorIndex: attackerIndex, target: targetRef),
+                depth: reactionDepth
+            ))
         }
 
         return AttackOutcome(attacker: currentAttacker, defender: currentDefender)
@@ -625,6 +636,8 @@ private extension BattleActor.SkillEffects.Reaction.Trigger {
         case (.allyDamagedPhysical, .allyDamagedPhysical): return true
         case (.selfKilledEnemy, .selfKilledEnemy): return true
         case (.allyMagicAttack, .allyMagicAttack): return true
+        case (.selfAttackNoKill, .selfAttackNoKill): return true
+        case (.selfMagicAttack, .selfMagicAttack): return true
         default: return false
         }
     }
@@ -640,8 +653,10 @@ private extension BattleActor.SkillEffects.Reaction {
         case (_, .selfDamagedMagical(_, _, let attacker)): return attacker
         case (_, .allyDamagedPhysical(_, _, let attacker)): return attacker
         case (_, .selfKilledEnemy(_, _, let killedEnemy)): return killedEnemy
+        case (_, .selfAttackNoKill(_, _, let target)): return target
         case (.randomEnemy, _): return nil  // フォールバックでランダムに選択
         case (_, .allyMagicAttack): return nil  // フォールバックでランダムに選択
+        case (_, .selfMagicAttack): return nil  // フォールバックでランダムに選択
         }
     }
 }

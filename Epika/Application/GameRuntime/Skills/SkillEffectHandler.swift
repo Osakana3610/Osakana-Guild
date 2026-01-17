@@ -86,6 +86,23 @@ extension DecodedSkillEffectPayload {
         }
         return Double(stats.value(for: scalingStatInt)) * coefficient
     }
+
+    /// chancePercent / baseChancePercent(+scalingStat) から発動率(%)を解決する
+    nonisolated func resolvedChancePercent(stats: ActorStats?, skillId: UInt16, effectIndex: Int) throws -> Double? {
+        if let chance = value[.chancePercent] {
+            return chance
+        }
+        if let coefficient = value[.baseChancePercent] {
+            guard let statRaw = parameters[.scalingStat] else {
+                throw RuntimeError.invalidConfiguration(
+                    reason: "Skill \(skillId)#\(effectIndex) baseChancePercent に scalingStat がありません"
+                )
+            }
+            guard let stats else { return nil }
+            return Double(stats.value(for: statRaw)) * coefficient
+        }
+        return nil
+    }
 }
 
 // MARK: - SkillEffectHandlerRegistry

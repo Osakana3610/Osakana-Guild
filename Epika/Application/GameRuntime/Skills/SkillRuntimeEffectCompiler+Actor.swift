@@ -7,7 +7,7 @@
 //   - BattleActor.SkillEffects 構築に必要なヘルパー関数を提供
 //
 // 【公開API】
-//   - BattleActor.SkillEffects.Reaction.make(from:skillName:skillId:stats:)
+//   - BattleActor.SkillEffects.Reaction.make(from:skillName:skillId:chancePercent:)
 //   - BattleActor.SkillEffects.RowProfile.applyParameters(_:)
 //
 // 【備考】
@@ -22,7 +22,7 @@ extension BattleActor.SkillEffects.Reaction {
     nonisolated static func make(from payload: DecodedSkillEffectPayload,
                                  skillName: String,
                                  skillId: UInt16,
-                                 stats: ActorStats?) -> BattleActor.SkillEffects.Reaction? {
+                                 chancePercent: Double) -> BattleActor.SkillEffects.Reaction? {
         guard payload.effectType == .reaction else { return nil }
         guard let triggerRaw = payload.parameters[.trigger],
               let trigger = BattleActor.SkillEffects.Reaction.Trigger(rawValue: UInt8(triggerRaw)) else { return nil }
@@ -31,9 +31,6 @@ extension BattleActor.SkillEffects.Reaction {
         let requiresMartial = (payload.parameters[.requiresMartial] == 1)
         let damageTypeRaw = payload.parameters[.damageType] ?? Int(BattleDamageType.physical.rawValue)
         let damageType = BattleDamageType(rawValue: UInt8(damageTypeRaw)) ?? .physical
-        var baseChance = payload.value[.baseChancePercent] ?? 100.0
-        // statScalingをコンパイル時に計算してbaseChanceに加算
-        baseChance += payload.scaledValue(from: stats)
         let attackCountMultiplier = payload.value[.attackCountMultiplier] ?? 0.3
         let criticalChancePercentMultiplier = payload.value[.criticalChancePercentMultiplier] ?? 0.5
         let accuracyMultiplier = payload.value[.accuracyMultiplier] ?? 1.0
@@ -44,7 +41,7 @@ extension BattleActor.SkillEffects.Reaction {
                                                  trigger: trigger,
                                                  target: target,
                                                  damageType: damageType,
-                                                 baseChancePercent: baseChance,
+                                                 baseChancePercent: chancePercent,
                                                  attackCountMultiplier: attackCountMultiplier,
                                                  criticalChancePercentMultiplier: criticalChancePercentMultiplier,
                                                  accuracyMultiplier: accuracyMultiplier,

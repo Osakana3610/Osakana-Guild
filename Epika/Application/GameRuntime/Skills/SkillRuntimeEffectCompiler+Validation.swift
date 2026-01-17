@@ -54,7 +54,7 @@ extension SkillRuntimeEffectCompiler {
         switch payload.effectType {
         case .extraAction:
             // chancePercent/valuePercent/count のいずれかがあればOK（countのみの場合は100%発動）
-            let hasChance = payload.value[.chancePercent] != nil || payload.value[.valuePercent] != nil
+            let hasChance = payload.value[.chancePercent] != nil || payload.value[.baseChancePercent] != nil
             let hasCount = payload.value[.count] != nil
             guard hasChance || hasCount else {
                 throw RuntimeError.invalidConfiguration(reason: "Skill \(skillId)#\(effectIndex) extraAction にchanceまたはcountがありません")

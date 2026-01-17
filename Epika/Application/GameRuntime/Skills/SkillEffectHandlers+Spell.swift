@@ -215,9 +215,12 @@ enum MagicCriticalChancePercentHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        var value = payload.value[.valuePercent] ?? 0.0
-        value += payload.scaledValue(from: context.actorStats)
-        accumulator.spell.magicCriticalChancePercent = max(accumulator.spell.magicCriticalChancePercent, value)
+        let chance = try payload.resolvedChancePercent(
+            stats: context.actorStats,
+            skillId: context.skillId,
+            effectIndex: context.effectIndex
+        ) ?? 0.0
+        accumulator.spell.magicCriticalChancePercent = max(accumulator.spell.magicCriticalChancePercent, chance)
         if let multiplier = payload.value[.multiplier] {
             accumulator.spell.magicCriticalMultiplier = max(accumulator.spell.magicCriticalMultiplier, multiplier)
         }
@@ -232,8 +235,11 @@ enum SpellChargeRecoveryChanceHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        var baseChance = payload.value[.chancePercent] ?? 0.0
-        baseChance += payload.scaledValue(from: context.actorStats)
+        let baseChance = try payload.resolvedChancePercent(
+            stats: context.actorStats,
+            skillId: context.skillId,
+            effectIndex: context.effectIndex
+        ) ?? 0.0
         let school: UInt8? = payload.parameters[.school].map { UInt8($0) }
         accumulator.spell.chargeRecoveries.append(.init(baseChancePercent: baseChance, school: school))
     }

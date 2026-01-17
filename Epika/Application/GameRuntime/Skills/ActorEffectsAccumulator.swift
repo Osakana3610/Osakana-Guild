@@ -118,6 +118,7 @@ struct ActorEffectsAccumulator {
             vitalize: resurrection.vitalizeResurrection,
             necromancerInterval: resurrection.necromancerInterval,
             passiveBetweenFloors: resurrection.resurrectionPassiveBetweenFloors,
+            passiveBetweenFloorsChancePercent: resurrection.resurrectionPassiveBetweenFloorsChancePercent,
             sacrificeInterval: resurrection.sacrificeInterval
         )
 
@@ -277,6 +278,7 @@ struct ResurrectionAccumulator {
     var vitalizeResurrection: BattleActor.SkillEffects.VitalizeResurrection?
     var necromancerInterval: Int?
     var resurrectionPassiveBetweenFloors: Bool = false
+    var resurrectionPassiveBetweenFloorsChancePercent: Double? = nil
     var sacrificeInterval: Int?
 }
 
