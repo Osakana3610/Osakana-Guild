@@ -60,6 +60,10 @@ resistance:
 finalChance = clamp(round(chance × targetProcMultiplier), 0, 100)
 ```
 
+### 混乱の補正
+
+混乱の付与確率は表記の確率を基準に、攻撃者と対象の精神差で増減する。精神差が大きいほど成功率が高い。
+
 ### 耐性タイプ
 
 | 耐性 | 倍率 |
