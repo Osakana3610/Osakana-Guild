@@ -32,4 +32,6 @@ Tools/MasterDataGenerator/output/
 .test-output/
 
 # Regression test data (local merge of user_data.sqlite + wal/shm)
-EpikaTests/TestData/
+EpikaTests/TestData/*
+!EpikaTests/TestData/
+!EpikaTests/TestData/SkillFamilyExpectations.tsv
