@@ -605,6 +605,76 @@
       "testMethod": "testShieldBlockStopsMultiHitAfterFirstHit"
     },
     {
+      "id": "BATTLE-TIMED-001",
+      "category": ["戦闘", "時限バフ", "戦闘開始"],
+      "description": "戦闘開始時の与ダメ%が倍率として適用されるか",
+      "formula": "damageDealtPercent=50 → multiplier=1.5",
+      "expectedRange": { "min": 1.5, "max": 1.5 },
+      "toleranceBasis": "決定的（固定倍率）",
+      "testFile": "ParryShieldBlockObservationTests.swift",
+      "testMethod": "testTimedBuffBattleStartDamageDealtMultiplier"
+    },
+    {
+      "id": "BATTLE-TIMED-002",
+      "category": ["戦闘", "時限バフ", "戦闘開始"],
+      "description": "戦闘開始時の命中加算がtimedBuffとして付与されるか",
+      "formula": "hitScoreAdditive=50",
+      "expectedRange": { "min": 50, "max": 50 },
+      "toleranceBasis": "決定的（固定加算）",
+      "testFile": "ParryShieldBlockObservationTests.swift",
+      "testMethod": "testTimedBuffBattleStartHitScoreAdditive"
+    },
+    {
+      "id": "BATTLE-TIMED-003",
+      "category": ["戦闘", "時限バフ", "ターン経過"],
+      "description": "ターン経過で命中が加算されるか（2ターン）",
+      "formula": "baseHitScore=100, +2/turn ×2 → 104",
+      "expectedRange": { "min": 104, "max": 104 },
+      "toleranceBasis": "決定的（加算）",
+      "testFile": "ParryShieldBlockObservationTests.swift",
+      "testMethod": "testTimedBuffTurnElapsedHitEvasionAdditive"
+    },
+    {
+      "id": "BATTLE-TIMED-004",
+      "category": ["戦闘", "時限バフ", "ターン経過"],
+      "description": "ターン経過で回避が加算されるか（2ターン）",
+      "formula": "baseEvasionScore=100, +2/turn ×2 → 104",
+      "expectedRange": { "min": 104, "max": 104 },
+      "toleranceBasis": "決定的（加算）",
+      "testFile": "ParryShieldBlockObservationTests.swift",
+      "testMethod": "testTimedBuffTurnElapsedHitEvasionAdditive"
+    },
+    {
+      "id": "BATTLE-TIMED-005",
+      "category": ["戦闘", "時限バフ", "ターン経過"],
+      "description": "ターン経過で攻撃回数が割合で増加するか（2ターン）",
+      "formula": "baseAttackCount=1.0, +2%/turn ×2 → 1.0404",
+      "expectedRange": { "min": 1.0404, "max": 1.0404 },
+      "toleranceBasis": "決定的（割合累積）",
+      "testFile": "ParryShieldBlockObservationTests.swift",
+      "testMethod": "testTimedBuffTurnElapsedAttackCountPercent"
+    },
+    {
+      "id": "BATTLE-TIMED-006",
+      "category": ["戦闘", "時限バフ", "ターン経過"],
+      "description": "ターン経過で攻撃力が割合で増加するか（2ターン）",
+      "formula": "baseAttackScore=1000, +2%/turn ×2 → 1040 (trunc)",
+      "expectedRange": { "min": 1040, "max": 1040 },
+      "toleranceBasis": "決定的（割合累積）",
+      "testFile": "ParryShieldBlockObservationTests.swift",
+      "testMethod": "testTimedBuffTurnElapsedAttackDefensePercent"
+    },
+    {
+      "id": "BATTLE-TIMED-007",
+      "category": ["戦闘", "時限バフ", "ターン経過"],
+      "description": "ターン経過で防御力が割合で増加するか（2ターン）",
+      "formula": "baseDefenseScore=500, +2%/turn ×2 → 520 (trunc)",
+      "expectedRange": { "min": 520, "max": 520 },
+      "toleranceBasis": "決定的（割合累積）",
+      "testFile": "ParryShieldBlockObservationTests.swift",
+      "testMethod": "testTimedBuffTurnElapsedAttackDefensePercent"
+    },
+    {
       "id": "SKILL-ALIGN-001",
       "category": ["スキル", "整合性", "JSON-TSV"],
       "description": "SkillMaster.json と SkillFamilyExpectations.tsv が一致しているか",
