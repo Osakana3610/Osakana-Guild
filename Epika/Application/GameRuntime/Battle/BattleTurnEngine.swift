@@ -99,6 +99,7 @@ struct BattleTurnEngine {
                                       actorId: actorIdx,
                                       effectKind: .enemyAppear)
         }
+        appendInitialSkillEffectLogs(&context)
 
         // 先制攻撃の実行
         executePreemptiveAttacks(&context)
@@ -217,6 +218,13 @@ struct BattleTurnEngine {
                 if context.random.nextBool(probability: probability) {
                     // 行動スロット減少（負の値で減算）
                     context.enemies[index].extraActionsNextTurn -= debuff.reduction
+                    let sourceIdx = context.actorIndex(for: debuff.side, arrayIndex: debuff.index)
+                    let targetIdx = context.actorIndex(for: .enemy, arrayIndex: index)
+                    appendSkillEffectLog(.enemyActionDebuff,
+                                         actorId: sourceIdx,
+                                         targetId: targetIdx,
+                                         context: &context,
+                                         turnOverride: context.turn)
                 }
             }
         }
@@ -231,7 +239,7 @@ struct BattleTurnEngine {
         guard !aliveEnemyIndices.isEmpty else { return }
 
         // 各味方のスキップ確率を確認し、保持者ごとに1回抽選
-        for player in context.players where player.isAlive {
+        for (sourceIndex, player) in context.players.enumerated() where player.isAlive {
             let skipChance = player.skillEffects.combat.enemySingleActionSkipChancePercent
             guard skipChance > 0 else { continue }
 
@@ -240,6 +248,13 @@ struct BattleTurnEngine {
                 // ランダムな敵を選択（同じ敵が複数回選ばれても1回のスキップ）
                 let targetIdx = aliveEnemyIndices[context.random.nextInt(in: 0...(aliveEnemyIndices.count - 1))]
                 context.enemies[targetIdx].skipActionThisTurn = true
+                let sourceActorIdx = context.actorIndex(for: .player, arrayIndex: sourceIndex)
+                let targetActorIdx = context.actorIndex(for: .enemy, arrayIndex: targetIdx)
+                appendSkillEffectLog(.enemyActionSkip,
+                                     actorId: sourceActorIdx,
+                                     targetId: targetActorIdx,
+                                     context: &context,
+                                     turnOverride: context.turn)
             }
         }
     }
@@ -289,6 +304,7 @@ extension BattleTurnEngine {
         var wasDodged: Bool
         var wasParried: Bool
         var wasBlocked: Bool
+        var barrierLogEvents: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
     }
 
     nonisolated struct PhysicalAttackOverrides {

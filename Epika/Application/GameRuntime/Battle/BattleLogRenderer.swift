@@ -261,6 +261,9 @@ struct BattleLogRenderer {
                                            skillNames: [UInt16: String],
                                            statusNames: [UInt16: String]) -> String? {
         switch entry.declaration.kind {
+        case .skillEffect:
+            return resolveSkillEffectLabel(extra: entry.declaration.extra,
+                                           location: "BattleLogRenderer.resolveActionLabel")
         case .priestMagic, .mageMagic:
             guard let skillIndex = entry.declaration.skillIndex,
                   let spellId = UInt8(exactly: skillIndex),
@@ -617,6 +620,9 @@ struct BattleLogRenderer {
                                            actionLabel: String?,
                                            statusNames: [UInt16: String]) -> String? {
         switch effect.kind {
+        case .skillEffect:
+            return resolveSkillEffectLabel(extra: effect.extra ?? entry.declaration.extra,
+                                           location: "BattleLogRenderer.resolveEffectLabel")
         case .statusInflict, .statusResist, .statusRecover, .statusTick:
             guard let statusId = effect.statusId,
                   let name = statusNames[statusId] else {
@@ -639,7 +645,8 @@ struct BattleLogRenderer {
 
     private static func declarationKey(for kind: ActionKind) -> String? {
         switch kind {
-        case .defend,
+        case .skillEffect,
+             .defend,
              .physicalAttack,
              .priestMagic,
              .mageMagic,
@@ -689,6 +696,8 @@ struct BattleLogRenderer {
 
     private static func declarationLogType(for kind: ActionKind) -> BattleLogEntry.LogType {
         switch kind {
+        case .skillEffect:
+            return .status
         case .defend: return .guard
         case .physicalAttack, .priestMagic, .mageMagic, .breath, .reactionAttack, .followUp, .noAction: return .action
         case .battleStart, .turnStart, .enemyAppear: return .system
@@ -723,6 +732,8 @@ struct BattleLogRenderer {
 
     private static func effectLogType(for kind: BattleActionEntry.Effect.Kind) -> BattleLogEntry.LogType {
         switch kind {
+        case .skillEffect:
+            return .status
         case .physicalDamage,
              .magicDamage,
              .breathDamage,
@@ -769,6 +780,15 @@ struct BattleLogRenderer {
         case .enemyAppear, .logOnly:
             return .system
         }
+    }
+
+    private static func resolveSkillEffectLabel(extra: UInt16?, location: String) -> String? {
+        guard let extra,
+              let kind = SkillEffectLogKind(rawValue: extra) else {
+            reportMissing("SkillEffectLogKind missing/invalid: \(String(describing: extra))", location: location)
+            return nil
+        }
+        return termValue(for: kind.termKey, location: location)
     }
 
     private static func placeholderMap(actor: String?,

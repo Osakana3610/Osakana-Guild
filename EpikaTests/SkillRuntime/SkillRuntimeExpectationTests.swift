@@ -1985,6 +1985,15 @@ private extension SkillRuntimeExpectationTests {
             throw VerificationError.failed("extraAction not compiled")
         }
 
+        func isActionSlot(_ kind: ActionKind) -> Bool {
+            switch kind {
+            case .defend, .physicalAttack, .priestMagic, .mageMagic, .breath:
+                return true
+            default:
+                return false
+            }
+        }
+
         func expectedExtraCount(turn: Int) -> Int {
             var total = 0
             for descriptor in descriptors {
@@ -2029,7 +2038,9 @@ private extension SkillRuntimeExpectationTests {
                                                context: &context,
                                                forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil))
             }
-            return context.actionEntries.filter { $0.actor == actorId }.count
+            return context.actionEntries.filter { entry in
+                entry.actor == actorId && isActionSlot(entry.declaration.kind)
+            }.count
         }
 
         let baseTurn = 1
@@ -2112,7 +2123,8 @@ private extension SkillRuntimeExpectationTests {
 
         let before = context.actionEntries.count
         withFixedMedianRandomMode {
-            BattleTurnEngine.dispatchReactions(for: event, depth: 0, context: &context)
+            context.reactionQueue.append(.init(event: event, depth: 0))
+            BattleTurnEngine.processReactionQueue(context: &context)
         }
         let after = context.actionEntries.count
         rawData["reactionEntries"] = Double(after - before)
@@ -2582,9 +2594,8 @@ private extension SkillRuntimeExpectationTests {
             let ally = TestActorBuilder.makePlayer(luck: 1,
                                                    partyMemberId: 2)
             var context = makeContext(players: [defender, ally], enemies: [], statusDefinitions: cache.statusEffectsById)
-            let builder = context.makeActionEntryBuilder(actorId: context.actorIndex(for: .player, arrayIndex: 0), kind: .physicalAttack)
             withFixedMedianRandomMode {
-                BattleTurnEngine.attemptRunawayIfNeeded(for: .player, defenderIndex: 0, damage: damage, context: &context, entryBuilder: builder)
+                _ = BattleTurnEngine.attemptRunawayIfNeeded(for: .player, defenderIndex: 0, damage: damage, context: &context)
             }
             return context.players[0].statusEffects.contains { effect in
                 cache.statusEffectsById[effect.id]?.tags.contains(BattleTurnEngine.statusTagConfusion) ?? false
@@ -3099,7 +3110,7 @@ private extension SkillRuntimeExpectationTests {
         case .magicNullifyChancePercent:
             let chance = try payload.resolvedChancePercent(stats: defaultActorStats(), skillId: skill.id, effectIndex: 0) ?? 0.0
             let damage = withFixedMedianRandomMode {
-                BattleTurnEngine.computeMagicalDamage(attacker: attacker, defender: &defender, spellId: nil, context: &context)
+                BattleTurnEngine.computeMagicalDamage(attacker: attacker, defender: &defender, spellId: nil, context: &context).damage
             }
             rawData["magicNullifyDamage"] = Double(damage)
             let expected = expectedBoolFromChancePercent(chance)
@@ -3115,13 +3126,13 @@ private extension SkillRuntimeExpectationTests {
                 BattleTurnEngine.computeMagicalDamage(attacker: TestActorBuilder.makeAttacker(luck: 18),
                                                       defender: &defender,
                                                       spellId: nil,
-                                                      context: &context)
+                                                      context: &context).damage
             }
             let crit = withFixedMedianRandomMode {
                 BattleTurnEngine.computeMagicalDamage(attacker: attacker,
                                                       defender: &defender,
                                                       spellId: nil,
-                                                      context: &context)
+                                                      context: &context).damage
             }
             rawData["magicCriticalChance"] = chance
             let expected = expectedBoolFromChancePercent(chance)

@@ -53,7 +53,13 @@ nonisolated struct BattleContext {
         /// 供儀スキルを持つ敵のインデックスリスト
         let enemySacrificeIndices: [Int]
         /// 味方の敵行動減少スキルの一覧
-        let enemyActionDebuffs: [(chancePercent: Double, reduction: Int)]
+        struct EnemyActionDebuffSource: Sendable {
+            let side: ActorSide
+            let index: Int
+            let chancePercent: Double
+            let reduction: Int
+        }
+        let enemyActionDebuffs: [EnemyActionDebuffSource]
         /// 救助スキルを持つ味方のインデックスリスト（陣形順ソート済み）
         let playerRescueCandidateIndices: [Int]
         /// 救助スキルを持つ敵のインデックスリスト（陣形順ソート済み）
@@ -72,6 +78,8 @@ nonisolated struct BattleContext {
     var enemySkillUsage: [String: [UInt16: Int]]
     /// リアクション処理キュー（再帰呼び出しを避けるため）
     var reactionQueue: [PendingReaction]
+    /// 行動順の速度/タイブレークを保持（リアクション順序用）
+    var actionOrderSnapshot: [ActorReference: ActionOrderSnapshot]
 
     // MARK: - 定数
     nonisolated static let maxTurns = 20
@@ -95,6 +103,7 @@ nonisolated struct BattleContext {
         self.turn = 0
         self.enemySkillUsage = [:]
         self.reactionQueue = []
+        self.actionOrderSnapshot = [:]
         // 戦闘開始時キャッシュを計算
         self.cached = Self.buildCachedFlags(players: players, enemies: enemies)
     }
@@ -113,10 +122,13 @@ nonisolated struct BattleContext {
             .map { $0.offset }
 
         // 敵行動減少スキル一覧
-        var enemyActionDebuffs: [(chancePercent: Double, reduction: Int)] = []
-        for player in players {
+        var enemyActionDebuffs: [CachedFlags.EnemyActionDebuffSource] = []
+        for (index, player) in players.enumerated() {
             for debuff in player.skillEffects.combat.enemyActionDebuffs {
-                enemyActionDebuffs.append((debuff.baseChancePercent, debuff.reduction))
+                enemyActionDebuffs.append(.init(side: .player,
+                                                index: index,
+                                                chancePercent: debuff.baseChancePercent,
+                                                reduction: debuff.reduction))
             }
         }
 
@@ -282,7 +294,7 @@ extension BattleContext {
         case enemy
     }
 
-    nonisolated enum ActorReference: Sendable {
+    nonisolated enum ActorReference: Hashable, Sendable {
         case player(Int)
         case enemy(Int)
     }
@@ -332,13 +344,15 @@ extension BattleContext {
         let enemyTarget: Int?
     }
 
-    nonisolated static let maxReactionDepth = 4
-    nonisolated static let maxExtraActionDepth = 5
-
     /// リアクションキューに積まれる保留イベント
     nonisolated struct PendingReaction: Sendable {
         let event: ReactionEvent
         let depth: Int
+    }
+
+    nonisolated struct ActionOrderSnapshot: Sendable {
+        let speed: Int
+        let tiebreaker: Double
     }
 
     nonisolated func actor(for side: ActorSide, index: Int) -> BattleActor? {

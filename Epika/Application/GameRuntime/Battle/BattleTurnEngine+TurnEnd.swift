@@ -67,7 +67,14 @@ extension BattleTurnEngine {
         actor.attackHistory.reset()
         applyStatusTicks(for: side, index: index, actor: &actor, context: &context)
         if actor.skillEffects.misc.autoDegradationRepair {
-            applyDegradationRepairIfAvailable(to: &actor, context: &context)
+            let repaired = applyDegradationRepairIfAvailable(to: &actor, context: &context)
+            if repaired > 0 {
+                let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+                appendSkillEffectLog(.degradationRepair,
+                                     actorId: actorIdx,
+                                     context: &context,
+                                     turnOverride: context.turn)
+            }
         }
         applySpellChargeRegenIfNeeded(for: &actor, context: context)
         updateTimedBuffs(for: side, index: index, actor: &actor, context: &context)
@@ -213,6 +220,14 @@ extension BattleTurnEngine {
         actor.guardActive = false
         actor.resurrectionTriggersUsed += 1
 
+        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+        if forcedTriggered {
+            appendSkillEffectLog(.resurrectionBuff,
+                                 actorId: actorIdx,
+                                 context: &context,
+                                 turnOverride: context.turn)
+        }
+
         if allowVitalize,
            let vitalize = actor.skillEffects.resurrection.vitalize,
            !actor.vitalizeActive {
@@ -224,9 +239,12 @@ extension BattleTurnEngine {
                 actor.grantedSkillIds.formUnion(vitalize.grantSkillIds)
             }
             rebuildSkillsAfterResurrection(for: &actor, context: context)
+            appendSkillEffectLog(.resurrectionVitalize,
+                                 actorId: actorIdx,
+                                 context: &context,
+                                 turnOverride: context.turn)
         }
 
-        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
         context.appendSimpleEntry(kind: .resurrection,
                                   actorId: actorIdx,
                                   targetId: actorIdx,

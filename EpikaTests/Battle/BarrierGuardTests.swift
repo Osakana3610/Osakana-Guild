@@ -83,7 +83,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
             defender: &defenderNoBarrier,
             spellId: nil,
             context: &contextNoBarrier
-        )
+        ).damage
 
         // バリアあり（魔法バリアキー = 2）
         let attackerWithBarrier = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 35)
@@ -103,7 +103,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
             defender: &defenderWithBarrier,
             spellId: nil,
             context: &contextWithBarrier
-        )
+        ).damage
 
         let expectedRatio = 1.0 / 3.0
         let actualRatio = Double(damageWithBarrier) / Double(damageNoBarrier)
@@ -130,7 +130,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
             attacker: attackerNoBarrier,
             defender: &defenderNoBarrier,
             context: &contextNoBarrier
-        )
+        ).damage
 
         // バリアあり（ブレスバリアキー = 3）
         let attackerWithBarrier = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
@@ -148,7 +148,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
             attacker: attackerWithBarrier,
             defender: &defenderWithBarrier,
             context: &contextWithBarrier
-        )
+        ).damage
 
         let expectedRatio = 1.0 / 3.0
         let actualRatio = Double(damageWithBarrier) / Double(damageNoBarrier)
@@ -475,7 +475,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
             defender: &defenderNoGuard,
             spellId: nil,
             context: &contextNoGuard
-        )
+        ).damage
 
         // ガードあり
         let attackerWithGuard = TestActorBuilder.makeAttacker(magicalAttackScore: 3000, luck: 35)
@@ -495,7 +495,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
             defender: &defenderWithGuard,
             spellId: nil,
             context: &contextWithGuard
-        )
+        ).damage
 
         let expectedRatio = 0.5
         let actualRatio = Double(damageWithGuard) / Double(damageNoGuard)
@@ -522,7 +522,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
             attacker: attackerNoGuard,
             defender: &defenderNoGuard,
             context: &contextNoGuard
-        )
+        ).damage
 
         // ガードあり
         let attackerWithGuard = TestActorBuilder.makeAttacker(luck: 35, breathDamageScore: 3000)
@@ -540,7 +540,7 @@ nonisolated final class BarrierGuardTests: XCTestCase {
             attacker: attackerWithGuard,
             defender: &defenderWithGuard,
             context: &contextWithGuard
-        )
+        ).damage
 
         let expectedRatio = 0.5
         let actualRatio = Double(damageWithGuard) / Double(damageNoGuard)
