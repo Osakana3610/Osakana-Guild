@@ -329,6 +329,7 @@ enum AttackCountAdditiveHandler: SkillEffectHandler {
     ) throws {
         // CombatStatCalculator で処理済み（キャラクターステータス計算時に適用）
         // ランタイム蓄積は不要
+        accumulator.combat.hasAttackCountAdditive = true
     }
 }
 

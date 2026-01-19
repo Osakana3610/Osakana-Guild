@@ -30,7 +30,6 @@ nonisolated struct BattleActionEntry: Codable, Sendable {
         var kind: ActionKind
         var skillIndex: UInt16?
         var extra: UInt16?
-        var label: String?
     }
 
     struct Effect: Codable, Sendable {
@@ -74,6 +73,7 @@ nonisolated struct BattleActionEntry: Codable, Sendable {
             case spellChargeRecover
             case enemyAppear
             case logOnly
+            case skillEffect
         }
 
         var kind: Kind
@@ -140,7 +140,7 @@ extension BattleActionEntry {
 
 /// 戦闘ログ全体
 nonisolated struct BattleLog: Codable, Sendable {
-    static let currentVersion: UInt8 = 3
+    static let currentVersion: UInt8 = 1
 
     var version: UInt8               // battle log schema version
     var initialHP: [UInt16: UInt32]  // actorIndex → 開始時HP
@@ -280,6 +280,80 @@ enum ActionKind: UInt8, Codable, Sendable {
 
     // スキル効果
     case spellChargeRecover = 130 // "{actor}は{spell}のチャージを回復した"
+
+    // スキル効果（発動ログ）
+    case skillEffect = 131        // "{actor}の{label}が発動した"
+}
+
+// MARK: - SkillEffectLogKind
+
+/// スキル効果ログの表示ラベル種別
+enum SkillEffectLogKind: UInt16, Codable, Sendable, CaseIterable {
+    case actionOrderShuffle = 1
+    case actionOrderShuffleEnemy = 2
+    case attackCountAdditive = 3
+    case breathVariant = 4
+    case spellCharges = 5
+    case procRate = 6
+    case cumulativeHitBonus = 7
+    case partyHostileAll = 8
+    case partyHostileTarget = 9
+    case reverseHealing = 10
+    case extraAction = 11
+    case reactionNextTurn = 12
+    case specialAttack = 13
+    case enemyActionDebuff = 14
+    case enemyActionSkip = 15
+    case berserk = 16
+    case magicCritical = 17
+    case magicNullify = 18
+    case cover = 19
+    case barrierPhysical = 20
+    case barrierMagical = 21
+    case barrierBreath = 22
+    case barrierGuardPhysical = 23
+    case barrierGuardMagical = 24
+    case barrierGuardBreath = 25
+    case degradationRepair = 26
+    case resurrectionBuff = 27
+    case resurrectionVitalize = 28
+    case runawayMagic = 29
+    case runawayDamage = 30
+
+    nonisolated var termKey: String {
+        switch self {
+        case .actionOrderShuffle: return "battleLog.term.skillEffect.actionOrderShuffle"
+        case .actionOrderShuffleEnemy: return "battleLog.term.skillEffect.actionOrderShuffleEnemy"
+        case .attackCountAdditive: return "battleLog.term.skillEffect.attackCountAdditive"
+        case .breathVariant: return "battleLog.term.skillEffect.breathVariant"
+        case .spellCharges: return "battleLog.term.skillEffect.spellCharges"
+        case .procRate: return "battleLog.term.skillEffect.procRate"
+        case .cumulativeHitBonus: return "battleLog.term.skillEffect.cumulativeHitBonus"
+        case .partyHostileAll: return "battleLog.term.skillEffect.partyHostileAll"
+        case .partyHostileTarget: return "battleLog.term.skillEffect.partyHostileTarget"
+        case .reverseHealing: return "battleLog.term.skillEffect.reverseHealing"
+        case .extraAction: return "battleLog.term.skillEffect.extraAction"
+        case .reactionNextTurn: return "battleLog.term.skillEffect.reactionNextTurn"
+        case .specialAttack: return "battleLog.term.skillEffect.specialAttack"
+        case .enemyActionDebuff: return "battleLog.term.skillEffect.enemyActionDebuff"
+        case .enemyActionSkip: return "battleLog.term.skillEffect.enemyActionSkip"
+        case .berserk: return "battleLog.term.skillEffect.berserk"
+        case .magicCritical: return "battleLog.term.skillEffect.magicCritical"
+        case .magicNullify: return "battleLog.term.skillEffect.magicNullify"
+        case .cover: return "battleLog.term.skillEffect.cover"
+        case .barrierPhysical: return "battleLog.term.skillEffect.barrierPhysical"
+        case .barrierMagical: return "battleLog.term.skillEffect.barrierMagical"
+        case .barrierBreath: return "battleLog.term.skillEffect.barrierBreath"
+        case .barrierGuardPhysical: return "battleLog.term.skillEffect.barrierGuardPhysical"
+        case .barrierGuardMagical: return "battleLog.term.skillEffect.barrierGuardMagical"
+        case .barrierGuardBreath: return "battleLog.term.skillEffect.barrierGuardBreath"
+        case .degradationRepair: return "battleLog.term.skillEffect.degradationRepair"
+        case .resurrectionBuff: return "battleLog.term.skillEffect.resurrectionBuff"
+        case .resurrectionVitalize: return "battleLog.term.skillEffect.resurrectionVitalize"
+        case .runawayMagic: return "battleLog.term.skillEffect.runawayMagic"
+        case .runawayDamage: return "battleLog.term.skillEffect.runawayDamage"
+        }
+    }
 }
 
 // MARK: - Outcome Values

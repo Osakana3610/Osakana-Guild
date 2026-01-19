@@ -42,10 +42,29 @@ extension BattleTurnEngine {
 
         // (ref, speed, tiebreaker, firstStrike)
         var entries: [(ActorReference, Int, Double, Bool)] = []
+        var snapshot: [ActorReference: BattleContext.ActionOrderSnapshot] = [:]
+
+        func recordSnapshot(ref: ActorReference, speed: Int, tiebreaker: Double) {
+            if let existing = snapshot[ref] {
+                snapshot[ref] = BattleContext.ActionOrderSnapshot(speed: speed,
+                                                                  tiebreaker: max(existing.tiebreaker, tiebreaker))
+            } else {
+                snapshot[ref] = BattleContext.ActionOrderSnapshot(speed: speed, tiebreaker: tiebreaker)
+            }
+        }
+
+        if shuffleEnemyOrder {
+            for (index, actor) in context.players.enumerated() where actor.isAlive && actor.skillEffects.combat.actionOrderShuffleEnemy {
+                let actorIdx = context.actorIndex(for: .player, arrayIndex: index)
+                appendSkillEffectLog(.actionOrderShuffleEnemy, actorId: actorIdx, context: &context, turnOverride: context.turn)
+            }
+        }
 
         for (idx, actor) in context.players.enumerated() where actor.isAlive {
             let speed: Int
             if actor.skillEffects.combat.actionOrderShuffle {
+                let actorIdx = context.actorIndex(for: .player, arrayIndex: idx)
+                appendSkillEffectLog(.actionOrderShuffle, actorId: actorIdx, context: &context, turnOverride: context.turn)
                 speed = context.random.nextInt(in: 0...10_000)
             } else {
                 let luckMultiplier = BattleRandomSystem.speedMultiplier(luck: actor.luck, random: &context.random)
@@ -57,7 +76,9 @@ extension BattleTurnEngine {
             let slots = max(1, 1 + actor.skillEffects.combat.nextTurnExtraActions + actor.extraActionsNextTurn)
             let hasFirstStrike = actor.skillEffects.combat.firstStrike
             for _ in 0..<slots {
-                entries.append((.player(idx), speed, context.random.nextDouble(in: 0.0...1.0), hasFirstStrike))
+                let tiebreaker = context.random.nextDouble(in: 0.0...1.0)
+                entries.append((.player(idx), speed, tiebreaker, hasFirstStrike))
+                recordSnapshot(ref: .player(idx), speed: speed, tiebreaker: tiebreaker)
             }
         }
 
@@ -65,6 +86,10 @@ extension BattleTurnEngine {
             let speed: Int
             // 敵は自身のactionOrderShuffle、または味方のactionOrderShuffleEnemyでシャッフル
             if actor.skillEffects.combat.actionOrderShuffle || shuffleEnemyOrder {
+                if actor.skillEffects.combat.actionOrderShuffle {
+                    let actorIdx = context.actorIndex(for: .enemy, arrayIndex: idx)
+                    appendSkillEffectLog(.actionOrderShuffle, actorId: actorIdx, context: &context, turnOverride: context.turn)
+                }
                 speed = context.random.nextInt(in: 0...10_000)
             } else {
                 let luckMultiplier = BattleRandomSystem.speedMultiplier(luck: actor.luck, random: &context.random)
@@ -78,12 +103,14 @@ extension BattleTurnEngine {
             let slots = max(1, 1 + nextExtra + extraNext)
             let hasFirstStrike = actor.skillEffects.combat.firstStrike
             for _ in 0..<slots {
-                entries.append((.enemy(idx), speed, context.random.nextDouble(in: 0.0...1.0), hasFirstStrike))
+                let tiebreaker = context.random.nextDouble(in: 0.0...1.0)
+                entries.append((.enemy(idx), speed, tiebreaker, hasFirstStrike))
+                recordSnapshot(ref: .enemy(idx), speed: speed, tiebreaker: tiebreaker)
             }
         }
 
         // 先制持ちを先にソート、その後は速度順
-        return entries.sorted { lhs, rhs in
+        let order = entries.sorted { lhs, rhs in
             // firstStrike持ちが先
             if lhs.3 != rhs.3 { return lhs.3 }
             // 速度が高い方が先
@@ -91,6 +118,8 @@ extension BattleTurnEngine {
             // 同速の場合はタイブレーカー
             return lhs.2 > rhs.2
         }.map { $0.0 }
+        context.actionOrderSnapshot = snapshot
+        return order
     }
 
     /// アクションを実行
@@ -102,7 +131,6 @@ extension BattleTurnEngine {
         var pendingDepths: [Int] = [depth]
 
         while let currentDepth = pendingDepths.popLast() {
-            guard currentDepth < BattleContext.maxExtraActionDepth else { continue }
             guard !context.isBattleOver else { return }
 
             let allowsExtraActions = executeSingleAction(for: side,
@@ -110,6 +138,7 @@ extension BattleTurnEngine {
                                                          context: &context,
                                                          forcedTargets: forcedTargets)
 
+            processReactionQueue(context: &context)
             if context.isBattleOver {
                 return
             }
@@ -120,7 +149,6 @@ extension BattleTurnEngine {
             guard let refreshedActor = context.actor(for: side, index: actorIndex),
                   refreshedActor.isAlive else { continue }
             let nextDepth = currentDepth + 1
-            guard nextDepth < BattleContext.maxExtraActionDepth else { continue }
 
             let extraDescriptors = refreshedActor.skillEffects.combat.extraActions
             guard !extraDescriptors.isEmpty else { continue }
@@ -161,6 +189,8 @@ extension BattleTurnEngine {
             }
 
             guard scheduledActions > 0 else { continue }
+            let actorIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
+            appendSkillEffectLog(.extraAction, actorId: actorIdx, context: &context, turnOverride: context.turn)
             for _ in 0..<scheduledActions {
                 pendingDepths.append(nextDepth)
             }
@@ -191,7 +221,11 @@ extension BattleTurnEngine {
         }
 
         var mutablePerformer = performer
-        _ = shouldTriggerBerserk(for: &mutablePerformer, context: &context)
+        let didBerserk = shouldTriggerBerserk(for: &mutablePerformer, context: &context)
+        if didBerserk {
+            let actorIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
+            appendSkillEffectLog(.berserk, actorId: actorIdx, context: &context, turnOverride: context.turn)
+        }
 
         if hasVampiricImpulse(actor: mutablePerformer) {
             let didImpulse = handleVampiricImpulse(attackerSide: side,
@@ -428,9 +462,16 @@ extension BattleTurnEngine {
 
         actor.guardActive = true
         actor.guardBarrierCharges = actor.skillEffects.combat.guardBarrierCharges
-        applyDegradationRepairIfAvailable(to: &actor, context: &context)
+        let repaired = applyDegradationRepairIfAvailable(to: &actor, context: &context)
         context.updateActor(actor, side: side, index: actorIndex)
         appendActionLog(for: actor, side: side, index: actorIndex, category: .defend, context: &context)
+        if repaired > 0 {
+            let actorIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
+            appendSkillEffectLog(.degradationRepair,
+                                 actorId: actorIdx,
+                                 context: &context,
+                                 turnOverride: context.turn)
+        }
     }
 
     nonisolated static func resetRescueUsage(_ context: inout BattleContext) {
@@ -475,6 +516,7 @@ extension BattleTurnEngine {
             let actorIdx = context.actorIndex(for: side, arrayIndex: index)
             context.appendSimpleEntry(kind: .withdraw,
                                       actorId: actorIdx,
+                                      targetId: actorIdx,
                                       effectKind: .withdraw)
         }
     }
@@ -513,6 +555,7 @@ extension BattleTurnEngine {
         if let target = playerTarget {
             let targetIdx = context.actorIndex(for: .player, arrayIndex: target)
             context.appendSimpleEntry(kind: .sacrifice,
+                                      actorId: targetIdx,
                                       targetId: targetIdx,
                                       effectKind: .sacrifice)
         }
@@ -524,6 +567,7 @@ extension BattleTurnEngine {
         if let target = enemyTarget {
             let targetIdx = context.actorIndex(for: .enemy, arrayIndex: target)
             context.appendSimpleEntry(kind: .sacrifice,
+                                      actorId: targetIdx,
                                       targetId: targetIdx,
                                       effectKind: .sacrifice)
         }

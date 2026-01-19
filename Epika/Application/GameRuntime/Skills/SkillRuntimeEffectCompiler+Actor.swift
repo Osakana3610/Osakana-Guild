@@ -38,6 +38,7 @@ extension BattleActor.SkillEffects.Reaction {
 
         return BattleActor.SkillEffects.Reaction(identifier: String(skillId),
                                                  displayName: skillName,
+                                                 skillId: skillId,
                                                  trigger: trigger,
                                                  target: target,
                                                  damageType: damageType,

@@ -117,6 +117,7 @@ struct CombatStatCalculator {
                        equipmentMultipliers: skillEffects.equipmentMultipliers)
 
         var attributes = base.makeAttributes()
+        skillEffects.baseMultipliers.apply(to: &attributes)
 
         // Clamp attributes to non-negative domain
         attributes.strength = max(0, attributes.strength)
@@ -350,6 +351,29 @@ private struct SkillEffectAggregator {
         }
     }
 
+    struct BaseStatMultipliers {
+        private var multipliers: [BaseStat: Double] = [:]
+
+        nonisolated init() {
+            for stat in BaseStat.allCases {
+                multipliers[stat] = 1.0
+            }
+        }
+
+        nonisolated mutating func multiply(stat: BaseStat, value: Double) {
+            multipliers[stat, default: 1.0] *= value
+        }
+
+        nonisolated func apply(to attributes: inout CharacterValues.CoreAttributes) {
+            attributes.strength = Int((Double(attributes.strength) * (multipliers[.strength] ?? 1.0)).rounded(.towardZero))
+            attributes.wisdom = Int((Double(attributes.wisdom) * (multipliers[.wisdom] ?? 1.0)).rounded(.towardZero))
+            attributes.spirit = Int((Double(attributes.spirit) * (multipliers[.spirit] ?? 1.0)).rounded(.towardZero))
+            attributes.vitality = Int((Double(attributes.vitality) * (multipliers[.vitality] ?? 1.0)).rounded(.towardZero))
+            attributes.agility = Int((Double(attributes.agility) * (multipliers[.agility] ?? 1.0)).rounded(.towardZero))
+            attributes.luck = Int((Double(attributes.luck) * (multipliers[.luck] ?? 1.0)).rounded(.towardZero))
+        }
+    }
+
     struct CriticalParameters {
         var flatBonus: Double = 0.0
         var cap: Double? = nil
@@ -359,6 +383,7 @@ private struct SkillEffectAggregator {
     }
 
     var talents: TalentModifiers
+    let baseMultipliers: BaseStatMultipliers
     let passives: PassiveMultipliers
     let additives: AdditiveBonuses
     let critical: CriticalParameters
@@ -371,6 +396,7 @@ private struct SkillEffectAggregator {
 
     nonisolated init(skills: [SkillDefinition]) throws {
         var talents = TalentModifiers()
+        var baseMultipliers = BaseStatMultipliers()
         var passives = PassiveMultipliers()
         var additives = AdditiveBonuses()
         var critical = CriticalParameters()
@@ -400,10 +426,17 @@ private struct SkillEffectAggregator {
                         additives.add(stat: statKey, value: additive)
                     }
                 case .statMultiplier:
-                    if let statRaw = payload.parameters[.stat],
-                       let statKey = CombatStatKey(statRaw),
+                    if let statRaw = payload.parameters[.stat] ?? payload.parameters[.statType],
                        let multiplier = payload.value[.multiplier] {
-                        passives.multiply(stat: statKey, value: multiplier)
+                        if statRaw == CombatStatKey.allRawValue {
+                            for key in CombatStatKey.allCases {
+                                passives.multiply(stat: key, value: multiplier)
+                            }
+                        } else if let statKey = CombatStatKey(statRaw) {
+                            passives.multiply(stat: statKey, value: multiplier)
+                        } else if let baseStat = BaseStat(rawValue: UInt8(clamping: statRaw)) {
+                            baseMultipliers.multiply(stat: baseStat, value: multiplier)
+                        }
                     }
                 case .attackCountAdditive:
                     if let additive = payload.value[.additive] {
@@ -418,7 +451,7 @@ private struct SkillEffectAggregator {
                         passives.multiply(stat: .attackCount, value: multiplier)
                     }
                 case .equipmentStatMultiplier:
-                    if let category = payload.parameters[.equipmentCategory],
+                    if let category = payload.parameters[.equipmentCategory] ?? payload.parameters[.equipmentType],
                        let multiplier = payload.value[.multiplier] {
                         equipmentMultipliers[category, default: 1.0] *= multiplier
                     }
@@ -513,6 +546,7 @@ private struct SkillEffectAggregator {
         }
 
         self.talents = talents
+        self.baseMultipliers = baseMultipliers
         self.passives = passives
         self.additives = additives
         self.critical = critical
@@ -705,6 +739,8 @@ private struct CombatAccumulator {
         stats[.additionalDamageScore] = additionalDamageScore
 
         var breathDamageScore = wisdom * (1.0 + levelFactor * coefficients.value(for: .magicalAttackScore)) * CombatFormulas.breathDamageScoreCoefficient
+        breathDamageScore *= talents.multiplier(for: .breathDamageScore)
+        breathDamageScore *= passives.multiplier(for: .breathDamageScore)
         breathDamageScore += additives.value(for: .breathDamageScore)
         stats[.breathDamageScore] = breathDamageScore
 
@@ -985,6 +1021,8 @@ private enum CombatStatKey: UInt8, CaseIterable {
     case trapRemovalScore = 11
     case additionalDamageScore = 12
     case breathDamageScore = 13
+
+    nonisolated static let allRawValue = 99
 
     /// EnumMappings.combatStat のInt値から初期化
     nonisolated init?(_ intValue: Int) {

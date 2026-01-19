@@ -1303,7 +1303,11 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
         spellbook: SkillRuntimeEffects.Spellbook = .empty,
         spells: SkillRuntimeEffects.SpellLoadout = .empty
     ) -> BattleActor {
-        BattleActor(
+        let resolvedPartyMemberId: UInt8? = {
+            guard kind == .player else { return partyMemberId }
+            return partyMemberId ?? 1
+        }()
+        return BattleActor(
             identifier: identifier,
             displayName: displayName,
             kind: kind,
@@ -1314,7 +1318,7 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
             vitality: stats.vitality,
             agility: stats.agility,
             luck: stats.luck,
-            partyMemberId: partyMemberId,
+            partyMemberId: resolvedPartyMemberId,
             level: level,
             jobName: nil,
             avatarIndex: nil,
@@ -1355,8 +1359,18 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
             if let turn {
                 guard entry.turn == UInt8(clamping: turn) else { return false }
             }
-            return entry.actor == actorId
+            guard entry.actor == actorId else { return false }
+            return isActionSlot(kind: entry.declaration.kind)
         }.count
+    }
+
+    private func isActionSlot(kind: ActionKind) -> Bool {
+        switch kind {
+        case .defend, .physicalAttack, .priestMagic, .mageMagic, .breath:
+            return true
+        default:
+            return false
+        }
     }
 
     private func countEffects(
@@ -1602,7 +1616,8 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
                 )
                 var context = makeContext(players: [performer, ally], enemies: [enemy], statusDefinitions: statusDefinitions)
                 guard let event = makeEvent(allyIndex: 1) else { return false }
-                BattleTurnEngine.dispatchReactions(for: event, depth: 0, context: &context)
+                context.reactionQueue.append(.init(event: event, depth: 0))
+                BattleTurnEngine.processReactionQueue(context: &context)
                 return countEffects(context.actionEntries, kind: .reactionAttack) > 0
             }
 
@@ -1784,7 +1799,7 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
                 enemyMasterIndex: 0
             )
             var context = makeContext(players: [attacker], enemies: [defender], statusDefinitions: statusDefinitions)
-            let damage = BattleTurnEngine.computeMagicalDamage(attacker: attacker, defender: &defender, spellId: nil, context: &context)
+            let damage = BattleTurnEngine.computeMagicalDamage(attacker: attacker, defender: &defender, spellId: nil, context: &context).damage
             let actual = (damage == 0)
             return [probe(label: "magicNullify", expected: expected, actual: actual)]
 
@@ -1816,7 +1831,7 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
                 enemyMasterIndex: 0
             )
             var contextWithCrit = makeContext(players: [attacker], enemies: [defender], statusDefinitions: statusDefinitions)
-            let damageWithCrit = BattleTurnEngine.computeMagicalDamage(attacker: attacker, defender: &defender, spellId: nil, context: &contextWithCrit)
+            let damageWithCrit = BattleTurnEngine.computeMagicalDamage(attacker: attacker, defender: &defender, spellId: nil, context: &contextWithCrit).damage
 
             var noCritEffects = actualEffects
             noCritEffects.spell.magicCriticalChancePercent = 0
@@ -1841,7 +1856,7 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
                 enemyMasterIndex: 0
             )
             var contextBase = makeContext(players: [noCritAttacker], enemies: [baseDefender], statusDefinitions: statusDefinitions)
-            let damageWithoutCrit = BattleTurnEngine.computeMagicalDamage(attacker: noCritAttacker, defender: &baseDefender, spellId: nil, context: &contextBase)
+            let damageWithoutCrit = BattleTurnEngine.computeMagicalDamage(attacker: noCritAttacker, defender: &baseDefender, spellId: nil, context: &contextBase).damage
 
             let actual = damageWithCrit > damageWithoutCrit
             return [probe(label: "magicCritical", expected: expected, actual: actual)]
@@ -2114,11 +2129,13 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
                     partyMemberId: 2
                 )
                 var context = makeContext(players: [defender, ally], enemies: [], statusDefinitions: statusDefinitions)
-                let actorId = context.actorIndex(for: .player, arrayIndex: 0)
-                let entryBuilder = context.makeActionEntryBuilder(actorId: actorId, kind: .damageSelf)
-                BattleTurnEngine.attemptRunawayIfNeeded(for: .player, defenderIndex: 0, damage: damage, context: &context, entryBuilder: entryBuilder)
-                let entry = entryBuilder.build()
-                return entry.effects.contains { $0.kind == .statusRampage }
+                let entries = BattleTurnEngine.attemptRunawayIfNeeded(for: .player,
+                                                                      defenderIndex: 0,
+                                                                      damage: damage,
+                                                                      context: &context)
+                return entries.contains { entry in
+                    entry.effects.contains { $0.kind == .statusRampage }
+                }
             }
 
             let maxHP = 1000.0

@@ -53,7 +53,13 @@ nonisolated struct BattleContext {
         /// 供儀スキルを持つ敵のインデックスリスト
         let enemySacrificeIndices: [Int]
         /// 味方の敵行動減少スキルの一覧
-        let enemyActionDebuffs: [(chancePercent: Double, reduction: Int)]
+        struct EnemyActionDebuffSource: Sendable {
+            let side: ActorSide
+            let index: Int
+            let chancePercent: Double
+            let reduction: Int
+        }
+        let enemyActionDebuffs: [EnemyActionDebuffSource]
         /// 救助スキルを持つ味方のインデックスリスト（陣形順ソート済み）
         let playerRescueCandidateIndices: [Int]
         /// 救助スキルを持つ敵のインデックスリスト（陣形順ソート済み）
@@ -65,7 +71,6 @@ nonisolated struct BattleContext {
     var players: [BattleActor]
     var enemies: [BattleActor]
     var actionEntries: [BattleActionEntry]
-    var pendingPostActionEntries: [BattleActionEntry]
     var initialHP: [UInt16: UInt32]
     var turn: Int
     var random: GameRandomSource
@@ -73,6 +78,8 @@ nonisolated struct BattleContext {
     var enemySkillUsage: [String: [UInt16: Int]]
     /// リアクション処理キュー（再帰呼び出しを避けるため）
     var reactionQueue: [PendingReaction]
+    /// 行動順の速度/タイブレークを保持（リアクション順序用）
+    var actionOrderSnapshot: [ActorReference: ActionOrderSnapshot]
 
     // MARK: - 定数
     nonisolated static let maxTurns = 20
@@ -92,11 +99,11 @@ nonisolated struct BattleContext {
         self.enemySkillDefinitions = enemySkillDefinitions
         self.random = random
         self.actionEntries = []
-        self.pendingPostActionEntries = []
         self.initialHP = [:]
         self.turn = 0
         self.enemySkillUsage = [:]
         self.reactionQueue = []
+        self.actionOrderSnapshot = [:]
         // 戦闘開始時キャッシュを計算
         self.cached = Self.buildCachedFlags(players: players, enemies: enemies)
     }
@@ -115,10 +122,13 @@ nonisolated struct BattleContext {
             .map { $0.offset }
 
         // 敵行動減少スキル一覧
-        var enemyActionDebuffs: [(chancePercent: Double, reduction: Int)] = []
-        for player in players {
+        var enemyActionDebuffs: [CachedFlags.EnemyActionDebuffSource] = []
+        for (index, player) in players.enumerated() {
             for debuff in player.skillEffects.combat.enemyActionDebuffs {
-                enemyActionDebuffs.append((debuff.baseChancePercent, debuff.reduction))
+                enemyActionDebuffs.append(.init(side: .player,
+                                                index: index,
+                                                chancePercent: debuff.baseChancePercent,
+                                                reduction: debuff.reduction))
             }
         }
 
@@ -172,7 +182,7 @@ nonisolated struct BattleContext {
     nonisolated func actorIndex(for side: ActorSide, arrayIndex: Int) -> UInt16 {
         switch side {
         case .player:
-            return UInt16(players[arrayIndex].partyMemberId ?? 0)
+            return UInt16(players[arrayIndex].partyMemberId!)
         case .enemy:
             let suffix = arrayIndex + 1  // 1=A, 2=B, ...
             let masterIndex = enemies[arrayIndex].enemyMasterIndex ?? 0
@@ -234,14 +244,6 @@ nonisolated struct BattleContext {
 
     nonisolated mutating func appendActionEntry(_ entry: BattleActionEntry) {
         actionEntries.append(entry)
-        if !pendingPostActionEntries.isEmpty {
-            actionEntries.append(contentsOf: pendingPostActionEntries)
-            pendingPostActionEntries.removeAll()
-        }
-    }
-
-    nonisolated mutating func appendPostActionEntry(_ entry: BattleActionEntry) {
-        pendingPostActionEntries.append(entry)
     }
 
     nonisolated mutating func appendSimpleEntry(kind: ActionKind,
@@ -251,15 +253,12 @@ nonisolated struct BattleContext {
                                     statusId: UInt16? = nil,
                                     skillIndex: UInt16? = nil,
                                     extra: UInt16? = nil,
-                                    label: String? = nil,
                                     effectKind: BattleActionEntry.Effect.Kind = .logOnly,
-                                    turnOverride: Int? = nil,
-                                    postAction: Bool = false) {
+                                    turnOverride: Int? = nil) {
         let builder = makeActionEntryBuilder(actorId: actorId,
                                              kind: kind,
                                              skillIndex: skillIndex,
                                              extra: extra,
-                                             label: label,
                                              turnOverride: turnOverride)
         if targetId != nil || value != nil || statusId != nil || effectKind != .logOnly || extra != nil {
             builder.addEffect(kind: effectKind,
@@ -269,23 +268,17 @@ nonisolated struct BattleContext {
                               extra: extra)
         }
         let entry = builder.build()
-        if postAction {
-            appendPostActionEntry(entry)
-        } else {
-            appendActionEntry(entry)
-        }
+        appendActionEntry(entry)
     }
 
     nonisolated func makeActionEntryBuilder(actorId: UInt16?,
                                 kind: ActionKind,
                                 skillIndex: UInt16? = nil,
                                 extra: UInt16? = nil,
-                                label: String? = nil,
                                 turnOverride: Int? = nil) -> BattleActionEntry.Builder {
         let declaration = BattleActionEntry.Declaration(kind: kind,
                                                         skillIndex: skillIndex,
-                                                        extra: extra,
-                                                        label: label)
+                                                        extra: extra)
         return BattleActionEntry.Builder(
             turn: turnOverride ?? turn,
             actor: actorId,
@@ -301,7 +294,7 @@ extension BattleContext {
         case enemy
     }
 
-    nonisolated enum ActorReference: Sendable {
+    nonisolated enum ActorReference: Hashable, Sendable {
         case player(Int)
         case enemy(Int)
     }
@@ -351,13 +344,15 @@ extension BattleContext {
         let enemyTarget: Int?
     }
 
-    nonisolated static let maxReactionDepth = 4
-    nonisolated static let maxExtraActionDepth = 5
-
     /// リアクションキューに積まれる保留イベント
     nonisolated struct PendingReaction: Sendable {
         let event: ReactionEvent
         let depth: Int
+    }
+
+    nonisolated struct ActionOrderSnapshot: Sendable {
+        let speed: Int
+        let tiebreaker: Double
     }
 
     nonisolated func actor(for side: ActorSide, index: Int) -> BattleActor? {

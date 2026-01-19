@@ -29,7 +29,12 @@ nonisolated enum TestActorBuilder {
         criticalChancePercent: Int = 0,
         additionalDamageScore: Int = 0,
         breathDamageScore: Int = 0,
-        skillEffects: BattleActor.SkillEffects = .neutral
+        skillEffects: BattleActor.SkillEffects = .neutral,
+        formationSlot: BattleFormationSlot = 1,
+        level: Int? = nil,
+        raceId: UInt8? = nil,
+        isMartialEligible: Bool = false,
+        partyMemberId: UInt8 = 1
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 10000,
@@ -45,21 +50,24 @@ nonisolated enum TestActorBuilder {
             trapRemovalScore: 0,
             additionalDamageScore: additionalDamageScore,
             breathDamageScore: breathDamageScore,
-            isMartialEligible: false
+            isMartialEligible: isMartialEligible
         )
 
         return BattleActor(
             identifier: "test.attacker",
             displayName: "テスト攻撃者",
             kind: .player,
-            formationSlot: 1,
+            formationSlot: formationSlot,
             strength: 100,
             wisdom: 50,
             spirit: 50,
             vitality: 100,
             agility: 50,
             luck: luck,
-            isMartialEligible: false,
+            partyMemberId: partyMemberId,
+            level: level,
+            isMartialEligible: isMartialEligible,
+            raceId: raceId,
             snapshot: snapshot,
             currentHP: snapshot.maxHP,
             actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
@@ -90,7 +98,11 @@ nonisolated enum TestActorBuilder {
         innateResistances: BattleInnateResistances = .neutral,
         guardActive: Bool = false,
         barrierCharges: [UInt8: Int] = [:],
-        guardBarrierCharges: [UInt8: Int] = [:]
+        guardBarrierCharges: [UInt8: Int] = [:],
+        formationSlot: BattleFormationSlot = 1,
+        level: Int? = nil,
+        raceId: UInt8? = nil,
+        isMartialEligible: Bool = false
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 50000,
@@ -106,21 +118,23 @@ nonisolated enum TestActorBuilder {
             trapRemovalScore: 0,
             additionalDamageScore: 0,
             breathDamageScore: 0,
-            isMartialEligible: false
+            isMartialEligible: isMartialEligible
         )
 
         return BattleActor(
             identifier: "test.defender",
             displayName: "テスト防御者",
             kind: .enemy,
-            formationSlot: 1,
+            formationSlot: formationSlot,
             strength: 20,
             wisdom: 20,
             spirit: 20,
             vitality: 20,
             agility: agility,
             luck: luck,
-            isMartialEligible: false,
+            level: level,
+            isMartialEligible: isMartialEligible,
+            raceId: raceId,
             snapshot: snapshot,
             currentHP: snapshot.maxHP,
             actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
@@ -174,7 +188,12 @@ nonisolated enum TestActorBuilder {
         criticalChancePercent: Int = 0,
         luck: Int,
         agility: Int = 20,
-        skillEffects: BattleActor.SkillEffects = .neutral
+        skillEffects: BattleActor.SkillEffects = .neutral,
+        formationSlot: BattleFormationSlot = 1,
+        level: Int? = nil,
+        raceId: UInt8? = nil,
+        isMartialEligible: Bool = false,
+        partyMemberId: UInt8 = 1
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: maxHP,
@@ -190,21 +209,24 @@ nonisolated enum TestActorBuilder {
             trapRemovalScore: 0,
             additionalDamageScore: 0,
             breathDamageScore: 0,
-            isMartialEligible: false
+            isMartialEligible: isMartialEligible
         )
 
         return BattleActor(
             identifier: "test.player",
             displayName: "テストプレイヤー",
             kind: .player,
-            formationSlot: 1,
+            formationSlot: formationSlot,
             strength: 20,
             wisdom: 20,
             spirit: 20,
             vitality: 20,
             agility: agility,
             luck: luck,
-            isMartialEligible: false,
+            partyMemberId: partyMemberId,
+            level: level,
+            isMartialEligible: isMartialEligible,
+            raceId: raceId,
             snapshot: snapshot,
             currentHP: snapshot.maxHP,
             actionRates: BattleActionRates(attack: 100, priestMagic: 0, mageMagic: 0, breath: 0),
@@ -459,7 +481,8 @@ nonisolated enum TestActorBuilder {
     ///   - attackCount: 攻撃回数（反撃のattackCountMultiplier検証用）
     static func makeReactionTestPlayer(
         skillEffects: BattleActor.SkillEffects = .neutral,
-        attackCount: Double = 1.0
+        attackCount: Double = 1.0,
+        partyMemberId: UInt8 = 1
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 50000,
@@ -489,6 +512,7 @@ nonisolated enum TestActorBuilder {
             vitality: 100,
             agility: 20,
             luck: 35,
+            partyMemberId: partyMemberId,
             isMartialEligible: false,
             snapshot: snapshot,
             currentHP: snapshot.maxHP,

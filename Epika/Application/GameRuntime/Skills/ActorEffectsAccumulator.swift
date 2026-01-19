@@ -99,7 +99,8 @@ struct ActorEffectsAccumulator {
             enemySingleActionSkipChancePercent: combat.enemySingleActionSkipChancePercent,
             actionOrderShuffleEnemy: combat.actionOrderShuffleEnemy,
             firstStrike: combat.firstStrike,
-            enemyStatDebuffs: combat.enemyStatDebuffs
+            enemyStatDebuffs: combat.enemyStatDebuffs,
+            hasAttackCountAdditive: combat.hasAttackCountAdditive
         )
 
         let statusGroup = BattleActor.SkillEffects.Status(
@@ -148,7 +149,8 @@ struct ActorEffectsAccumulator {
             retreatTurn: misc.retreatTurn,
             retreatChancePercent: misc.retreatChancePercent,
             targetingWeight: misc.targetingWeight,
-            coverRowsBehind: misc.coverRowsBehind
+            coverRowsBehind: misc.coverRowsBehind,
+            coverRowsBehindCondition: misc.coverRowsBehindCondition
         )
 
         return BattleActor.SkillEffects(
@@ -256,6 +258,7 @@ struct ActorCombatAccumulator {
     var actionOrderShuffleEnemy: Bool = false
     var firstStrike: Bool = false
     var enemyStatDebuffs: [BattleActor.SkillEffects.EnemyStatDebuff] = []
+    var hasAttackCountAdditive: Bool = false
 }
 
 // MARK: - StatusAccumulator
@@ -314,4 +317,5 @@ struct MiscAccumulator {
     var retreatChancePercent: Double?
     var targetingWeight: Double = 1.0
     var coverRowsBehind: Bool = false
+    var coverRowsBehindCondition: SkillConditionType?
 }

@@ -67,7 +67,14 @@ extension BattleTurnEngine {
         actor.attackHistory.reset()
         applyStatusTicks(for: side, index: index, actor: &actor, context: &context)
         if actor.skillEffects.misc.autoDegradationRepair {
-            applyDegradationRepairIfAvailable(to: &actor, context: &context)
+            let repaired = applyDegradationRepairIfAvailable(to: &actor, context: &context)
+            if repaired > 0 {
+                let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+                appendSkillEffectLog(.degradationRepair,
+                                     actorId: actorIdx,
+                                     context: &context,
+                                     turnOverride: context.turn)
+            }
         }
         applySpellChargeRegenIfNeeded(for: &actor, context: context)
         updateTimedBuffs(for: side, index: index, actor: &actor, context: &context)
@@ -94,6 +101,11 @@ extension BattleTurnEngine {
             .filter { actors[$0].isAlive && actors[$0].skillEffects.misc.endOfTurnHealingPercent > 0 }
             .max { actors[$0].skillEffects.misc.endOfTurnHealingPercent < actors[$1].skillEffects.misc.endOfTurnHealingPercent }!
         let healer = actors[healerIndex]
+        let healerIdx = context.actorIndex(for: side, arrayIndex: healerIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: healerIdx,
+                                                          kind: .healParty,
+                                                          turnOverride: context.turn)
+        var didApply = false
 
         for targetIndex in actors.indices {
             guard side == .player ? context.players[targetIndex].isAlive : context.enemies[targetIndex].isAlive else { continue }
@@ -107,13 +119,15 @@ extension BattleTurnEngine {
             let applied = min(amount, missing)
             target.currentHP += applied
             context.updateActor(target, side: side, index: targetIndex)
-            let healerIdx = context.actorIndex(for: side, arrayIndex: healerIndex)
             let targetIdx = context.actorIndex(for: side, arrayIndex: targetIndex)
-            context.appendSimpleEntry(kind: .healParty,
-                                      actorId: healerIdx,
-                                      targetId: targetIdx,
-                                      value: UInt32(applied),
-                                      effectKind: .healParty)
+            entryBuilder.addEffect(kind: .healParty,
+                                   target: targetIdx,
+                                   value: UInt32(applied))
+            didApply = true
+        }
+
+        if didApply {
+            context.appendActionEntry(entryBuilder.build())
         }
     }
 
@@ -206,6 +220,14 @@ extension BattleTurnEngine {
         actor.guardActive = false
         actor.resurrectionTriggersUsed += 1
 
+        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+        if forcedTriggered {
+            appendSkillEffectLog(.resurrectionBuff,
+                                 actorId: actorIdx,
+                                 context: &context,
+                                 turnOverride: context.turn)
+        }
+
         if allowVitalize,
            let vitalize = actor.skillEffects.resurrection.vitalize,
            !actor.vitalizeActive {
@@ -217,9 +239,12 @@ extension BattleTurnEngine {
                 actor.grantedSkillIds.formUnion(vitalize.grantSkillIds)
             }
             rebuildSkillsAfterResurrection(for: &actor, context: context)
+            appendSkillEffectLog(.resurrectionVitalize,
+                                 actorId: actorIdx,
+                                 context: &context,
+                                 turnOverride: context.turn)
         }
 
-        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
         context.appendSimpleEntry(kind: .resurrection,
                                   actorId: actorIdx,
                                   targetId: actorIdx,
@@ -395,6 +420,13 @@ extension BattleTurnEngine {
                     : []
             }
 
+            let actorIdx = context.actorIndex(for: side, arrayIndex: ownerIndex)
+            let entryBuilder = context.makeActionEntryBuilder(actorId: actorIdx,
+                                                              kind: .buffApply,
+                                                              skillIndex: trigger.sourceSkillId,
+                                                              turnOverride: context.turn)
+            var didAddEffect = false
+
             for index in targetIndices {
                 var actor = refreshedActors[index]
 
@@ -422,7 +454,8 @@ extension BattleTurnEngine {
                         let buff = TimedBuff(id: trigger.id,
                                              baseDuration: trigger.duration,
                                              remainingTurns: trigger.duration,
-                                             statModifiers: normalizedMods)
+                                             statModifiers: normalizedMods,
+                                             sourceSkillId: trigger.sourceSkillId)
                         upsert(buff: buff, into: &actor.timedBuffs)
                     }
 
@@ -432,6 +465,9 @@ extension BattleTurnEngine {
                 }
 
                 refreshedActors[index] = actor
+                let targetIdx = context.actorIndex(for: side, arrayIndex: index)
+                entryBuilder.addEffect(kind: .buffApply, target: targetIdx)
+                didAddEffect = true
             }
 
             if side == .player {
@@ -440,13 +476,9 @@ extension BattleTurnEngine {
                 context.enemies = refreshedActors
             }
 
-            let actorIdx = context.actorIndex(for: side, arrayIndex: ownerIndex)
-            context.appendSimpleEntry(kind: .buffApply,
-                                      actorId: actorIdx,
-                                      value: UInt32(context.turn),
-                                      skillIndex: trigger.sourceSkillId,
-                                      label: trigger.displayName,
-                                      effectKind: .buffApply)
+            if didAddEffect {
+                context.appendActionEntry(entryBuilder.build())
+            }
         }
     }
 
@@ -515,6 +547,8 @@ extension BattleTurnEngine {
             if buff.remainingTurns <= 0 {
                 context.appendSimpleEntry(kind: .buffExpire,
                                           actorId: actorIdx,
+                                          targetId: actorIdx,
+                                          skillIndex: buff.sourceSkillId,
                                           effectKind: .buffExpire)
                 continue
             }
@@ -577,8 +611,7 @@ extension BattleTurnEngine {
                                       actorId: rescuerIdx,
                                       targetId: targetIdx,
                                       value: UInt32(appliedHeal),
-                                      effectKind: .rescue,
-                                      postAction: true)
+                                      effectKind: .rescue)
             return true
         }
 

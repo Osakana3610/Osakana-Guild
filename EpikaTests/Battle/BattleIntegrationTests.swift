@@ -263,7 +263,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
                 defender: &defender,
                 spellId: nil,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -311,7 +311,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
                 defender: &defender,
                 spellId: nil,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -350,7 +350,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
                 attacker: attacker,
                 defender: &defender,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -387,7 +387,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
                 attacker: attacker,
                 defender: &defender,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -669,7 +669,7 @@ nonisolated final class BattleIntegrationTests: XCTestCase {
                 attacker: attacker,
                 defender: &defender,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 

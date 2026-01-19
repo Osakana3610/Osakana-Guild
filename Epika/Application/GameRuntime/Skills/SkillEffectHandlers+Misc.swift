@@ -304,5 +304,16 @@ enum CoverRowsBehindHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         accumulator.misc.coverRowsBehind = true
+        if let rawCondition = payload.parameters[.condition] {
+            guard let raw = UInt8(exactly: rawCondition),
+                  let condition = SkillConditionType(rawValue: raw) else {
+                throw RuntimeError.invalidConfiguration(
+                    reason: "Skill \(context.skillId)#\(context.effectIndex) coverRowsBehind の condition が無効です: \(rawCondition)"
+                )
+            }
+            accumulator.misc.coverRowsBehindCondition = condition
+        } else {
+            accumulator.misc.coverRowsBehindCondition = nil
+        }
     }
 }

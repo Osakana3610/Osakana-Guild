@@ -33,6 +33,20 @@ import Foundation
 extension BattleTurnEngine {
     nonisolated static let criticalDefenseRetainedFactor: Double = 0.5
 
+    nonisolated struct MagicalDamageResult: Sendable {
+        let damage: Int
+        let wasCritical: Bool
+        let wasNullified: Bool
+        let guardBarrierConsumed: Int
+        let barrierConsumed: Int
+    }
+
+    nonisolated struct BreathDamageResult: Sendable {
+        let damage: Int
+        let guardBarrierConsumed: Int
+        let barrierConsumed: Int
+    }
+
     // MARK: - Modifier Key Constants (avoid string concatenation per hit)
     private nonisolated static let physicalDamageDealtKey = "physicalDamageDealtMultiplier"
     private nonisolated static let physicalDamageTakenKey = "physicalDamageTakenMultiplier"
@@ -125,13 +139,17 @@ extension BattleTurnEngine {
     nonisolated static func computeMagicalDamage(attacker: BattleActor,
                                      defender: inout BattleActor,
                                      spellId: UInt8?,
-                                     context: inout BattleContext) -> Int {
+                                     context: inout BattleContext) -> MagicalDamageResult {
         // 魔法無効化判定
         let nullifyChance = defender.skillEffects.damage.magicNullifyChancePercent
         if nullifyChance > 0 {
             let cappedChance = max(0, min(100, Int(nullifyChance.rounded())))
             if BattleRandomSystem.percentChance(cappedChance, random: &context.random) {
-                return 0  // 魔法無効化成功
+                return MagicalDamageResult(damage: 0,
+                                           wasCritical: false,
+                                           wasNullified: true,
+                                           guardBarrierConsumed: 0,
+                                           barrierConsumed: 0)
             }
         }
 
@@ -147,10 +165,12 @@ extension BattleTurnEngine {
         damage *= damageTakenModifier(for: defender, damageType: .magical, spellId: spellId, attacker: attacker)
 
         // 必殺魔法（魔法必殺）判定
+        var didCritical = false
         let criticalChance = attacker.skillEffects.spell.magicCriticalChancePercent
         if criticalChance > 0 {
             let cappedChance = max(0, min(100, Int(criticalChance.rounded())))
             if BattleRandomSystem.percentChance(cappedChance, random: &context.random) {
+                didCritical = true
                 damage *= attacker.skillEffects.spell.magicCriticalMultiplier
             }
         }
@@ -160,13 +180,27 @@ extension BattleTurnEngine {
             damage *= defender.innateResistances.spells[spellId, default: 1.0]
         }
 
+        let barrierKey = barrierKey(for: .magical)
+        let guardActive = defender.guardActive
+        let guardBefore = defender.guardBarrierCharges[barrierKey] ?? 0
+        let barrierBefore = defender.barrierCharges[barrierKey] ?? 0
+
         let barrierMultiplier = applyBarrierIfAvailable(for: .magical, defender: &defender)
         var adjusted = damage * barrierMultiplier
         if barrierMultiplier == 1.0, defender.guardActive {
             adjusted *= 0.5
         }
 
-        return max(1, Int(adjusted.rounded()))
+        let guardAfter = defender.guardBarrierCharges[barrierKey] ?? 0
+        let barrierAfter = defender.barrierCharges[barrierKey] ?? 0
+        let guardConsumed = guardActive && guardAfter < guardBefore ? (guardBefore - guardAfter) : 0
+        let barrierConsumed = guardConsumed == 0 && barrierAfter < barrierBefore ? (barrierBefore - barrierAfter) : 0
+
+        return MagicalDamageResult(damage: max(1, Int(adjusted.rounded())),
+                                   wasCritical: didCritical,
+                                   wasNullified: false,
+                                   guardBarrierConsumed: guardConsumed,
+                                   barrierConsumed: barrierConsumed)
     }
 
     nonisolated static func computeReverseHealingDamage(attacker: BattleActor,
@@ -200,7 +234,7 @@ extension BattleTurnEngine {
 
     nonisolated static func computeBreathDamage(attacker: BattleActor,
                                     defender: inout BattleActor,
-                                    context: inout BattleContext) -> Int {
+                                    context: inout BattleContext) -> BreathDamageResult {
         let variance = BattleRandomSystem.speedMultiplier(luck: attacker.luck, random: &context.random)
         var damage = Double(attacker.snapshot.breathDamageScore) * variance
 
@@ -208,13 +242,25 @@ extension BattleTurnEngine {
         damage *= damageTakenModifier(for: defender, damageType: .breath, attacker: attacker)
         damage *= defender.innateResistances.breath  // ブレス耐性
 
+        let barrierKey = barrierKey(for: .breath)
+        let guardActive = defender.guardActive
+        let guardBefore = defender.guardBarrierCharges[barrierKey] ?? 0
+        let barrierBefore = defender.barrierCharges[barrierKey] ?? 0
+
         let barrierMultiplier = applyBarrierIfAvailable(for: .breath, defender: &defender)
         var adjusted = damage * barrierMultiplier
         if barrierMultiplier == 1.0, defender.guardActive {
             adjusted *= 0.5
         }
 
-        return max(1, Int(adjusted.rounded()))
+        let guardAfter = defender.guardBarrierCharges[barrierKey] ?? 0
+        let barrierAfter = defender.barrierCharges[barrierKey] ?? 0
+        let guardConsumed = guardActive && guardAfter < guardBefore ? (guardBefore - guardAfter) : 0
+        let barrierConsumed = guardConsumed == 0 && barrierAfter < barrierBefore ? (barrierBefore - barrierAfter) : 0
+
+        return BreathDamageResult(damage: max(1, Int(adjusted.rounded())),
+                                  guardBarrierConsumed: guardConsumed,
+                                  barrierConsumed: barrierConsumed)
     }
 
     nonisolated static func computeHealingAmount(caster: BattleActor,
@@ -321,12 +367,12 @@ extension BattleTurnEngine {
         if let attacker,
            let defenderLevel = defender.level,
            let attackerLevel = attacker.level,
-           defender.skillEffects.damage.levelComparisonDamageTakenPercent > 0 {
+           defender.skillEffects.damage.levelComparisonDamageTakenPercent != 0 {
             let levelDiff = defenderLevel - attackerLevel
             if levelDiff > 0 {
-                let reductionPercent = defender.skillEffects.damage.levelComparisonDamageTakenPercent * Double(levelDiff)
-                let reductionMultiplier = max(0.0, 1.0 - reductionPercent / 100.0)
-                result *= reductionMultiplier
+                let adjustmentPercent = defender.skillEffects.damage.levelComparisonDamageTakenPercent * Double(levelDiff)
+                let adjustmentMultiplier = max(0.0, 1.0 + adjustmentPercent / 100.0)
+                result *= adjustmentMultiplier
             }
         }
 
@@ -427,15 +473,18 @@ extension BattleTurnEngine {
         defender.degradationPercent = min(100.0, defender.degradationPercent + increment)
     }
 
-    nonisolated static func applyDegradationRepairIfAvailable(to actor: inout BattleActor, context: inout BattleContext) {
+    @discardableResult
+    nonisolated static func applyDegradationRepairIfAvailable(to actor: inout BattleActor, context: inout BattleContext) -> Double {
         let minP = actor.skillEffects.misc.degradationRepairMinPercent
         let maxP = actor.skillEffects.misc.degradationRepairMaxPercent
-        guard minP > 0, maxP >= minP else { return }
+        guard minP > 0, maxP >= minP else { return 0 }
         let bonus = actor.skillEffects.misc.degradationRepairBonusPercent
         let range = maxP - minP
         let roll = minP + context.random.nextDouble(in: 0...range)
         let repaired = roll * (1.0 + bonus / 100.0)
+        let before = actor.degradationPercent
         actor.degradationPercent = max(0.0, actor.degradationPercent - repaired)
+        return max(0.0, before - actor.degradationPercent)
     }
 
     nonisolated static func modifierDealtKey(for damageType: BattleDamageType) -> String {

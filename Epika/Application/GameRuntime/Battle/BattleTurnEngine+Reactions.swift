@@ -20,8 +20,8 @@
 //   - applyAbsorptionIfNeeded: ダメージ吸収処理
 //   - applySpellChargeGainOnPhysicalHit: 物理ヒット時の呪文チャージ回復
 //   - attemptRunawayIfNeeded: 暴走判定
-//   - dispatchReactions: リアクションイベントの発火
-//   - attemptReactions: リアクションの試行
+//   - processReactionQueue: リアクションキューのチェーン処理
+//   - executeReactionSlot: リアクションの実行
 //   - executeReactionAttack: 反撃攻撃の実行
 //   - applyAttackOutcome: 攻撃結果の適用
 //
@@ -36,12 +36,161 @@ import Foundation
 extension BattleTurnEngine {
     /// リアクションキューを処理する（再帰呼び出しを避けるため）
     nonisolated static func processReactionQueue(context: inout BattleContext) {
-        while let pending = context.reactionQueue.first {
-            context.reactionQueue.removeFirst()
-            guard pending.depth < BattleContext.maxReactionDepth else { continue }
+        while !context.reactionQueue.isEmpty {
             guard !context.isBattleOver else { return }
-            dispatchReactions(for: pending.event, depth: pending.depth, context: &context)
+            let pending = context.reactionQueue
+            context.reactionQueue.removeAll(keepingCapacity: true)
+
+            var slots: [ReactionSlot] = []
+            var sequence = 0
+            for entry in pending {
+                slots.append(contentsOf: collectReactionSlots(for: entry,
+                                                              sequence: &sequence,
+                                                              context: &context))
+            }
+
+            guard !slots.isEmpty else { continue }
+
+            slots.sort { lhs, rhs in
+                if lhs.priority != rhs.priority { return lhs.priority.rawValue < rhs.priority.rawValue }
+                if lhs.speed != rhs.speed { return lhs.speed > rhs.speed }
+                if lhs.tiebreaker != rhs.tiebreaker { return lhs.tiebreaker > rhs.tiebreaker }
+                return lhs.sequence < rhs.sequence
+            }
+
+            for slot in slots {
+                guard !context.isBattleOver else { return }
+                executeReactionSlot(slot, context: &context)
+            }
         }
+    }
+
+    private enum ReactionPriority: Int {
+        case counter = 0
+        case retaliation = 1
+        case followUp = 2
+    }
+
+    private struct ReactionSlot {
+        let priority: ReactionPriority
+        let speed: Int
+        let tiebreaker: Double
+        let sequence: Int
+        let side: ActorSide
+        let actorIndex: Int
+        let reaction: BattleActor.SkillEffects.Reaction
+        let event: ReactionEvent
+        let depth: Int
+    }
+
+    private nonisolated static func collectReactionSlots(for pending: BattleContext.PendingReaction,
+                                             sequence: inout Int,
+                                             context: inout BattleContext) -> [ReactionSlot] {
+        let event = pending.event
+        let depth = pending.depth
+
+        switch event {
+        case .allyDefeated(let side, _, _):
+            return actorIndices(for: side, context: context).flatMap {
+                collectReactionSlots(on: side,
+                                     actorIndex: $0,
+                                     event: event,
+                                     depth: depth,
+                                     sequence: &sequence,
+                                     context: &context)
+            }
+        case .selfDamagedPhysical(let side, let actorIndex, _),
+             .selfDamagedMagical(let side, let actorIndex, _),
+             .selfEvadePhysical(let side, let actorIndex, _),
+             .selfAttackNoKill(let side, let actorIndex, _),
+             .selfMagicAttack(let side, let actorIndex):
+            return collectReactionSlots(on: side,
+                                        actorIndex: actorIndex,
+                                        event: event,
+                                        depth: depth,
+                                        sequence: &sequence,
+                                        context: &context)
+        case .allyDamagedPhysical(let side, _, _):
+            return actorIndices(for: side, context: context).flatMap {
+                collectReactionSlots(on: side,
+                                     actorIndex: $0,
+                                     event: event,
+                                     depth: depth,
+                                     sequence: &sequence,
+                                     context: &context)
+            }
+        case .selfKilledEnemy(let side, let actorIndex, _):
+            return collectReactionSlots(on: side,
+                                        actorIndex: actorIndex,
+                                        event: event,
+                                        depth: depth,
+                                        sequence: &sequence,
+                                        context: &context)
+        case .allyMagicAttack(let side, _):
+            return actorIndices(for: side, context: context).flatMap {
+                collectReactionSlots(on: side,
+                                     actorIndex: $0,
+                                     event: event,
+                                     depth: depth,
+                                     sequence: &sequence,
+                                     context: &context)
+            }
+        }
+    }
+
+    private nonisolated static func collectReactionSlots(on side: ActorSide,
+                                             actorIndex: Int,
+                                             event: ReactionEvent,
+                                             depth: Int,
+                                             sequence: inout Int,
+                                             context: inout BattleContext) -> [ReactionSlot] {
+        guard let performer = context.actor(for: side, index: actorIndex), performer.isAlive else { return [] }
+        let candidates = performer.skillEffects.combat.reactions.filter { $0.trigger.matches(event: event) }
+        guard !candidates.isEmpty else { return [] }
+
+        let priority = reactionPriority(for: event)
+        let orderSnapshot = reactionOrderSnapshot(for: side, actorIndex: actorIndex, context: context)
+        var slots: [ReactionSlot] = []
+        slots.reserveCapacity(candidates.count)
+
+        for reaction in candidates {
+            slots.append(ReactionSlot(priority: priority,
+                                      speed: orderSnapshot.speed,
+                                      tiebreaker: orderSnapshot.tiebreaker,
+                                      sequence: sequence,
+                                      side: side,
+                                      actorIndex: actorIndex,
+                                      reaction: reaction,
+                                      event: event,
+                                      depth: depth))
+            sequence += 1
+        }
+        return slots
+    }
+
+    private nonisolated static func reactionPriority(for event: ReactionEvent) -> ReactionPriority {
+        switch event {
+        case .allyDefeated:
+            return .retaliation
+        case .selfDamagedPhysical,
+             .selfDamagedMagical,
+             .selfEvadePhysical,
+             .allyDamagedPhysical:
+            return .counter
+        case .selfKilledEnemy,
+             .allyMagicAttack,
+             .selfAttackNoKill,
+             .selfMagicAttack:
+            return .followUp
+        }
+    }
+
+    private nonisolated static func reactionOrderSnapshot(for side: ActorSide,
+                                               actorIndex: Int,
+                                               context: BattleContext) -> BattleContext.ActionOrderSnapshot {
+        let reference = BattleContext.reference(for: side, index: actorIndex)
+        return context.actionOrderSnapshot[reference]
+            ?? BattleContext.ActionOrderSnapshot(speed: 0, tiebreaker: 0.0)
     }
 
     nonisolated static func shouldTriggerParry(defender: inout BattleActor,
@@ -117,20 +266,27 @@ extension BattleTurnEngine {
     nonisolated static func attemptRunawayIfNeeded(for defenderSide: ActorSide,
                                        defenderIndex: Int,
                                        damage: Int,
-                                       context: inout BattleContext,
-                                       entryBuilder: BattleActionEntry.Builder?) {
-        guard damage > 0 else { return }
-        guard var defender = context.actor(for: defenderSide, index: defenderIndex) else { return }
-        guard defender.isAlive else { return }
+                                       context: inout BattleContext) -> [BattleActionEntry] {
+        guard damage > 0 else { return [] }
+        guard var defender = context.actor(for: defenderSide, index: defenderIndex) else { return [] }
+        guard defender.isAlive else { return [] }
         let maxHP = max(1, defender.snapshot.maxHP)
+        let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
+        var postEntries: [BattleActionEntry] = []
 
-        func trigger(runaway: BattleActor.SkillEffects.Runaway?, isMagic: Bool) {
+        func trigger(runaway: BattleActor.SkillEffects.Runaway?,
+                     kind: SkillEffectLogKind,
+                     isMagic: Bool) {
             guard let runaway else { return }
             let thresholdValue = Double(maxHP) * runaway.thresholdPercent / 100.0
             guard Double(damage) >= thresholdValue else { return }
             let probability = max(0.0, min(1.0, (runaway.chancePercent * defender.skillEffects.combat.procChanceMultiplier) / 100.0))
             guard context.random.nextBool(probability: probability) else { return }
 
+            let entryBuilder = context.makeActionEntryBuilder(actorId: defenderIdx,
+                                                              kind: .skillEffect,
+                                                              extra: kind.rawValue,
+                                                              turnOverride: context.turn)
             let baseDamage = Double(damage)
             var targets: [(ActorSide, Int)] = []
             for (idx, ally) in context.players.enumerated() where ally.isAlive && !(defenderSide == .player && idx == defenderIndex) {
@@ -141,15 +297,17 @@ extension BattleTurnEngine {
             }
             for ref in targets {
                 guard var target = context.actor(for: ref.0, index: ref.1) else { continue }
-                let modifier = damageTakenModifier(for: target, damageType: isMagic ? .magical : .physical, attacker: defender)
+                let modifier = damageTakenModifier(for: target,
+                                                   damageType: isMagic ? .magical : .physical,
+                                                   attacker: defender)
                 let rawDamage = max(1, Int((baseDamage * modifier).rounded()))
                 let applied = applyDamage(amount: rawDamage, to: &target)
                 context.updateActor(target, side: ref.0, index: ref.1)
                 let targetIdx = context.actorIndex(for: ref.0, arrayIndex: ref.1)
-                entryBuilder?.addEffect(kind: .statusRampage,
-                                        target: targetIdx,
-                                        value: UInt32(applied),
-                                        extra: UInt16(clamping: rawDamage))
+                entryBuilder.addEffect(kind: .statusRampage,
+                                       target: targetIdx,
+                                       value: UInt32(applied),
+                                       extra: UInt16(clamping: rawDamage))
             }
 
             if !hasStatus(tag: statusTagConfusion, in: defender, context: context) {
@@ -162,118 +320,101 @@ extension BattleTurnEngine {
                 }
             }
             context.updateActor(defender, side: defenderSide, index: defenderIndex)
+            postEntries.append(entryBuilder.build())
         }
 
-        trigger(runaway: defender.skillEffects.misc.magicRunaway, isMagic: true)
-        trigger(runaway: defender.skillEffects.misc.damageRunaway, isMagic: false)
+        trigger(runaway: defender.skillEffects.misc.magicRunaway, kind: .runawayMagic, isMagic: true)
+        trigger(runaway: defender.skillEffects.misc.damageRunaway, kind: .runawayDamage, isMagic: false)
+        return postEntries
     }
 
-    nonisolated static func dispatchReactions(for event: ReactionEvent,
-                                  depth: Int,
-                                  context: inout BattleContext) {
-        guard depth < BattleContext.maxReactionDepth else { return }
-        switch event {
-        case .allyDefeated(let side, _, _):
-            for index in actorIndices(for: side, context: context) {
-                attemptReactions(on: side, actorIndex: index, event: event, depth: depth, context: &context)
-            }
-        case .selfDamagedPhysical(let side, let actorIndex, _),
-             .selfDamagedMagical(let side, let actorIndex, _),
-             .selfEvadePhysical(let side, let actorIndex, _),
-             .selfAttackNoKill(let side, let actorIndex, _),
-             .selfMagicAttack(let side, let actorIndex):
-            attemptReactions(on: side, actorIndex: actorIndex, event: event, depth: depth, context: &context)
-        case .allyDamagedPhysical(let side, _, _):
-            for index in actorIndices(for: side, context: context) {
-                attemptReactions(on: side, actorIndex: index, event: event, depth: depth, context: &context)
-            }
-        case .selfKilledEnemy(let side, let actorIndex, _):
-            attemptReactions(on: side, actorIndex: actorIndex, event: event, depth: depth, context: &context)
-        case .allyMagicAttack(let side, _):
-            for index in actorIndices(for: side, context: context) {
-                attemptReactions(on: side, actorIndex: index, event: event, depth: depth, context: &context)
+    private nonisolated static func executeReactionSlot(_ slot: ReactionSlot, context: inout BattleContext) {
+        guard let performer = context.actor(for: slot.side, index: slot.actorIndex), performer.isAlive else { return }
+
+        let reaction = slot.reaction
+        let event = slot.event
+
+        if reaction.requiresMartial && !shouldUseMartialAttack(attacker: performer) {
+            return
+        }
+
+        if case .allyDamagedPhysical(_, let defenderIndex, _) = event,
+           defenderIndex == slot.actorIndex {
+            return
+        }
+
+        // 自分の魔法に自分で追撃しない
+        if case .allyMagicAttack(_, let casterIndex) = event,
+           casterIndex == slot.actorIndex {
+            return
+        }
+
+        if reaction.requiresAllyBehind {
+            guard case .allyDamagedPhysical(let eventSide, let defenderIndex, _) = event,
+                  eventSide == slot.side,
+                  let attackedActor = context.actor(for: slot.side, index: defenderIndex),
+                  performer.formationSlot.formationRow < attackedActor.formationSlot.formationRow else {
+                return
             }
         }
-    }
 
-    nonisolated static func attemptReactions(on side: ActorSide,
-                                 actorIndex: Int,
-                                 event: ReactionEvent,
-                                 depth: Int,
-                                 context: inout BattleContext) {
-        guard let performer = context.actor(for: side, index: actorIndex), performer.isAlive else { return }
+        guard let resolvedTarget = resolveReactionTarget(
+            reaction: reaction,
+            event: event,
+            attackerSide: slot.side,
+            attacker: performer,
+            context: &context
+        ) else {
+            return
+        }
 
-        let candidates = performer.skillEffects.combat.reactions.filter { $0.trigger.matches(event: event) }
+        // statScalingはコンパイル時にbaseChancePercentに計算済み
+        let baseChance = max(0.0, reaction.baseChancePercent)
+        var chance = baseChance * performer.skillEffects.combat.procChanceMultiplier
+        if let targetActor = context.actor(for: resolvedTarget.0, index: resolvedTarget.1) {
+            chance *= targetActor.skillEffects.combat.counterAttackEvasionMultiplier
+        }
+        let cappedChance = max(0, min(100, Int(floor(chance))))
+        guard cappedChance > 0 else { return }
 
-        guard !candidates.isEmpty else { return }
+        let rolled = BattleRandomSystem.percentChance(cappedChance, random: &context.random)
+        guard rolled else { return }
 
-        for reaction in candidates {
-            guard let currentPerformer = context.actor(for: side, index: actorIndex), currentPerformer.isAlive else { break }
-            if reaction.requiresMartial && !shouldUseMartialAttack(attacker: currentPerformer) {
-                continue
+        let performerIdx = context.actorIndex(for: slot.side, arrayIndex: slot.actorIndex)
+        let targetIdx = context.actorIndex(for: resolvedTarget.0, arrayIndex: resolvedTarget.1)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: performerIdx,
+                                                          kind: .reactionAttack,
+                                                          skillIndex: reaction.skillId,
+                                                          turnOverride: context.turn)
+        entryBuilder.addEffect(kind: .reactionAttack, target: targetIdx)
+
+        guard let reactionOutcome = executeReactionAttack(from: slot.side,
+                                                          actorIndex: slot.actorIndex,
+                                                          target: resolvedTarget,
+                                                          reaction: reaction,
+                                                          depth: slot.depth + 1,
+                                                          context: &context,
+                                                          entryBuilder: entryBuilder) else {
+            return
+        }
+        context.appendActionEntry(entryBuilder.build())
+        if !reactionOutcome.skillEffectLogs.isEmpty {
+            appendSkillEffectLogs(reactionOutcome.skillEffectLogs, context: &context, turnOverride: context.turn)
+        }
+        appendBarrierLogs(from: reactionOutcome.attackResult, context: &context, turnOverride: context.turn)
+        if !reactionOutcome.outcome.postEntries.isEmpty {
+            for entry in reactionOutcome.outcome.postEntries {
+                context.appendActionEntry(entry)
             }
-
-            if case .allyDamagedPhysical(_, let defenderIndex, _) = event,
-               defenderIndex == actorIndex {
-                continue
-            }
-
-            // 自分の魔法に自分で追撃しない
-            if case .allyMagicAttack(_, let casterIndex) = event,
-               casterIndex == actorIndex {
-                continue
-            }
-
-            if reaction.requiresAllyBehind {
-                guard case .allyDamagedPhysical(let eventSide, let defenderIndex, _) = event,
-                      eventSide == side,
-                      let attackedActor = context.actor(for: side, index: defenderIndex),
-                      currentPerformer.formationSlot.formationRow < attackedActor.formationSlot.formationRow else {
-                    continue
-                }
-            }
-
-            guard let resolvedTarget = resolveReactionTarget(
-                reaction: reaction,
-                event: event,
-                attackerSide: side,
-                attacker: currentPerformer,
-                context: &context
-            ) else {
-                continue
-            }
-
-            // statScalingはコンパイル時にbaseChancePercentに計算済み
-            let baseChance = max(0.0, reaction.baseChancePercent)
-            var chance = baseChance * currentPerformer.skillEffects.combat.procChanceMultiplier
-            if let targetActor = context.actor(for: resolvedTarget.0, index: resolvedTarget.1) {
-                chance *= targetActor.skillEffects.combat.counterAttackEvasionMultiplier
-            }
-            let cappedChance = max(0, min(100, Int(floor(chance))))
-
-            guard cappedChance > 0 else {
-                continue
-            }
-
-            let rolled = BattleRandomSystem.percentChance(cappedChance, random: &context.random)
-            guard rolled else { continue }
-
-            let performerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
-            let targetIdx = context.actorIndex(for: resolvedTarget.0, arrayIndex: resolvedTarget.1)
-            let entryBuilder = context.makeActionEntryBuilder(actorId: performerIdx,
-                                                              kind: .reactionAttack,
-                                                              label: reaction.displayName,
-                                                              turnOverride: context.turn)
-            entryBuilder.addEffect(kind: .reactionAttack, target: targetIdx)
-
-            executeReactionAttack(from: side,
-                                  actorIndex: actorIndex,
-                                  target: resolvedTarget,
-                                  reaction: reaction,
-                                  depth: depth + 1,
+        }
+        if reactionOutcome.outcome.defenderWasDefeated {
+            handleDefeatReactions(targetSide: resolvedTarget.0,
+                                  targetIndex: resolvedTarget.1,
+                                  killerSide: slot.side,
+                                  killerIndex: slot.actorIndex,
                                   context: &context,
-                                  entryBuilder: entryBuilder)
-            context.appendActionEntry(entryBuilder.build())
+                                  reactionDepth: slot.depth + 1,
+                                  allowsReactionEvents: false)
         }
     }
 
@@ -396,15 +537,16 @@ extension BattleTurnEngine {
         return nil
     }
 
+    @discardableResult
     nonisolated static func executeReactionAttack(from side: ActorSide,
                                       actorIndex: Int,
                                       target: (ActorSide, Int),
                                       reaction: BattleActor.SkillEffects.Reaction,
                                       depth: Int,
                                       context: inout BattleContext,
-                                      entryBuilder: BattleActionEntry.Builder) {
-        guard let attacker = context.actor(for: side, index: actorIndex), attacker.isAlive else { return }
-        guard let initialTarget = context.actor(for: target.0, index: target.1) else { return }
+                                      entryBuilder: BattleActionEntry.Builder) -> ReactionAttackOutcome? {
+        guard let attacker = context.actor(for: side, index: actorIndex), attacker.isAlive else { return nil }
+        guard let initialTarget = context.actor(for: target.0, index: target.1) else { return nil }
 
         let baseHits = max(1.0, attacker.snapshot.attackCount)
         let scaledHits = max(1, Int(baseHits * reaction.attackCountMultiplier))
@@ -416,6 +558,7 @@ extension BattleTurnEngine {
         let attackerIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
 
         let attackResult: AttackResult
+        var pendingSkillEffectLogs: [(kind: SkillEffectLogKind, actorId: UInt16, targetId: UInt16?)] = []
         switch reaction.damageType {
         case .physical:
             attackResult = performAttack(attackerSide: side,
@@ -432,14 +575,35 @@ extension BattleTurnEngine {
             var attackerCopy = modifiedAttacker
             var targetCopy = initialTarget
             var totalDamage = 0
+            var barrierLogEvents: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
             let iterations = max(1, scaledHits)
             for _ in 0..<iterations {
                 guard attackerCopy.isAlive, targetCopy.isAlive else { break }
-                let damage = computeMagicalDamage(attacker: attackerCopy,
+                let result = computeMagicalDamage(attacker: attackerCopy,
                                                   defender: &targetCopy,
                                                   spellId: nil,
                                                   context: &context)
-                let applied = applyDamage(amount: damage, to: &targetCopy)
+                if result.wasNullified {
+                    pendingSkillEffectLogs.append((kind: .magicNullify,
+                                                   actorId: targetIdx,
+                                                   targetId: attackerIdx))
+                }
+                if result.wasCritical {
+                    entryBuilder.addEffect(kind: .skillEffect,
+                                           target: targetIdx,
+                                           extra: SkillEffectLogKind.magicCritical.rawValue)
+                }
+                if result.guardBarrierConsumed > 0 {
+                    for _ in 0..<result.guardBarrierConsumed {
+                        barrierLogEvents.append((actorId: targetIdx, kind: .barrierGuardMagical))
+                    }
+                } else if result.barrierConsumed > 0 {
+                    for _ in 0..<result.barrierConsumed {
+                        barrierLogEvents.append((actorId: targetIdx, kind: .barrierMagical))
+                    }
+                }
+
+                let applied = applyDamage(amount: result.damage, to: &targetCopy)
                 let absorbed = applyAbsorptionIfNeeded(for: &attackerCopy,
                                                        damageDealt: applied,
                                                        damageType: .magical,
@@ -449,7 +613,7 @@ extension BattleTurnEngine {
                     entryBuilder.addEffect(kind: .magicDamage,
                                            target: targetIdx,
                                            value: UInt32(applied),
-                                           extra: UInt16(clamping: damage))
+                                           extra: UInt16(clamping: result.damage))
                 }
                 if absorbed > 0 {
                     entryBuilder.addEffect(kind: .healAbsorb, target: attackerIdx, value: UInt32(absorbed))
@@ -465,17 +629,28 @@ extension BattleTurnEngine {
                                         criticalHits: 0,
                                         wasDodged: false,
                                         wasParried: false,
-                                        wasBlocked: false)
+                                        wasBlocked: false,
+                                        barrierLogEvents: barrierLogEvents)
         case .breath:
             let attackerCopy = modifiedAttacker
             var targetCopy = initialTarget
-            let damage = computeBreathDamage(attacker: attackerCopy, defender: &targetCopy, context: &context)
-            let applied = applyDamage(amount: damage, to: &targetCopy)
+            let result = computeBreathDamage(attacker: attackerCopy, defender: &targetCopy, context: &context)
+            var barrierLogEvents: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
+            if result.guardBarrierConsumed > 0 {
+                for _ in 0..<result.guardBarrierConsumed {
+                    barrierLogEvents.append((actorId: targetIdx, kind: .barrierGuardBreath))
+                }
+            } else if result.barrierConsumed > 0 {
+                for _ in 0..<result.barrierConsumed {
+                    barrierLogEvents.append((actorId: targetIdx, kind: .barrierBreath))
+                }
+            }
+            let applied = applyDamage(amount: result.damage, to: &targetCopy)
             if applied > 0 {
                 entryBuilder.addEffect(kind: .breathDamage,
                                        target: targetIdx,
                                        value: UInt32(applied),
-                                       extra: UInt16(clamping: damage))
+                                       extra: UInt16(clamping: result.damage))
             }
             attackResult = AttackResult(attacker: attackerCopy,
                                         defender: targetCopy,
@@ -484,25 +659,37 @@ extension BattleTurnEngine {
                                         criticalHits: 0,
                                         wasDodged: false,
                                         wasParried: false,
-                                        wasBlocked: false)
+                                        wasBlocked: false,
+                                        barrierLogEvents: barrierLogEvents)
         }
 
-        _ = applyAttackOutcome(attackerSide: side,
-                               attackerIndex: actorIndex,
-                               defenderSide: target.0,
-                               defenderIndex: target.1,
-                               attacker: attackResult.attacker,
-                               defender: attackResult.defender,
-                               attackResult: attackResult,
-                               context: &context,
-                               reactionDepth: depth,
-                               entryBuilder: entryBuilder,
-                               allowsReactionEvents: false)
+        let outcome = applyAttackOutcome(attackerSide: side,
+                                         attackerIndex: actorIndex,
+                                         defenderSide: target.0,
+                                         defenderIndex: target.1,
+                                         attacker: attackResult.attacker,
+                                         defender: attackResult.defender,
+                                         attackResult: attackResult,
+                                         context: &context,
+                                         reactionDepth: depth,
+                                         entryBuilder: entryBuilder,
+                                         allowsReactionEvents: false)
+        return ReactionAttackOutcome(attackResult: attackResult,
+                                     outcome: outcome,
+                                     skillEffectLogs: pendingSkillEffectLogs)
+    }
+
+    struct ReactionAttackOutcome {
+        let attackResult: AttackResult
+        let outcome: AttackOutcome
+        let skillEffectLogs: [(kind: SkillEffectLogKind, actorId: UInt16, targetId: UInt16?)]
     }
 
     struct AttackOutcome {
         var attacker: BattleActor?
         var defender: BattleActor?
+        var defenderWasDefeated: Bool
+        var postEntries: [BattleActionEntry]
     }
 
     nonisolated static func applyAttackOutcome(attackerSide: ActorSide,
@@ -522,26 +709,14 @@ extension BattleTurnEngine {
         var currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
         var currentDefender = context.actor(for: defenderSide, index: defenderIndex)
 
-        attemptRunawayIfNeeded(for: defenderSide,
-                               defenderIndex: defenderIndex,
-                               damage: attackResult.totalDamage,
-                               context: &context,
-                               entryBuilder: entryBuilder)
+        let postEntries = attemptRunawayIfNeeded(for: defenderSide,
+                                                 defenderIndex: defenderIndex,
+                                                 damage: attackResult.totalDamage,
+                                                 context: &context)
         currentAttacker = context.actor(for: attackerSide, index: attackerIndex)
         currentDefender = context.actor(for: defenderSide, index: defenderIndex)
 
         let defenderWasDefeated = currentDefender.map { !$0.isAlive } ?? true
-
-        if defenderWasDefeated {
-            handleDefeatReactions(targetSide: defenderSide,
-                                  targetIndex: defenderIndex,
-                                  killerSide: attackerSide,
-                                  killerIndex: attackerIndex,
-                                  context: &context,
-                                  reactionDepth: reactionDepth,
-                                  allowsReactionEvents: allowsReactionEvents)
-            currentDefender = context.actor(for: defenderSide, index: defenderIndex)
-        }
 
         if attackResult.wasParried, let defenderActor = currentDefender, defenderActor.isAlive {
             let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
@@ -581,7 +756,10 @@ extension BattleTurnEngine {
             ))
         }
 
-        return AttackOutcome(attacker: currentAttacker, defender: currentDefender)
+        return AttackOutcome(attacker: currentAttacker,
+                             defender: currentDefender,
+                             defenderWasDefeated: defenderWasDefeated,
+                             postEntries: postEntries)
     }
 
     // MARK: - Defeat Handling

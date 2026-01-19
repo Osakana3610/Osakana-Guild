@@ -211,6 +211,7 @@ nonisolated struct TimedBuff: Sendable, Hashable {
     let baseDuration: Int
     var remainingTurns: Int
     let statModifiers: [String: Double]
+    let sourceSkillId: UInt16?
 }
 
 struct BattleAttackHistory: Sendable, Hashable {
@@ -466,6 +467,7 @@ nonisolated struct BattleActor: Sendable {
 
             let identifier: String
             let displayName: String
+            let skillId: UInt16
             let trigger: Trigger
             let target: Target
             let damageType: BattleDamageType
@@ -769,6 +771,7 @@ nonisolated struct BattleActor: Sendable {
             var actionOrderShuffleEnemy: Bool  // 道化師スキル: 敵の行動順シャッフル
             var firstStrike: Bool  // 道化師スキル: 先制攻撃
             var enemyStatDebuffs: [EnemyStatDebuff]  // 敵ステータス弱体化
+            var hasAttackCountAdditive: Bool  // 攻撃回数加算スキルの有無（ログ用）
 
             nonisolated static let neutral = Combat(
                 procChanceMultiplier: 1.0,
@@ -791,7 +794,8 @@ nonisolated struct BattleActor: Sendable {
                 enemySingleActionSkipChancePercent: 0.0,
                 actionOrderShuffleEnemy: false,
                 firstStrike: false,
-                enemyStatDebuffs: []
+                enemyStatDebuffs: [],
+                hasAttackCountAdditive: false
             )
         }
 
@@ -868,6 +872,7 @@ nonisolated struct BattleActor: Sendable {
             var retreatChancePercent: Double?
             var targetingWeight: Double  // 狙われ率の重み（デフォルト1.0、高いほど狙われやすい）
             var coverRowsBehind: Bool    // 後列の味方をかばう（前列にいる場合）
+            var coverRowsBehindCondition: SkillConditionType?
 
             nonisolated static let neutral = Misc(
                 healingGiven: 1.0,
@@ -895,7 +900,8 @@ nonisolated struct BattleActor: Sendable {
                 retreatTurn: nil,
                 retreatChancePercent: nil,
                 targetingWeight: 1.0,
-                coverRowsBehind: false
+                coverRowsBehind: false,
+                coverRowsBehindCondition: nil
             )
         }
 

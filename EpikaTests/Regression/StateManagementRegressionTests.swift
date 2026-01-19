@@ -123,6 +123,7 @@ nonisolated final class StateManagementRegressionTests: XCTestCase {
             vitality: 100,
             agility: 35,
             luck: 35,
+            partyMemberId: 1,
             isMartialEligible: false,
             snapshot: snapshotHigh,
             currentHP: snapshotHigh.maxHP,
@@ -206,11 +207,11 @@ nonisolated final class StateManagementRegressionTests: XCTestCase {
     /// 検証: バリアを持つキャラがダメージを受けるとチャージが減る
     func testBarrierChargesConsumed() {
         // バリアチャージ3を持つプレイヤー
-        let player = TestActorBuilder.makeDefender(
+        var player = TestActorBuilder.makePlayer(
             physicalDefenseScore: 1000,
-            luck: 35,
-            barrierCharges: [1: 3]  // damageType=1 (physical) に対して3チャージ
+            luck: 35
         )
+        player.barrierCharges = [1: 3]  // damageType=1 (physical) に対して3チャージ
 
         let enemy = TestActorBuilder.makeEnemy(
             maxHP: 50000,
