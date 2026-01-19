@@ -74,7 +74,7 @@ extension BattleTurnEngine {
         context.appendSimpleEntry(kind: .statusRecover,
                                   actorId: actorIdx,
                                   targetId: actorIdx,
-                                  label: definition.name,
+                                  statusId: UInt16(definition.id),
                                   effectKind: .statusRecover)
     }
 }

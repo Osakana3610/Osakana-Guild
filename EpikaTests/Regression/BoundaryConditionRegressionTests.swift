@@ -221,6 +221,7 @@ nonisolated final class BoundaryConditionRegressionTests: XCTestCase {
             vitality: 100,
             agility: 35,
             luck: 35,
+            partyMemberId: 1,
             isMartialEligible: false,
             snapshot: snapshot,
             currentHP: snapshot.maxHP,

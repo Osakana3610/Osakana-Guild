@@ -503,9 +503,14 @@ private extension SkillRuntimeExpectationTests {
         snapshot: CharacterValues.Combat,
         currentHP: Int? = nil,
         raceId: UInt8? = nil,
-        level: Int? = nil
+        level: Int? = nil,
+        partyMemberId: UInt8? = nil
     ) -> BattleActor {
-        BattleActor(
+        let resolvedPartyMemberId: UInt8? = {
+            guard kind == .player else { return nil }
+            return partyMemberId ?? 1
+        }()
+        return BattleActor(
             identifier: identifier,
             displayName: identifier,
             kind: kind,
@@ -516,6 +521,7 @@ private extension SkillRuntimeExpectationTests {
             vitality: 10,
             agility: 10,
             luck: 10,
+            partyMemberId: resolvedPartyMemberId,
             level: level,
             isMartialEligible: snapshot.isMartialEligible,
             raceId: raceId,
@@ -2570,8 +2576,11 @@ private extension SkillRuntimeExpectationTests {
         rawData["runawayChance"] = chance
 
         func run(damage: Int) -> Bool {
-            let defender = TestActorBuilder.makeDefender(luck: 18, skillEffects: skillEffects)
-            let ally = TestActorBuilder.makeDefender(luck: 1)
+            let defender = TestActorBuilder.makePlayer(luck: 18,
+                                                       skillEffects: skillEffects,
+                                                       partyMemberId: 1)
+            let ally = TestActorBuilder.makePlayer(luck: 1,
+                                                   partyMemberId: 2)
             var context = makeContext(players: [defender, ally], enemies: [], statusDefinitions: cache.statusEffectsById)
             let builder = context.makeActionEntryBuilder(actorId: context.actorIndex(for: .player, arrayIndex: 0), kind: .physicalAttack)
             withFixedMedianRandomMode {
@@ -2582,7 +2591,7 @@ private extension SkillRuntimeExpectationTests {
             }
         }
 
-        let maxHP = TestActorBuilder.makeDefender(luck: 18).snapshot.maxHP
+        let maxHP = TestActorBuilder.makePlayer(luck: 18, partyMemberId: 1).snapshot.maxHP
         let thresholdDamage = Int((Double(maxHP) * thresholdPercent / 100.0).rounded(.towardZero))
         let belowTriggered = run(damage: max(0, thresholdDamage - 1))
         if belowTriggered {

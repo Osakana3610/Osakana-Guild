@@ -30,7 +30,6 @@ struct EncounterDetailView: View {
     @State private var cachedTurnSummaries: [TurnSummary] = []
     @State private var isLoadingBattleLog = false
     @State private var battleLogError: String?
-    @State private var actorIdentifierToMemberId: [String: UInt8] = [:]
     @State private var actorIcons: [String: CharacterIconInfo] = [:]
 
     var body: some View {
@@ -71,10 +70,6 @@ struct EncounterDetailView: View {
                                    partyName: party.name,
                                    iconProvider: { participant in
                                        guard let participant else { return nil }
-                                       // プレイヤーはpartyMemberIdで、敵はactorId（id）で検索
-                                       if let memberId = participant.partyMemberId {
-                                           return iconInfo(forMember: memberId)
-                                       }
                                        return iconInfo(for: participant.id)
                                    })
                 }
@@ -101,31 +96,33 @@ struct EncounterDetailView: View {
         )
 
         for (index, participant) in archive.playerSnapshots.enumerated() {
-            guard let memberId = participant.partyMemberId else { continue }
-            let actorIndex = UInt16(memberId)
+            guard let characterId = participant.characterId else { continue }
+            let actorIndex = participant.actorIndex
+            let actorId = String(actorIndex)
             let initialHP = Int(archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP))
             // 現在のキャラクターからmaxHPを取得、見つからなければスナップショットを使用
-            let currentMaxHP = characterMaxHPs[memberId] ?? participant.maxHP
-            states[participant.actorId] = ParticipantState(
-                id: participant.actorId,
+            let currentMaxHP = characterMaxHPs[characterId] ?? participant.maxHP
+            states[actorId] = ParticipantState(
+                id: actorId,
                 name: participant.name,
                 currentHP: initialHP,
                 previousHP: initialHP,
                 maxHP: currentMaxHP,
                 level: participant.level,
                 jobName: nil,
-                partyMemberId: memberId,
+                partyMemberId: characterId,
                 role: .player,
                 order: index
             )
-            indexToId[actorIndex] = participant.actorId
+            indexToId[actorIndex] = actorId
         }
 
         for (index, participant) in archive.enemySnapshots.enumerated() {
-            guard let actorIndex = UInt16(participant.actorId) else { continue }
+            let actorIndex = participant.actorIndex
+            let actorId = String(actorIndex)
             let initialHP = Int(archive.battleLog.initialHP[actorIndex] ?? UInt32(participant.maxHP))
-            states[participant.actorId] = ParticipantState(
-                id: participant.actorId,
+            states[actorId] = ParticipantState(
+                id: actorId,
                 name: participant.name,
                 currentHP: initialHP,
                 previousHP: initialHP,
@@ -136,7 +133,7 @@ struct EncounterDetailView: View {
                 role: .enemy,
                 order: index
             )
-            indexToId[actorIndex] = participant.actorId
+            indexToId[actorIndex] = actorId
         }
 
         var result: [TurnSummary] = []
@@ -210,33 +207,31 @@ struct EncounterDetailView: View {
             // 名前マップを構築
             var allyNames: [UInt8: String] = [:]
             var enemyNames: [UInt16: String] = [:]
-            var memberMap: [String: UInt8] = [:]
             var iconMap: [String: CharacterIconInfo] = [:]
             var actorIdentifiers: [UInt16: String] = [:]
 
             for participant in archive.playerSnapshots {
-                if let memberId = participant.partyMemberId {
-                    allyNames[memberId] = participant.name
-                    memberMap[participant.actorId] = memberId
-                    actorIdentifiers[UInt16(memberId)] = participant.actorId
-                }
+                guard let characterId = participant.characterId else { continue }
+                let actorIndex = participant.actorIndex
+                let actorId = String(actorIndex)
+                allyNames[characterId] = participant.name
+                actorIdentifiers[actorIndex] = actorId
                 if let avatarIndex = participant.avatarIndex {
-                    iconMap[participant.actorId] = CharacterIconInfo(avatarIndex: avatarIndex,
-                                                                     enemyId: nil,
-                                                                     displayName: participant.name)
+                    iconMap[actorId] = CharacterIconInfo(avatarIndex: avatarIndex,
+                                                         enemyId: nil,
+                                                         displayName: participant.name)
                 }
             }
 
             for participant in archive.enemySnapshots {
-                // actorIdは "(arrayIndex+1)*1000+enemyMasterIndex" 形式で保存されている
-                if let actorIndex = UInt16(participant.actorId) {
-                    enemyNames[actorIndex] = participant.name
-                    actorIdentifiers[actorIndex] = participant.actorId
-                    let enemyId = actorIndex % 1000
-                    iconMap[participant.actorId] = CharacterIconInfo(avatarIndex: nil,
-                                                                     enemyId: enemyId,
-                                                                     displayName: participant.name)
-                }
+                let actorIndex = participant.actorIndex
+                let actorId = String(actorIndex)
+                enemyNames[actorIndex] = participant.name
+                actorIdentifiers[actorIndex] = actorId
+                let enemyId = actorIndex % 1000
+                iconMap[actorId] = CharacterIconInfo(avatarIndex: nil,
+                                                     enemyId: enemyId,
+                                                     displayName: participant.name)
             }
 
             // 呪文名マップを構築
@@ -257,6 +252,12 @@ struct EncounterDetailView: View {
                 skillNames[skill.id] = skill.name
             }
 
+            // 状態異常名マップ
+            var statusNames: [UInt16: String] = [:]
+            for status in appServices.masterDataCache.allStatusEffects {
+                statusNames[UInt16(status.id)] = status.name
+            }
+
             // BattleLogRenderer で変換
             renderedActions = BattleLogRenderer.render(
                 battleLog: archive.battleLog,
@@ -265,11 +266,11 @@ struct EncounterDetailView: View {
                 spellNames: spellNames,
                 enemySkillNames: enemySkillNames,
                 skillNames: skillNames,
+                statusNames: statusNames,
                 actorIdentifiers: actorIdentifiers
             )
             cachedTurnSummaries = buildTurnSummaries()
 
-            actorIdentifierToMemberId = memberMap
             actorIcons = iconMap
         } catch EncounterDetailError.unsupportedBattleLogVersion {
             battleLogError = EncounterDetailError.unsupportedBattleLogVersion.errorDescription
@@ -318,14 +319,6 @@ struct EncounterDetailView: View {
     private func iconInfo(for identifier: String?) -> CharacterIconInfo? {
         guard let identifier else { return nil }
         return actorIcons[identifier]
-    }
-
-    private func iconInfo(forMember memberId: UInt8?) -> CharacterIconInfo? {
-        guard let memberId else { return nil }
-        if let identifier = actorIdentifierToMemberId.first(where: { $0.value == memberId })?.key {
-            return actorIcons[identifier]
-        }
-        return nil
     }
 }
 
@@ -506,10 +499,12 @@ struct GroupedActionRowView: View {
                 }
 
                 // アクションメッセージ
-                Text(group.primaryEntry.message)
-                    .font(.subheadline)
-                    .foregroundStyle(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
+                if !group.primaryEntry.message.isEmpty {
+                    Text(group.primaryEntry.message)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
                 // primaryEntry自体がダメージ/回復の場合（アクション宣言なし）、HPバーを表示
                 if group.results.isEmpty && !group.hpChanges.isEmpty {

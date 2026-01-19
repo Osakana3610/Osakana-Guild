@@ -29,6 +29,47 @@ struct BattleLogRenderer {
         }
     }
 
+    private static func reportMissing(_ message: String, location: String) {
+#if DEBUG
+        assertionFailure("\(location): \(message)")
+#else
+        Task { await AppLogCollector.shared.logError(message, location: location) }
+#endif
+    }
+
+    private static func templateValue(for key: String, location: String) -> String? {
+        let value = L10n.battleLog(key)
+        if value.isEmpty || value == key {
+            reportMissing("Missing localized template: \(key)", location: location)
+            return nil
+        }
+        return value
+    }
+
+    private static func termValue(for key: String, location: String) -> String? {
+        templateValue(for: key, location: location)
+    }
+
+    private static func renderTemplate(key: String,
+                                       placeholders: [String: String?],
+                                       location: String) -> String? {
+        guard let template = templateValue(for: key, location: location) else { return nil }
+        for (token, value) in placeholders {
+            let placeholder = "{\(token)}"
+            if template.contains(placeholder), value == nil {
+                reportMissing("Missing placeholder value: \(token) for \(key)", location: location)
+                return nil
+            }
+        }
+
+        var result = template
+        for (token, value) in placeholders {
+            guard let value else { continue }
+            result = result.replacingOccurrences(of: "{\(token)}", with: value)
+        }
+        return result
+    }
+
     struct RenderedAction: Sendable, Identifiable {
         let id: Int
         let turn: Int
@@ -46,6 +87,7 @@ struct BattleLogRenderer {
         spellNames: [UInt8: String] = [:],
         enemySkillNames: [UInt16: String] = [:],
         skillNames: [UInt16: String] = [:],
+        statusNames: [UInt16: String] = [:],
         actorIdentifiers: [UInt16: String] = [:]
     ) -> [RenderedAction] {
         var rendered: [RenderedAction] = []
@@ -62,13 +104,15 @@ struct BattleLogRenderer {
                                                    spellNames: spellNames,
                                                    enemySkillNames: enemySkillNames,
                                                    skillNames: skillNames,
+                                                   statusNames: statusNames,
                                                    allyNames: allyNames,
                                                    enemyNames: enemyNames)
 
             let actionLabel = resolveActionLabel(entry: entry,
                                                  spellNames: spellNames,
                                                  enemySkillNames: enemySkillNames,
-                                                 skillNames: skillNames)
+                                                 skillNames: skillNames,
+                                                 statusNames: statusNames)
 
             let shouldRenderEffects = rendersEffectLines(for: entry)
             var effectEntries: [BattleLogEntry] = []
@@ -78,6 +122,7 @@ struct BattleLogRenderer {
                                                     actionLabel: actionLabel,
                                                     allyNames: allyNames,
                                                     enemyNames: enemyNames,
+                                                    statusNames: statusNames,
                                                     actorIdentifiers: actorIdentifiers)
             }
 
@@ -103,6 +148,7 @@ struct BattleLogRenderer {
                                             actionLabel: String?,
                                             allyNames: [UInt8: String],
                                             enemyNames: [UInt16: String],
+                                            statusNames: [UInt16: String],
                                             actorIdentifiers: [UInt16: String]) -> [BattleLogEntry] {
         if let buffSummary = renderBuffSummary(for: entry,
                                                actionLabel: actionLabel,
@@ -117,6 +163,7 @@ struct BattleLogRenderer {
                                          actionLabel: actionLabel,
                                          allyNames: allyNames,
                                          enemyNames: enemyNames,
+                                         statusNames: statusNames,
                                          actorIdentifiers: actorIdentifiers)
         }
 
@@ -129,6 +176,7 @@ struct BattleLogRenderer {
                                    actionLabel: actionLabel,
                                    allyNames: allyNames,
                                    enemyNames: enemyNames,
+                                   statusNames: statusNames,
                                    actorIdentifiers: actorIdentifiers)
         }
     }
@@ -140,6 +188,7 @@ struct BattleLogRenderer {
                                              spellNames: [UInt8: String],
                                              enemySkillNames: [UInt16: String],
                                              skillNames: [UInt16: String],
+                                             statusNames: [UInt16: String],
                                              allyNames: [UInt8: String],
                                              enemyNames: [UInt16: String]) -> BattleLogEntry {
         let (message, type) = declarationMessage(kind: entry.declaration.kind,
@@ -148,10 +197,11 @@ struct BattleLogRenderer {
                                                  spellNames: spellNames,
                                                  enemySkillNames: enemySkillNames,
                                                  skillNames: skillNames,
+                                                 statusNames: statusNames,
                                                  allyNames: allyNames,
                                                  enemyNames: enemyNames)
         return BattleLogEntry(turn: turn,
-                              message: message,
+                              message: message ?? "",
                               type: type,
                               actorId: actorId,
                               targetId: nil)
@@ -164,15 +214,20 @@ struct BattleLogRenderer {
                                         actionLabel: String?,
                                         allyNames: [UInt8: String],
                                         enemyNames: [UInt16: String],
+                                        statusNames: [UInt16: String],
                                         actorIdentifiers: [UInt16: String]) -> BattleLogEntry? {
         let targetName = resolveName(index: effect.target, allyNames: allyNames, enemyNames: enemyNames)
         let displayAmount = displayValue(for: effect)
+        let effectLabel = resolveEffectLabel(effect: effect,
+                                             entry: entry,
+                                             actionLabel: actionLabel,
+                                             statusNames: statusNames)
         let (message, type) = effectMessage(kind: effect.kind,
                                             actorName: actorName,
                                             targetName: targetName,
                                             value: displayAmount,
-                                            actionLabel: actionLabel)
-        guard !message.isEmpty else { return nil }
+                                            actionLabel: effectLabel)
+        guard let message, !message.isEmpty else { return nil }
         let targetId = effect.target.flatMap { actorIdentifiers[$0] } ?? effect.target.map { String($0) }
         return BattleLogEntry(turn: turn,
                               message: message,
@@ -186,54 +241,106 @@ struct BattleLogRenderer {
                                     enemyNames: [UInt16: String]) -> String? {
         guard let index else { return nil }
         if index >= 1000 {
-            return enemyNames[index] ?? "敵\(index)"
+            guard let name = enemyNames[index] else {
+                reportMissing("Enemy name not found for actorIndex=\(index)", location: "BattleLogRenderer.resolveName")
+                return nil
+            }
+            return name
         } else {
-            return allyNames[UInt8(index)] ?? "キャラ\(index)"
+            guard let name = allyNames[UInt8(index)] else {
+                reportMissing("Ally name not found for actorIndex=\(index)", location: "BattleLogRenderer.resolveName")
+                return nil
+            }
+            return name
         }
     }
 
     private static func resolveActionLabel(entry: BattleActionEntry,
                                            spellNames: [UInt8: String],
                                            enemySkillNames: [UInt16: String],
-                                           skillNames: [UInt16: String]) -> String? {
-        if let label = entry.declaration.label, !label.isEmpty {
-            return localizedActionLabel(label)
-        }
-
-        guard let skillIndex = entry.declaration.skillIndex else { return nil }
-
-        if entry.declaration.kind == .priestMagic || entry.declaration.kind == .mageMagic {
-            if let spellId = UInt8(exactly: skillIndex), let name = spellNames[spellId] {
-                return localizedActionLabel(name)
+                                           skillNames: [UInt16: String],
+                                           statusNames: [UInt16: String]) -> String? {
+        switch entry.declaration.kind {
+        case .priestMagic, .mageMagic:
+            guard let skillIndex = entry.declaration.skillIndex,
+                  let spellId = UInt8(exactly: skillIndex),
+                  let name = spellNames[spellId] else {
+                reportMissing("Spell name not found for skillIndex=\(String(describing: entry.declaration.skillIndex))",
+                              location: "BattleLogRenderer.resolveActionLabel")
+                return nil
             }
-        }
-
-        if entry.declaration.kind == .enemySpecialSkill {
-            if let name = enemySkillNames[skillIndex] {
-                return localizedActionLabel(name)
+            return name
+        case .enemySpecialSkill:
+            guard let skillIndex = entry.declaration.skillIndex,
+                  let name = enemySkillNames[skillIndex] else {
+                reportMissing("Enemy skill name not found for skillIndex=\(String(describing: entry.declaration.skillIndex))",
+                              location: "BattleLogRenderer.resolveActionLabel")
+                return nil
             }
-        }
-
-        return localizedActionLabel(skillNames[skillIndex])
-    }
-
-    private static func localizedActionLabel(_ label: String?) -> String? {
-        guard let label else { return nil }
-        switch label {
-        case L10n.Key.battleTermReactionAttack.defaultValue:
-            return L10n.BattleTerm.reactionAttack
-        case L10n.Key.battleTermFollowUp.defaultValue:
-            return L10n.BattleTerm.followUp
-        case L10n.Key.battleTermRetaliation.defaultValue:
-            return L10n.BattleTerm.retaliation
-        case L10n.Key.battleTermExtraAttack.defaultValue:
-            return L10n.BattleTerm.extraAttack
-        case L10n.Key.battleTermMartialFollowUp.defaultValue:
-            return L10n.BattleTerm.martialFollowUp
-        case L10n.Key.battleTermRescue.defaultValue:
-            return L10n.BattleTerm.rescue
+            return name
+        case .buffApply, .buffExpire:
+            guard let skillIndex = entry.declaration.skillIndex,
+                  let name = skillNames[skillIndex] else {
+                reportMissing("Skill name not found for skillIndex=\(String(describing: entry.declaration.skillIndex))",
+                              location: "BattleLogRenderer.resolveActionLabel")
+                return nil
+            }
+            return name
+        case .reactionAttack:
+            if let skillIndex = entry.declaration.skillIndex, let name = skillNames[skillIndex] {
+                return name
+            }
+            return termValue(for: "battleLog.term.reactionAttack", location: "BattleLogRenderer.resolveActionLabel")
+        case .followUp:
+            if let skillIndex = entry.declaration.skillIndex, let name = skillNames[skillIndex] {
+                return name
+            }
+            return termValue(for: "battleLog.term.martialFollowUp", location: "BattleLogRenderer.resolveActionLabel")
+        case .statusTick:
+            guard let statusId = entry.effects.first(where: { $0.kind == .statusTick })?.statusId,
+                  let name = statusNames[statusId] else {
+                reportMissing("Status name not found for statusId in statusTick",
+                              location: "BattleLogRenderer.resolveActionLabel")
+                return nil
+            }
+            return name
+        case .statusRecover:
+            guard let statusId = entry.effects.first(where: { $0.kind == .statusRecover })?.statusId,
+                  let name = statusNames[statusId] else {
+                reportMissing("Status name not found for statusId in statusRecover",
+                              location: "BattleLogRenderer.resolveActionLabel")
+                return nil
+            }
+            return name
+        case .spellChargeRecover:
+            guard let rawSpellId = entry.effects.first(where: { $0.kind == .spellChargeRecover })?.value,
+                  let spellId = UInt8(exactly: rawSpellId),
+                  let name = spellNames[spellId] else {
+                reportMissing("Spell name not found for spellChargeRecover",
+                              location: "BattleLogRenderer.resolveActionLabel")
+                return nil
+            }
+            return name
+        case .actionLocked:
+            return termValue(for: "battleLog.term.actionLocked", location: "BattleLogRenderer.resolveActionLabel")
+        case .resurrection:
+            return termValue(for: "battleLog.term.resurrection", location: "BattleLogRenderer.resolveActionLabel")
+        case .necromancer:
+            return termValue(for: "battleLog.term.necromancer", location: "BattleLogRenderer.resolveActionLabel")
+        case .rescue:
+            return termValue(for: "battleLog.term.rescue", location: "BattleLogRenderer.resolveActionLabel")
+        case .healParty:
+            return termValue(for: "battleLog.term.healParty", location: "BattleLogRenderer.resolveActionLabel")
+        case .healSelf:
+            return termValue(for: "battleLog.term.healSelf", location: "BattleLogRenderer.resolveActionLabel")
+        case .healAbsorb:
+            return termValue(for: "battleLog.term.healAbsorb", location: "BattleLogRenderer.resolveActionLabel")
+        case .healVampire:
+            return termValue(for: "battleLog.term.healVampire", location: "BattleLogRenderer.resolveActionLabel")
+        case .damageSelf:
+            return termValue(for: "battleLog.term.damageSelf", location: "BattleLogRenderer.resolveActionLabel")
         default:
-            return label
+            return nil
         }
     }
 
@@ -259,7 +366,14 @@ struct BattleLogRenderer {
         let attempts = entry.effects.filter { attemptKinds.contains($0.kind) }.count
         guard attempts > 1 else { return nil }
         let hits = entry.effects.filter { hitKinds.contains($0.kind) }.count
-        return "（\(attempts)回攻撃、\(hits)ヒット）"
+        return renderTemplate(
+            key: "battleLog.summary.hit",
+            placeholders: [
+                "attempts": formatAmount(attempts),
+                "hits": formatAmount(hits)
+            ],
+            location: "BattleLogRenderer.summarizeHits"
+        )
     }
 
     private static func rendersEffectLines(for entry: BattleActionEntry) -> Bool {
@@ -293,11 +407,25 @@ struct BattleLogRenderer {
         guard shouldSummarizeBuff(entry: entry) else { return nil }
         let targets = entry.effects.compactMap { $0.target }
         guard !targets.isEmpty else { return nil }
-        let description = describeTargetGroup(for: targets,
-                                              allyNames: allyNames,
-                                              enemyNames: enemyNames)
-        let label = actionLabel ?? "効果"
-        let message = "\(description)に\(label)の効果が付与された！"
+        guard let label = actionLabel else {
+            reportMissing("Missing action label for buff summary", location: "BattleLogRenderer.renderBuffSummary")
+            return nil
+        }
+        guard let description = describeTargetGroup(for: targets,
+                                                    allyNames: allyNames,
+                                                    enemyNames: enemyNames) else {
+            return nil
+        }
+        guard let message = renderTemplate(
+            key: "battleLog.summary.buffGroup",
+            placeholders: [
+                "group": description,
+                "label": label
+            ],
+            location: "BattleLogRenderer.renderBuffSummary"
+        ) else {
+            return nil
+        }
         let entryLine = BattleLogEntry(turn: Int(entry.turn),
                                        message: message,
                                        type: .status,
@@ -333,6 +461,7 @@ struct BattleLogRenderer {
                                               actionLabel: String?,
                                               allyNames: [UInt8: String],
                                               enemyNames: [UInt16: String],
+                                              statusNames: [UInt16: String],
                                               actorIdentifiers: [UInt16: String]) -> [BattleLogEntry] {
         enum RenderToken {
             case physicalSummary(UInt16)
@@ -408,6 +537,7 @@ struct BattleLogRenderer {
                                        actionLabel: actionLabel,
                                        allyNames: allyNames,
                                        enemyNames: enemyNames,
+                                       statusNames: statusNames,
                                        actorIdentifiers: actorIdentifiers)
             }
         }
@@ -420,46 +550,247 @@ struct BattleLogRenderer {
                                                  allyNames: [UInt8: String],
                                                  enemyNames: [UInt16: String],
                                                  actorIdentifiers: [UInt16: String]) -> BattleLogEntry? {
-        let actor = actorName ?? "不明"
-        let targetName = resolveName(index: target, allyNames: allyNames, enemyNames: enemyNames) ?? "対象"
-        var components: [String] = []
-
-        if summary.totalDamage > 0 {
-            components.append("\(actor)の攻撃！\(targetName)に\(formatAmount(summary.totalDamage))のダメージ！")
-        } else {
-            components.append("\(actor)の攻撃！")
+        guard let targetName = resolveName(index: target, allyNames: allyNames, enemyNames: enemyNames) else {
+            return nil
         }
+        let actor = actorName
+        let targetId = actorIdentifiers[target] ?? String(target)
 
         if summary.totalDamage == 0 && !summary.defeated {
             guard summary.attempts > 0 else { return nil }
-            let targetId = actorIdentifiers[target] ?? String(target)
+            guard let message = renderTemplate(
+                key: "battleLog.effect.physicalEvade",
+                placeholders: [
+                    "actor": actor,
+                    "target": targetName
+                ],
+                location: "BattleLogRenderer.makePhysicalSummaryEntry"
+            ) else {
+                return nil
+            }
             return BattleLogEntry(turn: Int(entry.turn),
-                                  message: "\(targetName)は攻撃をかわした！",
+                                  message: message,
                                   type: .miss,
                                   actorId: nil,
                                   targetId: targetId)
-        } else {
-            let targetId = actorIdentifiers[target] ?? String(target)
-            let type: BattleLogEntry.LogType = summary.totalDamage > 0 ? .damage : .action
-            return BattleLogEntry(turn: Int(entry.turn),
-                                  message: components.joined(separator: " "),
-                                  type: type,
+        }
+
+        let amountText = formatAmount(summary.totalDamage)
+        guard let message = renderTemplate(
+            key: "battleLog.effect.physicalDamage",
+            placeholders: [
+                "actor": actor,
+                "target": targetName,
+                "amount": amountText
+            ],
+            location: "BattleLogRenderer.makePhysicalSummaryEntry"
+        ) else {
+            return nil
+        }
+
+        let type: BattleLogEntry.LogType = summary.totalDamage > 0 ? .damage : .action
+        return BattleLogEntry(turn: Int(entry.turn),
+                              message: message,
+                              type: type,
                               actorId: nil,
                               targetId: targetId)
-        }
     }
 
     private static func describeTargetGroup(for targets: [UInt16],
                                             allyNames: [UInt8: String],
-                                            enemyNames: [UInt16: String]) -> String {
+                                            enemyNames: [UInt16: String]) -> String? {
         let uniqueTargets = Array(Set(targets))
-        guard let first = uniqueTargets.first else { return "対象" }
+        guard let first = uniqueTargets.first else {
+            reportMissing("Buff summary targets are empty", location: "BattleLogRenderer.describeTargetGroup")
+            return nil
+        }
         let isEnemySide = first >= 1000
         if uniqueTargets.count == 1 {
-            return resolveName(index: first, allyNames: allyNames, enemyNames: enemyNames) ?? (isEnemySide ? "敵" : "味方")
+            return resolveName(index: first, allyNames: allyNames, enemyNames: enemyNames)
         }
-        let descriptor = isEnemySide ? "敵" : "味方"
-        return "\(descriptor)全体"
+        let key = isEnemySide ? "battleLog.term.enemiesGroup" : "battleLog.term.alliesGroup"
+        return termValue(for: key, location: "BattleLogRenderer.describeTargetGroup")
+    }
+
+    private static func resolveEffectLabel(effect: BattleActionEntry.Effect,
+                                           entry: BattleActionEntry,
+                                           actionLabel: String?,
+                                           statusNames: [UInt16: String]) -> String? {
+        switch effect.kind {
+        case .statusInflict, .statusResist, .statusRecover, .statusTick:
+            guard let statusId = effect.statusId,
+                  let name = statusNames[statusId] else {
+                reportMissing("Status name not found for statusId=\(String(describing: effect.statusId))",
+                              location: "BattleLogRenderer.resolveEffectLabel")
+                return nil
+            }
+            return name
+        case .buffApply, .buffExpire, .reactionAttack, .followUp:
+            guard let actionLabel else {
+                reportMissing("Missing action label for effect kind \(effect.kind)",
+                              location: "BattleLogRenderer.resolveEffectLabel")
+                return nil
+            }
+            return actionLabel
+        default:
+            return nil
+        }
+    }
+
+    private static func declarationKey(for kind: ActionKind) -> String? {
+        switch kind {
+        case .defend,
+             .physicalAttack,
+             .priestMagic,
+             .mageMagic,
+             .breath,
+             .battleStart,
+             .turnStart,
+             .victory,
+             .defeat,
+             .retreat,
+             .physicalKill,
+             .statusRecover,
+             .statusTick,
+             .reactionAttack,
+             .followUp,
+             .healAbsorb,
+             .healVampire,
+             .healParty,
+             .healSelf,
+             .damageSelf,
+             .buffApply,
+             .buffExpire,
+             .resurrection,
+             .necromancer,
+             .rescue,
+             .actionLocked,
+             .noAction,
+             .withdraw,
+             .sacrifice,
+             .vampireUrge,
+             .enemyAppear,
+             .enemySpecialSkill,
+             .spellChargeRecover:
+            return "battleLog.declaration.\(kind)"
+        default:
+            return nil
+        }
+    }
+
+    private static func effectKey(for kind: BattleActionEntry.Effect.Kind) -> String? {
+        switch kind {
+        case .enemyAppear, .logOnly:
+            return nil
+        default:
+            return "battleLog.effect.\(kind)"
+        }
+    }
+
+    private static func declarationLogType(for kind: ActionKind) -> BattleLogEntry.LogType {
+        switch kind {
+        case .defend: return .guard
+        case .physicalAttack, .priestMagic, .mageMagic, .breath, .reactionAttack, .followUp, .noAction: return .action
+        case .battleStart, .turnStart, .enemyAppear: return .system
+        case .victory: return .victory
+        case .defeat: return .defeat
+        case .retreat: return .retreat
+        case .physicalKill,
+             .statusRecover,
+             .statusTick,
+             .buffApply,
+             .buffExpire,
+             .resurrection,
+             .necromancer,
+             .rescue,
+             .actionLocked,
+             .withdraw,
+             .sacrifice,
+             .vampireUrge:
+            return .status
+        case .healAbsorb, .healVampire, .healParty, .healSelf:
+            return .heal
+        case .damageSelf:
+            return .damage
+        case .enemySpecialSkill:
+            return .action
+        case .spellChargeRecover:
+            return .status
+        default:
+            return .system
+        }
+    }
+
+    private static func effectLogType(for kind: BattleActionEntry.Effect.Kind) -> BattleLogEntry.LogType {
+        switch kind {
+        case .physicalDamage,
+             .magicDamage,
+             .breathDamage,
+             .statusTick,
+             .statusRampage,
+             .damageSelf,
+             .enemySpecialDamage:
+            return .damage
+        case .physicalEvade,
+             .magicMiss:
+            return .miss
+        case .physicalParry,
+             .physicalBlock,
+             .martial,
+             .reactionAttack,
+             .followUp,
+             .noAction:
+            return .action
+        case .magicHeal,
+             .healParty,
+             .healSelf,
+             .healAbsorb,
+             .healVampire,
+             .enemySpecialHeal,
+             .resurrection,
+             .necromancer,
+             .rescue:
+            return .heal
+        case .physicalKill:
+            return .defeat
+        case .statusInflict,
+             .statusResist,
+             .statusRecover,
+             .statusConfusion,
+             .buffApply,
+             .buffExpire,
+             .actionLocked,
+             .withdraw,
+             .sacrifice,
+             .vampireUrge,
+             .enemySpecialBuff,
+             .spellChargeRecover:
+            return .status
+        case .enemyAppear, .logOnly:
+            return .system
+        }
+    }
+
+    private static func placeholderMap(actor: String?,
+                                       target: String?,
+                                       amount: String?,
+                                       label: String?,
+                                       turn: String? = nil,
+                                       attempts: String? = nil,
+                                       hits: String? = nil) -> [String: String?] {
+        [
+            "actor": actor,
+            "target": target,
+            "amount": amount,
+            "label": label,
+            "spell": label,
+            "skill": label,
+            "reaction": label,
+            "followUp": label,
+            "turn": turn,
+            "attempts": attempts,
+            "hits": hits
+        ]
     }
 
     private static func declarationMessage(kind: ActionKind,
@@ -468,245 +799,72 @@ struct BattleLogRenderer {
                                            spellNames: [UInt8: String],
                                            enemySkillNames: [UInt16: String],
                                            skillNames: [UInt16: String],
+                                           statusNames: [UInt16: String],
                                            allyNames: [UInt8: String],
-                                           enemyNames: [UInt16: String]) -> (String, BattleLogEntry.LogType) {
-        let actor = actorName ?? "不明"
-        let hitSummary = summarizeHits(for: entry, actionKind: kind)
+                                           enemyNames: [UInt16: String]) -> (String?, BattleLogEntry.LogType) {
+        let type = declarationLogType(for: kind)
+        guard let key = declarationKey(for: kind) else {
+            return ("", type)
+        }
+
         let actionLabel = resolveActionLabel(entry: entry,
                                              spellNames: spellNames,
                                              enemySkillNames: enemySkillNames,
-                                             skillNames: skillNames)
+                                             skillNames: skillNames,
+                                             statusNames: statusNames)
 
-        func appendDetails(to message: String) -> String {
-            var result = message
-            if let hitSummary {
-                result += " \(hitSummary)"
+        let turnText: String?
+        if kind == .turnStart {
+            guard let extra = entry.declaration.extra else {
+                reportMissing("Missing extra for turnStart", location: "BattleLogRenderer.declarationMessage")
+                return (nil, type)
             }
-            return result
+            turnText = formatAmount(Int(extra))
+        } else {
+            turnText = nil
         }
 
-        switch kind {
-        case .defend:
-            return ("\(actor)は防御態勢を取った", .guard)
-        case .physicalAttack:
-            return (appendDetails(to: "\(actor)の攻撃！"), .action)
-        case .physicalKill:
-            return ("戦闘不能が発生した", .status)
-        case .priestMagic:
-            let spellName = actionLabel
-                ?? entry.declaration.skillIndex
-                    .flatMap { UInt8(exactly: $0) }
-                    .flatMap { spellNames[$0] }
-                ?? "回復魔法"
-            return (appendDetails(to: "\(actor)は\(spellName)を唱えた！"), .action)
-        case .mageMagic:
-            let spellName = actionLabel
-                ?? entry.declaration.skillIndex
-                    .flatMap { UInt8(exactly: $0) }
-                    .flatMap { spellNames[$0] }
-                ?? "攻撃魔法"
-            return (appendDetails(to: "\(actor)は\(spellName)を唱えた！"), .action)
-        case .breath:
-            return (appendDetails(to: "\(actor)はブレスを吐いた！"), .action)
-        case .battleStart:
-            return ("戦闘開始！", .system)
-        case .turnStart:
-            let turnNumber = Int(entry.declaration.extra ?? UInt16(entry.turn))
-            return ("--- \(turnNumber)ターン目 ---", .system)
-        case .victory:
-            return ("勝利！ 敵を倒した！", .victory)
-        case .defeat:
-            return ("敗北… パーティは全滅した…", .defeat)
-        case .retreat:
-            return ("戦闘は長期化し、パーティは撤退を決断した", .retreat)
-        case .enemyAppear:
-            return ("敵が現れた！", .system)
-        case .enemySpecialSkill:
-            let skillName = actionLabel
-                ?? entry.declaration.skillIndex
-                    .flatMap { enemySkillNames[$0] }
-                ?? "特殊攻撃"
-            return (appendDetails(to: "\(actor)の\(skillName)！"), .action)
-        case .noAction:
-            return ("\(actor)は何もしなかった", .action)
-        case .withdraw:
-            return ("\(actor)は戦線離脱した", .status)
-        case .sacrifice:
-            return ("古の儀：\(actor)が供儀対象になった", .status)
-        case .vampireUrge:
-            return ("\(actor)は吸血衝動に駆られた", .status)
-        case .reactionAttack:
-            let name = actionLabel ?? L10n.BattleTerm.reactionAttack
-            return (appendDetails(to: "\(actor)の\(name)！"), .action)
-        case .followUp:
-            let name = actionLabel ?? L10n.BattleTerm.followUp
-            return (appendDetails(to: "\(actor)の\(name)！"), .action)
-        case .healParty:
-            let name = actionLabel ?? "回復術"
-            return (appendDetails(to: "\(actor)の\(name)！"), .heal)
-        case .healSelf:
-            let name = actionLabel ?? "回復"
-            return ("\(actor)は\(name)で自分を癒やした", .heal)
-        case .healAbsorb:
-            let name = actionLabel ?? "吸収"
-            return ("\(actor)は\(name)で回復した", .heal)
-        case .healVampire:
-            let name = actionLabel ?? "吸血"
-            return ("\(actor)は\(name)で回復した", .heal)
-        case .damageSelf:
-            let name = actionLabel ?? "反動"
-            return ("\(actor)は\(name)でダメージを受けた", .damage)
-        case .statusTick:
-            let name = actionLabel ?? "状態異常"
-            return ("\(actor)は\(name)の影響を受けている", .status)
-        case .statusRecover:
-            let name = actionLabel ?? "状態異常"
-            return ("\(actor)の\(name)が治った", .status)
-        case .buffApply:
-            if let label = actionLabel {
-                return ("\(actor)に\(label)の効果が付与された", .status)
-            } else {
-                return ("\(actor)に効果が付与された", .status)
-            }
-        case .buffExpire:
-            if let label = actionLabel {
-                return ("\(actor)の\(label)が切れた", .status)
-            } else {
-                return ("\(actor)の効果が切れた", .status)
-            }
-        case .resurrection:
-            let name = actionLabel ?? "蘇生の術"
-            return (appendDetails(to: "\(actor)は\(name)を行った"), .status)
-        case .necromancer:
-            let name = actionLabel ?? "ネクロマンサー"
-            return (appendDetails(to: "\(actor)は\(name)で死者を蘇らせた"), .status)
-        case .rescue:
-            let name = actionLabel ?? L10n.BattleTerm.rescue
-            return (appendDetails(to: "\(actor)は\(name)を行った"), .status)
-        case .actionLocked:
-            let name = actionLabel ?? "行動不能"
-            return ("\(actor)は\(name)だ", .status)
-        case .spellChargeRecover:
-            let name = actionLabel ?? "呪文"
-            return ("\(actor)は\(name)を再装填した", .status)
-        default:
-            // 残りは効果メッセージに委ねる
-            return ("", .system)
+        var message = renderTemplate(
+            key: key,
+            placeholders: placeholderMap(actor: actorName,
+                                         target: nil,
+                                         amount: nil,
+                                         label: actionLabel,
+                                         turn: turnText),
+            location: "BattleLogRenderer.declarationMessage"
+        )
+
+        if let hitSummary = summarizeHits(for: entry, actionKind: kind),
+           let base = message {
+            message = "\(base) \(hitSummary)"
         }
+
+        return (message, type)
     }
 
     private static func effectMessage(kind: BattleActionEntry.Effect.Kind,
                                       actorName: String?,
                                       targetName: String?,
                                       value: Int?,
-                                      actionLabel: String?) -> (String, BattleLogEntry.LogType) {
-        let actor = actorName ?? "不明"
-        let target = targetName ?? "対象"
-        let rawAmount = value ?? 0
-        let amountText = formatAmount(rawAmount)
-
-        switch kind {
-        case .physicalDamage:
-            return ("\(actor)の攻撃！\(target)に\(amountText)のダメージ！", .damage)
-        case .physicalEvade:
-            return ("\(actor)の攻撃！\(target)は攻撃をかわした！", .miss)
-        case .physicalParry:
-            return ("\(target)のパリィ！", .action)
-        case .physicalBlock:
-            return ("\(target)の盾防御！", .action)
-        case .physicalKill:
-            return ("\(target)を倒した！", .defeat)
-        case .martial:
-            return ("\(actor)の格闘戦！", .action)
-        case .magicDamage:
-            return ("\(actor)の魔法！\(target)に\(amountText)のダメージ！", .damage)
-        case .magicHeal:
-            return ("\(target)のHPが\(amountText)回復！", .heal)
-        case .magicMiss:
-            return ("しかし効かなかった", .miss)
-        case .breathDamage:
-            return ("\(actor)のブレス！\(target)に\(amountText)のダメージ！", .damage)
-        case .statusInflict:
-            return ("\(target)は状態異常になった！", .status)
-        case .statusResist:
-            return ("\(target)は抵抗した！", .status)
-        case .statusRecover:
-            return ("\(target)の状態異常が治った", .status)
-        case .statusTick:
-            return ("\(target)は継続ダメージで\(amountText)のダメージ！", .damage)
-        case .statusConfusion:
-            return ("\(actor)は暴走して混乱した！", .status)
-        case .statusRampage:
-            return ("\(actor)の暴走！\(target)に\(amountText)のダメージ！", .damage)
-        case .reactionAttack:
-            let name = actionLabel ?? L10n.BattleTerm.reactionAttack
-            return ("\(actor)の\(name)！", .action)
-        case .followUp:
-            let name = actionLabel ?? L10n.BattleTerm.followUp
-            return ("\(actor)の\(name)！", .action)
-        case .healAbsorb:
-            return ("\(actor)は吸収能力で\(amountText)回復", .heal)
-        case .healVampire:
-            return ("\(actor)は吸血で\(amountText)回復", .heal)
-        case .healParty, .healSelf:
-            return ("\(target)のHPが\(amountText)回復！", .heal)
-        case .damageSelf:
-            return ("\(target)は自身の効果で\(amountText)ダメージ", .damage)
-        case .buffApply:
-            if let label = actionLabel {
-                return ("\(label)が\(target)に付与された", .status)
-            } else {
-                return ("効果が発動した", .status)
-            }
-        case .buffExpire:
-            if let label = actionLabel {
-                return ("\(target)の\(label)が切れた", .status)
-            } else {
-                return ("\(target)の効果が切れた", .status)
-            }
-        case .resurrection:
-            return ("\(target)が蘇生した！", .heal)
-        case .necromancer:
-            return ("\(actor)のネクロマンサーで\(target)が蘇生した！", .heal)
-        case .rescue:
-            return ("\(actor)は\(target)を\(L10n.BattleTerm.rescue)した！", .heal)
-        case .actionLocked:
-            return ("\(actor)は動けない", .status)
-        case .noAction:
-            return ("\(actor)は何もしなかった", .action)
-        case .withdraw:
-            return ("\(actor)は戦線離脱した", .status)
-        case .sacrifice:
-            return ("古の儀：\(target)が供儀対象になった", .status)
-        case .vampireUrge:
-            return ("\(actor)は吸血衝動に駆られた", .status)
-        case .enemySpecialDamage:
-            return ("\(target)に\(amountText)のダメージ！", .damage)
-        case .enemySpecialHeal:
-            return ("\(actor)は\(amountText)回復した！", .heal)
-        case .enemySpecialBuff:
-            return ("\(actor)は能力を強化した！", .status)
-        case .spellChargeRecover:
-            return ("\(actor)は魔法のチャージを回復した", .status)
-        case .enemyAppear, .logOnly:
-            return ("", .system)
+                                      actionLabel: String?) -> (String?, BattleLogEntry.LogType) {
+        let type = effectLogType(for: kind)
+        guard let key = effectKey(for: kind) else {
+            return ("", type)
         }
+        let amountText = value.map { formatAmount($0) }
+        let message = renderTemplate(
+            key: key,
+            placeholders: placeholderMap(actor: actorName,
+                                         target: targetName,
+                                         amount: amountText,
+                                         label: actionLabel),
+            location: "BattleLogRenderer.effectMessage"
+        )
+        return (message, type)
     }
 
     private static func displayValue(for effect: BattleActionEntry.Effect) -> Int? {
-        let baseValue = effect.value.map { Int($0) }
-        switch effect.kind {
-        case .physicalDamage,
-             .magicDamage,
-             .breathDamage,
-             .statusTick,
-             .statusRampage,
-             .damageSelf,
-             .enemySpecialDamage:
-            return effect.extra.map { Int($0) } ?? baseValue
-        default:
-            return baseValue
-        }
+        effect.value.map { Int($0) }
     }
 
     private static func formatAmount(_ value: Int) -> String {

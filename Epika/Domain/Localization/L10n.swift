@@ -127,6 +127,10 @@ enum L10n {
         NSLocalizedString(key.rawValue, tableName: nil, bundle: .main, value: key.defaultValue, comment: "")
     }
 
+    nonisolated static func battleLog(_ key: String) -> String {
+        NSLocalizedString(key, tableName: nil, bundle: .main, value: "", comment: "")
+    }
+
     enum BaseStat {
         nonisolated static var strength: String { L10n.text(.baseStatStrength) }
         nonisolated static var wisdom: String { L10n.text(.baseStatWisdom) }

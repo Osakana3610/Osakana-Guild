@@ -151,6 +151,8 @@ extension BattleTurnEngine {
                                           maxTargets: targetCount,
                                           distinct: true)
 
+        var defeatedTargets: [(ActorSide, Int)] = []
+
         for targetRef in targets {
             guard let refreshedAttacker = context.actor(for: side, index: attackerIndex),
                   refreshedAttacker.isAlive else { break }
@@ -178,11 +180,7 @@ extension BattleTurnEngine {
                                     index: targetRef.1,
                                     context: &context,
                                     entryBuilder: entryBuilder)
-                    handleDefeatReactions(targetSide: targetRef.0,
-                                          targetIndex: targetRef.1,
-                                          killerSide: side,
-                                          killerIndex: attackerIndex,
-                                          context: &context)
+                    defeatedTargets.append(targetRef)
                 } else {
                     // 被ダメ時リアクション（魔法反撃）
                     let attackerRef = BattleContext.reference(for: side, index: attackerIndex)
@@ -219,6 +217,18 @@ extension BattleTurnEngine {
             }
         }
 
+        context.appendActionEntry(entryBuilder.build())
+
+        for targetRef in defeatedTargets {
+            handleDefeatReactions(targetSide: targetRef.0,
+                                  targetIndex: targetRef.1,
+                                  killerSide: side,
+                                  killerIndex: attackerIndex,
+                                  context: &context,
+                                  reactionDepth: 0,
+                                  allowsReactionEvents: true)
+        }
+
         // 自分の魔法攻撃イベント
         context.reactionQueue.append(.init(
             event: .selfMagicAttack(side: side, casterIndex: attackerIndex),
@@ -230,8 +240,6 @@ extension BattleTurnEngine {
             event: .allyMagicAttack(side: side, casterIndex: attackerIndex),
             depth: 0
         ))
-
-        context.appendActionEntry(entryBuilder.build())
 
         processReactionQueue(context: &context)
 
@@ -259,6 +267,8 @@ extension BattleTurnEngine {
                                           maxTargets: 6,
                                           distinct: true)
 
+        var defeatedTargets: [(ActorSide, Int)] = []
+
         for targetRef in targets {
             guard let refreshedAttacker = context.actor(for: side, index: attackerIndex),
                   refreshedAttacker.isAlive else { break }
@@ -282,15 +292,21 @@ extension BattleTurnEngine {
                                 index: targetRef.1,
                                 context: &context,
                                 entryBuilder: entryBuilder)
-                handleDefeatReactions(targetSide: targetRef.0,
-                                      targetIndex: targetRef.1,
-                                      killerSide: side,
-                                      killerIndex: attackerIndex,
-                                      context: &context)
+                defeatedTargets.append(targetRef)
             }
         }
 
         context.appendActionEntry(entryBuilder.build())
+
+        for targetRef in defeatedTargets {
+            handleDefeatReactions(targetSide: targetRef.0,
+                                  targetIndex: targetRef.1,
+                                  killerSide: side,
+                                  killerIndex: attackerIndex,
+                                  context: &context,
+                                  reactionDepth: 0,
+                                  allowsReactionEvents: true)
+        }
 
         processReactionQueue(context: &context)
 
@@ -414,7 +430,8 @@ extension BattleTurnEngine {
             id: "spell.\(spell.id)",
             baseDuration: permanentDuration,
             remainingTurns: permanentDuration,
-            statModifiers: statModifiers
+            statModifiers: statModifiers,
+            sourceSkillId: UInt16(spell.id)
         )
 
         for index in allies.indices where allies[index].isAlive {

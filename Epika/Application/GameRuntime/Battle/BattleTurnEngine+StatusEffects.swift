@@ -167,6 +167,7 @@ extension BattleTurnEngine {
                     entryBuilder.addEffect(kind: .statusTick,
                                            target: actorIdx,
                                            value: UInt32(applied),
+                                           statusId: UInt16(effect.id),
                                            extra: UInt16(clamping: damage))
                     context.appendActionEntry(entryBuilder.build())
                 }
@@ -239,17 +240,21 @@ extension BattleTurnEngine {
         guard hasCurer else { return }
 
         // 状態異常を全てクリア
-        let hadStatus = !target.statusEffects.isEmpty
+        let removedStatuses = target.statusEffects
         target.statusEffects = []
         context.updateActor(target, side: targetSide, index: targetIndex)
 
         // ログ出力
-        if hadStatus {
+        if !removedStatuses.isEmpty {
             let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
-            context.appendSimpleEntry(kind: .statusRecover,
-                                      actorId: targetIdx,
-                                      targetId: targetIdx,
-                                      effectKind: .statusRecover)
+            let entryBuilder = context.makeActionEntryBuilder(actorId: targetIdx,
+                                                              kind: .statusRecover)
+            for status in removedStatuses {
+                entryBuilder.addEffect(kind: .statusRecover,
+                                       target: targetIdx,
+                                       statusId: UInt16(status.id))
+            }
+            context.appendActionEntry(entryBuilder.build())
         }
     }
 }

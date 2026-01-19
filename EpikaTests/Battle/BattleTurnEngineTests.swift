@@ -308,9 +308,10 @@ nonisolated final class BattleTurnEngineTests: XCTestCase {
         let hpAfterFirstBattle = result1.players[0].currentHP
 
         // バトルログから味方がダメージを受けたか確認
+        let playerActorIndex = UInt16(player.partyMemberId ?? 0)
         let playerTookDamage = result1.battleLog.entries.contains { entry in
             entry.effects.contains { effect in
-                effect.kind == .physicalDamage && effect.target == 0
+                effect.kind == .physicalDamage && effect.target == playerActorIndex
             }
         }
 

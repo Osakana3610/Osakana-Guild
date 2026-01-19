@@ -30,7 +30,6 @@ nonisolated struct BattleActionEntry: Codable, Sendable {
         var kind: ActionKind
         var skillIndex: UInt16?
         var extra: UInt16?
-        var label: String?
     }
 
     struct Effect: Codable, Sendable {
@@ -140,7 +139,7 @@ extension BattleActionEntry {
 
 /// 戦闘ログ全体
 nonisolated struct BattleLog: Codable, Sendable {
-    static let currentVersion: UInt8 = 3
+    static let currentVersion: UInt8 = 1
 
     var version: UInt8               // battle log schema version
     var initialHP: [UInt16: UInt32]  // actorIndex → 開始時HP
