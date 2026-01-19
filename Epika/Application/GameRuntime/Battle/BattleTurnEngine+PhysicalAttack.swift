@@ -95,6 +95,15 @@ extension BattleTurnEngine {
                                              reactionDepth: 0,
                                              entryBuilder: actionEntryBuilder)
             context.appendActionEntry(actionEntryBuilder.build())
+            if outcome.defenderWasDefeated {
+                handleDefeatReactions(targetSide: target.0,
+                                      targetIndex: target.1,
+                                      killerSide: attackerSide,
+                                      killerIndex: attackerIndex,
+                                      context: &context,
+                                      reactionDepth: 0,
+                                      allowsReactionEvents: true)
+            }
             guard outcome.attacker != nil, outcome.defender != nil else { return }
             processReactionQueue(context: &context)
             return
@@ -121,6 +130,15 @@ extension BattleTurnEngine {
                                              reactionDepth: 0,
                                              entryBuilder: actionEntryBuilder)
             context.appendActionEntry(actionEntryBuilder.build())
+            if outcome.defenderWasDefeated {
+                handleDefeatReactions(targetSide: target.0,
+                                      targetIndex: target.1,
+                                      killerSide: attackerSide,
+                                      killerIndex: attackerIndex,
+                                      context: &context,
+                                      reactionDepth: 0,
+                                      allowsReactionEvents: true)
+            }
             guard outcome.attacker != nil, outcome.defender != nil else { return }
             processReactionQueue(context: &context)
             return
@@ -151,8 +169,18 @@ extension BattleTurnEngine {
         // 攻撃ログを追加（リアクション処理の前に追加して因果関係を正しく表現）
         context.appendActionEntry(actionEntryBuilder.build())
 
-        guard var updatedAttacker = outcome.attacker else { return }
-        guard var updatedDefender = outcome.defender else { return }
+        if outcome.defenderWasDefeated {
+            handleDefeatReactions(targetSide: target.0,
+                                  targetIndex: target.1,
+                                  killerSide: attackerSide,
+                                  killerIndex: attackerIndex,
+                                  context: &context,
+                                  reactionDepth: 0,
+                                  allowsReactionEvents: true)
+        }
+
+        guard var updatedAttacker = context.actor(for: attackerSide, index: attackerIndex) else { return }
+        guard var updatedDefender = context.actor(for: target.0, index: target.1) else { return }
         attacker = updatedAttacker
         defender = updatedDefender
 
@@ -242,6 +270,15 @@ extension BattleTurnEngine {
         context.updateActor(updatedAttacker, side: attackerSide, index: attackerIndex)
         context.updateActor(updatedDefender, side: targetRef.0, index: targetRef.1)
         context.appendActionEntry(entryBuilder.build())
+        if outcome.defenderWasDefeated {
+            handleDefeatReactions(targetSide: targetRef.0,
+                                  targetIndex: targetRef.1,
+                                  killerSide: attackerSide,
+                                  killerIndex: attackerIndex,
+                                  context: &context,
+                                  reactionDepth: 0,
+                                  allowsReactionEvents: true)
+        }
 
         processReactionQueue(context: &context)
         return true
@@ -558,7 +595,6 @@ extension BattleTurnEngine {
         let defenderIdx = context.actorIndex(for: defenderSide, arrayIndex: defenderIndex)
         let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
                                                           kind: .followUp,
-                                                          label: "格闘追撃",
                                                           turnOverride: context.turn)
         entryBuilder.addEffect(kind: .followUp, target: defenderIdx)
 
@@ -587,10 +623,20 @@ extension BattleTurnEngine {
 
         context.appendActionEntry(entryBuilder.build())
 
-        if let updatedAttacker = outcome.attacker {
+        if outcome.defenderWasDefeated {
+            handleDefeatReactions(targetSide: defenderSide,
+                                  targetIndex: defenderIndex,
+                                  killerSide: attackerSide,
+                                  killerIndex: attackerIndex,
+                                  context: &context,
+                                  reactionDepth: 0,
+                                  allowsReactionEvents: false)
+        }
+
+        if let updatedAttacker = context.actor(for: attackerSide, index: attackerIndex) {
             attacker = updatedAttacker
         }
-        if let updatedDefender = outcome.defender {
+        if let updatedDefender = context.actor(for: defenderSide, index: defenderIndex) {
             defender = updatedDefender
         }
     }
@@ -673,18 +719,27 @@ extension BattleTurnEngine {
                                                     defender: defender,
                                                     context: &context,
                                                     entryBuilder: entryBuilder)
-            _ = applyAttackOutcome(attackerSide: side,
-                                   attackerIndex: index,
-                                   defenderSide: target.0,
-                                   defenderIndex: target.1,
-                                   attacker: attackResult.attacker,
-                                   defender: attackResult.defender,
-                                   attackResult: attackResult,
-                                   context: &context,
-                                   reactionDepth: 0,
-                                   entryBuilder: entryBuilder)
+            let outcome = applyAttackOutcome(attackerSide: side,
+                                             attackerIndex: index,
+                                             defenderSide: target.0,
+                                             defenderIndex: target.1,
+                                             attacker: attackResult.attacker,
+                                             defender: attackResult.defender,
+                                             attackResult: attackResult,
+                                             context: &context,
+                                             reactionDepth: 0,
+                                             entryBuilder: entryBuilder)
 
             context.appendActionEntry(entryBuilder.build())
+            if outcome.defenderWasDefeated {
+                handleDefeatReactions(targetSide: target.0,
+                                      targetIndex: target.1,
+                                      killerSide: side,
+                                      killerIndex: index,
+                                      context: &context,
+                                      reactionDepth: 0,
+                                      allowsReactionEvents: true)
+            }
 
             processReactionQueue(context: &context)
 

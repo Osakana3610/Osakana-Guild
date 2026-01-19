@@ -475,6 +475,7 @@ extension BattleTurnEngine {
             let actorIdx = context.actorIndex(for: side, arrayIndex: index)
             context.appendSimpleEntry(kind: .withdraw,
                                       actorId: actorIdx,
+                                      targetId: actorIdx,
                                       effectKind: .withdraw)
         }
     }
@@ -513,6 +514,7 @@ extension BattleTurnEngine {
         if let target = playerTarget {
             let targetIdx = context.actorIndex(for: .player, arrayIndex: target)
             context.appendSimpleEntry(kind: .sacrifice,
+                                      actorId: targetIdx,
                                       targetId: targetIdx,
                                       effectKind: .sacrifice)
         }
@@ -524,6 +526,7 @@ extension BattleTurnEngine {
         if let target = enemyTarget {
             let targetIdx = context.actorIndex(for: .enemy, arrayIndex: target)
             context.appendSimpleEntry(kind: .sacrifice,
+                                      actorId: targetIdx,
                                       targetId: targetIdx,
                                       effectKind: .sacrifice)
         }

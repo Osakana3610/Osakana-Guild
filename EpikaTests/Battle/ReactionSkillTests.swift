@@ -566,6 +566,7 @@ nonisolated final class ReactionSkillTests: XCTestCase {
                 vitality: 50,
                 agility: 35,
                 luck: 35,
+                partyMemberId: 1,
                 isMartialEligible: false,
                 snapshot: mageSnapshot,
                 currentHP: mageSnapshot.maxHP,
@@ -988,6 +989,7 @@ nonisolated final class ReactionSkillTests: XCTestCase {
                 vitality: 20,
                 agility: 50,
                 luck: 35,
+                partyMemberId: 1,
                 isMartialEligible: true,
                 snapshot: snapshot,
                 currentHP: snapshot.maxHP,
@@ -1203,6 +1205,7 @@ nonisolated final class ReactionSkillTests: XCTestCase {
         let reaction = BattleActor.SkillEffects.Reaction(
             identifier: "test.reaction",
             displayName: "テスト反撃",
+            skillId: 1201,
             trigger: .selfDamagedPhysical,
             target: .attacker,
             damageType: .physical,
@@ -1292,11 +1295,13 @@ nonisolated final class ReactionSkillTests: XCTestCase {
         damageType: BattleDamageType = .physical,
         attackCountMultiplier: Double = 1.0,
         criticalChancePercentMultiplier: Double = 1.0,
-        displayName: String = "テスト反撃"
+        displayName: String = "テスト反撃",
+        skillId: UInt16 = 1202
     ) -> BattleActor.SkillEffects.Reaction {
         BattleActor.SkillEffects.Reaction(
             identifier: "test.reaction",
             displayName: displayName,
+            skillId: skillId,
             trigger: trigger,
             target: target,
             damageType: damageType,

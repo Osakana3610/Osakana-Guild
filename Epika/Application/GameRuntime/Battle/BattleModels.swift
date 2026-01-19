@@ -211,6 +211,7 @@ nonisolated struct TimedBuff: Sendable, Hashable {
     let baseDuration: Int
     var remainingTurns: Int
     let statModifiers: [String: Double]
+    let sourceSkillId: UInt16?
 }
 
 struct BattleAttackHistory: Sendable, Hashable {
@@ -466,6 +467,7 @@ nonisolated struct BattleActor: Sendable {
 
             let identifier: String
             let displayName: String
+            let skillId: UInt16
             let trigger: Trigger
             let target: Target
             let damageType: BattleDamageType

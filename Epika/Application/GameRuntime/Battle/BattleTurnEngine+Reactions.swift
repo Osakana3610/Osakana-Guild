@@ -262,18 +262,27 @@ extension BattleTurnEngine {
             let targetIdx = context.actorIndex(for: resolvedTarget.0, arrayIndex: resolvedTarget.1)
             let entryBuilder = context.makeActionEntryBuilder(actorId: performerIdx,
                                                               kind: .reactionAttack,
-                                                              label: reaction.displayName,
+                                                              skillIndex: reaction.skillId,
                                                               turnOverride: context.turn)
             entryBuilder.addEffect(kind: .reactionAttack, target: targetIdx)
 
-            executeReactionAttack(from: side,
-                                  actorIndex: actorIndex,
-                                  target: resolvedTarget,
-                                  reaction: reaction,
-                                  depth: depth + 1,
-                                  context: &context,
-                                  entryBuilder: entryBuilder)
+            let defenderWasDefeated = executeReactionAttack(from: side,
+                                                            actorIndex: actorIndex,
+                                                            target: resolvedTarget,
+                                                            reaction: reaction,
+                                                            depth: depth + 1,
+                                                            context: &context,
+                                                            entryBuilder: entryBuilder)
             context.appendActionEntry(entryBuilder.build())
+            if defenderWasDefeated {
+                handleDefeatReactions(targetSide: resolvedTarget.0,
+                                      targetIndex: resolvedTarget.1,
+                                      killerSide: side,
+                                      killerIndex: actorIndex,
+                                      context: &context,
+                                      reactionDepth: depth + 1,
+                                      allowsReactionEvents: false)
+            }
         }
     }
 
@@ -396,15 +405,16 @@ extension BattleTurnEngine {
         return nil
     }
 
+    @discardableResult
     nonisolated static func executeReactionAttack(from side: ActorSide,
                                       actorIndex: Int,
                                       target: (ActorSide, Int),
                                       reaction: BattleActor.SkillEffects.Reaction,
                                       depth: Int,
                                       context: inout BattleContext,
-                                      entryBuilder: BattleActionEntry.Builder) {
-        guard let attacker = context.actor(for: side, index: actorIndex), attacker.isAlive else { return }
-        guard let initialTarget = context.actor(for: target.0, index: target.1) else { return }
+                                      entryBuilder: BattleActionEntry.Builder) -> Bool {
+        guard let attacker = context.actor(for: side, index: actorIndex), attacker.isAlive else { return false }
+        guard let initialTarget = context.actor(for: target.0, index: target.1) else { return false }
 
         let baseHits = max(1.0, attacker.snapshot.attackCount)
         let scaledHits = max(1, Int(baseHits * reaction.attackCountMultiplier))
@@ -487,22 +497,24 @@ extension BattleTurnEngine {
                                         wasBlocked: false)
         }
 
-        _ = applyAttackOutcome(attackerSide: side,
-                               attackerIndex: actorIndex,
-                               defenderSide: target.0,
-                               defenderIndex: target.1,
-                               attacker: attackResult.attacker,
-                               defender: attackResult.defender,
-                               attackResult: attackResult,
-                               context: &context,
-                               reactionDepth: depth,
-                               entryBuilder: entryBuilder,
-                               allowsReactionEvents: false)
+        let outcome = applyAttackOutcome(attackerSide: side,
+                                         attackerIndex: actorIndex,
+                                         defenderSide: target.0,
+                                         defenderIndex: target.1,
+                                         attacker: attackResult.attacker,
+                                         defender: attackResult.defender,
+                                         attackResult: attackResult,
+                                         context: &context,
+                                         reactionDepth: depth,
+                                         entryBuilder: entryBuilder,
+                                         allowsReactionEvents: false)
+        return outcome.defenderWasDefeated
     }
 
     struct AttackOutcome {
         var attacker: BattleActor?
         var defender: BattleActor?
+        var defenderWasDefeated: Bool
     }
 
     nonisolated static func applyAttackOutcome(attackerSide: ActorSide,
@@ -531,17 +543,6 @@ extension BattleTurnEngine {
         currentDefender = context.actor(for: defenderSide, index: defenderIndex)
 
         let defenderWasDefeated = currentDefender.map { !$0.isAlive } ?? true
-
-        if defenderWasDefeated {
-            handleDefeatReactions(targetSide: defenderSide,
-                                  targetIndex: defenderIndex,
-                                  killerSide: attackerSide,
-                                  killerIndex: attackerIndex,
-                                  context: &context,
-                                  reactionDepth: reactionDepth,
-                                  allowsReactionEvents: allowsReactionEvents)
-            currentDefender = context.actor(for: defenderSide, index: defenderIndex)
-        }
 
         if attackResult.wasParried, let defenderActor = currentDefender, defenderActor.isAlive {
             let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
@@ -581,7 +582,9 @@ extension BattleTurnEngine {
             ))
         }
 
-        return AttackOutcome(attacker: currentAttacker, defender: currentDefender)
+        return AttackOutcome(attacker: currentAttacker,
+                             defender: currentDefender,
+                             defenderWasDefeated: defenderWasDefeated)
     }
 
     // MARK: - Defeat Handling

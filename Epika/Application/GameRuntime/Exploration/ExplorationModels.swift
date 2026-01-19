@@ -49,8 +49,7 @@ struct ExplorationDropReward: Sendable {
 }
 
 struct BattleParticipantSnapshot: Codable, Sendable {
-    let actorId: String
-    let partyMemberId: UInt8?
+    let actorIndex: UInt16
     let characterId: UInt8?
     let name: String
     let avatarIndex: UInt16?

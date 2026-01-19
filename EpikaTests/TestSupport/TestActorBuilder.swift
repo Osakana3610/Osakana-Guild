@@ -33,7 +33,8 @@ nonisolated enum TestActorBuilder {
         formationSlot: BattleFormationSlot = 1,
         level: Int? = nil,
         raceId: UInt8? = nil,
-        isMartialEligible: Bool = false
+        isMartialEligible: Bool = false,
+        partyMemberId: UInt8 = 1
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 10000,
@@ -63,6 +64,7 @@ nonisolated enum TestActorBuilder {
             vitality: 100,
             agility: 50,
             luck: luck,
+            partyMemberId: partyMemberId,
             level: level,
             isMartialEligible: isMartialEligible,
             raceId: raceId,
@@ -190,7 +192,8 @@ nonisolated enum TestActorBuilder {
         formationSlot: BattleFormationSlot = 1,
         level: Int? = nil,
         raceId: UInt8? = nil,
-        isMartialEligible: Bool = false
+        isMartialEligible: Bool = false,
+        partyMemberId: UInt8 = 1
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: maxHP,
@@ -220,6 +223,7 @@ nonisolated enum TestActorBuilder {
             vitality: 20,
             agility: agility,
             luck: luck,
+            partyMemberId: partyMemberId,
             level: level,
             isMartialEligible: isMartialEligible,
             raceId: raceId,
@@ -477,7 +481,8 @@ nonisolated enum TestActorBuilder {
     ///   - attackCount: 攻撃回数（反撃のattackCountMultiplier検証用）
     static func makeReactionTestPlayer(
         skillEffects: BattleActor.SkillEffects = .neutral,
-        attackCount: Double = 1.0
+        attackCount: Double = 1.0,
+        partyMemberId: UInt8 = 1
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: 50000,
@@ -507,6 +512,7 @@ nonisolated enum TestActorBuilder {
             vitality: 100,
             agility: 20,
             luck: 35,
+            partyMemberId: partyMemberId,
             isMartialEligible: false,
             snapshot: snapshot,
             currentHP: snapshot.maxHP,

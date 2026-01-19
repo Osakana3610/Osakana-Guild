@@ -23,6 +23,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
         let reaction = BattleActor.SkillEffects.Reaction(
             identifier: "job.counter",
             displayName: "職業反撃",
+            skillId: 1101,
             trigger: .selfDamagedPhysical,
             target: .attacker,
             damageType: .physical,
@@ -113,6 +114,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
             vitality: 100,
             agility: 35,
             luck: 35,
+            partyMemberId: 1,
             isMartialEligible: false,
             snapshot: snapshot,
             currentHP: snapshot.maxHP,
@@ -193,6 +195,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
             vitality: 100,
             agility: 35,
             luck: 35,
+            partyMemberId: 1,
             isMartialEligible: false,
             snapshot: snapshot,
             currentHP: 5000,  // 最大HPの半分からスタート
@@ -244,6 +247,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
         let pursuit = BattleActor.SkillEffects.Reaction(
             identifier: "test.pursuit",
             displayName: "追撃",
+            skillId: 1102,
             trigger: .selfKilledEnemy,
             target: .randomEnemy,
             damageType: .physical,
@@ -363,6 +367,7 @@ nonisolated final class SkillActivationRegressionTests: XCTestCase {
             vitality: 50,
             agility: 35,
             luck: 35,
+            partyMemberId: 1,
             isMartialEligible: false,
             snapshot: snapshot,
             currentHP: snapshot.maxHP,

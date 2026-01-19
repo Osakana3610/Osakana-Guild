@@ -568,7 +568,8 @@ actor ExplorationProgressService {
         // InitialHP: count(2) + entries(6 each)
         var hpCount = UInt16(initialHP.count)
         withUnsafeBytes(of: &hpCount) { data.append(contentsOf: $0) }
-        for (actorIndex, hp) in initialHP {
+        for actorIndex in initialHP.keys.sorted() {
+            guard let hp = initialHP[actorIndex] else { continue }
             var idx = actorIndex
             var hpVal = hp
             withUnsafeBytes(of: &idx) { data.append(contentsOf: $0) }
@@ -602,13 +603,6 @@ actor ExplorationProgressService {
                 data.append(1)
                 var extraValue = extra
                 withUnsafeBytes(of: &extraValue) { data.append(contentsOf: $0) }
-            } else {
-                data.append(0)
-            }
-
-            if let label = entry.declaration.label, let labelData = label.data(using: .utf8), !labelData.isEmpty {
-                data.append(UInt8(labelData.count))
-                data.append(labelData)
             } else {
                 data.append(0)
             }
@@ -656,13 +650,11 @@ actor ExplorationProgressService {
         data.append(UInt8(enemySnapshots.count))
 
         func encodeParticipant(_ snapshot: BattleParticipantSnapshot, to data: inout Data) {
-            // actorId: length(1) + UTF8 bytes
-            let actorIdData = Data(snapshot.actorId.utf8)
-            data.append(UInt8(actorIdData.count))
-            data.append(actorIdData)
+            // actorIndex(2)
+            var actorIndex = snapshot.actorIndex
+            withUnsafeBytes(of: &actorIndex) { data.append(contentsOf: $0) }
 
-            // partyMemberId(1) + characterId(1)
-            data.append(snapshot.partyMemberId ?? 0)
+            // characterId(1)
             data.append(snapshot.characterId ?? 0)
 
             // name: length(1) + UTF8 bytes
@@ -765,15 +757,6 @@ actor ExplorationProgressService {
             let hasExtra = try readUInt8()
             let declarationExtra: UInt16? = hasExtra == 1 ? try readUInt16() : nil
 
-            let labelLength = try readUInt8()
-            var declarationLabel: String?
-            if labelLength > 0 {
-                guard offset + Int(labelLength) <= data.count else { throw BattleLogArchiveDecodingError.malformedData }
-                let labelData = data[offset..<(offset + Int(labelLength))]
-                offset += Int(labelLength)
-                declarationLabel = String(data: labelData, encoding: .utf8)
-            }
-
             let effectCount = try readUInt8()
             var effects: [BattleActionEntry.Effect] = []
             for _ in 0..<effectCount {
@@ -803,8 +786,7 @@ actor ExplorationProgressService {
 
             let declaration = BattleActionEntry.Declaration(kind: kind,
                                                             skillIndex: skillIndex,
-                                                            extra: declarationExtra,
-                                                            label: declarationLabel)
+                                                            extra: declarationExtra)
             let entry = BattleActionEntry(turn: Int(turn),
                                           actor: actor,
                                           declaration: declaration,
@@ -817,16 +799,14 @@ actor ExplorationProgressService {
         let enemyCount = try readUInt8()
 
         func decodeParticipant() throws -> BattleParticipantSnapshot {
-            let actorId = try readString()
-            let partyMemberId = try readUInt8()
+            let actorIndex = try readUInt16()
             let characterId = try readUInt8()
             let name = try readString()
             let avatarIndex = try readUInt16()
             let level = try readUInt16()
             let maxHP = try readUInt32()
             return BattleParticipantSnapshot(
-                actorId: actorId,
-                partyMemberId: partyMemberId == 0 ? nil : partyMemberId,
+                actorIndex: actorIndex,
                 characterId: characterId == 0 ? nil : characterId,
                 name: name,
                 avatarIndex: avatarIndex == 0 ? nil : avatarIndex,
@@ -1202,7 +1182,7 @@ private extension ExplorationProgressService {
         var result: [UInt8: Int] = [:]
         for snapshot in decoded.playerSnapshots {
             guard let characterId = snapshot.characterId, characterId != 0 else { continue }
-            let actorIndex = UInt16(snapshot.partyMemberId ?? characterId)
+            let actorIndex = snapshot.actorIndex
             let currentHP = hp[actorIndex] ?? 0
             result[characterId] = max(0, min(currentHP, snapshot.maxHP))
         }

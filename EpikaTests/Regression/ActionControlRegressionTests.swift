@@ -25,6 +25,7 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
         let playerReaction = BattleActor.SkillEffects.Reaction(
             identifier: "test.counter",
             displayName: "反撃",
+            skillId: 1001,
             trigger: .selfDamagedPhysical,
             target: .attacker,
             damageType: .physical,
@@ -42,6 +43,7 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
         let enemyReaction = BattleActor.SkillEffects.Reaction(
             identifier: "test.enemy_counter",
             displayName: "敵反撃",
+            skillId: 1002,
             trigger: .selfDamagedPhysical,
             target: .attacker,
             damageType: .physical,
@@ -144,8 +146,9 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
             "死亡後攻撃(2d18f98): 戦闘は1ターンで終了")
 
         // 味方（target=0）へのダメージがあることを確認（敵が味方を攻撃した）
+        let playerActorIndex = UInt16(player.partyMemberId ?? 0)
         let playerTookDamage = result.battleLog.entries.contains { entry in
-            entry.effects.contains { $0.kind == .physicalDamage && $0.target == 0 }
+            entry.effects.contains { $0.kind == .physicalDamage && $0.target == playerActorIndex }
         }
         XCTAssertTrue(playerTookDamage,
             "死亡後攻撃(2d18f98): 味方がダメージを受けた")
@@ -174,6 +177,7 @@ nonisolated final class ActionControlRegressionTests: XCTestCase {
         let reaction = BattleActor.SkillEffects.Reaction(
             identifier: "test.counter",
             displayName: "反撃",
+            skillId: 1003,
             trigger: .selfDamagedPhysical,
             target: .attacker,
             damageType: .physical,

@@ -1303,7 +1303,11 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
         spellbook: SkillRuntimeEffects.Spellbook = .empty,
         spells: SkillRuntimeEffects.SpellLoadout = .empty
     ) -> BattleActor {
-        BattleActor(
+        let resolvedPartyMemberId: UInt8? = {
+            guard kind == .player else { return partyMemberId }
+            return partyMemberId ?? 1
+        }()
+        return BattleActor(
             identifier: identifier,
             displayName: displayName,
             kind: kind,
@@ -1314,7 +1318,7 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
             vitality: stats.vitality,
             agility: stats.agility,
             luck: stats.luck,
-            partyMemberId: partyMemberId,
+            partyMemberId: resolvedPartyMemberId,
             level: level,
             jobName: nil,
             avatarIndex: nil,

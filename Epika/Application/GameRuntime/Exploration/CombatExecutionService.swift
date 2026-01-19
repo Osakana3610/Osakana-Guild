@@ -103,11 +103,11 @@ struct CombatExecutionService {
         }
 
         let playerSnapshots: [BattleParticipantSnapshot] = resolution.playerActors.map { actor in
-            let character = actor.partyMemberId.flatMap { partyMembersById[$0] }
+            let characterId = actor.partyMemberId!
+            let character = partyMembersById[characterId]
             let avatarIndex = character?.resolvedAvatarId
-            return BattleParticipantSnapshot(actorId: actor.identifier,
-                                             partyMemberId: actor.partyMemberId,
-                                             characterId: character?.id,
+            return BattleParticipantSnapshot(actorIndex: UInt16(characterId),
+                                             characterId: character?.id ?? characterId,
                                              name: character?.displayName ?? actor.displayName,
                                              avatarIndex: avatarIndex,
                                              level: character?.level ?? actor.level,
@@ -170,8 +170,7 @@ struct CombatExecutionService {
                 displayName = baseName
             }
 
-            let snapshot = BattleParticipantSnapshot(actorId: String(actorIndex),
-                                                     partyMemberId: nil,
+            let snapshot = BattleParticipantSnapshot(actorIndex: actorIndex,
                                                      characterId: nil,
                                                      name: displayName,
                                                      avatarIndex: nil,
