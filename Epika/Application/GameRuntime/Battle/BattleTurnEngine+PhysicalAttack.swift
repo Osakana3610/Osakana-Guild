@@ -76,6 +76,10 @@ extension BattleTurnEngine {
         let accuracyMultiplier = isMartial ? BattleContext.martialAccuracyMultiplier : 1.0
 
         if useReverseHealing {
+            let targetIdx = context.actorIndex(for: target.0, arrayIndex: target.1)
+            actionEntryBuilder.addEffect(kind: .skillEffect,
+                                         target: targetIdx,
+                                         extra: SkillEffectLogKind.reverseHealing.rawValue)
             let attackResult = performReverseHealingAttack(attackerSide: attackerSide,
                                                         attackerIndex: attackerIndex,
                                                         attacker: attacker,
@@ -95,6 +99,12 @@ extension BattleTurnEngine {
                                              reactionDepth: 0,
                                              entryBuilder: actionEntryBuilder)
             context.appendActionEntry(actionEntryBuilder.build())
+            appendBarrierLogs(from: attackResult, context: &context, turnOverride: context.turn)
+            if !outcome.postEntries.isEmpty {
+                for entry in outcome.postEntries {
+                    context.appendActionEntry(entry)
+                }
+            }
             if outcome.defenderWasDefeated {
                 handleDefeatReactions(targetSide: target.0,
                                       targetIndex: target.1,
@@ -105,11 +115,14 @@ extension BattleTurnEngine {
                                       allowsReactionEvents: true)
             }
             guard outcome.attacker != nil, outcome.defender != nil else { return }
-            processReactionQueue(context: &context)
             return
         }
 
         if let special = selectSpecialAttack(for: attacker, context: &context) {
+            let targetIdx = context.actorIndex(for: target.0, arrayIndex: target.1)
+            actionEntryBuilder.addEffect(kind: .skillEffect,
+                                         target: targetIdx,
+                                         extra: SkillEffectLogKind.specialAttack.rawValue)
             let attackResult = performSpecialAttack(special,
                                                     attackerSide: attackerSide,
                                                     attackerIndex: attackerIndex,
@@ -130,6 +143,12 @@ extension BattleTurnEngine {
                                              reactionDepth: 0,
                                              entryBuilder: actionEntryBuilder)
             context.appendActionEntry(actionEntryBuilder.build())
+            appendBarrierLogs(from: attackResult, context: &context, turnOverride: context.turn)
+            if !outcome.postEntries.isEmpty {
+                for entry in outcome.postEntries {
+                    context.appendActionEntry(entry)
+                }
+            }
             if outcome.defenderWasDefeated {
                 handleDefeatReactions(targetSide: target.0,
                                       targetIndex: target.1,
@@ -140,7 +159,6 @@ extension BattleTurnEngine {
                                       allowsReactionEvents: true)
             }
             guard outcome.attacker != nil, outcome.defender != nil else { return }
-            processReactionQueue(context: &context)
             return
         }
 
@@ -168,6 +186,12 @@ extension BattleTurnEngine {
 
         // 攻撃ログを追加（リアクション処理の前に追加して因果関係を正しく表現）
         context.appendActionEntry(actionEntryBuilder.build())
+        appendBarrierLogs(from: attackResult, context: &context, turnOverride: context.turn)
+        if !outcome.postEntries.isEmpty {
+            for entry in outcome.postEntries {
+                context.appendActionEntry(entry)
+            }
+        }
 
         if outcome.defenderWasDefeated {
             handleDefeatReactions(targetSide: target.0,
@@ -199,7 +223,6 @@ extension BattleTurnEngine {
                                     context: &context)
         }
 
-        processReactionQueue(context: &context)
     }
 
     nonisolated static func handleVampiricImpulse(attackerSide: ActorSide,
@@ -270,6 +293,12 @@ extension BattleTurnEngine {
         context.updateActor(updatedAttacker, side: attackerSide, index: attackerIndex)
         context.updateActor(updatedDefender, side: targetRef.0, index: targetRef.1)
         context.appendActionEntry(entryBuilder.build())
+        appendBarrierLogs(from: attackResult, context: &context, turnOverride: context.turn)
+        if !outcome.postEntries.isEmpty {
+            for entry in outcome.postEntries {
+                context.appendActionEntry(entry)
+            }
+        }
         if outcome.defenderWasDefeated {
             handleDefeatReactions(targetSide: targetRef.0,
                                   targetIndex: targetRef.1,
@@ -280,7 +309,6 @@ extension BattleTurnEngine {
                                   allowsReactionEvents: true)
         }
 
-        processReactionQueue(context: &context)
         return true
     }
 
@@ -408,6 +436,7 @@ extension BattleTurnEngine {
         var parryTriggered = false
         var shieldBlockTriggered = false
         var stopAfterFirstHit = false
+        var barrierLogEvents: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
 
         let defenderIdx: UInt16
         if let defSide = defenderSide, let defIndex = defenderIndex {
@@ -442,10 +471,29 @@ extension BattleTurnEngine {
                 continue
             }
 
+            let barrierKey = barrierKey(for: .physical)
+            let guardActive = defenderCopy.guardActive
+            let guardBefore = defenderCopy.guardBarrierCharges[barrierKey] ?? 0
+            let barrierBefore = defenderCopy.barrierCharges[barrierKey] ?? 0
+
             let result = computePhysicalDamage(attacker: attackerCopy,
                                                defender: &defenderCopy,
                                                hitIndex: hitIndex,
                                                context: &context)
+
+            let guardAfter = defenderCopy.guardBarrierCharges[barrierKey] ?? 0
+            let barrierAfter = defenderCopy.barrierCharges[barrierKey] ?? 0
+            if guardActive && guardAfter < guardBefore {
+                let diff = guardBefore - guardAfter
+                for _ in 0..<diff {
+                    barrierLogEvents.append((actorId: defenderIdx, kind: .barrierGuardPhysical))
+                }
+            } else if barrierAfter < barrierBefore {
+                let diff = barrierBefore - barrierAfter
+                for _ in 0..<diff {
+                    barrierLogEvents.append((actorId: defenderIdx, kind: .barrierPhysical))
+                }
+            }
             var pendingDamage = result.damage
             if let targetRaceIds = overrides?.doubleDamageAgainstRaceIds,
                !targetRaceIds.isEmpty,
@@ -506,7 +554,8 @@ extension BattleTurnEngine {
                             criticalHits: criticalHits,
                             wasDodged: wasDodged,
                             wasParried: parryTriggered,
-                            wasBlocked: shieldBlockTriggered)
+                            wasBlocked: shieldBlockTriggered,
+                            barrierLogEvents: barrierLogEvents)
     }
 
     nonisolated static func performReverseHealingAttack(attackerSide: ActorSide,
@@ -519,6 +568,7 @@ extension BattleTurnEngine {
                                          entryBuilder: BattleActionEntry.Builder) -> AttackResult {
         let attackerCopy = attacker
         var defenderCopy = defender
+        var barrierLogEvents: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
 
         guard attackerCopy.isAlive && defenderCopy.isAlive else {
             return AttackResult(attacker: attackerCopy,
@@ -550,7 +600,26 @@ extension BattleTurnEngine {
                                 wasBlocked: false)
         }
 
+        let barrierKey = barrierKey(for: .magical)
+        let guardActive = defenderCopy.guardActive
+        let guardBefore = defenderCopy.guardBarrierCharges[barrierKey] ?? 0
+        let barrierBefore = defenderCopy.barrierCharges[barrierKey] ?? 0
+
         let result = computeReverseHealingDamage(attacker: attackerCopy, defender: &defenderCopy, context: &context)
+
+        let guardAfter = defenderCopy.guardBarrierCharges[barrierKey] ?? 0
+        let barrierAfter = defenderCopy.barrierCharges[barrierKey] ?? 0
+        if guardActive && guardAfter < guardBefore {
+            let diff = guardBefore - guardAfter
+            for _ in 0..<diff {
+                barrierLogEvents.append((actorId: defenderIdx, kind: .barrierGuardMagical))
+            }
+        } else if barrierAfter < barrierBefore {
+            let diff = barrierBefore - barrierAfter
+            for _ in 0..<diff {
+                barrierLogEvents.append((actorId: defenderIdx, kind: .barrierMagical))
+            }
+        }
         let applied = applyDamage(amount: result.damage, to: &defenderCopy)
 
         entryBuilder.addEffect(kind: .physicalDamage,
@@ -573,7 +642,8 @@ extension BattleTurnEngine {
                             criticalHits: result.critical ? 1 : 0,
                             wasDodged: false,
                             wasParried: false,
-                            wasBlocked: false)
+                            wasBlocked: false,
+                            barrierLogEvents: barrierLogEvents)
     }
 
     nonisolated static func executeFollowUpSequence(attackerSide: ActorSide,
@@ -622,6 +692,12 @@ extension BattleTurnEngine {
                                          allowsReactionEvents: false)
 
         context.appendActionEntry(entryBuilder.build())
+        appendBarrierLogs(from: followUpResult, context: &context, turnOverride: context.turn)
+        if !outcome.postEntries.isEmpty {
+            for entry in outcome.postEntries {
+                context.appendActionEntry(entry)
+            }
+        }
 
         if outcome.defenderWasDefeated {
             handleDefeatReactions(targetSide: defenderSide,
@@ -731,6 +807,12 @@ extension BattleTurnEngine {
                                              entryBuilder: entryBuilder)
 
             context.appendActionEntry(entryBuilder.build())
+            appendBarrierLogs(from: attackResult, context: &context, turnOverride: context.turn)
+            if !outcome.postEntries.isEmpty {
+                for entry in outcome.postEntries {
+                    context.appendActionEntry(entry)
+                }
+            }
             if outcome.defenderWasDefeated {
                 handleDefeatReactions(targetSide: target.0,
                                       targetIndex: target.1,

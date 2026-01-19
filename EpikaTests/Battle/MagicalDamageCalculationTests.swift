@@ -43,7 +43,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
                 defender: &defender,
                 spellId: nil,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -85,7 +85,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
                 defender: &defender,
                 spellId: nil,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -123,7 +123,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
                 defender: &defender,
                 spellId: nil,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -159,7 +159,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
             defender: &defender,
             spellId: nil,
             context: &context
-        )
+        ).damage
 
         XCTAssertGreaterThanOrEqual(damage, 1,
             "最低ダメージ保証: 期待>=1, 実測\(damage)")
@@ -193,7 +193,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
                 defender: &defender,
                 spellId: nil,
                 context: &context
-            )
+            ).damage
             if damage == 0 {
                 nullifyCount += 1
             }
@@ -229,7 +229,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
                 defender: &defender,
                 spellId: nil,
                 context: &context
-            )
+            ).damage
             if damage == 0 {
                 nullifyCount += 1
             }
@@ -270,7 +270,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
                 defender: &defenderCrit,
                 spellId: nil,
                 context: &contextCrit
-            )
+            ).damage
             criticalDamageTotal += critDamage
 
             // 必殺なし（比較用）
@@ -287,7 +287,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
                 defender: &defenderNormal,
                 spellId: nil,
                 context: &contextNormal
-            )
+            ).damage
             normalDamageTotal += normalDamage
         }
 

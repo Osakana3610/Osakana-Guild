@@ -80,6 +80,36 @@
 "battleLog.term.reactionAttack" = "反撃";
 "battleLog.term.followUp" = "追撃";
 "battleLog.term.martialFollowUp" = "格闘追撃";
+"battleLog.term.skillEffect.actionOrderShuffle" = "行動順シャッフル";
+"battleLog.term.skillEffect.actionOrderShuffleEnemy" = "敵行動順シャッフル";
+"battleLog.term.skillEffect.attackCountAdditive" = "攻撃回数増加";
+"battleLog.term.skillEffect.breathVariant" = "ブレス回数増加";
+"battleLog.term.skillEffect.spellCharges" = "魔法使用回数増加";
+"battleLog.term.skillEffect.procRate" = "発動率補正";
+"battleLog.term.skillEffect.cumulativeHitBonus" = "連続ヒットボーナス";
+"battleLog.term.skillEffect.partyHostileAll" = "味方敵対（全員）";
+"battleLog.term.skillEffect.partyHostileTarget" = "味方敵対（特定）";
+"battleLog.term.skillEffect.reverseHealing" = "リバース・ヒーリング";
+"battleLog.term.skillEffect.extraAction" = "追加行動";
+"battleLog.term.skillEffect.reactionNextTurn" = "次ターン追加行動";
+"battleLog.term.skillEffect.specialAttack" = "特殊攻撃";
+"battleLog.term.skillEffect.enemyActionDebuff" = "敵行動回数減少";
+"battleLog.term.skillEffect.enemyActionSkip" = "敵行動スキップ";
+"battleLog.term.skillEffect.berserk" = "暴走";
+"battleLog.term.skillEffect.magicCritical" = "必殺魔法";
+"battleLog.term.skillEffect.magicNullify" = "魔法無効化";
+"battleLog.term.skillEffect.cover" = "かばう";
+"battleLog.term.skillEffect.barrierPhysical" = "物理結界";
+"battleLog.term.skillEffect.barrierMagical" = "魔法結界";
+"battleLog.term.skillEffect.barrierBreath" = "ブレス結界";
+"battleLog.term.skillEffect.barrierGuardPhysical" = "防御時物理結界";
+"battleLog.term.skillEffect.barrierGuardMagical" = "防御時魔法結界";
+"battleLog.term.skillEffect.barrierGuardBreath" = "防御時ブレス結界";
+"battleLog.term.skillEffect.degradationRepair" = "劣化修復";
+"battleLog.term.skillEffect.resurrectionBuff" = "強制蘇生";
+"battleLog.term.skillEffect.resurrectionVitalize" = "蘇生時強化";
+"battleLog.term.skillEffect.runawayMagic" = "魔力暴走";
+"battleLog.term.skillEffect.runawayDamage" = "ダメージ暴走";
 
 "battleLog.declaration.defend" = "{actor}は防御態勢を取った";
 "battleLog.declaration.physicalAttack" = "{actor}の攻撃！";
@@ -114,6 +144,7 @@
 "battleLog.declaration.enemyAppear" = "敵が現れた！";
 "battleLog.declaration.enemySpecialSkill" = "{actor}の{skill}！";
 "battleLog.declaration.spellChargeRecover" = "{actor}は{label}を再装填した";
+"battleLog.declaration.skillEffect" = "{actor}の{label}が発動した！";
 
 "battleLog.effect.physicalDamage" = "{actor}の攻撃！{target}に{amount}のダメージ！";
 "battleLog.effect.physicalEvade" = "{actor}の攻撃！{target}は攻撃をかわした！";
@@ -152,5 +183,6 @@
 "battleLog.effect.enemySpecialHeal" = "{actor}は{amount}回復した！";
 "battleLog.effect.enemySpecialBuff" = "{actor}は能力を強化した！";
 "battleLog.effect.spellChargeRecover" = "{actor}は魔法のチャージを回復した";
+"battleLog.effect.skillEffect" = "{actor}の{label}が{target}に発動した！";
 "battleLog.effect.enemyAppear" = "";
 "battleLog.effect.logOnly" = "";

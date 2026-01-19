@@ -54,7 +54,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
                 attacker: attacker,
                 defender: &defender,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -94,7 +94,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
                 attacker: attacker,
                 defender: &defender,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -134,7 +134,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
                 attacker: attacker,
                 defender: &defender,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -168,7 +168,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
             attacker: attacker,
             defender: &defender,
             context: &context
-        )
+        ).damage
 
         XCTAssertGreaterThanOrEqual(damage, 1,
             "最低ダメージ保証: 期待>=1, 実測\(damage)")
@@ -199,7 +199,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
                 attacker: attacker,
                 defender: &defender,
                 context: &context
-            )
+            ).damage
             totalDamage += damage
         }
 
@@ -235,7 +235,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
                 attacker: attacker,
                 defender: &defender,
                 context: &context
-            )
+            ).damage
 
             // 完全耐性でも最低1ダメージ保証があるか確認
             // 仕様: max(1, round(damage)) なので0にはならない
@@ -278,7 +278,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
                 attacker: attackerCrit,
                 defender: &defenderCrit,
                 context: &contextCrit
-            )
+            ).damage
             totalDamageWithCrit += damageCrit
 
             // 必殺設定なし
@@ -294,7 +294,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
                 attacker: attackerNoCrit,
                 defender: &defenderNoCrit,
                 context: &contextNoCrit
-            )
+            ).damage
             totalDamageNoCrit += damageNoCrit
         }
 
@@ -332,7 +332,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
                 attacker: attackerHigh,
                 defender: &defenderHigh,
                 context: &contextHigh
-            )
+            ).damage
             totalDamageHighDef += damageHigh
 
             // 低防御
@@ -352,7 +352,7 @@ nonisolated final class BreathDamageCalculationTests: XCTestCase {
                 attacker: attackerLow,
                 defender: &defenderLow,
                 context: &contextLow
-            )
+            ).damage
             totalDamageLowDef += damageLow
         }
 

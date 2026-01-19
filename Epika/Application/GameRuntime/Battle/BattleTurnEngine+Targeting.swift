@@ -104,6 +104,13 @@ extension BattleTurnEngine {
                                                   targetIndex: targetIndex,
                                                   context: context,
                                                   random: &context.random) {
+                let coverActorId = context.actorIndex(for: targetSide, arrayIndex: coverTarget.1)
+                let originalTargetId = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
+                appendSkillEffectLog(.cover,
+                                     actorId: coverActorId,
+                                     targetId: originalTargetId,
+                                     context: &context,
+                                     turnOverride: context.turn)
                 return coverTarget
             }
         }

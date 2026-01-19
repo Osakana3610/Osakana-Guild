@@ -77,4 +77,84 @@ extension BattleTurnEngine {
                                   statusId: UInt16(definition.id),
                                   effectKind: .statusRecover)
     }
+
+    nonisolated static func appendSkillEffectLog(_ kind: SkillEffectLogKind,
+                                     actorId: UInt16,
+                                     targetId: UInt16? = nil,
+                                     context: inout BattleContext,
+                                     turnOverride: Int? = nil) {
+        let effectKind: BattleActionEntry.Effect.Kind = targetId == nil ? .logOnly : .skillEffect
+        context.appendSimpleEntry(kind: .skillEffect,
+                                  actorId: actorId,
+                                  targetId: targetId,
+                                  extra: kind.rawValue,
+                                  effectKind: effectKind,
+                                  turnOverride: turnOverride)
+    }
+
+    nonisolated static func appendSkillEffectLogs(_ events: [(kind: SkillEffectLogKind, actorId: UInt16, targetId: UInt16?)],
+                                      context: inout BattleContext,
+                                      turnOverride: Int? = nil) {
+        guard !events.isEmpty else { return }
+        for event in events {
+            appendSkillEffectLog(event.kind,
+                                 actorId: event.actorId,
+                                 targetId: event.targetId,
+                                 context: &context,
+                                 turnOverride: turnOverride)
+        }
+    }
+
+    nonisolated static func appendBarrierLogs(from result: AttackResult,
+                                  context: inout BattleContext,
+                                  turnOverride: Int? = nil) {
+        guard !result.barrierLogEvents.isEmpty else { return }
+        let events = result.barrierLogEvents.map { (kind: $0.kind, actorId: $0.actorId, targetId: UInt16?.none) }
+        appendSkillEffectLogs(events, context: &context, turnOverride: turnOverride)
+    }
+
+    nonisolated static func appendInitialSkillEffectLogs(_ context: inout BattleContext) {
+        appendInitialSkillEffectLogs(for: .player, context: &context)
+        appendInitialSkillEffectLogs(for: .enemy, context: &context)
+    }
+
+    private nonisolated static func appendInitialSkillEffectLogs(for side: ActorSide, context: inout BattleContext) {
+        let actors: [BattleActor] = side == .player ? context.players : context.enemies
+        for (index, actor) in actors.enumerated() {
+            let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+
+            if actor.skillEffects.combat.hasAttackCountAdditive {
+                appendSkillEffectLog(.attackCountAdditive, actorId: actorIdx, context: &context)
+            }
+            if actor.skillEffects.combat.nextTurnExtraActions > 0 {
+                appendSkillEffectLog(.reactionNextTurn, actorId: actorIdx, context: &context)
+            }
+            if !actor.skillEffects.combat.procRateModifier.multipliers.isEmpty
+                || !actor.skillEffects.combat.procRateModifier.additives.isEmpty {
+                appendSkillEffectLog(.procRate, actorId: actorIdx, context: &context)
+            }
+            if actor.skillEffects.combat.cumulativeHitBonus != nil {
+                appendSkillEffectLog(.cumulativeHitBonus, actorId: actorIdx, context: &context)
+            }
+            if actor.skillEffects.spell.breathExtraCharges > 0 {
+                appendSkillEffectLog(.breathVariant, actorId: actorIdx, context: &context)
+            }
+            if hasSpellChargeModifiers(actor.skillEffects.spell) {
+                appendSkillEffectLog(.spellCharges, actorId: actorIdx, context: &context)
+            }
+            if actor.skillEffects.misc.partyHostileAll {
+                appendSkillEffectLog(.partyHostileAll, actorId: actorIdx, context: &context)
+            }
+            if !actor.skillEffects.misc.partyHostileTargets.isEmpty {
+                appendSkillEffectLog(.partyHostileTarget, actorId: actorIdx, context: &context)
+            }
+        }
+    }
+
+    private nonisolated static func hasSpellChargeModifiers(_ effects: BattleActor.SkillEffects.Spell) -> Bool {
+        if let modifier = effects.defaultChargeModifier, !modifier.isEmpty {
+            return true
+        }
+        return effects.chargeModifiers.contains { !$0.value.isEmpty }
+    }
 }

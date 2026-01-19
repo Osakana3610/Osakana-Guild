@@ -771,6 +771,7 @@ nonisolated struct BattleActor: Sendable {
             var actionOrderShuffleEnemy: Bool  // 道化師スキル: 敵の行動順シャッフル
             var firstStrike: Bool  // 道化師スキル: 先制攻撃
             var enemyStatDebuffs: [EnemyStatDebuff]  // 敵ステータス弱体化
+            var hasAttackCountAdditive: Bool  // 攻撃回数加算スキルの有無（ログ用）
 
             nonisolated static let neutral = Combat(
                 procChanceMultiplier: 1.0,
@@ -793,7 +794,8 @@ nonisolated struct BattleActor: Sendable {
                 enemySingleActionSkipChancePercent: 0.0,
                 actionOrderShuffleEnemy: false,
                 firstStrike: false,
-                enemyStatDebuffs: []
+                enemyStatDebuffs: [],
+                hasAttackCountAdditive: false
             )
         }
 

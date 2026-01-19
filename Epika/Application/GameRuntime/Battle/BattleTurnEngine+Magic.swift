@@ -132,6 +132,8 @@ extension BattleTurnEngine {
         let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
                                                           kind: .mageMagic,
                                                           skillIndex: UInt16(spell.id))
+        var pendingSkillEffectLogs: [(kind: SkillEffectLogKind, actorId: UInt16, targetId: UInt16?)] = []
+        var pendingBarrierLogs: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
 
         // buffの場合は専用処理
         if spell.category == .buff {
@@ -161,18 +163,38 @@ extension BattleTurnEngine {
 
             let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
             if spell.category == .damage {
-                let damage = computeMagicalDamage(attacker: refreshedAttacker,
+                let result = computeMagicalDamage(attacker: refreshedAttacker,
                                                   defender: &target,
                                                   spellId: spell.id,
                                                   context: &context)
-                let applied = applyDamage(amount: damage, to: &target)
+                if result.wasNullified {
+                    pendingSkillEffectLogs.append((kind: .magicNullify,
+                                                   actorId: targetIdx,
+                                                   targetId: attackerIdx))
+                }
+                if result.wasCritical {
+                    entryBuilder.addEffect(kind: .skillEffect,
+                                           target: targetIdx,
+                                           extra: SkillEffectLogKind.magicCritical.rawValue)
+                }
+                if result.guardBarrierConsumed > 0 {
+                    for _ in 0..<result.guardBarrierConsumed {
+                        pendingBarrierLogs.append((actorId: targetIdx, kind: .barrierGuardMagical))
+                    }
+                } else if result.barrierConsumed > 0 {
+                    for _ in 0..<result.barrierConsumed {
+                        pendingBarrierLogs.append((actorId: targetIdx, kind: .barrierMagical))
+                    }
+                }
+
+                let applied = applyDamage(amount: result.damage, to: &target)
                 applyMagicDegradation(to: &target, spellId: spell.id, caster: refreshedAttacker)
 
                 context.updateActor(target, side: targetRef.0, index: targetRef.1)
                 entryBuilder.addEffect(kind: .magicDamage,
                                        target: targetIdx,
                                        value: UInt32(applied),
-                                       extra: UInt16(clamping: damage))
+                                       extra: UInt16(clamping: result.damage))
 
                 if !target.isAlive {
                     appendDefeatLog(for: target,
@@ -218,6 +240,13 @@ extension BattleTurnEngine {
         }
 
         context.appendActionEntry(entryBuilder.build())
+        if !pendingSkillEffectLogs.isEmpty {
+            appendSkillEffectLogs(pendingSkillEffectLogs, context: &context, turnOverride: context.turn)
+        }
+        if !pendingBarrierLogs.isEmpty {
+            let events = pendingBarrierLogs.map { (kind: $0.kind, actorId: $0.actorId, targetId: UInt16?.none) }
+            appendSkillEffectLogs(events, context: &context, turnOverride: context.turn)
+        }
 
         for targetRef in defeatedTargets {
             handleDefeatReactions(targetSide: targetRef.0,
@@ -241,8 +270,6 @@ extension BattleTurnEngine {
             depth: 0
         ))
 
-        processReactionQueue(context: &context)
-
         return true
     }
 
@@ -259,6 +286,7 @@ extension BattleTurnEngine {
         let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
         let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
                                                           kind: .breath)
+        var pendingBarrierLogs: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
 
         let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, context: context)
         let targets = selectStatusTargets(attackerSide: side,
@@ -275,8 +303,19 @@ extension BattleTurnEngine {
             guard var target = context.actor(for: targetRef.0, index: targetRef.1),
                   target.isAlive else { continue }
 
-            let damage = computeBreathDamage(attacker: refreshedAttacker, defender: &target, context: &context)
-            let applied = applyDamage(amount: damage, to: &target)
+            let result = computeBreathDamage(attacker: refreshedAttacker, defender: &target, context: &context)
+            if result.guardBarrierConsumed > 0 {
+                let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
+                for _ in 0..<result.guardBarrierConsumed {
+                    pendingBarrierLogs.append((actorId: targetIdx, kind: .barrierGuardBreath))
+                }
+            } else if result.barrierConsumed > 0 {
+                let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
+                for _ in 0..<result.barrierConsumed {
+                    pendingBarrierLogs.append((actorId: targetIdx, kind: .barrierBreath))
+                }
+            }
+            let applied = applyDamage(amount: result.damage, to: &target)
 
             context.updateActor(target, side: targetRef.0, index: targetRef.1)
 
@@ -284,7 +323,7 @@ extension BattleTurnEngine {
             entryBuilder.addEffect(kind: .breathDamage,
                                    target: targetIdx,
                                    value: UInt32(applied),
-                                   extra: UInt16(clamping: damage))
+                                   extra: UInt16(clamping: result.damage))
 
             if !target.isAlive {
                 appendDefeatLog(for: target,
@@ -297,6 +336,10 @@ extension BattleTurnEngine {
         }
 
         context.appendActionEntry(entryBuilder.build())
+        if !pendingBarrierLogs.isEmpty {
+            let events = pendingBarrierLogs.map { (kind: $0.kind, actorId: $0.actorId, targetId: UInt16?.none) }
+            appendSkillEffectLogs(events, context: &context, turnOverride: context.turn)
+        }
 
         for targetRef in defeatedTargets {
             handleDefeatReactions(targetSide: targetRef.0,
@@ -307,8 +350,6 @@ extension BattleTurnEngine {
                                   reactionDepth: 0,
                                   allowsReactionEvents: true)
         }
-
-        processReactionQueue(context: &context)
 
         return true
     }
