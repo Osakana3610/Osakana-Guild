@@ -874,6 +874,40 @@
       "testMethod": "testDefeatLogIsLastEntry"
     },
     {
+      "id": "BATTLE-LOG-013",
+      "category": [
+        "戦闘",
+        "ログ",
+        "参照"
+      ],
+      "description": "actorIndexが味方/敵で正しく計算されるか",
+      "formula": "playerIndex=partyMemberId, enemyIndex=1000×suffix+masterId",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleLogFormatTests.swift",
+      "testMethod": "testActorIndexMappingUsesPartyMemberIdAndEnemySuffix"
+    },
+    {
+      "id": "BATTLE-LOG-014",
+      "category": [
+        "戦闘",
+        "ログ",
+        "解釈"
+      ],
+      "description": "BattleLogEffectInterpreterが効果種別をdamage/heal/setHPに分類できるか",
+      "formula": "damage/heal/setHP/nilの判定",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleLogFormatTests.swift",
+      "testMethod": "testLogEffectInterpreterMapsImpactKinds"
+    },
+    {
       "id": "BATTLE-LOG-007",
       "category": [
         "戦闘",
@@ -12311,6 +12345,125 @@
       "toleranceBasis": "決定的（固定乱数モード）",
       "testFile": "TargetingTests.swift",
       "testMethod": "testSelectStatusTargetsCombinesSidesAndRespectsMaxTargets"
+    },
+    {
+      "id": "BATTLE-ENCOUNTER-001",
+      "category": [
+        "戦闘",
+        "敵編成",
+        "最小数"
+      ],
+      "description": "minEnemies未満の場合に最後のグループ数が補正されるか",
+      "formula": "lastGroupCount == minEnemies",
+      "expectedRange": {
+        "min": 3,
+        "max": 3
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "EnemyEncounterTests.swift",
+      "testMethod": "testEncounterAdjustsToMinEnemies"
+    },
+    {
+      "id": "BATTLE-ENCOUNTER-002",
+      "category": [
+        "戦闘",
+        "敵編成",
+        "最大数"
+      ],
+      "description": "maxEnemies超過時に後方グループから減算されるか",
+      "formula": "counts == [2,1] && total == 3",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "EnemyEncounterTests.swift",
+      "testMethod": "testEncounterAdjustsDownToMaxEnemies"
+    },
+    {
+      "id": "BATTLE-ENCOUNTER-003",
+      "category": [
+        "戦闘",
+        "敵編成",
+        "プール混合"
+      ],
+      "description": "mixRatio時のfloorPool先頭+normalPool先頭の順序が維持されるか",
+      "formula": "selectedId == floorPool[1]",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "EnemyEncounterTests.swift",
+      "testMethod": "testEncounterMixRatioUsesFloorPoolPrefix"
+    },
+    {
+      "id": "BATTLE-ENEMY-GROUP-001",
+      "category": [
+        "戦闘",
+        "敵編成",
+        "構築"
+      ],
+      "description": "敵ID昇順・同ID内レベル降順で並び、formationSlotが連番になるか",
+      "formula": "sorted specs && formationSlot == index+1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleEnemyGroupBuilderTests.swift",
+      "testMethod": "testMakeEnemiesSortsSpecsAndAssignsSlots"
+    },
+    {
+      "id": "BATTLE-CONTEXT-001",
+      "category": [
+        "戦闘",
+        "コンテキスト",
+        "並び"
+      ],
+      "description": "makePlayerActorsがorder順でソートしformationSlotを付与するか",
+      "formula": "order sort && slot=1..n",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleContextBuilderTests.swift",
+      "testMethod": "testMakePlayerActorsSortsByOrderAndAssignsSlots"
+    },
+    {
+      "id": "BATTLE-CONTEXT-002",
+      "category": [
+        "戦闘",
+        "コンテキスト",
+        "行動率"
+      ],
+      "description": "breathDamageScore=0の場合に行動率breathが0になるか",
+      "formula": "noBreathRate=0 && hasBreathRate=20",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleContextBuilderTests.swift",
+      "testMethod": "testMakePlayerActorsZeroesBreathRateWhenNoBreathDamage"
+    },
+    {
+      "id": "BATTLE-CONTEXT-003",
+      "category": [
+        "戦闘",
+        "コンテキスト",
+        "除外"
+      ],
+      "description": "maxHP=0のメンバーが戦闘アクターから除外されるか",
+      "formula": "actors.count == 1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleContextBuilderTests.swift",
+      "testMethod": "testMakePlayerActorsFiltersZeroMaxHP"
     },
     {
       "id": "BATTLE-TURNEND-001",
