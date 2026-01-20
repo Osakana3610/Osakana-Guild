@@ -25,6 +25,7 @@ import SwiftData
 /// これにより、コンテキスト生成時の設定（autosave無効化など）を統一できる。
 struct SwiftDataContextProvider: Sendable {
     nonisolated let container: ModelContainer
+    // iOS 17.0-17.3 のSwiftData競合回避のため共有Contextを使う（commit: 45ccefe）。
     nonisolated static var shouldUseSharedContext: Bool {
         if #available(iOS 17.4, *) {
             return false
