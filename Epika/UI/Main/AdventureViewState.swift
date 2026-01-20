@@ -27,6 +27,7 @@ import Observation
 final class AdventureViewState {
     private var activeExplorationHandles: [UInt8: AppServices.ExplorationRunHandle] = [:]
     private var activeExplorationTasks: [UInt8: Task<Void, Never>] = [:]
+    private var cancellationRequestedPartyIds: Set<UInt8> = []
     private weak var appServicesRef: AppServices?
 
     var selectedPartyIndex: Int = 0
@@ -253,20 +254,14 @@ final class AdventureViewState {
 
     func cancelExploration(for party: CachedParty, using appServices: AppServices) async {
         let partyId = party.id
+        if activeExplorationTasks[partyId] != nil {
+            cancellationRequestedPartyIds.insert(partyId)
+        }
         if let handle = activeExplorationHandles[partyId] {
-            activeExplorationTasks[partyId]?.cancel()
             await handle.cancel()
-            activeExplorationHandles[partyId] = nil
-            activeExplorationTasks[partyId] = nil
-            await updateExplorationProgress(forPartyId: partyId, using: appServices)
             return
         }
-
         if activeExplorationTasks[partyId] != nil {
-            activeExplorationTasks[partyId]?.cancel()
-            activeExplorationTasks[partyId] = nil
-            activeExplorationHandles[partyId] = nil
-            await updateExplorationProgress(forPartyId: partyId, using: appServices)
             return
         }
 
@@ -329,6 +324,7 @@ final class AdventureViewState {
 
         while remainingCount > 0 {
             if Task.isCancelled { break }
+            if cancellationRequestedPartyIds.contains(partyId), pendingHandle == nil { break }
             do {
                 let handle: AppServices.ExplorationRunHandle
                 let needsProgressUpdate: Bool
@@ -353,6 +349,7 @@ final class AdventureViewState {
                                                            using: appServices,
                                                            clearTaskAfterCompletion: false)
                 remainingCount -= 1
+                if cancellationRequestedPartyIds.contains(partyId) { break }
                 if !completed { break }
             } catch {
                 present(error: error)
@@ -381,6 +378,7 @@ final class AdventureViewState {
     private func clearExplorationTask(partyId: UInt8) {
         activeExplorationTasks[partyId] = nil
         activeExplorationHandles[partyId] = nil
+        cancellationRequestedPartyIds.remove(partyId)
     }
 
     private func clearExplorationHandle(partyId: UInt8) {
