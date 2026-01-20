@@ -173,6 +173,319 @@ nonisolated final class CombatStatCalculatorObservationTests: XCTestCase {
         recordInt(id: "BATTLE-STAT-301", expected: 136, measured: combat.hitScore, rawData: rawData)
     }
 
+    @MainActor func testStatConversionLinear() throws {
+        let coefficients = makeCoefficients()
+        let stats = RaceDefinition.BaseStats(
+            strength: 10,
+            wisdom: 12,
+            spirit: 14,
+            vitality: 16,
+            agility: 18,
+            luck: 20
+        )
+        let conversionEffect = makeEffect(
+            index: 1,
+            type: .statConversionLinear,
+            parameters: [
+                .sourceStat: Int(CombatStat.hitScore.rawValue),
+                .targetStat: Int(CombatStat.maxHP.rawValue)
+            ],
+            values: [.valuePerUnit: 0.1]
+        )
+        let skill = makeSkill(id: 9004, effects: [conversionEffect])
+        let combat = try calculateCombat(level: 1, stats: stats, coefficients: coefficients, skills: [skill])
+
+        var rawData = makeRawData(level: 1, stats: stats, coefficients: coefficients)
+        rawData["sourceStat"] = Double(CombatStat.hitScore.rawValue)
+        rawData["targetStat"] = Double(CombatStat.maxHP.rawValue)
+        rawData["conversionRatio"] = 0.1
+        recordInt(id: "BATTLE-STAT-401", expected: 189, measured: combat.maxHP, rawData: rawData)
+    }
+
+    @MainActor func testAttackCountRoundingHalfDown() throws {
+        let coefficients = makeCoefficients()
+        let stats = RaceDefinition.BaseStats(
+            strength: 10,
+            wisdom: 12,
+            spirit: 14,
+            vitality: 16,
+            agility: 35,
+            luck: 20
+        )
+        let combat = try calculateCombat(level: 1, stats: stats, coefficients: coefficients)
+
+        let rawData = makeRawData(level: 1, stats: stats, coefficients: coefficients)
+        recordDouble(id: "BATTLE-STAT-402", expected: 2.0, measured: combat.attackCount, rawData: rawData)
+    }
+
+    @MainActor func testAttackCountClampedToMinimum() throws {
+        let coefficients = makeCoefficients()
+        let stats = RaceDefinition.BaseStats(
+            strength: 10,
+            wisdom: 12,
+            spirit: 14,
+            vitality: 16,
+            agility: 35,
+            luck: 20
+        )
+        let attackCountEffect = makeEffect(
+            index: 1,
+            type: .attackCountAdditive,
+            values: [.additive: -3.0]
+        )
+        let skill = makeSkill(id: 9005, effects: [attackCountEffect])
+        let combat = try calculateCombat(level: 1, stats: stats, coefficients: coefficients, skills: [skill])
+
+        var rawData = makeRawData(level: 1, stats: stats, coefficients: coefficients)
+        rawData["attackCountAdditive"] = -3.0
+        recordDouble(id: "BATTLE-STAT-403", expected: 1.0, measured: combat.attackCount, rawData: rawData)
+    }
+
+    @MainActor func testCriticalChanceClampedLowerBound() throws {
+        let coefficients = makeCoefficients()
+        let stats = RaceDefinition.BaseStats(
+            strength: 10,
+            wisdom: 12,
+            spirit: 14,
+            vitality: 16,
+            agility: 18,
+            luck: 20
+        )
+        let criticalEffect = makeEffect(
+            index: 1,
+            type: .criticalChancePercentAdditive,
+            values: [.points: -200]
+        )
+        let skill = makeSkill(id: 9006, effects: [criticalEffect])
+        let combat = try calculateCombat(level: 1, stats: stats, coefficients: coefficients, skills: [skill])
+
+        var rawData = makeRawData(level: 1, stats: stats, coefficients: coefficients)
+        rawData["criticalAdditive"] = -200.0
+        recordInt(id: "BATTLE-STAT-404", expected: 0, measured: combat.criticalChancePercent, rawData: rawData)
+    }
+
+    @MainActor func testCriticalChanceClampedUpperBound() throws {
+        let coefficients = makeCoefficients()
+        let stats = RaceDefinition.BaseStats(
+            strength: 10,
+            wisdom: 12,
+            spirit: 14,
+            vitality: 16,
+            agility: 18,
+            luck: 20
+        )
+        let criticalEffect = makeEffect(
+            index: 1,
+            type: .criticalChancePercentAdditive,
+            values: [.points: 200]
+        )
+        let skill = makeSkill(id: 9007, effects: [criticalEffect])
+        let combat = try calculateCombat(level: 1, stats: stats, coefficients: coefficients, skills: [skill])
+
+        var rawData = makeRawData(level: 1, stats: stats, coefficients: coefficients)
+        rawData["criticalAdditive"] = 200.0
+        recordInt(id: "BATTLE-STAT-405", expected: 100, measured: combat.criticalChancePercent, rawData: rawData)
+    }
+
+    @MainActor func testMaxHPClampedToMinimum() throws {
+        let coefficients = makeCoefficients()
+        let stats = RaceDefinition.BaseStats(
+            strength: 10,
+            wisdom: 12,
+            spirit: 14,
+            vitality: 16,
+            agility: 18,
+            luck: 20
+        )
+        let maxHPEffect = makeEffect(
+            index: 1,
+            type: .statAdditive,
+            parameters: [.stat: Int(CombatStat.maxHP.rawValue)],
+            values: [.additive: -1000]
+        )
+        let skill = makeSkill(id: 9008, effects: [maxHPEffect])
+        let combat = try calculateCombat(level: 1, stats: stats, coefficients: coefficients, skills: [skill])
+
+        var rawData = makeRawData(level: 1, stats: stats, coefficients: coefficients)
+        rawData["maxHPAdditive"] = -1000.0
+        recordInt(id: "BATTLE-STAT-406", expected: 1, measured: combat.maxHP, rawData: rawData)
+    }
+
+    @MainActor func testLevelDependentValueHumanBoundaries() {
+        let cases: [(level: Int, expected: Double, id: String)] = [
+            (level: 30, expected: 3.0, id: "BATTLE-FORMULA-001"),
+            (level: 31, expected: 3.15, id: "BATTLE-FORMULA-002"),
+            (level: 61, expected: 7.725, id: "BATTLE-FORMULA-003"),
+            (level: 81, expected: 12.225, id: "BATTLE-FORMULA-004"),
+            (level: 101, expected: 16.6125, id: "BATTLE-FORMULA-005"),
+            (level: 151, expected: 22.29375, id: "BATTLE-FORMULA-006"),
+            (level: 181, expected: 27.440625, id: "BATTLE-FORMULA-007")
+        ]
+
+        for testCase in cases {
+            let measured = CombatFormulas.levelDependentValue(raceId: 1, level: testCase.level)
+            let rawData: [String: Double] = [
+                "raceId": 1.0,
+                "level": Double(testCase.level)
+            ]
+            recordDouble(id: testCase.id, expected: testCase.expected, measured: measured, rawData: rawData)
+        }
+    }
+
+    @MainActor func testLevelDependentValueNonHumanBoundaries() {
+        let cases: [(level: Int, expected: Double, id: String)] = [
+            (level: 80, expected: 12.0, id: "BATTLE-FORMULA-008"),
+            (level: 81, expected: 12.45, id: "BATTLE-FORMULA-009"),
+            (level: 181, expected: 57.45, id: "BATTLE-FORMULA-010")
+        ]
+
+        for testCase in cases {
+            let measured = CombatFormulas.levelDependentValue(raceId: 3, level: testCase.level)
+            let rawData: [String: Double] = [
+                "raceId": 3.0,
+                "level": Double(testCase.level)
+            ]
+            recordDouble(id: testCase.id, expected: testCase.expected, measured: measured, rawData: rawData)
+        }
+    }
+
+    @MainActor func testAgilityDependencyBoundaries() {
+        let cases: [(agility: Int, expected: Double, id: String)] = [
+            (agility: 20, expected: 20.0, id: "BATTLE-FORMULA-011"),
+            (agility: 21, expected: 20.84, id: "BATTLE-FORMULA-012"),
+            (agility: 35, expected: 50.0, id: "BATTLE-FORMULA-013"),
+            (agility: 34, expected: 45.52, id: "BATTLE-FORMULA-014")
+        ]
+
+        for testCase in cases {
+            let measured = CombatFormulas.agilityDependency(value: testCase.agility)
+            let rawData: [String: Double] = [
+                "agility": Double(testCase.agility)
+            ]
+            recordDouble(id: testCase.id, expected: testCase.expected, measured: measured, rawData: rawData)
+        }
+    }
+
+    @MainActor func testStrengthDependencyBoundaries() {
+        let cases: [(strength: Int, expected: Double, id: String)] = [
+            (strength: 9, expected: 5.0, id: "BATTLE-FORMULA-015"),
+            (strength: 10, expected: 5.0, id: "BATTLE-FORMULA-016"),
+            (strength: 25, expected: 15.0, id: "BATTLE-FORMULA-017"),
+            (strength: 30, expected: 30.0, id: "BATTLE-FORMULA-018"),
+            (strength: 33, expected: 45.0, id: "BATTLE-FORMULA-019"),
+            (strength: 35, expected: 60.0, id: "BATTLE-FORMULA-020"),
+            (strength: 34, expected: 52.5, id: "BATTLE-FORMULA-021")
+        ]
+
+        for testCase in cases {
+            let measured = CombatFormulas.strengthDependency(value: testCase.strength)
+            let rawData: [String: Double] = [
+                "strength": Double(testCase.strength)
+            ]
+            recordDouble(id: testCase.id, expected: testCase.expected, measured: measured, rawData: rawData)
+        }
+    }
+
+    @MainActor func testAdditionalDamageGrowth() {
+        let level = 10
+        let jobCoefficient = 2.0
+        let growthMultiplier = 1.5
+        let expected = 0.75
+
+        let measured = CombatFormulas.additionalDamageGrowth(
+            level: level,
+            jobCoefficient: jobCoefficient,
+            growthMultiplier: growthMultiplier
+        )
+        let rawData: [String: Double] = [
+            "level": Double(level),
+            "jobCoefficient": jobCoefficient,
+            "growthMultiplier": growthMultiplier
+        ]
+        recordDouble(id: "BATTLE-FORMULA-022", expected: expected, measured: measured, rawData: rawData)
+    }
+
+    @MainActor func testStatBonusMultiplierBoundaries() {
+        let cases: [(value: Int, expected: Double, id: String)] = [
+            (value: 20, expected: 1.0, id: "BATTLE-FORMULA-023"),
+            (value: 21, expected: 1.04, id: "BATTLE-FORMULA-024"),
+            (value: 35, expected: 1.8009435055069165, id: "BATTLE-FORMULA-025")
+        ]
+
+        for testCase in cases {
+            let measured = CombatFormulas.statBonusMultiplier(value: testCase.value)
+            let rawData: [String: Double] = [
+                "value": Double(testCase.value)
+            ]
+            recordDouble(id: testCase.id, expected: testCase.expected, measured: measured, rawData: rawData)
+        }
+    }
+
+    @MainActor func testResistancePercentBoundaries() {
+        let cases: [(value: Int, expected: Double, id: String)] = [
+            (value: 20, expected: 1.0, id: "BATTLE-FORMULA-026"),
+            (value: 21, expected: 0.96, id: "BATTLE-FORMULA-027"),
+            (value: 35, expected: 0.5420863798609088, id: "BATTLE-FORMULA-028")
+        ]
+
+        for testCase in cases {
+            let measured = CombatFormulas.resistancePercent(value: testCase.value)
+            let rawData: [String: Double] = [
+                "value": Double(testCase.value)
+            ]
+            recordDouble(id: testCase.id, expected: testCase.expected, measured: measured, rawData: rawData)
+        }
+    }
+
+    @MainActor func testEvasionLimitBoundaries() {
+        let cases: [(agility: Int, expected: Double, id: String)] = [
+            (agility: 20, expected: 95.0, id: "BATTLE-FORMULA-029"),
+            (agility: 21, expected: 95.6, id: "BATTLE-FORMULA-030"),
+            (agility: 35, expected: 99.26513073049944, id: "BATTLE-FORMULA-031")
+        ]
+
+        for testCase in cases {
+            let measured = CombatFormulas.evasionLimit(value: testCase.agility)
+            let rawData: [String: Double] = [
+                "agility": Double(testCase.agility)
+            ]
+            recordDouble(id: testCase.id, expected: testCase.expected, measured: measured, rawData: rawData)
+        }
+    }
+
+    @MainActor func testFinalAttackCountBoundaries() {
+        let levelFactor = 0.1
+        let jobCoefficient = 1.0
+        let talentMultiplier = 1.0
+        let passiveMultiplier = 1.0
+        let additive = 0.0
+        let cases: [(agility: Int, expected: Int, id: String)] = [
+            (agility: 20, expected: 1, id: "BATTLE-FORMULA-032"),
+            (agility: 30, expected: 2, id: "BATTLE-FORMULA-033"),
+            (agility: 35, expected: 2, id: "BATTLE-FORMULA-034")
+        ]
+
+        for testCase in cases {
+            let measured = CombatFormulas.finalAttackCount(
+                agility: testCase.agility,
+                levelFactor: levelFactor,
+                jobCoefficient: jobCoefficient,
+                talentMultiplier: talentMultiplier,
+                passiveMultiplier: passiveMultiplier,
+                additive: additive
+            )
+            let rawData: [String: Double] = [
+                "agility": Double(testCase.agility),
+                "levelFactor": levelFactor,
+                "jobCoefficient": jobCoefficient,
+                "talentMultiplier": talentMultiplier,
+                "passiveMultiplier": passiveMultiplier,
+                "additive": additive
+            ]
+            recordInt(id: testCase.id, expected: testCase.expected, measured: measured, rawData: rawData)
+        }
+    }
+
     @MainActor func testStatFixedToOne() throws {
         let coefficients = makeCoefficients()
         let stats = RaceDefinition.BaseStats(

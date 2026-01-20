@@ -241,11 +241,11 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
 
     // MARK: - 魔法必殺
 
-    /// magicCriticalChancePercent=100で必ず発動
+    /// criticalChancePercent=100で必ず発動
     func testMagicCritical100Percent() {
         var attackerSkillEffects = BattleActor.SkillEffects.neutral
-        attackerSkillEffects.spell.magicCriticalChancePercent = 100
-        attackerSkillEffects.spell.magicCriticalMultiplier = 2.0
+        attackerSkillEffects.damage.criticalMultiplier = 2.0
+        attackerSkillEffects.spell.magicCriticalEnabled = true
 
         var criticalDamageTotal = 0
         var normalDamageTotal = 0
@@ -256,6 +256,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
             let attackerCrit = TestActorBuilder.makeAttacker(
                 magicalAttackScore: 3000,
                 luck: 35,
+                criticalChancePercent: 100,
                 skillEffects: attackerSkillEffects
             )
             var defenderCrit = TestActorBuilder.makeDefender(magicalDefenseScore: 1000, luck: 35)
@@ -269,6 +270,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
                 attacker: attackerCrit,
                 defender: &defenderCrit,
                 spellId: nil,
+                allowMagicCritical: attackerSkillEffects.spell.magicCriticalEnabled,
                 context: &contextCrit
             ).damage
             criticalDamageTotal += critDamage
@@ -286,6 +288,7 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
                 attacker: attackerNormal,
                 defender: &defenderNormal,
                 spellId: nil,
+                allowMagicCritical: false,
                 context: &contextNormal
             ).damage
             normalDamageTotal += normalDamage
@@ -303,5 +306,74 @@ nonisolated final class MagicalDamageCalculationTests: XCTestCase {
             (expectedRatio - tolerance...expectedRatio + tolerance).contains(ratio),
             "魔法必殺2.0倍: 期待比\(expectedRatio)±2%, 実測比\(ratio)"
         )
+    }
+
+    /// 必殺率0/100と必殺魔法有効化の組み合わせ検証
+    func testMagicCriticalChanceExtremesWithSkillToggle() {
+        struct Case {
+            let criticalChancePercent: Int
+            let magicCriticalEnabled: Bool
+            let expectsCritical: Bool
+        }
+
+        let cases: [Case] = [
+            Case(criticalChancePercent: 100, magicCriticalEnabled: true, expectsCritical: true),
+            Case(criticalChancePercent: 100, magicCriticalEnabled: false, expectsCritical: false),
+            Case(criticalChancePercent: 0, magicCriticalEnabled: true, expectsCritical: false),
+            Case(criticalChancePercent: 0, magicCriticalEnabled: false, expectsCritical: false)
+        ]
+
+        for testCase in cases {
+            var skillEffects = BattleActor.SkillEffects.neutral
+            skillEffects.damage.criticalMultiplier = 2.0
+            skillEffects.spell.magicCriticalEnabled = testCase.magicCriticalEnabled
+
+            let attacker = TestActorBuilder.makeAttacker(
+                magicalAttackScore: 3000,
+                luck: 35,
+                criticalChancePercent: testCase.criticalChancePercent,
+                skillEffects: skillEffects
+            )
+            var defender = TestActorBuilder.makeDefender(magicalDefenseScore: 1000, luck: 35)
+            var context = TestActorBuilder.makeContext(seed: 42, attacker: attacker, defender: defender)
+
+            let result = BattleTurnEngine.computeMagicalDamage(
+                attacker: attacker,
+                defender: &defender,
+                spellId: nil,
+                allowMagicCritical: skillEffects.spell.magicCriticalEnabled,
+                context: &context
+            )
+
+            var baseDefender = TestActorBuilder.makeDefender(magicalDefenseScore: 1000, luck: 35)
+            var baseContext = TestActorBuilder.makeContext(seed: 42, attacker: attacker, defender: baseDefender)
+            let baseResult = BattleTurnEngine.computeMagicalDamage(
+                attacker: attacker,
+                defender: &baseDefender,
+                spellId: nil,
+                allowMagicCritical: false,
+                context: &baseContext
+            )
+
+            XCTAssertEqual(
+                result.wasCritical,
+                testCase.expectsCritical,
+                "必殺判定 mismatch: chance=\(testCase.criticalChancePercent), magicCriticalEnabled=\(testCase.magicCriticalEnabled)"
+            )
+
+            if testCase.expectsCritical {
+                XCTAssertGreaterThan(
+                    result.damage,
+                    baseResult.damage,
+                    "必殺発動時は通常より大きいダメージになるべき: chance=\(testCase.criticalChancePercent), magicCriticalEnabled=\(testCase.magicCriticalEnabled)"
+                )
+            } else {
+                XCTAssertEqual(
+                    result.damage,
+                    baseResult.damage,
+                    "必殺未発動時はダメージが一致すべき: chance=\(testCase.criticalChancePercent), magicCriticalEnabled=\(testCase.magicCriticalEnabled)"
+                )
+            }
+        }
     }
 }

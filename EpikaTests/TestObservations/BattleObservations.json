@@ -107,6 +107,57 @@
       "testMethod": "testReactionChance50PercentStatistical"
     },
     {
+      "id": "BATTLE-RANDOM-007",
+      "category": [
+        "戦闘",
+        "乱数",
+        "speedMultiplier"
+      ],
+      "description": "luck=1のspeedMultiplier平均値が期待範囲内か",
+      "formula": "(0.00 + 1.00) / 2 = 0.50",
+      "expectedRange": {
+        "min": 0.49,
+        "max": 0.51
+      },
+      "toleranceBasis": "期待値0.50の±2%、99%信頼区間、5530回試行",
+      "testFile": "BattleRandomSystemTests.swift",
+      "testMethod": "testSpeedMultiplierAverageLuck1"
+    },
+    {
+      "id": "BATTLE-RANDOM-008",
+      "category": [
+        "戦闘",
+        "乱数",
+        "speedMultiplier"
+      ],
+      "description": "luck=18のspeedMultiplier平均値が期待範囲内か",
+      "formula": "(0.16 + 1.00) / 2 = 0.58",
+      "expectedRange": {
+        "min": 0.568,
+        "max": 0.592
+      },
+      "toleranceBasis": "期待値0.58の±2%、99%信頼区間、2900回試行",
+      "testFile": "BattleRandomSystemTests.swift",
+      "testMethod": "testSpeedMultiplierAverageLuck18"
+    },
+    {
+      "id": "BATTLE-RANDOM-009",
+      "category": [
+        "戦闘",
+        "乱数",
+        "speedMultiplier"
+      ],
+      "description": "luck=35のspeedMultiplier平均値が期待範囲内か",
+      "formula": "(0.50 + 1.00) / 2 = 0.75",
+      "expectedRange": {
+        "min": 0.735,
+        "max": 0.765
+      },
+      "toleranceBasis": "期待値0.75の±2%、99%信頼区間、615回試行",
+      "testFile": "BattleRandomSystemTests.swift",
+      "testMethod": "testSpeedMultiplierAverageLuck35"
+    },
+    {
       "id": "BATTLE-PHYS-001",
       "category": [
         "戦闘",
@@ -517,6 +568,533 @@
       "testMethod": "testReactionDoesNotChainFromReactionAttack"
     },
     {
+      "id": "BATTLE-REACTION-012",
+      "category": [
+        "戦闘",
+        "スキル",
+        "反撃"
+      ],
+      "description": "反撃魔法では必殺ログが発生しないか",
+      "formula": "reactionAttack.magicCriticalCount == 0",
+      "expectedRange": {
+        "min": 0,
+        "max": 0
+      },
+      "toleranceBasis": "必殺ログが発生しないこと",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testMagicCriticalDoesNotTriggerOnReactionMagic"
+    },
+    {
+      "id": "BATTLE-REACTION-013",
+      "category": [
+        "戦闘",
+        "スキル",
+        "反撃"
+      ],
+      "description": "同時発火時の優先順（反撃→報復→追撃）が守られるか",
+      "formula": "reactionAttack.skillIndex order == counter, retaliation, followUp",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "順序一致",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionPriorityOrderCounterRetaliationFollowUp"
+    },
+    {
+      "id": "BATTLE-REACTION-014",
+      "category": [
+        "戦闘",
+        "スキル",
+        "反撃"
+      ],
+      "description": "requiresMartial が無効時に反撃が発動しないか",
+      "formula": "reactionCount == 0",
+      "expectedRange": {
+        "min": 0,
+        "max": 0
+      },
+      "toleranceBasis": "発動しないこと",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionRequiresMartialSkipsWhenNotEligible"
+    },
+    {
+      "id": "BATTLE-REACTION-015",
+      "category": [
+        "戦闘",
+        "スキル",
+        "反撃"
+      ],
+      "description": "requiresAllyBehind は後列が攻撃された時のみ発動するか",
+      "formula": "behind->reaction=1 && front->reaction=0",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "条件一致",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionRequiresAllyBehindOnlyTriggersWhenBehind"
+    },
+    {
+      "id": "BATTLE-ENEMY-SPECIAL-001",
+      "category": [
+        "戦闘",
+        "敵専用技",
+        "魔法"
+      ],
+      "description": "敵専用技の魔法で必殺ログが発生しないか",
+      "formula": "enemySpecial.magicCriticalCount == 0",
+      "expectedRange": {
+        "min": 0,
+        "max": 0
+      },
+      "toleranceBasis": "必殺ログが発生しないこと",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testEnemySpecialMagicDoesNotTriggerMagicCritical"
+    },
+    {
+      "id": "BATTLE-ENEMY-SPECIAL-002",
+      "category": [
+        "戦闘",
+        "敵専用技",
+        "物理"
+      ],
+      "description": "敵専用技の物理でダメージが発生するか",
+      "formula": "enemySpecialDamage > 0",
+      "expectedRange": {
+        "min": 1,
+        "max": null
+      },
+      "toleranceBasis": "ダメージが発生すること",
+      "testFile": "EnemySpecialSkillTests.swift",
+      "testMethod": "testEnemySpecialPhysicalDealsDamage"
+    },
+    {
+      "id": "BATTLE-ENEMY-SPECIAL-003",
+      "category": [
+        "戦闘",
+        "敵専用技",
+        "ブレス"
+      ],
+      "description": "敵専用技のブレスでダメージが発生するか",
+      "formula": "enemySpecialDamage > 0",
+      "expectedRange": {
+        "min": 1,
+        "max": null
+      },
+      "toleranceBasis": "ダメージが発生すること",
+      "testFile": "EnemySpecialSkillTests.swift",
+      "testMethod": "testEnemySpecialBreathDealsDamage"
+    },
+    {
+      "id": "BATTLE-ENEMY-SPECIAL-004",
+      "category": [
+        "戦闘",
+        "敵専用技",
+        "状態異常"
+      ],
+      "description": "敵専用技の状態異常が付与されるか",
+      "formula": "statusInflictCount == 1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "状態異常が1回付与されること",
+      "testFile": "EnemySpecialSkillTests.swift",
+      "testMethod": "testEnemySpecialStatusInflicts"
+    },
+    {
+      "id": "BATTLE-ENEMY-SPECIAL-005",
+      "category": [
+        "戦闘",
+        "敵専用技",
+        "回復"
+      ],
+      "description": "敵専用技の回復量が一致するか",
+      "formula": "healPercent × maxHP",
+      "expectedRange": {
+        "min": 5000,
+        "max": 5000
+      },
+      "toleranceBasis": "回復量が一致すること",
+      "testFile": "EnemySpecialSkillTests.swift",
+      "testMethod": "testEnemySpecialHealApplies"
+    },
+    {
+      "id": "BATTLE-ENEMY-SPECIAL-006",
+      "category": [
+        "戦闘",
+        "敵専用技",
+        "バフ"
+      ],
+      "description": "敵専用技のバフで攻撃力が更新されるか",
+      "formula": "physicalAttackScore × multiplier",
+      "expectedRange": {
+        "min": 1500,
+        "max": 1500
+      },
+      "toleranceBasis": "攻撃力が期待値に一致すること",
+      "testFile": "EnemySpecialSkillTests.swift",
+      "testMethod": "testEnemySpecialBuffApplies"
+    },
+    {
+      "id": "BATTLE-LOG-001",
+      "category": [
+        "戦闘",
+        "ログ",
+        "システム"
+      ],
+      "description": "battleStart が先頭に記録されるか",
+      "formula": "entries.first == battleStart",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "battleStart が先頭であること",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testBattleStartAndEnemyAppearLogs"
+    },
+    {
+      "id": "BATTLE-LOG-002",
+      "category": [
+        "戦闘",
+        "ログ",
+        "システム"
+      ],
+      "description": "enemyAppear が敵人数分記録されるか",
+      "formula": "enemyAppearCount == enemyCount",
+      "expectedRange": {
+        "min": 2,
+        "max": 2
+      },
+      "toleranceBasis": "敵人数分のログがあること",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testBattleStartAndEnemyAppearLogs"
+    },
+    {
+      "id": "BATTLE-LOG-003",
+      "category": [
+        "戦闘",
+        "ログ",
+        "ターン"
+      ],
+      "description": "turnStart が最大ターン数分記録されるか",
+      "formula": "turnStartCount == maxTurns(20)",
+      "expectedRange": {
+        "min": 20,
+        "max": 20
+      },
+      "toleranceBasis": "撤退までの20ターン分が記録されること",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testTurnStartLogsUseExtraOnRetreat"
+    },
+    {
+      "id": "BATTLE-LOG-004",
+      "category": [
+        "戦闘",
+        "ログ",
+        "ターン"
+      ],
+      "description": "turnStart の extra が turn と一致するか",
+      "formula": "turnStart.extra == turn",
+      "expectedRange": {
+        "min": 0,
+        "max": 0
+      },
+      "toleranceBasis": "不一致が0であること",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testTurnStartLogsUseExtraOnRetreat"
+    },
+    {
+      "id": "BATTLE-LOG-005",
+      "category": [
+        "戦闘",
+        "ログ",
+        "勝敗"
+      ],
+      "description": "勝利時の最後のログが victory か",
+      "formula": "lastEntry == victory",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "最後が victory であること",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testVictoryLogIsLastEntry"
+    },
+    {
+      "id": "BATTLE-LOG-006",
+      "category": [
+        "戦闘",
+        "ログ",
+        "勝敗"
+      ],
+      "description": "撤退時の最後のログが retreat か",
+      "formula": "lastEntry == retreat",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "最後が retreat であること",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testTurnStartLogsUseExtraOnRetreat"
+    },
+    {
+      "id": "BATTLE-LOG-012",
+      "category": [
+        "戦闘",
+        "ログ",
+        "勝敗"
+      ],
+      "description": "敗北時の最後のログが defeat か",
+      "formula": "lastEntry == defeat",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "最後が defeat であること",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testDefeatLogIsLastEntry"
+    },
+    {
+      "id": "BATTLE-LOG-007",
+      "category": [
+        "戦闘",
+        "ログ",
+        "保存"
+      ],
+      "description": "BattleLogバイナリの往復でヘッダ/初期HP/entriesが一致するか",
+      "formula": "decode(encode(log)) matches header/initialHP/entryKinds",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "pass/fail",
+      "testFile": "BattleLogPersistenceTests.swift",
+      "testMethod": "testBattleLogBinaryRoundTripPreservesCoreFields"
+    },
+    {
+      "id": "BATTLE-LOG-008",
+      "category": [
+        "戦闘",
+        "ログ",
+        "保存"
+      ],
+      "description": "BattleParticipantSnapshotの往復でスナップショットが一致するか",
+      "formula": "decode(encode(snapshot)) == snapshot",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "pass/fail",
+      "testFile": "BattleLogPersistenceTests.swift",
+      "testMethod": "testBattleLogBinaryRoundTripPreservesCoreFields"
+    },
+    {
+      "id": "BATTLE-LOG-009",
+      "category": [
+        "戦闘",
+        "ログ",
+        "保存"
+      ],
+      "description": "探索ログ保存後にBattleLogArchiveが復元できるか",
+      "formula": "battleLogArchive != nil && core fields match",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "pass/fail",
+      "testFile": "BattleLogPersistenceTests.swift",
+      "testMethod": "testExplorationProgressServiceSavesBattleLogArchive"
+    },
+    {
+      "id": "BATTLE-LOG-010",
+      "category": [
+        "戦闘",
+        "ログ",
+        "統合"
+      ],
+      "description": "CombatExecutionServiceの戦闘ログが保存・復元できるか",
+      "formula": "runCombat -> appendEvent -> battleLogArchive",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "pass/fail",
+      "testFile": "CombatExecutionServiceIntegrationTests.swift",
+      "testMethod": "testCombatExecutionSavesBattleLogArchive"
+    },
+    {
+      "id": "BATTLE-LOG-011",
+      "category": [
+        "戦闘",
+        "ログ",
+        "統合"
+      ],
+      "description": "ExplorationEngineのcombatイベントが保存・復元できるか",
+      "formula": "prepare -> nextEvent -> appendEvent -> battleLogArchive",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "pass/fail",
+      "testFile": "ExplorationEngineIntegrationTests.swift",
+      "testMethod": "testExplorationEngineCombatEventSavesBattleLogArchive"
+    },
+    {
+      "id": "BATTLE-FLOW-001",
+      "category": [
+        "戦闘",
+        "フロー",
+        "行動順"
+      ],
+      "description": "firstStrikeが速度より優先されるか",
+      "formula": "firstStrike=trueのアクターが先頭",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "BattleFlowActionOrderTests.swift",
+      "testMethod": "testActionOrderPrefersFirstStrike"
+    },
+    {
+      "id": "BATTLE-FLOW-002",
+      "category": [
+        "戦闘",
+        "フロー",
+        "行動順"
+      ],
+      "description": "速度の高いアクターが先に行動するか",
+      "formula": "speed降順で並ぶ",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "BattleFlowActionOrderTests.swift",
+      "testMethod": "testActionOrderSortsBySpeed"
+    },
+    {
+      "id": "BATTLE-FLOW-003",
+      "category": [
+        "戦闘",
+        "フロー",
+        "行動順"
+      ],
+      "description": "actionOrderShuffle時の速度が乱数で決まるか",
+      "formula": "random(0...10000)の中央値=5000",
+      "expectedRange": {
+        "min": 5000,
+        "max": 5000
+      },
+      "toleranceBasis": "固定乱数モードで中央値を検証",
+      "testFile": "BattleFlowActionOrderTests.swift",
+      "testMethod": "testActionOrderShuffleUsesRandomSpeed"
+    },
+    {
+      "id": "BATTLE-FLOW-004",
+      "category": [
+        "戦闘",
+        "フロー",
+        "リアクション"
+      ],
+      "description": "反撃キュー処理が行動完了後に実行されるか",
+      "formula": "reactionIndex > attackIndex",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "行動ログの順序",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testReactionQueuedAfterAction"
+    },
+    {
+      "id": "BATTLE-FLOW-005",
+      "category": [
+        "戦闘",
+        "フロー",
+        "行動順"
+      ],
+      "description": "同速時にtiebreakerで順序が決まるか",
+      "formula": "tiebreakerの高い方が先",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleFlowActionOrderTests.swift",
+      "testMethod": "testActionOrderUsesTieBreakerWhenSpeedEqual"
+    },
+    {
+      "id": "BATTLE-FLOW-006",
+      "category": [
+        "戦闘",
+        "フロー",
+        "行動順"
+      ],
+      "description": "追加行動枠で同一アクターが複数回並ぶか",
+      "formula": "slots = 1 + nextTurnExtraActions + extraActionsNextTurn",
+      "expectedRange": {
+        "min": 3,
+        "max": 3
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleFlowActionOrderTests.swift",
+      "testMethod": "testActionOrderAddsExtraSlotsFromNextTurnExtraActions"
+    },
+    {
+      "id": "BATTLE-FLOW-007",
+      "category": [
+        "戦闘",
+        "フロー",
+        "行動順"
+      ],
+      "description": "actionOrderShuffleEnemy時に敵速度が乱数で決まるか",
+      "formula": "random(0...10000)の中央値=5000",
+      "expectedRange": {
+        "min": 5000,
+        "max": 5000
+      },
+      "toleranceBasis": "固定乱数モードで中央値を検証",
+      "testFile": "BattleFlowActionOrderTests.swift",
+      "testMethod": "testActionOrderShuffleEnemyUsesRandomSpeed"
+    },
+    {
+      "id": "BATTLE-FLOW-008",
+      "category": [
+        "戦闘",
+        "フロー",
+        "先制"
+      ],
+      "description": "先制攻撃がturnStartより前に解決されるか",
+      "formula": "turnStartCount == 0 && outcome == victory",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testPreemptiveAttackResolvesBeforeTurnStart"
+    },
+    {
+      "id": "BATTLE-FLOW-009",
+      "category": [
+        "戦闘",
+        "フロー",
+        "撤退"
+      ],
+      "description": "敵撤退成立時はvictoryよりretreatを優先するか",
+      "formula": "outcome == retreat && withdrawCount == 1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testRetreatOverridesVictoryWhenEnemiesWithdraw"
+    },
+    {
       "id": "BATTLE-RESCUE-001",
       "category": [
         "戦闘",
@@ -581,6 +1159,159 @@
       "toleranceBasis": "決定的（指定ターンで解除）",
       "testFile": "StatusEffectTests.swift",
       "testMethod": "testStatusEffectDuration"
+    },
+    {
+      "id": "BATTLE-STATUS-003",
+      "category": [
+        "戦闘",
+        "状態異常",
+        "暴走"
+      ],
+      "description": "暴走発動時に混乱が付与されるか",
+      "formula": "berserkChancePercent=100 -> 混乱(3ターン)",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（100%発動）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testBerserkAppliesConfusion"
+    },
+    {
+      "id": "BATTLE-STATUS-004",
+      "category": [
+        "戦闘",
+        "状態異常",
+        "暴走"
+      ],
+      "description": "既に混乱中の場合は重ね掛けされないか",
+      "formula": "confusionの重複なし",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（重複なし）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testBerserkDoesNotStackConfusion"
+    },
+    {
+      "id": "BATTLE-STATUS-005",
+      "category": [
+        "戦闘",
+        "状態異常",
+        "継続"
+      ],
+      "description": "継続ダメージが正しく適用されるか",
+      "formula": "maxHP=1000, tick=10% -> 100ダメージ",
+      "expectedRange": {
+        "min": 100,
+        "max": 100
+      },
+      "toleranceBasis": "決定的（固定入力）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testApplyStatusTicksDealsDamageAndExpires"
+    },
+    {
+      "id": "BATTLE-STATUS-006",
+      "category": [
+        "戦闘",
+        "状態異常",
+        "継続"
+      ],
+      "description": "継続ダメージ後に状態異常が解除されるか",
+      "formula": "remainingTurns=1 -> 0で解除ログ",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（解除ログ）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testApplyStatusTicksDealsDamageAndExpires"
+    },
+    {
+      "id": "BATTLE-STATUS-007",
+      "category": [
+        "戦闘",
+        "状態異常",
+        "混乱"
+      ],
+      "description": "精神差が大きいほど混乱付与率が高いか（低）",
+      "formula": "attackerSpirit=1, defenderSpirit=35 -> 0%",
+      "expectedRange": {
+        "min": 0,
+        "max": 0
+      },
+      "toleranceBasis": "決定的（補正下限）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testConfusionInflictBaseChanceScalesWithSpiritDelta"
+    },
+    {
+      "id": "BATTLE-STATUS-008",
+      "category": [
+        "戦闘",
+        "状態異常",
+        "混乱"
+      ],
+      "description": "精神差が大きいほど混乱付与率が高いか（同値）",
+      "formula": "attackerSpirit=20, defenderSpirit=20 -> 25%",
+      "expectedRange": {
+        "min": 25,
+        "max": 25
+      },
+      "toleranceBasis": "決定的（補正中間）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testConfusionInflictBaseChanceScalesWithSpiritDelta"
+    },
+    {
+      "id": "BATTLE-STATUS-009",
+      "category": [
+        "戦闘",
+        "状態異常",
+        "混乱"
+      ],
+      "description": "精神差が大きいほど混乱付与率が高いか（高）",
+      "formula": "attackerSpirit=35, defenderSpirit=1 -> 50%",
+      "expectedRange": {
+        "min": 50,
+        "max": 50
+      },
+      "toleranceBasis": "決定的（補正上限）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testConfusionInflictBaseChanceScalesWithSpiritDelta"
+    },
+    {
+      "id": "BATTLE-STATUS-010",
+      "category": [
+        "戦闘",
+        "状態異常",
+        "バリア"
+      ],
+      "description": "眠りの付与時にバリア補正が1/3になるか",
+      "formula": "statusBarrierAdjustment(sleep) == 1/3",
+      "expectedRange": {
+        "min": 0.3333333333333333,
+        "max": 0.3333333333333333
+      },
+      "toleranceBasis": "決定的（補正値一致）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testStatusBarrierAdjustmentConsumesBarrierForSleepAndPetrify"
+    },
+    {
+      "id": "BATTLE-STATUS-011",
+      "category": [
+        "戦闘",
+        "状態異常",
+        "バリア"
+      ],
+      "description": "石化の付与時にバリア補正が1/3になるか",
+      "formula": "statusBarrierAdjustment(petrify) == 1/3",
+      "expectedRange": {
+        "min": 0.3333333333333333,
+        "max": 0.3333333333333333
+      },
+      "toleranceBasis": "決定的（補正値一致）",
+      "testFile": "StatusEffectTests.swift",
+      "testMethod": "testStatusBarrierAdjustmentConsumesBarrierForSleepAndPetrify"
     },
     {
       "id": "BATTLE-STAT-001",
@@ -989,6 +1720,686 @@
       "toleranceBasis": "決定的（固定値1）",
       "testFile": "CombatStatCalculatorObservationTests.swift",
       "testMethod": "testStatFixedToOne"
+    },
+    {
+      "id": "BATTLE-STAT-401",
+      "category": [
+        "戦闘",
+        "ステータス",
+        "変換"
+      ],
+      "description": "statConversionLinearでmaxHPに加算されるか",
+      "formula": "maxHP=176.0 + hitScore(130.8)×0.1 = 189.08 → trunc 189",
+      "expectedRange": {
+        "min": 189,
+        "max": 189
+      },
+      "toleranceBasis": "決定的（変換加算）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStatConversionLinear"
+    },
+    {
+      "id": "BATTLE-STAT-402",
+      "category": [
+        "戦闘",
+        "ステータス",
+        "攻撃回数"
+      ],
+      "description": "attackCountが0.5端数のとき切り捨てになるか",
+      "formula": "baseCount=2.5 → floor 2",
+      "expectedRange": {
+        "min": 2,
+        "max": 2
+      },
+      "toleranceBasis": "決定的（0.5は切り捨て）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testAttackCountRoundingHalfDown"
+    },
+    {
+      "id": "BATTLE-STAT-403",
+      "category": [
+        "戦闘",
+        "ステータス",
+        "攻撃回数"
+      ],
+      "description": "attackCountが1未満でも1にクランプされるか",
+      "formula": "attackCount=2.5 + (-3.0) = -0.5 → clamp 1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（最小1）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testAttackCountClampedToMinimum"
+    },
+    {
+      "id": "BATTLE-STAT-404",
+      "category": [
+        "戦闘",
+        "ステータス",
+        "必殺率"
+      ],
+      "description": "criticalChancePercentが0未満でも0にクランプされるか",
+      "formula": "criticalChancePercent=2.08 + (-200) → clamp 0",
+      "expectedRange": {
+        "min": 0,
+        "max": 0
+      },
+      "toleranceBasis": "決定的（下限0）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCriticalChanceClampedLowerBound"
+    },
+    {
+      "id": "BATTLE-STAT-405",
+      "category": [
+        "戦闘",
+        "ステータス",
+        "必殺率"
+      ],
+      "description": "criticalChancePercentが100を超えても100にクランプされるか",
+      "formula": "criticalChancePercent=2.08 + 200 → clamp 100",
+      "expectedRange": {
+        "min": 100,
+        "max": 100
+      },
+      "toleranceBasis": "決定的（上限100）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testCriticalChanceClampedUpperBound"
+    },
+    {
+      "id": "BATTLE-STAT-406",
+      "category": [
+        "戦闘",
+        "ステータス",
+        "HP"
+      ],
+      "description": "maxHPが1未満でも1にクランプされるか",
+      "formula": "maxHP=176 + (-1000) = -824 → clamp 1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（最小1）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testMaxHPClampedToMinimum"
+    },
+    {
+      "id": "BATTLE-FORMULA-001",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（人間）Lv30が正しいか",
+      "formula": "30×0.1=3.0",
+      "expectedRange": {
+        "min": 3.0,
+        "max": 3.0
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-002",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（人間）Lv31が正しいか",
+      "formula": "31×0.15-1.5=3.15",
+      "expectedRange": {
+        "min": 3.15,
+        "max": 3.15
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-003",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（人間）Lv61が正しいか",
+      "formula": "61×0.225-6=7.725",
+      "expectedRange": {
+        "min": 7.725,
+        "max": 7.725
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-004",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（人間）Lv81が正しいか",
+      "formula": "81×0.225-6=12.225",
+      "expectedRange": {
+        "min": 12.225,
+        "max": 12.225
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-005",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（人間）Lv101が正しいか",
+      "formula": "101×0.1125+5.25=16.6125",
+      "expectedRange": {
+        "min": 16.6125,
+        "max": 16.6125
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-006",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（人間）Lv151が正しいか",
+      "formula": "151×0.16875-3.1875=22.29375",
+      "expectedRange": {
+        "min": 22.29375,
+        "max": 22.29375
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-007",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（人間）Lv181が正しいか",
+      "formula": "181×0.253125-18.375=27.440625",
+      "expectedRange": {
+        "min": 27.440625,
+        "max": 27.440625
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-008",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（非人間）Lv80が正しいか",
+      "formula": "80×0.225-6=12.0",
+      "expectedRange": {
+        "min": 12.0,
+        "max": 12.0
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueNonHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-009",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（非人間）Lv81が正しいか",
+      "formula": "81×0.45-24=12.45",
+      "expectedRange": {
+        "min": 12.45,
+        "max": 12.45
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueNonHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-010",
+      "category": [
+        "戦闘",
+        "数式",
+        "レベル係数"
+      ],
+      "description": "levelDependentValue（非人間）Lv181が正しいか",
+      "formula": "181×0.45-24=57.45",
+      "expectedRange": {
+        "min": 57.45,
+        "max": 57.45
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testLevelDependentValueNonHumanBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-011",
+      "category": [
+        "戦闘",
+        "数式",
+        "敏捷依存"
+      ],
+      "description": "agilityDependencyで敏捷20以下が固定値になるか",
+      "formula": "agility<=20 → 20.0",
+      "expectedRange": {
+        "min": 20.0,
+        "max": 20.0
+      },
+      "toleranceBasis": "決定的（固定値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testAgilityDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-012",
+      "category": [
+        "戦闘",
+        "数式",
+        "敏捷依存"
+      ],
+      "description": "agilityDependencyで敏捷21のテーブル値が適用されるか",
+      "formula": "table[21]=20.84",
+      "expectedRange": {
+        "min": 20.84,
+        "max": 20.84
+      },
+      "toleranceBasis": "決定的（テーブル値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testAgilityDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-013",
+      "category": [
+        "戦闘",
+        "数式",
+        "敏捷依存"
+      ],
+      "description": "agilityDependencyで敏捷35のテーブル値が適用されるか",
+      "formula": "table[35]=50.0",
+      "expectedRange": {
+        "min": 50.0,
+        "max": 50.0
+      },
+      "toleranceBasis": "決定的（テーブル値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testAgilityDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-014",
+      "category": [
+        "戦闘",
+        "数式",
+        "敏捷依存"
+      ],
+      "description": "agilityDependencyで敏捷34のテーブル値が適用されるか",
+      "formula": "table[34]=45.52",
+      "expectedRange": {
+        "min": 45.52,
+        "max": 45.52
+      },
+      "toleranceBasis": "決定的（テーブル値）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testAgilityDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-015",
+      "category": [
+        "戦闘",
+        "数式",
+        "追加ダメージ係数"
+      ],
+      "description": "strengthDependencyで力9が正しいか",
+      "formula": "0.04×125=5.0",
+      "expectedRange": {
+        "min": 5.0,
+        "max": 5.0
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStrengthDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-016",
+      "category": [
+        "戦闘",
+        "数式",
+        "追加ダメージ係数"
+      ],
+      "description": "strengthDependencyで力10が正しいか",
+      "formula": "0.004×10×125=5.0",
+      "expectedRange": {
+        "min": 5.0,
+        "max": 5.0
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStrengthDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-017",
+      "category": [
+        "戦闘",
+        "数式",
+        "追加ダメージ係数"
+      ],
+      "description": "strengthDependencyで力25が正しいか",
+      "formula": "0.008×(25-10)×125=15.0",
+      "expectedRange": {
+        "min": 15.0,
+        "max": 15.0
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStrengthDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-018",
+      "category": [
+        "戦闘",
+        "数式",
+        "追加ダメージ係数"
+      ],
+      "description": "strengthDependencyで力30が正しいか",
+      "formula": "0.024×(30-20)×125=30.0",
+      "expectedRange": {
+        "min": 30.0,
+        "max": 30.0
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStrengthDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-019",
+      "category": [
+        "戦闘",
+        "数式",
+        "追加ダメージ係数"
+      ],
+      "description": "strengthDependencyで力33が正しいか",
+      "formula": "0.040×(33-24)×125=45.0",
+      "expectedRange": {
+        "min": 45.0,
+        "max": 45.0
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStrengthDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-020",
+      "category": [
+        "戦闘",
+        "数式",
+        "追加ダメージ係数"
+      ],
+      "description": "strengthDependencyで力35が正しいか",
+      "formula": "0.060×(35-27)×125=60.0",
+      "expectedRange": {
+        "min": 60.0,
+        "max": 60.0
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStrengthDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-021",
+      "category": [
+        "戦闘",
+        "数式",
+        "追加ダメージ係数"
+      ],
+      "description": "strengthDependencyで力34が正しいか",
+      "formula": "0.060×(34-27)×125=52.5",
+      "expectedRange": {
+        "min": 52.5,
+        "max": 52.5
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStrengthDependencyBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-022",
+      "category": [
+        "戦闘",
+        "数式",
+        "追加ダメージ係数"
+      ],
+      "description": "additionalDamageGrowthが係数通りに増加するか",
+      "formula": "(10/5)×0.125×2.0×1.5=0.75",
+      "expectedRange": {
+        "min": 0.75,
+        "max": 0.75
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testAdditionalDamageGrowth"
+    },
+    {
+      "id": "BATTLE-FORMULA-023",
+      "category": [
+        "戦闘",
+        "数式",
+        "21以上ボーナス"
+      ],
+      "description": "ステータス21以上ボーナス（CombatFormulas.statBonusMultiplier）で20は1.0か",
+      "formula": "value<21 → 1.0",
+      "expectedRange": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "toleranceBasis": "決定的（下限）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStatBonusMultiplierBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-024",
+      "category": [
+        "戦闘",
+        "数式",
+        "21以上ボーナス"
+      ],
+      "description": "ステータス21以上ボーナス（CombatFormulas.statBonusMultiplier）で21は1.04か",
+      "formula": "1.04^(21-20)=1.04",
+      "expectedRange": {
+        "min": 1.04,
+        "max": 1.04
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStatBonusMultiplierBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-025",
+      "category": [
+        "戦闘",
+        "数式",
+        "21以上ボーナス"
+      ],
+      "description": "ステータス21以上ボーナス（CombatFormulas.statBonusMultiplier）で35が正しいか",
+      "formula": "1.04^(35-20)=1.8009435055",
+      "expectedRange": {
+        "min": 1.8009435055,
+        "max": 1.8009435055
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testStatBonusMultiplierBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-026",
+      "category": [
+        "戦闘",
+        "数式",
+        "耐性"
+      ],
+      "description": "耐性係数（CombatFormulas.resistancePercent）で20は1.0か",
+      "formula": "value<21 → 1.0",
+      "expectedRange": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "toleranceBasis": "決定的（下限）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testResistancePercentBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-027",
+      "category": [
+        "戦闘",
+        "数式",
+        "耐性"
+      ],
+      "description": "耐性係数（CombatFormulas.resistancePercent）で21は0.96か",
+      "formula": "0.96^(21-20)=0.96",
+      "expectedRange": {
+        "min": 0.96,
+        "max": 0.96
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testResistancePercentBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-028",
+      "category": [
+        "戦闘",
+        "数式",
+        "耐性"
+      ],
+      "description": "耐性係数（CombatFormulas.resistancePercent）で35が正しいか",
+      "formula": "0.96^(35-20)=0.5420863799",
+      "expectedRange": {
+        "min": 0.5420863799,
+        "max": 0.5420863799
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testResistancePercentBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-029",
+      "category": [
+        "戦闘",
+        "数式",
+        "回避上限"
+      ],
+      "description": "回避上限（CombatFormulas.evasionLimit）で20は95.0か",
+      "formula": "value<21 → 95.0",
+      "expectedRange": {
+        "min": 95.0,
+        "max": 95.0
+      },
+      "toleranceBasis": "決定的（下限）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testEvasionLimitBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-030",
+      "category": [
+        "戦闘",
+        "数式",
+        "回避上限"
+      ],
+      "description": "回避上限（CombatFormulas.evasionLimit）で21は95.6か",
+      "formula": "100 - 5×0.88^(21-20) = 95.6",
+      "expectedRange": {
+        "min": 95.6,
+        "max": 95.6
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testEvasionLimitBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-031",
+      "category": [
+        "戦闘",
+        "数式",
+        "回避上限"
+      ],
+      "description": "回避上限（CombatFormulas.evasionLimit）で35が正しいか",
+      "formula": "100 - 5×0.88^(35-20) = 99.2651307305",
+      "expectedRange": {
+        "min": 99.2651307305,
+        "max": 99.2651307305
+      },
+      "toleranceBasis": "決定的（係数式）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testEvasionLimitBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-032",
+      "category": [
+        "戦闘",
+        "数式",
+        "攻撃回数"
+      ],
+      "description": "攻撃回数（CombatFormulas.finalAttackCount）で敏捷20が1回になるか",
+      "formula": "agility<=20 → base=20.0 → count=1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（式に基づく）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testFinalAttackCountBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-033",
+      "category": [
+        "戦闘",
+        "数式",
+        "攻撃回数"
+      ],
+      "description": "攻撃回数（CombatFormulas.finalAttackCount）で敏捷30が2回になるか",
+      "formula": "agilityDependency(30)=33.33 → count=2",
+      "expectedRange": {
+        "min": 2,
+        "max": 2
+      },
+      "toleranceBasis": "決定的（式に基づく）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testFinalAttackCountBoundaries"
+    },
+    {
+      "id": "BATTLE-FORMULA-034",
+      "category": [
+        "戦闘",
+        "数式",
+        "攻撃回数"
+      ],
+      "description": "攻撃回数（CombatFormulas.finalAttackCount）で敏捷35が2回になるか",
+      "formula": "agilityDependency(35)=50.0 → count=2",
+      "expectedRange": {
+        "min": 2,
+        "max": 2
+      },
+      "toleranceBasis": "決定的（式に基づく）",
+      "testFile": "CombatStatCalculatorObservationTests.swift",
+      "testMethod": "testFinalAttackCountBoundaries"
     },
     {
       "id": "BATTLE-PARRY-001",
@@ -8118,9 +9529,9 @@
       "category": [
         "スキル",
         "ランタイム",
-        "magicCriticalChancePercent"
+        "magicCriticalEnable"
       ],
-      "description": "[種族:サイキックLv99] 知恵依存で魔法必殺率増 (race.psychic.magicCrit)",
+      "description": "[種族:サイキックLv99] 必殺魔法 (race.psychic.magicCrit)",
       "formula": "ランタイム検証: passed=1",
       "expectedRange": {
         "min": 1,
@@ -10679,6 +12090,414 @@
       "toleranceBasis": "pass/fail",
       "testFile": "SkillRuntimeExpectationTests.swift",
       "testMethod": "testAllSkillRuntimeExpectations"
+    },
+    {
+      "id": "BATTLE-TARGET-001",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "狙われ率"
+      ],
+      "description": "狙われ率の高い対象が選ばれるか",
+      "formula": "targetingWeight高=選択",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testSelectOffensiveTargetPrefersHigherTargetingWeight"
+    },
+    {
+      "id": "BATTLE-TARGET-002",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "かばう"
+      ],
+      "description": "後列が狙われた場合にかばうが発動するか",
+      "formula": "selectedIndex==cover && coverLogあり",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testSelectOffensiveTargetUsesCoverWhenBackRowTargeted"
+    },
+    {
+      "id": "BATTLE-TARGET-003",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "味方フィルタ"
+      ],
+      "description": "partyProtectedTargetsに一致する味方が除外されるか",
+      "formula": "protected除外 → 非保護のみ選択",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testSelectOffensiveTargetFiltersProtectedAllies"
+    },
+    {
+      "id": "BATTLE-TARGET-004",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "味方フィルタ"
+      ],
+      "description": "partyHostileTargetsが指定されると一致対象のみ残るか",
+      "formula": "hostile対象のみ選択",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testSelectOffensiveTargetUsesHostileTargetsWhenSpecified"
+    },
+    {
+      "id": "BATTLE-TARGET-005",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "回復"
+      ],
+      "description": "回復対象はHP比率が最も低い味方になるか",
+      "formula": "lowestHPIndex == selected",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testSelectHealingTargetChoosesLowestHP"
+    },
+    {
+      "id": "BATTLE-TURNEND-001",
+      "category": [
+        "戦闘",
+        "ターン終了",
+        "リセット"
+      ],
+      "description": "ターン終了時にガード状態と攻撃履歴がリセットされるか",
+      "formula": "guardActive=false && attackHistory.reset",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TurnEndTests.swift",
+      "testMethod": "testEndOfTurnResetsGuardAndAttackHistory"
+    },
+    {
+      "id": "BATTLE-TURNEND-002",
+      "category": [
+        "戦闘",
+        "ターン終了",
+        "回復"
+      ],
+      "description": "パーティ回復が全員に合算%で適用されるか",
+      "formula": "totalHealed = 2000",
+      "expectedRange": {
+        "min": 2000,
+        "max": 2000
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TurnEndTests.swift",
+      "testMethod": "testEndOfTurnPartyHealingAppliesAndLogs"
+    },
+    {
+      "id": "BATTLE-TURNEND-003",
+      "category": [
+        "戦闘",
+        "ターン終了",
+        "蘇生"
+      ],
+      "description": "自動蘇生でHP回復とログ記録が行われるか",
+      "formula": "currentHP=500 && status cleared",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TurnEndTests.swift",
+      "testMethod": "testEndOfTurnAutoResurrection"
+    },
+    {
+      "id": "BATTLE-TURNEND-004",
+      "category": [
+        "戦闘",
+        "ターン終了",
+        "自己回復"
+      ],
+      "description": "自己回復が期待値で適用され、ログが記録されるか",
+      "formula": "endOfTurnSelfHPPercent=10 -> heal=100",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TurnEndTests.swift",
+      "testMethod": "testEndOfTurnSelfHealAppliesAndLogs"
+    },
+    {
+      "id": "BATTLE-TURNEND-005",
+      "category": [
+        "戦闘",
+        "ターン終了",
+        "自己ダメージ"
+      ],
+      "description": "自己ダメージが期待値で適用され、ログが記録されるか",
+      "formula": "endOfTurnSelfHPPercent=-10 -> damage=100",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TurnEndTests.swift",
+      "testMethod": "testEndOfTurnSelfDamageAppliesAndLogs"
+    },
+    {
+      "id": "BATTLE-TURNEND-006",
+      "category": [
+        "戦闘",
+        "ターン終了",
+        "タイムドバフ"
+      ],
+      "description": "タイムドバフ期限切れでbuffExpireが記録されるか",
+      "formula": "remainingTurns=1 -> expire",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TurnEndTests.swift",
+      "testMethod": "testEndOfTurnTimedBuffExpires"
+    },
+    {
+      "id": "BATTLE-TURNEND-007",
+      "category": [
+        "戦闘",
+        "ターン終了",
+        "呪文チャージ"
+      ],
+      "description": "呪文チャージ回復でチャージが増え、ログが記録されるか",
+      "formula": "chargeRecoveries=100% -> charges+1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（回復100%）",
+      "testFile": "TurnEndTests.swift",
+      "testMethod": "testEndOfTurnSpellChargeRecovery"
+    },
+    {
+      "id": "BATTLE-TURNEND-008",
+      "category": [
+        "戦闘",
+        "ターン終了",
+        "呪文チャージ"
+      ],
+      "description": "呪文チャージ再生でチャージと使用回数が更新されるか",
+      "formula": "regen every=1 -> charges=1 & usage=1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（every=1）",
+      "testFile": "TurnEndTests.swift",
+      "testMethod": "testEndOfTurnSpellChargeRegen"
+    },
+    {
+      "id": "BATTLE-TURNEND-009",
+      "category": [
+        "戦闘",
+        "ターン終了",
+        "蘇生"
+      ],
+      "description": "ネクロマンサー蘇生で対象が復活し、ログが記録されるか",
+      "formula": "turn=2 interval=1 -> HP=5%",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（chance=100%）",
+      "testFile": "TurnEndTests.swift",
+      "testMethod": "testNecromancerResurrectionTriggers"
+    },
+    {
+      "id": "BATTLE-ACTION-001",
+      "category": [
+        "戦闘",
+        "行動選択",
+        "敵専用技"
+      ],
+      "description": "敵専用技が成立した場合はenemySpecialSkillのみ返るか",
+      "formula": "categories == [enemySpecialSkill]",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "ActionSelectionTests.swift",
+      "testMethod": "testSelectActionCandidatesUsesEnemySpecialSkillWhenTriggered"
+    },
+    {
+      "id": "BATTLE-ACTION-002",
+      "category": [
+        "戦闘",
+        "行動選択",
+        "抽選"
+      ],
+      "description": "重み抽選で当選カテゴリ以降が返るか",
+      "formula": "breath=30失敗 → priest=60当選",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "ActionSelectionTests.swift",
+      "testMethod": "testSelectActionCandidatesReturnsHitIndexAndLaterWithFixedMedian"
+    },
+    {
+      "id": "BATTLE-ACTION-003",
+      "category": [
+        "戦闘",
+        "行動選択",
+        "フォールバック"
+      ],
+      "description": "候補が空のとき防御が選ばれるか",
+      "formula": "categories == [defend]",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "ActionSelectionTests.swift",
+      "testMethod": "testSelectActionCandidatesFallsBackToDefendWhenNoCandidates"
+    },
+    {
+      "id": "BATTLE-ACTION-004",
+      "category": [
+        "戦闘",
+        "行動選択",
+        "使用条件"
+      ],
+      "description": "使用不可の行動が候補から除外されるか",
+      "formula": "candidates == [physicalAttack]",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "ActionSelectionTests.swift",
+      "testMethod": "testSelectActionCandidatesFiltersUnavailableActions"
+    },
+    {
+      "id": "BATTLE-ACTION-005",
+      "category": [
+        "戦闘",
+        "行動制御",
+        "行動スキップ"
+      ],
+      "description": "敵行動スキップが成立すると敵の行動が実行されないか",
+      "formula": "enemyActionCount == 0",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（スキップ100%）",
+      "testFile": "TurnStartActionControlTests.swift",
+      "testMethod": "testEnemyActionSkipPreventsEnemyAction"
+    },
+    {
+      "id": "BATTLE-ACTION-006",
+      "category": [
+        "戦闘",
+        "行動制御",
+        "行動回数減少"
+      ],
+      "description": "敵行動回数減少が成立すると行動枠が1回になるか",
+      "formula": "nextTurnExtraActions=2, reduction=2 -> actions=1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（減少100%）",
+      "testFile": "TurnStartActionControlTests.swift",
+      "testMethod": "testEnemyActionDebuffReducesActionSlots"
+    },
+    {
+      "id": "BATTLE-TURNSTART-001",
+      "category": [
+        "戦闘",
+        "ターン開始",
+        "タイムドバフ"
+      ],
+      "description": "ターン開始でタイムドバフが適用ログとして記録されるか",
+      "formula": "buffApply(turn=1, actor=player)",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（退避1ターン）",
+      "testFile": "TurnStartActionControlTests.swift",
+      "testMethod": "testTurnStartAppliesTimedBuffTriggers"
+    },
+    {
+      "id": "BATTLE-TURNSTART-002",
+      "category": [
+        "戦闘",
+        "ターン開始",
+        "救助"
+      ],
+      "description": "救助使用回数がターン開始でリセットされるか",
+      "formula": "rescueActionsUsed == 0",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（退避1ターン）",
+      "testFile": "TurnStartActionControlTests.swift",
+      "testMethod": "testTurnStartResetsRescueUsage"
+    },
+    {
+      "id": "BATTLE-SACRIFICE-001",
+      "category": [
+        "戦闘",
+        "供儀",
+        "対象選定"
+      ],
+      "description": "供儀対象がレベルの低い味方から選ばれるか",
+      "formula": "targetIndex == lowestCandidate",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "TurnStartActionControlTests.swift",
+      "testMethod": "testComputeSacrificeTargetsSelectsLowerLevelCandidate"
+    },
+    {
+      "id": "BATTLE-SACRIFICE-002",
+      "category": [
+        "戦闘",
+        "供儀",
+        "対象選定"
+      ],
+      "description": "供儀間隔に達していない場合は対象が選ばれないか",
+      "formula": "targetIndex == nil",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TurnStartActionControlTests.swift",
+      "testMethod": "testComputeSacrificeTargetsSkipsWhenIntervalNotReached"
     }
   ]
 }

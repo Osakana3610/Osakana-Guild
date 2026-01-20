@@ -75,6 +75,291 @@ nonisolated final class ReactionSkillTests: XCTestCase {
             "反撃が発動しているべき")
     }
 
+    /// 反撃は行動完了後に記録される
+    @MainActor func testReactionQueuedAfterAction() {
+        let reaction = makeReaction()
+
+        var playerSkillEffects = BattleActor.SkillEffects.neutral
+        playerSkillEffects.combat.reactions = [reaction]
+
+        let player = TestActorBuilder.makeReactionTestPlayer(skillEffects: playerSkillEffects)
+        let enemy = TestActorBuilder.makeReactionTestEnemy()
+
+        var players = [player]
+        var enemies = [enemy]
+        var random = GameRandomSource(seed: 42)
+
+        let result = BattleTurnEngine.runBattle(
+            players: &players,
+            enemies: &enemies,
+            statusEffects: [:],
+            skillDefinitions: [:],
+            random: &random
+        )
+
+        let entries = result.battleLog.entries
+        guard let firstAttackIndex = entries.firstIndex(where: { $0.declaration.kind == .physicalAttack }),
+              let firstReactionIndex = entries.firstIndex(where: { $0.declaration.kind == .reactionAttack }) else {
+            XCTFail("物理攻撃または反撃ログが見つかりません")
+            return
+        }
+
+        let matches = firstReactionIndex > firstAttackIndex
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-FLOW-004",
+            expected: (min: 1, max: 1),
+            measured: matches ? 1 : 0,
+            rawData: [
+                "attackIndex": Double(firstAttackIndex),
+                "reactionIndex": Double(firstReactionIndex)
+            ]
+        )
+
+        XCTAssertTrue(matches, "反撃は行動完了後に記録されるべき")
+    }
+
+    /// 反撃/報復/追撃が同時発火した場合の優先順を検証
+    @MainActor func testReactionPriorityOrderCounterRetaliationFollowUp() {
+        let counter = makeReaction(trigger: .selfDamagedPhysical,
+                                   displayName: "反撃",
+                                   skillId: 2101)
+        let retaliation = makeReaction(trigger: .allyDefeated,
+                                       displayName: "報復",
+                                       skillId: 2102)
+        let followUp = makeReaction(trigger: .selfKilledEnemy,
+                                    displayName: "追撃",
+                                    skillId: 2103)
+
+        var skillEffects = BattleActor.SkillEffects.neutral
+        skillEffects.combat.reactions = [counter, retaliation, followUp]
+
+        let player = TestActorBuilder.makeReactionTestPlayer(skillEffects: skillEffects)
+        let enemy = TestActorBuilder.makeReactionTestEnemy(hp: 200000)
+
+        var context = BattleContext(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 42)
+        )
+
+        let playerRef = BattleContext.reference(for: .player, index: 0)
+        context.actionOrderSnapshot[playerRef] = BattleContext.ActionOrderSnapshot(speed: 50, tiebreaker: 0.5)
+
+        context.reactionQueue = [
+            BattleContext.PendingReaction(
+                event: .selfDamagedPhysical(side: .player,
+                                            actorIndex: 0,
+                                            attacker: .enemy(0)),
+                depth: 0
+            ),
+            BattleContext.PendingReaction(
+                event: .allyDefeated(side: .player,
+                                     fallenIndex: 0,
+                                     killer: .enemy(0)),
+                depth: 0
+            ),
+            BattleContext.PendingReaction(
+                event: .selfKilledEnemy(side: .player,
+                                        actorIndex: 0,
+                                        killedEnemy: .enemy(0)),
+                depth: 0
+            )
+        ]
+
+        BattleTurnEngine.processReactionQueue(context: &context)
+
+        let orderedSkillIds = context.actionEntries
+            .filter { $0.declaration.kind == .reactionAttack }
+            .compactMap { $0.declaration.skillIndex }
+
+        let expected: [UInt16] = [2101, 2102, 2103]
+        let matches = orderedSkillIds == expected
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-REACTION-013",
+            expected: (min: 1, max: 1),
+            measured: matches ? 1 : 0,
+            rawData: [
+                "count": Double(orderedSkillIds.count),
+                "first": Double(orderedSkillIds.first ?? 0),
+                "second": Double(orderedSkillIds.dropFirst().first ?? 0),
+                "third": Double(orderedSkillIds.dropFirst(2).first ?? 0)
+            ]
+        )
+
+        XCTAssertEqual(orderedSkillIds, expected, "反撃/報復/追撃の優先順が守られるべき")
+    }
+
+    /// requiresMartial が有効なリアクションは格闘不可なら発動しない
+    @MainActor func testReactionRequiresMartialSkipsWhenNotEligible() {
+        let reaction = makeReaction(trigger: .selfDamagedPhysical,
+                                    requiresMartial: true,
+                                    displayName: "格闘必須反撃",
+                                    skillId: 2104)
+        var skillEffects = BattleActor.SkillEffects.neutral
+        skillEffects.combat.reactions = [reaction]
+
+        let player = TestActorBuilder.makeReactionTestPlayer(skillEffects: skillEffects)
+        let enemy = TestActorBuilder.makeReactionTestEnemy(hp: 200000)
+
+        var context = BattleContext(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 42)
+        )
+
+        context.reactionQueue = [
+            BattleContext.PendingReaction(
+                event: .selfDamagedPhysical(side: .player,
+                                            actorIndex: 0,
+                                            attacker: .enemy(0)),
+                depth: 0
+            )
+        ]
+
+        BattleTurnEngine.processReactionQueue(context: &context)
+
+        let reactionCount = context.actionEntries.filter { $0.declaration.kind == .reactionAttack }.count
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-REACTION-014",
+            expected: (min: 0, max: 0),
+            measured: Double(reactionCount),
+            rawData: [
+                "reactionCount": Double(reactionCount)
+            ]
+        )
+
+        XCTAssertEqual(reactionCount, 0, "requiresMartialの反撃は格闘不可なら発動しないべき")
+    }
+
+    /// requiresAllyBehind は後列の味方が攻撃された場合のみ発動する
+    @MainActor func testReactionRequiresAllyBehindOnlyTriggersWhenBehind() {
+        let reaction = makeReaction(trigger: .allyDamagedPhysical,
+                                    requiresAllyBehind: true,
+                                    displayName: "後列条件追撃",
+                                    skillId: 2105)
+        var skillEffects = BattleActor.SkillEffects.neutral
+        skillEffects.combat.reactions = [reaction]
+
+        let enemy = TestActorBuilder.makeEnemy(
+            maxHP: 200000,
+            physicalAttackScore: 1000,
+            hitScore: 100,
+            evasionScore: 0,
+            luck: 35
+        )
+
+        let frontPerformer = TestActorBuilder.makePlayer(
+            maxHP: 50000,
+            physicalAttackScore: 1000,
+            hitScore: 100,
+            evasionScore: 0,
+            luck: 35,
+            skillEffects: skillEffects,
+            formationSlot: 1,
+            partyMemberId: 1
+        )
+        let backAlly = TestActorBuilder.makePlayer(
+            maxHP: 50000,
+            physicalAttackScore: 1000,
+            hitScore: 100,
+            evasionScore: 0,
+            luck: 35,
+            skillEffects: .neutral,
+            formationSlot: 5,
+            partyMemberId: 2
+        )
+
+        var contextBehind = BattleContext(
+            players: [frontPerformer, backAlly],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 42)
+        )
+
+        contextBehind.reactionQueue = [
+            BattleContext.PendingReaction(
+                event: .allyDamagedPhysical(side: .player,
+                                            defenderIndex: 1,
+                                            attacker: .enemy(0)),
+                depth: 0
+            )
+        ]
+
+        BattleTurnEngine.processReactionQueue(context: &contextBehind)
+        let reactionCountBehind = contextBehind.actionEntries
+            .filter { $0.declaration.kind == .reactionAttack }
+            .count
+
+        let backPerformer = TestActorBuilder.makePlayer(
+            maxHP: 50000,
+            physicalAttackScore: 1000,
+            hitScore: 100,
+            evasionScore: 0,
+            luck: 35,
+            skillEffects: skillEffects,
+            formationSlot: 5,
+            partyMemberId: 1
+        )
+        let frontAlly = TestActorBuilder.makePlayer(
+            maxHP: 50000,
+            physicalAttackScore: 1000,
+            hitScore: 100,
+            evasionScore: 0,
+            luck: 35,
+            skillEffects: .neutral,
+            formationSlot: 1,
+            partyMemberId: 2
+        )
+
+        var contextFront = BattleContext(
+            players: [backPerformer, frontAlly],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 43)
+        )
+
+        contextFront.reactionQueue = [
+            BattleContext.PendingReaction(
+                event: .allyDamagedPhysical(side: .player,
+                                            defenderIndex: 1,
+                                            attacker: .enemy(0)),
+                depth: 0
+            )
+        ]
+
+        BattleTurnEngine.processReactionQueue(context: &contextFront)
+        let reactionCountFront = contextFront.actionEntries
+            .filter { $0.declaration.kind == .reactionAttack }
+            .count
+
+        let matches = reactionCountBehind == 1 && reactionCountFront == 0
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-REACTION-015",
+            expected: (min: 1, max: 1),
+            measured: matches ? 1 : 0,
+            rawData: [
+                "reactionCountBehind": Double(reactionCountBehind),
+                "reactionCountFront": Double(reactionCountFront)
+            ]
+        )
+
+        XCTAssertTrue(matches, "requiresAllyBehindは後列が攻撃された時のみ発動するべき")
+    }
+
     /// attackCountMultiplier=0.3で攻撃回数が減少することを検証
     ///
     /// 検証方法:
@@ -251,6 +536,97 @@ nonisolated final class ReactionSkillTests: XCTestCase {
 
         XCTAssertGreaterThan(stats.count, 0,
             "魔法反撃が発動しているべき")
+    }
+
+    /// 反撃の魔法では必殺判定を行わないことを検証
+    @MainActor func testMagicCriticalDoesNotTriggerOnReactionMagic() {
+        let reaction = makeReaction(trigger: .selfDamagedMagical,
+                                    target: .attacker,
+                                    chancePercent: 100,
+                                    damageType: .magical,
+                                    displayName: "魔法反撃")
+        var playerSkillEffects = BattleActor.SkillEffects.neutral
+        playerSkillEffects.combat.reactions = [reaction]
+        playerSkillEffects.spell.magicCriticalEnabled = true
+        playerSkillEffects.damage.criticalMultiplier = 2.0
+
+        let player = TestActorBuilder.makePlayer(
+            maxHP: 50000,
+            physicalAttackScore: 100,
+            hitScore: 80,
+            criticalChancePercent: 100,
+            luck: 35,
+            agility: 1,
+            skillEffects: playerSkillEffects
+        )
+
+        let (spell, spellLoadout, actionResources) = makeMageSpellSetup()
+        let mageSnapshot = CharacterValues.Combat(
+            maxHP: 50000,
+            physicalAttackScore: 100,
+            magicalAttackScore: 1000,
+            physicalDefenseScore: 1000,
+            magicalDefenseScore: 1000,
+            hitScore: 100,
+            evasionScore: 0,
+            criticalChancePercent: 0,
+            attackCount: 1.0,
+            magicalHealingScore: 0,
+            trapRemovalScore: 0,
+            additionalDamageScore: 0,
+            breathDamageScore: 0,
+            isMartialEligible: false
+        )
+
+        let enemy = BattleActor(
+            identifier: "test.mage_enemy",
+            displayName: "魔法敵",
+            kind: .enemy,
+            formationSlot: 1,
+            strength: 20,
+            wisdom: 100,
+            spirit: 50,
+            vitality: 50,
+            agility: 35,
+            luck: 35,
+            isMartialEligible: false,
+            snapshot: mageSnapshot,
+            currentHP: mageSnapshot.maxHP,
+            actionRates: BattleActionRates(attack: 0, priestMagic: 0, mageMagic: 100, breath: 0),
+            actionResources: actionResources,
+            spells: spellLoadout
+        )
+
+        var players = [player]
+        var enemies = [enemy]
+        var random = GameRandomSource(seed: 42)
+
+        let result = BattleTurnEngine.runBattle(
+            players: &players,
+            enemies: &enemies,
+            statusEffects: [:],
+            skillDefinitions: [:],
+            random: &random
+        )
+
+        let stats = analyzeReactionDamage(from: result.battleLog, damageKind: .magicDamage)
+        let magicCriticalCount = countMagicCriticalEffects(in: result.battleLog.entries, actionKind: .reactionAttack)
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-REACTION-012",
+            expected: (min: 0, max: 0),
+            measured: Double(magicCriticalCount),
+            rawData: [
+                "reactionCount": Double(stats.count),
+                "magicCriticalCount": Double(magicCriticalCount),
+                "spellId": Double(spell.id)
+            ]
+        )
+
+        XCTAssertGreaterThan(stats.count, 0,
+            "魔法反撃が発動しているべき")
+        XCTAssertEqual(magicCriticalCount, 0,
+            "反撃魔法では必殺ログが発生しないべき")
     }
 
     /// 物理回避時に反撃が発動することを検証
@@ -1198,6 +1574,86 @@ nonisolated final class ReactionSkillTests: XCTestCase {
         )
     }
 
+    // MARK: - 敵専用技
+
+    /// 敵専用技の魔法では必殺判定を行わないことを検証
+    @MainActor func testEnemySpecialMagicDoesNotTriggerMagicCritical() {
+        let skillId: UInt16 = 9001
+        let skill = EnemySkillDefinition(
+            id: skillId,
+            name: "テスト敵魔法",
+            type: .magical,
+            targeting: .single,
+            chancePercent: 100,
+            usesPerBattle: 1,
+            damageDealtMultiplier: 1.0,
+            hitCount: 1,
+            element: nil,
+            statusId: nil,
+            statusChance: nil,
+            healPercent: nil,
+            buffType: nil,
+            buffMultiplier: nil
+        )
+
+        let player = TestActorBuilder.makePlayer(
+            maxHP: 50000,
+            physicalAttackScore: 100,
+            hitScore: 80,
+            luck: 35,
+            agility: 1
+        )
+
+        var enemy = TestActorBuilder.makeDefender(magicalDefenseScore: 1000, luck: 35)
+        var enemySnapshot = enemy.snapshot
+        enemySnapshot.magicalAttackScore = 3000
+        enemySnapshot.criticalChancePercent = 100
+        enemy.snapshot = enemySnapshot
+        enemy.baseSkillIds = [skillId]
+        enemy.skillEffects.spell.magicCriticalEnabled = true
+        enemy.skillEffects.damage.criticalMultiplier = 2.0
+
+        var context = BattleContext(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [skillId: skill],
+            random: GameRandomSource(seed: 42)
+        )
+
+        let executed = BattleTurnEngine.executeEnemySpecialSkill(
+            for: .enemy,
+            actorIndex: 0,
+            context: &context,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+
+        let specialEntries = context.actionEntries.filter { $0.declaration.kind == .enemySpecialSkill }
+        let damageTotal = specialEntries
+            .flatMap(\.effects)
+            .filter { $0.kind == .enemySpecialDamage }
+            .reduce(0) { $0 + Int($1.value ?? 0) }
+        let magicCriticalCount = countMagicCriticalEffects(in: context.actionEntries, actionKind: .enemySpecialSkill)
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-ENEMY-SPECIAL-001",
+            expected: (min: 0, max: 0),
+            measured: Double(magicCriticalCount),
+            rawData: [
+                "executed": executed ? 1 : 0,
+                "specialEntryCount": Double(specialEntries.count),
+                "damageTotal": Double(damageTotal),
+                "magicCriticalCount": Double(magicCriticalCount)
+            ]
+        )
+
+        XCTAssertTrue(executed, "敵専用技が発動するべき")
+        XCTAssertGreaterThan(specialEntries.count, 0, "敵専用技のログが記録されるべき")
+        XCTAssertGreaterThan(damageTotal, 0, "敵専用技の魔法ダメージが発生するべき")
+        XCTAssertEqual(magicCriticalCount, 0, "敵専用技の魔法では必殺ログが発生しないべき")
+    }
+
     // MARK: - Reaction構造体の検証
 
     /// Reaction構造体の生成と値の検証
@@ -1295,6 +1751,8 @@ nonisolated final class ReactionSkillTests: XCTestCase {
         damageType: BattleDamageType = .physical,
         attackCountMultiplier: Double = 1.0,
         criticalChancePercentMultiplier: Double = 1.0,
+        requiresMartial: Bool = false,
+        requiresAllyBehind: Bool = false,
         displayName: String = "テスト反撃",
         skillId: UInt16 = 1202
     ) -> BattleActor.SkillEffects.Reaction {
@@ -1309,8 +1767,8 @@ nonisolated final class ReactionSkillTests: XCTestCase {
             attackCountMultiplier: attackCountMultiplier,
             criticalChancePercentMultiplier: criticalChancePercentMultiplier,
             accuracyMultiplier: 1.0,
-            requiresMartial: false,
-            requiresAllyBehind: false
+            requiresMartial: requiresMartial,
+            requiresAllyBehind: requiresAllyBehind
         )
     }
 
@@ -1338,6 +1796,15 @@ nonisolated final class ReactionSkillTests: XCTestCase {
         }
 
         return (totalDamage, count)
+    }
+
+    private func countMagicCriticalEffects(in entries: [BattleActionEntry],
+                                           actionKind: ActionKind) -> Int {
+        entries
+            .filter { $0.declaration.kind == actionKind }
+            .flatMap(\.effects)
+            .filter { $0.kind == .skillEffect && $0.extra == SkillEffectLogKind.magicCritical.rawValue }
+            .count
     }
 
     private func countEntries(in log: BattleLog,

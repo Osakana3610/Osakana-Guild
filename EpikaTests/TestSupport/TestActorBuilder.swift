@@ -26,6 +26,7 @@ nonisolated enum TestActorBuilder {
         magicalAttackScore: Int = 1000,
         hitScore: Int = 100,
         luck: Int,
+        spirit: Int = 50,
         criticalChancePercent: Int = 0,
         additionalDamageScore: Int = 0,
         breathDamageScore: Int = 0,
@@ -60,7 +61,7 @@ nonisolated enum TestActorBuilder {
             formationSlot: formationSlot,
             strength: 100,
             wisdom: 50,
-            spirit: 50,
+            spirit: spirit,
             vitality: 100,
             agility: 50,
             luck: luck,
@@ -93,6 +94,7 @@ nonisolated enum TestActorBuilder {
         magicalDefenseScore: Int = 1000,
         evasionScore: Int = 0,
         luck: Int,
+        spirit: Int = 20,
         agility: Int = 20,
         skillEffects: BattleActor.SkillEffects = .neutral,
         innateResistances: BattleInnateResistances = .neutral,
@@ -128,7 +130,7 @@ nonisolated enum TestActorBuilder {
             formationSlot: formationSlot,
             strength: 20,
             wisdom: 20,
-            spirit: 20,
+            spirit: spirit,
             vitality: 20,
             agility: agility,
             luck: luck,
@@ -258,7 +260,8 @@ nonisolated enum TestActorBuilder {
         criticalChancePercent: Int = 0,
         luck: Int,
         agility: Int = 20,
-        skillEffects: BattleActor.SkillEffects = .neutral
+        skillEffects: BattleActor.SkillEffects = .neutral,
+        formationSlot: BattleFormationSlot = 1
     ) -> BattleActor {
         let snapshot = CharacterValues.Combat(
             maxHP: maxHP,
@@ -281,7 +284,7 @@ nonisolated enum TestActorBuilder {
             identifier: "test.enemy",
             displayName: "テスト敵",
             kind: .enemy,
-            formationSlot: 1,
+            formationSlot: formationSlot,
             strength: 20,
             wisdom: 20,
             spirit: 20,

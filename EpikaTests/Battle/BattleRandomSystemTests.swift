@@ -5,6 +5,21 @@ import XCTest
 ///
 /// 目的: 戦闘で使用する乱数が仕様通りに動作することを証明する
 nonisolated final class BattleRandomSystemTests: XCTestCase {
+    override class func tearDown() {
+        let expectation = XCTestExpectation(description: "Export observations")
+        Task { @MainActor in
+            do {
+                let url = try ObservationRecorder.shared.export()
+                print("Observations exported to: \(url.path)")
+            } catch {
+                print("Failed to export observations: \(error)")
+            }
+            expectation.fulfill()
+        }
+        _ = XCTWaiter().wait(for: [expectation], timeout: 5.0)
+        super.tearDown()
+    }
+
 
     // MARK: - GameRandomSource の決定性
 
@@ -218,6 +233,195 @@ nonisolated final class BattleRandomSystemTests: XCTestCase {
         XCTAssertTrue(
             (lowerBound...upperBound).contains(triggerCount),
             "発動率50%: 期待\(lowerBound)〜\(upperBound)回, 実測\(triggerCount)回 (\(trials)回試行)"
+        )
+    }
+
+    // MARK: - probability の検証
+
+    /// probability(0)は常にfalseを返すことを検証
+    func testProbability_ZeroAlwaysFalse() {
+        var rng = GameRandomSource(seed: 42)
+        for _ in 0..<100 {
+            let result = BattleRandomSystem.probability(0.0, random: &rng)
+            XCTAssertFalse(result, "probability=0で発動した")
+        }
+    }
+
+    /// probability(1)は常にtrueを返すことを検証
+    func testProbability_OneAlwaysTrue() {
+        var rng = GameRandomSource(seed: 42)
+        for _ in 0..<100 {
+            let result = BattleRandomSystem.probability(1.0, random: &rng)
+            XCTAssertTrue(result, "probability=1で発動しなかった")
+        }
+    }
+
+    // MARK: - speedMultiplier の範囲検証
+    //
+    // 境界値テストの観点から luck は 1, 18, 35 のみを使用（testing-principles.md）
+
+    /// luck=1（下限境界）でspeedMultiplierが0.00〜1.00の範囲になることを検証
+    ///
+    /// 計算式:
+    ///   lowerPercent = min(100, max((1 - 10) × 2, 0)) = 0
+    ///   random.nextInt(in: 0...100) → 0〜100のいずれか
+    ///   return percent / 100.0 → 0.00〜1.00
+    func testSpeedMultiplierRangeLuck1() {
+        var rng = GameRandomSource(seed: 42)
+        for i in 0..<100 {
+            let result = BattleRandomSystem.speedMultiplier(luck: 1, random: &rng)
+            XCTAssertGreaterThanOrEqual(result, 0.00, "luck=1で下限0.00を下回った（試行\(i+1)）")
+            XCTAssertLessThanOrEqual(result, 1.00, "luck=1で上限1.00を超えた（試行\(i+1)）")
+        }
+    }
+
+    /// luck=18（中間境界）でspeedMultiplierが0.16〜1.00の範囲になることを検証
+    ///
+    /// 計算式:
+    ///   lowerPercent = min(100, max((18 - 10) × 2, 0)) = 16
+    ///   random.nextInt(in: 16...100) → 16〜100のいずれか
+    ///   return percent / 100.0 → 0.16〜1.00
+    func testSpeedMultiplierRangeLuck18() {
+        var rng = GameRandomSource(seed: 42)
+        for i in 0..<100 {
+            let result = BattleRandomSystem.speedMultiplier(luck: 18, random: &rng)
+            XCTAssertGreaterThanOrEqual(result, 0.16, "luck=18で下限0.16を下回った（試行\(i+1)）")
+            XCTAssertLessThanOrEqual(result, 1.00, "luck=18で上限1.00を超えた（試行\(i+1)）")
+        }
+    }
+
+    /// luck=35（上限境界）でspeedMultiplierが0.50〜1.00の範囲になることを検証
+    ///
+    /// 計算式:
+    ///   lowerPercent = min(100, max((35 - 10) × 2, 0)) = 50
+    ///   random.nextInt(in: 50...100) → 50〜100のいずれか
+    ///   return percent / 100.0 → 0.50〜1.00
+    func testSpeedMultiplierRangeLuck35() {
+        var rng = GameRandomSource(seed: 42)
+        for i in 0..<100 {
+            let result = BattleRandomSystem.speedMultiplier(luck: 35, random: &rng)
+            XCTAssertGreaterThanOrEqual(result, 0.50, "luck=35で下限0.50を下回った（試行\(i+1)）")
+            XCTAssertLessThanOrEqual(result, 1.00, "luck=35で上限1.00を超えた（試行\(i+1)）")
+        }
+    }
+
+    // MARK: - speedMultiplier の期待値検証（統計的テスト）
+    //
+    // 一様分布 U(a,b) の期待値: E[X] = (a+b)/2
+    // 標準偏差: σ = (b-a) / √12
+    // 99%CI・±2%許容誤差で必要な試行回数: n = (2.576 × σ / ε)²
+
+    /// luck=1でspeedMultiplierの平均が期待値0.50に収束することを検証
+    ///
+    /// 計算:
+    ///   範囲: 0.00〜1.00
+    ///   期待値: (0.00 + 1.00) / 2 = 0.50
+    ///   σ = (1.00 - 0.00) / √12 ≈ 0.289
+    ///   ε = 0.50 × 0.02 = 0.01
+    ///   n = (2.576 × 0.289 / 0.01)² ≈ 5530
+    @MainActor func testSpeedMultiplierAverageLuck1() {
+        var rng = GameRandomSource(seed: 42)
+        var total = 0.0
+        let trials = 5530
+
+        for _ in 0..<trials {
+            total += BattleRandomSystem.speedMultiplier(luck: 1, random: &rng)
+        }
+
+        let average = total / Double(trials)
+        let expected = 0.50
+        let tolerance = expected * 0.02
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-RANDOM-007",
+            expected: (min: expected - tolerance, max: expected + tolerance),
+            measured: average,
+            rawData: [
+                "trials": Double(trials),
+                "expected": expected,
+                "average": average
+            ]
+        )
+
+        XCTAssertTrue(
+            (expected - tolerance...expected + tolerance).contains(average),
+            "speedMultiplier(luck=1): 期待\(expected)±2%, 実測\(average) (\(trials)回試行, 99%CI)"
+        )
+    }
+
+    /// luck=18でspeedMultiplierの平均が期待値0.58に収束することを検証
+    ///
+    /// 計算:
+    ///   範囲: 0.16〜1.00
+    ///   期待値: (0.16 + 1.00) / 2 = 0.58
+    ///   σ = (1.00 - 0.16) / √12 ≈ 0.242
+    ///   ε = 0.58 × 0.02 ≈ 0.0116
+    ///   n = (2.576 × 0.242 / 0.0116)² ≈ 2900
+    @MainActor func testSpeedMultiplierAverageLuck18() {
+        var rng = GameRandomSource(seed: 42)
+        var total = 0.0
+        let trials = 2900
+
+        for _ in 0..<trials {
+            total += BattleRandomSystem.speedMultiplier(luck: 18, random: &rng)
+        }
+
+        let average = total / Double(trials)
+        let expected = 0.58
+        let tolerance = expected * 0.02
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-RANDOM-008",
+            expected: (min: expected - tolerance, max: expected + tolerance),
+            measured: average,
+            rawData: [
+                "trials": Double(trials),
+                "expected": expected,
+                "average": average
+            ]
+        )
+
+        XCTAssertTrue(
+            (expected - tolerance...expected + tolerance).contains(average),
+            "speedMultiplier(luck=18): 期待\(expected)±2%, 実測\(average) (\(trials)回試行, 99%CI)"
+        )
+    }
+
+    /// luck=35でspeedMultiplierの平均が期待値0.75に収束することを検証
+    ///
+    /// 計算:
+    ///   範囲: 0.50〜1.00
+    ///   期待値: (0.50 + 1.00) / 2 = 0.75
+    ///   σ = (1.00 - 0.50) / √12 ≈ 0.144
+    ///   ε = 0.75 × 0.02 = 0.015
+    ///   n = (2.576 × 0.144 / 0.015)² ≈ 615
+    @MainActor func testSpeedMultiplierAverageLuck35() {
+        var rng = GameRandomSource(seed: 42)
+        var total = 0.0
+        let trials = 615
+
+        for _ in 0..<trials {
+            total += BattleRandomSystem.speedMultiplier(luck: 35, random: &rng)
+        }
+
+        let average = total / Double(trials)
+        let expected = 0.75
+        let tolerance = expected * 0.02
+
+        ObservationRecorder.shared.record(
+            id: "BATTLE-RANDOM-009",
+            expected: (min: expected - tolerance, max: expected + tolerance),
+            measured: average,
+            rawData: [
+                "trials": Double(trials),
+                "expected": expected,
+                "average": average
+            ]
+        )
+
+        XCTAssertTrue(
+            (expected - tolerance...expected + tolerance).contains(average),
+            "speedMultiplier(luck=35): 期待\(expected)±2%, 実測\(average) (\(trials)回試行, 99%CI)"
         )
     }
 }
